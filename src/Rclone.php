@@ -32,6 +32,7 @@ class Rclone
   private static array  $flags       = [];  // Global rclone flags to be applied to all commands.
   private static array  $envs        = [];  // Custom environment variables (usually rclone parameters).
   private static string $input       = '';  // Input string to be passed to rclone commands (e.g., for rcat).
+  private static array  $version_cache = []; // Cache for rclone version.
   private object        $progress;          // Object to store rclone progress information.
   private static array  $reset       = [    // Default values for resetting static properties.
                                             'timeout' => 120,
@@ -732,16 +733,26 @@ class Rclone
    */
   public function version(bool $numeric = FALSE) : string|float
   {
+    $cacheKey = $numeric ? 'numeric' : 'string';
+    if (isset(self::$version_cache[$cacheKey])) {
+      return self::$version_cache[$cacheKey];
+    }
+
     $cmd_output = $this->simpleRun('version'); // Executes 'rclone version'.
     
     // Parses version string like "rclone v1.2.3"
     preg_match_all('/rclone\sv(.+)/m', $cmd_output, $version_matches, PREG_SET_ORDER, 0);
     
+    $result = $numeric ? 0.0 : '';
+
     if (isset($version_matches[0][1])) {
       $version_string = $version_matches[0][1];
-      return $numeric ? (float) $version_string : $version_string;
+      $result = $numeric ? (float) $version_string : $version_string;
     }
-    return $numeric ? 0.0 : ''; // Should not happen with a valid rclone installation.
+
+    self::$version_cache[$cacheKey] = $result;
+
+    return $result;
   }
   
   /**
@@ -761,6 +772,9 @@ class Rclone
    */
   public static function setBIN(string $BIN) : void
   {
+    if (isset(self::$BIN) && self::$BIN !== $BIN) {
+      self::$version_cache = [];
+    }
     self::$BIN = $BIN;
   }
   
