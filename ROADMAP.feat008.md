@@ -67,3 +67,63 @@ Execute a structured manual test campaign to ensure functional stability across 
 
 ### External Sources
 - No external dependency required; this is an execution-process feature built on project-specific behavior.
+
+## Manual QA Matrix (Task 8.01)
+
+### Severity Model
+- P0: blocks core usage (cannot connect/chat/manage sessions)
+- P1: high-impact stability or security issue with workaround
+- P2: non-blocking UX/polish issue
+
+### Matrix Axes Used in This Round
+- Platform target: Linux desktop runtime, Web build, Android build
+- Network profile:
+  - Normal: real server reachable
+  - Timeout constrained: very small client timeout against heavy endpoint
+  - Intermittent disconnect: invalid host/port then recovery to valid host
+- Critical flows:
+  - F1: settings/connection
+  - F2: provider/session listing
+  - F3: session lifecycle (create/select/delete)
+  - F4: chat send + stream + summarize
+  - F5: error recovery after network failure
+
+### Test Cases
+
+| ID | Profile | Platform | Flow | Steps Summary | Expected Result | Severity if Fail |
+|----|---------|----------|------|---------------|-----------------|------------------|
+| QA-001 | Normal | Linux runtime | F1/F2 | Launch app and load providers/sessions from server | App starts and loads remote data | P0 |
+| QA-002 | Normal | API smoke | F3 | Create session, list sessions, delete session | CRUD succeeds without API schema errors | P0 |
+| QA-003 | Normal | API smoke | F4 | Send message, receive assistant response, summarize | Chat pipeline completes successfully | P0 |
+| QA-004 | Timeout constrained | API smoke | F2 | Call `/provider` with strict timeout | Timeout is handled without crash/hang | P1 |
+| QA-005 | Intermittent disconnect | API smoke | F5 | Fail request on invalid endpoint then retry valid endpoint | Recovery works and next request succeeds | P1 |
+| QA-006 | Normal | Build | Platform gate | Build Linux and Web artifacts | Builds complete successfully | P1 |
+| QA-007 | Normal | Build | Platform gate | Build Android debug APK | Build completes successfully | P1 |
+
+## Execution Results (Tasks 8.02/8.03/8.04)
+
+### Task 8.02 - Execution evidence
+
+- API smoke script created and executed:
+  - Script: `tool/qa/feat008_smoke.sh`
+  - Latest successful run: `/tmp/codewalk_feat008/20260209_032152`
+  - Result: `PASS_COUNT=5`, `FAIL_COUNT=0`
+- Platform/build validations executed:
+  - `flutter test` -> pass
+  - `flutter build linux` -> pass
+  - `flutter build web` -> pass
+  - `flutter build apk --debug` -> pass (after defect fix loop below)
+- Linux runtime smoke executed with log capture:
+  - log file: `/tmp/codewalk_feat008_runtime_after.log`
+
+### Task 8.03 - P0/P1 defect triage and fixes
+
+| Defect ID | Severity | Description | Status | Fix |
+|-----------|----------|-------------|--------|-----|
+| D-008-01 | P1 | Sensitive HTTP debug logging could expose payload secrets and produce excessive logs | Fixed | Removed raw `LogInterceptor` dumping; added safe concise logs in `lib/core/network/dio_client.dart` |
+| D-008-02 | P1 | Android debug build failed due AGP version mismatch (`8.7.3`) | Fixed | Updated AGP to `8.9.1` in `android/settings.gradle.kts` |
+
+### Task 8.04 - Release readiness artifact
+
+- Published: `QA.feat008.release-readiness.md`
+- Contents: matrix coverage, evidence paths, fixed defects, known limitations, and go/no-go decision.

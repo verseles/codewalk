@@ -76,10 +76,10 @@ Description: Expand project target platforms beyond mobile and deliver a true cr
 ### Feature 008: Manual QA Campaign and Stability Hardening
 Description: Execute a structured manual test campaign across supported platforms and critical user journeys, then fix high-impact defects before automation is expanded. (Visit file ROADMAP.feat008.md for full research details)
 
-- [ ] 8.01 Define manual test matrix (platform x feature x network condition)
-- [ ] 8.02 Execute exploratory and scripted scenarios, recording reproducible evidence
-- [ ] 8.03 Triage and fix P0/P1 defects before exit
-- [ ] 8.04 Publish a release readiness report with known limitations
+- [x] 8.01 Define manual test matrix (platform x feature x network condition) - Matrix, severity model, and scenario IDs QA-001..QA-007 documented in `ROADMAP.feat008.md`
+- [x] 8.02 Execute exploratory and scripted scenarios, recording reproducible evidence - Executed QA smoke script (`tool/qa/feat008_smoke.sh`) against `100.68.105.54:4096` with pass results and artifact logs under `/tmp/codewalk_feat008/*`
+- [x] 8.03 Triage and fix P0/P1 defects before exit - Fixed P1 secure logging leak in `dio_client.dart` and P1 Android build blocker (AGP `8.9.1`)
+- [x] 8.04 Publish a release readiness report with known limitations - Report published in `QA.feat008.release-readiness.md`
 
 ### Feature 009: Automated Test Suite and CI Quality Gates
 Description: Build comprehensive automated tests (unit, widget, integration) and enforce quality gates in CI so future changes remain stable. (Visit file ROADMAP.feat009.md for full research details)

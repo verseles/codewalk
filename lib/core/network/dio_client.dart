@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import 'dart:convert';
 
@@ -52,21 +53,6 @@ class DioClient {
   }
 
   void _setupInterceptors() {
-    _dio.interceptors.add(
-      LogInterceptor(
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: false,
-        responseBody: true,
-        logPrint: (object) {
-          // Print logs in debug mode only
-          if (const bool.fromEnvironment('dart.vm.product') == false) {
-            print(object);
-          }
-        },
-      ),
-    );
-
     // Request interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -76,12 +62,40 @@ class DioClient {
               (options.headers[ApiConstants.authorization] == null)) {
             options.headers[ApiConstants.authorization] = _basicAuthHeader;
           }
+
+          if (!kReleaseMode) {
+            options.extra['request_start_ms'] = DateTime.now().millisecondsSinceEpoch;
+            final uri = options.uri.toString();
+            print('[Dio] --> ${options.method.toUpperCase()} $uri');
+          }
+
           handler.next(options);
         },
         onResponse: (response, handler) {
+          if (!kReleaseMode) {
+            final startMs =
+                response.requestOptions.extra['request_start_ms'] as int?;
+            final elapsedMs = startMs == null
+                ? -1
+                : DateTime.now().millisecondsSinceEpoch - startMs;
+            final uri = response.requestOptions.uri.toString();
+            final status = response.statusCode ?? 0;
+            final durationLabel = elapsedMs >= 0 ? ' (${elapsedMs}ms)' : '';
+            print(
+              '[Dio] <-- $status ${response.requestOptions.method.toUpperCase()} $uri$durationLabel',
+            );
+          }
           handler.next(response);
         },
         onError: (error, handler) {
+          if (!kReleaseMode) {
+            final uri = error.requestOptions.uri.toString();
+            final method = error.requestOptions.method.toUpperCase();
+            final status = error.response?.statusCode;
+            print(
+              '[Dio] xx> ${status ?? 'ERR'} $method $uri: ${error.type.name}',
+            );
+          }
           // Centralized error handling
           _handleError(error);
           handler.next(error);
