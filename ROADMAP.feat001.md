@@ -16,14 +16,40 @@ Every requested change (license, renaming, API migration, desktop support, testi
 - Actual implementation changes for license/rebrand/API/layout/testing
 
 ## Current Findings (2026-02-09)
-- Markdown files currently present: 5 (`README.md`, `DEV.md`, `CHAT_API_ANALYSIS.md`, `BUGFIX_SUMMARY.md`, `AI_CHAT_IMPLEMENTATION.md`).
-- Non-English content is extensive: 38 files under `lib/` contain CJK text.
+- Markdown files currently present: 5 original (`README.md`, `DEV.md`, `CHAT_API_ANALYSIS.md`, `BUGFIX_SUMMARY.md`, `AI_CHAT_IMPLEMENTATION.md`) + roadmap files.
+- Non-English content: 14 files under `lib/` contain CJK text (comments and string literals).
 - Platform folders present: `android`, `web`; missing: `ios`, `windows`, `macos`, `linux`.
-- Legacy naming appears in runtime/build metadata (`open_mode`, `OpenMode`, Android namespace, web manifest, test import).
+- Legacy naming appears in 8 locations: pubspec, app constants, test import, web manifest, Android namespace, README, AI_CHAT_IMPLEMENTATION.md.
 - Baseline tooling:
   - `flutter --version`: 3.38.9 (stable)
-  - `flutter analyze`: fails with 167 issues (warnings/info; no blocker-level fix attempted here)
-  - `flutter test`: fails (default counter test not compatible with current app bootstrap/DI)
+  - `flutter analyze`: 167 issues (164 info, 3 warnings, 0 errors)
+  - `flutter test`: 1 test, all passed
+- Full baseline captured in `CODEBASE.md` (commit `b9de67f`)
+
+## Document and Artifact Classification
+
+| File | Class | Action | When |
+|------|-------|--------|------|
+| `README.md` | Runtime | Keep, rewrite for CodeWalk | Feature 005 |
+| `DEV.md` | Historical reference | Merge useful content into CODEBASE.md, then delete | Feature 005 |
+| `AI_CHAT_IMPLEMENTATION.md` | Historical reference | Merge into CODEBASE.md, then delete | Feature 005 |
+| `BUGFIX_SUMMARY.md` | Historical reference | Archive in commit history, then delete | Feature 005 |
+| `CHAT_API_ANALYSIS.md` | Historical reference | Merge into API docs for Feature 006, then delete | Feature 005/006 |
+| `ROADMAP.md` | Active | Keep | Permanent |
+| `ROADMAP.feat*.md` | Active | Keep during execution, archive after completion | Permanent |
+| `CODEBASE.md` | Active | Keep, update per feature | Permanent |
+| `ADR.md` | Active | Keep, append new decisions | Permanent |
+| `Makefile` | Active | Keep, extend as needed | Permanent |
+| `.g.dart` (5 files) | Generated | Regenerate via `build_runner` when models change | As needed |
+| `build/`, `.dart_tool/` | Generated | Gitignored, never commit | N/A |
+
+## Deletion Safety Rules
+
+1. **Never delete** a file without first running `grep` to verify no other file references it
+2. **Merge before delete** — for historical docs, extract all useful content into the appropriate destination before removing the source
+3. **Checkpoint before bulk deletion** — create a git tag (`pre-feat-XXX`) before any feature that involves file deletion
+4. **One commit per logical unit** — deletions should be in dedicated commits with clear messages explaining what was removed and where the content went
+5. **Verify after deletion** — run `flutter analyze` and `flutter test` after any deletion to confirm no regressions
 
 ## Implementation Stages
 
