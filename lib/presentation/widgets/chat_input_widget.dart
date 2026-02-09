@@ -6,10 +6,12 @@ class ChatInputWidget extends StatefulWidget {
     super.key,
     required this.onSendMessage,
     this.enabled = true,
+    this.focusNode,
   });
 
   final Function(String message) onSendMessage;
   final bool enabled;
+  final FocusNode? focusNode;
 
   @override
   State<ChatInputWidget> createState() => _ChatInputWidgetState();
@@ -17,14 +19,40 @@ class ChatInputWidget extends StatefulWidget {
 
 class _ChatInputWidgetState extends State<ChatInputWidget> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode _internalFocusNode = FocusNode();
   bool _isComposing = false;
+
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _effectiveFocusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatInputWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      (oldWidget.focusNode ?? _internalFocusNode).removeListener(
+        _handleFocusChange,
+      );
+      _effectiveFocusNode.addListener(_handleFocusChange);
+    }
+  }
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChange);
     _controller.dispose();
-    _focusNode.dispose();
+    _internalFocusNode.dispose();
     super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _handleSendMessage() {
@@ -133,7 +161,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     ),
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
-                      color: _focusNode.hasFocus
+                      color: _effectiveFocusNode.hasFocus
                           ? Theme.of(
                               context,
                             ).colorScheme.primary.withOpacity(0.5)
@@ -142,7 +170,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                             ).colorScheme.outline.withOpacity(0.2),
                       width: 1.5,
                     ),
-                    boxShadow: _focusNode.hasFocus
+                    boxShadow: _effectiveFocusNode.hasFocus
                         ? [
                             BoxShadow(
                               color: Theme.of(
@@ -156,7 +184,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                   ),
                   child: TextField(
                     controller: _controller,
-                    focusNode: _focusNode,
+                    focusNode: _effectiveFocusNode,
                     enabled: widget.enabled,
                     maxLines: null,
                     textInputAction: TextInputAction.newline,

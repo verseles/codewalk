@@ -37,9 +37,12 @@ codewalk/
 │   └── main.dart
 ├── test/
 │   └── widget_test.dart # Single widget test
+├── linux/             # Linux desktop runner
+├── macos/             # macOS desktop runner
 ├── web/               # Web platform
 │   ├── index.html
 │   └── manifest.json
+├── windows/           # Windows desktop runner
 ├── pubspec.yaml
 ├── analysis_options.yaml
 └── Makefile
@@ -178,18 +181,18 @@ Available in the server API but not used by the client: `/global/health`, `/glob
 | Android | Present | Kotlin, full build config |
 | Web | Present | PWA manifest, index.html |
 | iOS | Absent | No `ios/` directory |
-| Windows | Absent | No `windows/` directory |
-| macOS | Absent | No `macos/` directory |
-| Linux | Absent | No `linux/` directory |
+| Windows | Present | Runner/CMake files generated; builds only on Windows host |
+| macOS | Present | Runner/Xcode files generated; builds only on macOS host |
+| Linux | Present | Runner/CMake files generated; local build validated |
 
 ## Quality Baseline
 
 ### flutter analyze
 
-- **Total issues: 167**
+- **Total issues: 178**
   - Errors: 0
-  - Warnings: 3 (unused local variable, unused generated declarations)
-  - Info: 164 (deprecated API usage, avoid_print, use_super_parameters)
+  - Warnings: 6 (unused generated declarations)
+  - Info: 172 (deprecated API usage, avoid_print, use_super_parameters)
 - **Top issue categories:**
   - `deprecated_member_use` (~95): `withOpacity`, `background`, `surfaceVariant`, `onBackground`
   - `avoid_print` (~30): print statements in production code
@@ -257,6 +260,8 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Streaming send/receive flow (SSE via `/event`)
 - Message list rendering and incremental updates
 - Chat input and provider/model context
+- Responsive shell with mobile drawer and desktop split-view layout
+- Desktop shortcuts for new chat, refresh, and input focus
 
 ### Settings Module
 - Runtime configuration and theme preferences

@@ -53,135 +53,146 @@ class ChatSessionList extends StatelessWidget {
         final session = sessions[index];
         final isSelected = currentSession?.id == session.id;
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          elevation: isSelected ? 2 : 0,
-          color: isSelected
-              ? Theme.of(context).colorScheme.primaryContainer
-              : null,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.surfaceVariant,
-              child: Icon(
-                Icons.chat,
-                color: isSelected
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 20,
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          child: Card(
+            margin: EdgeInsets.zero,
+            elevation: isSelected ? 3 : 0,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
+            child: ListTile(
+              mouseCursor: SystemMouseCursors.click,
+              hoverColor: Theme.of(
+                context,
+              ).colorScheme.primary.withOpacity(0.06),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 4,
               ),
-            ),
-            title: Text(
-              session.title ?? _generateFallbackTitle(session.time),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                    : null,
+              leading: CircleAvatar(
+                backgroundColor: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surfaceVariant,
+                child: Icon(
+                  Icons.chat,
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 20,
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (session.summary != null && session.summary!.isNotEmpty)
-                  Text(
-                    session.summary!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isSelected
-                          ? Theme.of(
-                              context,
-                            ).colorScheme.onPrimaryContainer.withOpacity(0.8)
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
+              title: Text(
+                session.title ?? _generateFallbackTitle(session.time),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : null,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (session.summary != null && session.summary!.isNotEmpty)
                     Text(
-                      _formatTime(session.time),
+                      session.summary!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isSelected
                             ? Theme.of(
                                 context,
-                              ).colorScheme.onPrimaryContainer.withOpacity(0.6)
+                              ).colorScheme.onPrimaryContainer.withOpacity(0.8)
                             : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (session.shared) ...[
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.share,
-                        size: 12,
-                        color: isSelected
-                            ? Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer.withOpacity(0.6)
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        _formatTime(session.time),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                                    .withOpacity(0.6)
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
+                      if (session.shared) ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.share,
+                          size: 12,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                                    .withOpacity(0.6)
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ],
-            ),
-            trailing: PopupMenuButton<String>(
-              icon: Icon(
-                Icons.more_vert,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
               ),
-              onSelected: (value) {
-                switch (value) {
-                  case 'rename':
-                    _showRenameDialog(context, session);
-                    break;
-                  case 'share':
-                    _shareSession(session);
-                    break;
-                  case 'delete':
-                    _showDeleteDialog(context, session);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'rename',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit),
-                      SizedBox(width: 8),
-                      Text('Rename'),
-                    ],
-                  ),
+              trailing: PopupMenuButton<String>(
+                icon: Icon(
+                  Icons.more_vert,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                PopupMenuItem(
-                  value: 'share',
-                  child: Row(
-                    children: [
-                      Icon(session.shared ? Icons.link_off : Icons.link),
-                      const SizedBox(width: 8),
-                      Text(session.shared ? 'Unshare' : 'Share'),
-                    ],
+                onSelected: (value) {
+                  switch (value) {
+                    case 'rename':
+                      _showRenameDialog(context, session);
+                      break;
+                    case 'share':
+                      _shareSession(session);
+                      break;
+                    case 'delete':
+                      _showDeleteDialog(context, session);
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'rename',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit),
+                        SizedBox(width: 8),
+                        Text('Rename'),
+                      ],
+                    ),
                   ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
-                    ],
+                  PopupMenuItem(
+                    value: 'share',
+                    child: Row(
+                      children: [
+                        Icon(session.shared ? Icons.link_off : Icons.link),
+                        const SizedBox(width: 8),
+                        Text(session.shared ? 'Unshare' : 'Share'),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () => onSessionSelected?.call(session),
             ),
-            onTap: () => onSessionSelected?.call(session),
           ),
         );
       },

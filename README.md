@@ -1,6 +1,6 @@
 # CodeWalk
 
-A mobile and web client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
+A cross-platform client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
 ## Features
 
@@ -8,6 +8,8 @@ A mobile and web client for [OpenCode](https://github.com/sst/opencode) server m
 - Server connection with configurable host, port, and authentication
 - Session management (create, switch, delete, share)
 - Multi-provider and model selection
+- Responsive chat layout (mobile drawer, desktop split view)
+- Desktop keyboard shortcuts (`Ctrl/Cmd + N`, `Ctrl/Cmd + R`, `Ctrl/Cmd + L`, `Esc`)
 - Markdown rendering with syntax highlighting
 - Dark theme with Material Design 3
 
@@ -18,6 +20,10 @@ A mobile and web client for [OpenCode](https://github.com/sst/opencode) server m
 - Flutter SDK (>=3.8.1)
 - Dart SDK
 - An OpenCode-compatible server instance
+- Platform toolchain for your target:
+  - Linux desktop: `clang`, `cmake`, `ninja`, `pkg-config`
+  - Windows desktop: build from a Windows host
+  - macOS desktop: build from a macOS host
 
 ### Setup
 
@@ -26,9 +32,17 @@ A mobile and web client for [OpenCode](https://github.com/sst/opencode) server m
    flutter pub get
    ```
 
-2. Run the app:
+2. Run the app (examples):
    ```bash
-   flutter run
+   flutter run -d linux
+   flutter run -d chrome
+   flutter run -d android
+   ```
+
+3. Build artifacts (examples):
+   ```bash
+   flutter build linux
+   flutter build web
    ```
 
 ### Server Configuration

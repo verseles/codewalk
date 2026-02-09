@@ -68,10 +68,10 @@ Description: Align the client and internal API docs with the latest OpenCode Ser
 ### Feature 007: Cross-Platform Desktop Enablement and Responsive UX
 Description: Expand project target platforms beyond mobile and deliver a true cross experience for desktop/web/mobile with adaptive layouts and desktop-native interactions. (Visit file ROADMAP.feat007.md for full research details)
 
-- [ ] 7.01 Add desktop platforms (Windows/macOS/Linux) to Flutter project
-- [ ] 7.02 Implement responsive layout breakpoints (mobile drawer vs desktop split view)
-- [ ] 7.03 Add desktop input ergonomics (shortcuts, hover/focus polish, resize behavior)
-- [ ] 7.04 Validate build/run on each target and document platform-specific caveats
+- [x] 7.01 Add desktop platforms (Windows/macOS/Linux) to Flutter project - Enabled desktop flags and generated `linux/`, `macos/`, `windows/` via Flutter tooling
+- [x] 7.02 Implement responsive layout breakpoints (mobile drawer vs desktop split view) - `ChatPage` now adapts with mobile drawer (`<840`), split desktop (`>=840`), and large-desktop utility panel (`>=1200`)
+- [x] 7.03 Add desktop input ergonomics (shortcuts, hover/focus polish, resize behavior) - Added `Ctrl/Cmd+N`, `Ctrl/Cmd+R`, `Ctrl/Cmd+L`, `Esc`; external input focus control; desktop hover/cursor polish in session list
+- [/] 7.04 Validate build/run on each target and document platform-specific caveats - Linux/web validation passed (`flutter test`, `flutter build linux`, `flutter build web`, Linux runtime smoke). Blocked for full target matrix by host OS constraint (`flutter build windows` requires Windows host, `flutter build macos` requires macOS host)
 
 ### Feature 008: Manual QA Campaign and Stability Hardening
 Description: Execute a structured manual test campaign across supported platforms and critical user journeys, then fix high-impact defects before automation is expanded. (Visit file ROADMAP.feat008.md for full research details)

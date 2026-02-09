@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
 import 'server_settings_page.dart';
@@ -6,6 +7,22 @@ import 'server_settings_page.dart';
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
 import '../widgets/chat_session_list.dart';
+
+class _NewSessionIntent extends Intent {
+  const _NewSessionIntent();
+}
+
+class _RefreshIntent extends Intent {
+  const _RefreshIntent();
+}
+
+class _FocusInputIntent extends Intent {
+  const _FocusInputIntent();
+}
+
+class _EscapeIntent extends Intent {
+  const _EscapeIntent();
+}
 
 /// Chat page
 class ChatPage extends StatefulWidget {
@@ -18,7 +35,14 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  static const double _mobileBreakpoint = 840;
+  static const double _largeDesktopBreakpoint = 1200;
+  static const double _desktopSessionPaneWidth = 300;
+  static const double _largeDesktopSessionPaneWidth = 320;
+  static const double _largeDesktopUtilityPaneWidth = 280;
+
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
   ChatProvider? _chatProvider;
 
   @override
@@ -42,6 +66,7 @@ class _ChatPageState extends State<ChatPage> {
     _chatProvider?.setScrollToBottomCallback(null);
 
     _scrollController.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
   }
 
@@ -105,91 +130,361 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Future<void> _refreshData() async {
+    final chatProvider = context.read<ChatProvider>();
+    await chatProvider.loadSessions();
+    await chatProvider.refresh();
+  }
+
+  void _focusInput() {
+    if (!_inputFocusNode.hasFocus) {
+      _inputFocusNode.requestFocus();
+    }
+  }
+
+  void _handleEscape() {
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (scaffoldState?.isDrawerOpen ?? false) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final isMobile = width < _mobileBreakpoint;
+        final isLargeDesktop = width >= _largeDesktopBreakpoint;
+        final sessionPaneWidth = isLargeDesktop
+            ? _largeDesktopSessionPaneWidth
+            : _desktopSessionPaneWidth;
+        final mainContentWidth = isLargeDesktop ? 960.0 : double.infinity;
+
+        return Shortcuts(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.keyN, control: true):
+                _NewSessionIntent(),
+            SingleActivator(LogicalKeyboardKey.keyN, meta: true):
+                _NewSessionIntent(),
+            SingleActivator(LogicalKeyboardKey.keyR, control: true):
+                _RefreshIntent(),
+            SingleActivator(LogicalKeyboardKey.keyR, meta: true):
+                _RefreshIntent(),
+            SingleActivator(LogicalKeyboardKey.keyL, control: true):
+                _FocusInputIntent(),
+            SingleActivator(LogicalKeyboardKey.keyL, meta: true):
+                _FocusInputIntent(),
+            SingleActivator(LogicalKeyboardKey.escape): _EscapeIntent(),
+          },
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              _NewSessionIntent: CallbackAction<_NewSessionIntent>(
+                onInvoke: (_) {
+                  _createNewSession();
+                  return null;
+                },
               ),
-              child: Icon(
-                Icons.psychology,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
+              _RefreshIntent: CallbackAction<_RefreshIntent>(
+                onInvoke: (_) {
+                  _refreshData();
+                  return null;
+                },
+              ),
+              _FocusInputIntent: CallbackAction<_FocusInputIntent>(
+                onInvoke: (_) {
+                  _focusInput();
+                  return null;
+                },
+              ),
+              _EscapeIntent: CallbackAction<_EscapeIntent>(
+                onInvoke: (_) {
+                  _handleEscape();
+                  return null;
+                },
+              ),
+            },
+            child: Focus(
+              autofocus: true,
+              child: Scaffold(
+                backgroundColor: Theme.of(context).colorScheme.background,
+                appBar: _buildAppBar(),
+                drawer: isMobile ? _buildSessionDrawer() : null,
+                body: Consumer<ChatProvider>(
+                  builder: (context, chatProvider, child) {
+                    if (isMobile) {
+                      return _buildChatContent(
+                        chatProvider: chatProvider,
+                        maxContentWidth: double.infinity,
+                        horizontalPadding: 0,
+                        verticalPadding: 0,
+                      );
+                    }
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: sessionPaneWidth,
+                          child: _buildSessionPanel(closeOnSelect: false),
+                        ),
+                        VerticalDivider(
+                          width: 1,
+                          thickness: 1,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withOpacity(0.12),
+                        ),
+                        Expanded(
+                          child: _buildChatContent(
+                            chatProvider: chatProvider,
+                            maxContentWidth: mainContentWidth,
+                            horizontalPadding: 12,
+                            verticalPadding: 8,
+                          ),
+                        ),
+                        if (isLargeDesktop) ...[
+                          VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withOpacity(0.12),
+                          ),
+                          SizedBox(
+                            width: _largeDesktopUtilityPaneWidth,
+                            child: _buildDesktopUtilityPane(chatProvider),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-            const SizedBox(width: 12),
-            const Text('AI Chat'),
+          ),
+        );
+      },
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.psychology,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Text('AI Chat'),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add_comment_outlined),
+          tooltip: 'New Chat (Ctrl/Cmd+N)',
+          onPressed: _createNewSession,
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          tooltip: 'Refresh (Ctrl/Cmd+R)',
+          onPressed: _refreshData,
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit_note),
+          tooltip: 'Focus Input (Ctrl/Cmd+L)',
+          onPressed: _focusInput,
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: 'Settings',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ServerSettingsPage(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSessionDrawer() {
+    return Drawer(
+      child: SafeArea(child: _buildSessionPanel(closeOnSelect: true)),
+    );
+  }
+
+  Widget _buildSessionPanel({required bool closeOnSelect}) {
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      child: Consumer<ChatProvider>(
+        builder: (context, chatProvider, child) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 12, 8, 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withOpacity(0.15),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Conversations',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: _createNewSession,
+                      tooltip: 'New Chat',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: _refreshData,
+                      tooltip: 'Refresh',
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ChatSessionList(
+                  sessions: chatProvider.sessions,
+                  currentSession: chatProvider.currentSession,
+                  onSessionSelected: (session) {
+                    chatProvider.selectSession(session);
+                    if (closeOnSelect) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  onSessionDeleted: (session) {
+                    chatProvider.deleteSession(session.id);
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDesktopUtilityPane(ChatProvider chatProvider) {
+    return Container(
+      color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: [
+            Text(
+              'Desktop Shortcuts',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            _buildShortcutHint('Ctrl/Cmd + N', 'New conversation'),
+            _buildShortcutHint('Ctrl/Cmd + R', 'Refresh chat data'),
+            _buildShortcutHint('Ctrl/Cmd + L', 'Focus message input'),
+            _buildShortcutHint('Esc', 'Close drawer or unfocus input'),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _createNewSession,
+              icon: const Icon(Icons.add_comment_outlined),
+              label: const Text('New Chat'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _refreshData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+            const SizedBox(height: 16),
+            if (chatProvider.currentSession != null)
+              Text(
+                'Current session:\n${chatProvider.currentSession!.title ?? 'New Chat'}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () {
-              Navigator.push(
+      ),
+    );
+  }
+
+  Widget _buildShortcutHint(String shortcut, String description) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              shortcut,
+              style: Theme.of(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ServerSettingsPage(),
-                ),
-              );
-            },
+              ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
           ),
-          Consumer<ChatProvider>(
-            builder: (context, chatProvider, child) {
-              return PopupMenuButton<String>(
-                onSelected: (value) async {
-                  switch (value) {
-                    case 'new_session':
-                      await _createNewSession();
-                      break;
-                    case 'refresh':
-                      await chatProvider.refresh();
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'new_session',
-                    child: Row(
-                      children: [
-                        Icon(Icons.add),
-                        SizedBox(width: 8),
-                        Text('New Chat'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'refresh',
-                    child: Row(
-                      children: [
-                        Icon(Icons.refresh),
-                        SizedBox(width: 8),
-                        Text('Refresh'),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              description,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
         ],
       ),
-      drawer: _buildSessionDrawer(),
-      body: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
-          return Column(
+    );
+  }
+
+  Widget _buildChatContent({
+    required ChatProvider chatProvider,
+    required double maxContentWidth,
+    required double horizontalPadding,
+    required double verticalPadding,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxContentWidth),
+          child: Column(
             children: [
               // Current session info - modern design
               if (chatProvider.currentSession != null)
@@ -270,47 +565,11 @@ class _ChatPageState extends State<ChatPage> {
                 enabled:
                     chatProvider.currentSession != null &&
                     chatProvider.state != ChatState.sending,
+                focusNode: _inputFocusNode,
               ),
             ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSessionDrawer() {
-    return Drawer(
-      child: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
-          return Column(
-            children: [
-              AppBar(
-                title: const Text('Conversations'),
-                automaticallyImplyLeading: false,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: _createNewSession,
-                    tooltip: 'New Chat',
-                  ),
-                ],
-              ),
-              Expanded(
-                child: ChatSessionList(
-                  sessions: chatProvider.sessions,
-                  currentSession: chatProvider.currentSession,
-                  onSessionSelected: (session) {
-                    chatProvider.selectSession(session);
-                    Navigator.of(context).pop(); // Close drawer
-                  },
-                  onSessionDeleted: (session) {
-                    chatProvider.deleteSession(session.id);
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -415,30 +674,30 @@ class _ChatPageState extends State<ChatPage> {
         if (index < chatProvider.messages.length) {
           final message = chatProvider.messages[index];
           return ChatMessageWidget(key: ValueKey(message.id), message: message);
-        } else {
-          // Show loading indicator
-          return Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const SizedBox(width: 40), // Avatar placeholder
-                const SizedBox(width: 12),
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Thinking...',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          );
         }
+
+        // Show loading indicator
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const SizedBox(width: 40), // Avatar placeholder
+              const SizedBox(width: 12),
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Thinking...',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
