@@ -52,11 +52,11 @@ codewalk/
 | `.dart` (source) | 53 | Under `lib/` and `test/` |
 | `.g.dart` (generated) | 5 | JSON serialization models |
 | `.dart` (total) | 58 | All Dart files |
-| `.md` (markdown) | 15 | Docs + roadmap files |
+| `.md` (markdown) | 14 | Docs + roadmap files |
 
 ## Legacy Naming References
 
-All runtime/build/config references to `open_mode`/`OpenMode` were renamed to `codewalk`/`CodeWalk` in Feature 003. Remaining references exist only in historical documentation files (NOTICE, ADR.md, ROADMAP files, AI_CHAT_IMPLEMENTATION.md) as intentional attribution to the original project.
+All runtime/build/config references to `open_mode`/`OpenMode` were renamed to `codewalk`/`CodeWalk` in Feature 003. Remaining references exist only in historical documentation files (NOTICE, ADR.md, ROADMAP files) as intentional attribution to the original project.
 
 ## API Endpoints
 
@@ -100,6 +100,8 @@ Extracted from `lib/data/datasources/*.dart`. Server base URL is configurable.
 | GET | `/project/current` | Get current project |
 
 **Total: 21 endpoints**
+
+> **Note:** `POST /session/{id}/message` requires only the current message payload; the server maintains conversation context via session ID (no full history needed in the request).
 
 ## Non-English Content (CJK)
 
@@ -192,3 +194,34 @@ The project follows **Clean Architecture** with three layers:
 3. **Presentation** — pages, providers (ChangeNotifier), widgets, theme
 
 Dependency injection via `get_it`. HTTP via `dio`. State management via `provider`.
+
+## Module Overview
+
+### Authentication and Server Config
+- Server host/port setup, API key/basic auth configuration
+- Connection checks and error feedback
+
+### Session Module
+- Session list loading and caching
+- Session selection and current session persistence
+- Create/delete/update/share operations
+
+### Chat Module
+- Streaming send/receive flow (SSE via `/event`)
+- Message list rendering and incremental updates
+- Chat input and provider/model context
+
+### Settings Module
+- Runtime configuration and theme preferences
+- Provider defaults and server details
+
+## Chat System Details
+
+### Core Entities
+- `ChatMessage`: supports user and assistant messages with typed parts (`TextPart`, `FilePart`, `ToolPart`, `ReasoningPart`)
+- `ChatSession`: session identity, metadata, optional share/summary info, path/workspace linkage
+
+### Streaming Flow
+- Uses SSE events (`/event`) for incremental message updates
+- Client merges event updates with full message fetch when needed
+- Handles transient errors and stream close/reconnect paths

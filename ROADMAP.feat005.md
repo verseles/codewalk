@@ -36,10 +36,10 @@ Remove unnecessary markdown clutter while preserving essential project knowledge
 - [x] Record classification table in this file
 
 ### Task 5.02 - Merge Unique Content into CODEBASE.md
-- [ ] From DEV.md: Module Overview (~20 lines) covering Auth/Server Config, Session, Chat, Settings modules
-- [ ] From AI_CHAT_IMPLEMENTATION.md: Core entities (ChatMessage typed parts, ChatSession metadata) and streaming flow (~12 lines)
-- [ ] From CHAT_API_ANALYSIS.md: API note about POST /session/{id}/message requiring only current payload (~2 lines)
-- [ ] Update CODEBASE.md references (remove AI_CHAT_IMPLEMENTATION.md mention, update .md count)
+- [x] From DEV.md: Module Overview (~20 lines) covering Auth/Server Config, Session, Chat, Settings modules
+- [x] From AI_CHAT_IMPLEMENTATION.md: Core entities (ChatMessage typed parts, ChatSession metadata) and streaming flow (~12 lines)
+- [x] From CHAT_API_ANALYSIS.md: API note about POST /session/{id}/message requiring only current payload (~2 lines)
+- [x] Update CODEBASE.md references (remove AI_CHAT_IMPLEMENTATION.md mention, update .md count)
 
 ### Task 5.03 - Rewrite README.md
 - [ ] Remove WIP and Vibe Project banners
