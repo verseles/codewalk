@@ -53,9 +53,9 @@ Description: Translate all remaining non-English content to English, including u
 Description: Remove unnecessary markdown files, consolidate surviving docs, and rewrite README with explicit origin attribution to OpenMode. (Visit file ROADMAP.feat005.md for full research details)
 
 - [x] 5.01 Classify markdown docs into keep/merge/delete buckets
-- [~] 5.02 Merge unique content from historical docs into CODEBASE.md
-- [ ] 5.03 Rewrite `README.md` for CodeWalk and add explicit acknowledgment to original project
-- [ ] 5.04 Delete redundant `.md` files and verify no critical knowledge was lost
+- [x] 5.02 Merge unique content from historical docs into CODEBASE.md
+- [x] 5.03 Rewrite `README.md` for CodeWalk and add explicit acknowledgment to original project
+- [x] 5.04 Delete redundant `.md` files and verify no critical knowledge was lost
 
 ### Feature 006: OpenCode Server Mode API Refresh and Documentation Update
 Description: Align the client and internal API docs with the latest OpenCode Server Mode endpoints/schemas and close compatibility gaps. (Visit file ROADMAP.feat006.md for full research details)

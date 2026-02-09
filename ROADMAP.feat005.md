@@ -51,11 +51,24 @@ Remove unnecessary markdown clutter while preserving essential project knowledge
 - [x] Add explicit Origin and Acknowledgment section (OpenMode/easychen attribution)
 
 ### Task 5.04 - Delete Redundant Files and Verify Integrity
-- [ ] Delete: DEV.md, AI_CHAT_IMPLEMENTATION.md, BUGFIX_SUMMARY.md, CHAT_API_ANALYSIS.md
-- [ ] Verify zero .dart references to deleted files
-- [ ] Run make precommit
-- [ ] Update ROADMAP.md (mark 5.01-5.04 as [x])
-- [ ] Confirm final .md count: 14
+- [x] Delete: DEV.md, AI_CHAT_IMPLEMENTATION.md, BUGFIX_SUMMARY.md, CHAT_API_ANALYSIS.md
+- [x] Verify zero .dart references to deleted files
+- [x] Run make precommit (flutter test passed, analyze baseline unchanged at 167 info/warning)
+- [x] Update ROADMAP.md (mark 5.01-5.04 as [x])
+- [x] Confirm final .md count: 14
+
+## Completion Summary
+
+Feature 005 completed. Markdown footprint reduced from 18 to 14 files.
+
+**Commits:**
+- `8562850` feat(005): classify markdown docs into keep/merge/delete buckets
+- `7c72e70` feat(005): merge unique content from historical docs into CODEBASE.md
+- `b219a2b` feat(005): rewrite README.md with CodeWalk identity and OpenMode attribution
+- (current) feat(005): delete redundant historical markdown files
+
+**Files deleted:** DEV.md, AI_CHAT_IMPLEMENTATION.md, BUGFIX_SUMMARY.md, CHAT_API_ANALYSIS.md
+**Files modified:** README.md (rewritten), CODEBASE.md (merged content + updated refs), ROADMAP.md (tasks marked), ROADMAP.feat005.md (completion summary)
 
 ## Risks and Mitigations
 - Risk: deleting docs that still contain unique troubleshooting details.
