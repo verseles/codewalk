@@ -16,22 +16,48 @@ abstract class AppLocalDataSource {
   Future<void> saveServerPort(int port);
 
   /// Technical comment translated to English.
-  Future<String?> getApiKey();
+  Future<String?> getServerProfilesJson();
 
   /// Technical comment translated to English.
-  Future<void> saveApiKey(String apiKey);
+  Future<void> saveServerProfilesJson(String profilesJson);
 
   /// Technical comment translated to English.
-  Future<String?> getSelectedProvider();
+  Future<String?> getActiveServerId();
 
   /// Technical comment translated to English.
-  Future<void> saveSelectedProvider(String providerId);
+  Future<void> saveActiveServerId(String serverId);
 
   /// Technical comment translated to English.
-  Future<String?> getSelectedModel();
+  Future<String?> getDefaultServerId();
 
   /// Technical comment translated to English.
-  Future<void> saveSelectedModel(String modelId);
+  Future<void> saveDefaultServerId(String? serverId);
+
+  /// Technical comment translated to English.
+  Future<String?> getApiKey({String? serverId});
+
+  /// Technical comment translated to English.
+  Future<void> saveApiKey(String apiKey, {String? serverId});
+
+  /// Technical comment translated to English.
+  Future<String?> getSelectedProvider({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveSelectedProvider(
+    String providerId, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<String?> getSelectedModel({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveSelectedModel(
+    String modelId, {
+    String? serverId,
+    String? scopeId,
+  });
 
   /// Technical comment translated to English.
   Future<String?> getThemeMode();
@@ -43,43 +69,59 @@ abstract class AppLocalDataSource {
   Future<String?> getLastSessionId();
 
   /// Technical comment translated to English.
-  Future<void> saveLastSessionId(String sessionId);
+  Future<void> saveLastSessionId(
+    String sessionId, {
+    String? serverId,
+    String? scopeId,
+  });
 
   /// Technical comment translated to English.
-  Future<String?> getCurrentSessionId();
+  Future<String?> getCurrentSessionId({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
-  Future<void> saveCurrentSessionId(String sessionId);
+  Future<void> saveCurrentSessionId(
+    String sessionId, {
+    String? serverId,
+    String? scopeId,
+  });
 
   /// Technical comment translated to English.
-  Future<String?> getCachedSessions();
+  Future<String?> getCachedSessions({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
-  Future<void> saveCachedSessions(String sessionsJson);
+  Future<void> saveCachedSessions(
+    String sessionsJson, {
+    String? serverId,
+    String? scopeId,
+  });
 
   /// Technical comment translated to English.
-  Future<int?> getCachedSessionsUpdatedAt();
+  Future<int?> getCachedSessionsUpdatedAt({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
-  Future<void> saveCachedSessionsUpdatedAt(int epochMs);
+  Future<void> saveCachedSessionsUpdatedAt(
+    int epochMs, {
+    String? serverId,
+    String? scopeId,
+  });
 
   /// Technical comment translated to English.
-  Future<bool?> getBasicAuthEnabled();
+  Future<bool?> getBasicAuthEnabled({String? serverId});
 
   /// Technical comment translated to English.
-  Future<void> saveBasicAuthEnabled(bool enabled);
+  Future<void> saveBasicAuthEnabled(bool enabled, {String? serverId});
 
   /// Technical comment translated to English.
-  Future<String?> getBasicAuthUsername();
+  Future<String?> getBasicAuthUsername({String? serverId});
 
   /// Technical comment translated to English.
-  Future<void> saveBasicAuthUsername(String username);
+  Future<void> saveBasicAuthUsername(String username, {String? serverId});
 
   /// Technical comment translated to English.
-  Future<String?> getBasicAuthPassword();
+  Future<String?> getBasicAuthPassword({String? serverId});
 
   /// Technical comment translated to English.
-  Future<void> saveBasicAuthPassword(String password);
+  Future<void> saveBasicAuthPassword(String password, {String? serverId});
 
   /// Technical comment translated to English.
   Future<void> clearAll();
@@ -90,6 +132,20 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   final SharedPreferences sharedPreferences;
 
   AppLocalDataSourceImpl({required this.sharedPreferences});
+
+  String _scopedKey(String base, {String? serverId, String? scopeId}) {
+    final scopedServer = serverId?.trim();
+    if (scopedServer == null || scopedServer.isEmpty) {
+      return base;
+    }
+    final encodedServer = Uri.encodeComponent(scopedServer);
+    final scopedContext = scopeId?.trim();
+    if (scopedContext == null || scopedContext.isEmpty) {
+      return '$base::$encodedServer';
+    }
+    final encodedContext = Uri.encodeComponent(scopedContext);
+    return '$base::$encodedServer::$encodedContext';
+  }
 
   @override
   Future<String?> getServerHost() async {
@@ -112,36 +168,115 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }
 
   @override
-  Future<String?> getApiKey() async {
-    return sharedPreferences.getString(AppConstants.apiKeyKey);
+  Future<String?> getServerProfilesJson() async {
+    return sharedPreferences.getString(AppConstants.serverProfilesKey);
   }
 
   @override
-  Future<void> saveApiKey(String apiKey) async {
-    await sharedPreferences.setString(AppConstants.apiKeyKey, apiKey);
-  }
-
-  @override
-  Future<String?> getSelectedProvider() async {
-    return sharedPreferences.getString(AppConstants.selectedProviderKey);
-  }
-
-  @override
-  Future<void> saveSelectedProvider(String providerId) async {
+  Future<void> saveServerProfilesJson(String profilesJson) async {
     await sharedPreferences.setString(
-      AppConstants.selectedProviderKey,
+      AppConstants.serverProfilesKey,
+      profilesJson,
+    );
+  }
+
+  @override
+  Future<String?> getActiveServerId() async {
+    return sharedPreferences.getString(AppConstants.activeServerIdKey);
+  }
+
+  @override
+  Future<void> saveActiveServerId(String serverId) async {
+    await sharedPreferences.setString(AppConstants.activeServerIdKey, serverId);
+  }
+
+  @override
+  Future<String?> getDefaultServerId() async {
+    return sharedPreferences.getString(AppConstants.defaultServerIdKey);
+  }
+
+  @override
+  Future<void> saveDefaultServerId(String? serverId) async {
+    if (serverId == null || serverId.trim().isEmpty) {
+      await sharedPreferences.remove(AppConstants.defaultServerIdKey);
+      return;
+    }
+    await sharedPreferences.setString(
+      AppConstants.defaultServerIdKey,
+      serverId,
+    );
+  }
+
+  @override
+  Future<String?> getApiKey({String? serverId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.apiKeyKey, serverId: serverId),
+    );
+  }
+
+  @override
+  Future<void> saveApiKey(String apiKey, {String? serverId}) async {
+    await sharedPreferences.setString(
+      _scopedKey(AppConstants.apiKeyKey, serverId: serverId),
+      apiKey,
+    );
+  }
+
+  @override
+  Future<String?> getSelectedProvider({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.selectedProviderKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveSelectedProvider(
+    String providerId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.selectedProviderKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
       providerId,
     );
   }
 
   @override
-  Future<String?> getSelectedModel() async {
-    return sharedPreferences.getString(AppConstants.selectedModelKey);
+  Future<String?> getSelectedModel({String? serverId, String? scopeId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.selectedModelKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
   }
 
   @override
-  Future<void> saveSelectedModel(String modelId) async {
-    await sharedPreferences.setString(AppConstants.selectedModelKey, modelId);
+  Future<void> saveSelectedModel(
+    String modelId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.selectedModelKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      modelId,
+    );
   }
 
   @override
@@ -160,81 +295,155 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }
 
   @override
-  Future<void> saveLastSessionId(String sessionId) async {
-    await sharedPreferences.setString(AppConstants.lastSessionIdKey, sessionId);
-  }
-
-  @override
-  Future<String?> getCurrentSessionId() async {
-    return sharedPreferences.getString(AppConstants.currentSessionIdKey);
-  }
-
-  @override
-  Future<void> saveCurrentSessionId(String sessionId) async {
+  Future<void> saveLastSessionId(
+    String sessionId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
     await sharedPreferences.setString(
-      AppConstants.currentSessionIdKey,
+      _scopedKey(
+        AppConstants.lastSessionIdKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
       sessionId,
     );
   }
 
   @override
-  Future<String?> getCachedSessions() async {
-    return sharedPreferences.getString(AppConstants.cachedSessionsKey);
+  Future<String?> getCurrentSessionId({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.currentSessionIdKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
   }
 
   @override
-  Future<void> saveCachedSessions(String sessionsJson) async {
+  Future<void> saveCurrentSessionId(
+    String sessionId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
     await sharedPreferences.setString(
-      AppConstants.cachedSessionsKey,
+      _scopedKey(
+        AppConstants.currentSessionIdKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      sessionId,
+    );
+  }
+
+  @override
+  Future<String?> getCachedSessions({String? serverId, String? scopeId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.cachedSessionsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveCachedSessions(
+    String sessionsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.cachedSessionsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
       sessionsJson,
     );
   }
 
   @override
-  Future<int?> getCachedSessionsUpdatedAt() async {
-    return sharedPreferences.getInt(AppConstants.cachedSessionsUpdatedAtKey);
+  Future<int?> getCachedSessionsUpdatedAt({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getInt(
+      _scopedKey(
+        AppConstants.cachedSessionsUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
   }
 
   @override
-  Future<void> saveCachedSessionsUpdatedAt(int epochMs) async {
+  Future<void> saveCachedSessionsUpdatedAt(
+    int epochMs, {
+    String? serverId,
+    String? scopeId,
+  }) async {
     await sharedPreferences.setInt(
-      AppConstants.cachedSessionsUpdatedAtKey,
+      _scopedKey(
+        AppConstants.cachedSessionsUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
       epochMs,
     );
   }
 
   @override
-  Future<bool?> getBasicAuthEnabled() async {
-    return sharedPreferences.getBool(AppConstants.basicAuthEnabledKey);
+  Future<bool?> getBasicAuthEnabled({String? serverId}) async {
+    return sharedPreferences.getBool(
+      _scopedKey(AppConstants.basicAuthEnabledKey, serverId: serverId),
+    );
   }
 
   @override
-  Future<void> saveBasicAuthEnabled(bool enabled) async {
-    await sharedPreferences.setBool(AppConstants.basicAuthEnabledKey, enabled);
+  Future<void> saveBasicAuthEnabled(bool enabled, {String? serverId}) async {
+    await sharedPreferences.setBool(
+      _scopedKey(AppConstants.basicAuthEnabledKey, serverId: serverId),
+      enabled,
+    );
   }
 
   @override
-  Future<String?> getBasicAuthUsername() async {
-    return sharedPreferences.getString(AppConstants.basicAuthUsernameKey);
+  Future<String?> getBasicAuthUsername({String? serverId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.basicAuthUsernameKey, serverId: serverId),
+    );
   }
 
   @override
-  Future<void> saveBasicAuthUsername(String username) async {
+  Future<void> saveBasicAuthUsername(
+    String username, {
+    String? serverId,
+  }) async {
     await sharedPreferences.setString(
-      AppConstants.basicAuthUsernameKey,
+      _scopedKey(AppConstants.basicAuthUsernameKey, serverId: serverId),
       username,
     );
   }
 
   @override
-  Future<String?> getBasicAuthPassword() async {
-    return sharedPreferences.getString(AppConstants.basicAuthPasswordKey);
+  Future<String?> getBasicAuthPassword({String? serverId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.basicAuthPasswordKey, serverId: serverId),
+    );
   }
 
   @override
-  Future<void> saveBasicAuthPassword(String password) async {
+  Future<void> saveBasicAuthPassword(
+    String password, {
+    String? serverId,
+  }) async {
     await sharedPreferences.setString(
-      AppConstants.basicAuthPasswordKey,
+      _scopedKey(AppConstants.basicAuthPasswordKey, serverId: serverId),
       password,
     );
   }

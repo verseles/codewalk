@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../network/dio_client.dart';
 
@@ -86,7 +87,8 @@ Future<void> init() async {
     () => AppProvider(
       getAppInfo: sl(),
       checkConnection: sl(),
-      updateServerConfig: sl(),
+      localDataSource: sl(),
+      dioClient: sl(),
     ),
   );
 
@@ -103,9 +105,7 @@ Future<void> init() async {
     ),
   );
 
-  sl.registerFactory(
-    () => ProjectProvider(projectRepository: sl()),
-  );
+  sl.registerFactory(() => ProjectProvider(projectRepository: sl()));
 
   // Load local configuration
   await _loadLocalConfig();
@@ -116,26 +116,66 @@ Future<void> _loadLocalConfig() async {
   final localDataSource = sl<AppLocalDataSource>();
   final dioClient = sl<DioClient>();
 
-  // Get saved server configuration
-  final host = await localDataSource.getServerHost();
-  final port = await localDataSource.getServerPort();
+  final profilesJson = await localDataSource.getServerProfilesJson();
+  final activeServerId = await localDataSource.getActiveServerId();
+  var loadedFromProfiles = false;
 
-  if (host != null && port != null) {
-    final baseUrl = 'http://$host:$port';
-    dioClient.updateBaseUrl(baseUrl);
+  if (profilesJson != null && profilesJson.trim().isNotEmpty) {
+    try {
+      final decoded = jsonDecode(profilesJson);
+      if (decoded is List) {
+        Map<String, dynamic>? activeProfile;
+        for (final item in decoded) {
+          if (item is Map<String, dynamic>) {
+            if (item['id'] == activeServerId) {
+              activeProfile = item;
+              break;
+            }
+            activeProfile ??= item;
+          }
+        }
+
+        if (activeProfile != null) {
+          final url = activeProfile['url'] as String?;
+          if (url != null && url.isNotEmpty) {
+            dioClient.updateBaseUrl(url);
+            loadedFromProfiles = true;
+          }
+          final basicEnabled =
+              activeProfile['basicAuthEnabled'] as bool? ?? false;
+          final username = activeProfile['basicAuthUsername'] as String? ?? '';
+          final password = activeProfile['basicAuthPassword'] as String? ?? '';
+          if (basicEnabled && username.isNotEmpty && password.isNotEmpty) {
+            dioClient.setBasicAuth(username, password);
+          } else {
+            dioClient.clearAuth();
+          }
+        }
+      }
+    } catch (_) {
+      // Fallback below.
+    }
   }
 
-  // Load Basic auth configuration
-  final basicEnabled = await localDataSource.getBasicAuthEnabled();
-  if (basicEnabled == true) {
-    final username = await localDataSource.getBasicAuthUsername();
-    final password = await localDataSource.getBasicAuthPassword();
-    if ((username != null && username.isNotEmpty) &&
-        (password != null && password.isNotEmpty)) {
-      dioClient.setBasicAuth(username, password);
+  if (!loadedFromProfiles) {
+    final host = await localDataSource.getServerHost();
+    final port = await localDataSource.getServerPort();
+
+    if (host != null && port != null) {
+      final baseUrl = 'http://$host:$port';
+      dioClient.updateBaseUrl(baseUrl);
     }
-  } else {
-    // Ensure no leftover auth header when disabled
-    dioClient.clearAuth();
+
+    final basicEnabled = await localDataSource.getBasicAuthEnabled();
+    if (basicEnabled == true) {
+      final username = await localDataSource.getBasicAuthUsername();
+      final password = await localDataSource.getBasicAuthPassword();
+      if ((username != null && username.isNotEmpty) &&
+          (password != null && password.isNotEmpty)) {
+        dioClient.setBasicAuth(username, password);
+      }
+    } else {
+      dioClient.clearAuth();
+    }
   }
 }

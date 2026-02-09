@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,13 +9,17 @@ import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/provider.dart';
+import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/presentation/pages/chat_page.dart';
+import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
 
@@ -27,9 +33,12 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(700, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      final provider = _buildChatProvider();
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-      await tester.pumpWidget(_testApp(provider));
+      await tester.pumpWidget(_testApp(provider, appProvider));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.menu), findsOneWidget);
@@ -42,9 +51,12 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(1300, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      final provider = _buildChatProvider();
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-      await tester.pumpWidget(_testApp(provider));
+      await tester.pumpWidget(_testApp(provider, appProvider));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.menu), findsNothing);
@@ -88,9 +100,18 @@ void main() {
       return Stream<Either<Failure, ChatMessage>>.value(Right(reply));
     };
 
-    final provider = _buildChatProvider(chatRepository: repository);
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-    await tester.pumpWidget(_testApp(provider));
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Session 1'));
@@ -109,14 +130,20 @@ void main() {
   });
 }
 
-Widget _testApp(ChatProvider provider) {
-  return ChangeNotifierProvider<ChatProvider>.value(
-    value: provider,
+Widget _testApp(ChatProvider provider, AppProvider appProvider) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<ChatProvider>.value(value: provider),
+      ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+    ],
     child: const MaterialApp(home: ChatPage()),
   );
 }
 
-ChatProvider _buildChatProvider({FakeChatRepository? chatRepository}) {
+ChatProvider _buildChatProvider({
+  FakeChatRepository? chatRepository,
+  required InMemoryAppLocalDataSource localDataSource,
+}) {
   final chatRepo = chatRepository ?? FakeChatRepository();
   final appRepo = FakeAppRepository()
     ..providersResult = Right(
@@ -144,8 +171,23 @@ ChatProvider _buildChatProvider({FakeChatRepository? chatRepository}) {
     projectProvider: ProjectProvider(
       projectRepository: FakeProjectRepository(),
     ),
-    localDataSource: InMemoryAppLocalDataSource(),
+    localDataSource: localDataSource,
   );
+}
+
+AppProvider _buildAppProvider({
+  required InMemoryAppLocalDataSource localDataSource,
+}) {
+  final repository = FakeAppRepository();
+  final provider = AppProvider(
+    getAppInfo: GetAppInfo(repository),
+    checkConnection: CheckConnection(repository),
+    localDataSource: localDataSource,
+    dioClient: DioClient(),
+    enableHealthPolling: false,
+  );
+  unawaited(provider.initialize());
+  return provider;
 }
 
 Model _model(String id) {

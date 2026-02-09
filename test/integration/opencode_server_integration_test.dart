@@ -9,6 +9,17 @@ import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/data/repositories/app_repository_impl.dart';
 import 'package:codewalk/data/repositories/chat_repository_impl.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/domain/usecases/check_connection.dart';
+import 'package:codewalk/domain/usecases/create_chat_session.dart';
+import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/get_app_info.dart';
+import 'package:codewalk/domain/usecases/get_chat_messages.dart';
+import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
+import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/presentation/providers/app_provider.dart';
+import 'package:codewalk/presentation/providers/chat_provider.dart';
+import 'package:codewalk/presentation/providers/project_provider.dart';
 
 import '../support/fakes.dart';
 import '../support/mock_opencode_server.dart';
@@ -136,5 +147,97 @@ void main() {
         (_) => fail('expected failure'),
       );
     });
+
+    test(
+      'switching active server isolates session cache by server id',
+      () async {
+        final serverB = MockOpenCodeServer(
+          initialSessionTitle: 'Second Server Session',
+        );
+        await serverB.start();
+        addTearDown(() => serverB.close());
+
+        final localDataSource = InMemoryAppLocalDataSource();
+        final dioClient = DioClient();
+        final appRepository = AppRepositoryImpl(
+          remoteDataSource: AppRemoteDataSourceImpl(dio: dioClient.dio),
+          localDataSource: localDataSource,
+          dioClient: dioClient,
+        );
+        final chatRepository = ChatRepositoryImpl(
+          remoteDataSource: ChatRemoteDataSourceImpl(dio: dioClient.dio),
+        );
+        final projectProvider = ProjectProvider(
+          projectRepository: FakeProjectRepository(),
+        );
+
+        final appProvider = AppProvider(
+          getAppInfo: GetAppInfo(appRepository),
+          checkConnection: CheckConnection(appRepository),
+          localDataSource: localDataSource,
+          dioClient: dioClient,
+          enableHealthPolling: false,
+        );
+        await appProvider.initialize();
+        final initial = appProvider.activeServer!;
+        await appProvider.updateServerProfile(
+          id: initial.id,
+          url: server.baseUrl,
+          label: 'Server A',
+          basicAuthEnabled: false,
+          basicAuthUsername: '',
+          basicAuthPassword: '',
+        );
+        await appProvider.addServerProfile(
+          url: serverB.baseUrl,
+          label: 'Server B',
+        );
+
+        final chatProvider = ChatProvider(
+          sendChatMessage: SendChatMessage(chatRepository),
+          getChatSessions: GetChatSessions(chatRepository),
+          createChatSession: CreateChatSession(chatRepository),
+          getChatMessages: GetChatMessages(chatRepository),
+          getProviders: GetProviders(appRepository),
+          deleteChatSession: DeleteChatSession(chatRepository),
+          projectProvider: projectProvider,
+          localDataSource: localDataSource,
+        );
+        await projectProvider.initializeProject();
+
+        await chatProvider.initializeProviders();
+        await chatProvider.loadSessions();
+        expect(chatProvider.sessions.first.title, 'Initial Session');
+
+        final serverBId = appProvider.serverProfiles
+            .where((p) => p.label == 'Server B')
+            .first
+            .id;
+        final switched = await appProvider.setActiveServer(serverBId);
+        expect(switched, isTrue);
+        await chatProvider.onServerScopeChanged();
+        expect(chatProvider.sessions.first.title, 'Second Server Session');
+
+        final serverAId = appProvider.serverProfiles
+            .where((p) => p.label == 'Server A')
+            .first
+            .id;
+        await appProvider.setActiveServer(serverAId);
+        await chatProvider.onServerScopeChanged();
+        expect(chatProvider.sessions.first.title, 'Initial Session');
+
+        final scopeId =
+            projectProvider.currentProject?.path ??
+            projectProvider.currentProjectId;
+        final keyA = 'cached_sessions::$serverAId::$scopeId';
+        final keyB = 'cached_sessions::$serverBId::$scopeId';
+        expect(localDataSource.scopedStrings[keyA], isNotNull);
+        expect(localDataSource.scopedStrings[keyB], isNotNull);
+        expect(
+          localDataSource.scopedStrings[keyA],
+          isNot(equals(localDataSource.scopedStrings[keyB])),
+        );
+      },
+    );
   });
 }

@@ -210,8 +210,24 @@ No data from server A can appear when server B is active.
 - No session/model cache leakage across servers.
 - Automated tests cover core server-management paths.
 
+## Implementation Status
+
+Status: Completed (2026-02-09)
+
+Implemented artifacts:
+
+- Added domain/server primitives and persistence keys for multi-server profiles and active/default tracking.
+- Refactored local datasource and provider flows to support server-scoped + context-scoped storage.
+- Rebuilt server settings into a full manager UI (CRUD, active/default, health badges, connectivity restrictions).
+- Added app-bar server quick switch with active-server synchronization into chat state.
+- Added test coverage (unit/widget/integration) for migration, normalization, unhealthy-activation blocking, and server cache isolation.
+
+Validation executed:
+
+- `flutter test` (all tests passing)
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` (infos only)
+
 ## Source Links
 
 - https://github.com/anomalyco/opencode
 - https://opencode.ai/docs/server/
-

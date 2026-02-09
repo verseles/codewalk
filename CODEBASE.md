@@ -70,11 +70,11 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 55 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 54 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 11 | Test files (unit, widget, integration, support) |
+| `.dart` (tests) | 13 | Test files (unit, widget, integration, support) |
 | `.dart` (total) | 71 | All Dart files including .dart_tool |
-| `.md` (markdown) | 15 | Docs + roadmap + CONTRIBUTING.md |
+| `.md` (markdown) | 16 | Docs + roadmap + CONTRIBUTING.md |
 | `.sh` (scripts) | 3 | CI validation + installer scripts |
 
 ## Legacy Naming References
@@ -95,6 +95,7 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | POST | `/app/init` | Legacy initialization fallback (`/path` is primary readiness probe) |
 | GET | `/provider` | Get providers (`{all, default, connected}`) |
 | GET | `/config` | Fetch config info |
+| GET | `/global/health` | Server health probe used by multi-server orchestration (with `/path` fallback) |
 
 ### ChatRemoteDataSource (`chat_remote_datasource.dart`)
 
@@ -210,7 +211,6 @@ Required for parity wave:
 
 Deferred/optional after parity wave:
 
-- `/global/health`
 - `/global/event`
 - `/global/config`
 - `/global/dispose`
@@ -268,26 +268,24 @@ Deferred/optional after parity wave:
 
 ### flutter analyze
 
-- **Total issues: 136** (reduced from 178 baseline)
+- **Total issues: 90** (reduced from 178 baseline)
   - Errors: 0
-  - Warnings: 1 (`unused_local_variable` in test support)
-  - Info: ~135 (deprecated API usage, unnecessary_underscores in tests)
+  - Warnings: 0
+  - Info: 90 (mostly deprecated API usage and lint modernization opportunities)
 - **Top issue categories:**
-  - `deprecated_member_use` (~95): `withOpacity`, `surfaceVariant`
+  - `deprecated_member_use` (~66): `withOpacity`, `surfaceVariant`
   - `overridden_fields` (~5): field overrides in model classes
-  - `unnecessary_underscores` (~7): test parameter naming
+  - `unnecessary_underscores` (~6): test parameter naming
 - **CI Budget:** 186 issues maximum (enforced via `tool/ci/check_analyze_budget.sh`)
 
 ### flutter test
 
-- **Result: 27 tests, all passed**
+- **Result: 35 tests, all passed**
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
-  - 12 tests: widget_test.dart (ChatInputWidget)
-  - 3 tests: unit/providers/app_provider_test.dart
-  - 6 tests: unit/providers/chat_provider_test.dart
-  - 3 tests: widget/chat_page_test.dart
-  - 3 tests: integration/opencode_server_integration_test.dart
+  - Unit: providers/usecases/models with migration and server-scope assertions
+  - Widget: responsive shell, app shell navigation, and server settings behavior
+  - Integration: mock-server coverage for SSE + error mapping + server-switch isolation
 - **Test tags:** `requires_server`, `hardware` (defined in dart_test.yaml)
 
 ## CI/CD and Automation
@@ -323,17 +321,20 @@ Deferred/optional after parity wave:
 
 ### Makefile Automation
 
-67-line Makefile with 9 targets:
+158-line Makefile with 13 targets:
 
 | Target | Description |
 |--------|-------------|
 | `help` | Show available targets (default) |
 | `deps` | Install Flutter dependencies (`flutter pub get`) |
 | `gen` | Run code generation (`dart run build_runner`) |
+| `icons` | Regenerate app icons for all supported platforms |
+| `icons-check` | Validate icon assets and expected dimensions |
 | `analyze` | Static analysis with budget check (186 max) |
 | `test` | Run all tests |
 | `coverage` | Generate coverage report with threshold check (35% min) |
 | `check` | Full validation chain: deps → gen → analyze → test |
+| `desktop` | Build desktop binary for current host OS |
 | `android` | Build APK + optional Telegram upload (tdl) |
 | `precommit` | Complete pre-commit validation: check + android |
 | `clean` | Clean build artifacts and reinstall dependencies |
@@ -408,13 +409,15 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Replaces direct `print()` calls (deprecated in codebase per CONTRIBUTING.md)
 
 ### Authentication and Server Config
-- Server host/port setup, API key/basic auth configuration
-- Connection checks and error feedback
+- Multi-server profile management (`ServerProfile`) with active/default selection
+- Per-server basic auth configuration and URL normalization
+- Health-aware activation (`/global/health`, fallback `/path`)
 
 ### Session Module
 - Session list loading and caching
 - Session selection and current session persistence
 - Create/delete/update/share operations
+- Server-scoped cache isolation to prevent cross-server leakage
 
 ### Chat Module
 - Streaming send/receive flow (SSE via `/event`)
@@ -425,7 +428,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 
 ### Settings Module
 - Runtime configuration and theme preferences
-- Provider defaults and server details
+- Full server manager UI (add/edit/remove, default, active, health badges)
 
 ## Chat System Details
 
@@ -453,14 +456,16 @@ test/
 │   │   ├── chat_session_model_test.dart      # Session model serialization
 │   │   └── provider_model_test.dart          # Provider model serialization
 │   ├── providers/
-│   │   ├── app_provider_test.dart            # AppProvider state management (3 tests)
-│   │   └── chat_provider_test.dart           # ChatProvider state management (6 tests)
+│   │   ├── app_provider_test.dart            # AppProvider state management + migration/health/switch rules
+│   │   └── chat_provider_test.dart           # ChatProvider state + server-scoped cache behavior
 │   └── usecases/
 │       └── chat_usecases_test.dart           # ChatUseCases domain logic
 ├── widget/
-│   └── chat_page_test.dart                   # ChatPage responsive shell (3 tests)
+│   ├── chat_page_test.dart                   # ChatPage responsive shell
+│   ├── app_shell_page_test.dart              # Bottom navigation + logs tab interaction
+│   └── server_settings_page_test.dart        # Multi-server manager rendering and unhealthy-switch guard
 ├── integration/
-│   └── opencode_server_integration_test.dart # Mock server SSE flow (3 tests)
+│   └── opencode_server_integration_test.dart # Mock server SSE flow + server-switch cache isolation
 └── support/
     ├── fakes.dart                             # Fake implementations for testing
     └── mock_opencode_server.dart              # Shelf-based mock OpenCode API server
@@ -471,6 +476,7 @@ test/
 **mock_opencode_server.dart:**
 - Shelf-based HTTP server emulating OpenCode API
 - Supports `/session`, `/session/{id}/message` endpoints
+- Supports `/global/health` for server-health orchestration tests
 - SSE event stream simulation for real-time updates
 - Controllable error injection for fault testing
 
@@ -588,3 +594,10 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Analyze issues: 178 → 136 (-24%)
 - Coverage enforcement: none → 35% minimum
 - CI jobs: none → 5 parallel jobs
+
+**Feature 011 (unreleased, in-progress branch):**
+- Added multi-server persistence model with legacy migration from `server_host`/`server_port`.
+- Added active/default server orchestration with health checks and safe-switch constraints.
+- Refactored local persistence and chat provider state to server-scoped keys.
+- Added server manager UX and app-bar quick switcher.
+- Expanded tests for migration/switching/isolation and raised total passing tests to 35.

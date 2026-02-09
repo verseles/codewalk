@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:provider/provider.dart';
 import 'core/di/injection_container.dart' as di;
@@ -34,7 +35,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => di.sl<AppProvider>()),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = di.sl<AppProvider>();
+            unawaited(provider.initialize());
+            return provider;
+          },
+        ),
         ChangeNotifierProvider(create: (_) => di.sl<ProjectProvider>()),
       ],
       child: DynamicColorBuilder(

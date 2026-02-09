@@ -1,16 +1,22 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart' hide Provider;
 
+import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/provider.dart';
+import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
 import 'package:codewalk/presentation/pages/app_shell_page.dart';
+import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
 
@@ -22,8 +28,14 @@ void main() {
   testWidgets('uses NavigationBar on mobile and can open logs tab', (
     WidgetTester tester,
   ) async {
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
     await tester.pumpWidget(
-      _testApp(_buildChatProvider(), const Size(430, 900)),
+      _testApp(
+        _buildChatProvider(localDataSource: localDataSource),
+        _buildAppProvider(localDataSource: localDataSource),
+        const Size(430, 900),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -39,8 +51,14 @@ void main() {
   testWidgets('uses NavigationRail on wide layouts', (
     WidgetTester tester,
   ) async {
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
     await tester.pumpWidget(
-      _testApp(_buildChatProvider(), const Size(1200, 900)),
+      _testApp(
+        _buildChatProvider(localDataSource: localDataSource),
+        _buildAppProvider(localDataSource: localDataSource),
+        const Size(1200, 900),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -49,9 +67,12 @@ void main() {
   });
 }
 
-Widget _testApp(ChatProvider provider, Size size) {
-  return ChangeNotifierProvider<ChatProvider>.value(
-    value: provider,
+Widget _testApp(ChatProvider chatProvider, AppProvider appProvider, Size size) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
+      ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+    ],
     child: MaterialApp(
       home: MediaQuery(
         data: MediaQueryData(size: size),
@@ -61,7 +82,9 @@ Widget _testApp(ChatProvider provider, Size size) {
   );
 }
 
-ChatProvider _buildChatProvider() {
+ChatProvider _buildChatProvider({
+  required InMemoryAppLocalDataSource localDataSource,
+}) {
   final chatRepo = FakeChatRepository();
   final appRepo = FakeAppRepository()
     ..providersResult = Right(
@@ -89,8 +112,23 @@ ChatProvider _buildChatProvider() {
     projectProvider: ProjectProvider(
       projectRepository: FakeProjectRepository(),
     ),
-    localDataSource: InMemoryAppLocalDataSource(),
+    localDataSource: localDataSource,
   );
+}
+
+AppProvider _buildAppProvider({
+  required InMemoryAppLocalDataSource localDataSource,
+}) {
+  final repository = FakeAppRepository();
+  final provider = AppProvider(
+    getAppInfo: GetAppInfo(repository),
+    checkConnection: CheckConnection(repository),
+    localDataSource: localDataSource,
+    dioClient: DioClient(),
+    enableHealthPolling: false,
+  );
+  unawaited(provider.initialize());
+  return provider;
 }
 
 Model _model(String id) {

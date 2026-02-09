@@ -86,10 +86,12 @@ Completed a signed parity contract baseline using a fixed upstream/docs/OpenAPI 
 ### Feature 011: Multi-Server Management and Health Orchestration
 Description: Implement first-class support for multiple OpenCode servers (desktop/mobile parity), including active/default server routing and health-aware switching. (Visit file ROADMAP.feat011.md for full research details)
 
-- [ ] 11.01 Introduce `ServerProfile` storage (list, add/edit/remove, active, default) replacing single `host/port` persistence
-- [ ] 11.02 Build server manager UI (`add`, `edit`, `delete`, `set default`, `health badge`, `connectivity validation`)
-- [ ] 11.03 Scope runtime state/caches per server (projects, sessions, model preferences, auth settings) to avoid cross-server pollution
-- [ ] 11.04 Add unit/widget/integration coverage for server switching, invalid server handling, and fallback behavior
+Completed multi-server orchestration end-to-end with persisted `ServerProfile` migration from legacy host/port keys, health-aware activation/default selection, scoped runtime persistence (`serverId` + contextual scope) for chat/session/model state isolation, and full UI/server-switch integration from app bar and settings. Added unit/widget/integration coverage validating migration, duplicate normalization, unhealthy switch blocking, and cache isolation across active server switches.
+
+- [x] 11.01 Introduce `ServerProfile` storage (list, add/edit/remove, active, default) replacing single `host/port` persistence
+- [x] 11.02 Build server manager UI (`add`, `edit`, `delete`, `set default`, `health badge`, `connectivity validation`)
+- [x] 11.03 Scope runtime state/caches per server (projects, sessions, model preferences, auth settings) to avoid cross-server pollution
+- [x] 11.04 Add unit/widget/integration coverage for server switching, invalid server handling, and fallback behavior
 
 ### Feature 012: Model/Provider Switching and Variant (Reasoning Effort) Controls
 Description: Bring model control parity with OpenCode Desktop/Web, including current-model changes and model variant/reasoning-effort changes. (Visit file ROADMAP.feat012.md for full research details)

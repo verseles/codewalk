@@ -1,628 +1,558 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/logging/app_logger.dart';
-import '../providers/app_provider.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/constants/api_constants.dart';
-import '../../core/di/injection_container.dart';
-import '../../data/datasources/app_local_datasource.dart';
-import '../../core/network/dio_client.dart';
 
-/// Server settings page
+import '../../core/constants/app_constants.dart';
+import '../../domain/entities/server_profile.dart';
+import '../providers/app_provider.dart';
+
 class ServerSettingsPage extends StatefulWidget {
-  const ServerSettingsPage({Key? key}) : super(key: key);
+  const ServerSettingsPage({super.key});
 
   @override
   State<ServerSettingsPage> createState() => _ServerSettingsPageState();
 }
 
+enum _ServerAction { activate, setDefault, clearDefault, edit, delete, check }
+
 class _ServerSettingsPageState extends State<ServerSettingsPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _hostController = TextEditingController();
-  final _portController = TextEditingController();
-  final _basicUsernameController = TextEditingController();
-  final _basicPasswordController = TextEditingController();
-  final _hostFocusNode = FocusNode();
-  final _portFocusNode = FocusNode();
-  final _basicUsernameFocusNode = FocusNode();
-  final _basicPasswordFocusNode = FocusNode();
-  bool _basicEnabled = false;
-  bool _hasCheckedConnection =
-      false; // Only show status after explicit check/test
-  bool _isSaving = false;
-  String? _lastSavedSignature;
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    final appProvider = context.read<AppProvider>();
-    _hostController.text = appProvider.serverHost;
-    _portController.text = appProvider.serverPort.toString();
-
-    // Load saved server config from local storage and sync to UI/provider
-    Future.microtask(() async {
-      final local = sl<AppLocalDataSource>();
-      final savedHost = await local.getServerHost();
-      final savedPort = await local.getServerPort();
-      final savedBasicEnabled = await local.getBasicAuthEnabled();
-      final savedUsername = await local.getBasicAuthUsername();
-      final savedPassword = await local.getBasicAuthPassword();
-      if (savedHost != null && savedPort != null && mounted) {
-        _hostController.text = savedHost;
-        _portController.text = savedPort.toString();
-        // Keep provider state consistent so other parts reflect the same values
-        appProvider.setServerConfig(savedHost, savedPort);
-      }
-      if (mounted) {
-        _basicEnabled = savedBasicEnabled ?? false;
-        _basicUsernameController.text = savedUsername ?? '';
-        _basicPasswordController.text = savedPassword ?? '';
-        _lastSavedSignature = _buildCurrentSignature();
-        setState(() {});
-      }
-    });
-
-    _hostFocusNode.addListener(() => _handleBlurAutoSave(_hostFocusNode));
-    _portFocusNode.addListener(() => _handleBlurAutoSave(_portFocusNode));
-    _basicUsernameFocusNode.addListener(
-      () => _handleBlurAutoSave(_basicUsernameFocusNode),
-    );
-    _basicPasswordFocusNode.addListener(
-      () => _handleBlurAutoSave(_basicPasswordFocusNode),
-    );
+    Future.microtask(_bootstrap);
   }
 
-  @override
-  void dispose() {
-    _hostController.dispose();
-    _portController.dispose();
-    _basicUsernameController.dispose();
-    _basicPasswordController.dispose();
-    _hostFocusNode.dispose();
-    _portFocusNode.dispose();
-    _basicUsernameFocusNode.dispose();
-    _basicPasswordFocusNode.dispose();
-    super.dispose();
+  Future<void> _bootstrap() async {
+    if (!mounted) return;
+    final appProvider = context.read<AppProvider>();
+    await appProvider.initialize();
+    if (!mounted) return;
+    await appProvider.refreshServerHealth();
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Server Settings'),
+        title: const Text('Server Manager'),
         actions: [
-          if (_hasCheckedConnection)
-            Consumer<AppProvider>(
-              builder: (context, appProvider, child) {
-                return IconButton(
-                  icon: Icon(
-                    appProvider.isConnected
-                        ? Icons.cloud_done
-                        : Icons.cloud_off,
-                    color: appProvider.isConnected ? Colors.green : Colors.red,
-                  ),
-                  onPressed: () => _checkConnection(),
-                );
-              },
-            ),
+          IconButton(
+            onPressed: () => context.read<AppProvider>().refreshServerHealth(),
+            icon: const Icon(Icons.health_and_safety_outlined),
+            tooltip: 'Refresh Health',
+          ),
+          IconButton(
+            onPressed: _openCreateDialog,
+            icon: const Icon(Icons.add),
+            tooltip: 'Add Server',
+          ),
         ],
       ),
-      resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                bottom:
-                    AppConstants.defaultPadding +
-                    MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Connection status card (only visible after explicit test/check)
-                  if (_hasCheckedConnection)
-                    Consumer<AppProvider>(
-                      builder: (context, appProvider, child) {
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(
-                              AppConstants.defaultPadding,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      appProvider.isConnected
-                                          ? Icons.check_circle
-                                          : Icons.error,
-                                      color: appProvider.isConnected
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                    const SizedBox(
-                                      width: AppConstants.smallPadding,
-                                    ),
-                                    Text(
-                                      appProvider.isConnected
-                                          ? 'Connected'
-                                          : 'Disconnected',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium,
-                                    ),
-                                  ],
-                                ),
-                                if (!appProvider.isConnected &&
-                                    appProvider.errorMessage.isNotEmpty) ...[
-                                  const SizedBox(
-                                    height: AppConstants.smallPadding,
-                                  ),
-                                  Text(
-                                    appProvider.errorMessage,
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.error,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                                if (appProvider.isConnected &&
-                                    appProvider.appInfo != null) ...[
-                                  const SizedBox(
-                                    height: AppConstants.smallPadding,
-                                  ),
-                                  Text(
-                                    'Host: ${appProvider.appInfo!.hostname}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                  Text(
-                                    'Working Directory: ${appProvider.appInfo!.path.cwd}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                ],
-                              ],
-                            ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openCreateDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Server'),
+      ),
+      body: Consumer<AppProvider>(
+        builder: (context, appProvider, _) {
+          final profiles = appProvider.serverProfiles;
+          if (_loading && profiles.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(AppConstants.defaultPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildActiveServerCard(appProvider),
+                const SizedBox(height: AppConstants.defaultPadding),
+                Expanded(
+                  child: profiles.isEmpty
+                      ? _buildEmptyState()
+                      : ListView.separated(
+                          itemCount: profiles.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (_, index) => _buildProfileTile(
+                            appProvider: appProvider,
+                            profile: profiles[index],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-                  const SizedBox(height: AppConstants.defaultPadding),
-
-                  // Server configuration form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(
-                        AppConstants.defaultPadding,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildActiveServerCard(AppProvider appProvider) {
+    final activeServer = appProvider.activeServer;
+    final activeId = appProvider.activeServerId;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Active Server',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: activeId,
+              items: appProvider.serverProfiles
+                  .map(
+                    (profile) => DropdownMenuItem<String>(
+                      value: profile.id,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Server Configuration',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: AppConstants.defaultPadding),
-
-                          // Host address input
-                          TextFormField(
-                            controller: _hostController,
-                            focusNode: _hostFocusNode,
-                            decoration: const InputDecoration(
-                              labelText: 'Host Address',
-                              hintText: 'e.g.: 127.0.0.1',
-                              prefixIcon: Icon(Icons.computer),
-                            ),
-                            onEditingComplete: () {
-                              FocusScope.of(context).unfocus();
-                              unawaited(
-                                _saveSettings(
-                                  silent: true,
-                                  requireValidation: false,
-                                ),
-                              );
-                            },
-                            onTapOutside: (_) {
-                              unawaited(
-                                _saveSettings(
-                                  silent: true,
-                                  requireValidation: false,
-                                ),
-                              );
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter host address';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: AppConstants.defaultPadding),
-
-                          // Port input
-                          TextFormField(
-                            controller: _portController,
-                            focusNode: _portFocusNode,
-                            decoration: const InputDecoration(
-                              labelText: 'Port',
-                              hintText: 'e.g.: 4096',
-                              prefixIcon: Icon(Icons.settings_ethernet),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onEditingComplete: () {
-                              FocusScope.of(context).unfocus();
-                              unawaited(
-                                _saveSettings(
-                                  silent: true,
-                                  requireValidation: false,
-                                ),
-                              );
-                            },
-                            onTapOutside: (_) {
-                              unawaited(
-                                _saveSettings(
-                                  silent: true,
-                                  requireValidation: false,
-                                ),
-                              );
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter port number';
-                              }
-                              final port = int.tryParse(value);
-                              if (port == null || port < 1 || port > 65535) {
-                                return 'Please enter valid port number (1-65535)';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: AppConstants.defaultPadding),
-
-                          // Reset button
-                          TextButton(
-                            onPressed: _resetToDefault,
-                            child: const Text('Reset to Default'),
-                          ),
-
-                          const SizedBox(height: AppConstants.defaultPadding),
-
-                          // Basic authentication section
-                          SwitchListTile(
-                            value: _basicEnabled,
-                            onChanged: (val) {
-                              setState(() {
-                                _basicEnabled = val;
-                              });
-                              unawaited(
-                                _saveSettings(
-                                  silent: true,
-                                  requireValidation: false,
-                                ),
-                              );
-                            },
-                            title: const Text('Enable Basic Authentication'),
-                            subtitle: const Text(
-                              'If enabled, requests will include Basic Authorization header.',
+                          _HealthDot(status: appProvider.healthFor(profile.id)),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: Text(
+                              profile.displayName,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-
-                          if (_basicEnabled) ...[
-                            const SizedBox(height: AppConstants.smallPadding),
-                            TextFormField(
-                              controller: _basicUsernameController,
-                              focusNode: _basicUsernameFocusNode,
-                              decoration: const InputDecoration(
-                                labelText: 'Username',
-                                prefixIcon: Icon(Icons.person_outline),
-                              ),
-                              onEditingComplete: () {
-                                FocusScope.of(context).unfocus();
-                                unawaited(
-                                  _saveSettings(
-                                    silent: true,
-                                    requireValidation: false,
-                                  ),
-                                );
-                              },
-                              onTapOutside: (_) {
-                                unawaited(
-                                  _saveSettings(
-                                    silent: true,
-                                    requireValidation: false,
-                                  ),
-                                );
-                              },
-                              validator: (value) {
-                                if (!_basicEnabled) return null;
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter username';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: AppConstants.smallPadding),
-                            TextFormField(
-                              controller: _basicPasswordController,
-                              focusNode: _basicPasswordFocusNode,
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock_outline),
-                              ),
-                              obscureText: true,
-                              onEditingComplete: () {
-                                FocusScope.of(context).unfocus();
-                                unawaited(
-                                  _saveSettings(
-                                    silent: true,
-                                    requireValidation: false,
-                                  ),
-                                );
-                              },
-                              onTapOutside: (_) {
-                                unawaited(
-                                  _saveSettings(
-                                    silent: true,
-                                    requireValidation: false,
-                                  ),
-                                );
-                              },
-                              validator: (value) {
-                                if (!_basicEnabled) return null;
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter password';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
                         ],
                       ),
                     ),
-                  ),
+                  )
+                  .toList(),
+              onChanged: (id) async {
+                if (id == null || id == activeId) return;
+                final status = appProvider.healthFor(id);
+                if (status == ServerHealthStatus.unhealthy) {
+                  _showMessage(
+                    'This server is unhealthy. Use check health or edit settings before activating.',
+                  );
+                  return;
+                }
 
-                  const SizedBox(height: AppConstants.defaultPadding),
-
-                  // Save and test buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: _saveSettings,
-                          icon: const Icon(Icons.save),
-                          label: const Text('Save'),
-                        ),
-                      ),
-                      const SizedBox(width: AppConstants.smallPadding),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _testConnection,
-                          icon: const Icon(Icons.wifi_find),
-                          label: const Text('Test'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                final ok = await appProvider.setActiveServer(id);
+                if (!ok && mounted) {
+                  _showMessage(appProvider.errorMessage);
+                }
+              },
+              decoration: const InputDecoration(
+                labelText: 'Choose active server',
+                border: OutlineInputBorder(),
               ),
             ),
-          ),
+            if (activeServer != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                activeServer.url,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 
-  /// Save settings
-  Future<bool> _saveSettings({
-    bool silent = false,
-    bool requireValidation = true,
-  }) async {
-    if (_isSaving) {
-      return false;
-    }
-    if (requireValidation && !_formKey.currentState!.validate()) {
-      return false;
-    }
-    if (!requireValidation && !_canAutoSave()) {
-      return false;
-    }
+  Widget _buildProfileTile({
+    required AppProvider appProvider,
+    required ServerProfile profile,
+  }) {
+    final isActive = profile.id == appProvider.activeServerId;
+    final isDefault = profile.id == appProvider.defaultServerId;
 
-    final host = _hostController.text.trim();
-    final port = int.tryParse(_portController.text.trim());
-    if (port == null) {
-      return false;
-    }
-
-    // On Android emulator, localhost/127.0.0.1 should point to 10.0.2.2
-    // This mapping avoids accidental calls to the host machine's loopback.
-    var mappedHost = host;
-    final isAndroid =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    if (isAndroid &&
-        (host == '127.0.0.1' || host.toLowerCase() == 'localhost')) {
-      mappedHost = '10.0.2.2';
-    }
-
-    final signature = _buildCurrentSignature(mappedHostOverride: mappedHost);
-    if (signature == _lastSavedSignature) {
-      return true;
-    }
-
-    _isSaving = true;
-    try {
-      final appProvider = context.read<AppProvider>();
-      final success = await appProvider.updateServerConfig(mappedHost, port);
-
-      if (success && mounted) {
-        // Save Basic auth settings
-        final local = sl<AppLocalDataSource>();
-        await local.saveBasicAuthEnabled(_basicEnabled);
-        await local.saveBasicAuthUsername(_basicUsernameController.text.trim());
-        await local.saveBasicAuthPassword(_basicPasswordController.text.trim());
-
-        // Apply to Dio client
-        final dioClient = sl<DioClient>();
-        if (_basicEnabled &&
-            _basicUsernameController.text.trim().isNotEmpty &&
-            _basicPasswordController.text.trim().isNotEmpty) {
-          dioClient.setBasicAuth(
-            _basicUsernameController.text.trim(),
-            _basicPasswordController.text.trim(),
-          );
-        } else {
-          dioClient.clearAuth();
-        }
-
-        _lastSavedSignature = signature;
-
-        if (!silent) {
-          final info = 'Settings saved: http://$mappedHost:$port';
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(info)));
-        }
-        if (!silent && mappedHost != host && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Android emulator detected: mapped localhost to 10.0.2.2',
+    return Card(
+      child: ListTile(
+        leading: _HealthDot(status: appProvider.healthFor(profile.id)),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                profile.displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          );
+            if (isActive) const _MetaChip(label: 'Active'),
+            if (isDefault) const _MetaChip(label: 'Default'),
+          ],
+        ),
+        subtitle: Text(
+          profile.url,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: PopupMenuButton<_ServerAction>(
+          onSelected: (action) => _handleServerAction(
+            appProvider: appProvider,
+            profile: profile,
+            action: action,
+          ),
+          itemBuilder: (_) => [
+            if (!isActive)
+              const PopupMenuItem(
+                value: _ServerAction.activate,
+                child: Text('Set Active'),
+              ),
+            if (!isDefault)
+              const PopupMenuItem(
+                value: _ServerAction.setDefault,
+                child: Text('Set Default'),
+              ),
+            if (isDefault)
+              const PopupMenuItem(
+                value: _ServerAction.clearDefault,
+                child: Text('Clear Default'),
+              ),
+            const PopupMenuItem(
+              value: _ServerAction.check,
+              child: Text('Check Health'),
+            ),
+            const PopupMenuItem(value: _ServerAction.edit, child: Text('Edit')),
+            const PopupMenuItem(
+              value: _ServerAction.delete,
+              child: Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.dns_outlined, size: 48),
+          const SizedBox(height: 12),
+          Text(
+            'No servers configured',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Add at least one OpenCode server to start using the app.',
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleServerAction({
+    required AppProvider appProvider,
+    required ServerProfile profile,
+    required _ServerAction action,
+  }) async {
+    switch (action) {
+      case _ServerAction.activate:
+        if (appProvider.healthFor(profile.id) == ServerHealthStatus.unhealthy) {
+          _showMessage('Cannot activate an unhealthy server');
+          return;
         }
-        return true;
-      }
-
-      if (!silent && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Save failed: ${appProvider.errorMessage}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-      return false;
-    } catch (e, stackTrace) {
-      AppLogger.error(
-        'Failed to save server settings',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      if (!silent && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Save failed: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-      return false;
-    } finally {
-      _isSaving = false;
+        final ok = await appProvider.setActiveServer(profile.id);
+        if (!ok) {
+          _showMessage(appProvider.errorMessage);
+        }
+        break;
+      case _ServerAction.setDefault:
+        final ok = await appProvider.setDefaultServer(profile.id);
+        if (!ok) {
+          _showMessage(appProvider.errorMessage);
+        }
+        break;
+      case _ServerAction.clearDefault:
+        await appProvider.clearDefaultServer();
+        break;
+      case _ServerAction.edit:
+        await _openEditDialog(profile);
+        break;
+      case _ServerAction.delete:
+        await _confirmDelete(profile);
+        break;
+      case _ServerAction.check:
+        await appProvider.refreshServerHealth(serverId: profile.id);
+        break;
     }
   }
 
-  /// Test connection
-  void _testConnection() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _openCreateDialog() async {
+    await _openProfileDialog(initial: null);
+  }
 
-    // Save settings first
-    await _saveSettings();
+  Future<void> _openEditDialog(ServerProfile profile) async {
+    await _openProfileDialog(initial: profile);
+  }
 
-    // Then test connection
-    final appProvider = context.read<AppProvider>();
-    await appProvider.getAppInfo();
-    setState(() {
-      _hasCheckedConnection = true;
-    });
+  Future<void> _openProfileDialog({ServerProfile? initial}) async {
+    final urlController = TextEditingController(text: initial?.url ?? '');
+    final labelController = TextEditingController(text: initial?.label ?? '');
+    final usernameController = TextEditingController(
+      text: initial?.basicAuthUsername ?? '',
+    );
+    final passwordController = TextEditingController(
+      text: initial?.basicAuthPassword ?? '',
+    );
+    var basicAuthEnabled = initial?.basicAuthEnabled ?? false;
+    final formKey = GlobalKey<FormState>();
 
-    if (mounted) {
-      if (appProvider.isConnected) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Connection successful!'),
-            backgroundColor: Colors.green,
-          ),
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(initial == null ? 'Add Server' : 'Edit Server'),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: urlController,
+                        decoration: const InputDecoration(
+                          labelText: 'Server URL',
+                          hintText: 'http://127.0.0.1:4096',
+                        ),
+                        validator: (value) {
+                          final raw = value?.trim() ?? '';
+                          if (raw.isEmpty) return 'Enter a server URL';
+                          try {
+                            AppProvider.normalizeServerUrl(raw);
+                            return null;
+                          } catch (_) {
+                            return 'Invalid URL';
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: labelController,
+                        decoration: const InputDecoration(
+                          labelText: 'Label (optional)',
+                          hintText: 'Office server',
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SwitchListTile(
+                        value: basicAuthEnabled,
+                        onChanged: (value) {
+                          setState(() {
+                            basicAuthEnabled = value;
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Use Basic Auth'),
+                      ),
+                      if (basicAuthEnabled) ...[
+                        TextFormField(
+                          controller: usernameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                          ),
+                          validator: (value) {
+                            if (!basicAuthEnabled) return null;
+                            if ((value ?? '').trim().isEmpty) {
+                              return 'Enter username';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: passwordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                          ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (!basicAuthEnabled) return null;
+                            if ((value ?? '').trim().isEmpty) {
+                              return 'Enter password';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    if (formKey.currentState?.validate() != true) return;
+                    Navigator.of(dialogContext).pop(true);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Connection failed: ${appProvider.errorMessage}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
-  }
+      },
+    );
 
-  /// Check connection
-  void _checkConnection() async {
-    final appProvider = context.read<AppProvider>();
-    await appProvider.checkConnection();
-    setState(() {
-      _hasCheckedConnection = true;
-    });
-
-    if (mounted) {
-      final message = appProvider.isConnected
-          ? 'Connection OK'
-          : 'Connection failed';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
-  /// Reset to default values
-  void _resetToDefault() {
-    _hostController.text = ApiConstants.defaultHost;
-    _portController.text = ApiConstants.defaultPort.toString();
-    unawaited(_saveSettings(silent: true, requireValidation: false));
-  }
-
-  void _handleBlurAutoSave(FocusNode focusNode) {
-    if (focusNode.hasFocus) {
+    if (shouldSave != true || !mounted) {
+      urlController.dispose();
+      labelController.dispose();
+      usernameController.dispose();
+      passwordController.dispose();
       return;
     }
-    unawaited(_saveSettings(silent: true, requireValidation: false));
+
+    final appProvider = context.read<AppProvider>();
+    final adjustedUrl = _mapAndroidLoopback(urlController.text.trim());
+    final success = initial == null
+        ? await appProvider.addServerProfile(
+            url: adjustedUrl,
+            label: labelController.text.trim(),
+            basicAuthEnabled: basicAuthEnabled,
+            basicAuthUsername: usernameController.text.trim(),
+            basicAuthPassword: passwordController.text.trim(),
+            setAsActive: appProvider.serverProfiles.isEmpty,
+          )
+        : await appProvider.updateServerProfile(
+            id: initial.id,
+            url: adjustedUrl,
+            label: labelController.text.trim(),
+            basicAuthEnabled: basicAuthEnabled,
+            basicAuthUsername: usernameController.text.trim(),
+            basicAuthPassword: passwordController.text.trim(),
+          );
+
+    if (!success) {
+      _showMessage(appProvider.errorMessage);
+    } else if (kIsWeb == false &&
+        defaultTargetPlatform == TargetPlatform.android &&
+        adjustedUrl.contains('10.0.2.2') &&
+        urlController.text.contains('localhost')) {
+      _showMessage('Android emulator detected: localhost mapped to 10.0.2.2');
+    }
+
+    urlController.dispose();
+    labelController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
   }
 
-  bool _canAutoSave() {
-    final host = _hostController.text.trim();
-    final port = int.tryParse(_portController.text.trim());
-    if (host.isEmpty || port == null || port < 1 || port > 65535) {
-      return false;
+  Future<void> _confirmDelete(ServerProfile profile) async {
+    final appProvider = context.read<AppProvider>();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: const Text('Delete server'),
+          content: Text('Remove "${profile.displayName}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+    final ok = await appProvider.removeServerProfile(profile.id);
+    if (!ok) {
+      _showMessage(appProvider.errorMessage);
     }
-    if (_basicEnabled &&
-        (_basicUsernameController.text.trim().isEmpty ||
-            _basicPasswordController.text.trim().isEmpty)) {
-      return false;
-    }
-    return true;
   }
 
-  String _buildCurrentSignature({String? mappedHostOverride}) {
-    final host = (mappedHostOverride ?? _hostController.text.trim())
-        .toLowerCase();
-    final port = _portController.text.trim();
-    final basicEnabled = _basicEnabled ? '1' : '0';
-    final user = _basicUsernameController.text.trim();
-    final pass = _basicPasswordController.text.trim();
-    return '$host|$port|$basicEnabled|$user|$pass';
+  String _mapAndroidLoopback(String input) {
+    var normalized = input.trim();
+    try {
+      normalized = AppProvider.normalizeServerUrl(normalized);
+    } catch (_) {
+      return input.trim();
+    }
+
+    final isAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    if (!isAndroid) return normalized;
+
+    final uri = Uri.tryParse(normalized);
+    if (uri == null) return normalized;
+    final isLoopback =
+        uri.host == '127.0.0.1' || uri.host.toLowerCase() == 'localhost';
+    if (!isLoopback) return normalized;
+
+    return Uri(scheme: uri.scheme, host: '10.0.2.2', port: uri.port).toString();
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _HealthDot extends StatelessWidget {
+  const _HealthDot({required this.status});
+
+  final ServerHealthStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, tooltip) = switch (status) {
+      ServerHealthStatus.healthy => (Colors.green, 'Healthy'),
+      ServerHealthStatus.unhealthy => (Colors.red, 'Unhealthy'),
+      ServerHealthStatus.unknown => (Colors.grey, 'Unknown'),
+    };
+
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+      ),
+    );
   }
 }

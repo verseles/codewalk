@@ -57,6 +57,7 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> _defaultModels = {};
   String? _selectedProviderId;
   String? _selectedModelId;
+  String _activeServerId = 'legacy';
   int _providersFetchId = 0;
   int _sessionsFetchId = 0;
   int _messagesFetchId = 0;
@@ -74,6 +75,7 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> get defaultModels => _defaultModels;
   String? get selectedProviderId => _selectedProviderId;
   String? get selectedModelId => _selectedModelId;
+  String get activeServerId => _activeServerId;
 
   /// Set scroll-to-bottom callback
   void setScrollToBottomCallback(VoidCallback? callback) {
@@ -95,49 +97,91 @@ class ChatProvider extends ChangeNotifier {
   /// Initialize providers
   Future<void> initializeProviders() async {
     final fetchId = ++_providersFetchId;
+    final serverId = await _resolveServerScopeId();
+    final scopeId = _resolveContextScopeId();
     try {
+      var failed = false;
+      var connected = <String>[];
       final result = await getProviders();
       if (fetchId != _providersFetchId) {
         return;
       }
       result.fold(
         (failure) {
+          failed = true;
           AppLogger.warn('Failed to load providers: ${failure.toString()}');
         },
         (providersResponse) {
           _providers = providersResponse.providers;
           _defaultModels = providersResponse.defaultModels;
-
-          if (_providers.isNotEmpty) {
-            // Selection priority: first connected provider, then first available
-            Provider? selectedProvider;
-
-            // Try connected providers first
-            for (final connectedId in providersResponse.connected) {
-              selectedProvider = _providers
-                  .where((p) => p.id == connectedId)
-                  .firstOrNull;
-              if (selectedProvider != null) break;
-            }
-
-            // Fall back to first available provider
-            selectedProvider ??= _providers.first;
-
-            _selectedProviderId = selectedProvider.id;
-
-            // Get default model or first available model
-            if (_defaultModels.containsKey(selectedProvider.id)) {
-              _selectedModelId = _defaultModels[selectedProvider.id];
-            } else if (selectedProvider.models.isNotEmpty) {
-              _selectedModelId = selectedProvider.models.keys.first;
-            }
-
-            AppLogger.debug(
-              'Selected provider: $_selectedProviderId, model: $_selectedModelId',
-            );
-          }
+          connected = providersResponse.connected;
         },
       );
+
+      if (failed) {
+        return;
+      }
+
+      if (_providers.isNotEmpty) {
+        final persistedProvider = await localDataSource.getSelectedProvider(
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+        final persistedModel = await localDataSource.getSelectedModel(
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+
+        Provider? selectedProvider;
+
+        if (persistedProvider != null) {
+          selectedProvider = _providers
+              .where((p) => p.id == persistedProvider)
+              .firstOrNull;
+        }
+
+        // Try connected providers first
+        if (selectedProvider == null) {
+          for (final connectedId in connected) {
+            selectedProvider = _providers
+                .where((p) => p.id == connectedId)
+                .firstOrNull;
+            if (selectedProvider != null) break;
+          }
+        }
+
+        // Fall back to first available provider
+        selectedProvider ??= _providers.first;
+        _selectedProviderId = selectedProvider.id;
+
+        if (persistedModel != null &&
+            selectedProvider.models.containsKey(persistedModel)) {
+          _selectedModelId = persistedModel;
+        } else if (_defaultModels.containsKey(selectedProvider.id)) {
+          _selectedModelId = _defaultModels[selectedProvider.id];
+        } else if (selectedProvider.models.isNotEmpty) {
+          _selectedModelId = selectedProvider.models.keys.first;
+        }
+
+        if (_selectedProviderId != null) {
+          localDataSource.saveSelectedProvider(
+            _selectedProviderId!,
+            serverId: serverId,
+            scopeId: scopeId,
+          );
+        }
+        if (_selectedModelId != null) {
+          localDataSource.saveSelectedModel(
+            _selectedModelId!,
+            serverId: serverId,
+            scopeId: scopeId,
+          );
+        }
+
+        AppLogger.debug(
+          'Selected provider: $_selectedProviderId, model: $_selectedModelId, server=$serverId',
+        );
+      }
     } catch (e, stackTrace) {
       AppLogger.error(
         'Exception while initializing providers',
@@ -150,6 +194,43 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  String _resolveContextScopeId() {
+    return projectProvider.currentProject?.path ??
+        projectProvider.currentProjectId;
+  }
+
+  Future<String> _resolveServerScopeId() async {
+    final stored = await localDataSource.getActiveServerId();
+    if (stored != null && stored.isNotEmpty) {
+      _activeServerId = stored;
+      return stored;
+    }
+    _activeServerId = 'legacy';
+    return 'legacy';
+  }
+
+  /// Reset provider state and reload server-scoped data.
+  Future<void> onServerScopeChanged() async {
+    _providersFetchId += 1;
+    _sessionsFetchId += 1;
+    _messagesFetchId += 1;
+    _messageSubscription?.cancel();
+    _messageSubscription = null;
+    _sessions = <ChatSession>[];
+    _messages = <ChatMessage>[];
+    _currentSession = null;
+    _errorMessage = null;
+    _providers = <Provider>[];
+    _defaultModels = <String, String>{};
+    _selectedProviderId = null;
+    _selectedModelId = null;
+    _state = ChatState.initial;
+    notifyListeners();
+
+    await initializeProviders();
+    await loadSessions();
+  }
+
   /// Load session list
   Future<void> loadSessions() async {
     if (_state == ChatState.loading) return;
@@ -158,9 +239,12 @@ class ChatProvider extends ChangeNotifier {
     _setState(ChatState.loading);
     clearError();
 
+    final serverId = await _resolveServerScopeId();
+    final scopeId = _resolveContextScopeId();
+
     try {
       // First try loading from cache
-      await _loadCachedSessions();
+      await _loadCachedSessions(serverId: serverId, scopeId: scopeId);
 
       // Then fetch latest data from server
       final result = await getChatSessions();
@@ -169,31 +253,31 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
 
-      result.fold(
-        (failure) {
-          if (fetchId != _sessionsFetchId) {
-            return;
-          }
+      if (result.isLeft()) {
+        if (fetchId != _sessionsFetchId) {
+          return;
+        }
+        final failure = result.fold((f) => f, (_) => null);
+        if (failure != null) {
           _handleFailure(failure);
-        },
-        (sessions) async {
-          if (fetchId != _sessionsFetchId) {
-            return;
-          }
-          _sessions = sessions;
-          _setState(ChatState.loaded);
+        }
+        return;
+      }
 
-          // Save to cache
-          await _saveCachedSessions(sessions);
+      final sessions = result.fold((_) => <ChatSession>[], (value) => value);
+      if (fetchId != _sessionsFetchId) {
+        return;
+      }
+      _sessions = sessions;
+      _setState(ChatState.loaded);
 
-          if (fetchId != _sessionsFetchId) {
-            return;
-          }
+      await _saveCachedSessions(sessions, serverId: serverId, scopeId: scopeId);
 
-          // Restore last selected session
-          await loadLastSession();
-        },
-      );
+      if (fetchId != _sessionsFetchId) {
+        return;
+      }
+
+      await loadLastSession(serverId: serverId, scopeId: scopeId);
     } catch (e, stackTrace) {
       if (fetchId != _sessionsFetchId) {
         return;
@@ -208,10 +292,19 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Load sessions from cache
-  Future<void> _loadCachedSessions() async {
+  Future<void> _loadCachedSessions({
+    required String serverId,
+    required String scopeId,
+  }) async {
     try {
-      final cachedData = await localDataSource.getCachedSessions();
-      final cachedAtMs = await localDataSource.getCachedSessionsUpdatedAt();
+      final cachedData = await localDataSource.getCachedSessions(
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+      final cachedAtMs = await localDataSource.getCachedSessionsUpdatedAt(
+        serverId: serverId,
+        scopeId: scopeId,
+      );
       final isFresh =
           cachedAtMs != null &&
           DateTime.now().difference(
@@ -244,15 +337,25 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Save sessions to cache
-  Future<void> _saveCachedSessions(List<ChatSession> sessions) async {
+  Future<void> _saveCachedSessions(
+    List<ChatSession> sessions, {
+    required String serverId,
+    required String scopeId,
+  }) async {
     try {
       final jsonList = sessions
           .map((session) => ChatSessionModel.fromDomain(session).toJson())
           .toList();
       final jsonString = json.encode(jsonList);
-      await localDataSource.saveCachedSessions(jsonString);
+      await localDataSource.saveCachedSessions(
+        jsonString,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
       await localDataSource.saveCachedSessionsUpdatedAt(
         DateTime.now().millisecondsSinceEpoch,
+        serverId: serverId,
+        scopeId: scopeId,
       );
     } catch (e, stackTrace) {
       AppLogger.warn(
@@ -264,9 +367,17 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Save current session ID
-  Future<void> _saveCurrentSessionId(String sessionId) async {
+  Future<void> _saveCurrentSessionId(
+    String sessionId, {
+    required String serverId,
+    required String scopeId,
+  }) async {
     try {
-      await localDataSource.saveCurrentSessionId(sessionId);
+      await localDataSource.saveCurrentSessionId(
+        sessionId,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
     } catch (e, stackTrace) {
       AppLogger.warn(
         'Failed to save current session ID',
@@ -277,9 +388,15 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Load last selected session
-  Future<void> loadLastSession() async {
+  Future<void> loadLastSession({
+    required String serverId,
+    required String scopeId,
+  }) async {
     try {
-      final sessionId = await localDataSource.getCurrentSessionId();
+      final sessionId = await localDataSource.getCurrentSessionId(
+        serverId: serverId,
+        scopeId: scopeId,
+      );
       if (sessionId != null) {
         final session = _sessions.where((s) => s.id == sessionId).firstOrNull;
         if (session != null) {
@@ -358,7 +475,13 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     // Save current session ID
-    await _saveCurrentSessionId(session.id);
+    final serverId = await _resolveServerScopeId();
+    final scopeId = _resolveContextScopeId();
+    await _saveCurrentSessionId(
+      session.id,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
 
     // Load messages for selected session
     await loadMessages(session.id);

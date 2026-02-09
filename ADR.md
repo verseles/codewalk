@@ -13,6 +13,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-007: Hybrid Auto-Save in Server Settings (2026-02-09) [Accepted]
 - ADR-008: Unified Cross-Platform Icon Pipeline and Asset Size Policy (2026-02-09) [Accepted]
 - ADR-009: OpenCode v2 Parity Contract Freeze and Storage Migration Baseline (2026-02-09) [Accepted]
+- ADR-010: Multi-Server Profile Orchestration and Scoped Persistence (2026-02-09) [Accepted]
 
 ---
 
@@ -261,3 +262,58 @@ The OpenCode server/app surface expanded significantly after the original CodeWa
 - `ROADMAP.md` - execution tracking for Feature 010 tasks and dependencies
 - `CODEBASE.md` - updated v2 route/event/part taxonomy baseline
 - `lib/core/constants/app_constants.dart` - current flat-key source set considered in migration plan
+
+---
+
+## ADR-010: Multi-Server Profile Orchestration and Scoped Persistence
+
+Status: Accepted  
+Date: 2026-02-09
+
+### Context
+
+CodeWalk previously supported only one server (`server_host` + `server_port` flat persistence), which caused architectural limits for parity with OpenCode Desktop/Web. Feature 011 required first-class multi-server support with active/default switching, health-aware activation, and isolation between server-specific runtime caches (sessions/models/current context). Without namespacing, switching servers could leak stale state between environments.
+
+### Decision
+
+1. Introduce `ServerProfile` as the canonical persisted server entity and store:
+   - `server_profiles` (JSON list)
+   - `active_server_id`
+   - `default_server_id`
+2. Add one-way legacy migration from `server_host`/`server_port` and old auth keys into the new profile structure (idempotent, fallback reads retained).
+3. Implement health orchestration in `AppProvider`:
+   - primary probe `GET /global/health`
+   - fallback probe `GET /path`
+   - prevent activation of explicitly unhealthy profiles.
+4. Namespace state persistence by server and context so chat/session/model caches are isolated per active server.
+
+### Rationale
+
+- Multi-server parity is foundational for subsequent features (model variants, advanced session lifecycle, workspace context).
+- Isolated persistence prevents cross-server data contamination, a critical correctness requirement.
+- Health-aware activation aligns UX with upstream behavior and reduces invalid switch failures.
+- Idempotent migration preserves backward compatibility while enabling new architecture.
+
+### Consequences
+
+- Positive: users can manage multiple servers (add/edit/remove, active/default) with deterministic routing behavior.
+- Positive: cached sessions/current session/model selections no longer bleed across servers.
+- Positive: server switch UX is available from settings and chat app bar, reducing context-switch friction.
+- Trade-off: provider and local-storage logic became more complex due to scoped key strategy and migration support.
+- Trade-off: temporary fallback handling for legacy keys must be maintained until a future cleanup window.
+
+### Key Files
+
+- `lib/domain/entities/server_profile.dart` - server profile entity model
+- `lib/core/constants/app_constants.dart` - v2 multi-server/scoped storage keys
+- `lib/data/datasources/app_local_datasource.dart` - scoped persistence API and profile storage
+- `lib/presentation/providers/app_provider.dart` - server orchestration, migration, health checks
+- `lib/presentation/providers/chat_provider.dart` - server-scoped chat/session/model cache handling
+- `lib/presentation/pages/server_settings_page.dart` - server manager UI
+- `lib/presentation/pages/chat_page.dart` - quick server switch control
+
+### References
+
+- `ROADMAP.feat011.md`
+- `ROADMAP.md`
+- https://opencode.ai/docs/server/

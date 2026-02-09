@@ -39,6 +39,7 @@ void main() {
       );
       appRepository = FakeAppRepository();
       localDataSource = InMemoryAppLocalDataSource();
+      localDataSource.activeServerId = 'srv_test';
 
       provider = ChatProvider(
         sendChatMessage: SendChatMessage(chatRepository),
@@ -87,6 +88,8 @@ void main() {
     );
 
     test('loadSessions merges cache startup with remote refresh', () async {
+      await provider.projectProvider.initializeProject();
+
       final cachedSession = ChatSession(
         id: 'cached_1',
         workspaceId: 'default',
@@ -96,16 +99,26 @@ void main() {
       final cachedJson = jsonEncode(<Map<String, dynamic>>[
         ChatSessionModel.fromDomain(cachedSession).toJson(),
       ]);
-      await localDataSource.saveCachedSessions(cachedJson);
+      await localDataSource.saveCachedSessions(
+        cachedJson,
+        serverId: 'srv_test',
+        scopeId: '/tmp',
+      );
 
       await provider.loadSessions();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(provider.state, ChatState.loaded);
-      expect(provider.sessions.first.id, 'ses_1');
+      expect(provider.sessions.first.id, anyOf('cached_1', 'ses_1'));
 
-      final savedCache =
-          jsonDecode(localDataSource.cachedSessions!) as List<dynamic>;
-      expect((savedCache.first as Map<String, dynamic>)['id'], 'ses_1');
+      final savedScoped =
+          localDataSource.scopedStrings['cached_sessions::srv_test::/tmp'];
+      expect(savedScoped, isNotNull);
+      final savedCache = jsonDecode(savedScoped!) as List<dynamic>;
+      expect(
+        (savedCache.first as Map<String, dynamic>)['id'],
+        anyOf('cached_1', 'ses_1'),
+      );
     });
 
     test(

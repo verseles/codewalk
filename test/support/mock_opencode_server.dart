@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 class MockOpenCodeServer {
+  MockOpenCodeServer({this.initialSessionTitle = 'Initial Session'});
+
   HttpServer? _server;
   int _sessionCounter = 1;
+  final String initialSessionTitle;
 
   bool sendMessageValidationError = false;
   bool streamMessageUpdates = false;
@@ -35,7 +38,7 @@ class MockOpenCodeServer {
   }
 
   void _seedData() {
-    final session = _session('ses_1', title: 'Initial Session');
+    final session = _session('ses_1', title: initialSessionTitle);
     _sessionsById.clear();
     _sessionsById[session['id'] as String] = session;
 
@@ -69,6 +72,11 @@ class MockOpenCodeServer {
         'directory': '/workspace/project',
         'home': '/tmp/home',
       });
+      return;
+    }
+
+    if (method == 'GET' && request.uri.path == '/global/health') {
+      await _writeJson(request.response, 200, <String, dynamic>{'ok': true});
       return;
     }
 
@@ -185,7 +193,6 @@ class MockOpenCodeServer {
     if (segments.length == 4 &&
         segments[0] == 'session' &&
         segments[2] == 'message') {
-      final sessionId = segments[1];
       final messageId = segments[3];
 
       if (method == 'GET') {

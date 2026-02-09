@@ -17,6 +17,9 @@ import 'package:codewalk/domain/repositories/project_repository.dart';
 class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? serverHost;
   int? serverPort;
+  String? serverProfilesJson;
+  String? activeServerId;
+  String? defaultServerId;
   String? apiKey;
   String? selectedProvider;
   String? selectedModel;
@@ -28,11 +31,27 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   bool? basicAuthEnabled;
   String? basicAuthUsername;
   String? basicAuthPassword;
+  final Map<String, String> scopedStrings = <String, String>{};
+  final Map<String, int> scopedInts = <String, int>{};
+  final Map<String, bool> scopedBools = <String, bool>{};
+
+  String _key(String base, {String? serverId, String? scopeId}) {
+    if (serverId == null || serverId.isEmpty) {
+      return base;
+    }
+    if (scopeId == null || scopeId.isEmpty) {
+      return '$base::$serverId';
+    }
+    return '$base::$serverId::$scopeId';
+  }
 
   @override
   Future<void> clearAll() async {
     serverHost = null;
     serverPort = null;
+    serverProfilesJson = null;
+    activeServerId = null;
+    defaultServerId = null;
     apiKey = null;
     selectedProvider = null;
     selectedModel = null;
@@ -44,37 +63,105 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     basicAuthEnabled = null;
     basicAuthUsername = null;
     basicAuthPassword = null;
+    scopedStrings.clear();
+    scopedInts.clear();
+    scopedBools.clear();
   }
 
   @override
-  Future<String?> getApiKey() async => apiKey;
+  Future<String?> getActiveServerId() async => activeServerId;
 
   @override
-  Future<bool?> getBasicAuthEnabled() async => basicAuthEnabled;
+  Future<String?> getApiKey({String? serverId}) async {
+    if (serverId == null) return apiKey;
+    return scopedStrings[_key('api_key', serverId: serverId)];
+  }
 
   @override
-  Future<String?> getBasicAuthPassword() async => basicAuthPassword;
+  Future<bool?> getBasicAuthEnabled({String? serverId}) async {
+    if (serverId == null) return basicAuthEnabled;
+    return scopedBools[_key('basic_auth_enabled', serverId: serverId)];
+  }
 
   @override
-  Future<String?> getBasicAuthUsername() async => basicAuthUsername;
+  Future<String?> getBasicAuthPassword({String? serverId}) async {
+    if (serverId == null) return basicAuthPassword;
+    return scopedStrings[_key('basic_auth_password', serverId: serverId)];
+  }
 
   @override
-  Future<String?> getCachedSessions() async => cachedSessions;
+  Future<String?> getBasicAuthUsername({String? serverId}) async {
+    if (serverId == null) return basicAuthUsername;
+    return scopedStrings[_key('basic_auth_username', serverId: serverId)];
+  }
 
   @override
-  Future<int?> getCachedSessionsUpdatedAt() async => cachedSessionsUpdatedAt;
+  Future<String?> getCachedSessions({String? serverId, String? scopeId}) async {
+    if (serverId == null && scopeId == null) return cachedSessions;
+    return scopedStrings[_key(
+      'cached_sessions',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
 
   @override
-  Future<String?> getCurrentSessionId() async => currentSessionId;
+  Future<int?> getCachedSessionsUpdatedAt({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return cachedSessionsUpdatedAt;
+    return scopedInts[_key(
+      'cached_sessions_updated_at',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getCurrentSessionId({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return currentSessionId;
+    return scopedStrings[_key(
+      'current_session_id',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getDefaultServerId() async => defaultServerId;
 
   @override
   Future<String?> getLastSessionId() async => lastSessionId;
 
   @override
-  Future<String?> getSelectedModel() async => selectedModel;
+  Future<String?> getSelectedModel({String? serverId, String? scopeId}) async {
+    if (serverId == null && scopeId == null) return selectedModel;
+    return scopedStrings[_key(
+      'selected_model',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
 
   @override
-  Future<String?> getSelectedProvider() async => selectedProvider;
+  Future<String?> getSelectedProvider({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return selectedProvider;
+    return scopedStrings[_key(
+      'selected_provider',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getServerProfilesJson() async => serverProfilesJson;
 
   @override
   Future<String?> getServerHost() async => serverHost;
@@ -86,53 +173,168 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   Future<String?> getThemeMode() async => themeMode;
 
   @override
-  Future<void> saveApiKey(String apiKey) async {
-    this.apiKey = apiKey;
+  Future<void> saveActiveServerId(String serverId) async {
+    activeServerId = serverId;
   }
 
   @override
-  Future<void> saveBasicAuthEnabled(bool enabled) async {
-    basicAuthEnabled = enabled;
+  Future<void> saveApiKey(String apiKey, {String? serverId}) async {
+    if (serverId == null) {
+      this.apiKey = apiKey;
+      return;
+    }
+    scopedStrings[_key('api_key', serverId: serverId)] = apiKey;
   }
 
   @override
-  Future<void> saveBasicAuthPassword(String password) async {
-    basicAuthPassword = password;
+  Future<void> saveBasicAuthEnabled(bool enabled, {String? serverId}) async {
+    if (serverId == null) {
+      basicAuthEnabled = enabled;
+      return;
+    }
+    scopedBools[_key('basic_auth_enabled', serverId: serverId)] = enabled;
   }
 
   @override
-  Future<void> saveBasicAuthUsername(String username) async {
-    basicAuthUsername = username;
+  Future<void> saveBasicAuthPassword(
+    String password, {
+    String? serverId,
+  }) async {
+    if (serverId == null) {
+      basicAuthPassword = password;
+      return;
+    }
+    scopedStrings[_key('basic_auth_password', serverId: serverId)] = password;
   }
 
   @override
-  Future<void> saveCachedSessions(String sessionsJson) async {
-    cachedSessions = sessionsJson;
+  Future<void> saveBasicAuthUsername(
+    String username, {
+    String? serverId,
+  }) async {
+    if (serverId == null) {
+      basicAuthUsername = username;
+      return;
+    }
+    scopedStrings[_key('basic_auth_username', serverId: serverId)] = username;
   }
 
   @override
-  Future<void> saveCachedSessionsUpdatedAt(int epochMs) async {
-    cachedSessionsUpdatedAt = epochMs;
+  Future<void> saveCachedSessions(
+    String sessionsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      cachedSessions = sessionsJson;
+      return;
+    }
+    scopedStrings[_key(
+          'cached_sessions',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        sessionsJson;
   }
 
   @override
-  Future<void> saveCurrentSessionId(String sessionId) async {
-    currentSessionId = sessionId;
+  Future<void> saveCachedSessionsUpdatedAt(
+    int epochMs, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      cachedSessionsUpdatedAt = epochMs;
+      return;
+    }
+    scopedInts[_key(
+          'cached_sessions_updated_at',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        epochMs;
   }
 
   @override
-  Future<void> saveLastSessionId(String sessionId) async {
-    lastSessionId = sessionId;
+  Future<void> saveCurrentSessionId(
+    String sessionId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      currentSessionId = sessionId;
+      return;
+    }
+    scopedStrings[_key(
+          'current_session_id',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        sessionId;
   }
 
   @override
-  Future<void> saveSelectedModel(String modelId) async {
-    selectedModel = modelId;
+  Future<void> saveDefaultServerId(String? serverId) async {
+    defaultServerId = serverId;
   }
 
   @override
-  Future<void> saveSelectedProvider(String providerId) async {
-    selectedProvider = providerId;
+  Future<void> saveLastSessionId(
+    String sessionId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      lastSessionId = sessionId;
+      return;
+    }
+    scopedStrings[_key(
+          'last_session_id',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        sessionId;
+  }
+
+  @override
+  Future<void> saveSelectedModel(
+    String modelId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      selectedModel = modelId;
+      return;
+    }
+    scopedStrings[_key(
+          'selected_model',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        modelId;
+  }
+
+  @override
+  Future<void> saveSelectedProvider(
+    String providerId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      selectedProvider = providerId;
+      return;
+    }
+    scopedStrings[_key(
+          'selected_provider',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        providerId;
+  }
+
+  @override
+  Future<void> saveServerProfilesJson(String profilesJson) async {
+    serverProfilesJson = profilesJson;
   }
 
   @override

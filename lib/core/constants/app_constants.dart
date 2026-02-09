@@ -9,6 +9,12 @@ class AppConstants {
   // Storage keys
   static const String serverHostKey = 'server_host';
   static const String serverPortKey = 'server_port';
+  static const String serverProfilesKey = 'server_profiles';
+  static const String activeServerIdKey = 'active_server_id';
+  static const String defaultServerIdKey = 'default_server_id';
+  static const String storageSchemaVersionKey = 'storage_schema_version';
+  static const String migrationV1ToV2CompletedKey =
+      'migration_v1_to_v2_completed';
   static const String apiKeyKey = 'api_key';
   static const String selectedProviderKey = 'selected_provider';
   static const String selectedModelKey = 'selected_model';

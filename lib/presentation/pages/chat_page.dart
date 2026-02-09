@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/logging/app_logger.dart';
+import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
 import '../widgets/chat_session_list.dart';
+import 'server_settings_page.dart';
 
 class _NewSessionIntent extends Intent {
   const _NewSessionIntent();
@@ -44,6 +48,8 @@ class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
   ChatProvider? _chatProvider;
+  AppProvider? _appProvider;
+  String? _lastServerId;
 
   @override
   void initState() {
@@ -58,12 +64,20 @@ class _ChatPageState extends State<ChatPage> {
     super.didChangeDependencies();
     // Safely get ChatProvider reference here
     _chatProvider ??= context.read<ChatProvider>();
+    final nextAppProvider = context.read<AppProvider>();
+    if (!identical(_appProvider, nextAppProvider)) {
+      _appProvider?.removeListener(_handleAppProviderChange);
+      _appProvider = nextAppProvider;
+      _lastServerId = nextAppProvider.activeServerId;
+      _appProvider?.addListener(_handleAppProviderChange);
+    }
   }
 
   @override
   void dispose() {
     // Clean up scroll callback using saved reference
     _chatProvider?.setScrollToBottomCallback(null);
+    _appProvider?.removeListener(_handleAppProviderChange);
 
     _scrollController.dispose();
     _inputFocusNode.dispose();
@@ -82,6 +96,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _initializeChatProvider(ChatProvider chatProvider) async {
     try {
+      await context.read<AppProvider>().initialize();
       // Technical comment translated to English.
       await chatProvider.initializeProviders();
 
@@ -92,6 +107,15 @@ class _ChatPageState extends State<ChatPage> {
       chatProvider.clearError();
       AppLogger.error('Chat initialization failed', error: e);
     }
+  }
+
+  void _handleAppProviderChange() {
+    final currentServerId = _appProvider?.activeServerId;
+    if (currentServerId == null || currentServerId == _lastServerId) {
+      return;
+    }
+    _lastServerId = currentServerId;
+    unawaited(_chatProvider?.onServerScopeChanged());
   }
 
   void _scrollToBottom({bool force = false}) {
@@ -293,6 +317,119 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
       actions: [
+        Consumer<AppProvider>(
+          builder: (context, appProvider, child) {
+            final active = appProvider.activeServer;
+            final status = active == null
+                ? ServerHealthStatus.unknown
+                : appProvider.healthFor(active.id);
+            final statusColor = switch (status) {
+              ServerHealthStatus.healthy => Colors.green,
+              ServerHealthStatus.unhealthy => Colors.red,
+              ServerHealthStatus.unknown => colorScheme.outline,
+            };
+            return PopupMenuButton<String>(
+              tooltip: 'Switch Server',
+              onSelected: (value) async {
+                if (value == '__manage__') {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ServerSettingsPage(),
+                    ),
+                  );
+                  return;
+                }
+
+                final ok = await appProvider.setActiveServer(value);
+                if (!ok && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(appProvider.errorMessage)),
+                  );
+                }
+              },
+              itemBuilder: (context) {
+                final items = <PopupMenuEntry<String>>[];
+                for (final server in appProvider.serverProfiles) {
+                  final serverHealth = appProvider.healthFor(server.id);
+                  final disabled = serverHealth == ServerHealthStatus.unhealthy;
+                  items.add(
+                    PopupMenuItem<String>(
+                      value: server.id,
+                      enabled: !disabled,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: switch (serverHealth) {
+                                ServerHealthStatus.healthy => Colors.green,
+                                ServerHealthStatus.unhealthy => Colors.red,
+                                ServerHealthStatus.unknown => Colors.grey,
+                              },
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              server.displayName,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (server.id == appProvider.activeServerId)
+                            const Icon(Icons.check, size: 16),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                items.add(const PopupMenuDivider());
+                items.add(
+                  const PopupMenuItem<String>(
+                    value: '__manage__',
+                    child: Text('Manage Servers'),
+                  ),
+                );
+                return items;
+              },
+              child: Container(
+                margin: const EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: colorScheme.outline.withOpacity(0.4),
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 120),
+                      child: Text(
+                        active?.displayName ?? 'Server',
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.arrow_drop_down, size: 18),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.add_comment_outlined),
           tooltip: 'New Chat',
