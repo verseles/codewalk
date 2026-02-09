@@ -465,6 +465,58 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       // Start SSE listener for message update events
       bool messageCompleted = false;
+      bool eventStreamEnded = false;
+      var pendingMessageFetches = 0;
+
+      void maybeCloseEventController({Duration delay = Duration.zero}) {
+        Future<void>.delayed(delay, () {
+          if (eventController.isClosed) {
+            return;
+          }
+          if (pendingMessageFetches > 0) {
+            return;
+          }
+          if (!messageCompleted && !eventStreamEnded) {
+            return;
+          }
+
+          eventSubscription?.cancel();
+          if (!eventController.isClosed) {
+            eventController.close();
+          }
+        });
+      }
+
+      void fetchAndEmitMessage(String messageId) {
+        pendingMessageFetches += 1;
+        _getCompleteMessage(projectId, sessionId, messageId)
+            .then((message) {
+              if (message == null) {
+                return;
+              }
+
+              if (!eventController.isClosed) {
+                eventController.add(message);
+              }
+
+              if (message.completedTime != null && !messageCompleted) {
+                messageCompleted = true;
+                maybeCloseEventController(
+                  delay: const Duration(milliseconds: 500),
+                );
+              }
+            })
+            .catchError((error) {
+              print('Failed to fetch complete message: $error');
+            })
+            .whenComplete(() {
+              pendingMessageFetches -= 1;
+              if (pendingMessageFetches < 0) {
+                pendingMessageFetches = 0;
+              }
+              maybeCloseEventController();
+            });
+      }
 
       // Create SSE listener
       try {
@@ -509,34 +561,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
                       if (info != null && info['sessionID'] == sessionId) {
                         print('Event: message.updated ${info['id']}');
-                        _getCompleteMessage(
-                              projectId,
-                              sessionId,
-                              info['id'] as String,
-                            )
-                            .then((message) {
-                              if (message != null) {
-                                if (!eventController.isClosed) {
-                                  eventController.add(message);
-                                }
-                                if (message.completedTime != null &&
-                                    !messageCompleted) {
-                                  messageCompleted = true;
-                                  Future.delayed(
-                                    const Duration(milliseconds: 500),
-                                    () {
-                                      eventSubscription?.cancel();
-                                      if (!eventController.isClosed) {
-                                        eventController.close();
-                                      }
-                                    },
-                                  );
-                                }
-                              }
-                            })
-                            .catchError((error) {
-                              print('Failed to fetch complete message: $error');
-                            });
+                        fetchAndEmitMessage(info['id'] as String);
                       }
                     } else if (eventType == 'message.part.updated') {
                       final properties =
@@ -547,34 +572,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                         print(
                           'Event: message.part.updated ${part['messageID']}',
                         );
-                        _getCompleteMessage(
-                              projectId,
-                              sessionId,
-                              part['messageID'] as String,
-                            )
-                            .then((message) {
-                              if (message != null) {
-                                if (!eventController.isClosed) {
-                                  eventController.add(message);
-                                }
-                                if (message.completedTime != null &&
-                                    !messageCompleted) {
-                                  messageCompleted = true;
-                                  Future.delayed(
-                                    const Duration(milliseconds: 500),
-                                    () {
-                                      eventSubscription?.cancel();
-                                      if (!eventController.isClosed) {
-                                        eventController.close();
-                                      }
-                                    },
-                                  );
-                                }
-                              }
-                            })
-                            .catchError((error) {
-                              print('Failed to fetch complete message: $error');
-                            });
+                        fetchAndEmitMessage(part['messageID'] as String);
                       }
                     } else if (eventType == 'session.updated') {
                       print('Event: session.updated');
@@ -598,12 +596,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                           }
                         }
                         messageCompleted = true;
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          eventSubscription?.cancel();
-                          if (!eventController.isClosed) {
-                            eventController.close();
-                          }
-                        });
+                        maybeCloseEventController(
+                          delay: const Duration(milliseconds: 500),
+                        );
                       }
                     } else if (eventType == 'session.idle') {
                       final properties =
@@ -612,12 +607,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                         print('Event: session.idle for $sessionId');
                         if (!messageCompleted) {
                           messageCompleted = true;
-                          Future.delayed(const Duration(milliseconds: 500), () {
-                            eventSubscription?.cancel();
-                            if (!eventController.isClosed) {
-                              eventController.close();
-                            }
-                          });
+                          maybeCloseEventController(
+                            delay: const Duration(milliseconds: 500),
+                          );
                         }
                       }
                     } else if (eventType == 'message.removed') {
@@ -644,9 +636,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                 },
                 onDone: () {
                   print('Event stream ended');
-                  if (!eventController.isClosed) {
-                    eventController.close();
-                  }
+                  eventStreamEnded = true;
+                  maybeCloseEventController(
+                    delay: const Duration(milliseconds: 200),
+                  );
                 },
               );
         }
