@@ -82,12 +82,10 @@ Description: Execute a structured manual test campaign across supported platform
 - [x] 8.04 Publish a release readiness report with known limitations - Report published in `QA.feat008.release-readiness.md` - Commit: da2940b
 
 ### Feature 009: Automated Test Suite and CI Quality Gates
-Description: Build comprehensive automated tests (unit, widget, integration) and enforce quality gates in CI so future changes remain stable. (Visit file ROADMAP.feat009.md for full research details)
+Description: Build comprehensive automated tests (unit, widget, integration) and enforce quality gates in CI so future changes remain stable.
 
-- [ ] 9.01 Create unit tests for data mapping, providers, and use cases
-- [ ] 9.02 Create widget tests for chat flows and responsive behavior
-- [ ] 9.03 Create integration tests with a controllable mock OpenCode server
-- [ ] 9.04 Add CI pipeline with `analyze`, tests, and coverage thresholds
+Implemented a layered automation baseline with unit tests for model parsing/use case delegation/provider state transitions, widget tests for responsive chat shell and send-message flow, and integration tests against a controllable local mock OpenCode server including session CRUD, app/provider bootstrap calls, SSE message updates, and 400 validation error mapping. Added CI workflow gates for phased static analysis budget, full test execution with coverage generation, and minimum coverage threshold enforcement scripts, plus a race-condition fix in chat SSE handling so pending message fetches are not dropped when the event stream closes.
+Commits: 5125edd
 
 ## Dependency Order
 
