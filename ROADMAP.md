@@ -20,10 +20,10 @@ source_project: "https://github.com/easychen/openMode"
 ### Feature 001: Baseline Audit, Safety Rails, and Deletion Policy
 Description: Build an objective baseline of the current fork (code, docs, endpoints, tests, platform support) and define hard safety rails before touching implementation. (Visit file ROADMAP.feat001.md for full research details)
 
-- [ ] 1.01 Capture baseline inventory (files, naming, endpoints, locale, platform folders, lint/test status)
-- [ ] 1.02 Define keep/remove rules for documents and generated artifacts
-- [ ] 1.03 Define rollback checkpoints and branch strategy for solo execution
-- [ ] 1.04 Publish feature dependency map and acceptance gates for all next features
+- [x] 1.01 Capture baseline inventory (files, naming, endpoints, locale, platform folders, lint/test status)
+- [x] 1.02 Define keep/remove rules for documents and generated artifacts
+- [x] 1.03 Define rollback checkpoints and branch strategy for solo execution
+- [x] 1.04 Publish feature dependency map and acceptance gates for all next features
 
 ### Feature 002: Licensing Migration to AGPLv3 + Commercial (>500M Revenue)
 Description: Replace MIT with a compliant AGPLv3 setup and add a separate commercial license track for organizations above the revenue threshold. (Visit file ROADMAP.feat002.md for full research details)
@@ -108,3 +108,17 @@ Description: Build comprehensive automated tests (unit, widget, integration) and
 - [/] Partially done but blocked
 - [!] Won't do (with reason)
 - [ ] Not started
+
+## Acceptance Gates
+
+| Feature | Entry Gate | Exit Gate |
+|---------|-----------|-----------|
+| 001 | None | CODEBASE.md + Makefile + doc classification + ADR + gates defined |
+| 002 | 001 complete | LICENSE AGPLv3 + LICENSE-COMMERCIAL.md + NOTICE + dep compatibility verified |
+| 003 | 002 complete | All IDs renamed + `flutter analyze` no new errors + smoke test build |
+| 004 | 003 complete | Zero CJK strings in `lib/` + `flutter analyze` clean |
+| 005 | 004 complete | README rewritten + docs consolidated + no orphan MD files |
+| 006 | 005 complete | Gap matrix closed + models updated + validated against real server |
+| 007 | 006 complete | Desktop builds OK + responsive layout + keyboard shortcuts working |
+| 008 | 007 complete | Test matrix executed + P0/P1 fixed + readiness report published |
+| 009 | 008 complete | Unit/widget/integration tests + CI pipeline + coverage thresholds |

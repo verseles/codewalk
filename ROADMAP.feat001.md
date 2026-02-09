@@ -108,3 +108,16 @@ Defined in `ADR.md` (ADR-001). Summary:
 
 ### External Research
 - No external dependency required for this feature; this feature is grounded in repository facts.
+
+## Completion Summary
+
+Feature 001 completed on 2026-02-09. All four tasks delivered:
+
+| Task | Deliverable | Commit |
+|------|-------------|--------|
+| 1.01 | `Makefile` + `CODEBASE.md` with full baseline | `7d7e6f6`, `b9de67f` |
+| 1.02 | Doc classification table + deletion safety rules in this file | `3640fb2` |
+| 1.03 | `ADR.md` with ADR-001 (branch strategy) | `d307731` |
+| 1.04 | Acceptance gates table in `ROADMAP.md` + tasks marked complete | (this commit) |
+
+No source code was modified. Zero risk of regression.
