@@ -1,7 +1,4 @@
-import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/provider.dart';
-
-part 'provider_model.g.dart';
 
 /// Technical comment translated to English.
 class ProvidersResponseModel {
@@ -57,8 +54,7 @@ class ProvidersResponseModel {
   }
 }
 
-/// Technical comment translated to English.
-@JsonSerializable()
+/// Provider model - supports both old and new API formats.
 class ProviderModel {
   const ProviderModel({
     required this.id,
@@ -76,12 +72,46 @@ class ProviderModel {
   final String? npm;
   final Map<String, ModelModel> models;
 
-  factory ProviderModel.fromJson(Map<String, dynamic> json) =>
-      _$ProviderModelFromJson(json);
+  factory ProviderModel.fromJson(Map<String, dynamic> json) {
+    // Parse env: may be List<String> or absent
+    final envList = (json['env'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList() ??
+        <String>[];
 
-  Map<String, dynamic> toJson() => _$ProviderModelToJson(this);
+    // Parse models map
+    final modelsMap = <String, ModelModel>{};
+    final modelsJson = json['models'] as Map<String, dynamic>?;
+    if (modelsJson != null) {
+      for (final entry in modelsJson.entries) {
+        try {
+          modelsMap[entry.key] =
+              ModelModel.fromJson(entry.value as Map<String, dynamic>);
+        } catch (e) {
+          // Skip models that fail to parse
+        }
+      }
+    }
 
-  /// Technical comment translated to English.
+    return ProviderModel(
+      id: json['id'] as String,
+      name: json['name'] as String? ?? json['id'] as String,
+      env: envList,
+      api: json['api'] is String ? json['api'] as String : null,
+      npm: json['npm'] as String?,
+      models: modelsMap,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'env': env,
+        'api': api,
+        'npm': npm,
+        'models': models.map((k, v) => MapEntry(k, v.toJson())),
+      };
+
   Provider toDomain() {
     return Provider(
       id: id,
@@ -94,8 +124,7 @@ class ProviderModel {
   }
 }
 
-/// Technical comment translated to English.
-@JsonSerializable()
+/// Model - supports both flat fields and nested capabilities format.
 class ModelModel {
   const ModelModel({
     required this.id,
@@ -116,29 +145,72 @@ class ModelModel {
 
   final String id;
   final String name;
-  @JsonKey(name: 'release_date')
   final String releaseDate;
   final bool attachment;
   final bool reasoning;
   final bool temperature;
-  @JsonKey(name: 'tool_call')
   final bool toolCall;
   final ModelCostModel cost;
   final ModelLimitModel limit;
   final Map<String, dynamic>? options;
   final String? knowledge;
-  @JsonKey(name: 'last_updated')
   final String? lastUpdated;
   final Map<String, dynamic>? modalities;
-  @JsonKey(name: 'open_weights')
   final bool? openWeights;
 
-  factory ModelModel.fromJson(Map<String, dynamic> json) =>
-      _$ModelModelFromJson(json);
+  /// Parse model from JSON, supporting both flat and capabilities-nested formats.
+  factory ModelModel.fromJson(Map<String, dynamic> json) {
+    final capabilities = json['capabilities'] as Map<String, dynamic>?;
 
-  Map<String, dynamic> toJson() => _$ModelModelToJson(this);
+    // Extract booleans from capabilities or flat fields
+    final attachment = capabilities?['attachment'] as bool? ??
+        json['attachment'] as bool? ??
+        false;
+    final reasoning = capabilities?['reasoning'] as bool? ??
+        json['reasoning'] as bool? ??
+        false;
+    final temperature = capabilities?['temperature'] as bool? ??
+        json['temperature'] as bool? ??
+        false;
+    final toolCall = capabilities?['toolcall'] as bool? ??
+        json['tool_call'] as bool? ??
+        false;
 
-  /// Technical comment translated to English.
+    return ModelModel(
+      id: json['id'] as String,
+      name: json['name'] as String? ?? json['id'] as String,
+      releaseDate: json['release_date'] as String? ?? '',
+      attachment: attachment,
+      reasoning: reasoning,
+      temperature: temperature,
+      toolCall: toolCall,
+      cost: ModelCostModel.fromJson(json['cost'] as Map<String, dynamic>),
+      limit: ModelLimitModel.fromJson(json['limit'] as Map<String, dynamic>),
+      options: json['options'] as Map<String, dynamic>?,
+      knowledge: json['knowledge'] as String?,
+      lastUpdated: json['last_updated'] as String?,
+      modalities: json['modalities'] as Map<String, dynamic>?,
+      openWeights: json['open_weights'] as bool?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'release_date': releaseDate,
+        'attachment': attachment,
+        'reasoning': reasoning,
+        'temperature': temperature,
+        'tool_call': toolCall,
+        'cost': cost.toJson(),
+        'limit': limit.toJson(),
+        'options': options,
+        'knowledge': knowledge,
+        'last_updated': lastUpdated,
+        'modalities': modalities,
+        'open_weights': openWeights,
+      };
+
   Model toDomain() {
     return Model(
       id: id,
@@ -159,8 +231,7 @@ class ModelModel {
   }
 }
 
-/// Technical comment translated to English.
-@JsonSerializable()
+/// Model cost - supports both flat fields and nested cache format.
 class ModelCostModel {
   const ModelCostModel({
     required this.input,
@@ -169,13 +240,9 @@ class ModelCostModel {
     this.cacheWrite,
   });
 
-  @JsonKey(fromJson: _doubleFromJson)
   final double input;
-  @JsonKey(fromJson: _doubleFromJson)
   final double output;
-  @JsonKey(name: 'cache_read', fromJson: _nullableDoubleFromJson)
   final double? cacheRead;
-  @JsonKey(name: 'cache_write', fromJson: _nullableDoubleFromJson)
   final double? cacheWrite;
 
   static double _doubleFromJson(dynamic value) {
@@ -187,18 +254,28 @@ class ModelCostModel {
 
   static double? _nullableDoubleFromJson(dynamic value) {
     if (value == null) return null;
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    if (value is String) return double.tryParse(value);
-    return null;
+    return _doubleFromJson(value);
   }
 
-  factory ModelCostModel.fromJson(Map<String, dynamic> json) =>
-      _$ModelCostModelFromJson(json);
+  /// Parse cost from JSON, supporting both `{cache_read, cache_write}` and `{cache: {read, write}}`.
+  factory ModelCostModel.fromJson(Map<String, dynamic> json) {
+    final cache = json['cache'] as Map<String, dynamic>?;
+    return ModelCostModel(
+      input: _doubleFromJson(json['input']),
+      output: _doubleFromJson(json['output']),
+      cacheRead: _nullableDoubleFromJson(cache?['read'] ?? json['cache_read']),
+      cacheWrite:
+          _nullableDoubleFromJson(cache?['write'] ?? json['cache_write']),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ModelCostModelToJson(this);
+  Map<String, dynamic> toJson() => {
+        'input': input,
+        'output': output,
+        'cache_read': cacheRead,
+        'cache_write': cacheWrite,
+      };
 
-  /// Technical comment translated to English.
   ModelCost toDomain() {
     return ModelCost(
       input: input,
@@ -209,20 +286,23 @@ class ModelCostModel {
   }
 }
 
-/// Technical comment translated to English.
-@JsonSerializable()
+/// Model limits.
 class ModelLimitModel {
   const ModelLimitModel({required this.context, required this.output});
 
   final int context;
   final int output;
 
-  factory ModelLimitModel.fromJson(Map<String, dynamic> json) =>
-      _$ModelLimitModelFromJson(json);
+  factory ModelLimitModel.fromJson(Map<String, dynamic> json) {
+    return ModelLimitModel(
+      context: (json['context'] as num?)?.toInt() ?? 0,
+      output: (json['output'] as num?)?.toInt() ?? 0,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ModelLimitModelToJson(this);
+  Map<String, dynamic> toJson() =>
+      {'context': context, 'output': output};
 
-  /// Technical comment translated to English.
   ModelLimit toDomain() {
     return ModelLimit(context: context, output: output);
   }

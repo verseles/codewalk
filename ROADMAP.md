@@ -63,7 +63,7 @@ Description: Align the client and internal API docs with the latest OpenCode Ser
 - [x] 6.01 Build endpoint-by-endpoint gap matrix (current client vs latest docs)
 - [x] 6.02 Update models/datasources/use cases for schema and endpoint drift
 - [x] 6.03 Replace outdated API docs with a versioned Server Mode integration guide
-- [ ] 6.04 Validate chat/session/provider flows against a real server instance
+- [x] 6.04 Validate chat/session/provider flows against a real server instance - Completed on 2026-02-09 against `100.68.105.54:4096`: `/path`, `/provider`, `/session`, `/event`, create/update/delete/summarize, and assistant message flow validated after compatibility fixes for nested `model` payload and message parsing
 
 ### Feature 007: Cross-Platform Desktop Enablement and Responsive UX
 Description: Expand project target platforms beyond mobile and deliver a true cross experience for desktop/web/mobile with adaptive layouts and desktop-native interactions. (Visit file ROADMAP.feat007.md for full research details)

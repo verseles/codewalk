@@ -425,7 +425,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        return ChatMessageModel.fromJson(response.data);
+        final map = response.data as Map<String, dynamic>;
+        final info =
+            (map['info'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+        final parts = (map['parts'] as List<dynamic>?) ?? <dynamic>[];
+        return ChatMessageModel.fromJson({...info, 'parts': parts});
       } else {
         throw const ServerException('Server error');
       }
@@ -446,6 +450,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     ChatInputModel input, {
     String? directory,
   }) async* {
+    final eventController = StreamController<ChatMessageModel>();
+    StreamSubscription<String>? eventSubscription;
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
@@ -458,8 +464,6 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       print('==================');
 
       // Start SSE listener for message update events
-      final eventController = StreamController<ChatMessageModel>();
-      late StreamSubscription eventSubscription;
       bool messageCompleted = false;
 
       // Create SSE listener
@@ -512,15 +516,19 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                             )
                             .then((message) {
                               if (message != null) {
-                                eventController.add(message);
+                                if (!eventController.isClosed) {
+                                  eventController.add(message);
+                                }
                                 if (message.completedTime != null &&
                                     !messageCompleted) {
                                   messageCompleted = true;
                                   Future.delayed(
                                     const Duration(milliseconds: 500),
                                     () {
-                                      eventSubscription.cancel();
-                                      eventController.close();
+                                      eventSubscription?.cancel();
+                                      if (!eventController.isClosed) {
+                                        eventController.close();
+                                      }
                                     },
                                   );
                                 }
@@ -546,15 +554,19 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                             )
                             .then((message) {
                               if (message != null) {
-                                eventController.add(message);
+                                if (!eventController.isClosed) {
+                                  eventController.add(message);
+                                }
                                 if (message.completedTime != null &&
                                     !messageCompleted) {
                                   messageCompleted = true;
                                   Future.delayed(
                                     const Duration(milliseconds: 500),
                                     () {
-                                      eventSubscription.cancel();
-                                      eventController.close();
+                                      eventSubscription?.cancel();
+                                      if (!eventController.isClosed) {
+                                        eventController.close();
+                                      }
                                     },
                                   );
                                 }
@@ -574,23 +586,24 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                           properties?['sessionID'] as String?;
                       if (errorSessionId == sessionId) {
                         print('Event: session.error for $sessionId');
-                        final error = properties?['error']
-                            as Map<String, dynamic>?;
+                        final error =
+                            properties?['error'] as Map<String, dynamic>?;
                         if (error != null) {
                           final errorName =
                               error['name'] as String? ?? 'UnknownError';
-                          eventController.addError(
-                            Exception('Session error: $errorName'),
-                          );
+                          if (!eventController.isClosed) {
+                            eventController.addError(
+                              Exception('Session error: $errorName'),
+                            );
+                          }
                         }
                         messageCompleted = true;
-                        Future.delayed(
-                          const Duration(milliseconds: 500),
-                          () {
-                            eventSubscription.cancel();
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          eventSubscription?.cancel();
+                          if (!eventController.isClosed) {
                             eventController.close();
-                          },
-                        );
+                          }
+                        });
                       }
                     } else if (eventType == 'session.idle') {
                       final properties =
@@ -599,13 +612,12 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                         print('Event: session.idle for $sessionId');
                         if (!messageCompleted) {
                           messageCompleted = true;
-                          Future.delayed(
-                            const Duration(milliseconds: 500),
-                            () {
-                              eventSubscription.cancel();
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            eventSubscription?.cancel();
+                            if (!eventController.isClosed) {
                               eventController.close();
-                            },
-                          );
+                            }
+                          });
                         }
                       }
                     } else if (eventType == 'message.removed') {
@@ -626,11 +638,15 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                 },
                 onError: (error) {
                   print('Event stream error: $error');
-                  eventController.addError(error);
+                  if (!eventController.isClosed) {
+                    eventController.addError(error);
+                  }
                 },
                 onDone: () {
                   print('Event stream ended');
-                  eventController.close();
+                  if (!eventController.isClosed) {
+                    eventController.close();
+                  }
                 },
               );
         }
@@ -648,16 +664,39 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         print('✅ Message sent successfully');
 
-        // Fetch initial message state
-        if (input.messageId != null) {
-          final initialMessage = await _getCompleteMessage(
-            projectId,
-            sessionId,
-            input.messageId!,
-          );
-          if (initialMessage != null) {
-            yield initialMessage;
+        // Parse immediate server response (`{info, parts}`) when available.
+        final responseData = response.data;
+        ChatMessageModel? immediateMessage;
+        if (responseData is Map<String, dynamic>) {
+          final info =
+              (responseData['info'] as Map<String, dynamic>?) ??
+              <String, dynamic>{};
+          final parts =
+              (responseData['parts'] as List<dynamic>?) ?? <dynamic>[];
+          if (info.isNotEmpty) {
+            immediateMessage = ChatMessageModel.fromJson({
+              ...info,
+              'parts': parts,
+            });
+            yield immediateMessage;
           }
+        }
+
+        // If the immediate response already completed, no streaming is needed.
+        if (immediateMessage?.completedTime != null) {
+          await eventSubscription?.cancel();
+          if (!eventController.isClosed) {
+            await eventController.close();
+          }
+          return;
+        }
+
+        // If stream connection is unavailable, return what we already have.
+        if (eventSubscription == null) {
+          if (!eventController.isClosed) {
+            await eventController.close();
+          }
+          return;
         }
 
         // Listen for subsequent message updates
@@ -678,6 +717,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     } catch (e) {
       print('Message send exception: $e');
       throw const ServerException('Failed to send message');
+    } finally {
+      eventSubscription?.cancel();
+      if (!eventController.isClosed) {
+        eventController.close();
+      }
     }
   }
 
@@ -851,10 +895,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final response = await dio.post(
         '/session/$sessionId/summarize',
-        data: {
-          'providerID': providerId,
-          'modelID': modelId,
-        },
+        data: {'providerID': providerId, 'modelID': modelId},
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 

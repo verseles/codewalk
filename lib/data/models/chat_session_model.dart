@@ -150,19 +150,59 @@ class ChatInputModel {
 
   @JsonKey(name: 'messageID')
   final String? messageId;
-  @JsonKey(name: 'providerID')
   final String providerId;
-  @JsonKey(name: 'modelID')
   final String modelId;
   final String? mode;
   final String? system;
   final Map<String, bool>? tools;
   final List<ChatInputPartModel> parts;
 
-  factory ChatInputModel.fromJson(Map<String, dynamic> json) =>
-      _$ChatInputModelFromJson(json);
+  /// Supports both legacy flat (`providerID`/`modelID` + `mode`) and
+  /// current nested (`model` + `agent`) request schemas.
+  factory ChatInputModel.fromJson(Map<String, dynamic> json) {
+    final model = json['model'] as Map<String, dynamic>?;
+    final partsJson = (json['parts'] as List<dynamic>?) ?? const <dynamic>[];
 
-  Map<String, dynamic> toJson() => _$ChatInputModelToJson(this);
+    return ChatInputModel(
+      messageId: json['messageID'] as String?,
+      providerId:
+          (model?['providerID'] as String?) ??
+          (json['providerID'] as String?) ??
+          '',
+      modelId:
+          (model?['modelID'] as String?) ?? (json['modelID'] as String?) ?? '',
+      mode: (json['agent'] as String?) ?? (json['mode'] as String?),
+      system: json['system'] as String?,
+      tools: (json['tools'] as Map<String, dynamic>?)?.map(
+        (key, value) => MapEntry(key, value == true),
+      ),
+      parts: partsJson
+          .map((e) => ChatInputPartModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{
+      'parts': parts.map((p) => p.toJson()).toList(),
+      'model': {'providerID': providerId, 'modelID': modelId},
+      // Force reply creation from /session/{id}/message for sync prompt flow.
+      'noReply': false,
+    };
+    if (messageId != null) {
+      map['messageID'] = messageId;
+    }
+    if (mode != null && mode!.isNotEmpty) {
+      map['agent'] = mode;
+    }
+    if (system != null && system!.isNotEmpty) {
+      map['system'] = system;
+    }
+    if (tools != null && tools!.isNotEmpty) {
+      map['tools'] = tools;
+    }
+    return map;
+  }
 
   static ChatInputModel fromDomain(ChatInput input) {
     return ChatInputModel(
@@ -196,10 +236,36 @@ class ChatInputPartModel {
   final String? name;
   final String? id;
 
-  factory ChatInputPartModel.fromJson(Map<String, dynamic> json) =>
-      _$ChatInputPartModelFromJson(json);
+  factory ChatInputPartModel.fromJson(Map<String, dynamic> json) {
+    return ChatInputPartModel(
+      type: json['type'] as String,
+      text: json['text'] as String?,
+      source: json['source'] as Map<String, dynamic>?,
+      filename: json['filename'] as String?,
+      name: json['name'] as String?,
+      id: json['id'] as String?,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ChatInputPartModelToJson(this);
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{'type': type};
+    if (text != null) {
+      map['text'] = text;
+    }
+    if (source != null) {
+      map['source'] = source;
+    }
+    if (filename != null) {
+      map['filename'] = filename;
+    }
+    if (name != null) {
+      map['name'] = name;
+    }
+    if (id != null) {
+      map['id'] = id;
+    }
+    return map;
+  }
 
   /// Technical comment translated to English.
   static ChatInputPartModel fromDomain(ChatInputPart part) {

@@ -49,9 +49,9 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 53 | Under `lib/` and `test/` |
-| `.g.dart` (generated) | 5 | JSON serialization models |
-| `.dart` (total) | 58 | All Dart files |
+| `.dart` (source) | 51 | Under `lib/` and `test/` (excluding generated) |
+| `.g.dart` (generated) | 4 | JSON serialization models |
+| `.dart` (total) | 55 | All Dart files |
 | `.md` (markdown) | 14 | Docs + roadmap files |
 
 ## Legacy Naming References
@@ -67,8 +67,9 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/app` | Fetch app info (git, hostname, paths, time) |
-| POST | `/app/init` | Initialize application |
+| GET | `/path` | Fetch runtime path info (primary app bootstrap endpoint) |
+| GET | `/app` | Fetch app info (legacy fallback for older servers) |
+| POST | `/app/init` | Legacy initialization fallback (`/path` is primary readiness probe) |
 | GET | `/provider` | Get providers (`{all, default, connected}`) |
 | GET | `/config` | Fetch config info |
 
@@ -100,17 +101,17 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | GET | `/project` | List all projects |
 | GET | `/project/current` | Get current project |
 
-**Total: 20 endpoints used by client**
+**Total: 23 endpoint operations used by client (including legacy fallbacks)**
 
 ### ChatInput Schema
 
 `POST /session/{id}/message` body:
 
 ```
-{ providerID, modelID, parts: [{type, text}|{type, mime, url}], mode?, system?, tools?, messageID? }
+{ model: { providerID, modelID }, parts: [{type, text}|{type, mime, url}], agent?, system?, tools?, messageID?, noReply? }
 ```
 
-> **Note:** The `mode` field replaces the previous `agent` field. The server ignores unknown fields.
+> **Note:** Current server schema expects `agent`; client domain field `mode` is mapped to `agent` at request serialization.
 
 ### MessageTokens Schema
 

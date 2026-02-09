@@ -44,18 +44,34 @@ Endpoints available in the API but not implemented in the client: `/global/healt
 
 - [x] 6.01 Build endpoint-by-endpoint gap matrix
 - [x] 6.02 Update models/datasources/use cases for schema and endpoint drift
-  - [x] 6.02a AppRemoteDataSource: Migrate to `GET /app`
+  - [x] 6.02a AppRemoteDataSource: Prefer `GET /path` with `GET /app` fallback
   - [x] 6.02b Provider response: Support new schema (`all` + `connected`)
   - [x] 6.02c Message/Part models: Update schemas (tokens, patch, summary, SymbolSource)
-  - [x] 6.02d ChatInput: Rename `agent` to `mode`
+  - [x] 6.02d ChatInput: Map domain `mode` to API `agent` and support nested `model` payload
   - [x] 6.02e Session summarize: Add body with providerID/modelID
   - [x] 6.02f Event handling: Expand event types
   - [x] 6.02g Remove hardcoded fallback provider
   - [x] 6.02h Fix getProject (documented as intentional /project/current fallback)
   - [x] 6.02i Regenerate JSON serialization
 - [x] 6.03 Update API documentation in CODEBASE.md
-- [ ] 6.04 Validate chat/session/provider flows against a real server instance
+- [x] 6.04 Validate chat/session/provider flows against a real server instance - Completed on 2026-02-09 against `100.68.105.54:4096` after fixing request/response compatibility (`model` object payload, non-null part fields, `/path` app bootstrap, `{info,parts}` parsing)
 
 ## Implementation Notes
 
-_Updated as implementation progresses._
+### 6.04 Real Server Validation (2026-02-09)
+
+Target server: `http://100.68.105.54:4096`
+
+Validated successfully:
+- `GET /path` app bootstrap flow worked with HTTP 200 and was mapped into app info state (`hostname`, `path.cwd`, `path.root`).
+- `GET /provider` returned current schema (`all`, `default`, `connected`) with HTTP 200.
+- `GET /session` returned existing sessions with HTTP 200.
+- Session lifecycle worked: `POST /session`, `GET /session/{id}`, `PATCH /session/{id}`, `DELETE /session/{id}` all returned HTTP 200.
+- Message flow worked end-to-end after schema fixes: `POST /session/{id}/message` returned assistant payload and `GET /session/{id}/message/{messageID}` parsed correctly as assistant message.
+- `POST /session/{id}/summarize` with `{providerID, modelID}` returned HTTP 200 (`true`).
+- SSE endpoint `GET /event` responded HTTP 200 and emitted events (`server.connected`, `message.updated`, `message.part.updated`, `session.status`, `session.idle`).
+
+Root-cause correction applied during validation:
+- Initial blocker was not server runtime instability; it was request-shape drift in client serialization versus current OpenAPI (`model: {providerID, modelID}` expected, not flat `providerID/modelID`).
+- Request parts also had null fields (notably `id: null`) that caused 400 validation errors; serializer was updated to omit nulls.
+- Message detail parser was updated to handle `{info, parts}` response shape on `GET /session/{id}/message/{messageID}`.

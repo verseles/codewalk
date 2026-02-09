@@ -24,29 +24,50 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
 
   @override
   Future<AppInfoModel> getAppInfo({String? directory}) async {
-    // Use GET /app which returns the full App object directly.
     final queryParams = directory != null
         ? {'directory': directory}
         : <String, dynamic>{};
 
-    final response = await dio.get('/app', queryParameters: queryParams);
-    return AppInfoModel.fromJson(response.data as Map<String, dynamic>);
+    // Current API uses GET /path. Keep /app as fallback for older servers.
+    try {
+      final response = await dio.get('/path', queryParameters: queryParams);
+      if (response.data is Map<String, dynamic>) {
+        return _appInfoFromPath(response.data as Map<String, dynamic>);
+      }
+    } catch (_) {
+      // Fallback below
+    }
+
+    final legacy = await dio.get('/app', queryParameters: queryParams);
+    return AppInfoModel.fromJson(legacy.data as Map<String, dynamic>);
   }
 
   @override
   Future<bool> initializeApp({String? directory}) async {
+    final queryParams = directory != null
+        ? {'directory': directory}
+        : <String, dynamic>{};
+
+    // Newer servers do not expose /app/init; use /path as readiness probe.
     try {
-      final queryParams = directory != null
-          ? {'directory': directory}
-          : <String, dynamic>{};
-      final response = await dio.post(
-        '/app/init',
-        queryParameters: queryParams,
-      );
-      return response.data['success'] ?? true;
+      final response = await dio.get('/path', queryParameters: queryParams);
+      return response.statusCode == 200;
     } catch (e) {
-      print('Error while initializing app: $e');
-      return false;
+      // Backward compatibility for older instances that still support /app/init.
+      try {
+        final response = await dio.post(
+          '/app/init',
+          queryParameters: queryParams,
+        );
+        if (response.data is Map<String, dynamic>) {
+          return (response.data as Map<String, dynamic>)['success'] ?? true;
+        }
+        return response.statusCode == 200;
+      } catch (legacyError) {
+        print('Error while initializing app: $e');
+        print('Legacy init failed: $legacyError');
+        return false;
+      }
     }
   }
 
@@ -68,5 +89,47 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
         : <String, dynamic>{};
     final response = await dio.get('/config', queryParameters: queryParams);
     return response.data as Map<String, dynamic>;
+  }
+
+  AppInfoModel _appInfoFromPath(Map<String, dynamic> pathData) {
+    final configPath = pathData['config'] as String? ?? '';
+    final statePath = pathData['state'] as String? ?? '';
+    final worktreePath =
+        (pathData['worktree'] as String?) ??
+        (pathData['root'] as String?) ??
+        '';
+    final directoryPath =
+        (pathData['directory'] as String?) ??
+        (pathData['cwd'] as String?) ??
+        '';
+    final homePath = pathData['home'] as String? ?? '';
+
+    return AppInfoModel(
+      hostname: _extractHostFromBaseUrl(),
+      git: false,
+      path: AppPathModel(
+        config: configPath,
+        data: homePath.isNotEmpty ? homePath : statePath,
+        root: worktreePath,
+        cwd: directoryPath,
+        state: statePath,
+      ),
+      time: null,
+    );
+  }
+
+  String _extractHostFromBaseUrl() {
+    try {
+      final baseUrl = dio.options.baseUrl as String?;
+      if (baseUrl != null && baseUrl.isNotEmpty) {
+        final host = Uri.parse(baseUrl).host;
+        if (host.isNotEmpty) {
+          return host;
+        }
+      }
+    } catch (_) {
+      // Keep fallback below
+    }
+    return 'unknown';
   }
 }
