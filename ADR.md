@@ -14,6 +14,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-008: Unified Cross-Platform Icon Pipeline and Asset Size Policy (2026-02-09) [Accepted]
 - ADR-009: OpenCode v2 Parity Contract Freeze and Storage Migration Baseline (2026-02-09) [Accepted]
 - ADR-010: Multi-Server Profile Orchestration and Scoped Persistence (2026-02-09) [Accepted]
+- ADR-011: Model Selection and Variant Preference Orchestration (2026-02-09) [Accepted]
 
 ---
 
@@ -317,3 +318,60 @@ CodeWalk previously supported only one server (`server_host` + `server_port` fla
 - `ROADMAP.feat011.md`
 - `ROADMAP.md`
 - https://opencode.ai/docs/server/
+
+---
+
+## ADR-011: Model Selection and Variant Preference Orchestration
+
+Status: Accepted  
+Date: 2026-02-09
+
+### Context
+
+After Feature 011 established multi-server state isolation, CodeWalk still lacked parity for model control: no in-app provider/model picker, no variant (reasoning effort) controls, and no persistence strategy for recent/frequent model usage. Without this, users could not reliably steer model behavior and outbound prompt payloads could not express variant-specific intent.
+
+### Decision
+
+1. Extend provider/model domain schema to include typed model variants parsed from `/provider`.
+2. Extend chat input contract with optional `variant` and serialize it in outbound message payloads when selected.
+3. Add `ChatProvider` orchestration APIs for model state:
+   - `setSelectedProvider`
+   - `setSelectedModel`
+   - `setSelectedVariant`
+   - `cycleVariant`
+4. Persist model preferences in server/context-scoped storage:
+   - selected variant map per `provider/model`
+   - recent model keys
+   - model usage counts (frequent model signal)
+5. Add composer-level controls in chat UI for provider/model selection and reasoning cycle.
+
+### Rationale
+
+- Model/variant selection is a direct parity requirement with upstream OpenCode Desktop/Web.
+- Variant-aware payloads are necessary to control reasoning effort where models expose multiple variants.
+- Recent/frequent persistence improves recovery when defaults or provider inventories change across restarts.
+- Server/context scoping preserves isolation guarantees introduced in Feature 011.
+
+### Consequences
+
+- Positive: users can choose provider/model from chat UI and cycle reasoning variant when available.
+- Positive: outbound prompt bodies include `variant`, achieving payload parity for current send flow.
+- Positive: restored preferences now account for both explicit selection and historical usage.
+- Trade-off: `ChatProvider` state machine complexity increased with preference loading/fallback logic.
+- Trade-off: additional persisted keys require migration-aware maintenance in future storage refactors.
+
+### Key Files
+
+- `lib/domain/entities/provider.dart`
+- `lib/data/models/provider_model.dart`
+- `lib/domain/entities/chat_session.dart`
+- `lib/data/models/chat_session_model.dart`
+- `lib/data/datasources/app_local_datasource.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/presentation/pages/chat_page.dart`
+
+### References
+
+- `ROADMAP.feat012.md`
+- `ROADMAP.md`
+- https://opencode.ai/docs/models/

@@ -60,6 +60,36 @@ abstract class AppLocalDataSource {
   });
 
   /// Technical comment translated to English.
+  Future<String?> getSelectedVariantMap({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveSelectedVariantMap(
+    String variantMapJson, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<String?> getRecentModelsJson({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveRecentModelsJson(
+    String recentModelsJson, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<String?> getModelUsageCountsJson({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveModelUsageCountsJson(
+    String usageCountsJson, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
   Future<String?> getThemeMode();
 
   /// Technical comment translated to English.
@@ -276,6 +306,96 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
         scopeId: scopeId,
       ),
       modelId,
+    );
+  }
+
+  @override
+  Future<String?> getSelectedVariantMap({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.selectedVariantMapKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveSelectedVariantMap(
+    String variantMapJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.selectedVariantMapKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      variantMapJson,
+    );
+  }
+
+  @override
+  Future<String?> getRecentModelsJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.recentModelsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveRecentModelsJson(
+    String recentModelsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.recentModelsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      recentModelsJson,
+    );
+  }
+
+  @override
+  Future<String?> getModelUsageCountsJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.modelUsageCountsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveModelUsageCountsJson(
+    String usageCountsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.modelUsageCountsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      usageCountsJson,
     );
   }
 

@@ -119,6 +119,31 @@ void main() {
       },
     );
 
+    test('ChatRemoteDataSource includes variant in outbound payload', () async {
+      final remote = ChatRemoteDataSourceImpl(
+        dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+      );
+
+      await remote
+          .sendMessage(
+            'default',
+            'ses_1',
+            const ChatInputModel(
+              messageId: 'msg_user_variant',
+              providerId: 'mock-provider',
+              modelId: 'mock-model',
+              variant: 'high',
+              parts: <ChatInputPartModel>[
+                ChatInputPartModel(type: 'text', text: 'variant please'),
+              ],
+            ),
+          )
+          .first;
+
+      expect(server.lastSendMessagePayload, isNotNull);
+      expect(server.lastSendMessagePayload?['variant'], 'high');
+    });
+
     test('ChatRepository maps send 400 error to ValidationFailure', () async {
       server.sendMessageValidationError = true;
 

@@ -11,6 +11,7 @@ class MockOpenCodeServer {
 
   bool sendMessageValidationError = false;
   bool streamMessageUpdates = false;
+  Map<String, dynamic>? lastSendMessagePayload;
 
   final Map<String, Map<String, dynamic>> _sessionsById =
       <String, Map<String, dynamic>>{};
@@ -228,7 +229,8 @@ class MockOpenCodeServer {
       }
 
       if (method == 'POST') {
-        await _readJsonBody(request);
+        final payload = await _readJsonBody(request);
+        lastSendMessagePayload = payload;
 
         if (sendMessageValidationError) {
           await _writeJson(request.response, 400, <String, dynamic>{

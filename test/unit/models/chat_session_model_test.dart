@@ -51,6 +51,7 @@ void main() {
       final model = ChatInputModel.fromJson(<String, dynamic>{
         'messageID': 'msg_1',
         'agent': 'code',
+        'variant': 'high',
         'model': <String, dynamic>{
           'providerID': 'anthropic',
           'modelID': 'claude-3-5-sonnet',
@@ -62,6 +63,7 @@ void main() {
 
       expect(model.providerId, 'anthropic');
       expect(model.modelId, 'claude-3-5-sonnet');
+      expect(model.variant, 'high');
       expect(model.mode, 'code');
 
       final json = model.toJson();
@@ -74,6 +76,7 @@ void main() {
         (json['model'] as Map<String, dynamic>)['modelID'],
         'claude-3-5-sonnet',
       );
+      expect(json['variant'], 'high');
       expect(json['agent'], 'code');
     });
   });

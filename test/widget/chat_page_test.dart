@@ -128,6 +128,48 @@ void main() {
     expect(find.text('hello from widget'), findsOneWidget);
     expect(find.text('ok from widget'), findsOneWidget);
   });
+
+  testWidgets('shows model controls and cycles reasoning variant', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_1',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
+        ),
+      ],
+    );
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+      includeVariants: true,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Provider:'), findsOneWidget);
+    expect(find.textContaining('Model:'), findsOneWidget);
+    expect(find.text('Reasoning: Auto'), findsOneWidget);
+
+    await tester.tap(find.text('Reasoning: Auto'));
+    await tester.pumpAndSettle();
+    expect(find.text('Reasoning: Low'), findsOneWidget);
+  });
 }
 
 Widget _testApp(ChatProvider provider, AppProvider appProvider) {
@@ -143,6 +185,7 @@ Widget _testApp(ChatProvider provider, AppProvider appProvider) {
 ChatProvider _buildChatProvider({
   FakeChatRepository? chatRepository,
   required InMemoryAppLocalDataSource localDataSource,
+  bool includeVariants = false,
 }) {
   final chatRepo = chatRepository ?? FakeChatRepository();
   final appRepo = FakeAppRepository()
@@ -153,7 +196,17 @@ ChatProvider _buildChatProvider({
             id: 'provider_1',
             name: 'Provider 1',
             env: const <String>[],
-            models: <String, Model>{'model_1': _model('model_1')},
+            models: <String, Model>{
+              'model_1': _model(
+                'model_1',
+                variants: includeVariants
+                    ? const <String, ModelVariant>{
+                        'low': ModelVariant(id: 'low', name: 'Low'),
+                        'high': ModelVariant(id: 'high', name: 'High'),
+                      }
+                    : const <String, ModelVariant>{},
+              ),
+            },
           ),
         ],
         defaultModels: const <String, String>{'provider_1': 'model_1'},
@@ -190,7 +243,10 @@ AppProvider _buildAppProvider({
   return provider;
 }
 
-Model _model(String id) {
+Model _model(
+  String id, {
+  Map<String, ModelVariant> variants = const <String, ModelVariant>{},
+}) {
   return Model(
     id: id,
     name: id,
@@ -202,5 +258,6 @@ Model _model(String id) {
     cost: const ModelCost(input: 0.001, output: 0.002),
     limit: const ModelLimit(context: 1000, output: 100),
     options: const <String, dynamic>{},
+    variants: variants,
   );
 }

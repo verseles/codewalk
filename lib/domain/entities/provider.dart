@@ -34,6 +34,7 @@ class Model extends Equatable {
   final ModelCost cost;
   final ModelLimit limit;
   final Map<String, dynamic> options;
+  final Map<String, ModelVariant> variants;
   final String? knowledge;
   final String? lastUpdated;
   final Map<String, dynamic>? modalities;
@@ -50,6 +51,7 @@ class Model extends Equatable {
     required this.cost,
     required this.limit,
     required this.options,
+    this.variants = const <String, ModelVariant>{},
     this.knowledge,
     this.lastUpdated,
     this.modalities,
@@ -68,11 +70,30 @@ class Model extends Equatable {
     cost,
     limit,
     options,
+    variants,
     knowledge,
     lastUpdated,
     modalities,
     openWeights,
   ];
+}
+
+/// Technical comment translated to English.
+class ModelVariant extends Equatable {
+  const ModelVariant({
+    required this.id,
+    required this.name,
+    this.description,
+    this.metadata = const <String, dynamic>{},
+  });
+
+  final String id;
+  final String name;
+  final String? description;
+  final Map<String, dynamic> metadata;
+
+  @override
+  List<Object?> get props => [id, name, description, metadata];
 }
 
 /// Technical comment translated to English.

@@ -96,11 +96,13 @@ Completed multi-server orchestration end-to-end with persisted `ServerProfile` m
 ### Feature 012: Model/Provider Switching and Variant (Reasoning Effort) Controls
 Description: Bring model control parity with OpenCode Desktop/Web, including current-model changes and model variant/reasoning-effort changes. (Visit file ROADMAP.feat012.md for full research details)
 
-- [ ] 12.01 Add provider/model picker in chat composer flow and persist user selections
-- [ ] 12.02 Parse/provider model variants from `/provider` and expose current variant state in UI
-- [ ] 12.03 Add variant/reasoning-effort cycle action and include `variant` field in outbound prompt payloads
-- [ ] 12.04 Persist recent/frequent model usage (server-scoped) and restore safely across launches
-- [ ] 12.05 Add tests for model switch, variant switch, and backward compatibility when variants are absent
+Completed model-control parity foundations by adding provider/model picker controls in the composer area, variant/reasoning cycling with model-aware validation, and outbound payload parity through `variant` serialization for message sends. Extended server-scoped persistence to include variant maps plus recent/frequent model history and restore logic; expanded unit/widget/integration tests to cover parsing, selection, cycling, payload assertions, and no-variant backward compatibility.
+
+- [x] 12.01 Add provider/model picker in chat composer flow and persist user selections
+- [x] 12.02 Parse/provider model variants from `/provider` and expose current variant state in UI
+- [x] 12.03 Add variant/reasoning-effort cycle action and include `variant` field in outbound prompt payloads
+- [x] 12.04 Persist recent/frequent model usage (server-scoped) and restore safely across launches
+- [x] 12.05 Add tests for model switch, variant switch, and backward compatibility when variants are absent
 
 ### Feature 013: Event Stream and Message-Part Parity (Messages, Thinking, Tools, Questions, Permissions)
 Description: Expand real-time event handling to match OpenCode v2 event/part taxonomy and reliably render message lifecycle details. (Visit file ROADMAP.feat013.md for full research details)

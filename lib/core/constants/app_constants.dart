@@ -18,6 +18,9 @@ class AppConstants {
   static const String apiKeyKey = 'api_key';
   static const String selectedProviderKey = 'selected_provider';
   static const String selectedModelKey = 'selected_model';
+  static const String selectedVariantMapKey = 'selected_variant_map';
+  static const String recentModelsKey = 'recent_models';
+  static const String modelUsageCountsKey = 'model_usage_counts';
   static const String themeKey = 'theme_mode';
   static const String lastSessionIdKey = 'last_session_id';
   static const String cachedSessionsKey = 'cached_sessions';

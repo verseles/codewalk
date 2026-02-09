@@ -23,6 +23,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? apiKey;
   String? selectedProvider;
   String? selectedModel;
+  String? selectedVariantMapJson;
+  String? recentModelsJson;
+  String? modelUsageCountsJson;
   String? themeMode;
   String? lastSessionId;
   String? currentSessionId;
@@ -55,6 +58,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     apiKey = null;
     selectedProvider = null;
     selectedModel = null;
+    selectedVariantMapJson = null;
+    recentModelsJson = null;
+    modelUsageCountsJson = null;
     themeMode = null;
     lastSessionId = null;
     currentSessionId = null;
@@ -142,6 +148,45 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     if (serverId == null && scopeId == null) return selectedModel;
     return scopedStrings[_key(
       'selected_model',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getSelectedVariantMap({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return selectedVariantMapJson;
+    return scopedStrings[_key(
+      'selected_variant_map',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getRecentModelsJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return recentModelsJson;
+    return scopedStrings[_key(
+      'recent_models',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getModelUsageCountsJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return modelUsageCountsJson;
+    return scopedStrings[_key(
+      'model_usage_counts',
       serverId: serverId,
       scopeId: scopeId,
     )];
@@ -312,6 +357,56 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
           scopeId: scopeId,
         )] =
         modelId;
+  }
+
+  @override
+  Future<void> saveSelectedVariantMap(
+    String variantMapJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      selectedVariantMapJson = variantMapJson;
+      return;
+    }
+    scopedStrings[_key(
+          'selected_variant_map',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        variantMapJson;
+  }
+
+  @override
+  Future<void> saveRecentModelsJson(
+    String recentModelsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      this.recentModelsJson = recentModelsJson;
+      return;
+    }
+    scopedStrings[_key('recent_models', serverId: serverId, scopeId: scopeId)] =
+        recentModelsJson;
+  }
+
+  @override
+  Future<void> saveModelUsageCountsJson(
+    String usageCountsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      modelUsageCountsJson = usageCountsJson;
+      return;
+    }
+    scopedStrings[_key(
+          'model_usage_counts',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        usageCountsJson;
   }
 
   @override

@@ -193,9 +193,25 @@ Model docs:
 - Preferences are restored and correctly isolated by server context.
 - Regression tests validate variant/no-variant behaviors.
 
+## Implementation Status
+
+Status: Completed (2026-02-09)
+
+Implemented artifacts:
+
+- Added typed variant support in provider/domain models and `variant` propagation in chat input serialization.
+- Added server-scoped preference storage for selected variant map, recent model keys, and model usage counts.
+- Expanded `ChatProvider` with provider/model setters, variant cycling, model-usage tracking, and restoration logic.
+- Added composer-level model controls in `ChatPage` (provider picker, model picker, reasoning cycle chip).
+- Added/updated tests covering variant parsing, request serialization, selection/cycle behavior, and integration payload checks.
+
+Validation executed:
+
+- `flutter test` (all tests passing)
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` (infos only)
+
 ## Source Links
 
 - https://github.com/anomalyco/opencode
 - https://opencode.ai/docs/models/
 - https://opencode.ai/docs/server/
-

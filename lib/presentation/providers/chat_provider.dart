@@ -57,12 +57,17 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> _defaultModels = {};
   String? _selectedProviderId;
   String? _selectedModelId;
+  String? _selectedVariantId;
+  List<String> _recentModelKeys = <String>[];
+  Map<String, int> _modelUsageCounts = <String, int>{};
+  Map<String, String> _selectedVariantByModel = <String, String>{};
   String _activeServerId = 'legacy';
   int _providersFetchId = 0;
   int _sessionsFetchId = 0;
   int _messagesFetchId = 0;
 
   static const Duration _sessionsCacheTtl = Duration(days: 3);
+  static const int _maxRecentModels = 8;
 
   // Getters
   ChatState get state => _state;
@@ -75,7 +80,44 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> get defaultModels => _defaultModels;
   String? get selectedProviderId => _selectedProviderId;
   String? get selectedModelId => _selectedModelId;
+  String? get selectedVariantId => _selectedVariantId;
+  List<String> get recentModelKeys =>
+      List<String>.unmodifiable(_recentModelKeys);
+  Map<String, int> get modelUsageCounts =>
+      Map<String, int>.unmodifiable(_modelUsageCounts);
   String get activeServerId => _activeServerId;
+
+  Provider? get selectedProvider {
+    final selectedId = _selectedProviderId;
+    if (selectedId == null) {
+      return null;
+    }
+    return _providers
+        .where((provider) => provider.id == selectedId)
+        .firstOrNull;
+  }
+
+  Model? get selectedModel {
+    final provider = selectedProvider;
+    final modelId = _selectedModelId;
+    if (provider == null || modelId == null) {
+      return null;
+    }
+    return provider.models[modelId];
+  }
+
+  List<ModelVariant> get availableVariants =>
+      selectedModel?.variants.values.toList(growable: false) ??
+      const <ModelVariant>[];
+
+  String get selectedVariantLabel {
+    final selected = _selectedVariantId;
+    if (selected == null) {
+      return 'Auto';
+    }
+    final variant = selectedModel?.variants[selected];
+    return variant?.name ?? selected;
+  }
 
   /// Set scroll-to-bottom callback
   void setScrollToBottomCallback(VoidCallback? callback) {
@@ -92,6 +134,150 @@ class ChatProvider extends ChangeNotifier {
   void _setError(String message) {
     _errorMessage = message;
     _setState(ChatState.error);
+  }
+
+  String _modelKey(String providerId, String modelId) {
+    return '$providerId/$modelId';
+  }
+
+  String? _providerFromModelKey(String modelKey) {
+    final separatorIndex = modelKey.indexOf('/');
+    if (separatorIndex <= 0) {
+      return null;
+    }
+    return modelKey.substring(0, separatorIndex);
+  }
+
+  String? _modelFromModelKey(String modelKey) {
+    final separatorIndex = modelKey.indexOf('/');
+    if (separatorIndex <= 0 || separatorIndex == modelKey.length - 1) {
+      return null;
+    }
+    return modelKey.substring(separatorIndex + 1);
+  }
+
+  Future<void> _loadModelPreferenceState({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    _recentModelKeys = <String>[];
+    _modelUsageCounts = <String, int>{};
+    _selectedVariantByModel = <String, String>{};
+
+    final recentJson = await localDataSource.getRecentModelsJson(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (recentJson != null && recentJson.trim().isNotEmpty) {
+      try {
+        final decoded = json.decode(recentJson);
+        if (decoded is List<dynamic>) {
+          _recentModelKeys = decoded
+              .whereType<String>()
+              .where((value) => value.trim().isNotEmpty)
+              .take(_maxRecentModels)
+              .toList(growable: false);
+        }
+      } catch (_) {
+        _recentModelKeys = <String>[];
+      }
+    }
+
+    final usageJson = await localDataSource.getModelUsageCountsJson(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (usageJson != null && usageJson.trim().isNotEmpty) {
+      try {
+        final decoded = json.decode(usageJson);
+        if (decoded is Map<String, dynamic>) {
+          _modelUsageCounts = decoded.map(
+            (key, value) => MapEntry(
+              key,
+              value is num ? value.toInt() : int.tryParse('$value') ?? 0,
+            ),
+          );
+          _modelUsageCounts.removeWhere((_, value) => value <= 0);
+        }
+      } catch (_) {
+        _modelUsageCounts = <String, int>{};
+      }
+    }
+
+    final variantsJson = await localDataSource.getSelectedVariantMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (variantsJson != null && variantsJson.trim().isNotEmpty) {
+      try {
+        final decoded = json.decode(variantsJson);
+        if (decoded is Map<String, dynamic>) {
+          _selectedVariantByModel = decoded.map(
+            (key, value) => MapEntry(key, '$value'),
+          );
+          _selectedVariantByModel.removeWhere(
+            (_, value) => value.trim().isEmpty,
+          );
+        }
+      } catch (_) {
+        _selectedVariantByModel = <String, String>{};
+      }
+    }
+  }
+
+  Future<void> _persistModelPreferenceState({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    await localDataSource.saveRecentModelsJson(
+      json.encode(_recentModelKeys),
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    await localDataSource.saveModelUsageCountsJson(
+      json.encode(_modelUsageCounts),
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    await localDataSource.saveSelectedVariantMap(
+      json.encode(_selectedVariantByModel),
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+  }
+
+  String? _resolveStoredVariantForSelection() {
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    if (providerId == null || modelId == null) {
+      return null;
+    }
+    final model = selectedModel;
+    if (model == null || model.variants.isEmpty) {
+      return null;
+    }
+    final modelKey = _modelKey(providerId, modelId);
+    final persistedVariant = _selectedVariantByModel[modelKey];
+    if (persistedVariant == null ||
+        !model.variants.containsKey(persistedVariant)) {
+      return null;
+    }
+    return persistedVariant;
+  }
+
+  void _recordModelUsage() {
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    if (providerId == null || modelId == null) {
+      return;
+    }
+    final key = _modelKey(providerId, modelId);
+    _recentModelKeys.remove(key);
+    _recentModelKeys.insert(0, key);
+    if (_recentModelKeys.length > _maxRecentModels) {
+      _recentModelKeys = _recentModelKeys.take(_maxRecentModels).toList();
+    }
+    _modelUsageCounts[key] = (_modelUsageCounts[key] ?? 0) + 1;
   }
 
   /// Initialize providers
@@ -123,6 +309,8 @@ class ChatProvider extends ChangeNotifier {
       }
 
       if (_providers.isNotEmpty) {
+        await _loadModelPreferenceState(serverId: serverId, scopeId: scopeId);
+
         final persistedProvider = await localDataSource.getSelectedProvider(
           serverId: serverId,
           scopeId: scopeId,
@@ -150,6 +338,22 @@ class ChatProvider extends ChangeNotifier {
           }
         }
 
+        // Then try providers from recent usage.
+        if (selectedProvider == null) {
+          for (final recentModelKey in _recentModelKeys) {
+            final providerId = _providerFromModelKey(recentModelKey);
+            if (providerId == null) {
+              continue;
+            }
+            selectedProvider = _providers
+                .where((p) => p.id == providerId)
+                .firstOrNull;
+            if (selectedProvider != null) {
+              break;
+            }
+          }
+        }
+
         // Fall back to first available provider
         selectedProvider ??= _providers.first;
         _selectedProviderId = selectedProvider.id;
@@ -157,30 +361,82 @@ class ChatProvider extends ChangeNotifier {
         if (persistedModel != null &&
             selectedProvider.models.containsKey(persistedModel)) {
           _selectedModelId = persistedModel;
-        } else if (_defaultModels.containsKey(selectedProvider.id)) {
-          _selectedModelId = _defaultModels[selectedProvider.id];
-        } else if (selectedProvider.models.isNotEmpty) {
+        } else {
+          for (final recentModelKey in _recentModelKeys) {
+            final providerId = _providerFromModelKey(recentModelKey);
+            final modelId = _modelFromModelKey(recentModelKey);
+            if (providerId != selectedProvider.id || modelId == null) {
+              continue;
+            }
+            if (selectedProvider.models.containsKey(modelId)) {
+              _selectedModelId = modelId;
+              break;
+            }
+          }
+        }
+
+        if (_selectedModelId == null &&
+            selectedProvider.models.isNotEmpty &&
+            _modelUsageCounts.isNotEmpty) {
+          String? mostUsedModelId;
+          var mostUsedCount = -1;
+          for (final modelId in selectedProvider.models.keys) {
+            final usage =
+                _modelUsageCounts[_modelKey(selectedProvider.id, modelId)] ?? 0;
+            if (usage > mostUsedCount) {
+              mostUsedCount = usage;
+              mostUsedModelId = modelId;
+            }
+          }
+          if (mostUsedModelId != null && mostUsedCount > 0) {
+            _selectedModelId = mostUsedModelId;
+          }
+        }
+
+        if (_selectedModelId == null &&
+            _defaultModels.containsKey(selectedProvider.id)) {
+          final defaultModelId = _defaultModels[selectedProvider.id];
+          if (defaultModelId != null &&
+              selectedProvider.models.containsKey(defaultModelId)) {
+            _selectedModelId = defaultModelId;
+          }
+        }
+
+        if (_selectedModelId == null && selectedProvider.models.isNotEmpty) {
           _selectedModelId = selectedProvider.models.keys.first;
         }
 
+        _selectedVariantId = _resolveStoredVariantForSelection();
+
         if (_selectedProviderId != null) {
-          localDataSource.saveSelectedProvider(
+          await localDataSource.saveSelectedProvider(
             _selectedProviderId!,
             serverId: serverId,
             scopeId: scopeId,
           );
         }
         if (_selectedModelId != null) {
-          localDataSource.saveSelectedModel(
+          await localDataSource.saveSelectedModel(
             _selectedModelId!,
             serverId: serverId,
             scopeId: scopeId,
           );
         }
+        await _persistModelPreferenceState(
+          serverId: serverId,
+          scopeId: scopeId,
+        );
 
         AppLogger.debug(
-          'Selected provider: $_selectedProviderId, model: $_selectedModelId, server=$serverId',
+          'Selected provider=$_selectedProviderId model=$_selectedModelId variant=$_selectedVariantId server=$serverId',
         );
+      } else {
+        _selectedProviderId = null;
+        _selectedModelId = null;
+        _selectedVariantId = null;
+        _recentModelKeys = <String>[];
+        _modelUsageCounts = <String, int>{};
+        _selectedVariantByModel = <String, String>{};
       }
     } catch (e, stackTrace) {
       AppLogger.error(
@@ -224,11 +480,130 @@ class ChatProvider extends ChangeNotifier {
     _defaultModels = <String, String>{};
     _selectedProviderId = null;
     _selectedModelId = null;
+    _selectedVariantId = null;
+    _recentModelKeys = <String>[];
+    _modelUsageCounts = <String, int>{};
+    _selectedVariantByModel = <String, String>{};
     _state = ChatState.initial;
     notifyListeners();
 
     await initializeProviders();
     await loadSessions();
+  }
+
+  Future<void> _persistSelection() async {
+    final serverId = await _resolveServerScopeId();
+    final scopeId = _resolveContextScopeId();
+    if (_selectedProviderId != null) {
+      await localDataSource.saveSelectedProvider(
+        _selectedProviderId!,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+    }
+    if (_selectedModelId != null) {
+      await localDataSource.saveSelectedModel(
+        _selectedModelId!,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+    }
+    await _persistModelPreferenceState(serverId: serverId, scopeId: scopeId);
+  }
+
+  Future<void> setSelectedProvider(String providerId) async {
+    final provider = _providers.where((p) => p.id == providerId).firstOrNull;
+    if (provider == null) {
+      return;
+    }
+    _selectedProviderId = provider.id;
+
+    String? nextModelId;
+    if (_selectedModelId != null &&
+        provider.models.containsKey(_selectedModelId)) {
+      nextModelId = _selectedModelId;
+    }
+
+    if (nextModelId == null) {
+      for (final recentModelKey in _recentModelKeys) {
+        final recentProviderId = _providerFromModelKey(recentModelKey);
+        final recentModelId = _modelFromModelKey(recentModelKey);
+        if (recentProviderId == provider.id &&
+            recentModelId != null &&
+            provider.models.containsKey(recentModelId)) {
+          nextModelId = recentModelId;
+          break;
+        }
+      }
+    }
+
+    if (nextModelId == null) {
+      final defaultModelId = _defaultModels[provider.id];
+      if (defaultModelId != null &&
+          provider.models.containsKey(defaultModelId)) {
+        nextModelId = defaultModelId;
+      }
+    }
+
+    nextModelId ??= provider.models.keys.firstOrNull;
+    _selectedModelId = nextModelId;
+    _selectedVariantId = _resolveStoredVariantForSelection();
+    await _persistSelection();
+    notifyListeners();
+  }
+
+  Future<void> setSelectedModel(String modelId) async {
+    final provider = selectedProvider;
+    if (provider == null || !provider.models.containsKey(modelId)) {
+      return;
+    }
+    _selectedModelId = modelId;
+    _selectedVariantId = _resolveStoredVariantForSelection();
+    await _persistSelection();
+    notifyListeners();
+  }
+
+  Future<void> setSelectedVariant(String? variantId) async {
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    final model = selectedModel;
+    if (providerId == null || modelId == null || model == null) {
+      return;
+    }
+
+    final modelKey = _modelKey(providerId, modelId);
+    if (variantId == null || variantId.trim().isEmpty) {
+      _selectedVariantId = null;
+      _selectedVariantByModel.remove(modelKey);
+    } else if (model.variants.containsKey(variantId)) {
+      _selectedVariantId = variantId;
+      _selectedVariantByModel[modelKey] = variantId;
+    } else {
+      _selectedVariantId = null;
+      _selectedVariantByModel.remove(modelKey);
+    }
+
+    await _persistSelection();
+    notifyListeners();
+  }
+
+  Future<void> cycleVariant() async {
+    final model = selectedModel;
+    if (model == null || model.variants.isEmpty) {
+      return;
+    }
+    final variantIds = model.variants.keys.toList(growable: false);
+    final selectedVariant = _selectedVariantId;
+    if (selectedVariant == null) {
+      await setSelectedVariant(variantIds.first);
+      return;
+    }
+    final currentIndex = variantIds.indexOf(selectedVariant);
+    if (currentIndex == -1 || currentIndex >= variantIds.length - 1) {
+      await setSelectedVariant(null);
+      return;
+    }
+    await setSelectedVariant(variantIds[currentIndex + 1]);
   }
 
   /// Load session list
@@ -559,11 +934,15 @@ class ChatProvider extends ChangeNotifier {
       await initializeProviders();
     }
 
+    _recordModelUsage();
+    await _persistSelection();
+
     // Create chat input
     final input = ChatInput(
       messageId: messageId,
       providerId: _selectedProviderId ?? 'anthropic',
       modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
+      variant: _selectedVariantId,
       parts: [TextInputPart(text: text)],
     );
 

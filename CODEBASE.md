@@ -157,7 +157,7 @@ Compatibility tiers:
 `POST /session/{id}/message` body:
 
 ```
-{ model: { providerID, modelID }, parts: [{type, text}|{type, mime, url}], agent?, system?, tools?, messageID?, noReply? }
+{ model: { providerID, modelID }, variant?, parts: [{type, text}|{type, mime, url}], agent?, system?, tools?, messageID?, noReply? }
 ```
 
 > **Note:** Current server schema expects `agent`; client domain field `mode` is mapped to `agent` at request serialization.
@@ -268,10 +268,10 @@ Deferred/optional after parity wave:
 
 ### flutter analyze
 
-- **Total issues: 90** (reduced from 178 baseline)
+- **Total issues: 92** (reduced from 178 baseline)
   - Errors: 0
   - Warnings: 0
-  - Info: 90 (mostly deprecated API usage and lint modernization opportunities)
+  - Info: 92 (mostly deprecated API usage and lint modernization opportunities)
 - **Top issue categories:**
   - `deprecated_member_use` (~66): `withOpacity`, `surfaceVariant`
   - `overridden_fields` (~5): field overrides in model classes
@@ -280,7 +280,7 @@ Deferred/optional after parity wave:
 
 ### flutter test
 
-- **Result: 35 tests, all passed**
+- **Result: 40 tests, all passed**
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
   - Unit: providers/usecases/models with migration and server-scope assertions
@@ -423,6 +423,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Streaming send/receive flow (SSE via `/event`)
 - Message list rendering and incremental updates
 - Chat input and provider/model context
+- In-app provider/model picker and reasoning-variant cycle controls
 - Responsive shell with mobile drawer and desktop split-view layout
 - Desktop shortcuts for new chat, refresh, and input focus
 
@@ -437,6 +438,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - `ChatSession`: session identity, metadata, optional share/summary info, path/workspace linkage
 - `MessageTokens`: includes `input`, `output`, `reasoning`, `cacheRead`, `cacheWrite`
 - `ProvidersResponse`: includes `providers`, `defaultModels`, `connected`
+- `Model`: includes optional `variants` metadata used for reasoning-effort controls
 
 ### Streaming Flow
 - Uses SSE events (`/event`) for incremental message updates
@@ -479,6 +481,7 @@ test/
 - Supports `/global/health` for server-health orchestration tests
 - SSE event stream simulation for real-time updates
 - Controllable error injection for fault testing
+- Captures outbound send payload for integration assertions (`variant`, etc.)
 
 **fakes.dart:**
 - `FakeAppLocalDataSource`: In-memory SharedPreferences simulation
@@ -566,7 +569,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 | `.lcovrc` | LCOV coverage options (branch coverage disabled) |
 | `codecov.yml` | Codecov integration (35% project, 30% patch) |
 | `pubspec.yaml` | Dependency and version management |
-| `Makefile` | Build automation (9 targets, 67 lines) |
+| `Makefile` | Build automation (13 targets, 158 lines) |
 | `.github/workflows/ci.yml` | CI/CD pipeline (5 jobs) |
 | `CONTRIBUTING.md` | Contribution guidelines and standards |
 
@@ -595,9 +598,16 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Coverage enforcement: none → 35% minimum
 - CI jobs: none → 5 parallel jobs
 
-**Feature 011 (unreleased, in-progress branch):**
+**Feature 011 (completed):**
 - Added multi-server persistence model with legacy migration from `server_host`/`server_port`.
 - Added active/default server orchestration with health checks and safe-switch constraints.
 - Refactored local persistence and chat provider state to server-scoped keys.
 - Added server manager UX and app-bar quick switcher.
 - Expanded tests for migration/switching/isolation and raised total passing tests to 35.
+
+**Feature 012 (completed):**
+- Added provider/model picker controls in chat composer flow with server-scoped persistence.
+- Added typed model-variant parsing from `/provider` and variant-cycle UX for reasoning effort.
+- Added `variant` serialization in outbound chat payloads for parity with OpenCode v2 prompt schema.
+- Added server-scoped recent/frequent model usage tracking and restoration across launches.
+- Expanded unit/widget/integration coverage for variant parsing, cycling, persistence, and payload assertions (40 tests passing).

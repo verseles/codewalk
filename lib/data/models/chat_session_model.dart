@@ -143,6 +143,7 @@ class ChatInputModel {
     required this.parts,
     required this.providerId,
     required this.modelId,
+    this.variant,
     this.mode,
     this.system,
     this.tools,
@@ -154,6 +155,7 @@ class ChatInputModel {
   final String providerId;
   @JsonKey(name: 'modelID')
   final String modelId;
+  final String? variant;
   final String? mode;
   final String? system;
   final Map<String, bool>? tools;
@@ -173,6 +175,7 @@ class ChatInputModel {
           '',
       modelId:
           (model?['modelID'] as String?) ?? (json['modelID'] as String?) ?? '',
+      variant: json['variant'] as String?,
       mode: (json['agent'] as String?) ?? (json['mode'] as String?),
       system: json['system'] as String?,
       tools: (json['tools'] as Map<String, dynamic>?)?.map(
@@ -194,6 +197,9 @@ class ChatInputModel {
     if (messageId != null) {
       map['messageID'] = messageId;
     }
+    if (variant != null && variant!.isNotEmpty) {
+      map['variant'] = variant;
+    }
     if (mode != null && mode!.isNotEmpty) {
       map['agent'] = mode;
     }
@@ -211,6 +217,7 @@ class ChatInputModel {
       messageId: input.messageId,
       providerId: input.providerId,
       modelId: input.modelId,
+      variant: input.variant,
       mode: input.mode,
       system: input.system,
       tools: input.tools,

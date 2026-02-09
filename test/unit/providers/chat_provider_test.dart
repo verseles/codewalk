@@ -87,6 +87,127 @@ void main() {
       },
     );
 
+    test(
+      'setSelectedModel and cycleVariant update selection and payload',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': _model(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'low': ModelVariant(id: 'low', name: 'Low'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        expect(provider.selectedVariantId, isNull);
+
+        await provider.cycleVariant();
+        expect(provider.selectedVariantId, 'low');
+
+        await provider.cycleVariant();
+        expect(provider.selectedVariantId, 'high');
+
+        await provider.cycleVariant();
+        expect(provider.selectedVariantId, isNull);
+
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        await provider.setSelectedVariant('high');
+        await provider.sendMessage('variant payload');
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(chatRepository.lastSendInput?.variant, 'high');
+      },
+    );
+
+    test('cycleVariant is no-op when current model has no variants', () async {
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{'model_plain': _model('model_plain')},
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_plain'},
+          connected: const <String>['provider_a'],
+        ),
+      );
+
+      await provider.initializeProviders();
+      expect(provider.selectedVariantId, isNull);
+
+      await provider.cycleVariant();
+      expect(provider.selectedVariantId, isNull);
+    });
+
+    test(
+      'initializeProviders restores recent/frequent model preference from local storage',
+      () async {
+        final scopeId =
+            provider.projectProvider.currentProject?.path ??
+            provider.projectProvider.currentProjectId;
+
+        await localDataSource.saveRecentModelsJson(
+          jsonEncode(<String>['provider_b/model_hot']),
+          serverId: 'srv_test',
+          scopeId: scopeId,
+        );
+        await localDataSource.saveModelUsageCountsJson(
+          jsonEncode(<String, int>{'provider_b/model_hot': 7}),
+          serverId: 'srv_test',
+          scopeId: scopeId,
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_hot': _model('model_hot')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>[],
+          ),
+        );
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_hot');
+        expect(provider.recentModelKeys.first, 'provider_b/model_hot');
+        expect(provider.modelUsageCounts['provider_b/model_hot'], 7);
+      },
+    );
+
     test('loadSessions merges cache startup with remote refresh', () async {
       await provider.projectProvider.initializeProject();
 
@@ -207,7 +328,10 @@ void main() {
   });
 }
 
-Model _model(String id) {
+Model _model(
+  String id, {
+  Map<String, ModelVariant> variants = const <String, ModelVariant>{},
+}) {
   return Model(
     id: id,
     name: id,
@@ -219,5 +343,6 @@ Model _model(String id) {
     cost: const ModelCost(input: 0.001, output: 0.002),
     limit: const ModelLimit(context: 1000, output: 100),
     options: const <String, dynamic>{},
+    variants: variants,
   );
 }

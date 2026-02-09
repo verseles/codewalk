@@ -28,6 +28,14 @@ void main() {
                   'cache': <String, dynamic>{'read': 0.0003, 'write': 0.003},
                 },
                 'limit': <String, dynamic>{'context': 200000, 'output': 8192},
+                'variants': <String, dynamic>{
+                  'low': <String, dynamic>{
+                    'name': 'Low',
+                    'description': 'Fast reasoning',
+                    'effort': 1,
+                  },
+                  'high': <String, dynamic>{'label': 'High', 'effort': 3},
+                },
               },
             },
           },
@@ -47,6 +55,9 @@ void main() {
       expect(domainModel?.toolCall, isTrue);
       expect(domainModel?.cost.cacheRead, closeTo(0.0003, 0.0000001));
       expect(domainModel?.limit.context, 200000);
+      expect(domainModel?.variants.keys, containsAll(<String>['low', 'high']));
+      expect(domainModel?.variants['low']?.name, 'Low');
+      expect(domainModel?.variants['high']?.name, 'High');
     });
 
     test('parses legacy schema and skips invalid models', () {

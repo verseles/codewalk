@@ -15,7 +15,8 @@ class ProvidersResponseModel {
   /// Parse both old (`{providers, default}`) and new (`{all, default, connected}`) schemas.
   factory ProvidersResponseModel.fromJson(Map<String, dynamic> json) {
     // New API uses 'all', old API uses 'providers'
-    final providersList = (json['all'] as List<dynamic>?) ??
+    final providersList =
+        (json['all'] as List<dynamic>?) ??
         (json['providers'] as List<dynamic>?) ??
         <dynamic>[];
 
@@ -27,7 +28,8 @@ class ProvidersResponseModel {
         ? Map<String, String>.from(json['default'] as Map)
         : <String, String>{};
 
-    final connected = (json['connected'] as List<dynamic>?)
+    final connected =
+        (json['connected'] as List<dynamic>?)
             ?.map((e) => e as String)
             .toList() ??
         <String>[];
@@ -40,10 +42,10 @@ class ProvidersResponseModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'providers': providers.map((p) => p.toJson()).toList(),
-        'default': defaultModels,
-        'connected': connected,
-      };
+    'providers': providers.map((p) => p.toJson()).toList(),
+    'default': defaultModels,
+    'connected': connected,
+  };
 
   ProvidersResponse toDomain() {
     return ProvidersResponse(
@@ -74,9 +76,8 @@ class ProviderModel {
 
   factory ProviderModel.fromJson(Map<String, dynamic> json) {
     // Parse env: may be List<String> or absent
-    final envList = (json['env'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList() ??
+    final envList =
+        (json['env'] as List<dynamic>?)?.map((e) => e as String).toList() ??
         <String>[];
 
     // Parse models map
@@ -85,8 +86,9 @@ class ProviderModel {
     if (modelsJson != null) {
       for (final entry in modelsJson.entries) {
         try {
-          modelsMap[entry.key] =
-              ModelModel.fromJson(entry.value as Map<String, dynamic>);
+          modelsMap[entry.key] = ModelModel.fromJson(
+            entry.value as Map<String, dynamic>,
+          );
         } catch (e) {
           // Skip models that fail to parse
         }
@@ -104,13 +106,13 @@ class ProviderModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'env': env,
-        'api': api,
-        'npm': npm,
-        'models': models.map((k, v) => MapEntry(k, v.toJson())),
-      };
+    'id': id,
+    'name': name,
+    'env': env,
+    'api': api,
+    'npm': npm,
+    'models': models.map((k, v) => MapEntry(k, v.toJson())),
+  };
 
   Provider toDomain() {
     return Provider(
@@ -137,6 +139,7 @@ class ModelModel {
     required this.cost,
     required this.limit,
     this.options = const {},
+    this.variants = const <String, ModelVariantModel>{},
     this.knowledge,
     this.lastUpdated,
     this.modalities,
@@ -153,6 +156,7 @@ class ModelModel {
   final ModelCostModel cost;
   final ModelLimitModel limit;
   final Map<String, dynamic>? options;
+  final Map<String, ModelVariantModel> variants;
   final String? knowledge;
   final String? lastUpdated;
   final Map<String, dynamic>? modalities;
@@ -161,18 +165,32 @@ class ModelModel {
   /// Parse model from JSON, supporting both flat and capabilities-nested formats.
   factory ModelModel.fromJson(Map<String, dynamic> json) {
     final capabilities = json['capabilities'] as Map<String, dynamic>?;
+    final variantsJson = json['variants'] as Map<String, dynamic>?;
+    final variants = <String, ModelVariantModel>{};
+    if (variantsJson != null) {
+      for (final entry in variantsJson.entries) {
+        variants[entry.key] = ModelVariantModel.fromJson(
+          entry.key,
+          entry.value,
+        );
+      }
+    }
 
     // Extract booleans from capabilities or flat fields
-    final attachment = capabilities?['attachment'] as bool? ??
+    final attachment =
+        capabilities?['attachment'] as bool? ??
         json['attachment'] as bool? ??
         false;
-    final reasoning = capabilities?['reasoning'] as bool? ??
+    final reasoning =
+        capabilities?['reasoning'] as bool? ??
         json['reasoning'] as bool? ??
         false;
-    final temperature = capabilities?['temperature'] as bool? ??
+    final temperature =
+        capabilities?['temperature'] as bool? ??
         json['temperature'] as bool? ??
         false;
-    final toolCall = capabilities?['toolcall'] as bool? ??
+    final toolCall =
+        capabilities?['toolcall'] as bool? ??
         json['tool_call'] as bool? ??
         false;
 
@@ -187,6 +205,7 @@ class ModelModel {
       cost: ModelCostModel.fromJson(json['cost'] as Map<String, dynamic>),
       limit: ModelLimitModel.fromJson(json['limit'] as Map<String, dynamic>),
       options: json['options'] as Map<String, dynamic>?,
+      variants: variants,
       knowledge: json['knowledge'] as String?,
       lastUpdated: json['last_updated'] as String?,
       modalities: json['modalities'] as Map<String, dynamic>?,
@@ -195,21 +214,22 @@ class ModelModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'release_date': releaseDate,
-        'attachment': attachment,
-        'reasoning': reasoning,
-        'temperature': temperature,
-        'tool_call': toolCall,
-        'cost': cost.toJson(),
-        'limit': limit.toJson(),
-        'options': options,
-        'knowledge': knowledge,
-        'last_updated': lastUpdated,
-        'modalities': modalities,
-        'open_weights': openWeights,
-      };
+    'id': id,
+    'name': name,
+    'release_date': releaseDate,
+    'attachment': attachment,
+    'reasoning': reasoning,
+    'temperature': temperature,
+    'tool_call': toolCall,
+    'cost': cost.toJson(),
+    'limit': limit.toJson(),
+    'options': options,
+    'variants': variants.map((k, v) => MapEntry(k, v.toJson())),
+    'knowledge': knowledge,
+    'last_updated': lastUpdated,
+    'modalities': modalities,
+    'open_weights': openWeights,
+  };
 
   Model toDomain() {
     return Model(
@@ -223,10 +243,63 @@ class ModelModel {
       cost: cost.toDomain(),
       limit: limit.toDomain(),
       options: options ?? {},
+      variants: variants.map((key, value) => MapEntry(key, value.toDomain())),
       knowledge: knowledge,
       lastUpdated: lastUpdated,
       modalities: modalities,
       openWeights: openWeights,
+    );
+  }
+}
+
+/// Model variant metadata.
+class ModelVariantModel {
+  const ModelVariantModel({
+    required this.id,
+    required this.name,
+    this.description,
+    this.metadata = const <String, dynamic>{},
+  });
+
+  final String id;
+  final String name;
+  final String? description;
+  final Map<String, dynamic> metadata;
+
+  factory ModelVariantModel.fromJson(String id, dynamic rawJson) {
+    if (rawJson is String) {
+      return ModelVariantModel(id: id, name: rawJson);
+    }
+    if (rawJson is Map<String, dynamic>) {
+      final metadata = Map<String, dynamic>.from(rawJson);
+      metadata.remove('name');
+      metadata.remove('label');
+      metadata.remove('description');
+      return ModelVariantModel(
+        id: id,
+        name: rawJson['name'] as String? ?? rawJson['label'] as String? ?? id,
+        description: rawJson['description'] as String?,
+        metadata: metadata,
+      );
+    }
+    return ModelVariantModel(id: id, name: id);
+  }
+
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{...metadata};
+    json['name'] = name;
+    if (description != null && description!.isNotEmpty) {
+      json['description'] = description;
+    }
+    return json;
+  }
+
+  ModelVariant toDomain() {
+    return ModelVariant(
+      id: id,
+      name: name,
+      description: description,
+      metadata: metadata,
     );
   }
 }
@@ -264,17 +337,18 @@ class ModelCostModel {
       input: _doubleFromJson(json['input']),
       output: _doubleFromJson(json['output']),
       cacheRead: _nullableDoubleFromJson(cache?['read'] ?? json['cache_read']),
-      cacheWrite:
-          _nullableDoubleFromJson(cache?['write'] ?? json['cache_write']),
+      cacheWrite: _nullableDoubleFromJson(
+        cache?['write'] ?? json['cache_write'],
+      ),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'input': input,
-        'output': output,
-        'cache_read': cacheRead,
-        'cache_write': cacheWrite,
-      };
+    'input': input,
+    'output': output,
+    'cache_read': cacheRead,
+    'cache_write': cacheWrite,
+  };
 
   ModelCost toDomain() {
     return ModelCost(
@@ -300,8 +374,7 @@ class ModelLimitModel {
     );
   }
 
-  Map<String, dynamic> toJson() =>
-      {'context': context, 'output': output};
+  Map<String, dynamic> toJson() => {'context': context, 'output': output};
 
   ModelLimit toDomain() {
     return ModelLimit(context: context, output: output);

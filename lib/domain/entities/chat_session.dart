@@ -84,6 +84,7 @@ class ChatInput extends Equatable {
     required this.parts,
     required this.providerId,
     required this.modelId,
+    this.variant,
     this.mode,
     this.system,
     this.tools,
@@ -92,6 +93,7 @@ class ChatInput extends Equatable {
   final String? messageId;
   final String providerId;
   final String modelId;
+  final String? variant;
   final String? mode;
   final String? system;
   final Map<String, bool>? tools;
@@ -102,6 +104,7 @@ class ChatInput extends Equatable {
     messageId,
     providerId,
     modelId,
+    variant,
     mode,
     system,
     tools,

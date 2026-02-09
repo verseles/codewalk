@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/logging/app_logger.dart';
+import '../../domain/entities/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 
@@ -656,6 +657,8 @@ class _ChatPageState extends State<ChatPage> {
               // Message list
               Expanded(child: _buildMessageList(chatProvider)),
 
+              _buildModelControls(chatProvider),
+
               // Input field
               ChatInputWidget(
                 onSendMessage: (text) async {
@@ -671,6 +674,106 @@ class _ChatPageState extends State<ChatPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildModelControls(ChatProvider chatProvider) {
+    final selectedProvider = chatProvider.selectedProvider;
+    final selectedModel = chatProvider.selectedModel;
+    final variants = chatProvider.availableVariants;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        border: Border.all(color: colorScheme.outline.withOpacity(0.14)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          PopupMenuButton<String>(
+            tooltip: 'Choose provider',
+            onSelected: (providerId) {
+              unawaited(chatProvider.setSelectedProvider(providerId));
+            },
+            itemBuilder: (context) => chatProvider.providers
+                .map(
+                  (provider) => PopupMenuItem<String>(
+                    value: provider.id,
+                    child: Text(provider.name),
+                  ),
+                )
+                .toList(),
+            child: _buildModelControlChip(
+              icon: Icons.hub_outlined,
+              label: 'Provider: ${selectedProvider?.name ?? 'Select'}',
+            ),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Choose model',
+            enabled: selectedProvider != null,
+            onSelected: (modelId) {
+              unawaited(chatProvider.setSelectedModel(modelId));
+            },
+            itemBuilder: (context) {
+              final providerModels =
+                  selectedProvider?.models.values.toList(growable: false) ??
+                  const <Model>[];
+              return providerModels
+                  .map(
+                    (model) => PopupMenuItem<String>(
+                      value: model.id,
+                      child: Text(model.name),
+                    ),
+                  )
+                  .toList();
+            },
+            child: _buildModelControlChip(
+              icon: Icons.smart_toy_outlined,
+              label: 'Model: ${selectedModel?.name ?? 'Select'}',
+            ),
+          ),
+          if (variants.isNotEmpty)
+            ActionChip(
+              avatar: const Icon(Icons.psychology_alt_outlined, size: 18),
+              label: Text('Reasoning: ${chatProvider.selectedVariantLabel}'),
+              onPressed: () {
+                unawaited(chatProvider.cycleVariant());
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelControlChip({
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.25),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16),
+          const SizedBox(width: 6),
+          Text(label, style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(width: 4),
+          const Icon(Icons.arrow_drop_down, size: 18),
+        ],
       ),
     );
   }
