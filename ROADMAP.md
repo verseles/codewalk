@@ -82,7 +82,7 @@ Description: Consolidate the latest OpenCode Server/API/Desktop/Web behavior int
 - [ ] 10.04 Define migration strategy for persisted client state (server profiles, model selection, session cache)
 
 ### Feature 011: Multi-Server Management and Health Orchestration
-Description: Implement first-class support for multiple OpenCode servers (desktop/mobile parity), including active/default server routing and health-aware switching.
+Description: Implement first-class support for multiple OpenCode servers (desktop/mobile parity), including active/default server routing and health-aware switching. (Visit file ROADMAP.feat011.md for full research details)
 
 - [ ] 11.01 Introduce `ServerProfile` storage (list, add/edit/remove, active, default) replacing single `host/port` persistence
 - [ ] 11.02 Build server manager UI (`add`, `edit`, `delete`, `set default`, `health badge`, `connectivity validation`)
@@ -90,7 +90,7 @@ Description: Implement first-class support for multiple OpenCode servers (deskto
 - [ ] 11.04 Add unit/widget/integration coverage for server switching, invalid server handling, and fallback behavior
 
 ### Feature 012: Model/Provider Switching and Variant (Reasoning Effort) Controls
-Description: Bring model control parity with OpenCode Desktop/Web, including current-model changes and model variant/reasoning-effort changes.
+Description: Bring model control parity with OpenCode Desktop/Web, including current-model changes and model variant/reasoning-effort changes. (Visit file ROADMAP.feat012.md for full research details)
 
 - [ ] 12.01 Add provider/model picker in chat composer flow and persist user selections
 - [ ] 12.02 Parse/provider model variants from `/provider` and expose current variant state in UI
@@ -99,7 +99,7 @@ Description: Bring model control parity with OpenCode Desktop/Web, including cur
 - [ ] 12.05 Add tests for model switch, variant switch, and backward compatibility when variants are absent
 
 ### Feature 013: Event Stream and Message-Part Parity (Messages, Thinking, Tools, Questions, Permissions)
-Description: Expand real-time event handling to match OpenCode v2 event/part taxonomy and reliably render message lifecycle details.
+Description: Expand real-time event handling to match OpenCode v2 event/part taxonomy and reliably render message lifecycle details. (Visit file ROADMAP.feat013.md for full research details)
 
 - [ ] 13.01 Harden SSE layer (reconnect, backoff, stale subscription guard, fetch fallback) for long-running sessions
 - [ ] 13.02 Support full high-value event set (`message.*`, `session.status`, `session.error`, `permission.*`, `question.*`) in provider state
@@ -108,7 +108,7 @@ Description: Expand real-time event handling to match OpenCode v2 event/part tax
 - [ ] 13.05 Add integration tests with mocked event matrix and partial/delta update scenarios
 
 ### Feature 014: Advanced Session Lifecycle Management
-Description: Upgrade session operations beyond basic CRUD to parity-level management for active and historical work.
+Description: Upgrade session operations beyond basic CRUD to parity-level management for active and historical work. (Visit file ROADMAP.feat014.md for full research details)
 
 - [ ] 14.01 Implement rename/archive/share/unshare/delete flows end-to-end (API + UI + optimistic update + rollback)
 - [ ] 14.02 Add session fork/children/todo/diff/status capabilities where supported by server
@@ -117,7 +117,7 @@ Description: Upgrade session operations beyond basic CRUD to parity-level manage
 - [ ] 14.05 Cover session lifecycle operations with integration tests against controlled server fixtures
 
 ### Feature 015: Project/Workspace Context Parity
-Description: Support multi-project and workspace/worktree workflows using directory-aware API/event orchestration.
+Description: Support multi-project and workspace/worktree workflows using directory-aware API/event orchestration. (Visit file ROADMAP.feat015.md for full research details)
 
 - [ ] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [ ] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes
@@ -126,7 +126,7 @@ Description: Support multi-project and workspace/worktree workflows using direct
 - [ ] 15.05 Add tests for project/workspace switching, context isolation, and stale-state race conditions
 
 ### Feature 016: Reliability Hardening, QA, and Release Readiness for Parity Wave
-Description: Validate and harden all parity features with measurable quality gates before production rollout.
+Description: Validate and harden all parity features with measurable quality gates before production rollout. (Visit file ROADMAP.feat016.md for full research details)
 
 - [ ] 16.01 Expand automated test matrix (unit/widget/integration) for multi-server + model/variant + event + session/workspace flows
 - [ ] 16.02 Run manual QA campaign on Android + desktop/web parity scenarios and log reproducible defects
