@@ -52,8 +52,8 @@ Description: Translate all remaining non-English content to English, including u
 ### Feature 005: Documentation Restructure and Markdown Pruning
 Description: Remove unnecessary markdown files, consolidate surviving docs, and rewrite README with explicit origin attribution to OpenMode. (Visit file ROADMAP.feat005.md for full research details)
 
-- [ ] 5.01 Classify markdown docs into keep/merge/delete buckets
-- [ ] 5.02 Merge valuable content into a compact `docs/` structure
+- [x] 5.01 Classify markdown docs into keep/merge/delete buckets
+- [~] 5.02 Merge unique content from historical docs into CODEBASE.md
 - [ ] 5.03 Rewrite `README.md` for CodeWalk and add explicit acknowledgment to original project
 - [ ] 5.04 Delete redundant `.md` files and verify no critical knowledge was lost
 

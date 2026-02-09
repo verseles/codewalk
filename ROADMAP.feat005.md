@@ -8,72 +8,73 @@ Remove unnecessary markdown clutter while preserving essential project knowledge
 - Rewrite README for CodeWalk identity
 - Add explicit acknowledgment to original project:
   - https://github.com/easychen/openMode
-- Consolidate important technical docs into a compact `docs/` structure
+- Merge unique content into CODEBASE.md (no `docs/` directory -- too little content to justify)
 
 ## Out of Scope
 - API contract implementation updates (handled in Feature 006)
 
-## Current Findings (2026-02-09)
-Current markdown files at repository root:
-- `README.md`
-- `DEV.md`
-- `CHAT_API_ANALYSIS.md`
-- `BUGFIX_SUMMARY.md`
-- `AI_CHAT_IMPLEMENTATION.md`
+## Document Classification
 
-These overlap in content and contain mixed language/outdated assumptions.
+| File | Decision | Rationale |
+|------|----------|-----------|
+| README.md | REWRITE | Task 5.03 - new CodeWalk identity and OpenMode attribution |
+| CODEBASE.md | KEEP + receives merge | Single source of truth for technical reference |
+| ROADMAP.md | KEEP | Active roadmap |
+| ADR.md | KEEP | Architectural decision records |
+| LICENSE-COMMERCIAL.md | KEEP | Legal terms |
+| NOTICE | KEEP | Legal attribution |
+| ROADMAP.feat001-009.md | KEEP | Audit trail (completed) + operational (pending) |
+| DEV.md | MERGE -> DELETE | ~80% overlap with CODEBASE.md; ~30 unique lines (Module Overview) |
+| AI_CHAT_IMPLEMENTATION.md | MERGE -> DELETE | Core entities and streaming flow details useful for feat006 context |
+| BUGFIX_SUMMARY.md | DELETE | Purely historical, fixes already applied in code |
+| CHAT_API_ANALYSIS.md | MERGE -> DELETE | 1 note about API design (no-history payload), rest is historical |
 
-## Implementation Stages
+## Implementation Tasks
 
-### Stage 1 - Documentation Classification
-- Keep:
-  - `README.md`
-  - License files
-  - `ROADMAP.md` + active feature logs
-- Merge then remove:
-  - historical implementation notes with overlapping API/chat content
-- Delete:
-  - stale one-off analysis docs after merged replacement exists.
+### Task 5.01 - Document Classification
+- [x] Classify all markdown files into keep/merge/delete buckets
+- [x] Record classification table in this file
 
-### Stage 2 - README Rewrite (CodeWalk)
-- Rewrite intro, setup, architecture, and status sections.
-- Add explicit origin/acknowledgment section:
-  - state that CodeWalk is forked/derived from OpenMode,
-  - link to original repository,
-  - clarify ongoing independent maintenance.
+### Task 5.02 - Merge Unique Content into CODEBASE.md
+- [ ] From DEV.md: Module Overview (~20 lines) covering Auth/Server Config, Session, Chat, Settings modules
+- [ ] From AI_CHAT_IMPLEMENTATION.md: Core entities (ChatMessage typed parts, ChatSession metadata) and streaming flow (~12 lines)
+- [ ] From CHAT_API_ANALYSIS.md: API note about POST /session/{id}/message requiring only current payload (~2 lines)
+- [ ] Update CODEBASE.md references (remove AI_CHAT_IMPLEMENTATION.md mention, update .md count)
 
-### Stage 3 - Documentation IA Cleanup
-- Move persistent technical docs under `docs/` by topic:
-  - `docs/api/`
-  - `docs/architecture/`
-  - `docs/testing/`
-- Remove duplicate and contradictory content.
+### Task 5.03 - Rewrite README.md
+- [ ] Remove WIP and Vibe Project banners
+- [ ] Remove emojis from headers
+- [ ] Remove video/screenshot placeholder
+- [ ] Remove placeholder clone URL (your-username)
+- [ ] Correct "iOS and Android" to "Android and web"
+- [ ] Simplify architecture section (reference CODEBASE.md)
+- [ ] Add explicit Origin and Acknowledgment section (OpenMode/easychen attribution)
 
-### Stage 4 - Link and Content Validation
-- Validate all internal links.
-- Ensure no required onboarding/API/testing information was lost.
-
-## Deliverables
-- Clean top-level docs
-- Updated `README.md` with origin acknowledgment
-- Structured `docs/` tree for retained long-form technical content
+### Task 5.04 - Delete Redundant Files and Verify Integrity
+- [ ] Delete: DEV.md, AI_CHAT_IMPLEMENTATION.md, BUGFIX_SUMMARY.md, CHAT_API_ANALYSIS.md
+- [ ] Verify zero .dart references to deleted files
+- [ ] Run make precommit
+- [ ] Update ROADMAP.md (mark 5.01-5.04 as [x])
+- [ ] Confirm final .md count: 14
 
 ## Risks and Mitigations
 - Risk: deleting docs that still contain unique troubleshooting details.
-  - Mitigation: extract unique knowledge before deletion and cross-link in new docs.
+  - Mitigation: extract unique knowledge before deletion via merge step (Task 5.02).
 - Risk: roadmap files conflict with markdown reduction goal.
   - Mitigation: keep roadmap feature files active during execution; condense/remove when feature is fully complete.
 
 ## Definition of Done
-- Markdown footprint is intentional and minimal
+- Markdown footprint is intentional and minimal (18 -> 14 files)
 - README reflects current product, license, and origin correctly
 - No stale docs remain in root except intentional control files
+- `make precommit` passes
 
 ## Research Log
 
 ### Local Research
 - Root markdown inventory captured and reviewed.
 - Significant overlap found across chat/API historical notes.
+- Unique content from DEV.md, AI_CHAT_IMPLEMENTATION.md, CHAT_API_ANALYSIS.md identified for merge.
 
 ### External Sources
 - Original project URL to cite in README acknowledgment:
