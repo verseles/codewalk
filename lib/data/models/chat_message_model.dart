@@ -21,6 +21,7 @@ class ChatMessageModel {
     this.mode,
     this.system,
     this.path,
+    this.isSummary,
   });
 
   final String id;
@@ -31,6 +32,9 @@ class ChatMessageModel {
   final DateTime time;
   @JsonKey(includeFromJson: false, includeToJson: false)
   final DateTime? completedTime;
+  /// Whether this message is a summary message.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final bool? isSummary;
 
   static DateTime _timeFromJson(dynamic value) {
     if (value is Map<String, dynamic>) {
@@ -141,6 +145,11 @@ class ChatMessageModel {
       }
     }
 
+    // Parse summary as bool for AssistantMessage
+    final bool? isSummary = json['summary'] is bool
+        ? json['summary'] as bool
+        : null;
+
     return ChatMessageModel(
       id: model.id,
       sessionId: model.sessionId,
@@ -156,6 +165,7 @@ class ChatMessageModel {
       mode: model.mode,
       system: model.system,
       path: model.path,
+      isSummary: isSummary,
     );
   }
 
@@ -188,6 +198,7 @@ class ChatMessageModel {
         tokens: tokens?.toDomain(),
         error: error?.toDomain(),
         mode: mode,
+        summary: isSummary,
       );
     }
   }
@@ -216,6 +227,7 @@ class ChatMessageModel {
             ? MessageErrorModel.fromDomain(message.error!)
             : null,
         mode: message.mode,
+        isSummary: message.summary,
       );
     } else {
       return ChatMessageModel(
@@ -246,6 +258,8 @@ class MessagePartModel {
     this.tool,
     this.state,
     this.time,
+    this.files,
+    this.hash,
   });
 
   final String id;
@@ -265,6 +279,9 @@ class MessagePartModel {
   final Map<String, dynamic>? state;
   @JsonKey(fromJson: _partTimeFromJson)
   final DateTime? time;
+  // Patch part fields
+  final List<String>? files;
+  final String? hash;
 
   static DateTime? _partTimeFromJson(dynamic value) {
     if (value == null) return null;
@@ -301,6 +318,9 @@ class MessagePartModel {
           time: time,
         );
       case PartType.file:
+        final parsed = source != null
+            ? _parseFilePartSource(source!)
+            : (fileSource: null as FileSource?, symbolSource: null as SymbolSource?);
         return FilePart(
           id: id,
           messageId: messageId,
@@ -308,7 +328,8 @@ class MessagePartModel {
           url: url ?? '',
           mime: mime ?? '',
           filename: filename,
-          source: source != null ? _parseFileSource(source!) : null,
+          fileSource: parsed.fileSource,
+          symbolSource: parsed.symbolSource,
         );
       case PartType.tool:
         return ToolPart(
@@ -326,6 +347,14 @@ class MessagePartModel {
           sessionId: sessionId,
           text: text ?? '',
           time: time,
+        );
+      case PartType.patch:
+        return PatchPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          files: files ?? <String>[],
+          hash: hash ?? '',
         );
       default:
         // Default to text part
@@ -362,8 +391,8 @@ class MessagePartModel {
           url: filePart.url,
           mime: filePart.mime,
           filename: filePart.filename,
-          source: filePart.source != null
-              ? _fileSourceToMap(filePart.source!)
+          source: filePart.fileSource != null
+              ? _fileSourceToMap(filePart.fileSource!)
               : null,
         );
       case PartType.tool:
@@ -386,6 +415,16 @@ class MessagePartModel {
           type: 'reasoning',
           text: reasoningPart.text,
           time: reasoningPart.time,
+        );
+      case PartType.patch:
+        final patchPart = part as PatchPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'patch',
+          files: patchPart.files,
+          hash: patchPart.hash,
         );
       default:
         return MessagePartModel(
@@ -410,32 +449,65 @@ class MessagePartModel {
       case 'reasoning':
         return PartType.reasoning;
       case 'step_start':
+      case 'step-start':
         return PartType.stepStart;
       case 'step_finish':
+      case 'step-finish':
         return PartType.stepFinish;
       case 'snapshot':
         return PartType.snapshot;
+      case 'patch':
+        return PartType.patch;
       default:
         return PartType.text;
     }
   }
 
-  static FileSource? _parseFileSource(Map<String, dynamic> source) {
+  /// Parse file part source, supporting both FileSource and SymbolSource.
+  static ({FileSource? fileSource, SymbolSource? symbolSource}) _parseFilePartSource(
+      Map<String, dynamic> source) {
     try {
+      final type = source['type'] as String? ?? '';
       final text = source['text'] as Map<String, dynamic>?;
-      if (text == null) return null;
+      if (text == null) return (fileSource: null, symbolSource: null);
 
-      return FileSource(
-        path: source['path'] as String? ?? '',
-        text: FilePartSourceText(
-          value: text['value'] as String? ?? '',
-          start: text['start'] as int? ?? 0,
-          end: text['end'] as int? ?? 0,
+      final sourceText = FilePartSourceText(
+        value: text['value'] as String? ?? '',
+        start: text['start'] as int? ?? 0,
+        end: text['end'] as int? ?? 0,
+      );
+
+      if (type == 'symbol') {
+        final range = source['range'] as Map<String, dynamic>?;
+        final start = range?['start'] as Map<String, dynamic>?;
+        final end = range?['end'] as Map<String, dynamic>?;
+        return (
+          fileSource: null,
+          symbolSource: SymbolSource(
+            name: source['name'] as String? ?? '',
+            kind: source['kind'] as int? ?? 0,
+            path: source['path'] as String? ?? '',
+            range: SymbolRange(
+              startLine: start?['line'] as int? ?? 0,
+              startCharacter: start?['character'] as int? ?? 0,
+              endLine: end?['line'] as int? ?? 0,
+              endCharacter: end?['character'] as int? ?? 0,
+            ),
+            text: sourceText,
+          ),
+        );
+      }
+
+      return (
+        fileSource: FileSource(
+          path: source['path'] as String? ?? '',
+          text: sourceText,
+          type: type,
         ),
-        type: source['type'] as String? ?? '',
+        symbolSource: null,
       );
     } catch (e) {
-      return null;
+      return (fileSource: null, symbolSource: null);
     }
   }
 
@@ -546,20 +618,20 @@ class MessagePartModel {
 }
 
 /// Message token model
-@JsonSerializable()
 class MessageTokensModel {
   const MessageTokensModel({
     required this.input,
     required this.output,
-    required this.total,
+    this.reasoning = 0,
+    this.cacheRead = 0,
+    this.cacheWrite = 0,
   });
 
-  @JsonKey(fromJson: _intFromJson)
   final int input;
-  @JsonKey(fromJson: _intFromJson)
   final int output;
-  @JsonKey(fromJson: _intFromJson)
-  final int total;
+  final int reasoning;
+  final int cacheRead;
+  final int cacheWrite;
 
   static int _intFromJson(dynamic value) {
     if (value == null) return 0;
@@ -572,36 +644,68 @@ class MessageTokensModel {
     return 0;
   }
 
-  factory MessageTokensModel.fromJson(Map<String, dynamic> json) =>
-      _$MessageTokensModelFromJson(json);
+  factory MessageTokensModel.fromJson(Map<String, dynamic> json) {
+    final cache = json['cache'] as Map<String, dynamic>?;
+    return MessageTokensModel(
+      input: _intFromJson(json['input']),
+      output: _intFromJson(json['output']),
+      reasoning: _intFromJson(json['reasoning']),
+      cacheRead: _intFromJson(cache?['read']),
+      cacheWrite: _intFromJson(cache?['write']),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$MessageTokensModelToJson(this);
+  Map<String, dynamic> toJson() => {
+        'input': input,
+        'output': output,
+        'reasoning': reasoning,
+        'cache': {'read': cacheRead, 'write': cacheWrite},
+      };
 
   MessageTokens toDomain() {
-    return MessageTokens(input: input, output: output, total: total);
+    return MessageTokens(
+      input: input,
+      output: output,
+      reasoning: reasoning,
+      cacheRead: cacheRead,
+      cacheWrite: cacheWrite,
+    );
   }
 
   static MessageTokensModel fromDomain(MessageTokens tokens) {
     return MessageTokensModel(
       input: tokens.input,
       output: tokens.output,
-      total: tokens.total,
+      reasoning: tokens.reasoning,
+      cacheRead: tokens.cacheRead,
+      cacheWrite: tokens.cacheWrite,
     );
   }
 }
 
-/// Message error model
-@JsonSerializable()
+/// Message error model - supports both `{name, message}` and `{name, data}` formats.
 class MessageErrorModel {
   const MessageErrorModel({required this.name, required this.message});
 
   final String name;
   final String message;
 
-  factory MessageErrorModel.fromJson(Map<String, dynamic> json) =>
-      _$MessageErrorModelFromJson(json);
+  factory MessageErrorModel.fromJson(Map<String, dynamic> json) {
+    final name = json['name'] as String? ?? 'UnknownError';
+    // Try 'message' first, then extract from 'data'
+    String message;
+    if (json['message'] is String) {
+      message = json['message'] as String;
+    } else if (json['data'] is Map<String, dynamic>) {
+      final data = json['data'] as Map<String, dynamic>;
+      message = data['message'] as String? ?? name;
+    } else {
+      message = name;
+    }
+    return MessageErrorModel(name: name, message: message);
+  }
 
-  Map<String, dynamic> toJson() => _$MessageErrorModelToJson(this);
+  Map<String, dynamic> toJson() => {'name': name, 'message': message};
 
   MessageError toDomain() {
     return MessageError(name: name, message: message);

@@ -7,7 +7,7 @@ part of 'chat_session_model.dart';
 // **************************************************************************
 
 ChatSessionModel _$ChatSessionModelFromJson(Map<String, dynamic> json) =>
-  ChatSessionModel(
+    ChatSessionModel(
       id: json['id'] as String,
       time: SessionTimeModel.fromJson(json['time'] as Map<String, dynamic>),
       workspaceId: json['workspaceId'] as String?,
@@ -68,7 +68,7 @@ ChatInputModel _$ChatInputModelFromJson(Map<String, dynamic> json) =>
           .toList(),
       providerId: json['providerID'] as String,
       modelId: json['modelID'] as String,
-      agent: json['agent'] as String?,
+      mode: json['mode'] as String?,
       system: json['system'] as String?,
       tools: (json['tools'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as bool),
@@ -80,7 +80,7 @@ Map<String, dynamic> _$ChatInputModelToJson(ChatInputModel instance) =>
       'messageID': instance.messageId,
       'providerID': instance.providerId,
       'modelID': instance.modelId,
-      'agent': instance.agent,
+      'mode': instance.mode,
       'system': instance.system,
       'tools': instance.tools,
       'parts': instance.parts,
@@ -116,8 +116,8 @@ SessionCreateInputModel _$SessionCreateInputModelFromJson(
 Map<String, dynamic> _$SessionCreateInputModelToJson(
   SessionCreateInputModel instance,
 ) => <String, dynamic>{
-  'parentID': instance.parentId,
-  'title': instance.title,
+  'parentID': ?instance.parentId,
+  'title': ?instance.title,
 };
 
 SessionUpdateInputModel _$SessionUpdateInputModelFromJson(

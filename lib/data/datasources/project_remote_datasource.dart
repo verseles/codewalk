@@ -38,6 +38,8 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
 
   @override
   Future<ProjectModel> getProject(String projectId) async {
+    // The API does not have a GET /project/:id endpoint.
+    // Fall back to /project/current which is the only supported single-project route.
     final response = await dio.get('/project/current');
     return ProjectModel.fromJson(response.data);
   }

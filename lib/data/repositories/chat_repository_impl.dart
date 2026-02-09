@@ -371,12 +371,16 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<Either<Failure, void>> summarizeSession(
     String projectId,
     String sessionId, {
+    required String providerId,
+    required String modelId,
     String? directory,
   }) async {
     try {
       await remoteDataSource.summarizeSession(
         projectId,
         sessionId,
+        providerId: providerId,
+        modelId: modelId,
         directory: directory,
       );
       return const Right(null);

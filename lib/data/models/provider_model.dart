@@ -4,27 +4,55 @@ import '../../domain/entities/provider.dart';
 part 'provider_model.g.dart';
 
 /// Technical comment translated to English.
-@JsonSerializable()
 class ProvidersResponseModel {
   const ProvidersResponseModel({
     required this.providers,
     required this.defaultModels,
+    this.connected = const [],
   });
 
   final List<ProviderModel> providers;
-  @JsonKey(name: 'default')
   final Map<String, String> defaultModels;
+  final List<String> connected;
 
-  factory ProvidersResponseModel.fromJson(Map<String, dynamic> json) =>
-      _$ProvidersResponseModelFromJson(json);
+  /// Parse both old (`{providers, default}`) and new (`{all, default, connected}`) schemas.
+  factory ProvidersResponseModel.fromJson(Map<String, dynamic> json) {
+    // New API uses 'all', old API uses 'providers'
+    final providersList = (json['all'] as List<dynamic>?) ??
+        (json['providers'] as List<dynamic>?) ??
+        <dynamic>[];
 
-  Map<String, dynamic> toJson() => _$ProvidersResponseModelToJson(this);
+    final providers = providersList
+        .map((e) => ProviderModel.fromJson(e as Map<String, dynamic>))
+        .toList();
 
-  /// Technical comment translated to English.
+    final defaultModels = json['default'] != null
+        ? Map<String, String>.from(json['default'] as Map)
+        : <String, String>{};
+
+    final connected = (json['connected'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList() ??
+        <String>[];
+
+    return ProvidersResponseModel(
+      providers: providers,
+      defaultModels: defaultModels,
+      connected: connected,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'providers': providers.map((p) => p.toJson()).toList(),
+        'default': defaultModels,
+        'connected': connected,
+      };
+
   ProvidersResponse toDomain() {
     return ProvidersResponse(
       providers: providers.map((p) => p.toDomain()).toList(),
       defaultModels: defaultModels,
+      connected: connected,
     );
   }
 }

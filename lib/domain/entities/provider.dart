@@ -108,12 +108,14 @@ class ModelLimit extends Equatable {
 class ProvidersResponse extends Equatable {
   final List<Provider> providers;
   final Map<String, String> defaultModels;
+  final List<String> connected;
 
   const ProvidersResponse({
     required this.providers,
     required this.defaultModels,
+    this.connected = const [],
   });
 
   @override
-  List<Object> get props => [providers, defaultModels];
+  List<Object> get props => [providers, defaultModels, connected];
 }

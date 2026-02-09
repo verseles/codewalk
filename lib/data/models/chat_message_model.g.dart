@@ -63,6 +63,10 @@ MessagePartModel _$MessagePartModelFromJson(Map<String, dynamic> json) =>
       tool: json['tool'] as String?,
       state: json['state'] as Map<String, dynamic>?,
       time: MessagePartModel._partTimeFromJson(json['time']),
+      files: (json['files'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      hash: json['hash'] as String?,
     );
 
 Map<String, dynamic> _$MessagePartModelToJson(MessagePartModel instance) =>
@@ -80,27 +84,6 @@ Map<String, dynamic> _$MessagePartModelToJson(MessagePartModel instance) =>
       'tool': instance.tool,
       'state': instance.state,
       'time': instance.time?.toIso8601String(),
+      'files': instance.files,
+      'hash': instance.hash,
     };
-
-MessageTokensModel _$MessageTokensModelFromJson(Map<String, dynamic> json) =>
-    MessageTokensModel(
-      input: MessageTokensModel._intFromJson(json['input']),
-      output: MessageTokensModel._intFromJson(json['output']),
-      total: MessageTokensModel._intFromJson(json['total']),
-    );
-
-Map<String, dynamic> _$MessageTokensModelToJson(MessageTokensModel instance) =>
-    <String, dynamic>{
-      'input': instance.input,
-      'output': instance.output,
-      'total': instance.total,
-    };
-
-MessageErrorModel _$MessageErrorModelFromJson(Map<String, dynamic> json) =>
-    MessageErrorModel(
-      name: json['name'] as String,
-      message: json['message'] as String,
-    );
-
-Map<String, dynamic> _$MessageErrorModelToJson(MessageErrorModel instance) =>
-    <String, dynamic>{'name': instance.name, 'message': instance.message};

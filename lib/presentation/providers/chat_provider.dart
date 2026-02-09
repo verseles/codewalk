@@ -93,33 +93,25 @@ class ChatProvider extends ChangeNotifier {
       result.fold(
         (failure) {
           print('Failed to load providers: ${failure.toString()}');
-          // Use fallback defaults
-          _selectedProviderId =
-              'moonshotai-cn'; // First provider observed from response
-          _selectedModelId =
-              'kimi-k2-turbo-preview'; // Model observed from response
         },
         (providersResponse) {
-          print(
-            'Loaded providers successfully: ${providersResponse.providers.length} items',
-          );
           _providers = providersResponse.providers;
           _defaultModels = providersResponse.defaultModels;
 
-          // Default model selection priority:
-          // 1. Anthropic provider (if available)
-          // 2. First available provider
           if (_providers.isNotEmpty) {
-            // Try to find Anthropic provider
-            Provider selectedProvider;
-            final anthropicProvider = _providers
-                .where((p) => p.id == 'anthropic')
-                .firstOrNull;
-            if (anthropicProvider != null) {
-              selectedProvider = anthropicProvider;
-            } else {
-              selectedProvider = _providers.first;
+            // Selection priority: first connected provider, then first available
+            Provider? selectedProvider;
+
+            // Try connected providers first
+            for (final connectedId in providersResponse.connected) {
+              selectedProvider = _providers
+                  .where((p) => p.id == connectedId)
+                  .firstOrNull;
+              if (selectedProvider != null) break;
             }
+
+            // Fall back to first available provider
+            selectedProvider ??= _providers.first;
 
             _selectedProviderId = selectedProvider.id;
 
@@ -138,9 +130,6 @@ class ChatProvider extends ChangeNotifier {
       );
     } catch (e) {
       print('Exception while initializing providers: $e');
-      // Use fallback defaults
-      _selectedProviderId = 'moonshotai-cn';
-      _selectedModelId = 'kimi-k2-turbo-preview';
     }
     notifyListeners();
   }
@@ -360,13 +349,8 @@ class ChatProvider extends ChangeNotifier {
     // Create chat input
     final input = ChatInput(
       messageId: messageId,
-      providerId: _selectedProviderId ?? 'anthropic', // Use selected provider
-      modelId:
-          _selectedModelId ??
-          'claude-3-5-sonnet-20241022', // Use selected model
-      agent: 'general', // default agent
-      system: '', // default system prompt
-      tools: const {}, // default tools configuration
+      providerId: _selectedProviderId ?? 'anthropic',
+      modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
       parts: [TextInputPart(text: text)],
     );
 

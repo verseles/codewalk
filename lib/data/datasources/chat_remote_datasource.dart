@@ -113,6 +113,8 @@ abstract class ChatRemoteDataSource {
   Future<void> summarizeSession(
     String projectId,
     String sessionId, {
+    required String providerId,
+    required String modelId,
     String? directory,
   });
 }
@@ -502,8 +504,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final info = properties?['info'] as Map<String, dynamic>?;
 
                       if (info != null && info['sessionID'] == sessionId) {
-                        print('🔄 Message updated event: ${info['id']}');
-                        // Get complete message payload (including parts)
+                        print('Event: message.updated ${info['id']}');
                         _getCompleteMessage(
                               projectId,
                               sessionId,
@@ -512,15 +513,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                             .then((message) {
                               if (message != null) {
                                 eventController.add(message);
-
-                                // Check whether message is completed
                                 if (message.completedTime != null &&
                                     !messageCompleted) {
                                   messageCompleted = true;
-                                  print(
-                                    '🎉 Message completed, preparing to close event stream',
-                                  );
-                                  // Delay close to ensure final update is processed
                                   Future.delayed(
                                     const Duration(milliseconds: 500),
                                     () {
@@ -542,9 +537,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
                       if (part != null && part['sessionID'] == sessionId) {
                         print(
-                          '🔄 Message part updated: ${part['messageID']} - ${part['id']}',
+                          'Event: message.part.updated ${part['messageID']}',
                         );
-                        // Get complete message payload (including parts)
                         _getCompleteMessage(
                               projectId,
                               sessionId,
@@ -553,15 +547,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                             .then((message) {
                               if (message != null) {
                                 eventController.add(message);
-
-                                // Check whether message is completed
                                 if (message.completedTime != null &&
                                     !messageCompleted) {
                                   messageCompleted = true;
-                                  print(
-                                    '🎉 Message completed, preparing to close event stream',
-                                  );
-                                  // Delay close to ensure final update is processed
                                   Future.delayed(
                                     const Duration(milliseconds: 500),
                                     () {
@@ -576,6 +564,60 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                               print('Failed to fetch complete message: $error');
                             });
                       }
+                    } else if (eventType == 'session.updated') {
+                      print('Event: session.updated');
+                      // Session metadata updated - could notify provider
+                    } else if (eventType == 'session.error') {
+                      final properties =
+                          event['properties'] as Map<String, dynamic>?;
+                      final errorSessionId =
+                          properties?['sessionID'] as String?;
+                      if (errorSessionId == sessionId) {
+                        print('Event: session.error for $sessionId');
+                        final error = properties?['error']
+                            as Map<String, dynamic>?;
+                        if (error != null) {
+                          final errorName =
+                              error['name'] as String? ?? 'UnknownError';
+                          eventController.addError(
+                            Exception('Session error: $errorName'),
+                          );
+                        }
+                        messageCompleted = true;
+                        Future.delayed(
+                          const Duration(milliseconds: 500),
+                          () {
+                            eventSubscription.cancel();
+                            eventController.close();
+                          },
+                        );
+                      }
+                    } else if (eventType == 'session.idle') {
+                      final properties =
+                          event['properties'] as Map<String, dynamic>?;
+                      if (properties?['sessionID'] == sessionId) {
+                        print('Event: session.idle for $sessionId');
+                        if (!messageCompleted) {
+                          messageCompleted = true;
+                          Future.delayed(
+                            const Duration(milliseconds: 500),
+                            () {
+                              eventSubscription.cancel();
+                              eventController.close();
+                            },
+                          );
+                        }
+                      }
+                    } else if (eventType == 'message.removed') {
+                      print('Event: message.removed');
+                      // Message removed from session - UI should handle
+                    } else if (eventType == 'message.part.removed') {
+                      print('Event: message.part.removed');
+                      // Part removed from message - UI should handle
+                    } else {
+                      // Other events (file.edited, permission.updated, etc.)
+                      // Logged at debug level, not actionable for mobile client
+                      print('Event: $eventType (ignored)');
                     }
                   } catch (e) {
                     print('Failed to parse event: $e');
@@ -797,6 +839,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   Future<void> summarizeSession(
     String projectId,
     String sessionId, {
+    required String providerId,
+    required String modelId,
     String? directory,
   }) async {
     try {
@@ -807,6 +851,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
       final response = await dio.post(
         '/session/$sessionId/summarize',
+        data: {
+          'providerID': providerId,
+          'modelID': modelId,
+        },
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 

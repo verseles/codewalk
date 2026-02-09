@@ -143,7 +143,7 @@ class ChatInputModel {
     required this.parts,
     required this.providerId,
     required this.modelId,
-    this.agent,
+    this.mode,
     this.system,
     this.tools,
   });
@@ -154,7 +154,7 @@ class ChatInputModel {
   final String providerId;
   @JsonKey(name: 'modelID')
   final String modelId;
-  final String? agent;
+  final String? mode;
   final String? system;
   final Map<String, bool>? tools;
   final List<ChatInputPartModel> parts;
@@ -164,13 +164,12 @@ class ChatInputModel {
 
   Map<String, dynamic> toJson() => _$ChatInputModelToJson(this);
 
-  /// Technical comment translated to English.
   static ChatInputModel fromDomain(ChatInput input) {
     return ChatInputModel(
       messageId: input.messageId,
       providerId: input.providerId,
       modelId: input.modelId,
-      agent: input.agent,
+      mode: input.mode,
       system: input.system,
       tools: input.tools,
       parts: input.parts.map((p) => ChatInputPartModel.fromDomain(p)).toList(),

@@ -110,6 +110,8 @@ abstract class ChatRepository {
   Future<Either<Failure, void>> summarizeSession(
     String projectId,
     String sessionId, {
+    required String providerId,
+    required String modelId,
     String? directory,
   });
 }

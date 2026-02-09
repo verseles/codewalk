@@ -55,7 +55,7 @@ abstract class SessionRepository {
     required String modelId,
     required List<MessagePart> parts,
     String? messageId,
-    String? agent,
+    String? mode,
     String? system,
     Map<String, bool>? tools,
   });

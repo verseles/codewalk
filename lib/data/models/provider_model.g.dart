@@ -6,22 +6,6 @@ part of 'provider_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ProvidersResponseModel _$ProvidersResponseModelFromJson(
-  Map<String, dynamic> json,
-) => ProvidersResponseModel(
-  providers: (json['providers'] as List<dynamic>)
-      .map((e) => ProviderModel.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  defaultModels: Map<String, String>.from(json['default'] as Map),
-);
-
-Map<String, dynamic> _$ProvidersResponseModelToJson(
-  ProvidersResponseModel instance,
-) => <String, dynamic>{
-  'providers': instance.providers,
-  'default': instance.defaultModels,
-};
-
 ProviderModel _$ProviderModelFromJson(Map<String, dynamic> json) =>
     ProviderModel(
       id: json['id'] as String,

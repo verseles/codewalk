@@ -44,6 +44,7 @@ class AssistantMessage extends ChatMessage {
     this.tokens,
     this.error,
     this.mode,
+    this.summary,
   }) : super(role: MessageRole.assistant);
 
   final DateTime? completedTime;
@@ -53,6 +54,7 @@ class AssistantMessage extends ChatMessage {
   final MessageTokens? tokens;
   final MessageError? error;
   final String? mode;
+  final bool? summary;
 
   /// Technical comment translated to English.
   bool get isCompleted => completedTime != null;
@@ -67,6 +69,7 @@ class AssistantMessage extends ChatMessage {
     tokens,
     error,
     mode,
+    summary,
   ];
 }
 
@@ -117,16 +120,22 @@ class FilePart extends MessagePart {
     required this.url,
     required this.mime,
     this.filename,
-    this.source,
+    this.fileSource,
+    this.symbolSource,
   }) : super(type: PartType.file);
 
   final String url;
   final String mime;
   final String? filename;
-  final FileSource? source;
+  final FileSource? fileSource;
+  final SymbolSource? symbolSource;
+
+  /// Backwards-compatible getter.
+  FileSource? get source => fileSource;
 
   @override
-  List<Object?> get props => [...super.props, url, mime, filename, source];
+  List<Object?> get props =>
+      [...super.props, url, mime, filename, fileSource, symbolSource];
 }
 
 /// Technical comment translated to English.
@@ -165,6 +174,23 @@ class ReasoningPart extends MessagePart {
   List<Object?> get props => [...super.props, text, time];
 }
 
+/// Patch part containing file change information.
+class PatchPart extends MessagePart {
+  const PatchPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.files,
+    required this.hash,
+  }) : super(type: PartType.patch);
+
+  final List<String> files;
+  final String hash;
+
+  @override
+  List<Object?> get props => [...super.props, files, hash];
+}
+
 /// Technical comment translated to English.
 enum PartType {
   text,
@@ -175,6 +201,7 @@ enum PartType {
   stepStart,
   stepFinish,
   snapshot,
+  patch,
 }
 
 /// Technical comment translated to English.
@@ -191,6 +218,44 @@ class FileSource extends Equatable {
 
   @override
   List<Object?> get props => [path, text, type];
+}
+
+/// Symbol source for file parts (LSP symbol references).
+class SymbolSource extends Equatable {
+  const SymbolSource({
+    required this.name,
+    required this.kind,
+    required this.path,
+    required this.range,
+    required this.text,
+  });
+
+  final String name;
+  final int kind;
+  final String path;
+  final SymbolRange range;
+  final FilePartSourceText text;
+
+  @override
+  List<Object?> get props => [name, kind, path, range, text];
+}
+
+/// Range for symbol source positions.
+class SymbolRange extends Equatable {
+  const SymbolRange({
+    required this.startLine,
+    required this.startCharacter,
+    required this.endLine,
+    required this.endCharacter,
+  });
+
+  final int startLine;
+  final int startCharacter;
+  final int endLine;
+  final int endCharacter;
+
+  @override
+  List<Object?> get props => [startLine, startCharacter, endLine, endCharacter];
 }
 
 /// Technical comment translated to English.
@@ -315,15 +380,21 @@ class MessageTokens extends Equatable {
   const MessageTokens({
     required this.input,
     required this.output,
-    required this.total,
+    this.reasoning = 0,
+    this.cacheRead = 0,
+    this.cacheWrite = 0,
   });
 
   final int input;
   final int output;
-  final int total;
+  final int reasoning;
+  final int cacheRead;
+  final int cacheWrite;
+
+  int get total => input + output + reasoning;
 
   @override
-  List<Object?> get props => [input, output, total];
+  List<Object?> get props => [input, output, reasoning, cacheRead, cacheWrite];
 }
 
 /// Technical comment translated to English.
