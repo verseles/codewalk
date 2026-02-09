@@ -1,10 +1,11 @@
-.PHONY: help deps gen icons icons-check analyze test coverage check android precommit clean
+.PHONY: help deps gen icons icons-check analyze test coverage check desktop android precommit clean
 
 APK_DIR = build/app/outputs/flutter-apk
 APK_PATH = $(APK_DIR)/codewalk.apk
 ANALYZE_LOG = /tmp/flutter_analyze.log
 TDL_CHANNEL = VerselesBot
 TDL_TARGET = 6
+TDL_CAPTION_BASE = Ajustes mais recentes feitos
 
 help:
 	@echo "CodeWalk Make Targets"
@@ -17,6 +18,7 @@ help:
 	@echo "  make test       Run tests"
 	@echo "  make coverage   Run tests with coverage + threshold gate"
 	@echo "  make check      deps + gen + analyze + test"
+	@echo "  make desktop    Build desktop app for current host OS"
 	@echo "  make android    Build Android APK (arm64)"
 	@echo "  make precommit  check + android"
 	@echo "  make clean      Clean and restore dependencies"
@@ -107,6 +109,25 @@ coverage:
 
 check: deps gen analyze test
 
+desktop:
+	@set -e; \
+	if [ "$$OS" = "Windows_NT" ]; then \
+		echo "Detected Windows host. Building Windows desktop app..."; \
+		flutter build windows; \
+		echo "Desktop build ready: build/windows/x64/runner/Release/"; \
+	elif [ "$$(uname -s)" = "Darwin" ]; then \
+		echo "Detected macOS host. Building macOS desktop app..."; \
+		flutter build macos; \
+		echo "Desktop build ready: build/macos/Build/Products/Release/"; \
+	elif [ "$$(uname -s)" = "Linux" ]; then \
+		echo "Detected Linux host. Building Linux desktop app..."; \
+		flutter build linux; \
+		echo "Desktop build ready: build/linux/x64/release/bundle/"; \
+	else \
+		echo "Unsupported host OS for make desktop."; \
+		exit 1; \
+	fi
+
 android:
 	flutter build apk --release --target-platform android-arm64
 	@if [ -f "$(APK_DIR)/app-release.apk" ]; then \
@@ -118,7 +139,9 @@ android:
 	fi
 	@if command -v tdl >/dev/null 2>&1; then \
 		echo "Uploading APK via tdl..."; \
-		if tdl up -c "$(TDL_CHANNEL)" -t "$(TDL_TARGET)" --path="$(APK_PATH)"; then \
+		CAPTION_TEXT="$${TDL_CAPTION:-$(TDL_CAPTION_BASE) em $$(date +%Y-%m-%d\ %H:%M)}"; \
+		CAPTION_EXPR="\"$$CAPTION_TEXT\""; \
+		if tdl up -c "$(TDL_CHANNEL)" -t "$(TDL_TARGET)" --caption="$$CAPTION_EXPR" --path="$(APK_PATH)"; then \
 			echo "APK uploaded via tdl."; \
 		else \
 			echo "tdl upload failed."; \
