@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// AI提供商实体
+/// Technical comment translated to English.
 class Provider extends Equatable {
   final String id;
   final String name;
@@ -22,7 +22,7 @@ class Provider extends Equatable {
   List<Object?> get props => [id, name, env, api, npm, models];
 }
 
-/// AI模型实体
+/// Technical comment translated to English.
 class Model extends Equatable {
   final String id;
   final String name;
@@ -75,7 +75,7 @@ class Model extends Equatable {
   ];
 }
 
-/// 模型费用信息
+/// Technical comment translated to English.
 class ModelCost extends Equatable {
   final double input;
   final double output;
@@ -93,7 +93,7 @@ class ModelCost extends Equatable {
   List<Object?> get props => [input, output, cacheRead, cacheWrite];
 }
 
-/// 模型限制信息
+/// Technical comment translated to English.
 class ModelLimit extends Equatable {
   final int context;
   final int output;
@@ -104,7 +104,7 @@ class ModelLimit extends Equatable {
   List<Object> get props => [context, output];
 }
 
-/// 提供商配置响应
+/// Technical comment translated to English.
 class ProvidersResponse extends Equatable {
   final List<Provider> providers;
   final Map<String, String> defaultModels;

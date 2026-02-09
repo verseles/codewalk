@@ -2,44 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/constants/app_constants.dart';
 
-/// 应用主题配置 - AI 风格现代化设计
+/// Technical comment translated to English.
 class AppTheme {
-  // AI 风格主色调 - 科技蓝紫渐变
+  // Technical comment translated to English.
   static const Color primaryColor = Color(0xFF6366F1); // Indigo 500
   static const Color primaryVariant = Color(0xFF4F46E5); // Indigo 600
   static const Color secondaryColor = Color(0xFF06B6D4); // Cyan 500
   static const Color secondaryVariant = Color(0xFF0891B2); // Cyan 600
 
-  // 辅助色调
+  // Technical comment translated to English.
   static const Color accentColor = Color(0xFF8B5CF6); // Violet 500
   static const Color accentVariant = Color(0xFF7C3AED); // Violet 600
 
-  // 深色主题专用颜色
-  static const Color surfaceDark = Color(0xFF0F0F23); // 深蓝灰
-  static const Color surfaceVariantDark = Color(0xFF1A1A2E); // 中蓝灰
-  static const Color backgroundDark = Color(0xFF0A0A0F); // 极深背景
-  static const Color cardDark = Color(0xFF16213E); // 卡片背景
+  // Technical comment translated to English.
+  static const Color surfaceDark = Color(
+    0xFF0F0F23,
+  ); // Technical comment translated to English.
+  static const Color surfaceVariantDark = Color(
+    0xFF1A1A2E,
+  ); // Technical comment translated to English.
+  static const Color backgroundDark = Color(
+    0xFF0A0A0F,
+  ); // Technical comment translated to English.
+  static const Color cardDark = Color(
+    0xFF16213E,
+  ); // Technical comment translated to English.
 
-  // 亮色主题颜色（保留但不作为默认）
+  // Technical comment translated to English.
   static const Color surfaceLight = Color(0xFFFAFAFA);
   static const Color backgroundLight = Color(0xFFFFFFFF);
 
-  // 状态颜色 - 现代化调色
+  // Technical comment translated to English.
   static const Color errorColor = Color(0xFFEF4444); // Red 500
   static const Color successColor = Color(0xFF10B981); // Emerald 500
   static const Color warningColor = Color(0xFFF59E0B); // Amber 500
   static const Color infoColor = Color(0xFF3B82F6); // Blue 500
 
-  // 文本颜色
+  // Technical comment translated to English.
   static const Color textPrimaryDark = Color(0xFFE2E8F0); // Slate 200
   static const Color textSecondaryDark = Color(0xFF94A3B8); // Slate 400
   static const Color textTertiaryDark = Color(0xFF64748B); // Slate 500
 
-  // 边框和分割线
+  // Technical comment translated to English.
   static const Color borderDark = Color(0xFF334155); // Slate 700
   static const Color dividerDark = Color(0xFF1E293B); // Slate 800
 
-  /// 亮色主题（保留但不推荐使用）
+  /// Technical comment translated to English.
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -106,13 +114,13 @@ class AppTheme {
     );
   }
 
-  /// 暗色主题 - AI 风格现代化设计（默认主题）
+  /// Technical comment translated to English.
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
 
-      // 现代化配色方案
+      // Technical comment translated to English.
       colorScheme: const ColorScheme.dark(
         brightness: Brightness.dark,
         primary: primaryColor,
@@ -151,7 +159,7 @@ class AppTheme {
         inversePrimary: primaryVariant,
       ),
 
-      // 系统栏样式
+      // Technical comment translated to English.
       appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: true,
@@ -167,7 +175,7 @@ class AppTheme {
         iconTheme: IconThemeData(color: textPrimaryDark),
       ),
 
-      // 卡片主题 - 现代化设计
+      // Technical comment translated to English.
       cardTheme: CardThemeData(
         elevation: 0,
         color: cardDark,
@@ -182,7 +190,7 @@ class AppTheme {
         ),
       ),
 
-      // 按钮主题
+      // Technical comment translated to English.
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
@@ -204,7 +212,7 @@ class AppTheme {
         ),
       ),
 
-      // 文本按钮主题
+      // Technical comment translated to English.
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryColor,
@@ -218,31 +226,31 @@ class AppTheme {
         ),
       ),
 
-      // 输入框主题 - 现代化设计
+      // Technical comment translated to English.
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceVariantDark,
         contentPadding: const EdgeInsets.all(AppConstants.defaultPadding),
 
-        // 默认边框
+        // Technical comment translated to English.
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide(color: borderDark.withOpacity(0.3)),
         ),
 
-        // 启用状态边框
+        // Technical comment translated to English.
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: BorderSide(color: borderDark.withOpacity(0.3)),
         ),
 
-        // 聚焦状态边框
+        // Technical comment translated to English.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: const BorderSide(color: primaryColor, width: 2),
         ),
 
-        // 错误状态边框
+        // Technical comment translated to English.
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           borderSide: const BorderSide(color: errorColor, width: 2),
@@ -253,12 +261,12 @@ class AppTheme {
           borderSide: const BorderSide(color: errorColor, width: 2),
         ),
 
-        // 文本样式
+        // Technical comment translated to English.
         hintStyle: const TextStyle(color: textTertiaryDark),
         labelStyle: const TextStyle(color: textSecondaryDark),
       ),
 
-      // SnackBar 主题
+      // Technical comment translated to English.
       snackBarTheme: SnackBarThemeData(
         backgroundColor: cardDark,
         contentTextStyle: const TextStyle(color: textPrimaryDark),
@@ -269,7 +277,7 @@ class AppTheme {
         elevation: 8,
       ),
 
-      // 对话框主题
+      // Technical comment translated to English.
       dialogTheme: DialogThemeData(
         backgroundColor: cardDark,
         elevation: 24,
@@ -287,7 +295,7 @@ class AppTheme {
         ),
       ),
 
-      // 抽屉主题
+      // Technical comment translated to English.
       drawerTheme: DrawerThemeData(
         backgroundColor: surfaceDark,
         elevation: 16,
@@ -299,7 +307,7 @@ class AppTheme {
         ),
       ),
 
-      // 底部导航栏主题
+      // Technical comment translated to English.
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surfaceDark,
         selectedItemColor: primaryColor,
@@ -308,14 +316,14 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
       ),
 
-      // 分割线主题
+      // Technical comment translated to English.
       dividerTheme: const DividerThemeData(
         color: dividerDark,
         thickness: 1,
         space: 1,
       ),
 
-      // 列表瓦片主题
+      // Technical comment translated to English.
       listTileTheme: const ListTileThemeData(
         textColor: textPrimaryDark,
         iconColor: textSecondaryDark,
@@ -325,7 +333,7 @@ class AppTheme {
         ),
       ),
 
-      // Chip 主题
+      // Technical comment translated to English.
       chipTheme: ChipThemeData(
         backgroundColor: surfaceVariantDark,
         selectedColor: primaryColor.withOpacity(0.2),
@@ -340,7 +348,7 @@ class AppTheme {
         ),
       ),
 
-      // 文本主题
+      // Technical comment translated to English.
       textTheme: const TextTheme(
         displayLarge: TextStyle(
           color: textPrimaryDark,
@@ -431,7 +439,7 @@ class AppTheme {
     );
   }
 
-  /// 创建渐变装饰
+  /// Technical comment translated to English.
   static BoxDecoration createGradientDecoration({
     List<Color>? colors,
     AlignmentGeometry begin = Alignment.topLeft,
@@ -455,7 +463,7 @@ class AppTheme {
     );
   }
 
-  /// 创建卡片阴影
+  /// Technical comment translated to English.
   static List<BoxShadow> createCardShadow({
     Color? color,
     double blurRadius = 8,

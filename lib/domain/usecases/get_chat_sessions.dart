@@ -3,13 +3,13 @@ import '../entities/chat_session.dart';
 import '../repositories/chat_repository.dart';
 import '../../core/errors/failures.dart';
 
-/// 获取聊天会话列表用例
+/// Technical comment translated to English.
 class GetChatSessions {
   const GetChatSessions(this.repository);
 
   final ChatRepository repository;
 
-  /// 执行获取会话列表
+  /// Technical comment translated to English.
   Future<Either<Failure, List<ChatSession>>> call([
     GetChatSessionsParams? params,
   ]) async {
@@ -17,11 +17,9 @@ class GetChatSessions {
   }
 }
 
-/// 获取聊天会话列表参数
+/// Technical comment translated to English.
 class GetChatSessionsParams {
-  const GetChatSessionsParams({
-    this.directory,
-  });
+  const GetChatSessionsParams({this.directory});
 
   final String? directory;
 }

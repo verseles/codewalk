@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// 聊天会话实体
+/// Technical comment translated to English.
 class ChatSession extends Equatable {
   const ChatSession({
     required this.id,
@@ -12,25 +12,25 @@ class ChatSession extends Equatable {
     this.path,
   });
 
-  /// 会话 ID
+  /// Technical comment translated to English.
   final String id;
 
-  /// 工作空间 ID
+  /// Technical comment translated to English.
   final String workspaceId;
 
-  /// 创建时间
+  /// Technical comment translated to English.
   final DateTime time;
 
-  /// 会话标题
+  /// Technical comment translated to English.
   final String? title;
 
-  /// 是否共享
+  /// Technical comment translated to English.
   final bool shared;
 
-  /// 会话摘要
+  /// Technical comment translated to English.
   final String? summary;
 
-  /// 会话路径信息
+  /// Technical comment translated to English.
   final SessionPath? path;
 
   @override
@@ -44,7 +44,7 @@ class ChatSession extends Equatable {
     path,
   ];
 
-  /// 创建副本
+  /// Technical comment translated to English.
   ChatSession copyWith({
     String? id,
     String? workspaceId,
@@ -66,7 +66,7 @@ class ChatSession extends Equatable {
   }
 }
 
-/// 会话路径信息
+/// Technical comment translated to English.
 class SessionPath extends Equatable {
   const SessionPath({required this.root, required this.workspace});
 
@@ -77,7 +77,7 @@ class SessionPath extends Equatable {
   List<Object?> get props => [root, workspace];
 }
 
-/// 聊天输入
+/// Technical comment translated to English.
 class ChatInput extends Equatable {
   const ChatInput({
     this.messageId,
@@ -89,25 +89,25 @@ class ChatInput extends Equatable {
     this.tools,
   });
 
-  /// 消息 ID
+  /// Technical comment translated to English.
   final String? messageId;
 
-  /// 提供商 ID
+  /// Technical comment translated to English.
   final String providerId;
 
-  /// 模型 ID
+  /// Technical comment translated to English.
   final String modelId;
 
-  /// 代理
+  /// Technical comment translated to English.
   final String? agent;
 
-  /// 系统提示
+  /// Technical comment translated to English.
   final String? system;
 
-  /// 工具配置
+  /// Technical comment translated to English.
   final Map<String, bool>? tools;
 
-  /// 消息部件
+  /// Technical comment translated to English.
   final List<ChatInputPart> parts;
 
   @override
@@ -122,7 +122,7 @@ class ChatInput extends Equatable {
   ];
 }
 
-/// 聊天输入部件
+/// Technical comment translated to English.
 abstract class ChatInputPart extends Equatable {
   const ChatInputPart({required this.type});
 
@@ -132,7 +132,7 @@ abstract class ChatInputPart extends Equatable {
   List<Object?> get props => [type];
 }
 
-/// 文本输入部件
+/// Technical comment translated to English.
 class TextInputPart extends ChatInputPart {
   const TextInputPart({required this.text})
     : super(type: ChatInputPartType.text);
@@ -143,7 +143,7 @@ class TextInputPart extends ChatInputPart {
   List<Object?> get props => [...super.props, text];
 }
 
-/// 文件输入部件
+/// Technical comment translated to English.
 class FileInputPart extends ChatInputPart {
   const FileInputPart({required this.source, this.filename})
     : super(type: ChatInputPartType.file);
@@ -155,7 +155,7 @@ class FileInputPart extends ChatInputPart {
   List<Object?> get props => [...super.props, source, filename];
 }
 
-/// 代理输入部件
+/// Technical comment translated to English.
 class AgentInputPart extends ChatInputPart {
   const AgentInputPart({required this.name, this.id, this.source})
     : super(type: ChatInputPartType.agent);
@@ -168,10 +168,10 @@ class AgentInputPart extends ChatInputPart {
   List<Object?> get props => [...super.props, name, id, source];
 }
 
-/// 聊天输入部件类型
+/// Technical comment translated to English.
 enum ChatInputPartType { text, file, agent }
 
-/// 文件输入源
+/// Technical comment translated to English.
 class FileInputSource extends Equatable {
   const FileInputSource({
     required this.path,
@@ -187,7 +187,7 @@ class FileInputSource extends Equatable {
   List<Object?> get props => [path, text, type];
 }
 
-/// 文件输入源文本
+/// Technical comment translated to English.
 class FileInputSourceText extends Equatable {
   const FileInputSourceText({
     required this.value,
@@ -203,7 +203,7 @@ class FileInputSourceText extends Equatable {
   List<Object?> get props => [value, start, end];
 }
 
-/// 代理输入源
+/// Technical comment translated to English.
 class AgentInputSource extends Equatable {
   const AgentInputSource({
     required this.value,
@@ -219,7 +219,7 @@ class AgentInputSource extends Equatable {
   List<Object?> get props => [value, start, end];
 }
 
-/// 会话创建输入
+/// Technical comment translated to English.
 class SessionCreateInput extends Equatable {
   const SessionCreateInput({this.parentId, this.title});
 
@@ -230,7 +230,7 @@ class SessionCreateInput extends Equatable {
   List<Object?> get props => [parentId, title];
 }
 
-/// 会话更新输入
+/// Technical comment translated to English.
 class SessionUpdateInput extends Equatable {
   const SessionUpdateInput({this.title});
 

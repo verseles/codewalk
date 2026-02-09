@@ -44,10 +44,10 @@ Description: Rename all product-facing and package-level identifiers from OpenMo
 ### Feature 004: Full English Standardization (UI, Code Comments, Docs)
 Description: Translate all remaining non-English content to English, including user-facing strings, comments, logs, and technical documentation. (Visit file ROADMAP.feat004.md for full research details)
 
-- [ ] 4.01 Convert all UI strings and runtime errors/log messages to English
-- [ ] 4.02 Translate non-English comments/docblocks in `lib/` to concise technical English
-- [ ] 4.03 Translate technical markdown that must be kept after cleanup
-- [ ] 4.04 Add a language consistency check step to prevent regressions
+- [x] 4.01 Convert all UI strings and runtime errors/log messages to English
+- [x] 4.02 Translate non-English comments/docblocks in `lib/` to concise technical English
+- [x] 4.03 Translate technical markdown that must be kept after cleanup
+- [!] 4.04 Add a language consistency check step to prevent regressions - Won't do (user decision: unnecessary)
 
 ### Feature 005: Documentation Restructure and Markdown Pruning
 Description: Remove unnecessary markdown files, consolidate surviving docs, and rewrite README with explicit origin attribution to OpenMode. (Visit file ROADMAP.feat005.md for full research details)

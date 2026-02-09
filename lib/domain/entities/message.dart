@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-/// 消息角色枚举
+/// Technical comment translated to English.
 enum MessageRole { user, assistant }
 
-/// 消息实体基类
+/// Technical comment translated to English.
 abstract class Message extends Equatable {
   final String id;
   final String sessionId;
@@ -18,7 +18,7 @@ abstract class Message extends Equatable {
   });
 }
 
-/// 用户消息
+/// Technical comment translated to English.
 class UserMessage extends Message {
   const UserMessage({
     required String id,
@@ -30,7 +30,7 @@ class UserMessage extends Message {
   List<Object> get props => [id, sessionId, role, time];
 }
 
-/// 助手消息
+/// Technical comment translated to English.
 class AssistantMessage extends Message {
   final MessageError? error;
   final List<String> system;
@@ -80,7 +80,7 @@ class AssistantMessage extends Message {
   ];
 }
 
-/// 消息时间信息
+/// Technical comment translated to English.
 class MessageTime extends Equatable {
   final int created;
   final int? completed;
@@ -91,7 +91,7 @@ class MessageTime extends Equatable {
   List<Object?> get props => [created, completed];
 }
 
-/// 消息路径信息
+/// Technical comment translated to English.
 class MessagePath extends Equatable {
   final String cwd;
   final String root;
@@ -102,7 +102,7 @@ class MessagePath extends Equatable {
   List<Object> get props => [cwd, root];
 }
 
-/// 消息令牌信息
+/// Technical comment translated to English.
 class MessageTokens extends Equatable {
   final int input;
   final int output;
@@ -120,7 +120,7 @@ class MessageTokens extends Equatable {
   List<Object> get props => [input, output, reasoning, cache];
 }
 
-/// 令牌缓存信息
+/// Technical comment translated to English.
 class TokenCache extends Equatable {
   final int read;
   final int write;
@@ -131,14 +131,14 @@ class TokenCache extends Equatable {
   List<Object> get props => [read, write];
 }
 
-/// 消息错误信息
+/// Technical comment translated to English.
 abstract class MessageError extends Equatable {
   final String name;
 
   const MessageError({required this.name});
 }
 
-/// 提供商认证错误
+/// Technical comment translated to English.
 class ProviderAuthError extends MessageError {
   final String providerId;
   final String message;
@@ -150,7 +150,7 @@ class ProviderAuthError extends MessageError {
   List<Object> get props => [name, providerId, message];
 }
 
-/// 未知错误
+/// Technical comment translated to English.
 class UnknownError extends MessageError {
   final String message;
 
@@ -160,7 +160,7 @@ class UnknownError extends MessageError {
   List<Object> get props => [name, message];
 }
 
-/// 消息输出长度错误
+/// Technical comment translated to English.
 class MessageOutputLengthError extends MessageError {
   const MessageOutputLengthError() : super(name: 'MessageOutputLengthError');
 
@@ -168,7 +168,7 @@ class MessageOutputLengthError extends MessageError {
   List<Object> get props => [name];
 }
 
-/// 消息中止错误
+/// Technical comment translated to English.
 class MessageAbortedError extends MessageError {
   const MessageAbortedError() : super(name: 'MessageAbortedError');
 

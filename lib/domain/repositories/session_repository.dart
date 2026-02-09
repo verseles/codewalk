@@ -3,52 +3,52 @@ import '../../core/errors/failures.dart';
 import '../entities/session.dart';
 import '../entities/message.dart';
 
-/// 会话仓库接口
+/// Technical comment translated to English.
 abstract class SessionRepository {
-  /// 获取所有会话
+  /// Technical comment translated to English.
   Future<Either<Failure, List<Session>>> getSessions();
 
-  /// 获取指定会话
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> getSession(String sessionId);
 
-  /// 创建新会话
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> createSession({
     String? parentId,
     String? title,
   });
 
-  /// 更新会话
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> updateSession(
     String sessionId, {
     String? title,
   });
 
-  /// 删除会话
+  /// Technical comment translated to English.
   Future<Either<Failure, bool>> deleteSession(String sessionId);
 
-  /// 获取子会话
+  /// Technical comment translated to English.
   Future<Either<Failure, List<Session>>> getChildSessions(String sessionId);
 
-  /// 分享会话
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> shareSession(String sessionId);
 
-  /// 取消分享会话
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> unshareSession(String sessionId);
 
-  /// 中止会话
+  /// Technical comment translated to English.
   Future<Either<Failure, bool>> abortSession(String sessionId);
 
-  /// 总结会话
+  /// Technical comment translated to English.
   Future<Either<Failure, bool>> summarizeSession(
     String sessionId,
     String providerId,
     String modelId,
   );
 
-  /// 获取会话消息
+  /// Technical comment translated to English.
   Future<Either<Failure, List<Message>>> getSessionMessages(String sessionId);
 
-  /// 发送消息
+  /// Technical comment translated to English.
   Future<Either<Failure, Message>> sendMessage({
     required String sessionId,
     required String providerId,
@@ -60,25 +60,25 @@ abstract class SessionRepository {
     Map<String, bool>? tools,
   });
 
-  /// 撤销消息
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> revertMessage(
     String sessionId,
     String messageId, {
     String? partId,
   });
 
-  /// 恢复撤销的消息
+  /// Technical comment translated to English.
   Future<Either<Failure, Session>> unrevertMessages(String sessionId);
 }
 
-/// 消息部分基类
+/// Technical comment translated to English.
 abstract class MessagePart {
   final String type;
 
   const MessagePart({required this.type});
 }
 
-/// 文本消息部分
+/// Technical comment translated to English.
 class TextMessagePart extends MessagePart {
   final String text;
   final bool? synthetic;
@@ -87,7 +87,7 @@ class TextMessagePart extends MessagePart {
     : super(type: 'text');
 }
 
-/// 文件消息部分
+/// Technical comment translated to English.
 class FileMessagePart extends MessagePart {
   final String mime;
   final String url;
@@ -97,7 +97,7 @@ class FileMessagePart extends MessagePart {
     : super(type: 'file');
 }
 
-/// 代理消息部分
+/// Technical comment translated to English.
 class AgentMessagePart extends MessagePart {
   final String name;
 

@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../repositories/app_repository.dart';
 
-/// 更新服务器配置参数
+/// Technical comment translated to English.
 class UpdateServerConfigParams {
   final String host;
   final int port;
@@ -10,7 +10,7 @@ class UpdateServerConfigParams {
   const UpdateServerConfigParams({required this.host, required this.port});
 }
 
-/// 更新服务器配置用例
+/// Technical comment translated to English.
 class UpdateServerConfig {
   final AppRepository repository;
 

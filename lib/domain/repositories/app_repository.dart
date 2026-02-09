@@ -3,20 +3,20 @@ import '../../core/errors/failures.dart';
 import '../entities/app_info.dart';
 import '../entities/provider.dart';
 
-/// 应用仓库接口
+/// Technical comment translated to English.
 abstract class AppRepository {
-  /// 获取应用信息
+  /// Technical comment translated to English.
   Future<Either<Failure, AppInfo>> getAppInfo({String? directory});
 
-  /// 初始化应用
+  /// Technical comment translated to English.
   Future<Either<Failure, bool>> initializeApp({String? directory});
 
-  /// 检查服务器连接
+  /// Technical comment translated to English.
   Future<Either<Failure, bool>> checkConnection({String? directory});
 
-  /// 更新服务器配置
+  /// Technical comment translated to English.
   Future<Either<Failure, void>> updateServerConfig(String host, int port);
 
-  /// 获取提供商信息
+  /// Technical comment translated to English.
   Future<Either<Failure, ProvidersResponse>> getProviders({String? directory});
 }

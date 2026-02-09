@@ -5,13 +5,11 @@ import '../../domain/entities/project.dart';
 import '../../domain/repositories/project_repository.dart';
 import '../datasources/project_remote_datasource.dart';
 
-/// Project 仓库实现
+/// Technical comment translated to English.
 class ProjectRepositoryImpl implements ProjectRepository {
   final ProjectRemoteDataSource remoteDataSource;
 
-  ProjectRepositoryImpl({
-    required this.remoteDataSource,
-  });
+  ProjectRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<Either<Failure, List<Project>>> getProjects() async {
@@ -26,9 +24,13 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Either<Failure, Project>> getCurrentProject({String? directory}) async {
+  Future<Either<Failure, Project>> getCurrentProject({
+    String? directory,
+  }) async {
     try {
-      final projectModel = await remoteDataSource.getCurrentProject(directory: directory);
+      final projectModel = await remoteDataSource.getCurrentProject(
+        directory: directory,
+      );
       return Right(projectModel.toDomain());
     } on DioException catch (e) {
       return Left(_handleDioException(e));
@@ -49,7 +51,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     }
   }
 
-  /// 处理 Dio 异常
+  /// Technical comment translated to English.
   Failure _handleDioException(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:

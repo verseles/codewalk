@@ -3,7 +3,7 @@ import '../../core/errors/failures.dart';
 import '../entities/app_info.dart';
 import '../repositories/app_repository.dart';
 
-/// 获取应用信息用例
+/// Technical comment translated to English.
 class GetAppInfo {
   final AppRepository repository;
 

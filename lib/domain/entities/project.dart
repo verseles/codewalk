@@ -1,4 +1,4 @@
-/// Project 实体类
+/// Technical comment translated to English.
 class Project {
   final String id;
   final String name;

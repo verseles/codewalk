@@ -1,85 +1,85 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 
-/// 应用本地数据源接口
+/// Technical comment translated to English.
 abstract class AppLocalDataSource {
-  /// 获取服务器主机地址
+  /// Technical comment translated to English.
   Future<String?> getServerHost();
 
-  /// 保存服务器主机地址
+  /// Technical comment translated to English.
   Future<void> saveServerHost(String host);
 
-  /// 获取服务器端口
+  /// Technical comment translated to English.
   Future<int?> getServerPort();
 
-  /// 保存服务器端口
+  /// Technical comment translated to English.
   Future<void> saveServerPort(int port);
 
-  /// 获取API密钥
+  /// Technical comment translated to English.
   Future<String?> getApiKey();
 
-  /// 保存API密钥
+  /// Technical comment translated to English.
   Future<void> saveApiKey(String apiKey);
 
-  /// 获取选中的提供商
+  /// Technical comment translated to English.
   Future<String?> getSelectedProvider();
 
-  /// 保存选中的提供商
+  /// Technical comment translated to English.
   Future<void> saveSelectedProvider(String providerId);
 
-  /// 获取选中的模型
+  /// Technical comment translated to English.
   Future<String?> getSelectedModel();
 
-  /// 保存选中的模型
+  /// Technical comment translated to English.
   Future<void> saveSelectedModel(String modelId);
 
-  /// 获取主题模式
+  /// Technical comment translated to English.
   Future<String?> getThemeMode();
 
-  /// 保存主题模式
+  /// Technical comment translated to English.
   Future<void> saveThemeMode(String themeMode);
 
-  /// 获取最后的会话ID
+  /// Technical comment translated to English.
   Future<String?> getLastSessionId();
 
-  /// 保存最后的会话ID
+  /// Technical comment translated to English.
   Future<void> saveLastSessionId(String sessionId);
 
-  /// 获取当前会话ID
+  /// Technical comment translated to English.
   Future<String?> getCurrentSessionId();
 
-  /// 保存当前会话ID
+  /// Technical comment translated to English.
   Future<void> saveCurrentSessionId(String sessionId);
 
-  /// 获取缓存的会话列表
+  /// Technical comment translated to English.
   Future<String?> getCachedSessions();
 
-  /// 保存会话列表到缓存
+  /// Technical comment translated to English.
   Future<void> saveCachedSessions(String sessionsJson);
 
-  /// 获取是否启用 Basic 认证
+  /// Technical comment translated to English.
   Future<bool?> getBasicAuthEnabled();
 
-  /// 保存是否启用 Basic 认证
+  /// Technical comment translated to English.
   Future<void> saveBasicAuthEnabled(bool enabled);
 
-  /// 获取 Basic 认证用户名
+  /// Technical comment translated to English.
   Future<String?> getBasicAuthUsername();
 
-  /// 保存 Basic 认证用户名
+  /// Technical comment translated to English.
   Future<void> saveBasicAuthUsername(String username);
 
-  /// 获取 Basic 认证密码
+  /// Technical comment translated to English.
   Future<String?> getBasicAuthPassword();
 
-  /// 保存 Basic 认证密码
+  /// Technical comment translated to English.
   Future<void> saveBasicAuthPassword(String password);
 
-  /// 清除所有数据
+  /// Technical comment translated to English.
   Future<void> clearAll();
 }
 
-/// 应用本地数据源实现
+/// Technical comment translated to English.
 class AppLocalDataSourceImpl implements AppLocalDataSource {
   final SharedPreferences sharedPreferences;
 
@@ -165,7 +165,10 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<void> saveCurrentSessionId(String sessionId) async {
-    await sharedPreferences.setString(AppConstants.currentSessionIdKey, sessionId);
+    await sharedPreferences.setString(
+      AppConstants.currentSessionIdKey,
+      sessionId,
+    );
   }
 
   @override
@@ -175,7 +178,10 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<void> saveCachedSessions(String sessionsJson) async {
-    await sharedPreferences.setString(AppConstants.cachedSessionsKey, sessionsJson);
+    await sharedPreferences.setString(
+      AppConstants.cachedSessionsKey,
+      sessionsJson,
+    );
   }
 
   @override
@@ -195,7 +201,10 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<void> saveBasicAuthUsername(String username) async {
-    await sharedPreferences.setString(AppConstants.basicAuthUsernameKey, username);
+    await sharedPreferences.setString(
+      AppConstants.basicAuthUsernameKey,
+      username,
+    );
   }
 
   @override
@@ -205,7 +214,10 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<void> saveBasicAuthPassword(String password) async {
-    await sharedPreferences.setString(AppConstants.basicAuthPasswordKey, password);
+    await sharedPreferences.setString(
+      AppConstants.basicAuthPasswordKey,
+      password,
+    );
   }
 
   @override

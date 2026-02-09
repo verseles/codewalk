@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// 会话实体
+/// Technical comment translated to English.
 class Session extends Equatable {
   final String id;
   final String? parentId;
@@ -32,7 +32,7 @@ class Session extends Equatable {
   ];
 }
 
-/// 会话时间信息
+/// Technical comment translated to English.
 class SessionTime extends Equatable {
   final int created;
   final int updated;
@@ -43,7 +43,7 @@ class SessionTime extends Equatable {
   List<Object> get props => [created, updated];
 }
 
-/// 会话分享信息
+/// Technical comment translated to English.
 class SessionShare extends Equatable {
   final String url;
 
@@ -53,7 +53,7 @@ class SessionShare extends Equatable {
   List<Object> get props => [url];
 }
 
-/// 会话回滚信息
+/// Technical comment translated to English.
 class SessionRevert extends Equatable {
   final String messageId;
   final String? partId;

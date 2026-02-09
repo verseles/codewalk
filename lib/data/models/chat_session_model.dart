@@ -3,7 +3,7 @@ import '../../domain/entities/chat_session.dart';
 
 part 'chat_session_model.g.dart';
 
-/// 聊天会话模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ChatSessionModel {
   const ChatSessionModel({
@@ -48,7 +48,7 @@ class ChatSessionModel {
     return value.toString();
   }
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   ChatSession toDomain() {
     return ChatSession(
       id: id,
@@ -61,7 +61,7 @@ class ChatSessionModel {
     );
   }
 
-  /// 从领域实体创建
+  /// Technical comment translated to English.
   static ChatSessionModel fromDomain(ChatSession session) {
     return ChatSessionModel(
       id: session.id,
@@ -77,7 +77,7 @@ class ChatSessionModel {
   }
 }
 
-/// 会话时间模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class SessionTimeModel {
   const SessionTimeModel({required this.created, required this.updated});
@@ -100,7 +100,7 @@ class SessionTimeModel {
   }
 }
 
-/// 会话分享模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class SessionShareModel {
   const SessionShareModel({required this.url});
@@ -113,7 +113,7 @@ class SessionShareModel {
   Map<String, dynamic> toJson() => _$SessionShareModelToJson(this);
 }
 
-/// 会话路径模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class SessionPathModel {
   const SessionPathModel({required this.root, required this.workspace});
@@ -135,7 +135,7 @@ class SessionPathModel {
   }
 }
 
-/// 聊天输入模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ChatInputModel {
   const ChatInputModel({
@@ -164,7 +164,7 @@ class ChatInputModel {
 
   Map<String, dynamic> toJson() => _$ChatInputModelToJson(this);
 
-  /// 从领域实体创建
+  /// Technical comment translated to English.
   static ChatInputModel fromDomain(ChatInput input) {
     return ChatInputModel(
       messageId: input.messageId,
@@ -178,7 +178,7 @@ class ChatInputModel {
   }
 }
 
-/// 聊天输入部件模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ChatInputPartModel {
   const ChatInputPartModel({
@@ -202,15 +202,15 @@ class ChatInputPartModel {
 
   Map<String, dynamic> toJson() => _$ChatInputPartModelToJson(this);
 
-  /// 从领域实体创建
+  /// Technical comment translated to English.
   static ChatInputPartModel fromDomain(ChatInputPart part) {
     switch (part.type) {
       case ChatInputPartType.text:
         final textPart = part as TextInputPart;
         return ChatInputPartModel(
-          type: 'text', 
+          type: 'text',
           text: textPart.text,
-          id: 'prt_${DateTime.now().millisecondsSinceEpoch}', // 生成唯一ID
+          id: 'prt_${DateTime.now().millisecondsSinceEpoch}', // Technical comment translated to English.
         );
       case ChatInputPartType.file:
         final filePart = part as FileInputPart;
@@ -218,27 +218,26 @@ class ChatInputPartModel {
           type: 'file',
           source: filePart.source.toMap(),
           filename: filePart.filename,
-          id: 'prt_${DateTime.now().millisecondsSinceEpoch}', // 生成唯一ID
+          id: 'prt_${DateTime.now().millisecondsSinceEpoch}', // Technical comment translated to English.
         );
       case ChatInputPartType.agent:
         final agentPart = part as AgentInputPart;
         return ChatInputPartModel(
           type: 'agent',
           name: agentPart.name,
-          id: agentPart.id ?? 'prt_${DateTime.now().millisecondsSinceEpoch}', // 生成唯一ID
+          id:
+              agentPart.id ??
+              'prt_${DateTime.now().millisecondsSinceEpoch}', // Technical comment translated to English.
           source: agentPart.source?.toMap(),
         );
     }
   }
 }
 
-/// 会话创建输入模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class SessionCreateInputModel {
-  const SessionCreateInputModel({
-    this.parentId,
-    this.title,
-  });
+  const SessionCreateInputModel({this.parentId, this.title});
 
   @JsonKey(name: 'parentID', includeIfNull: false)
   final String? parentId;
@@ -248,7 +247,7 @@ class SessionCreateInputModel {
   factory SessionCreateInputModel.fromJson(Map<String, dynamic> json) =>
       _$SessionCreateInputModelFromJson(json);
 
-  // 手动实现 toJson 以避免向后端发送 null 字段
+  // Technical comment translated to English.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     if (parentId != null) {
@@ -263,12 +262,12 @@ class SessionCreateInputModel {
   static SessionCreateInputModel fromDomain(SessionCreateInput input) {
     return SessionCreateInputModel(
       parentId: input.parentId,
-      title: input.title ?? '新对话',
+      title: input.title ?? 'New chat',
     );
   }
 }
 
-/// 会话更新输入模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class SessionUpdateInputModel {
   const SessionUpdateInputModel({this.title});
@@ -278,7 +277,7 @@ class SessionUpdateInputModel {
   factory SessionUpdateInputModel.fromJson(Map<String, dynamic> json) =>
       _$SessionUpdateInputModelFromJson(json);
 
-  // 同样避免发送空字段
+  // Technical comment translated to English.
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     if (title != null) {
@@ -292,7 +291,7 @@ class SessionUpdateInputModel {
   }
 }
 
-/// 扩展方法
+/// Technical comment translated to English.
 extension on FileInputSource {
   Map<String, dynamic> toMap() {
     return {

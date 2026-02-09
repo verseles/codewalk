@@ -15,10 +15,10 @@ import '../../domain/usecases/delete_chat_session.dart';
 import '../../core/errors/failures.dart';
 import 'project_provider.dart';
 
-/// 聊天状态
+/// Chat state
 enum ChatState { initial, loading, loaded, error, sending }
 
-/// 聊天提供者
+/// Chat provider
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
     required this.sendChatMessage,
@@ -31,7 +31,7 @@ class ChatProvider extends ChangeNotifier {
     required this.localDataSource,
   });
 
-  // 滚动回调
+  // Scroll callback
   VoidCallback? _scrollToBottomCallback;
 
   final SendChatMessage sendChatMessage;
@@ -50,7 +50,7 @@ class ChatProvider extends ChangeNotifier {
   String? _errorMessage;
   StreamSubscription<dynamic>? _messageSubscription;
 
-  // 项目和提供商相关状态
+  // Project and provider-related state
   String? _currentProjectId;
   List<Provider> _providers = [];
   Map<String, String> _defaultModels = {};
@@ -69,44 +69,48 @@ class ChatProvider extends ChangeNotifier {
   String? get selectedProviderId => _selectedProviderId;
   String? get selectedModelId => _selectedModelId;
 
-  /// 设置滚动到底部的回调
+  /// Set scroll-to-bottom callback
   void setScrollToBottomCallback(VoidCallback? callback) {
     _scrollToBottomCallback = callback;
   }
 
-  /// 设置状态
+  /// Set state
   void _setState(ChatState newState) {
     _state = newState;
     notifyListeners();
   }
 
-  /// 设置错误
+  /// Set error
   void _setError(String message) {
     _errorMessage = message;
     _setState(ChatState.error);
   }
 
-  /// 初始化提供商
+  /// Initialize providers
   Future<void> initializeProviders() async {
     try {
       final result = await getProviders();
       result.fold(
         (failure) {
-          print('获取提供商失败: ${failure.toString()}');
-          // 使用默认值作为备用
-          _selectedProviderId = 'moonshotai-cn'; // 从响应中看到的第一个提供商
-          _selectedModelId = 'kimi-k2-turbo-preview'; // 从响应中看到的模型
+          print('Failed to load providers: ${failure.toString()}');
+          // Use fallback defaults
+          _selectedProviderId =
+              'moonshotai-cn'; // First provider observed from response
+          _selectedModelId =
+              'kimi-k2-turbo-preview'; // Model observed from response
         },
         (providersResponse) {
-          print('成功获取提供商: ${providersResponse.providers.length} 个');
+          print(
+            'Loaded providers successfully: ${providersResponse.providers.length} items',
+          );
           _providers = providersResponse.providers;
           _defaultModels = providersResponse.defaultModels;
 
-          // 选择默认模型，优先级：
-          // 1. Anthropic 提供商（如果可用）
-          // 2. 第一个可用的提供商
+          // Default model selection priority:
+          // 1. Anthropic provider (if available)
+          // 2. First available provider
           if (_providers.isNotEmpty) {
-            // 尝试找到 Anthropic 提供商
+            // Try to find Anthropic provider
             Provider selectedProvider;
             final anthropicProvider = _providers
                 .where((p) => p.id == 'anthropic')
@@ -119,59 +123,58 @@ class ChatProvider extends ChangeNotifier {
 
             _selectedProviderId = selectedProvider.id;
 
-            // 获取默认模型或第一个可用模型
+            // Get default model or first available model
             if (_defaultModels.containsKey(selectedProvider.id)) {
               _selectedModelId = _defaultModels[selectedProvider.id];
             } else if (selectedProvider.models.isNotEmpty) {
               _selectedModelId = selectedProvider.models.keys.first;
             }
 
-            print('选择了提供商: $_selectedProviderId, 模型: $_selectedModelId');
+            print(
+              'Selected provider: $_selectedProviderId, model: $_selectedModelId',
+            );
           }
         },
       );
     } catch (e) {
-      print('初始化提供商时发生异常: $e');
-      // 使用默认值作为备用
+      print('Exception while initializing providers: $e');
+      // Use fallback defaults
       _selectedProviderId = 'moonshotai-cn';
       _selectedModelId = 'kimi-k2-turbo-preview';
     }
     notifyListeners();
   }
 
-  /// 加载会话列表
+  /// Load session list
   Future<void> loadSessions() async {
     if (_state == ChatState.loading) return;
-    
+
     _setState(ChatState.loading);
     clearError();
 
     try {
-      // 首先尝试从缓存加载
+      // First try loading from cache
       await _loadCachedSessions();
-      
-      // 然后从服务器获取最新数据
+
+      // Then fetch latest data from server
       final result = await getChatSessions();
-      
-      result.fold(
-        (failure) => _handleFailure(failure),
-        (sessions) async {
-          _sessions = sessions;
-          _setState(ChatState.loaded);
-          
-          // 保存到缓存
-          await _saveCachedSessions(sessions);
-          
-          // 恢复上次选择的会话
-          await loadLastSession();
-        },
-      );
+
+      result.fold((failure) => _handleFailure(failure), (sessions) async {
+        _sessions = sessions;
+        _setState(ChatState.loaded);
+
+        // Save to cache
+        await _saveCachedSessions(sessions);
+
+        // Restore last selected session
+        await loadLastSession();
+      });
     } catch (e) {
-      _setError('加载会话列表失败: ${e.toString()}');
+      _setError('Failed to load session list: ${e.toString()}');
     }
   }
 
-  /// 从缓存加载会话列表
+  /// Load sessions from cache
   Future<void> _loadCachedSessions() async {
     try {
       final cachedData = await localDataSource.getCachedSessions();
@@ -180,7 +183,7 @@ class ChatProvider extends ChangeNotifier {
         final cachedSessions = jsonList
             .map((json) => ChatSessionModel.fromJson(json).toDomain())
             .toList();
-        
+
         if (cachedSessions.isNotEmpty) {
           _sessions = cachedSessions;
           _setState(ChatState.loaded);
@@ -188,11 +191,11 @@ class ChatProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      print('加载缓存会话失败: $e');
+      print('Failed to load cached sessions: $e');
     }
   }
 
-  /// 保存会话列表到缓存
+  /// Save sessions to cache
   Future<void> _saveCachedSessions(List<ChatSession> sessions) async {
     try {
       final jsonList = sessions
@@ -201,20 +204,20 @@ class ChatProvider extends ChangeNotifier {
       final jsonString = json.encode(jsonList);
       await localDataSource.saveCachedSessions(jsonString);
     } catch (e) {
-      print('保存会话缓存失败: $e');
+      print('Failed to save session cache: $e');
     }
   }
 
-  /// 保存当前会话ID
+  /// Save current session ID
   Future<void> _saveCurrentSessionId(String sessionId) async {
     try {
       await localDataSource.saveCurrentSessionId(sessionId);
     } catch (e) {
-      print('保存当前会话ID失败: $e');
+      print('Failed to save current session ID: $e');
     }
   }
 
-  /// 加载上次选择的会话
+  /// Load last selected session
   Future<void> loadLastSession() async {
     try {
       final sessionId = await localDataSource.getCurrentSessionId();
@@ -225,27 +228,24 @@ class ChatProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      print('加载上次会话失败: $e');
+      print('Failed to load last session: $e');
     }
   }
 
-  /// 创建新会话
+  /// Create new session
   Future<void> createNewSession({String? parentId, String? title}) async {
     final projectId = projectProvider.currentProjectId;
     final directory = projectProvider.currentProject?.path;
     _setState(ChatState.loading);
 
-    // 生成基于时间的标题
+    // Generate time-based title
     final now = DateTime.now();
     final defaultTitle = title ?? _generateSessionTitle(now);
 
     final result = await createChatSession(
       CreateChatSessionParams(
         projectId: projectId,
-        input: SessionCreateInput(
-          parentId: parentId,
-          title: defaultTitle,
-        ),
+        input: SessionCreateInput(parentId: parentId, title: defaultTitle),
         directory: directory,
       ),
     );
@@ -253,56 +253,57 @@ class ChatProvider extends ChangeNotifier {
     result.fold((failure) => _handleFailure(failure), (session) {
       _sessions.insert(0, session);
       _currentSession = session;
-      _messages.clear(); // 确保新会话开始时消息列表为空
+      _messages
+          .clear(); // Ensure message list is empty when a new session starts
       _setState(ChatState.loaded);
     });
   }
 
-  /// 生成基于时间的会话标题
+  /// Generate time-based session title
   String _generateSessionTitle(DateTime time) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final sessionDate = DateTime(time.year, time.month, time.day);
 
     if (sessionDate == today) {
-      // 今天的对话显示时间
+      // Show time for today's conversations
       return 'Today ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } else {
       final difference = today.difference(sessionDate).inDays;
       if (difference == 1) {
-        // 昨天的对话
+        // Yesterday conversation
         return 'Yesterday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else if (difference < 7) {
-        // 一周内的对话显示星期几
+        // Show weekday for conversations within a week
         final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         final weekday = weekdays[time.weekday - 1];
         return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else {
-        // 更早的对话显示日期
+        // Show date for older conversations
         return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       }
     }
   }
 
-  /// 选择会话
+  /// Select session
   Future<void> selectSession(ChatSession session) async {
     if (_currentSession?.id == session.id) return;
 
-    // 清空当前消息列表
+    // Clear current message list
     _messages.clear();
     _currentSession = session;
     notifyListeners();
 
-    // 保存当前会话ID
+    // Save current session ID
     await _saveCurrentSessionId(session.id);
 
-    // 加载新会话的消息
+    // Load messages for selected session
     await loadMessages(session.id);
   }
 
-  /// 加载消息列表
+  /// Load message list
   Future<void> loadMessages(String sessionId) async {
-    // 同步项目ID（根据 ProjectProvider），新接口对 projectId 非必需
+    // Sync project ID from ProjectProvider; projectId is optional for the new API
     _currentProjectId = projectProvider.currentProjectId;
 
     _setState(ChatState.loading);
@@ -320,19 +321,19 @@ class ChatProvider extends ChangeNotifier {
     });
   }
 
-  /// 发送消息
+  /// Send message
   Future<void> sendMessage(String text) async {
     if (_currentSession == null || text.trim().isEmpty) return;
 
     _setState(ChatState.sending);
 
-    // 同步项目ID（根据 ProjectProvider）
+    // Sync project ID from ProjectProvider
     _currentProjectId = projectProvider.currentProjectId;
 
-    // 生成消息 ID
+    // Generate message ID
     final messageId = 'msg_${DateTime.now().millisecondsSinceEpoch}';
 
-    // 添加用户消息到界面
+    // Add user message to UI
     final userMessage = UserMessage(
       id: messageId,
       sessionId: _currentSession!.id,
@@ -351,42 +352,44 @@ class ChatProvider extends ChangeNotifier {
     _messages.add(userMessage);
     notifyListeners();
 
-    // 确保已初始化提供商
+    // Ensure providers are initialized
     if (_selectedProviderId == null || _selectedModelId == null) {
       await initializeProviders();
     }
 
-    // 创建聊天输入
+    // Create chat input
     final input = ChatInput(
       messageId: messageId,
-      providerId: _selectedProviderId ?? 'anthropic', // 使用选中的提供商
-      modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022', // 使用选中的模型
-      agent: 'general', // 默认 agent
-      system: '', // 默认系统提示
-      tools: const {}, // 默认工具配置
+      providerId: _selectedProviderId ?? 'anthropic', // Use selected provider
+      modelId:
+          _selectedModelId ??
+          'claude-3-5-sonnet-20241022', // Use selected model
+      agent: 'general', // default agent
+      system: '', // default system prompt
+      tools: const {}, // default tools configuration
       parts: [TextInputPart(text: text)],
     );
 
-    // 取消之前的订阅
+    // Cancel previous subscription
     _messageSubscription?.cancel();
 
-    // 发送消息并监听流式响应
+    // Send message and listen for streaming response
     _messageSubscription =
         sendChatMessage(
           SendChatMessageParams(
             projectId: projectProvider.currentProjectId,
-            sessionId: _currentSession!.id, 
+            sessionId: _currentSession!.id,
             input: input,
           ),
         ).listen(
           (result) {
             result.fold((failure) => _handleFailure(failure), (message) {
-              // 更新或添加助手消息
+              // Update or add assistant message
               _updateOrAddMessage(message);
             });
           },
           onError: (error) {
-            _setError('发送消息失败: $error');
+            _setError('Failed to send message: $error');
           },
           onDone: () {
             _setState(ChatState.loaded);
@@ -394,56 +397,60 @@ class ChatProvider extends ChangeNotifier {
         );
   }
 
-  /// 更新或添加消息
+  /// Update or add message
   void _updateOrAddMessage(ChatMessage message) {
     final index = _messages.indexWhere((m) => m.id == message.id);
     if (index != -1) {
-      // 更新现有消息
+      // Update existing message
       _messages[index] = message;
-      print('🔄 更新消息: ${message.id}, 部件数量: ${message.parts.length}');
+      print(
+        '🔄 Updated message: ${message.id}, parts count: ${message.parts.length}',
+      );
     } else {
-      // 添加新消息
+      // Add new message
       _messages.add(message);
-      print('➕ 添加新消息: ${message.id}, 角色: ${message.role}');
+      print('➕ Add new message: ${message.id}, role: ${message.role}');
     }
 
-    // 检查是否有未完成的助手消息
+    // Check if there is an unfinished assistant message
     if (message is AssistantMessage) {
-      print('🤖 助手消息状态: ${message.isCompleted ? "已完成" : "进行中"}');
+      print(
+        '🤖 Assistant message status: ${message.isCompleted ? "completed" : "in progress"}',
+      );
       if (message.isCompleted && _state == ChatState.sending) {
-        print('✅ 消息完成，更新状态为已加载');
+        print('✅ Message completed, set state to loaded');
         _setState(ChatState.loaded);
       }
     }
 
     notifyListeners();
 
-    // 触发自动滚动
+    // Trigger auto-scroll
     _scrollToBottomCallback?.call();
   }
 
-  /// 处理失败
+  /// Handle failure
   void _handleFailure(Failure failure) {
     switch (failure.runtimeType) {
       case NetworkFailure:
-        _setError('网络连接失败，请检查网络设置');
+        _setError('Network connection failed. Please check network settings');
         break;
       case ServerFailure:
-        _setError('服务器错误，请稍后再试');
+        _setError('Server error. Please try again later');
         break;
       case NotFoundFailure:
-        _setError('资源不存在');
+        _setError('Resource not found');
         break;
       case ValidationFailure:
-        _setError('输入参数无效');
+        _setError('Invalid input parameters');
         break;
       default:
-        _setError('未知错误，请稍后再试');
+        _setError('Unknown error. Please try again later');
         break;
     }
   }
 
-  /// 清除错误
+  /// Clear error
   void clearError() {
     _errorMessage = null;
     if (_state == ChatState.error) {
@@ -451,9 +458,9 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  /// 删除会话
+  /// Delete session
   Future<void> deleteSession(String sessionId) async {
-    // 同步项目ID（根据 ProjectProvider）
+    // Sync project ID from ProjectProvider
     _currentProjectId = projectProvider.currentProjectId;
 
     final result = await deleteChatSession(
@@ -464,15 +471,15 @@ class ChatProvider extends ChangeNotifier {
     );
 
     result.fold((failure) => _handleFailure(failure), (_) {
-      // 从本地列表中移除会话
+      // Remove session from local list
       _sessions.removeWhere((session) => session.id == sessionId);
 
-      // 如果删除的是当前会话，清空当前会话和消息
+      // If current session is deleted, clear current session and messages
       if (_currentSession?.id == sessionId) {
         _currentSession = null;
         _messages.clear();
 
-        // 如果还有其他会话，选择第一个
+        // If other sessions remain, select the first one
         if (_sessions.isNotEmpty) {
           selectSession(_sessions.first);
         }
@@ -482,15 +489,15 @@ class ChatProvider extends ChangeNotifier {
     });
   }
 
-  /// 刷新当前会话
+  /// Refresh current session
   Future<void> refresh() async {
     if (_currentSession != null) {
       await loadMessages(_currentSession!.id);
     } else {
-      // 如果没有当前会话，重新加载会话列表
+      // If there is no current session, reload sessions
       if (_sessions.isNotEmpty) {
-        // 假设我们有 workspaceId，实际应该从应用状态中获取
-        // 这里需要根据实际情况调整
+        // Assume workspaceId exists; in practice it should come from app state
+        // Adjust based on actual app behavior
         _setState(ChatState.loaded);
       }
     }

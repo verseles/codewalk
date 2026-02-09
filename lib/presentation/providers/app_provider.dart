@@ -5,10 +5,10 @@ import '../../domain/usecases/check_connection.dart';
 import '../../domain/usecases/update_server_config.dart';
 import '../../core/constants/api_constants.dart';
 
-/// 应用状态枚举
+/// Technical comment translated to English.
 enum AppStatus { initial, loading, loaded, error, disconnected }
 
-/// 应用状态提供者
+/// Technical comment translated to English.
 class AppProvider extends ChangeNotifier {
   final GetAppInfo _getAppInfo;
   final CheckConnection _checkConnection;
@@ -22,7 +22,7 @@ class AppProvider extends ChangeNotifier {
        _checkConnection = checkConnection,
        _updateServerConfig = updateServerConfig;
 
-  // 状态
+  // Technical comment translated to English.
   AppStatus _status = AppStatus.initial;
   AppInfo? _appInfo;
   String _errorMessage = '';
@@ -39,7 +39,7 @@ class AppProvider extends ChangeNotifier {
   bool get isConnected => _isConnected;
   String get serverUrl => 'http://$_serverHost:$_serverPort';
 
-  /// 获取应用信息
+  /// Technical comment translated to English.
   Future<void> getAppInfo() async {
     _setStatus(AppStatus.loading);
 
@@ -61,7 +61,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 检查服务器连接
+  /// Technical comment translated to English.
   Future<void> checkConnection() async {
     final result = await _checkConnection();
 
@@ -81,7 +81,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 更新服务器配置
+  /// Technical comment translated to English.
   Future<bool> updateServerConfig(String host, int port) async {
     final params = UpdateServerConfigParams(host: host, port: port);
     final result = await _updateServerConfig(params);
@@ -102,20 +102,20 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
-  /// 设置服务器配置（从本地存储加载）
+  /// Technical comment translated to English.
   void setServerConfig(String host, int port) {
     _serverHost = host;
     _serverPort = port;
     notifyListeners();
   }
 
-  /// 清除错误消息
+  /// Technical comment translated to English.
   void clearError() {
     _errorMessage = '';
     notifyListeners();
   }
 
-  /// 重置状态
+  /// Technical comment translated to English.
   void reset() {
     _status = AppStatus.initial;
     _appInfo = null;

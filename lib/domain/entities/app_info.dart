@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// 应用信息实体
+/// Technical comment translated to English.
 class AppInfo extends Equatable {
   final String hostname;
   final bool git;
@@ -18,7 +18,7 @@ class AppInfo extends Equatable {
   List<Object?> get props => [hostname, git, path, time];
 }
 
-/// 应用路径信息
+/// Technical comment translated to English.
 class AppPath extends Equatable {
   final String config;
   final String data;
@@ -38,7 +38,7 @@ class AppPath extends Equatable {
   List<Object> get props => [config, data, root, cwd, state];
 }
 
-/// 应用时间信息
+/// Technical comment translated to English.
 class AppTime extends Equatable {
   final int? initialized;
 

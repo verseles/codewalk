@@ -12,12 +12,20 @@ abstract class ChatRemoteDataSource {
   Future<List<ChatSessionModel>> getSessions({String? directory});
 
   /// Get session details
-  Future<ChatSessionModel> getSession(String projectId, String sessionId, {String? directory});
+  Future<ChatSessionModel> getSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
   /// Create session
-  Future<ChatSessionModel> createSession(String projectId, SessionCreateInputModel input, {String? directory});
+  Future<ChatSessionModel> createSession(
+    String projectId,
+    SessionCreateInputModel input, {
+    String? directory,
+  });
 
-  /// 更新会话
+  /// Update session
   Future<ChatSessionModel> updateSession(
     String projectId,
     String sessionId,
@@ -25,34 +33,73 @@ abstract class ChatRemoteDataSource {
     String? directory,
   });
 
-  /// 删除会话
-  Future<void> deleteSession(String projectId, String sessionId, {String? directory});
+  /// Delete session
+  Future<void> deleteSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
-  /// 分享会话
-  Future<ChatSessionModel> shareSession(String projectId, String sessionId, {String? directory});
+  /// Share session
+  Future<ChatSessionModel> shareSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
-  /// 取消分享会话
-  Future<ChatSessionModel> unshareSession(String projectId, String sessionId, {String? directory});
+  /// Unshare session
+  Future<ChatSessionModel> unshareSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
-  /// 获取会话消息列表
-  Future<List<ChatMessageModel>> getMessages(String projectId, String sessionId, {String? directory});
+  /// Get session messages
+  Future<List<ChatMessageModel>> getMessages(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
-  /// 获取消息详情
-  Future<ChatMessageModel> getMessage(String projectId, String sessionId, String messageId, {String? directory});
+  /// Get message details
+  Future<ChatMessageModel> getMessage(
+    String projectId,
+    String sessionId,
+    String messageId, {
+    String? directory,
+  });
 
-  /// 发送聊天消息（流式）
-  Stream<ChatMessageModel> sendMessage(String projectId, String sessionId, ChatInputModel input, {String? directory});
+  /// Send chat message (streaming)
+  Stream<ChatMessageModel> sendMessage(
+    String projectId,
+    String sessionId,
+    ChatInputModel input, {
+    String? directory,
+  });
 
-  /// 中止会话
-  Future<void> abortSession(String projectId, String sessionId, {String? directory});
+  /// Abort session
+  Future<void> abortSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
-  /// 撤销消息
-  Future<void> revertMessage(String projectId, String sessionId, String messageId, {String? directory});
+  /// Revert message
+  Future<void> revertMessage(
+    String projectId,
+    String sessionId,
+    String messageId, {
+    String? directory,
+  });
 
-  /// 恢复撤销的消息
-  Future<void> unrevertMessages(String projectId, String sessionId, {String? directory});
+  /// Unrevert messages
+  Future<void> unrevertMessages(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 
-  /// 初始化会话
+  /// Initialize session
   Future<void> initSession(
     String projectId,
     String sessionId, {
@@ -62,11 +109,15 @@ abstract class ChatRemoteDataSource {
     String? directory,
   });
 
-  /// 总结会话
-  Future<void> summarizeSession(String projectId, String sessionId, {String? directory});
+  /// Summarize session
+  Future<void> summarizeSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
 }
 
-/// Chat remote data source实现
+/// Chat remote data source implementation
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   const ChatRemoteDataSourceImpl({required this.dio});
 
@@ -79,8 +130,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，会话列表端点是 /session，不需要 projectId 路径参数
+
+      // Per updated API spec, session list endpoint is /session and does not require projectId in path
       final response = await dio.get(
         '/session',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
@@ -90,27 +141,31 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((json) => ChatSessionModel.fromJson(json)).toList();
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<ChatSessionModel> getSession(String projectId, String sessionId, {String? directory}) async {
+  Future<ChatSessionModel> getSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，获取单个会话端点是 /session/{id}，不需要 projectId 路径参数
+
+      // Per updated API spec, single session endpoint is /session/{id} and does not require projectId in path
       final response = await dio.get(
         '/session/$sessionId',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
@@ -119,27 +174,31 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         return ChatSessionModel.fromJson(response.data);
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<ChatSessionModel> createSession(String projectId, SessionCreateInputModel input, {String? directory}) async {
+  Future<ChatSessionModel> createSession(
+    String projectId,
+    SessionCreateInputModel input, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，会话创建端点是 /session，不需要 projectId 路径参数
+
+      // Per updated API spec, create session endpoint is /session and does not require projectId in path
       final response = await dio.post(
         '/session',
         data: input.toJson(),
@@ -149,15 +208,15 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         return ChatSessionModel.fromJson(response.data);
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
-        throw const ValidationException('参数验证失败');
+        throw const ValidationException('Invalid input parameters');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
@@ -173,8 +232,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，更新会话端点是 /session/{id}，不需要 projectId 路径参数
+
+      // Per updated API spec, update session endpoint is /session/{id} and does not require projectId in path
       final response = await dio.patch(
         '/session/$sessionId',
         data: input.toJson(),
@@ -184,57 +243,65 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         return ChatSessionModel.fromJson(response.data);
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
       if (e.response?.statusCode == 400) {
-        throw const ValidationException('参数验证失败');
+        throw const ValidationException('Invalid input parameters');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<void> deleteSession(String projectId, String sessionId, {String? directory}) async {
+  Future<void> deleteSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，删除会话端点是 /session/{id}，不需要 projectId 路径参数
+
+      // Per updated API spec, delete session endpoint is /session/{id} and does not require projectId in path
       final response = await dio.delete(
         '/session/$sessionId',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<ChatSessionModel> shareSession(String projectId, String sessionId, {String? directory}) async {
+  Future<ChatSessionModel> shareSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，分享会话端点是 /session/{id}/share，不需要 projectId 路径参数
+
+      // Per updated API spec, share session endpoint is /session/{id}/share and does not require projectId in path
       final response = await dio.post(
         '/session/$sessionId/share',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
@@ -243,27 +310,31 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         return ChatSessionModel.fromJson(response.data);
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<ChatSessionModel> unshareSession(String projectId, String sessionId, {String? directory}) async {
+  Future<ChatSessionModel> unshareSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      // 根据新的 API 规范，取消分享会话端点是 /session/{id}/share，不需要 projectId 路径参数
+
+      // Per updated API spec, unshare session endpoint is /session/{id}/share and does not require projectId in path
       final response = await dio.delete(
         '/session/$sessionId/share',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
@@ -272,31 +343,35 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         return ChatSessionModel.fromJson(response.data);
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<List<ChatMessageModel>> getMessages(String projectId, String sessionId, {String? directory}) async {
+  Future<List<ChatMessageModel>> getMessages(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.get(
         '/session/$sessionId/message',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
         options: Options(
-          // 会话历史可能较大，提升接收超时以避免 60 秒中断
+          // Session history can be large; increase receive timeout to avoid 60-second interruption
           receiveTimeout: const Duration(minutes: 3),
         ),
       );
@@ -307,39 +382,42 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         // Flatten to a single map compatible with ChatMessageModel.fromJson
         return data.map((item) {
           final map = item as Map<String, dynamic>;
-          final info = (map['info'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+          final info =
+              (map['info'] as Map<String, dynamic>?) ?? <String, dynamic>{};
           final parts = (map['parts'] as List<dynamic>?) ?? <dynamic>[];
-          return ChatMessageModel.fromJson({
-            ...info,
-            'parts': parts,
-          });
+          return ChatMessageModel.fromJson({...info, 'parts': parts});
         }).toList();
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<ChatMessageModel> getMessage(String projectId, String sessionId, String messageId, {String? directory}) async {
+  Future<ChatMessageModel> getMessage(
+    String projectId,
+    String sessionId,
+    String messageId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.get(
         '/session/$sessionId/message/$messageId',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
         options: Options(
-          // 单条消息也可能较慢，统一提升接收超时
+          // Single message fetch can also be slow; increase receive timeout consistently
           receiveTimeout: const Duration(minutes: 3),
         ),
       );
@@ -347,37 +425,42 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (response.statusCode == 200) {
         return ChatMessageModel.fromJson(response.data);
       } else {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Stream<ChatMessageModel> sendMessage(String projectId, String sessionId, ChatInputModel input, {String? directory}) async* {
+  Stream<ChatMessageModel> sendMessage(
+    String projectId,
+    String sessionId,
+    ChatInputModel input, {
+    String? directory,
+  }) async* {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
-      print('=== 开始发送消息 ===');
-      print('会话ID: $sessionId');
-      print('消息ID: ${input.messageId}');
+
+      print('=== Starting message send ===');
+      print('Session ID: $sessionId');
+      print('Message ID: ${input.messageId}');
       print('==================');
 
-      // 启动 SSE 监听器，监听消息更新事件
+      // Start SSE listener for message update events
       final eventController = StreamController<ChatMessageModel>();
       late StreamSubscription eventSubscription;
       bool messageCompleted = false;
 
-      // 创建 SSE 监听器
+      // Create SSE listener
       try {
         final eventResponse = await dio.get(
           '/event',
@@ -391,7 +474,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         );
 
         if (eventResponse.statusCode == 200) {
-          print('✅ 成功连接到事件流');
+          print('✅ Connected to event stream');
 
           eventSubscription = (eventResponse.data as ResponseBody).stream
               .transform(
@@ -403,7 +486,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               )
               .transform(const LineSplitter())
               .where((line) => line.startsWith('data: '))
-              .map((line) => line.substring(6)) // 移除 "data: " 前缀
+              .map((line) => line.substring(6)) // Remove "data: " prefix
               .where((data) => data.isNotEmpty && data != '[DONE]')
               .listen(
                 (eventData) {
@@ -411,7 +494,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                     final event = jsonDecode(eventData) as Map<String, dynamic>;
                     final eventType = event['type'] as String?;
 
-                    print('📨 收到事件: $eventType');
+                    print('📨 Event received: $eventType');
 
                     if (eventType == 'message.updated') {
                       final properties =
@@ -419,19 +502,25 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final info = properties?['info'] as Map<String, dynamic>?;
 
                       if (info != null && info['sessionID'] == sessionId) {
-                        print('🔄 消息更新事件: ${info['id']}');
-                        // 获取完整的消息信息（包括 parts）
-                         _getCompleteMessage(projectId, sessionId, info['id'] as String)
-                             .then((message) {
+                        print('🔄 Message updated event: ${info['id']}');
+                        // Get complete message payload (including parts)
+                        _getCompleteMessage(
+                              projectId,
+                              sessionId,
+                              info['id'] as String,
+                            )
+                            .then((message) {
                               if (message != null) {
                                 eventController.add(message);
 
-                                // 检查消息是否完成
+                                // Check whether message is completed
                                 if (message.completedTime != null &&
                                     !messageCompleted) {
                                   messageCompleted = true;
-                                  print('🎉 消息完成，准备关闭事件流');
-                                  // 延迟关闭，确保最后的更新被处理
+                                  print(
+                                    '🎉 Message completed, preparing to close event stream',
+                                  );
+                                  // Delay close to ensure final update is processed
                                   Future.delayed(
                                     const Duration(milliseconds: 500),
                                     () {
@@ -443,7 +532,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                               }
                             })
                             .catchError((error) {
-                              print('获取完整消息失败: $error');
+                              print('Failed to fetch complete message: $error');
                             });
                       }
                     } else if (eventType == 'message.part.updated') {
@@ -453,20 +542,26 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
                       if (part != null && part['sessionID'] == sessionId) {
                         print(
-                          '🔄 消息部件更新: ${part['messageID']} - ${part['id']}',
+                          '🔄 Message part updated: ${part['messageID']} - ${part['id']}',
                         );
-                        // 获取完整的消息信息
-                         _getCompleteMessage(projectId, sessionId, part['messageID'] as String)
-                             .then((message) {
+                        // Get complete message payload (including parts)
+                        _getCompleteMessage(
+                              projectId,
+                              sessionId,
+                              part['messageID'] as String,
+                            )
+                            .then((message) {
                               if (message != null) {
                                 eventController.add(message);
 
-                                // 检查消息是否完成
+                                // Check whether message is completed
                                 if (message.completedTime != null &&
                                     !messageCompleted) {
                                   messageCompleted = true;
-                                  print('🎉 消息完成，准备关闭事件流');
-                                  // 延迟关闭，确保最后的更新被处理
+                                  print(
+                                    '🎉 Message completed, preparing to close event stream',
+                                  );
+                                  // Delay close to ensure final update is processed
                                   Future.delayed(
                                     const Duration(milliseconds: 500),
                                     () {
@@ -478,30 +573,30 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                               }
                             })
                             .catchError((error) {
-                              print('获取完整消息失败: $error');
+                              print('Failed to fetch complete message: $error');
                             });
                       }
                     }
                   } catch (e) {
-                    print('解析事件失败: $e');
-                    print('事件数据: $eventData');
+                    print('Failed to parse event: $e');
+                    print('Event data: $eventData');
                   }
                 },
                 onError: (error) {
-                  print('事件流错误: $error');
+                  print('Event stream error: $error');
                   eventController.addError(error);
                 },
                 onDone: () {
-                  print('事件流结束');
+                  print('Event stream ended');
                   eventController.close();
                 },
               );
         }
       } catch (e) {
-        print('连接事件流失败: $e');
+        print('Failed to connect to event stream: $e');
       }
 
-      // 发送消息请求
+      // Send message request
       final response = await dio.post(
         '/session/$sessionId/message',
         data: input.toJson(),
@@ -509,39 +604,47 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        print('✅ 消息发送成功');
+        print('✅ Message sent successfully');
 
-        // 获取初始消息状态
+        // Fetch initial message state
         if (input.messageId != null) {
-          final initialMessage = await _getCompleteMessage(projectId, sessionId, input.messageId!);
+          final initialMessage = await _getCompleteMessage(
+            projectId,
+            sessionId,
+            input.messageId!,
+          );
           if (initialMessage != null) {
             yield initialMessage;
           }
         }
 
-        // 监听后续的消息更新
+        // Listen for subsequent message updates
         await for (final message in eventController.stream) {
           yield message;
         }
       } else {
-        throw const ServerException('发送消息失败');
+        throw const ServerException('Failed to send message');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('会话不存在');
+        throw const NotFoundException('Session not found');
       }
       if (e.response?.statusCode == 400) {
-        throw const ValidationException('消息格式错误');
+        throw const ValidationException('Invalid message format');
       }
-      throw const ServerException('发送消息失败');
+      throw const ServerException('Failed to send message');
     } catch (e) {
-      print('发送消息异常: $e');
-      throw const ServerException('发送消息失败');
+      print('Message send exception: $e');
+      throw const ServerException('Failed to send message');
     }
   }
 
-  /// 获取完整的消息信息（包括 parts）
-  Future<ChatMessageModel?> _getCompleteMessage(String projectId, String sessionId, String messageId) async {
+  /// Get complete message payload (including parts)
+  Future<ChatMessageModel?> _getCompleteMessage(
+    String projectId,
+    String sessionId,
+    String messageId,
+  ) async {
     try {
       final response = await dio.get('/session/$sessionId/message/$messageId');
 
@@ -552,45 +655,54 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         return ChatMessageModel.fromJson({...info, 'parts': parts});
       }
     } catch (e) {
-      print('获取完整消息失败: $e');
+      print('Failed to fetch complete message: $e');
     }
     return null;
   }
 
   @override
-  Future<void> abortSession(String projectId, String sessionId, {String? directory}) async {
+  Future<void> abortSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.post(
         '/session/$sessionId/abort',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<void> revertMessage(String projectId, String sessionId, String messageId, {String? directory}) async {
+  Future<void> revertMessage(
+    String projectId,
+    String sessionId,
+    String messageId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.post(
         '/session/$sessionId/revert',
         data: {'messageID': messageId},
@@ -598,41 +710,45 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<void> unrevertMessages(String projectId, String sessionId, {String? directory}) async {
+  Future<void> unrevertMessages(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.post(
         '/session/$sessionId/unrevert',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
@@ -650,7 +766,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.post(
         '/session/$sessionId/init',
         data: {
@@ -662,44 +778,48 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
       if (e.response?.statusCode == 400) {
-        throw const ValidationException('参数验证失败');
+        throw const ValidationException('Invalid input parameters');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 
   @override
-  Future<void> summarizeSession(String projectId, String sessionId, {String? directory}) async {
+  Future<void> summarizeSession(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
       }
-      
+
       final response = await dio.post(
         '/session/$sessionId/summarize',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('服务器错误');
+        throw const ServerException('Server error');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('资源未找到');
+        throw const NotFoundException('Resource not found');
       }
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     } catch (e) {
-      throw const ServerException('服务器错误');
+      throw const ServerException('Server error');
     }
   }
 }

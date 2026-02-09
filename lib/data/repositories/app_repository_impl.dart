@@ -8,7 +8,7 @@ import '../datasources/app_remote_datasource.dart';
 import '../datasources/app_local_datasource.dart';
 import '../../core/network/dio_client.dart';
 
-/// 应用仓库实现
+/// Technical comment translated to English.
 class AppRepositoryImpl implements AppRepository {
   final AppRemoteDataSource remoteDataSource;
   final AppLocalDataSource localDataSource;
@@ -23,7 +23,9 @@ class AppRepositoryImpl implements AppRepository {
   @override
   Future<Either<Failure, AppInfo>> getAppInfo({String? directory}) async {
     try {
-      final appInfoModel = await remoteDataSource.getAppInfo(directory: directory);
+      final appInfoModel = await remoteDataSource.getAppInfo(
+        directory: directory,
+      );
       return Right(appInfoModel.toEntity());
     } on DioException catch (e) {
       return Left(_handleDioException(e));
@@ -62,11 +64,11 @@ class AppRepositoryImpl implements AppRepository {
     int port,
   ) async {
     try {
-      // 保存到本地存储
+      // Technical comment translated to English.
       await localDataSource.saveServerHost(host);
       await localDataSource.saveServerPort(port);
 
-      // 更新 Dio 客户端的基础 URL
+      // Technical comment translated to English.
       final baseUrl = 'http://$host:$port';
       dioClient.updateBaseUrl(baseUrl);
 
@@ -76,7 +78,7 @@ class AppRepositoryImpl implements AppRepository {
     }
   }
 
-  /// 处理 Dio 异常
+  /// Technical comment translated to English.
   Failure _handleDioException(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
@@ -105,9 +107,13 @@ class AppRepositoryImpl implements AppRepository {
   }
 
   @override
-  Future<Either<Failure, ProvidersResponse>> getProviders({String? directory}) async {
+  Future<Either<Failure, ProvidersResponse>> getProviders({
+    String? directory,
+  }) async {
     try {
-      final providersModel = await remoteDataSource.getProviders(directory: directory);
+      final providersModel = await remoteDataSource.getProviders(
+        directory: directory,
+      );
       return Right(providersModel.toDomain());
     } on DioException catch (e) {
       return Left(_handleDioException(e));

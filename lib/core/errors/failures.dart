@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// 失败结果基类
+/// Base failure type
 abstract class Failure extends Equatable {
   final String message;
   final int? code;
@@ -11,47 +11,47 @@ abstract class Failure extends Equatable {
   List<Object?> get props => [message, code];
 }
 
-/// 网络失败
+/// Network failure
 class NetworkFailure extends Failure {
   const NetworkFailure(super.message, [super.code]);
 }
 
-/// 服务器失败
+/// Server failure
 class ServerFailure extends Failure {
   const ServerFailure(super.message, [super.code]);
 }
 
-/// 认证失败
+/// Auth failure
 class AuthFailure extends Failure {
   const AuthFailure(super.message, [super.code]);
 }
 
-/// 缓存失败
+/// Cache failure
 class CacheFailure extends Failure {
   const CacheFailure(super.message);
 }
 
-/// 解析失败
+/// Parse failure
 class ParseFailure extends Failure {
   const ParseFailure(super.message);
 }
 
-/// 验证失败
+/// Validation failure
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }
 
-/// 文件失败
+/// File failure
 class FileFailure extends Failure {
   const FileFailure(super.message);
 }
 
-/// 未找到失败
+/// Not found failure
 class NotFoundFailure extends Failure {
   const NotFoundFailure(super.message);
 }
 
-/// 未知失败
+/// Unknown failure
 class UnknownFailure extends Failure {
   const UnknownFailure(super.message);
 }

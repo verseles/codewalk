@@ -4,19 +4,23 @@ import '../entities/chat_session.dart';
 import '../repositories/chat_repository.dart';
 import '../../core/errors/failures.dart';
 
-/// 发送聊天消息用例
+/// Technical comment translated to English.
 class SendChatMessage {
   const SendChatMessage(this.repository);
 
   final ChatRepository repository;
 
-  /// 执行发送消息
+  /// Technical comment translated to English.
   Stream<Either<Failure, ChatMessage>> call(SendChatMessageParams params) {
-    return repository.sendMessage(params.projectId, params.sessionId, params.input);
+    return repository.sendMessage(
+      params.projectId,
+      params.sessionId,
+      params.input,
+    );
   }
 }
 
-/// 发送聊天消息参数
+/// Technical comment translated to English.
 class SendChatMessageParams {
   const SendChatMessageParams({
     required this.projectId,

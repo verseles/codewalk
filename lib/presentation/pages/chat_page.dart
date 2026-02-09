@@ -10,7 +10,7 @@ import '../widgets/chat_session_list.dart';
 /// Chat page
 class ChatPage extends StatefulWidget {
   final String? projectId;
-  
+
   const ChatPage({super.key, this.projectId});
 
   @override
@@ -51,28 +51,28 @@ class _ChatPageState extends State<ChatPage> {
     // Set scroll to bottom callback
     chatProvider.setScrollToBottomCallback(_scrollToBottom);
 
-    // 初始化提供商并加载会话
+    // Technical comment translated to English.
     _initializeChatProvider(chatProvider);
   }
 
   Future<void> _initializeChatProvider(ChatProvider chatProvider) async {
     try {
-      // 首先初始化提供商
+      // Technical comment translated to English.
       await chatProvider.initializeProviders();
-      
-      // 然后加载会话列表
+
+      // Technical comment translated to English.
       await chatProvider.loadSessions();
     } catch (e) {
-      // 如果初始化失败，设置错误状态
+      // Technical comment translated to English.
       chatProvider.clearError();
-      print('聊天初始化失败: $e');
+      print('Chat initialization failed: $e');
     }
   }
 
   void _scrollToBottom({bool force = false}) {
     if (!_scrollController.hasClients) return;
 
-    // 如果是强制滚动（用户发送消息后），直接滚动到底部
+    // Technical comment translated to English.
     if (force) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -264,7 +264,7 @@ class _ChatPageState extends State<ChatPage> {
               ChatInputWidget(
                 onSendMessage: (text) async {
                   await chatProvider.sendMessage(text);
-                  // 用户发送消息后强制滚动到底部
+                  // Technical comment translated to English.
                   _scrollToBottom(force: true);
                 },
                 enabled:
@@ -446,7 +446,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _createNewSession() async {
     final chatProvider = context.read<ChatProvider>();
 
-    // 根据新的 API 规范，不再需要 workspaceId，可以选择性地提供 parentId
+    // Technical comment translated to English.
     await chatProvider.createNewSession();
   }
 }

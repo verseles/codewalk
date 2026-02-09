@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
 import 'dart:convert';
 
-/// Dio HTTP客户端配置
+/// Dio HTTP client configuration
 class DioClient {
   late final Dio _dio;
   String? _basicAuthHeader; // cached Authorization header
@@ -67,7 +67,7 @@ class DioClient {
       ),
     );
 
-    // 请求拦截器
+    // Request interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -82,7 +82,7 @@ class DioClient {
           handler.next(response);
         },
         onError: (error, handler) {
-          // 统一错误处理
+          // Centralized error handling
           _handleError(error);
           handler.next(error);
         },
@@ -95,27 +95,27 @@ class DioClient {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        // 超时错误
+        // Timeout error
         break;
       case DioExceptionType.badResponse:
-        // HTTP错误状态码
+        // HTTP error status code
         break;
       case DioExceptionType.cancel:
-        // 请求被取消
+        // Request cancelled
         break;
       case DioExceptionType.connectionError:
-        // 连接错误
+        // Connection error
         break;
       case DioExceptionType.unknown:
-        // 未知错误
+        // Unknown error
         break;
       case DioExceptionType.badCertificate:
-        // 证书错误
+        // Certificate error
         break;
     }
   }
 
-  // GET请求
+  // GET request
   Future<Response<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -128,7 +128,7 @@ class DioClient {
     );
   }
 
-  // POST请求
+  // POST request
   Future<Response<T>> post<T>(
     String path, {
     dynamic data,
@@ -143,7 +143,7 @@ class DioClient {
     );
   }
 
-  // PUT请求
+  // PUT request
   Future<Response<T>> put<T>(
     String path, {
     dynamic data,
@@ -158,7 +158,7 @@ class DioClient {
     );
   }
 
-  // PATCH请求
+  // PATCH request
   Future<Response<T>> patch<T>(
     String path, {
     dynamic data,
@@ -173,7 +173,7 @@ class DioClient {
     );
   }
 
-  // DELETE请求
+  // DELETE request
   Future<Response<T>> delete<T>(
     String path, {
     dynamic data,

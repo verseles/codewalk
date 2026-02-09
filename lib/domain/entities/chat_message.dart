@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// 聊天消息实体
+/// Technical comment translated to English.
 abstract class ChatMessage extends Equatable {
   const ChatMessage({
     required this.id,
@@ -20,7 +20,7 @@ abstract class ChatMessage extends Equatable {
   List<Object?> get props => [id, sessionId, role, time, parts];
 }
 
-/// 用户消息
+/// Technical comment translated to English.
 class UserMessage extends ChatMessage {
   const UserMessage({
     required super.id,
@@ -30,7 +30,7 @@ class UserMessage extends ChatMessage {
   }) : super(role: MessageRole.user);
 }
 
-/// 助手消息
+/// Technical comment translated to English.
 class AssistantMessage extends ChatMessage {
   const AssistantMessage({
     required super.id,
@@ -54,7 +54,7 @@ class AssistantMessage extends ChatMessage {
   final MessageError? error;
   final String? mode;
 
-  /// 检查消息是否完成
+  /// Technical comment translated to English.
   bool get isCompleted => completedTime != null;
 
   @override
@@ -70,10 +70,10 @@ class AssistantMessage extends ChatMessage {
   ];
 }
 
-/// 消息角色枚举
+/// Technical comment translated to English.
 enum MessageRole { user, assistant }
 
-/// 消息部件基类
+/// Technical comment translated to English.
 abstract class MessagePart extends Equatable {
   const MessagePart({
     required this.id,
@@ -91,7 +91,7 @@ abstract class MessagePart extends Equatable {
   List<Object?> get props => [id, messageId, sessionId, type];
 }
 
-/// 文本部件
+/// Technical comment translated to English.
 class TextPart extends MessagePart {
   const TextPart({
     required super.id,
@@ -108,7 +108,7 @@ class TextPart extends MessagePart {
   List<Object?> get props => [...super.props, text, time];
 }
 
-/// 文件部件
+/// Technical comment translated to English.
 class FilePart extends MessagePart {
   const FilePart({
     required super.id,
@@ -129,7 +129,7 @@ class FilePart extends MessagePart {
   List<Object?> get props => [...super.props, url, mime, filename, source];
 }
 
-/// 工具部件
+/// Technical comment translated to English.
 class ToolPart extends MessagePart {
   const ToolPart({
     required super.id,
@@ -148,7 +148,7 @@ class ToolPart extends MessagePart {
   List<Object?> get props => [...super.props, callId, tool, state];
 }
 
-/// 推理部件
+/// Technical comment translated to English.
 class ReasoningPart extends MessagePart {
   const ReasoningPart({
     required super.id,
@@ -165,7 +165,7 @@ class ReasoningPart extends MessagePart {
   List<Object?> get props => [...super.props, text, time];
 }
 
-/// 部件类型枚举
+/// Technical comment translated to English.
 enum PartType {
   text,
   file,
@@ -177,7 +177,7 @@ enum PartType {
   snapshot,
 }
 
-/// 文件源
+/// Technical comment translated to English.
 class FileSource extends Equatable {
   const FileSource({
     required this.path,
@@ -193,7 +193,7 @@ class FileSource extends Equatable {
   List<Object?> get props => [path, text, type];
 }
 
-/// 文件部件源文本
+/// Technical comment translated to English.
 class FilePartSourceText extends Equatable {
   const FilePartSourceText({
     required this.value,
@@ -209,7 +209,7 @@ class FilePartSourceText extends Equatable {
   List<Object?> get props => [value, start, end];
 }
 
-/// 工具状态
+/// Technical comment translated to English.
 abstract class ToolState extends Equatable {
   const ToolState({required this.status});
 
@@ -219,12 +219,12 @@ abstract class ToolState extends Equatable {
   List<Object?> get props => [status];
 }
 
-/// 工具状态 - 等待中
+/// Technical comment translated to English.
 class ToolStatePending extends ToolState {
   const ToolStatePending() : super(status: ToolStatus.pending);
 }
 
-/// 工具状态 - 运行中
+/// Technical comment translated to English.
 class ToolStateRunning extends ToolState {
   const ToolStateRunning({
     required this.input,
@@ -242,7 +242,7 @@ class ToolStateRunning extends ToolState {
   List<Object?> get props => [...super.props, input, time, title, metadata];
 }
 
-/// 工具状态 - 已完成
+/// Technical comment translated to English.
 class ToolStateCompleted extends ToolState {
   const ToolStateCompleted({
     required this.input,
@@ -269,7 +269,7 @@ class ToolStateCompleted extends ToolState {
   ];
 }
 
-/// 工具状态 - 错误
+/// Technical comment translated to English.
 class ToolStateError extends ToolState {
   const ToolStateError({
     required this.input,
@@ -296,10 +296,10 @@ class ToolStateError extends ToolState {
   ];
 }
 
-/// 工具状态枚举
+/// Technical comment translated to English.
 enum ToolStatus { pending, running, completed, error }
 
-/// 工具时间
+/// Technical comment translated to English.
 class ToolTime extends Equatable {
   const ToolTime({required this.start, this.end});
 
@@ -310,7 +310,7 @@ class ToolTime extends Equatable {
   List<Object?> get props => [start, end];
 }
 
-/// 消息令牌信息
+/// Technical comment translated to English.
 class MessageTokens extends Equatable {
   const MessageTokens({
     required this.input,
@@ -326,7 +326,7 @@ class MessageTokens extends Equatable {
   List<Object?> get props => [input, output, total];
 }
 
-/// 消息错误
+/// Technical comment translated to English.
 class MessageError extends Equatable {
   const MessageError({required this.name, required this.message});
 

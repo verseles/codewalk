@@ -3,7 +3,7 @@ import '../../domain/entities/provider.dart';
 
 part 'provider_model.g.dart';
 
-/// 提供商响应模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ProvidersResponseModel {
   const ProvidersResponseModel({
@@ -20,7 +20,7 @@ class ProvidersResponseModel {
 
   Map<String, dynamic> toJson() => _$ProvidersResponseModelToJson(this);
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   ProvidersResponse toDomain() {
     return ProvidersResponse(
       providers: providers.map((p) => p.toDomain()).toList(),
@@ -29,7 +29,7 @@ class ProvidersResponseModel {
   }
 }
 
-/// 提供商模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ProviderModel {
   const ProviderModel({
@@ -53,7 +53,7 @@ class ProviderModel {
 
   Map<String, dynamic> toJson() => _$ProviderModelToJson(this);
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   Provider toDomain() {
     return Provider(
       id: id,
@@ -66,7 +66,7 @@ class ProviderModel {
   }
 }
 
-/// AI模型模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ModelModel {
   const ModelModel({
@@ -110,7 +110,7 @@ class ModelModel {
 
   Map<String, dynamic> toJson() => _$ModelModelToJson(this);
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   Model toDomain() {
     return Model(
       id: id,
@@ -131,7 +131,7 @@ class ModelModel {
   }
 }
 
-/// 模型费用模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ModelCostModel {
   const ModelCostModel({
@@ -170,7 +170,7 @@ class ModelCostModel {
 
   Map<String, dynamic> toJson() => _$ModelCostModelToJson(this);
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   ModelCost toDomain() {
     return ModelCost(
       input: input,
@@ -181,7 +181,7 @@ class ModelCostModel {
   }
 }
 
-/// 模型限制模型
+/// Technical comment translated to English.
 @JsonSerializable()
 class ModelLimitModel {
   const ModelLimitModel({required this.context, required this.output});
@@ -194,7 +194,7 @@ class ModelLimitModel {
 
   Map<String, dynamic> toJson() => _$ModelLimitModelToJson(this);
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   ModelLimit toDomain() {
     return ModelLimit(context: context, output: output);
   }

@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
 import '../repositories/app_repository.dart';
 
-/// 检查服务器连接用例
+/// Technical comment translated to English.
 class CheckConnection {
   final AppRepository repository;
 

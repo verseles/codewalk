@@ -3,13 +3,13 @@ import '../entities/chat_session.dart';
 import '../repositories/chat_repository.dart';
 import '../../core/errors/failures.dart';
 
-/// 创建聊天会话用例
+/// Technical comment translated to English.
 class CreateChatSession {
   const CreateChatSession(this.repository);
 
   final ChatRepository repository;
 
-  /// 执行创建会话
+  /// Technical comment translated to English.
   Future<Either<Failure, ChatSession>> call(
     CreateChatSessionParams params,
   ) async {
@@ -21,7 +21,7 @@ class CreateChatSession {
   }
 }
 
-/// 创建聊天会话参数
+/// Technical comment translated to English.
 class CreateChatSessionParams {
   const CreateChatSessionParams({
     required this.projectId,

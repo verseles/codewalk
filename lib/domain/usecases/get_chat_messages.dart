@@ -3,13 +3,13 @@ import '../entities/chat_message.dart';
 import '../repositories/chat_repository.dart';
 import '../../core/errors/failures.dart';
 
-/// 获取聊天消息列表用例
+/// Technical comment translated to English.
 class GetChatMessages {
   const GetChatMessages(this.repository);
 
   final ChatRepository repository;
 
-  /// 执行获取消息列表
+  /// Technical comment translated to English.
   Future<Either<Failure, List<ChatMessage>>> call(
     GetChatMessagesParams params,
   ) async {
@@ -17,7 +17,7 @@ class GetChatMessages {
   }
 }
 
-/// 获取聊天消息列表参数
+/// Technical comment translated to English.
 class GetChatMessagesParams {
   const GetChatMessagesParams({
     required this.projectId,

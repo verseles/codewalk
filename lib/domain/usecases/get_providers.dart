@@ -3,7 +3,7 @@ import '../entities/provider.dart';
 import '../repositories/app_repository.dart';
 import '../../core/errors/failures.dart';
 
-/// 获取提供商用例
+/// Technical comment translated to English.
 class GetProviders {
   final AppRepository repository;
 

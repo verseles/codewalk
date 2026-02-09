@@ -1,6 +1,6 @@
 import '../../domain/entities/project.dart';
 
-/// Project 数据模型
+/// Technical comment translated to English.
 class ProjectModel {
   final String id;
   final String name;
@@ -16,7 +16,7 @@ class ProjectModel {
     this.updatedAt,
   });
 
-  /// 从 JSON 创建 ProjectModel
+  /// Technical comment translated to English.
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
       id: json['id'] as String,
@@ -27,7 +27,7 @@ class ProjectModel {
     );
   }
 
-  /// 转换为 JSON
+  /// Technical comment translated to English.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -38,7 +38,7 @@ class ProjectModel {
     };
   }
 
-  /// 转换为领域实体
+  /// Technical comment translated to English.
   Project toDomain() {
     return Project(
       id: id,
@@ -49,7 +49,7 @@ class ProjectModel {
     );
   }
 
-  /// 从领域实体创建
+  /// Technical comment translated to English.
   factory ProjectModel.fromDomain(Project project) {
     return ProjectModel(
       id: project.id,
@@ -86,19 +86,19 @@ class ProjectModel {
   }
 }
 
-/// Projects 响应模型
+/// Technical comment translated to English.
 class ProjectsResponseModel {
   final List<ProjectModel> projects;
 
-  const ProjectsResponseModel({
-    required this.projects,
-  });
+  const ProjectsResponseModel({required this.projects});
 
-  /// 从 JSON 创建 ProjectsResponseModel
+  /// Technical comment translated to English.
   factory ProjectsResponseModel.fromJson(dynamic json) {
     if (json is List) {
       return ProjectsResponseModel(
-        projects: json.map((item) => ProjectModel.fromJson(item as Map<String, dynamic>)).toList(),
+        projects: json
+            .map((item) => ProjectModel.fromJson(item as Map<String, dynamic>))
+            .toList(),
       );
     } else if (json is Map<String, dynamic> && json.containsKey('projects')) {
       return ProjectsResponseModel(
@@ -111,12 +111,12 @@ class ProjectsResponseModel {
     }
   }
 
-  /// 转换为 JSON
+  /// Technical comment translated to English.
   dynamic toJson() {
     return projects.map((project) => project.toJson()).toList();
   }
 
-  /// 转换为领域实体列表
+  /// Technical comment translated to English.
   List<Project> toDomain() {
     return projects.map((project) => project.toDomain()).toList();
   }

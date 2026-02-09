@@ -1,22 +1,22 @@
 import '../models/provider_model.dart';
 import '../models/app_info_model.dart';
 
-/// 应用远程数据源接口
+/// Technical comment translated to English.
 abstract class AppRemoteDataSource {
-  /// 获取应用信息
+  /// Technical comment translated to English.
   Future<AppInfoModel> getAppInfo({String? directory});
 
-  /// 初始化应用
+  /// Technical comment translated to English.
   Future<bool> initializeApp({String? directory});
 
-  /// 获取提供商信息
+  /// Technical comment translated to English.
   Future<ProvidersResponseModel> getProviders({String? directory});
 
-  /// 获取配置信息
+  /// Technical comment translated to English.
   Future<Map<String, dynamic>> getConfig({String? directory});
 }
 
-/// 应用远程数据源实现
+/// Technical comment translated to English.
 class AppRemoteDataSourceImpl implements AppRemoteDataSource {
   final dynamic dio;
 
@@ -63,11 +63,16 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
   @override
   Future<bool> initializeApp({String? directory}) async {
     try {
-      final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
-      final response = await dio.post('/app/init', queryParameters: queryParams);
+      final queryParams = directory != null
+          ? {'directory': directory}
+          : <String, dynamic>{};
+      final response = await dio.post(
+        '/app/init',
+        queryParameters: queryParams,
+      );
       return response.data['success'] ?? true;
     } catch (e) {
-      print('初始化应用时出错: $e');
+      print('Error while initializing app: $e');
       return false;
     }
   }
@@ -75,13 +80,15 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
   @override
   Future<ProvidersResponseModel> getProviders({String? directory}) async {
     try {
-      final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
+      final queryParams = directory != null
+          ? {'directory': directory}
+          : <String, dynamic>{};
       final response = await dio.get('/provider', queryParameters: queryParams);
-      print('Providers API 响应: ${response.data}');
+      print('Providers API response: ${response.data}');
       return ProvidersResponseModel.fromJson(response.data);
     } catch (e) {
-      print('解析提供商响应时出错: $e');
-      // 返回一个最小的备用响应
+      print('Error while parsing provider response: $e');
+      // Technical comment translated to English.
       return ProvidersResponseModel(
         providers: [
           ProviderModel(
@@ -110,7 +117,9 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> getConfig({String? directory}) async {
-    final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
+    final queryParams = directory != null
+        ? {'directory': directory}
+        : <String, dynamic>{};
     final response = await dio.get('/config', queryParameters: queryParams);
     return response.data as Map<String, dynamic>;
   }

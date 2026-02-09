@@ -1,18 +1,18 @@
 import '../models/project_model.dart';
 
-/// Project 远程数据源接口
+/// Technical comment translated to English.
 abstract class ProjectRemoteDataSource {
-  /// 获取所有项目
+  /// Technical comment translated to English.
   Future<ProjectsResponseModel> getProjects();
 
-  /// 获取当前项目
+  /// Technical comment translated to English.
   Future<ProjectModel> getCurrentProject({String? directory});
 
-  /// 根据 ID 获取项目
+  /// Technical comment translated to English.
   Future<ProjectModel> getProject(String projectId);
 }
 
-/// Project 远程数据源实现
+/// Technical comment translated to English.
 class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
   final dynamic dio;
 
@@ -26,8 +26,13 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
 
   @override
   Future<ProjectModel> getCurrentProject({String? directory}) async {
-    final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
-    final response = await dio.get('/project/current', queryParameters: queryParams);
+    final queryParams = directory != null
+        ? {'directory': directory}
+        : <String, dynamic>{};
+    final response = await dio.get(
+      '/project/current',
+      queryParameters: queryParams,
+    );
     return ProjectModel.fromJson(response.data);
   }
 
