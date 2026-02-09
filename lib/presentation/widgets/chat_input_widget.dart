@@ -27,32 +27,18 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   @override
   void initState() {
     super.initState();
-    _effectiveFocusNode.addListener(_handleFocusChange);
   }
 
   @override
   void didUpdateWidget(covariant ChatInputWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode != widget.focusNode) {
-      (oldWidget.focusNode ?? _internalFocusNode).removeListener(
-        _handleFocusChange,
-      );
-      _effectiveFocusNode.addListener(_handleFocusChange);
-    }
   }
 
   @override
   void dispose() {
-    _effectiveFocusNode.removeListener(_handleFocusChange);
     _controller.dispose();
     _internalFocusNode.dispose();
     super.dispose();
-  }
-
-  void _handleFocusChange() {
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   void _handleSendMessage() {
@@ -74,208 +60,65 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Theme.of(context).colorScheme.surface.withOpacity(0.8),
-            Theme.of(context).colorScheme.surface,
-          ],
-        ),
+        color: colorScheme.surfaceContainerLow,
         border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-            width: 1,
-          ),
+          top: BorderSide(color: colorScheme.outlineVariant, width: 1),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
           child: Row(
             children: [
-              // Attachment button - modern design
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceVariant.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withOpacity(0.2),
-                  ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: widget.enabled ? _showAttachmentOptions : null,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Icon(
-                        Icons.add_rounded,
-                        color: widget.enabled
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant.withOpacity(0.5),
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
+              IconButton.filledTonal(
+                onPressed: widget.enabled ? _showAttachmentOptions : null,
+                tooltip: 'Add attachment',
+                icon: const Icon(Icons.attach_file_rounded),
               ),
-
-              const SizedBox(width: 12),
-
-              // Input field - modern design
+              const SizedBox(width: 8),
               Expanded(
-                child: Container(
-                  constraints: const BoxConstraints(
-                    minHeight: 44,
-                    maxHeight: 120,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(
-                          context,
-                        ).colorScheme.surfaceVariant.withOpacity(0.3),
-                        Theme.of(
-                          context,
-                        ).colorScheme.surfaceVariant.withOpacity(0.1),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _effectiveFocusNode,
+                  enabled: widget.enabled,
+                  maxLines: null,
+                  textInputAction: TextInputAction.newline,
+                  keyboardType: TextInputType.multiline,
+                  onChanged: _handleTextChanged,
+                  onSubmitted: (_) => _handleSendMessage(),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  decoration: InputDecoration(
+                    hintText: 'Type a message...',
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerHighest,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(26),
+                      borderSide: BorderSide.none,
                     ),
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(
-                      color: _effectiveFocusNode.hasFocus
-                          ? Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.5)
-                          : Theme.of(
-                              context,
-                            ).colorScheme.outline.withOpacity(0.2),
-                      width: 1.5,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(26),
+                      borderSide: BorderSide.none,
                     ),
-                    boxShadow: _effectiveFocusNode.hasFocus
-                        ? [
-                            BoxShadow(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _effectiveFocusNode,
-                    enabled: widget.enabled,
-                    maxLines: null,
-                    textInputAction: TextInputAction.newline,
-                    keyboardType: TextInputType.multiline,
-                    onChanged: _handleTextChanged,
-                    onSubmitted: (_) => _handleSendMessage(),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      hintStyle: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
                     ),
                   ),
                 ),
               ),
-
-              const SizedBox(width: 12),
-
-              // Send button - modern design
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                decoration: BoxDecoration(
-                  gradient: (_isComposing && widget.enabled)
-                      ? LinearGradient(
-                          colors: [
-                            Theme.of(context).colorScheme.primary,
-                            Theme.of(context).colorScheme.tertiary,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : null,
-                  color: (!_isComposing || !widget.enabled)
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.surfaceVariant.withOpacity(0.5)
-                      : null,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: (_isComposing && widget.enabled)
-                        ? Colors.transparent
-                        : Theme.of(
-                            context,
-                          ).colorScheme.outline.withOpacity(0.2),
-                  ),
-                  boxShadow: (_isComposing && widget.enabled)
-                      ? [
-                          BoxShadow(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: (_isComposing && widget.enabled)
+                    ? _handleSendMessage
+                    : null,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(52, 52),
+                  padding: EdgeInsets.zero,
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: (_isComposing && widget.enabled)
-                        ? _handleSendMessage
-                        : null,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          _isComposing ? Icons.send_rounded : Icons.mic_rounded,
-                          key: ValueKey(_isComposing),
-                          color: (_isComposing && widget.enabled)
-                              ? Colors.white
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant.withOpacity(0.5),
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                child: const Icon(Icons.send_rounded),
               ),
             ],
           ),
@@ -287,6 +130,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   void _showAttachmentOptions() {
     showModalBottomSheet<void>(
       context: context,
+      showDragHandle: true,
       builder: (context) => SafeArea(
         child: Wrap(
           children: [

@@ -5,11 +5,14 @@ on:
     branches: ["**"]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,11 +23,19 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Flutter Version
-        run: flutter --version
-
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Verify generated code is committed
+        run: |
+          if git status --porcelain | grep -E '\.g\.dart$' >/dev/null; then
+            echo "::error::Generated files changed. Commit the generated output."
+            git status --porcelain
+            exit 1
+          fi
 
       - name: Analyze (phased gate)
         run: flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee /tmp/flutter_analyze.log
@@ -35,17 +46,163 @@ jobs:
       - name: Test (unit + widget + integration) with coverage
         run: flutter test --coverage
 
+      - name: Install lcov
+        run: |
+          if ! command -v lcov >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y lcov
+          fi
+
       - name: Enforce coverage threshold
         run: bash tool/ci/check_coverage.sh coverage/lcov.info 35
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.filtered.info
+          fail_ci_if_error: false
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-lcov
-          path: coverage/lcov.info
+          path: |
+            coverage/lcov.info
+            coverage/lcov.filtered.info
 
       - name: Upload analyze report
         uses: actions/upload-artifact@v4
         with:
           name: analyze-log
           path: /tmp/flutter_analyze.log
+
+  build-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-linux
+          path: build/linux/x64/release/bundle/
+
+  build-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-web
+          path: build/web/
+
+  build-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Android signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            {
+              echo "storePassword=$STORE_PASSWORD"
+              echo "keyPassword=$KEY_PASSWORD"
+              echo "keyAlias=$KEY_ALIAS"
+              echo "storeFile=upload-keystore.jks"
+            } > android/key.properties
+          else
+            echo "Signing secrets not configured. Building unsigned artifact."
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (arm64)
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk codewalk-android-arm64.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-android
+          path: codewalk-android-arm64.apk
+
+  ci-status:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [quality, build-linux, build-web, build-android]
+    steps:
+      - name: Validate all jobs
+        run: |
+          jobs=(quality build-linux build-web build-android)
+          results=(
+            "${{ needs.quality.result }}"
+            "${{ needs.build-linux.result }}"
+            "${{ needs.build-web.result }}"
+            "${{ needs.build-android.result }}"
+          )
+          for i in "${!jobs[@]}"; do
+            if [ "${results[$i]}" != "success" ]; then
+              echo "::error::${jobs[$i]} failed with status: ${results[$i]}"
+              exit 1
+            fi
+          done
+          echo "All quality and build jobs completed successfully."

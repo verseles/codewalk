@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_session_model.dart';
+import '../../core/logging/app_logger.dart';
 import '../../core/errors/exceptions.dart';
 
 /// Chat remote data source
@@ -458,10 +459,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         queryParams['directory'] = directory;
       }
 
-      print('=== Starting message send ===');
-      print('Session ID: $sessionId');
-      print('Message ID: ${input.messageId}');
-      print('==================');
+      AppLogger.debug('Starting message send: session=$sessionId');
+      AppLogger.debug('Message ID: ${input.messageId}');
 
       // Start SSE listener for message update events
       bool messageCompleted = false;
@@ -507,7 +506,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               }
             })
             .catchError((error) {
-              print('Failed to fetch complete message: $error');
+              AppLogger.warn('Failed to fetch complete message', error: error);
             })
             .whenComplete(() {
               pendingMessageFetches -= 1;
@@ -532,7 +531,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         );
 
         if (eventResponse.statusCode == 200) {
-          print('✅ Connected to event stream');
+          AppLogger.debug('Connected to event stream');
 
           eventSubscription = (eventResponse.data as ResponseBody).stream
               .transform(
@@ -552,7 +551,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                     final event = jsonDecode(eventData) as Map<String, dynamic>;
                     final eventType = event['type'] as String?;
 
-                    print('📨 Event received: $eventType');
+                    AppLogger.debug('Event received: $eventType');
 
                     if (eventType == 'message.updated') {
                       final properties =
@@ -560,7 +559,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final info = properties?['info'] as Map<String, dynamic>?;
 
                       if (info != null && info['sessionID'] == sessionId) {
-                        print('Event: message.updated ${info['id']}');
+                        AppLogger.debug('Event: message.updated ${info['id']}');
                         fetchAndEmitMessage(info['id'] as String);
                       }
                     } else if (eventType == 'message.part.updated') {
@@ -569,13 +568,13 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final part = properties?['part'] as Map<String, dynamic>?;
 
                       if (part != null && part['sessionID'] == sessionId) {
-                        print(
+                        AppLogger.debug(
                           'Event: message.part.updated ${part['messageID']}',
                         );
                         fetchAndEmitMessage(part['messageID'] as String);
                       }
                     } else if (eventType == 'session.updated') {
-                      print('Event: session.updated');
+                      AppLogger.debug('Event: session.updated');
                       // Session metadata updated - could notify provider
                     } else if (eventType == 'session.error') {
                       final properties =
@@ -583,7 +582,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final errorSessionId =
                           properties?['sessionID'] as String?;
                       if (errorSessionId == sessionId) {
-                        print('Event: session.error for $sessionId');
+                        AppLogger.warn('Event: session.error for $sessionId');
                         final error =
                             properties?['error'] as Map<String, dynamic>?;
                         if (error != null) {
@@ -604,7 +603,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final properties =
                           event['properties'] as Map<String, dynamic>?;
                       if (properties?['sessionID'] == sessionId) {
-                        print('Event: session.idle for $sessionId');
+                        AppLogger.debug('Event: session.idle for $sessionId');
                         if (!messageCompleted) {
                           messageCompleted = true;
                           maybeCloseEventController(
@@ -613,29 +612,29 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                         }
                       }
                     } else if (eventType == 'message.removed') {
-                      print('Event: message.removed');
+                      AppLogger.debug('Event: message.removed');
                       // Message removed from session - UI should handle
                     } else if (eventType == 'message.part.removed') {
-                      print('Event: message.part.removed');
+                      AppLogger.debug('Event: message.part.removed');
                       // Part removed from message - UI should handle
                     } else {
                       // Other events (file.edited, permission.updated, etc.)
                       // Logged at debug level, not actionable for mobile client
-                      print('Event: $eventType (ignored)');
+                      AppLogger.debug('Event: $eventType (ignored)');
                     }
                   } catch (e) {
-                    print('Failed to parse event: $e');
-                    print('Event data: $eventData');
+                    AppLogger.warn('Failed to parse event', error: e);
+                    AppLogger.debug('Event data: $eventData');
                   }
                 },
                 onError: (error) {
-                  print('Event stream error: $error');
+                  AppLogger.warn('Event stream error', error: error);
                   if (!eventController.isClosed) {
                     eventController.addError(error);
                   }
                 },
                 onDone: () {
-                  print('Event stream ended');
+                  AppLogger.debug('Event stream ended');
                   eventStreamEnded = true;
                   maybeCloseEventController(
                     delay: const Duration(milliseconds: 200),
@@ -644,7 +643,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               );
         }
       } catch (e) {
-        print('Failed to connect to event stream: $e');
+        AppLogger.warn('Failed to connect to event stream', error: e);
       }
 
       // Send message request
@@ -655,7 +654,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        print('✅ Message sent successfully');
+        AppLogger.debug('Message sent successfully');
 
         // Parse immediate server response (`{info, parts}`) when available.
         final responseData = response.data;
@@ -708,7 +707,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       }
       throw const ServerException('Failed to send message');
     } catch (e) {
-      print('Message send exception: $e');
+      AppLogger.error('Message send exception', error: e);
       throw const ServerException('Failed to send message');
     } finally {
       eventSubscription?.cancel();
@@ -734,7 +733,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         return ChatMessageModel.fromJson({...info, 'parts': parts});
       }
     } catch (e) {
-      print('Failed to fetch complete message: $e');
+      AppLogger.warn('Failed to fetch complete message', error: e);
     }
     return null;
   }

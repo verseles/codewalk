@@ -1,5 +1,6 @@
 import '../models/provider_model.dart';
 import '../models/app_info_model.dart';
+import '../../core/logging/app_logger.dart';
 
 /// Technical comment translated to English.
 abstract class AppRemoteDataSource {
@@ -64,8 +65,11 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
         }
         return response.statusCode == 200;
       } catch (legacyError) {
-        print('Error while initializing app: $e');
-        print('Legacy init failed: $legacyError');
+        AppLogger.error(
+          'Error while initializing app with /path fallback',
+          error: e,
+        );
+        AppLogger.error('Legacy init failed (/app/init)', error: legacyError);
         return false;
       }
     }

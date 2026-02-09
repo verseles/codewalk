@@ -22,7 +22,7 @@ void main() {
     );
 
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.send_rounded), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), 'hello');
     await tester.pumpAndSettle();

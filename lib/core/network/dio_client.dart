@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import '../constants/api_constants.dart';
 import 'dart:convert';
 
@@ -27,9 +28,7 @@ class DioClient {
   void updateBaseUrl(String baseUrl) {
     _dio.options.baseUrl = baseUrl;
     // Log base URL change for easier debugging during configuration updates
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
-      print('[Dio] Base URL updated: $baseUrl');
-    }
+    AppLogger.debug('[Dio] Base URL updated: $baseUrl');
   }
 
   /// Set Basic Authorization header using username and password
@@ -38,18 +37,14 @@ class DioClient {
     final encoded = base64Encode(utf8.encode(credentials));
     _basicAuthHeader = 'Basic $encoded';
     _dio.options.headers[ApiConstants.authorization] = _basicAuthHeader!;
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
-      print('[Dio] Basic auth header set');
-    }
+    AppLogger.debug('[Dio] Basic auth header set');
   }
 
   /// Clear Authorization header
   void clearAuth() {
     _basicAuthHeader = null;
     _dio.options.headers.remove(ApiConstants.authorization);
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
-      print('[Dio] Authorization header cleared');
-    }
+    AppLogger.debug('[Dio] Authorization header cleared');
   }
 
   void _setupInterceptors() {
@@ -64,9 +59,10 @@ class DioClient {
           }
 
           if (!kReleaseMode) {
-            options.extra['request_start_ms'] = DateTime.now().millisecondsSinceEpoch;
+            options.extra['request_start_ms'] =
+                DateTime.now().millisecondsSinceEpoch;
             final uri = options.uri.toString();
-            print('[Dio] --> ${options.method.toUpperCase()} $uri');
+            AppLogger.debug('[Dio] --> ${options.method.toUpperCase()} $uri');
           }
 
           handler.next(options);
@@ -81,7 +77,7 @@ class DioClient {
             final uri = response.requestOptions.uri.toString();
             final status = response.statusCode ?? 0;
             final durationLabel = elapsedMs >= 0 ? ' (${elapsedMs}ms)' : '';
-            print(
+            AppLogger.debug(
               '[Dio] <-- $status ${response.requestOptions.method.toUpperCase()} $uri$durationLabel',
             );
           }
@@ -92,8 +88,10 @@ class DioClient {
             final uri = error.requestOptions.uri.toString();
             final method = error.requestOptions.method.toUpperCase();
             final status = error.response?.statusCode;
-            print(
+            AppLogger.warn(
               '[Dio] xx> ${status ?? 'ERR'} $method $uri: ${error.type.name}',
+              error: error,
+              stackTrace: error.stackTrace,
             );
           }
           // Centralized error handling

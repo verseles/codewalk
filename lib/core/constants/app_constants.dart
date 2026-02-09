@@ -4,8 +4,7 @@ class AppConstants {
   static const String appName = 'CodeWalk';
   static const String appSubtitle = 'A Mobile Client for OpenCode';
   static const String appVersion = '1.0.0';
-  static const String appDescription =
-      'CodeWalk - Mobile client for OpenCode';
+  static const String appDescription = 'CodeWalk - Mobile client for OpenCode';
 
   // Storage keys
   static const String serverHostKey = 'server_host';
@@ -16,6 +15,7 @@ class AppConstants {
   static const String themeKey = 'theme_mode';
   static const String lastSessionIdKey = 'last_session_id';
   static const String cachedSessionsKey = 'cached_sessions';
+  static const String cachedSessionsUpdatedAtKey = 'cached_sessions_updated_at';
   static const String currentSessionIdKey = 'current_session_id';
 
   // Basic auth storage keys

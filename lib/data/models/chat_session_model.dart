@@ -150,7 +150,9 @@ class ChatInputModel {
 
   @JsonKey(name: 'messageID')
   final String? messageId;
+  @JsonKey(name: 'providerID')
   final String providerId;
+  @JsonKey(name: 'modelID')
   final String modelId;
   final String? mode;
   final String? system;

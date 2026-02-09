@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../../core/logging/app_logger.dart';
 import '../../data/datasources/app_local_datasource.dart';
 import '../../data/models/chat_session_model.dart';
 import '../../domain/entities/chat_message.dart';
@@ -56,6 +57,11 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> _defaultModels = {};
   String? _selectedProviderId;
   String? _selectedModelId;
+  int _providersFetchId = 0;
+  int _sessionsFetchId = 0;
+  int _messagesFetchId = 0;
+
+  static const Duration _sessionsCacheTtl = Duration(days: 3);
 
   // Getters
   ChatState get state => _state;
@@ -88,11 +94,15 @@ class ChatProvider extends ChangeNotifier {
 
   /// Initialize providers
   Future<void> initializeProviders() async {
+    final fetchId = ++_providersFetchId;
     try {
       final result = await getProviders();
+      if (fetchId != _providersFetchId) {
+        return;
+      }
       result.fold(
         (failure) {
-          print('Failed to load providers: ${failure.toString()}');
+          AppLogger.warn('Failed to load providers: ${failure.toString()}');
         },
         (providersResponse) {
           _providers = providersResponse.providers;
@@ -122,21 +132,28 @@ class ChatProvider extends ChangeNotifier {
               _selectedModelId = selectedProvider.models.keys.first;
             }
 
-            print(
+            AppLogger.debug(
               'Selected provider: $_selectedProviderId, model: $_selectedModelId',
             );
           }
         },
       );
-    } catch (e) {
-      print('Exception while initializing providers: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Exception while initializing providers',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
-    notifyListeners();
+    if (fetchId == _providersFetchId) {
+      notifyListeners();
+    }
   }
 
   /// Load session list
   Future<void> loadSessions() async {
     if (_state == ChatState.loading) return;
+    final fetchId = ++_sessionsFetchId;
 
     _setState(ChatState.loading);
     clearError();
@@ -148,17 +165,44 @@ class ChatProvider extends ChangeNotifier {
       // Then fetch latest data from server
       final result = await getChatSessions();
 
-      result.fold((failure) => _handleFailure(failure), (sessions) async {
-        _sessions = sessions;
-        _setState(ChatState.loaded);
+      if (fetchId != _sessionsFetchId) {
+        return;
+      }
 
-        // Save to cache
-        await _saveCachedSessions(sessions);
+      result.fold(
+        (failure) {
+          if (fetchId != _sessionsFetchId) {
+            return;
+          }
+          _handleFailure(failure);
+        },
+        (sessions) async {
+          if (fetchId != _sessionsFetchId) {
+            return;
+          }
+          _sessions = sessions;
+          _setState(ChatState.loaded);
 
-        // Restore last selected session
-        await loadLastSession();
-      });
-    } catch (e) {
+          // Save to cache
+          await _saveCachedSessions(sessions);
+
+          if (fetchId != _sessionsFetchId) {
+            return;
+          }
+
+          // Restore last selected session
+          await loadLastSession();
+        },
+      );
+    } catch (e, stackTrace) {
+      if (fetchId != _sessionsFetchId) {
+        return;
+      }
+      AppLogger.error(
+        'Failed to load session list',
+        error: e,
+        stackTrace: stackTrace,
+      );
       _setError('Failed to load session list: ${e.toString()}');
     }
   }
@@ -167,6 +211,13 @@ class ChatProvider extends ChangeNotifier {
   Future<void> _loadCachedSessions() async {
     try {
       final cachedData = await localDataSource.getCachedSessions();
+      final cachedAtMs = await localDataSource.getCachedSessionsUpdatedAt();
+      final isFresh =
+          cachedAtMs != null &&
+          DateTime.now().difference(
+                DateTime.fromMillisecondsSinceEpoch(cachedAtMs),
+              ) <=
+              _sessionsCacheTtl;
       if (cachedData != null) {
         final List<dynamic> jsonList = json.decode(cachedData);
         final cachedSessions = jsonList
@@ -176,11 +227,19 @@ class ChatProvider extends ChangeNotifier {
         if (cachedSessions.isNotEmpty) {
           _sessions = cachedSessions;
           _setState(ChatState.loaded);
-          notifyListeners();
+          if (!isFresh) {
+            AppLogger.info(
+              'Session cache is stale (> ${_sessionsCacheTtl.inDays} days). Refreshing from server.',
+            );
+          }
         }
       }
-    } catch (e) {
-      print('Failed to load cached sessions: $e');
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to load cached sessions',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -192,8 +251,15 @@ class ChatProvider extends ChangeNotifier {
           .toList();
       final jsonString = json.encode(jsonList);
       await localDataSource.saveCachedSessions(jsonString);
-    } catch (e) {
-      print('Failed to save session cache: $e');
+      await localDataSource.saveCachedSessionsUpdatedAt(
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to save session cache',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -201,8 +267,12 @@ class ChatProvider extends ChangeNotifier {
   Future<void> _saveCurrentSessionId(String sessionId) async {
     try {
       await localDataSource.saveCurrentSessionId(sessionId);
-    } catch (e) {
-      print('Failed to save current session ID: $e');
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to save current session ID',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -216,8 +286,12 @@ class ChatProvider extends ChangeNotifier {
           await selectSession(session);
         }
       }
-    } catch (e) {
-      print('Failed to load last session: $e');
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to load last session',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -292,6 +366,7 @@ class ChatProvider extends ChangeNotifier {
 
   /// Load message list
   Future<void> loadMessages(String sessionId) async {
+    final fetchId = ++_messagesFetchId;
     // Sync project ID from ProjectProvider; projectId is optional for the new API
     _currentProjectId = projectProvider.currentProjectId;
 
@@ -304,10 +379,25 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    result.fold((failure) => _handleFailure(failure), (messages) {
-      _messages = messages;
-      _setState(ChatState.loaded);
-    });
+    if (fetchId != _messagesFetchId) {
+      return;
+    }
+
+    result.fold(
+      (failure) {
+        if (fetchId != _messagesFetchId) {
+          return;
+        }
+        _handleFailure(failure);
+      },
+      (messages) {
+        if (fetchId != _messagesFetchId || _currentSession?.id != sessionId) {
+          return;
+        }
+        _messages = messages;
+        _setState(ChatState.loaded);
+      },
+    );
   }
 
   /// Send message
@@ -387,22 +477,22 @@ class ChatProvider extends ChangeNotifier {
     if (index != -1) {
       // Update existing message
       _messages[index] = message;
-      print(
-        '🔄 Updated message: ${message.id}, parts count: ${message.parts.length}',
+      AppLogger.debug(
+        'Updated message: ${message.id}, parts=${message.parts.length}',
       );
     } else {
       // Add new message
       _messages.add(message);
-      print('➕ Add new message: ${message.id}, role: ${message.role}');
+      AppLogger.debug('Added new message: ${message.id}, role=${message.role}');
     }
 
     // Check if there is an unfinished assistant message
     if (message is AssistantMessage) {
-      print(
-        '🤖 Assistant message status: ${message.isCompleted ? "completed" : "in progress"}',
+      AppLogger.debug(
+        'Assistant message status: ${message.isCompleted ? "completed" : "in_progress"}',
       );
       if (message.isCompleted && _state == ChatState.sending) {
-        print('✅ Message completed, set state to loaded');
+        AppLogger.debug('Message completed, setting state to loaded');
         _setState(ChatState.loaded);
       }
     }

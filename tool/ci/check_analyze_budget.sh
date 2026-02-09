@@ -11,11 +11,15 @@ fi
 
 issues_line=$(grep -Eo '[0-9]+ issues found\.?' "$ANALYZE_LOG" | tail -n1 || true)
 if [[ -z "$issues_line" ]]; then
-  echo "Unable to parse issue count from analyze log."
-  exit 1
+  if grep -q "No issues found" "$ANALYZE_LOG"; then
+    issues_count=0
+  else
+    echo "Unable to parse issue count from analyze log."
+    exit 1
+  fi
+else
+  issues_count=$(echo "$issues_line" | grep -Eo '^[0-9]+')
 fi
-
-issues_count=$(echo "$issues_line" | grep -Eo '^[0-9]+')
 
 echo "Analyze issues: $issues_count (budget: <= $MAX_ISSUES)"
 

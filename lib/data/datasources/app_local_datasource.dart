@@ -58,6 +58,12 @@ abstract class AppLocalDataSource {
   Future<void> saveCachedSessions(String sessionsJson);
 
   /// Technical comment translated to English.
+  Future<int?> getCachedSessionsUpdatedAt();
+
+  /// Technical comment translated to English.
+  Future<void> saveCachedSessionsUpdatedAt(int epochMs);
+
+  /// Technical comment translated to English.
   Future<bool?> getBasicAuthEnabled();
 
   /// Technical comment translated to English.
@@ -181,6 +187,19 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     await sharedPreferences.setString(
       AppConstants.cachedSessionsKey,
       sessionsJson,
+    );
+  }
+
+  @override
+  Future<int?> getCachedSessionsUpdatedAt() async {
+    return sharedPreferences.getInt(AppConstants.cachedSessionsUpdatedAtKey);
+  }
+
+  @override
+  Future<void> saveCachedSessionsUpdatedAt(int epochMs) async {
+    await sharedPreferences.setInt(
+      AppConstants.cachedSessionsUpdatedAtKey,
+      epochMs,
     );
   }
 

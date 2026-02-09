@@ -18,52 +18,40 @@ source_project: "https://github.com/easychen/openMode"
 ## Task List
 
 ### Feature 001: Baseline Audit, Safety Rails, and Deletion Policy
-Description: Build an objective baseline of the current fork (code, docs, endpoints, tests, platform support) and define hard safety rails before touching implementation. (Visit file ROADMAP.feat001.md for full research details)
+Description: Build an objective baseline of the current fork (code, docs, endpoints, tests, platform support) and define hard safety rails before touching implementation.
 
-- [x] 1.01 Capture baseline inventory (files, naming, endpoints, locale, platform folders, lint/test status)
-- [x] 1.02 Define keep/remove rules for documents and generated artifacts
-- [x] 1.03 Define rollback checkpoints and branch strategy for solo execution
-- [x] 1.04 Publish feature dependency map and acceptance gates for all next features
+Completed a full baseline inventory of source/runtime/docs/platform state, defined deletion and retention policies for generated and markdown artifacts, and established rollback checkpoints plus dependency and acceptance-gate governance for all later features.
+Commits: b9de67f, 7d7e6f6, 3640fb2, d307731, c96f53c
 
 ### Feature 002: Licensing Migration to AGPLv3 + Commercial (>500M Revenue)
-Description: Replace MIT with a compliant AGPLv3 setup and add a separate commercial license track for organizations above the revenue threshold. (Visit file ROADMAP.feat002.md for full research details)
+Description: Replace MIT with a compliant AGPLv3 setup and add a separate commercial license track for organizations above the revenue threshold.
 
-- [x] 2.01 Replace root LICENSE with GNU AGPLv3 text and SPDX metadata updates - Commit: f0bc342
-- [x] 2.02 Add `LICENSE-COMMERCIAL.md` with the >500M revenue trigger and commercial terms - Commit: 898889f
-- [x] 2.03 Add legal notices (`NOTICE`, attribution, warranty limitations, contact path) - Commit: b5e1719
-- [x] 2.04 Validate dependency/license compatibility and document unresolved legal decisions - Commit: a25cb31
+Completed legal migration from MIT to AGPLv3, added a dedicated commercial license track for organizations above the revenue threshold, published attribution/warranty notices, and validated dependency licensing compatibility with unresolved decisions documented.
+Commits: 2b51dd3, f0bc342, 898889f, b5e1719, a25cb31
 
 ### Feature 003: Rebrand OpenMode -> CodeWalk (Code, Package IDs, Metadata)
-Description: Rename all product-facing and package-level identifiers from OpenMode/open_mode to CodeWalk/codewalk across app runtime, build metadata, and distribution assets. (Visit file ROADMAP.feat003.md for full research details)
+Description: Rename all product-facing and package-level identifiers from OpenMode/open_mode to CodeWalk/codewalk across app runtime, build metadata, and distribution assets.
 
-- [x] 3.01 Rename app/package identifiers (`pubspec`, imports, app constants, test imports) - Commit: ede3939
-- [x] 3.02 Rename Android package namespace/applicationId and Kotlin package path - Commit: a519f8f
-- [x] 3.03 Update web metadata (manifest, title, PWA labels) and asset references - Commit: 63549d4
-- [x] 3.04 Run compile/lint smoke checks after rename to catch broken references
+Completed product and package rebranding from OpenMode to CodeWalk across Flutter metadata, source imports, Android namespace/applicationId, and web manifest/title/PWA references, followed by smoke validation to catch rename regressions.
+Commits: 9483801, ede3939, a519f8f, 63549d4
 
 ### Feature 004: Full English Standardization (UI, Code Comments, Docs)
-Description: Translate all remaining non-English content to English, including user-facing strings, comments, logs, and technical documentation. (Visit file ROADMAP.feat004.md for full research details)
+Description: Translate all remaining non-English content to English, including user-facing strings, comments, logs, and technical documentation.
 
-- [x] 4.01 Convert all UI strings and runtime errors/log messages to English
-- [x] 4.02 Translate non-English comments/docblocks in `lib/` to concise technical English
-- [x] 4.03 Translate technical markdown that must be kept after cleanup
-- [!] 4.04 Add a language consistency check step to prevent regressions - Won't do (user decision: unnecessary)
+Completed English standardization for UI strings, runtime messaging, source comments, and retained technical docs. Automated language regression checks were intentionally marked as a wont-do based on product decision.
+Commits: 1bc9184
 
 ### Feature 005: Documentation Restructure and Markdown Pruning
-Description: Remove unnecessary markdown files, consolidate surviving docs, and rewrite README with explicit origin attribution to OpenMode. (Visit file ROADMAP.feat005.md for full research details)
+Description: Remove unnecessary markdown files, consolidate surviving docs, and rewrite README with explicit origin attribution to OpenMode.
 
-- [x] 5.01 Classify markdown docs into keep/merge/delete buckets
-- [x] 5.02 Merge unique content from historical docs into CODEBASE.md
-- [x] 5.03 Rewrite `README.md` for CodeWalk and add explicit acknowledgment to original project
-- [x] 5.04 Delete redundant `.md` files and verify no critical knowledge was lost
+Completed documentation triage and consolidation by classifying markdown assets, merging unique technical history into `CODEBASE.md`, rewriting `README.md` for the CodeWalk identity with origin attribution, and pruning redundant files without knowledge loss.
+Commits: 8562850, 7c72e70, b219a2b, d02f486
 
 ### Feature 006: OpenCode Server Mode API Refresh and Documentation Update
-Description: Align the client and internal API docs with the latest OpenCode Server Mode endpoints/schemas and close compatibility gaps. (Visit file ROADMAP.feat006.md for full research details)
+Description: Align the client and internal API docs with the latest OpenCode Server Mode endpoints/schemas and close compatibility gaps.
 
-- [x] 6.01 Build endpoint-by-endpoint gap matrix (current client vs latest docs)
-- [x] 6.02 Update models/datasources/use cases for schema and endpoint drift
-- [x] 6.03 Replace outdated API docs with a versioned Server Mode integration guide
-- [x] 6.04 Validate chat/session/provider flows against a real server instance - Completed on 2026-02-09 against `100.68.105.54:4096`: `/path`, `/provider`, `/session`, `/event`, create/update/delete/summarize, and assistant message flow validated after compatibility fixes for nested `model` payload and message parsing
+Completed a full Server Mode compatibility refresh through endpoint gap mapping, model/datasource/use-case updates for schema drift, and replacement of obsolete integration docs with a versioned guide; validated live against `100.68.105.54:4096` across provider, session, event, and message paths including nested-model parsing fixes.
+Commits: e994f39, bbadbe4, 78acc18, ad6470c
 
 ### Feature 007: Cross-Platform Desktop Enablement and Responsive UX
 Description: Expand project target platforms beyond mobile and deliver a true cross experience for desktop/web/mobile with adaptive layouts and desktop-native interactions. (Visit file ROADMAP.feat007.md for full research details)
@@ -74,12 +62,10 @@ Description: Expand project target platforms beyond mobile and deliver a true cr
 - [/] 7.04 Validate build/run on each target and document platform-specific caveats - Linux/web validation passed (`flutter test`, `flutter build linux`, `flutter build web`, Linux runtime smoke). Blocked for full target matrix by host OS constraint (`flutter build windows` requires Windows host, `flutter build macos` requires macOS host)
 
 ### Feature 008: Manual QA Campaign and Stability Hardening
-Description: Execute a structured manual test campaign across supported platforms and critical user journeys, then fix high-impact defects before automation is expanded. (Visit file ROADMAP.feat008.md for full research details)
+Description: Execute a structured manual test campaign across supported platforms and critical user journeys, then fix high-impact defects before automation is expanded.
 
-- [x] 8.01 Define manual test matrix (platform x feature x network condition) - Matrix, severity model, and scenario IDs QA-001..QA-007 documented in `ROADMAP.feat008.md` - Commit: da2940b
-- [x] 8.02 Execute exploratory and scripted scenarios, recording reproducible evidence - Executed QA smoke script (`tool/qa/feat008_smoke.sh`) against `100.68.105.54:4096` with pass results and artifact logs under `/tmp/codewalk_feat008/*` - Commit: da2940b
-- [x] 8.03 Triage and fix P0/P1 defects before exit - Fixed P1 secure logging leak in `dio_client.dart` and P1 Android build blocker (AGP `8.9.1`) - Commit: da2940b
-- [x] 8.04 Publish a release readiness report with known limitations - Report published in `QA.feat008.release-readiness.md` - Commit: da2940b
+Completed a structured QA campaign with defined matrix and scenario IDs, executed scripted smoke coverage against live server flows, fixed P1 defects (secure logging leak and Android AGP build blocker), and published release readiness with known limitations.
+Commits: da2940b, cc5c78f
 
 ### Feature 009: Automated Test Suite and CI Quality Gates
 Description: Build comprehensive automated tests (unit, widget, integration) and enforce quality gates in CI so future changes remain stable.

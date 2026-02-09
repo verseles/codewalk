@@ -3,14 +3,33 @@ set -euo pipefail
 
 LCOV_FILE="${1:-coverage/lcov.info}"
 MIN_COVERAGE="${2:-35}"
+FILTERED_FILE="${3:-coverage/lcov.filtered.info}"
 
 if [[ ! -f "$LCOV_FILE" ]]; then
   echo "Coverage file not found: $LCOV_FILE"
   exit 1
 fi
 
-total_lines=$(awk -F: '/^LF:/{sum+=$2} END {print sum+0}' "$LCOV_FILE")
-covered_lines=$(awk -F: '/^LH:/{sum+=$2} END {print sum+0}' "$LCOV_FILE")
+INPUT_FILE="$LCOV_FILE"
+
+if command -v lcov >/dev/null 2>&1; then
+  lcov --remove "$LCOV_FILE" \
+    "lib/**/*.g.dart" \
+    "**/generated_plugin_registrant.dart" \
+    "lib/l10n/*" \
+    -o "$FILTERED_FILE" \
+    --ignore-errors unused >/dev/null 2>&1 || {
+    echo "lcov filtering failed, falling back to raw report."
+  }
+  if [[ -f "$FILTERED_FILE" ]]; then
+    INPUT_FILE="$FILTERED_FILE"
+  fi
+else
+  echo "lcov not found, using raw coverage report."
+fi
+
+total_lines=$(awk -F: '/^LF:/{sum+=$2} END {print sum+0}' "$INPUT_FILE")
+covered_lines=$(awk -F: '/^LH:/{sum+=$2} END {print sum+0}' "$INPUT_FILE")
 
 if [[ "$total_lines" -eq 0 ]]; then
   echo "No executable lines found in coverage report."

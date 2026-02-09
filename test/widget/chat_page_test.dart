@@ -48,7 +48,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.menu), findsNothing);
-      expect(find.text('Desktop Shortcuts'), findsOneWidget);
+      expect(find.text('Keyboard shortcuts'), findsOneWidget);
       expect(find.text('Conversations'), findsOneWidget);
     });
   });

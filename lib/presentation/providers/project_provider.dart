@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/repositories/project_repository.dart';
 import '../../core/errors/failures.dart';
+import '../../core/logging/app_logger.dart';
 
 /// Technical comment translated to English.
 enum ProjectStatus { initial, loading, loaded, error }
@@ -148,7 +149,7 @@ class ProjectProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('current_project_id', projectId);
     } catch (e) {
-      print('Failed to save project ID: $e');
+      AppLogger.warn('Failed to save project ID', error: e);
     }
   }
 

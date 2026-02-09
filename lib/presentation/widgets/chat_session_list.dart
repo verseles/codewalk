@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/chat_session.dart';
 
 /// Chat session list widget
@@ -48,49 +49,42 @@ class ChatSessionList extends StatelessWidget {
     }
 
     return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
       itemCount: sessions.length,
       itemBuilder: (context, index) {
         final session = sessions[index];
         final isSelected = currentSession?.id == session.id;
+        final colorScheme = Theme.of(context).colorScheme;
 
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          curve: Curves.easeOut,
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          child: Card(
-            margin: EdgeInsets.zero,
-            elevation: isSelected ? 3 : 0,
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Material(
             color: isSelected
-                ? Theme.of(context).colorScheme.primaryContainer
-                : null,
+                ? colorScheme.secondaryContainer
+                : colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(18),
             child: ListTile(
               mouseCursor: SystemMouseCursors.click,
-              hoverColor: Theme.of(
-                context,
-              ).colorScheme.primary.withOpacity(0.06),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
               ),
               leading: CircleAvatar(
                 backgroundColor: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceVariant,
+                    ? colorScheme.primary
+                    : colorScheme.surfaceContainerHighest,
                 child: Icon(
                   Icons.chat,
                   color: isSelected
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ? colorScheme.onPrimary
+                      : colorScheme.onSurfaceVariant,
                   size: 20,
                 ),
               ),
               title: Text(
                 session.title ?? _generateFallbackTitle(session.time),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : null,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? colorScheme.onSecondaryContainer : null,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -103,10 +97,8 @@ class ChatSessionList extends StatelessWidget {
                       session.summary!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isSelected
-                            ? Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer.withOpacity(0.8)
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                            ? colorScheme.onSecondaryContainer.withOpacity(0.8)
+                            : colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -118,9 +110,10 @@ class ChatSessionList extends StatelessWidget {
                         _formatTime(session.time),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                                    .withOpacity(0.6)
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                              ? colorScheme.onSecondaryContainer.withOpacity(
+                                  0.7,
+                                )
+                              : colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (session.shared) ...[
@@ -129,9 +122,10 @@ class ChatSessionList extends StatelessWidget {
                           Icons.share,
                           size: 12,
                           color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                                    .withOpacity(0.6)
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                              ? colorScheme.onSecondaryContainer.withOpacity(
+                                  0.7,
+                                )
+                              : colorScheme.onSurfaceVariant,
                         ),
                       ],
                     ],
@@ -142,8 +136,8 @@ class ChatSessionList extends StatelessWidget {
                 icon: Icon(
                   Icons.more_vert,
                   color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ? colorScheme.onSecondaryContainer
+                      : colorScheme.onSurfaceVariant,
                 ),
                 onSelected: (value) {
                   switch (value) {
@@ -225,20 +219,16 @@ class ChatSessionList extends StatelessWidget {
     final sessionDate = DateTime(time.year, time.month, time.day);
 
     if (sessionDate == today) {
-      // Show time for today's conversations
       return 'Today ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } else {
       final difference = today.difference(sessionDate).inDays;
       if (difference == 1) {
-        // Yesterday's conversations
         return 'Yesterday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else if (difference < 7) {
-        // Show weekday for conversations within a week
         final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         final weekday = weekdays[time.weekday - 1];
         return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else {
-        // Show date for older conversations
         return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       }
     }
@@ -268,7 +258,6 @@ class ChatSessionList extends StatelessWidget {
             onPressed: () {
               final newTitle = controller.text.trim();
               if (newTitle.isNotEmpty) {
-                // TODO: Implement rename functionality
                 Navigator.of(context).pop();
               }
             },

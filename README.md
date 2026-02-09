@@ -45,12 +45,27 @@ A cross-platform client for [OpenCode](https://github.com/sst/opencode) server m
    flutter build web
    ```
 
+### Make Targets
+
+```bash
+make check      # deps + codegen + analyze + test
+make android    # build arm64 APK
+make precommit  # check + android
+```
+
 ### Server Configuration
 
 1. Launch the app and navigate to **Server Settings**
 2. Enter your server host and port (e.g., `127.0.0.1:4096`)
 3. Configure authentication if required (API key or basic auth)
 4. Use **Test Connection** to verify connectivity
+
+## Installer Scripts
+
+- Linux/macOS: `install.sh`
+- Windows: `install.ps1`
+
+Both scripts install latest GitHub release artifacts to user-local paths.
 
 ## Architecture
 

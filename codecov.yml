@@ -1,0 +1,19 @@
+coverage:
+  precision: 2
+  round: down
+  range: "35...100"
+  status:
+    project:
+      default:
+        target: 35%
+        threshold: 3%
+    patch:
+      default:
+        target: 30%
+        threshold: 10%
+
+ignore:
+  - "test/**/*"
+  - "**/*.g.dart"
+  - "**/generated_plugin_registrant.dart"
+  - "lib/l10n/**"

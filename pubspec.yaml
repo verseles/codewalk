@@ -70,6 +70,7 @@ dependencies:
   
   # Dependency injection
   get_it: ^9.2.0
+  dynamic_color: ^1.8.1
 
 dev_dependencies:
   flutter_test:
@@ -102,7 +103,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/
+    - assets/images/icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -136,6 +137,9 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
   image_path: "assets/images/icon.png"
+  adaptive_icon_foreground: "assets/images/adaptive_foreground.png"
+  adaptive_icon_background: "#7EAFC2"
+  adaptive_icon_foreground_inset: 0
   min_sdk_android: 21 # android min sdk min:16, default 21
   web:
     generate: true

@@ -24,6 +24,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? lastSessionId;
   String? currentSessionId;
   String? cachedSessions;
+  int? cachedSessionsUpdatedAt;
   bool? basicAuthEnabled;
   String? basicAuthUsername;
   String? basicAuthPassword;
@@ -39,6 +40,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     lastSessionId = null;
     currentSessionId = null;
     cachedSessions = null;
+    cachedSessionsUpdatedAt = null;
     basicAuthEnabled = null;
     basicAuthUsername = null;
     basicAuthPassword = null;
@@ -58,6 +60,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
 
   @override
   Future<String?> getCachedSessions() async => cachedSessions;
+
+  @override
+  Future<int?> getCachedSessionsUpdatedAt() async => cachedSessionsUpdatedAt;
 
   @override
   Future<String?> getCurrentSessionId() async => currentSessionId;
@@ -103,6 +108,11 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   @override
   Future<void> saveCachedSessions(String sessionsJson) async {
     cachedSessions = sessionsJson;
+  }
+
+  @override
+  Future<void> saveCachedSessionsUpdatedAt(int epochMs) async {
+    cachedSessionsUpdatedAt = epochMs;
   }
 
   @override

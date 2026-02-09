@@ -12,6 +12,7 @@ class ChatMessageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Check if message has valid content
     final hasValidContent = message.parts.any((part) {
@@ -26,156 +27,69 @@ class ChatMessageWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Modern avatar design
-          Container(
-            width: 40,
-            height: 40,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      child: Align(
+        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isUser
-                    ? [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.primaryContainer,
-                      ]
-                    : [
-                        Theme.of(context).colorScheme.tertiary,
-                        Theme.of(context).colorScheme.tertiaryContainer,
-                      ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+              color: isUser
+                  ? colorScheme.primaryContainer.withOpacity(0.45)
+                  : colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(18).copyWith(
+                bottomRight: isUser ? const Radius.circular(6) : null,
+                bottomLeft: !isUser ? const Radius.circular(6) : null,
               ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      (isUser
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.tertiary)
-                          .withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withOpacity(0.45),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      isUser ? 'You' : 'Assistant',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: isUser
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _formatTime(message.time),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (!isUser && message is AssistantMessage)
+                      _buildAssistantInfo(context, message as AssistantMessage),
+                  ],
                 ),
+                const SizedBox(height: 8),
+
+                ...message.parts.map(
+                  (part) => _buildMessagePart(context, part),
+                ),
+
+                if (message is AssistantMessage &&
+                    (message as AssistantMessage).error != null)
+                  _buildErrorInfo(
+                    context,
+                    (message as AssistantMessage).error!,
+                  ),
               ],
             ),
-            child: Icon(
-              isUser ? Icons.person : Icons.psychology,
-              color: Colors.white,
-              size: 20,
-            ),
           ),
-          const SizedBox(width: 16),
-
-          // Message content container - modern design
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isUser
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withOpacity(0.1)
-                    : Theme.of(
-                        context,
-                      ).colorScheme.surfaceVariant.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(16).copyWith(
-                  topLeft: isUser
-                      ? const Radius.circular(16)
-                      : const Radius.circular(4),
-                  topRight: isUser
-                      ? const Radius.circular(4)
-                      : const Radius.circular(16),
-                ),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Message header info - modern design
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isUser
-                              ? Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.1)
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.tertiary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          isUser ? 'You' : 'AI Assistant',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: isUser
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.tertiary,
-                              ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outline.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          _formatTime(message.time),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                                fontSize: 10,
-                              ),
-                        ),
-                      ),
-                      const Spacer(),
-                      if (!isUser && message is AssistantMessage)
-                        _buildAssistantInfo(
-                          context,
-                          message as AssistantMessage,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Message parts list
-                  ...message.parts.map(
-                    (part) => _buildMessagePart(context, part),
-                  ),
-
-                  // Error message
-                  if (message is AssistantMessage &&
-                      (message as AssistantMessage).error != null)
-                    _buildErrorInfo(
-                      context,
-                      (message as AssistantMessage).error!,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -264,20 +178,15 @@ class ChatMessageWidget extends StatelessWidget {
           // Copy button
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton.icon(
+            child: IconButton.filledTonal(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: part.text));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Copied to clipboard')),
                 );
               },
-              icon: const Icon(Icons.copy, size: 16),
-              label: const Text('Copy'),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: const Size(0, 32),
-                textStyle: Theme.of(context).textTheme.bodySmall,
-              ),
+              icon: const Icon(Icons.copy, size: 18),
+              tooltip: 'Copy',
             ),
           ),
         ],
@@ -378,10 +287,12 @@ class ChatMessageWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final lineCount = '\n'.allMatches(part.text).length + 1;
+    final isLongReasoning = part.text.length > 600 || lineCount > 12;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
-      constraints: const BoxConstraints(maxHeight: 600),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
@@ -410,16 +321,25 @@ class ChatMessageWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Text(
-                part.text,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+          if (isLongReasoning)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 240),
+              child: SingleChildScrollView(
+                child: Text(
+                  part.text,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+                ),
               ),
+            )
+          else
+            Text(
+              part.text,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
             ),
-          ),
         ],
       ),
     );

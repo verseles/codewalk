@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../core/logging/app_logger.dart';
 import '../providers/chat_provider.dart';
-import 'server_settings_page.dart';
 
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
@@ -90,7 +90,7 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       // Technical comment translated to English.
       chatProvider.clearError();
-      print('Chat initialization failed: $e');
+      AppLogger.error('Chat initialization failed', error: e);
     }
   }
 
@@ -272,58 +272,43 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   AppBar _buildAppBar() {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
-      title: Row(
+      titleSpacing: 12,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.psychology,
-              color: Theme.of(context).colorScheme.primary,
-              size: 20,
+          Text(
+            'CodeWalk',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          Text(
+            'Conversational workspace',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(width: 12),
-          const Text('AI Chat'),
         ],
       ),
       actions: [
         IconButton(
           icon: const Icon(Icons.add_comment_outlined),
-          tooltip: 'New Chat (Ctrl/Cmd+N)',
+          tooltip: 'New Chat',
           onPressed: _createNewSession,
         ),
         IconButton(
           icon: const Icon(Icons.refresh),
-          tooltip: 'Refresh (Ctrl/Cmd+R)',
+          tooltip: 'Refresh',
           onPressed: _refreshData,
         ),
         IconButton(
           icon: const Icon(Icons.edit_note),
-          tooltip: 'Focus Input (Ctrl/Cmd+L)',
+          tooltip: 'Focus Input',
           onPressed: _focusInput,
         ),
-        IconButton(
-          icon: const Icon(Icons.settings),
-          tooltip: 'Settings',
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ServerSettingsPage(),
-              ),
-            );
-          },
-        ),
+        const SizedBox(width: 4),
       ],
     );
   }
@@ -335,105 +320,110 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildSessionPanel({required bool closeOnSelect}) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: Consumer<ChatProvider>(
-        builder: (context, chatProvider, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(12, 12, 8, 8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withOpacity(0.15),
-                    ),
+    return Consumer<ChatProvider>(
+      builder: (context, chatProvider, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Conversations',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: _createNewSession,
+                        tooltip: 'New Chat',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: _refreshData,
+                        tooltip: 'Refresh',
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Conversations',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: _createNewSession,
-                      tooltip: 'New Chat',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: _refreshData,
-                      tooltip: 'Refresh',
-                    ),
-                  ],
-                ),
               ),
-              Expanded(
-                child: ChatSessionList(
-                  sessions: chatProvider.sessions,
-                  currentSession: chatProvider.currentSession,
-                  onSessionSelected: (session) {
-                    chatProvider.selectSession(session);
-                    if (closeOnSelect) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  onSessionDeleted: (session) {
-                    chatProvider.deleteSession(session.id);
-                  },
-                ),
+            ),
+            Expanded(
+              child: ChatSessionList(
+                sessions: chatProvider.sessions,
+                currentSession: chatProvider.currentSession,
+                onSessionSelected: (session) {
+                  chatProvider.selectSession(session);
+                  if (closeOnSelect) {
+                    Navigator.of(context).pop();
+                  }
+                },
+                onSessionDeleted: (session) {
+                  chatProvider.deleteSession(session.id);
+                },
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildDesktopUtilityPane(ChatProvider chatProvider) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(12),
-          children: [
-            Text(
-              'Desktop Shortcuts',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            _buildShortcutHint('Ctrl/Cmd + N', 'New conversation'),
-            _buildShortcutHint('Ctrl/Cmd + R', 'Refresh chat data'),
-            _buildShortcutHint('Ctrl/Cmd + L', 'Focus message input'),
-            _buildShortcutHint('Esc', 'Close drawer or unfocus input'),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _createNewSession,
-              icon: const Icon(Icons.add_comment_outlined),
-              label: const Text('New Chat'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: _refreshData,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Refresh'),
-            ),
-            const SizedBox(height: 16),
-            if (chatProvider.currentSession != null)
-              Text(
-                'Current session:\n${chatProvider.currentSession!.title ?? 'New Chat'}',
-                style: Theme.of(context).textTheme.bodySmall,
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(12),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Keyboard shortcuts',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildShortcutHint('Ctrl/Cmd + N', 'New conversation'),
+                  _buildShortcutHint('Ctrl/Cmd + R', 'Refresh chat data'),
+                  _buildShortcutHint('Ctrl/Cmd + L', 'Focus message input'),
+                  _buildShortcutHint('Esc', 'Close drawer or unfocus input'),
+                ],
               ),
-          ],
-        ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _createNewSession,
+            icon: const Icon(Icons.add_comment_outlined),
+            label: const Text('New Chat'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _refreshData,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh'),
+          ),
+          const SizedBox(height: 12),
+          if (chatProvider.currentSession != null)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  'Current session:\n${chatProvider.currentSession!.title ?? 'New Chat'}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -491,64 +481,38 @@ class _ChatPageState extends State<ChatPage> {
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.all(8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(
-                          context,
-                        ).colorScheme.surfaceVariant.withOpacity(0.3),
-                        Theme.of(
-                          context,
-                        ).colorScheme.surfaceVariant.withOpacity(0.1),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withOpacity(0.2),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 4,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).colorScheme.primary,
-                              Theme.of(context).colorScheme.tertiary,
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
+                  child: Card(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline,
+                            size: 18,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSecondaryContainer,
                           ),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              chatProvider.currentSession!.title ?? 'New Chat',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSecondaryContainer,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          chatProvider.currentSession!.title ?? 'New Chat',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chat_bubble_outline,
-                        size: 16,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.7),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 
