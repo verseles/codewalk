@@ -1273,6 +1273,41 @@ class Rclone
     }
 
     /**
+     * Gets checksums for files using the specified hash algorithm (rclone hashsum).
+     *
+     * @see https://rclone.org/commands/rclone_hashsum/
+     *
+     * @param string      $hashAlgorithm The hash algorithm to use (e.g., 'md5', 'sha1', 'dropbox').
+     * @param string|null $path          Path to checksum.
+     * @param array       $flags         Additional flags.
+     *
+     * @return array Associative array of [path => hash].
+     */
+    public function hashsum(string $hashAlgorithm, ?string $path = null, array $flags = []): array
+    {
+        $result = $this->simpleRun('hashsum', [$hashAlgorithm, $this->left_side->backend($path)], $flags);
+
+        if ($result === '') {
+            return [];
+        }
+
+        $checksums = [];
+        foreach (explode("\n", $result) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            // Format: "hash  filename" (two spaces between)
+            // Note: Hash length varies by algorithm, so we use + instead of fixed length
+            if (preg_match('/^([a-fA-F0-9]+)\s+(.+)$/', $line, $matches)) {
+                $checksums[$matches[2]] = $matches[1];
+            }
+        }
+
+        return $checksums;
+    }
+
+    /**
      * Gets SHA1 checksums for files (rclone sha1sum).
      *
      * @see https://rclone.org/commands/rclone_sha1sum/

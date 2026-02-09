@@ -277,4 +277,28 @@ class ExtraCommandsTest extends AbstractProviderTest
         // Source should still exist (copy, not move)
         self::assertFileExists($sourceFile);
     }
+
+    #[Test]
+    #[Depends('instantiate_with_one_provider')]
+    public function test_hashsum_command(Rclone $rclone): void
+    {
+        $dir = $this->working_directory . '/hashsum_test';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        file_put_contents($dir . '/file1.txt', 'hello world');
+
+        // Test with MD5
+        $checksums = $rclone->hashsum('md5', $dir);
+
+        self::assertIsArray($checksums);
+        self::assertArrayHasKey('file1.txt', $checksums);
+        // md5('hello world') = 5eb63bbbe01eeed093cb22bb8f5acdc3
+        self::assertEquals('5eb63bbbe01eeed093cb22bb8f5acdc3', $checksums['file1.txt']);
+
+        // Test with SHA1
+        $checksums = $rclone->hashsum('sha1', $dir);
+        // sha1('hello world') = 2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
+        self::assertEquals('2aae6c35c94fcfb415dbe95f408b9ce91ee846ed', $checksums['file1.txt']);
+    }
 }
