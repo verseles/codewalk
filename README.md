@@ -1,6 +1,8 @@
 # CodeWalk
 
-A cross-platform client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
+![CodeWalk Logo](assets/images/logo.256.png)
+
+A native (really fast!!) cross-platform client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
 ## Features
 
@@ -28,11 +30,13 @@ A cross-platform client for [OpenCode](https://github.com/sst/opencode) server m
 ### Setup
 
 1. Install dependencies:
+
    ```bash
    flutter pub get
    ```
 
 2. Run the app (examples):
+
    ```bash
    flutter run -d linux
    flutter run -d chrome
