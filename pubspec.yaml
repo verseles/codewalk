@@ -45,19 +45,19 @@ dependencies:
   shared_preferences: ^2.2.2
   
   # Markdown rendering
-  flutter_markdown: ^0.6.18
+  flutter_markdown: ^0.7.7+1
   
   # Code highlighting
   flutter_highlight: ^0.7.0
   
   # File picker
-  file_picker: ^8.1.2
+  file_picker: ^10.3.10
   
   # URL launcher
   url_launcher: ^6.2.2
   
   # App info
-  package_info_plus: ^4.2.0
+  package_info_plus: ^9.0.0
   
   # JSON serialization
   json_annotation: ^4.8.1
@@ -69,7 +69,7 @@ dependencies:
   dartz: ^0.10.1
   
   # Dependency injection
-  get_it: ^7.6.4
+  get_it: ^9.2.0
 
 dev_dependencies:
   flutter_test:
@@ -80,14 +80,14 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   
   # JSON code generation
   json_serializable: ^6.7.1
   build_runner: ^2.4.7
   
   # Flutter launcher icons generator
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
