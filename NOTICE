@@ -1,0 +1,24 @@
+CodeWalk
+Copyright (C) 2026 Helio Oliveira
+
+Licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+See LICENSE for the full license text.
+
+A separate commercial license is available for organizations with annual
+revenue exceeding USD 500,000,000. See LICENSE-COMMERCIAL.md for details.
+
+---
+
+ORIGIN AND ATTRIBUTION
+
+CodeWalk is a fork of OpenMode, originally created by easychen.
+Original project: https://github.com/easychen/openMode
+Original license: MIT
+
+Substantial modifications have been made to the original codebase since
+the fork, including but not limited to: licensing changes, code structure
+reorganization, feature additions, and documentation rewrites.
+
+The original MIT-licensed code remains available at the upstream repository
+linked above. All modifications made in this fork are licensed under the
+AGPLv3 (or the commercial license, where applicable).

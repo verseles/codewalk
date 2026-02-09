@@ -28,10 +28,10 @@ Description: Build an objective baseline of the current fork (code, docs, endpoi
 ### Feature 002: Licensing Migration to AGPLv3 + Commercial (>500M Revenue)
 Description: Replace MIT with a compliant AGPLv3 setup and add a separate commercial license track for organizations above the revenue threshold. (Visit file ROADMAP.feat002.md for full research details)
 
-- [ ] 2.01 Replace root LICENSE with GNU AGPLv3 text and SPDX metadata updates
-- [ ] 2.02 Add `LICENSE-COMMERCIAL.md` with the >500M revenue trigger and commercial terms
-- [ ] 2.03 Add legal notices (`NOTICE`, attribution, warranty limitations, contact path)
-- [ ] 2.04 Validate dependency/license compatibility and document unresolved legal decisions
+- [x] 2.01 Replace root LICENSE with GNU AGPLv3 text and SPDX metadata updates - Commit: f0bc342
+- [x] 2.02 Add `LICENSE-COMMERCIAL.md` with the >500M revenue trigger and commercial terms - Commit: 898889f
+- [x] 2.03 Add legal notices (`NOTICE`, attribution, warranty limitations, contact path) - Commit: b5e1719
+- [x] 2.04 Validate dependency/license compatibility and document unresolved legal decisions - Commit: a25cb31
 
 ### Feature 003: Rebrand OpenMode -> CodeWalk (Code, Package IDs, Metadata)
 Description: Rename all product-facing and package-level identifiers from OpenMode/open_mode to CodeWalk/codewalk across app runtime, build metadata, and distribution assets. (Visit file ROADMAP.feat003.md for full research details)

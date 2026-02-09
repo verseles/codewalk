@@ -108,7 +108,12 @@ lib/
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is dual-licensed:
+
+- **Open Source:** [GNU Affero General Public License v3.0 (AGPLv3)](LICENSE) — free for everyone.
+- **Commercial:** A [separate commercial license](LICENSE-COMMERCIAL.md) is available for organizations with annual revenue exceeding USD 500M that wish to use the software without AGPLv3 obligations.
+
+See [NOTICE](NOTICE) for attribution and origin details.
 
 ## 🙏 Acknowledgments
 
