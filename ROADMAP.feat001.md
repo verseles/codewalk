@@ -73,6 +73,15 @@ Every requested change (license, renaming, API migration, desktop support, testi
 - Ensure each feature doc is executable as a standalone work packet.
 - Ensure command trigger clarity: "implement feat XXX".
 
+## Rollback and Branch Strategy
+
+Defined in `ADR.md` (ADR-001). Summary:
+- Tag `pre-feat-XXX` on main before each feature starts
+- Feature branches: `feat/XXX-description`
+- Squash merge to main after acceptance gates pass
+- Rollback by discarding branch; main stays at tag state
+- Feature 001 is exception: direct to main (docs only)
+
 ## Deliverables
 - `ROADMAP.md` with ordered features and dependencies
 - `ROADMAP.feat001.md` to `ROADMAP.feat009.md` fully populated
