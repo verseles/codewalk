@@ -60,9 +60,9 @@ Description: Remove unnecessary markdown files, consolidate surviving docs, and 
 ### Feature 006: OpenCode Server Mode API Refresh and Documentation Update
 Description: Align the client and internal API docs with the latest OpenCode Server Mode endpoints/schemas and close compatibility gaps. (Visit file ROADMAP.feat006.md for full research details)
 
-- [ ] 6.01 Build endpoint-by-endpoint gap matrix (current client vs latest docs)
-- [ ] 6.02 Update models/datasources/use cases for schema and endpoint drift
-- [ ] 6.03 Replace outdated API docs with a versioned Server Mode integration guide
+- [x] 6.01 Build endpoint-by-endpoint gap matrix (current client vs latest docs)
+- [x] 6.02 Update models/datasources/use cases for schema and endpoint drift
+- [x] 6.03 Replace outdated API docs with a versioned Server Mode integration guide
 - [ ] 6.04 Validate chat/session/provider flows against a real server instance
 
 ### Feature 007: Cross-Platform Desktop Enablement and Responsive UX

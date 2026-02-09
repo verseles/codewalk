@@ -61,15 +61,16 @@ All runtime/build/config references to `open_mode`/`OpenMode` were renamed to `c
 ## API Endpoints
 
 Extracted from `lib/data/datasources/*.dart`. Server base URL is configurable.
+Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `anomalyco/opencode-sdk-js`).
 
 ### AppRemoteDataSource (`app_remote_datasource.dart`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/path` | Fetch path info |
-| GET | `/config` | Fetch config info |
+| GET | `/app` | Fetch app info (git, hostname, paths, time) |
 | POST | `/app/init` | Initialize application |
-| GET | `/provider` | Get provider information |
+| GET | `/provider` | Get providers (`{all, default, connected}`) |
+| GET | `/config` | Fetch config info |
 
 ### ChatRemoteDataSource (`chat_remote_datasource.dart`)
 
@@ -82,15 +83,15 @@ Extracted from `lib/data/datasources/*.dart`. Server base URL is configurable.
 | DELETE | `/session/{id}` | Delete session |
 | POST | `/session/{id}/share` | Share session |
 | DELETE | `/session/{id}/share` | Unshare session |
-| GET | `/session/{sessionId}/message` | List messages |
-| GET | `/session/{sessionId}/message/{messageId}` | Get specific message |
-| POST | `/session/{sessionId}/message` | Send message (streaming) |
+| GET | `/session/{id}/message` | List messages |
+| GET | `/session/{id}/message/{messageId}` | Get specific message |
+| POST | `/session/{id}/message` | Send message (streaming via SSE) |
 | GET | `/event` | SSE event stream |
-| POST | `/session/{sessionId}/abort` | Abort session |
-| POST | `/session/{sessionId}/revert` | Revert message |
-| POST | `/session/{sessionId}/unrevert` | Unrevert messages |
-| POST | `/session/{sessionId}/init` | Initialize session |
-| POST | `/session/{sessionId}/summarize` | Summarize session |
+| POST | `/session/{id}/abort` | Abort session |
+| POST | `/session/{id}/revert` | Revert message (`{messageID, partID?}`) |
+| POST | `/session/{id}/unrevert` | Unrevert messages |
+| POST | `/session/{id}/init` | Initialize session (`{messageID, providerID, modelID}`) |
+| POST | `/session/{id}/summarize` | Summarize session (`{providerID, modelID}`) |
 
 ### ProjectRemoteDataSource (`project_remote_datasource.dart`)
 
@@ -99,9 +100,54 @@ Extracted from `lib/data/datasources/*.dart`. Server base URL is configurable.
 | GET | `/project` | List all projects |
 | GET | `/project/current` | Get current project |
 
-**Total: 21 endpoints**
+**Total: 20 endpoints used by client**
 
-> **Note:** `POST /session/{id}/message` requires only the current message payload; the server maintains conversation context via session ID (no full history needed in the request).
+### ChatInput Schema
+
+`POST /session/{id}/message` body:
+
+```
+{ providerID, modelID, parts: [{type, text}|{type, mime, url}], mode?, system?, tools?, messageID? }
+```
+
+> **Note:** The `mode` field replaces the previous `agent` field. The server ignores unknown fields.
+
+### MessageTokens Schema
+
+```
+{ input: int, output: int, reasoning: int, cache: { read: int, write: int } }
+```
+
+### Supported Event Types (SSE `/event`)
+
+| Event | Handled | Description |
+|-------|---------|-------------|
+| `message.updated` | Yes | Message info updated |
+| `message.part.updated` | Yes | Part content updated |
+| `message.removed` | Logged | Message removed from session |
+| `message.part.removed` | Logged | Part removed from message |
+| `session.updated` | Logged | Session metadata changed |
+| `session.error` | Yes | Session error (closes stream) |
+| `session.idle` | Yes | Session went idle (closes stream) |
+| `session.deleted` | Logged | Session deleted |
+| Others | Ignored | `file.edited`, `permission.updated`, `installation.updated`, etc. |
+
+### Part Types
+
+| Type | Supported | Fields |
+|------|-----------|--------|
+| `text` | Yes | `text`, `time?`, `synthetic?` |
+| `file` | Yes | `url`, `mime`, `filename?`, `source?` (FileSource or SymbolSource) |
+| `tool` | Yes | `callID`, `tool`, `state` |
+| `reasoning` | Yes | `text`, `time?` |
+| `patch` | Yes | `files: string[]`, `hash: string` |
+| `step-start` | Parsed | Metadata only |
+| `step-finish` | Parsed | `tokens`, `cost` |
+| `snapshot` | Parsed | `snapshot: string` |
+
+### API Endpoints Not Yet Implemented
+
+Available in the server API but not used by the client: `/global/health`, `/global/event`, `/session/status`, `/session/:id/children`, `/session/:id/todo`, `/session/:id/fork`, `/session/:id/diff`, `/session/:id/permissions/:id`, `/find/*`, `/file/*`, `/mode`, `/agent`, `/command`, `/log`, `/mcp`, `/lsp`, `/formatter`, `/vcs`, `/instance/dispose`, `/provider/auth`, `/provider/:id/oauth/*`, `PATCH /config`, `/doc`, TUI control routes.
 
 ## Non-English Content (CJK)
 
@@ -218,8 +264,10 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 ## Chat System Details
 
 ### Core Entities
-- `ChatMessage`: supports user and assistant messages with typed parts (`TextPart`, `FilePart`, `ToolPart`, `ReasoningPart`)
+- `ChatMessage`: supports user and assistant messages with typed parts (`TextPart`, `FilePart`, `ToolPart`, `ReasoningPart`, `PatchPart`)
 - `ChatSession`: session identity, metadata, optional share/summary info, path/workspace linkage
+- `MessageTokens`: includes `input`, `output`, `reasoning`, `cacheRead`, `cacheWrite`
+- `ProvidersResponse`: includes `providers`, `defaultModels`, `connected`
 
 ### Streaming Flow
 - Uses SSE events (`/event`) for incremental message updates
