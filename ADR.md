@@ -12,6 +12,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-006: Session SWR Cache and Async Race Guards (2026-02-09) [Accepted]
 - ADR-007: Hybrid Auto-Save in Server Settings (2026-02-09) [Accepted]
 - ADR-008: Unified Cross-Platform Icon Pipeline and Asset Size Policy (2026-02-09) [Accepted]
+- ADR-009: OpenCode v2 Parity Contract Freeze and Storage Migration Baseline (2026-02-09) [Accepted]
 
 ---
 
@@ -219,3 +220,44 @@ Adopt a single source-of-truth icon workflow based on `assets/images/original.pn
 - `linux/CMakeLists.txt` - Linux icon installation into bundle data
 - `linux/runner/my_application.cc` - Linux runtime icon loading
 - `android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml` - adaptive icon foreground inset configuration
+
+---
+
+## ADR-009: OpenCode v2 Parity Contract Freeze and Storage Migration Baseline
+
+Status: Accepted  
+Date: 2026-02-09
+
+### Context
+
+The OpenCode server/app surface expanded significantly after the original CodeWalk fork (multi-server orchestration, broader event taxonomy, model variant controls, advanced session lifecycle). Implementation work for features 011-016 requires a stable contract boundary; otherwise feature scope can drift and introduce regressions. CodeWalk also stores user state in flat keys today, which is incompatible with upcoming server-scoped and directory-scoped behavior.
+
+### Decision
+
+1. Lock parity planning to upstream snapshot `anomalyco/opencode@24fd8c1` and the corresponding OpenAPI (`packages/sdk/openapi.json`) as the baseline contract for this migration wave.
+2. Classify parity scope into:
+   - Required (delivery wave 011-015): route/event/part/UX coverage needed for Desktop/Web parity goals.
+   - Optional (post-wave): lower-priority or experimental route families.
+3. Adopt a migration baseline for persistence:
+   - move from flat keys (`server_host`, `selected_model`, `cached_sessions`, etc.) to server-scoped and directory-scoped namespaced keys,
+   - keep idempotent migration with one-release fallback reads from legacy keys.
+
+### Rationale
+
+- A contract freeze converts research into executable scope, reducing churn while implementation is in progress.
+- Required-vs-optional classification prevents parity work from ballooning into non-critical surfaces.
+- Namespaced persistence is mandatory to avoid cross-server and cross-directory state pollution once multi-server support is introduced.
+
+### Consequences
+
+- Positive: upcoming features can be implemented with a stable API/event target and explicit acceptance criteria.
+- Positive: migration risk is controlled by idempotent rollout and rollback-safe fallback reads.
+- Trade-off: some newer upstream capabilities remain intentionally deferred until after parity wave completion.
+- Trade-off: maintaining temporary legacy key fallback increases short-term storage access complexity.
+
+### Key Files
+
+- `ROADMAP.feat010.md` - frozen parity contract, Required vs Optional matrix, migration checklist
+- `ROADMAP.md` - execution tracking for Feature 010 tasks and dependencies
+- `CODEBASE.md` - updated v2 route/event/part taxonomy baseline
+- `lib/core/constants/app_constants.dart` - current flat-key source set considered in migration plan

@@ -113,6 +113,122 @@ Current data sources use only this path set:
 - Feature 015: project/workspace multi-context parity
 - Feature 016: hardening, QA, release readiness
 
+## Contract Freeze (Signed)
+
+Freeze date: 2026-02-09
+
+This feature defines the parity contract baseline for the next delivery wave (features 011-016). This baseline is now considered locked and must be treated as implementation input, not a moving target, unless a new roadmap task explicitly updates it.
+
+### 10.01 Target Snapshot Lock and Supported Range
+
+Reference lock:
+
+- Upstream source lock: `anomalyco/opencode@24fd8c1` (`dev`)
+- OpenAPI source lock: `packages/sdk/openapi.json` from the same commit (82 route paths at snapshot time)
+- Docs lock:
+  - `https://opencode.ai/docs/server/`
+  - `https://opencode.ai/docs/models/`
+  - `https://opencode.ai/docs/web/`
+
+Compatibility policy:
+
+- Fully supported target: OpenCode servers that expose v2 route/event structures compatible with the locked sources above.
+- Compatibility fallback target: older server-mode instances that still satisfy current critical bootstrap/session routes used by CodeWalk (`/path` or legacy `/app`, `/provider`, `/project/current`, `/session`, `/session/{id}/message`, `/event`).
+- Unsupported target: instances missing any critical route above or returning incompatible payload shapes for core session/message entities.
+
+Versioning note:
+
+- OpenCode parity is commit/API-contract driven (not strict semver driven). CodeWalk therefore pins compatibility to upstream snapshot + schema behavior and keeps selective fallbacks for transition safety.
+
+### 10.02 Required vs Optional Parity Matrix
+
+#### Endpoint scope
+
+| Surface | Required (parity wave) | Optional (post-wave) |
+|---|---|---|
+| App bootstrap/config | `/path`, `/provider`, `/config`, `/project`, `/project/current` (+ legacy `/app` fallback) | `/global/config`, `/global/dispose` |
+| Core sessions/messages | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event` | `/global/event` (deferred to feature 015 rollout stage) |
+| Session lifecycle advanced | `/session/{id}/share`, `/session/{id}/abort`, `/session/{id}/revert`, `/session/{id}/unrevert`, `/session/{id}/init`, `/session/{id}/summarize`, `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff` | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
+| Interactive flows | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Future extended decision trees not currently exercised by app/web parity tests |
+| Context/tooling | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (read-only parity paths first) | `/lsp`, `/experimental/worktree*`, `/pty*` |
+
+#### Event scope
+
+| Category | Required (parity wave) | Optional (post-wave) |
+|---|---|---|
+| Message lifecycle | `message.updated`, `message.part.updated`, `message.part.removed`, `message.removed` | Low-value informational events unrelated to visible chat timeline |
+| Session lifecycle | `session.created`, `session.updated`, `session.deleted`, `session.status`, `session.error`, `session.idle` | Rare maintenance/status events that do not impact visible UI state |
+| Human-in-loop | `permission.asked`, `permission.replied`, `question.asked`, `question.replied`, `question.rejected` | Non-blocking advisory prompts without required user response |
+| Work context | `todo.updated`, `session.diff`, `vcs.branch.updated`, `worktree.ready`, `worktree.failed` | Provider/internal diagnostics events not rendered in first parity wave |
+
+#### Part taxonomy scope
+
+| Category | Required (parity wave) | Optional (post-wave) |
+|---|---|---|
+| Already implemented core | `text`, `file`, `tool`, `reasoning`, `patch` | None |
+| Must be completed in parity wave | `step-start`, `step-finish`, `snapshot`, `subtask`, `agent`, `retry`, `compaction` | Experimental part kinds introduced after snapshot |
+
+#### UX scope
+
+| Area | Required (parity wave) | Optional (post-wave) |
+|---|---|---|
+| Server management | Multi-server list/add/edit/delete/active/default/health | Advanced telemetry dashboards |
+| Model controls | Provider/model picker + variant (reasoning effort) switching and persistence | Per-tool model overrides |
+| Session operations | Rename/archive/share/unshare/delete/fork/children/todo/diff/status | Bulk operations and power-user batch flows |
+| Workspace context | Project/workspace switching with directory-scoped isolation | Full worktree orchestration parity on day one |
+
+### 10.04 Persisted State Migration Strategy
+
+Current persisted keys (v1 flat storage):
+
+- `server_host`, `server_port`
+- `api_key`
+- `selected_provider`, `selected_model`
+- `current_session_id`, `last_session_id`
+- `cached_sessions`, `cached_sessions_updated_at`
+- `basic_auth_enabled`, `basic_auth_username`, `basic_auth_password`
+
+Target persisted layout (v2 scoped storage):
+
+- Global keys:
+  - `storage_schema_version`
+  - `server_profiles`
+  - `active_server_id`
+  - `default_server_id`
+  - `migration_v1_to_v2_completed`
+- Server-scoped keys:
+  - `v2.server.<serverId>.auth.api_key`
+  - `v2.server.<serverId>.auth.basic.*`
+- Server + directory scoped keys:
+  - `v2.server.<serverId>.dir.<directoryHash>.selected_provider`
+  - `v2.server.<serverId>.dir.<directoryHash>.selected_model`
+  - `v2.server.<serverId>.dir.<directoryHash>.selected_variant`
+  - `v2.server.<serverId>.dir.<directoryHash>.current_session_id`
+  - `v2.server.<serverId>.dir.<directoryHash>.cached_sessions`
+  - `v2.server.<serverId>.dir.<directoryHash>.cached_sessions_updated_at`
+
+Migration execution checklist:
+
+1. Add schema version key and idempotent migration guard.
+2. Build default server profile from v1 (`server_host`, `server_port`, auth keys).
+3. Move model/session/cache keys into scoped namespace for the active directory context.
+4. Keep one-release read fallback for v1 keys when v2 keys are missing.
+5. Never delete v1 keys during first release containing migration.
+6. Add telemetry/log marker for migration success/failure to support rollback diagnosis.
+7. Remove v1 fallback only after at least one stable release cycle.
+
+Rollback safety:
+
+- If migration fails mid-flight, keep app operable in read-only fallback from v1 flat keys.
+- Migration must be restart-safe and idempotent (safe to rerun without data duplication).
+
+## Feature 010 Completion Checklist
+
+- [x] 10.01 Snapshot lock + supported compatibility range defined
+- [x] 10.02 Required vs Optional parity matrix defined
+- [x] 10.03 `CODEBASE.md` integration taxonomy aligned with v2 baseline (see feature commit)
+- [x] 10.04 Persisted-state migration strategy and rollback rules documented
+
 ## Open Risks to Resolve Early
 
 1. Backward compatibility policy for older server responses vs strict v2 behavior.

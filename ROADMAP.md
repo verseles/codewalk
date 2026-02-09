@@ -76,10 +76,12 @@ Commits: 5125edd
 ### Feature 010: OpenCode Upstream Parity Baseline and Contract Freeze
 Description: Consolidate the latest OpenCode Server/API/Desktop/Web behavior into a single compatibility contract for CodeWalk implementation planning. (Visit file ROADMAP.feat010.md for full research details)
 
-- [ ] 10.01 Lock target reference snapshot (`opencode.ai` docs + upstream commit + OpenAPI) and define supported server versions/range
-- [ ] 10.02 Define parity matrix (`endpoint + event + part type + UX behavior`) with Required vs Optional scope
-- [ ] 10.03 Align local docs (`CODEBASE.md` integration section) with v2 route/event taxonomy before feature implementation begins
-- [ ] 10.04 Define migration strategy for persisted client state (server profiles, model selection, session cache)
+Completed a signed parity contract baseline using a fixed upstream/docs/OpenAPI snapshot, defined Required vs Optional parity scope across endpoint/event/part/UX surfaces, aligned `CODEBASE.md` to the v2 taxonomy for implementation work, and documented a rollback-safe persisted-state migration strategy from flat keys to server/directory-scoped storage.
+
+- [x] 10.01 Lock target reference snapshot (`opencode.ai` docs + upstream commit + OpenAPI) and define supported server versions/range
+- [x] 10.02 Define parity matrix (`endpoint + event + part type + UX behavior`) with Required vs Optional scope
+- [x] 10.03 Align local docs (`CODEBASE.md` integration section) with v2 route/event taxonomy before feature implementation begins
+- [x] 10.04 Define migration strategy for persisted client state (server profiles, model selection, session cache)
 
 ### Feature 011: Multi-Server Management and Health Orchestration
 Description: Implement first-class support for multiple OpenCode servers (desktop/mobile parity), including active/default server routing and health-aware switching. (Visit file ROADMAP.feat011.md for full research details)

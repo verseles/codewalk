@@ -126,6 +126,31 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 
 **Total: 23 endpoint operations used by client (including legacy fallbacks)**
 
+### Feature 010 Parity Contract Baseline (Locked 2026-02-09)
+
+- Upstream lock: `anomalyco/opencode@24fd8c1` (`dev`)
+- OpenAPI lock: `packages/sdk/openapi.json` (82 route paths at lock time)
+- Source references:
+  - `https://opencode.ai/docs/server/`
+  - `https://opencode.ai/docs/models/`
+  - `https://opencode.ai/docs/web/`
+
+Compatibility tiers:
+
+- Fully supported: servers compatible with locked v2 route/event schemas.
+- Fallback compatible: legacy server-mode responses that still satisfy core bootstrap/session paths (`/path` or `/app`, `/provider`, `/project/current`, `/session`, `/session/{id}/message`, `/event`).
+- Unsupported: missing core paths or incompatible payload shapes for core entities.
+
+### Route Taxonomy (v2 Contract)
+
+| Family | Current client | Required in parity wave (Features 011-015) | Optional post-wave |
+|---|---|---|---|
+| App bootstrap/config | Partial | `/path`, `/provider`, `/config`, `/project`, `/project/current` (+ `/app` fallback) | `/global/config`, `/global/dispose` |
+| Core sessions/messages | Partial | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event` | `/global/event` |
+| Session lifecycle advanced | Partial | `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff`, plus existing share/revert/abort/init/summarize paths | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
+| Interactive flows | Missing | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
+| Tooling/context | Mostly missing | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) | `/lsp`, `/experimental/worktree*`, `/pty*` |
+
 ### ChatInput Schema
 
 `POST /session/{id}/message` body:
@@ -142,36 +167,70 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 { input: int, output: int, reasoning: int, cache: { read: int, write: int } }
 ```
 
-### Supported Event Types (SSE `/event`)
+### SSE Event Taxonomy (`/event`)
 
-| Event | Handled | Description |
-|-------|---------|-------------|
-| `message.updated` | Yes | Message info updated |
-| `message.part.updated` | Yes | Part content updated |
-| `message.removed` | Logged | Message removed from session |
-| `message.part.removed` | Logged | Part removed from message |
-| `session.updated` | Logged | Session metadata changed |
-| `session.error` | Yes | Session error (closes stream) |
-| `session.idle` | Yes | Session went idle (closes stream) |
-| `session.deleted` | Logged | Session deleted |
-| Others | Ignored | `file.edited`, `permission.updated`, `installation.updated`, etc. |
+| Event group | Current handling state | Parity contract classification |
+|---|---|---|
+| `message.updated`, `message.part.updated` | Fully handled | Required |
+| `message.removed`, `message.part.removed` | Logged only | Required |
+| `session.error`, `session.idle` | Handled (stream close and error) | Required |
+| `session.created`, `session.updated`, `session.deleted`, `session.status` | Partial/logged | Required |
+| `permission.asked`, `permission.replied` | Not handled | Required |
+| `question.asked`, `question.replied`, `question.rejected` | Not handled | Required |
+| `todo.updated`, `session.diff`, `vcs.branch.updated`, `worktree.ready`, `worktree.failed` | Not handled | Required |
+| Other diagnostic/low-impact events | Ignored | Optional |
 
-### Part Types
+### Message Part Taxonomy
 
-| Type | Supported | Fields |
-|------|-----------|--------|
-| `text` | Yes | `text`, `time?`, `synthetic?` |
-| `file` | Yes | `url`, `mime`, `filename?`, `source?` (FileSource or SymbolSource) |
-| `tool` | Yes | `callID`, `tool`, `state` |
-| `reasoning` | Yes | `text`, `time?` |
-| `patch` | Yes | `files: string[]`, `hash: string` |
-| `step-start` | Parsed | Metadata only |
-| `step-finish` | Parsed | `tokens`, `cost` |
-| `snapshot` | Parsed | `snapshot: string` |
+| Part type | Current handling state | Parity contract classification |
+|---|---|---|
+| `text`, `file`, `tool`, `reasoning`, `patch` | Implemented | Required |
+| `step-start`, `step-finish`, `snapshot` | Parsed only (minimal rendering) | Required |
+| `agent`, `subtask`, `retry`, `compaction` | Not fully surfaced | Required |
+| Unknown/future part types | Ignored defensively | Optional |
 
-### API Endpoints Not Yet Implemented
+### API Endpoints Not Yet Implemented (Prioritized)
 
-Available in the server API but not used by the client: `/global/health`, `/global/event`, `/session/status`, `/session/:id/children`, `/session/:id/todo`, `/session/:id/fork`, `/session/:id/diff`, `/session/:id/permissions/:id`, `/find/*`, `/file/*`, `/mode`, `/agent`, `/command`, `/log`, `/mcp`, `/lsp`, `/formatter`, `/vcs`, `/instance/dispose`, `/provider/auth`, `/provider/:id/oauth/*`, `PATCH /config`, `/doc`, TUI control routes.
+Required for parity wave:
+
+- `/session/status`
+- `/session/:id/children`
+- `/session/:id/todo`
+- `/session/:id/fork`
+- `/session/:id/diff`
+- `/permission`
+- `/permission/:requestID/reply`
+- `/question`
+- `/question/:requestID/reply`
+- `/question/:requestID/reject`
+- `/find/*`
+- `/file/*`
+- `/vcs`
+- `/mcp/*`
+
+Deferred/optional after parity wave:
+
+- `/global/health`
+- `/global/event`
+- `/global/config`
+- `/global/dispose`
+- `/session/:id/permissions/:id`
+- `/session/:id/command`
+- `/session/:id/shell`
+- `/lsp`
+- `/experimental/worktree*`
+- `/pty*`
+- `/mode`
+- `/agent`
+- `/command`
+- `/log`
+- `/formatter`
+- `/instance/dispose`
+- `/provider/auth`
+- `/provider/:id/oauth/*`
+- `PATCH /config`
+- `/doc`
+- TUI control routes
 
 ## Non-English Content (CJK)
 
