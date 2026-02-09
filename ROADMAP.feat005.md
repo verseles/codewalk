@@ -42,13 +42,13 @@ Remove unnecessary markdown clutter while preserving essential project knowledge
 - [x] Update CODEBASE.md references (remove AI_CHAT_IMPLEMENTATION.md mention, update .md count)
 
 ### Task 5.03 - Rewrite README.md
-- [ ] Remove WIP and Vibe Project banners
-- [ ] Remove emojis from headers
-- [ ] Remove video/screenshot placeholder
-- [ ] Remove placeholder clone URL (your-username)
-- [ ] Correct "iOS and Android" to "Android and web"
-- [ ] Simplify architecture section (reference CODEBASE.md)
-- [ ] Add explicit Origin and Acknowledgment section (OpenMode/easychen attribution)
+- [x] Remove WIP and Vibe Project banners
+- [x] Remove emojis from headers
+- [x] Remove video/screenshot placeholder
+- [x] Remove placeholder clone URL (your-username)
+- [x] Correct "iOS and Android" to "Android and web"
+- [x] Simplify architecture section (reference CODEBASE.md)
+- [x] Add explicit Origin and Acknowledgment section (OpenMode/easychen attribution)
 
 ### Task 5.04 - Delete Redundant Files and Verify Integrity
 - [ ] Delete: DEV.md, AI_CHAT_IMPLEMENTATION.md, BUGFIX_SUMMARY.md, CHAT_API_ANALYSIS.md

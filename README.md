@@ -1,122 +1,70 @@
 # CodeWalk
 
-![](./assets/images/logo.256.png)
+A mobile and web client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
-> 🚧 [WIP] This app is a work in progress, and only basic features are implemented.
+## Features
 
-> 🤖 [Vibe Project] The vast majority of the code was implemented by Cursor.
+- AI chat interface with streaming responses
+- Server connection with configurable host, port, and authentication
+- Session management (create, switch, delete, share)
+- Multi-provider and model selection
+- Markdown rendering with syntax highlighting
+- Dark theme with Material Design 3
 
-**A Mobile Client for OpenCode**
-
-CodeWalk is a mobile client for [OpenCode](https://github.com/sst/opencode). Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
-
-
-
-https://github.com/user-attachments/assets/75236c93-5741-4b51-ab45-9fdf7900f0ae
-
-
-
-## ✨ Features
-
-- 🤖 **AI Chat Interface**: Engage in natural conversations with AI assistants
-- 🔗 **Server Connection**: Connect to OpenCode servers with configurable settings
-- 💬 **Session Management**: Create and manage multiple chat sessions
-- 🎨 **Modern UI**: Beautiful dark theme with Material Design 3
-- 📱 **Cross-platform**: Built with Flutter for iOS and Android
-- ⚡ **Real-time Communication**: Instant messaging with AI assistants
-- 🔧 **Configurable**: Flexible server configuration options
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Flutter SDK (>=3.8.1)
 - Dart SDK
-- Android Studio / Xcode (for mobile development)
-- OpenCode server instance
+- An OpenCode-compatible server instance
 
-### Installation
+### Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/codewalk.git
-   cd codewalk
-   ```
-
-2. **Install dependencies**
+1. Install dependencies:
    ```bash
    flutter pub get
    ```
 
-3. **Run the app**
+2. Run the app:
    ```bash
    flutter run
    ```
 
-### Configuration
+### Server Configuration
 
-1. Launch the app
-2. Navigate to **Server Settings**
-3. Configure your OpenCode server:
-   - **Host Address**: Your server IP (e.g., 127.0.0.1)
-   - **Port**: Your server port (e.g., 4096)
-4. Tap **Test Connection** to verify connectivity
-5. Save your settings
+1. Launch the app and navigate to **Server Settings**
+2. Enter your server host and port (e.g., `127.0.0.1:4096`)
+3. Configure authentication if required (API key or basic auth)
+4. Use **Test Connection** to verify connectivity
 
-## 📱 Screenshots
+## Architecture
 
-*Screenshots coming soon...*
+The project follows Clean Architecture with three layers: Domain, Data, and Presentation. Dependency injection via `get_it`, HTTP via `dio`, state management via `provider`.
 
-## 🏗️ Architecture
+For full technical details, see [CODEBASE.md](CODEBASE.md).
 
-CodeWalk follows Clean Architecture principles with clear separation of concerns:
+## Tech Stack
 
-```
-lib/
-├── core/                 # Core utilities and constants
-│   ├── constants/       # App and API constants
-│   ├── di/             # Dependency injection
-│   ├── errors/         # Error handling
-│   ├── network/        # Network client configuration
-│   └── utils/          # Utility functions
-├── data/               # Data layer
-│   ├── datasources/    # Local and remote data sources
-│   ├── models/         # Data models
-│   └── repositories/   # Repository implementations
-├── domain/             # Business logic layer
-│   ├── entities/       # Business entities
-│   ├── repositories/   # Repository interfaces
-│   └── usecases/       # Business use cases
-└── presentation/       # UI layer
-    ├── pages/          # App screens
-    ├── providers/      # State management
-    ├── theme/          # App theming
-    └── widgets/        # Reusable UI components
-```
+- **Framework:** Flutter
+- **Language:** Dart
+- **State Management:** Provider
+- **HTTP Client:** Dio
+- **Local Storage:** SharedPreferences
+- **Dependency Injection:** GetIt
+- **Design System:** Material Design 3
 
-## 🛠️ Tech Stack
-
-- **Framework**: Flutter
-- **Language**: Dart
-- **State Management**: Provider
-- **HTTP Client**: Dio
-- **Local Storage**: SharedPreferences
-- **Dependency Injection**: GetIt
-- **Architecture**: Clean Architecture
-- **Design System**: Material Design 3
-
-
-## 📄 License
+## License
 
 This project is dual-licensed:
 
-- **Open Source:** [GNU Affero General Public License v3.0 (AGPLv3)](LICENSE) — free for everyone.
+- **Open Source:** [GNU Affero General Public License v3.0 (AGPLv3)](LICENSE) -- free for everyone.
 - **Commercial:** A [separate commercial license](LICENSE-COMMERCIAL.md) is available for organizations with annual revenue exceeding USD 500M that wish to use the software without AGPLv3 obligations.
 
-See [NOTICE](NOTICE) for attribution and origin details.
+## Origin and Acknowledgment
 
-## 🙏 Acknowledgments
+CodeWalk is a fork of [OpenMode](https://github.com/easychen/openMode), originally created by [easychen](https://github.com/easychen). The original project is licensed under MIT.
 
-- OpenCode team for the amazing AI assistant platform
-- Flutter team for the excellent mobile framework
-- Material Design team for the beautiful design system
+Substantial modifications have been made since the fork, including licensing changes, code restructuring, rebranding, full English standardization, and documentation rewrites. All modifications are licensed under AGPLv3 (or the commercial license, where applicable).
+
+See [NOTICE](NOTICE) for full attribution details.
