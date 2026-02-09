@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ft07.openmode.open_mode"
+    namespace = "com.verseles.codewalk"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.ft07.openmode.open_mode"
+        applicationId = "com.verseles.codewalk"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

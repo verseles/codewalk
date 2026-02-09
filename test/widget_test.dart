@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:open_mode/presentation/widgets/chat_input_widget.dart';
+import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
 
 void main() {
   testWidgets('ChatInputWidget renders and sends message', (

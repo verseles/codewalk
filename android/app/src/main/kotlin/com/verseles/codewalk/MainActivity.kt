@@ -1,4 +1,4 @@
-package com.ft07.openmode.open_mode
+package com.verseles.codewalk
 
 import io.flutter.embedding.android.FlutterActivity
 

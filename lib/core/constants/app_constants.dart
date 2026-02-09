@@ -1,11 +1,11 @@
 /// Application level constants definition
 class AppConstants {
   // App information
-  static const String appName = 'OpenMode';
-  static const String appSubtitle = 'Mobile App for OpenCode and more';
+  static const String appName = 'CodeWalk';
+  static const String appSubtitle = 'A Mobile Client for OpenCode';
   static const String appVersion = '1.0.0';
   static const String appDescription =
-      'Mobile client for OpenCode AI assistant';
+      'CodeWalk - Mobile client for OpenCode';
 
   // Storage keys
   static const String serverHostKey = 'server_host';

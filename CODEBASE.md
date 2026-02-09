@@ -56,18 +56,7 @@ codewalk/
 
 ## Legacy Naming References
 
-All occurrences of the original project name (`open_mode`, `OpenMode`, `openMode`) that will need renaming in Feature 003.
-
-| File | Reference | Type |
-|------|-----------|------|
-| `pubspec.yaml:1` | `name: open_mode` | Package name |
-| `pubspec.yaml:2` | `"OpenMode - Mobile App for OpenCode and more"` | Description |
-| `lib/core/constants/app_constants.dart:4` | `appName = 'OpenMode'` | Runtime constant |
-| `test/widget_test.dart:4` | `import 'package:open_mode/...'` | Test import |
-| `web/manifest.json:2-3` | `"name": "open_mode"`, `"short_name": "open_mode"` | PWA metadata |
-| `README.md:1,11,72` | `# OpenMode`, description, architecture | Documentation |
-| `AI_CHAT_IMPLEMENTATION.md:5,207` | References in CJK text | Historical doc |
-| `android/app/src/main/kotlin/com/ft07/openmode/open_mode/` | Kotlin package path | Android namespace |
+All runtime/build/config references to `open_mode`/`OpenMode` were renamed to `codewalk`/`CodeWalk` in Feature 003. Remaining references exist only in historical documentation files (NOTICE, ADR.md, ROADMAP files, AI_CHAT_IMPLEMENTATION.md) as intentional attribution to the original project.
 
 ## API Endpoints
 

@@ -1,4 +1,4 @@
-# OpenMode
+# CodeWalk
 
 ![](./assets/images/logo.256.png)
 
@@ -6,9 +6,9 @@
 
 > 🤖 [Vibe Project] The vast majority of the code was implemented by Cursor.
 
-**Mobile App for OpenCode and more**
+**A Mobile Client for OpenCode**
 
-OpenMode is a mobile client for [OpenCode](https://github.com/sst/opencode) (and more, maybe). Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
+CodeWalk is a mobile client for [OpenCode](https://github.com/sst/opencode). Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
 
 
 
@@ -39,8 +39,8 @@ https://github.com/user-attachments/assets/75236c93-5741-4b51-ab45-9fdf7900f0ae
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/openmode.git
-   cd openmode
+   git clone https://github.com/your-username/codewalk.git
+   cd codewalk
    ```
 
 2. **Install dependencies**
@@ -69,7 +69,7 @@ https://github.com/user-attachments/assets/75236c93-5741-4b51-ab45-9fdf7900f0ae
 
 ## 🏗️ Architecture
 
-OpenMode follows Clean Architecture principles with clear separation of concerns:
+CodeWalk follows Clean Architecture principles with clear separation of concerns:
 
 ```
 lib/

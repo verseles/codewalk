@@ -36,10 +36,10 @@ Description: Replace MIT with a compliant AGPLv3 setup and add a separate commer
 ### Feature 003: Rebrand OpenMode -> CodeWalk (Code, Package IDs, Metadata)
 Description: Rename all product-facing and package-level identifiers from OpenMode/open_mode to CodeWalk/codewalk across app runtime, build metadata, and distribution assets. (Visit file ROADMAP.feat003.md for full research details)
 
-- [ ] 3.01 Rename app/package identifiers (`pubspec`, imports, app constants, test imports)
-- [ ] 3.02 Rename Android package namespace/applicationId and Kotlin package path
-- [ ] 3.03 Update web metadata (manifest, title, PWA labels) and asset references
-- [ ] 3.04 Run compile/lint smoke checks after rename to catch broken references
+- [x] 3.01 Rename app/package identifiers (`pubspec`, imports, app constants, test imports) - Commit: ede3939
+- [x] 3.02 Rename Android package namespace/applicationId and Kotlin package path - Commit: a519f8f
+- [x] 3.03 Update web metadata (manifest, title, PWA labels) and asset references - Commit: 63549d4
+- [x] 3.04 Run compile/lint smoke checks after rename to catch broken references
 
 ### Feature 004: Full English Standardization (UI, Code Comments, Docs)
 Description: Translate all remaining non-English content to English, including user-facing strings, comments, logs, and technical documentation. (Visit file ROADMAP.feat004.md for full research details)

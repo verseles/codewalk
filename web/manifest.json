@@ -1,11 +1,11 @@
 {
-    "name": "open_mode",
-    "short_name": "open_mode",
+    "name": "CodeWalk",
+    "short_name": "CodeWalk",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",
-    "description": "Mobile app for opencode and more",
+    "description": "CodeWalk - A mobile client for OpenCode",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
