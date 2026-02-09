@@ -7,6 +7,7 @@ import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/data/datasources/app_local_datasource.dart';
 import 'package:codewalk/domain/entities/app_info.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
+import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
@@ -466,6 +467,7 @@ class FakeChatRepository implements ChatRepository {
   String? lastGetSessionsDirectory;
   String? lastSendProjectId;
   String? lastSendSessionId;
+  String? lastSendDirectory;
   ChatInput? lastSendInput;
   Stream<Either<Failure, ChatMessage>> Function(
     String projectId,
@@ -479,6 +481,24 @@ class FakeChatRepository implements ChatRepository {
   Failure? createSessionFailure;
   Failure? getMessagesFailure;
   Failure? deleteSessionFailure;
+  final StreamController<Either<Failure, ChatEvent>> eventController =
+      StreamController<Either<Failure, ChatEvent>>.broadcast();
+  List<ChatPermissionRequest> pendingPermissions = <ChatPermissionRequest>[];
+  List<ChatQuestionRequest> pendingQuestions = <ChatQuestionRequest>[];
+  String? lastPermissionRequestId;
+  String? lastPermissionReply;
+  String? lastPermissionMessage;
+  String? lastQuestionReplyRequestId;
+  List<List<String>>? lastQuestionAnswers;
+  String? lastQuestionRejectRequestId;
+
+  void emitEvent(ChatEvent event) {
+    eventController.add(Right(event));
+  }
+
+  void emitEventFailure(Failure failure) {
+    eventController.add(Left(failure));
+  }
 
   @override
   Future<Either<Failure, void>> abortSession(
@@ -586,6 +606,67 @@ class FakeChatRepository implements ChatRepository {
   }) async => const Right(null);
 
   @override
+  Future<Either<Failure, List<ChatPermissionRequest>>> listPermissions({
+    String? directory,
+  }) async {
+    return Right(List<ChatPermissionRequest>.from(pendingPermissions));
+  }
+
+  @override
+  Future<Either<Failure, void>> replyPermission({
+    required String requestId,
+    required String reply,
+    String? message,
+    String? directory,
+  }) async {
+    lastPermissionRequestId = requestId;
+    lastPermissionReply = reply;
+    lastPermissionMessage = message;
+    pendingPermissions = pendingPermissions
+        .where((item) => item.id != requestId)
+        .toList(growable: false);
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, List<ChatQuestionRequest>>> listQuestions({
+    String? directory,
+  }) async {
+    return Right(List<ChatQuestionRequest>.from(pendingQuestions));
+  }
+
+  @override
+  Future<Either<Failure, void>> replyQuestion({
+    required String requestId,
+    required List<List<String>> answers,
+    String? directory,
+  }) async {
+    lastQuestionReplyRequestId = requestId;
+    lastQuestionAnswers = answers;
+    pendingQuestions = pendingQuestions
+        .where((item) => item.id != requestId)
+        .toList(growable: false);
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> rejectQuestion({
+    required String requestId,
+    String? directory,
+  }) async {
+    lastQuestionRejectRequestId = requestId;
+    pendingQuestions = pendingQuestions
+        .where((item) => item.id != requestId)
+        .toList(growable: false);
+    return const Right(null);
+  }
+
+  @override
+  Stream<Either<Failure, ChatEvent>> subscribeEvents({String? directory}) {
+    return eventController.stream;
+  }
+
+  @override
   Stream<Either<Failure, ChatMessage>> sendMessage(
     String projectId,
     String sessionId,
@@ -594,6 +675,7 @@ class FakeChatRepository implements ChatRepository {
   }) {
     lastSendProjectId = projectId;
     lastSendSessionId = sessionId;
+    lastSendDirectory = directory;
     lastSendInput = input;
 
     if (sendMessageHandler != null) {

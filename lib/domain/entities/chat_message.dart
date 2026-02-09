@@ -134,8 +134,14 @@ class FilePart extends MessagePart {
   FileSource? get source => fileSource;
 
   @override
-  List<Object?> get props =>
-      [...super.props, url, mime, filename, fileSource, symbolSource];
+  List<Object?> get props => [
+    ...super.props,
+    url,
+    mime,
+    filename,
+    fileSource,
+    symbolSource,
+  ];
 }
 
 /// Technical comment translated to English.
@@ -174,6 +180,74 @@ class ReasoningPart extends MessagePart {
   List<Object?> get props => [...super.props, text, time];
 }
 
+/// Agent invocation marker emitted by the model/runtime.
+class AgentPart extends MessagePart {
+  const AgentPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.name,
+    this.source,
+  }) : super(type: PartType.agent);
+
+  final String name;
+  final AgentSource? source;
+
+  @override
+  List<Object?> get props => [...super.props, name, source];
+}
+
+/// Step boundary marker for an assistant run.
+class StepStartPart extends MessagePart {
+  const StepStartPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    this.snapshot,
+  }) : super(type: PartType.stepStart);
+
+  final String? snapshot;
+
+  @override
+  List<Object?> get props => [...super.props, snapshot];
+}
+
+/// Step completion marker with token/cost details.
+class StepFinishPart extends MessagePart {
+  const StepFinishPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.reason,
+    required this.cost,
+    required this.tokens,
+    this.snapshot,
+  }) : super(type: PartType.stepFinish);
+
+  final String reason;
+  final String? snapshot;
+  final double cost;
+  final MessageTokens tokens;
+
+  @override
+  List<Object?> get props => [...super.props, reason, snapshot, cost, tokens];
+}
+
+/// Snapshot pointer emitted by the runtime.
+class SnapshotPart extends MessagePart {
+  const SnapshotPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.snapshot,
+  }) : super(type: PartType.snapshot);
+
+  final String snapshot;
+
+  @override
+  List<Object?> get props => [...super.props, snapshot];
+}
+
 /// Patch part containing file change information.
 class PatchPart extends MessagePart {
   const PatchPart({
@@ -191,6 +265,70 @@ class PatchPart extends MessagePart {
   List<Object?> get props => [...super.props, files, hash];
 }
 
+/// User-triggered subtask execution description.
+class SubtaskPart extends MessagePart {
+  const SubtaskPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.prompt,
+    required this.description,
+    required this.agent,
+    this.model,
+    this.command,
+  }) : super(type: PartType.subtask);
+
+  final String prompt;
+  final String description;
+  final String agent;
+  final SubtaskModelRef? model;
+  final String? command;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    prompt,
+    description,
+    agent,
+    model,
+    command,
+  ];
+}
+
+/// Retry information when provider calls are retried.
+class RetryPart extends MessagePart {
+  const RetryPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.attempt,
+    required this.createdAt,
+    required this.error,
+  }) : super(type: PartType.retry);
+
+  final int attempt;
+  final DateTime createdAt;
+  final RetryErrorDetails error;
+
+  @override
+  List<Object?> get props => [...super.props, attempt, createdAt, error];
+}
+
+/// Internal compaction marker for long-running sessions.
+class CompactionPart extends MessagePart {
+  const CompactionPart({
+    required super.id,
+    required super.messageId,
+    required super.sessionId,
+    required this.auto,
+  }) : super(type: PartType.compaction);
+
+  final bool auto;
+
+  @override
+  List<Object?> get props => [...super.props, auto];
+}
+
 /// Technical comment translated to English.
 enum PartType {
   text,
@@ -202,6 +340,52 @@ enum PartType {
   stepFinish,
   snapshot,
   patch,
+  subtask,
+  retry,
+  compaction,
+}
+
+/// Source range metadata for agent parts.
+class AgentSource extends Equatable {
+  const AgentSource({
+    required this.value,
+    required this.start,
+    required this.end,
+  });
+
+  final String value;
+  final int start;
+  final int end;
+
+  @override
+  List<Object?> get props => [value, start, end];
+}
+
+/// Model reference associated with subtask parts.
+class SubtaskModelRef extends Equatable {
+  const SubtaskModelRef({required this.providerId, required this.modelId});
+
+  final String providerId;
+  final String modelId;
+
+  @override
+  List<Object?> get props => [providerId, modelId];
+}
+
+/// Retry error details from upstream API failures.
+class RetryErrorDetails extends Equatable {
+  const RetryErrorDetails({
+    required this.message,
+    required this.isRetryable,
+    this.statusCode,
+  });
+
+  final String message;
+  final bool isRetryable;
+  final int? statusCode;
+
+  @override
+  List<Object?> get props => [message, isRetryable, statusCode];
 }
 
 /// Technical comment translated to English.

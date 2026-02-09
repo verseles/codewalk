@@ -70,10 +70,10 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 54 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 69 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 13 | Test files (unit, widget, integration, support) |
-| `.dart` (total) | 71 | All Dart files including .dart_tool |
+| `.dart` (tests) | 14 | Test files (unit, widget, integration, support) |
+| `.dart` (total) | 83 | Tracked Dart files in repository (including tests and generated files) |
 | `.md` (markdown) | 16 | Docs + roadmap + CONTRIBUTING.md |
 | `.sh` (scripts) | 3 | CI validation + installer scripts |
 
@@ -112,6 +112,11 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | GET | `/session/{id}/message/{messageId}` | Get specific message |
 | POST | `/session/{id}/message` | Send message (streaming via SSE) |
 | GET | `/event` | SSE event stream |
+| GET | `/permission` | List pending permission requests |
+| POST | `/permission/{requestId}/reply` | Reply to permission request (`once`, `always`, `reject`) |
+| GET | `/question` | List pending question requests |
+| POST | `/question/{requestId}/reply` | Submit question answers |
+| POST | `/question/{requestId}/reject` | Reject question request |
 | POST | `/session/{id}/abort` | Abort session |
 | POST | `/session/{id}/revert` | Revert message (`{messageID, partID?}`) |
 | POST | `/session/{id}/unrevert` | Unrevert messages |
@@ -125,7 +130,7 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | GET | `/project` | List all projects |
 | GET | `/project/current` | Get current project |
 
-**Total: 23 endpoint operations used by client (including legacy fallbacks)**
+**Total: 29 endpoint operations used by client (including legacy fallbacks)**
 
 ### Feature 010 Parity Contract Baseline (Locked 2026-02-09)
 
@@ -149,8 +154,29 @@ Compatibility tiers:
 | App bootstrap/config | Partial | `/path`, `/provider`, `/config`, `/project`, `/project/current` (+ `/app` fallback) | `/global/config`, `/global/dispose` |
 | Core sessions/messages | Partial | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event` | `/global/event` |
 | Session lifecycle advanced | Partial | `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff`, plus existing share/revert/abort/init/summarize paths | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
-| Interactive flows | Missing | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
+| Interactive flows | Implemented (Feature 013) | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
 | Tooling/context | Mostly missing | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) | `/lsp`, `/experimental/worktree*`, `/pty*` |
+
+### Feature 013 Realtime Architecture (Implemented 2026-02-09)
+
+- Added dedicated realtime domain and parsing models:
+  - `lib/domain/entities/chat_realtime.dart`
+  - `lib/data/models/chat_realtime_model.dart`
+- Added realtime/interactions use cases:
+  - `lib/domain/usecases/watch_chat_events.dart`
+  - `lib/domain/usecases/get_chat_message.dart`
+  - `lib/domain/usecases/list_pending_permissions.dart`
+  - `lib/domain/usecases/reply_permission.dart`
+  - `lib/domain/usecases/list_pending_questions.dart`
+  - `lib/domain/usecases/reply_question.dart`
+  - `lib/domain/usecases/reject_question.dart`
+- Extended `ChatProvider` with provider-level reducer and interaction queues:
+  - resilient `/event` subscription lifecycle with reconnect
+  - state maps for `session.status`, pending permission, pending question
+  - fallback full-message fetch on partial/delta events
+- Added interaction UI widgets:
+  - `lib/presentation/widgets/permission_request_card.dart`
+  - `lib/presentation/widgets/question_request_card.dart`
 
 ### ChatInput Schema
 
@@ -172,12 +198,12 @@ Compatibility tiers:
 
 | Event group | Current handling state | Parity contract classification |
 |---|---|---|
-| `message.updated`, `message.part.updated` | Fully handled | Required |
-| `message.removed`, `message.part.removed` | Logged only | Required |
-| `session.error`, `session.idle` | Handled (stream close and error) | Required |
-| `session.created`, `session.updated`, `session.deleted`, `session.status` | Partial/logged | Required |
-| `permission.asked`, `permission.replied` | Not handled | Required |
-| `question.asked`, `question.replied`, `question.rejected` | Not handled | Required |
+| `message.updated`, `message.part.updated` | Handled with reducer + fallback fetch for partial payloads | Required |
+| `message.removed`, `message.part.removed` | Fully handled in reducer | Required |
+| `session.error`, `session.idle` | Fully handled in reducer | Required |
+| `session.created`, `session.updated`, `session.deleted`, `session.status` | Fully handled in reducer | Required |
+| `permission.asked`, `permission.replied` | Fully handled with pending queue sync | Required |
+| `question.asked`, `question.replied`, `question.rejected` | Fully handled with pending queue sync | Required |
 | `todo.updated`, `session.diff`, `vcs.branch.updated`, `worktree.ready`, `worktree.failed` | Not handled | Required |
 | Other diagnostic/low-impact events | Ignored | Optional |
 
@@ -186,8 +212,8 @@ Compatibility tiers:
 | Part type | Current handling state | Parity contract classification |
 |---|---|---|
 | `text`, `file`, `tool`, `reasoning`, `patch` | Implemented | Required |
-| `step-start`, `step-finish`, `snapshot` | Parsed only (minimal rendering) | Required |
-| `agent`, `subtask`, `retry`, `compaction` | Not fully surfaced | Required |
+| `step-start`, `step-finish`, `snapshot` | Parsed + rendered as structured info blocks | Required |
+| `agent`, `subtask`, `retry`, `compaction` | Parsed + rendered as structured info blocks | Required |
 | Unknown/future part types | Ignored defensively | Optional |
 
 ### API Endpoints Not Yet Implemented (Prioritized)
@@ -199,11 +225,6 @@ Required for parity wave:
 - `/session/:id/todo`
 - `/session/:id/fork`
 - `/session/:id/diff`
-- `/permission`
-- `/permission/:requestID/reply`
-- `/question`
-- `/question/:requestID/reply`
-- `/question/:requestID/reject`
 - `/find/*`
 - `/file/*`
 - `/vcs`
@@ -268,24 +289,24 @@ Deferred/optional after parity wave:
 
 ### flutter analyze
 
-- **Total issues: 92** (reduced from 178 baseline)
+- **Total issues: 101**
   - Errors: 0
   - Warnings: 0
-  - Info: 92 (mostly deprecated API usage and lint modernization opportunities)
+  - Info: 101 (mostly deprecated API usage and lint modernization opportunities)
 - **Top issue categories:**
-  - `deprecated_member_use` (~66): `withOpacity`, `surfaceVariant`
+  - `deprecated_member_use` (majority): `withOpacity`, `surfaceVariant`, old color roles
   - `overridden_fields` (~5): field overrides in model classes
   - `unnecessary_underscores` (~6): test parameter naming
 - **CI Budget:** 186 issues maximum (enforced via `tool/ci/check_analyze_budget.sh`)
 
 ### flutter test
 
-- **Result: 40 tests, all passed**
+- **Result: 47 tests, all passed**
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
   - Unit: providers/usecases/models with migration and server-scope assertions
-  - Widget: responsive shell, app shell navigation, and server settings behavior
-  - Integration: mock-server coverage for SSE + error mapping + server-switch isolation
+  - Widget: responsive shell, app shell navigation, server settings, and interaction cards
+  - Integration: mock-server coverage for SSE reconnect + permission/question flows + error mapping + server-switch isolation
 - **Test tags:** `requires_server`, `hardware` (defined in dart_test.yaml)
 
 ## CI/CD and Automation
@@ -421,9 +442,11 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 
 ### Chat Module
 - Streaming send/receive flow (SSE via `/event`)
-- Message list rendering and incremental updates
+- Realtime event reducer for `session.*`, `message.*`, `permission.*`, and `question.*`
+- Message list rendering with incremental updates + targeted full-message fallback fetch
 - Chat input and provider/model context
 - In-app provider/model picker and reasoning-variant cycle controls
+- In-chat permission/question cards with actionable replies
 - Responsive shell with mobile drawer and desktop split-view layout
 - Desktop shortcuts for new chat, refresh, and input focus
 
@@ -434,16 +457,26 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 ## Chat System Details
 
 ### Core Entities
-- `ChatMessage`: supports user and assistant messages with typed parts (`TextPart`, `FilePart`, `ToolPart`, `ReasoningPart`, `PatchPart`)
+- `ChatMessage`: supports user and assistant messages with typed parts (`TextPart`, `FilePart`, `ToolPart`, `ReasoningPart`, `PatchPart`, `AgentPart`, `StepStartPart`, `StepFinishPart`, `SnapshotPart`, `SubtaskPart`, `RetryPart`, `CompactionPart`)
 - `ChatSession`: session identity, metadata, optional share/summary info, path/workspace linkage
 - `MessageTokens`: includes `input`, `output`, `reasoning`, `cacheRead`, `cacheWrite`
 - `ProvidersResponse`: includes `providers`, `defaultModels`, `connected`
 - `Model`: includes optional `variants` metadata used for reasoning-effort controls
+- `ChatEvent`: typed realtime event wrapper with session status and interactive request payloads
 
 ### Streaming Flow
 - Uses SSE events (`/event`) for incremental message updates
-- Client merges event updates with full message fetch when needed
-- Handles transient errors and stream close/reconnect paths
+- Send flow forwards active `directory` scope to `/event` and message fallback fetch
+- `ChatRemoteDataSource.subscribeEvents()` maintains reconnect/backoff loop
+- `ChatProvider` applies reducer transitions per event type
+- Client merges event deltas with full message fetch when needed
+- Send path records release-visible lifecycle logs (`info`/`warn`) for stream connect/fallback/poll completion diagnostics in `LogsPage`
+- Send path includes watchdog polling fallback when stream is connected but no per-message events are emitted
+- Provider startup guards cancel stale realtime subscriptions to avoid duplicate `/event` streams
+- Standard prompt sends omit `messageID`; that field is reserved for explicit message-targeted workflows
+- Provider send setup is wrapped with stage logs and non-blocking selection persistence so local storage issues cannot prevent network send dispatch
+- Recent-model preference restoration keeps mutable lists for model-usage updates, avoiding fixed-length list mutation crashes during send setup
+- Handles transient errors and stale subscription generation guards
 
 ## Test Infrastructure
 
@@ -465,9 +498,10 @@ test/
 ├── widget/
 │   ├── chat_page_test.dart                   # ChatPage responsive shell
 │   ├── app_shell_page_test.dart              # Bottom navigation + logs tab interaction
+│   ├── interaction_cards_test.dart           # Permission/question UI action dispatch
 │   └── server_settings_page_test.dart        # Multi-server manager rendering and unhealthy-switch guard
 ├── integration/
-│   └── opencode_server_integration_test.dart # Mock server SSE flow + server-switch cache isolation
+│   └── opencode_server_integration_test.dart # Mock server SSE flow/reconnect + interaction endpoints + server-switch cache isolation
 └── support/
     ├── fakes.dart                             # Fake implementations for testing
     └── mock_opencode_server.dart              # Shelf-based mock OpenCode API server
@@ -478,8 +512,9 @@ test/
 **mock_opencode_server.dart:**
 - Shelf-based HTTP server emulating OpenCode API
 - Supports `/session`, `/session/{id}/message` endpoints
+- Supports `/permission*` and `/question*` interaction endpoints
 - Supports `/global/health` for server-health orchestration tests
-- SSE event stream simulation for real-time updates
+- SSE event stream simulation for real-time updates and reconnect scenarios
 - Controllable error injection for fault testing
 - Captures outbound send payload for integration assertions (`variant`, etc.)
 
@@ -489,6 +524,11 @@ test/
 - `FakeChatRemoteDataSource`: In-memory session/message management
 - `FakeProjectRemoteDataSource`: Static project list
 - Used for isolated unit testing without network dependencies
+
+**tool/qa/feat008_smoke.sh (live smoke):**
+- Verifies `/provider`, `/session`, `/event`, and two sequential `/session/{id}/message` turns in the same session
+- Uses preferred defaults (`openai` + `gpt-5.1-codex-mini`, variant `low`) with fallback only if unavailable
+- Fails when assistant returns `info.error`, when second turn reuses previous assistant ID, or when no non-empty text is produced
 
 ### Test Tags (dart_test.yaml)
 

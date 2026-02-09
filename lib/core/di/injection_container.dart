@@ -14,8 +14,15 @@ import '../../domain/usecases/send_chat_message.dart';
 import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/create_chat_session.dart';
 import '../../domain/usecases/get_chat_messages.dart';
+import '../../domain/usecases/get_chat_message.dart';
 import '../../domain/usecases/get_providers.dart';
 import '../../domain/usecases/delete_chat_session.dart';
+import '../../domain/usecases/watch_chat_events.dart';
+import '../../domain/usecases/list_pending_permissions.dart';
+import '../../domain/usecases/reply_permission.dart';
+import '../../domain/usecases/list_pending_questions.dart';
+import '../../domain/usecases/reply_question.dart';
+import '../../domain/usecases/reject_question.dart';
 import '../../data/datasources/chat_remote_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -79,8 +86,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetChatSessions(sl()));
   sl.registerLazySingleton(() => CreateChatSession(sl()));
   sl.registerLazySingleton(() => GetChatMessages(sl()));
+  sl.registerLazySingleton(() => GetChatMessage(sl()));
   sl.registerLazySingleton(() => GetProviders(sl()));
   sl.registerLazySingleton(() => DeleteChatSession(sl()));
+  sl.registerLazySingleton(() => WatchChatEvents(sl()));
+  sl.registerLazySingleton(() => ListPendingPermissions(sl()));
+  sl.registerLazySingleton(() => ReplyPermission(sl()));
+  sl.registerLazySingleton(() => ListPendingQuestions(sl()));
+  sl.registerLazySingleton(() => ReplyQuestion(sl()));
+  sl.registerLazySingleton(() => RejectQuestion(sl()));
 
   // State management
   sl.registerFactory(
@@ -98,8 +112,15 @@ Future<void> init() async {
       getChatSessions: sl(),
       createChatSession: sl(),
       getChatMessages: sl(),
+      getChatMessage: sl(),
       getProviders: sl(),
       deleteChatSession: sl(),
+      watchChatEvents: sl(),
+      listPendingPermissions: sl(),
+      replyPermission: sl(),
+      listPendingQuestions: sl(),
+      replyQuestion: sl(),
+      rejectQuestion: sl(),
       projectProvider: sl(),
       localDataSource: sl(),
     ),

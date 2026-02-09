@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/logging/app_logger.dart';
+import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
@@ -11,6 +12,8 @@ import '../providers/chat_provider.dart';
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
 import '../widgets/chat_session_list.dart';
+import '../widgets/permission_request_card.dart';
+import '../widgets/question_request_card.dart';
 import 'server_settings_page.dart';
 
 class _NewSessionIntent extends Intent {
@@ -648,6 +651,25 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                             ),
                           ),
+                          if (chatProvider.currentSessionStatus != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                _sessionStatusLabel(
+                                  chatProvider.currentSessionStatus!,
+                                ),
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -656,6 +678,8 @@ class _ChatPageState extends State<ChatPage> {
 
               // Message list
               Expanded(child: _buildMessageList(chatProvider)),
+
+              _buildInteractionPrompts(chatProvider),
 
               _buildModelControls(chatProvider),
 
@@ -751,6 +775,67 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildInteractionPrompts(ChatProvider chatProvider) {
+    final permissionRequest = chatProvider.currentPermissionRequest;
+    final questionRequest = chatProvider.currentQuestionRequest;
+    if (permissionRequest == null && questionRequest == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        if (permissionRequest != null)
+          PermissionRequestCard(
+            request: permissionRequest,
+            busy: chatProvider.isRespondingInteraction,
+            onDecide: (reply) {
+              unawaited(
+                chatProvider.respondPermissionRequest(
+                  requestId: permissionRequest.id,
+                  reply: reply,
+                ),
+              );
+            },
+          ),
+        if (questionRequest != null)
+          QuestionRequestCard(
+            request: questionRequest,
+            busy: chatProvider.isRespondingInteraction,
+            onSubmit: (answers) {
+              unawaited(
+                chatProvider.submitQuestionAnswers(
+                  requestId: questionRequest.id,
+                  answers: answers,
+                ),
+              );
+            },
+            onReject: () {
+              unawaited(
+                chatProvider.rejectQuestionRequest(
+                  requestId: questionRequest.id,
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  String _sessionStatusLabel(SessionStatusInfo status) {
+    switch (status.type) {
+      case SessionStatusType.busy:
+        return 'Status: Busy';
+      case SessionStatusType.retry:
+        final attempt = status.attempt ?? 0;
+        if (attempt > 0) {
+          return 'Status: Retry #$attempt';
+        }
+        return 'Status: Retry';
+      case SessionStatusType.idle:
+        return 'Status: Idle';
+    }
   }
 
   Widget _buildModelControlChip({

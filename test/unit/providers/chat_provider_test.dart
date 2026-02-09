@@ -6,14 +6,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
+import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
+import 'package:codewalk/domain/usecases/list_pending_questions.dart';
+import 'package:codewalk/domain/usecases/reject_question.dart';
+import 'package:codewalk/domain/usecases/reply_permission.dart';
+import 'package:codewalk/domain/usecases/reply_question.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/domain/usecases/watch_chat_events.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
 
@@ -46,8 +54,15 @@ void main() {
         getChatSessions: GetChatSessions(chatRepository),
         createChatSession: CreateChatSession(chatRepository),
         getChatMessages: GetChatMessages(chatRepository),
+        getChatMessage: GetChatMessage(chatRepository),
         getProviders: GetProviders(appRepository),
         deleteChatSession: DeleteChatSession(chatRepository),
+        watchChatEvents: WatchChatEvents(chatRepository),
+        listPendingPermissions: ListPendingPermissions(chatRepository),
+        replyPermission: ReplyPermission(chatRepository),
+        listPendingQuestions: ListPendingQuestions(chatRepository),
+        replyQuestion: ReplyQuestion(chatRepository),
+        rejectQuestion: RejectQuestion(chatRepository),
         projectProvider: ProjectProvider(
           projectRepository: FakeProjectRepository(),
         ),
@@ -134,6 +149,7 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 20));
 
         expect(chatRepository.lastSendInput?.variant, 'high');
+        expect(chatRepository.lastSendInput?.messageId, isNull);
       },
     );
 
@@ -279,6 +295,7 @@ void main() {
           yield Right(assistantCompleted);
         };
 
+        await provider.projectProvider.initializeProject();
         await provider.loadSessions();
         await provider.selectSession(provider.sessions.first);
 
@@ -294,6 +311,155 @@ void main() {
           chatRepository.lastSendInput?.parts.single,
           const TextInputPart(text: 'hello provider'),
         );
+        expect(chatRepository.lastSendInput?.messageId, isNull);
+        expect(
+          chatRepository.lastSendDirectory,
+          provider.projectProvider.currentProject?.path,
+        );
+      },
+    );
+
+    test(
+      'sendMessage works when recent models are restored from local storage',
+      () async {
+        final scopeId =
+            provider.projectProvider.currentProject?.path ??
+            provider.projectProvider.currentProjectId;
+        await localDataSource.saveRecentModelsJson(
+          jsonEncode(<String>['provider_a/model_a']),
+          serverId: 'srv_test',
+          scopeId: scopeId,
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        final assistantCompleted = AssistantMessage(
+          id: 'msg_assistant_recent_storage',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(2200),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_recent_storage_done',
+              messageId: 'msg_assistant_recent_storage',
+              sessionId: 'ses_1',
+              text: 'answer from restored recent model',
+            ),
+          ],
+        );
+        chatRepository.sendMessageHandler = (_, __, ___, ____) async* {
+          yield Right(assistantCompleted);
+        };
+
+        await provider.projectProvider.initializeProject();
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        await provider.sendMessage('hello from restored recent storage');
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+
+        expect(provider.state, ChatState.loaded);
+        expect(
+          chatRepository.lastSendInput?.parts.single,
+          const TextInputPart(text: 'hello from restored recent storage'),
+        );
+        final assistant = provider.messages.last as AssistantMessage;
+        expect(
+          (assistant.parts.single as TextPart).text,
+          'answer from restored recent model',
+        );
+      },
+    );
+
+    test(
+      'sendMessage continues when local selection persistence fails',
+      () async {
+        final failingLocalDataSource = _ThrowingPersistenceLocalDataSource();
+        failingLocalDataSource.activeServerId = 'srv_test';
+
+        final resilientProvider = ChatProvider(
+          sendChatMessage: SendChatMessage(chatRepository),
+          getChatSessions: GetChatSessions(chatRepository),
+          createChatSession: CreateChatSession(chatRepository),
+          getChatMessages: GetChatMessages(chatRepository),
+          getChatMessage: GetChatMessage(chatRepository),
+          getProviders: GetProviders(appRepository),
+          deleteChatSession: DeleteChatSession(chatRepository),
+          watchChatEvents: WatchChatEvents(chatRepository),
+          listPendingPermissions: ListPendingPermissions(chatRepository),
+          replyPermission: ReplyPermission(chatRepository),
+          listPendingQuestions: ListPendingQuestions(chatRepository),
+          replyQuestion: ReplyQuestion(chatRepository),
+          rejectQuestion: RejectQuestion(chatRepository),
+          projectProvider: ProjectProvider(
+            projectRepository: FakeProjectRepository(),
+          ),
+          localDataSource: failingLocalDataSource,
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        final assistantCompleted = AssistantMessage(
+          id: 'msg_assistant_resilient',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(2200),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_resilient_done',
+              messageId: 'msg_assistant_resilient',
+              sessionId: 'ses_1',
+              text: 'resilient answer',
+            ),
+          ],
+        );
+        chatRepository.sendMessageHandler = (_, __, ___, ____) async* {
+          yield Right(assistantCompleted);
+        };
+
+        await resilientProvider.projectProvider.initializeProject();
+        await resilientProvider.initializeProviders();
+        await resilientProvider.loadSessions();
+        await resilientProvider.selectSession(resilientProvider.sessions.first);
+
+        await resilientProvider.sendMessage('hello with persistence failure');
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+
+        expect(resilientProvider.state, ChatState.loaded);
+        expect(
+          chatRepository.lastSendInput?.parts.single,
+          const TextInputPart(text: 'hello with persistence failure'),
+        );
+        expect(chatRepository.lastSendInput?.messageId, isNull);
+        final assistant = resilientProvider.messages.last as AssistantMessage;
+        expect((assistant.parts.single as TextPart).text, 'resilient answer');
       },
     );
 
@@ -325,6 +491,163 @@ void main() {
         'Network connection failed. Please check network settings',
       );
     });
+
+    test(
+      'applies realtime message.updated fallback fetch and session status',
+      () async {
+        final draft = AssistantMessage(
+          id: 'msg_ai_live',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_draft',
+              messageId: 'msg_ai_live',
+              sessionId: 'ses_1',
+              text: 'draft',
+            ),
+          ],
+        );
+        final completed = AssistantMessage(
+          id: 'msg_ai_live',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(1500),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_done',
+              messageId: 'msg_ai_live',
+              sessionId: 'ses_1',
+              text: 'done',
+            ),
+          ],
+        );
+        chatRepository.messagesBySession['ses_1'] = <ChatMessage>[draft];
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        expect(
+          ((provider.messages.single as AssistantMessage).parts.single
+                  as TextPart)
+              .text,
+          'draft',
+        );
+
+        chatRepository.messagesBySession['ses_1'] = <ChatMessage>[completed];
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'message.updated',
+            properties: <String, dynamic>{
+              'info': <String, dynamic>{
+                'id': 'msg_ai_live',
+                'sessionID': 'ses_1',
+              },
+            },
+          ),
+        );
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'busy'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+
+        final message = provider.messages.single as AssistantMessage;
+        expect((message.parts.single as TextPart).text, 'done');
+        expect(message.isCompleted, isTrue);
+        expect(provider.currentSessionStatus?.type, SessionStatusType.busy);
+      },
+    );
+
+    test(
+      'loads and responds to pending permission and question requests',
+      () async {
+        chatRepository.pendingPermissions = const <ChatPermissionRequest>[
+          ChatPermissionRequest(
+            id: 'perm_1',
+            sessionId: 'ses_1',
+            permission: 'edit',
+            patterns: <String>['lib/**'],
+            always: <String>[],
+            metadata: <String, dynamic>{},
+          ),
+        ];
+        chatRepository.pendingQuestions = const <ChatQuestionRequest>[
+          ChatQuestionRequest(
+            id: 'q_1',
+            sessionId: 'ses_1',
+            questions: <ChatQuestionInfo>[
+              ChatQuestionInfo(
+                question: 'Proceed?',
+                header: 'Confirm',
+                options: <ChatQuestionOption>[
+                  ChatQuestionOption(label: 'Yes', description: 'continue'),
+                ],
+              ),
+            ],
+          ),
+        ];
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        expect(provider.currentPermissionRequest?.id, 'perm_1');
+        expect(provider.currentQuestionRequest?.id, 'q_1');
+
+        await provider.respondPermissionRequest(
+          requestId: 'perm_1',
+          reply: 'once',
+        );
+        expect(chatRepository.lastPermissionRequestId, 'perm_1');
+        expect(chatRepository.lastPermissionReply, 'once');
+
+        await provider.submitQuestionAnswers(
+          requestId: 'q_1',
+          answers: const <List<String>>[
+            <String>['Yes'],
+          ],
+        );
+        expect(chatRepository.lastQuestionReplyRequestId, 'q_1');
+        expect(chatRepository.lastQuestionAnswers, const <List<String>>[
+          <String>['Yes'],
+        ]);
+      },
+    );
   });
 }
 
@@ -345,4 +668,51 @@ Model _model(
     options: const <String, dynamic>{},
     variants: variants,
   );
+}
+
+class _ThrowingPersistenceLocalDataSource extends InMemoryAppLocalDataSource {
+  @override
+  Future<void> saveSelectedProvider(
+    String providerId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    throw Exception('saveSelectedProvider failed');
+  }
+
+  @override
+  Future<void> saveSelectedModel(
+    String modelId, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    throw Exception('saveSelectedModel failed');
+  }
+
+  @override
+  Future<void> saveRecentModelsJson(
+    String recentModelsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    throw Exception('saveRecentModelsJson failed');
+  }
+
+  @override
+  Future<void> saveModelUsageCountsJson(
+    String usageCountsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    throw Exception('saveModelUsageCountsJson failed');
+  }
+
+  @override
+  Future<void> saveSelectedVariantMap(
+    String variantMapJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    throw Exception('saveSelectedVariantMap failed');
+  }
 }

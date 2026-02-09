@@ -15,6 +15,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-009: OpenCode v2 Parity Contract Freeze and Storage Migration Baseline (2026-02-09) [Accepted]
 - ADR-010: Multi-Server Profile Orchestration and Scoped Persistence (2026-02-09) [Accepted]
 - ADR-011: Model Selection and Variant Preference Orchestration (2026-02-09) [Accepted]
+- ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration (2026-02-09) [Accepted]
 
 ---
 
@@ -375,3 +376,60 @@ After Feature 011 established multi-server state isolation, CodeWalk still lacke
 - `ROADMAP.feat012.md`
 - `ROADMAP.md`
 - https://opencode.ai/docs/models/
+
+---
+
+## ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration
+
+Status: Accepted  
+Date: 2026-02-09
+
+### Context
+
+CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE subset, limited part rendering, and no user-action flow for `permission.*` and `question.*` events. This caused parity gaps with current OpenCode clients: missing lifecycle/status synchronization, weak resilience under stream reconnects, and no in-app interactive approval/question handling.
+
+### Decision
+
+1. Introduce a dedicated realtime event subscription path in chat data/repository layers with reconnect + bounded backoff behavior.
+2. Move high-value event handling into a provider-level reducer in `ChatProvider` for:
+   - `session.*` status and metadata updates
+   - `message.*` updates/removals
+   - `permission.*` and `question.*` ask/reply lifecycle queues
+3. Add targeted message fallback fetch (`GetChatMessage`) when event payloads are partial/delta-based.
+4. Expand message part taxonomy support in parser + UI for:
+   - `agent`, `step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, `patch`
+5. Add interactive UI cards for pending permission/question requests and connect them to response endpoints.
+
+### Rationale
+
+- Event handling must be centralized and deterministic to avoid state drift across long sessions.
+- Delta/partial event payloads are common and require fallback fetch to prevent lost data.
+- Permission/question flows are blocking interaction paths; without in-app actions, user tasks stall.
+- Rendering extended part taxonomy avoids silent data loss and improves parity/debug visibility.
+
+### Consequences
+
+- Positive: realtime state reflects broader OpenCode event surface with reconnect tolerance.
+- Positive: interactive permission/question requests are now actionable directly in mobile UI.
+- Positive: message lifecycle fidelity improved via reducer + targeted fallback fetch.
+- Trade-off: `ChatProvider` gained additional orchestration complexity and larger in-memory state maps.
+- Trade-off: test surface increased (unit/widget/integration), requiring stronger regression discipline.
+
+### Key Files
+
+- `lib/data/datasources/chat_remote_datasource.dart`
+- `lib/data/repositories/chat_repository_impl.dart`
+- `lib/domain/entities/chat_realtime.dart`
+- `lib/domain/usecases/watch_chat_events.dart`
+- `lib/domain/usecases/get_chat_message.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/presentation/widgets/chat_message_widget.dart`
+- `lib/presentation/widgets/permission_request_card.dart`
+- `lib/presentation/widgets/question_request_card.dart`
+
+### References
+
+- `ROADMAP.feat013.md`
+- `ROADMAP.md`
+- https://opencode.ai/docs/server/
+- https://github.com/anomalyco/opencode

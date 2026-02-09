@@ -11,7 +11,21 @@ class MockOpenCodeServer {
 
   bool sendMessageValidationError = false;
   bool streamMessageUpdates = false;
+  String? requiredEventDirectory;
+  String? requiredMessageDirectory;
   Map<String, dynamic>? lastSendMessagePayload;
+  int eventConnectionCount = 0;
+  int eventCloseDelayMs = 900;
+  List<Map<String, dynamic>> scriptedEvents = <Map<String, dynamic>>[];
+  List<List<Map<String, dynamic>>> scriptedEventsByConnection =
+      <List<Map<String, dynamic>>>[];
+  List<Map<String, dynamic>> pendingPermissions = <Map<String, dynamic>>[];
+  List<Map<String, dynamic>> pendingQuestions = <Map<String, dynamic>>[];
+  String? lastPermissionReplyRequestId;
+  Map<String, dynamic>? lastPermissionReplyPayload;
+  String? lastQuestionReplyRequestId;
+  Map<String, dynamic>? lastQuestionReplyPayload;
+  String? lastQuestionRejectRequestId;
 
   final Map<String, Map<String, dynamic>> _sessionsById =
       <String, Map<String, dynamic>>{};
@@ -47,6 +61,18 @@ class MockOpenCodeServer {
     _messagesBySession['ses_1'] = <Map<String, dynamic>>[];
 
     _messageDetails.clear();
+    eventConnectionCount = 0;
+    scriptedEvents = <Map<String, dynamic>>[];
+    scriptedEventsByConnection = <List<Map<String, dynamic>>>[];
+    requiredEventDirectory = null;
+    requiredMessageDirectory = null;
+    pendingPermissions = <Map<String, dynamic>>[];
+    pendingQuestions = <Map<String, dynamic>>[];
+    lastPermissionReplyRequestId = null;
+    lastPermissionReplyPayload = null;
+    lastQuestionReplyRequestId = null;
+    lastQuestionReplyPayload = null;
+    lastQuestionRejectRequestId = null;
   }
 
   Map<String, dynamic> _session(String id, {required String title}) {
@@ -116,7 +142,19 @@ class MockOpenCodeServer {
     }
 
     if (method == 'GET' && request.uri.path == '/event') {
-      if (!streamMessageUpdates) {
+      if (requiredEventDirectory != null &&
+          request.uri.queryParameters['directory'] != requiredEventDirectory) {
+        await _writeJson(request.response, 404, <String, dynamic>{
+          'error': 'event directory mismatch',
+        });
+        return;
+      }
+
+      eventConnectionCount += 1;
+      final hasScriptedEvents =
+          scriptedEvents.isNotEmpty ||
+          (eventConnectionCount - 1) < scriptedEventsByConnection.length;
+      if (!streamMessageUpdates && !hasScriptedEvents) {
         await _writeJson(request.response, 404, <String, dynamic>{
           'error': 'disabled',
         });
@@ -128,25 +166,94 @@ class MockOpenCodeServer {
       request.response.headers.set('cache-control', 'no-cache');
       request.response.headers.set('connection', 'keep-alive');
 
-      // Wait until send endpoint creates message payload to avoid racing.
-      var waitCycles = 0;
-      while (!_messageDetails.containsKey('msg_ai_1') && waitCycles < 60) {
-        waitCycles += 1;
-        await Future<void>.delayed(const Duration(milliseconds: 10));
+      if (streamMessageUpdates) {
+        // Wait until send endpoint creates message payload to avoid racing.
+        var waitCycles = 0;
+        while (!_messageDetails.containsKey('msg_ai_1') && waitCycles < 60) {
+          waitCycles += 1;
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+
+        final event = <String, dynamic>{
+          'type': 'message.updated',
+          'properties': <String, dynamic>{
+            'info': <String, dynamic>{'id': 'msg_ai_1', 'sessionID': 'ses_1'},
+          },
+        };
+        request.response.write('data: ${jsonEncode(event)}\n\n');
+        await request.response.flush();
       }
 
-      final event = <String, dynamic>{
-        'type': 'message.updated',
-        'properties': <String, dynamic>{
-          'info': <String, dynamic>{'id': 'msg_ai_1', 'sessionID': 'ses_1'},
-        },
-      };
+      final scriptedForConnection =
+          (eventConnectionCount - 1) < scriptedEventsByConnection.length
+          ? scriptedEventsByConnection[eventConnectionCount - 1]
+          : scriptedEvents;
+      for (final event in scriptedForConnection) {
+        request.response.write('data: ${jsonEncode(event)}\n\n');
+        await request.response.flush();
+      }
 
-      request.response.write('data: ${jsonEncode(event)}\n\n');
-      await request.response.flush();
-      await Future<void>.delayed(const Duration(milliseconds: 900));
+      await Future<void>.delayed(Duration(milliseconds: eventCloseDelayMs));
       await request.response.close();
       return;
+    }
+
+    if (segments.length == 1 && segments[0] == 'permission') {
+      if (method == 'GET') {
+        await _writeJson(request.response, 200, pendingPermissions);
+        return;
+      }
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'permission' &&
+        segments[2] == 'reply') {
+      if (method == 'POST') {
+        final requestId = segments[1];
+        lastPermissionReplyRequestId = requestId;
+        lastPermissionReplyPayload = await _readJsonBody(request);
+        pendingPermissions = pendingPermissions
+            .where((item) => item['id'] != requestId)
+            .toList(growable: false);
+        await _writeJson(request.response, 200, true);
+        return;
+      }
+    }
+
+    if (segments.length == 1 && segments[0] == 'question') {
+      if (method == 'GET') {
+        await _writeJson(request.response, 200, pendingQuestions);
+        return;
+      }
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'question' &&
+        segments[2] == 'reply') {
+      if (method == 'POST') {
+        final requestId = segments[1];
+        lastQuestionReplyRequestId = requestId;
+        lastQuestionReplyPayload = await _readJsonBody(request);
+        pendingQuestions = pendingQuestions
+            .where((item) => item['id'] != requestId)
+            .toList(growable: false);
+        await _writeJson(request.response, 200, true);
+        return;
+      }
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'question' &&
+        segments[2] == 'reject') {
+      if (method == 'POST') {
+        final requestId = segments[1];
+        lastQuestionRejectRequestId = requestId;
+        pendingQuestions = pendingQuestions
+            .where((item) => item['id'] != requestId)
+            .toList(growable: false);
+        await _writeJson(request.response, 200, true);
+        return;
+      }
     }
 
     if (segments.length == 1 && segments[0] == 'session') {
@@ -197,6 +304,14 @@ class MockOpenCodeServer {
       final messageId = segments[3];
 
       if (method == 'GET') {
+        if (requiredMessageDirectory != null &&
+            request.uri.queryParameters['directory'] !=
+                requiredMessageDirectory) {
+          await _writeJson(request.response, 404, <String, dynamic>{
+            'error': 'message directory mismatch',
+          });
+          return;
+        }
         final found = _messageDetails[messageId];
         if (found == null) {
           await _writeJson(request.response, 404, <String, dynamic>{

@@ -13,10 +13,17 @@ import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
+import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
+import 'package:codewalk/domain/usecases/list_pending_questions.dart';
+import 'package:codewalk/domain/usecases/reject_question.dart';
+import 'package:codewalk/domain/usecases/reply_permission.dart';
+import 'package:codewalk/domain/usecases/reply_question.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/domain/usecases/watch_chat_events.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
@@ -119,6 +126,40 @@ void main() {
       },
     );
 
+    test(
+      'ChatRemoteDataSource sendMessage forwards directory to event and message fetch',
+      () async {
+        server.streamMessageUpdates = true;
+        server.requiredEventDirectory = '/workspace/project';
+        server.requiredMessageDirectory = '/workspace/project';
+
+        final remote = ChatRemoteDataSourceImpl(
+          dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+        );
+
+        final messages = await remote
+            .sendMessage(
+              'default',
+              'ses_1',
+              const ChatInputModel(
+                messageId: 'msg_user_dir_1',
+                providerId: 'mock-provider',
+                modelId: 'mock-model',
+                parts: <ChatInputPartModel>[
+                  ChatInputPartModel(type: 'text', text: 'hello directory'),
+                ],
+              ),
+              directory: '/workspace/project',
+            )
+            .toList();
+
+        expect(messages.length, greaterThanOrEqualTo(2));
+        expect((messages.first.parts.single).text, 'working');
+        expect((messages.last.parts.single).text, 'done');
+        expect(messages.last.completedTime, isNotNull);
+      },
+    );
+
     test('ChatRemoteDataSource includes variant in outbound payload', () async {
       final remote = ChatRemoteDataSourceImpl(
         dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
@@ -143,6 +184,120 @@ void main() {
       expect(server.lastSendMessagePayload, isNotNull);
       expect(server.lastSendMessagePayload?['variant'], 'high');
     });
+
+    test(
+      'ChatRemoteDataSource subscribes and reconnects on SSE closure',
+      () async {
+        server.eventCloseDelayMs = 40;
+        server.scriptedEventsByConnection = <List<Map<String, dynamic>>>[
+          <Map<String, dynamic>>[
+            <String, dynamic>{
+              'type': 'session.status',
+              'properties': <String, dynamic>{
+                'sessionID': 'ses_1',
+                'status': <String, dynamic>{'type': 'busy'},
+              },
+            },
+          ],
+          <Map<String, dynamic>>[
+            <String, dynamic>{
+              'type': 'question.asked',
+              'properties': <String, dynamic>{
+                'id': 'q_1',
+                'sessionID': 'ses_1',
+                'questions': <dynamic>[
+                  <String, dynamic>{
+                    'question': 'Proceed?',
+                    'header': 'Confirm',
+                    'options': <dynamic>[
+                      <String, dynamic>{
+                        'label': 'Yes',
+                        'description': 'continue',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        ];
+
+        final remote = ChatRemoteDataSourceImpl(
+          dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+        );
+
+        final collected = await remote
+            .subscribeEvents()
+            .map((event) => event.type)
+            .where((type) => type != 'server.connected')
+            .take(2)
+            .toList();
+
+        expect(collected, <String>['session.status', 'question.asked']);
+        expect(server.eventConnectionCount, greaterThanOrEqualTo(2));
+      },
+    );
+
+    test(
+      'ChatRemoteDataSource lists and responds to permission/question prompts',
+      () async {
+        server.pendingPermissions = <Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 'perm_1',
+            'sessionID': 'ses_1',
+            'permission': 'edit',
+            'patterns': <String>['lib/**'],
+            'always': <String>[],
+            'metadata': <String, dynamic>{},
+          },
+        ];
+        server.pendingQuestions = <Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 'q_1',
+            'sessionID': 'ses_1',
+            'questions': <dynamic>[
+              <String, dynamic>{
+                'question': 'Continue?',
+                'header': 'Confirm',
+                'options': <dynamic>[
+                  <String, dynamic>{
+                    'label': 'Yes',
+                    'description': 'Continue execution',
+                  },
+                ],
+              },
+            ],
+          },
+        ];
+
+        final remote = ChatRemoteDataSourceImpl(
+          dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+        );
+
+        final permissions = await remote.listPermissions();
+        final questions = await remote.listQuestions();
+        expect(permissions.single.id, 'perm_1');
+        expect(questions.single.id, 'q_1');
+
+        await remote.replyPermission(requestId: 'perm_1', reply: 'once');
+        expect(server.lastPermissionReplyRequestId, 'perm_1');
+        expect(server.lastPermissionReplyPayload?['reply'], 'once');
+
+        await remote.replyQuestion(
+          requestId: 'q_1',
+          answers: const <List<String>>[
+            <String>['Yes'],
+          ],
+        );
+        expect(server.lastQuestionReplyRequestId, 'q_1');
+        expect(
+          server.lastQuestionReplyPayload?['answers'],
+          const <List<String>>[
+            <String>['Yes'],
+          ],
+        );
+      },
+    );
 
     test('ChatRepository maps send 400 error to ValidationFailure', () async {
       server.sendMessageValidationError = true;
@@ -223,8 +378,15 @@ void main() {
           getChatSessions: GetChatSessions(chatRepository),
           createChatSession: CreateChatSession(chatRepository),
           getChatMessages: GetChatMessages(chatRepository),
+          getChatMessage: GetChatMessage(chatRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(chatRepository),
+          watchChatEvents: WatchChatEvents(chatRepository),
+          listPendingPermissions: ListPendingPermissions(chatRepository),
+          replyPermission: ReplyPermission(chatRepository),
+          listPendingQuestions: ListPendingQuestions(chatRepository),
+          replyQuestion: ReplyQuestion(chatRepository),
+          rejectQuestion: RejectQuestion(chatRepository),
           projectProvider: projectProvider,
           localDataSource: localDataSource,
         );

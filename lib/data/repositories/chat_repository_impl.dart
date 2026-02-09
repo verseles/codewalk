@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../core/errors/failures.dart';
 import '../../core/errors/exceptions.dart';
+import '../../core/logging/app_logger.dart';
 import '../datasources/chat_remote_datasource.dart';
 import '../models/chat_session_model.dart';
 
@@ -236,6 +238,9 @@ class ChatRepositoryImpl implements ChatRepository {
     ChatInput input, {
     String? directory,
   }) async* {
+    AppLogger.info(
+      'Repository send start session=$sessionId provider=${input.providerId} model=${input.modelId} variant=${input.variant ?? "auto"} directory=${directory ?? "-"}',
+    );
     try {
       final inputModel = ChatInputModel.fromDomain(input);
       final messageStream = remoteDataSource.sendMessage(
@@ -248,16 +253,160 @@ class ChatRepositoryImpl implements ChatRepository {
       await for (final message in messageStream) {
         yield Right(message.toDomain());
       }
+      AppLogger.info('Repository send stream completed session=$sessionId');
     } on NotFoundException {
+      AppLogger.warn('Repository send failed: session not found $sessionId');
       yield const Left(NotFoundFailure('Session not found'));
     } on ValidationException {
+      AppLogger.warn('Repository send failed: validation error');
       yield const Left(ValidationFailure('Invalid input parameters'));
     } on ServerException {
+      AppLogger.warn('Repository send failed: server error');
       yield const Left(ServerFailure('Failed to send message'));
     } on NetworkException {
+      AppLogger.warn('Repository send failed: network error');
       yield const Left(NetworkFailure('Network connection failed'));
     } catch (e) {
+      AppLogger.error('Repository send failed: unexpected exception', error: e);
       yield const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, ChatEvent>> subscribeEvents({
+    String? directory,
+  }) async* {
+    try {
+      final eventStream = remoteDataSource.subscribeEvents(
+        directory: directory,
+      );
+      await for (final event in eventStream) {
+        yield Right(event.toDomain());
+      }
+    } on ServerException {
+      yield const Left(ServerFailure('Failed to subscribe to realtime events'));
+    } on NetworkException {
+      yield const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      yield const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ChatPermissionRequest>>> listPermissions({
+    String? directory,
+  }) async {
+    try {
+      final items = await remoteDataSource.listPermissions(
+        directory: directory,
+      );
+      return Right(
+        items.map((item) => item.toDomain()).toList(growable: false),
+      );
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Permission route not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to list permissions'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> replyPermission({
+    required String requestId,
+    required String reply,
+    String? message,
+    String? directory,
+  }) async {
+    try {
+      await remoteDataSource.replyPermission(
+        requestId: requestId,
+        reply: reply,
+        message: message,
+        directory: directory,
+      );
+      return const Right(null);
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Permission request not found'));
+    } on ValidationException {
+      return const Left(ValidationFailure('Invalid permission response'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to respond permission'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ChatQuestionRequest>>> listQuestions({
+    String? directory,
+  }) async {
+    try {
+      final items = await remoteDataSource.listQuestions(directory: directory);
+      return Right(
+        items.map((item) => item.toDomain()).toList(growable: false),
+      );
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Question route not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to list questions'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> replyQuestion({
+    required String requestId,
+    required List<List<String>> answers,
+    String? directory,
+  }) async {
+    try {
+      await remoteDataSource.replyQuestion(
+        requestId: requestId,
+        answers: answers,
+        directory: directory,
+      );
+      return const Right(null);
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Question request not found'));
+    } on ValidationException {
+      return const Left(ValidationFailure('Invalid question response'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to respond question'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> rejectQuestion({
+    required String requestId,
+    String? directory,
+  }) async {
+    try {
+      await remoteDataSource.rejectQuestion(
+        requestId: requestId,
+        directory: directory,
+      );
+      return const Right(null);
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Question request not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to reject question'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
     }
   }
 

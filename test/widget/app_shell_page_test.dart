@@ -11,10 +11,17 @@ import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
+import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
+import 'package:codewalk/domain/usecases/list_pending_questions.dart';
+import 'package:codewalk/domain/usecases/reject_question.dart';
+import 'package:codewalk/domain/usecases/reply_permission.dart';
+import 'package:codewalk/domain/usecases/reply_question.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/domain/usecases/watch_chat_events.dart';
 import 'package:codewalk/presentation/pages/app_shell_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
@@ -107,8 +114,15 @@ ChatProvider _buildChatProvider({
     getChatSessions: GetChatSessions(chatRepo),
     createChatSession: CreateChatSession(chatRepo),
     getChatMessages: GetChatMessages(chatRepo),
+    getChatMessage: GetChatMessage(chatRepo),
     getProviders: GetProviders(appRepo),
     deleteChatSession: DeleteChatSession(chatRepo),
+    watchChatEvents: WatchChatEvents(chatRepo),
+    listPendingPermissions: ListPendingPermissions(chatRepo),
+    replyPermission: ReplyPermission(chatRepo),
+    listPendingQuestions: ListPendingQuestions(chatRepo),
+    replyQuestion: ReplyQuestion(chatRepo),
+    rejectQuestion: RejectQuestion(chatRepo),
     projectProvider: ProjectProvider(
       projectRepository: FakeProjectRepository(),
     ),

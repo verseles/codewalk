@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../entities/chat_message.dart';
+import '../entities/chat_realtime.dart';
 import '../entities/chat_session.dart';
 import '../../core/errors/failures.dart';
 
@@ -71,6 +72,40 @@ abstract class ChatRepository {
     String projectId,
     String sessionId,
     ChatInput input, {
+    String? directory,
+  });
+
+  /// Subscribe to global session/message events from SSE.
+  Stream<Either<Failure, ChatEvent>> subscribeEvents({String? directory});
+
+  /// List pending permission requests.
+  Future<Either<Failure, List<ChatPermissionRequest>>> listPermissions({
+    String? directory,
+  });
+
+  /// Respond to a permission request.
+  Future<Either<Failure, void>> replyPermission({
+    required String requestId,
+    required String reply,
+    String? message,
+    String? directory,
+  });
+
+  /// List pending question requests.
+  Future<Either<Failure, List<ChatQuestionRequest>>> listQuestions({
+    String? directory,
+  });
+
+  /// Submit answers for a question request.
+  Future<Either<Failure, void>> replyQuestion({
+    required String requestId,
+    required List<List<String>> answers,
+    String? directory,
+  });
+
+  /// Reject a question request.
+  Future<Either<Failure, void>> rejectQuestion({
+    required String requestId,
     String? directory,
   });
 

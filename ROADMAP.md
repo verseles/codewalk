@@ -107,11 +107,20 @@ Completed model-control parity foundations by adding provider/model picker contr
 ### Feature 013: Event Stream and Message-Part Parity (Messages, Thinking, Tools, Questions, Permissions)
 Description: Expand real-time event handling to match OpenCode v2 event/part taxonomy and reliably render message lifecycle details. (Visit file ROADMAP.feat013.md for full research details)
 
-- [ ] 13.01 Harden SSE layer (reconnect, backoff, stale subscription guard, fetch fallback) for long-running sessions
-- [ ] 13.02 Support full high-value event set (`message.*`, `session.status`, `session.error`, `permission.*`, `question.*`) in provider state
-- [ ] 13.03 Expand part parsing/rendering coverage (`step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, `agent`, `patch`)
-- [ ] 13.04 Add permission/question response UX for interactive tool flows
-- [ ] 13.05 Add integration tests with mocked event matrix and partial/delta update scenarios
+Completed realtime parity foundations with resilient SSE subscription (`/event`) including reconnect/backoff handling, provider-level event reducer for session/message/status/permission/question flows, and fallback full-message fetch on partial/delta scenarios. Expanded part taxonomy parsing/rendering for step/snapshot/subtask/retry/compaction/agent/patch types, added interactive permission/question cards with response endpoints, and covered behavior through unit/widget/integration tests (including event-matrix + reconnect scenarios).
+
+Applied a post-completion stabilization fix to forward `directory` scope through send-message streaming (`/event` and `/session/{id}/message/{messageId}` fetch fallback), resolving cases where responses stayed in thinking-only state when server routing required directory-scoped events.
+Added an additional stabilization pass with release-visible send lifecycle logs in Logs tab and assistant-message-ID recovery via `/session/{id}/message` when stream events are unavailable, improving field diagnosis for intermittent SSE failures.
+Added watchdog fallback for cases where `/event` stays connected without message events, and removed duplicate realtime subscriptions by fixing a provider-level race in event subscription startup.
+Applied send-payload correction for normal prompts: stop sending `messageID` in standard message creation requests to prevent stale repeated assistant IDs from server immediate responses.
+Hardened provider send setup with step logs and best-effort local selection persistence so storage-layer failures cannot block outbound send stream subscription.
+Fixed a send-path crash triggered by fixed-length restored recent-model lists (`Unsupported operation: Cannot remove from a fixed-length list`) before repository dispatch.
+
+- [x] 13.01 Harden SSE layer (reconnect, backoff, stale subscription guard, fetch fallback) for long-running sessions
+- [x] 13.02 Support full high-value event set (`message.*`, `session.status`, `session.error`, `permission.*`, `question.*`) in provider state
+- [x] 13.03 Expand part parsing/rendering coverage (`step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, `agent`, `patch`)
+- [x] 13.04 Add permission/question response UX for interactive tool flows
+- [x] 13.05 Add integration tests with mocked event matrix and partial/delta update scenarios
 
 ### Feature 014: Advanced Session Lifecycle Management
 Description: Upgrade session operations beyond basic CRUD to parity-level management for active and historical work. (Visit file ROADMAP.feat014.md for full research details)

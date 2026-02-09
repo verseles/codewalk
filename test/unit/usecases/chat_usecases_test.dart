@@ -92,11 +92,13 @@ void main() {
             projectId: 'default',
             sessionId: 'ses_1',
             input: input,
+            directory: '/workspace/project',
           ),
         ).toList();
 
         expect(repository.lastSendProjectId, 'default');
         expect(repository.lastSendSessionId, 'ses_1');
+        expect(repository.lastSendDirectory, '/workspace/project');
         expect(repository.lastSendInput, input);
         expect(values, hasLength(1));
         final streamed =

@@ -135,10 +135,24 @@ class ChatMessageWidget extends StatelessWidget {
         return _buildFilePart(context, part as FilePart);
       case PartType.tool:
         return _buildToolPart(context, part as ToolPart);
+      case PartType.agent:
+        return _buildAgentPart(context, part as AgentPart);
       case PartType.reasoning:
         return _buildReasoningPart(context, part as ReasoningPart);
-      default:
-        return const SizedBox.shrink();
+      case PartType.stepStart:
+        return _buildStepStartPart(context, part as StepStartPart);
+      case PartType.stepFinish:
+        return _buildStepFinishPart(context, part as StepFinishPart);
+      case PartType.snapshot:
+        return _buildSnapshotPart(context, part as SnapshotPart);
+      case PartType.patch:
+        return _buildPatchPart(context, part as PatchPart);
+      case PartType.subtask:
+        return _buildSubtaskPart(context, part as SubtaskPart);
+      case PartType.retry:
+        return _buildRetryPart(context, part as RetryPart);
+      case PartType.compaction:
+        return _buildCompactionPart(context, part as CompactionPart);
     }
   }
 
@@ -340,6 +354,127 @@ class ChatMessageWidget extends StatelessWidget {
                 context,
               ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgentPart(BuildContext context, AgentPart part) {
+    return _buildInfoContainer(
+      context,
+      icon: Icons.support_agent,
+      title: 'Agent',
+      subtitle: part.name,
+    );
+  }
+
+  Widget _buildStepStartPart(BuildContext context, StepStartPart part) {
+    return _buildInfoContainer(
+      context,
+      icon: Icons.play_circle_outline,
+      title: 'Step started',
+      subtitle: part.snapshot != null ? 'snapshot: ${part.snapshot}' : null,
+    );
+  }
+
+  Widget _buildStepFinishPart(BuildContext context, StepFinishPart part) {
+    return _buildInfoContainer(
+      context,
+      icon: Icons.check_circle_outline,
+      title: 'Step finished',
+      subtitle:
+          '${part.reason} • tokens ${part.tokens.total} • \$${part.cost.toStringAsFixed(6)}',
+    );
+  }
+
+  Widget _buildSnapshotPart(BuildContext context, SnapshotPart part) {
+    return _buildInfoContainer(
+      context,
+      icon: Icons.camera_alt_outlined,
+      title: 'Snapshot',
+      subtitle: part.snapshot,
+    );
+  }
+
+  Widget _buildPatchPart(BuildContext context, PatchPart part) {
+    final files = part.files.take(4).join(', ');
+    final suffix = part.files.length > 4
+        ? ' (+${part.files.length - 4} more)'
+        : '';
+    return _buildInfoContainer(
+      context,
+      icon: Icons.compare_arrows_outlined,
+      title: 'Patch',
+      subtitle: files.isEmpty ? part.hash : '$files$suffix',
+    );
+  }
+
+  Widget _buildSubtaskPart(BuildContext context, SubtaskPart part) {
+    final model = part.model == null
+        ? ''
+        : ' • ${part.model!.providerId}/${part.model!.modelId}';
+    return _buildInfoContainer(
+      context,
+      icon: Icons.task_outlined,
+      title: 'Subtask (${part.agent})',
+      subtitle: '${part.description}$model',
+    );
+  }
+
+  Widget _buildRetryPart(BuildContext context, RetryPart part) {
+    return _buildInfoContainer(
+      context,
+      icon: Icons.refresh_outlined,
+      title: 'Retry #${part.attempt}',
+      subtitle: part.error.message,
+    );
+  }
+
+  Widget _buildCompactionPart(BuildContext context, CompactionPart part) {
+    return _buildInfoContainer(
+      context,
+      icon: Icons.compress_outlined,
+      title: 'Compaction',
+      subtitle: part.auto ? 'automatic' : 'manual',
+    );
+  }
+
+  Widget _buildInfoContainer(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.45),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                if (subtitle != null && subtitle.trim().isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );

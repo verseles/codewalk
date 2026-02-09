@@ -3,16 +3,26 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../../core/logging/app_logger.dart';
 import '../../data/datasources/app_local_datasource.dart';
+import '../../data/models/chat_message_model.dart';
+import '../../data/models/chat_realtime_model.dart';
 import '../../data/models/chat_session_model.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/provider.dart';
-import '../../domain/usecases/send_chat_message.dart';
-import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/create_chat_session.dart';
-import '../../domain/usecases/get_chat_messages.dart';
-import '../../domain/usecases/get_providers.dart';
 import '../../domain/usecases/delete_chat_session.dart';
+import '../../domain/usecases/get_chat_message.dart';
+import '../../domain/usecases/get_chat_messages.dart';
+import '../../domain/usecases/get_chat_sessions.dart';
+import '../../domain/usecases/get_providers.dart';
+import '../../domain/usecases/list_pending_permissions.dart';
+import '../../domain/usecases/list_pending_questions.dart';
+import '../../domain/usecases/reject_question.dart';
+import '../../domain/usecases/reply_permission.dart';
+import '../../domain/usecases/reply_question.dart';
+import '../../domain/usecases/send_chat_message.dart';
+import '../../domain/usecases/watch_chat_events.dart';
 import '../../core/errors/failures.dart';
 import 'project_provider.dart';
 
@@ -26,8 +36,15 @@ class ChatProvider extends ChangeNotifier {
     required this.getChatSessions,
     required this.createChatSession,
     required this.getChatMessages,
+    required this.getChatMessage,
     required this.getProviders,
     required this.deleteChatSession,
+    required this.watchChatEvents,
+    required this.listPendingPermissions,
+    required this.replyPermission,
+    required this.listPendingQuestions,
+    required this.replyQuestion,
+    required this.rejectQuestion,
     required this.projectProvider,
     required this.localDataSource,
   });
@@ -39,8 +56,15 @@ class ChatProvider extends ChangeNotifier {
   final GetChatSessions getChatSessions;
   final CreateChatSession createChatSession;
   final GetChatMessages getChatMessages;
+  final GetChatMessage getChatMessage;
   final GetProviders getProviders;
   final DeleteChatSession deleteChatSession;
+  final WatchChatEvents watchChatEvents;
+  final ListPendingPermissions listPendingPermissions;
+  final ReplyPermission replyPermission;
+  final ListPendingQuestions listPendingQuestions;
+  final ReplyQuestion replyQuestion;
+  final RejectQuestion rejectQuestion;
   final ProjectProvider projectProvider;
   final AppLocalDataSource localDataSource;
 
@@ -50,6 +74,15 @@ class ChatProvider extends ChangeNotifier {
   List<ChatMessage> _messages = [];
   String? _errorMessage;
   StreamSubscription<dynamic>? _messageSubscription;
+  StreamSubscription<dynamic>? _eventSubscription;
+  int _eventStreamGeneration = 0;
+  bool _isRespondingInteraction = false;
+  Map<String, SessionStatusInfo> _sessionStatusById =
+      <String, SessionStatusInfo>{};
+  Map<String, List<ChatPermissionRequest>> _pendingPermissionsBySession =
+      <String, List<ChatPermissionRequest>>{};
+  Map<String, List<ChatQuestionRequest>> _pendingQuestionsBySession =
+      <String, List<ChatQuestionRequest>>{};
 
   // Project and provider-related state
   String? _currentProjectId;
@@ -86,6 +119,43 @@ class ChatProvider extends ChangeNotifier {
   Map<String, int> get modelUsageCounts =>
       Map<String, int>.unmodifiable(_modelUsageCounts);
   String get activeServerId => _activeServerId;
+  bool get isRespondingInteraction => _isRespondingInteraction;
+  Map<String, SessionStatusInfo> get sessionStatusById =>
+      Map<String, SessionStatusInfo>.unmodifiable(_sessionStatusById);
+
+  SessionStatusInfo? get currentSessionStatus {
+    final sessionId = _currentSession?.id;
+    if (sessionId == null) {
+      return null;
+    }
+    return _sessionStatusById[sessionId];
+  }
+
+  List<ChatPermissionRequest> get currentSessionPermissions {
+    final sessionId = _currentSession?.id;
+    if (sessionId == null) {
+      return const <ChatPermissionRequest>[];
+    }
+    return List<ChatPermissionRequest>.unmodifiable(
+      _pendingPermissionsBySession[sessionId] ??
+          const <ChatPermissionRequest>[],
+    );
+  }
+
+  List<ChatQuestionRequest> get currentSessionQuestions {
+    final sessionId = _currentSession?.id;
+    if (sessionId == null) {
+      return const <ChatQuestionRequest>[];
+    }
+    return List<ChatQuestionRequest>.unmodifiable(
+      _pendingQuestionsBySession[sessionId] ?? const <ChatQuestionRequest>[],
+    );
+  }
+
+  ChatPermissionRequest? get currentPermissionRequest =>
+      currentSessionPermissions.firstOrNull;
+  ChatQuestionRequest? get currentQuestionRequest =>
+      currentSessionQuestions.firstOrNull;
 
   Provider? get selectedProvider {
     final selectedId = _selectedProviderId;
@@ -176,7 +246,7 @@ class ChatProvider extends ChangeNotifier {
               .whereType<String>()
               .where((value) => value.trim().isNotEmpty)
               .take(_maxRecentModels)
-              .toList(growable: false);
+              .toList();
         }
       } catch (_) {
         _recentModelKeys = <String>[];
@@ -271,6 +341,7 @@ class ChatProvider extends ChangeNotifier {
     if (providerId == null || modelId == null) {
       return;
     }
+    _recentModelKeys = List<String>.from(_recentModelKeys);
     final key = _modelKey(providerId, modelId);
     _recentModelKeys.remove(key);
     _recentModelKeys.insert(0, key);
@@ -278,6 +349,454 @@ class ChatProvider extends ChangeNotifier {
       _recentModelKeys = _recentModelKeys.take(_maxRecentModels).toList();
     }
     _modelUsageCounts[key] = (_modelUsageCounts[key] ?? 0) + 1;
+  }
+
+  Future<void> _startRealtimeEventSubscription() async {
+    final generation = ++_eventStreamGeneration;
+    final previousSubscription = _eventSubscription;
+    _eventSubscription = null;
+    await previousSubscription?.cancel();
+
+    final directory = projectProvider.currentProject?.path;
+    final newSubscription = watchChatEvents(directory: directory).listen(
+      (result) {
+        if (generation != _eventStreamGeneration) {
+          return;
+        }
+        result.fold((failure) {
+          AppLogger.warn(
+            'Realtime event stream failure: ${failure.toString()}',
+          );
+        }, _applyChatEvent);
+      },
+      onError: (error) {
+        if (generation != _eventStreamGeneration) {
+          return;
+        }
+        AppLogger.warn('Realtime event stream exception', error: error);
+      },
+    );
+
+    if (generation != _eventStreamGeneration) {
+      await newSubscription.cancel();
+      return;
+    }
+
+    _eventSubscription = newSubscription;
+  }
+
+  Future<void> _loadPendingInteractions() async {
+    final directory = projectProvider.currentProject?.path;
+
+    final permissionsResult = await listPendingPermissions(
+      directory: directory,
+    );
+    permissionsResult.fold(
+      (failure) {
+        AppLogger.warn('Failed to load pending permissions: $failure');
+      },
+      (permissions) {
+        final grouped = <String, List<ChatPermissionRequest>>{};
+        for (final item in permissions) {
+          grouped.putIfAbsent(item.sessionId, () => <ChatPermissionRequest>[])
+            ..add(item);
+        }
+        _pendingPermissionsBySession = grouped;
+      },
+    );
+
+    final questionsResult = await listPendingQuestions(directory: directory);
+    questionsResult.fold(
+      (failure) {
+        AppLogger.warn('Failed to load pending questions: $failure');
+      },
+      (questions) {
+        final grouped = <String, List<ChatQuestionRequest>>{};
+        for (final item in questions) {
+          grouped.putIfAbsent(item.sessionId, () => <ChatQuestionRequest>[])
+            ..add(item);
+        }
+        _pendingQuestionsBySession = grouped;
+      },
+    );
+
+    notifyListeners();
+  }
+
+  void _upsertSession(ChatSession session) {
+    final existingIndex = _sessions.indexWhere((item) => item.id == session.id);
+    if (existingIndex == -1) {
+      _sessions.insert(0, session);
+      return;
+    }
+    _sessions[existingIndex] = session;
+  }
+
+  void _removeSessionById(String sessionId) {
+    _sessions.removeWhere((item) => item.id == sessionId);
+    if (_currentSession?.id == sessionId) {
+      _currentSession = null;
+      _messages = <ChatMessage>[];
+    }
+    _sessionStatusById.remove(sessionId);
+    _pendingPermissionsBySession.remove(sessionId);
+    _pendingQuestionsBySession.remove(sessionId);
+  }
+
+  void _applyChatEvent(ChatEvent event) {
+    final properties = event.properties;
+    switch (event.type) {
+      case 'session.created':
+      case 'session.updated':
+        final info = properties['info'];
+        if (info is Map<String, dynamic>) {
+          final nextSession = ChatSessionModel.fromJson(info).toDomain();
+          _upsertSession(nextSession);
+          if (_currentSession?.id == nextSession.id) {
+            _currentSession = nextSession;
+          }
+          notifyListeners();
+        }
+        break;
+      case 'session.deleted':
+        final info = properties['info'];
+        if (info is Map<String, dynamic>) {
+          final sessionId = info['id'] as String?;
+          if (sessionId != null && sessionId.isNotEmpty) {
+            _removeSessionById(sessionId);
+            notifyListeners();
+          }
+        }
+        break;
+      case 'session.status':
+        final sessionId = properties['sessionID'] as String?;
+        final statusMap = properties['status'];
+        if (sessionId != null && statusMap is Map<String, dynamic>) {
+          final status = SessionStatusModel.fromJson(statusMap).toDomain();
+          _sessionStatusById[sessionId] = status;
+          notifyListeners();
+        }
+        break;
+      case 'session.idle':
+        final sessionId = properties['sessionID'] as String?;
+        if (sessionId != null) {
+          _sessionStatusById[sessionId] = const SessionStatusInfo(
+            type: SessionStatusType.idle,
+          );
+          notifyListeners();
+        }
+        break;
+      case 'session.error':
+        final sessionId = properties['sessionID'] as String?;
+        if (sessionId != null && sessionId == _currentSession?.id) {
+          final error = properties['error'] as Map<String, dynamic>?;
+          final data = error?['data'] as Map<String, dynamic>? ?? {};
+          final message =
+              data['message'] as String? ??
+              error?['message'] as String? ??
+              'Session error';
+          _setError(message);
+        }
+        break;
+      case 'message.updated':
+        final info = properties['info'] as Map<String, dynamic>?;
+        final sessionId = info?['sessionID'] as String?;
+        final messageId = info?['id'] as String?;
+        if (sessionId != null &&
+            messageId != null &&
+            _currentSession?.id == sessionId) {
+          unawaited(_fetchMessageFallback(sessionId, messageId));
+        }
+        break;
+      case 'message.part.updated':
+        final partMap = properties['part'] as Map<String, dynamic>?;
+        final part = partMap == null
+            ? null
+            : MessagePartModel.fromJson(partMap).toDomain();
+        final sessionId = part?.sessionId;
+        final messageId = part?.messageId;
+        if (sessionId == null ||
+            messageId == null ||
+            _currentSession?.id != sessionId) {
+          break;
+        }
+
+        final partIndex = _messages.indexWhere((item) => item.id == messageId);
+        final delta = properties['delta'] as String?;
+        if (part == null ||
+            partIndex == -1 ||
+            (delta != null && delta.isNotEmpty)) {
+          unawaited(_fetchMessageFallback(sessionId, messageId));
+          break;
+        }
+        final message = _messages[partIndex];
+        final nextParts = List<MessagePart>.from(message.parts);
+        final existingPartIndex = nextParts.indexWhere(
+          (item) => item.id == part.id,
+        );
+        if (existingPartIndex == -1) {
+          nextParts.add(part);
+        } else {
+          nextParts[existingPartIndex] = part;
+        }
+        _messages[partIndex] = _copyMessageWithParts(message, nextParts);
+        notifyListeners();
+        _scrollToBottomCallback?.call();
+        break;
+      case 'message.part.removed':
+        final sessionId = properties['sessionID'] as String?;
+        final messageId = properties['messageID'] as String?;
+        final partId = properties['partID'] as String?;
+        if (sessionId == null ||
+            messageId == null ||
+            partId == null ||
+            _currentSession?.id != sessionId) {
+          break;
+        }
+        final messageIndex = _messages.indexWhere(
+          (item) => item.id == messageId,
+        );
+        if (messageIndex == -1) {
+          break;
+        }
+        final message = _messages[messageIndex];
+        final nextParts = message.parts
+            .where((part) => part.id != partId)
+            .toList(growable: false);
+        _messages[messageIndex] = _copyMessageWithParts(message, nextParts);
+        notifyListeners();
+        break;
+      case 'message.removed':
+        final sessionId = properties['sessionID'] as String?;
+        final messageId = properties['messageID'] as String?;
+        if (sessionId == null ||
+            messageId == null ||
+            _currentSession?.id != sessionId) {
+          break;
+        }
+        _messages.removeWhere((item) => item.id == messageId);
+        notifyListeners();
+        break;
+      case 'permission.asked':
+        final permission = ChatPermissionRequestModel.fromJson(
+          properties,
+        ).toDomain();
+        final sessionPermissions = List<ChatPermissionRequest>.from(
+          _pendingPermissionsBySession[permission.sessionId] ??
+              const <ChatPermissionRequest>[],
+        );
+        final existingIndex = sessionPermissions.indexWhere(
+          (item) => item.id == permission.id,
+        );
+        if (existingIndex == -1) {
+          sessionPermissions.add(permission);
+        } else {
+          sessionPermissions[existingIndex] = permission;
+        }
+        _pendingPermissionsBySession[permission.sessionId] = sessionPermissions;
+        notifyListeners();
+        break;
+      case 'permission.replied':
+        final sessionId = properties['sessionID'] as String?;
+        final requestId = properties['requestID'] as String?;
+        if (sessionId == null || requestId == null) {
+          break;
+        }
+        final existing = _pendingPermissionsBySession[sessionId];
+        if (existing == null) {
+          break;
+        }
+        final filtered = existing
+            .where((item) => item.id != requestId)
+            .toList(growable: false);
+        if (filtered.isEmpty) {
+          _pendingPermissionsBySession.remove(sessionId);
+        } else {
+          _pendingPermissionsBySession[sessionId] = filtered;
+        }
+        notifyListeners();
+        break;
+      case 'question.asked':
+        final question = ChatQuestionRequestModel.fromJson(
+          properties,
+        ).toDomain();
+        final sessionQuestions = List<ChatQuestionRequest>.from(
+          _pendingQuestionsBySession[question.sessionId] ??
+              const <ChatQuestionRequest>[],
+        );
+        final existingIndex = sessionQuestions.indexWhere(
+          (item) => item.id == question.id,
+        );
+        if (existingIndex == -1) {
+          sessionQuestions.add(question);
+        } else {
+          sessionQuestions[existingIndex] = question;
+        }
+        _pendingQuestionsBySession[question.sessionId] = sessionQuestions;
+        notifyListeners();
+        break;
+      case 'question.replied':
+      case 'question.rejected':
+        final sessionId = properties['sessionID'] as String?;
+        final requestId = properties['requestID'] as String?;
+        if (sessionId == null || requestId == null) {
+          break;
+        }
+        final existing = _pendingQuestionsBySession[sessionId];
+        if (existing == null) {
+          break;
+        }
+        final filtered = existing
+            .where((item) => item.id != requestId)
+            .toList(growable: false);
+        if (filtered.isEmpty) {
+          _pendingQuestionsBySession.remove(sessionId);
+        } else {
+          _pendingQuestionsBySession[sessionId] = filtered;
+        }
+        notifyListeners();
+        break;
+      default:
+        break;
+    }
+  }
+
+  ChatMessage _copyMessageWithParts(
+    ChatMessage message,
+    List<MessagePart> parts,
+  ) {
+    if (message is AssistantMessage) {
+      return AssistantMessage(
+        id: message.id,
+        sessionId: message.sessionId,
+        time: message.time,
+        parts: parts,
+        completedTime: message.completedTime,
+        providerId: message.providerId,
+        modelId: message.modelId,
+        cost: message.cost,
+        tokens: message.tokens,
+        error: message.error,
+        mode: message.mode,
+        summary: message.summary,
+      );
+    }
+    return UserMessage(
+      id: message.id,
+      sessionId: message.sessionId,
+      time: message.time,
+      parts: parts,
+    );
+  }
+
+  Future<void> _fetchMessageFallback(String sessionId, String messageId) async {
+    final result = await getChatMessage(
+      GetChatMessageParams(
+        projectId: projectProvider.currentProjectId,
+        sessionId: sessionId,
+        messageId: messageId,
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+    result.fold((failure) {
+      AppLogger.warn(
+        'Message fallback fetch failed for $messageId: ${failure.toString()}',
+      );
+    }, _updateOrAddMessage);
+  }
+
+  Future<void> respondPermissionRequest({
+    required String requestId,
+    required String reply,
+    String? message,
+  }) async {
+    if (_isRespondingInteraction) {
+      return;
+    }
+    _isRespondingInteraction = true;
+    notifyListeners();
+    final result = await replyPermission(
+      ReplyPermissionParams(
+        requestId: requestId,
+        reply: reply,
+        message: message,
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+    _isRespondingInteraction = false;
+    result.fold(_handleFailure, (_) {
+      for (final sessionId in _pendingPermissionsBySession.keys.toList()) {
+        final filtered = _pendingPermissionsBySession[sessionId]!
+            .where((item) => item.id != requestId)
+            .toList(growable: false);
+        if (filtered.isEmpty) {
+          _pendingPermissionsBySession.remove(sessionId);
+        } else {
+          _pendingPermissionsBySession[sessionId] = filtered;
+        }
+      }
+    });
+    notifyListeners();
+  }
+
+  Future<void> submitQuestionAnswers({
+    required String requestId,
+    required List<List<String>> answers,
+  }) async {
+    if (_isRespondingInteraction) {
+      return;
+    }
+    _isRespondingInteraction = true;
+    notifyListeners();
+    final result = await replyQuestion(
+      ReplyQuestionParams(
+        requestId: requestId,
+        answers: answers,
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+    _isRespondingInteraction = false;
+    result.fold(_handleFailure, (_) {
+      for (final sessionId in _pendingQuestionsBySession.keys.toList()) {
+        final filtered = _pendingQuestionsBySession[sessionId]!
+            .where((item) => item.id != requestId)
+            .toList(growable: false);
+        if (filtered.isEmpty) {
+          _pendingQuestionsBySession.remove(sessionId);
+        } else {
+          _pendingQuestionsBySession[sessionId] = filtered;
+        }
+      }
+    });
+    notifyListeners();
+  }
+
+  Future<void> rejectQuestionRequest({required String requestId}) async {
+    if (_isRespondingInteraction) {
+      return;
+    }
+    _isRespondingInteraction = true;
+    notifyListeners();
+    final result = await rejectQuestion(
+      RejectQuestionParams(
+        requestId: requestId,
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+    _isRespondingInteraction = false;
+    result.fold(_handleFailure, (_) {
+      for (final sessionId in _pendingQuestionsBySession.keys.toList()) {
+        final filtered = _pendingQuestionsBySession[sessionId]!
+            .where((item) => item.id != requestId)
+            .toList(growable: false);
+        if (filtered.isEmpty) {
+          _pendingQuestionsBySession.remove(sessionId);
+        } else {
+          _pendingQuestionsBySession[sessionId] = filtered;
+        }
+      }
+    });
+    notifyListeners();
   }
 
   /// Initialize providers
@@ -446,6 +965,8 @@ class ChatProvider extends ChangeNotifier {
       );
     }
     if (fetchId == _providersFetchId) {
+      await _startRealtimeEventSubscription();
+      await _loadPendingInteractions();
       notifyListeners();
     }
   }
@@ -470,12 +991,19 @@ class ChatProvider extends ChangeNotifier {
     _providersFetchId += 1;
     _sessionsFetchId += 1;
     _messagesFetchId += 1;
+    _eventStreamGeneration += 1;
     _messageSubscription?.cancel();
+    _eventSubscription?.cancel();
     _messageSubscription = null;
+    _eventSubscription = null;
     _sessions = <ChatSession>[];
     _messages = <ChatMessage>[];
     _currentSession = null;
     _errorMessage = null;
+    _sessionStatusById = <String, SessionStatusInfo>{};
+    _pendingPermissionsBySession = <String, List<ChatPermissionRequest>>{};
+    _pendingQuestionsBySession = <String, List<ChatQuestionRequest>>{};
+    _isRespondingInteraction = false;
     _providers = <Provider>[];
     _defaultModels = <String, String>{};
     _selectedProviderId = null;
@@ -902,75 +1430,107 @@ class ChatProvider extends ChangeNotifier {
   Future<void> sendMessage(String text) async {
     if (_currentSession == null || text.trim().isEmpty) return;
 
+    AppLogger.info(
+      'Provider send start session=${_currentSession!.id} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"} variant=${_selectedVariantId ?? "auto"}',
+    );
     _setState(ChatState.sending);
 
-    // Sync project ID from ProjectProvider
-    _currentProjectId = projectProvider.currentProjectId;
+    try {
+      // Sync project ID from ProjectProvider
+      _currentProjectId = projectProvider.currentProjectId;
 
-    // Generate message ID
-    final messageId = 'msg_${DateTime.now().millisecondsSinceEpoch}';
+      // Generate message ID
+      final localMessageId = 'msg_${DateTime.now().millisecondsSinceEpoch}';
 
-    // Add user message to UI
-    final userMessage = UserMessage(
-      id: messageId,
-      sessionId: _currentSession!.id,
-      time: DateTime.now(),
-      parts: [
-        TextPart(
-          id: '${messageId}_text',
-          messageId: messageId,
-          sessionId: _currentSession!.id,
-          text: text,
-          time: DateTime.now(),
-        ),
-      ],
-    );
-
-    _messages.add(userMessage);
-    notifyListeners();
-
-    // Ensure providers are initialized
-    if (_selectedProviderId == null || _selectedModelId == null) {
-      await initializeProviders();
-    }
-
-    _recordModelUsage();
-    await _persistSelection();
-
-    // Create chat input
-    final input = ChatInput(
-      messageId: messageId,
-      providerId: _selectedProviderId ?? 'anthropic',
-      modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
-      variant: _selectedVariantId,
-      parts: [TextInputPart(text: text)],
-    );
-
-    // Cancel previous subscription
-    _messageSubscription?.cancel();
-
-    // Send message and listen for streaming response
-    _messageSubscription =
-        sendChatMessage(
-          SendChatMessageParams(
-            projectId: projectProvider.currentProjectId,
+      // Add user message to UI
+      final userMessage = UserMessage(
+        id: localMessageId,
+        sessionId: _currentSession!.id,
+        time: DateTime.now(),
+        parts: [
+          TextPart(
+            id: '${localMessageId}_text',
+            messageId: localMessageId,
             sessionId: _currentSession!.id,
-            input: input,
+            text: text,
+            time: DateTime.now(),
           ),
-        ).listen(
-          (result) {
-            result.fold((failure) => _handleFailure(failure), (message) {
-              // Update or add assistant message
-              _updateOrAddMessage(message);
-            });
-          },
-          onError: (error) {
-            _setError('Failed to send message: $error');
-          },
-          onDone: () {
-            _setState(ChatState.loaded);
-          },
+        ],
+      );
+
+      _messages.add(userMessage);
+      notifyListeners();
+
+      // Ensure providers are initialized
+      if (_selectedProviderId == null || _selectedModelId == null) {
+        AppLogger.info('Provider send initializing provider/model selection');
+        await initializeProviders();
+        AppLogger.info(
+          'Provider send initialized provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"}',
         );
+      }
+
+      _recordModelUsage();
+      // Persisting selection is best-effort; it must not block message sending.
+      unawaited(
+        _persistSelection().catchError(
+          (error, stackTrace) => AppLogger.warn(
+            'Provider send selection persistence failed',
+            error: error,
+            stackTrace: stackTrace is StackTrace ? stackTrace : null,
+          ),
+        ),
+      );
+
+      // Create chat input
+      final input = ChatInput(
+        providerId: _selectedProviderId ?? 'anthropic',
+        modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
+        variant: _selectedVariantId,
+        parts: [TextInputPart(text: text)],
+      );
+
+      // Cancel previous subscription
+      _messageSubscription?.cancel();
+
+      AppLogger.info(
+        'Provider send subscribing stream session=${_currentSession!.id} directory=${projectProvider.currentProject?.path ?? "-"}',
+      );
+
+      // Send message and listen for streaming response
+      _messageSubscription =
+          sendChatMessage(
+            SendChatMessageParams(
+              projectId: projectProvider.currentProjectId,
+              sessionId: _currentSession!.id,
+              input: input,
+              directory: projectProvider.currentProject?.path,
+            ),
+          ).listen(
+            (result) {
+              result.fold((failure) => _handleFailure(failure), (message) {
+                // Update or add assistant message
+                _updateOrAddMessage(message);
+              });
+            },
+            onError: (error) {
+              AppLogger.error('Provider send stream error', error: error);
+              _setError('Failed to send message: $error');
+            },
+            onDone: () {
+              AppLogger.info('Provider send stream finished');
+              _setState(ChatState.loaded);
+            },
+          );
+      AppLogger.info('Provider send stream subscription attached');
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Provider send setup failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      _setError('Failed to start message send');
+    }
   }
 
   /// Update or add message
@@ -1007,6 +1567,9 @@ class ChatProvider extends ChangeNotifier {
 
   /// Handle failure
   void _handleFailure(Failure failure) {
+    AppLogger.warn(
+      'Chat failure handled type=${failure.runtimeType} message=${failure.message}',
+    );
     switch (failure.runtimeType) {
       case NetworkFailure:
         _setError('Network connection failed. Please check network settings');
@@ -1082,6 +1645,8 @@ class ChatProvider extends ChangeNotifier {
   @override
   void dispose() {
     _messageSubscription?.cancel();
+    _eventStreamGeneration += 1;
+    _eventSubscription?.cancel();
     super.dispose();
   }
 }

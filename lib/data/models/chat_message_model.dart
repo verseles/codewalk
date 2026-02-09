@@ -32,6 +32,7 @@ class ChatMessageModel {
   final DateTime time;
   @JsonKey(includeFromJson: false, includeToJson: false)
   final DateTime? completedTime;
+
   /// Whether this message is a summary message.
   @JsonKey(includeFromJson: false, includeToJson: false)
   final bool? isSummary;
@@ -107,7 +108,9 @@ class ChatMessageModel {
     final completedTime = _completedTimeFromJson(json['time']);
 
     // Prepare parts and synthesize text from summary if needed
-    final List<MessagePartModel> computedParts = List<MessagePartModel>.from(model.parts);
+    final List<MessagePartModel> computedParts = List<MessagePartModel>.from(
+      model.parts,
+    );
 
     // For UserMessage: server may provide `summary` object without `parts`
     // We synthesize a text part so UI can display meaningful content.
@@ -299,8 +302,33 @@ class MessagePartModel {
     return null;
   }
 
-  factory MessagePartModel.fromJson(Map<String, dynamic> json) =>
-      _$MessagePartModelFromJson(json);
+  factory MessagePartModel.fromJson(Map<String, dynamic> json) {
+    final type = (json['type'] as String?) ?? 'text';
+    final synthesizedState = _buildSyntheticState(type, json);
+    final rawState = json['state'] as Map<String, dynamic>?;
+    final mergedState = <String, dynamic>{
+      if (rawState != null) ...rawState,
+      if (synthesizedState != null) ...synthesizedState,
+    };
+
+    return MessagePartModel(
+      id: (json['id'] as String?) ?? '',
+      messageId: (json['messageID'] as String?) ?? '',
+      sessionId: (json['sessionID'] as String?) ?? '',
+      type: type,
+      text: json['text'] as String?,
+      url: json['url'] as String?,
+      mime: json['mime'] as String?,
+      filename: json['filename'] as String?,
+      source: json['source'] as Map<String, dynamic>?,
+      callId: json['callID'] as String?,
+      tool: json['tool'] as String?,
+      state: mergedState.isEmpty ? null : mergedState,
+      time: _partTimeFromJson(json['time']),
+      files: (json['files'] as List<dynamic>?)?.map((e) => '$e').toList(),
+      hash: json['hash'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$MessagePartModelToJson(this);
 
@@ -320,7 +348,10 @@ class MessagePartModel {
       case PartType.file:
         final parsed = source != null
             ? _parseFilePartSource(source!)
-            : (fileSource: null as FileSource?, symbolSource: null as SymbolSource?);
+            : (
+                fileSource: null as FileSource?,
+                symbolSource: null as SymbolSource?,
+              );
         return FilePart(
           id: id,
           messageId: messageId,
@@ -356,14 +387,97 @@ class MessagePartModel {
           files: files ?? <String>[],
           hash: hash ?? '',
         );
-      default:
-        // Default to text part
-        return TextPart(
+      case PartType.agent:
+        final sourceMap = state?['source'] as Map<String, dynamic>? ?? source;
+        return AgentPart(
           id: id,
           messageId: messageId,
           sessionId: sessionId,
-          text: text ?? '',
-          time: time,
+          name: (state?['name'] as String?) ?? '',
+          source: sourceMap == null
+              ? null
+              : AgentSource(
+                  value: sourceMap['value'] as String? ?? '',
+                  start: sourceMap['start'] as int? ?? 0,
+                  end: sourceMap['end'] as int? ?? 0,
+                ),
+        );
+      case PartType.stepStart:
+        return StepStartPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          snapshot: state?['snapshot'] as String?,
+        );
+      case PartType.stepFinish:
+        final tokens = state?['tokens'] as Map<String, dynamic>? ?? {};
+        final cache = tokens['cache'] as Map<String, dynamic>? ?? {};
+        return StepFinishPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          reason: (state?['reason'] as String?) ?? '',
+          snapshot: state?['snapshot'] as String?,
+          cost: (state?['cost'] as num?)?.toDouble() ?? 0,
+          tokens: MessageTokens(
+            input: (tokens['input'] as num?)?.toInt() ?? 0,
+            output: (tokens['output'] as num?)?.toInt() ?? 0,
+            reasoning: (tokens['reasoning'] as num?)?.toInt() ?? 0,
+            cacheRead: (cache['read'] as num?)?.toInt() ?? 0,
+            cacheWrite: (cache['write'] as num?)?.toInt() ?? 0,
+          ),
+        );
+      case PartType.snapshot:
+        return SnapshotPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          snapshot: (state?['snapshot'] as String?) ?? '',
+        );
+      case PartType.subtask:
+        final modelMap = state?['model'] as Map<String, dynamic>?;
+        return SubtaskPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          prompt: (state?['prompt'] as String?) ?? '',
+          description: (state?['description'] as String?) ?? '',
+          agent: (state?['agent'] as String?) ?? '',
+          model: modelMap == null
+              ? null
+              : SubtaskModelRef(
+                  providerId: modelMap['providerID'] as String? ?? '',
+                  modelId: modelMap['modelID'] as String? ?? '',
+                ),
+          command: state?['command'] as String?,
+        );
+      case PartType.retry:
+        final retryError = state?['error'] as Map<String, dynamic>? ?? {};
+        final retryErrorData =
+            retryError['data'] as Map<String, dynamic>? ?? retryError;
+        final retryCreated =
+            (state?['created'] as num?)?.toInt() ??
+            ((state?['time'] as Map<String, dynamic>?)?['created'] as num?)
+                ?.toInt() ??
+            0;
+        return RetryPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          attempt: (state?['attempt'] as num?)?.toInt() ?? 0,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(retryCreated),
+          error: RetryErrorDetails(
+            message: retryErrorData['message'] as String? ?? '',
+            isRetryable: retryErrorData['isRetryable'] as bool? ?? false,
+            statusCode: (retryErrorData['statusCode'] as num?)?.toInt(),
+          ),
+        );
+      case PartType.compaction:
+        return CompactionPart(
+          id: id,
+          messageId: messageId,
+          sessionId: sessionId,
+          auto: state?['auto'] as bool? ?? false,
         );
     }
   }
@@ -426,12 +540,109 @@ class MessagePartModel {
           files: patchPart.files,
           hash: patchPart.hash,
         );
-      default:
+      case PartType.agent:
+        final agentPart = part as AgentPart;
         return MessagePartModel(
           id: part.id,
           messageId: part.messageId,
           sessionId: part.sessionId,
-          type: 'text',
+          type: 'agent',
+          state: {
+            'name': agentPart.name,
+            if (agentPart.source != null)
+              'source': {
+                'value': agentPart.source!.value,
+                'start': agentPart.source!.start,
+                'end': agentPart.source!.end,
+              },
+          },
+        );
+      case PartType.stepStart:
+        final stepStartPart = part as StepStartPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'step-start',
+          state: {'snapshot': stepStartPart.snapshot},
+        );
+      case PartType.stepFinish:
+        final stepFinishPart = part as StepFinishPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'step-finish',
+          state: {
+            'reason': stepFinishPart.reason,
+            'snapshot': stepFinishPart.snapshot,
+            'cost': stepFinishPart.cost,
+            'tokens': {
+              'input': stepFinishPart.tokens.input,
+              'output': stepFinishPart.tokens.output,
+              'reasoning': stepFinishPart.tokens.reasoning,
+              'cache': {
+                'read': stepFinishPart.tokens.cacheRead,
+                'write': stepFinishPart.tokens.cacheWrite,
+              },
+            },
+          },
+        );
+      case PartType.snapshot:
+        final snapshotPart = part as SnapshotPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'snapshot',
+          state: {'snapshot': snapshotPart.snapshot},
+        );
+      case PartType.subtask:
+        final subtaskPart = part as SubtaskPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'subtask',
+          state: {
+            'prompt': subtaskPart.prompt,
+            'description': subtaskPart.description,
+            'agent': subtaskPart.agent,
+            if (subtaskPart.model != null)
+              'model': {
+                'providerID': subtaskPart.model!.providerId,
+                'modelID': subtaskPart.model!.modelId,
+              },
+            'command': subtaskPart.command,
+          },
+        );
+      case PartType.retry:
+        final retryPart = part as RetryPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'retry',
+          state: {
+            'attempt': retryPart.attempt,
+            'created': retryPart.createdAt.millisecondsSinceEpoch,
+            'error': {
+              'data': {
+                'message': retryPart.error.message,
+                'isRetryable': retryPart.error.isRetryable,
+                'statusCode': retryPart.error.statusCode,
+              },
+            },
+          },
+        );
+      case PartType.compaction:
+        final compactionPart = part as CompactionPart;
+        return MessagePartModel(
+          id: part.id,
+          messageId: part.messageId,
+          sessionId: part.sessionId,
+          type: 'compaction',
+          state: {'auto': compactionPart.auto},
         );
     }
   }
@@ -458,14 +669,66 @@ class MessagePartModel {
         return PartType.snapshot;
       case 'patch':
         return PartType.patch;
+      case 'subtask':
+        return PartType.subtask;
+      case 'retry':
+        return PartType.retry;
+      case 'compaction':
+        return PartType.compaction;
       default:
         return PartType.text;
     }
   }
 
+  static Map<String, dynamic>? _buildSyntheticState(
+    String type,
+    Map<String, dynamic> json,
+  ) {
+    switch (type) {
+      case 'agent':
+        return {
+          'name': json['name'],
+          if (json['source'] is Map<String, dynamic>) 'source': json['source'],
+        };
+      case 'step_start':
+      case 'step-start':
+        return {'snapshot': json['snapshot']};
+      case 'step_finish':
+      case 'step-finish':
+        return {
+          'reason': json['reason'],
+          'snapshot': json['snapshot'],
+          'cost': json['cost'],
+          'tokens': json['tokens'],
+        };
+      case 'snapshot':
+        return {'snapshot': json['snapshot']};
+      case 'subtask':
+        return {
+          'prompt': json['prompt'],
+          'description': json['description'],
+          'agent': json['agent'],
+          'model': json['model'],
+          'command': json['command'],
+        };
+      case 'retry':
+        final time = json['time'] as Map<String, dynamic>?;
+        return {
+          'attempt': json['attempt'],
+          'error': json['error'],
+          if (time != null) 'time': time,
+          if (time?['created'] != null) 'created': time?['created'],
+        };
+      case 'compaction':
+        return {'auto': json['auto']};
+      default:
+        return null;
+    }
+  }
+
   /// Parse file part source, supporting both FileSource and SymbolSource.
-  static ({FileSource? fileSource, SymbolSource? symbolSource}) _parseFilePartSource(
-      Map<String, dynamic> source) {
+  static ({FileSource? fileSource, SymbolSource? symbolSource})
+  _parseFilePartSource(Map<String, dynamic> source) {
     try {
       final type = source['type'] as String? ?? '';
       final text = source['text'] as Map<String, dynamic>?;
@@ -656,11 +919,11 @@ class MessageTokensModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'input': input,
-        'output': output,
-        'reasoning': reasoning,
-        'cache': {'read': cacheRead, 'write': cacheWrite},
-      };
+    'input': input,
+    'output': output,
+    'reasoning': reasoning,
+    'cache': {'read': cacheRead, 'write': cacheWrite},
+  };
 
   MessageTokens toDomain() {
     return MessageTokens(

@@ -16,6 +16,7 @@ class SendChatMessage {
       params.projectId,
       params.sessionId,
       params.input,
+      directory: params.directory,
     );
   }
 }
@@ -26,9 +27,11 @@ class SendChatMessageParams {
     required this.projectId,
     required this.sessionId,
     required this.input,
+    this.directory,
   });
 
   final String projectId;
   final String sessionId;
   final ChatInput input;
+  final String? directory;
 }

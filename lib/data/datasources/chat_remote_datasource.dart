@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import '../models/chat_message_model.dart';
+import '../models/chat_realtime_model.dart';
 import '../models/chat_session_model.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/errors/exceptions.dart';
@@ -77,6 +79,33 @@ abstract class ChatRemoteDataSource {
     ChatInputModel input, {
     String? directory,
   });
+
+  /// Subscribe to realtime event stream.
+  Stream<ChatEventModel> subscribeEvents({String? directory});
+
+  /// List pending permission requests.
+  Future<List<ChatPermissionRequestModel>> listPermissions({String? directory});
+
+  /// Reply to a permission request.
+  Future<void> replyPermission({
+    required String requestId,
+    required String reply,
+    String? message,
+    String? directory,
+  });
+
+  /// List pending question requests.
+  Future<List<ChatQuestionRequestModel>> listQuestions({String? directory});
+
+  /// Reply to a question request.
+  Future<void> replyQuestion({
+    required String requestId,
+    required List<List<String>> answers,
+    String? directory,
+  });
+
+  /// Reject a question request.
+  Future<void> rejectQuestion({required String requestId, String? directory});
 
   /// Abort session
   Future<void> abortSession(
@@ -459,13 +488,128 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         queryParams['directory'] = directory;
       }
 
-      AppLogger.debug('Starting message send: session=$sessionId');
-      AppLogger.debug('Message ID: ${input.messageId}');
+      AppLogger.info(
+        'Chat send start session=$sessionId provider=${input.providerId} model=${input.modelId} variant=${input.variant ?? "auto"} directory=${directory ?? "-"}',
+      );
+      AppLogger.info('Request messageID=${input.messageId ?? "<none>"}');
 
       // Start SSE listener for message update events
       bool messageCompleted = false;
       bool eventStreamEnded = false;
       var pendingMessageFetches = 0;
+      String? activeAssistantMessageId;
+      var fallbackCompletionWatchStarted = false;
+
+      int extractCreatedTimeMs(dynamic timeValue) {
+        if (timeValue is Map<String, dynamic>) {
+          final created = timeValue['created'];
+          if (created is num) {
+            return created.toInt();
+          }
+        } else if (timeValue is num) {
+          return timeValue.toInt();
+        }
+        return 0;
+      }
+
+      Future<String?> resolveAssistantMessageId() async {
+        if (activeAssistantMessageId != null &&
+            activeAssistantMessageId!.isNotEmpty) {
+          return activeAssistantMessageId;
+        }
+
+        try {
+          final response = await dio.get(
+            '/session/$sessionId/message',
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+          );
+
+          if (response.statusCode != 200) {
+            AppLogger.warn(
+              'Failed to resolve assistant message ID: unexpected status ${response.statusCode}',
+            );
+            return null;
+          }
+
+          final list = response.data as List<dynamic>? ?? const <dynamic>[];
+          String? candidateId;
+          var candidateCreated = -1;
+
+          for (final raw in list) {
+            if (raw is! Map) {
+              continue;
+            }
+            final item = Map<String, dynamic>.from(raw);
+            final infoRaw = item['info'];
+            final info = infoRaw is Map<String, dynamic> ? infoRaw : item;
+
+            final role = info['role'] as String?;
+            final id = info['id'] as String?;
+            if (role != 'assistant' || id == null || id.isEmpty) {
+              continue;
+            }
+
+            final created = extractCreatedTimeMs(info['time']);
+            if (created >= candidateCreated) {
+              candidateCreated = created;
+              candidateId = id;
+            }
+          }
+
+          if (candidateId != null) {
+            activeAssistantMessageId = candidateId;
+            AppLogger.info(
+              'Resolved assistant message ID from session list: $candidateId',
+            );
+          } else {
+            AppLogger.warn(
+              'Unable to resolve assistant message ID from session list',
+            );
+          }
+          return candidateId;
+        } catch (error) {
+          AppLogger.warn(
+            'Failed to resolve assistant message ID from session list',
+            error: error,
+          );
+          return null;
+        }
+      }
+
+      Future<ChatMessageModel?> pollCompleteMessage(
+        String messageId, {
+        int maxAttempts = 120,
+      }) async {
+        AppLogger.info(
+          'Polling assistant message completion id=$messageId attempts=$maxAttempts',
+        );
+        ChatMessageModel? latest;
+        for (var attempt = 0; attempt < maxAttempts; attempt += 1) {
+          final fetched = await _getCompleteMessage(
+            projectId,
+            sessionId,
+            messageId,
+            directory: directory,
+          );
+          if (fetched != null) {
+            latest = fetched;
+            if (fetched.completedTime != null) {
+              AppLogger.info(
+                'Assistant message completed via polling id=$messageId attempt=${attempt + 1}',
+              );
+              return fetched;
+            }
+          }
+          if ((attempt + 1) % 15 == 0) {
+            AppLogger.info(
+              'Polling still waiting for completion id=$messageId attempt=${attempt + 1}',
+            );
+          }
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+        AppLogger.warn('Polling ended without completion id=$messageId');
+        return latest;
+      }
 
       void maybeCloseEventController({Duration delay = Duration.zero}) {
         Future<void>.delayed(delay, () {
@@ -486,9 +630,67 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         });
       }
 
+      void startFallbackCompletionWatch({
+        required String reason,
+        Duration initialDelay = const Duration(seconds: 12),
+      }) {
+        if (fallbackCompletionWatchStarted) {
+          return;
+        }
+        fallbackCompletionWatchStarted = true;
+
+        unawaited(() async {
+          if (initialDelay > Duration.zero) {
+            await Future<void>.delayed(initialDelay);
+          }
+
+          if (messageCompleted || eventController.isClosed) {
+            return;
+          }
+
+          String? fallbackMessageId = activeAssistantMessageId;
+          for (
+            var attempt = 0;
+            (fallbackMessageId == null || fallbackMessageId.isEmpty) &&
+                attempt < 30;
+            attempt += 1
+          ) {
+            fallbackMessageId = await resolveAssistantMessageId();
+            if (fallbackMessageId != null && fallbackMessageId.isNotEmpty) {
+              break;
+            }
+            await Future<void>.delayed(const Duration(seconds: 2));
+          }
+
+          if (fallbackMessageId == null || fallbackMessageId.isEmpty) {
+            AppLogger.warn(
+              'Completion fallback aborted: message ID unresolved reason=$reason',
+            );
+            messageCompleted = true;
+            maybeCloseEventController(delay: const Duration(milliseconds: 200));
+            return;
+          }
+
+          AppLogger.info(
+            'Starting completion fallback reason=$reason id=$fallbackMessageId',
+          );
+          final completed = await pollCompleteMessage(fallbackMessageId);
+          if (completed != null && !eventController.isClosed) {
+            eventController.add(completed);
+          }
+          messageCompleted = true;
+          maybeCloseEventController(delay: const Duration(milliseconds: 200));
+        }());
+      }
+
       void fetchAndEmitMessage(String messageId) {
         pendingMessageFetches += 1;
-        _getCompleteMessage(projectId, sessionId, messageId)
+        _getCompleteMessage(
+              projectId,
+              sessionId,
+              messageId,
+              directory: directory,
+            )
             .then((message) {
               if (message == null) {
                 return;
@@ -521,17 +723,20 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       try {
         final eventResponse = await dio.get(
           '/event',
+          queryParameters: queryParams.isNotEmpty ? queryParams : null,
           options: Options(
             headers: {
               'Accept': 'text/event-stream',
               'Cache-Control': 'no-cache',
             },
             responseType: ResponseType.stream,
+            connectTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(minutes: 5),
           ),
         );
 
         if (eventResponse.statusCode == 200) {
-          AppLogger.debug('Connected to event stream');
+          AppLogger.info('Connected send-event stream for session=$sessionId');
 
           eventSubscription = (eventResponse.data as ResponseBody).stream
               .transform(
@@ -559,8 +764,13 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final info = properties?['info'] as Map<String, dynamic>?;
 
                       if (info != null && info['sessionID'] == sessionId) {
+                        final messageId = info['id'] as String?;
+                        if (messageId == null || messageId.isEmpty) {
+                          return;
+                        }
+                        activeAssistantMessageId = messageId;
                         AppLogger.debug('Event: message.updated ${info['id']}');
-                        fetchAndEmitMessage(info['id'] as String);
+                        fetchAndEmitMessage(messageId);
                       }
                     } else if (eventType == 'message.part.updated') {
                       final properties =
@@ -568,10 +778,15 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                       final part = properties?['part'] as Map<String, dynamic>?;
 
                       if (part != null && part['sessionID'] == sessionId) {
+                        final messageId = part['messageID'] as String?;
+                        if (messageId == null || messageId.isEmpty) {
+                          return;
+                        }
+                        activeAssistantMessageId = messageId;
                         AppLogger.debug(
                           'Event: message.part.updated ${part['messageID']}',
                         );
-                        fetchAndEmitMessage(part['messageID'] as String);
+                        fetchAndEmitMessage(messageId);
                       }
                     } else if (eventType == 'session.updated') {
                       AppLogger.debug('Event: session.updated');
@@ -611,12 +826,37 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                           );
                         }
                       }
+                    } else if (eventType == 'session.status') {
+                      final properties =
+                          event['properties'] as Map<String, dynamic>?;
+                      if (properties?['sessionID'] == sessionId) {
+                        final status =
+                            properties?['status'] as Map<String, dynamic>?;
+                        if (status?['type'] == 'idle' && !messageCompleted) {
+                          messageCompleted = true;
+                          maybeCloseEventController(
+                            delay: const Duration(milliseconds: 500),
+                          );
+                        }
+                      }
                     } else if (eventType == 'message.removed') {
                       AppLogger.debug('Event: message.removed');
                       // Message removed from session - UI should handle
                     } else if (eventType == 'message.part.removed') {
-                      AppLogger.debug('Event: message.part.removed');
-                      // Part removed from message - UI should handle
+                      final properties =
+                          event['properties'] as Map<String, dynamic>?;
+                      final removedSessionId =
+                          properties?['sessionID'] as String?;
+                      final removedMessageId =
+                          properties?['messageID'] as String?;
+                      if (removedSessionId == sessionId &&
+                          removedMessageId != null) {
+                        activeAssistantMessageId = removedMessageId;
+                        AppLogger.debug(
+                          'Event: message.part.removed $removedMessageId',
+                        );
+                        fetchAndEmitMessage(removedMessageId);
+                      }
                     } else {
                       // Other events (file.edited, permission.updated, etc.)
                       // Logged at debug level, not actionable for mobile client
@@ -634,8 +874,17 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                   }
                 },
                 onDone: () {
-                  AppLogger.debug('Event stream ended');
+                  AppLogger.info(
+                    'Send-event stream ended for session=$sessionId',
+                  );
                   eventStreamEnded = true;
+                  if (!messageCompleted && !eventController.isClosed) {
+                    startFallbackCompletionWatch(
+                      reason: 'send-event-stream-ended',
+                      initialDelay: Duration.zero,
+                    );
+                    return;
+                  }
                   maybeCloseEventController(
                     delay: const Duration(milliseconds: 200),
                   );
@@ -654,7 +903,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        AppLogger.debug('Message sent successfully');
+        AppLogger.info('Send request accepted for session=$sessionId');
 
         // Parse immediate server response (`{info, parts}`) when available.
         final responseData = response.data;
@@ -666,10 +915,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           final parts =
               (responseData['parts'] as List<dynamic>?) ?? <dynamic>[];
           if (info.isNotEmpty) {
+            activeAssistantMessageId = info['id'] as String?;
             immediateMessage = ChatMessageModel.fromJson({
               ...info,
               'parts': parts,
             });
+            AppLogger.info(
+              'Immediate assistant message received id=${activeAssistantMessageId ?? "-"} completed=${immediateMessage.completedTime != null}',
+            );
             yield immediateMessage;
           }
         }
@@ -685,11 +938,30 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
         // If stream connection is unavailable, return what we already have.
         if (eventSubscription == null) {
+          final fallbackMessageId =
+              activeAssistantMessageId ?? await resolveAssistantMessageId();
+          if (fallbackMessageId != null) {
+            AppLogger.info(
+              'No send-event stream available; using polling fallback id=$fallbackMessageId',
+            );
+            final completed = await pollCompleteMessage(fallbackMessageId);
+            if (completed != null) {
+              yield completed;
+            }
+          } else {
+            AppLogger.warn(
+              'No send-event stream and assistant message ID unresolved',
+            );
+          }
           if (!eventController.isClosed) {
             await eventController.close();
           }
           return;
         }
+
+        // Safety net: some servers keep /event connected but may not emit
+        // message events for every request. Prevents stuck "sending".
+        startFallbackCompletionWatch(reason: 'send-event-watchdog');
 
         // Listen for subsequent message updates
         await for (final message in eventController.stream) {
@@ -710,6 +982,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       AppLogger.error('Message send exception', error: e);
       throw const ServerException('Failed to send message');
     } finally {
+      AppLogger.info('Chat send flow finalized for session=$sessionId');
       eventSubscription?.cancel();
       if (!eventController.isClosed) {
         eventController.close();
@@ -717,14 +990,317 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     }
   }
 
+  @override
+  Stream<ChatEventModel> subscribeEvents({String? directory}) {
+    final queryParams = <String, String>{};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory;
+    }
+
+    final controller = StreamController<ChatEventModel>();
+    StreamSubscription<String>? lineSubscription;
+    var cancelled = false;
+
+    Future<void> connectLoop() async {
+      var reconnectAttempt = 0;
+      while (!cancelled) {
+        try {
+          final response = await dio.get(
+            '/event',
+            queryParameters: queryParams.isNotEmpty ? queryParams : null,
+            options: Options(
+              headers: {
+                'Accept': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+              },
+              responseType: ResponseType.stream,
+              connectTimeout: const Duration(seconds: 5),
+              // SSE should stay open for long periods.
+              receiveTimeout: const Duration(hours: 2),
+            ),
+          );
+
+          if (response.statusCode != 200) {
+            throw const ServerException('Failed to subscribe to events');
+          }
+
+          reconnectAttempt = 0;
+          final responseBody = response.data as ResponseBody;
+          lineSubscription = responseBody.stream
+              .transform(
+                StreamTransformer.fromHandlers(
+                  handleData: (Uint8List data, EventSink<String> sink) {
+                    sink.add(utf8.decode(data));
+                  },
+                ),
+              )
+              .transform(const LineSplitter())
+              .where((line) => line.startsWith('data: '))
+              .map((line) => line.substring(6))
+              .where((data) => data.isNotEmpty && data != '[DONE]')
+              .listen(
+                (eventData) {
+                  if (cancelled || controller.isClosed) {
+                    return;
+                  }
+                  try {
+                    final eventJson = jsonDecode(eventData);
+                    if (eventJson is Map<String, dynamic>) {
+                      final event = ChatEventModel.fromJson(eventJson);
+                      controller.add(event);
+                    }
+                  } catch (error) {
+                    AppLogger.warn(
+                      'Failed to decode SSE event payload',
+                      error: error,
+                    );
+                  }
+                },
+                onError: (error) {
+                  AppLogger.warn('Realtime event stream failure', error: error);
+                },
+              );
+
+          await lineSubscription?.asFuture<void>();
+        } catch (error) {
+          final isClosedHttpStream =
+              error is HttpException &&
+              error.message.contains('Connection closed while receiving data');
+          final isExpectedReconnect =
+              error is DioException &&
+              (error.type == DioExceptionType.connectionTimeout ||
+                  error.type == DioExceptionType.connectionError ||
+                  error.type == DioExceptionType.receiveTimeout ||
+                  error.type == DioExceptionType.unknown);
+          if (isExpectedReconnect || isClosedHttpStream) {
+            AppLogger.info(
+              'Realtime event stream reconnecting after transient failure',
+              error: error,
+            );
+          } else {
+            AppLogger.warn(
+              'Failed to connect to realtime event stream',
+              error: error,
+            );
+          }
+        } finally {
+          await lineSubscription?.cancel();
+          lineSubscription = null;
+        }
+
+        if (cancelled) {
+          break;
+        }
+
+        reconnectAttempt += 1;
+        final clampedPower = reconnectAttempt > 5 ? 5 : reconnectAttempt;
+        final delayMs = 300 * (1 << clampedPower);
+        final boundedDelayMs = delayMs > 8000 ? 8000 : delayMs;
+        await Future<void>.delayed(Duration(milliseconds: boundedDelayMs));
+      }
+
+      if (!controller.isClosed) {
+        await controller.close();
+      }
+    }
+
+    controller.onListen = () {
+      unawaited(connectLoop());
+    };
+    controller.onCancel = () async {
+      cancelled = true;
+      await lineSubscription?.cancel();
+      lineSubscription = null;
+      if (!controller.isClosed) {
+        await controller.close();
+      }
+    };
+
+    return controller.stream;
+  }
+
+  @override
+  Future<List<ChatPermissionRequestModel>> listPermissions({
+    String? directory,
+  }) async {
+    final queryParams = <String, String>{};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory;
+    }
+
+    try {
+      final response = await dio.get(
+        '/permission',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Failed to list permissions');
+      }
+      final data = response.data as List<dynamic>? ?? const <dynamic>[];
+      return data
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .map(ChatPermissionRequestModel.fromJson)
+          .toList(growable: false);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Permission route not found');
+      }
+      throw const ServerException('Failed to list permissions');
+    } catch (_) {
+      throw const ServerException('Failed to list permissions');
+    }
+  }
+
+  @override
+  Future<void> replyPermission({
+    required String requestId,
+    required String reply,
+    String? message,
+    String? directory,
+  }) async {
+    final queryParams = <String, String>{};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory;
+    }
+
+    try {
+      final body = <String, dynamic>{'reply': reply};
+      if (message != null && message.trim().isNotEmpty) {
+        body['message'] = message.trim();
+      }
+      final response = await dio.post(
+        '/permission/$requestId/reply',
+        data: body,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Failed to reply permission');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Permission request not found');
+      }
+      if (e.response?.statusCode == 400) {
+        throw const ValidationException('Invalid permission reply');
+      }
+      throw const ServerException('Failed to reply permission');
+    } catch (_) {
+      throw const ServerException('Failed to reply permission');
+    }
+  }
+
+  @override
+  Future<List<ChatQuestionRequestModel>> listQuestions({
+    String? directory,
+  }) async {
+    final queryParams = <String, String>{};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory;
+    }
+
+    try {
+      final response = await dio.get(
+        '/question',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Failed to list questions');
+      }
+      final data = response.data as List<dynamic>? ?? const <dynamic>[];
+      return data
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .map(ChatQuestionRequestModel.fromJson)
+          .toList(growable: false);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Question route not found');
+      }
+      throw const ServerException('Failed to list questions');
+    } catch (_) {
+      throw const ServerException('Failed to list questions');
+    }
+  }
+
+  @override
+  Future<void> replyQuestion({
+    required String requestId,
+    required List<List<String>> answers,
+    String? directory,
+  }) async {
+    final queryParams = <String, String>{};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory;
+    }
+
+    try {
+      final response = await dio.post(
+        '/question/$requestId/reply',
+        data: {'answers': answers},
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Failed to reply question');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Question request not found');
+      }
+      if (e.response?.statusCode == 400) {
+        throw const ValidationException('Invalid question reply');
+      }
+      throw const ServerException('Failed to reply question');
+    } catch (_) {
+      throw const ServerException('Failed to reply question');
+    }
+  }
+
+  @override
+  Future<void> rejectQuestion({
+    required String requestId,
+    String? directory,
+  }) async {
+    final queryParams = <String, String>{};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory;
+    }
+
+    try {
+      final response = await dio.post(
+        '/question/$requestId/reject',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Failed to reject question');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Question request not found');
+      }
+      throw const ServerException('Failed to reject question');
+    } catch (_) {
+      throw const ServerException('Failed to reject question');
+    }
+  }
+
   /// Get complete message payload (including parts)
   Future<ChatMessageModel?> _getCompleteMessage(
     String projectId,
     String sessionId,
-    String messageId,
-  ) async {
+    String messageId, {
+    String? directory,
+  }) async {
     try {
-      final response = await dio.get('/session/$sessionId/message/$messageId');
+      final queryParams = <String, String>{};
+      if (directory != null && directory.trim().isNotEmpty) {
+        queryParams['directory'] = directory;
+      }
+
+      final response = await dio.get(
+        '/session/$sessionId/message/$messageId',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
 
       if (response.statusCode == 200) {
         final info = response.data['info'] as Map<String, dynamic>;

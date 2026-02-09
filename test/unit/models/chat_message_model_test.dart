@@ -58,5 +58,99 @@ void main() {
       expect(message.summary, isTrue);
       expect((message.parts.single as TextPart).text, 'done');
     });
+
+    test('parses extended part taxonomy without data loss', () {
+      final model = ChatMessageModel.fromJson(<String, dynamic>{
+        'id': 'msg_ai_parts',
+        'sessionID': 'ses_1',
+        'role': 'assistant',
+        'time': <String, dynamic>{'created': 1000, 'completed': 1100},
+        'parts': <dynamic>[
+          <String, dynamic>{
+            'id': 'prt_agent',
+            'messageID': 'msg_ai_parts',
+            'sessionID': 'ses_1',
+            'type': 'agent',
+            'name': 'planner',
+            'source': <String, dynamic>{
+              'value': 'agent prompt',
+              'start': 0,
+              'end': 12,
+            },
+          },
+          <String, dynamic>{
+            'id': 'prt_step_start',
+            'messageID': 'msg_ai_parts',
+            'sessionID': 'ses_1',
+            'type': 'step-start',
+            'snapshot': 'snap_a',
+          },
+          <String, dynamic>{
+            'id': 'prt_step_finish',
+            'messageID': 'msg_ai_parts',
+            'sessionID': 'ses_1',
+            'type': 'step-finish',
+            'reason': 'completed',
+            'cost': 0.42,
+            'tokens': <String, dynamic>{
+              'input': 10,
+              'output': 20,
+              'reasoning': 5,
+              'cache': <String, dynamic>{'read': 1, 'write': 2},
+            },
+          },
+          <String, dynamic>{
+            'id': 'prt_subtask',
+            'messageID': 'msg_ai_parts',
+            'sessionID': 'ses_1',
+            'type': 'subtask',
+            'prompt': 'run tests',
+            'description': 'execute test suite',
+            'agent': 'tester',
+            'model': <String, dynamic>{
+              'providerID': 'openai',
+              'modelID': 'gpt-4.1',
+            },
+          },
+          <String, dynamic>{
+            'id': 'prt_retry',
+            'messageID': 'msg_ai_parts',
+            'sessionID': 'ses_1',
+            'type': 'retry',
+            'attempt': 2,
+            'error': <String, dynamic>{
+              'name': 'APIError',
+              'data': <String, dynamic>{
+                'message': 'rate limited',
+                'isRetryable': true,
+                'statusCode': 429,
+              },
+            },
+            'time': <String, dynamic>{'created': 1050},
+          },
+          <String, dynamic>{
+            'id': 'prt_compaction',
+            'messageID': 'msg_ai_parts',
+            'sessionID': 'ses_1',
+            'type': 'compaction',
+            'auto': true,
+          },
+        ],
+      });
+
+      final message = model.toDomain() as AssistantMessage;
+      expect(message.parts.whereType<AgentPart>().single.name, 'planner');
+      expect(
+        message.parts.whereType<StepStartPart>().single.snapshot,
+        'snap_a',
+      );
+      expect(message.parts.whereType<StepFinishPart>().single.tokens.total, 35);
+      expect(
+        message.parts.whereType<SubtaskPart>().single.model?.providerId,
+        'openai',
+      );
+      expect(message.parts.whereType<RetryPart>().single.attempt, 2);
+      expect(message.parts.whereType<CompactionPart>().single.auto, isTrue);
+    });
   });
 }

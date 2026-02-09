@@ -200,8 +200,37 @@ Use controllable mock event stream to validate:
 - Permission/question requests are actionable in-app.
 - Automated tests cover reducer and stream race conditions.
 
+## Implementation Status
+
+**Status**: Completed
+
+Implemented in mobile client with:
+
+- SSE subscription flow with reconnect/backoff in `ChatRemoteDataSource.subscribeEvents()`.
+- Provider-level realtime reducer in `ChatProvider` for `session.*`, `message.*`, `permission.*`, and `question.*`.
+- Fallback full-message fetch via `GetChatMessage` when delta/partial updates are received.
+- Expanded part taxonomy parsing + rendering for `agent`, `step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, and `patch`.
+- Interactive permission/question cards with reply/reject endpoint integration.
+- Integration test matrix updates for reconnect and permission/question endpoint flows.
+
+Validation executed:
+
+- `flutter test` (all tests passing).
+- `flutter analyze --no-fatal-infos --no-fatal-warnings` (passes with infos only).
+
+Post-completion stabilization:
+
+- Fixed `directory` propagation in `sendMessage()` streaming path so both `/event` subscription and `/session/{id}/message/{messageId}` fallback fetch use the active project directory scope.
+- Added integration coverage to enforce directory-scoped send streaming (`/event` + message fetch) and prevent regression where only interim thinking content appeared without final reply.
+- Added release-visible send lifecycle logs (`info`/`warn`) for `send -> event stream -> fallback poll -> completion`.
+- Hardened fallback when event stream is missing/closed: resolve assistant `messageID` from `/session/{id}/message` before polling completion.
+- Added send watchdog fallback when `/event` stays open but no message events arrive, preventing stuck `sending/thinking` state.
+- Fixed provider realtime subscription race to avoid duplicate `/event` subscriptions under concurrent initialization.
+- Removed `messageID` from regular send payload path (`POST /session/{id}/message`) to avoid server-side stale immediate replies reusing previous assistant message IDs.
+- Hardened provider send setup with stage-level logs and best-effort (non-blocking) selection persistence so local storage failures/timeouts do not prevent request dispatch.
+- Fixed regression in model-usage tracking when restored recent-model list was fixed-length, which caused `Unsupported operation: Cannot remove from a fixed-length list` before request dispatch.
+
 ## Source Links
 
 - https://github.com/anomalyco/opencode
 - https://opencode.ai/docs/server/
-
