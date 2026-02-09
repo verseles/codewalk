@@ -73,6 +73,66 @@ Description: Build comprehensive automated tests (unit, widget, integration) and
 Implemented a layered automation baseline with unit tests for model parsing/use case delegation/provider state transitions, widget tests for responsive chat shell and send-message flow, and integration tests against a controllable local mock OpenCode server including session CRUD, app/provider bootstrap calls, SSE message updates, and 400 validation error mapping. Added CI workflow gates for phased static analysis budget, full test execution with coverage generation, and minimum coverage threshold enforcement scripts, plus a race-condition fix in chat SSE handling so pending message fetches are not dropped when the event stream closes.
 Commits: 5125edd
 
+### Feature 010: OpenCode Upstream Parity Baseline and Contract Freeze
+Description: Consolidate the latest OpenCode Server/API/Desktop/Web behavior into a single compatibility contract for CodeWalk implementation planning. (Visit file ROADMAP.feat010.md for full research details)
+
+- [ ] 10.01 Lock target reference snapshot (`opencode.ai` docs + upstream commit + OpenAPI) and define supported server versions/range
+- [ ] 10.02 Define parity matrix (`endpoint + event + part type + UX behavior`) with Required vs Optional scope
+- [ ] 10.03 Align local docs (`CODEBASE.md` integration section) with v2 route/event taxonomy before feature implementation begins
+- [ ] 10.04 Define migration strategy for persisted client state (server profiles, model selection, session cache)
+
+### Feature 011: Multi-Server Management and Health Orchestration
+Description: Implement first-class support for multiple OpenCode servers (desktop/mobile parity), including active/default server routing and health-aware switching.
+
+- [ ] 11.01 Introduce `ServerProfile` storage (list, add/edit/remove, active, default) replacing single `host/port` persistence
+- [ ] 11.02 Build server manager UI (`add`, `edit`, `delete`, `set default`, `health badge`, `connectivity validation`)
+- [ ] 11.03 Scope runtime state/caches per server (projects, sessions, model preferences, auth settings) to avoid cross-server pollution
+- [ ] 11.04 Add unit/widget/integration coverage for server switching, invalid server handling, and fallback behavior
+
+### Feature 012: Model/Provider Switching and Variant (Reasoning Effort) Controls
+Description: Bring model control parity with OpenCode Desktop/Web, including current-model changes and model variant/reasoning-effort changes.
+
+- [ ] 12.01 Add provider/model picker in chat composer flow and persist user selections
+- [ ] 12.02 Parse/provider model variants from `/provider` and expose current variant state in UI
+- [ ] 12.03 Add variant/reasoning-effort cycle action and include `variant` field in outbound prompt payloads
+- [ ] 12.04 Persist recent/frequent model usage (server-scoped) and restore safely across launches
+- [ ] 12.05 Add tests for model switch, variant switch, and backward compatibility when variants are absent
+
+### Feature 013: Event Stream and Message-Part Parity (Messages, Thinking, Tools, Questions, Permissions)
+Description: Expand real-time event handling to match OpenCode v2 event/part taxonomy and reliably render message lifecycle details.
+
+- [ ] 13.01 Harden SSE layer (reconnect, backoff, stale subscription guard, fetch fallback) for long-running sessions
+- [ ] 13.02 Support full high-value event set (`message.*`, `session.status`, `session.error`, `permission.*`, `question.*`) in provider state
+- [ ] 13.03 Expand part parsing/rendering coverage (`step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, `agent`, `patch`)
+- [ ] 13.04 Add permission/question response UX for interactive tool flows
+- [ ] 13.05 Add integration tests with mocked event matrix and partial/delta update scenarios
+
+### Feature 014: Advanced Session Lifecycle Management
+Description: Upgrade session operations beyond basic CRUD to parity-level management for active and historical work.
+
+- [ ] 14.01 Implement rename/archive/share/unshare/delete flows end-to-end (API + UI + optimistic update + rollback)
+- [ ] 14.02 Add session fork/children/todo/diff/status capabilities where supported by server
+- [ ] 14.03 Implement robust session list UX (sorting, filtering/search, scalable loading strategy)
+- [ ] 14.04 Add session timeline/history quality (state reconciliation across updates and navigation)
+- [ ] 14.05 Cover session lifecycle operations with integration tests against controlled server fixtures
+
+### Feature 015: Project/Workspace Context Parity
+Description: Support multi-project and workspace/worktree workflows using directory-aware API/event orchestration.
+
+- [ ] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
+- [ ] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes
+- [ ] 15.03 Adopt `directory` scoping consistently for requests and event routing to avoid cross-context bleed
+- [ ] 15.04 Introduce global-context sync strategy (`/global/event` + per-directory stores) with deterministic cache invalidation
+- [ ] 15.05 Add tests for project/workspace switching, context isolation, and stale-state race conditions
+
+### Feature 016: Reliability Hardening, QA, and Release Readiness for Parity Wave
+Description: Validate and harden all parity features with measurable quality gates before production rollout.
+
+- [ ] 16.01 Expand automated test matrix (unit/widget/integration) for multi-server + model/variant + event + session/workspace flows
+- [ ] 16.02 Run manual QA campaign on Android + desktop/web parity scenarios and log reproducible defects
+- [ ] 16.03 Update technical docs and decisions (`ADR.md`, `CODEBASE.md`, release notes) for new architecture/state model
+- [ ] 16.04 Validate `make precommit` + CI stability and publish rollout checklist/known limitations
+
 ## Dependency Order
 
 1. Feature 001 -> blocks all other features (baseline + safety rails)
@@ -83,7 +143,14 @@ Commits: 5125edd
 6. Feature 006 -> should happen before desktop/manual/automation validation
 7. Feature 007 -> should happen before full manual QA campaign
 8. Feature 008 -> should happen before final CI quality thresholds
-9. Feature 009 -> closes roadmap and enables long-term maintainability
+9. Feature 009 -> provides regression safety net for parity expansion
+10. Feature 010 -> defines parity contract and scope boundaries for all upcoming implementation
+11. Feature 011 -> depends on 010 and establishes server orchestration foundation
+12. Feature 012 -> depends on 010/011 for model persistence and active-server context
+13. Feature 013 -> depends on 010 and should land before advanced session UX
+14. Feature 014 -> depends on 013 event fidelity and 012 model controls
+15. Feature 015 -> depends on 011 + 013 to safely support multi-context orchestration
+16. Feature 016 -> final hardening/release gate for features 011-015
 
 ## Legend
 
@@ -106,3 +173,10 @@ Commits: 5125edd
 | 007 | 006 complete | Desktop builds OK + responsive layout + keyboard shortcuts working |
 | 008 | 007 complete | Test matrix executed + P0/P1 fixed + readiness report published |
 | 009 | 008 complete | Unit/widget/integration tests + CI pipeline + coverage thresholds |
+| 010 | 009 complete | Signed parity contract + endpoint/event/UX gap matrix + migration checklist |
+| 011 | 010 complete | Multi-server profile management + active/default switching + server-scoped state isolation |
+| 012 | 010, 011 complete | User can switch model/provider + switch variant/reasoning effort + payload parity validated |
+| 013 | 010 complete | Stable SSE/event engine + expanded part rendering + interactive question/permission handling |
+| 014 | 012, 013 complete | Session lifecycle parity (rename/archive/share/fork/etc.) with passing API/UI tests |
+| 015 | 011, 013 complete | Reliable project/workspace context switching with directory-isolated state |
+| 016 | 011-015 complete | QA signoff + docs/ADR/CODEBASE updates + release checklist complete |
