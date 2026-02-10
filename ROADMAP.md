@@ -161,7 +161,7 @@ Description: Validate and harden all parity features with measurable quality gat
 
 - [x] 16.01 Expand automated test matrix (unit/widget/integration) for multi-server + model/variant + event + session/workspace flows
 - [x] 16.02 Run manual QA campaign on Android + desktop/web parity scenarios and log reproducible defects
-- [ ] 16.03 Update technical docs and decisions (`ADR.md`, `CODEBASE.md`, release notes) for new architecture/state model
+- [x] 16.03 Update technical docs and decisions (`ADR.md`, `CODEBASE.md`, release notes) for new architecture/state model
 - [ ] 16.04 Validate `make precommit` + CI stability and publish rollout checklist/known limitations
 
 ## Dependency Order

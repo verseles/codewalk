@@ -61,9 +61,11 @@ codewalk/
 ├── .lcovrc            # LCOV coverage configuration
 ├── codecov.yml        # Codecov integration config
 ├── CONTRIBUTING.md    # Contribution guidelines
+├── QA.feat016.release-readiness.md # Feature 016 parity QA matrix and defect triage
+├── RELEASE_NOTES.md   # Release signoff notes and known limitations
 ├── install.sh         # Unix installer script
 ├── install.ps1        # Windows installer script
-└── Makefile           # Build automation (67 lines)
+└── Makefile           # Build automation and packaging gates
 ```
 
 ## File Counts
@@ -72,9 +74,9 @@ codewalk/
 |------|-------|-------|
 | `.dart` (source) | 81 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 16 | Test files (unit, widget, integration, support) |
+| `.dart` (tests) | 17 | Test files (unit, widget, integration, support) |
 | `.dart` (total) | 97 | Repository files excluding build artifacts |
-| `.md` (markdown) | 15 | Docs + roadmap + CONTRIBUTING.md |
+| `.md` (markdown) | 17 | Docs + roadmap + release/QA artifacts |
 | `.sh` (scripts) | 4 | CI validation + installer/smoke scripts |
 
 ## Legacy Naming References
@@ -241,6 +243,20 @@ Compatibility tiers:
   - Workspace creation now includes a server-backed directory browser (`/file`) and validates Git context (`/vcs`) before submit.
   - Directory picker now surfaces a git-only warning, and successful workspace creation force-switches context to the newly created directory.
 - Added workspace operation telemetry in `ProjectProvider` so `create/reset/delete` failures and user-facing provider errors are emitted to the in-app Logs stream.
+
+### Feature 016 Reliability and Release-Readiness Architecture (Implemented 2026-02-10)
+
+- Added parity-wave release gate with explicit evidence contract:
+  - automated coverage expansion (unit/widget/integration),
+  - manual scenario matrix IDs `PAR-001`..`PAR-008`,
+  - platform runtime/build smoke requirements and documented known limitations.
+- Added release-readiness artifacts:
+  - `QA.feat016.release-readiness.md` for matrix execution and defect triage,
+  - `RELEASE_NOTES.md` for parity-wave signoff summary.
+- Expanded parity-focused tests for:
+  - server-scoped model selection restore across server switches,
+  - question reject flow in provider + chat widget integration,
+  - `/question/{id}/reject` integration coverage in mock server route contract.
 
 ### ChatInput Schema
 
@@ -674,6 +690,10 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Web: static site bundle
 - Android: signed APK (arm64-v8a)
 
+**Release documentation:**
+- `RELEASE_NOTES.md` tracks parity-wave release signoff and known limitations.
+- `QA.feat016.release-readiness.md` records executed QA matrix evidence.
+
 ## Configuration Files Summary
 
 | File | Purpose |
@@ -745,3 +765,9 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Added explicit app-log telemetry for workspace lifecycle operations to improve production debugging from mobile.
 - Added `/global/event` subscription for cross-context invalidation and resilient subscription teardown during server switches.
 - Expanded tests for project/worktree/global-event/context isolation and raised total passing tests to 66.
+
+**Feature 016 (completed):**
+- Expanded parity regression coverage across unit/widget/integration suites (including server-scoped model restore and reject-question flows).
+- Executed QA matrix `PAR-001..PAR-008` with artifacts in `/tmp/codewalk_feat016/20260210_022919`.
+- Added release-readiness report (`QA.feat016.release-readiness.md`) and release notes (`RELEASE_NOTES.md`).
+- Documented one reproducible host-environment limitation (Android emulator startup `-6`) with mitigation via build/artifact validation and APK upload path.

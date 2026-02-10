@@ -18,6 +18,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration (2026-02-09) [Accepted]
 - ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration (2026-02-10) [Accepted]
 - ADR-014: Project/Workspace Context Orchestration with Global Event Sync (2026-02-10) [Accepted]
+- ADR-015: Parity Wave Release Gate and QA Evidence Contract (2026-02-10) [Accepted]
 
 ---
 
@@ -557,3 +558,55 @@ After multi-server/model/session parity improvements, CodeWalk still risked cont
 - `ROADMAP.md`
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
+
+---
+
+## ADR-015: Parity Wave Release Gate and QA Evidence Contract
+
+Status: Accepted  
+Date: 2026-02-10
+
+### Context
+
+Features 011-015 introduced cross-cutting changes in server orchestration, model selection, realtime event handling, session lifecycle, and project/workspace context isolation. A final release wave needed one consistent quality contract to avoid shipping regressions caused by route/event/state interactions that are hard to validate with isolated unit checks only.
+
+### Decision
+
+Adopt a release-readiness contract for Feature 016 with explicit evidence requirements:
+
+1. Expand automated parity coverage across unit/widget/integration suites for multi-server + model/variant + event + session/workspace flows.
+2. Execute a parity QA matrix with scenario IDs (`PAR-001`..`PAR-008`) and persist execution evidence.
+3. Gate release readiness on:
+   - runtime smokes for desktop/web,
+   - platform build health (`linux`, `web`, `android`),
+   - local precommit gate (`make precommit`),
+   - documented known limitations and defect triage.
+4. Publish release notes and roadmap signoff tied to concrete artifacts.
+
+### Rationale
+
+- The parity wave changed behavior in multiple state scopes (`serverId`, `directory`, session lifecycle, event streams), so release confidence must come from combined scenario validation, not only API-level checks.
+- Scenario IDs provide repeatable regression tracking and make failures easier to triage across future iterations.
+- Enforcing evidence-first signoff in docs (`QA`, `ROADMAP`, `RELEASE_NOTES`) avoids undocumented release decisions.
+
+### Consequences
+
+- Positive: release decisions are reproducible, auditable, and tied to objective artifacts.
+- Positive: parity regressions are detected earlier through targeted matrix coverage.
+- Positive: known limitations become explicit, reducing ambiguity during rollout.
+- Trade-off: release cadence is slower due to additional QA and documentation gates.
+- Trade-off: maintaining matrix artifacts increases process overhead for each parity release wave.
+
+### Key Files
+
+- `QA.feat016.release-readiness.md`
+- `ROADMAP.md`
+- `CODEBASE.md`
+- `RELEASE_NOTES.md`
+- `Makefile`
+
+### References
+
+- `ROADMAP.feat016.md`
+- `ROADMAP.md`
+- `QA.feat016.release-readiness.md`
