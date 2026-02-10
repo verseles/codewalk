@@ -267,6 +267,10 @@ class ChatMessageWidget extends StatelessWidget {
 
   void _copyTextToClipboard(BuildContext context, String text) {
     Clipboard.setData(ClipboardData(text: text));
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.android) {
+      return;
+    }
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Copied to clipboard')));

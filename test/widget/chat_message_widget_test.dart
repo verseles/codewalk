@@ -188,11 +188,12 @@ void main() {
     expect(find.byTooltip('Copy'), findsNothing);
   });
 
-  testWidgets('background copy handler shows copy feedback', (
+  testWidgets('background copy handler shows feedback on non-android', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.windows),
         home: Scaffold(
           body: ChatMessageWidget(
             message: UserMessage(
@@ -232,11 +233,51 @@ void main() {
     expect(find.text('Copied to clipboard'), findsOneWidget);
   });
 
+  testWidgets('background copy handler does not show feedback on android', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: UserMessage(
+              id: 'msg_9',
+              sessionId: 'ses_9',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_text_9',
+                  messageId: 'msg_9',
+                  sessionId: 'ses_9',
+                  text: 'Android native clipboard feedback',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final backgroundDetectorFinder = find.byWidgetPredicate(
+      (widget) =>
+          widget is GestureDetector &&
+          widget.behavior == HitTestBehavior.opaque &&
+          widget.onDoubleTap != null,
+    );
+    final detector = tester.widget<GestureDetector>(backgroundDetectorFinder);
+    detector.onDoubleTap?.call();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Copied to clipboard'), findsNothing);
+  });
+
   testWidgets('double tap on text does not trigger background copy', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.windows),
         home: Scaffold(
           body: ChatMessageWidget(
             message: AssistantMessage(
