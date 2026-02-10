@@ -35,6 +35,20 @@ class _EscapeIntent extends Intent {
   const _EscapeIntent();
 }
 
+class _ModelSelectorEntry {
+  const _ModelSelectorEntry({
+    required this.providerId,
+    required this.providerName,
+    required this.modelId,
+    required this.modelName,
+  });
+
+  final String providerId;
+  final String providerName;
+  final String modelId;
+  final String modelName;
+}
+
 /// Chat page
 class ChatPage extends StatefulWidget {
   final String? projectId;
@@ -1512,7 +1526,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildModelControls(ChatProvider chatProvider) {
-    final selectedProvider = chatProvider.selectedProvider;
     final selectedModel = chatProvider.selectedModel;
     final variants = chatProvider.availableVariants;
     final colorScheme = Theme.of(context).colorScheme;
@@ -1531,46 +1544,18 @@ class _ChatPageState extends State<ChatPage> {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          PopupMenuButton<String>(
-            tooltip: 'Choose provider',
-            onSelected: (providerId) {
-              unawaited(chatProvider.setSelectedProvider(providerId));
-            },
-            itemBuilder: (context) => chatProvider.providers
-                .map(
-                  (provider) => PopupMenuItem<String>(
-                    value: provider.id,
-                    child: Text(provider.name),
-                  ),
-                )
-                .toList(),
-            child: _buildModelControlChip(
-              icon: Icons.hub_outlined,
-              label: 'Provider: ${selectedProvider?.name ?? 'Select'}',
-            ),
-          ),
-          PopupMenuButton<String>(
-            tooltip: 'Choose model',
-            enabled: selectedProvider != null,
-            onSelected: (modelId) {
-              unawaited(chatProvider.setSelectedModel(modelId));
-            },
-            itemBuilder: (context) {
-              final providerModels =
-                  selectedProvider?.models.values.toList(growable: false) ??
-                  const <Model>[];
-              return providerModels
-                  .map(
-                    (model) => PopupMenuItem<String>(
-                      value: model.id,
-                      child: Text(model.name),
-                    ),
-                  )
-                  .toList();
-            },
-            child: _buildModelControlChip(
-              icon: Icons.smart_toy_outlined,
-              label: 'Model: ${selectedModel?.name ?? 'Select'}',
+          Tooltip(
+            message: 'Choose model',
+            child: InkWell(
+              key: const ValueKey<String>('model_selector_button'),
+              borderRadius: BorderRadius.circular(999),
+              onTap: chatProvider.providers.isEmpty
+                  ? null
+                  : () => unawaited(_openModelSelector(chatProvider)),
+              child: _buildModelControlChip(
+                icon: Icons.smart_toy_outlined,
+                label: selectedModel?.name ?? 'Select model',
+              ),
             ),
           ),
           if (variants.isNotEmpty)
@@ -1583,6 +1568,166 @@ class _ChatPageState extends State<ChatPage> {
             ),
         ],
       ),
+    );
+  }
+
+  List<_ModelSelectorEntry> _buildModelSelectorEntries(
+    ChatProvider chatProvider,
+  ) {
+    final entries = <_ModelSelectorEntry>[];
+    for (final provider in chatProvider.providers) {
+      for (final model in provider.models.values) {
+        entries.add(
+          _ModelSelectorEntry(
+            providerId: provider.id,
+            providerName: provider.name,
+            modelId: model.id,
+            modelName: model.name,
+          ),
+        );
+      }
+    }
+    return entries;
+  }
+
+  Future<void> _openModelSelector(ChatProvider chatProvider) async {
+    final entries = _buildModelSelectorEntries(chatProvider);
+    var query = '';
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (bottomSheetContext, setModalState) {
+            final normalizedQuery = query.trim().toLowerCase();
+            final filteredEntries = entries
+                .where((entry) {
+                  if (normalizedQuery.isEmpty) {
+                    return true;
+                  }
+                  return entry.modelName.toLowerCase().contains(
+                        normalizedQuery,
+                      ) ||
+                      entry.modelId.toLowerCase().contains(normalizedQuery) ||
+                      entry.providerName.toLowerCase().contains(
+                        normalizedQuery,
+                      ) ||
+                      entry.providerId.toLowerCase().contains(normalizedQuery);
+                })
+                .toList(growable: false);
+            final groupedEntries = <String, List<_ModelSelectorEntry>>{};
+            for (final entry in filteredEntries) {
+              groupedEntries
+                  .putIfAbsent(entry.providerId, () => <_ModelSelectorEntry>[])
+                  .add(entry);
+            }
+            final selectedProviderId = chatProvider.selectedProviderId;
+            final selectedModelId = chatProvider.selectedModelId;
+            final selectedKey =
+                selectedProviderId == null || selectedModelId == null
+                ? null
+                : '$selectedProviderId/$selectedModelId';
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(bottomSheetContext).bottom,
+                ),
+                child: SizedBox(
+                  height: MediaQuery.sizeOf(bottomSheetContext).height * 0.72,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                        child: TextField(
+                          autofocus: true,
+                          onChanged: (value) {
+                            setModalState(() {
+                              query = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search model or provider',
+                            prefixIcon: const Icon(Icons.search),
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: filteredEntries.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No models found',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              )
+                            : ListView(
+                                children: [
+                                  for (final provider in chatProvider.providers)
+                                    if (groupedEntries.containsKey(
+                                      provider.id,
+                                    )) ...[
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          12,
+                                          16,
+                                          4,
+                                        ),
+                                        child: Text(
+                                          provider.name,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                      ),
+                                      for (final entry
+                                          in groupedEntries[provider.id]!)
+                                        ListTile(
+                                          title: Text(entry.modelName),
+                                          subtitle:
+                                              entry.modelName == entry.modelId
+                                              ? null
+                                              : Text(entry.modelId),
+                                          trailing:
+                                              selectedKey ==
+                                                  '${entry.providerId}/${entry.modelId}'
+                                              ? const Icon(Icons.check_rounded)
+                                              : null,
+                                          onTap: () async {
+                                            await chatProvider
+                                                .setSelectedModelByProvider(
+                                                  providerId: entry.providerId,
+                                                  modelId: entry.modelId,
+                                                );
+                                            if (!mounted) {
+                                              return;
+                                            }
+                                            Navigator.of(
+                                              bottomSheetContext,
+                                            ).pop();
+                                          },
+                                        ),
+                                    ],
+                                ],
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

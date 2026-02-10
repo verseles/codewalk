@@ -1783,15 +1783,27 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setSelectedModelByProvider({
+    required String providerId,
+    required String modelId,
+  }) async {
+    final provider = _providers.where((p) => p.id == providerId).firstOrNull;
+    if (provider == null || !provider.models.containsKey(modelId)) {
+      return;
+    }
+    _selectedProviderId = providerId;
+    _selectedModelId = modelId;
+    _selectedVariantId = _resolveStoredVariantForSelection();
+    await _persistSelection();
+    notifyListeners();
+  }
+
   Future<void> setSelectedModel(String modelId) async {
     final provider = selectedProvider;
     if (provider == null || !provider.models.containsKey(modelId)) {
       return;
     }
-    _selectedModelId = modelId;
-    _selectedVariantId = _resolveStoredVariantForSelection();
-    await _persistSelection();
-    notifyListeners();
+    await setSelectedModelByProvider(providerId: provider.id, modelId: modelId);
   }
 
   Future<void> setSelectedVariant(String? variantId) async {

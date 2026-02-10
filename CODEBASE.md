@@ -716,7 +716,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Expanded tests for migration/switching/isolation and raised total passing tests to 35.
 
 **Feature 012 (completed):**
-- Added provider/model picker controls in chat composer flow with server-scoped persistence.
+- Replaced split provider/model controls with a single searchable model selector grouped by provider, while keeping server-scoped selection persistence.
 - Added typed model-variant parsing from `/provider` and variant-cycle UX for reasoning effort.
 - Added `variant` serialization in outbound chat payloads for parity with OpenCode v2 prompt schema.
 - Added server-scoped recent/frequent model usage tracking and restoration across launches.

@@ -268,47 +268,67 @@ void main() {
     expect(find.text('ok from widget'), findsOneWidget);
   });
 
-  testWidgets('shows model controls and cycles reasoning variant', (
-    WidgetTester tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+    'shows unified model selector with search and cycles reasoning variant',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    final repository = FakeChatRepository(
-      sessions: <ChatSession>[
-        ChatSession(
-          id: 'ses_1',
-          workspaceId: 'default',
-          time: DateTime.fromMillisecondsSinceEpoch(1000),
-          title: 'Session 1',
-        ),
-      ],
-    );
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_1',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Session 1',
+          ),
+        ],
+      );
 
-    final localDataSource = InMemoryAppLocalDataSource()
-      ..activeServerId = 'srv_test';
-    final provider = _buildChatProvider(
-      chatRepository: repository,
-      localDataSource: localDataSource,
-      includeVariants: true,
-    );
-    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+        includeVariants: true,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-    await tester.pumpWidget(_testApp(provider, appProvider));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
 
-    await provider.loadSessions();
-    await provider.selectSession(provider.sessions.first);
-    await tester.pump(const Duration(milliseconds: 150));
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await tester.pump(const Duration(milliseconds: 150));
 
-    expect(find.textContaining('Provider:'), findsOneWidget);
-    expect(find.textContaining('Model:'), findsOneWidget);
-    expect(find.text('Reasoning: Auto'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+        findsOneWidget,
+      );
+      expect(find.text('model_1'), findsOneWidget);
+      expect(find.text('Reasoning: Auto'), findsOneWidget);
 
-    await tester.tap(find.text('Reasoning: Auto'));
-    await tester.pumpAndSettle();
-    expect(find.text('Reasoning: Low'), findsOneWidget);
-  });
+      await tester.tap(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Search model or provider'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Search model or provider'),
+        'missing-model',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('No models found'), findsOneWidget);
+
+      await tester.tapAt(const Offset(8, 8));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Reasoning: Auto'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reasoning: Low'), findsOneWidget);
+    },
+  );
 
   testWidgets('opens conversation at latest message and toggles jump FAB', (
     WidgetTester tester,

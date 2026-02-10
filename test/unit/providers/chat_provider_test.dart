@@ -173,6 +173,44 @@ void main() {
       },
     );
 
+    test(
+      'setSelectedModelByProvider updates provider and model together',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        expect(provider.selectedProviderId, 'provider_a');
+        expect(provider.selectedModelId, 'model_a');
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+      },
+    );
+
     test('cycleVariant is no-op when current model has no variants', () async {
       appRepository.providersResult = Right(
         ProvidersResponse(
