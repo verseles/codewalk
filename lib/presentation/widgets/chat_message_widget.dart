@@ -77,7 +77,7 @@ class ChatMessageWidget extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 ...message.parts.map(
-                  (part) => _buildMessagePart(context, part, isUser: isUser),
+                  (part) => _buildMessagePart(context, part),
                 ),
 
                 if (message is AssistantMessage &&
@@ -165,18 +165,10 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildMessagePart(
-    BuildContext context,
-    MessagePart part, {
-    required bool isUser,
-  }) {
+  Widget _buildMessagePart(BuildContext context, MessagePart part) {
     switch (part.type) {
       case PartType.text:
-        return _buildTextPart(
-          context,
-          part as TextPart,
-          showCopyButton: isUser,
-        );
+        return _buildTextPart(context, part as TextPart);
       case PartType.file:
         return _buildFilePart(context, part as FilePart);
       case PartType.tool:
@@ -202,11 +194,7 @@ class ChatMessageWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildTextPart(
-    BuildContext context,
-    TextPart part, {
-    required bool showCopyButton,
-  }) {
+  Widget _buildTextPart(BuildContext context, TextPart part) {
     // Don't display if text is empty or only whitespace
     if (part.text.trim().isEmpty) {
       return const SizedBox.shrink();
@@ -218,45 +206,40 @@ class ChatMessageWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Render text using Markdown
-          MarkdownBody(
-            data: part.text,
-            selectable: true,
-            styleSheet: MarkdownStyleSheet(
-              p: Theme.of(context).textTheme.bodyMedium,
-              code: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontFamily: 'monospace',
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          _DoubleTapCopyRegion(
+            onDoubleTap: () => _copyTextToClipboard(context, part.text),
+            child: MarkdownBody(
+              data: part.text,
+              selectable: true,
+              styleSheet: MarkdownStyleSheet(
+                p: Theme.of(context).textTheme.bodyMedium,
+                code: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'monospace',
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                ),
+                codeblockDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              codeblockDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
-              ),
+              onTapLink: (text, href, title) {
+                if (href != null) {
+                  // TODO: Implement link navigation
+                }
+              },
             ),
-            onTapLink: (text, href, title) {
-              if (href != null) {
-                // TODO: Implement link navigation
-              }
-            },
           ),
           const SizedBox(height: 8),
-
-          if (showCopyButton)
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton.filledTonal(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: part.text));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Copied to clipboard')),
-                  );
-                },
-                icon: const Icon(Icons.copy, size: 18),
-                tooltip: 'Copy',
-              ),
-            ),
         ],
       ),
     );
+  }
+
+  void _copyTextToClipboard(BuildContext context, String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Copied to clipboard')));
   }
 
   Widget _buildFilePart(BuildContext context, FilePart part) {
@@ -695,5 +678,50 @@ class ChatMessageWidget extends StatelessWidget {
     } else {
       return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
+  }
+}
+
+class _DoubleTapCopyRegion extends StatefulWidget {
+  const _DoubleTapCopyRegion({required this.child, required this.onDoubleTap});
+
+  final Widget child;
+  final VoidCallback onDoubleTap;
+
+  @override
+  State<_DoubleTapCopyRegion> createState() => _DoubleTapCopyRegionState();
+}
+
+class _DoubleTapCopyRegionState extends State<_DoubleTapCopyRegion> {
+  static const int _doubleTapThresholdMs = 320;
+  static const double _maxTapDistance = 28;
+
+  int? _lastTapEpochMs;
+  Offset? _lastTapPosition;
+
+  void _handlePointerUp(PointerUpEvent event) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final lastEpoch = _lastTapEpochMs;
+    final lastPosition = _lastTapPosition;
+
+    if (lastEpoch != null && lastPosition != null) {
+      final elapsedMs = now - lastEpoch;
+      final distance = (event.position - lastPosition).distance;
+      final isDoubleTap =
+          elapsedMs <= _doubleTapThresholdMs && distance <= _maxTapDistance;
+      if (isDoubleTap) {
+        _lastTapEpochMs = null;
+        _lastTapPosition = null;
+        widget.onDoubleTap();
+        return;
+      }
+    }
+
+    _lastTapEpochMs = now;
+    _lastTapPosition = event.position;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(onPointerUp: _handlePointerUp, child: widget.child);
   }
 }

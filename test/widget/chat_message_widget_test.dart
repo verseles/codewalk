@@ -131,7 +131,9 @@ void main() {
     expect(find.byTooltip('Copy'), findsNothing);
   });
 
-  testWidgets('user text keeps copy button', (WidgetTester tester) async {
+  testWidgets('user text also does not show copy button', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -154,6 +156,35 @@ void main() {
       ),
     );
 
-    expect(find.byTooltip('Copy'), findsOneWidget);
+    expect(find.byTooltip('Copy'), findsNothing);
+  });
+
+  testWidgets('user text is selectable and has no copy button', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: UserMessage(
+              id: 'msg_6',
+              sessionId: 'ses_6',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_text_6',
+                  messageId: 'msg_6',
+                  sessionId: 'ses_6',
+                  text: 'User selectable text',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SelectableText), findsWidgets);
+    expect(find.byTooltip('Copy'), findsNothing);
   });
 }
