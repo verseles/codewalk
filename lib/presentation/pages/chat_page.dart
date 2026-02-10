@@ -762,19 +762,20 @@ class _ChatPageState extends State<ChatPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final isMobile = MediaQuery.sizeOf(context).width < _mobileBreakpoint;
     return AppBar(
-      titleSpacing: 0,
-      actions: [
-        Consumer<ProjectProvider>(
-          builder: (context, projectProvider, child) {
-            final currentProject = projectProvider.currentProject;
-            final currentDirectoryFull = _directoryLabel(
-              projectProvider.currentDirectory,
-            );
-            final currentDirectoryChip = isMobile
-                ? _directoryBasename(currentDirectoryFull)
-                : currentDirectoryFull;
+      titleSpacing: isMobile ? 0 : 8,
+      title: Consumer<ProjectProvider>(
+        builder: (context, projectProvider, child) {
+          final currentProject = projectProvider.currentProject;
+          final currentDirectoryFull = _directoryLabel(
+            projectProvider.currentDirectory,
+          );
+          final currentDirectoryChip = isMobile
+              ? _directoryBasename(currentDirectoryFull)
+              : currentDirectoryFull;
 
-            return PopupMenuButton<String>(
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: PopupMenuButton<String>(
               tooltip: 'Choose Directory',
               onSelected: (value) async {
                 if (value == '__refresh_projects__') {
@@ -919,17 +920,11 @@ class _ChatPageState extends State<ChatPage> {
 
                 return items;
               },
-              child: Container(
-                margin: const EdgeInsets.only(right: 4),
+              child: Padding(
+                key: const ValueKey<String>('project_selector_button'),
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 6 : 8,
+                  horizontal: isMobile ? 2 : 6,
                   vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: colorScheme.outline.withOpacity(0.4),
-                  ),
-                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -938,12 +933,12 @@ class _ChatPageState extends State<ChatPage> {
                     SizedBox(width: isMobile ? 4 : 6),
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: isMobile ? 92 : 180,
+                        maxWidth: isMobile ? 100 : 280,
                       ),
                       child: Text(
                         currentDirectoryChip,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium,
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                     const SizedBox(width: 2),
@@ -951,9 +946,11 @@ class _ChatPageState extends State<ChatPage> {
                   ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+      ),
+      actions: [
         Consumer<AppProvider>(
           builder: (context, appProvider, child) {
             final active = appProvider.activeServer;

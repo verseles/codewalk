@@ -239,6 +239,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('Choose Directory'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('project_selector_button')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getTopLeft(
+            find.byKey(const ValueKey<String>('project_selector_button')),
+          )
+          .dx,
+      lessThan(220),
+    );
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
