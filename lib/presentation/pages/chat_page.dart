@@ -457,11 +457,15 @@ class _ChatPageState extends State<ChatPage> {
 
   AppBar _buildAppBar() {
     final colorScheme = Theme.of(context).colorScheme;
+    final isMobile = MediaQuery.sizeOf(context).width < _mobileBreakpoint;
     return AppBar(
       titleSpacing: 12,
       title: Consumer<ProjectProvider>(
         builder: (context, projectProvider, child) {
           final currentPath = _directoryLabel(projectProvider.currentDirectory);
+          final currentPathDisplay = isMobile
+              ? _directoryBasename(currentPath)
+              : currentPath;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -472,7 +476,7 @@ class _ChatPageState extends State<ChatPage> {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               Text(
-                'Directory: $currentPath',
+                'Directory: $currentPathDisplay',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -486,9 +490,12 @@ class _ChatPageState extends State<ChatPage> {
         Consumer<ProjectProvider>(
           builder: (context, projectProvider, child) {
             final currentProject = projectProvider.currentProject;
-            final currentDirectory = _directoryLabel(
+            final currentDirectoryFull = _directoryLabel(
               projectProvider.currentDirectory,
             );
+            final currentDirectoryChip = isMobile
+                ? _directoryBasename(currentDirectoryFull)
+                : currentDirectoryFull;
 
             return PopupMenuButton<String>(
               tooltip: 'Choose Directory',
@@ -550,7 +557,7 @@ class _ChatPageState extends State<ChatPage> {
                     child: Text(
                       currentProject == null
                           ? 'No active context'
-                          : 'Current directory: $currentDirectory',
+                          : 'Current directory: $currentDirectoryFull',
                     ),
                   ),
                   const PopupMenuItem<String>(
@@ -637,7 +644,10 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: Container(
                 margin: const EdgeInsets.only(right: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 6 : 8,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: colorScheme.outline.withOpacity(0.4),
@@ -648,11 +658,13 @@ class _ChatPageState extends State<ChatPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.folder_open_outlined, size: 16),
-                    const SizedBox(width: 6),
+                    SizedBox(width: isMobile ? 4 : 6),
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 180),
+                      constraints: BoxConstraints(
+                        maxWidth: isMobile ? 92 : 180,
+                      ),
                       child: Text(
-                        currentDirectory,
+                        currentDirectoryChip,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
@@ -753,25 +765,38 @@ class _ChatPageState extends State<ChatPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        shape: BoxShape.circle,
+                    if (isMobile) ...[
+                      const Icon(Icons.cloud_outlined, size: 16),
+                      const SizedBox(width: 6),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 120),
-                      child: Text(
-                        active?.displayName ?? 'Server',
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium,
+                    ] else ...[
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.arrow_drop_down, size: 18),
+                      const SizedBox(width: 6),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 120),
+                        child: Text(
+                          active?.displayName ?? 'Server',
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.arrow_drop_down, size: 18),
+                    ],
                   ],
                 ),
               ),
@@ -788,11 +813,12 @@ class _ChatPageState extends State<ChatPage> {
           tooltip: 'Refresh',
           onPressed: _refreshData,
         ),
-        IconButton(
-          icon: const Icon(Icons.edit_note),
-          tooltip: 'Focus Input',
-          onPressed: _focusInput,
-        ),
+        if (!isMobile)
+          IconButton(
+            icon: const Icon(Icons.edit_note),
+            tooltip: 'Focus Input',
+            onPressed: _focusInput,
+          ),
         const SizedBox(width: 4),
       ],
     );
@@ -807,6 +833,22 @@ class _ChatPageState extends State<ChatPage> {
       return 'Global';
     }
     return trimmed;
+  }
+
+  String _directoryBasename(String directoryLabel) {
+    if (directoryLabel == 'Global') {
+      return directoryLabel;
+    }
+    final normalized = directoryLabel.replaceAll('\\', '/');
+    final parts = normalized
+        .split('/')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList(growable: false);
+    if (parts.isEmpty) {
+      return directoryLabel;
+    }
+    return parts.last;
   }
 
   String _projectDisplayLabel(Project project) {

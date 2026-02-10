@@ -114,14 +114,56 @@ void main() {
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
 
-    expect(find.text('Directory: /repo/a'), findsOneWidget);
-    expect(find.text('/repo/a'), findsOneWidget);
+    expect(find.textContaining('Directory:'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
 
     expect(find.text('Current directory: /repo/a'), findsOneWidget);
     expect(find.text('Select a directory/workspace below'), findsOneWidget);
+  });
+
+  testWidgets('shows basename directory and compact controls on mobile', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: FakeProjectRepository(
+        currentProject: Project(
+          id: 'proj_mobile',
+          name: 'Project Mobile',
+          path: '/repo/mobile-project',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+        projects: <Project>[
+          Project(
+            id: 'proj_mobile',
+            name: 'Project Mobile',
+            path: '/repo/mobile-project',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      ),
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Directory: mobile-project'), findsOneWidget);
+    expect(find.byTooltip('Focus Input'), findsNothing);
+
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Current directory: /repo/mobile-project'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows global label when current context is root', (
