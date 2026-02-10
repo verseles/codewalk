@@ -221,6 +221,7 @@ void main() {
       final popoverRect = tester.getRect(panelFinder);
       expect(popoverRect.bottom, lessThanOrEqualTo(inputRect.top));
       expect(popoverRect.height, lessThanOrEqualTo(156));
+      expect(inputRect.bottom, lessThanOrEqualTo(844 - 300));
 
       final popoverScrollableFinder = find.descendant(
         of: panelFinder,

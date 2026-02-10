@@ -597,6 +597,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         ),
       ),
       child: SafeArea(
+        top: false,
+        left: false,
+        right: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -844,10 +847,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   double _popoverMaxHeight(BuildContext context) {
     final media = MediaQuery.of(context);
-    final visibleHeight =
-        media.size.height - media.viewInsets.bottom - media.viewPadding.top;
+    final visibleHeight = media.size.height - media.viewInsets.bottom;
+    final reservedInputSpace = _inputRowHeight + 18 + media.viewPadding.bottom;
+    final availableForPopover = visibleHeight - reservedInputSpace;
     final maxByInput = _inputRowHeight * _popoverInputHeightMultiplier;
-    return math.max(0, math.min(maxByInput, visibleHeight));
+    return math.max(0, math.min(maxByInput, availableForPopover));
   }
 
   Widget _buildSuggestionPopover({

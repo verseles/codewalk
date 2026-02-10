@@ -285,7 +285,8 @@ Compatibility tiers:
   - trigger-aware mode orchestration (`normal`/`shell`) with `!` activation at offset 0
   - popover orchestration for `@` mentions and `/` slash commands
   - suggestion popover rendered inline above the input row (without global overlay), keeping input + keyboard interaction stable on mobile and desktop
-  - popover sizing uses a single cap rule for all layouts: up to `3x` input height, clamped by the visible viewport height; long lists scroll internally
+  - popover sizing uses a single cap rule for all layouts: up to `3x` input height, clamped by visible viewport after reserving input space; long lists scroll internally
+  - composer `SafeArea` now ignores top inset to avoid unnecessary vertical growth while keyboard is open on Android
   - keyboard navigation and selection (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`)
   - input focus persistence while mention/slash suggestions refresh
   - mention insertion normalizes trailing spacing to avoid token/punctuation glue on mobile
