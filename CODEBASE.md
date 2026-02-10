@@ -716,8 +716,8 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Expanded tests for migration/switching/isolation and raised total passing tests to 35.
 
 **Feature 012 (completed):**
-- Replaced split provider/model controls with a single searchable model selector grouped by provider, while keeping server-scoped selection persistence.
-- Added selector UX refinements: provider groups are alphabetically ordered and up to 3 recent models are surfaced at the top on open.
+- Replaced split provider/model controls with a single quick model selector (anchored popup) grouped by provider, while keeping server-scoped selection persistence.
+- Added selector UX refinements: provider groups are alphabetically ordered and up to 3 recent models are surfaced first on open.
 - Added typed model-variant parsing from `/provider` and variant-cycle UX for reasoning effort.
 - Added `variant` serialization in outbound chat payloads for parity with OpenCode v2 prompt schema.
 - Added server-scoped recent/frequent model usage tracking and restoration across launches.

@@ -283,7 +283,7 @@ void main() {
   });
 
   testWidgets(
-    'shows unified model selector with search and cycles reasoning variant',
+    'shows unified quick model selector and cycles reasoning variant',
     (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -320,27 +320,35 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('model_1'), findsOneWidget);
-      expect(find.text('Reasoning: Auto'), findsOneWidget);
+      expect(find.text('Auto'), findsOneWidget);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('model_selector_button')),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Search model or provider'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey<String>('model_selector_provider_header_provider_1'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>('model_selector_item_provider_1_model_1'),
+        ),
+        findsOneWidget,
+      );
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Search model or provider'),
-        'missing-model',
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('model_selector_item_provider_1_model_1'),
+        ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('No models found'), findsOneWidget);
 
-      await tester.tapAt(const Offset(8, 8));
+      await tester.tap(find.text('Auto'));
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Reasoning: Auto'));
-      await tester.pumpAndSettle();
-      expect(find.text('Reasoning: Low'), findsOneWidget);
+      expect(find.text('Low'), findsOneWidget);
     },
   );
 
