@@ -180,6 +180,9 @@ void main() {
   testWidgets(
     'mention popover stays above input when keyboard insets are active',
     (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
       await tester.pumpWidget(
         _buildChatInputHarness(
           mediaQueryData: const MediaQueryData(
@@ -208,9 +211,13 @@ void main() {
         const ValueKey<String>('composer_popover_mention'),
       );
       expect(popoverFinder, findsOneWidget);
+      final panelFinder = find.byKey(
+        const ValueKey<String>('composer_popover_panel_mention'),
+      );
+      expect(panelFinder, findsOneWidget);
 
       final inputRect = tester.getRect(find.byType(TextField));
-      final popoverRect = tester.getRect(popoverFinder);
+      final popoverRect = tester.getRect(panelFinder);
       expect(popoverRect.bottom, lessThanOrEqualTo(inputRect.top));
     },
   );

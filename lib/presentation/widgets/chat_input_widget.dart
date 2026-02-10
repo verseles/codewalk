@@ -102,6 +102,8 @@ class ChatInputWidget extends StatefulWidget {
 }
 
 class _ChatInputWidgetState extends State<ChatInputWidget> {
+  static const double _mobilePopoverFixedHeight = 280;
+  static const double _mobilePopoverBreakpoint = 840;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _internalFocusNode = FocusNode();
   final LayerLink _popoverAnchorLink = LayerLink();
@@ -598,8 +600,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         return;
       }
       if (showPopover) {
-        _popoverOverlayController.show();
-      } else {
+        if (!_popoverOverlayController.isShowing) {
+          _popoverOverlayController.show();
+        }
+      } else if (_popoverOverlayController.isShowing) {
         _popoverOverlayController.hide();
       }
     });
@@ -891,10 +895,14 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   double _popoverMaxHeight(MediaQueryData media) {
-    const minHeight = 72.0;
+    const desktopMinHeight = 72.0;
+    final isMobile = media.size.width < _mobilePopoverBreakpoint;
+    final desiredHeight = isMobile
+        ? _mobilePopoverFixedHeight
+        : media.size.height * 0.9;
     final anchorContext = _composerInputRowKey.currentContext;
-    final maxHeightLimit = (media.size.height * 0.9).clamp(
-      minHeight,
+    final maxHeightLimit = desiredHeight.clamp(
+      desktopMinHeight,
       media.size.height,
     );
 
@@ -908,8 +916,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     final topSafeArea = media.viewPadding.top;
     final inputTop = renderObject.localToGlobal(Offset.zero).dy;
-    final availableAboveInput = inputTop - topSafeArea - 8;
-    return availableAboveInput.clamp(minHeight, maxHeightLimit).toDouble();
+    final availableAboveInput = (inputTop - topSafeArea - 8).clamp(
+      0.0,
+      media.size.height,
+    );
+    if (isMobile) {
+      return availableAboveInput.clamp(0.0, maxHeightLimit).toDouble();
+    }
+    return availableAboveInput
+        .clamp(desktopMinHeight, maxHeightLimit)
+        .toDouble();
   }
 
   Widget _buildSuggestionOverlay({
@@ -918,6 +934,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }) {
     final media = MediaQuery.of(context);
     final maxHeight = _popoverMaxHeight(media);
+    final isMobile = media.size.width < _mobilePopoverBreakpoint;
+    if (maxHeight <= 0) {
+      return const SizedBox.shrink();
+    }
     return CompositedTransformFollower(
       link: _popoverAnchorLink,
       showWhenUnlinked: false,
@@ -929,6 +949,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         child: _buildSuggestionPopover(
           colorScheme: colorScheme,
           maxHeight: maxHeight,
+          isMobile: isMobile,
         ),
       ),
     );
@@ -937,6 +958,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   Widget _buildSuggestionPopover({
     required ColorScheme colorScheme,
     required double maxHeight,
+    required bool isMobile,
   }) {
     final isMention = _popoverType == ChatComposerPopoverType.mention;
     final suggestions = isMention
@@ -972,6 +994,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       descendantsAreFocusable: false,
       skipTraversal: true,
       child: Material(
+        key: ValueKey<String>('composer_popover_panel_${_popoverType.name}'),
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         child: ConstrainedBox(
@@ -996,9 +1019,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                   key: ValueKey<String>(
                     'composer_popover_${_popoverType.name}',
                   ),
+                  primary: false,
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.manual,
-                  shrinkWrap: true,
+                  shrinkWrap: !isMobile,
                   itemCount: suggestions.length,
                   itemBuilder: (context, index) {
                     final item = suggestions[index];
