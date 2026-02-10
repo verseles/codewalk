@@ -487,8 +487,14 @@ class ProjectProvider extends ChangeNotifier {
     if (path != '/') {
       return false;
     }
-    final idLooksSynthetic = id.isEmpty || id == '/' || id == path;
-    final nameLooksSynthetic = name.isEmpty || name == '/' || name == path;
+    final normalizedName = name.toLowerCase();
+    final idLooksSynthetic =
+        id.isEmpty || id == '/' || id == path || id == 'global';
+    final nameLooksSynthetic =
+        name.isEmpty ||
+        name == '/' ||
+        name == path ||
+        normalizedName == 'global';
     return idLooksSynthetic && nameLooksSynthetic;
   }
 

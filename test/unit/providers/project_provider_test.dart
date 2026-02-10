@@ -160,6 +160,43 @@ void main() {
     });
 
     test(
+      'treats global root project as placeholder when real contexts exist',
+      () async {
+        final globalProject = Project(
+          id: 'global',
+          name: 'Global',
+          path: '/',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        projectRepository = FakeProjectRepository(
+          currentProject: globalProject,
+          projects: <Project>[
+            globalProject,
+            Project(
+              id: 'proj_real',
+              name: 'Project Real',
+              path: '/repo/real',
+              createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+            ),
+          ],
+        );
+        provider = ProjectProvider(
+          projectRepository: projectRepository,
+          localDataSource: localDataSource,
+        );
+
+        await provider.initializeProject();
+
+        expect(
+          provider.projects.map((item) => item.id),
+          isNot(contains('global')),
+        );
+        expect(provider.currentProject?.id, 'proj_real');
+        expect(provider.currentDirectory, '/repo/real');
+      },
+    );
+
+    test(
       'root path uses project id as scope and no directory filter',
       () async {
         projectRepository = FakeProjectRepository(

@@ -18,6 +18,35 @@ class ProjectModel {
 
   /// Technical comment translated to English.
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
+    String? readNonEmptyString(dynamic value) {
+      if (value is String && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+      return null;
+    }
+
+    String? readPathValue(dynamic raw) {
+      if (raw is String && raw.trim().isNotEmpty) {
+        return raw.trim();
+      }
+      if (raw is Map) {
+        final map = Map<String, dynamic>.from(raw);
+        for (final key in <String>[
+          'worktree',
+          'directory',
+          'path',
+          'root',
+          'cwd',
+        ]) {
+          final value = readNonEmptyString(map[key]);
+          if (value != null) {
+            return value;
+          }
+        }
+      }
+      return null;
+    }
+
     String parseDate(dynamic value) {
       if (value is String && value.trim().isNotEmpty) {
         return value;
@@ -30,22 +59,52 @@ class ProjectModel {
       return DateTime.fromMillisecondsSinceEpoch(0).toIso8601String();
     }
 
+    String deriveDefaultName(String path) {
+      if (path == '/') {
+        return 'Global';
+      }
+      final parts = path
+          .split('/')
+          .map((item) => item.trim())
+          .where((item) => item.isNotEmpty)
+          .toList(growable: false);
+      if (parts.isNotEmpty) {
+        return parts.last;
+      }
+      return path;
+    }
+
     final parsedPath =
-        (json['path'] as String?) ??
-        (json['directory'] as String?) ??
-        (json['root'] as String?) ??
+        readPathValue(json['path']) ??
+        readPathValue(json['worktree']) ??
+        readPathValue(json['directory']) ??
+        readPathValue(json['root']) ??
+        readPathValue(json['cwd']) ??
         '/';
-    final parsedId = (json['id'] as String?) ?? parsedPath;
-    final parsedName = (json['name'] as String?) ?? parsedPath;
+
+    final parsedId =
+        readNonEmptyString(json['id']) ??
+        readNonEmptyString(json['projectID']) ??
+        parsedPath;
+
+    final parsedName =
+        readNonEmptyString(json['name']) ??
+        readNonEmptyString(json['title']) ??
+        readNonEmptyString(json['label']) ??
+        deriveDefaultName(parsedPath);
+
+    final timeMap = json['time'] is Map
+        ? Map<String, dynamic>.from(json['time'] as Map)
+        : null;
+    final createdAtRaw = json['createdAt'] ?? timeMap?['created'];
+    final updatedAtRaw = json['updatedAt'] ?? timeMap?['updated'];
 
     return ProjectModel(
       id: parsedId,
       name: parsedName,
       path: parsedPath,
-      createdAt: parseDate(json['createdAt']),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : parseDate(json['updatedAt']),
+      createdAt: parseDate(createdAtRaw),
+      updatedAt: updatedAtRaw == null ? null : parseDate(updatedAtRaw),
     );
   }
 
