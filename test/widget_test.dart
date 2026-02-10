@@ -220,6 +220,21 @@ void main() {
       final inputRect = tester.getRect(find.byType(TextField));
       final popoverRect = tester.getRect(panelFinder);
       expect(popoverRect.bottom, lessThanOrEqualTo(inputRect.top));
+      expect(popoverRect.height, lessThanOrEqualTo(156));
+
+      final popoverScrollableFinder = find.descendant(
+        of: panelFinder,
+        matching: find.byType(Scrollable),
+      );
+      expect(popoverScrollableFinder, findsOneWidget);
+      expect(find.text('README_19.md'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('README_19.md'),
+        80,
+        scrollable: popoverScrollableFinder,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('README_19.md'), findsOneWidget);
     },
   );
 

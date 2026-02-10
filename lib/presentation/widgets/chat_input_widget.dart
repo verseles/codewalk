@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -102,14 +103,10 @@ class ChatInputWidget extends StatefulWidget {
 }
 
 class _ChatInputWidgetState extends State<ChatInputWidget> {
+  static const double _inputRowHeight = 52;
   static const double _popoverInputHeightMultiplier = 3;
-  static const double _popoverGap = 8;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _internalFocusNode = FocusNode();
-  final LayerLink _popoverAnchorLink = LayerLink();
-  final GlobalKey _composerInputRowKey = GlobalKey();
-  final OverlayPortalController _popoverOverlayController =
-      OverlayPortalController();
   final List<FileInputPart> _attachments = <FileInputPart>[];
   final stt.SpeechToText _speechToText = stt.SpeechToText();
   final RegExp _mentionTriggerPattern = RegExp(r'(^|\s)@([^\s@]*)$');
@@ -147,9 +144,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   void dispose() {
     _sendHoldTimer?.cancel();
     _suggestionDebounce?.cancel();
-    if (_popoverOverlayController.isShowing) {
-      _popoverOverlayController.hide();
-    }
     unawaited(_speechToText.stop());
     _controller.dispose();
     _internalFocusNode.dispose();
@@ -595,19 +589,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         !_isSending;
     final showPopover = _popoverType != ChatComposerPopoverType.none;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      if (showPopover) {
-        if (!_popoverOverlayController.isShowing) {
-          _popoverOverlayController.show();
-        }
-      } else if (_popoverOverlayController.isShowing) {
-        _popoverOverlayController.hide();
-      }
-    });
-
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
@@ -616,328 +597,257 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         ),
       ),
       child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final popoverWidth = (constraints.maxWidth - 24).clamp(
-              0.0,
-              constraints.maxWidth,
-            );
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_mode == ChatComposerMode.shell)
-                  Padding(
-                    key: const ValueKey<String>('composer_shell_mode_row'),
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Chip(
-                        key: const ValueKey<String>('composer_shell_mode_chip'),
-                        avatar: const Icon(Icons.terminal_rounded, size: 16),
-                        label: const Text('Shell mode'),
-                        onDeleted: widget.enabled
-                            ? () {
-                                setState(() {
-                                  _mode = ChatComposerMode.normal;
-                                  _controller.clear();
-                                  _isComposing = false;
-                                });
-                              }
-                            : null,
-                      ),
-                    ),
-                  ),
-                if (mentionTokens.isNotEmpty)
-                  Padding(
-                    key: const ValueKey<String>('composer_mention_tokens_row'),
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: mentionTokens
-                            .map((token) {
-                              final value = token.group(1) ?? '';
-                              return InputChip(
-                                key: ValueKey<String>('mention_token_$value'),
-                                avatar: Icon(
-                                  _mentionIconForToken(value),
-                                  size: 16,
-                                ),
-                                label: Text('@$value'),
-                                onDeleted: widget.enabled
-                                    ? () {
-                                        final start = token.start;
-                                        final end = token.end;
-                                        final current = _controller.text;
-                                        if (start < 0 || end > current.length) {
-                                          return;
-                                        }
-                                        final nextText = current.replaceRange(
-                                          start,
-                                          end,
-                                          '',
-                                        );
-                                        _controller.value = TextEditingValue(
-                                          text: nextText,
-                                          selection: TextSelection.collapsed(
-                                            offset: start.clamp(
-                                              0,
-                                              nextText.length,
-                                            ),
-                                          ),
-                                        );
-                                        _handleTextChanged(nextText);
-                                      }
-                                    : null,
-                              );
-                            })
-                            .toList(growable: false),
-                      ),
-                    ),
-                  ),
-                if (showAttachments)
-                  Padding(
-                    key: const ValueKey<String>('composer_attachments_row'),
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: List<Widget>.generate(_attachments.length, (
-                        index,
-                      ) {
-                        final attachment = _attachments[index];
-                        return InputChip(
-                          avatar: Icon(
-                            attachment.mime.startsWith('image/')
-                                ? Icons.image_outlined
-                                : Icons.picture_as_pdf_outlined,
-                            size: 18,
-                          ),
-                          label: Text(attachment.filename ?? 'attachment'),
-                          onDeleted: widget.enabled
-                              ? () {
-                                  setState(() {
-                                    _attachments.removeAt(index);
-                                  });
-                                }
-                              : null,
-                        );
-                      }),
-                    ),
-                  ),
-                if (showPopover)
-                  const SizedBox(
-                    key: ValueKey<String>('composer_popover_row'),
-                    height: 8,
-                  ),
-                Padding(
-                  key: const ValueKey<String>('composer_input_row'),
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-                  child: OverlayPortal(
-                    controller: _popoverOverlayController,
-                    overlayChildBuilder: (context) => _buildSuggestionOverlay(
-                      colorScheme: colorScheme,
-                      popoverWidth: popoverWidth.toDouble(),
-                    ),
-                    child: CompositedTransformTarget(
-                      key: _composerInputRowKey,
-                      link: _popoverAnchorLink,
-                      child: Row(
-                        children: [
-                          if (widget.showAttachmentButton &&
-                              _mode == ChatComposerMode.normal) ...[
-                            IconButton.filledTonal(
-                              onPressed: widget.enabled
-                                  ? _showAttachmentOptions
-                                  : null,
-                              tooltip: 'Add attachment',
-                              icon: const Icon(Icons.attach_file_rounded),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Expanded(
-                            child: Focus(
-                              onKeyEvent: _handleInputKeyEvent,
-                              child: TextField(
-                                controller: _controller,
-                                focusNode: _effectiveFocusNode,
-                                enabled: widget.enabled,
-                                maxLines: null,
-                                textInputAction: TextInputAction.newline,
-                                keyboardType: TextInputType.multiline,
-                                onChanged: _handleTextChanged,
-                                onSubmitted: (_) =>
-                                    unawaited(_handleSendMessage()),
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                decoration: InputDecoration(
-                                  hintText: _composerHintText(),
-                                  filled: true,
-                                  fillColor: _mode == ChatComposerMode.shell
-                                      ? colorScheme.tertiaryContainer
-                                      : colorScheme.surfaceContainerHighest,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(26),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(26),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton.filledTonal(
-                            onPressed: widget.enabled && !_isSending
-                                ? () => unawaited(_toggleVoiceInput())
-                                : null,
-                            tooltip: _isListening
-                                ? 'Stop voice input'
-                                : 'Start voice input',
-                            style: IconButton.styleFrom(
-                              backgroundColor: microphoneButtonBackgroundColor(
-                                isListening: _isListening,
-                                colorScheme: colorScheme,
-                              ),
-                              foregroundColor: microphoneButtonForegroundColor(
-                                isListening: _isListening,
-                                colorScheme: colorScheme,
-                              ),
-                            ),
-                            icon: Icon(
-                              _isListening
-                                  ? Icons.mic_rounded
-                                  : Icons.mic_none_rounded,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Listener(
-                            onPointerDown: (_) =>
-                                _handleSendButtonPressStart(canSend: canSend),
-                            onPointerUp: (_) => _handleSendButtonPressEnd(),
-                            onPointerCancel: (_) => _handleSendButtonPressEnd(),
-                            child: FilledButton(
-                              onPressed: canSend ? _handleSendButtonTap : null,
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size(52, 52),
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: _isSending
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : SizedBox(
-                                      width: 52,
-                                      height: 52,
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          const Align(
-                                            alignment: Alignment.center,
-                                            child: Icon(Icons.send_rounded),
-                                          ),
-                                          Align(
-                                            alignment: Alignment.bottomRight,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                right: 4,
-                                                bottom: 4,
-                                              ),
-                                              child: DecoratedBox(
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme
-                                                      .primaryContainer,
-                                                  borderRadius:
-                                                      BorderRadius.circular(99),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                    1,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons
-                                                        .keyboard_return_rounded,
-                                                    size: 10,
-                                                    color: colorScheme
-                                                        .onPrimaryContainer,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_mode == ChatComposerMode.shell)
+              Padding(
+                key: const ValueKey<String>('composer_shell_mode_row'),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Chip(
+                    key: const ValueKey<String>('composer_shell_mode_chip'),
+                    avatar: const Icon(Icons.terminal_rounded, size: 16),
+                    label: const Text('Shell mode'),
+                    onDeleted: widget.enabled
+                        ? () {
+                            setState(() {
+                              _mode = ChatComposerMode.normal;
+                              _controller.clear();
+                              _isComposing = false;
+                            });
+                          }
+                        : null,
                   ),
                 ),
-              ],
-            );
-          },
+              ),
+            if (mentionTokens.isNotEmpty)
+              Padding(
+                key: const ValueKey<String>('composer_mention_tokens_row'),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: mentionTokens
+                        .map((token) {
+                          final value = token.group(1) ?? '';
+                          return InputChip(
+                            key: ValueKey<String>('mention_token_$value'),
+                            avatar: Icon(_mentionIconForToken(value), size: 16),
+                            label: Text('@$value'),
+                            onDeleted: widget.enabled
+                                ? () {
+                                    final start = token.start;
+                                    final end = token.end;
+                                    final current = _controller.text;
+                                    if (start < 0 || end > current.length) {
+                                      return;
+                                    }
+                                    final nextText = current.replaceRange(
+                                      start,
+                                      end,
+                                      '',
+                                    );
+                                    _controller.value = TextEditingValue(
+                                      text: nextText,
+                                      selection: TextSelection.collapsed(
+                                        offset: start.clamp(0, nextText.length),
+                                      ),
+                                    );
+                                    _handleTextChanged(nextText);
+                                  }
+                                : null,
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
+                ),
+              ),
+            if (showAttachments)
+              Padding(
+                key: const ValueKey<String>('composer_attachments_row'),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List<Widget>.generate(_attachments.length, (index) {
+                    final attachment = _attachments[index];
+                    return InputChip(
+                      avatar: Icon(
+                        attachment.mime.startsWith('image/')
+                            ? Icons.image_outlined
+                            : Icons.picture_as_pdf_outlined,
+                        size: 18,
+                      ),
+                      label: Text(attachment.filename ?? 'attachment'),
+                      onDeleted: widget.enabled
+                          ? () {
+                              setState(() {
+                                _attachments.removeAt(index);
+                              });
+                            }
+                          : null,
+                    );
+                  }),
+                ),
+              ),
+            if (showPopover)
+              Padding(
+                key: const ValueKey<String>('composer_popover_row'),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: _buildSuggestionPopover(
+                  colorScheme: colorScheme,
+                  maxHeight: _popoverMaxHeight(context),
+                ),
+              ),
+            Padding(
+              key: const ValueKey<String>('composer_input_row'),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+              child: Row(
+                children: [
+                  if (widget.showAttachmentButton &&
+                      _mode == ChatComposerMode.normal) ...[
+                    IconButton.filledTonal(
+                      onPressed: widget.enabled ? _showAttachmentOptions : null,
+                      tooltip: 'Add attachment',
+                      icon: const Icon(Icons.attach_file_rounded),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(
+                    child: Focus(
+                      onKeyEvent: _handleInputKeyEvent,
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _effectiveFocusNode,
+                        enabled: widget.enabled,
+                        maxLines: null,
+                        textInputAction: TextInputAction.newline,
+                        keyboardType: TextInputType.multiline,
+                        onChanged: _handleTextChanged,
+                        onSubmitted: (_) => unawaited(_handleSendMessage()),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        decoration: InputDecoration(
+                          hintText: _composerHintText(),
+                          filled: true,
+                          fillColor: _mode == ChatComposerMode.shell
+                              ? colorScheme.tertiaryContainer
+                              : colorScheme.surfaceContainerHighest,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(26),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(26),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filledTonal(
+                    onPressed: widget.enabled && !_isSending
+                        ? () => unawaited(_toggleVoiceInput())
+                        : null,
+                    tooltip: _isListening
+                        ? 'Stop voice input'
+                        : 'Start voice input',
+                    style: IconButton.styleFrom(
+                      backgroundColor: microphoneButtonBackgroundColor(
+                        isListening: _isListening,
+                        colorScheme: colorScheme,
+                      ),
+                      foregroundColor: microphoneButtonForegroundColor(
+                        isListening: _isListening,
+                        colorScheme: colorScheme,
+                      ),
+                    ),
+                    icon: Icon(
+                      _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Listener(
+                    onPointerDown: (_) =>
+                        _handleSendButtonPressStart(canSend: canSend),
+                    onPointerUp: (_) => _handleSendButtonPressEnd(),
+                    onPointerCancel: (_) => _handleSendButtonPressEnd(),
+                    child: FilledButton(
+                      onPressed: canSend ? _handleSendButtonTap : null,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(52, 52),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: _isSending
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : SizedBox(
+                              width: 52,
+                              height: 52,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  const Align(
+                                    alignment: Alignment.center,
+                                    child: Icon(Icons.send_rounded),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 4,
+                                        bottom: 4,
+                                      ),
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primaryContainer,
+                                          borderRadius: BorderRadius.circular(
+                                            99,
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(1),
+                                          child: Icon(
+                                            Icons.keyboard_return_rounded,
+                                            size: 10,
+                                            color:
+                                                colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  double _popoverMaxHeight(MediaQueryData media) {
-    final anchorContext = _composerInputRowKey.currentContext;
-    if (anchorContext == null) {
-      return 0;
-    }
-    final renderObject = anchorContext.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) {
-      return 0;
-    }
-
-    final topSafeArea = media.viewPadding.top;
-    final inputTop = renderObject.localToGlobal(Offset.zero).dy;
-    final inputHeight = renderObject.size.height;
-    final availableAboveInput = (inputTop - topSafeArea - _popoverGap).clamp(
-      0.0,
-      media.size.height,
-    );
-    final maxByInput = inputHeight * _popoverInputHeightMultiplier;
-    return availableAboveInput.clamp(0.0, maxByInput).toDouble();
-  }
-
-  Widget _buildSuggestionOverlay({
-    required ColorScheme colorScheme,
-    required double popoverWidth,
-  }) {
+  double _popoverMaxHeight(BuildContext context) {
     final media = MediaQuery.of(context);
-    final maxHeight = _popoverMaxHeight(media);
-    if (maxHeight <= 0) {
-      return const SizedBox.shrink();
-    }
-    return CompositedTransformFollower(
-      link: _popoverAnchorLink,
-      showWhenUnlinked: false,
-      targetAnchor: Alignment.topLeft,
-      followerAnchor: Alignment.bottomLeft,
-      offset: const Offset(0, -8),
-      child: SizedBox(
-        width: popoverWidth,
-        child: _buildSuggestionPopover(
-          colorScheme: colorScheme,
-          maxHeight: maxHeight,
-        ),
-      ),
-    );
+    final visibleHeight =
+        media.size.height - media.viewInsets.bottom - media.viewPadding.top;
+    final maxByInput = _inputRowHeight * _popoverInputHeightMultiplier;
+    return math.max(0, math.min(maxByInput, visibleHeight));
   }
 
   Widget _buildSuggestionPopover({
