@@ -115,8 +115,53 @@ void main() {
     },
   );
 
+  testWidgets('shows only supported attachment options for image-only model', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      providersResponse: ProvidersResponse(
+        providers: <Provider>[
+          Provider(
+            id: 'provider_1',
+            name: 'Provider 1',
+            env: const <String>[],
+            models: <String, Model>{
+              'model_1': _model(
+                'model_1',
+                attachment: true,
+                modalities: const <String, dynamic>{
+                  'input': <String>['text', 'image'],
+                },
+              ),
+            },
+          ),
+        ],
+        defaultModels: const <String, String>{'provider_1': 'model_1'},
+        connected: const <String>['provider_1'],
+      ),
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Add attachment'), findsOneWidget);
+    await tester.tap(find.byTooltip('New Chat').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Add attachment'));
+    await tester.pumpAndSettle();
+    expect(find.text('Select Images'), findsOneWidget);
+    expect(find.text('Select PDF'), findsNothing);
+  });
+
   testWidgets(
-    'shows attachment button when selected model supports image/pdf input',
+    'shows both image and PDF options when model supports both modalities',
     (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -136,7 +181,7 @@ void main() {
                   'model_1',
                   attachment: true,
                   modalities: const <String, dynamic>{
-                    'input': <String>['text', 'image'],
+                    'input': <String>['text', 'image', 'pdf'],
                   },
                 ),
               },
@@ -152,6 +197,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byTooltip('Add attachment'), findsOneWidget);
+      await tester.tap(find.byTooltip('New Chat').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Add attachment'));
+      await tester.pumpAndSettle();
+      expect(find.text('Select Images'), findsOneWidget);
+      expect(find.text('Select PDF'), findsOneWidget);
     },
   );
 

@@ -14,6 +14,8 @@ class ChatInputWidget extends StatefulWidget {
     this.enabled = true,
     this.focusNode,
     this.showAttachmentButton = false,
+    this.allowImageAttachment = true,
+    this.allowPdfAttachment = true,
   });
 
   final FutureOr<void> Function(String message, List<FileInputPart> attachments)
@@ -21,6 +23,8 @@ class ChatInputWidget extends StatefulWidget {
   final bool enabled;
   final FocusNode? focusNode;
   final bool showAttachmentButton;
+  final bool allowImageAttachment;
+  final bool allowPdfAttachment;
 
   @override
   State<ChatInputWidget> createState() => _ChatInputWidgetState();
@@ -48,6 +52,22 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     if (!widget.showAttachmentButton && _attachments.isNotEmpty) {
       setState(() {
         _attachments.clear();
+      });
+      return;
+    }
+
+    if (_attachments.isEmpty) {
+      return;
+    }
+
+    final filtered = _attachments
+        .where((attachment) => _isMimeAllowed(attachment.mime))
+        .toList(growable: false);
+    if (filtered.length != _attachments.length) {
+      setState(() {
+        _attachments
+          ..clear()
+          ..addAll(filtered);
       });
     }
   }
@@ -215,28 +235,34 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _showAttachmentOptions() {
+    if (!widget.allowImageAttachment && !widget.allowPdfAttachment) {
+      return;
+    }
+
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (context) => SafeArea(
         child: Wrap(
           children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Select Images'),
-              onTap: () {
-                Navigator.of(context).pop();
-                unawaited(_pickImages());
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-              title: const Text('Select PDF'),
-              onTap: () {
-                Navigator.of(context).pop();
-                unawaited(_pickPdf());
-              },
-            ),
+            if (widget.allowImageAttachment)
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Select Images'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  unawaited(_pickImages());
+                },
+              ),
+            if (widget.allowPdfAttachment)
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('Select PDF'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  unawaited(_pickPdf());
+                },
+              ),
           ],
         ),
       ),
@@ -276,6 +302,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         continue;
       }
       final mime = forcePdf ? 'application/pdf' : _resolveImageMime(file);
+      if (!_isMimeAllowed(mime)) {
+        continue;
+      }
       nextAttachments.add(
         FileInputPart(
           mime: mime,
@@ -306,6 +335,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         }
       }
     });
+  }
+
+  bool _isMimeAllowed(String mime) {
+    if (mime.startsWith('image/')) {
+      return widget.allowImageAttachment;
+    }
+    if (mime == 'application/pdf') {
+      return widget.allowPdfAttachment;
+    }
+    return false;
   }
 
   String? _resolveAttachmentUrl(PlatformFile file, {required bool forcePdf}) {

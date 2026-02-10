@@ -608,10 +608,11 @@ class _ChatPageState extends State<ChatPage> {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  bool _supportsComposerAttachments(Model? model) {
+  bool _supportsInputModality(Model? model, String modality) {
     if (model == null || !model.attachment) {
       return false;
     }
+    final normalizedModality = modality.toLowerCase();
     final modalities = model.modalities;
     final input = modalities?['input'];
     if (input is List) {
@@ -619,12 +620,21 @@ class _ChatPageState extends State<ChatPage> {
           .whereType<Object>()
           .map((item) => item.toString().toLowerCase())
           .toSet();
-      return normalized.contains('image') || normalized.contains('pdf');
+      return normalized.contains(normalizedModality);
     }
     if (input is Map) {
-      return input['image'] == true || input['pdf'] == true;
+      return input[normalizedModality] == true;
     }
+    // Backward compatibility for servers that only expose `attachment=true`.
     return true;
+  }
+
+  bool _supportsImageAttachments(Model? model) {
+    return _supportsInputModality(model, 'image');
+  }
+
+  bool _supportsPdfAttachments(Model? model) {
+    return _supportsInputModality(model, 'pdf');
   }
 
   @override
@@ -1708,22 +1718,31 @@ class _ChatPageState extends State<ChatPage> {
               _buildModelControls(chatProvider),
 
               // Input field
-              ChatInputWidget(
-                onSendMessage: (text, attachments) async {
-                  await chatProvider.sendMessage(
-                    text,
-                    attachments: attachments,
+              Builder(
+                builder: (context) {
+                  final selectedModel = chatProvider.selectedModel;
+                  final supportsImages = _supportsImageAttachments(
+                    selectedModel,
                   );
-                  // Technical comment translated to English.
-                  _scrollToBottom(force: true);
+                  final supportsPdf = _supportsPdfAttachments(selectedModel);
+                  return ChatInputWidget(
+                    onSendMessage: (text, attachments) async {
+                      await chatProvider.sendMessage(
+                        text,
+                        attachments: attachments,
+                      );
+                      // Technical comment translated to English.
+                      _scrollToBottom(force: true);
+                    },
+                    enabled:
+                        chatProvider.currentSession != null &&
+                        chatProvider.state != ChatState.sending,
+                    focusNode: _inputFocusNode,
+                    showAttachmentButton: supportsImages || supportsPdf,
+                    allowImageAttachment: supportsImages,
+                    allowPdfAttachment: supportsPdf,
+                  );
                 },
-                enabled:
-                    chatProvider.currentSession != null &&
-                    chatProvider.state != ChatState.sending,
-                focusNode: _inputFocusNode,
-                showAttachmentButton: _supportsComposerAttachments(
-                  chatProvider.selectedModel,
-                ),
               ),
             ],
           ),
