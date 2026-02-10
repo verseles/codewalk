@@ -41,49 +41,84 @@ import '../support/fakes.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('uses NavigationBar on mobile and can open logs tab', (
+  testWidgets('renders chat as the primary root screen', (
     WidgetTester tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     final localDataSource = InMemoryAppLocalDataSource()
       ..activeServerId = 'srv_test';
     await tester.pumpWidget(
       _testApp(
         _buildChatProvider(localDataSource: localDataSource),
         _buildAppProvider(localDataSource: localDataSource),
-        const Size(430, 900),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(NavigationRail), findsNothing);
+    expect(find.text('Conversations'), findsOneWidget);
+  });
+
+  testWidgets('opens logs from sidebar and returns to chat via back arrow', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    await tester.pumpWidget(
+      _testApp(
+        _buildChatProvider(localDataSource: localDataSource),
+        _buildAppProvider(localDataSource: localDataSource),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Logs'));
     await tester.pumpAndSettle();
 
     expect(find.text('App Logs'), findsOneWidget);
-  });
 
-  testWidgets('uses NavigationRail on wide layouts', (
-    WidgetTester tester,
-  ) async {
-    final localDataSource = InMemoryAppLocalDataSource()
-      ..activeServerId = 'srv_test';
-    await tester.pumpWidget(
-      _testApp(
-        _buildChatProvider(localDataSource: localDataSource),
-        _buildAppProvider(localDataSource: localDataSource),
-        const Size(1200, 900),
-      ),
-    );
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationRail), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.text('Conversations'), findsOneWidget);
   });
+
+  testWidgets(
+    'opens settings from sidebar and returns to chat via back arrow',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      await tester.pumpWidget(
+        _testApp(
+          _buildChatProvider(localDataSource: localDataSource),
+          _buildAppProvider(localDataSource: localDataSource),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Server Manager'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Conversations'), findsOneWidget);
+    },
+  );
 }
 
-Widget _testApp(ChatProvider chatProvider, AppProvider appProvider, Size size) {
+Widget _testApp(ChatProvider chatProvider, AppProvider appProvider) {
   return MultiProvider(
     providers: [
       ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
@@ -92,12 +127,7 @@ Widget _testApp(ChatProvider chatProvider, AppProvider appProvider, Size size) {
         value: chatProvider.projectProvider,
       ),
     ],
-    child: MaterialApp(
-      home: MediaQuery(
-        data: MediaQueryData(size: size),
-        child: const AppShellPage(),
-      ),
-    ),
+    child: MaterialApp(home: const AppShellPage()),
   );
 }
 

@@ -506,7 +506,9 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
+- Chat-first shell: `AppShellPage` mounts `ChatPage` as primary route; `Logs` and `Settings` open as secondary routes with native back navigation to chat
 - Responsive shell with mobile drawer and desktop split-view layout
+- Sidebar top navigation: `Chat / Logs / Settings` segment appears above `Conversations` controls
 - Desktop shortcuts for new chat, refresh, and input focus
 
 ### Settings Module
@@ -560,7 +562,7 @@ test/
 │       └── chat_usecases_test.dart           # ChatUseCases domain logic
 ├── widget/
 │   ├── chat_page_test.dart                   # ChatPage responsive shell
-│   ├── app_shell_page_test.dart              # Bottom navigation + logs tab interaction
+│   ├── app_shell_page_test.dart              # Chat-first shell and sidebar Logs/Settings back-navigation flow
 │   ├── chat_session_list_test.dart           # Session lifecycle menu actions (rename/share/archive/delete)
 │   ├── interaction_cards_test.dart           # Permission/question UI action dispatch
 │   └── server_settings_page_test.dart        # Multi-server manager rendering and unhealthy-switch guard

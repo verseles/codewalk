@@ -16,6 +16,7 @@ import '../widgets/chat_input_widget.dart';
 import '../widgets/chat_session_list.dart';
 import '../widgets/permission_request_card.dart';
 import '../widgets/question_request_card.dart';
+import 'logs_page.dart';
 import 'server_settings_page.dart';
 
 class _NewSessionIntent extends Intent {
@@ -33,6 +34,8 @@ class _FocusInputIntent extends Intent {
 class _EscapeIntent extends Intent {
   const _EscapeIntent();
 }
+
+enum _SidebarDestination { chat, logs, settings }
 
 /// Chat page
 class ChatPage extends StatefulWidget {
@@ -944,6 +947,87 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Future<void> _closeDrawerIfNeeded({required bool closeOnSelect}) async {
+    if (!closeOnSelect) {
+      return;
+    }
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (!(scaffoldState?.isDrawerOpen ?? false)) {
+      return;
+    }
+    Navigator.of(context).pop();
+    await Future<void>.delayed(Duration.zero);
+  }
+
+  Future<void> _openLogsPage({required bool closeOnSelect}) async {
+    await _closeDrawerIfNeeded(closeOnSelect: closeOnSelect);
+    if (!mounted) {
+      return;
+    }
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const LogsPage()));
+  }
+
+  Future<void> _openSettingsPage({required bool closeOnSelect}) async {
+    await _closeDrawerIfNeeded(closeOnSelect: closeOnSelect);
+    if (!mounted) {
+      return;
+    }
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ServerSettingsPage()));
+  }
+
+  Widget _buildSidebarNavigation({required bool closeOnSelect}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: SegmentedButton<_SidebarDestination>(
+            showSelectedIcon: false,
+            segments: const <ButtonSegment<_SidebarDestination>>[
+              ButtonSegment<_SidebarDestination>(
+                value: _SidebarDestination.chat,
+                icon: Icon(Icons.chat_bubble_rounded),
+                label: Text('Chat'),
+              ),
+              ButtonSegment<_SidebarDestination>(
+                value: _SidebarDestination.logs,
+                icon: Icon(Icons.receipt_long_rounded),
+                label: Text('Logs'),
+              ),
+              ButtonSegment<_SidebarDestination>(
+                value: _SidebarDestination.settings,
+                icon: Icon(Icons.tune_rounded),
+                label: Text('Settings'),
+              ),
+            ],
+            selected: const <_SidebarDestination>{_SidebarDestination.chat},
+            onSelectionChanged: (selection) {
+              if (selection.isEmpty) {
+                return;
+              }
+              final destination = selection.first;
+              switch (destination) {
+                case _SidebarDestination.chat:
+                  unawaited(_closeDrawerIfNeeded(closeOnSelect: closeOnSelect));
+                  return;
+                case _SidebarDestination.logs:
+                  unawaited(_openLogsPage(closeOnSelect: closeOnSelect));
+                  return;
+                case _SidebarDestination.settings:
+                  unawaited(_openSettingsPage(closeOnSelect: closeOnSelect));
+                  return;
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSessionPanel({required bool closeOnSelect}) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
@@ -959,6 +1043,7 @@ class _ChatPageState extends State<ChatPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildSidebarNavigation(closeOnSelect: closeOnSelect),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
               child: Card(
