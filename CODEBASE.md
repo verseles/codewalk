@@ -492,6 +492,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Session list loading and caching
 - Session list controls: search/filter/sort/load-more windowing
 - Session selection and current session persistence
+- New-session creation now guarantees immediate focus on the created session and persists scoped `current_session_id`
 - Full lifecycle operations: create/delete/rename/archive/unarchive/share/unshare/fork
 - Session insights orchestration: status snapshot + children/todo/diff hydration
 - Optimistic session mutations with rollback on API failure

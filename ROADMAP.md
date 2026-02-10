@@ -141,6 +141,7 @@ Applied a post-completion chat UX refinement so conversation view opens at the l
 Adjusted project-context switching to auto-open the last session per directory (with fallback to most recent when no stored selection exists), reducing empty-state friction during A/B project navigation.
 Aligned main navigation with chat-first workflow by moving `Chat / Logs / Settings` controls to the top of the conversations sidebar and making `Logs`/`Settings` secondary routes with explicit back navigation to chat.
 Refined the sidebar navigation style to match area semantics: removed explicit `Chat` action and kept a compact one-line row with actionable `Logs` and `Settings` buttons only.
+Fixed a new-session UX regression where `New Chat` could create sessions without switching focus: directory-scoped session lists are now kept mutable and new-session creation explicitly persists/selects the newly created session.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes

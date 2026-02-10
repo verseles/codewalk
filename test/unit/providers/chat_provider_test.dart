@@ -279,6 +279,75 @@ void main() {
     });
 
     test(
+      'createNewSession selects created session in directory-scoped context',
+      () async {
+        final scopedRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_scoped_1',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              title: 'Scoped Session',
+              directory: '/tmp',
+            ),
+          ],
+        );
+        final scopedProvider = ChatProvider(
+          sendChatMessage: SendChatMessage(scopedRepository),
+          getChatSessions: GetChatSessions(scopedRepository),
+          createChatSession: CreateChatSession(scopedRepository),
+          getChatMessages: GetChatMessages(scopedRepository),
+          getChatMessage: GetChatMessage(scopedRepository),
+          getProviders: GetProviders(appRepository),
+          deleteChatSession: DeleteChatSession(scopedRepository),
+          updateChatSession: UpdateChatSession(scopedRepository),
+          shareChatSession: ShareChatSession(scopedRepository),
+          unshareChatSession: UnshareChatSession(scopedRepository),
+          forkChatSession: ForkChatSession(scopedRepository),
+          getSessionStatus: GetSessionStatus(scopedRepository),
+          getSessionChildren: GetSessionChildren(scopedRepository),
+          getSessionTodo: GetSessionTodo(scopedRepository),
+          getSessionDiff: GetSessionDiff(scopedRepository),
+          watchChatEvents: WatchChatEvents(scopedRepository),
+          watchGlobalChatEvents: WatchGlobalChatEvents(scopedRepository),
+          listPendingPermissions: ListPendingPermissions(scopedRepository),
+          replyPermission: ReplyPermission(scopedRepository),
+          listPendingQuestions: ListPendingQuestions(scopedRepository),
+          replyQuestion: ReplyQuestion(scopedRepository),
+          rejectQuestion: RejectQuestion(scopedRepository),
+          projectProvider: ProjectProvider(
+            projectRepository: FakeProjectRepository(),
+            localDataSource: localDataSource,
+          ),
+          localDataSource: localDataSource,
+        );
+
+        await scopedProvider.projectProvider.initializeProject();
+        await scopedProvider.loadSessions();
+        expect(scopedProvider.currentSession?.id, 'ses_scoped_1');
+
+        await scopedProvider.createNewSession();
+
+        expect(scopedProvider.state, ChatState.loaded);
+        expect(scopedProvider.currentSession, isNotNull);
+        expect(scopedProvider.currentSession?.id, isNot('ses_scoped_1'));
+        expect(
+          scopedProvider.sessions.any(
+            (session) => session.id == scopedProvider.currentSession?.id,
+          ),
+          isTrue,
+        );
+        expect(scopedProvider.messages, isEmpty);
+
+        final storedCurrent = await localDataSource.getCurrentSessionId(
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+        expect(storedCurrent, scopedProvider.currentSession?.id);
+      },
+    );
+
+    test(
       'sendMessage appends user message and final assistant reply',
       () async {
         final assistantPartial = AssistantMessage(

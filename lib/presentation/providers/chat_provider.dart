@@ -500,24 +500,20 @@ class ChatProvider extends ChangeNotifier {
       projectProvider.currentDirectory,
     );
     if (currentDirectory == null) {
-      return sessions;
+      return List<ChatSession>.from(sessions);
     }
 
     final hasDirectoryMetadata = sessions.any((session) {
       return _normalizeDirectory(_sessionDirectory(session)) != null;
     });
     if (!hasDirectoryMetadata) {
-      return sessions;
+      return List<ChatSession>.from(sessions);
     }
 
-    return sessions
-        .where((session) {
-          final sessionDirectory = _normalizeDirectory(
-            _sessionDirectory(session),
-          );
-          return sessionDirectory == currentDirectory;
-        })
-        .toList(growable: false);
+    return sessions.where((session) {
+      final sessionDirectory = _normalizeDirectory(_sessionDirectory(session));
+      return sessionDirectory == currentDirectory;
+    }).toList();
   }
 
   String? _sessionDirectory(ChatSession session) {
@@ -2099,15 +2095,38 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    result.fold((failure) => _handleFailure(failure), (session) {
-      _sessions.add(session);
-      _sortSessionsInPlace();
-      _currentSession = session;
-      _messages
-          .clear(); // Ensure message list is empty when a new session starts
-      unawaited(loadSessionInsights(session.id, silent: true));
-      _setState(ChatState.loaded);
-    });
+    if (result.isLeft()) {
+      final failure = result.fold((value) => value, (_) => null);
+      if (failure != null) {
+        _handleFailure(failure);
+      }
+      return;
+    }
+
+    final session = result.fold((_) => null, (value) => value);
+    if (session == null) {
+      _setError('Failed to create session');
+      return;
+    }
+
+    _sessions = List<ChatSession>.from(_sessions);
+    _removeSessionById(session.id);
+    _sessions.add(session);
+    _sortSessionsInPlace();
+    _currentSession = session;
+    _messages = <ChatMessage>[];
+    _sessionInsightsError = null;
+
+    final serverId = await _resolveServerScopeId();
+    final scopeId = _resolveContextScopeId();
+    await _saveCurrentSessionId(
+      session.id,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    unawaited(_persistSessionCacheBestEffort());
+    unawaited(loadSessionInsights(session.id, silent: true));
+    _setState(ChatState.loaded);
   }
 
   /// Generate time-based session title
