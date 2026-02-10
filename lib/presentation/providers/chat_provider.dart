@@ -165,6 +165,7 @@ class ChatProvider extends ChangeNotifier {
   int _sessionVisibleLimit = 40;
   bool _isLoadingSessionInsights = false;
   String? _sessionInsightsError;
+  final Set<String> _pendingLocalUserMessageIds = <String>{};
 
   // Project and provider-related state
   String? _currentProjectId;
@@ -481,6 +482,7 @@ class ChatProvider extends ChangeNotifier {
     _sessions = _filterSessionsForCurrentContext(snapshot.sessions);
     _currentSession = snapshot.currentSession;
     _messages = snapshot.messages;
+    _pendingLocalUserMessageIds.clear();
     _sessionStatusById = snapshot.sessionStatusById;
     _pendingPermissionsBySession = snapshot.pendingPermissionsBySession;
     _pendingQuestionsBySession = snapshot.pendingQuestionsBySession;
@@ -852,6 +854,7 @@ class ChatProvider extends ChangeNotifier {
     if (_currentSession?.id == sessionId) {
       _currentSession = _sessions.firstOrNull;
       _messages = <ChatMessage>[];
+      _pendingLocalUserMessageIds.clear();
     }
     _sessionStatusById.remove(sessionId);
     _pendingPermissionsBySession.remove(sessionId);
@@ -2115,6 +2118,7 @@ class ChatProvider extends ChangeNotifier {
     _sortSessionsInPlace();
     _currentSession = session;
     _messages = <ChatMessage>[];
+    _pendingLocalUserMessageIds.clear();
     _sessionInsightsError = null;
 
     final serverId = await _resolveServerScopeId();
@@ -2164,6 +2168,7 @@ class ChatProvider extends ChangeNotifier {
 
     // Clear current message list
     _messages.clear();
+    _pendingLocalUserMessageIds.clear();
     _currentSession = session;
     notifyListeners();
 
@@ -2213,6 +2218,7 @@ class ChatProvider extends ChangeNotifier {
           return;
         }
         _messages = messages;
+        _pendingLocalUserMessageIds.clear();
         _setState(ChatState.loaded);
       },
     );
@@ -2232,7 +2238,8 @@ class ChatProvider extends ChangeNotifier {
       _currentProjectId = projectProvider.currentProjectId;
 
       // Generate message ID
-      final localMessageId = 'msg_${DateTime.now().millisecondsSinceEpoch}';
+      final localMessageId =
+          'local_user_${DateTime.now().microsecondsSinceEpoch}';
 
       // Add user message to UI
       final userMessage = UserMessage(
@@ -2251,6 +2258,7 @@ class ChatProvider extends ChangeNotifier {
       );
 
       _messages.add(userMessage);
+      _pendingLocalUserMessageIds.add(localMessageId);
       notifyListeners();
 
       // Ensure providers are initialized
@@ -2331,10 +2339,25 @@ class ChatProvider extends ChangeNotifier {
 
   /// Update or add message
   void _updateOrAddMessage(ChatMessage message) {
+    if (message is UserMessage) {
+      final pendingLocalIndex = _findPendingLocalUserMessageIndex(message);
+      if (pendingLocalIndex != -1) {
+        final previousId = _messages[pendingLocalIndex].id;
+        _pendingLocalUserMessageIds.remove(previousId);
+        _messages[pendingLocalIndex] = message;
+        notifyListeners();
+        _scrollToBottomCallback?.call();
+        return;
+      }
+    }
+
     final index = _messages.indexWhere((m) => m.id == message.id);
     if (index != -1) {
       // Update existing message
       _messages[index] = message;
+      if (message is UserMessage) {
+        _pendingLocalUserMessageIds.remove(message.id);
+      }
       AppLogger.debug(
         'Updated message: ${message.id}, parts=${message.parts.length}',
       );
@@ -2359,6 +2382,44 @@ class ChatProvider extends ChangeNotifier {
 
     // Trigger auto-scroll
     _scrollToBottomCallback?.call();
+  }
+
+  String _normalizedUserMessageText(UserMessage message) {
+    return message.parts
+        .whereType<TextPart>()
+        .map((part) => part.text.trim())
+        .where((text) => text.isNotEmpty)
+        .join('\n');
+  }
+
+  int _findPendingLocalUserMessageIndex(UserMessage incoming) {
+    final incomingText = _normalizedUserMessageText(incoming);
+    if (incomingText.isEmpty) {
+      return -1;
+    }
+
+    for (var index = 0; index < _messages.length; index += 1) {
+      final current = _messages[index];
+      if (current is! UserMessage) {
+        continue;
+      }
+      if (!_pendingLocalUserMessageIds.contains(current.id)) {
+        continue;
+      }
+      if (current.sessionId != incoming.sessionId) {
+        continue;
+      }
+      final currentText = _normalizedUserMessageText(current);
+      if (currentText != incomingText) {
+        continue;
+      }
+      final delta = incoming.time.difference(current.time).abs();
+      if (delta > const Duration(minutes: 5)) {
+        continue;
+      }
+      return index;
+    }
+    return -1;
   }
 
   /// Handle failure

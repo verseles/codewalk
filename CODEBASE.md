@@ -503,6 +503,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Global context sync stream (`/global/event`) for cross-directory invalidation
 - Realtime event reducer for `session.*`, `message.*`, `permission.*`, and `question.*`
 - Message list rendering with incremental updates + targeted full-message fallback fetch
+- Optimistic local user messages are reconciled with server-confirmed user messages to prevent duplicate visual bubbles
 - Chat input and provider/model context
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-chat permission/question cards with actionable replies

@@ -409,6 +409,64 @@ void main() {
     );
 
     test(
+      'sendMessage replaces optimistic local user message with server user message',
+      () async {
+        final now = DateTime.now();
+        final serverUserMessage = UserMessage(
+          id: 'msg_server_user_1',
+          sessionId: 'ses_1',
+          time: now.add(const Duration(seconds: 1)),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_user_server_1',
+              messageId: 'msg_server_user_1',
+              sessionId: 'ses_1',
+              text: 'hello dedupe',
+            ),
+          ],
+        );
+        final assistantCompleted = AssistantMessage(
+          id: 'msg_assistant_dedupe',
+          sessionId: 'ses_1',
+          time: now.add(const Duration(seconds: 2)),
+          completedTime: now.add(const Duration(seconds: 3)),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_assistant_dedupe',
+              messageId: 'msg_assistant_dedupe',
+              sessionId: 'ses_1',
+              text: 'dedupe ok',
+            ),
+          ],
+        );
+
+        chatRepository.sendMessageHandler = (_, __, ___, ____) async* {
+          yield Right(serverUserMessage);
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+          yield Right(assistantCompleted);
+        };
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        await provider.sendMessage('hello dedupe');
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+
+        expect(provider.state, ChatState.loaded);
+        expect(provider.messages.length, 2);
+        expect(provider.messages.first.id, 'msg_server_user_1');
+        expect((provider.messages.first as UserMessage).parts, hasLength(1));
+        expect(
+          ((provider.messages.first as UserMessage).parts.first as TextPart)
+              .text,
+          'hello dedupe',
+        );
+        expect(provider.messages.last.id, 'msg_assistant_dedupe');
+      },
+    );
+
+    test(
       'sendMessage works when recent models are restored from local storage',
       () async {
         final scopeId =
