@@ -173,6 +173,74 @@ void main() {
     expect(textField.controller!.text, '@README.md ');
   });
 
+  testWidgets('mention selection keeps input focused while typing', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatInputWidget(
+            onSendMessage: (_) {},
+            onMentionQuery: (query) async {
+              return const <ChatComposerMentionSuggestion>[
+                ChatComposerMentionSuggestion(
+                  value: 'lib/main.dart',
+                  type: ChatComposerSuggestionType.file,
+                  subtitle: 'file',
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '@ma');
+    await tester.pumpAndSettle();
+
+    final inputField = tester.widget<TextField>(find.byType(TextField));
+    expect(inputField.focusNode?.hasFocus, isTrue);
+  });
+
+  testWidgets(
+    'mention insertion guarantees space before trailing punctuation',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChatInputWidget(
+              onSendMessage: (_) {},
+              onMentionQuery: (query) async {
+                return const <ChatComposerMentionSuggestion>[
+                  ChatComposerMentionSuggestion(
+                    value: 'README.md',
+                    type: ChatComposerSuggestionType.file,
+                    subtitle: 'file',
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: '@REA?',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('README.md'));
+      await tester.pumpAndSettle();
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.controller!.text, '@README.md ?');
+    },
+  );
+
   test('microphone button uses default palette when inactive', () {
     const colorScheme = ColorScheme.light();
     expect(

@@ -244,6 +244,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     setState(() {
       _isComposing = text.trim().isNotEmpty;
     });
+    _ensureInputFocus();
+  }
+
+  void _ensureInputFocus() {
+    if (!widget.enabled) {
+      return;
+    }
+    if (!_effectiveFocusNode.hasFocus) {
+      _effectiveFocusNode.requestFocus();
+    }
   }
 
   String _normalizeShellPayload(String text) {
@@ -321,6 +331,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       _activeSuggestionIndex = 0;
       _isLoadingSuggestions = false;
     });
+    _ensureInputFocus();
   }
 
   Future<void> _loadMentionSuggestions(String query) async {
@@ -344,11 +355,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             ? ChatComposerPopoverType.none
             : ChatComposerPopoverType.mention;
       });
+      _ensureInputFocus();
     } finally {
       if (mounted) {
         setState(() {
           _isLoadingSuggestions = false;
         });
+        _ensureInputFocus();
       }
     }
   }
@@ -374,11 +387,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             ? ChatComposerPopoverType.none
             : ChatComposerPopoverType.slash;
       });
+      _ensureInputFocus();
     } finally {
       if (mounted) {
         setState(() {
           _isLoadingSuggestions = false;
         });
+        _ensureInputFocus();
       }
     }
   }
@@ -480,9 +495,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     }
     final fullMatch = match.group(0) ?? '';
     final mentionStart = safeOffset - fullMatch.length;
-    final replacement = '${match.group(1) ?? ''}@${suggestion.value} ';
-    final nextText = text.replaceRange(mentionStart, safeOffset, replacement);
-    final nextOffset = mentionStart + replacement.length;
+    final replacementPrefix = '${match.group(1) ?? ''}@${suggestion.value} ';
+    final suffix = text.substring(safeOffset).replaceFirst(RegExp(r'^\s+'), '');
+    final nextText =
+        '${text.substring(0, mentionStart)}$replacementPrefix$suffix';
+    final nextOffset = mentionStart + replacementPrefix.length;
 
     _controller.value = TextEditingValue(
       text: nextText,
@@ -581,6 +598,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           children: [
             if (_mode == ChatComposerMode.shell)
               Padding(
+                key: const ValueKey<String>('composer_shell_mode_row'),
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -602,6 +620,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
               ),
             if (mentionTokens.isNotEmpty)
               Padding(
+                key: const ValueKey<String>('composer_mention_tokens_row'),
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -645,6 +664,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
               ),
             if (showAttachments)
               Padding(
+                key: const ValueKey<String>('composer_attachments_row'),
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 child: Wrap(
                   spacing: 8,
@@ -672,10 +692,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
               ),
             if (_popoverType != ChatComposerPopoverType.none)
               Padding(
+                key: const ValueKey<String>('composer_popover_row'),
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 child: _buildSuggestionPopover(colorScheme),
               ),
             Padding(
+              key: const ValueKey<String>('composer_input_row'),
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
               child: Row(
                 children: [
@@ -814,6 +836,14 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   Widget _buildSuggestionPopover(ColorScheme colorScheme) {
+    final media = MediaQuery.of(context);
+    final maxHeight =
+        (media.size.height -
+                media.viewPadding.top -
+                media.viewInsets.bottom -
+                150)
+            .clamp(220.0, media.size.height * 0.78)
+            .toDouble();
     final isMention = _popoverType == ChatComposerPopoverType.mention;
     final suggestions = isMention
         ? _mentionSuggestions
@@ -843,69 +873,78 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
               )
               .toList(growable: false);
 
-    return Material(
-      color: colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 220),
-        child: _isLoadingSuggestions && suggestions.isEmpty
-            ? const SizedBox(
-                height: 72,
-                child: Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              )
-            : suggestions.isEmpty
-            ? const SizedBox(
-                height: 72,
-                child: Center(child: Text('No suggestions')),
-              )
-            : ListView.builder(
-                key: ValueKey<String>('composer_popover_${_popoverType.name}'),
-                shrinkWrap: true,
-                itemCount: suggestions.length,
-                itemBuilder: (context, index) {
-                  final item = suggestions[index];
-                  final selected = index == _activeSuggestionIndex;
-                  return ListTile(
-                    dense: true,
-                    selected: selected,
-                    leading: Icon(item.icon, size: 18),
-                    title: Text(item.title),
-                    subtitle: item.subtitle == null || item.subtitle!.isEmpty
-                        ? null
-                        : Text(
-                            item.subtitle!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        item.badge,
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
+    return Focus(
+      canRequestFocus: false,
+      descendantsAreFocusable: false,
+      skipTraversal: true,
+      child: Material(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: _isLoadingSuggestions && suggestions.isEmpty
+              ? const SizedBox(
+                  height: 72,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    onTap: () {
-                      setState(() {
-                        _activeSuggestionIndex = index;
-                      });
-                      unawaited(_applyActiveSuggestion());
-                    },
-                  );
-                },
-              ),
+                  ),
+                )
+              : suggestions.isEmpty
+              ? const SizedBox(
+                  height: 72,
+                  child: Center(child: Text('No suggestions')),
+                )
+              : ListView.builder(
+                  key: ValueKey<String>(
+                    'composer_popover_${_popoverType.name}',
+                  ),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.manual,
+                  shrinkWrap: true,
+                  itemCount: suggestions.length,
+                  itemBuilder: (context, index) {
+                    final item = suggestions[index];
+                    final selected = index == _activeSuggestionIndex;
+                    return ListTile(
+                      dense: true,
+                      selected: selected,
+                      leading: Icon(item.icon, size: 18),
+                      title: Text(item.title),
+                      subtitle: item.subtitle == null || item.subtitle!.isEmpty
+                          ? null
+                          : Text(
+                              item.subtitle!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          item.badge,
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _activeSuggestionIndex = index;
+                        });
+                        unawaited(_applyActiveSuggestion());
+                      },
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }
