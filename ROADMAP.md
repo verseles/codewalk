@@ -172,6 +172,18 @@ Refined the top app bar context selector by removing the rounded bordered chip s
 Replaced the project selector popup menu with an adaptive Android-style dialog: fullscreen on small screens and centered on larger screens, with permanent actions pinned at the top and per-project trailing close buttons directly in the project list.
 Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 
+### Feature 017: Realtime-First Refreshless UX
+Description: Remove manual refresh interactions and keep UI state continuously updated through SSE-driven sync with lifecycle-aware efficiency controls. (Visit file ROADMAP.feat017.md for full research details)
+
+- [x] 17.01 Research and capability freeze (`/event`, `/global/event`, PTY websocket scope, fallback constraints)
+- [ ] 17.02 Implement event-reducer completeness audit and close missing incremental update paths
+- [ ] 17.03 Replace broad refresh calls with incremental state mutation + scoped invalidation
+- [ ] 17.04 Add lifecycle policy for stream management (foreground subscribe, background suspend, resume reconcile)
+- [ ] 17.05 Add degraded-mode fallback (slow scoped polling only when SSE is unhealthy)
+- [ ] 17.06 Remove refresh buttons from target flows and surface sync/connection status in UI
+- [ ] 17.07 Expand tests (unit/widget/integration) for reconnect, resume, and no-refresh user flows
+- [ ] 17.08 Add telemetry/KPIs and rollout guardrails (feature flag + rollback path)
+
 ## Dependency Order
 
 1. Feature 001 -> blocks all other features (baseline + safety rails)
@@ -190,6 +202,7 @@ Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 14. Feature 014 -> depends on 013 event fidelity and 012 model controls
 15. Feature 015 -> depends on 011 + 013 to safely support multi-context orchestration
 16. Feature 016 -> final hardening/release gate for features 011-015
+17. Feature 017 -> depends on 013 + 015 + 016 to safely remove manual refresh controls
 
 ## Legend
 
@@ -219,3 +232,4 @@ Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 | 014 | 012, 013 complete | Session lifecycle parity (rename/archive/share/fork/etc.) with passing API/UI tests |
 | 015 | 011, 013 complete | Reliable project/workspace context switching with directory-isolated state |
 | 016 | 011-015 complete | QA signoff + docs/ADR/CODEBASE updates + release checklist complete |
+| 017 | 013, 015, 016 complete | Refreshless UX with SSE-first sync, lifecycle-aware fallback, and validated no-manual-refresh flows |
