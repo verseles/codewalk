@@ -783,3 +783,4 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Refined post-release attachment UX so image/PDF options are filtered independently by model input modalities instead of relying only on generic attachment support.
 - Added post-release voice input support with `speech_to_text`, including microphone button UX in the composer and Android manifest updates for speech recognition availability.
 - Added post-release secondary send-button behavior: hold for 300ms inserts newline and shows a corner indicator icon for this non-send action.
+- Restored staged assistant progress feedback in chat list using provider realtime state (`ChatState.sending`, `session.status`, and in-progress `AssistantMessage` parts) to render `Thinking...`, `Receiving response...`, and `Retrying model request...` indicators until completion.

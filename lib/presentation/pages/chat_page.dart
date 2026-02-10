@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' hide Provider;
 import '../../core/logging/app_logger.dart';
+import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
@@ -2400,34 +2401,58 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
+    final progressStage = _resolveAssistantProgressStage(chatProvider);
+
     return ListView.builder(
       key: const ValueKey<String>('chat_message_list'),
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount:
-          chatProvider.messages.length +
-          (chatProvider.state == ChatState.sending ? 1 : 0),
+      itemCount: chatProvider.messages.length + (progressStage == null ? 0 : 1),
       itemBuilder: (context, index) {
         if (index < chatProvider.messages.length) {
           final message = chatProvider.messages[index];
           return ChatMessageWidget(key: ValueKey(message.id), message: message);
         }
 
-        // Show loading indicator
+        final indicator = switch (progressStage) {
+          _AssistantProgressStage.receiving => (
+            text: 'Receiving response...',
+            icon: Icons.auto_awesome,
+            showSpinner: false,
+          ),
+          _AssistantProgressStage.retrying => (
+            text: 'Retrying model request...',
+            icon: Icons.refresh_rounded,
+            showSpinner: true,
+          ),
+          _AssistantProgressStage.thinking || null => (
+            text: 'Thinking...',
+            icon: Icons.hourglass_top_rounded,
+            showSpinner: true,
+          ),
+        };
+
         return Container(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               const SizedBox(width: 40), // Avatar placeholder
               const SizedBox(width: 12),
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
+              if (indicator.showSpinner)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Icon(
+                  indicator.icon,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               const SizedBox(width: 8),
               Text(
-                'Thinking...',
+                indicator.text,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -2439,6 +2464,37 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  _AssistantProgressStage? _resolveAssistantProgressStage(
+    ChatProvider chatProvider,
+  ) {
+    final statusType = chatProvider.currentSessionStatus?.type;
+    final hasInProgressAssistant = chatProvider.messages
+        .whereType<AssistantMessage>()
+        .any((message) => !message.isCompleted);
+    final hasStreamingAssistantParts = chatProvider.messages
+        .whereType<AssistantMessage>()
+        .any((message) => !message.isCompleted && message.parts.isNotEmpty);
+    final hasBusyOrRetryStatus =
+        statusType == SessionStatusType.busy ||
+        statusType == SessionStatusType.retry;
+
+    final shouldShowIndicator =
+        chatProvider.state == ChatState.sending ||
+        hasBusyOrRetryStatus ||
+        hasInProgressAssistant;
+    if (!shouldShowIndicator) {
+      return null;
+    }
+
+    if (statusType == SessionStatusType.retry) {
+      return _AssistantProgressStage.retrying;
+    }
+    if (hasStreamingAssistantParts) {
+      return _AssistantProgressStage.receiving;
+    }
+    return _AssistantProgressStage.thinking;
+  }
+
   Future<void> _createNewSession() async {
     final chatProvider = context.read<ChatProvider>();
 
@@ -2446,6 +2502,8 @@ class _ChatPageState extends State<ChatPage> {
     await chatProvider.createNewSession();
   }
 }
+
+enum _AssistantProgressStage { thinking, receiving, retrying }
 
 class _DirectoryPickerSheet extends StatefulWidget {
   const _DirectoryPickerSheet({required this.initialDirectory});

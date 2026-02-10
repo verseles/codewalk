@@ -947,6 +947,76 @@ void main() {
 
     expect(find.byIcon(Icons.mark_chat_unread_outlined), findsNothing);
   });
+
+  testWidgets(
+    'shows thinking then receiving indicators while reply is in progress',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_progress',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Progress Session',
+          ),
+        ],
+      );
+      repository.messagesBySession['ses_progress'] = const <ChatMessage>[];
+
+      final streamController = StreamController<Either<Failure, ChatMessage>>();
+      addTearDown(() async {
+        await streamController.close();
+      });
+      repository.sendMessageHandler = (_, __, ___, ____) =>
+          streamController.stream;
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await provider.initializeProviders();
+      await tester.pumpAndSettle();
+
+      await provider.sendMessage('status progress');
+      await tester.pump();
+
+      expect(find.text('Thinking...'), findsOneWidget);
+
+      streamController.add(
+        Right(
+          AssistantMessage(
+            id: 'msg_assistant_progress',
+            sessionId: 'ses_progress',
+            time: DateTime.fromMillisecondsSinceEpoch(2000),
+            parts: const <MessagePart>[
+              TextPart(
+                id: 'part_assistant_progress',
+                messageId: 'msg_assistant_progress',
+                sessionId: 'ses_progress',
+                text: 'partial token',
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Receiving response...'), findsOneWidget);
+      expect(find.text('Thinking...'), findsNothing);
+    },
+  );
 }
 
 Widget _testApp(ChatProvider provider, AppProvider appProvider) {
