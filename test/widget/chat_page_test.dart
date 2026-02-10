@@ -114,7 +114,7 @@ void main() {
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Directory:'), findsOneWidget);
+    expect(find.byTooltip('Choose Directory'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
@@ -155,7 +155,7 @@ void main() {
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
 
-    expect(find.text('Directory: mobile-project'), findsOneWidget);
+    expect(find.text('mobile-project'), findsOneWidget);
     expect(find.byTooltip('Focus Input'), findsNothing);
 
     await tester.tap(find.byTooltip('Choose Directory'));
@@ -198,8 +198,10 @@ void main() {
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
 
-    expect(find.text('Directory: Global'), findsOneWidget);
-    expect(find.text('Global'), findsOneWidget);
+    expect(find.byTooltip('Choose Directory'), findsOneWidget);
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    expect(find.text('Current directory: Global'), findsOneWidget);
   });
 
   testWidgets('sends message from chat input and renders assistant response', (

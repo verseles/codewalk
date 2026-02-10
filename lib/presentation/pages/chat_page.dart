@@ -459,33 +459,7 @@ class _ChatPageState extends State<ChatPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final isMobile = MediaQuery.sizeOf(context).width < _mobileBreakpoint;
     return AppBar(
-      titleSpacing: 12,
-      title: Consumer<ProjectProvider>(
-        builder: (context, projectProvider, child) {
-          final currentPath = _directoryLabel(projectProvider.currentDirectory);
-          final currentPathDisplay = isMobile
-              ? _directoryBasename(currentPath)
-              : currentPath;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'CodeWalk',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              Text(
-                'Directory: $currentPathDisplay',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          );
-        },
-      ),
+      titleSpacing: 0,
       actions: [
         Consumer<ProjectProvider>(
           builder: (context, projectProvider, child) {
