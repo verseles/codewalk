@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,20 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test';
+        ..activeServerId = 'srv_test'
+        ..defaultServerId = 'srv_test'
+        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 'srv_test',
+            'url': 'http://127.0.0.1:4096',
+            'label': 'Test Server',
+            'basicAuthEnabled': false,
+            'basicAuthUsername': '',
+            'basicAuthPassword': '',
+            'createdAt': 0,
+            'updatedAt': 0,
+          },
+        ]);
       final provider = _buildChatProvider(localDataSource: localDataSource);
       final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
@@ -330,6 +344,126 @@ void main() {
     },
   );
 
+  testWidgets(
+    'model selector shows top 3 recent models and alphabetical providers',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final recentModelsJson = jsonEncode(<String>[
+        'provider_a/model_a3',
+        'provider_z/model_z2',
+        'provider_a/model_a2',
+      ]);
+      localDataSource.recentModelsJson = recentModelsJson;
+      for (final serverId in <String>['srv_test', 'legacy']) {
+        for (final scopeId in <String>['/tmp', 'default']) {
+          await localDataSource.saveRecentModelsJson(
+            recentModelsJson,
+            serverId: serverId,
+            scopeId: scopeId,
+          );
+        }
+      }
+
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        providersResponse: ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_z',
+              name: 'Zulu Provider',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_z1': _model('model_z1', name: 'Z1'),
+                'model_z2': _model('model_z2', name: 'Z2'),
+              },
+            ),
+            Provider(
+              id: 'provider_a',
+              name: 'Alpha Provider',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_a1': _model('model_a1', name: 'A1'),
+                'model_a2': _model('model_a2', name: 'A2'),
+                'model_a3': _model('model_a3', name: 'A3'),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a1'},
+          connected: const <String>['provider_a', 'provider_z'],
+        ),
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+      final scopedServerId =
+          await localDataSource.getActiveServerId() ?? 'legacy';
+      final scopedScopeId =
+          provider.projectProvider.currentDirectory ??
+          provider.projectProvider.currentProjectId;
+      await localDataSource.saveRecentModelsJson(
+        recentModelsJson,
+        serverId: scopedServerId,
+        scopeId: scopedScopeId,
+      );
+      await provider.initializeProviders();
+      await tester.pumpAndSettle();
+      expect(provider.recentModelKeys, isNotEmpty);
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey<String>('model_selector_recent_header')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>('model_selector_recent_provider_a_model_a3'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>('model_selector_recent_provider_z_model_z2'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>('model_selector_recent_provider_a_model_a2'),
+        ),
+        findsOneWidget,
+      );
+
+      final alphaDy = tester
+          .getTopLeft(
+            find.byKey(
+              const ValueKey<String>(
+                'model_selector_provider_header_provider_a',
+              ),
+            ),
+          )
+          .dy;
+      final zuluDy = tester
+          .getTopLeft(
+            find.byKey(
+              const ValueKey<String>(
+                'model_selector_provider_header_provider_z',
+              ),
+            ),
+          )
+          .dy;
+      expect(alphaDy, lessThan(zuluDy));
+    },
+  );
+
   testWidgets('opens conversation at latest message and toggles jump FAB', (
     WidgetTester tester,
   ) async {
@@ -497,32 +631,34 @@ ChatProvider _buildChatProvider({
   FakeProjectRepository? projectRepository,
   required InMemoryAppLocalDataSource localDataSource,
   bool includeVariants = false,
+  ProvidersResponse? providersResponse,
 }) {
   final chatRepo = chatRepository ?? FakeChatRepository();
   final appRepo = FakeAppRepository()
     ..providersResult = Right(
-      ProvidersResponse(
-        providers: <Provider>[
-          Provider(
-            id: 'provider_1',
-            name: 'Provider 1',
-            env: const <String>[],
-            models: <String, Model>{
-              'model_1': _model(
-                'model_1',
-                variants: includeVariants
-                    ? const <String, ModelVariant>{
-                        'low': ModelVariant(id: 'low', name: 'Low'),
-                        'high': ModelVariant(id: 'high', name: 'High'),
-                      }
-                    : const <String, ModelVariant>{},
+      providersResponse ??
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_1',
+                name: 'Provider 1',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_1': _model(
+                    'model_1',
+                    variants: includeVariants
+                        ? const <String, ModelVariant>{
+                            'low': ModelVariant(id: 'low', name: 'Low'),
+                            'high': ModelVariant(id: 'high', name: 'High'),
+                          }
+                        : const <String, ModelVariant>{},
+                  ),
+                },
               ),
-            },
+            ],
+            defaultModels: const <String, String>{'provider_1': 'model_1'},
+            connected: const <String>['provider_1'],
           ),
-        ],
-        defaultModels: const <String, String>{'provider_1': 'model_1'},
-        connected: const <String>['provider_1'],
-      ),
     );
 
   return ChatProvider(
@@ -573,11 +709,12 @@ AppProvider _buildAppProvider({
 
 Model _model(
   String id, {
+  String? name,
   Map<String, ModelVariant> variants = const <String, ModelVariant>{},
 }) {
   return Model(
     id: id,
-    name: id,
+    name: name ?? id,
     releaseDate: '2025-01-01',
     attachment: false,
     reasoning: false,

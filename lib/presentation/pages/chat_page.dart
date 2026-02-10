@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/project.dart';
-import '../../domain/entities/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/project_provider.dart';
@@ -1575,7 +1574,15 @@ class _ChatPageState extends State<ChatPage> {
     ChatProvider chatProvider,
   ) {
     final entries = <_ModelSelectorEntry>[];
-    for (final provider in chatProvider.providers) {
+    final providers = List.of(chatProvider.providers)
+      ..sort((a, b) {
+        final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        if (byName != 0) {
+          return byName;
+        }
+        return a.id.compareTo(b.id);
+      });
+    for (final provider in providers) {
       for (final model in provider.models.values) {
         entries.add(
           _ModelSelectorEntry(
@@ -1590,8 +1597,69 @@ class _ChatPageState extends State<ChatPage> {
     return entries;
   }
 
+  String _selectorEntryKey(String providerId, String modelId) {
+    return '$providerId/$modelId';
+  }
+
+  String? _providerIdFromSelectorKey(String modelKey) {
+    final separatorIndex = modelKey.indexOf('/');
+    if (separatorIndex <= 0) {
+      return null;
+    }
+    return modelKey.substring(0, separatorIndex);
+  }
+
+  String? _modelIdFromSelectorKey(String modelKey) {
+    final separatorIndex = modelKey.indexOf('/');
+    if (separatorIndex <= 0 || separatorIndex == modelKey.length - 1) {
+      return null;
+    }
+    return modelKey.substring(separatorIndex + 1);
+  }
+
+  List<_ModelSelectorEntry> _buildRecentModelEntries(
+    ChatProvider chatProvider,
+    List<_ModelSelectorEntry> allEntries,
+  ) {
+    final byKey = <String, _ModelSelectorEntry>{
+      for (final entry in allEntries)
+        _selectorEntryKey(entry.providerId, entry.modelId): entry,
+    };
+    final recent = <_ModelSelectorEntry>[];
+    final seen = <String>{};
+
+    for (final recentModelKey in chatProvider.recentModelKeys) {
+      final providerId = _providerIdFromSelectorKey(recentModelKey);
+      final modelId = _modelIdFromSelectorKey(recentModelKey);
+      if (providerId == null || modelId == null) {
+        continue;
+      }
+      final key = _selectorEntryKey(providerId, modelId);
+      if (!seen.add(key)) {
+        continue;
+      }
+      final entry = byKey[key];
+      if (entry == null) {
+        continue;
+      }
+      recent.add(entry);
+      if (recent.length >= 3) {
+        break;
+      }
+    }
+    return recent;
+  }
+
   Future<void> _openModelSelector(ChatProvider chatProvider) async {
     final entries = _buildModelSelectorEntries(chatProvider);
+    final sortedProviders = List.of(chatProvider.providers)
+      ..sort((a, b) {
+        final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        if (byName != 0) {
+          return byName;
+        }
+        return a.id.compareTo(b.id);
+      });
     var query = '';
 
     await showModalBottomSheet<void>(
@@ -1602,7 +1670,7 @@ class _ChatPageState extends State<ChatPage> {
         return StatefulBuilder(
           builder: (bottomSheetContext, setModalState) {
             final normalizedQuery = query.trim().toLowerCase();
-            final filteredEntries = entries
+            final matchingEntries = entries
                 .where((entry) {
                   if (normalizedQuery.isEmpty) {
                     return true;
@@ -1617,12 +1685,32 @@ class _ChatPageState extends State<ChatPage> {
                       entry.providerId.toLowerCase().contains(normalizedQuery);
                 })
                 .toList(growable: false);
+            final recentEntries = normalizedQuery.isEmpty
+                ? _buildRecentModelEntries(chatProvider, entries)
+                : const <_ModelSelectorEntry>[];
+            final recentKeys = recentEntries
+                .map(
+                  (entry) => _selectorEntryKey(entry.providerId, entry.modelId),
+                )
+                .toSet();
+            final groupedSourceEntries =
+                normalizedQuery.isEmpty && recentKeys.isNotEmpty
+                ? matchingEntries
+                      .where(
+                        (entry) => !recentKeys.contains(
+                          _selectorEntryKey(entry.providerId, entry.modelId),
+                        ),
+                      )
+                      .toList(growable: false)
+                : matchingEntries;
             final groupedEntries = <String, List<_ModelSelectorEntry>>{};
-            for (final entry in filteredEntries) {
+            for (final entry in groupedSourceEntries) {
               groupedEntries
                   .putIfAbsent(entry.providerId, () => <_ModelSelectorEntry>[])
                   .add(entry);
             }
+            final hasVisibleEntries =
+                recentEntries.isNotEmpty || groupedEntries.isNotEmpty;
             final selectedProviderId = chatProvider.selectedProviderId;
             final selectedModelId = chatProvider.selectedModelId;
             final selectedKey =
@@ -1659,7 +1747,7 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                       Expanded(
-                        child: filteredEntries.isEmpty
+                        child: !hasVisibleEntries
                             ? Center(
                                 child: Text(
                                   'No models found',
@@ -1668,11 +1756,65 @@ class _ChatPageState extends State<ChatPage> {
                               )
                             : ListView(
                                 children: [
-                                  for (final provider in chatProvider.providers)
+                                  if (recentEntries.isNotEmpty) ...[
+                                    Padding(
+                                      key: const ValueKey<String>(
+                                        'model_selector_recent_header',
+                                      ),
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        12,
+                                        16,
+                                        4,
+                                      ),
+                                      child: Text(
+                                        'Recent',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ),
+                                    for (final entry in recentEntries)
+                                      ListTile(
+                                        key: ValueKey<String>(
+                                          'model_selector_recent_${entry.providerId}_${entry.modelId}',
+                                        ),
+                                        title: Text(entry.modelName),
+                                        subtitle: Text(entry.providerName),
+                                        trailing:
+                                            selectedKey ==
+                                                _selectorEntryKey(
+                                                  entry.providerId,
+                                                  entry.modelId,
+                                                )
+                                            ? const Icon(Icons.check_rounded)
+                                            : null,
+                                        onTap: () async {
+                                          await chatProvider
+                                              .setSelectedModelByProvider(
+                                                providerId: entry.providerId,
+                                                modelId: entry.modelId,
+                                              );
+                                          if (!mounted) {
+                                            return;
+                                          }
+                                          Navigator.of(
+                                            bottomSheetContext,
+                                          ).pop();
+                                        },
+                                      ),
+                                  ],
+                                  for (final provider in sortedProviders)
                                     if (groupedEntries.containsKey(
                                       provider.id,
                                     )) ...[
                                       Padding(
+                                        key: ValueKey<String>(
+                                          'model_selector_provider_header_${provider.id}',
+                                        ),
                                         padding: const EdgeInsets.fromLTRB(
                                           16,
                                           12,

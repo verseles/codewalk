@@ -144,6 +144,7 @@ Refined the sidebar navigation style to match area semantics: removed explicit `
 Fixed a new-session UX regression where `New Chat` could create sessions without switching focus: directory-scoped session lists are now kept mutable and new-session creation explicitly persists/selects the newly created session.
 Fixed a visual duplicate-send issue where a local optimistic user bubble and server-confirmed user message could appear together; confirmed messages now replace pending local bubbles when content/session/time match.
 Unified provider/model controls into a single searchable model selector grouped by provider, with compact closed-state label showing only the active model name.
+Refined the unified model selector to sort provider groups alphabetically and surface the 3 most recently used models on open for faster repeat selection.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes
