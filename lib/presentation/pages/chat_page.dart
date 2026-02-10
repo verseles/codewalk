@@ -515,6 +515,7 @@ class _ChatPageState extends State<ChatPage> {
       );
       return;
     }
+    await projectProvider.switchToDirectoryContext(created.directory);
     await chatProvider.onProjectScopeChanged();
     if (!mounted) {
       return;
@@ -2554,6 +2555,38 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withOpacity(0.45),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Workspace creation requires a Git repository directory.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: TextField(
               key: const ValueKey<String>('directory_picker_filter'),
               controller: _filterController,

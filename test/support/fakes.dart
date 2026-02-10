@@ -1135,6 +1135,14 @@ class FakeProjectRepository implements ProjectRepository {
       createdAt: DateTime.now(),
     );
     _worktrees.add(created);
+    _projects.add(
+      Project(
+        id: 'proj_${_projects.length + 1}',
+        name: name,
+        path: created.directory,
+        createdAt: DateTime.now(),
+      ),
+    );
     return Right(created);
   }
 

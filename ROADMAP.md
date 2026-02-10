@@ -148,6 +148,7 @@ Refined selection UX so model/provider uses searchable bottom sheet (with alphab
 Clarified workspace creation UX by allowing users to choose an explicit base directory in the "Create workspace" dialog, instead of always using the current context directory implicitly.
 Added explicit workspace-operation telemetry in app logs (`create/reset/delete` start/success/failure + provider error mirroring) to diagnose silent failures directly from the Logs tab.
 Added dynamic folder browsing for workspace creation (server-backed directory picker via `/file`) with preflight Git validation (`/vcs`) to prevent non-git workspace attempts.
+Added explicit git-only warning inside directory picker and reinforced post-create context switch so newly created workspaces open immediately.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes

@@ -154,6 +154,64 @@ class ProjectProvider extends ChangeNotifier {
     return true;
   }
 
+  Future<bool> switchToDirectoryContext(String directory) async {
+    final normalized = directory.trim();
+    if (normalized.isEmpty) {
+      _setError('Failed to switch project: directory is empty');
+      return false;
+    }
+
+    Project? project = _projects
+        .where((item) => item.path.trim() == normalized)
+        .firstOrNull;
+    if (project == null) {
+      await _loadProjects(silent: true);
+      project = _projects
+          .where((item) => item.path.trim() == normalized)
+          .firstOrNull;
+    }
+
+    if (project == null) {
+      final fetched = await _projectRepository.getCurrentProject(
+        directory: normalized,
+      );
+      fetched.fold(
+        (failure) {
+          AppLogger.warn(
+            'Failed to fetch project for directory=$normalized',
+            error: failure,
+          );
+        },
+        (item) {
+          project = item;
+          final existingIndex = _projects.indexWhere((p) => p.id == item.id);
+          if (existingIndex >= 0) {
+            _projects[existingIndex] = item;
+          } else {
+            _projects = <Project>[item, ..._projects];
+          }
+        },
+      );
+    }
+
+    if (project == null) {
+      _setError('Failed to switch project: directory not found');
+      return false;
+    }
+
+    final selectedProject = project!;
+    if (_currentProject?.id == selectedProject.id) {
+      return false;
+    }
+
+    _currentProject = selectedProject;
+    _ensureOpenProject(selectedProject.id);
+    await _persistProjectState();
+    await loadWorktrees(silent: true);
+    notifyListeners();
+    return true;
+  }
+
   Future<bool> closeProject(String projectId) async {
     if (!_openProjectIds.contains(projectId)) {
       return false;
@@ -296,13 +354,11 @@ class ProjectProvider extends ChangeNotifier {
         await loadWorktrees(silent: true);
 
         if (switchToCreated) {
-          final project = _projects
-              .where((item) => item.path == worktree.directory)
-              .firstOrNull;
-          if (project != null) {
-            _currentProject = project;
-            _ensureOpenProject(project.id);
-            await _persistProjectState();
+          final switched = await switchToDirectoryContext(worktree.directory);
+          if (!switched && _currentProject?.path.trim() != worktree.directory) {
+            AppLogger.warn(
+              'Workspace created but context switch did not apply directory=${worktree.directory}',
+            );
           }
         }
 

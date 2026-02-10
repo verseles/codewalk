@@ -271,6 +271,10 @@ void main() {
     expect(projectRepository.lastCreatedWorktreeName, 'Feature API');
     expect(projectRepository.lastCreatedWorktreeDirectory, '/repo/custom');
     expect(
+      provider.projectProvider.currentDirectory,
+      '/repo/custom/feature-api',
+    );
+    expect(
       find.text('Workspace created in /repo/custom: Feature API'),
       findsOneWidget,
     );
@@ -332,6 +336,10 @@ void main() {
 
     expect(
       find.byKey(const ValueKey<String>('directory_picker_sheet')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Workspace creation requires a Git repository directory.'),
       findsOneWidget,
     );
     await tester.tap(

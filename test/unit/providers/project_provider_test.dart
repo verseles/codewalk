@@ -157,6 +157,27 @@ void main() {
       expect(isGit, isTrue);
     });
 
+    test('switchToDirectoryContext switches to matching directory', () async {
+      await provider.initializeProject();
+
+      final switched = await provider.switchToDirectoryContext('/repo/b');
+
+      expect(switched, isTrue);
+      expect(provider.currentProject?.path, '/repo/b');
+    });
+
+    test(
+      'switchToDirectoryContext returns false when directory is unchanged',
+      () async {
+        await provider.initializeProject();
+
+        final switched = await provider.switchToDirectoryContext('/repo/a');
+
+        expect(switched, isFalse);
+        expect(provider.currentProject?.path, '/repo/a');
+      },
+    );
+
     test('listDirectories surfaces errors and logs them', () async {
       projectRepository.directoryFailure = const NetworkFailure(
         'Client error',
