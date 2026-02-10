@@ -101,6 +101,8 @@ ChatInputPartModel _$ChatInputPartModelFromJson(Map<String, dynamic> json) =>
     ChatInputPartModel(
       type: json['type'] as String,
       text: json['text'] as String?,
+      mime: json['mime'] as String?,
+      url: json['url'] as String?,
       source: json['source'] as Map<String, dynamic>?,
       filename: json['filename'] as String?,
       name: json['name'] as String?,
@@ -111,6 +113,8 @@ Map<String, dynamic> _$ChatInputPartModelToJson(ChatInputPartModel instance) =>
     <String, dynamic>{
       'type': instance.type,
       'text': instance.text,
+      'mime': instance.mime,
+      'url': instance.url,
       'source': instance.source,
       'filename': instance.filename,
       'name': instance.name,
