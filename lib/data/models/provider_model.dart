@@ -162,6 +162,43 @@ class ModelModel {
   final Map<String, dynamic>? modalities;
   final bool? openWeights;
 
+  static List<String>? _normalizeModalityList(dynamic raw) {
+    if (raw is List) {
+      return raw.whereType<String>().toList(growable: false);
+    }
+    if (raw is Map) {
+      final result = <String>[];
+      for (final entry in raw.entries) {
+        if (entry.value == true && entry.key is String) {
+          result.add(entry.key as String);
+        }
+      }
+      return result;
+    }
+    return null;
+  }
+
+  static Map<String, dynamic>? _modalitiesFromCapabilities(
+    Map<String, dynamic>? capabilities,
+  ) {
+    if (capabilities == null) {
+      return null;
+    }
+    final input = _normalizeModalityList(capabilities['input']);
+    final output = _normalizeModalityList(capabilities['output']);
+    if (input == null && output == null) {
+      return null;
+    }
+    final result = <String, dynamic>{};
+    if (input != null) {
+      result['input'] = input;
+    }
+    if (output != null) {
+      result['output'] = output;
+    }
+    return result;
+  }
+
   /// Parse model from JSON, supporting both flat and capabilities-nested formats.
   factory ModelModel.fromJson(Map<String, dynamic> json) {
     final capabilities = json['capabilities'] as Map<String, dynamic>?;
@@ -193,6 +230,9 @@ class ModelModel {
         capabilities?['toolcall'] as bool? ??
         json['tool_call'] as bool? ??
         false;
+    final modalities =
+        json['modalities'] as Map<String, dynamic>? ??
+        _modalitiesFromCapabilities(capabilities);
 
     return ModelModel(
       id: json['id'] as String,
@@ -208,7 +248,7 @@ class ModelModel {
       variants: variants,
       knowledge: json['knowledge'] as String?,
       lastUpdated: json['last_updated'] as String?,
-      modalities: json['modalities'] as Map<String, dynamic>?,
+      modalities: modalities,
       openWeights: json['open_weights'] as bool?,
     );
   }

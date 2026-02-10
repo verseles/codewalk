@@ -2237,8 +2237,15 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Send message
-  Future<void> sendMessage(String text) async {
-    if (_currentSession == null || text.trim().isEmpty) return;
+  Future<void> sendMessage(
+    String text, {
+    List<FileInputPart> attachments = const <FileInputPart>[],
+  }) async {
+    final trimmedText = text.trim();
+    if (_currentSession == null ||
+        (trimmedText.isEmpty && attachments.isEmpty)) {
+      return;
+    }
 
     AppLogger.info(
       'Provider send start session=${_currentSession!.id} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"} variant=${_selectedVariantId ?? "auto"}',
@@ -2254,19 +2261,37 @@ class ChatProvider extends ChangeNotifier {
           'local_user_${DateTime.now().microsecondsSinceEpoch}';
 
       // Add user message to UI
-      final userMessage = UserMessage(
-        id: localMessageId,
-        sessionId: _currentSession!.id,
-        time: DateTime.now(),
-        parts: [
+      final now = DateTime.now();
+      final userParts = <MessagePart>[];
+      if (trimmedText.isNotEmpty) {
+        userParts.add(
           TextPart(
             id: '${localMessageId}_text',
             messageId: localMessageId,
             sessionId: _currentSession!.id,
-            text: text,
-            time: DateTime.now(),
+            text: trimmedText,
+            time: now,
           ),
-        ],
+        );
+      }
+      for (var index = 0; index < attachments.length; index += 1) {
+        final attachment = attachments[index];
+        userParts.add(
+          FilePart(
+            id: '${localMessageId}_file_$index',
+            messageId: localMessageId,
+            sessionId: _currentSession!.id,
+            url: attachment.url,
+            mime: attachment.mime,
+            filename: attachment.filename,
+          ),
+        );
+      }
+      final userMessage = UserMessage(
+        id: localMessageId,
+        sessionId: _currentSession!.id,
+        time: now,
+        parts: userParts,
       );
 
       _messages.add(userMessage);
@@ -2295,11 +2320,15 @@ class ChatProvider extends ChangeNotifier {
       );
 
       // Create chat input
+      final inputParts = <ChatInputPart>[
+        if (trimmedText.isNotEmpty) TextInputPart(text: trimmedText),
+        ...attachments,
+      ];
       final input = ChatInput(
         providerId: _selectedProviderId ?? 'anthropic',
         modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
         variant: _selectedVariantId,
-        parts: [TextInputPart(text: text)],
+        parts: inputParts,
       );
 
       // Cancel previous subscription
@@ -2396,17 +2425,26 @@ class ChatProvider extends ChangeNotifier {
     _scrollToBottomCallback?.call();
   }
 
-  String _normalizedUserMessageText(UserMessage message) {
-    return message.parts
+  String _normalizedUserMessageSignature(UserMessage message) {
+    final textSignature = message.parts
         .whereType<TextPart>()
         .map((part) => part.text.trim())
         .where((text) => text.isNotEmpty)
         .join('\n');
+    final fileSignature = message.parts
+        .whereType<FilePart>()
+        .map((part) => '${part.mime.trim()}|${part.url.trim()}')
+        .where((value) => value.isNotEmpty)
+        .join('\n');
+    if (fileSignature.isEmpty) {
+      return textSignature;
+    }
+    return '$textSignature\n$fileSignature'.trim();
   }
 
   int _findPendingLocalUserMessageIndex(UserMessage incoming) {
-    final incomingText = _normalizedUserMessageText(incoming);
-    if (incomingText.isEmpty) {
+    final incomingSignature = _normalizedUserMessageSignature(incoming);
+    if (incomingSignature.isEmpty) {
       return -1;
     }
 
@@ -2421,8 +2459,8 @@ class ChatProvider extends ChangeNotifier {
       if (current.sessionId != incoming.sessionId) {
         continue;
       }
-      final currentText = _normalizedUserMessageText(current);
-      if (currentText != incomingText) {
+      final currentSignature = _normalizedUserMessageSignature(current);
+      if (currentSignature != incomingSignature) {
         continue;
       }
       final delta = incoming.time.difference(current.time).abs();

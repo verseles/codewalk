@@ -337,6 +337,8 @@ class ChatInputPartModel {
   const ChatInputPartModel({
     required this.type,
     this.text,
+    this.mime,
+    this.url,
     this.source,
     this.filename,
     this.name,
@@ -345,6 +347,8 @@ class ChatInputPartModel {
 
   final String type;
   final String? text;
+  final String? mime;
+  final String? url;
   final Map<String, dynamic>? source;
   final String? filename;
   final String? name;
@@ -354,6 +358,8 @@ class ChatInputPartModel {
     return ChatInputPartModel(
       type: json['type'] as String,
       text: json['text'] as String?,
+      mime: json['mime'] as String?,
+      url: json['url'] as String?,
       source: json['source'] as Map<String, dynamic>?,
       filename: json['filename'] as String?,
       name: json['name'] as String?,
@@ -365,6 +371,12 @@ class ChatInputPartModel {
     final map = <String, dynamic>{'type': type};
     if (text != null) {
       map['text'] = text;
+    }
+    if (mime != null) {
+      map['mime'] = mime;
+    }
+    if (url != null) {
+      map['url'] = url;
     }
     if (source != null) {
       map['source'] = source;
@@ -395,7 +407,9 @@ class ChatInputPartModel {
         final filePart = part as FileInputPart;
         return ChatInputPartModel(
           type: 'file',
-          source: filePart.source.toMap(),
+          mime: filePart.mime,
+          url: filePart.url,
+          source: filePart.source?.toMap(),
           filename: filePart.filename,
           id: 'prt_${DateTime.now().millisecondsSinceEpoch}', // Technical comment translated to English.
         );

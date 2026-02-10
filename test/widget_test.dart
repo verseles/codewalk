@@ -13,7 +13,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ChatInputWidget(
-            onSendMessage: (message) {
+            onSendMessage: (message, attachments) {
               sentMessage = message;
             },
           ),

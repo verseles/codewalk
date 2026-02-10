@@ -608,6 +608,25 @@ class _ChatPageState extends State<ChatPage> {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
+  bool _supportsComposerAttachments(Model? model) {
+    if (model == null || !model.attachment) {
+      return false;
+    }
+    final modalities = model.modalities;
+    final input = modalities?['input'];
+    if (input is List) {
+      final normalized = input
+          .whereType<Object>()
+          .map((item) => item.toString().toLowerCase())
+          .toSet();
+      return normalized.contains('image') || normalized.contains('pdf');
+    }
+    if (input is Map) {
+      return input['image'] == true || input['pdf'] == true;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -1690,8 +1709,11 @@ class _ChatPageState extends State<ChatPage> {
 
               // Input field
               ChatInputWidget(
-                onSendMessage: (text) async {
-                  await chatProvider.sendMessage(text);
+                onSendMessage: (text, attachments) async {
+                  await chatProvider.sendMessage(
+                    text,
+                    attachments: attachments,
+                  );
                   // Technical comment translated to English.
                   _scrollToBottom(force: true);
                 },
@@ -1699,6 +1721,9 @@ class _ChatPageState extends State<ChatPage> {
                     chatProvider.currentSession != null &&
                     chatProvider.state != ChatState.sending,
                 focusNode: _inputFocusNode,
+                showAttachmentButton: _supportsComposerAttachments(
+                  chatProvider.selectedModel,
+                ),
               ),
             ],
           ),

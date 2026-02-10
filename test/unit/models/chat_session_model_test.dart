@@ -103,5 +103,30 @@ void main() {
       expect(json['variant'], 'high');
       expect(json['agent'], 'code');
     });
+
+    test('serializes file parts with mime and url fields', () {
+      final input = ChatInput(
+        providerId: 'google',
+        modelId: 'gemini-2.5-flash',
+        parts: const <ChatInputPart>[
+          TextInputPart(text: 'look at this'),
+          FileInputPart(
+            mime: 'application/pdf',
+            url: 'data:application/pdf;base64,Zm9v',
+            filename: 'sample.pdf',
+          ),
+        ],
+      );
+
+      final model = ChatInputModel.fromDomain(input);
+      final json = model.toJson();
+      final parts = json['parts'] as List<dynamic>;
+
+      expect(parts, hasLength(2));
+      expect(parts[1]['type'], 'file');
+      expect(parts[1]['mime'], 'application/pdf');
+      expect(parts[1]['url'], 'data:application/pdf;base64,Zm9v');
+      expect(parts[1]['filename'], 'sample.pdf');
+    });
   });
 }

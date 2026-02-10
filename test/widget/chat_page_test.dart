@@ -97,6 +97,64 @@ void main() {
     });
   });
 
+  testWidgets(
+    'hides attachment button when selected model does not support attachments',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Add attachment'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows attachment button when selected model supports image/pdf input',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        providersResponse: ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_1',
+              name: 'Provider 1',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_1': _model(
+                  'model_1',
+                  attachment: true,
+                  modalities: const <String, dynamic>{
+                    'input': <String>['text', 'image'],
+                  },
+                ),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_1': 'model_1'},
+          connected: const <String>['provider_1'],
+        ),
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Add attachment'), findsOneWidget);
+    },
+  );
+
   testWidgets('shows active directory and directory selector guidance', (
     WidgetTester tester,
   ) async {
@@ -937,19 +995,22 @@ AppProvider _buildAppProvider({
 Model _model(
   String id, {
   String? name,
+  bool attachment = false,
+  Map<String, dynamic>? modalities,
   Map<String, ModelVariant> variants = const <String, ModelVariant>{},
 }) {
   return Model(
     id: id,
     name: name ?? id,
     releaseDate: '2025-01-01',
-    attachment: false,
+    attachment: attachment,
     reasoning: false,
     temperature: true,
     toolCall: false,
     cost: const ModelCost(input: 0.001, output: 0.002),
     limit: const ModelLimit(context: 1000, output: 100),
     options: const <String, dynamic>{},
+    modalities: modalities,
     variants: variants,
   );
 }

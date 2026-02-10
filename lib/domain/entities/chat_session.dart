@@ -174,14 +174,20 @@ class TextInputPart extends ChatInputPart {
 
 /// Technical comment translated to English.
 class FileInputPart extends ChatInputPart {
-  const FileInputPart({required this.source, this.filename})
-    : super(type: ChatInputPartType.file);
+  const FileInputPart({
+    required this.mime,
+    required this.url,
+    this.filename,
+    this.source,
+  }) : super(type: ChatInputPartType.file);
 
-  final FileInputSource source;
+  final String mime;
+  final String url;
   final String? filename;
+  final FileInputSource? source;
 
   @override
-  List<Object?> get props => [...super.props, source, filename];
+  List<Object?> get props => [...super.props, mime, url, filename, source];
 }
 
 /// Technical comment translated to English.

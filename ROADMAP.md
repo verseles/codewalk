@@ -160,6 +160,7 @@ Added explicit git-only warning inside directory picker and reinforced post-crea
 Description: Validate and harden all parity features with measurable quality gates before production rollout.
 
 Completed parity hardening and release readiness by expanding regression coverage across unit/widget/integration suites (including server-scoped model restore and question-reject flows), executing the `PAR-001..PAR-008` QA matrix with reproducible artifacts, and finalizing architecture/release documentation (`ADR.md`, `CODEBASE.md`, `RELEASE_NOTES.md`, `QA.feat016.release-readiness.md`). Final rollout gates were validated via `make precommit`, coverage gate pass at 59.44%, and Linux/Web release builds, with one documented non-product host limitation (Android emulator startup failure code `-6`) mitigated by successful APK build/upload validation.
+Applied a post-release chat composer enhancement: implemented image/PDF attachments in the input flow (`file_picker` + `file` parts with `mime`/`url`) and gated attachment UI visibility by selected model capabilities so unsupported models hide the attachment action.
 Commits: d568f22, 47ecddb, 3081b2e
 
 ## Dependency Order

@@ -21,6 +21,12 @@ void main() {
                   'reasoning': true,
                   'temperature': false,
                   'toolcall': true,
+                  'input': <String, dynamic>{
+                    'text': true,
+                    'image': true,
+                    'pdf': false,
+                  },
+                  'output': <String, dynamic>{'text': true},
                 },
                 'cost': <String, dynamic>{
                   'input': '0.003',
@@ -58,6 +64,10 @@ void main() {
       expect(domainModel?.variants.keys, containsAll(<String>['low', 'high']));
       expect(domainModel?.variants['low']?.name, 'Low');
       expect(domainModel?.variants['high']?.name, 'High');
+      expect(
+        domainModel?.modalities?['input'],
+        containsAll(<String>['text', 'image']),
+      );
     });
 
     test('parses legacy schema and skips invalid models', () {
