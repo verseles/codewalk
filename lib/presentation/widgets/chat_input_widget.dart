@@ -102,8 +102,8 @@ class ChatInputWidget extends StatefulWidget {
 }
 
 class _ChatInputWidgetState extends State<ChatInputWidget> {
-  static const double _mobilePopoverFixedHeight = 280;
-  static const double _mobilePopoverBreakpoint = 840;
+  static const double _popoverInputHeightMultiplier = 3;
+  static const double _popoverGap = 8;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _internalFocusNode = FocusNode();
   final LayerLink _popoverAnchorLink = LayerLink();
@@ -895,37 +895,24 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   double _popoverMaxHeight(MediaQueryData media) {
-    const desktopMinHeight = 72.0;
-    final isMobile = media.size.width < _mobilePopoverBreakpoint;
-    final desiredHeight = isMobile
-        ? _mobilePopoverFixedHeight
-        : media.size.height * 0.9;
     final anchorContext = _composerInputRowKey.currentContext;
-    final maxHeightLimit = desiredHeight.clamp(
-      desktopMinHeight,
-      media.size.height,
-    );
-
     if (anchorContext == null) {
-      return maxHeightLimit.toDouble();
+      return 0;
     }
     final renderObject = anchorContext.findRenderObject();
     if (renderObject is! RenderBox || !renderObject.hasSize) {
-      return maxHeightLimit.toDouble();
+      return 0;
     }
 
     final topSafeArea = media.viewPadding.top;
     final inputTop = renderObject.localToGlobal(Offset.zero).dy;
-    final availableAboveInput = (inputTop - topSafeArea - 8).clamp(
+    final inputHeight = renderObject.size.height;
+    final availableAboveInput = (inputTop - topSafeArea - _popoverGap).clamp(
       0.0,
       media.size.height,
     );
-    if (isMobile) {
-      return availableAboveInput.clamp(0.0, maxHeightLimit).toDouble();
-    }
-    return availableAboveInput
-        .clamp(desktopMinHeight, maxHeightLimit)
-        .toDouble();
+    final maxByInput = inputHeight * _popoverInputHeightMultiplier;
+    return availableAboveInput.clamp(0.0, maxByInput).toDouble();
   }
 
   Widget _buildSuggestionOverlay({
@@ -934,7 +921,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }) {
     final media = MediaQuery.of(context);
     final maxHeight = _popoverMaxHeight(media);
-    final isMobile = media.size.width < _mobilePopoverBreakpoint;
     if (maxHeight <= 0) {
       return const SizedBox.shrink();
     }
@@ -949,7 +935,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         child: _buildSuggestionPopover(
           colorScheme: colorScheme,
           maxHeight: maxHeight,
-          isMobile: isMobile,
         ),
       ),
     );
@@ -958,7 +943,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   Widget _buildSuggestionPopover({
     required ColorScheme colorScheme,
     required double maxHeight,
-    required bool isMobile,
   }) {
     final isMention = _popoverType == ChatComposerPopoverType.mention;
     final suggestions = isMention
@@ -1022,7 +1006,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                   primary: false,
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.manual,
-                  shrinkWrap: !isMobile,
+                  shrinkWrap: false,
                   itemCount: suggestions.length,
                   itemBuilder: (context, index) {
                     final item = suggestions[index];

@@ -192,13 +192,14 @@ void main() {
           child: ChatInputWidget(
             onSendMessage: (_) {},
             onMentionQuery: (query) async {
-              return const <ChatComposerMentionSuggestion>[
-                ChatComposerMentionSuggestion(
-                  value: 'README.md',
+              return List<ChatComposerMentionSuggestion>.generate(
+                20,
+                (index) => ChatComposerMentionSuggestion(
+                  value: 'README_$index.md',
                   type: ChatComposerSuggestionType.file,
                   subtitle: 'file',
                 ),
-              ];
+              );
             },
           ),
         ),

@@ -285,7 +285,7 @@ Compatibility tiers:
   - trigger-aware mode orchestration (`normal`/`shell`) with `!` activation at offset 0
   - popover orchestration for `@` mentions and `/` slash commands
   - suggestion popover rendered as input-anchored overlay (instead of inline layout row), growing upward to preserve input visibility while keyboard is open
-  - mobile-only popover sizing uses fixed-height target with top-space clamp, keeping the panel scrollable internally without crossing screen top
+  - popover sizing uses a single cap rule for all layouts: up to `3x` input height, additionally clamped by available space above the input; long lists scroll internally
   - keyboard navigation and selection (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`)
   - input focus persistence while mention/slash suggestions refresh
   - mention insertion normalizes trailing spacing to avoid token/punctuation glue on mobile
