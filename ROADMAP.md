@@ -137,6 +137,7 @@ Completed full session lifecycle parity implementation across domain/data/provid
 Description: Support multi-project and workspace/worktree workflows using directory-aware API/event orchestration. (Visit file ROADMAP.feat015.md for full research details)
 
 Completed project/workspace parity across domain/data/provider/UI layers with deterministic context isolation (`serverId::directory`), project switcher UX with active context controls (switch/close/reopen/refresh), worktree lifecycle operations (`create/reset/delete/open`), and directory-scoped routing for provider/session/message/event calls. Added global-context synchronization via `/global/event` with dirty-context invalidation and scoped snapshot restore, plus expanded unit/widget/integration coverage for project switching, worktree routes, global event ingestion, and server-scoped cache isolation under context transitions.
+Applied a post-completion chat UX refinement so conversation view opens at the latest message and exposes a jump-to-latest FAB that is visually highlighted when new messages arrive while the user is reading older content.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes

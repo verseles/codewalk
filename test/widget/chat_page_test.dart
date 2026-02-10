@@ -309,6 +309,154 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Reasoning: Low'), findsOneWidget);
   });
+
+  testWidgets('opens conversation at latest message and toggles jump FAB', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_scroll',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Scrollable Session',
+        ),
+      ],
+    );
+    repository.messagesBySession['ses_scroll'] = _threadMessages(
+      'ses_scroll',
+      40,
+    );
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('message 39'), findsOneWidget);
+    expect(find.byTooltip('Go to latest message'), findsNothing);
+
+    await tester.drag(
+      find.byKey(const ValueKey<String>('chat_message_list')),
+      const Offset(0, 420),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Go to latest message'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Go to latest message'));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Go to latest message'), findsNothing);
+    expect(find.text('message 39'), findsOneWidget);
+  });
+
+  testWidgets('highlights jump FAB when new messages arrive below viewport', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_live',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Live Session',
+        ),
+      ],
+    );
+    repository.messagesBySession['ses_live'] = _threadMessages('ses_live', 40);
+
+    final streamController = StreamController<Either<Failure, ChatMessage>>();
+    addTearDown(() async {
+      await streamController.close();
+    });
+    repository.sendMessageHandler = (_, __, ___, ____) =>
+        streamController.stream;
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await provider.initializeProviders();
+    await tester.pumpAndSettle();
+
+    await tester.drag(
+      find.byKey(const ValueKey<String>('chat_message_list')),
+      const Offset(0, 420),
+    );
+    await tester.pumpAndSettle();
+
+    final fabFinder = find.byKey(const ValueKey<String>('jump_to_latest_fab'));
+    expect(fabFinder, findsOneWidget);
+    expect(
+      find.descendant(
+        of: fabFinder,
+        matching: find.byIcon(Icons.arrow_downward_rounded),
+      ),
+      findsOneWidget,
+    );
+
+    await provider.sendMessage('trigger streaming reply');
+    await tester.pump();
+
+    streamController.add(
+      Right(
+        AssistantMessage(
+          id: 'msg_stream_1',
+          sessionId: 'ses_live',
+          time: DateTime.fromMillisecondsSinceEpoch(3000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(3200),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_stream_1',
+              messageId: 'msg_stream_1',
+              sessionId: 'ses_live',
+              text: 'live response',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: fabFinder,
+        matching: find.byIcon(Icons.mark_chat_unread_outlined),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byTooltip('Go to latest message'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.mark_chat_unread_outlined), findsNothing);
+  });
 }
 
 Widget _testApp(ChatProvider provider, AppProvider appProvider) {
@@ -420,4 +568,23 @@ Model _model(
     options: const <String, dynamic>{},
     variants: variants,
   );
+}
+
+List<ChatMessage> _threadMessages(String sessionId, int count) {
+  return List<ChatMessage>.generate(count, (index) {
+    final messageId = 'msg_${sessionId}_$index';
+    return UserMessage(
+      id: messageId,
+      sessionId: sessionId,
+      time: DateTime.fromMillisecondsSinceEpoch(index * 1000),
+      parts: <MessagePart>[
+        TextPart(
+          id: 'part_${sessionId}_$index',
+          messageId: messageId,
+          sessionId: sessionId,
+          text: 'message $index',
+        ),
+      ],
+    );
+  });
 }

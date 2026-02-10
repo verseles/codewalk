@@ -50,6 +50,7 @@ class _ChatPageState extends State<ChatPage> {
   static const double _desktopSessionPaneWidth = 300;
   static const double _largeDesktopSessionPaneWidth = 320;
   static const double _largeDesktopUtilityPaneWidth = 280;
+  static const double _nearBottomThreshold = 200;
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
@@ -58,10 +59,15 @@ class _ChatPageState extends State<ChatPage> {
   ChatProvider? _chatProvider;
   AppProvider? _appProvider;
   String? _lastServerId;
+  String? _trackedSessionId;
+  String? _pendingInitialScrollSessionId;
+  bool _showScrollToLatestFab = false;
+  bool _hasUnreadMessagesBelow = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScrollChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -86,6 +92,7 @@ class _ChatPageState extends State<ChatPage> {
     // Clean up scroll callback using saved reference
     _chatProvider?.setScrollToBottomCallback(null);
     _appProvider?.removeListener(_handleAppProviderChange);
+    _scrollController.removeListener(_handleScrollChanged);
 
     _scrollController.dispose();
     _inputFocusNode.dispose();
@@ -141,40 +148,108 @@ class _ChatPageState extends State<ChatPage> {
     await _chatProvider?.onServerScopeChanged();
   }
 
-  void _scrollToBottom({bool force = false}) {
-    if (!_scrollController.hasClients) return;
+  bool _isNearBottom() {
+    if (!_scrollController.hasClients) {
+      return true;
+    }
+    final position = _scrollController.position;
+    return (position.maxScrollExtent - position.pixels) <= _nearBottomThreshold;
+  }
 
-    // Technical comment translated to English.
-    if (force) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+  void _handleScrollChanged() {
+    if (!_scrollController.hasClients) {
       return;
     }
 
-    // Smart scroll: only auto-scroll when user is near bottom
-    final position = _scrollController.position;
-    final threshold =
-        200.0; // Consider within 200 pixels from bottom as near bottom
+    final awayFromBottom = !_isNearBottom();
+    if (!awayFromBottom) {
+      if (_showScrollToLatestFab || _hasUnreadMessagesBelow) {
+        setState(() {
+          _showScrollToLatestFab = false;
+          _hasUnreadMessagesBelow = false;
+        });
+      }
+      return;
+    }
 
-    if (position.maxScrollExtent - position.pixels <= threshold) {
-      // Delay one frame to ensure message is rendered
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
+    if (!_showScrollToLatestFab) {
+      setState(() {
+        _showScrollToLatestFab = true;
       });
     }
+  }
+
+  void _syncSessionScrollState(ChatProvider chatProvider) {
+    final sessionId = chatProvider.currentSession?.id;
+    if (sessionId != _trackedSessionId) {
+      _trackedSessionId = sessionId;
+      _pendingInitialScrollSessionId = sessionId;
+      if (_showScrollToLatestFab || _hasUnreadMessagesBelow) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _showScrollToLatestFab = false;
+            _hasUnreadMessagesBelow = false;
+          });
+        });
+      }
+    }
+
+    if (sessionId == null) {
+      _pendingInitialScrollSessionId = null;
+      return;
+    }
+
+    if (_pendingInitialScrollSessionId == sessionId &&
+        chatProvider.messages.isNotEmpty &&
+        chatProvider.state != ChatState.loading) {
+      _pendingInitialScrollSessionId = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _trackedSessionId != sessionId) {
+          return;
+        }
+        _scrollToBottom(force: true);
+      });
+    }
+  }
+
+  void _markUnreadMessagesBelow() {
+    if (_showScrollToLatestFab && _hasUnreadMessagesBelow) {
+      return;
+    }
+    setState(() {
+      _showScrollToLatestFab = true;
+      _hasUnreadMessagesBelow = true;
+    });
+  }
+
+  void _scrollToBottom({bool force = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) {
+        return;
+      }
+
+      final shouldScroll = force || _isNearBottom();
+      if (!shouldScroll) {
+        _markUnreadMessagesBelow();
+        return;
+      }
+
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+
+      if (_showScrollToLatestFab || _hasUnreadMessagesBelow) {
+        setState(() {
+          _showScrollToLatestFab = false;
+          _hasUnreadMessagesBelow = false;
+        });
+      }
+    });
   }
 
   Future<void> _refreshData() async {
@@ -399,6 +474,7 @@ class _ChatPageState extends State<ChatPage> {
                 drawer: isMobile ? _buildSessionDrawer() : null,
                 body: Consumer<ChatProvider>(
                   builder: (context, chatProvider, child) {
+                    _syncSessionScrollState(chatProvider);
                     if (isMobile) {
                       return _buildChatContent(
                         chatProvider: chatProvider,
@@ -1336,7 +1412,7 @@ class _ChatPageState extends State<ChatPage> {
                 ),
 
               // Message list
-              Expanded(child: _buildMessageList(chatProvider)),
+              Expanded(child: _buildMessageViewport(chatProvider)),
 
               _buildInteractionPrompts(chatProvider),
 
@@ -1544,6 +1620,50 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Widget _buildMessageViewport(ChatProvider chatProvider) {
+    final showFab =
+        _showScrollToLatestFab &&
+        chatProvider.currentSession != null &&
+        chatProvider.messages.isNotEmpty;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Stack(
+      children: [
+        Positioned.fill(child: _buildMessageList(chatProvider)),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: showFab
+                ? FloatingActionButton.small(
+                    key: const ValueKey<String>('jump_to_latest_fab'),
+                    heroTag: 'jump_to_latest_fab',
+                    tooltip: 'Go to latest message',
+                    onPressed: () => _scrollToBottom(force: true),
+                    backgroundColor: _hasUnreadMessagesBelow
+                        ? colorScheme.primary
+                        : colorScheme.surfaceContainerHigh,
+                    foregroundColor: _hasUnreadMessagesBelow
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurfaceVariant,
+                    child: Icon(
+                      _hasUnreadMessagesBelow
+                          ? Icons.mark_chat_unread_outlined
+                          : Icons.arrow_downward_rounded,
+                    ),
+                  )
+                : const SizedBox(
+                    key: ValueKey<String>('jump_to_latest_fab_hidden'),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildMessageList(ChatProvider chatProvider) {
     if (chatProvider.state == ChatState.loading &&
         chatProvider.messages.isEmpty) {
@@ -1635,6 +1755,7 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return ListView.builder(
+      key: const ValueKey<String>('chat_message_list'),
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount:
