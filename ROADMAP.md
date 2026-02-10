@@ -179,13 +179,10 @@ Completed refreshless realtime orchestration by introducing a feature-flagged SS
 Commits: f190e02
 
 ### Feature 018: Prompt Power Features Parity (`@`, `!`, `/`)
-Description: Replicar no composer os gatilhos de produtividade do OpenCode Web: menção de arquivos/agentes com `@`, modo shell com `!` no início, e catálogo de comandos por `/` no começo do input. (Visit file ROADMAP.feat018.md for full research details)
+Description: Replicar no composer os gatilhos de produtividade do OpenCode Web: menção de arquivos/agentes com `@`, modo shell com `!` no início, e catálogo de comandos por `/` no começo do input.
 
-- [x] 18.01 Pesquisa e congelamento de contrato (`/command`, `/agent`, parse de prompt e comportamento de popovers)
-- [ ] 18.02 Implementar menções `@` com sugestões contextuais (arquivos + agentes), navegação por teclado e inserção de pill/token no prompt
-- [ ] 18.03 Implementar modo shell ao digitar `!` no início (estado dedicado, envio para endpoint shell e saída por `Esc`/backspace em input vazio)
-- [ ] 18.04 Implementar catálogo slash `/` no início do prompt (builtin + custom + skills/MCP via `source`) com execução consistente
-- [ ] 18.05 Cobrir com testes unit/widget/integration os fluxos `@`/`!`/`/`, inclusive cenários de erro/empty-state
+Concluída a paridade de gatilhos no composer com estado dedicado para shell (`!`), popovers contextuais para menções `@` (arquivos + agentes) e slash `/` (builtin + comandos remotos com `source`), incluindo navegação por teclado (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`), inserção de tokens/prefixos no input, e ações builtin consistentes no contexto da chat page. O envio shell foi integrado ao fluxo de provider/datasource com roteamento para `POST /session/{id}/shell`, e a cobertura foi expandida com testes de widget para `@`/`!`/`/` e teste unitário de payload shell.
+Commits: e97544b
 
 ### Feature 019: File Explorer and Viewer Parity
 Description: Entregar navegação completa de arquivos com ícones, busca rápida, abertura em abas e visualização de conteúdo diretamente na UI, alinhado ao OpenCode Web. (Visit file ROADMAP.feat019.md for full research details)
