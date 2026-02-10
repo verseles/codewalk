@@ -23,6 +23,12 @@ abstract class ProjectRemoteDataSource {
 
   /// Technical comment translated to English.
   Future<void> deleteWorktree(String worktreeId, {String? directory});
+
+  /// Technical comment translated to English.
+  Future<List<String>> listDirectories(String directory);
+
+  /// Technical comment translated to English.
+  Future<bool> isGitDirectory(String directory);
 }
 
 /// Technical comment translated to English.
@@ -130,5 +136,48 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
       queryParams['directory'] = directory;
     }
     await dio.delete('/experimental/worktree', queryParameters: queryParams);
+  }
+
+  @override
+  Future<List<String>> listDirectories(String directory) async {
+    final normalized = directory.trim();
+    final response = await dio.get(
+      '/file',
+      queryParameters: <String, dynamic>{'directory': normalized, 'path': '.'},
+    );
+    final data = response.data;
+    if (data is! List) {
+      return const <String>[];
+    }
+
+    final results = <String>[];
+    for (final item in data.whereType<Map>()) {
+      final node = Map<String, dynamic>.from(item);
+      final type = node['type'] as String?;
+      if (type != 'directory') {
+        continue;
+      }
+      final absolute = node['absolute'] as String?;
+      if (absolute == null || absolute.trim().isEmpty) {
+        continue;
+      }
+      results.add(absolute.trim());
+    }
+    return results;
+  }
+
+  @override
+  Future<bool> isGitDirectory(String directory) async {
+    final response = await dio.get(
+      '/vcs',
+      queryParameters: <String, dynamic>{'directory': directory.trim()},
+    );
+    final data = response.data;
+    if (data is! Map) {
+      return false;
+    }
+    final map = Map<String, dynamic>.from(data);
+    final branch = map['branch'] as String?;
+    return branch != null && branch.trim().isNotEmpty;
   }
 }

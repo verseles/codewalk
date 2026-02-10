@@ -242,6 +242,7 @@ void main() {
         ),
       ],
     );
+    projectRepository.gitDirectories.add('/repo/custom');
     final provider = _buildChatProvider(
       localDataSource: localDataSource,
       projectRepository: projectRepository,
@@ -272,6 +273,96 @@ void main() {
     expect(
       find.text('Workspace created in /repo/custom: Feature API'),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('create workspace supports browsing directories dynamically', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_a',
+        name: 'Project A',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.directoriesByPath['/repo/a'] = <String>[
+      '/repo/a/client',
+      '/repo/a/server',
+    ];
+    projectRepository.directoriesByPath['/repo/a/client'] = <String>[
+      '/repo/a/client/app',
+    ];
+    projectRepository.gitDirectories.add('/repo/a/client/app');
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Create workspace in directory...'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('workspace_open_directory_picker_button'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('directory_picker_sheet')),
+      findsOneWidget,
+    );
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('directory_picker_item_/repo/a/client'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('directory_picker_item_/repo/a/client/app'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('directory_picker_use_current')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/repo/a/client/app'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('workspace_name_input')),
+      'Feature Browser',
+    );
+    await tester.tap(find.text('Create'));
+    await tester.pumpAndSettle();
+
+    expect(
+      projectRepository.lastCreatedWorktreeDirectory,
+      '/repo/a/client/app',
     );
   });
 

@@ -34,4 +34,10 @@ abstract class ProjectRepository {
     String worktreeId, {
     String? directory,
   });
+
+  /// List subdirectories for a given absolute directory path.
+  Future<Either<Failure, List<String>>> listDirectories(String directory);
+
+  /// Determine whether a directory is a Git repository context.
+  Future<Either<Failure, bool>> isGitDirectory(String directory);
 }

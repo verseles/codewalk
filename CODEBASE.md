@@ -238,6 +238,7 @@ Compatibility tiers:
 - Updated chat UI with project/workspace controls and active-context indicator:
   - `lib/presentation/pages/chat_page.dart`
   - Workspace creation dialog now accepts optional base-directory override to make project-folder targeting explicit.
+  - Workspace creation now includes a server-backed directory browser (`/file`) and validates Git context (`/vcs`) before submit.
 - Added workspace operation telemetry in `ProjectProvider` so `create/reset/delete` failures and user-facing provider errors are emitted to the in-app Logs stream.
 
 ### ChatInput Schema
@@ -738,6 +739,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Added project/workspace context orchestration with deterministic `serverId::directory` snapshot isolation.
 - Added worktree operations (`create/reset/delete/open`) and current-project switching via `/project` + `/experimental/worktree*`.
 - Added explicit base-directory input when creating workspaces to avoid implicit folder targeting.
+- Added dynamic directory picker and Git preflight validation to reduce create-workspace 400 errors on non-git paths.
 - Added explicit app-log telemetry for workspace lifecycle operations to improve production debugging from mobile.
 - Added `/global/event` subscription for cross-context invalidation and resilient subscription teardown during server switches.
 - Expanded tests for project/worktree/global-event/context isolation and raised total passing tests to 66.

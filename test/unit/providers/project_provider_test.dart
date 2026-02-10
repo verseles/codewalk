@@ -135,6 +135,46 @@ void main() {
       expect(deleteOk, isTrue);
     });
 
+    test('listDirectories returns sorted unique directories', () async {
+      projectRepository.directoriesByPath['/repo/a'] = <String>[
+        '/repo/a/zeta',
+        '/repo/a/Alpha',
+        '/repo/a/alpha',
+      ];
+
+      final listed = await provider.listDirectories('/repo/a');
+
+      expect(listed, isNotNull);
+      expect(listed, hasLength(3));
+      expect(listed!.first, '/repo/a/Alpha');
+    });
+
+    test('isGitDirectory returns true for configured git path', () async {
+      projectRepository.gitDirectories.add('/repo/a');
+
+      final isGit = await provider.isGitDirectory('/repo/a');
+
+      expect(isGit, isTrue);
+    });
+
+    test('listDirectories surfaces errors and logs them', () async {
+      projectRepository.directoryFailure = const NetworkFailure(
+        'Client error',
+        400,
+      );
+
+      final listed = await provider.listDirectories('/repo/a');
+
+      expect(listed, isNull);
+      expect(provider.error, 'Failed to list directories: Client error');
+      expect(
+        AppLogger.entries.value.any(
+          (entry) => entry.message.contains('Directory list failed'),
+        ),
+        isTrue,
+      );
+    });
+
     test('logs workspace create failure in app logger', () async {
       await provider.initializeProject();
       projectRepository.worktreeFailure = const NetworkFailure(

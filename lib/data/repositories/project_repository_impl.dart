@@ -116,6 +116,32 @@ class ProjectRepositoryImpl implements ProjectRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, List<String>>> listDirectories(
+    String directory,
+  ) async {
+    try {
+      final items = await remoteDataSource.listDirectories(directory);
+      return Right(items);
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> isGitDirectory(String directory) async {
+    try {
+      final result = await remoteDataSource.isGitDirectory(directory);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   /// Technical comment translated to English.
   Failure _handleDioException(DioException e) {
     switch (e.type) {

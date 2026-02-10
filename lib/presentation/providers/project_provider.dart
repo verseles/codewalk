@@ -392,6 +392,65 @@ class ProjectProvider extends ChangeNotifier {
     );
   }
 
+  Future<List<String>?> listDirectories(String directory) async {
+    final normalized = directory.trim();
+    if (normalized.isEmpty) {
+      _setError('Directory cannot be empty');
+      return null;
+    }
+    AppLogger.info('Directory list start directory=$normalized');
+    final result = await _projectRepository.listDirectories(normalized);
+    return result.fold(
+      (failure) {
+        AppLogger.warn(
+          'Directory list failed directory=$normalized',
+          error: failure,
+        );
+        _setError('Failed to list directories: ${failure.message}');
+        return null;
+      },
+      (directories) {
+        final unique =
+            directories
+                .map((item) => item.trim())
+                .where((item) => item.isNotEmpty)
+                .toSet()
+                .toList(growable: false)
+              ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+        AppLogger.info(
+          'Directory list succeeded directory=$normalized count=${unique.length}',
+        );
+        return unique;
+      },
+    );
+  }
+
+  Future<bool?> isGitDirectory(String directory) async {
+    final normalized = directory.trim();
+    if (normalized.isEmpty) {
+      _setError('Directory cannot be empty');
+      return null;
+    }
+    AppLogger.info('Directory git check start directory=$normalized');
+    final result = await _projectRepository.isGitDirectory(normalized);
+    return result.fold(
+      (failure) {
+        AppLogger.warn(
+          'Directory git check failed directory=$normalized',
+          error: failure,
+        );
+        _setError('Failed to validate directory: ${failure.message}');
+        return null;
+      },
+      (isGit) {
+        AppLogger.info(
+          'Directory git check result directory=$normalized git=$isGit',
+        );
+        return isGit;
+      },
+    );
+  }
+
   void clearError() {
     _error = null;
     if (_status == ProjectStatus.error) {

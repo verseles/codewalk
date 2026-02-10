@@ -1061,8 +1061,11 @@ class FakeProjectRepository implements ProjectRepository {
   final List<Project> _projects;
   final List<Worktree> _worktrees;
   Failure? worktreeFailure;
+  Failure? directoryFailure;
   String? lastCreatedWorktreeName;
   String? lastCreatedWorktreeDirectory;
+  final Set<String> gitDirectories = <String>{};
+  final Map<String, List<String>> directoriesByPath = <String, List<String>>{};
 
   @override
   Future<Either<Failure, Project>> getCurrentProject({
@@ -1156,6 +1159,36 @@ class FakeProjectRepository implements ProjectRepository {
     }
     _worktrees.removeWhere((item) => item.id == worktreeId);
     return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> listDirectories(
+    String directory,
+  ) async {
+    if (directoryFailure != null) {
+      return Left(directoryFailure!);
+    }
+    final key = directory.trim();
+    final seeded = directoriesByPath[key];
+    if (seeded != null) {
+      return Right(List<String>.from(seeded));
+    }
+    final inferred = <String>[];
+    for (final project in _projects) {
+      final path = project.path.trim();
+      if (path.startsWith('$key/') && path != key) {
+        inferred.add(path);
+      }
+    }
+    return Right(inferred);
+  }
+
+  @override
+  Future<Either<Failure, bool>> isGitDirectory(String directory) async {
+    if (directoryFailure != null) {
+      return Left(directoryFailure!);
+    }
+    return Right(gitDirectories.contains(directory.trim()));
   }
 }
 

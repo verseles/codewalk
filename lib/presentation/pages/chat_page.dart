@@ -309,59 +309,189 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _createWorkspace() async {
     final projectProvider = context.read<ProjectProvider>();
     final chatProvider = context.read<ChatProvider>();
+    final appProvider = context.read<AppProvider>();
+    final defaultDirectory =
+        projectProvider.currentDirectory ??
+        appProvider.appInfo?.path.data ??
+        '/';
     final nameController = TextEditingController();
     final baseDirectoryController = TextEditingController(
-      text: projectProvider.currentDirectory ?? '',
+      text: defaultDirectory,
     );
     final createdInput = await showDialog<(String, String?)>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Create Workspace'),
-          content: SizedBox(
-            width: 420,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  key: const ValueKey<String>('workspace_name_input'),
-                  controller: nameController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Workspace name',
-                    hintText: 'ex: feature-branch',
-                  ),
+        var validatingDirectory = false;
+        String? validationMessage;
+        bool? gitDirectory;
+
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('Create Workspace'),
+              content: SizedBox(
+                width: 420,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      key: const ValueKey<String>('workspace_name_input'),
+                      controller: nameController,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Workspace name',
+                        hintText: 'ex: feature-branch',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const ValueKey<String>(
+                        'workspace_base_directory_input',
+                      ),
+                      controller: baseDirectoryController,
+                      decoration: InputDecoration(
+                        labelText: 'Base directory',
+                        hintText: '/repo/my-project',
+                        helperText:
+                            'Browse folders to pick where the workspace is created',
+                        suffixIcon: IconButton(
+                          key: const ValueKey<String>(
+                            'workspace_open_directory_picker_button',
+                          ),
+                          tooltip: 'Browse directories',
+                          onPressed: () async {
+                            final picked = await _openDirectoryPicker(
+                              initialDirectory:
+                                  baseDirectoryController.text.trim().isEmpty
+                                  ? defaultDirectory
+                                  : baseDirectoryController.text.trim(),
+                            );
+                            if (!dialogContext.mounted || picked == null) {
+                              return;
+                            }
+                            baseDirectoryController.text = picked;
+                            setDialogState(() {
+                              validationMessage = null;
+                              gitDirectory = null;
+                            });
+                          },
+                          icon: const Icon(Icons.folder_open_outlined),
+                        ),
+                      ),
+                    ),
+                    if (validationMessage != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            gitDirectory == true
+                                ? Icons.check_circle_outline
+                                : Icons.warning_amber_rounded,
+                            size: 16,
+                            color: gitDirectory == true
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              validationMessage!,
+                              key: const ValueKey<String>(
+                                'workspace_directory_validation_message',
+                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: gitDirectory == true
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.error,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  key: const ValueKey<String>('workspace_base_directory_input'),
-                  controller: baseDirectoryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Base directory (optional)',
-                    hintText: '/repo/my-project',
-                    helperText:
-                        'Where the workspace should be created on the server',
-                  ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: validatingDirectory
+                      ? null
+                      : () async {
+                          final name = nameController.text.trim();
+                          if (name.isEmpty) {
+                            setDialogState(() {
+                              validationMessage =
+                                  'Workspace name cannot be empty.';
+                              gitDirectory = false;
+                            });
+                            return;
+                          }
+
+                          final baseDirectory = baseDirectoryController.text
+                              .trim();
+                          if (baseDirectory.isNotEmpty) {
+                            setDialogState(() {
+                              validatingDirectory = true;
+                              validationMessage = null;
+                              gitDirectory = null;
+                            });
+                            final isGit = await projectProvider.isGitDirectory(
+                              baseDirectory,
+                            );
+                            if (!dialogContext.mounted) {
+                              return;
+                            }
+                            if (isGit == null) {
+                              setDialogState(() {
+                                validatingDirectory = false;
+                                validationMessage =
+                                    projectProvider.error ??
+                                    'Failed to validate directory.';
+                                gitDirectory = false;
+                              });
+                              return;
+                            }
+                            if (!isGit) {
+                              setDialogState(() {
+                                validatingDirectory = false;
+                                validationMessage =
+                                    'Selected directory is not a Git repository.';
+                                gitDirectory = false;
+                              });
+                              return;
+                            }
+                            setDialogState(() {
+                              validatingDirectory = false;
+                              validationMessage = 'Git repository detected.';
+                              gitDirectory = true;
+                            });
+                          }
+
+                          if (!dialogContext.mounted) {
+                            return;
+                          }
+                          Navigator.of(dialogContext).pop((
+                            name,
+                            baseDirectory.isEmpty ? null : baseDirectory,
+                          ));
+                        },
+                  child: validatingDirectory
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Create'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                final baseDirectory = baseDirectoryController.text.trim();
-                Navigator.of(
-                  dialogContext,
-                ).pop((name, baseDirectory.isEmpty ? null : baseDirectory));
-              },
-              child: const Text('Create'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -397,6 +527,24 @@ class _ChatPageState extends State<ChatPage> {
               : 'Workspace created in ${createdInput.$2}: ${created.name}',
         ),
       ),
+    );
+  }
+
+  Future<String?> _openDirectoryPicker({
+    required String initialDirectory,
+  }) async {
+    final appProvider = context.read<AppProvider>();
+    final startDirectory = initialDirectory.trim().isNotEmpty
+        ? initialDirectory.trim()
+        : (appProvider.appInfo?.path.data.trim().isNotEmpty ?? false)
+        ? appProvider.appInfo!.path.data.trim()
+        : '/';
+
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => _DirectoryPickerSheet(initialDirectory: startDirectory),
     );
   }
 
@@ -2251,5 +2399,228 @@ class _ChatPageState extends State<ChatPage> {
 
     // Technical comment translated to English.
     await chatProvider.createNewSession();
+  }
+}
+
+class _DirectoryPickerSheet extends StatefulWidget {
+  const _DirectoryPickerSheet({required this.initialDirectory});
+
+  final String initialDirectory;
+
+  @override
+  State<_DirectoryPickerSheet> createState() => _DirectoryPickerSheetState();
+}
+
+class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
+  late String _currentDirectory;
+  final TextEditingController _filterController = TextEditingController();
+  List<String> _directories = const <String>[];
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentDirectory = _normalizeDirectory(widget.initialDirectory);
+    _loadDirectory(_currentDirectory);
+    _filterController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDirectory(String directory) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    final provider = context.read<ProjectProvider>();
+    final listed = await provider.listDirectories(directory);
+
+    if (!mounted) {
+      return;
+    }
+
+    if (listed == null) {
+      setState(() {
+        _loading = false;
+        _error = provider.error ?? 'Failed to load directories';
+      });
+      return;
+    }
+
+    setState(() {
+      _currentDirectory = _normalizeDirectory(directory);
+      _directories = listed;
+      _loading = false;
+      _error = null;
+    });
+  }
+
+  String _normalizeDirectory(String input) {
+    var value = input.trim();
+    if (value.isEmpty) {
+      return '/';
+    }
+    if (value.length > 1 && value.endsWith('/')) {
+      value = value.substring(0, value.length - 1);
+    }
+    return value;
+  }
+
+  String _basename(String path) {
+    final normalized = _normalizeDirectory(path).replaceAll('\\', '/');
+    if (normalized == '/') {
+      return '/';
+    }
+    final parts = normalized
+        .split('/')
+        .where((item) => item.trim().isNotEmpty)
+        .toList(growable: false);
+    return parts.isEmpty ? normalized : parts.last;
+  }
+
+  String? _parentDirectory(String path) {
+    final normalized = _normalizeDirectory(path).replaceAll('\\', '/');
+    if (normalized == '/') {
+      return null;
+    }
+    final index = normalized.lastIndexOf('/');
+    if (index <= 0) {
+      return '/';
+    }
+    return normalized.substring(0, index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final query = _filterController.text.trim().toLowerCase();
+    final filtered = query.isEmpty
+        ? _directories
+        : _directories
+              .where((item) {
+                final base = _basename(item).toLowerCase();
+                return base.contains(query) ||
+                    item.toLowerCase().contains(query);
+              })
+              .toList(growable: false);
+    final parent = _parentDirectory(_currentDirectory);
+
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height * 0.82,
+      child: Column(
+        key: const ValueKey<String>('directory_picker_sheet'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Select directory',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                TextButton(
+                  key: const ValueKey<String>('directory_picker_use_current'),
+                  onPressed: _loading
+                      ? null
+                      : () => Navigator.of(context).pop(_currentDirectory),
+                  child: const Text('Use current'),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _currentDirectory,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: TextField(
+              key: const ValueKey<String>('directory_picker_filter'),
+              controller: _filterController,
+              decoration: InputDecoration(
+                isDense: true,
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'Filter directories',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_error!, textAlign: TextAlign.center),
+                          const SizedBox(height: 8),
+                          FilledButton.tonal(
+                            onPressed: () => _loadDirectory(_currentDirectory),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView(
+                    children: [
+                      if (parent != null)
+                        ListTile(
+                          key: const ValueKey<String>(
+                            'directory_picker_parent',
+                          ),
+                          leading: const Icon(Icons.arrow_upward_rounded),
+                          title: const Text('..'),
+                          subtitle: Text(parent),
+                          onTap: () => _loadDirectory(parent),
+                        ),
+                      for (final directory in filtered)
+                        ListTile(
+                          key: ValueKey<String>(
+                            'directory_picker_item_$directory',
+                          ),
+                          leading: const Icon(Icons.folder_outlined),
+                          title: Text(_basename(directory)),
+                          subtitle: Text(
+                            directory,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () => _loadDirectory(directory),
+                          onLongPress: () => Navigator.of(
+                            context,
+                          ).pop(_normalizeDirectory(directory)),
+                        ),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 }
