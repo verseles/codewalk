@@ -786,10 +786,7 @@ class ChatProvider extends ChangeNotifier {
     _setSyncState(ChatSyncState.connected, reason: 'signal:$source');
   }
 
-  void _handleRealtimeStreamFailure({
-    required String source,
-    Object? error,
-  }) {
+  void _handleRealtimeStreamFailure({required String source, Object? error}) {
     _consecutiveRealtimeFailures += 1;
     AppLogger.warn(
       'event_stream_reconnecting source=$source attempts=$_consecutiveRealtimeFailures',
@@ -830,9 +827,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _enterDegradedMode({required String reason}) {
-    if (!_refreshlessRealtimeEnabled ||
-        !_isForegroundActive ||
-        _degradedMode) {
+    if (!_refreshlessRealtimeEnabled || !_isForegroundActive || _degradedMode) {
       return;
     }
     _degradedMode = true;
@@ -942,15 +937,18 @@ class ChatProvider extends ChangeNotifier {
         if (generation != _eventStreamGeneration) {
           return;
         }
-        result.fold((failure) {
-          _handleRealtimeStreamFailure(
-            source: 'session-stream-failure',
-            error: failure,
-          );
-        }, (event) {
-          _markRealtimeSignal(source: 'session-stream');
-          _applyChatEvent(event);
-        });
+        result.fold(
+          (failure) {
+            _handleRealtimeStreamFailure(
+              source: 'session-stream-failure',
+              error: failure,
+            );
+          },
+          (event) {
+            _markRealtimeSignal(source: 'session-stream');
+            _applyChatEvent(event);
+          },
+        );
       },
       onError: (error) {
         if (generation != _eventStreamGeneration) {
@@ -981,15 +979,18 @@ class ChatProvider extends ChangeNotifier {
         if (generation != _eventStreamGeneration) {
           return;
         }
-        result.fold((failure) {
-          _handleRealtimeStreamFailure(
-            source: 'global-stream-failure',
-            error: failure,
-          );
-        }, (event) {
-          _markRealtimeSignal(source: 'global-stream');
-          _handleGlobalEvent(event);
-        });
+        result.fold(
+          (failure) {
+            _handleRealtimeStreamFailure(
+              source: 'global-stream-failure',
+              error: failure,
+            );
+          },
+          (event) {
+            _markRealtimeSignal(source: 'global-stream');
+            _handleGlobalEvent(event);
+          },
+        );
       },
       onError: (error) {
         if (generation != _eventStreamGeneration) {
@@ -2656,10 +2657,14 @@ class ChatProvider extends ChangeNotifier {
   Future<void> sendMessage(
     String text, {
     List<FileInputPart> attachments = const <FileInputPart>[],
+    bool shellMode = false,
   }) async {
     final trimmedText = text.trim();
+    final effectiveAttachments = shellMode
+        ? const <FileInputPart>[]
+        : attachments;
     if (_currentSession == null ||
-        (trimmedText.isEmpty && attachments.isEmpty)) {
+        (trimmedText.isEmpty && effectiveAttachments.isEmpty)) {
       return;
     }
 
@@ -2685,13 +2690,13 @@ class ChatProvider extends ChangeNotifier {
             id: '${localMessageId}_text',
             messageId: localMessageId,
             sessionId: _currentSession!.id,
-            text: trimmedText,
+            text: shellMode ? '!$trimmedText' : trimmedText,
             time: now,
           ),
         );
       }
-      for (var index = 0; index < attachments.length; index += 1) {
-        final attachment = attachments[index];
+      for (var index = 0; index < effectiveAttachments.length; index += 1) {
+        final attachment = effectiveAttachments[index];
         userParts.add(
           FilePart(
             id: '${localMessageId}_file_$index',
@@ -2738,12 +2743,13 @@ class ChatProvider extends ChangeNotifier {
       // Create chat input
       final inputParts = <ChatInputPart>[
         if (trimmedText.isNotEmpty) TextInputPart(text: trimmedText),
-        ...attachments,
+        ...effectiveAttachments,
       ];
       final input = ChatInput(
         providerId: _selectedProviderId ?? 'anthropic',
         modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
         variant: _selectedVariantId,
+        mode: shellMode ? 'shell' : null,
         parts: inputParts,
       );
 

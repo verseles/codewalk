@@ -7,14 +7,14 @@ void main() {
   testWidgets('ChatInputWidget renders and sends message', (
     WidgetTester tester,
   ) async {
-    String? sentMessage;
+    ChatInputSubmission? sentSubmission;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ChatInputWidget(
-            onSendMessage: (message, attachments) {
-              sentMessage = message;
+            onSendMessage: (submission) {
+              sentSubmission = submission;
             },
           ),
         ),
@@ -33,20 +33,21 @@ void main() {
     await tester.tap(find.byIcon(Icons.send_rounded));
     await tester.pumpAndSettle();
 
-    expect(sentMessage, 'hello');
+    expect(sentSubmission?.text, 'hello');
+    expect(sentSubmission?.mode, ChatComposerMode.normal);
   });
 
   testWidgets(
     'holding send button for 300ms inserts newline instead of sending',
     (WidgetTester tester) async {
-      String? sentMessage;
+      ChatInputSubmission? sentSubmission;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: ChatInputWidget(
-              onSendMessage: (message, attachments) {
-                sentMessage = message;
+              onSendMessage: (submission) {
+                sentSubmission = submission;
               },
             ),
           ),
@@ -64,11 +65,113 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      expect(sentMessage, isNull);
+      expect(sentSubmission, isNull);
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.controller!.text, 'hello\n');
     },
   );
+
+  testWidgets('typing ! enters shell mode and sends shell submission', (
+    WidgetTester tester,
+  ) async {
+    ChatInputSubmission? sentSubmission;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatInputWidget(
+            onSendMessage: (submission) {
+              sentSubmission = submission;
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '!pwd');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('composer_shell_mode_chip')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pumpAndSettle();
+
+    expect(sentSubmission?.mode, ChatComposerMode.shell);
+    expect(sentSubmission?.text, 'pwd');
+  });
+
+  testWidgets('slash popover inserts selected command prefix', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatInputWidget(
+            onSendMessage: (_) {},
+            onSlashQuery: (query) async {
+              return const <ChatComposerSlashCommandSuggestion>[
+                ChatComposerSlashCommandSuggestion(
+                  name: 'open',
+                  source: 'command',
+                  description: 'Open file',
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '/op');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('composer_popover_slash')),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('/open'));
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.controller!.text, '/open ');
+  });
+
+  testWidgets('mention popover inserts @ token', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatInputWidget(
+            onSendMessage: (_) {},
+            onMentionQuery: (query) async {
+              return const <ChatComposerMentionSuggestion>[
+                ChatComposerMentionSuggestion(
+                  value: 'README.md',
+                  type: ChatComposerSuggestionType.file,
+                  subtitle: 'file',
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '@REA');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('composer_popover_mention')),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('README.md'));
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.controller!.text, '@README.md ');
+  });
 
   test('microphone button uses default palette when inactive', () {
     const colorScheme = ColorScheme.light();

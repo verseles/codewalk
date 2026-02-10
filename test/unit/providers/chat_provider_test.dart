@@ -498,6 +498,42 @@ void main() {
       },
     );
 
+    test('sendMessage sends shell mode payload when requested', () async {
+      final assistantCompleted = AssistantMessage(
+        id: 'msg_shell_done',
+        sessionId: 'ses_1',
+        time: DateTime.fromMillisecondsSinceEpoch(2000),
+        completedTime: DateTime.fromMillisecondsSinceEpoch(2100),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'prt_shell_done',
+            messageId: 'msg_shell_done',
+            sessionId: 'ses_1',
+            text: 'shell output',
+          ),
+        ],
+      );
+      chatRepository.sendMessageHandler = (_, __, ___, ____) async* {
+        yield Right(assistantCompleted);
+      };
+
+      await provider.projectProvider.initializeProject();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+
+      await provider.sendMessage('pwd', shellMode: true);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(provider.state, ChatState.loaded);
+      expect(chatRepository.lastSendInput?.mode, 'shell');
+      expect(
+        chatRepository.lastSendInput?.parts.single,
+        const TextInputPart(text: 'pwd'),
+      );
+      final userMessage = provider.messages.first as UserMessage;
+      expect((userMessage.parts.first as TextPart).text, '!pwd');
+    });
+
     test(
       'sendMessage replaces optimistic local user message with server user message',
       () async {
@@ -1060,15 +1096,9 @@ void main() {
         await provider.loadSessions();
         await provider.selectSession(provider.sessions.first);
 
-        chatRepository.emitEventFailure(
-          const NetworkFailure('stream down 1'),
-        );
-        chatRepository.emitEventFailure(
-          const NetworkFailure('stream down 2'),
-        );
-        chatRepository.emitEventFailure(
-          const NetworkFailure('stream down 3'),
-        );
+        chatRepository.emitEventFailure(const NetworkFailure('stream down 1'));
+        chatRepository.emitEventFailure(const NetworkFailure('stream down 2'));
+        chatRepository.emitEventFailure(const NetworkFailure('stream down 3'));
         await Future<void>.delayed(const Duration(milliseconds: 60));
 
         expect(provider.isInDegradedMode, isTrue);
@@ -1090,58 +1120,67 @@ void main() {
       },
     );
 
-    test('resume foreground re-subscribes and reconciles session state', () async {
-      final nextMessage = AssistantMessage(
-        id: 'msg_resume',
-        sessionId: 'ses_1',
-        time: DateTime.fromMillisecondsSinceEpoch(2000),
-        completedTime: DateTime.fromMillisecondsSinceEpoch(2100),
-        parts: const <MessagePart>[
-          TextPart(
-            id: 'part_resume',
-            messageId: 'msg_resume',
-            sessionId: 'ses_1',
-            text: 'after resume',
-          ),
-        ],
-      );
-      chatRepository.messagesBySession['ses_1'] = <ChatMessage>[nextMessage];
-
-      appRepository.providersResult = Right(
-        ProvidersResponse(
-          providers: <Provider>[
-            Provider(
-              id: 'provider_a',
-              name: 'Provider A',
-              env: const <String>[],
-              models: <String, Model>{'model_a': _model('model_a')},
+    test(
+      'resume foreground re-subscribes and reconciles session state',
+      () async {
+        final nextMessage = AssistantMessage(
+          id: 'msg_resume',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(2100),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_resume',
+              messageId: 'msg_resume',
+              sessionId: 'ses_1',
+              text: 'after resume',
             ),
           ],
-          defaultModels: const <String, String>{'provider_a': 'model_a'},
-          connected: const <String>['provider_a'],
-        ),
-      );
+        );
+        chatRepository.messagesBySession['ses_1'] = <ChatMessage>[nextMessage];
 
-      await provider.initializeProviders();
-      await provider.loadSessions();
-      await provider.selectSession(provider.sessions.first);
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
 
-      final sessionsBefore = chatRepository.getSessionsCallCount;
-      final messagesBefore = chatRepository.getMessagesCallCount;
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
 
-      await provider.setForegroundActive(false);
-      await provider.setForegroundActive(true);
-      await Future<void>.delayed(const Duration(milliseconds: 80));
+        final sessionsBefore = chatRepository.getSessionsCallCount;
+        final messagesBefore = chatRepository.getMessagesCallCount;
 
-      expect(chatRepository.getSessionsCallCount, greaterThan(sessionsBefore));
-      expect(chatRepository.getMessagesCallCount, greaterThan(messagesBefore));
-      expect(
-        ((provider.messages.single as AssistantMessage).parts.single
-                as TextPart)
-            .text,
-        'after resume',
-      );
-    });
+        await provider.setForegroundActive(false);
+        await provider.setForegroundActive(true);
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+
+        expect(
+          chatRepository.getSessionsCallCount,
+          greaterThan(sessionsBefore),
+        );
+        expect(
+          chatRepository.getMessagesCallCount,
+          greaterThan(messagesBefore),
+        );
+        expect(
+          ((provider.messages.single as AssistantMessage).parts.single
+                  as TextPart)
+              .text,
+          'after resume',
+        );
+      },
+    );
 
     test(
       'global session.updated applies incrementally without broad session reload',

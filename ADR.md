@@ -22,6 +22,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-016: Chat-First Navigation Architecture (2026-02-10) [Accepted]
 - ADR-017: Composer Multimodal Input Pipeline (2026-02-10) [Accepted]
 - ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback (2026-02-10) [Accepted]
+- ADR-019: Prompt Power Composer Triggers (`@`, `!`, `/`) (2026-02-10) [Accepted]
 
 ---
 
@@ -716,6 +717,69 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 - `lib/presentation/pages/chat_page.dart`
 - `test/unit/providers/chat_provider_test.dart`
 - `test/widget/chat_page_test.dart`
+
+### References
+
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-019: Prompt Power Composer Triggers (`@`, `!`, `/`)
+
+Status: Accepted
+Date: 2026-02-10
+
+### Context
+
+Feature 018 required parity in the chat composer with OpenCode prompt-productivity triggers:
+
+- `@` mention suggestions while typing,
+- `!` at offset 0 to enter shell mode with dedicated send route,
+- `/` slash command catalog with builtin and server-provided commands.
+
+Before this change, the mobile composer only supported plain text, attachments, and voice dictation. It lacked trigger grammar, contextual suggestion popovers, and shell routing, which made advanced workflows slower and inconsistent with upstream behavior.
+
+### Decision
+
+1. Extend `ChatInputWidget` to support structured compose behavior:
+   - composer mode: `normal | shell`,
+   - popover states: `none | mention | slash`,
+   - keyboard navigation for suggestions (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`),
+   - inline mention token chips derived from `@token` text.
+2. Keep message payload compatibility by preserving text-based prompt grammar for `@` and `/` (no breaking input-part schema changes for mentions).
+3. Integrate shell mode send in provider/data layers:
+   - provider sets `ChatInput.mode = 'shell'`,
+   - datasource routes shell submissions to `POST /session/{id}/shell`,
+   - request body contract: `{ agent: "build", command: "<text>" }`.
+4. Integrate contextual suggestion sources in `ChatPage`:
+   - mention suggestions: `/find/file` + `/agent`,
+   - slash catalog: builtin command list + `/command` (`source` badges preserved),
+   - builtin slash actions executed directly in UI (`/new`, `/model`, `/agent`, `/open`, `/help`).
+
+### Rationale
+
+- Trigger grammar in composer is a high-frequency UX path and should be first-class in the input widget rather than ad-hoc parsing at send time.
+- Shell mode requires a dedicated route contract; reusing `/session/{id}/message` would diverge from server semantics.
+- Keeping `@`/`/` as text-compatible grammar avoids risky payload schema changes while still delivering UX parity (popover + keyboard + insertion behavior).
+- Fetching slash/mention catalogs from server endpoints keeps command/agent lists aligned with runtime capabilities (including skill/MCP-sourced commands).
+
+### Consequences
+
+- Positive: composer now supports `@`, `!`, and `/` productivity flows with keyboard and touch interaction.
+- Positive: shell commands are sent through the proper shell endpoint and represented in chat timeline.
+- Positive: slash catalog exposes command sources, improving discoverability for builtin vs server-provided commands.
+- Trade-off: mention handling remains text-token based (not fully structured token serialization in payload).
+- Trade-off: slash builtin coverage is intentionally scoped; richer agent/command integrations continue in follow-up features.
+
+### Key Files
+
+- `lib/presentation/widgets/chat_input_widget.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/data/datasources/chat_remote_datasource.dart`
+- `test/widget_test.dart`
+- `test/unit/providers/chat_provider_test.dart`
 
 ### References
 

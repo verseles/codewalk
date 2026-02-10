@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' hide Provider;
 import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
+import '../../core/network/dio_client.dart';
+import '../../core/di/injection_container.dart' as di;
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/project.dart';
@@ -868,7 +870,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text(label, style: Theme.of(context).textTheme.labelSmall),
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ],
                   ),
                 ),
@@ -2025,14 +2030,22 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   );
                   final supportsPdf = _supportsPdfAttachments(selectedModel);
                   return ChatInputWidget(
-                    onSendMessage: (text, attachments) async {
+                    onSendMessage: (submission) async {
                       await chatProvider.sendMessage(
-                        text,
-                        attachments: attachments,
+                        submission.text,
+                        attachments: submission.attachments,
+                        shellMode: submission.mode == ChatComposerMode.shell,
                       );
                       // Technical comment translated to English.
                       _scrollToBottom(force: true);
                     },
+                    onMentionQuery: _queryMentionSuggestions,
+                    onSlashQuery: _querySlashSuggestions,
+                    onBuiltinSlashCommand: (commandName) =>
+                        _handleBuiltinSlashCommand(
+                          commandName: commandName,
+                          chatProvider: chatProvider,
+                        ),
                     enabled:
                         chatProvider.currentSession != null &&
                         chatProvider.state != ChatState.sending,
@@ -2798,6 +2811,242 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
     // Technical comment translated to English.
     await chatProvider.createNewSession();
+  }
+
+  Future<List<ChatComposerMentionSuggestion>> _queryMentionSuggestions(
+    String query,
+  ) async {
+    final normalizedQuery = query.trim().toLowerCase();
+    final projectProvider = context.read<ProjectProvider>();
+    final dio = di.sl<DioClient>().dio;
+
+    try {
+      final responses = await Future.wait([
+        dio.get(
+          '/find/file',
+          queryParameters: <String, String>{
+            'query': normalizedQuery,
+            if ((projectProvider.currentDirectory ?? '').isNotEmpty)
+              'directory': projectProvider.currentDirectory!,
+            'limit': '12',
+          },
+        ),
+        dio.get('/agent'),
+      ]);
+
+      final fileData = responses[0].data as List<dynamic>? ?? const <dynamic>[];
+      final agentData =
+          responses[1].data as List<dynamic>? ?? const <dynamic>[];
+      final suggestions = <ChatComposerMentionSuggestion>[];
+
+      for (final raw in fileData) {
+        String? path;
+        if (raw is String) {
+          path = raw;
+        } else if (raw is Map) {
+          path =
+              raw['path'] as String? ??
+              raw['name'] as String? ??
+              raw['file'] as String?;
+        }
+        if (path == null || path.trim().isEmpty) {
+          continue;
+        }
+        suggestions.add(
+          ChatComposerMentionSuggestion(
+            value: path.trim(),
+            type: ChatComposerSuggestionType.file,
+            subtitle: 'file',
+          ),
+        );
+      }
+
+      for (final raw in agentData) {
+        if (raw is! Map) {
+          continue;
+        }
+        final name = raw['name'] as String?;
+        final hidden = raw['hidden'] == true;
+        if (name == null || name.trim().isEmpty || hidden) {
+          continue;
+        }
+        final normalizedName = name.trim().toLowerCase();
+        if (normalizedQuery.isNotEmpty &&
+            !normalizedName.contains(normalizedQuery)) {
+          continue;
+        }
+        suggestions.add(
+          ChatComposerMentionSuggestion(
+            value: name.trim(),
+            type: ChatComposerSuggestionType.agent,
+            subtitle: raw['mode'] as String? ?? 'agent',
+          ),
+        );
+      }
+
+      return suggestions.take(20).toList(growable: false);
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Composer mention query failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return const <ChatComposerMentionSuggestion>[];
+    }
+  }
+
+  List<ChatComposerSlashCommandSuggestion> _builtinSlashCommands() {
+    return const <ChatComposerSlashCommandSuggestion>[
+      ChatComposerSlashCommandSuggestion(
+        name: 'new',
+        source: 'builtin',
+        description: 'Create a new chat session',
+        isBuiltin: true,
+      ),
+      ChatComposerSlashCommandSuggestion(
+        name: 'model',
+        source: 'builtin',
+        description: 'Open model selector',
+        isBuiltin: true,
+      ),
+      ChatComposerSlashCommandSuggestion(
+        name: 'agent',
+        source: 'builtin',
+        description: 'Agent quick action',
+        isBuiltin: true,
+      ),
+      ChatComposerSlashCommandSuggestion(
+        name: 'open',
+        source: 'builtin',
+        description: 'File open quick action',
+        isBuiltin: true,
+      ),
+      ChatComposerSlashCommandSuggestion(
+        name: 'help',
+        source: 'builtin',
+        description: 'Show command help',
+        isBuiltin: true,
+      ),
+    ];
+  }
+
+  Future<List<ChatComposerSlashCommandSuggestion>> _querySlashSuggestions(
+    String query,
+  ) async {
+    final normalizedQuery = query.trim().toLowerCase();
+    final commands = <ChatComposerSlashCommandSuggestion>[
+      ..._builtinSlashCommands(),
+    ];
+    final dio = di.sl<DioClient>().dio;
+
+    try {
+      final response = await dio.get('/command');
+      final remoteData = response.data as List<dynamic>? ?? const <dynamic>[];
+      for (final raw in remoteData) {
+        if (raw is! Map) {
+          continue;
+        }
+        final name = raw['name'] as String?;
+        if (name == null || name.trim().isEmpty) {
+          continue;
+        }
+        commands.add(
+          ChatComposerSlashCommandSuggestion(
+            name: name.trim(),
+            source: raw['source'] as String? ?? 'command',
+            description: raw['description'] as String?,
+          ),
+        );
+      }
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Composer slash query failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final deduped = <String, ChatComposerSlashCommandSuggestion>{};
+    for (final command in commands) {
+      deduped.putIfAbsent(command.name.toLowerCase(), () => command);
+    }
+
+    final filtered =
+        deduped.values
+            .where((command) {
+              if (normalizedQuery.isEmpty) {
+                return true;
+              }
+              final byName = command.name.toLowerCase().contains(
+                normalizedQuery,
+              );
+              final bySource = command.source.toLowerCase().contains(
+                normalizedQuery,
+              );
+              final byDescription = (command.description ?? '')
+                  .toLowerCase()
+                  .contains(normalizedQuery);
+              return byName || bySource || byDescription;
+            })
+            .toList(growable: false)
+          ..sort((a, b) {
+            if (a.isBuiltin != b.isBuiltin) {
+              return a.isBuiltin ? -1 : 1;
+            }
+            return a.name.compareTo(b.name);
+          });
+
+    return filtered.take(24).toList(growable: false);
+  }
+
+  Future<bool> _handleBuiltinSlashCommand({
+    required String commandName,
+    required ChatProvider chatProvider,
+  }) async {
+    final command = commandName.trim().toLowerCase();
+    switch (command) {
+      case 'new':
+        await _createNewSession();
+        return true;
+      case 'model':
+        if (chatProvider.providers.isEmpty) {
+          return true;
+        }
+        await _openModelSelector(chatProvider);
+        return true;
+      case 'agent':
+        if (!mounted) {
+          return true;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Agent picker will be expanded in Feature 020'),
+          ),
+        );
+        return true;
+      case 'open':
+        if (!mounted) {
+          return true;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File-open dialog is planned in Feature 019'),
+          ),
+        );
+        return true;
+      case 'help':
+        if (!mounted) {
+          return true;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Use @ for mentions, ! for shell, / for commands'),
+          ),
+        );
+        return true;
+      default:
+        return false;
+    }
   }
 }
 

@@ -3,11 +3,56 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../domain/entities/chat_session.dart';
+
+enum ChatComposerMode { normal, shell }
+
+enum ChatComposerSuggestionType { file, agent }
+
+enum ChatComposerPopoverType { none, mention, slash }
+
+class ChatInputSubmission {
+  const ChatInputSubmission({
+    required this.text,
+    required this.attachments,
+    required this.mode,
+  });
+
+  final String text;
+  final List<FileInputPart> attachments;
+  final ChatComposerMode mode;
+}
+
+class ChatComposerMentionSuggestion {
+  const ChatComposerMentionSuggestion({
+    required this.value,
+    required this.type,
+    this.subtitle,
+  });
+
+  final String value;
+  final ChatComposerSuggestionType type;
+  final String? subtitle;
+}
+
+class ChatComposerSlashCommandSuggestion {
+  const ChatComposerSlashCommandSuggestion({
+    required this.name,
+    required this.source,
+    this.description,
+    this.isBuiltin = false,
+  });
+
+  final String name;
+  final String source;
+  final String? description;
+  final bool isBuiltin;
+}
 
 @visibleForTesting
 Color microphoneButtonBackgroundColor({
@@ -30,6 +75,9 @@ class ChatInputWidget extends StatefulWidget {
   const ChatInputWidget({
     super.key,
     required this.onSendMessage,
+    this.onMentionQuery,
+    this.onSlashQuery,
+    this.onBuiltinSlashCommand,
     this.enabled = true,
     this.focusNode,
     this.showAttachmentButton = false,
@@ -37,8 +85,12 @@ class ChatInputWidget extends StatefulWidget {
     this.allowPdfAttachment = true,
   });
 
-  final FutureOr<void> Function(String message, List<FileInputPart> attachments)
-  onSendMessage;
+  final FutureOr<void> Function(ChatInputSubmission submission) onSendMessage;
+  final Future<List<ChatComposerMentionSuggestion>> Function(String query)?
+  onMentionQuery;
+  final Future<List<ChatComposerSlashCommandSuggestion>> Function(String query)?
+  onSlashQuery;
+  final FutureOr<bool> Function(String commandName)? onBuiltinSlashCommand;
   final bool enabled;
   final FocusNode? focusNode;
   final bool showAttachmentButton;
@@ -54,13 +106,27 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   final FocusNode _internalFocusNode = FocusNode();
   final List<FileInputPart> _attachments = <FileInputPart>[];
   final stt.SpeechToText _speechToText = stt.SpeechToText();
+  final RegExp _mentionTriggerPattern = RegExp(r'(^|\s)@([^\s@]*)$');
+  final RegExp _slashTriggerPattern = RegExp(r'^/(\S*)$');
+  final RegExp _mentionTokenPattern = RegExp(r'@([^\s@]+)');
   bool _isComposing = false;
   bool _isSending = false;
   bool _isListening = false;
   bool _isInitializingSpeech = false;
   bool _isSpeechEnabled = false;
+  bool _isLoadingSuggestions = false;
+  ChatComposerMode _mode = ChatComposerMode.normal;
+  ChatComposerPopoverType _popoverType = ChatComposerPopoverType.none;
+  List<ChatComposerMentionSuggestion> _mentionSuggestions =
+      <ChatComposerMentionSuggestion>[];
+  List<ChatComposerSlashCommandSuggestion> _slashSuggestions =
+      <ChatComposerSlashCommandSuggestion>[];
+  int _activeSuggestionIndex = 0;
+  String _activeMentionQuery = '';
+  String _activeSlashQuery = '';
   String _speechPrefix = '';
   Timer? _sendHoldTimer;
+  Timer? _suggestionDebounce;
   DateTime? _lastSecondarySendActionAt;
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
@@ -74,6 +140,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   @override
   void dispose() {
     _sendHoldTimer?.cancel();
+    _suggestionDebounce?.cancel();
     unawaited(_speechToText.stop());
     _controller.dispose();
     _internalFocusNode.dispose();
@@ -108,10 +175,14 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   Future<void> _handleSendMessage() async {
     final text = _controller.text.trim();
+    final payloadText = _mode == ChatComposerMode.shell
+        ? _normalizeShellPayload(text)
+        : text;
     if (!widget.enabled || _isSending) {
       return;
     }
-    if (text.isEmpty && _attachments.isEmpty) {
+    if (payloadText.isEmpty &&
+        (_mode == ChatComposerMode.shell || _attachments.isEmpty)) {
       return;
     }
     if (_isListening) {
@@ -124,8 +195,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     try {
       await widget.onSendMessage(
-        text,
-        List<FileInputPart>.unmodifiable(_attachments),
+        ChatInputSubmission(
+          text: payloadText,
+          attachments: _mode == ChatComposerMode.shell
+              ? const <FileInputPart>[]
+              : List<FileInputPart>.unmodifiable(_attachments),
+          mode: _mode,
+        ),
       );
       if (!mounted) {
         return;
@@ -134,6 +210,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       setState(() {
         _isComposing = false;
         _attachments.clear();
+        _mode = ChatComposerMode.normal;
+        _popoverType = ChatComposerPopoverType.none;
+        _mentionSuggestions = <ChatComposerMentionSuggestion>[];
+        _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
+        _activeSuggestionIndex = 0;
       });
     } catch (error) {
       if (!mounted) {
@@ -152,16 +233,338 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _handleTextChanged(String text) {
+    _refreshComposerMode(text);
+    _scheduleSuggestionQuery();
+    if (_popoverType != ChatComposerPopoverType.none &&
+        _activeSuggestionIndex >= _activeSuggestionsCount) {
+      _activeSuggestionIndex = _activeSuggestionsCount > 0
+          ? _activeSuggestionsCount - 1
+          : 0;
+    }
     setState(() {
       _isComposing = text.trim().isNotEmpty;
     });
   }
 
+  String _normalizeShellPayload(String text) {
+    final normalized = text.startsWith('!') ? text.substring(1) : text;
+    return normalized.trim();
+  }
+
+  void _refreshComposerMode(String text) {
+    final nextMode = text.startsWith('!')
+        ? ChatComposerMode.shell
+        : ChatComposerMode.normal;
+    if (_mode == nextMode) {
+      return;
+    }
+    setState(() {
+      _mode = nextMode;
+    });
+  }
+
+  int get _activeSuggestionsCount {
+    switch (_popoverType) {
+      case ChatComposerPopoverType.mention:
+        return _mentionSuggestions.length;
+      case ChatComposerPopoverType.slash:
+        return _slashSuggestions.length;
+      case ChatComposerPopoverType.none:
+        return 0;
+    }
+  }
+
+  void _scheduleSuggestionQuery() {
+    _suggestionDebounce?.cancel();
+    _suggestionDebounce = Timer(
+      const Duration(milliseconds: 120),
+      _refreshSuggestions,
+    );
+  }
+
+  Future<void> _refreshSuggestions() async {
+    if (!mounted) {
+      return;
+    }
+
+    final value = _controller.value;
+    final text = value.text;
+    final selectionOffset = value.selection.isValid
+        ? value.selection.baseOffset
+        : text.length;
+    final safeOffset = selectionOffset.clamp(0, text.length).toInt();
+    final prefix = text.substring(0, safeOffset);
+
+    final mentionMatch = _mentionTriggerPattern.firstMatch(prefix);
+    if (mentionMatch != null && widget.onMentionQuery != null) {
+      final query = mentionMatch.group(2) ?? '';
+      _activeMentionQuery = query;
+      await _loadMentionSuggestions(query);
+      return;
+    }
+
+    final slashMatch = _slashTriggerPattern.firstMatch(text.trim());
+    if (slashMatch != null && widget.onSlashQuery != null) {
+      final query = slashMatch.group(1) ?? '';
+      _activeSlashQuery = query;
+      await _loadSlashSuggestions(query);
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _popoverType = ChatComposerPopoverType.none;
+      _mentionSuggestions = <ChatComposerMentionSuggestion>[];
+      _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
+      _activeSuggestionIndex = 0;
+      _isLoadingSuggestions = false;
+    });
+  }
+
+  Future<void> _loadMentionSuggestions(String query) async {
+    final loader = widget.onMentionQuery;
+    if (loader == null) {
+      return;
+    }
+    setState(() {
+      _isLoadingSuggestions = true;
+      _popoverType = ChatComposerPopoverType.mention;
+    });
+    try {
+      final suggestions = await loader(query);
+      if (!mounted || query != _activeMentionQuery) {
+        return;
+      }
+      setState(() {
+        _mentionSuggestions = suggestions;
+        _activeSuggestionIndex = 0;
+        _popoverType = suggestions.isEmpty
+            ? ChatComposerPopoverType.none
+            : ChatComposerPopoverType.mention;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingSuggestions = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadSlashSuggestions(String query) async {
+    final loader = widget.onSlashQuery;
+    if (loader == null) {
+      return;
+    }
+    setState(() {
+      _isLoadingSuggestions = true;
+      _popoverType = ChatComposerPopoverType.slash;
+    });
+    try {
+      final suggestions = await loader(query);
+      if (!mounted || query != _activeSlashQuery) {
+        return;
+      }
+      setState(() {
+        _slashSuggestions = suggestions;
+        _activeSuggestionIndex = 0;
+        _popoverType = suggestions.isEmpty
+            ? ChatComposerPopoverType.none
+            : ChatComposerPopoverType.slash;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingSuggestions = false;
+        });
+      }
+    }
+  }
+
+  KeyEventResult _handleInputKeyEvent(FocusNode _, KeyEvent event) {
+    if (event is! KeyDownEvent) {
+      return KeyEventResult.ignored;
+    }
+
+    final logicalKey = event.logicalKey;
+    final hasPopover = _popoverType != ChatComposerPopoverType.none;
+
+    if (hasPopover && _activeSuggestionsCount > 0) {
+      if (logicalKey == LogicalKeyboardKey.arrowDown) {
+        setState(() {
+          _activeSuggestionIndex =
+              (_activeSuggestionIndex + 1) % _activeSuggestionsCount;
+        });
+        return KeyEventResult.handled;
+      }
+
+      if (logicalKey == LogicalKeyboardKey.arrowUp) {
+        setState(() {
+          _activeSuggestionIndex =
+              (_activeSuggestionIndex - 1 + _activeSuggestionsCount) %
+              _activeSuggestionsCount;
+        });
+        return KeyEventResult.handled;
+      }
+
+      if (logicalKey == LogicalKeyboardKey.enter ||
+          logicalKey == LogicalKeyboardKey.tab) {
+        unawaited(_applyActiveSuggestion());
+        return KeyEventResult.handled;
+      }
+    }
+
+    if (logicalKey == LogicalKeyboardKey.escape) {
+      if (hasPopover) {
+        _closePopover();
+        return KeyEventResult.handled;
+      }
+      if (_mode == ChatComposerMode.shell) {
+        setState(() {
+          _mode = ChatComposerMode.normal;
+          _controller.clear();
+          _isComposing = false;
+        });
+        return KeyEventResult.handled;
+      }
+    }
+
+    if (logicalKey == LogicalKeyboardKey.backspace &&
+        _mode == ChatComposerMode.shell) {
+      final normalized = _normalizeShellPayload(_controller.text);
+      if (normalized.isEmpty) {
+        setState(() {
+          _mode = ChatComposerMode.normal;
+          _controller.clear();
+          _isComposing = false;
+        });
+        return KeyEventResult.handled;
+      }
+    }
+
+    return KeyEventResult.ignored;
+  }
+
+  Future<void> _applyActiveSuggestion() async {
+    if (!mounted || _activeSuggestionsCount == 0) {
+      return;
+    }
+
+    switch (_popoverType) {
+      case ChatComposerPopoverType.mention:
+        final suggestion = _mentionSuggestions[_activeSuggestionIndex];
+        _applyMentionSuggestion(suggestion);
+        return;
+      case ChatComposerPopoverType.slash:
+        final suggestion = _slashSuggestions[_activeSuggestionIndex];
+        await _applySlashSuggestion(suggestion);
+        return;
+      case ChatComposerPopoverType.none:
+        return;
+    }
+  }
+
+  void _applyMentionSuggestion(ChatComposerMentionSuggestion suggestion) {
+    final value = _controller.value;
+    final text = value.text;
+    final selectionOffset = value.selection.isValid
+        ? value.selection.baseOffset
+        : text.length;
+    final safeOffset = selectionOffset.clamp(0, text.length).toInt();
+    final prefix = text.substring(0, safeOffset);
+    final match = _mentionTriggerPattern.firstMatch(prefix);
+    if (match == null) {
+      return;
+    }
+    final fullMatch = match.group(0) ?? '';
+    final mentionStart = safeOffset - fullMatch.length;
+    final replacement = '${match.group(1) ?? ''}@${suggestion.value} ';
+    final nextText = text.replaceRange(mentionStart, safeOffset, replacement);
+    final nextOffset = mentionStart + replacement.length;
+
+    _controller.value = TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: nextOffset),
+    );
+
+    setState(() {
+      _isComposing = nextText.trim().isNotEmpty;
+      _popoverType = ChatComposerPopoverType.none;
+      _mentionSuggestions = <ChatComposerMentionSuggestion>[];
+      _activeSuggestionIndex = 0;
+    });
+    _effectiveFocusNode.requestFocus();
+  }
+
+  Future<void> _applySlashSuggestion(
+    ChatComposerSlashCommandSuggestion suggestion,
+  ) async {
+    if (suggestion.isBuiltin && widget.onBuiltinSlashCommand != null) {
+      final handled = await widget.onBuiltinSlashCommand!(suggestion.name);
+      if (handled) {
+        setState(() {
+          _popoverType = ChatComposerPopoverType.none;
+          _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
+          _activeSuggestionIndex = 0;
+          _controller.clear();
+          _isComposing = false;
+        });
+        return;
+      }
+    }
+
+    final replacement = '/${suggestion.name} ';
+    _controller.value = TextEditingValue(
+      text: replacement,
+      selection: TextSelection.collapsed(offset: replacement.length),
+    );
+    setState(() {
+      _isComposing = replacement.trim().isNotEmpty;
+      _popoverType = ChatComposerPopoverType.none;
+      _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
+      _activeSuggestionIndex = 0;
+    });
+    _effectiveFocusNode.requestFocus();
+  }
+
+  void _closePopover() {
+    setState(() {
+      _popoverType = ChatComposerPopoverType.none;
+      _mentionSuggestions = <ChatComposerMentionSuggestion>[];
+      _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
+      _activeSuggestionIndex = 0;
+    });
+  }
+
+  List<RegExpMatch> _extractMentionTokens(String text) {
+    return _mentionTokenPattern.allMatches(text).toList(growable: false);
+  }
+
+  IconData _mentionIconForToken(String value) {
+    if (value.contains('/') || value.contains('.')) {
+      return Icons.insert_drive_file_outlined;
+    }
+    return Icons.smart_toy_outlined;
+  }
+
+  String _composerHintText() {
+    if (_mode == ChatComposerMode.shell) {
+      return 'Shell command (Esc to exit)';
+    }
+    return 'Type a message... (`@` file/agent, `/` command, `!` shell)';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final mentionTokens = _extractMentionTokens(_controller.text);
+    final showAttachments =
+        _attachments.isNotEmpty && _mode == ChatComposerMode.normal;
     final canSend =
-        (_isComposing || _attachments.isNotEmpty) &&
+        (_isComposing ||
+            (_attachments.isNotEmpty && _mode == ChatComposerMode.normal)) &&
         widget.enabled &&
         !_isSending;
 
@@ -176,7 +579,71 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_attachments.isNotEmpty)
+            if (_mode == ChatComposerMode.shell)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Chip(
+                    key: const ValueKey<String>('composer_shell_mode_chip'),
+                    avatar: const Icon(Icons.terminal_rounded, size: 16),
+                    label: const Text('Shell mode'),
+                    onDeleted: widget.enabled
+                        ? () {
+                            setState(() {
+                              _mode = ChatComposerMode.normal;
+                              _controller.clear();
+                              _isComposing = false;
+                            });
+                          }
+                        : null,
+                  ),
+                ),
+              ),
+            if (mentionTokens.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: mentionTokens
+                        .map((token) {
+                          final value = token.group(1) ?? '';
+                          return InputChip(
+                            key: ValueKey<String>('mention_token_$value'),
+                            avatar: Icon(_mentionIconForToken(value), size: 16),
+                            label: Text('@$value'),
+                            onDeleted: widget.enabled
+                                ? () {
+                                    final start = token.start;
+                                    final end = token.end;
+                                    final current = _controller.text;
+                                    if (start < 0 || end > current.length) {
+                                      return;
+                                    }
+                                    final nextText = current.replaceRange(
+                                      start,
+                                      end,
+                                      '',
+                                    );
+                                    _controller.value = TextEditingValue(
+                                      text: nextText,
+                                      selection: TextSelection.collapsed(
+                                        offset: start.clamp(0, nextText.length),
+                                      ),
+                                    );
+                                    _handleTextChanged(nextText);
+                                  }
+                                : null,
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
+                ),
+              ),
+            if (showAttachments)
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 child: Wrap(
@@ -203,11 +670,17 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                   }),
                 ),
               ),
+            if (_popoverType != ChatComposerPopoverType.none)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: _buildSuggestionPopover(colorScheme),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
               child: Row(
                 children: [
-                  if (widget.showAttachmentButton) ...[
+                  if (widget.showAttachmentButton &&
+                      _mode == ChatComposerMode.normal) ...[
                     IconButton.filledTonal(
                       onPressed: widget.enabled ? _showAttachmentOptions : null,
                       tooltip: 'Add attachment',
@@ -216,31 +689,36 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     const SizedBox(width: 8),
                   ],
                   Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _effectiveFocusNode,
-                      enabled: widget.enabled,
-                      maxLines: null,
-                      textInputAction: TextInputAction.newline,
-                      keyboardType: TextInputType.multiline,
-                      onChanged: _handleTextChanged,
-                      onSubmitted: (_) => unawaited(_handleSendMessage()),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        filled: true,
-                        fillColor: colorScheme.surfaceContainerHighest,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(26),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(26),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
+                    child: Focus(
+                      onKeyEvent: _handleInputKeyEvent,
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _effectiveFocusNode,
+                        enabled: widget.enabled,
+                        maxLines: null,
+                        textInputAction: TextInputAction.newline,
+                        keyboardType: TextInputType.multiline,
+                        onChanged: _handleTextChanged,
+                        onSubmitted: (_) => unawaited(_handleSendMessage()),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        decoration: InputDecoration(
+                          hintText: _composerHintText(),
+                          filled: true,
+                          fillColor: _mode == ChatComposerMode.shell
+                              ? colorScheme.tertiaryContainer
+                              : colorScheme.surfaceContainerHighest,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(26),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(26),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
+                          ),
                         ),
                       ),
                     ),
@@ -331,6 +809,103 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestionPopover(ColorScheme colorScheme) {
+    final isMention = _popoverType == ChatComposerPopoverType.mention;
+    final suggestions = isMention
+        ? _mentionSuggestions
+              .map(
+                (item) => (
+                  title: item.value,
+                  subtitle: item.subtitle,
+                  icon: item.type == ChatComposerSuggestionType.file
+                      ? Icons.insert_drive_file_outlined
+                      : Icons.smart_toy_outlined,
+                  badge: item.type == ChatComposerSuggestionType.file
+                      ? 'file'
+                      : 'agent',
+                ),
+              )
+              .toList(growable: false)
+        : _slashSuggestions
+              .map(
+                (item) => (
+                  title: '/${item.name}',
+                  subtitle: item.description,
+                  icon: item.isBuiltin
+                      ? Icons.bolt_outlined
+                      : Icons.extension_outlined,
+                  badge: item.source,
+                ),
+              )
+              .toList(growable: false);
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 220),
+        child: _isLoadingSuggestions && suggestions.isEmpty
+            ? const SizedBox(
+                height: 72,
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              )
+            : suggestions.isEmpty
+            ? const SizedBox(
+                height: 72,
+                child: Center(child: Text('No suggestions')),
+              )
+            : ListView.builder(
+                key: ValueKey<String>('composer_popover_${_popoverType.name}'),
+                shrinkWrap: true,
+                itemCount: suggestions.length,
+                itemBuilder: (context, index) {
+                  final item = suggestions[index];
+                  final selected = index == _activeSuggestionIndex;
+                  return ListTile(
+                    dense: true,
+                    selected: selected,
+                    leading: Icon(item.icon, size: 18),
+                    title: Text(item.title),
+                    subtitle: item.subtitle == null || item.subtitle!.isEmpty
+                        ? null
+                        : Text(
+                            item.subtitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        item.badge,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _activeSuggestionIndex = index;
+                      });
+                      unawaited(_applyActiveSuggestion());
+                    },
+                  );
+                },
+              ),
       ),
     );
   }

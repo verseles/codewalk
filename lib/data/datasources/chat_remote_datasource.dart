@@ -729,6 +729,55 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     }
   }
 
+  Future<ChatMessageModel> _sendShellCommand(
+    String sessionId,
+    ChatInputModel input, {
+    String? directory,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (directory != null) {
+        queryParams['directory'] = directory;
+      }
+
+      final command = input.parts
+          .where((part) => part.type == 'text')
+          .map((part) => part.text ?? '')
+          .join('\n')
+          .trim();
+      if (command.isEmpty) {
+        throw const ValidationException('Shell command cannot be empty');
+      }
+
+      final response = await dio.post(
+        '/session/$sessionId/shell',
+        data: <String, dynamic>{'agent': 'build', 'command': command},
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Server error');
+      }
+
+      final map = response.data as Map<String, dynamic>;
+      final info = (map['info'] as Map<String, dynamic>?) ?? map;
+      final parts = (map['parts'] as List<dynamic>?) ?? const <dynamic>[];
+      return ChatMessageModel.fromJson({...info, 'parts': parts});
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Resource not found');
+      }
+      if (e.response?.statusCode == 400) {
+        throw const ValidationException('Invalid input parameters');
+      }
+      throw const ServerException('Server error');
+    } catch (e) {
+      if (e is ValidationException) {
+        rethrow;
+      }
+      throw const ServerException('Server error');
+    }
+  }
+
   @override
   Stream<ChatMessageModel> sendMessage(
     String projectId,
@@ -748,6 +797,16 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         'Chat send start session=$sessionId provider=${input.providerId} model=${input.modelId} variant=${input.variant ?? "auto"} directory=${directory ?? "-"}',
       );
       AppLogger.info('Request messageID=${input.messageId ?? "<none>"}');
+
+      if (input.mode == 'shell') {
+        final shellMessage = await _sendShellCommand(
+          sessionId,
+          input,
+          directory: directory,
+        );
+        yield shellMessage;
+        return;
+      }
 
       // Start SSE listener for message update events
       bool messageCompleted = false;

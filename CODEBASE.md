@@ -119,6 +119,7 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | GET | `/session/{id}/message` | List messages |
 | GET | `/session/{id}/message/{messageId}` | Get specific message |
 | POST | `/session/{id}/message` | Send message (streaming via SSE) |
+| POST | `/session/{id}/shell` | Execute shell-mode prompt command |
 | GET | `/event` | SSE event stream |
 | GET | `/global/event` | Global SSE event stream (cross-context sync) |
 | GET | `/permission` | List pending permission requests |
@@ -144,7 +145,7 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | DELETE | `/experimental/worktree` | Delete worktree (`id` query) |
 | POST | `/experimental/worktree/reset` | Reset worktree (`id` payload) |
 
-**Total: 40 endpoint operations used by client (including legacy fallbacks)**
+**Total: 41 endpoint operations used by client (including legacy fallbacks)**
 
 ### Feature 010 Parity Contract Baseline (Locked 2026-02-09)
 
@@ -278,6 +279,25 @@ Compatibility tiers:
   - unit tests for degraded enter/recover, foreground resume reconcile, and global incremental updates
   - widget tests for reconnect behavior without periodic polling and refresh-control absence
 
+### Feature 018 Prompt Power Composer Architecture (Implemented 2026-02-10)
+
+- Extended composer state machine in `ChatInputWidget`:
+  - trigger-aware mode orchestration (`normal`/`shell`) with `!` activation at offset 0
+  - popover orchestration for `@` mentions and `/` slash commands
+  - keyboard navigation and selection (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`)
+  - mention token chips rendered from prompt text
+- Added contextual suggestion fetching in `ChatPage`:
+  - mention sources from `/find/file` and `/agent`
+  - slash catalog from builtin commands plus `/command` (with `source` badges)
+  - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/help`) executed directly in UI context
+- Added shell send-path routing:
+  - `ChatProvider.sendMessage(..., shellMode: true)` marks payload mode as shell
+  - `ChatRemoteDataSource.sendMessage` routes shell-mode payloads to `POST /session/{id}/shell`
+  - shell request contract currently uses `{agent: "build", command: "<text>"}` and returns assistant message payload
+- Expanded coverage:
+  - widget tests for shell-mode submit and `@`/`/` popover insertion flows
+  - provider unit test for shell payload mode propagation
+
 ### ChatInput Schema
 
 `POST /session/{id}/message` body:
@@ -321,7 +341,7 @@ Compatibility tiers:
 
 Required for parity wave:
 
-- `/find/*`
+- `/find/*` (except `/find/file`)
 - `/file/*`
 - `/vcs`
 - `/mcp/*`
@@ -332,12 +352,9 @@ Deferred/optional after parity wave:
 - `/global/dispose`
 - `/session/:id/permissions/:id`
 - `/session/:id/command`
-- `/session/:id/shell`
 - `/lsp`
 - `/pty*`
 - `/mode`
-- `/agent`
-- `/command`
 - `/log`
 - `/formatter`
 - `/instance/dispose`
@@ -551,6 +568,8 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Attachment menu options are modality-aware per model: when a model supports only image or only PDF, the composer sheet exposes only the supported option(s)
 - Chat composer includes a microphone action (next to send) that runs speech-to-text via `speech_to_text` and writes live dictation into the same text input
 - Send button has a secondary composer action: hold for 300ms inserts a newline at cursor/selection instead of sending, with a small corner icon indicator for discoverability
+- Chat composer supports prompt power triggers: `@` contextual mentions (files/agents), leading `!` shell mode, and leading `/` slash command catalog with source badges
+- Shell-mode sends use a dedicated server route (`/session/{id}/shell`) through datasource-level routing
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
