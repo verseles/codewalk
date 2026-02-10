@@ -22,6 +22,7 @@ void main() {
     );
 
     expect(find.byType(TextField), findsOneWidget);
+    expect(find.byTooltip('Start voice input'), findsOneWidget);
     expect(find.byIcon(Icons.send_rounded), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), 'hello');

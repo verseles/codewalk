@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../domain/entities/chat_session.dart';
 
@@ -34,13 +37,25 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _internalFocusNode = FocusNode();
   final List<FileInputPart> _attachments = <FileInputPart>[];
+  final stt.SpeechToText _speechToText = stt.SpeechToText();
   bool _isComposing = false;
   bool _isSending = false;
+  bool _isListening = false;
+  bool _isInitializingSpeech = false;
+  bool _isSpeechEnabled = false;
+  String _speechPrefix = '';
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(_initializeSpeech());
+  }
+
+  @override
   void dispose() {
+    unawaited(_speechToText.stop());
     _controller.dispose();
     _internalFocusNode.dispose();
     super.dispose();
@@ -79,6 +94,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     }
     if (text.isEmpty && _attachments.isEmpty) {
       return;
+    }
+    if (_isListening) {
+      await _stopListening();
     }
 
     setState(() {
@@ -206,6 +224,18 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                           vertical: 14,
                         ),
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filledTonal(
+                    onPressed: widget.enabled && !_isSending
+                        ? () => unawaited(_toggleVoiceInput())
+                        : null,
+                    tooltip: _isListening
+                        ? 'Stop voice input'
+                        : 'Start voice input',
+                    icon: Icon(
+                      _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -384,5 +414,161 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       default:
         return 'image/png';
     }
+  }
+
+  Future<void> _toggleVoiceInput() async {
+    if (_isInitializingSpeech) {
+      return;
+    }
+
+    if (_isListening) {
+      await _stopListening();
+      return;
+    }
+
+    await _startListening();
+  }
+
+  Future<void> _startListening() async {
+    if (!widget.enabled || _isSending) {
+      return;
+    }
+
+    if (!_isSpeechEnabled) {
+      await _initializeSpeech();
+    }
+    if (!_isSpeechEnabled) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Voice input is unavailable on this device'),
+        ),
+      );
+      return;
+    }
+
+    _speechPrefix = _controller.text;
+    try {
+      await _speechToText.listen(
+        onResult: _onSpeechResult,
+        listenOptions: stt.SpeechListenOptions(
+          partialResults: true,
+          cancelOnError: true,
+          listenMode: stt.ListenMode.dictation,
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isListening = _speechToText.isListening;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isListening = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to start voice input')),
+      );
+    }
+  }
+
+  Future<void> _stopListening() async {
+    try {
+      await _speechToText.stop();
+    } catch (_) {
+      // Ignore platform stop errors to keep compose flow resilient.
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isListening = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _initializeSpeech() async {
+    if (_isInitializingSpeech) {
+      return;
+    }
+
+    _isInitializingSpeech = true;
+    try {
+      final enabled = await _speechToText.initialize(
+        onStatus: _onSpeechStatus,
+        onError: _onSpeechError,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSpeechEnabled = enabled;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSpeechEnabled = false;
+      });
+    } finally {
+      _isInitializingSpeech = false;
+    }
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    if (!mounted) {
+      return;
+    }
+
+    final recognized = result.recognizedWords.trim();
+    final prefix = _speechPrefix;
+    final shouldAddSpace =
+        prefix.isNotEmpty &&
+        recognized.isNotEmpty &&
+        !prefix.endsWith(' ') &&
+        !prefix.endsWith('\n');
+    final nextText = recognized.isEmpty
+        ? prefix
+        : shouldAddSpace
+        ? '$prefix $recognized'
+        : '$prefix$recognized';
+
+    _controller.value = TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: nextText.length),
+    );
+
+    setState(() {
+      _isComposing = nextText.trim().isNotEmpty;
+    });
+  }
+
+  void _onSpeechStatus(String status) {
+    if (!mounted) {
+      return;
+    }
+
+    final listening = status == 'listening' || _speechToText.isListening;
+    if (_isListening == listening) {
+      return;
+    }
+    setState(() {
+      _isListening = listening;
+    });
+  }
+
+  void _onSpeechError(SpeechRecognitionError error) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isListening = false;
+    });
   }
 }

@@ -528,6 +528,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Chat input and provider/model context
 - Chat composer supports image/PDF attachments via `file_picker`, serializes `file` parts with `mime` + `url`, and hides the attachment action when the selected model does not advertise attachment/image/pdf input support
 - Attachment menu options are modality-aware per model: when a model supports only image or only PDF, the composer sheet exposes only the supported option(s)
+- Chat composer includes a microphone action (next to send) that runs speech-to-text via `speech_to_text` and writes live dictation into the same text input
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
@@ -779,3 +780,4 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Documented one reproducible host-environment limitation (Android emulator startup `-6`) with mitigation via build/artifact validation and APK upload path.
 - Added post-release chat composer attachment flow (image/PDF), including model-capability-based button visibility and payload parity for `file` parts (`mime` + `url`).
 - Refined post-release attachment UX so image/PDF options are filtered independently by model input modalities instead of relying only on generic attachment support.
+- Added post-release voice input support with `speech_to_text`, including microphone button UX in the composer and Android manifest updates for speech recognition availability.

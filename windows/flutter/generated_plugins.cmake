@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  speech_to_text_windows
   url_launcher_windows
 )
 
