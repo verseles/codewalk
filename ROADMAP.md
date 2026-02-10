@@ -169,6 +169,7 @@ Restored assistant progress feedback during response generation by showing stage
 Removed inline `Step started`/`Step finished` assistant blocks from the message body and moved their metadata to the assistant info menu (`i` icon) in the message header for a cleaner response flow.
 Enabled selectable text for assistant and user messages through a unified `SelectionArea` around message content, removed dedicated inline copy buttons, changed full-message copy to trigger only on double-tap/double-click over the message bubble background (not on top of text), and suppressed in-app copy toast on Android to rely on native system feedback.
 Refined the top app bar context selector by removing the rounded bordered chip style and moving the current directory selector to the left-aligned title area, making project context the primary top-bar highlight.
+Replaced the project selector popup menu with an adaptive Android-style dialog: fullscreen on small screens and centered on larger screens, with permanent actions pinned at the top and per-project trailing close buttons directly in the project list.
 Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 
 ## Dependency Order

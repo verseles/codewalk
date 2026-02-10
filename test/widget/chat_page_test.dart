@@ -255,8 +255,14 @@ void main() {
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
 
+    expect(
+      find.byKey(const ValueKey<String>('project_selector_dialog_content')),
+      findsOneWidget,
+    );
+    expect(find.text('Project context'), findsOneWidget);
     expect(find.text('Current directory: /repo/a'), findsOneWidget);
     expect(find.text('Select a directory/workspace below'), findsOneWidget);
+    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
   });
 
   testWidgets('shows basename directory and compact controls on mobile', (
@@ -296,6 +302,14 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('project_selector_dialog_content')),
+      findsOneWidget,
+    );
+    final mobileDialogSize = tester.getSize(
+      find.byKey(const ValueKey<String>('project_selector_dialog_content')),
+    );
+    expect(mobileDialogSize.width, closeTo(390, 0.5));
     expect(
       find.text('Current directory: /repo/mobile-project'),
       findsOneWidget,

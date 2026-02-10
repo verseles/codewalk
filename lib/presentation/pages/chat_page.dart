@@ -763,193 +763,7 @@ class _ChatPageState extends State<ChatPage> {
     final isMobile = MediaQuery.sizeOf(context).width < _mobileBreakpoint;
     return AppBar(
       titleSpacing: isMobile ? 0 : 8,
-      title: Consumer<ProjectProvider>(
-        builder: (context, projectProvider, child) {
-          final currentProject = projectProvider.currentProject;
-          final currentDirectoryFull = _directoryLabel(
-            projectProvider.currentDirectory,
-          );
-          final currentDirectoryChip = isMobile
-              ? _directoryBasename(currentDirectoryFull)
-              : currentDirectoryFull;
-
-          return Align(
-            alignment: Alignment.centerLeft,
-            child: PopupMenuButton<String>(
-              tooltip: 'Choose Directory',
-              onSelected: (value) async {
-                if (value == '__refresh_projects__') {
-                  await projectProvider.loadProjects();
-                  return;
-                }
-                if (value == '__refresh_workspaces__') {
-                  await projectProvider.loadWorktrees();
-                  return;
-                }
-                if (value == '__create_workspace__') {
-                  await _createWorkspace();
-                  return;
-                }
-                if (value.startsWith('switch:')) {
-                  await _switchProjectContext(
-                    value.substring('switch:'.length),
-                  );
-                  return;
-                }
-                if (value.startsWith('close:')) {
-                  await _closeProjectContext(value.substring('close:'.length));
-                  return;
-                }
-                if (value.startsWith('reopen:')) {
-                  await _reopenProjectContext(
-                    value.substring('reopen:'.length),
-                  );
-                  return;
-                }
-                if (value.startsWith('switch-workspace:')) {
-                  final directory = value.substring('switch-workspace:'.length);
-                  final project = projectProvider.projects
-                      .where((item) => item.path == directory)
-                      .firstOrNull;
-                  if (project != null) {
-                    await _switchProjectContext(project.id);
-                  }
-                  return;
-                }
-                if (value.startsWith('reset-workspace:')) {
-                  await _resetWorkspace(
-                    value.substring('reset-workspace:'.length),
-                  );
-                  return;
-                }
-                if (value.startsWith('delete-workspace:')) {
-                  await _deleteWorkspace(
-                    value.substring('delete-workspace:'.length),
-                  );
-                }
-              },
-              itemBuilder: (context) {
-                final items = <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    enabled: false,
-                    child: Text(
-                      currentProject == null
-                          ? 'No active context'
-                          : 'Current directory: $currentDirectoryFull',
-                    ),
-                  ),
-                  const PopupMenuItem<String>(
-                    enabled: false,
-                    child: Text('Select a directory/workspace below'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: '__refresh_projects__',
-                    child: Text('Refresh projects'),
-                  ),
-                  const PopupMenuDivider(),
-                ];
-
-                for (final project in projectProvider.openProjects) {
-                  items.add(
-                    PopupMenuItem<String>(
-                      value: 'switch:${project.id}',
-                      child: _projectMenuLabel(
-                        project,
-                        selected: project.id == currentProject?.id,
-                      ),
-                    ),
-                  );
-                  if (project.id != currentProject?.id) {
-                    items.add(
-                      PopupMenuItem<String>(
-                        value: 'close:${project.id}',
-                        child: Text('Close ${_projectDisplayLabel(project)}'),
-                      ),
-                    );
-                  }
-                }
-
-                if (projectProvider.closedProjects.isNotEmpty) {
-                  items.add(const PopupMenuDivider());
-                  for (final project in projectProvider.closedProjects) {
-                    items.add(
-                      PopupMenuItem<String>(
-                        value: 'reopen:${project.id}',
-                        child: Text('Reopen ${_projectDisplayLabel(project)}'),
-                      ),
-                    );
-                  }
-                }
-
-                if (projectProvider.worktreeSupported ||
-                    projectProvider.worktrees.isNotEmpty) {
-                  items.add(const PopupMenuDivider());
-                  items.add(
-                    const PopupMenuItem<String>(
-                      value: '__create_workspace__',
-                      child: Text('Create workspace in directory...'),
-                    ),
-                  );
-                  items.add(
-                    const PopupMenuItem<String>(
-                      value: '__refresh_workspaces__',
-                      child: Text('Refresh workspaces'),
-                    ),
-                  );
-                  for (final worktree in projectProvider.worktrees) {
-                    items.add(
-                      PopupMenuItem<String>(
-                        value: 'switch-workspace:${worktree.directory}',
-                        child: Text('Open ${worktree.name}'),
-                      ),
-                    );
-                    items.add(
-                      PopupMenuItem<String>(
-                        value: 'reset-workspace:${worktree.id}',
-                        child: Text('Reset ${worktree.name}'),
-                      ),
-                    );
-                    items.add(
-                      PopupMenuItem<String>(
-                        value: 'delete-workspace:${worktree.id}',
-                        child: Text('Delete ${worktree.name}'),
-                      ),
-                    );
-                  }
-                }
-
-                return items;
-              },
-              child: Padding(
-                key: const ValueKey<String>('project_selector_button'),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 2 : 6,
-                  vertical: 6,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.folder_open_outlined, size: 16),
-                    SizedBox(width: isMobile ? 4 : 6),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: isMobile ? 100 : 280,
-                      ),
-                      child: Text(
-                        currentDirectoryChip,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.arrow_drop_down, size: 18),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+      title: _buildProjectSelectorTitle(isMobile: isMobile),
       actions: [
         Consumer<AppProvider>(
           builder: (context, appProvider, child) {
@@ -1098,6 +912,372 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Widget _buildProjectSelectorTitle({required bool isMobile}) {
+    return Consumer<ProjectProvider>(
+      builder: (context, projectProvider, child) {
+        final currentDirectoryFull = _directoryLabel(
+          projectProvider.currentDirectory,
+        );
+        final currentDirectoryChip = isMobile
+            ? _directoryBasename(currentDirectoryFull)
+            : currentDirectoryFull;
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: Tooltip(
+            message: 'Choose Directory',
+            child: InkWell(
+              onTap: () => unawaited(_openProjectSelectorDialog()),
+              borderRadius: BorderRadius.circular(10),
+              child: Padding(
+                key: const ValueKey<String>('project_selector_button'),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 2 : 6,
+                  vertical: 6,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.folder_open_outlined, size: 16),
+                    SizedBox(width: isMobile ? 4 : 6),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: isMobile ? 100 : 280,
+                      ),
+                      child: Text(
+                        currentDirectoryChip,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.arrow_drop_down, size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openProjectSelectorDialog() async {
+    if (!mounted) {
+      return;
+    }
+    final view = View.of(context);
+    final screenWidth = MediaQueryData.fromView(view).size.width;
+    final isSmallScreen = screenWidth < _mobileBreakpoint;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return Consumer<ProjectProvider>(
+          builder: (context, projectProvider, child) {
+            final content = _buildProjectSelectorDialogContent(
+              dialogContext: dialogContext,
+              projectProvider: projectProvider,
+              isSmallScreen: isSmallScreen,
+            );
+            if (isSmallScreen) {
+              return Dialog.fullscreen(
+                key: const ValueKey<String>(
+                  'project_selector_dialog_fullscreen',
+                ),
+                child: content,
+              );
+            }
+            return Dialog(
+              key: const ValueKey<String>('project_selector_dialog_centered'),
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 24,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SizedBox(
+                width: 760,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 720),
+                  child: content,
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildProjectSelectorDialogContent({
+    required BuildContext dialogContext,
+    required ProjectProvider projectProvider,
+    required bool isSmallScreen,
+  }) {
+    final colorScheme = Theme.of(dialogContext).colorScheme;
+    final currentProject = projectProvider.currentProject;
+    final currentDirectoryFull = _directoryLabel(
+      projectProvider.currentDirectory,
+    );
+    final worktreeEnabled =
+        projectProvider.worktreeSupported ||
+        projectProvider.worktrees.isNotEmpty;
+
+    return Material(
+      key: const ValueKey<String>('project_selector_dialog_content'),
+      color: colorScheme.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              isSmallScreen ? 16 : 20,
+              isSmallScreen ? 12 : 16,
+              isSmallScreen ? 8 : 12,
+              8,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Project context',
+                    style: Theme.of(dialogContext).textTheme.titleLarge,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: 'Close',
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(isSmallScreen ? 16 : 20, 0, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currentProject == null
+                      ? 'No active context'
+                      : 'Current directory: $currentDirectoryFull',
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Select a directory/workspace below',
+                  style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(isSmallScreen ? 16 : 20, 4, 20, 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonalIcon(
+                  onPressed: () => unawaited(projectProvider.loadProjects()),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Refresh projects'),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () => unawaited(
+                    _openCreateWorkspaceFromSelector(dialogContext),
+                  ),
+                  icon: const Icon(Icons.add_box_outlined),
+                  label: const Text('Create workspace in directory...'),
+                ),
+                if (worktreeEnabled)
+                  FilledButton.tonalIcon(
+                    onPressed: () => unawaited(projectProvider.loadWorktrees()),
+                    icon: const Icon(Icons.sync_rounded),
+                    label: const Text('Refresh workspaces'),
+                  ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
+              children: [
+                _buildSelectorSectionHeader(dialogContext, 'Open projects'),
+                for (final project in projectProvider.openProjects)
+                  _buildOpenProjectTile(
+                    dialogContext: dialogContext,
+                    project: project,
+                    selected: project.id == currentProject?.id,
+                    onSwitch: () => unawaited(
+                      _switchProjectFromSelector(dialogContext, project.id),
+                    ),
+                    onClose: () => unawaited(_closeProjectContext(project.id)),
+                    closeEnabled:
+                        projectProvider.openProjects.length > 1 ||
+                        project.id != currentProject?.id,
+                  ),
+                if (projectProvider.closedProjects.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildSelectorSectionHeader(dialogContext, 'Closed projects'),
+                  for (final project in projectProvider.closedProjects)
+                    ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      leading: const Icon(Icons.folder_off_outlined, size: 20),
+                      title: Text(
+                        _projectDisplayLabel(project),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        _directoryLabel(project.path),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.undo_rounded),
+                        tooltip: 'Reopen ${_projectDisplayLabel(project)}',
+                        onPressed: () =>
+                            unawaited(_reopenProjectContext(project.id)),
+                      ),
+                    ),
+                ],
+                if (worktreeEnabled) ...[
+                  const SizedBox(height: 8),
+                  _buildSelectorSectionHeader(dialogContext, 'Workspaces'),
+                  for (final worktree in projectProvider.worktrees)
+                    ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      leading: Icon(
+                        worktree.active
+                            ? Icons.folder_special_outlined
+                            : Icons.folder_copy_outlined,
+                        size: 20,
+                      ),
+                      title: Text(
+                        worktree.name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        _directoryLabel(worktree.directory),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onTap: () => unawaited(
+                        _switchWorkspaceFromSelector(
+                          dialogContext,
+                          worktree.directory,
+                        ),
+                      ),
+                      trailing: Wrap(
+                        spacing: 2,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.restart_alt_rounded),
+                            tooltip: 'Reset ${worktree.name}',
+                            onPressed: () =>
+                                unawaited(_resetWorkspace(worktree.id)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            tooltip: 'Delete ${worktree.name}',
+                            onPressed: () =>
+                                unawaited(_deleteWorkspace(worktree.id)),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectorSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+      child: Text(
+        title,
+        style: Theme.of(
+          context,
+        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  Widget _buildOpenProjectTile({
+    required BuildContext dialogContext,
+    required Project project,
+    required bool selected,
+    required VoidCallback onSwitch,
+    required VoidCallback onClose,
+    required bool closeEnabled,
+  }) {
+    final path = _directoryLabel(project.path);
+    final displayName = _projectDisplayLabel(project);
+
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      leading: Icon(
+        selected ? Icons.radio_button_checked : Icons.folder_open_outlined,
+        size: 20,
+      ),
+      title: Text(displayName, overflow: TextOverflow.ellipsis),
+      subtitle: path == displayName
+          ? null
+          : Text(path, overflow: TextOverflow.ellipsis),
+      selected: selected,
+      onTap: onSwitch,
+      trailing: IconButton(
+        icon: const Icon(Icons.close_rounded),
+        tooltip: 'Close ${_projectDisplayLabel(project)}',
+        onPressed: closeEnabled ? onClose : null,
+      ),
+    );
+  }
+
+  Future<void> _openCreateWorkspaceFromSelector(
+    BuildContext dialogContext,
+  ) async {
+    if (dialogContext.mounted) {
+      Navigator.of(dialogContext).pop();
+    }
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) {
+      return;
+    }
+    await _createWorkspace();
+  }
+
+  Future<void> _switchProjectFromSelector(
+    BuildContext dialogContext,
+    String projectId,
+  ) async {
+    await _switchProjectContext(projectId);
+    if (dialogContext.mounted) {
+      Navigator.of(dialogContext).pop();
+    }
+  }
+
+  Future<void> _switchWorkspaceFromSelector(
+    BuildContext dialogContext,
+    String directory,
+  ) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final switched = await projectProvider.switchToDirectoryContext(directory);
+    if (!switched) {
+      return;
+    }
+    await _refreshData();
+    if (dialogContext.mounted) {
+      Navigator.of(dialogContext).pop();
+    }
+  }
+
   String _directoryLabel(String? directory) {
     final trimmed = directory?.trim();
     if (trimmed == null ||
@@ -1132,34 +1312,6 @@ class _ChatPageState extends State<ChatPage> {
       return path;
     }
     return name;
-  }
-
-  Widget _projectMenuLabel(Project project, {required bool selected}) {
-    final path = _directoryLabel(project.path);
-    final displayName = _projectDisplayLabel(project);
-
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(displayName, overflow: TextOverflow.ellipsis),
-              if (path != displayName)
-                Text(
-                  path,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (selected) const Icon(Icons.check, size: 16),
-      ],
-    );
   }
 
   Widget _buildSessionDrawer() {
