@@ -720,7 +720,6 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 ### References
 
 - `ROADMAP.md`
-- `ROADMAP.feat017.md`
 - `CODEBASE.md`
 
 ---
