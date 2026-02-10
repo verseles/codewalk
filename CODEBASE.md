@@ -285,11 +285,14 @@ Compatibility tiers:
   - trigger-aware mode orchestration (`normal`/`shell`) with `!` activation at offset 0
   - popover orchestration for `@` mentions and `/` slash commands
   - keyboard navigation and selection (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`)
+  - input focus persistence while mention/slash suggestions refresh
+  - mention insertion normalizes trailing spacing to avoid token/punctuation glue on mobile
   - mention token chips rendered from prompt text
 - Added contextual suggestion fetching in `ChatPage`:
   - mention sources from `/find/file` and `/agent`
   - slash catalog from builtin commands plus `/command` (with `source` badges)
   - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/help`) executed directly in UI context
+  - keyboard-inset aware layout keeps composer above on-screen keyboard and constrains suggestion panel to render above input
 - Added shell send-path routing:
   - `ChatProvider.sendMessage(..., shellMode: true)` marks payload mode as shell
   - `ChatRemoteDataSource.sendMessage` routes shell-mode payloads to `POST /session/{id}/shell`

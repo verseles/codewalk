@@ -181,8 +181,8 @@ Commits: f190e02
 ### Feature 018: Prompt Power Features Parity (`@`, `!`, `/`)
 Description: Replicar no composer os gatilhos de produtividade do OpenCode Web: menção de arquivos/agentes com `@`, modo shell com `!` no início, e catálogo de comandos por `/` no começo do input.
 
-Concluída a paridade de gatilhos no composer com estado dedicado para shell (`!`), popovers contextuais para menções `@` (arquivos + agentes) e slash `/` (builtin + comandos remotos com `source`), incluindo navegação por teclado (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`), inserção de tokens/prefixos no input, e ações builtin consistentes no contexto da chat page. O envio shell foi integrado ao fluxo de provider/datasource com roteamento para `POST /session/{id}/shell`, e a cobertura foi expandida com testes de widget para `@`/`!`/`/` e teste unitário de payload shell.
-Commits: e97544b
+Concluída a paridade de gatilhos no composer com estado dedicado para shell (`!`), popovers contextuais para menções `@` (arquivos + agentes) e slash `/` (builtin + comandos remotos com `source`), incluindo navegação por teclado (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`), inserção de tokens/prefixos no input, e ações builtin consistentes no contexto da chat page. O envio shell foi integrado ao fluxo de provider/datasource com roteamento para `POST /session/{id}/shell`, e a cobertura foi expandida com testes de widget para `@`/`!`/`/` e teste unitário de payload shell. Na sequência, a UX do composer foi estabilizada para mobile/desktop com preservação de foco do input durante digitação em sugestões, painel de sugestões crescendo para cima sem cobrir o input, input mantendo-se acima do teclado, e inserção de menção com espaço seguro antes de pontuação.
+Commits: e97544b, 094057a, 8be2d81
 
 ### Feature 019: File Explorer and Viewer Parity
 Description: Entregar navegação completa de arquivos com ícones, busca rápida, abertura em abas e visualização de conteúdo diretamente na UI, alinhado ao OpenCode Web. (Visit file ROADMAP.feat019.md for full research details)
