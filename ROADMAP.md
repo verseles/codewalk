@@ -174,14 +174,15 @@ Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 
 ### Feature 017: Realtime-First Refreshless UX
 Description: Remove manual refresh interactions and keep UI state continuously updated through SSE-driven sync with lifecycle-aware efficiency controls. (Visit file ROADMAP.feat017.md for full research details)
+Progress (2026-02-10): Added active-session refresh on server reconnect and a 5-second foreground chat refresh loop with new unit/widget coverage for reconnect + periodic refresh behavior.
 
 - [x] 17.01 Research and capability freeze (`/event`, `/global/event`, PTY websocket scope, fallback constraints)
 - [ ] 17.02 Implement event-reducer completeness audit and close missing incremental update paths
 - [ ] 17.03 Replace broad refresh calls with incremental state mutation + scoped invalidation
-- [ ] 17.04 Add lifecycle policy for stream management (foreground subscribe, background suspend, resume reconcile)
+- [~] 17.04 Add lifecycle policy for stream management (foreground subscribe, background suspend, resume reconcile)
 - [ ] 17.05 Add degraded-mode fallback (slow scoped polling only when SSE is unhealthy)
 - [ ] 17.06 Remove refresh buttons from target flows and surface sync/connection status in UI
-- [ ] 17.07 Expand tests (unit/widget/integration) for reconnect, resume, and no-refresh user flows
+- [~] 17.07 Expand tests (unit/widget/integration) for reconnect, resume, and no-refresh user flows
 - [ ] 17.08 Add telemetry/KPIs and rollout guardrails (feature flag + rollback path)
 
 ### Feature 018: Prompt Power Features Parity (`@`, `!`, `/`)

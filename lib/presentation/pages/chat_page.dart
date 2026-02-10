@@ -60,13 +60,14 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   static const double _mobileBreakpoint = 840;
   static const double _largeDesktopBreakpoint = 1200;
   static const double _desktopSessionPaneWidth = 300;
   static const double _largeDesktopSessionPaneWidth = 320;
   static const double _largeDesktopUtilityPaneWidth = 280;
   static const double _nearBottomThreshold = 200;
+  static const Duration _activeScreenRefreshInterval = Duration(seconds: 5);
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
@@ -75,14 +76,18 @@ class _ChatPageState extends State<ChatPage> {
   ChatProvider? _chatProvider;
   AppProvider? _appProvider;
   String? _lastServerId;
+  bool? _lastServerConnectionState;
   String? _trackedSessionId;
   String? _pendingInitialScrollSessionId;
   bool _showScrollToLatestFab = false;
   bool _hasUnreadMessagesBelow = false;
+  bool _isAppInForeground = true;
+  Timer? _activeScreenRefreshTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _scrollController.addListener(_handleScrollChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
@@ -99,8 +104,10 @@ class _ChatPageState extends State<ChatPage> {
       _appProvider?.removeListener(_handleAppProviderChange);
       _appProvider = nextAppProvider;
       _lastServerId = nextAppProvider.activeServerId;
+      _lastServerConnectionState = nextAppProvider.isConnected;
       _appProvider?.addListener(_handleAppProviderChange);
     }
+    _updateActiveScreenRefreshTimer();
   }
 
   @override
@@ -109,11 +116,19 @@ class _ChatPageState extends State<ChatPage> {
     _chatProvider?.setScrollToBottomCallback(null);
     _appProvider?.removeListener(_handleAppProviderChange);
     _scrollController.removeListener(_handleScrollChanged);
+    _activeScreenRefreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
 
     _scrollController.dispose();
     _inputFocusNode.dispose();
     _sessionSearchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isAppInForeground = state == AppLifecycleState.resumed;
+    _updateActiveScreenRefreshTimer();
   }
 
   void _loadInitialData() {
@@ -147,12 +162,30 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleAppProviderChange() {
-    final currentServerId = _appProvider?.activeServerId;
-    if (currentServerId == null || currentServerId == _lastServerId) {
+    final appProvider = _appProvider;
+    if (appProvider == null) {
       return;
     }
-    _lastServerId = currentServerId;
-    unawaited(_handleServerScopeChange());
+    final currentServerId = appProvider.activeServerId;
+    final currentConnected = appProvider.isConnected;
+    final serverChanged = currentServerId != _lastServerId;
+
+    if (serverChanged) {
+      _lastServerId = currentServerId;
+      _lastServerConnectionState = currentConnected;
+      if (currentServerId != null) {
+        unawaited(_handleServerScopeChange());
+      }
+      _updateActiveScreenRefreshTimer();
+      return;
+    }
+
+    final wasConnected = _lastServerConnectionState;
+    _lastServerConnectionState = currentConnected;
+    if (wasConnected == false && currentConnected) {
+      unawaited(_handleServerReconnected());
+    }
+    _updateActiveScreenRefreshTimer();
   }
 
   Future<void> _handleServerScopeChange() async {
@@ -162,6 +195,51 @@ class _ChatPageState extends State<ChatPage> {
     final projectProvider = context.read<ProjectProvider>();
     await projectProvider.onServerScopeChanged();
     await _chatProvider?.onServerScopeChanged();
+  }
+
+  Future<void> _handleServerReconnected() async {
+    if (!mounted || !_isChatScreenActive()) {
+      return;
+    }
+    final chatProvider = _chatProvider ?? context.read<ChatProvider>();
+    await chatProvider.refreshActiveSessionView(
+      reason: 'app-provider-reconnected',
+    );
+  }
+
+  bool _isChatScreenActive() {
+    if (!mounted || !_isAppInForeground) {
+      return false;
+    }
+    final route = ModalRoute.of(context);
+    if (route == null) {
+      return true;
+    }
+    return route.isCurrent;
+  }
+
+  void _updateActiveScreenRefreshTimer() {
+    if (!_isChatScreenActive()) {
+      _activeScreenRefreshTimer?.cancel();
+      _activeScreenRefreshTimer = null;
+      return;
+    }
+
+    if (_activeScreenRefreshTimer != null) {
+      return;
+    }
+
+    _activeScreenRefreshTimer = Timer.periodic(_activeScreenRefreshInterval, (
+      _,
+    ) {
+      if (!mounted || !_isChatScreenActive()) {
+        return;
+      }
+      final chatProvider = _chatProvider ?? context.read<ChatProvider>();
+      unawaited(
+        chatProvider.refreshActiveSessionView(reason: 'active-screen-poll'),
+      );
+    });
   }
 
   bool _isNearBottom() {

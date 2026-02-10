@@ -963,6 +963,81 @@ void main() {
       },
     );
 
+    test('refreshes active session when realtime stream reconnects', () async {
+      final draft = AssistantMessage(
+        id: 'msg_ai_live',
+        sessionId: 'ses_1',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'prt_draft',
+            messageId: 'msg_ai_live',
+            sessionId: 'ses_1',
+            text: 'draft',
+          ),
+        ],
+      );
+      final updated = AssistantMessage(
+        id: 'msg_ai_live',
+        sessionId: 'ses_1',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        completedTime: DateTime.fromMillisecondsSinceEpoch(1800),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'prt_done',
+            messageId: 'msg_ai_live',
+            sessionId: 'ses_1',
+            text: 'done after reconnect',
+          ),
+        ],
+      );
+      chatRepository.messagesBySession['ses_1'] = <ChatMessage>[draft];
+      chatRepository.sessionStatusById = const <String, SessionStatusInfo>{
+        'ses_1': SessionStatusInfo(type: SessionStatusType.idle),
+      };
+
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{'model_a': _model('model_a')},
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a'},
+          connected: const <String>['provider_a'],
+        ),
+      );
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      expect(
+        ((provider.messages.single as AssistantMessage).parts.single
+                as TextPart)
+            .text,
+        'draft',
+      );
+
+      chatRepository.messagesBySession['ses_1'] = <ChatMessage>[updated];
+      chatRepository.sessionStatusById = const <String, SessionStatusInfo>{
+        'ses_1': SessionStatusInfo(type: SessionStatusType.busy),
+      };
+      chatRepository.emitEvent(
+        const ChatEvent(
+          type: 'server.connected',
+          properties: <String, dynamic>{},
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+
+      final message = provider.messages.single as AssistantMessage;
+      expect((message.parts.single as TextPart).text, 'done after reconnect');
+      expect(provider.currentSessionStatus?.type, SessionStatusType.busy);
+    });
+
     test(
       'loads and responds to pending permission and question requests',
       () async {

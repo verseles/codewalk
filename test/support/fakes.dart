@@ -526,6 +526,8 @@ class FakeChatRepository implements ChatRepository {
   final ProvidersResponse providersDefault;
 
   String? lastGetSessionsDirectory;
+  int getMessagesCallCount = 0;
+  int getSessionStatusCallCount = 0;
   String? lastSendProjectId;
   String? lastSendSessionId;
   String? lastSendDirectory;
@@ -642,6 +644,7 @@ class FakeChatRepository implements ChatRepository {
     String sessionId, {
     String? directory,
   }) async {
+    getMessagesCallCount += 1;
     if (getMessagesFailure != null) return Left(getMessagesFailure!);
     return Right(
       List<ChatMessage>.from(messagesBySession[sessionId] ?? const []),
@@ -702,6 +705,7 @@ class FakeChatRepository implements ChatRepository {
   Future<Either<Failure, Map<String, SessionStatusInfo>>> getSessionStatus({
     String? directory,
   }) async {
+    getSessionStatusCallCount += 1;
     if (sessionStatusFailure != null) {
       return Left(sessionStatusFailure!);
     }

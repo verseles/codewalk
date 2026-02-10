@@ -574,6 +574,93 @@ void main() {
     expect(find.text('ok from widget'), findsOneWidget);
   });
 
+  testWidgets(
+    'refreshes active session on reconnect and every 5s while chat is active',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_refresh',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Refresh Session',
+          ),
+        ],
+      );
+      repository.messagesBySession['ses_refresh'] = <ChatMessage>[
+        AssistantMessage(
+          id: 'msg_refresh_1',
+          sessionId: 'ses_refresh',
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(2200),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_refresh_1',
+              messageId: 'msg_refresh_1',
+              sessionId: 'ses_refresh',
+              text: 'initial',
+            ),
+          ],
+        ),
+      ];
+      final appRepository = FakeAppRepository();
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(
+        localDataSource: localDataSource,
+        appRepository: appRepository,
+      );
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await tester.pumpAndSettle();
+
+      final baseMessageCalls = repository.getMessagesCallCount;
+      final baseStatusCalls = repository.getSessionStatusCallCount;
+
+      appRepository.checkConnectionResult = const Right(false);
+      await appProvider.checkConnection();
+      await tester.pumpAndSettle();
+
+      appRepository.checkConnectionResult = const Right(true);
+      await appProvider.checkConnection();
+      await tester.pumpAndSettle();
+
+      expect(repository.getMessagesCallCount, greaterThan(baseMessageCalls));
+      expect(
+        repository.getSessionStatusCallCount,
+        greaterThan(baseStatusCalls),
+      );
+
+      final reconnectMessageCalls = repository.getMessagesCallCount;
+      final reconnectStatusCalls = repository.getSessionStatusCallCount;
+
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+
+      expect(
+        repository.getMessagesCallCount,
+        greaterThan(reconnectMessageCalls),
+      );
+      expect(
+        repository.getSessionStatusCallCount,
+        greaterThan(reconnectStatusCalls),
+      );
+    },
+  );
+
   testWidgets('rejects question request from chat interaction card', (
     WidgetTester tester,
   ) async {
@@ -1126,8 +1213,9 @@ ChatProvider _buildChatProvider({
 
 AppProvider _buildAppProvider({
   required InMemoryAppLocalDataSource localDataSource,
+  FakeAppRepository? appRepository,
 }) {
-  final repository = FakeAppRepository();
+  final repository = appRepository ?? FakeAppRepository();
   final provider = AppProvider(
     getAppInfo: GetAppInfo(repository),
     checkConnection: CheckConnection(repository),

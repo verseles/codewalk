@@ -166,6 +166,7 @@ class ChatProvider extends ChangeNotifier {
   bool _isLoadingSessionInsights = false;
   String? _sessionInsightsError;
   final Set<String> _pendingLocalUserMessageIds = <String>{};
+  bool _activeSessionRefreshInFlight = false;
 
   // Project and provider-related state
   String? _currentProjectId;
@@ -867,6 +868,11 @@ class ChatProvider extends ChangeNotifier {
   void _applyChatEvent(ChatEvent event) {
     final properties = event.properties;
     switch (event.type) {
+      case 'server.connected':
+        unawaited(
+          refreshActiveSessionView(reason: 'realtime-server-connected'),
+        );
+        break;
       case 'session.created':
       case 'session.updated':
         final info = properties['info'];
@@ -1253,6 +1259,87 @@ class ChatProvider extends ChangeNotifier {
         'Message fallback fetch failed for $messageId: ${failure.toString()}',
       );
     }, _updateOrAddMessage);
+  }
+
+  List<ChatMessage> _mergeServerMessagesWithPendingLocalUsers(
+    List<ChatMessage> serverMessages,
+  ) {
+    if (_pendingLocalUserMessageIds.isEmpty) {
+      return serverMessages;
+    }
+
+    final merged = List<ChatMessage>.from(serverMessages);
+    final existingIds = serverMessages.map((message) => message.id).toSet();
+
+    _pendingLocalUserMessageIds.removeWhere(existingIds.contains);
+
+    if (_pendingLocalUserMessageIds.isEmpty) {
+      return merged;
+    }
+
+    for (final message in _messages) {
+      if (message is! UserMessage) {
+        continue;
+      }
+      if (!_pendingLocalUserMessageIds.contains(message.id)) {
+        continue;
+      }
+      if (existingIds.contains(message.id)) {
+        continue;
+      }
+      merged.add(message);
+    }
+
+    return merged;
+  }
+
+  Future<void> refreshActiveSessionView({
+    String reason = 'manual',
+    bool includeStatus = true,
+  }) async {
+    final session = _currentSession;
+    if (session == null) {
+      return;
+    }
+    if (_activeSessionRefreshInFlight) {
+      return;
+    }
+
+    _activeSessionRefreshInFlight = true;
+    AppLogger.debug(
+      'Refreshing active session view reason=$reason session=${session.id}',
+    );
+
+    try {
+      final messagesResult = await getChatMessages(
+        GetChatMessagesParams(
+          projectId: projectProvider.currentProjectId,
+          sessionId: session.id,
+          directory: projectProvider.currentDirectory,
+        ),
+      );
+
+      messagesResult.fold(
+        (failure) {
+          AppLogger.warn(
+            'Failed to refresh active session messages for ${session.id}: $failure',
+          );
+        },
+        (messages) {
+          if (_currentSession?.id != session.id) {
+            return;
+          }
+          _messages = _mergeServerMessagesWithPendingLocalUsers(messages);
+          notifyListeners();
+        },
+      );
+
+      if (includeStatus) {
+        await refreshSessionStatusSnapshot();
+      }
+    } finally {
+      _activeSessionRefreshInFlight = false;
+    }
   }
 
   Future<void> refreshSessionStatusSnapshot({bool silent = true}) async {
@@ -2730,8 +2817,7 @@ class ChatProvider extends ChangeNotifier {
   /// Refresh current session
   Future<void> refresh() async {
     if (_currentSession != null) {
-      await loadMessages(_currentSession!.id);
-      await loadSessionInsights(_currentSession!.id, silent: true);
+      await refreshActiveSessionView(reason: 'manual-refresh');
     } else {
       // If there is no current session, reload sessions
       if (_sessions.isNotEmpty) {
