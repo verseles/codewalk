@@ -27,6 +27,7 @@ class Logger
 
     private static bool $debugMode = false;
 
+    /** @var array<int, array<string, mixed>> */
     private static array $logs = [];
 
     private static int $maxLogs = 1000;
@@ -66,6 +67,8 @@ class Logger
 
     /**
      * Log a debug message (only if debug mode is enabled).
+     *
+     * @param array<string, mixed> $context
      */
     public static function debug(string $message, array $context = []): void
     {
@@ -76,6 +79,8 @@ class Logger
 
     /**
      * Log an info message.
+     *
+     * @param array<string, mixed> $context
      */
     public static function info(string $message, array $context = []): void
     {
@@ -84,6 +89,8 @@ class Logger
 
     /**
      * Log a warning message.
+     *
+     * @param array<string, mixed> $context
      */
     public static function warning(string $message, array $context = []): void
     {
@@ -92,6 +99,8 @@ class Logger
 
     /**
      * Log an error message.
+     *
+     * @param array<string, mixed> $context
      */
     public static function error(string $message, array $context = []): void
     {
@@ -100,6 +109,8 @@ class Logger
 
     /**
      * Log a message at the specified level.
+     *
+     * @param array<string, mixed> $context
      */
     public static function log(string $level, string $message, array $context = []): void
     {
@@ -129,6 +140,8 @@ class Logger
 
     /**
      * Get all stored logs.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function getLogs(): array
     {
@@ -145,6 +158,8 @@ class Logger
 
     /**
      * Get logs filtered by level.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function getLogsByLevel(string $level): array
     {
@@ -153,6 +168,8 @@ class Logger
 
     /**
      * Log command execution (debug mode only).
+     *
+     * @param array<string, string> $envs
      */
     public static function logCommand(string $command, array $envs = []): void
     {
@@ -180,27 +197,36 @@ class Logger
 
     /**
      * Redact sensitive information from context array.
+     *
+     * @param array<string, mixed> $context
+     *
+     * @return array<string, mixed>
      */
     private static function redactContext(array $context): array
     {
         $sensitiveKeys = ['password', 'secret', 'token', 'key', 'credential', 'auth'];
+        $redacted = [];
 
-        $redact = function ($value, $key) use (&$redact, $sensitiveKeys) {
+        foreach ($context as $key => $value) {
             if (is_array($value)) {
-                return array_map($redact, $value, array_keys($value));
+                $redacted[$key] = self::redactContext($value);
+
+                continue;
             }
 
+            $isSensitive = false;
             if (is_string($key)) {
                 foreach ($sensitiveKeys as $sensitiveKey) {
                     if (stripos($key, $sensitiveKey) !== false) {
-                        return SecretsRedactor::REDACTED;
+                        $isSensitive = true;
+                        break;
                     }
                 }
             }
 
-            return $value;
-        };
+            $redacted[$key] = $isSensitive ? SecretsRedactor::REDACTED : $value;
+        }
 
-        return array_map($redact, $context, array_keys($context));
+        return $redacted;
     }
 }

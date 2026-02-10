@@ -62,6 +62,9 @@ abstract class AbstractProvider
         return $this->provider;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function flags(): array
     {
         $prefix = 'RCLONE_CONFIG_' . $this->name() . '_';
@@ -69,6 +72,11 @@ abstract class AbstractProvider
         return $this->prefix_flags($prefix);
     }
 
+    /**
+     * @param string $prefix
+     *
+     * @return array<string, string>
+     */
     protected function prefix_flags(string $prefix): array
     {
         $prefixed = Rclone::prefix_flags($this->flags, $prefix);
@@ -78,11 +86,19 @@ abstract class AbstractProvider
         return $prefixed;
     }
 
+    /**
+     * @return string
+     */
     public function name()
     {
         return $this->name;
     }
 
+    /**
+     * @param string|null $path
+     *
+     * @return string
+     */
     public function backend($path = null)
     {
         return $this->name() . ':' . $path;
@@ -105,6 +121,8 @@ abstract class AbstractProvider
 
     /**
      * Validate provider configuration.
+     *
+     * @param array<string, mixed> $flags
      *
      * @throws InvalidArgumentException If required fields are missing.
      */
@@ -129,8 +147,8 @@ abstract class AbstractProvider
     /**
      * Check for plaintext credentials and emit warnings.
      *
-     * @param array $flags The provider flags.
-     * @param string $providerName The provider name for context.
+     * @param array<string, mixed> $flags        The provider flags.
+     * @param string               $providerName The provider name for context.
      */
     protected function checkCredentials(array $flags, string $providerName): void
     {
@@ -206,6 +224,8 @@ abstract class AbstractProvider
 
     /**
      * Get the raw flags array.
+     *
+     * @return array<string, mixed>
      */
     public function getRawFlags(): array
     {
@@ -214,6 +234,8 @@ abstract class AbstractProvider
 
     /**
      * Get sensitive field names that should be redacted.
+     *
+     * @return array<int, string>
      */
     public function getSensitiveFields(): array
     {
@@ -223,7 +245,7 @@ abstract class AbstractProvider
     /**
      * Extract secret values from this provider for redaction purposes.
      *
-     * @return array List of secret values.
+     * @return array<int, string> List of secret values.
      */
     public function extractSecrets(): array
     {

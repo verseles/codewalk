@@ -6,6 +6,17 @@ namespace Verseles\Flyclone;
 
 class StatsParser
 {
+    /**
+     * @return object{
+     *   errors: int,
+     *   checks: int,
+     *   files: int,
+     *   bytes: int,
+     *   elapsed_time: float,
+     *   speed_human: string,
+     *   speed_bytes_per_second: float
+     * }
+     */
     public static function parse(string $output): object
     {
         $stats = [

@@ -13,13 +13,13 @@ use RuntimeException;
  */
 class RcloneException extends RuntimeException
 {
-    /** @var array Additional context about the error */
+    /** @var array<string, mixed> Additional context about the error */
     protected array $context = [];
 
     /**
      * Set additional context for the exception.
      *
-     * @param array $context Contextual information (command, provider, path, etc.)
+     * @param array<string, mixed> $context Contextual information (command, provider, path, etc.)
      */
     public function setContext(array $context): self
     {
@@ -31,7 +31,7 @@ class RcloneException extends RuntimeException
     /**
      * Get the exception context.
      *
-     * @return array The context array.
+     * @return array<string, mixed> The context array.
      */
     public function getContext(): array
     {

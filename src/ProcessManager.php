@@ -32,13 +32,13 @@ class ProcessManager
 
     private static string $input = '';
 
-    /** @var array Secrets to redact from error messages */
+    /** @var array<int, string> Secrets to redact from error messages */
     private array $secrets = [];
 
-    /** @var array Last executed command (for debugging) */
+    /** @var array<int, string> Last executed command (for debugging) */
     private array $lastCommand = [];
 
-    /** @var array Last environment variables (for debugging) */
+    /** @var array<string, string> Last environment variables (for debugging) */
     private array $lastEnvs = [];
 
     public static function getTimeout(): int
@@ -108,7 +108,7 @@ class ProcessManager
     /**
      * Set secrets to be redacted from error messages.
      *
-     * @param array $secrets Array of secret values to redact.
+     * @param array<int, string> $secrets Array of secret values to redact.
      */
     public function setSecrets(array $secrets): self
     {
@@ -120,7 +120,7 @@ class ProcessManager
     /**
      * Get the last executed command (for debugging).
      *
-     * @return array The command array.
+     * @return array<int, string> The command array.
      */
     public function getLastCommand(): array
     {
@@ -142,7 +142,7 @@ class ProcessManager
      * Get the last environment variables (for debugging).
      * Sensitive values are redacted.
      *
-     * @return array The environment variables with secrets redacted.
+     * @return array<string, string> The environment variables with secrets redacted.
      */
     public function getLastEnvs(): array
     {
@@ -153,6 +153,10 @@ class ProcessManager
 
     /**
      * Redact sensitive values from environment variables.
+     *
+     * @param array<string, string> $envs
+     *
+     * @return array<string, string>
      */
     private function redactEnvValues(array $envs): array
     {
@@ -174,6 +178,14 @@ class ProcessManager
         return $redacted;
     }
 
+    /**
+     * @param array<int, string>    $command
+     * @param array<string, string> $envs
+     * @param callable|null         $onProgress
+     * @param int|null              $timeout
+     *
+     * @return Process
+     */
     public function run(array $command, array $envs = [], ?callable $onProgress = null, ?int $timeout = null): Process
     {
         $this->lastCommand = $command;

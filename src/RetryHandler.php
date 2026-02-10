@@ -23,10 +23,10 @@ class RetryHandler
 
     private bool $enabled = true;
 
-    /** @var callable|null Custom retry condition */
+    /** @var (callable(Exception): bool)|null Custom retry condition */
     private $retryCondition = null;
 
-    /** @var callable|null Callback called before each retry */
+    /** @var (callable(int, Exception, int): void)|null Callback called before each retry */
     private $onRetry = null;
 
     /**
@@ -90,7 +90,7 @@ class RetryHandler
     /**
      * Set a custom condition for determining if an exception should trigger a retry.
      *
-     * @param callable $condition Function that receives the exception and returns bool.
+     * @param callable(Exception): bool $condition Function that receives the exception and returns bool.
      */
     public function retryWhen(callable $condition): self
     {
@@ -102,7 +102,7 @@ class RetryHandler
     /**
      * Set a callback to be called before each retry attempt.
      *
-     * @param callable $callback Function that receives (attempt number, exception, delay).
+     * @param callable(int, Exception, int): void $callback Function that receives (attempt number, exception, delay).
      */
     public function onRetry(callable $callback): self
     {
@@ -203,6 +203,8 @@ class RetryHandler
 
     /**
      * Get current configuration as array.
+     *
+     * @return array<string, mixed>
      */
     public function getConfig(): array
     {
