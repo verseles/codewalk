@@ -1275,12 +1275,16 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
     final controller = StreamController<ChatEventModel>();
     StreamSubscription<String>? lineSubscription;
+    CancelToken? requestCancelToken;
+    Completer<void>? activeConnectionDone;
     var cancelled = false;
 
     Future<void> connectLoop() async {
       var reconnectAttempt = 0;
       while (!cancelled) {
         try {
+          final cancelToken = CancelToken();
+          requestCancelToken = cancelToken;
           final response = await dio.get(
             path,
             queryParameters: queryParams.isNotEmpty ? queryParams : null,
@@ -1294,6 +1298,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               // SSE should stay open for long periods.
               receiveTimeout: const Duration(hours: 2),
             ),
+            cancelToken: cancelToken,
           );
 
           if (response.statusCode != 200) {
@@ -1302,6 +1307,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
           reconnectAttempt = 0;
           final responseBody = response.data as ResponseBody;
+          final streamDone = Completer<void>();
+          activeConnectionDone = streamDone;
           lineSubscription = responseBody.stream
               .transform(
                 StreamTransformer.fromHandlers(
@@ -1333,30 +1340,54 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                   }
                 },
                 onError: (error) {
+                  if (cancelled) {
+                    if (!streamDone.isCompleted) {
+                      streamDone.complete();
+                    }
+                    return;
+                  }
                   AppLogger.warn('$logLabel failure', error: error);
+                  if (!streamDone.isCompleted) {
+                    streamDone.complete();
+                  }
+                },
+                onDone: () {
+                  if (!streamDone.isCompleted) {
+                    streamDone.complete();
+                  }
                 },
               );
 
-          await lineSubscription?.asFuture<void>();
+          await streamDone.future;
         } catch (error) {
-          final isClosedHttpStream =
-              error is HttpException &&
-              error.message.contains('Connection closed while receiving data');
-          final isExpectedReconnect =
-              error is DioException &&
-              (error.type == DioExceptionType.connectionTimeout ||
-                  error.type == DioExceptionType.connectionError ||
-                  error.type == DioExceptionType.receiveTimeout ||
-                  error.type == DioExceptionType.unknown);
-          if (isExpectedReconnect || isClosedHttpStream) {
-            AppLogger.info(
-              '$logLabel reconnecting after transient failure',
-              error: error,
-            );
+          final isCancelledRequest =
+              error is DioException && error.type == DioExceptionType.cancel;
+          if (cancelled || isCancelledRequest) {
+            // Subscription was intentionally cancelled while switching context.
           } else {
-            AppLogger.warn('Failed to connect to $logLabel', error: error);
+            final isClosedHttpStream =
+                error is HttpException &&
+                error.message.contains(
+                  'Connection closed while receiving data',
+                );
+            final isExpectedReconnect =
+                error is DioException &&
+                (error.type == DioExceptionType.connectionTimeout ||
+                    error.type == DioExceptionType.connectionError ||
+                    error.type == DioExceptionType.receiveTimeout ||
+                    error.type == DioExceptionType.unknown);
+            if (isExpectedReconnect || isClosedHttpStream) {
+              AppLogger.info(
+                '$logLabel reconnecting after transient failure',
+                error: error,
+              );
+            } else {
+              AppLogger.warn('Failed to connect to $logLabel', error: error);
+            }
           }
         } finally {
+          requestCancelToken = null;
+          activeConnectionDone = null;
           await lineSubscription?.cancel();
           lineSubscription = null;
         }
@@ -1380,13 +1411,15 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     controller.onListen = () {
       unawaited(connectLoop());
     };
-    controller.onCancel = () async {
+    controller.onCancel = () {
       cancelled = true;
-      await lineSubscription?.cancel();
-      lineSubscription = null;
-      if (!controller.isClosed) {
-        await controller.close();
+      requestCancelToken?.cancel('event-stream-cancelled');
+      final pendingDone = activeConnectionDone;
+      if (pendingDone != null && !pendingDone.isCompleted) {
+        pendingDone.complete();
       }
+      unawaited(lineSubscription?.cancel());
+      lineSubscription = null;
     };
 
     return controller.stream;
