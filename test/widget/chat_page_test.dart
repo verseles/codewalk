@@ -282,75 +282,78 @@ void main() {
     expect(find.text('ok from widget'), findsOneWidget);
   });
 
-  testWidgets(
-    'shows unified quick model selector and cycles reasoning variant',
-    (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(1000, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('shows model selector with search and quick reasoning selector', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      final repository = FakeChatRepository(
-        sessions: <ChatSession>[
-          ChatSession(
-            id: 'ses_1',
-            workspaceId: 'default',
-            time: DateTime.fromMillisecondsSinceEpoch(1000),
-            title: 'Session 1',
-          ),
-        ],
-      );
-
-      final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test';
-      final provider = _buildChatProvider(
-        chatRepository: repository,
-        localDataSource: localDataSource,
-        includeVariants: true,
-      );
-      final appProvider = _buildAppProvider(localDataSource: localDataSource);
-
-      await tester.pumpWidget(_testApp(provider, appProvider));
-      await tester.pumpAndSettle();
-
-      await provider.loadSessions();
-      await provider.selectSession(provider.sessions.first);
-      await tester.pump(const Duration(milliseconds: 150));
-
-      expect(
-        find.byKey(const ValueKey<String>('model_selector_button')),
-        findsOneWidget,
-      );
-      expect(find.text('model_1'), findsOneWidget);
-      expect(find.text('Auto'), findsOneWidget);
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('model_selector_button')),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(
-          const ValueKey<String>('model_selector_provider_header_provider_1'),
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_1',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
         ),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(
-          const ValueKey<String>('model_selector_item_provider_1_model_1'),
-        ),
-        findsOneWidget,
-      );
+      ],
+    );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('model_selector_item_provider_1_model_1'),
-        ),
-      );
-      await tester.pumpAndSettle();
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+      includeVariants: true,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-      await tester.tap(find.text('Auto'));
-      await tester.pumpAndSettle();
-      expect(find.text('Low'), findsOneWidget);
-    },
-  );
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(
+      find.byKey(const ValueKey<String>('model_selector_button')),
+      findsOneWidget,
+    );
+    expect(find.text('model_1'), findsOneWidget);
+    expect(find.text('Auto'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('model_selector_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Search model or provider'), findsOneWidget);
+    expect(
+      find.byKey(
+        const ValueKey<String>('model_selector_provider_header_provider_1'),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Search model or provider'),
+      'missing-model',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('No models found'), findsOneWidget);
+
+    await tester.tapAt(const Offset(8, 8));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('variant_selector_button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('variant_selector_option_low')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Low'), findsOneWidget);
+  });
 
   testWidgets(
     'model selector shows top 3 recent models and alphabetical providers',

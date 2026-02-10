@@ -1528,17 +1528,9 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildModelControls(ChatProvider chatProvider) {
     final selectedModel = chatProvider.selectedModel;
     final variants = chatProvider.availableVariants;
-    final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        border: Border.all(color: colorScheme.outline.withOpacity(0.14)),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -1546,29 +1538,28 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Tooltip(
             message: 'Choose model',
-            child: Builder(
-              builder: (chipContext) => ActionChip(
-                key: const ValueKey<String>('model_selector_button'),
-                avatar: const Icon(Icons.smart_toy_outlined, size: 18),
-                label: Text(selectedModel?.name ?? 'Select model'),
-                onPressed: chatProvider.providers.isEmpty
-                    ? null
-                    : () => unawaited(
-                        _openModelQuickSelector(
-                          chatProvider,
-                          anchorContext: chipContext,
-                        ),
-                      ),
-              ),
+            child: ActionChip(
+              key: const ValueKey<String>('model_selector_button'),
+              avatar: const Icon(Icons.smart_toy_outlined, size: 18),
+              label: Text(selectedModel?.name ?? 'Select model'),
+              onPressed: chatProvider.providers.isEmpty
+                  ? null
+                  : () => unawaited(_openModelSelector(chatProvider)),
             ),
           ),
           if (variants.isNotEmpty)
-            ActionChip(
-              avatar: const Icon(Icons.psychology_alt_outlined, size: 18),
-              label: Text(chatProvider.selectedVariantLabel),
-              onPressed: () {
-                unawaited(chatProvider.cycleVariant());
-              },
+            Builder(
+              builder: (chipContext) => ActionChip(
+                key: const ValueKey<String>('variant_selector_button'),
+                avatar: const Icon(Icons.psychology_alt_outlined, size: 18),
+                label: Text(chatProvider.selectedVariantLabel),
+                onPressed: () => unawaited(
+                  _openVariantQuickSelector(
+                    chatProvider,
+                    anchorContext: chipContext,
+                  ),
+                ),
+              ),
             ),
         ],
       ),
@@ -1668,80 +1659,239 @@ class _ChatPageState extends State<ChatPage> {
     return recent;
   }
 
-  PopupMenuItem<String> _buildModelMenuHeader({
-    required String key,
-    required String title,
-  }) {
-    return PopupMenuItem<String>(
-      enabled: false,
-      height: 32,
-      child: Text(
-        title,
-        key: ValueKey<String>(key),
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-      ),
-    );
-  }
+  Future<void> _openModelSelector(ChatProvider chatProvider) async {
+    final entries = _buildModelSelectorEntries(chatProvider);
+    final sortedProviders = _sortedProviders(chatProvider);
+    var query = '';
 
-  PopupMenuItem<String> _buildModelMenuEntry({
-    required String key,
-    required _ModelSelectorEntry entry,
-    required bool selected,
-    bool showProviderName = false,
-  }) {
-    return PopupMenuItem<String>(
-      key: ValueKey<String>(key),
-      value: _selectorEntryKey(entry.providerId, entry.modelId),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(entry.modelName, overflow: TextOverflow.ellipsis),
-                if (showProviderName)
-                  Text(
-                    entry.providerName,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (bottomSheetContext, setModalState) {
+            final normalizedQuery = query.trim().toLowerCase();
+            final matchingEntries = entries
+                .where((entry) {
+                  if (normalizedQuery.isEmpty) {
+                    return true;
+                  }
+                  return entry.modelName.toLowerCase().contains(
+                        normalizedQuery,
+                      ) ||
+                      entry.modelId.toLowerCase().contains(normalizedQuery) ||
+                      entry.providerName.toLowerCase().contains(
+                        normalizedQuery,
+                      ) ||
+                      entry.providerId.toLowerCase().contains(normalizedQuery);
+                })
+                .toList(growable: false);
+
+            final recentEntries = normalizedQuery.isEmpty
+                ? _buildRecentModelEntries(chatProvider, entries)
+                : const <_ModelSelectorEntry>[];
+            final recentKeys = recentEntries
+                .map(
+                  (entry) => _selectorEntryKey(entry.providerId, entry.modelId),
+                )
+                .toSet();
+            final groupedSourceEntries =
+                normalizedQuery.isEmpty && recentKeys.isNotEmpty
+                ? matchingEntries
+                      .where(
+                        (entry) => !recentKeys.contains(
+                          _selectorEntryKey(entry.providerId, entry.modelId),
+                        ),
+                      )
+                      .toList(growable: false)
+                : matchingEntries;
+
+            final groupedEntries = <String, List<_ModelSelectorEntry>>{};
+            for (final entry in groupedSourceEntries) {
+              groupedEntries
+                  .putIfAbsent(entry.providerId, () => <_ModelSelectorEntry>[])
+                  .add(entry);
+            }
+            final hasVisibleEntries =
+                recentEntries.isNotEmpty || groupedEntries.isNotEmpty;
+
+            final selectedProviderId = chatProvider.selectedProviderId;
+            final selectedModelId = chatProvider.selectedModelId;
+            final selectedKey =
+                selectedProviderId == null || selectedModelId == null
+                ? null
+                : '$selectedProviderId/$selectedModelId';
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(bottomSheetContext).bottom,
+                ),
+                child: SizedBox(
+                  height: MediaQuery.sizeOf(bottomSheetContext).height * 0.72,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                        child: TextField(
+                          autofocus: true,
+                          onChanged: (value) {
+                            setModalState(() {
+                              query = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search model or provider',
+                            prefixIcon: const Icon(Icons.search),
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: !hasVisibleEntries
+                            ? Center(
+                                child: Text(
+                                  'No models found',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              )
+                            : ListView(
+                                children: [
+                                  if (recentEntries.isNotEmpty) ...[
+                                    Padding(
+                                      key: const ValueKey<String>(
+                                        'model_selector_recent_header',
+                                      ),
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        12,
+                                        16,
+                                        4,
+                                      ),
+                                      child: Text(
+                                        'Recent',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
+                                    ),
+                                    for (final entry in recentEntries)
+                                      ListTile(
+                                        key: ValueKey<String>(
+                                          'model_selector_recent_${entry.providerId}_${entry.modelId}',
+                                        ),
+                                        title: Text(entry.modelName),
+                                        subtitle: Text(entry.providerName),
+                                        trailing:
+                                            selectedKey ==
+                                                _selectorEntryKey(
+                                                  entry.providerId,
+                                                  entry.modelId,
+                                                )
+                                            ? const Icon(Icons.check_rounded)
+                                            : null,
+                                        onTap: () async {
+                                          await chatProvider
+                                              .setSelectedModelByProvider(
+                                                providerId: entry.providerId,
+                                                modelId: entry.modelId,
+                                              );
+                                          if (!mounted) {
+                                            return;
+                                          }
+                                          Navigator.of(
+                                            bottomSheetContext,
+                                          ).pop();
+                                        },
+                                      ),
+                                  ],
+                                  for (final provider in sortedProviders)
+                                    if (groupedEntries.containsKey(
+                                      provider.id,
+                                    )) ...[
+                                      Padding(
+                                        key: ValueKey<String>(
+                                          'model_selector_provider_header_${provider.id}',
+                                        ),
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          12,
+                                          16,
+                                          4,
+                                        ),
+                                        child: Text(
+                                          provider.name,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                      ),
+                                      for (final entry
+                                          in groupedEntries[provider.id]!)
+                                        ListTile(
+                                          key: ValueKey<String>(
+                                            'model_selector_item_${entry.providerId}_${entry.modelId}',
+                                          ),
+                                          title: Text(entry.modelName),
+                                          subtitle:
+                                              entry.modelName == entry.modelId
+                                              ? null
+                                              : Text(entry.modelId),
+                                          trailing:
+                                              selectedKey ==
+                                                  _selectorEntryKey(
+                                                    entry.providerId,
+                                                    entry.modelId,
+                                                  )
+                                              ? const Icon(Icons.check_rounded)
+                                              : null,
+                                          onTap: () async {
+                                            await chatProvider
+                                                .setSelectedModelByProvider(
+                                                  providerId: entry.providerId,
+                                                  modelId: entry.modelId,
+                                                );
+                                            if (!mounted) {
+                                              return;
+                                            }
+                                            Navigator.of(
+                                              bottomSheetContext,
+                                            ).pop();
+                                          },
+                                        ),
+                                    ],
+                                ],
+                              ),
+                      ),
+                    ],
                   ),
-              ],
-            ),
-          ),
-          if (selected) const Icon(Icons.check_rounded, size: 18),
-        ],
-      ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
-  Future<void> _openModelQuickSelector(
+  Future<void> _openVariantQuickSelector(
     ChatProvider chatProvider, {
     required BuildContext anchorContext,
   }) async {
-    final entries = _buildModelSelectorEntries(chatProvider);
-    final recentEntries = _buildRecentModelEntries(chatProvider, entries);
-    final recentKeys = recentEntries
-        .map((entry) => _selectorEntryKey(entry.providerId, entry.modelId))
-        .toSet();
-    final groupedEntries = <String, List<_ModelSelectorEntry>>{};
-    for (final entry in entries) {
-      final key = _selectorEntryKey(entry.providerId, entry.modelId);
-      if (recentKeys.contains(key)) {
-        continue;
-      }
-      groupedEntries
-          .putIfAbsent(entry.providerId, () => <_ModelSelectorEntry>[])
-          .add(entry);
+    final variants = chatProvider.availableVariants;
+    if (variants.isEmpty) {
+      return;
     }
-
-    final selectedProviderId = chatProvider.selectedProviderId;
-    final selectedModelId = chatProvider.selectedModelId;
-    final selectedKey = selectedProviderId == null || selectedModelId == null
-        ? null
-        : '$selectedProviderId/$selectedModelId';
 
     final buttonBox = anchorContext.findRenderObject() as RenderBox?;
     final overlayBox =
@@ -1755,67 +1905,16 @@ class _ChatPageState extends State<ChatPage> {
     );
     final buttonRect = buttonTopLeft & buttonBox.size;
     const margin = 8.0;
-    final maxWidth = overlayBox.size.width - (margin * 2);
-    final menuWidth = maxWidth.clamp(220.0, 340.0).toDouble();
+    const menuWidth = 220.0;
     final left = (buttonRect.center.dx - (menuWidth / 2))
         .clamp(margin, overlayBox.size.width - menuWidth - margin)
         .toDouble();
     final top = (buttonRect.top - 4).clamp(margin, overlayBox.size.height - 48);
 
-    final menuEntries = <PopupMenuEntry<String>>[];
-    if (recentEntries.isNotEmpty) {
-      menuEntries.add(
-        _buildModelMenuHeader(
-          key: 'model_selector_recent_header',
-          title: 'Recent',
-        ),
-      );
-      for (final entry in recentEntries) {
-        final key = _selectorEntryKey(entry.providerId, entry.modelId);
-        menuEntries.add(
-          _buildModelMenuEntry(
-            key: 'model_selector_recent_${entry.providerId}_${entry.modelId}',
-            entry: entry,
-            selected: selectedKey == key,
-            showProviderName: true,
-          ),
-        );
-      }
-      if (groupedEntries.isNotEmpty) {
-        menuEntries.add(const PopupMenuDivider());
-      }
-    }
-
-    for (final provider in _sortedProviders(chatProvider)) {
-      if (!groupedEntries.containsKey(provider.id)) {
-        continue;
-      }
-      menuEntries.add(
-        _buildModelMenuHeader(
-          key: 'model_selector_provider_header_${provider.id}',
-          title: provider.name,
-        ),
-      );
-      for (final entry in groupedEntries[provider.id]!) {
-        final key = _selectorEntryKey(entry.providerId, entry.modelId);
-        menuEntries.add(
-          _buildModelMenuEntry(
-            key: 'model_selector_item_${entry.providerId}_${entry.modelId}',
-            entry: entry,
-            selected: selectedKey == key,
-          ),
-        );
-      }
-    }
-
-    if (menuEntries.isEmpty) {
-      return;
-    }
-
-    final selected = await showMenu<String>(
+    final selected = await showMenu<String?>(
       context: context,
-      constraints: BoxConstraints(
-        minWidth: menuWidth < 240 ? menuWidth : 240,
+      constraints: const BoxConstraints(
+        minWidth: menuWidth,
         maxWidth: menuWidth,
       ),
       position: RelativeRect.fromLTRB(
@@ -1824,20 +1923,38 @@ class _ChatPageState extends State<ChatPage> {
         overlayBox.size.width - left - menuWidth,
         overlayBox.size.height - top.toDouble(),
       ),
-      items: menuEntries,
+      items: [
+        PopupMenuItem<String?>(
+          key: const ValueKey<String>('variant_selector_option_auto'),
+          value: null,
+          child: Row(
+            children: [
+              const Expanded(child: Text('Auto')),
+              if (chatProvider.selectedVariantId == null)
+                const Icon(Icons.check_rounded, size: 18),
+            ],
+          ),
+        ),
+        for (final variant in variants)
+          PopupMenuItem<String?>(
+            key: ValueKey<String>('variant_selector_option_${variant.id}'),
+            value: variant.id,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(variant.name, overflow: TextOverflow.ellipsis),
+                ),
+                if (chatProvider.selectedVariantId == variant.id)
+                  const Icon(Icons.check_rounded, size: 18),
+              ],
+            ),
+          ),
+      ],
     );
-    if (selected == null) {
+    if (selected == null && chatProvider.selectedVariantId == null) {
       return;
     }
-    final providerId = _providerIdFromSelectorKey(selected);
-    final modelId = _modelIdFromSelectorKey(selected);
-    if (providerId == null || modelId == null) {
-      return;
-    }
-    await chatProvider.setSelectedModelByProvider(
-      providerId: providerId,
-      modelId: modelId,
-    );
+    await chatProvider.setSelectedVariant(selected);
   }
 
   Widget _buildInteractionPrompts(ChatProvider chatProvider) {

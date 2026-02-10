@@ -143,8 +143,8 @@ Aligned main navigation with chat-first workflow by moving `Chat / Logs / Settin
 Refined the sidebar navigation style to match area semantics: removed explicit `Chat` action and kept a compact one-line row with actionable `Logs` and `Settings` buttons only.
 Fixed a new-session UX regression where `New Chat` could create sessions without switching focus: directory-scoped session lists are now kept mutable and new-session creation explicitly persists/selects the newly created session.
 Fixed a visual duplicate-send issue where a local optimistic user bubble and server-confirmed user message could appear together; confirmed messages now replace pending local bubbles when content/session/time match.
-Unified provider/model controls into a single quick selector grouped by provider, with compact closed-state label showing only the active model name.
-Refined the unified selector to open as an anchored popup over the chip for faster choices, while keeping provider groups alphabetically ordered and surfacing the 3 most recently used models first.
+Unified provider/model controls into a single searchable selector grouped by provider, with compact closed-state label showing only the active model name.
+Refined selection UX so model/provider uses searchable bottom sheet (with alphabetical providers + 3 recent models), while reasoning effort uses a fast anchored popup selector; also removed the outer border wrapper around both selector chips.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes
