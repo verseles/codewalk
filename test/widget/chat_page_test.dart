@@ -8,6 +8,7 @@ import 'package:provider/provider.dart' hide Provider;
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
@@ -79,6 +80,84 @@ void main() {
       expect(find.text('Keyboard shortcuts'), findsOneWidget);
       expect(find.text('Conversations'), findsOneWidget);
     });
+  });
+
+  testWidgets('shows active directory and directory selector guidance', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: FakeProjectRepository(
+        currentProject: Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+        projects: <Project>[
+          Project(
+            id: 'proj_a',
+            name: 'Project A',
+            path: '/repo/a',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      ),
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Directory: /repo/a'), findsOneWidget);
+    expect(find.text('/repo/a'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Current directory: /repo/a'), findsOneWidget);
+    expect(find.text('Select a directory/workspace below'), findsOneWidget);
+  });
+
+  testWidgets('shows global label when current context is root', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: FakeProjectRepository(
+        currentProject: Project(
+          id: 'proj_root',
+          name: '/',
+          path: '/',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+        projects: <Project>[
+          Project(
+            id: 'proj_root',
+            name: '/',
+            path: '/',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      ),
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Directory: Global'), findsOneWidget);
+    expect(find.text('Global'), findsOneWidget);
   });
 
   testWidgets('sends message from chat input and renders assistant response', (
@@ -203,6 +282,7 @@ Widget _testApp(ChatProvider provider, AppProvider appProvider) {
 
 ChatProvider _buildChatProvider({
   FakeChatRepository? chatRepository,
+  FakeProjectRepository? projectRepository,
   required InMemoryAppLocalDataSource localDataSource,
   bool includeVariants = false,
 }) {
@@ -257,7 +337,7 @@ ChatProvider _buildChatProvider({
     replyQuestion: ReplyQuestion(chatRepo),
     rejectQuestion: RejectQuestion(chatRepo),
     projectProvider: ProjectProvider(
-      projectRepository: FakeProjectRepository(),
+      projectRepository: projectRepository ?? FakeProjectRepository(),
       localDataSource: localDataSource,
     ),
     localDataSource: localDataSource,

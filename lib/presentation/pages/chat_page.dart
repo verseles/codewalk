@@ -461,7 +461,7 @@ class _ChatPageState extends State<ChatPage> {
       titleSpacing: 12,
       title: Consumer<ProjectProvider>(
         builder: (context, projectProvider, child) {
-          final currentPath = projectProvider.currentDirectory ?? 'Global';
+          final currentPath = _directoryLabel(projectProvider.currentDirectory);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -472,7 +472,7 @@ class _ChatPageState extends State<ChatPage> {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               Text(
-                'Context: $currentPath',
+                'Directory: $currentPath',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -486,20 +486,12 @@ class _ChatPageState extends State<ChatPage> {
         Consumer<ProjectProvider>(
           builder: (context, projectProvider, child) {
             final currentProject = projectProvider.currentProject;
-            String projectLabel(Project project) {
-              final rawName = '${project.name}'.trim();
-              final rawPath = '${project.path}'.trim();
-              if ((rawName.isEmpty || rawName == '/') && rawPath == '/') {
-                return 'Global';
-              }
-              if (rawName.isEmpty || rawName == '/') {
-                return rawPath.isEmpty ? '-' : rawPath;
-              }
-              return rawName;
-            }
+            final currentDirectory = _directoryLabel(
+              projectProvider.currentDirectory,
+            );
 
             return PopupMenuButton<String>(
-              tooltip: 'Switch Project Context',
+              tooltip: 'Choose Directory',
               onSelected: (value) async {
                 if (value == '__refresh_projects__') {
                   await projectProvider.loadProjects();
@@ -558,8 +550,12 @@ class _ChatPageState extends State<ChatPage> {
                     child: Text(
                       currentProject == null
                           ? 'No active context'
-                          : 'Current: ${projectLabel(currentProject)}',
+                          : 'Current directory: $currentDirectory',
                     ),
+                  ),
+                  const PopupMenuItem<String>(
+                    enabled: false,
+                    child: Text('Select a directory/workspace below'),
                   ),
                   const PopupMenuItem<String>(
                     value: '__refresh_projects__',
@@ -572,17 +568,9 @@ class _ChatPageState extends State<ChatPage> {
                   items.add(
                     PopupMenuItem<String>(
                       value: 'switch:${project.id}',
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              projectLabel(project),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (project.id == currentProject?.id)
-                            const Icon(Icons.check, size: 16),
-                        ],
+                      child: _projectMenuLabel(
+                        project,
+                        selected: project.id == currentProject?.id,
                       ),
                     ),
                   );
@@ -590,7 +578,7 @@ class _ChatPageState extends State<ChatPage> {
                     items.add(
                       PopupMenuItem<String>(
                         value: 'close:${project.id}',
-                        child: Text('Close ${projectLabel(project)}'),
+                        child: Text('Close ${_projectDisplayLabel(project)}'),
                       ),
                     );
                   }
@@ -602,7 +590,7 @@ class _ChatPageState extends State<ChatPage> {
                     items.add(
                       PopupMenuItem<String>(
                         value: 'reopen:${project.id}',
-                        child: Text('Reopen ${projectLabel(project)}'),
+                        child: Text('Reopen ${_projectDisplayLabel(project)}'),
                       ),
                     );
                   }
@@ -662,9 +650,9 @@ class _ChatPageState extends State<ChatPage> {
                     const Icon(Icons.folder_open_outlined, size: 16),
                     const SizedBox(width: 6),
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 120),
+                      constraints: const BoxConstraints(maxWidth: 180),
                       child: Text(
-                        currentProject?.name ?? 'Context',
+                        currentDirectory,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
@@ -806,6 +794,54 @@ class _ChatPageState extends State<ChatPage> {
           onPressed: _focusInput,
         ),
         const SizedBox(width: 4),
+      ],
+    );
+  }
+
+  String _directoryLabel(String? directory) {
+    final trimmed = directory?.trim();
+    if (trimmed == null ||
+        trimmed.isEmpty ||
+        trimmed == '/' ||
+        trimmed == '-') {
+      return 'Global';
+    }
+    return trimmed;
+  }
+
+  String _projectDisplayLabel(Project project) {
+    final name = project.name.trim();
+    final path = _directoryLabel(project.path);
+    if (name.isEmpty || name == '/' || name == path) {
+      return path;
+    }
+    return name;
+  }
+
+  Widget _projectMenuLabel(Project project, {required bool selected}) {
+    final path = _directoryLabel(project.path);
+    final displayName = _projectDisplayLabel(project);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(displayName, overflow: TextOverflow.ellipsis),
+              if (path != displayName)
+                Text(
+                  path,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (selected) const Icon(Icons.check, size: 16),
       ],
     );
   }

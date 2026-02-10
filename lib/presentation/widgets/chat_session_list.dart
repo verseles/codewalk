@@ -92,7 +92,7 @@ class ChatSessionList extends StatelessWidget {
                 ),
               ),
               title: Text(
-                session.title ?? _generateFallbackTitle(session.time),
+                _displayTitle(session),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? colorScheme.onSecondaryContainer : null,
@@ -283,6 +283,14 @@ class ChatSessionList extends StatelessWidget {
     } else {
       return '${time.month}/${time.day}';
     }
+  }
+
+  String _displayTitle(ChatSession session) {
+    final raw = session.title?.trim();
+    if (raw == null || raw.isEmpty) {
+      return _generateFallbackTitle(session.time);
+    }
+    return raw;
   }
 
   /// Generate fallback session title

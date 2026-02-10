@@ -44,6 +44,30 @@ void main() {
       expect(roundtrip.path, original.path);
       expect(roundtrip.shared, isFalse);
     });
+
+    test('uses non-empty title fallback fields and trims value', () {
+      final withNameFallback = ChatSessionModel.fromJson(<String, dynamic>{
+        'id': 'ses_name',
+        'workspaceId': 'ws_1',
+        'time': <String, dynamic>{'created': 1000, 'updated': 1000},
+        'title': '   ',
+        'name': '  Legacy Name  ',
+      });
+
+      final withSessionTitleFallback = ChatSessionModel.fromJson(
+        <String, dynamic>{
+          'id': 'ses_session_title',
+          'workspaceId': 'ws_1',
+          'time': <String, dynamic>{'created': 1000, 'updated': 1000},
+          'title': '',
+          'name': '   ',
+          'sessionTitle': '  Session Title Field ',
+        },
+      );
+
+      expect(withNameFallback.toDomain().title, 'Legacy Name');
+      expect(withSessionTitleFallback.toDomain().title, 'Session Title Field');
+    });
   });
 
   group('ChatInputModel', () {

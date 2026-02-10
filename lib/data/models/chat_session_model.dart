@@ -45,6 +45,20 @@ class ChatSessionModel {
     final rawPath = json['path'];
     final pathMap = rawPath is Map ? Map<String, dynamic>.from(rawPath) : null;
 
+    String? readNonEmptyTitle() {
+      final candidates = <dynamic>[
+        json['title'],
+        json['name'],
+        json['sessionTitle'],
+      ];
+      for (final candidate in candidates) {
+        if (candidate is String && candidate.trim().isNotEmpty) {
+          return candidate.trim();
+        }
+      }
+      return null;
+    }
+
     return ChatSessionModel(
       id: json['id'] as String? ?? '',
       workspaceId: json['workspaceId'] as String?,
@@ -52,7 +66,7 @@ class ChatSessionModel {
         (json['time'] as Map?)?.map((key, value) => MapEntry('$key', value)) ??
             const <String, dynamic>{},
       ),
-      title: json['title'] as String?,
+      title: readNonEmptyTitle(),
       parentId: json['parentID'] as String?,
       directory: json['directory'] as String?,
       version: json['version'] as String?,
