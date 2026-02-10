@@ -526,6 +526,7 @@ class FakeChatRepository implements ChatRepository {
   final ProvidersResponse providersDefault;
 
   String? lastGetSessionsDirectory;
+  int getSessionsCallCount = 0;
   int getMessagesCallCount = 0;
   int getSessionStatusCallCount = 0;
   String? lastSendProjectId;
@@ -672,6 +673,7 @@ class FakeChatRepository implements ChatRepository {
     int? startEpochMs,
     int? limit,
   }) async {
+    getSessionsCallCount += 1;
     lastGetSessionsDirectory = directory;
     if (getSessionsFailure != null) return Left(getSessionsFailure!);
     var list = List<ChatSession>.from(sessions);

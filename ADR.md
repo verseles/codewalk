@@ -21,6 +21,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-015: Parity Wave Release Gate and QA Evidence Contract (2026-02-10) [Accepted]
 - ADR-016: Chat-First Navigation Architecture (2026-02-10) [Accepted]
 - ADR-017: Composer Multimodal Input Pipeline (2026-02-10) [Accepted]
+- ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback (2026-02-10) [Accepted]
 
 ---
 
@@ -659,6 +660,67 @@ CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `Stat
 ### References
 
 - `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback
+
+Status: Accepted
+Date: 2026-02-10
+
+### Context
+
+Feature 017 required removing manual refresh interactions from chat/context flows and making SSE the primary sync mechanism. Before this change, the app still depended on explicit refresh actions and a periodic 5-second foreground polling loop. The prior behavior worked, but it increased network churn, duplicated responsibilities between UI polling and realtime events, and made lifecycle transitions (background/resume) less deterministic.
+
+### Decision
+
+1. Adopt refreshless-by-default behavior guarded by a runtime feature flag:
+   - `CODEWALK_REFRESHLESS_ENABLED` (default `true`).
+2. Introduce provider-level sync state machine:
+   - `connected`, `reconnecting`, `delayed`.
+3. Move stream lifecycle to explicit foreground/background control:
+   - background: suspend event subscriptions and timers,
+   - resume: re-subscribe and run one scoped reconcile pass.
+4. Add degraded mode fallback when SSE health is poor:
+   - enter degraded after repeated stream failures or stale signal threshold,
+   - run slow scoped polling (30s) only while degraded,
+   - auto-recover and stop polling when SSE signals resume.
+5. Replace broad global refresh calls with scoped reconcile intents:
+   - sessions refresh only when required,
+   - active-session refresh only for message-level changes,
+   - status refresh only when relevant.
+6. Remove manual refresh controls from target chat/context UX when refreshless flag is enabled, and surface sync state in the app bar.
+
+### Rationale
+
+- SSE-first parity with upstream behavior reduces redundant polling and improves responsiveness.
+- Lifecycle-aware control prevents long-lived subscriptions from running while the app is backgrounded.
+- Degraded mode gives controlled resilience under unstable networks without reverting to aggressive polling.
+- Scoped reconciliation keeps state fresh while minimizing unnecessary requests.
+- Feature flag provides immediate rollback capability without code reversion.
+
+### Consequences
+
+- Positive: chat/context flows now update without explicit manual refresh actions.
+- Positive: background/resume behavior is deterministic and test-covered.
+- Positive: sync state is visible in UI and logs (`connected`, `reconnecting`, `delayed`).
+- Positive: degraded polling is controlled and only active during stream-health degradation.
+- Trade-off: `ChatProvider` orchestration complexity increased (state machine + timers + lifecycle branching).
+- Trade-off: feature-flag split path needs ongoing test coverage to prevent regressions when toggled.
+
+### Key Files
+
+- `lib/core/config/feature_flags.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `test/unit/providers/chat_provider_test.dart`
+- `test/widget/chat_page_test.dart`
+
+### References
+
+- `ROADMAP.md`
+- `ROADMAP.feat017.md`
 - `CODEBASE.md`
 
 ---

@@ -575,7 +575,7 @@ void main() {
   });
 
   testWidgets(
-    'refreshes active session on reconnect and every 5s while chat is active',
+    'refreshes active session on reconnect and keeps no manual 5s polling',
     (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -650,16 +650,32 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
 
-      expect(
-        repository.getMessagesCallCount,
-        greaterThan(reconnectMessageCalls),
-      );
-      expect(
-        repository.getSessionStatusCallCount,
-        greaterThan(reconnectStatusCalls),
-      );
+      expect(repository.getMessagesCallCount, reconnectMessageCalls);
+      expect(repository.getSessionStatusCallCount, reconnectStatusCalls);
     },
   );
+
+  testWidgets('hides refresh actions in refreshless mode', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository();
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Refresh'), findsNothing);
+    expect(find.text('Refresh'), findsNothing);
+  });
 
   testWidgets('rejects question request from chat interaction card', (
     WidgetTester tester,

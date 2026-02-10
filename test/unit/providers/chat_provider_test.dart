@@ -1039,6 +1039,155 @@ void main() {
     });
 
     test(
+      'enters degraded mode after repeated stream failures and recovers on signal',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        chatRepository.emitEventFailure(
+          const NetworkFailure('stream down 1'),
+        );
+        chatRepository.emitEventFailure(
+          const NetworkFailure('stream down 2'),
+        );
+        chatRepository.emitEventFailure(
+          const NetworkFailure('stream down 3'),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 60));
+
+        expect(provider.isInDegradedMode, isTrue);
+        expect(provider.syncState, ChatSyncState.delayed);
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'idle'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 60));
+
+        expect(provider.isInDegradedMode, isFalse);
+        expect(provider.syncState, ChatSyncState.connected);
+      },
+    );
+
+    test('resume foreground re-subscribes and reconciles session state', () async {
+      final nextMessage = AssistantMessage(
+        id: 'msg_resume',
+        sessionId: 'ses_1',
+        time: DateTime.fromMillisecondsSinceEpoch(2000),
+        completedTime: DateTime.fromMillisecondsSinceEpoch(2100),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'part_resume',
+            messageId: 'msg_resume',
+            sessionId: 'ses_1',
+            text: 'after resume',
+          ),
+        ],
+      );
+      chatRepository.messagesBySession['ses_1'] = <ChatMessage>[nextMessage];
+
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{'model_a': _model('model_a')},
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a'},
+          connected: const <String>['provider_a'],
+        ),
+      );
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+
+      final sessionsBefore = chatRepository.getSessionsCallCount;
+      final messagesBefore = chatRepository.getMessagesCallCount;
+
+      await provider.setForegroundActive(false);
+      await provider.setForegroundActive(true);
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+
+      expect(chatRepository.getSessionsCallCount, greaterThan(sessionsBefore));
+      expect(chatRepository.getMessagesCallCount, greaterThan(messagesBefore));
+      expect(
+        ((provider.messages.single as AssistantMessage).parts.single
+                as TextPart)
+            .text,
+        'after resume',
+      );
+    });
+
+    test(
+      'global session.updated applies incrementally without broad session reload',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        final sessionsBefore = chatRepository.getSessionsCallCount;
+        final activeDirectory = provider.projectProvider.currentDirectory;
+
+        chatRepository.emitGlobalEvent(
+          ChatEvent(
+            type: 'session.updated',
+            properties: <String, dynamic>{
+              if (activeDirectory != null) 'directory': activeDirectory,
+              'info': <String, dynamic>{
+                'id': 'ses_1',
+                'workspaceId': 'default',
+                'title': 'Session 1 renamed',
+                'time': <String, dynamic>{'created': 1000, 'updated': 2000},
+              },
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(provider.sessions.first.title, 'Session 1 renamed');
+        expect(chatRepository.getSessionsCallCount, sessionsBefore);
+      },
+    );
+
+    test(
       'loads and responds to pending permission and question requests',
       () async {
         chatRepository.pendingPermissions = const <ChatPermissionRequest>[

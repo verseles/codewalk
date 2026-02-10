@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' hide Provider;
+import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
@@ -67,7 +68,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   static const double _largeDesktopSessionPaneWidth = 320;
   static const double _largeDesktopUtilityPaneWidth = 280;
   static const double _nearBottomThreshold = 200;
-  static const Duration _activeScreenRefreshInterval = Duration(seconds: 5);
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
@@ -82,7 +82,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   bool _showScrollToLatestFab = false;
   bool _hasUnreadMessagesBelow = false;
   bool _isAppInForeground = true;
-  Timer? _activeScreenRefreshTimer;
 
   @override
   void initState() {
@@ -107,16 +106,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       _lastServerConnectionState = nextAppProvider.isConnected;
       _appProvider?.addListener(_handleAppProviderChange);
     }
-    _updateActiveScreenRefreshTimer();
   }
 
   @override
   void dispose() {
     // Clean up scroll callback using saved reference
     _chatProvider?.setScrollToBottomCallback(null);
+    unawaited(_chatProvider?.setForegroundActive(false));
     _appProvider?.removeListener(_handleAppProviderChange);
     _scrollController.removeListener(_handleScrollChanged);
-    _activeScreenRefreshTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
     _scrollController.dispose();
@@ -128,7 +126,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _isAppInForeground = state == AppLifecycleState.resumed;
-    _updateActiveScreenRefreshTimer();
+    final provider = _chatProvider;
+    if (provider != null) {
+      unawaited(provider.setForegroundActive(_isAppInForeground));
+    }
   }
 
   void _loadInitialData() {
@@ -136,6 +137,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
     // Set scroll to bottom callback
     chatProvider.setScrollToBottomCallback(_scrollToBottom);
+    unawaited(chatProvider.setForegroundActive(_isAppInForeground));
 
     // Technical comment translated to English.
     _initializeChatProvider(chatProvider);
@@ -176,7 +178,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       if (currentServerId != null) {
         unawaited(_handleServerScopeChange());
       }
-      _updateActiveScreenRefreshTimer();
       return;
     }
 
@@ -185,7 +186,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     if (wasConnected == false && currentConnected) {
       unawaited(_handleServerReconnected());
     }
-    _updateActiveScreenRefreshTimer();
   }
 
   Future<void> _handleServerScopeChange() async {
@@ -216,30 +216,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return true;
     }
     return route.isCurrent;
-  }
-
-  void _updateActiveScreenRefreshTimer() {
-    if (!_isChatScreenActive()) {
-      _activeScreenRefreshTimer?.cancel();
-      _activeScreenRefreshTimer = null;
-      return;
-    }
-
-    if (_activeScreenRefreshTimer != null) {
-      return;
-    }
-
-    _activeScreenRefreshTimer = Timer.periodic(_activeScreenRefreshInterval, (
-      _,
-    ) {
-      if (!mounted || !_isChatScreenActive()) {
-        return;
-      }
-      final chatProvider = _chatProvider ?? context.read<ChatProvider>();
-      unawaited(
-        chatProvider.refreshActiveSessionView(reason: 'active-screen-poll'),
-      );
-    });
   }
 
   bool _isNearBottom() {
@@ -727,50 +703,62 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ? _largeDesktopSessionPaneWidth
             : _desktopSessionPaneWidth;
         final mainContentWidth = isLargeDesktop ? 960.0 : double.infinity;
+        final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
+        final shortcutMap = <ShortcutActivator, Intent>{
+          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
+              const _NewSessionIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyN, meta: true):
+              const _NewSessionIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyL, control: true):
+              const _FocusInputIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyL, meta: true):
+              const _FocusInputIntent(),
+          const SingleActivator(LogicalKeyboardKey.escape):
+              const _EscapeIntent(),
+        };
+        final actionMap = <Type, Action<Intent>>{
+          _NewSessionIntent: CallbackAction<_NewSessionIntent>(
+            onInvoke: (_) {
+              _createNewSession();
+              return null;
+            },
+          ),
+          _FocusInputIntent: CallbackAction<_FocusInputIntent>(
+            onInvoke: (_) {
+              _focusInput();
+              return null;
+            },
+          ),
+          _EscapeIntent: CallbackAction<_EscapeIntent>(
+            onInvoke: (_) {
+              _handleEscape();
+              return null;
+            },
+          ),
+        };
+        if (!refreshlessEnabled) {
+          shortcutMap[const SingleActivator(
+                LogicalKeyboardKey.keyR,
+                control: true,
+              )] =
+              const _RefreshIntent();
+          shortcutMap[const SingleActivator(
+                LogicalKeyboardKey.keyR,
+                meta: true,
+              )] =
+              const _RefreshIntent();
+          actionMap[_RefreshIntent] = CallbackAction<_RefreshIntent>(
+            onInvoke: (_) {
+              _refreshData();
+              return null;
+            },
+          );
+        }
 
         return Shortcuts(
-          shortcuts: const <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.keyN, control: true):
-                _NewSessionIntent(),
-            SingleActivator(LogicalKeyboardKey.keyN, meta: true):
-                _NewSessionIntent(),
-            SingleActivator(LogicalKeyboardKey.keyR, control: true):
-                _RefreshIntent(),
-            SingleActivator(LogicalKeyboardKey.keyR, meta: true):
-                _RefreshIntent(),
-            SingleActivator(LogicalKeyboardKey.keyL, control: true):
-                _FocusInputIntent(),
-            SingleActivator(LogicalKeyboardKey.keyL, meta: true):
-                _FocusInputIntent(),
-            SingleActivator(LogicalKeyboardKey.escape): _EscapeIntent(),
-          },
+          shortcuts: shortcutMap,
           child: Actions(
-            actions: <Type, Action<Intent>>{
-              _NewSessionIntent: CallbackAction<_NewSessionIntent>(
-                onInvoke: (_) {
-                  _createNewSession();
-                  return null;
-                },
-              ),
-              _RefreshIntent: CallbackAction<_RefreshIntent>(
-                onInvoke: (_) {
-                  _refreshData();
-                  return null;
-                },
-              ),
-              _FocusInputIntent: CallbackAction<_FocusInputIntent>(
-                onInvoke: (_) {
-                  _focusInput();
-                  return null;
-                },
-              ),
-              _EscapeIntent: CallbackAction<_EscapeIntent>(
-                onInvoke: (_) {
-                  _handleEscape();
-                  return null;
-                },
-              ),
-            },
+            actions: actionMap,
             child: Focus(
               autofocus: true,
               child: Scaffold(
@@ -839,10 +827,54 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   AppBar _buildAppBar() {
     final colorScheme = Theme.of(context).colorScheme;
     final isMobile = MediaQuery.sizeOf(context).width < _mobileBreakpoint;
+    final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
       titleSpacing: isMobile ? 0 : 8,
       title: _buildProjectSelectorTitle(isMobile: isMobile),
       actions: [
+        if (refreshlessEnabled && !isMobile)
+          Consumer2<ChatProvider, AppProvider>(
+            builder: (context, chatProvider, appProvider, child) {
+              final label = _syncStatusLabel(
+                chatProvider: chatProvider,
+                appProvider: appProvider,
+              );
+              final color = _syncStatusColor(
+                context: context,
+                chatProvider: chatProvider,
+                appProvider: appProvider,
+              );
+              return Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Container(
+                  key: const ValueKey<String>('chat_sync_status_chip'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.14),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(label, style: Theme.of(context).textTheme.labelSmall),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         Consumer<AppProvider>(
           builder: (context, appProvider, child) {
             final active = appProvider.activeServer;
@@ -974,11 +1006,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           tooltip: 'New Chat',
           onPressed: _createNewSession,
         ),
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          tooltip: 'Refresh',
-          onPressed: _refreshData,
-        ),
+        if (!refreshlessEnabled)
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: _refreshData,
+          ),
         if (!isMobile)
           IconButton(
             icon: const Icon(Icons.edit_note),
@@ -988,6 +1021,37 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         const SizedBox(width: 4),
       ],
     );
+  }
+
+  String _syncStatusLabel({
+    required ChatProvider chatProvider,
+    required AppProvider appProvider,
+  }) {
+    if (!appProvider.isConnected ||
+        chatProvider.syncState == ChatSyncState.reconnecting) {
+      return 'Reconnecting';
+    }
+    if (chatProvider.syncState == ChatSyncState.delayed ||
+        chatProvider.isInDegradedMode) {
+      return 'Sync delayed';
+    }
+    return 'Connected';
+  }
+
+  Color _syncStatusColor({
+    required BuildContext context,
+    required ChatProvider chatProvider,
+    required AppProvider appProvider,
+  }) {
+    if (!appProvider.isConnected ||
+        chatProvider.syncState == ChatSyncState.reconnecting) {
+      return Theme.of(context).colorScheme.error;
+    }
+    if (chatProvider.syncState == ChatSyncState.delayed ||
+        chatProvider.isInDegradedMode) {
+      return Colors.orange;
+    }
+    return Colors.green;
   }
 
   Widget _buildProjectSelectorTitle({required bool isMobile}) {
@@ -1157,18 +1221,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               runSpacing: 8,
               children: [
                 FilledButton.tonalIcon(
-                  onPressed: () => unawaited(projectProvider.loadProjects()),
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Refresh projects'),
-                ),
-                FilledButton.tonalIcon(
                   onPressed: () => unawaited(
                     _openCreateWorkspaceFromSelector(dialogContext),
                   ),
                   icon: const Icon(Icons.add_box_outlined),
                   label: const Text('Create workspace in directory...'),
                 ),
-                if (worktreeEnabled)
+                if (!FeatureFlags.refreshlessRealtime)
+                  FilledButton.tonalIcon(
+                    onPressed: () => unawaited(projectProvider.loadProjects()),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Refresh projects'),
+                  ),
+                if (worktreeEnabled && !FeatureFlags.refreshlessRealtime)
                   FilledButton.tonalIcon(
                     onPressed: () => unawaited(projectProvider.loadWorktrees()),
                     icon: const Icon(Icons.sync_rounded),
@@ -1346,11 +1411,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     String directory,
   ) async {
     final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
     final switched = await projectProvider.switchToDirectoryContext(directory);
     if (!switched) {
       return;
     }
-    await _refreshData();
+    await chatProvider.onProjectScopeChanged();
     if (dialogContext.mounted) {
       Navigator.of(dialogContext).pop();
     }
@@ -1506,11 +1572,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             onPressed: _createNewSession,
                             tooltip: 'New Chat',
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: _refreshData,
-                            tooltip: 'Refresh',
-                          ),
+                          if (!FeatureFlags.refreshlessRealtime)
+                            IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed: _refreshData,
+                              tooltip: 'Refresh',
+                            ),
                         ],
                       ),
                       Wrap(
@@ -1700,7 +1767,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 12),
                   _buildShortcutHint('Ctrl/Cmd + N', 'New conversation'),
-                  _buildShortcutHint('Ctrl/Cmd + R', 'Refresh chat data'),
+                  if (!FeatureFlags.refreshlessRealtime)
+                    _buildShortcutHint('Ctrl/Cmd + R', 'Refresh chat data'),
                   _buildShortcutHint('Ctrl/Cmd + L', 'Focus message input'),
                   _buildShortcutHint('Esc', 'Close drawer or unfocus input'),
                 ],
@@ -1713,12 +1781,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             icon: const Icon(Icons.add_comment_outlined),
             label: const Text('New Chat'),
           ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: _refreshData,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Refresh'),
-          ),
+          if (!FeatureFlags.refreshlessRealtime) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _refreshData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
           const SizedBox(height: 12),
           if (chatProvider.currentSession != null)
             Card(
@@ -1736,18 +1806,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
-                        IconButton(
-                          onPressed: () {
-                            final session = chatProvider.currentSession;
-                            if (session != null) {
-                              unawaited(
-                                chatProvider.loadSessionInsights(session.id),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.sync, size: 18),
-                          tooltip: 'Refresh session details',
-                        ),
+                        if (!FeatureFlags.refreshlessRealtime)
+                          IconButton(
+                            onPressed: () {
+                              final session = chatProvider.currentSession;
+                              if (session != null) {
+                                unawaited(
+                                  chatProvider.loadSessionInsights(session.id),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.sync, size: 18),
+                            tooltip: 'Refresh session details',
+                          ),
                       ],
                     ),
                     const SizedBox(height: 8),

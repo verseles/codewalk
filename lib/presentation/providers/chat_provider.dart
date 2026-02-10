@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
 import '../../data/datasources/app_local_datasource.dart';
 import '../../data/models/chat_message_model.dart';
@@ -37,6 +38,8 @@ import 'project_provider.dart';
 
 /// Chat state
 enum ChatState { initial, loading, loaded, error, sending }
+
+enum ChatSyncState { connected, reconnecting, delayed }
 
 enum SessionListFilter { active, archived, all }
 
@@ -101,7 +104,17 @@ class ChatProvider extends ChangeNotifier {
     required this.rejectQuestion,
     required this.projectProvider,
     required this.localDataSource,
+    Duration syncSignalStaleThreshold = const Duration(seconds: 20),
+    Duration syncHealthCheckInterval = const Duration(seconds: 5),
+    Duration degradedPollingInterval = const Duration(seconds: 30),
+    int degradedFailureThreshold = 3,
+    bool refreshlessRealtimeEnabled = FeatureFlags.refreshlessRealtime,
   }) {
+    _syncSignalStaleThreshold = syncSignalStaleThreshold;
+    _syncHealthCheckInterval = syncHealthCheckInterval;
+    _degradedPollingInterval = degradedPollingInterval;
+    _degradedFailureThreshold = degradedFailureThreshold;
+    _refreshlessRealtimeEnabled = refreshlessRealtimeEnabled;
     _activeContextKey = _composeContextKey(
       _activeServerId,
       _resolveContextScopeId(),
@@ -186,6 +199,23 @@ class ChatProvider extends ChangeNotifier {
   final Map<String, _ChatContextSnapshot> _contextSnapshots =
       <String, _ChatContextSnapshot>{};
   final Set<String> _dirtyContextKeys = <String>{};
+  Timer? _syncHealthTimer;
+  Timer? _degradedPollingTimer;
+  DateTime? _lastRealtimeSignalAt;
+  ChatSyncState _syncState = ChatSyncState.reconnecting;
+  bool _isForegroundActive = true;
+  bool _degradedMode = false;
+  DateTime? _degradedModeStartedAt;
+  int _consecutiveRealtimeFailures = 0;
+  bool _pendingRefreshSessions = false;
+  bool _pendingRefreshStatus = false;
+  bool _pendingRefreshActiveSession = false;
+  bool _featureFlagLogged = false;
+  late final Duration _syncSignalStaleThreshold;
+  late final Duration _syncHealthCheckInterval;
+  late final Duration _degradedPollingInterval;
+  late final int _degradedFailureThreshold;
+  late final bool _refreshlessRealtimeEnabled;
 
   static const Duration _sessionsCacheTtl = Duration(days: 3);
   static const int _maxRecentModels = 8;
@@ -213,6 +243,9 @@ class ChatProvider extends ChangeNotifier {
       Map<String, int>.unmodifiable(_modelUsageCounts);
   String get activeServerId => _activeServerId;
   bool get isRespondingInteraction => _isRespondingInteraction;
+  ChatSyncState get syncState => _syncState;
+  bool get isInDegradedMode => _degradedMode;
+  bool get refreshlessRealtimeEnabled => _refreshlessRealtimeEnabled;
   Map<String, SessionStatusInfo> get sessionStatusById =>
       Map<String, SessionStatusInfo>.unmodifiable(_sessionStatusById);
 
@@ -733,6 +766,159 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  void _setSyncState(ChatSyncState nextState, {String? reason}) {
+    if (_syncState == nextState) {
+      return;
+    }
+    _syncState = nextState;
+    AppLogger.info(
+      'sync_state_changed state=${nextState.name} reason=${reason ?? "-"}',
+    );
+    notifyListeners();
+  }
+
+  void _markRealtimeSignal({required String source}) {
+    _lastRealtimeSignalAt = DateTime.now();
+    _consecutiveRealtimeFailures = 0;
+    if (_degradedMode) {
+      _exitDegradedMode(reason: 'signal-restored:$source');
+    }
+    _setSyncState(ChatSyncState.connected, reason: 'signal:$source');
+  }
+
+  void _handleRealtimeStreamFailure({
+    required String source,
+    Object? error,
+  }) {
+    _consecutiveRealtimeFailures += 1;
+    AppLogger.warn(
+      'event_stream_reconnecting source=$source attempts=$_consecutiveRealtimeFailures',
+      error: error,
+    );
+    _setSyncState(ChatSyncState.reconnecting, reason: 'stream-failure:$source');
+    if (_refreshlessRealtimeEnabled &&
+        _consecutiveRealtimeFailures >= _degradedFailureThreshold) {
+      _enterDegradedMode(reason: 'stream-failure:$source');
+    }
+  }
+
+  void _startSyncHealthMonitor() {
+    if (!_refreshlessRealtimeEnabled) {
+      return;
+    }
+    _syncHealthTimer?.cancel();
+    _syncHealthTimer = Timer.periodic(_syncHealthCheckInterval, (_) {
+      _evaluateSyncHealth();
+    });
+  }
+
+  void _evaluateSyncHealth() {
+    if (!_refreshlessRealtimeEnabled || !_isForegroundActive) {
+      return;
+    }
+    final signalAt = _lastRealtimeSignalAt;
+    if (signalAt == null) {
+      return;
+    }
+    final stale =
+        DateTime.now().difference(signalAt) > _syncSignalStaleThreshold;
+    if (!stale) {
+      return;
+    }
+    _setSyncState(ChatSyncState.delayed, reason: 'stale-signal');
+    _enterDegradedMode(reason: 'stale-signal');
+  }
+
+  void _enterDegradedMode({required String reason}) {
+    if (!_refreshlessRealtimeEnabled ||
+        !_isForegroundActive ||
+        _degradedMode) {
+      return;
+    }
+    _degradedMode = true;
+    _degradedModeStartedAt = DateTime.now();
+    _setSyncState(ChatSyncState.delayed, reason: 'degraded-enter:$reason');
+    AppLogger.warn(
+      'sync_degraded_entered reason=$reason interval=${_degradedPollingInterval.inSeconds}s',
+    );
+    _degradedPollingTimer?.cancel();
+    _degradedPollingTimer = Timer.periodic(_degradedPollingInterval, (_) {
+      unawaited(_runDegradedScopedSync(reason: 'degraded-periodic'));
+    });
+    unawaited(_runDegradedScopedSync(reason: 'degraded-enter'));
+  }
+
+  void _exitDegradedMode({required String reason}) {
+    if (!_degradedMode) {
+      return;
+    }
+    _degradedMode = false;
+    final startedAt = _degradedModeStartedAt;
+    _degradedModeStartedAt = null;
+    _degradedPollingTimer?.cancel();
+    _degradedPollingTimer = null;
+    final durationSeconds = startedAt == null
+        ? null
+        : DateTime.now().difference(startedAt).inSeconds;
+    AppLogger.info(
+      'sync_degraded_recovered reason=$reason duration_s=${durationSeconds ?? 0}',
+    );
+  }
+
+  Future<void> _runDegradedScopedSync({required String reason}) async {
+    if (!_degradedMode || !_isForegroundActive) {
+      return;
+    }
+    AppLogger.info('sync_degraded_poll_tick reason=$reason');
+    await loadSessions();
+    await refreshActiveSessionView(reason: 'degraded-sync:$reason');
+  }
+
+  Future<void> setForegroundActive(bool isActive) async {
+    _isForegroundActive = isActive;
+    if (!_refreshlessRealtimeEnabled) {
+      return;
+    }
+
+    if (!isActive) {
+      _syncHealthTimer?.cancel();
+      _syncHealthTimer = null;
+      _degradedPollingTimer?.cancel();
+      _degradedPollingTimer = null;
+      _degradedMode = false;
+      _degradedModeStartedAt = null;
+      _setSyncState(ChatSyncState.reconnecting, reason: 'app-background');
+      await _pauseRealtimeSubscriptions();
+      return;
+    }
+
+    _startSyncHealthMonitor();
+    await _resumeRealtimeAfterForeground();
+  }
+
+  Future<void> _pauseRealtimeSubscriptions() async {
+    _eventStreamGeneration += 1;
+    await _cancelSubscriptionSafely(
+      _eventSubscription,
+      label: 'realtime event',
+    );
+    await _cancelSubscriptionSafely(
+      _globalEventSubscription,
+      label: 'global event',
+    );
+    _eventSubscription = null;
+    _globalEventSubscription = null;
+  }
+
+  Future<void> _resumeRealtimeAfterForeground() async {
+    AppLogger.info('sync_resume_reconcile_start');
+    await _startRealtimeEventSubscription();
+    await _loadPendingInteractions();
+    await loadSessions();
+    await refreshActiveSessionView(reason: 'foreground-resume');
+    AppLogger.info('sync_resume_reconcile_complete');
+  }
+
   Future<void> _startRealtimeEventSubscription() async {
     final generation = ++_eventStreamGeneration;
     final previousSubscription = _eventSubscription;
@@ -747,6 +933,8 @@ class ChatProvider extends ChangeNotifier {
       previousGlobalSubscription,
       label: 'global event',
     );
+    _setSyncState(ChatSyncState.reconnecting, reason: 'subscription-start');
+    _startSyncHealthMonitor();
 
     final directory = projectProvider.currentDirectory;
     final newSubscription = watchChatEvents(directory: directory).listen(
@@ -755,16 +943,29 @@ class ChatProvider extends ChangeNotifier {
           return;
         }
         result.fold((failure) {
-          AppLogger.warn(
-            'Realtime event stream failure: ${failure.toString()}',
+          _handleRealtimeStreamFailure(
+            source: 'session-stream-failure',
+            error: failure,
           );
-        }, _applyChatEvent);
+        }, (event) {
+          _markRealtimeSignal(source: 'session-stream');
+          _applyChatEvent(event);
+        });
       },
       onError: (error) {
         if (generation != _eventStreamGeneration) {
           return;
         }
-        AppLogger.warn('Realtime event stream exception', error: error);
+        _handleRealtimeStreamFailure(
+          source: 'session-stream-exception',
+          error: error,
+        );
+      },
+      onDone: () {
+        if (generation != _eventStreamGeneration) {
+          return;
+        }
+        _handleRealtimeStreamFailure(source: 'session-stream-done');
       },
     );
 
@@ -781,16 +982,29 @@ class ChatProvider extends ChangeNotifier {
           return;
         }
         result.fold((failure) {
-          AppLogger.warn(
-            'Global realtime event stream failure: ${failure.toString()}',
+          _handleRealtimeStreamFailure(
+            source: 'global-stream-failure',
+            error: failure,
           );
-        }, _handleGlobalEvent);
+        }, (event) {
+          _markRealtimeSignal(source: 'global-stream');
+          _handleGlobalEvent(event);
+        });
       },
       onError: (error) {
         if (generation != _eventStreamGeneration) {
           return;
         }
-        AppLogger.warn('Global realtime event stream exception', error: error);
+        _handleRealtimeStreamFailure(
+          source: 'global-stream-exception',
+          error: error,
+        );
+      },
+      onDone: () {
+        if (generation != _eventStreamGeneration) {
+          return;
+        }
+        _handleRealtimeStreamFailure(source: 'global-stream-done');
       },
     );
 
@@ -887,17 +1101,18 @@ class ChatProvider extends ChangeNotifier {
         break;
       case 'session.deleted':
         final info = properties['info'];
-        if (info is Map<String, dynamic>) {
-          final sessionId = info['id'] as String?;
-          if (sessionId != null && sessionId.isNotEmpty) {
-            final deletedCurrent = _currentSession?.id == sessionId;
-            _removeSessionById(sessionId);
-            if (deletedCurrent && _currentSession != null) {
-              unawaited(loadMessages(_currentSession!.id));
-              unawaited(loadSessionInsights(_currentSession!.id, silent: true));
-            }
-            notifyListeners();
+        final sessionId =
+            (info is Map<String, dynamic> ? info['id'] as String? : null) ??
+            properties['sessionID'] as String? ??
+            properties['id'] as String?;
+        if (sessionId != null && sessionId.isNotEmpty) {
+          final deletedCurrent = _currentSession?.id == sessionId;
+          _removeSessionById(sessionId);
+          if (deletedCurrent && _currentSession != null) {
+            unawaited(loadMessages(_currentSession!.id));
+            unawaited(loadSessionInsights(_currentSession!.id, silent: true));
           }
+          notifyListeners();
         }
         break;
       case 'session.status':
@@ -971,6 +1186,7 @@ class ChatProvider extends ChangeNotifier {
         }
         break;
       case 'message.updated':
+      case 'message.created':
         final info = properties['info'] as Map<String, dynamic>?;
         final sessionId = info?['sessionID'] as String?;
         final messageId = info?['id'] as String?;
@@ -1050,6 +1266,7 @@ class ChatProvider extends ChangeNotifier {
         notifyListeners();
         break;
       case 'permission.asked':
+      case 'permission.updated':
         final permission = ChatPermissionRequestModel.fromJson(
           properties,
         ).toDomain();
@@ -1089,6 +1306,7 @@ class ChatProvider extends ChangeNotifier {
         notifyListeners();
         break;
       case 'question.asked':
+      case 'question.updated':
         final question = ChatQuestionRequestModel.fromJson(
           properties,
         ).toDomain();
@@ -1147,7 +1365,15 @@ class ChatProvider extends ChangeNotifier {
     final directory = _extractDirectoryFromEvent(event);
     if (directory == null || directory.trim().isEmpty) {
       _dirtyContextKeys.add(_activeContextKey);
-      _scheduleCurrentContextRefresh();
+      if (_tryApplyGlobalEventIncremental(event)) {
+        return;
+      }
+      _scheduleCurrentContextRefresh(
+        reason: 'global:$type:no-directory',
+        refreshSessions: true,
+        refreshStatus: true,
+        refreshActiveSession: true,
+      );
       return;
     }
 
@@ -1155,12 +1381,61 @@ class ChatProvider extends ChangeNotifier {
     _dirtyContextKeys.add(targetContextKey);
 
     if (targetContextKey == _activeContextKey) {
-      _scheduleCurrentContextRefresh();
+      if (_tryApplyGlobalEventIncremental(event)) {
+        return;
+      }
+      _scheduleGlobalFallbackReconcile(event);
       return;
     }
 
     _contextSnapshots.remove(targetContextKey);
     unawaited(_clearPersistedContextCache(targetContextKey));
+  }
+
+  bool _tryApplyGlobalEventIncremental(ChatEvent event) {
+    const supportedTypes = <String>{
+      'server.connected',
+      'session.created',
+      'session.updated',
+      'session.deleted',
+      'session.status',
+      'session.diff',
+      'session.idle',
+      'session.error',
+      'todo.updated',
+      'message.created',
+      'message.updated',
+      'message.part.updated',
+      'message.part.removed',
+      'message.removed',
+      'permission.asked',
+      'permission.updated',
+      'permission.replied',
+      'question.asked',
+      'question.updated',
+      'question.replied',
+      'question.rejected',
+    };
+    if (!supportedTypes.contains(event.type)) {
+      return false;
+    }
+    _applyChatEvent(event);
+    return true;
+  }
+
+  void _scheduleGlobalFallbackReconcile(ChatEvent event) {
+    final type = event.type;
+    final refreshSessions =
+        type.startsWith('session.') ||
+        type.startsWith('project.') ||
+        type.startsWith('worktree.');
+    final refreshActiveSession = type.startsWith('message.');
+    _scheduleCurrentContextRefresh(
+      reason: 'global:$type:fallback',
+      refreshSessions: refreshSessions,
+      refreshStatus: refreshSessions || refreshActiveSession,
+      refreshActiveSession: refreshActiveSession,
+    );
   }
 
   String? _extractDirectoryFromEvent(ChatEvent event) {
@@ -1209,11 +1484,46 @@ class ChatProvider extends ChangeNotifier {
     );
   }
 
-  void _scheduleCurrentContextRefresh() {
+  void _scheduleCurrentContextRefresh({
+    required String reason,
+    bool refreshSessions = false,
+    bool refreshStatus = false,
+    bool refreshActiveSession = false,
+  }) {
+    _pendingRefreshSessions = _pendingRefreshSessions || refreshSessions;
+    _pendingRefreshStatus = _pendingRefreshStatus || refreshStatus;
+    _pendingRefreshActiveSession =
+        _pendingRefreshActiveSession || refreshActiveSession;
     _globalRefreshDebounce?.cancel();
     _globalRefreshDebounce = Timer(const Duration(milliseconds: 300), () {
-      unawaited(loadSessions());
-      unawaited(refreshSessionStatusSnapshot());
+      final shouldRefreshSessions = _pendingRefreshSessions;
+      final shouldRefreshStatus = _pendingRefreshStatus;
+      final shouldRefreshActiveSession = _pendingRefreshActiveSession;
+      _pendingRefreshSessions = false;
+      _pendingRefreshStatus = false;
+      _pendingRefreshActiveSession = false;
+
+      AppLogger.info(
+        'scoped_reconcile_triggered reason=$reason sessions=$shouldRefreshSessions active=$shouldRefreshActiveSession status=$shouldRefreshStatus',
+      );
+
+      if (shouldRefreshSessions) {
+        unawaited(loadSessions());
+      }
+
+      if (shouldRefreshActiveSession) {
+        unawaited(
+          refreshActiveSessionView(
+            reason: 'scoped-reconcile:$reason',
+            includeStatus: !shouldRefreshSessions && shouldRefreshStatus,
+          ),
+        );
+        return;
+      }
+
+      if (!shouldRefreshSessions && shouldRefreshStatus) {
+        unawaited(refreshSessionStatusSnapshot());
+      }
     });
   }
 
@@ -1546,6 +1856,12 @@ class ChatProvider extends ChangeNotifier {
 
   /// Initialize providers
   Future<void> initializeProviders() async {
+    if (!_featureFlagLogged) {
+      _featureFlagLogged = true;
+      AppLogger.info(
+        'refreshless_feature_enabled=$_refreshlessRealtimeEnabled',
+      );
+    }
     final fetchId = ++_providersFetchId;
     final serverId = await _resolveServerScopeId();
     final scopeId = _resolveContextScopeId();
@@ -1712,7 +2028,11 @@ class ChatProvider extends ChangeNotifier {
       );
     }
     if (fetchId == _providersFetchId) {
-      await _startRealtimeEventSubscription();
+      if (_refreshlessRealtimeEnabled && !_isForegroundActive) {
+        _setSyncState(ChatSyncState.reconnecting, reason: 'background-init');
+      } else {
+        await _startRealtimeEventSubscription();
+      }
       await _loadPendingInteractions();
       await refreshSessionStatusSnapshot();
       notifyListeners();
@@ -1772,6 +2092,15 @@ class ChatProvider extends ChangeNotifier {
     _messageSubscription = null;
     _eventSubscription = null;
     _globalEventSubscription = null;
+    _consecutiveRealtimeFailures = 0;
+    _lastRealtimeSignalAt = null;
+    _degradedMode = false;
+    _degradedModeStartedAt = null;
+    _degradedPollingTimer?.cancel();
+    _degradedPollingTimer = null;
+    if (_refreshlessRealtimeEnabled) {
+      _setSyncState(ChatSyncState.reconnecting, reason: 'context-switch');
+    }
 
     final serverId = await _resolveServerScopeId();
     final nextScope = _resolveContextScopeId();
@@ -2835,6 +3164,8 @@ class ChatProvider extends ChangeNotifier {
     _eventSubscription?.cancel();
     _globalEventSubscription?.cancel();
     _globalRefreshDebounce?.cancel();
+    _syncHealthTimer?.cancel();
+    _degradedPollingTimer?.cancel();
     super.dispose();
   }
 }

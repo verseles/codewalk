@@ -17,6 +17,7 @@ codewalk/
 │   └── images/        # App icons and images
 ├── lib/
 │   ├── core/
+│   │   ├── config/    # Feature flags and runtime rollout switches
 │   │   ├── constants/ # API and app constants
 │   │   ├── di/        # Dependency injection (get_it)
 │   │   ├── errors/    # Exception and failure classes
@@ -258,6 +259,25 @@ Compatibility tiers:
   - question reject flow in provider + chat widget integration,
   - `/question/{id}/reject` integration coverage in mock server route contract.
 
+### Feature 017 Realtime-First Refreshless Architecture (Implemented 2026-02-10)
+
+- Added refreshless rollout guardrail:
+  - `lib/core/config/feature_flags.dart` (`CODEWALK_REFRESHLESS_ENABLED`, default `true`)
+- Expanded `ChatProvider` realtime orchestration:
+  - sync state machine (`connected` / `reconnecting` / `delayed`)
+  - lifecycle-aware stream policy (`setForegroundActive`) with background suspend and resume reconcile
+  - degraded mode with slow scoped polling (`30s`) only when SSE health degrades
+  - scoped reconcile queue replacing broad refresh patterns
+  - broader incremental reducer support (`message.created`, `permission.updated`, `question.updated`) plus global-event incremental application
+- Updated `ChatPage` UX to refreshless-first:
+  - removed manual refresh affordances in target chat/context flows when feature flag is enabled
+  - removed legacy 5-second active-screen refresh loop
+  - added sync status indicator (`Connected`, `Reconnecting`, `Sync delayed`) in the app bar on non-mobile layouts
+  - kept rollback path: manual refresh controls are conditionally available when feature flag is disabled
+- Expanded coverage:
+  - unit tests for degraded enter/recover, foreground resume reconcile, and global incremental updates
+  - widget tests for reconnect behavior without periodic polling and refresh-control absence
+
 ### ChatInput Schema
 
 `POST /session/{id}/message` body:
@@ -278,12 +298,12 @@ Compatibility tiers:
 
 | Event group | Current handling state | Parity contract classification |
 |---|---|---|
-| `message.updated`, `message.part.updated` | Handled with reducer + fallback fetch for partial payloads | Required |
+| `message.created`, `message.updated`, `message.part.updated` | Handled with reducer + fallback fetch for partial payloads | Required |
 | `message.removed`, `message.part.removed` | Fully handled in reducer | Required |
 | `session.error`, `session.idle` | Fully handled in reducer | Required |
 | `session.created`, `session.updated`, `session.deleted`, `session.status` | Fully handled in reducer | Required |
-| `permission.asked`, `permission.replied` | Fully handled with pending queue sync | Required |
-| `question.asked`, `question.replied`, `question.rejected` | Fully handled with pending queue sync | Required |
+| `permission.asked`, `permission.updated`, `permission.replied` | Fully handled with pending queue sync | Required |
+| `question.asked`, `question.updated`, `question.replied`, `question.rejected` | Fully handled with pending queue sync | Required |
 | `todo.updated`, `session.diff` | Fully handled in reducer (session insight maps) | Required |
 | `vcs.branch.updated`, `worktree.ready`, `worktree.failed` | Not handled | Required |
 | Other diagnostic/low-impact events | Ignored | Optional |
