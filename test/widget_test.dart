@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
+
+Widget _buildChatInputHarness({
+  required ChatInputWidget child,
+  MediaQueryData? mediaQueryData,
+}) {
+  Widget home = Scaffold(
+    body: Align(alignment: Alignment.bottomCenter, child: child),
+  );
+  if (mediaQueryData != null) {
+    home = MediaQuery(data: mediaQueryData, child: home);
+  }
+  return MaterialApp(home: home);
+}
 
 void main() {
   testWidgets('ChatInputWidget renders and sends message', (
@@ -10,13 +24,11 @@ void main() {
     ChatInputSubmission? sentSubmission;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChatInputWidget(
-            onSendMessage: (submission) {
-              sentSubmission = submission;
-            },
-          ),
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (submission) {
+            sentSubmission = submission;
+          },
         ),
       ),
     );
@@ -43,13 +55,11 @@ void main() {
       ChatInputSubmission? sentSubmission;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ChatInputWidget(
-              onSendMessage: (submission) {
-                sentSubmission = submission;
-              },
-            ),
+        _buildChatInputHarness(
+          child: ChatInputWidget(
+            onSendMessage: (submission) {
+              sentSubmission = submission;
+            },
           ),
         ),
       );
@@ -77,13 +87,11 @@ void main() {
     ChatInputSubmission? sentSubmission;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChatInputWidget(
-            onSendMessage: (submission) {
-              sentSubmission = submission;
-            },
-          ),
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (submission) {
+            sentSubmission = submission;
+          },
         ),
       ),
     );
@@ -107,20 +115,18 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChatInputWidget(
-            onSendMessage: (_) {},
-            onSlashQuery: (query) async {
-              return const <ChatComposerSlashCommandSuggestion>[
-                ChatComposerSlashCommandSuggestion(
-                  name: 'open',
-                  source: 'command',
-                  description: 'Open file',
-                ),
-              ];
-            },
-          ),
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          onSlashQuery: (query) async {
+            return const <ChatComposerSlashCommandSuggestion>[
+              ChatComposerSlashCommandSuggestion(
+                name: 'open',
+                source: 'command',
+                description: 'Open file',
+              ),
+            ];
+          },
         ),
       ),
     );
@@ -132,7 +138,7 @@ void main() {
       find.byKey(const ValueKey<String>('composer_popover_slash')),
       findsOneWidget,
     );
-    await tester.tap(find.text('/open'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
     final textField = tester.widget<TextField>(find.byType(TextField));
@@ -141,9 +147,46 @@ void main() {
 
   testWidgets('mention popover inserts @ token', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChatInputWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          onMentionQuery: (query) async {
+            return const <ChatComposerMentionSuggestion>[
+              ChatComposerMentionSuggestion(
+                value: 'README.md',
+                type: ChatComposerSuggestionType.file,
+                subtitle: 'file',
+              ),
+            ];
+          },
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '@REA');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('composer_popover_mention')),
+      findsOneWidget,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.controller!.text, '@README.md ');
+  });
+
+  testWidgets(
+    'mention popover stays above input when keyboard insets are active',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildChatInputHarness(
+          mediaQueryData: const MediaQueryData(
+            size: Size(390, 844),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: ChatInputWidget(
             onSendMessage: (_) {},
             onMentionQuery: (query) async {
               return const <ChatComposerMentionSuggestion>[
@@ -156,41 +199,38 @@ void main() {
             },
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.enterText(find.byType(TextField), '@REA');
-    await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '@REA');
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey<String>('composer_popover_mention')),
-      findsOneWidget,
-    );
-    await tester.tap(find.text('README.md'));
-    await tester.pumpAndSettle();
+      final popoverFinder = find.byKey(
+        const ValueKey<String>('composer_popover_mention'),
+      );
+      expect(popoverFinder, findsOneWidget);
 
-    final textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.controller!.text, '@README.md ');
-  });
+      final inputRect = tester.getRect(find.byType(TextField));
+      final popoverRect = tester.getRect(popoverFinder);
+      expect(popoverRect.bottom, lessThanOrEqualTo(inputRect.top));
+    },
+  );
 
   testWidgets('mention selection keeps input focused while typing', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChatInputWidget(
-            onSendMessage: (_) {},
-            onMentionQuery: (query) async {
-              return const <ChatComposerMentionSuggestion>[
-                ChatComposerMentionSuggestion(
-                  value: 'lib/main.dart',
-                  type: ChatComposerSuggestionType.file,
-                  subtitle: 'file',
-                ),
-              ];
-            },
-          ),
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          onMentionQuery: (query) async {
+            return const <ChatComposerMentionSuggestion>[
+              ChatComposerMentionSuggestion(
+                value: 'lib/main.dart',
+                type: ChatComposerSuggestionType.file,
+                subtitle: 'file',
+              ),
+            ];
+          },
         ),
       ),
     );
@@ -206,20 +246,18 @@ void main() {
     'mention insertion guarantees space before trailing punctuation',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ChatInputWidget(
-              onSendMessage: (_) {},
-              onMentionQuery: (query) async {
-                return const <ChatComposerMentionSuggestion>[
-                  ChatComposerMentionSuggestion(
-                    value: 'README.md',
-                    type: ChatComposerSuggestionType.file,
-                    subtitle: 'file',
-                  ),
-                ];
-              },
-            ),
+        _buildChatInputHarness(
+          child: ChatInputWidget(
+            onSendMessage: (_) {},
+            onMentionQuery: (query) async {
+              return const <ChatComposerMentionSuggestion>[
+                ChatComposerMentionSuggestion(
+                  value: 'README.md',
+                  type: ChatComposerSuggestionType.file,
+                  subtitle: 'file',
+                ),
+              ];
+            },
           ),
         ),
       );
@@ -233,7 +271,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('README.md'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pumpAndSettle();
 
       final textField = tester.widget<TextField>(find.byType(TextField));

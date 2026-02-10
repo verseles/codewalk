@@ -284,6 +284,7 @@ Compatibility tiers:
 - Extended composer state machine in `ChatInputWidget`:
   - trigger-aware mode orchestration (`normal`/`shell`) with `!` activation at offset 0
   - popover orchestration for `@` mentions and `/` slash commands
+  - suggestion popover rendered as input-anchored overlay (instead of inline layout row), growing upward to preserve input visibility while keyboard is open
   - keyboard navigation and selection (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`)
   - input focus persistence while mention/slash suggestions refresh
   - mention insertion normalizes trailing spacing to avoid token/punctuation glue on mobile
@@ -292,7 +293,7 @@ Compatibility tiers:
   - mention sources from `/find/file` and `/agent`
   - slash catalog from builtin commands plus `/command` (with `source` badges)
   - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/help`) executed directly in UI context
-  - keyboard-inset aware layout keeps composer above on-screen keyboard and constrains suggestion panel to render above input
+  - composer returned to scaffold-native keyboard inset handling (`resizeToAvoidBottomInset`) to keep input above mobile keyboard consistently
 - Added shell send-path routing:
   - `ChatProvider.sendMessage(..., shellMode: true)` marks payload mode as shell
   - `ChatRemoteDataSource.sendMessage` routes shell-mode payloads to `POST /session/{id}/shell`
