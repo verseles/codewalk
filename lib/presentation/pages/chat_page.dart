@@ -978,7 +978,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildSidebarNavigation({required bool closeOnSelect}) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       child: Card(
@@ -993,32 +992,31 @@ class _ChatPageState extends State<ChatPage> {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
-            ListTile(
-              enabled: false,
-              leading: const Icon(Icons.chat_bubble_rounded),
-              title: const Text('Chat'),
-              subtitle: const Text('Primary'),
-              trailing: Icon(
-                Icons.check_circle,
-                size: 18,
-                color: colorScheme.primary,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => unawaited(
+                        _openLogsPage(closeOnSelect: closeOnSelect),
+                      ),
+                      icon: const Icon(Icons.receipt_long_rounded),
+                      label: const Text('Logs'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      onPressed: () => unawaited(
+                        _openSettingsPage(closeOnSelect: closeOnSelect),
+                      ),
+                      icon: const Icon(Icons.tune_rounded),
+                      label: const Text('Settings'),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.receipt_long_rounded),
-              title: const Text('Logs'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () =>
-                  unawaited(_openLogsPage(closeOnSelect: closeOnSelect)),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.tune_rounded),
-              title: const Text('Settings'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () =>
-                  unawaited(_openSettingsPage(closeOnSelect: closeOnSelect)),
             ),
           ],
         ),
