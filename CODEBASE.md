@@ -1,7 +1,7 @@
 # CodeWalk - Codebase Baseline Snapshot
 
 > Captured: 2026-02-10
-> Git baseline: `57633fa8c113c2e53c77acb905e7cca627a29d0d` (main)
+> Git baseline: `6e0135106ef03c59b54077d49ce23fd56a5ce463` (main)
 > Flutter: 3.38.9 (stable)
 
 ## Project Structure
@@ -31,7 +31,7 @@ codewalk/
 │   │   ├── repositories/ # Repository interfaces
 │   │   └── usecases/    # Application use cases
 │   ├── presentation/
-│   │   ├── pages/       # Chat, Home, Server Settings
+│   │   ├── pages/       # App Shell, Chat, Home, Logs, Server Settings
 │   │   ├── providers/   # State management (Provider)
 │   │   ├── theme/       # App theme configuration
 │   │   └── widgets/     # Chat input, message, session list
@@ -72,12 +72,12 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 81 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 77 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 17 | Test files (unit, widget, integration, support) |
-| `.dart` (total) | 97 | Repository files excluding build artifacts |
-| `.md` (markdown) | 17 | Docs + roadmap + release/QA artifacts |
-| `.sh` (scripts) | 4 | CI validation + installer/smoke scripts |
+| `.dart` (tests) | 18 | Test files (unit, widget, integration, support) |
+| `.dart` (total) | 99 | Repository files excluding build artifacts |
+| `.md` (markdown) | 22 | Docs + roadmap + release/QA artifacts |
+| `.sh` (scripts) | 5 | CI validation + installer/smoke scripts |
 
 ## Legacy Naming References
 
@@ -293,7 +293,7 @@ Compatibility tiers:
 | Part type | Current handling state | Parity contract classification |
 |---|---|---|
 | `text`, `file`, `tool`, `reasoning`, `patch` | Implemented | Required |
-| `step-start`, `step-finish`, `snapshot` | Parsed + rendered as structured info blocks | Required |
+| `step-start`, `step-finish`, `snapshot` | Parsed; details accessible via assistant info menu | Required |
 | `agent`, `subtask`, `retry`, `compaction` | Parsed + rendered as structured info blocks | Required |
 | Unknown/future part types | Ignored defensively | Optional |
 
@@ -363,10 +363,10 @@ Deferred/optional after parity wave:
 
 ### flutter analyze
 
-- **Total issues: 101**
+- **Total issues: 125**
   - Errors: 0
   - Warnings: 0
-  - Info: 101 (mostly deprecated API usage and lint modernization opportunities)
+  - Info: 125 (mostly deprecated API usage and lint modernization opportunities)
 - **Top issue categories:**
   - `deprecated_member_use` (majority): `withOpacity`, `surfaceVariant`, old color roles
   - `overridden_fields` (~5): field overrides in model classes
@@ -375,7 +375,7 @@ Deferred/optional after parity wave:
 
 ### flutter test
 
-- **Result: 97 tests, all passed** (latest full run with coverage)
+- **Result: 113 tests, all passed** (latest full run with coverage)
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
   - Unit: providers/usecases/models with migration, server/context-scope assertions, lifecycle optimistic-rollback, and project/worktree orchestration
@@ -468,6 +468,7 @@ Deferred/optional after parity wave:
 | flutter_markdown | ^0.7.7+1 | Markdown rendering |
 | flutter_highlight | ^0.7.0 | Code syntax highlighting |
 | file_picker | ^10.3.10 | File picker |
+| speech_to_text | ^7.3.0 | Voice input dictation |
 | url_launcher | ^6.2.2 | URL launcher |
 | package_info_plus | ^9.0.0 | App version info |
 | json_annotation | ^4.8.1 | JSON serialization annotations |
