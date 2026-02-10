@@ -101,4 +101,59 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('assistant text is selectable and does not show copy button', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_3',
+              sessionId: 'ses_3',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_text_3',
+                  messageId: 'msg_3',
+                  sessionId: 'ses_3',
+                  text: 'Selectable assistant text',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SelectableText), findsWidgets);
+    expect(find.byTooltip('Copy'), findsNothing);
+  });
+
+  testWidgets('user text keeps copy button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: UserMessage(
+              id: 'msg_4',
+              sessionId: 'ses_4',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_text_4',
+                  messageId: 'msg_4',
+                  sessionId: 'ses_4',
+                  text: 'User text',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byTooltip('Copy'), findsOneWidget);
+  });
 }

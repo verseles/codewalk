@@ -77,7 +77,7 @@ class ChatMessageWidget extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 ...message.parts.map(
-                  (part) => _buildMessagePart(context, part),
+                  (part) => _buildMessagePart(context, part, isUser: isUser),
                 ),
 
                 if (message is AssistantMessage &&
@@ -165,10 +165,18 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildMessagePart(BuildContext context, MessagePart part) {
+  Widget _buildMessagePart(
+    BuildContext context,
+    MessagePart part, {
+    required bool isUser,
+  }) {
     switch (part.type) {
       case PartType.text:
-        return _buildTextPart(context, part as TextPart);
+        return _buildTextPart(
+          context,
+          part as TextPart,
+          showCopyButton: isUser,
+        );
       case PartType.file:
         return _buildFilePart(context, part as FilePart);
       case PartType.tool:
@@ -194,7 +202,11 @@ class ChatMessageWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildTextPart(BuildContext context, TextPart part) {
+  Widget _buildTextPart(
+    BuildContext context,
+    TextPart part, {
+    required bool showCopyButton,
+  }) {
     // Don't display if text is empty or only whitespace
     if (part.text.trim().isEmpty) {
       return const SizedBox.shrink();
@@ -208,6 +220,7 @@ class ChatMessageWidget extends StatelessWidget {
           // Render text using Markdown
           MarkdownBody(
             data: part.text,
+            selectable: true,
             styleSheet: MarkdownStyleSheet(
               p: Theme.of(context).textTheme.bodyMedium,
               code: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -227,20 +240,20 @@ class ChatMessageWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // Copy button
-          Align(
-            alignment: Alignment.centerRight,
-            child: IconButton.filledTonal(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: part.text));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')),
-                );
-              },
-              icon: const Icon(Icons.copy, size: 18),
-              tooltip: 'Copy',
+          if (showCopyButton)
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton.filledTonal(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: part.text));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Copied to clipboard')),
+                  );
+                },
+                icon: const Icon(Icons.copy, size: 18),
+                tooltip: 'Copy',
+              ),
             ),
-          ),
         ],
       ),
     );
