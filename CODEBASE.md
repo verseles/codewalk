@@ -237,6 +237,7 @@ Compatibility tiers:
   - `lib/presentation/providers/chat_provider.dart` (context snapshots, dirty-context invalidation, global event sync, resilient SSE teardown)
 - Updated chat UI with project/workspace controls and active-context indicator:
   - `lib/presentation/pages/chat_page.dart`
+  - Workspace creation dialog now accepts optional base-directory override to make project-folder targeting explicit.
 
 ### ChatInput Schema
 
@@ -735,5 +736,6 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 **Feature 015 (completed):**
 - Added project/workspace context orchestration with deterministic `serverId::directory` snapshot isolation.
 - Added worktree operations (`create/reset/delete/open`) and current-project switching via `/project` + `/experimental/worktree*`.
+- Added explicit base-directory input when creating workspaces to avoid implicit folder targeting.
 - Added `/global/event` subscription for cross-context invalidation and resilient subscription teardown during server switches.
 - Expanded tests for project/worktree/global-event/context isolation and raised total passing tests to 66.

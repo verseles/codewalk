@@ -309,18 +309,41 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _createWorkspace() async {
     final projectProvider = context.read<ProjectProvider>();
     final chatProvider = context.read<ChatProvider>();
-    final controller = TextEditingController();
-    final createdName = await showDialog<String>(
+    final nameController = TextEditingController();
+    final baseDirectoryController = TextEditingController(
+      text: projectProvider.currentDirectory ?? '',
+    );
+    final createdInput = await showDialog<(String, String?)>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Create Workspace'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Workspace name',
-              hintText: 'ex: feature-branch',
+          content: SizedBox(
+            width: 420,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  key: const ValueKey<String>('workspace_name_input'),
+                  controller: nameController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Workspace name',
+                    hintText: 'ex: feature-branch',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const ValueKey<String>('workspace_base_directory_input'),
+                  controller: baseDirectoryController,
+                  decoration: const InputDecoration(
+                    labelText: 'Base directory (optional)',
+                    hintText: '/repo/my-project',
+                    helperText:
+                        'Where the workspace should be created on the server',
+                  ),
+                ),
+              ],
             ),
           ),
           actions: [
@@ -330,7 +353,11 @@ class _ChatPageState extends State<ChatPage> {
             ),
             FilledButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(controller.text.trim());
+                final name = nameController.text.trim();
+                final baseDirectory = baseDirectoryController.text.trim();
+                Navigator.of(
+                  dialogContext,
+                ).pop((name, baseDirectory.isEmpty ? null : baseDirectory));
               },
               child: const Text('Create'),
             ),
@@ -338,14 +365,14 @@ class _ChatPageState extends State<ChatPage> {
         );
       },
     );
-
-    if (!mounted || createdName == null || createdName.trim().isEmpty) {
+    if (!mounted || createdInput == null || createdInput.$1.trim().isEmpty) {
       return;
     }
 
     final created = await projectProvider.createWorktree(
-      createdName,
+      createdInput.$1,
       switchToCreated: true,
+      directory: createdInput.$2,
     );
     if (!mounted) {
       return;
@@ -363,7 +390,13 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Workspace created: ${created.name}')),
+      SnackBar(
+        content: Text(
+          createdInput.$2 == null
+              ? 'Workspace created: ${created.name}'
+              : 'Workspace created in ${createdInput.$2}: ${created.name}',
+        ),
+      ),
     );
   }
 
@@ -674,7 +707,7 @@ class _ChatPageState extends State<ChatPage> {
                   items.add(
                     const PopupMenuItem<String>(
                       value: '__create_workspace__',
-                      child: Text('Create workspace'),
+                      child: Text('Create workspace in directory...'),
                     ),
                   );
                   items.add(

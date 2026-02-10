@@ -218,6 +218,63 @@ void main() {
     expect(find.text('Current directory: Global'), findsOneWidget);
   });
 
+  testWidgets('create workspace allows overriding base directory', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_a',
+        name: 'Project A',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Create workspace in directory...'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('workspace_name_input')),
+      'Feature API',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('workspace_base_directory_input')),
+      '/repo/custom',
+    );
+    await tester.tap(find.text('Create'));
+    await tester.pumpAndSettle();
+
+    expect(projectRepository.lastCreatedWorktreeName, 'Feature API');
+    expect(projectRepository.lastCreatedWorktreeDirectory, '/repo/custom');
+    expect(
+      find.text('Workspace created in /repo/custom: Feature API'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('sends message from chat input and renders assistant response', (
     WidgetTester tester,
   ) async {

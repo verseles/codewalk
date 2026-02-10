@@ -1061,6 +1061,8 @@ class FakeProjectRepository implements ProjectRepository {
   final List<Project> _projects;
   final List<Worktree> _worktrees;
   Failure? worktreeFailure;
+  String? lastCreatedWorktreeName;
+  String? lastCreatedWorktreeDirectory;
 
   @override
   Future<Either<Failure, Project>> getCurrentProject({
@@ -1117,6 +1119,8 @@ class FakeProjectRepository implements ProjectRepository {
     if (worktreeFailure != null) {
       return Left(worktreeFailure!);
     }
+    lastCreatedWorktreeName = name;
+    lastCreatedWorktreeDirectory = directory;
     final normalized = name.trim().toLowerCase().replaceAll(' ', '-');
     final base = directory ?? '/tmp';
     final created = Worktree(

@@ -247,6 +247,7 @@ class ProjectProvider extends ChangeNotifier {
   Future<Worktree?> createWorktree(
     String name, {
     bool switchToCreated = true,
+    String? directory,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
@@ -254,9 +255,13 @@ class ProjectProvider extends ChangeNotifier {
       return null;
     }
 
+    final targetDirectory = directory?.trim();
+
     final result = await _projectRepository.createWorktree(
       trimmed,
-      directory: currentDirectory,
+      directory: (targetDirectory == null || targetDirectory.isEmpty)
+          ? currentDirectory
+          : targetDirectory,
     );
 
     return result.fold(
