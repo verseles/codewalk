@@ -47,45 +47,70 @@ class ChatMessageWidget extends StatelessWidget {
                 color: colorScheme.outlineVariant.withOpacity(0.45),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                Row(
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onDoubleTap: () {
+                      final copyText = _composeMessageCopyText(message);
+                      if (copyText.isNotEmpty) {
+                        _copyTextToClipboard(context, copyText);
+                      }
+                    },
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      isUser ? 'You' : 'Assistant',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: isUser
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
+                    Row(
+                      children: [
+                        Text(
+                          isUser ? 'You' : 'Assistant',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: isUser
+                                    ? colorScheme.primary
+                                    : colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _formatTime(message.time),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontSize: 11,
+                              ),
+                        ),
+                        const Spacer(),
+                        if (!isUser && message is AssistantMessage)
+                          _buildAssistantInfo(
+                            context,
+                            message as AssistantMessage,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SelectionArea(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...message.parts.map(
+                            (part) => _buildMessagePart(context, part),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _formatTime(message.time),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 11,
+                    if (message is AssistantMessage &&
+                        (message as AssistantMessage).error != null)
+                      _buildErrorInfo(
+                        context,
+                        (message as AssistantMessage).error!,
                       ),
-                    ),
-                    const Spacer(),
-                    if (!isUser && message is AssistantMessage)
-                      _buildAssistantInfo(context, message as AssistantMessage),
                   ],
                 ),
-                const SizedBox(height: 8),
-
-                ...message.parts.map(
-                  (part) => _buildMessagePart(context, part),
-                ),
-
-                if (message is AssistantMessage &&
-                    (message as AssistantMessage).error != null)
-                  _buildErrorInfo(
-                    context,
-                    (message as AssistantMessage).error!,
-                  ),
               ],
             ),
           ),
@@ -206,33 +231,39 @@ class ChatMessageWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Render text using Markdown
-          _DoubleTapCopyRegion(
-            onDoubleTap: () => _copyTextToClipboard(context, part.text),
-            child: MarkdownBody(
-              data: part.text,
-              selectable: true,
-              styleSheet: MarkdownStyleSheet(
-                p: Theme.of(context).textTheme.bodyMedium,
-                code: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontFamily: 'monospace',
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                ),
-                codeblockDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          MarkdownBody(
+            data: part.text,
+            selectable: true,
+            styleSheet: MarkdownStyleSheet(
+              p: Theme.of(context).textTheme.bodyMedium,
+              code: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontFamily: 'monospace',
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
               ),
-              onTapLink: (text, href, title) {
-                if (href != null) {
-                  // TODO: Implement link navigation
-                }
-              },
+              codeblockDecoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
+            onTapLink: (text, href, title) {
+              if (href != null) {
+                // TODO: Implement link navigation
+              }
+            },
           ),
           const SizedBox(height: 8),
         ],
       ),
     );
+  }
+
+  String _composeMessageCopyText(ChatMessage message) {
+    final parts = message.parts
+        .whereType<TextPart>()
+        .map((part) => part.text.trim())
+        .where((text) => text.isNotEmpty)
+        .toList(growable: false);
+    return parts.join('\n\n');
   }
 
   void _copyTextToClipboard(BuildContext context, String text) {
@@ -678,50 +709,5 @@ class ChatMessageWidget extends StatelessWidget {
     } else {
       return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
-  }
-}
-
-class _DoubleTapCopyRegion extends StatefulWidget {
-  const _DoubleTapCopyRegion({required this.child, required this.onDoubleTap});
-
-  final Widget child;
-  final VoidCallback onDoubleTap;
-
-  @override
-  State<_DoubleTapCopyRegion> createState() => _DoubleTapCopyRegionState();
-}
-
-class _DoubleTapCopyRegionState extends State<_DoubleTapCopyRegion> {
-  static const int _doubleTapThresholdMs = 320;
-  static const double _maxTapDistance = 28;
-
-  int? _lastTapEpochMs;
-  Offset? _lastTapPosition;
-
-  void _handlePointerUp(PointerUpEvent event) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final lastEpoch = _lastTapEpochMs;
-    final lastPosition = _lastTapPosition;
-
-    if (lastEpoch != null && lastPosition != null) {
-      final elapsedMs = now - lastEpoch;
-      final distance = (event.position - lastPosition).distance;
-      final isDoubleTap =
-          elapsedMs <= _doubleTapThresholdMs && distance <= _maxTapDistance;
-      if (isDoubleTap) {
-        _lastTapEpochMs = null;
-        _lastTapPosition = null;
-        widget.onDoubleTap();
-        return;
-      }
-    }
-
-    _lastTapEpochMs = now;
-    _lastTapPosition = event.position;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(onPointerUp: _handlePointerUp, child: widget.child);
   }
 }

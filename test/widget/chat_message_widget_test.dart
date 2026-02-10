@@ -187,4 +187,82 @@ void main() {
     expect(find.byType(SelectableText), findsWidgets);
     expect(find.byTooltip('Copy'), findsNothing);
   });
+
+  testWidgets('background copy handler shows copy feedback', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: UserMessage(
+              id: 'msg_7',
+              sessionId: 'ses_7',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_text_7a',
+                  messageId: 'msg_7',
+                  sessionId: 'ses_7',
+                  text: 'First line',
+                ),
+                TextPart(
+                  id: 'part_text_7b',
+                  messageId: 'msg_7',
+                  sessionId: 'ses_7',
+                  text: 'Second line',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final backgroundDetectorFinder = find.byWidgetPredicate(
+      (widget) =>
+          widget is GestureDetector &&
+          widget.behavior == HitTestBehavior.opaque &&
+          widget.onDoubleTap != null,
+    );
+    final detector = tester.widget<GestureDetector>(backgroundDetectorFinder);
+    detector.onDoubleTap?.call();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Copied to clipboard'), findsOneWidget);
+  });
+
+  testWidgets('double tap on text does not trigger background copy', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_8',
+              sessionId: 'ses_8',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_text_8',
+                  messageId: 'msg_8',
+                  sessionId: 'ses_8',
+                  text: 'Word selection should win',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final textFinder = find.text('Word selection should win');
+    await tester.tap(textFinder);
+    await tester.pump(const Duration(milliseconds: 40));
+    await tester.tap(textFinder);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Copied to clipboard'), findsNothing);
+  });
 }
