@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../domain/entities/chat_session.dart';
 
@@ -10,12 +11,21 @@ class ChatSessionList extends StatelessWidget {
     this.currentSession,
     this.onSessionSelected,
     this.onSessionDeleted,
+    this.onSessionRenamed,
+    this.onSessionShareToggled,
+    this.onSessionArchiveToggled,
+    this.onSessionForked,
   });
 
   final List<ChatSession> sessions;
   final ChatSession? currentSession;
-  final Function(ChatSession session)? onSessionSelected;
-  final Function(ChatSession session)? onSessionDeleted;
+  final Future<void> Function(ChatSession session)? onSessionSelected;
+  final Future<void> Function(ChatSession session)? onSessionDeleted;
+  final Future<bool> Function(ChatSession session, String title)? onSessionRenamed;
+  final Future<bool> Function(ChatSession session)? onSessionShareToggled;
+  final Future<bool> Function(ChatSession session, bool archived)?
+  onSessionArchiveToggled;
+  final Future<void> Function(ChatSession session)? onSessionForked;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +83,7 @@ class ChatSessionList extends StatelessWidget {
                     ? colorScheme.primary
                     : colorScheme.surfaceContainerHighest,
                 child: Icon(
-                  Icons.chat,
+                  session.archived ? Icons.archive_outlined : Icons.chat,
                   color: isSelected
                       ? colorScheme.onPrimary
                       : colorScheme.onSurfaceVariant,
@@ -85,6 +95,9 @@ class ChatSessionList extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? colorScheme.onSecondaryContainer : null,
+                  decoration: session.archived
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -104,7 +117,9 @@ class ChatSessionList extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         _formatTime(session.time),
@@ -116,8 +131,7 @@ class ChatSessionList extends StatelessWidget {
                               : colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      if (session.shared) ...[
-                        const SizedBox(width: 8),
+                      if (session.shared)
                         Icon(
                           Icons.share,
                           size: 12,
@@ -127,7 +141,16 @@ class ChatSessionList extends StatelessWidget {
                                 )
                               : colorScheme.onSurfaceVariant,
                         ),
-                      ],
+                      if (session.archived)
+                        Icon(
+                          Icons.archive,
+                          size: 12,
+                          color: isSelected
+                              ? colorScheme.onSecondaryContainer.withOpacity(
+                                  0.7,
+                                )
+                              : colorScheme.onSurfaceVariant,
+                        ),
                     ],
                   ),
                 ],
@@ -145,7 +168,16 @@ class ChatSessionList extends StatelessWidget {
                       _showRenameDialog(context, session);
                       break;
                     case 'share':
-                      _shareSession(session);
+                      _toggleShare(context, session);
+                      break;
+                    case 'copy-link':
+                      _copyShareLink(context, session);
+                      break;
+                    case 'archive':
+                      _toggleArchive(context, session);
+                      break;
+                    case 'fork':
+                      _forkSession(context, session);
                       break;
                     case 'delete':
                       _showDeleteDialog(context, session);
@@ -173,6 +205,39 @@ class ChatSessionList extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (session.shareUrl != null && session.shareUrl!.isNotEmpty)
+                    const PopupMenuItem(
+                      value: 'copy-link',
+                      child: Row(
+                        children: [
+                          Icon(Icons.copy),
+                          SizedBox(width: 8),
+                          Text('Copy Link'),
+                        ],
+                      ),
+                    ),
+                  PopupMenuItem(
+                    value: 'archive',
+                    child: Row(
+                      children: [
+                        Icon(
+                          session.archived ? Icons.unarchive_outlined : Icons.archive_outlined,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(session.archived ? 'Unarchive' : 'Archive'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'fork',
+                    child: Row(
+                      children: [
+                        Icon(Icons.call_split),
+                        SizedBox(width: 8),
+                        Text('Fork'),
+                      ],
+                    ),
+                  ),
                   const PopupMenuItem(
                     value: 'delete',
                     child: Row(
@@ -185,7 +250,12 @@ class ChatSessionList extends StatelessWidget {
                   ),
                 ],
               ),
-              onTap: () => onSessionSelected?.call(session),
+              onTap: () {
+                final callback = onSessionSelected;
+                if (callback != null) {
+                  callback(session);
+                }
+              },
             ),
           ),
         );
@@ -235,6 +305,11 @@ class ChatSessionList extends StatelessWidget {
   }
 
   void _showRenameDialog(BuildContext context, ChatSession session) {
+    final callback = onSessionRenamed;
+    if (callback == null) {
+      return;
+    }
+
     final controller = TextEditingController(text: session.title);
 
     showDialog<void>(
@@ -255,21 +330,96 @@ class ChatSessionList extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               final newTitle = controller.text.trim();
-              if (newTitle.isNotEmpty) {
-                Navigator.of(context).pop();
+              if (newTitle.isEmpty) {
+                return;
+              }
+              Navigator.of(context).pop();
+              final ok = await callback(session, newTitle);
+              if (!ok && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to rename conversation')),
+                );
               }
             },
-            child: const Text('OK'),
+            child: const Text('Save'),
           ),
         ],
       ),
     );
   }
 
-  void _shareSession(ChatSession session) {
-    // TODO: Implement share/unshare functionality
+  Future<void> _toggleShare(BuildContext context, ChatSession session) async {
+    final callback = onSessionShareToggled;
+    if (callback == null) {
+      return;
+    }
+
+    final ok = await callback(session);
+    if (!context.mounted) {
+      return;
+    }
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to update sharing state')),
+      );
+      return;
+    }
+
+    final nextAction = session.shared ? 'unshared' : 'shared';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Conversation $nextAction')),
+    );
+  }
+
+  Future<void> _copyShareLink(BuildContext context, ChatSession session) async {
+    final link = session.shareUrl;
+    if (link == null || link.isEmpty) {
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: link));
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Share link copied')),
+    );
+  }
+
+  Future<void> _toggleArchive(BuildContext context, ChatSession session) async {
+    final callback = onSessionArchiveToggled;
+    if (callback == null) {
+      return;
+    }
+
+    final archive = !session.archived;
+    final ok = await callback(session, archive);
+    if (!context.mounted) {
+      return;
+    }
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to update archive state')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          archive ? 'Conversation archived' : 'Conversation unarchived',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _forkSession(BuildContext context, ChatSession session) async {
+    final callback = onSessionForked;
+    if (callback == null) {
+      return;
+    }
+    await callback(session);
   }
 
   void _showDeleteDialog(BuildContext context, ChatSession session) {
@@ -288,7 +438,10 @@ class ChatSessionList extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              onSessionDeleted?.call(session);
+              final callback = onSessionDeleted;
+              if (callback != null) {
+                callback(session);
+              }
             },
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,

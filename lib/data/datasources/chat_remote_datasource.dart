@@ -6,13 +6,20 @@ import 'package:dio/dio.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_realtime_model.dart';
 import '../models/chat_session_model.dart';
+import '../models/session_lifecycle_model.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/errors/exceptions.dart';
 
 /// Chat remote data source
 abstract class ChatRemoteDataSource {
   /// Get session list
-  Future<List<ChatSessionModel>> getSessions({String? directory});
+  Future<List<ChatSessionModel>> getSessions({
+    String? directory,
+    String? search,
+    bool? rootsOnly,
+    int? startEpochMs,
+    int? limit,
+  });
 
   /// Get session details
   Future<ChatSessionModel> getSession(
@@ -54,6 +61,39 @@ abstract class ChatRemoteDataSource {
   Future<ChatSessionModel> unshareSession(
     String projectId,
     String sessionId, {
+    String? directory,
+  });
+
+  /// Fork session
+  Future<ChatSessionModel> forkSession(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  });
+
+  /// Get session status map
+  Future<Map<String, SessionStatusModel>> getSessionStatus({String? directory});
+
+  /// Get session children
+  Future<List<ChatSessionModel>> getSessionChildren(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
+
+  /// Get session todos
+  Future<List<SessionTodoModel>> getSessionTodo(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
+
+  /// Get session diff
+  Future<List<SessionDiffModel>> getSessionDiff(
+    String projectId,
+    String sessionId, {
+    String? messageId,
     String? directory,
   });
 
@@ -156,11 +196,29 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   final Dio dio;
 
   @override
-  Future<List<ChatSessionModel>> getSessions({String? directory}) async {
+  Future<List<ChatSessionModel>> getSessions({
+    String? directory,
+    String? search,
+    bool? rootsOnly,
+    int? startEpochMs,
+    int? limit,
+  }) async {
     try {
       final queryParams = <String, String>{};
       if (directory != null) {
         queryParams['directory'] = directory;
+      }
+      if (search != null && search.trim().isNotEmpty) {
+        queryParams['search'] = search.trim();
+      }
+      if (rootsOnly == true) {
+        queryParams['roots'] = 'true';
+      }
+      if (startEpochMs != null) {
+        queryParams['start'] = '$startEpochMs';
+      }
+      if (limit != null) {
+        queryParams['limit'] = '$limit';
       }
 
       // Per updated API spec, session list endpoint is /session and does not require projectId in path
@@ -383,6 +441,196 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       }
       throw const ServerException('Server error');
     } catch (e) {
+      throw const ServerException('Server error');
+    }
+  }
+
+  @override
+  Future<ChatSessionModel> forkSession(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (directory != null) {
+        queryParams['directory'] = directory;
+      }
+      final body = <String, dynamic>{};
+      if (messageId != null && messageId.trim().isNotEmpty) {
+        body['messageID'] = messageId.trim();
+      }
+
+      final response = await dio.post(
+        '/session/$sessionId/fork',
+        data: body.isEmpty ? null : body,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      if (response.statusCode == 200) {
+        return ChatSessionModel.fromJson(response.data);
+      }
+      throw const ServerException('Server error');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Resource not found');
+      }
+      if (e.response?.statusCode == 400) {
+        throw const ValidationException('Invalid input parameters');
+      }
+      throw const ServerException('Server error');
+    } catch (e) {
+      throw const ServerException('Server error');
+    }
+  }
+
+  @override
+  Future<Map<String, SessionStatusModel>> getSessionStatus({
+    String? directory,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (directory != null) {
+        queryParams['directory'] = directory;
+      }
+
+      final response = await dio.get(
+        '/session/status',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Server error');
+      }
+      final raw = response.data;
+      if (raw is! Map) {
+        return const <String, SessionStatusModel>{};
+      }
+      final map = <String, SessionStatusModel>{};
+      raw.forEach((key, value) {
+        if (value is Map) {
+          map['$key'] = SessionStatusModel.fromJson(
+            Map<String, dynamic>.from(value),
+          );
+        }
+      });
+      return map;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Resource not found');
+      }
+      throw const ServerException('Server error');
+    } catch (_) {
+      throw const ServerException('Server error');
+    }
+  }
+
+  @override
+  Future<List<ChatSessionModel>> getSessionChildren(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (directory != null) {
+        queryParams['directory'] = directory;
+      }
+
+      final response = await dio.get(
+        '/session/$sessionId/children',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Server error');
+      }
+      final data = response.data as List<dynamic>? ?? const <dynamic>[];
+      return data
+          .whereType<Map>()
+          .map((item) => ChatSessionModel.fromJson(Map<String, dynamic>.from(item)))
+          .toList(growable: false);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Resource not found');
+      }
+      throw const ServerException('Server error');
+    } catch (_) {
+      throw const ServerException('Server error');
+    }
+  }
+
+  @override
+  Future<List<SessionTodoModel>> getSessionTodo(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (directory != null) {
+        queryParams['directory'] = directory;
+      }
+
+      final response = await dio.get(
+        '/session/$sessionId/todo',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Server error');
+      }
+      final data = response.data as List<dynamic>? ?? const <dynamic>[];
+      return data
+          .whereType<Map>()
+          .map(
+            (item) => SessionTodoModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList(growable: false);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Resource not found');
+      }
+      throw const ServerException('Server error');
+    } catch (_) {
+      throw const ServerException('Server error');
+    }
+  }
+
+  @override
+  Future<List<SessionDiffModel>> getSessionDiff(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (directory != null) {
+        queryParams['directory'] = directory;
+      }
+      if (messageId != null && messageId.trim().isNotEmpty) {
+        queryParams['messageID'] = messageId.trim();
+      }
+
+      final response = await dio.get(
+        '/session/$sessionId/diff',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode != 200) {
+        throw const ServerException('Server error');
+      }
+      final data = response.data as List<dynamic>? ?? const <dynamic>[];
+      return data
+          .whereType<Map>()
+          .map(
+            (item) => SessionDiffModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList(growable: false);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw const NotFoundException('Resource not found');
+      }
+      throw const ServerException('Server error');
+    } catch (_) {
       throw const ServerException('Server error');
     }
   }

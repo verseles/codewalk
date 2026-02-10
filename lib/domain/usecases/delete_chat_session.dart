@@ -7,10 +7,12 @@ class DeleteChatSessionParams {
   const DeleteChatSessionParams({
     required this.projectId,
     required this.sessionId,
+    this.directory,
   });
 
   final String projectId;
   final String sessionId;
+  final String? directory;
 }
 
 /// Technical comment translated to English.
@@ -21,6 +23,10 @@ class DeleteChatSession {
 
   /// Technical comment translated to English.
   Future<Either<Failure, void>> call(DeleteChatSessionParams params) async {
-    return await repository.deleteSession(params.projectId, params.sessionId);
+    return await repository.deleteSession(
+      params.projectId,
+      params.sessionId,
+      directory: params.directory,
+    );
   }
 }

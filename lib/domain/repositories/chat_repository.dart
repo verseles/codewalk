@@ -7,7 +7,13 @@ import '../../core/errors/failures.dart';
 /// Technical comment translated to English.
 abstract class ChatRepository {
   /// Technical comment translated to English.
-  Future<Either<Failure, List<ChatSession>>> getSessions({String? directory});
+  Future<Either<Failure, List<ChatSession>>> getSessions({
+    String? directory,
+    String? search,
+    bool? rootsOnly,
+    int? startEpochMs,
+    int? limit,
+  });
 
   /// Technical comment translated to English.
   Future<Either<Failure, ChatSession>> getSession(
@@ -49,6 +55,41 @@ abstract class ChatRepository {
   Future<Either<Failure, ChatSession>> unshareSession(
     String projectId,
     String sessionId, {
+    String? directory,
+  });
+
+  /// Technical comment translated to English.
+  Future<Either<Failure, ChatSession>> forkSession(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  });
+
+  /// Technical comment translated to English.
+  Future<Either<Failure, Map<String, SessionStatusInfo>>> getSessionStatus({
+    String? directory,
+  });
+
+  /// Technical comment translated to English.
+  Future<Either<Failure, List<ChatSession>>> getSessionChildren(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
+
+  /// Technical comment translated to English.
+  Future<Either<Failure, List<SessionTodo>>> getSessionTodo(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  });
+
+  /// Technical comment translated to English.
+  Future<Either<Failure, List<SessionDiff>>> getSessionDiff(
+    String projectId,
+    String sessionId, {
+    String? messageId,
     String? directory,
   });
 

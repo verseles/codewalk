@@ -123,13 +123,15 @@ Fixed a send-path crash triggered by fixed-length restored recent-model lists (`
 - [x] 13.05 Add integration tests with mocked event matrix and partial/delta update scenarios
 
 ### Feature 014: Advanced Session Lifecycle Management
-Description: Upgrade session operations beyond basic CRUD to parity-level management for active and historical work. (Visit file ROADMAP.feat014.md for full research details)
+Description: Upgrade session operations beyond basic CRUD to parity-level management for active and historical work.
 
-- [ ] 14.01 Implement rename/archive/share/unshare/delete flows end-to-end (API + UI + optimistic update + rollback)
-- [ ] 14.02 Add session fork/children/todo/diff/status capabilities where supported by server
-- [ ] 14.03 Implement robust session list UX (sorting, filtering/search, scalable loading strategy)
-- [ ] 14.04 Add session timeline/history quality (state reconciliation across updates and navigation)
-- [ ] 14.05 Cover session lifecycle operations with integration tests against controlled server fixtures
+Completed full session lifecycle parity implementation across domain/data/provider/UI layers: added end-to-end rename/archive/unarchive/share/unshare/delete with optimistic local updates + rollback, implemented fork/status/children/todo/diff capabilities with provider-level insight reconciliation, and expanded session list UX with search/filter/sort/load-more controls suitable for large histories. Also extended event reducer handling for `todo.updated` and `session.diff`, hardened session ordering/cache persistence behavior, and added lifecycle-focused unit/widget/integration tests with controlled server fixtures.
+
+- [x] 14.01 Implement rename/archive/share/unshare/delete flows end-to-end (API + UI + optimistic update + rollback)
+- [x] 14.02 Add session fork/children/todo/diff/status capabilities where supported by server
+- [x] 14.03 Implement robust session list UX (sorting, filtering/search, scalable loading strategy)
+- [x] 14.04 Add session timeline/history quality (state reconciliation across updates and navigation)
+- [x] 14.05 Cover session lifecycle operations with integration tests against controlled server fixtures
 
 ### Feature 015: Project/Workspace Context Parity
 Description: Support multi-project and workspace/worktree workflows using directory-aware API/event orchestration. (Visit file ROADMAP.feat015.md for full research details)

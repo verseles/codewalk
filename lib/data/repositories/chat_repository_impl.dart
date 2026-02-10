@@ -18,9 +18,19 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   Future<Either<Failure, List<ChatSession>>> getSessions({
     String? directory,
+    String? search,
+    bool? rootsOnly,
+    int? startEpochMs,
+    int? limit,
   }) async {
     try {
-      final sessions = await remoteDataSource.getSessions(directory: directory);
+      final sessions = await remoteDataSource.getSessions(
+        directory: directory,
+        search: search,
+        rootsOnly: rootsOnly,
+        startEpochMs: startEpochMs,
+        limit: limit,
+      );
       return Right(sessions.map((s) => s.toDomain()).toList());
     } on ServerException {
       return const Left(ServerFailure('Failed to load sessions'));
@@ -177,6 +187,128 @@ class ChatRepositoryImpl implements ChatRepository {
     } on NetworkException {
       return const Left(NetworkFailure('Network connection failed'));
     } catch (e) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ChatSession>> forkSession(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  }) async {
+    try {
+      final session = await remoteDataSource.forkSession(
+        projectId,
+        sessionId,
+        messageId: messageId,
+        directory: directory,
+      );
+      return Right(session.toDomain());
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Session not found'));
+    } on ValidationException {
+      return const Left(ValidationFailure('Invalid input parameters'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to fork session'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, SessionStatusInfo>>> getSessionStatus({
+    String? directory,
+  }) async {
+    try {
+      final map = await remoteDataSource.getSessionStatus(directory: directory);
+      return Right(
+        map.map((key, value) => MapEntry(key, value.toDomain())),
+      );
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Session status not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to load session status'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ChatSession>>> getSessionChildren(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
+    try {
+      final children = await remoteDataSource.getSessionChildren(
+        projectId,
+        sessionId,
+        directory: directory,
+      );
+      return Right(children.map((item) => item.toDomain()).toList());
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Session not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to load session children'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<SessionTodo>>> getSessionTodo(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
+    try {
+      final todos = await remoteDataSource.getSessionTodo(
+        projectId,
+        sessionId,
+        directory: directory,
+      );
+      return Right(todos.map((item) => item.toDomain()).toList());
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Session not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to load session todo'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      return const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<SessionDiff>>> getSessionDiff(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  }) async {
+    try {
+      final diff = await remoteDataSource.getSessionDiff(
+        projectId,
+        sessionId,
+        messageId: messageId,
+        directory: directory,
+      );
+      return Right(diff.map((item) => item.toDomain()).toList());
+    } on NotFoundException {
+      return const Left(NotFoundFailure('Session not found'));
+    } on ServerException {
+      return const Left(ServerFailure('Failed to load session diff'));
+    } on NetworkException {
+      return const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
       return const Left(UnknownFailure('Unknown error'));
     }
   }

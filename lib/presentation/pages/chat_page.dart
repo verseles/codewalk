@@ -51,6 +51,8 @@ class _ChatPageState extends State<ChatPage> {
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
+  final TextEditingController _sessionSearchController =
+      TextEditingController();
   ChatProvider? _chatProvider;
   AppProvider? _appProvider;
   String? _lastServerId;
@@ -85,6 +87,7 @@ class _ChatPageState extends State<ChatPage> {
 
     _scrollController.dispose();
     _inputFocusNode.dispose();
+    _sessionSearchController.dispose();
     super.dispose();
   }
 
@@ -463,6 +466,15 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildSessionPanel({required bool closeOnSelect}) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
+        if (_sessionSearchController.text != chatProvider.sessionSearchQuery) {
+          _sessionSearchController.value = TextEditingValue(
+            text: chatProvider.sessionSearchQuery,
+            selection: TextSelection.collapsed(
+              offset: chatProvider.sessionSearchQuery.length,
+            ),
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -470,24 +482,101 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
               child: Card(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Text(
-                          'Conversations',
-                          style: Theme.of(context).textTheme.titleMedium,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Conversations',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: _createNewSession,
+                            tooltip: 'New Chat',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: _refreshData,
+                            tooltip: 'Refresh',
+                          ),
+                        ],
+                      ),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          PopupMenuButton<SessionListFilter>(
+                            tooltip: 'Filter sessions',
+                            onSelected: chatProvider.setSessionListFilter,
+                            itemBuilder: (context) => const [
+                              PopupMenuItem(
+                                value: SessionListFilter.active,
+                                child: Text('Active'),
+                              ),
+                              PopupMenuItem(
+                                value: SessionListFilter.archived,
+                                child: Text('Archived'),
+                              ),
+                              PopupMenuItem(
+                                value: SessionListFilter.all,
+                                child: Text('All'),
+                              ),
+                            ],
+                            child: _headerChip(
+                              context,
+                              icon: Icons.filter_list,
+                              label: switch (chatProvider.sessionListFilter) {
+                                SessionListFilter.active => 'Active',
+                                SessionListFilter.archived => 'Archived',
+                                SessionListFilter.all => 'All',
+                              },
+                            ),
+                          ),
+                          PopupMenuButton<SessionListSort>(
+                            tooltip: 'Sort sessions',
+                            onSelected: chatProvider.setSessionListSort,
+                            itemBuilder: (context) => const [
+                              PopupMenuItem(
+                                value: SessionListSort.recent,
+                                child: Text('Most Recent'),
+                              ),
+                              PopupMenuItem(
+                                value: SessionListSort.oldest,
+                                child: Text('Oldest'),
+                              ),
+                              PopupMenuItem(
+                                value: SessionListSort.title,
+                                child: Text('Title'),
+                              ),
+                            ],
+                            child: _headerChip(
+                              context,
+                              icon: Icons.sort,
+                              label: switch (chatProvider.sessionListSort) {
+                                SessionListSort.recent => 'Recent',
+                                SessionListSort.oldest => 'Oldest',
+                                SessionListSort.title => 'Title',
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _sessionSearchController,
+                        onChanged: chatProvider.setSessionSearchQuery,
+                        decoration: InputDecoration(
+                          hintText: 'Search conversations',
+                          prefixIcon: const Icon(Icons.search),
+                          isDense: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: _createNewSession,
-                        tooltip: 'New Chat',
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: _refreshData,
-                        tooltip: 'Refresh',
                       ),
                     ],
                   ),
@@ -495,23 +584,89 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             Expanded(
-              child: ChatSessionList(
-                sessions: chatProvider.sessions,
-                currentSession: chatProvider.currentSession,
-                onSessionSelected: (session) {
-                  chatProvider.selectSession(session);
-                  if (closeOnSelect) {
-                    Navigator.of(context).pop();
-                  }
-                },
-                onSessionDeleted: (session) {
-                  chatProvider.deleteSession(session.id);
-                },
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ChatSessionList(
+                      sessions: chatProvider.visibleSessions,
+                      currentSession: chatProvider.currentSession,
+                      onSessionSelected: (session) async {
+                        await chatProvider.selectSession(session);
+                        if (closeOnSelect && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      onSessionDeleted: (session) async {
+                        await chatProvider.deleteSession(session.id);
+                      },
+                      onSessionRenamed: (session, title) {
+                        return chatProvider.renameSession(session, title);
+                      },
+                      onSessionShareToggled: (session) {
+                        return chatProvider.toggleSessionShare(session);
+                      },
+                      onSessionArchiveToggled: (session, archived) {
+                        return chatProvider.setSessionArchived(session, archived);
+                      },
+                      onSessionForked: (session) async {
+                        final created = await chatProvider.forkSession(session);
+                        if (!context.mounted) {
+                          return;
+                        }
+                        if (created == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Failed to fork conversation'),
+                            ),
+                          );
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Conversation forked')),
+                        );
+                        if (closeOnSelect) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
+                  ),
+                  if (chatProvider.canLoadMoreSessions)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                      child: OutlinedButton.icon(
+                        onPressed: chatProvider.loadMoreSessions,
+                        icon: const Icon(Icons.expand_more),
+                        label: const Text('Load more'),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _headerChip(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14),
+          const SizedBox(width: 4),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+        ],
+      ),
     );
   }
 
@@ -558,9 +713,66 @@ class _ChatPageState extends State<ChatPage> {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Text(
-                  'Current session:\n${chatProvider.currentSession!.title ?? 'New Chat'}',
-                  style: Theme.of(context).textTheme.bodySmall,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            chatProvider.currentSession!.title ?? 'New Chat',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            final session = chatProvider.currentSession;
+                            if (session != null) {
+                              unawaited(chatProvider.loadSessionInsights(session.id));
+                            }
+                          },
+                          icon: const Icon(Icons.sync, size: 18),
+                          tooltip: 'Refresh session details',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _sessionStatusLabel(
+                        chatProvider.currentSessionStatus ??
+                            const SessionStatusInfo(type: SessionStatusType.idle),
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Children: ${chatProvider.currentSessionChildren.length}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      'Todos: ${chatProvider.currentSessionTodo.length}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      'Diff files: ${chatProvider.currentSessionDiff.length}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    if (chatProvider.isLoadingSessionInsights)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: LinearProgressIndicator(minHeight: 2),
+                      ),
+                    if (chatProvider.sessionInsightsError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          chatProvider.sessionInsightsError!,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Theme.of(context).colorScheme.error),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -629,47 +841,75 @@ class _ChatPageState extends State<ChatPage> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.chat_bubble_outline,
-                            size: 18,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSecondaryContainer,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              chatProvider.currentSession!.title ?? 'New Chat',
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSecondaryContainer,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                          ),
-                          if (chatProvider.currentSessionStatus != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.chat_bubble_outline,
+                                size: 18,
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(999),
+                                ).colorScheme.onSecondaryContainer,
                               ),
-                              child: Text(
-                                _sessionStatusLabel(
-                                  chatProvider.currentSessionStatus!,
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  chatProvider.currentSession!.title ?? 'New Chat',
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSecondaryContainer,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                 ),
-                                style: Theme.of(context).textTheme.labelSmall,
                               ),
-                            ),
+                              if (chatProvider.currentSessionStatus != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    _sessionStatusLabel(
+                                      chatProvider.currentSessionStatus!,
+                                    ),
+                                    style: Theme.of(context).textTheme.labelSmall,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _metaChip(
+                                context,
+                                icon: Icons.call_split,
+                                label:
+                                    'Children: ${chatProvider.currentSessionChildren.length}',
+                              ),
+                              _metaChip(
+                                context,
+                                icon: Icons.checklist,
+                                label: 'Todos: ${chatProvider.currentSessionTodo.length}',
+                              ),
+                              _metaChip(
+                                context,
+                                icon: Icons.compare_arrows,
+                                label: 'Diff: ${chatProvider.currentSessionDiff.length}',
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -836,6 +1076,28 @@ class _ChatPageState extends State<ChatPage> {
       case SessionStatusType.idle:
         return 'Status: Idle';
     }
+  }
+
+  Widget _metaChip(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14),
+          const SizedBox(width: 4),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+        ],
+      ),
+    );
   }
 
   Widget _buildModelControlChip({

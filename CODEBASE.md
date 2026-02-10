@@ -70,11 +70,11 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 69 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 74 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 14 | Test files (unit, widget, integration, support) |
-| `.dart` (total) | 83 | Tracked Dart files in repository (including tests and generated files) |
-| `.md` (markdown) | 16 | Docs + roadmap + CONTRIBUTING.md |
+| `.dart` (tests) | 15 | Test files (unit, widget, integration, support) |
+| `.dart` (total) | 93 | Repository files excluding build artifacts |
+| `.md` (markdown) | 15 | Docs + roadmap + CONTRIBUTING.md |
 | `.sh` (scripts) | 3 | CI validation + installer scripts |
 
 ## Legacy Naming References
@@ -101,13 +101,18 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/session` | List sessions |
+| GET | `/session` | List sessions (`directory`, `search`, `roots`, `start`, `limit`) |
 | GET | `/session/{id}` | Get session details |
 | POST | `/session` | Create session |
 | PATCH | `/session/{id}` | Update session |
 | DELETE | `/session/{id}` | Delete session |
 | POST | `/session/{id}/share` | Share session |
 | DELETE | `/session/{id}/share` | Unshare session |
+| POST | `/session/{id}/fork` | Fork session (`{messageID?}`) |
+| GET | `/session/status` | Snapshot status map for all sessions |
+| GET | `/session/{id}/children` | List forked child sessions |
+| GET | `/session/{id}/todo` | List session todo items |
+| GET | `/session/{id}/diff` | List session diff files (`messageID?`) |
 | GET | `/session/{id}/message` | List messages |
 | GET | `/session/{id}/message/{messageId}` | Get specific message |
 | POST | `/session/{id}/message` | Send message (streaming via SSE) |
@@ -130,7 +135,7 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | GET | `/project` | List all projects |
 | GET | `/project/current` | Get current project |
 
-**Total: 29 endpoint operations used by client (including legacy fallbacks)**
+**Total: 34 endpoint operations used by client (including legacy fallbacks)**
 
 ### Feature 010 Parity Contract Baseline (Locked 2026-02-09)
 
@@ -153,7 +158,7 @@ Compatibility tiers:
 |---|---|---|---|
 | App bootstrap/config | Partial | `/path`, `/provider`, `/config`, `/project`, `/project/current` (+ `/app` fallback) | `/global/config`, `/global/dispose` |
 | Core sessions/messages | Partial | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event` | `/global/event` |
-| Session lifecycle advanced | Partial | `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff`, plus existing share/revert/abort/init/summarize paths | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
+| Session lifecycle advanced | Implemented (Feature 014) | `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff`, plus existing share/revert/abort/init/summarize paths | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
 | Interactive flows | Implemented (Feature 013) | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
 | Tooling/context | Mostly missing | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) | `/lsp`, `/experimental/worktree*`, `/pty*` |
 
@@ -177,6 +182,34 @@ Compatibility tiers:
 - Added interaction UI widgets:
   - `lib/presentation/widgets/permission_request_card.dart`
   - `lib/presentation/widgets/question_request_card.dart`
+
+### Feature 014 Session Lifecycle Architecture (Implemented 2026-02-10)
+
+- Added domain lifecycle entities and contracts:
+  - `lib/domain/entities/chat_session.dart` (`archivedAt`, `shareUrl`, `parentId`, `SessionTodo`, `SessionDiff`)
+  - `lib/domain/repositories/chat_repository.dart` (fork/status/children/todo/diff operations)
+- Added lifecycle use cases:
+  - `lib/domain/usecases/update_chat_session.dart`
+  - `lib/domain/usecases/share_chat_session.dart`
+  - `lib/domain/usecases/unshare_chat_session.dart`
+  - `lib/domain/usecases/fork_chat_session.dart`
+  - `lib/domain/usecases/get_session_status.dart`
+  - `lib/domain/usecases/get_session_children.dart`
+  - `lib/domain/usecases/get_session_todo.dart`
+  - `lib/domain/usecases/get_session_diff.dart`
+- Expanded data layer for lifecycle endpoints and models:
+  - `lib/data/datasources/chat_remote_datasource.dart`
+  - `lib/data/models/chat_session_model.dart`
+  - `lib/data/models/session_lifecycle_model.dart`
+  - `lib/data/repositories/chat_repository_impl.dart`
+- Extended `ChatProvider` lifecycle orchestration:
+  - optimistic rename/archive/share/delete with rollback
+  - session insight hydration (`status`, `children`, `todo`, `diff`)
+  - session list search/filter/sort/load-more state
+  - reducer support for `todo.updated` and `session.diff`
+- Updated lifecycle UI surfaces:
+  - `lib/presentation/widgets/chat_session_list.dart` action menu (rename/share/archive/fork/delete)
+  - `lib/presentation/pages/chat_page.dart` session controls and insight chips/panel
 
 ### ChatInput Schema
 
@@ -204,7 +237,8 @@ Compatibility tiers:
 | `session.created`, `session.updated`, `session.deleted`, `session.status` | Fully handled in reducer | Required |
 | `permission.asked`, `permission.replied` | Fully handled with pending queue sync | Required |
 | `question.asked`, `question.replied`, `question.rejected` | Fully handled with pending queue sync | Required |
-| `todo.updated`, `session.diff`, `vcs.branch.updated`, `worktree.ready`, `worktree.failed` | Not handled | Required |
+| `todo.updated`, `session.diff` | Fully handled in reducer (session insight maps) | Required |
+| `vcs.branch.updated`, `worktree.ready`, `worktree.failed` | Not handled | Required |
 | Other diagnostic/low-impact events | Ignored | Optional |
 
 ### Message Part Taxonomy
@@ -220,11 +254,6 @@ Compatibility tiers:
 
 Required for parity wave:
 
-- `/session/status`
-- `/session/:id/children`
-- `/session/:id/todo`
-- `/session/:id/fork`
-- `/session/:id/diff`
 - `/find/*`
 - `/file/*`
 - `/vcs`
@@ -301,12 +330,12 @@ Deferred/optional after parity wave:
 
 ### flutter test
 
-- **Result: 47 tests, all passed**
+- **Result: 58 tests, all passed**
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
-  - Unit: providers/usecases/models with migration and server-scope assertions
-  - Widget: responsive shell, app shell navigation, server settings, and interaction cards
-  - Integration: mock-server coverage for SSE reconnect + permission/question flows + error mapping + server-switch isolation
+  - Unit: providers/usecases/models with migration, server-scope assertions, and lifecycle optimistic-rollback flows
+  - Widget: responsive shell, app shell navigation, server settings, interaction cards, and session lifecycle action menu
+  - Integration: mock-server coverage for SSE reconnect + permission/question flows + lifecycle endpoints + server-switch isolation
 - **Test tags:** `requires_server`, `hardware` (defined in dart_test.yaml)
 
 ## CI/CD and Automation
@@ -436,8 +465,11 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 
 ### Session Module
 - Session list loading and caching
+- Session list controls: search/filter/sort/load-more windowing
 - Session selection and current session persistence
-- Create/delete/update/share operations
+- Full lifecycle operations: create/delete/rename/archive/unarchive/share/unshare/fork
+- Session insights orchestration: status snapshot + children/todo/diff hydration
+- Optimistic session mutations with rollback on API failure
 - Server-scoped cache isolation to prevent cross-server leakage
 
 ### Chat Module
@@ -458,7 +490,8 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 
 ### Core Entities
 - `ChatMessage`: supports user and assistant messages with typed parts (`TextPart`, `FilePart`, `ToolPart`, `ReasoningPart`, `PatchPart`, `AgentPart`, `StepStartPart`, `StepFinishPart`, `SnapshotPart`, `SubtaskPart`, `RetryPart`, `CompactionPart`)
-- `ChatSession`: session identity, metadata, optional share/summary info, path/workspace linkage
+- `ChatSession`: session identity, parent/directory linkage, archive/share metadata, optional summary and path info
+- `SessionTodo` / `SessionDiff`: session insight entities used by lifecycle panel and reducer updates
 - `MessageTokens`: includes `input`, `output`, `reasoning`, `cacheRead`, `cacheWrite`
 - `ProvidersResponse`: includes `providers`, `defaultModels`, `connected`
 - `Model`: includes optional `variants` metadata used for reasoning-effort controls
@@ -498,10 +531,11 @@ test/
 ├── widget/
 │   ├── chat_page_test.dart                   # ChatPage responsive shell
 │   ├── app_shell_page_test.dart              # Bottom navigation + logs tab interaction
+│   ├── chat_session_list_test.dart           # Session lifecycle menu actions (rename/share/archive/delete)
 │   ├── interaction_cards_test.dart           # Permission/question UI action dispatch
 │   └── server_settings_page_test.dart        # Multi-server manager rendering and unhealthy-switch guard
 ├── integration/
-│   └── opencode_server_integration_test.dart # Mock server SSE flow/reconnect + interaction endpoints + server-switch cache isolation
+│   └── opencode_server_integration_test.dart # Mock server SSE flow/reconnect + interaction endpoints + lifecycle endpoints + server-switch cache isolation
 └── support/
     ├── fakes.dart                             # Fake implementations for testing
     └── mock_opencode_server.dart              # Shelf-based mock OpenCode API server
@@ -512,6 +546,7 @@ test/
 **mock_opencode_server.dart:**
 - Shelf-based HTTP server emulating OpenCode API
 - Supports `/session`, `/session/{id}/message` endpoints
+- Supports advanced lifecycle routes (`/session/status`, `/children`, `/todo`, `/diff`, `/fork`, `/share`, `PATCH /session/{id}`)
 - Supports `/permission*` and `/question*` interaction endpoints
 - Supports `/global/health` for server-health orchestration tests
 - SSE event stream simulation for real-time updates and reconnect scenarios

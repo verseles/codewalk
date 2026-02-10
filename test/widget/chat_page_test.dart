@@ -12,17 +12,25 @@ import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/get_session_children.dart';
+import 'package:codewalk/domain/usecases/get_session_diff.dart';
+import 'package:codewalk/domain/usecases/get_session_status.dart';
+import 'package:codewalk/domain/usecases/get_session_todo.dart';
 import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
 import 'package:codewalk/domain/usecases/list_pending_questions.dart';
 import 'package:codewalk/domain/usecases/reject_question.dart';
 import 'package:codewalk/domain/usecases/reply_permission.dart';
 import 'package:codewalk/domain/usecases/reply_question.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/domain/usecases/share_chat_session.dart';
+import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
+import 'package:codewalk/domain/usecases/update_chat_session.dart';
 import 'package:codewalk/domain/usecases/watch_chat_events.dart';
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/presentation/pages/chat_page.dart';
@@ -124,7 +132,7 @@ void main() {
     await tester.tap(find.text('Session 1'));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField), 'hello from widget');
+    await tester.enterText(find.byType(TextField).last, 'hello from widget');
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.send_rounded));
@@ -229,6 +237,14 @@ ChatProvider _buildChatProvider({
     getChatMessage: GetChatMessage(chatRepo),
     getProviders: GetProviders(appRepo),
     deleteChatSession: DeleteChatSession(chatRepo),
+    updateChatSession: UpdateChatSession(chatRepo),
+    shareChatSession: ShareChatSession(chatRepo),
+    unshareChatSession: UnshareChatSession(chatRepo),
+    forkChatSession: ForkChatSession(chatRepo),
+    getSessionStatus: GetSessionStatus(chatRepo),
+    getSessionChildren: GetSessionChildren(chatRepo),
+    getSessionTodo: GetSessionTodo(chatRepo),
+    getSessionDiff: GetSessionDiff(chatRepo),
     watchChatEvents: WatchChatEvents(chatRepo),
     listPendingPermissions: ListPendingPermissions(chatRepo),
     replyPermission: ReplyPermission(chatRepo),

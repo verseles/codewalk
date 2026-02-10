@@ -12,17 +12,25 @@ import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/get_session_children.dart';
+import 'package:codewalk/domain/usecases/get_session_diff.dart';
+import 'package:codewalk/domain/usecases/get_session_status.dart';
+import 'package:codewalk/domain/usecases/get_session_todo.dart';
 import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
 import 'package:codewalk/domain/usecases/list_pending_questions.dart';
 import 'package:codewalk/domain/usecases/reject_question.dart';
 import 'package:codewalk/domain/usecases/reply_permission.dart';
 import 'package:codewalk/domain/usecases/reply_question.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/domain/usecases/share_chat_session.dart';
+import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
+import 'package:codewalk/domain/usecases/update_chat_session.dart';
 import 'package:codewalk/domain/usecases/watch_chat_events.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
@@ -92,6 +100,79 @@ void main() {
         await remote.deleteSession('default', created.id);
         final afterDelete = await remote.getSessions();
         expect(afterDelete.map((s) => s.id), isNot(contains(created.id)));
+      },
+    );
+
+    test(
+      'ChatRemoteDataSource supports lifecycle endpoints (status/todo/diff/share/fork/archive)',
+      () async {
+        server.sessionStatusById = <String, Map<String, dynamic>>{
+          'ses_1': <String, dynamic>{'type': 'busy'},
+        };
+        server.sessionTodoById['ses_1'] = <Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 'todo_1',
+            'content': 'Implement lifecycle',
+            'status': 'in_progress',
+            'priority': 'high',
+          },
+        ];
+        server.sessionDiffById['ses_1'] = <Map<String, dynamic>>[
+          <String, dynamic>{
+            'file': 'lib/main.dart',
+            'before': 'old',
+            'after': 'new',
+            'additions': 8,
+            'deletions': 2,
+            'status': 'modified',
+          },
+        ];
+
+        final remote = ChatRemoteDataSourceImpl(
+          dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+        );
+
+        final renamed = await remote.updateSession(
+          'default',
+          'ses_1',
+          const SessionUpdateInputModel(title: 'Renamed Session'),
+        );
+        expect(renamed.title, 'Renamed Session');
+
+        final archived = await remote.updateSession(
+          'default',
+          'ses_1',
+          const SessionUpdateInputModel(archivedAtEpochMs: 1739079999999),
+        );
+        expect(archived.time.archived, 1739079999999);
+
+        final unarchived = await remote.updateSession(
+          'default',
+          'ses_1',
+          const SessionUpdateInputModel(archivedAtEpochMs: 0),
+        );
+        expect(unarchived.time.archived, isNull);
+
+        final shared = await remote.shareSession('default', 'ses_1');
+        expect(shared.share?.url, isNotNull);
+
+        final unshared = await remote.unshareSession('default', 'ses_1');
+        expect(unshared.share, isNull);
+
+        final forked = await remote.forkSession('default', 'ses_1');
+        expect(forked.parentId, 'ses_1');
+
+        final children = await remote.getSessionChildren('default', 'ses_1');
+        expect(children.map((item) => item.id), contains(forked.id));
+
+        final todo = await remote.getSessionTodo('default', 'ses_1');
+        expect(todo.single.id, 'todo_1');
+
+        final diff = await remote.getSessionDiff('default', 'ses_1');
+        expect(diff.single.file, 'lib/main.dart');
+
+        final status = await remote.getSessionStatus();
+        expect(status['ses_1']?.type, 'busy');
       },
     );
 
@@ -381,6 +462,14 @@ void main() {
           getChatMessage: GetChatMessage(chatRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(chatRepository),
+          updateChatSession: UpdateChatSession(chatRepository),
+          shareChatSession: ShareChatSession(chatRepository),
+          unshareChatSession: UnshareChatSession(chatRepository),
+          forkChatSession: ForkChatSession(chatRepository),
+          getSessionStatus: GetSessionStatus(chatRepository),
+          getSessionChildren: GetSessionChildren(chatRepository),
+          getSessionTodo: GetSessionTodo(chatRepository),
+          getSessionDiff: GetSessionDiff(chatRepository),
           watchChatEvents: WatchChatEvents(chatRepository),
           listPendingPermissions: ListPendingPermissions(chatRepository),
           replyPermission: ReplyPermission(chatRepository),

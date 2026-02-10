@@ -17,12 +17,20 @@ import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/get_chat_message.dart';
 import '../../domain/usecases/get_providers.dart';
 import '../../domain/usecases/delete_chat_session.dart';
+import '../../domain/usecases/fork_chat_session.dart';
+import '../../domain/usecases/get_session_children.dart';
+import '../../domain/usecases/get_session_diff.dart';
+import '../../domain/usecases/get_session_status.dart';
+import '../../domain/usecases/get_session_todo.dart';
 import '../../domain/usecases/watch_chat_events.dart';
 import '../../domain/usecases/list_pending_permissions.dart';
 import '../../domain/usecases/reply_permission.dart';
 import '../../domain/usecases/list_pending_questions.dart';
 import '../../domain/usecases/reply_question.dart';
 import '../../domain/usecases/reject_question.dart';
+import '../../domain/usecases/share_chat_session.dart';
+import '../../domain/usecases/unshare_chat_session.dart';
+import '../../domain/usecases/update_chat_session.dart';
 import '../../data/datasources/chat_remote_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -89,6 +97,14 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetChatMessage(sl()));
   sl.registerLazySingleton(() => GetProviders(sl()));
   sl.registerLazySingleton(() => DeleteChatSession(sl()));
+  sl.registerLazySingleton(() => UpdateChatSession(sl()));
+  sl.registerLazySingleton(() => ShareChatSession(sl()));
+  sl.registerLazySingleton(() => UnshareChatSession(sl()));
+  sl.registerLazySingleton(() => ForkChatSession(sl()));
+  sl.registerLazySingleton(() => GetSessionStatus(sl()));
+  sl.registerLazySingleton(() => GetSessionChildren(sl()));
+  sl.registerLazySingleton(() => GetSessionTodo(sl()));
+  sl.registerLazySingleton(() => GetSessionDiff(sl()));
   sl.registerLazySingleton(() => WatchChatEvents(sl()));
   sl.registerLazySingleton(() => ListPendingPermissions(sl()));
   sl.registerLazySingleton(() => ReplyPermission(sl()));
@@ -115,6 +131,14 @@ Future<void> init() async {
       getChatMessage: sl(),
       getProviders: sl(),
       deleteChatSession: sl(),
+      updateChatSession: sl(),
+      shareChatSession: sl(),
+      unshareChatSession: sl(),
+      forkChatSession: sl(),
+      getSessionStatus: sl(),
+      getSessionChildren: sl(),
+      getSessionTodo: sl(),
+      getSessionDiff: sl(),
       watchChatEvents: sl(),
       listPendingPermissions: sl(),
       replyPermission: sl(),

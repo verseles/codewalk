@@ -12,22 +12,34 @@ import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/provider.dart';
 import '../../domain/usecases/create_chat_session.dart';
 import '../../domain/usecases/delete_chat_session.dart';
+import '../../domain/usecases/fork_chat_session.dart';
 import '../../domain/usecases/get_chat_message.dart';
 import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/get_providers.dart';
+import '../../domain/usecases/get_session_children.dart';
+import '../../domain/usecases/get_session_diff.dart';
+import '../../domain/usecases/get_session_status.dart';
+import '../../domain/usecases/get_session_todo.dart';
 import '../../domain/usecases/list_pending_permissions.dart';
 import '../../domain/usecases/list_pending_questions.dart';
 import '../../domain/usecases/reject_question.dart';
 import '../../domain/usecases/reply_permission.dart';
 import '../../domain/usecases/reply_question.dart';
 import '../../domain/usecases/send_chat_message.dart';
+import '../../domain/usecases/share_chat_session.dart';
+import '../../domain/usecases/unshare_chat_session.dart';
+import '../../domain/usecases/update_chat_session.dart';
 import '../../domain/usecases/watch_chat_events.dart';
 import '../../core/errors/failures.dart';
 import 'project_provider.dart';
 
 /// Chat state
 enum ChatState { initial, loading, loaded, error, sending }
+
+enum SessionListFilter { active, archived, all }
+
+enum SessionListSort { recent, oldest, title }
 
 /// Chat provider
 class ChatProvider extends ChangeNotifier {
@@ -39,6 +51,14 @@ class ChatProvider extends ChangeNotifier {
     required this.getChatMessage,
     required this.getProviders,
     required this.deleteChatSession,
+    required this.updateChatSession,
+    required this.shareChatSession,
+    required this.unshareChatSession,
+    required this.forkChatSession,
+    required this.getSessionStatus,
+    required this.getSessionChildren,
+    required this.getSessionTodo,
+    required this.getSessionDiff,
     required this.watchChatEvents,
     required this.listPendingPermissions,
     required this.replyPermission,
@@ -59,6 +79,14 @@ class ChatProvider extends ChangeNotifier {
   final GetChatMessage getChatMessage;
   final GetProviders getProviders;
   final DeleteChatSession deleteChatSession;
+  final UpdateChatSession updateChatSession;
+  final ShareChatSession shareChatSession;
+  final UnshareChatSession unshareChatSession;
+  final ForkChatSession forkChatSession;
+  final GetSessionStatus getSessionStatus;
+  final GetSessionChildren getSessionChildren;
+  final GetSessionTodo getSessionTodo;
+  final GetSessionDiff getSessionDiff;
   final WatchChatEvents watchChatEvents;
   final ListPendingPermissions listPendingPermissions;
   final ReplyPermission replyPermission;
@@ -83,6 +111,18 @@ class ChatProvider extends ChangeNotifier {
       <String, List<ChatPermissionRequest>>{};
   Map<String, List<ChatQuestionRequest>> _pendingQuestionsBySession =
       <String, List<ChatQuestionRequest>>{};
+  Map<String, List<ChatSession>> _sessionChildrenById =
+      <String, List<ChatSession>>{};
+  Map<String, List<SessionTodo>> _sessionTodoById =
+      <String, List<SessionTodo>>{};
+  Map<String, List<SessionDiff>> _sessionDiffById =
+      <String, List<SessionDiff>>{};
+  String _sessionSearchQuery = '';
+  SessionListFilter _sessionListFilter = SessionListFilter.active;
+  SessionListSort _sessionListSort = SessionListSort.recent;
+  int _sessionVisibleLimit = 40;
+  bool _isLoadingSessionInsights = false;
+  String? _sessionInsightsError;
 
   // Project and provider-related state
   String? _currentProjectId;
@@ -105,6 +145,11 @@ class ChatProvider extends ChangeNotifier {
   // Getters
   ChatState get state => _state;
   List<ChatSession> get sessions => _sessions;
+  String get sessionSearchQuery => _sessionSearchQuery;
+  SessionListFilter get sessionListFilter => _sessionListFilter;
+  SessionListSort get sessionListSort => _sessionListSort;
+  bool get isLoadingSessionInsights => _isLoadingSessionInsights;
+  String? get sessionInsightsError => _sessionInsightsError;
   ChatSession? get currentSession => _currentSession;
   List<ChatMessage> get messages => _messages;
   String? get errorMessage => _errorMessage;
@@ -122,6 +167,78 @@ class ChatProvider extends ChangeNotifier {
   bool get isRespondingInteraction => _isRespondingInteraction;
   Map<String, SessionStatusInfo> get sessionStatusById =>
       Map<String, SessionStatusInfo>.unmodifiable(_sessionStatusById);
+
+  List<ChatSession> get visibleSessions {
+    final query = _sessionSearchQuery.trim().toLowerCase();
+    final filtered = _sessions.where((session) {
+      final archived = session.archived;
+      switch (_sessionListFilter) {
+        case SessionListFilter.active:
+          if (archived) {
+            return false;
+          }
+        case SessionListFilter.archived:
+          if (!archived) {
+            return false;
+          }
+        case SessionListFilter.all:
+          break;
+      }
+
+      if (query.isEmpty) {
+        return true;
+      }
+
+      final title = (session.title ?? '').toLowerCase();
+      final summary = (session.summary ?? '').toLowerCase();
+      return title.contains(query) || summary.contains(query);
+    }).toList(growable: false);
+
+    final sorted = List<ChatSession>.from(filtered)
+      ..sort((a, b) {
+        switch (_sessionListSort) {
+          case SessionListSort.oldest:
+            return a.time.compareTo(b.time);
+          case SessionListSort.title:
+            return (a.title ?? '').toLowerCase().compareTo(
+              (b.title ?? '').toLowerCase(),
+            );
+          case SessionListSort.recent:
+            return b.time.compareTo(a.time);
+        }
+      });
+
+    if (sorted.length <= _sessionVisibleLimit) {
+      return sorted;
+    }
+    return sorted.take(_sessionVisibleLimit).toList(growable: false);
+  }
+
+  bool get canLoadMoreSessions {
+    final query = _sessionSearchQuery.trim().toLowerCase();
+    final total = _sessions.where((session) {
+      final archived = session.archived;
+      switch (_sessionListFilter) {
+        case SessionListFilter.active:
+          if (archived) {
+            return false;
+          }
+        case SessionListFilter.archived:
+          if (!archived) {
+            return false;
+          }
+        case SessionListFilter.all:
+          break;
+      }
+      if (query.isEmpty) {
+        return true;
+      }
+      final title = (session.title ?? '').toLowerCase();
+      final summary = (session.summary ?? '').toLowerCase();
+      return title.contains(query) || summary.contains(query);
+    }).length;
+    return total > visibleSessions.length;
+  }
 
   SessionStatusInfo? get currentSessionStatus {
     final sessionId = _currentSession?.id;
@@ -156,6 +273,36 @@ class ChatProvider extends ChangeNotifier {
       currentSessionPermissions.firstOrNull;
   ChatQuestionRequest? get currentQuestionRequest =>
       currentSessionQuestions.firstOrNull;
+
+  List<ChatSession> get currentSessionChildren {
+    final sessionId = _currentSession?.id;
+    if (sessionId == null) {
+      return const <ChatSession>[];
+    }
+    return List<ChatSession>.unmodifiable(
+      _sessionChildrenById[sessionId] ?? const <ChatSession>[],
+    );
+  }
+
+  List<SessionTodo> get currentSessionTodo {
+    final sessionId = _currentSession?.id;
+    if (sessionId == null) {
+      return const <SessionTodo>[];
+    }
+    return List<SessionTodo>.unmodifiable(
+      _sessionTodoById[sessionId] ?? const <SessionTodo>[],
+    );
+  }
+
+  List<SessionDiff> get currentSessionDiff {
+    final sessionId = _currentSession?.id;
+    if (sessionId == null) {
+      return const <SessionDiff>[];
+    }
+    return List<SessionDiff>.unmodifiable(
+      _sessionDiffById[sessionId] ?? const <SessionDiff>[],
+    );
+  }
 
   Provider? get selectedProvider {
     final selectedId = _selectedProviderId;
@@ -351,6 +498,54 @@ class ChatProvider extends ChangeNotifier {
     _modelUsageCounts[key] = (_modelUsageCounts[key] ?? 0) + 1;
   }
 
+  void _sortSessionsInPlace() {
+    _sessions.sort((a, b) {
+      if (_sessionListSort == SessionListSort.oldest) {
+        return a.time.compareTo(b.time);
+      }
+      if (_sessionListSort == SessionListSort.title) {
+        return (a.title ?? '').toLowerCase().compareTo(
+          (b.title ?? '').toLowerCase(),
+        );
+      }
+      return b.time.compareTo(a.time);
+    });
+  }
+
+  void setSessionSearchQuery(String query) {
+    final normalized = query.trim();
+    if (_sessionSearchQuery == normalized) {
+      return;
+    }
+    _sessionSearchQuery = normalized;
+    _sessionVisibleLimit = 40;
+    notifyListeners();
+  }
+
+  void setSessionListFilter(SessionListFilter filter) {
+    if (_sessionListFilter == filter) {
+      return;
+    }
+    _sessionListFilter = filter;
+    _sessionVisibleLimit = 40;
+    notifyListeners();
+  }
+
+  void setSessionListSort(SessionListSort sort) {
+    if (_sessionListSort == sort) {
+      return;
+    }
+    _sessionListSort = sort;
+    _sortSessionsInPlace();
+    _sessionVisibleLimit = 40;
+    notifyListeners();
+  }
+
+  void loadMoreSessions() {
+    _sessionVisibleLimit += 40;
+    notifyListeners();
+  }
+
   Future<void> _startRealtimeEventSubscription() async {
     final generation = ++_eventStreamGeneration;
     final previousSubscription = _eventSubscription;
@@ -426,21 +621,26 @@ class ChatProvider extends ChangeNotifier {
   void _upsertSession(ChatSession session) {
     final existingIndex = _sessions.indexWhere((item) => item.id == session.id);
     if (existingIndex == -1) {
-      _sessions.insert(0, session);
+      _sessions.add(session);
+      _sortSessionsInPlace();
       return;
     }
     _sessions[existingIndex] = session;
+    _sortSessionsInPlace();
   }
 
   void _removeSessionById(String sessionId) {
     _sessions.removeWhere((item) => item.id == sessionId);
     if (_currentSession?.id == sessionId) {
-      _currentSession = null;
+      _currentSession = _sessions.firstOrNull;
       _messages = <ChatMessage>[];
     }
     _sessionStatusById.remove(sessionId);
     _pendingPermissionsBySession.remove(sessionId);
     _pendingQuestionsBySession.remove(sessionId);
+    _sessionChildrenById.remove(sessionId);
+    _sessionTodoById.remove(sessionId);
+    _sessionDiffById.remove(sessionId);
   }
 
   void _applyChatEvent(ChatEvent event) {
@@ -463,7 +663,12 @@ class ChatProvider extends ChangeNotifier {
         if (info is Map<String, dynamic>) {
           final sessionId = info['id'] as String?;
           if (sessionId != null && sessionId.isNotEmpty) {
+            final deletedCurrent = _currentSession?.id == sessionId;
             _removeSessionById(sessionId);
+            if (deletedCurrent && _currentSession != null) {
+              unawaited(loadMessages(_currentSession!.id));
+              unawaited(loadSessionInsights(_currentSession!.id, silent: true));
+            }
             notifyListeners();
           }
         }
@@ -474,6 +679,42 @@ class ChatProvider extends ChangeNotifier {
         if (sessionId != null && statusMap is Map<String, dynamic>) {
           final status = SessionStatusModel.fromJson(statusMap).toDomain();
           _sessionStatusById[sessionId] = status;
+          notifyListeners();
+        }
+        break;
+      case 'session.diff':
+        final sessionId = properties['sessionID'] as String?;
+        final diffRaw = properties['diff'];
+        if (sessionId != null && diffRaw is List) {
+          final parsed = diffRaw
+              .whereType<Map>()
+              .map((item) => SessionDiff(
+                    file: item['file'] as String? ?? '',
+                    before: item['before'] as String? ?? '',
+                    after: item['after'] as String? ?? '',
+                    additions: (item['additions'] as num?)?.toInt() ?? 0,
+                    deletions: (item['deletions'] as num?)?.toInt() ?? 0,
+                    status: item['status'] as String?,
+                  ))
+              .toList(growable: false);
+          _sessionDiffById[sessionId] = parsed;
+          notifyListeners();
+        }
+        break;
+      case 'todo.updated':
+        final sessionId = properties['sessionID'] as String?;
+        final todosRaw = properties['todos'];
+        if (sessionId != null && todosRaw is List) {
+          final parsed = todosRaw
+              .whereType<Map>()
+              .map((item) => SessionTodo(
+                    id: item['id'] as String? ?? '',
+                    content: item['content'] as String? ?? '',
+                    status: item['status'] as String? ?? 'pending',
+                    priority: item['priority'] as String? ?? 'medium',
+                  ))
+              .toList(growable: false);
+          _sessionTodoById[sessionId] = parsed;
           notifyListeners();
         }
         break;
@@ -703,6 +944,97 @@ class ChatProvider extends ChangeNotifier {
         'Message fallback fetch failed for $messageId: ${failure.toString()}',
       );
     }, _updateOrAddMessage);
+  }
+
+  Future<void> refreshSessionStatusSnapshot({bool silent = true}) async {
+    final result = await getSessionStatus(
+      GetSessionStatusParams(directory: projectProvider.currentProject?.path),
+    );
+    result.fold((failure) {
+      if (!silent) {
+        _sessionInsightsError = 'Failed to load session status';
+        notifyListeners();
+      }
+      AppLogger.warn('Failed to load session status snapshot: $failure');
+    }, (statusMap) {
+      _sessionStatusById = statusMap;
+      if (!silent) {
+        _sessionInsightsError = null;
+      }
+      notifyListeners();
+    });
+  }
+
+  Future<void> loadSessionInsights(
+    String sessionId, {
+    String? messageId,
+    bool silent = false,
+  }) async {
+    if (!silent) {
+      _isLoadingSessionInsights = true;
+      _sessionInsightsError = null;
+      notifyListeners();
+    }
+
+    final directory = projectProvider.currentProject?.path;
+    final projectId = projectProvider.currentProjectId;
+
+    final childrenResult = await getSessionChildren(
+      GetSessionChildrenParams(
+        projectId: projectId,
+        sessionId: sessionId,
+        directory: directory,
+      ),
+    );
+    childrenResult.fold((failure) {
+      AppLogger.warn('Failed to load session children for $sessionId: $failure');
+    }, (children) {
+      _sessionChildrenById[sessionId] = children;
+    });
+
+    final todoResult = await getSessionTodo(
+      GetSessionTodoParams(
+        projectId: projectId,
+        sessionId: sessionId,
+        directory: directory,
+      ),
+    );
+    todoResult.fold((failure) {
+      AppLogger.warn('Failed to load session todo for $sessionId: $failure');
+    }, (todos) {
+      _sessionTodoById[sessionId] = todos;
+    });
+
+    final diffResult = await getSessionDiff(
+      GetSessionDiffParams(
+        projectId: projectId,
+        sessionId: sessionId,
+        messageId: messageId,
+        directory: directory,
+      ),
+    );
+    diffResult.fold((failure) {
+      AppLogger.warn('Failed to load session diff for $sessionId: $failure');
+    }, (diff) {
+      _sessionDiffById[sessionId] = diff;
+    });
+
+    final statusResult = await getSessionStatus(
+      GetSessionStatusParams(directory: directory),
+    );
+    statusResult.fold((failure) {
+      AppLogger.warn('Failed to refresh status for $sessionId: $failure');
+      if (!silent) {
+        _sessionInsightsError = 'Some session details could not be loaded';
+      }
+    }, (statusMap) {
+      _sessionStatusById = statusMap;
+    });
+
+    if (!silent) {
+      _isLoadingSessionInsights = false;
+    }
+    notifyListeners();
   }
 
   Future<void> respondPermissionRequest({
@@ -967,6 +1299,7 @@ class ChatProvider extends ChangeNotifier {
     if (fetchId == _providersFetchId) {
       await _startRealtimeEventSubscription();
       await _loadPendingInteractions();
+      await refreshSessionStatusSnapshot();
       notifyListeners();
     }
   }
@@ -1003,6 +1336,15 @@ class ChatProvider extends ChangeNotifier {
     _sessionStatusById = <String, SessionStatusInfo>{};
     _pendingPermissionsBySession = <String, List<ChatPermissionRequest>>{};
     _pendingQuestionsBySession = <String, List<ChatQuestionRequest>>{};
+    _sessionChildrenById = <String, List<ChatSession>>{};
+    _sessionTodoById = <String, List<SessionTodo>>{};
+    _sessionDiffById = <String, List<SessionDiff>>{};
+    _sessionSearchQuery = '';
+    _sessionListFilter = SessionListFilter.active;
+    _sessionListSort = SessionListSort.recent;
+    _sessionVisibleLimit = 40;
+    _isLoadingSessionInsights = false;
+    _sessionInsightsError = null;
     _isRespondingInteraction = false;
     _providers = <Provider>[];
     _defaultModels = <String, String>{};
@@ -1150,7 +1492,9 @@ class ChatProvider extends ChangeNotifier {
       await _loadCachedSessions(serverId: serverId, scopeId: scopeId);
 
       // Then fetch latest data from server
-      final result = await getChatSessions();
+      final result = await getChatSessions(
+        GetChatSessionsParams(directory: projectProvider.currentProject?.path),
+      );
 
       if (fetchId != _sessionsFetchId) {
         return;
@@ -1172,6 +1516,8 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
       _sessions = sessions;
+      _sessionVisibleLimit = 40;
+      _sortSessionsInPlace();
       _setState(ChatState.loaded);
 
       await _saveCachedSessions(sessions, serverId: serverId, scopeId: scopeId);
@@ -1181,6 +1527,7 @@ class ChatProvider extends ChangeNotifier {
       }
 
       await loadLastSession(serverId: serverId, scopeId: scopeId);
+      await refreshSessionStatusSnapshot();
     } catch (e, stackTrace) {
       if (fetchId != _sessionsFetchId) {
         return;
@@ -1222,6 +1569,7 @@ class ChatProvider extends ChangeNotifier {
 
         if (cachedSessions.isNotEmpty) {
           _sessions = cachedSessions;
+          _sortSessionsInPlace();
           _setState(ChatState.loaded);
           if (!isFresh) {
             AppLogger.info(
@@ -1263,6 +1611,20 @@ class ChatProvider extends ChangeNotifier {
     } catch (e, stackTrace) {
       AppLogger.warn(
         'Failed to save session cache',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<void> _persistSessionCacheBestEffort() async {
+    try {
+      final serverId = await _resolveServerScopeId();
+      final scopeId = _resolveContextScopeId();
+      await _saveCachedSessions(_sessions, serverId: serverId, scopeId: scopeId);
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to persist sessions cache',
         error: e,
         stackTrace: stackTrace,
       );
@@ -1334,10 +1696,12 @@ class ChatProvider extends ChangeNotifier {
     );
 
     result.fold((failure) => _handleFailure(failure), (session) {
-      _sessions.insert(0, session);
+      _sessions.add(session);
+      _sortSessionsInPlace();
       _currentSession = session;
       _messages
           .clear(); // Ensure message list is empty when a new session starts
+      unawaited(loadSessionInsights(session.id, silent: true));
       _setState(ChatState.loaded);
     });
   }
@@ -1370,7 +1734,10 @@ class ChatProvider extends ChangeNotifier {
 
   /// Select session
   Future<void> selectSession(ChatSession session) async {
-    if (_currentSession?.id == session.id) return;
+    if (_currentSession?.id == session.id) {
+      await loadSessionInsights(session.id, silent: true);
+      return;
+    }
 
     // Clear current message list
     _messages.clear();
@@ -1388,6 +1755,7 @@ class ChatProvider extends ChangeNotifier {
 
     // Load messages for selected session
     await loadMessages(session.id);
+    await loadSessionInsights(session.id, silent: true);
   }
 
   /// Load message list
@@ -1402,6 +1770,7 @@ class ChatProvider extends ChangeNotifier {
       GetChatMessagesParams(
         projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
+        directory: projectProvider.currentProject?.path,
       ),
     );
 
@@ -1520,6 +1889,10 @@ class ChatProvider extends ChangeNotifier {
             onDone: () {
               AppLogger.info('Provider send stream finished');
               _setState(ChatState.loaded);
+              final sessionId = _currentSession?.id;
+              if (sessionId != null) {
+                unawaited(loadSessionInsights(sessionId, silent: true));
+              }
             },
           );
       AppLogger.info('Provider send stream subscription attached');
@@ -1589,6 +1962,176 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  ChatSession? _sessionById(String sessionId) {
+    return _sessions.where((session) => session.id == sessionId).firstOrNull;
+  }
+
+  void _applySessionLocally(ChatSession session) {
+    _upsertSession(session);
+    if (_currentSession?.id == session.id) {
+      _currentSession = session;
+    }
+  }
+
+  Future<bool> renameSession(ChatSession session, String title) async {
+    final trimmed = title.trim();
+    if (trimmed.isEmpty || trimmed == (session.title ?? '').trim()) {
+      return false;
+    }
+
+    final previous = _sessionById(session.id);
+    if (previous == null) {
+      return false;
+    }
+
+    final optimistic = previous.copyWith(title: trimmed);
+    _applySessionLocally(optimistic);
+    notifyListeners();
+
+    final result = await updateChatSession(
+      UpdateChatSessionParams(
+        projectId: projectProvider.currentProjectId,
+        sessionId: session.id,
+        input: SessionUpdateInput(title: trimmed),
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+
+    return result.fold((failure) {
+      _applySessionLocally(previous);
+      _handleFailure(failure);
+      notifyListeners();
+      return false;
+    }, (updated) {
+      _applySessionLocally(updated);
+      unawaited(_persistSessionCacheBestEffort());
+      notifyListeners();
+      return true;
+    });
+  }
+
+  Future<bool> setSessionArchived(ChatSession session, bool archived) async {
+    final previous = _sessionById(session.id);
+    if (previous == null) {
+      return false;
+    }
+
+    final archivedAt = archived ? DateTime.now() : null;
+    final optimistic = previous.copyWith(
+      archivedAt: archivedAt,
+      title: previous.title,
+    );
+    _applySessionLocally(optimistic);
+
+    if (archived && _sessionListFilter == SessionListFilter.active) {
+      if (_currentSession?.id == session.id) {
+        _currentSession = _sessions.firstWhere(
+          (item) => item.id != session.id && !item.archived,
+          orElse: () => previous,
+        );
+      }
+    }
+    notifyListeners();
+
+    final result = await updateChatSession(
+      UpdateChatSessionParams(
+        projectId: projectProvider.currentProjectId,
+        sessionId: session.id,
+        input: SessionUpdateInput(
+          archivedAtEpochMs: archived
+              ? archivedAt!.millisecondsSinceEpoch
+              : 0,
+        ),
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+
+    return result.fold((failure) {
+      _applySessionLocally(previous);
+      if (_currentSession?.id != previous.id && session.id == previous.id) {
+        _currentSession = previous;
+      }
+      _handleFailure(failure);
+      notifyListeners();
+      return false;
+    }, (updated) {
+      _applySessionLocally(updated);
+      unawaited(_persistSessionCacheBestEffort());
+      notifyListeners();
+      return true;
+    });
+  }
+
+  Future<bool> toggleSessionShare(ChatSession session) async {
+    final previous = _sessionById(session.id);
+    if (previous == null) {
+      return false;
+    }
+
+    final optimistic = previous.copyWith(
+      shareUrl: previous.shared ? null : previous.shareUrl,
+      shared: !previous.shared,
+    );
+    _applySessionLocally(optimistic);
+    notifyListeners();
+
+    final result = previous.shared
+        ? await unshareChatSession(
+            UnshareChatSessionParams(
+              projectId: projectProvider.currentProjectId,
+              sessionId: session.id,
+              directory: projectProvider.currentProject?.path,
+            ),
+          )
+        : await shareChatSession(
+            ShareChatSessionParams(
+              projectId: projectProvider.currentProjectId,
+              sessionId: session.id,
+              directory: projectProvider.currentProject?.path,
+            ),
+          );
+
+    return result.fold((failure) {
+      _applySessionLocally(previous);
+      _handleFailure(failure);
+      notifyListeners();
+      return false;
+    }, (updated) {
+      _applySessionLocally(updated);
+      unawaited(_persistSessionCacheBestEffort());
+      notifyListeners();
+      return true;
+    });
+  }
+
+  Future<ChatSession?> forkSession(
+    ChatSession session, {
+    String? messageId,
+    bool selectForked = true,
+  }) async {
+    final result = await forkChatSession(
+      ForkChatSessionParams(
+        projectId: projectProvider.currentProjectId,
+        sessionId: session.id,
+        messageId: messageId,
+        directory: projectProvider.currentProject?.path,
+      ),
+    );
+
+    return result.fold((failure) {
+      _handleFailure(failure);
+      return null;
+    }, (forked) async {
+      _applySessionLocally(forked);
+      unawaited(_persistSessionCacheBestEffort());
+      notifyListeners();
+      if (selectForked) {
+        await selectSession(forked);
+      }
+      return forked;
+    });
+  }
+
   /// Clear error
   void clearError() {
     _errorMessage = null;
@@ -1599,31 +2142,40 @@ class ChatProvider extends ChangeNotifier {
 
   /// Delete session
   Future<void> deleteSession(String sessionId) async {
-    // Sync project ID from ProjectProvider
     _currentProjectId = projectProvider.currentProjectId;
+    final previousSessions = List<ChatSession>.from(_sessions);
+    final previousCurrent = _currentSession;
+    final previousMessages = List<ChatMessage>.from(_messages);
+    final wasCurrent = previousCurrent?.id == sessionId;
+
+    _removeSessionById(sessionId);
+    _sortSessionsInPlace();
+
+    if (wasCurrent) {
+      _currentSession = _sessions.firstOrNull;
+      _messages = <ChatMessage>[];
+    }
+    notifyListeners();
 
     final result = await deleteChatSession(
       DeleteChatSessionParams(
         projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
+        directory: projectProvider.currentProject?.path,
       ),
     );
 
-    result.fold((failure) => _handleFailure(failure), (_) {
-      // Remove session from local list
-      _sessions.removeWhere((session) => session.id == sessionId);
-
-      // If current session is deleted, clear current session and messages
-      if (_currentSession?.id == sessionId) {
-        _currentSession = null;
-        _messages.clear();
-
-        // If other sessions remain, select the first one
-        if (_sessions.isNotEmpty) {
-          selectSession(_sessions.first);
-        }
+    result.fold((failure) {
+      _sessions = previousSessions;
+      _currentSession = previousCurrent;
+      _messages = previousMessages;
+      _sortSessionsInPlace();
+      _handleFailure(failure);
+    }, (_) async {
+      if (wasCurrent && _currentSession != null) {
+        await loadMessages(_currentSession!.id);
+        await loadSessionInsights(_currentSession!.id, silent: true);
       }
-
       notifyListeners();
     });
   }
@@ -1632,6 +2184,7 @@ class ChatProvider extends ChangeNotifier {
   Future<void> refresh() async {
     if (_currentSession != null) {
       await loadMessages(_currentSession!.id);
+      await loadSessionInsights(_currentSession!.id, silent: true);
     } else {
       // If there is no current session, reload sessions
       if (_sessions.isNotEmpty) {

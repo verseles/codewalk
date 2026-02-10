@@ -13,7 +13,11 @@ class GetChatMessages {
   Future<Either<Failure, List<ChatMessage>>> call(
     GetChatMessagesParams params,
   ) async {
-    return repository.getMessages(params.projectId, params.sessionId);
+    return repository.getMessages(
+      params.projectId,
+      params.sessionId,
+      directory: params.directory,
+    );
   }
 }
 
@@ -22,8 +26,10 @@ class GetChatMessagesParams {
   const GetChatMessagesParams({
     required this.projectId,
     required this.sessionId,
+    this.directory,
   });
 
   final String projectId;
   final String sessionId;
+  final String? directory;
 }

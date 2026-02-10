@@ -11,16 +11,24 @@ import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
+import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
+import 'package:codewalk/domain/usecases/get_session_children.dart';
+import 'package:codewalk/domain/usecases/get_session_diff.dart';
+import 'package:codewalk/domain/usecases/get_session_status.dart';
+import 'package:codewalk/domain/usecases/get_session_todo.dart';
 import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
 import 'package:codewalk/domain/usecases/list_pending_questions.dart';
 import 'package:codewalk/domain/usecases/reject_question.dart';
 import 'package:codewalk/domain/usecases/reply_permission.dart';
 import 'package:codewalk/domain/usecases/reply_question.dart';
 import 'package:codewalk/domain/usecases/send_chat_message.dart';
+import 'package:codewalk/domain/usecases/share_chat_session.dart';
+import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
+import 'package:codewalk/domain/usecases/update_chat_session.dart';
 import 'package:codewalk/domain/usecases/watch_chat_events.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
@@ -57,6 +65,14 @@ void main() {
         getChatMessage: GetChatMessage(chatRepository),
         getProviders: GetProviders(appRepository),
         deleteChatSession: DeleteChatSession(chatRepository),
+        updateChatSession: UpdateChatSession(chatRepository),
+        shareChatSession: ShareChatSession(chatRepository),
+        unshareChatSession: UnshareChatSession(chatRepository),
+        forkChatSession: ForkChatSession(chatRepository),
+        getSessionStatus: GetSessionStatus(chatRepository),
+        getSessionChildren: GetSessionChildren(chatRepository),
+        getSessionTodo: GetSessionTodo(chatRepository),
+        getSessionDiff: GetSessionDiff(chatRepository),
         watchChatEvents: WatchChatEvents(chatRepository),
         listPendingPermissions: ListPendingPermissions(chatRepository),
         replyPermission: ReplyPermission(chatRepository),
@@ -399,6 +415,14 @@ void main() {
           getChatMessage: GetChatMessage(chatRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(chatRepository),
+          updateChatSession: UpdateChatSession(chatRepository),
+          shareChatSession: ShareChatSession(chatRepository),
+          unshareChatSession: UnshareChatSession(chatRepository),
+          forkChatSession: ForkChatSession(chatRepository),
+          getSessionStatus: GetSessionStatus(chatRepository),
+          getSessionChildren: GetSessionChildren(chatRepository),
+          getSessionTodo: GetSessionTodo(chatRepository),
+          getSessionDiff: GetSessionDiff(chatRepository),
           watchChatEvents: WatchChatEvents(chatRepository),
           listPendingPermissions: ListPendingPermissions(chatRepository),
           replyPermission: ReplyPermission(chatRepository),
@@ -462,6 +486,127 @@ void main() {
         expect((assistant.parts.single as TextPart).text, 'resilient answer');
       },
     );
+
+    test('renameSession applies persisted title on success', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.first;
+
+      final ok = await provider.renameSession(session, 'Renamed Session');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      expect(ok, isTrue);
+      expect(
+        provider.sessions.where((item) => item.id == session.id).first.title,
+        'Renamed Session',
+      );
+      expect(
+        chatRepository.sessions.where((item) => item.id == session.id).first.title,
+        'Renamed Session',
+      );
+    });
+
+    test('renameSession rolls back optimistic title on failure', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.first;
+      chatRepository.updateSessionFailure = const ServerFailure('update failed');
+
+      final ok = await provider.renameSession(session, 'Broken Rename');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      expect(ok, isFalse);
+      expect(
+        provider.sessions.where((item) => item.id == session.id).first.title,
+        'Session 1',
+      );
+      expect(provider.state, ChatState.error);
+    });
+
+    test('share/archive/fork lifecycle operations update provider state', () async {
+      chatRepository.sessions.add(
+        ChatSession(
+          id: 'ses_2',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1200),
+          title: 'Session 2',
+        ),
+      );
+
+      await provider.loadSessions();
+      await provider.selectSession(
+        provider.sessions.where((item) => item.id == 'ses_1').first,
+      );
+
+      final shared = await provider.toggleSessionShare(provider.currentSession!);
+      expect(shared, isTrue);
+      expect(provider.currentSession?.shared, isTrue);
+      expect(provider.currentSession?.shareUrl, isNotNull);
+
+      final archived = await provider.setSessionArchived(
+        provider.currentSession!,
+        true,
+      );
+      expect(archived, isTrue);
+      final archivedSession = provider.sessions
+          .where((item) => item.id == 'ses_1')
+          .first;
+      expect(archivedSession.archived, isTrue);
+
+      final unarchived = await provider.setSessionArchived(archivedSession, false);
+      expect(unarchived, isTrue);
+      final unarchivedSession = provider.sessions
+          .where((item) => item.id == 'ses_1')
+          .first;
+      expect(unarchivedSession.archived, isFalse);
+
+      final forked = await provider.forkSession(unarchivedSession);
+      expect(forked, isNotNull);
+      expect(forked?.parentId, 'ses_1');
+      expect(provider.currentSession?.id, forked?.id);
+    });
+
+    test('loadSessionInsights updates children, todo, diff and status maps', () async {
+      final child = ChatSession(
+        id: 'ses_child_1',
+        workspaceId: 'default',
+        time: DateTime.fromMillisecondsSinceEpoch(2000),
+        title: 'Child Session',
+        parentId: 'ses_1',
+      );
+      chatRepository.sessionChildrenById['ses_1'] = <ChatSession>[child];
+      chatRepository.sessionTodoById['ses_1'] = const <SessionTodo>[
+        SessionTodo(
+          id: 'todo_1',
+          content: 'Implement feature',
+          status: 'in_progress',
+          priority: 'high',
+        ),
+      ];
+      chatRepository.sessionDiffById['ses_1'] = const <SessionDiff>[
+        SessionDiff(
+          file: 'lib/main.dart',
+          before: '',
+          after: '',
+          additions: 10,
+          deletions: 2,
+          status: 'modified',
+        ),
+      ];
+      chatRepository.sessionStatusById = const <String, SessionStatusInfo>{
+        'ses_1': SessionStatusInfo(type: SessionStatusType.busy),
+      };
+
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await provider.loadSessionInsights('ses_1');
+
+      expect(provider.currentSessionChildren, hasLength(1));
+      expect(provider.currentSessionChildren.single.id, 'ses_child_1');
+      expect(provider.currentSessionTodo, hasLength(1));
+      expect(provider.currentSessionTodo.single.id, 'todo_1');
+      expect(provider.currentSessionDiff, hasLength(1));
+      expect(provider.currentSessionDiff.single.file, 'lib/main.dart');
+      expect(provider.currentSessionStatus?.type, SessionStatusType.busy);
+    });
 
     test(
       'deleteSession clears current session when deleting active one',

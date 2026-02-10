@@ -7,7 +7,11 @@ class ChatSession extends Equatable {
     required this.workspaceId,
     required this.time,
     this.title,
+    this.parentId,
+    this.directory,
+    this.archivedAt,
     this.shared = false,
+    this.shareUrl,
     this.summary,
     this.path,
   });
@@ -24,8 +28,16 @@ class ChatSession extends Equatable {
   /// Technical comment translated to English.
   final String? title;
 
+  final String? parentId;
+
+  final String? directory;
+
+  final DateTime? archivedAt;
+
   /// Technical comment translated to English.
   final bool shared;
+
+  final String? shareUrl;
 
   /// Technical comment translated to English.
   final String? summary;
@@ -33,13 +45,19 @@ class ChatSession extends Equatable {
   /// Technical comment translated to English.
   final SessionPath? path;
 
+  bool get archived => archivedAt != null;
+
   @override
   List<Object?> get props => [
     id,
     workspaceId,
     time,
     title,
+    parentId,
+    directory,
+    archivedAt,
     shared,
+    shareUrl,
     summary,
     path,
   ];
@@ -49,21 +67,42 @@ class ChatSession extends Equatable {
     String? id,
     String? workspaceId,
     DateTime? time,
-    String? title,
+    Object? title = _unset,
+    Object? parentId = _unset,
+    Object? directory = _unset,
+    Object? archivedAt = _unset,
     bool? shared,
-    String? summary,
-    SessionPath? path,
+    Object? shareUrl = _unset,
+    Object? summary = _unset,
+    Object? path = _unset,
   }) {
+    final nextShareUrl = identical(shareUrl, _unset)
+        ? this.shareUrl
+        : shareUrl as String?;
+    final nextShared = shared ?? (nextShareUrl != null);
+
     return ChatSession(
       id: id ?? this.id,
       workspaceId: workspaceId ?? this.workspaceId,
       time: time ?? this.time,
-      title: title ?? this.title,
-      shared: shared ?? this.shared,
-      summary: summary ?? this.summary,
-      path: path ?? this.path,
+      title: identical(title, _unset) ? this.title : title as String?,
+      parentId: identical(parentId, _unset)
+          ? this.parentId
+          : parentId as String?,
+      directory: identical(directory, _unset)
+          ? this.directory
+          : directory as String?,
+      archivedAt: identical(archivedAt, _unset)
+          ? this.archivedAt
+          : archivedAt as DateTime?,
+      shared: nextShared,
+      shareUrl: nextShareUrl,
+      summary: identical(summary, _unset) ? this.summary : summary as String?,
+      path: identical(path, _unset) ? this.path : path as SessionPath?,
     );
   }
+
+  static const Object _unset = Object();
 }
 
 /// Technical comment translated to English.
@@ -222,10 +261,49 @@ class SessionCreateInput extends Equatable {
 
 /// Technical comment translated to English.
 class SessionUpdateInput extends Equatable {
-  const SessionUpdateInput({this.title});
+  const SessionUpdateInput({this.title, this.archivedAtEpochMs});
 
   final String? title;
+  final int? archivedAtEpochMs;
 
   @override
-  List<Object?> get props => [title];
+  List<Object?> get props => [title, archivedAtEpochMs];
+}
+
+class SessionTodo extends Equatable {
+  const SessionTodo({
+    required this.id,
+    required this.content,
+    required this.status,
+    required this.priority,
+  });
+
+  final String id;
+  final String content;
+  final String status;
+  final String priority;
+
+  @override
+  List<Object?> get props => [id, content, status, priority];
+}
+
+class SessionDiff extends Equatable {
+  const SessionDiff({
+    required this.file,
+    required this.before,
+    required this.after,
+    required this.additions,
+    required this.deletions,
+    this.status,
+  });
+
+  final String file;
+  final String before;
+  final String after;
+  final int additions;
+  final int deletions;
+  final String? status;
+
+  @override
+  List<Object?> get props => [file, before, after, additions, deletions, status];
 }

@@ -26,6 +26,12 @@ class MockOpenCodeServer {
   String? lastQuestionReplyRequestId;
   Map<String, dynamic>? lastQuestionReplyPayload;
   String? lastQuestionRejectRequestId;
+  Map<String, Map<String, dynamic>> sessionStatusById =
+      <String, Map<String, dynamic>>{};
+  final Map<String, List<Map<String, dynamic>>> sessionTodoById =
+      <String, List<Map<String, dynamic>>>{};
+  final Map<String, List<Map<String, dynamic>>> sessionDiffById =
+      <String, List<Map<String, dynamic>>>{};
 
   final Map<String, Map<String, dynamic>> _sessionsById =
       <String, Map<String, dynamic>>{};
@@ -73,18 +79,38 @@ class MockOpenCodeServer {
     lastQuestionReplyRequestId = null;
     lastQuestionReplyPayload = null;
     lastQuestionRejectRequestId = null;
+    sessionStatusById = <String, Map<String, dynamic>>{
+      'ses_1': <String, dynamic>{'type': 'idle'},
+    };
+    sessionTodoById
+      ..clear()
+      ..['ses_1'] = <Map<String, dynamic>>[];
+    sessionDiffById
+      ..clear()
+      ..['ses_1'] = <Map<String, dynamic>>[];
   }
 
-  Map<String, dynamic> _session(String id, {required String title}) {
-    return <String, dynamic>{
+  Map<String, dynamic> _session(
+    String id, {
+    required String title,
+    String? parentId,
+    int? archivedAt,
+    String? shareUrl,
+  }) {
+    final map = <String, dynamic>{
       'id': id,
       'workspaceId': 'default',
+      'directory': '/workspace/project',
+      if (parentId != null) 'parentID': parentId,
       'time': <String, dynamic>{
         'created': 1739079900000,
         'updated': 1739079900000,
+        if (archivedAt != null) 'archived': archivedAt,
       },
       'title': title,
+      if (shareUrl != null) 'share': <String, dynamic>{'url': shareUrl},
     };
+    return map;
   }
 
   Future<void> _handleRequest(HttpRequest request) async {
@@ -227,6 +253,14 @@ class MockOpenCodeServer {
       }
     }
 
+    if (segments.length == 2 &&
+        segments[0] == 'session' &&
+        segments[1] == 'status' &&
+        method == 'GET') {
+      await _writeJson(request.response, 200, sessionStatusById);
+      return;
+    }
+
     if (segments.length == 3 &&
         segments[0] == 'question' &&
         segments[2] == 'reply') {
@@ -258,18 +292,59 @@ class MockOpenCodeServer {
 
     if (segments.length == 1 && segments[0] == 'session') {
       if (method == 'GET') {
-        await _writeJson(request.response, 200, _sessionsById.values.toList());
+        var sessions = _sessionsById.values.toList(growable: false);
+
+        final rootsOnly = request.uri.queryParameters['roots'] == 'true';
+        if (rootsOnly) {
+          sessions = sessions
+              .where((session) => session['parentID'] == null)
+              .toList(growable: false);
+        }
+
+        final search = request.uri.queryParameters['search']?.trim();
+        if (search != null && search.isNotEmpty) {
+          final normalized = search.toLowerCase();
+          sessions = sessions
+              .where(
+                (session) => ((session['title'] as String?) ?? '')
+                    .toLowerCase()
+                    .contains(normalized),
+              )
+              .toList(growable: false);
+        }
+
+        final start = int.tryParse(request.uri.queryParameters['start'] ?? '');
+        if (start != null) {
+          sessions = sessions
+              .where(
+                (session) =>
+                    ((session['time'] as Map<String, dynamic>)['updated'] as int) >=
+                    start,
+              )
+              .toList(growable: false);
+        }
+
+        final limit = int.tryParse(request.uri.queryParameters['limit'] ?? '');
+        if (limit != null && sessions.length > limit) {
+          sessions = sessions.take(limit).toList(growable: false);
+        }
+
+        await _writeJson(request.response, 200, sessions);
         return;
       }
 
       if (method == 'POST') {
         final payload = await _readJsonBody(request);
         final title = (payload['title'] as String?) ?? 'New Session';
+        final parentId = payload['parentID'] as String?;
         _sessionCounter += 1;
         final id = 'ses_$_sessionCounter';
-        final created = _session(id, title: title);
+        final created = _session(id, title: title, parentId: parentId);
         _sessionsById[id] = created;
         _messagesBySession[id] = <Map<String, dynamic>>[];
+        sessionStatusById[id] = <String, dynamic>{'type': 'idle'};
+        sessionTodoById[id] = <Map<String, dynamic>>[];
+        sessionDiffById[id] = <Map<String, dynamic>>[];
         await _writeJson(request.response, 200, created);
         return;
       }
@@ -281,6 +356,9 @@ class MockOpenCodeServer {
       if (method == 'DELETE') {
         _sessionsById.remove(sessionId);
         _messagesBySession.remove(sessionId);
+        sessionStatusById.remove(sessionId);
+        sessionTodoById.remove(sessionId);
+        sessionDiffById.remove(sessionId);
         await _writeJson(request.response, 200, <String, dynamic>{'ok': true});
         return;
       }
@@ -296,6 +374,132 @@ class MockOpenCodeServer {
         await _writeJson(request.response, 200, found);
         return;
       }
+
+      if (method == 'PATCH') {
+        final found = _sessionsById[sessionId];
+        if (found == null) {
+          await _writeJson(request.response, 404, <String, dynamic>{
+            'error': 'not found',
+          });
+          return;
+        }
+        final payload = await _readJsonBody(request);
+        final title = payload['title'] as String?;
+        final timePatch = payload['time'] as Map<String, dynamic>?;
+        final archived = (timePatch?['archived'] as num?)?.toInt();
+
+        final updated = Map<String, dynamic>.from(found);
+        if (title != null) {
+          updated['title'] = title;
+        }
+        final time = Map<String, dynamic>.from(
+          updated['time'] as Map<String, dynamic>,
+        );
+        time['updated'] = DateTime.now().millisecondsSinceEpoch;
+        if (archived != null) {
+          if (archived <= 0) {
+            time.remove('archived');
+          } else {
+            time['archived'] = archived;
+          }
+        }
+        updated['time'] = time;
+        _sessionsById[sessionId] = updated;
+        await _writeJson(request.response, 200, updated);
+        return;
+      }
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'session' &&
+        segments[2] == 'children' &&
+        method == 'GET') {
+      final parentId = segments[1];
+      final children = _sessionsById.values
+          .where((session) => session['parentID'] == parentId)
+          .toList(growable: false);
+      await _writeJson(request.response, 200, children);
+      return;
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'session' &&
+        segments[2] == 'todo' &&
+        method == 'GET') {
+      final sessionId = segments[1];
+      await _writeJson(
+        request.response,
+        200,
+        sessionTodoById[sessionId] ?? <Map<String, dynamic>>[],
+      );
+      return;
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'session' &&
+        segments[2] == 'diff' &&
+        method == 'GET') {
+      final sessionId = segments[1];
+      await _writeJson(
+        request.response,
+        200,
+        sessionDiffById[sessionId] ?? <Map<String, dynamic>>[],
+      );
+      return;
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'session' &&
+        segments[2] == 'share') {
+      final sessionId = segments[1];
+      final found = _sessionsById[sessionId];
+      if (found == null) {
+        await _writeJson(request.response, 404, <String, dynamic>{
+          'error': 'not found',
+        });
+        return;
+      }
+      final next = Map<String, dynamic>.from(found);
+      if (method == 'POST') {
+        next['share'] = <String, dynamic>{
+          'url': 'https://share.mock/s/$sessionId',
+        };
+        _sessionsById[sessionId] = next;
+        await _writeJson(request.response, 200, next);
+        return;
+      }
+      if (method == 'DELETE') {
+        next.remove('share');
+        _sessionsById[sessionId] = next;
+        await _writeJson(request.response, 200, next);
+        return;
+      }
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'session' &&
+        segments[2] == 'fork' &&
+        method == 'POST') {
+      final sessionId = segments[1];
+      final source = _sessionsById[sessionId];
+      if (source == null) {
+        await _writeJson(request.response, 404, <String, dynamic>{
+          'error': 'not found',
+        });
+        return;
+      }
+
+      _sessionCounter += 1;
+      final nextId = 'ses_$_sessionCounter';
+      final title = '${source['title']} (fork)';
+      final created = _session(nextId, title: title, parentId: sessionId);
+      _sessionsById[nextId] = created;
+      _messagesBySession[nextId] = <Map<String, dynamic>>[];
+      sessionStatusById[nextId] = <String, dynamic>{'type': 'idle'};
+      sessionTodoById[nextId] = <Map<String, dynamic>>[];
+      sessionDiffById[nextId] = <Map<String, dynamic>>[];
+      await _writeJson(request.response, 200, created);
+      return;
     }
 
     if (segments.length == 4 &&

@@ -481,6 +481,14 @@ class FakeChatRepository implements ChatRepository {
   Failure? createSessionFailure;
   Failure? getMessagesFailure;
   Failure? deleteSessionFailure;
+  Failure? updateSessionFailure;
+  Failure? shareSessionFailure;
+  Failure? unshareSessionFailure;
+  Failure? forkSessionFailure;
+  Failure? sessionStatusFailure;
+  Failure? sessionChildrenFailure;
+  Failure? sessionTodoFailure;
+  Failure? sessionDiffFailure;
   final StreamController<Either<Failure, ChatEvent>> eventController =
       StreamController<Either<Failure, ChatEvent>>.broadcast();
   List<ChatPermissionRequest> pendingPermissions = <ChatPermissionRequest>[];
@@ -491,6 +499,14 @@ class FakeChatRepository implements ChatRepository {
   String? lastQuestionReplyRequestId;
   List<List<String>>? lastQuestionAnswers;
   String? lastQuestionRejectRequestId;
+  Map<String, SessionStatusInfo> sessionStatusById =
+      <String, SessionStatusInfo>{};
+  final Map<String, List<ChatSession>> sessionChildrenById =
+      <String, List<ChatSession>>{};
+  final Map<String, List<SessionTodo>> sessionTodoById =
+      <String, List<SessionTodo>>{};
+  final Map<String, List<SessionDiff>> sessionDiffById =
+      <String, List<SessionDiff>>{};
 
   void emitEvent(ChatEvent event) {
     eventController.add(Right(event));
@@ -581,10 +597,89 @@ class FakeChatRepository implements ChatRepository {
   @override
   Future<Either<Failure, List<ChatSession>>> getSessions({
     String? directory,
+    String? search,
+    bool? rootsOnly,
+    int? startEpochMs,
+    int? limit,
   }) async {
     lastGetSessionsDirectory = directory;
     if (getSessionsFailure != null) return Left(getSessionsFailure!);
-    return Right(List<ChatSession>.from(sessions));
+    var list = List<ChatSession>.from(sessions);
+    if (rootsOnly == true) {
+      list = list.where((item) => item.parentId == null).toList(growable: false);
+    }
+    if (search != null && search.trim().isNotEmpty) {
+      final term = search.trim().toLowerCase();
+      list = list
+          .where(
+            (item) =>
+                (item.title ?? '').toLowerCase().contains(term) ||
+                (item.summary ?? '').toLowerCase().contains(term),
+          )
+          .toList(growable: false);
+    }
+    if (startEpochMs != null) {
+      list = list
+          .where((item) => item.time.millisecondsSinceEpoch >= startEpochMs)
+          .toList(growable: false);
+    }
+    if (limit != null && list.length > limit) {
+      list = list.take(limit).toList(growable: false);
+    }
+    return Right(list);
+  }
+
+  @override
+  Future<Either<Failure, Map<String, SessionStatusInfo>>> getSessionStatus({
+    String? directory,
+  }) async {
+    if (sessionStatusFailure != null) {
+      return Left(sessionStatusFailure!);
+    }
+    return Right(Map<String, SessionStatusInfo>.from(sessionStatusById));
+  }
+
+  @override
+  Future<Either<Failure, List<ChatSession>>> getSessionChildren(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
+    if (sessionChildrenFailure != null) {
+      return Left(sessionChildrenFailure!);
+    }
+    return Right(
+      List<ChatSession>.from(sessionChildrenById[sessionId] ?? const <ChatSession>[]),
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<SessionTodo>>> getSessionTodo(
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
+    if (sessionTodoFailure != null) {
+      return Left(sessionTodoFailure!);
+    }
+    return Right(
+      List<SessionTodo>.from(sessionTodoById[sessionId] ?? const <SessionTodo>[]),
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<SessionDiff>>> getSessionDiff(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  }) async {
+    if (sessionDiffFailure != null) {
+      return Left(sessionDiffFailure!);
+    }
+    return Right(
+      List<SessionDiff>.from(sessionDiffById[sessionId] ?? const <SessionDiff>[]),
+    );
   }
 
   @override
@@ -707,7 +802,17 @@ class FakeChatRepository implements ChatRepository {
     String projectId,
     String sessionId, {
     String? directory,
-  }) async => getSession(projectId, sessionId, directory: directory);
+  }) async {
+    if (shareSessionFailure != null) return Left(shareSessionFailure!);
+    final index = sessions.indexWhere((s) => s.id == sessionId);
+    if (index == -1) return const Left(NotFoundFailure('Session not found'));
+    final updated = sessions[index].copyWith(
+      shared: true,
+      shareUrl: 'https://share.mock/$sessionId',
+    );
+    sessions[index] = updated;
+    return Right(updated);
+  }
 
   @override
   Future<Either<Failure, void>> summarizeSession(
@@ -723,7 +828,40 @@ class FakeChatRepository implements ChatRepository {
     String projectId,
     String sessionId, {
     String? directory,
-  }) async => getSession(projectId, sessionId, directory: directory);
+  }) async {
+    if (unshareSessionFailure != null) return Left(unshareSessionFailure!);
+    final index = sessions.indexWhere((s) => s.id == sessionId);
+    if (index == -1) return const Left(NotFoundFailure('Session not found'));
+    final updated = sessions[index].copyWith(shared: false, shareUrl: null);
+    sessions[index] = updated;
+    return Right(updated);
+  }
+
+  @override
+  Future<Either<Failure, ChatSession>> forkSession(
+    String projectId,
+    String sessionId, {
+    String? messageId,
+    String? directory,
+  }) async {
+    if (forkSessionFailure != null) return Left(forkSessionFailure!);
+    final parent = sessions.where((item) => item.id == sessionId).firstOrNull;
+    if (parent == null) {
+      return const Left(NotFoundFailure('Session not found'));
+    }
+    final forked = ChatSession(
+      id: 'ses_${sessions.length + 1}',
+      workspaceId: parent.workspaceId,
+      time: DateTime.now(),
+      title: '${parent.title ?? 'Conversation'} (fork)',
+      parentId: parent.id,
+      directory: parent.directory,
+    );
+    sessions.insert(0, forked);
+    sessionChildrenById.putIfAbsent(parent.id, () => <ChatSession>[])
+      ..add(forked);
+    return Right(forked);
+  }
 
   @override
   Future<Either<Failure, void>> unrevertMessages(
@@ -739,9 +877,16 @@ class FakeChatRepository implements ChatRepository {
     SessionUpdateInput input, {
     String? directory,
   }) async {
+    if (updateSessionFailure != null) return Left(updateSessionFailure!);
     final index = sessions.indexWhere((s) => s.id == sessionId);
     if (index == -1) return const Left(NotFoundFailure('Session not found'));
-    final updated = sessions[index].copyWith(title: input.title);
+    final updated = sessions[index].copyWith(
+      title: input.title ?? sessions[index].title,
+      archivedAt:
+          input.archivedAtEpochMs == null || input.archivedAtEpochMs! <= 0
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(input.archivedAtEpochMs!),
+    );
     sessions[index] = updated;
     return Right(updated);
   }

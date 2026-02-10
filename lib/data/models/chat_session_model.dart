@@ -11,6 +11,8 @@ class ChatSessionModel {
     required this.time,
     this.workspaceId,
     this.title,
+    this.parentId,
+    this.directory,
     this.version,
     this.shared = false,
     this.summary,
@@ -22,6 +24,9 @@ class ChatSessionModel {
   final String? workspaceId;
   final SessionTimeModel time;
   final String? title;
+  @JsonKey(name: 'parentID')
+  final String? parentId;
+  final String? directory;
   final String? version;
   final bool shared;
   @JsonKey(fromJson: _summaryFromJson)
@@ -29,10 +34,59 @@ class ChatSessionModel {
   final SessionPathModel? path;
   final SessionShareModel? share;
 
-  factory ChatSessionModel.fromJson(Map<String, dynamic> json) =>
-      _$ChatSessionModelFromJson(json);
+  factory ChatSessionModel.fromJson(Map<String, dynamic> json) {
+    final rawShare = json['share'];
+    final shareMap = rawShare is Map ? Map<String, dynamic>.from(rawShare) : null;
+    final share = shareMap == null ? null : SessionShareModel.fromJson(shareMap);
+    final rawPath = json['path'];
+    final pathMap = rawPath is Map ? Map<String, dynamic>.from(rawPath) : null;
 
-  Map<String, dynamic> toJson() => _$ChatSessionModelToJson(this);
+    return ChatSessionModel(
+      id: json['id'] as String? ?? '',
+      workspaceId: json['workspaceId'] as String?,
+      time: SessionTimeModel.fromJson(
+        (json['time'] as Map?)?.map((key, value) => MapEntry('$key', value)) ??
+            const <String, dynamic>{},
+      ),
+      title: json['title'] as String?,
+      parentId: json['parentID'] as String?,
+      directory: json['directory'] as String?,
+      version: json['version'] as String?,
+      shared: share != null || json['shared'] == true,
+      summary: _summaryFromJson(json['summary']),
+      path: pathMap == null ? null : SessionPathModel.fromJson(pathMap),
+      share: share,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{'id': id, 'time': time.toJson()};
+    if (workspaceId != null) {
+      map['workspaceId'] = workspaceId;
+    }
+    if (title != null) {
+      map['title'] = title;
+    }
+    if (parentId != null) {
+      map['parentID'] = parentId;
+    }
+    if (directory != null) {
+      map['directory'] = directory;
+    }
+    if (version != null) {
+      map['version'] = version;
+    }
+    if (summary != null) {
+      map['summary'] = summary;
+    }
+    if (path != null) {
+      map['path'] = path!.toJson();
+    }
+    if (share != null) {
+      map['share'] = share!.toJson();
+    }
+    return map;
+  }
 
   /// Safely parse summary from API which may return Map or String
   static String? _summaryFromJson(dynamic value) {
@@ -55,7 +109,13 @@ class ChatSessionModel {
       workspaceId: workspaceId ?? 'default',
       time: time.toDomain(),
       title: title,
-      shared: share != null,
+      parentId: parentId,
+      directory: directory,
+      archivedAt: time.archived == null || time.archived! <= 0
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(time.archived!),
+      shared: share != null || shared,
+      shareUrl: share?.url,
       summary: summary,
       path: path?.toDomain(),
     );
@@ -63,16 +123,26 @@ class ChatSessionModel {
 
   /// Technical comment translated to English.
   static ChatSessionModel fromDomain(ChatSession session) {
+    final timestamp = session.time.millisecondsSinceEpoch;
     return ChatSessionModel(
       id: session.id,
       workspaceId: session.workspaceId,
-      time: SessionTimeModel.fromDomain(session.time),
+      time: SessionTimeModel(
+        created: timestamp,
+        updated: timestamp,
+        archived: session.archivedAt?.millisecondsSinceEpoch,
+      ),
       title: session.title,
+      parentId: session.parentId,
+      directory: session.directory,
       shared: session.shared,
       summary: session.summary,
       path: session.path != null
           ? SessionPathModel.fromDomain(session.path!)
           : null,
+      share: session.shareUrl == null
+          ? null
+          : SessionShareModel(url: session.shareUrl!),
     );
   }
 }
@@ -80,18 +150,35 @@ class ChatSessionModel {
 /// Technical comment translated to English.
 @JsonSerializable()
 class SessionTimeModel {
-  const SessionTimeModel({required this.created, required this.updated});
+  const SessionTimeModel({
+    required this.created,
+    required this.updated,
+    this.archived,
+  });
 
   final int created;
   final int updated;
+  final int? archived;
 
-  factory SessionTimeModel.fromJson(Map<String, dynamic> json) =>
-      _$SessionTimeModelFromJson(json);
+  factory SessionTimeModel.fromJson(Map<String, dynamic> json) {
+    return SessionTimeModel(
+      created: (json['created'] as num?)?.toInt() ?? 0,
+      updated: (json['updated'] as num?)?.toInt() ?? 0,
+      archived: (json['archived'] as num?)?.toInt(),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$SessionTimeModelToJson(this);
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{'created': created, 'updated': updated};
+    if (archived != null) {
+      map['archived'] = archived;
+    }
+    return map;
+  }
 
   DateTime toDomain() {
-    return DateTime.fromMillisecondsSinceEpoch(created);
+    final source = updated > 0 ? updated : created;
+    return DateTime.fromMillisecondsSinceEpoch(source);
   }
 
   static SessionTimeModel fromDomain(DateTime time) {
@@ -344,9 +431,10 @@ class SessionCreateInputModel {
 /// Technical comment translated to English.
 @JsonSerializable()
 class SessionUpdateInputModel {
-  const SessionUpdateInputModel({this.title});
+  const SessionUpdateInputModel({this.title, this.archivedAtEpochMs});
 
   final String? title;
+  final int? archivedAtEpochMs;
 
   factory SessionUpdateInputModel.fromJson(Map<String, dynamic> json) =>
       _$SessionUpdateInputModelFromJson(json);
@@ -357,11 +445,17 @@ class SessionUpdateInputModel {
     if (title != null) {
       map['title'] = title;
     }
+    if (archivedAtEpochMs != null) {
+      map['time'] = <String, dynamic>{'archived': archivedAtEpochMs};
+    }
     return map;
   }
 
   static SessionUpdateInputModel fromDomain(SessionUpdateInput input) {
-    return SessionUpdateInputModel(title: input.title);
+    return SessionUpdateInputModel(
+      title: input.title,
+      archivedAtEpochMs: input.archivedAtEpochMs,
+    );
   }
 }
 

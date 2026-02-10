@@ -16,6 +16,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-010: Multi-Server Profile Orchestration and Scoped Persistence (2026-02-09) [Accepted]
 - ADR-011: Model Selection and Variant Preference Orchestration (2026-02-09) [Accepted]
 - ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration (2026-02-09) [Accepted]
+- ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration (2026-02-10) [Accepted]
 
 ---
 
@@ -430,6 +431,68 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 ### References
 
 - `ROADMAP.feat013.md`
+- `ROADMAP.md`
+- https://opencode.ai/docs/server/
+- https://github.com/anomalyco/opencode
+
+---
+
+## ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration
+
+Status: Accepted  
+Date: 2026-02-10
+
+### Context
+
+Basic session CRUD was no longer enough for parity with current OpenCode flows. CodeWalk needed rename/archive/share/fork behaviors, lifecycle insight surfaces (`status`, `children`, `todo`, `diff`), and scalable list navigation for larger histories. Existing provider logic handled session state updates narrowly and could leave the UI stale after lifecycle mutations or event-only partial payloads.
+
+### Decision
+
+1. Expand session domain contracts to include lifecycle metadata (`parentId`, `directory`, `archivedAt`, `shareUrl`) and lifecycle insight entities (`SessionTodo`, `SessionDiff`).
+2. Extend chat repository/data-source contracts with advanced lifecycle operations:
+   - `/session/{id}` patch update
+   - `/session/{id}/share` create/delete
+   - `/session/{id}/fork`
+   - `/session/status`
+   - `/session/{id}/children`
+   - `/session/{id}/todo`
+   - `/session/{id}/diff`
+   - list query controls (`search`, `roots`, `start`, `limit`)
+3. Implement provider-level optimistic mutations (rename/archive/share/delete) with rollback on failure and deterministic re-sync after remote acknowledgment.
+4. Introduce lifecycle insight orchestration in `ChatProvider` to hydrate and maintain `status`, `children`, `todo`, and `diff` maps, including reducer handling for `todo.updated` and `session.diff`.
+5. Expand session list UX to include filter/sort/search/load-more controls and add lifecycle action menu coverage in widget/integration tests.
+
+### Rationale
+
+- Lifecycle mutation latency should not block UX responsiveness, so optimistic local updates are required.
+- Rollback paths are mandatory to preserve state correctness when API operations fail.
+- Insight hydration aligns mobile behavior with OpenCode Desktop/Web visibility for session state beyond message text.
+- Query windowing controls are needed to keep session history navigation performant as data volume grows.
+- Dedicated lifecycle endpoint coverage in the mock server and integration tests prevents regressions in parity-critical flows.
+
+### Consequences
+
+- Positive: session management now supports parity-level lifecycle operations and metadata.
+- Positive: users get immediate UI feedback on lifecycle actions with automatic recovery on failures.
+- Positive: session insight data is now visible and synchronized through both API pulls and realtime events.
+- Trade-off: `ChatProvider` state orchestration became more complex (optimistic state + rollback + insight caches).
+- Trade-off: larger test surface area increases maintenance cost but improves confidence against regressions.
+
+### Key Files
+
+- `lib/domain/entities/chat_session.dart`
+- `lib/domain/repositories/chat_repository.dart`
+- `lib/data/datasources/chat_remote_datasource.dart`
+- `lib/data/models/session_lifecycle_model.dart`
+- `lib/data/repositories/chat_repository_impl.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `lib/presentation/widgets/chat_session_list.dart`
+- `test/integration/opencode_server_integration_test.dart`
+- `test/widget/chat_session_list_test.dart`
+
+### References
+
 - `ROADMAP.md`
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
