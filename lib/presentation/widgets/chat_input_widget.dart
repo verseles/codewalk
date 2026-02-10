@@ -44,6 +44,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   bool _isInitializingSpeech = false;
   bool _isSpeechEnabled = false;
   String _speechPrefix = '';
+  Timer? _sendHoldTimer;
+  DateTime? _lastSecondarySendActionAt;
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
 
@@ -55,6 +57,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   @override
   void dispose() {
+    _sendHoldTimer?.cancel();
     unawaited(_speechToText.stop());
     _controller.dispose();
     _internalFocusNode.dispose();
@@ -239,21 +242,48 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: canSend
-                        ? () => unawaited(_handleSendMessage())
-                        : null,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(52, 52),
-                      padding: EdgeInsets.zero,
+                  Listener(
+                    onPointerDown: (_) =>
+                        _handleSendButtonPressStart(canSend: canSend),
+                    onPointerUp: (_) => _handleSendButtonPressEnd(),
+                    onPointerCancel: (_) => _handleSendButtonPressEnd(),
+                    child: FilledButton(
+                      onPressed: canSend ? _handleSendButtonTap : null,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(52, 52),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: _isSending
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Icon(Icons.send_rounded),
+                                Positioned(
+                                  right: 8,
+                                  bottom: 8,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(99),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(1),
+                                      child: Icon(
+                                        Icons.keyboard_return_rounded,
+                                        size: 10,
+                                        color: colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
-                    child: _isSending
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.send_rounded),
                   ),
                 ],
               ),
@@ -414,6 +444,63 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       default:
         return 'image/png';
     }
+  }
+
+  void _handleSendButtonTap() {
+    final lastSecondaryAction = _lastSecondarySendActionAt;
+    if (lastSecondaryAction != null &&
+        DateTime.now().difference(lastSecondaryAction) <
+            const Duration(milliseconds: 500)) {
+      return;
+    }
+    unawaited(_handleSendMessage());
+  }
+
+  void _handleSendButtonPressStart({required bool canSend}) {
+    if (!canSend || _isSending) {
+      return;
+    }
+    _sendHoldTimer?.cancel();
+    _sendHoldTimer = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) {
+        return;
+      }
+      _lastSecondarySendActionAt = DateTime.now();
+      _insertComposerNewline();
+    });
+  }
+
+  void _handleSendButtonPressEnd() {
+    _sendHoldTimer?.cancel();
+    _sendHoldTimer = null;
+  }
+
+  void _insertComposerNewline() {
+    if (!widget.enabled || _isSending) {
+      return;
+    }
+
+    final current = _controller.value;
+    final text = current.text;
+    final selection = current.selection;
+    final start = selection.isValid ? selection.start : text.length;
+    final end = selection.isValid ? selection.end : text.length;
+    final from = start <= end ? start : end;
+    final to = start <= end ? end : start;
+    final safeFrom = from.clamp(0, text.length).toInt();
+    final safeTo = to.clamp(0, text.length).toInt();
+    final nextText = text.replaceRange(safeFrom, safeTo, '\n');
+    final nextOffset = safeFrom + 1;
+
+    _controller.value = TextEditingValue(
+      text: nextText,
+      selection: TextSelection.collapsed(offset: nextOffset),
+    );
+    _effectiveFocusNode.requestFocus();
+
+    setState(() {
+      _isComposing = nextText.trim().isNotEmpty;
+    });
   }
 
   Future<void> _toggleVoiceInput() async {

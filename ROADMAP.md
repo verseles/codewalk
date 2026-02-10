@@ -163,6 +163,7 @@ Completed parity hardening and release readiness by expanding regression coverag
 Applied a post-release chat composer enhancement: implemented image/PDF attachments in the input flow (`file_picker` + `file` parts with `mime`/`url`) and gated attachment UI visibility by selected model capabilities so unsupported models hide the attachment action.
 Refined attachment capability handling to be modality-aware per model (`image` vs `pdf`), so the attachment sheet now shows only supported options instead of exposing unsupported file types.
 Added voice-to-text input in the chat composer using `speech_to_text`, with a dedicated microphone action beside send and Android speech-recognition permission/query wiring for device compatibility.
+Enhanced composer send affordance with a secondary hold action: pressing send for 300ms inserts a newline instead of sending, plus a small corner icon to signal this behavior in the button UI.
 Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 
 ## Dependency Order
