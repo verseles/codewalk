@@ -60,7 +60,6 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(NavigationRail), findsNothing);
     expect(find.text('Conversations'), findsOneWidget);
-    expect(find.text('Areas'), findsOneWidget);
     expect(find.text('Logs'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
   });

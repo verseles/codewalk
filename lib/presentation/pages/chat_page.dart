@@ -986,14 +986,7 @@ class _ChatPageState extends State<ChatPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-              child: Text(
-                'Areas',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
               child: Row(
                 children: [
                   Expanded(
