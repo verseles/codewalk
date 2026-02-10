@@ -165,6 +165,7 @@ Refined attachment capability handling to be modality-aware per model (`image` v
 Added voice-to-text input in the chat composer using `speech_to_text`, with a dedicated microphone action beside send and Android speech-recognition permission/query wiring for device compatibility.
 Enhanced composer send affordance with a secondary hold action: pressing send for 300ms inserts a newline instead of sending, plus a small corner icon to signal this behavior in the button UI.
 Restored assistant progress feedback during response generation by showing staged indicators in the message list (`Thinking...`, `Receiving response...`, `Retrying model request...`) driven by send state, `session.status`, and in-progress assistant message parts.
+Removed inline `Step started`/`Step finished` assistant blocks from the message body and moved their metadata to the assistant info menu (`i` icon) in the message header for a cleaner response flow.
 Commits: d568f22, 47ecddb, 3081b2e, b65f7f6, afb63be
 
 ## Dependency Order

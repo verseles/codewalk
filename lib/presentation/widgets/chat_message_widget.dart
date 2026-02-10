@@ -95,6 +95,9 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildAssistantInfo(BuildContext context, AssistantMessage message) {
+    final stepStarts = message.parts.whereType<StepStartPart>().toList();
+    final stepFinishes = message.parts.whereType<StepFinishPart>().toList();
+
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.info_outline,
@@ -102,28 +105,63 @@ class ChatMessageWidget extends StatelessWidget {
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       tooltip: 'Message Info',
-      itemBuilder: (context) => [
-        if (message.modelId != null)
-          PopupMenuItem(
-            enabled: false,
-            child: Text('Model: ${message.modelId}'),
-          ),
-        if (message.providerId != null)
-          PopupMenuItem(
-            enabled: false,
-            child: Text('Provider: ${message.providerId}'),
-          ),
-        if (message.tokens != null)
-          PopupMenuItem(
-            enabled: false,
-            child: Text('Tokens: ${message.tokens!.total}'),
-          ),
-        if (message.cost != null)
-          PopupMenuItem(
-            enabled: false,
-            child: Text('Cost: \$${message.cost!.toStringAsFixed(6)}'),
-          ),
-      ],
+      itemBuilder: (context) {
+        final items = <PopupMenuEntry<String>>[
+          if (message.modelId != null)
+            PopupMenuItem(
+              enabled: false,
+              child: Text('Model: ${message.modelId}'),
+            ),
+          if (message.providerId != null)
+            PopupMenuItem(
+              enabled: false,
+              child: Text('Provider: ${message.providerId}'),
+            ),
+          if (message.tokens != null)
+            PopupMenuItem(
+              enabled: false,
+              child: Text('Tokens: ${message.tokens!.total}'),
+            ),
+          if (message.cost != null)
+            PopupMenuItem(
+              enabled: false,
+              child: Text('Cost: \$${message.cost!.toStringAsFixed(6)}'),
+            ),
+        ];
+
+        final hasStepMetadata =
+            stepStarts.isNotEmpty || stepFinishes.isNotEmpty;
+        if (items.isNotEmpty && hasStepMetadata) {
+          items.add(const PopupMenuDivider());
+        }
+
+        for (var index = 0; index < stepStarts.length; index += 1) {
+          final stepStart = stepStarts[index];
+          final snapshot = stepStart.snapshot?.trim();
+          final details = snapshot == null || snapshot.isEmpty
+              ? 'Step started #${index + 1}'
+              : 'Step started #${index + 1}: $snapshot';
+          items.add(PopupMenuItem(enabled: false, child: Text(details)));
+        }
+
+        for (var index = 0; index < stepFinishes.length; index += 1) {
+          final stepFinish = stepFinishes[index];
+          final details =
+              'Step finished #${index + 1}: ${stepFinish.reason} • tokens ${stepFinish.tokens.total} • \$${stepFinish.cost.toStringAsFixed(6)}';
+          items.add(PopupMenuItem(enabled: false, child: Text(details)));
+        }
+
+        if (items.isEmpty) {
+          items.add(
+            const PopupMenuItem(
+              enabled: false,
+              child: Text('No metadata available'),
+            ),
+          );
+        }
+
+        return items;
+      },
     );
   }
 
@@ -140,9 +178,9 @@ class ChatMessageWidget extends StatelessWidget {
       case PartType.reasoning:
         return _buildReasoningPart(context, part as ReasoningPart);
       case PartType.stepStart:
-        return _buildStepStartPart(context, part as StepStartPart);
+        return const SizedBox.shrink();
       case PartType.stepFinish:
-        return _buildStepFinishPart(context, part as StepFinishPart);
+        return const SizedBox.shrink();
       case PartType.snapshot:
         return _buildSnapshotPart(context, part as SnapshotPart);
       case PartType.patch:
@@ -365,25 +403,6 @@ class ChatMessageWidget extends StatelessWidget {
       icon: Icons.support_agent,
       title: 'Agent',
       subtitle: part.name,
-    );
-  }
-
-  Widget _buildStepStartPart(BuildContext context, StepStartPart part) {
-    return _buildInfoContainer(
-      context,
-      icon: Icons.play_circle_outline,
-      title: 'Step started',
-      subtitle: part.snapshot != null ? 'snapshot: ${part.snapshot}' : null,
-    );
-  }
-
-  Widget _buildStepFinishPart(BuildContext context, StepFinishPart part) {
-    return _buildInfoContainer(
-      context,
-      icon: Icons.check_circle_outline,
-      title: 'Step finished',
-      subtitle:
-          '${part.reason} • tokens ${part.tokens.total} • \$${part.cost.toStringAsFixed(6)}',
     );
   }
 
