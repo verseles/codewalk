@@ -127,7 +127,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(SelectableText), findsWidgets);
+    expect(find.byType(SelectionArea), findsOneWidget);
     expect(find.byTooltip('Copy'), findsNothing);
   });
 
@@ -184,7 +184,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(SelectableText), findsWidgets);
+    expect(find.byType(SelectionArea), findsOneWidget);
     expect(find.byTooltip('Copy'), findsNothing);
   });
 

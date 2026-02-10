@@ -233,7 +233,6 @@ class ChatMessageWidget extends StatelessWidget {
           // Render text using Markdown
           MarkdownBody(
             data: part.text,
-            selectable: true,
             styleSheet: MarkdownStyleSheet(
               p: Theme.of(context).textTheme.bodyMedium,
               code: Theme.of(context).textTheme.bodyMedium?.copyWith(
