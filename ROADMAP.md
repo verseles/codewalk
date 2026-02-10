@@ -184,6 +184,51 @@ Description: Remove manual refresh interactions and keep UI state continuously u
 - [ ] 17.07 Expand tests (unit/widget/integration) for reconnect, resume, and no-refresh user flows
 - [ ] 17.08 Add telemetry/KPIs and rollout guardrails (feature flag + rollback path)
 
+### Feature 018: Prompt Power Features Parity (`@`, `!`, `/`)
+Description: Replicar no composer os gatilhos de produtividade do OpenCode Web: menção de arquivos/agentes com `@`, modo shell com `!` no início, e catálogo de comandos por `/` no começo do input. (Visit file ROADMAP.feat018.md for full research details)
+
+- [x] 18.01 Pesquisa e congelamento de contrato (`/command`, `/agent`, parse de prompt e comportamento de popovers)
+- [ ] 18.02 Implementar menções `@` com sugestões contextuais (arquivos + agentes), navegação por teclado e inserção de pill/token no prompt
+- [ ] 18.03 Implementar modo shell ao digitar `!` no início (estado dedicado, envio para endpoint shell e saída por `Esc`/backspace em input vazio)
+- [ ] 18.04 Implementar catálogo slash `/` no início do prompt (builtin + custom + skills/MCP via `source`) com execução consistente
+- [ ] 18.05 Cobrir com testes unit/widget/integration os fluxos `@`/`!`/`/`, inclusive cenários de erro/empty-state
+
+### Feature 019: File Explorer and Viewer Parity
+Description: Entregar navegação completa de arquivos com ícones, busca rápida, abertura em abas e visualização de conteúdo diretamente na UI, alinhado ao OpenCode Web. (Visit file ROADMAP.feat019.md for full research details)
+
+- [x] 19.01 Pesquisa e contrato de dados (`/file`, `/file/content`, `/find/file`, estados da árvore e tabs)
+- [ ] 19.02 Implementar painel de arquivos com árvore expansível, ícones por tipo e ações de abrir/alternar contexto
+- [ ] 19.03 Implementar busca de arquivos (fuzzy/ranqueada) com diálogo dedicado e atalhos para abertura rápida
+- [ ] 19.04 Implementar visualizador de arquivo (texto/binário/diff quando aplicável) com cache e reconciliação com eventos de mudança
+- [ ] 19.05 Adicionar testes para árvore, busca, abertura de tabs e renderização de conteúdo
+
+### Feature 020: Agent Selector in Composer (Model/Thinking Bar)
+Description: Incluir seletor explícito de agente (Build, Plan e demais permitidos) ao lado de provider/model e thinking, com persistência por contexto e integração de envio. (Visit file ROADMAP.feat020.md for full research details)
+
+- [x] 20.01 Pesquisa e freeze de contrato (`/agent`, regras de `mode`/`hidden`, compatibilidade com variant/model)
+- [ ] 20.02 Implementar seletor de agente na barra de controles do composer com ordem e labels consistentes
+- [ ] 20.03 Persistir seleção por escopo (`server + directory`) e restaurar com fallback seguro quando agente/modelo não existir
+- [ ] 20.04 Integrar seleção ao payload de prompt e aos comandos rápidos (ciclo de agente + slash/atalho quando aplicável)
+- [ ] 20.05 Cobrir seleção/persistência/fallback em testes unit/widget/integration
+
+### Feature 021: Session Title Visibility and Quick Rename Parity
+Description: Melhorar a UX de sessão para sempre exibir título de conversa de forma clara e permitir renomeação rápida/inline sem fricção. (Visit file ROADMAP.feat021.md for full research details)
+
+- [x] 21.01 Pesquisa e freeze de comportamento (display de título no header, rename inline/menu e contrato `session.update`)
+- [ ] 21.02 Garantir exibição consistente do título da sessão ativa nas áreas primárias da tela (mobile e desktop)
+- [ ] 21.03 Implementar renomeação inline com fluxo otimista + rollback em erro e sincronização imediata da lista de sessões
+- [ ] 21.04 Refinar fallback de títulos automáticos (`Today ...`) para reduzir ambiguidade e melhorar legibilidade temporal
+- [ ] 21.05 Cobrir render/rename/fallback com testes automatizados
+
+### Feature 022: Settings Parity (Notifications, Sounds, Shortcuts)
+Description: Expandir configurações para incluir notificações e sons por categoria (agente/permissões/erros) e uma tela dedicada de atalhos com busca e detecção de conflito. (Visit file ROADMAP.feat022.md for full research details)
+
+- [x] 22.01 Pesquisa e freeze de escopo de settings (toggles, sound selectors, keybind groups/search/conflict)
+- [ ] 22.02 Implementar preferências de notificação por categoria com integração de plataforma (desktop/web/mobile) e persistência
+- [ ] 22.03 Implementar preferências de som por categoria com pré-escuta, persistência e fallback quando áudio não estiver disponível
+- [ ] 22.04 Implementar tela de atalhos dedicada com grupos, busca fuzzy, redefinição global e validação de conflitos
+- [ ] 22.05 Cobrir persistência e comportamento de settings com testes unit/widget/integration
+
 ## Dependency Order
 
 1. Feature 001 -> blocks all other features (baseline + safety rails)
@@ -203,6 +248,11 @@ Description: Remove manual refresh interactions and keep UI state continuously u
 15. Feature 015 -> depends on 011 + 013 to safely support multi-context orchestration
 16. Feature 016 -> final hardening/release gate for features 011-015
 17. Feature 017 -> depends on 013 + 015 + 016 to safely remove manual refresh controls
+18. Feature 018 -> depends on 012 + 015 + 017 to add advanced prompt triggers over stable scoped context and realtime sync
+19. Feature 019 -> depends on 015 + 017 + 018 for refreshless file navigation integrated with prompt/file-open flows
+20. Feature 020 -> depends on 012 + 018 to align agent selection with model/thinking controls and prompt command grammar
+21. Feature 021 -> depends on 014 + 017 to deliver consistent session-title UX over stable lifecycle and sync behavior
+22. Feature 022 -> depends on 018 + 020 to expose complete command/agent-driven settings and shortcut management
 
 ## Legend
 
@@ -233,3 +283,8 @@ Description: Remove manual refresh interactions and keep UI state continuously u
 | 015 | 011, 013 complete | Reliable project/workspace context switching with directory-isolated state |
 | 016 | 011-015 complete | QA signoff + docs/ADR/CODEBASE updates + release checklist complete |
 | 017 | 013, 015, 016 complete | Refreshless UX with SSE-first sync, lifecycle-aware fallback, and validated no-manual-refresh flows |
+| 018 | 012, 015, 017 complete | Composer supports `@` mentions + leading `!` shell mode + leading `/` slash commands with tested keyboard/mouse flows |
+| 019 | 015, 017, 018 complete | File tree + fuzzy open + file viewer available with stable state sync and passing navigation/render tests |
+| 020 | 012, 018 complete | Agent selector is first-class beside model/thinking, persisted per context, and reflected in outbound prompts |
+| 021 | 014, 017 complete | Active session title is always visible and rename-inline flow updates state/UI reliably with rollback safety |
+| 022 | 018, 020 complete | Settings include notification/sound categories and searchable shortcut management with persistence/conflict checks |
