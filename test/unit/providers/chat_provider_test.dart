@@ -211,6 +211,58 @@ void main() {
       },
     );
 
+    test(
+      'onServerScopeChanged restores model selection per server scope',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+
+        await provider.projectProvider.initializeProject();
+        await provider.initializeProviders();
+        expect(provider.selectedProviderId, 'provider_a');
+        expect(provider.selectedModelId, 'model_a');
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+
+        localDataSource.activeServerId = 'srv_other';
+        await provider.onServerScopeChanged();
+        expect(provider.selectedProviderId, 'provider_a');
+        expect(provider.selectedModelId, 'model_a');
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_a',
+          modelId: 'model_a',
+        );
+        localDataSource.activeServerId = 'srv_test';
+        await provider.onServerScopeChanged();
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+      },
+    );
+
     test('cycleVariant is no-op when current model has no variants', () async {
       appRepository.providersResult = Right(
         ProvidersResponse(
@@ -978,6 +1030,52 @@ void main() {
         expect(chatRepository.lastQuestionAnswers, const <List<String>>[
           <String>['Yes'],
         ]);
+      },
+    );
+
+    test(
+      'rejectQuestionRequest removes pending question from provider state',
+      () async {
+        chatRepository.pendingQuestions = const <ChatQuestionRequest>[
+          ChatQuestionRequest(
+            id: 'q_reject_1',
+            sessionId: 'ses_1',
+            questions: <ChatQuestionInfo>[
+              ChatQuestionInfo(
+                question: 'Reject this?',
+                header: 'Confirm',
+                options: <ChatQuestionOption>[
+                  ChatQuestionOption(label: 'Yes', description: 'Reject'),
+                ],
+              ),
+            ],
+          ),
+        ];
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        expect(provider.currentQuestionRequest?.id, 'q_reject_1');
+
+        await provider.rejectQuestionRequest(requestId: 'q_reject_1');
+
+        expect(chatRepository.lastQuestionRejectRequestId, 'q_reject_1');
+        expect(provider.currentQuestionRequest, isNull);
       },
     );
 

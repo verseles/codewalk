@@ -8,6 +8,7 @@ import 'package:provider/provider.dart' hide Provider;
 
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
+import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
@@ -436,6 +437,65 @@ void main() {
     expect(repository.lastSendInput, isNotNull);
     expect(find.text('hello from widget'), findsOneWidget);
     expect(find.text('ok from widget'), findsOneWidget);
+  });
+
+  testWidgets('rejects question request from chat interaction card', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_1',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
+        ),
+      ],
+    );
+    repository.pendingQuestions = const <ChatQuestionRequest>[
+      ChatQuestionRequest(
+        id: 'q_widget_reject_1',
+        sessionId: 'ses_1',
+        questions: <ChatQuestionInfo>[
+          ChatQuestionInfo(
+            question: 'Proceed?',
+            header: 'Confirm',
+            options: <ChatQuestionOption>[
+              ChatQuestionOption(label: 'Yes', description: 'Continue'),
+              ChatQuestionOption(label: 'No', description: 'Stop'),
+            ],
+          ),
+        ],
+      ),
+    ];
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.initializeProviders();
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Submit Answers'), findsOneWidget);
+    expect(find.text('Reject'), findsOneWidget);
+
+    await tester.tap(find.text('Reject'));
+    await tester.pumpAndSettle();
+
+    expect(repository.lastQuestionRejectRequestId, 'q_widget_reject_1');
+    expect(find.text('Submit Answers'), findsNothing);
   });
 
   testWidgets('shows model selector with search and quick reasoning selector', (

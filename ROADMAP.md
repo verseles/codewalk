@@ -159,7 +159,7 @@ Added explicit git-only warning inside directory picker and reinforced post-crea
 ### Feature 016: Reliability Hardening, QA, and Release Readiness for Parity Wave
 Description: Validate and harden all parity features with measurable quality gates before production rollout. (Visit file ROADMAP.feat016.md for full research details)
 
-- [ ] 16.01 Expand automated test matrix (unit/widget/integration) for multi-server + model/variant + event + session/workspace flows
+- [x] 16.01 Expand automated test matrix (unit/widget/integration) for multi-server + model/variant + event + session/workspace flows
 - [ ] 16.02 Run manual QA campaign on Android + desktop/web parity scenarios and log reproducible defects
 - [ ] 16.03 Update technical docs and decisions (`ADR.md`, `CODEBASE.md`, release notes) for new architecture/state model
 - [ ] 16.04 Validate `make precommit` + CI stability and publish rollout checklist/known limitations

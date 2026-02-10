@@ -433,6 +433,40 @@ void main() {
       },
     );
 
+    test('ChatRemoteDataSource rejects pending question requests', () async {
+      server.pendingQuestions = <Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 'q_reject_1',
+          'sessionID': 'ses_1',
+          'questions': <dynamic>[
+            <String, dynamic>{
+              'question': 'Stop execution?',
+              'header': 'Confirm',
+              'options': <dynamic>[
+                <String, dynamic>{
+                  'label': 'Stop',
+                  'description': 'Reject request',
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      final remote = ChatRemoteDataSourceImpl(
+        dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+      );
+
+      final before = await remote.listQuestions();
+      expect(before.single.id, 'q_reject_1');
+
+      await remote.rejectQuestion(requestId: 'q_reject_1');
+      expect(server.lastQuestionRejectRequestId, 'q_reject_1');
+
+      final after = await remote.listQuestions();
+      expect(after, isEmpty);
+    });
+
     test('ChatRepository maps send 400 error to ValidationFailure', () async {
       server.sendMessageValidationError = true;
 
