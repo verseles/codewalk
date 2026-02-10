@@ -31,6 +31,7 @@ import '../../domain/usecases/share_chat_session.dart';
 import '../../domain/usecases/unshare_chat_session.dart';
 import '../../domain/usecases/update_chat_session.dart';
 import '../../domain/usecases/watch_chat_events.dart';
+import '../../domain/usecases/watch_global_chat_events.dart';
 import '../../core/errors/failures.dart';
 import 'project_provider.dart';
 
@@ -40,6 +41,38 @@ enum ChatState { initial, loading, loaded, error, sending }
 enum SessionListFilter { active, archived, all }
 
 enum SessionListSort { recent, oldest, title }
+
+class _ChatContextSnapshot {
+  const _ChatContextSnapshot({
+    required this.sessions,
+    required this.currentSession,
+    required this.messages,
+    required this.sessionStatusById,
+    required this.pendingPermissionsBySession,
+    required this.pendingQuestionsBySession,
+    required this.sessionChildrenById,
+    required this.sessionTodoById,
+    required this.sessionDiffById,
+    required this.sessionSearchQuery,
+    required this.sessionListFilter,
+    required this.sessionListSort,
+    required this.sessionVisibleLimit,
+  });
+
+  final List<ChatSession> sessions;
+  final ChatSession? currentSession;
+  final List<ChatMessage> messages;
+  final Map<String, SessionStatusInfo> sessionStatusById;
+  final Map<String, List<ChatPermissionRequest>> pendingPermissionsBySession;
+  final Map<String, List<ChatQuestionRequest>> pendingQuestionsBySession;
+  final Map<String, List<ChatSession>> sessionChildrenById;
+  final Map<String, List<SessionTodo>> sessionTodoById;
+  final Map<String, List<SessionDiff>> sessionDiffById;
+  final String sessionSearchQuery;
+  final SessionListFilter sessionListFilter;
+  final SessionListSort sessionListSort;
+  final int sessionVisibleLimit;
+}
 
 /// Chat provider
 class ChatProvider extends ChangeNotifier {
@@ -60,6 +93,7 @@ class ChatProvider extends ChangeNotifier {
     required this.getSessionTodo,
     required this.getSessionDiff,
     required this.watchChatEvents,
+    required this.watchGlobalChatEvents,
     required this.listPendingPermissions,
     required this.replyPermission,
     required this.listPendingQuestions,
@@ -67,7 +101,12 @@ class ChatProvider extends ChangeNotifier {
     required this.rejectQuestion,
     required this.projectProvider,
     required this.localDataSource,
-  });
+  }) {
+    _activeContextKey = _composeContextKey(
+      _activeServerId,
+      _resolveContextScopeId(),
+    );
+  }
 
   // Scroll callback
   VoidCallback? _scrollToBottomCallback;
@@ -88,6 +127,7 @@ class ChatProvider extends ChangeNotifier {
   final GetSessionTodo getSessionTodo;
   final GetSessionDiff getSessionDiff;
   final WatchChatEvents watchChatEvents;
+  final WatchGlobalChatEvents watchGlobalChatEvents;
   final ListPendingPermissions listPendingPermissions;
   final ReplyPermission replyPermission;
   final ListPendingQuestions listPendingQuestions;
@@ -103,7 +143,9 @@ class ChatProvider extends ChangeNotifier {
   String? _errorMessage;
   StreamSubscription<dynamic>? _messageSubscription;
   StreamSubscription<dynamic>? _eventSubscription;
+  StreamSubscription<dynamic>? _globalEventSubscription;
   int _eventStreamGeneration = 0;
+  Timer? _globalRefreshDebounce;
   bool _isRespondingInteraction = false;
   Map<String, SessionStatusInfo> _sessionStatusById =
       <String, SessionStatusInfo>{};
@@ -138,6 +180,10 @@ class ChatProvider extends ChangeNotifier {
   int _providersFetchId = 0;
   int _sessionsFetchId = 0;
   int _messagesFetchId = 0;
+  String _activeContextKey = 'legacy::default';
+  final Map<String, _ChatContextSnapshot> _contextSnapshots =
+      <String, _ChatContextSnapshot>{};
+  final Set<String> _dirtyContextKeys = <String>{};
 
   static const Duration _sessionsCacheTtl = Duration(days: 3);
   static const int _maxRecentModels = 8;
@@ -170,29 +216,31 @@ class ChatProvider extends ChangeNotifier {
 
   List<ChatSession> get visibleSessions {
     final query = _sessionSearchQuery.trim().toLowerCase();
-    final filtered = _sessions.where((session) {
-      final archived = session.archived;
-      switch (_sessionListFilter) {
-        case SessionListFilter.active:
-          if (archived) {
-            return false;
+    final filtered = _sessions
+        .where((session) {
+          final archived = session.archived;
+          switch (_sessionListFilter) {
+            case SessionListFilter.active:
+              if (archived) {
+                return false;
+              }
+            case SessionListFilter.archived:
+              if (!archived) {
+                return false;
+              }
+            case SessionListFilter.all:
+              break;
           }
-        case SessionListFilter.archived:
-          if (!archived) {
-            return false;
+
+          if (query.isEmpty) {
+            return true;
           }
-        case SessionListFilter.all:
-          break;
-      }
 
-      if (query.isEmpty) {
-        return true;
-      }
-
-      final title = (session.title ?? '').toLowerCase();
-      final summary = (session.summary ?? '').toLowerCase();
-      return title.contains(query) || summary.contains(query);
-    }).toList(growable: false);
+          final title = (session.title ?? '').toLowerCase();
+          final summary = (session.summary ?? '').toLowerCase();
+          return title.contains(query) || summary.contains(query);
+        })
+        .toList(growable: false);
 
     final sorted = List<ChatSession>.from(filtered)
       ..sort((a, b) {
@@ -373,6 +421,78 @@ class ChatProvider extends ChangeNotifier {
     return modelKey.substring(separatorIndex + 1);
   }
 
+  String _composeContextKey(String serverId, String scopeId) {
+    return '$serverId::$scopeId';
+  }
+
+  String? _scopeIdFromContextKey(String contextKey) {
+    final separatorIndex = contextKey.indexOf('::');
+    if (separatorIndex <= 0 || separatorIndex == contextKey.length - 2) {
+      return null;
+    }
+    return contextKey.substring(separatorIndex + 2);
+  }
+
+  String? _serverIdFromContextKey(String contextKey) {
+    final separatorIndex = contextKey.indexOf('::');
+    if (separatorIndex <= 0) {
+      return null;
+    }
+    return contextKey.substring(0, separatorIndex);
+  }
+
+  void _storeCurrentContextSnapshot() {
+    _contextSnapshots[_activeContextKey] = _ChatContextSnapshot(
+      sessions: _sessions,
+      currentSession: _currentSession,
+      messages: _messages,
+      sessionStatusById: _sessionStatusById,
+      pendingPermissionsBySession: _pendingPermissionsBySession,
+      pendingQuestionsBySession: _pendingQuestionsBySession,
+      sessionChildrenById: _sessionChildrenById,
+      sessionTodoById: _sessionTodoById,
+      sessionDiffById: _sessionDiffById,
+      sessionSearchQuery: _sessionSearchQuery,
+      sessionListFilter: _sessionListFilter,
+      sessionListSort: _sessionListSort,
+      sessionVisibleLimit: _sessionVisibleLimit,
+    );
+  }
+
+  void _restoreContextSnapshot(String contextKey) {
+    final snapshot = _contextSnapshots[contextKey];
+    if (snapshot == null) {
+      _sessions = <ChatSession>[];
+      _currentSession = null;
+      _messages = <ChatMessage>[];
+      _sessionStatusById = <String, SessionStatusInfo>{};
+      _pendingPermissionsBySession = <String, List<ChatPermissionRequest>>{};
+      _pendingQuestionsBySession = <String, List<ChatQuestionRequest>>{};
+      _sessionChildrenById = <String, List<ChatSession>>{};
+      _sessionTodoById = <String, List<SessionTodo>>{};
+      _sessionDiffById = <String, List<SessionDiff>>{};
+      _sessionSearchQuery = '';
+      _sessionListFilter = SessionListFilter.active;
+      _sessionListSort = SessionListSort.recent;
+      _sessionVisibleLimit = 40;
+      return;
+    }
+
+    _sessions = snapshot.sessions;
+    _currentSession = snapshot.currentSession;
+    _messages = snapshot.messages;
+    _sessionStatusById = snapshot.sessionStatusById;
+    _pendingPermissionsBySession = snapshot.pendingPermissionsBySession;
+    _pendingQuestionsBySession = snapshot.pendingQuestionsBySession;
+    _sessionChildrenById = snapshot.sessionChildrenById;
+    _sessionTodoById = snapshot.sessionTodoById;
+    _sessionDiffById = snapshot.sessionDiffById;
+    _sessionSearchQuery = snapshot.sessionSearchQuery;
+    _sessionListFilter = snapshot.sessionListFilter;
+    _sessionListSort = snapshot.sessionListSort;
+    _sessionVisibleLimit = snapshot.sessionVisibleLimit;
+  }
+
   Future<void> _loadModelPreferenceState({
     required String serverId,
     required String scopeId,
@@ -546,11 +666,34 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _cancelSubscriptionSafely(
+    StreamSubscription<dynamic>? subscription, {
+    required String label,
+  }) async {
+    if (subscription == null) {
+      return;
+    }
+    try {
+      await subscription.cancel().timeout(const Duration(seconds: 2));
+    } catch (error) {
+      AppLogger.warn('Failed to cancel $label subscription', error: error);
+    }
+  }
+
   Future<void> _startRealtimeEventSubscription() async {
     final generation = ++_eventStreamGeneration;
     final previousSubscription = _eventSubscription;
+    final previousGlobalSubscription = _globalEventSubscription;
     _eventSubscription = null;
-    await previousSubscription?.cancel();
+    _globalEventSubscription = null;
+    await _cancelSubscriptionSafely(
+      previousSubscription,
+      label: 'realtime event',
+    );
+    await _cancelSubscriptionSafely(
+      previousGlobalSubscription,
+      label: 'global event',
+    );
 
     final directory = projectProvider.currentProject?.path;
     final newSubscription = watchChatEvents(directory: directory).listen(
@@ -578,6 +721,31 @@ class ChatProvider extends ChangeNotifier {
     }
 
     _eventSubscription = newSubscription;
+
+    final globalSubscription = watchGlobalChatEvents().listen(
+      (result) {
+        if (generation != _eventStreamGeneration) {
+          return;
+        }
+        result.fold((failure) {
+          AppLogger.warn(
+            'Global realtime event stream failure: ${failure.toString()}',
+          );
+        }, _handleGlobalEvent);
+      },
+      onError: (error) {
+        if (generation != _eventStreamGeneration) {
+          return;
+        }
+        AppLogger.warn('Global realtime event stream exception', error: error);
+      },
+    );
+
+    if (generation != _eventStreamGeneration) {
+      await globalSubscription.cancel();
+      return;
+    }
+    _globalEventSubscription = globalSubscription;
   }
 
   Future<void> _loadPendingInteractions() async {
@@ -688,14 +856,16 @@ class ChatProvider extends ChangeNotifier {
         if (sessionId != null && diffRaw is List) {
           final parsed = diffRaw
               .whereType<Map>()
-              .map((item) => SessionDiff(
-                    file: item['file'] as String? ?? '',
-                    before: item['before'] as String? ?? '',
-                    after: item['after'] as String? ?? '',
-                    additions: (item['additions'] as num?)?.toInt() ?? 0,
-                    deletions: (item['deletions'] as num?)?.toInt() ?? 0,
-                    status: item['status'] as String?,
-                  ))
+              .map(
+                (item) => SessionDiff(
+                  file: item['file'] as String? ?? '',
+                  before: item['before'] as String? ?? '',
+                  after: item['after'] as String? ?? '',
+                  additions: (item['additions'] as num?)?.toInt() ?? 0,
+                  deletions: (item['deletions'] as num?)?.toInt() ?? 0,
+                  status: item['status'] as String?,
+                ),
+              )
               .toList(growable: false);
           _sessionDiffById[sessionId] = parsed;
           notifyListeners();
@@ -707,12 +877,14 @@ class ChatProvider extends ChangeNotifier {
         if (sessionId != null && todosRaw is List) {
           final parsed = todosRaw
               .whereType<Map>()
-              .map((item) => SessionTodo(
-                    id: item['id'] as String? ?? '',
-                    content: item['content'] as String? ?? '',
-                    status: item['status'] as String? ?? 'pending',
-                    priority: item['priority'] as String? ?? 'medium',
-                  ))
+              .map(
+                (item) => SessionTodo(
+                  id: item['id'] as String? ?? '',
+                  content: item['content'] as String? ?? '',
+                  status: item['status'] as String? ?? 'pending',
+                  priority: item['priority'] as String? ?? 'medium',
+                ),
+              )
               .toList(growable: false);
           _sessionTodoById[sessionId] = parsed;
           notifyListeners();
@@ -902,6 +1074,90 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  void _handleGlobalEvent(ChatEvent event) {
+    final type = event.type;
+    final affectsContext =
+        type.startsWith('session.') ||
+        type.startsWith('message.') ||
+        type.startsWith('project.') ||
+        type.startsWith('worktree.');
+    if (!affectsContext) {
+      return;
+    }
+
+    final directory = _extractDirectoryFromEvent(event);
+    if (directory == null || directory.trim().isEmpty) {
+      _dirtyContextKeys.add(_activeContextKey);
+      _scheduleCurrentContextRefresh();
+      return;
+    }
+
+    final targetContextKey = _composeContextKey(_activeServerId, directory);
+    _dirtyContextKeys.add(targetContextKey);
+
+    if (targetContextKey == _activeContextKey) {
+      _scheduleCurrentContextRefresh();
+      return;
+    }
+
+    _contextSnapshots.remove(targetContextKey);
+    unawaited(_clearPersistedContextCache(targetContextKey));
+  }
+
+  String? _extractDirectoryFromEvent(ChatEvent event) {
+    final properties = event.properties;
+    final direct = properties['directory'] as String?;
+    if (direct != null && direct.trim().isNotEmpty) {
+      return direct.trim();
+    }
+
+    final info = properties['info'];
+    if (info is Map<String, dynamic>) {
+      final value = info['directory'] as String?;
+      if (value != null && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+
+    final session = properties['session'];
+    if (session is Map<String, dynamic>) {
+      final value = session['directory'] as String?;
+      if (value != null && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+
+    final project = properties['project'];
+    if (project is Map<String, dynamic>) {
+      final value = project['directory'] as String?;
+      if (value != null && value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _clearPersistedContextCache(String contextKey) async {
+    final serverId = _serverIdFromContextKey(contextKey);
+    final scopeId = _scopeIdFromContextKey(contextKey);
+    if (serverId == null || scopeId == null) {
+      return;
+    }
+    await localDataSource.clearChatContextCache(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+  }
+
+  void _scheduleCurrentContextRefresh() {
+    _globalRefreshDebounce?.cancel();
+    _globalRefreshDebounce = Timer(const Duration(milliseconds: 300), () {
+      unawaited(loadSessions());
+      unawaited(refreshSessionStatusSnapshot());
+    });
+  }
+
   ChatMessage _copyMessageWithParts(
     ChatMessage message,
     List<MessagePart> parts,
@@ -950,19 +1206,22 @@ class ChatProvider extends ChangeNotifier {
     final result = await getSessionStatus(
       GetSessionStatusParams(directory: projectProvider.currentProject?.path),
     );
-    result.fold((failure) {
-      if (!silent) {
-        _sessionInsightsError = 'Failed to load session status';
+    result.fold(
+      (failure) {
+        if (!silent) {
+          _sessionInsightsError = 'Failed to load session status';
+          notifyListeners();
+        }
+        AppLogger.warn('Failed to load session status snapshot: $failure');
+      },
+      (statusMap) {
+        _sessionStatusById = statusMap;
+        if (!silent) {
+          _sessionInsightsError = null;
+        }
         notifyListeners();
-      }
-      AppLogger.warn('Failed to load session status snapshot: $failure');
-    }, (statusMap) {
-      _sessionStatusById = statusMap;
-      if (!silent) {
-        _sessionInsightsError = null;
-      }
-      notifyListeners();
-    });
+      },
+    );
   }
 
   Future<void> loadSessionInsights(
@@ -986,11 +1245,16 @@ class ChatProvider extends ChangeNotifier {
         directory: directory,
       ),
     );
-    childrenResult.fold((failure) {
-      AppLogger.warn('Failed to load session children for $sessionId: $failure');
-    }, (children) {
-      _sessionChildrenById[sessionId] = children;
-    });
+    childrenResult.fold(
+      (failure) {
+        AppLogger.warn(
+          'Failed to load session children for $sessionId: $failure',
+        );
+      },
+      (children) {
+        _sessionChildrenById[sessionId] = children;
+      },
+    );
 
     final todoResult = await getSessionTodo(
       GetSessionTodoParams(
@@ -999,11 +1263,14 @@ class ChatProvider extends ChangeNotifier {
         directory: directory,
       ),
     );
-    todoResult.fold((failure) {
-      AppLogger.warn('Failed to load session todo for $sessionId: $failure');
-    }, (todos) {
-      _sessionTodoById[sessionId] = todos;
-    });
+    todoResult.fold(
+      (failure) {
+        AppLogger.warn('Failed to load session todo for $sessionId: $failure');
+      },
+      (todos) {
+        _sessionTodoById[sessionId] = todos;
+      },
+    );
 
     final diffResult = await getSessionDiff(
       GetSessionDiffParams(
@@ -1013,23 +1280,29 @@ class ChatProvider extends ChangeNotifier {
         directory: directory,
       ),
     );
-    diffResult.fold((failure) {
-      AppLogger.warn('Failed to load session diff for $sessionId: $failure');
-    }, (diff) {
-      _sessionDiffById[sessionId] = diff;
-    });
+    diffResult.fold(
+      (failure) {
+        AppLogger.warn('Failed to load session diff for $sessionId: $failure');
+      },
+      (diff) {
+        _sessionDiffById[sessionId] = diff;
+      },
+    );
 
     final statusResult = await getSessionStatus(
       GetSessionStatusParams(directory: directory),
     );
-    statusResult.fold((failure) {
-      AppLogger.warn('Failed to refresh status for $sessionId: $failure');
-      if (!silent) {
-        _sessionInsightsError = 'Some session details could not be loaded';
-      }
-    }, (statusMap) {
-      _sessionStatusById = statusMap;
-    });
+    statusResult.fold(
+      (failure) {
+        AppLogger.warn('Failed to refresh status for $sessionId: $failure');
+        if (!silent) {
+          _sessionInsightsError = 'Some session details could not be loaded';
+        }
+      },
+      (statusMap) {
+        _sessionStatusById = statusMap;
+      },
+    );
 
     if (!silent) {
       _isLoadingSessionInsights = false;
@@ -1139,7 +1412,9 @@ class ChatProvider extends ChangeNotifier {
     try {
       var failed = false;
       var connected = <String>[];
-      final result = await getProviders();
+      final result = await getProviders(
+        directory: projectProvider.currentProject?.path,
+      );
       if (fetchId != _providersFetchId) {
         return;
       }
@@ -1313,36 +1588,60 @@ class ChatProvider extends ChangeNotifier {
     final stored = await localDataSource.getActiveServerId();
     if (stored != null && stored.isNotEmpty) {
       _activeServerId = stored;
+      _activeContextKey = _composeContextKey(
+        _activeServerId,
+        _resolveContextScopeId(),
+      );
       return stored;
     }
     _activeServerId = 'legacy';
+    _activeContextKey = _composeContextKey(
+      _activeServerId,
+      _resolveContextScopeId(),
+    );
     return 'legacy';
+  }
+
+  Future<void> onProjectScopeChanged() async {
+    await _switchContext(reason: 'project');
   }
 
   /// Reset provider state and reload server-scoped data.
   Future<void> onServerScopeChanged() async {
+    await _switchContext(reason: 'server');
+  }
+
+  Future<void> _switchContext({required String reason}) async {
+    _storeCurrentContextSnapshot();
+
     _providersFetchId += 1;
     _sessionsFetchId += 1;
     _messagesFetchId += 1;
     _eventStreamGeneration += 1;
-    _messageSubscription?.cancel();
-    _eventSubscription?.cancel();
+    await _cancelSubscriptionSafely(
+      _messageSubscription,
+      label: 'message stream',
+    );
+    await _cancelSubscriptionSafely(
+      _eventSubscription,
+      label: 'realtime event',
+    );
+    await _cancelSubscriptionSafely(
+      _globalEventSubscription,
+      label: 'global event',
+    );
     _messageSubscription = null;
     _eventSubscription = null;
-    _sessions = <ChatSession>[];
-    _messages = <ChatMessage>[];
-    _currentSession = null;
+    _globalEventSubscription = null;
+
+    final serverId = await _resolveServerScopeId();
+    final nextScope = _resolveContextScopeId();
+    final nextContextKey = _composeContextKey(serverId, nextScope);
+    _activeContextKey = nextContextKey;
+    _currentProjectId = projectProvider.currentProjectId;
+    _restoreContextSnapshot(nextContextKey);
+
     _errorMessage = null;
-    _sessionStatusById = <String, SessionStatusInfo>{};
-    _pendingPermissionsBySession = <String, List<ChatPermissionRequest>>{};
-    _pendingQuestionsBySession = <String, List<ChatQuestionRequest>>{};
-    _sessionChildrenById = <String, List<ChatSession>>{};
-    _sessionTodoById = <String, List<SessionTodo>>{};
-    _sessionDiffById = <String, List<SessionDiff>>{};
-    _sessionSearchQuery = '';
-    _sessionListFilter = SessionListFilter.active;
-    _sessionListSort = SessionListSort.recent;
-    _sessionVisibleLimit = 40;
     _isLoadingSessionInsights = false;
     _sessionInsightsError = null;
     _isRespondingInteraction = false;
@@ -1354,11 +1653,23 @@ class ChatProvider extends ChangeNotifier {
     _recentModelKeys = <String>[];
     _modelUsageCounts = <String, int>{};
     _selectedVariantByModel = <String, String>{};
-    _state = ChatState.initial;
+    _state = _sessions.isEmpty ? ChatState.initial : ChatState.loaded;
     notifyListeners();
 
+    AppLogger.info(
+      'Switching chat context reason=$reason context=$_activeContextKey',
+    );
     await initializeProviders();
-    await loadSessions();
+
+    final contextMarkedDirty = _dirtyContextKeys.remove(nextContextKey);
+    if (contextMarkedDirty || _sessions.isEmpty) {
+      await loadSessions();
+      return;
+    }
+
+    if (_currentSession != null && _messages.isEmpty) {
+      await loadMessages(_currentSession!.id);
+    }
   }
 
   Future<void> _persistSelection() async {
@@ -1621,7 +1932,11 @@ class ChatProvider extends ChangeNotifier {
     try {
       final serverId = await _resolveServerScopeId();
       final scopeId = _resolveContextScopeId();
-      await _saveCachedSessions(_sessions, serverId: serverId, scopeId: scopeId);
+      await _saveCachedSessions(
+        _sessions,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
     } catch (e, stackTrace) {
       AppLogger.warn(
         'Failed to persist sessions cache',
@@ -1997,17 +2312,20 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    return result.fold((failure) {
-      _applySessionLocally(previous);
-      _handleFailure(failure);
-      notifyListeners();
-      return false;
-    }, (updated) {
-      _applySessionLocally(updated);
-      unawaited(_persistSessionCacheBestEffort());
-      notifyListeners();
-      return true;
-    });
+    return result.fold(
+      (failure) {
+        _applySessionLocally(previous);
+        _handleFailure(failure);
+        notifyListeners();
+        return false;
+      },
+      (updated) {
+        _applySessionLocally(updated);
+        unawaited(_persistSessionCacheBestEffort());
+        notifyListeners();
+        return true;
+      },
+    );
   }
 
   Future<bool> setSessionArchived(ChatSession session, bool archived) async {
@@ -2038,28 +2356,29 @@ class ChatProvider extends ChangeNotifier {
         projectId: projectProvider.currentProjectId,
         sessionId: session.id,
         input: SessionUpdateInput(
-          archivedAtEpochMs: archived
-              ? archivedAt!.millisecondsSinceEpoch
-              : 0,
+          archivedAtEpochMs: archived ? archivedAt!.millisecondsSinceEpoch : 0,
         ),
         directory: projectProvider.currentProject?.path,
       ),
     );
 
-    return result.fold((failure) {
-      _applySessionLocally(previous);
-      if (_currentSession?.id != previous.id && session.id == previous.id) {
-        _currentSession = previous;
-      }
-      _handleFailure(failure);
-      notifyListeners();
-      return false;
-    }, (updated) {
-      _applySessionLocally(updated);
-      unawaited(_persistSessionCacheBestEffort());
-      notifyListeners();
-      return true;
-    });
+    return result.fold(
+      (failure) {
+        _applySessionLocally(previous);
+        if (_currentSession?.id != previous.id && session.id == previous.id) {
+          _currentSession = previous;
+        }
+        _handleFailure(failure);
+        notifyListeners();
+        return false;
+      },
+      (updated) {
+        _applySessionLocally(updated);
+        unawaited(_persistSessionCacheBestEffort());
+        notifyListeners();
+        return true;
+      },
+    );
   }
 
   Future<bool> toggleSessionShare(ChatSession session) async {
@@ -2091,17 +2410,20 @@ class ChatProvider extends ChangeNotifier {
             ),
           );
 
-    return result.fold((failure) {
-      _applySessionLocally(previous);
-      _handleFailure(failure);
-      notifyListeners();
-      return false;
-    }, (updated) {
-      _applySessionLocally(updated);
-      unawaited(_persistSessionCacheBestEffort());
-      notifyListeners();
-      return true;
-    });
+    return result.fold(
+      (failure) {
+        _applySessionLocally(previous);
+        _handleFailure(failure);
+        notifyListeners();
+        return false;
+      },
+      (updated) {
+        _applySessionLocally(updated);
+        unawaited(_persistSessionCacheBestEffort());
+        notifyListeners();
+        return true;
+      },
+    );
   }
 
   Future<ChatSession?> forkSession(
@@ -2118,18 +2440,21 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    return result.fold((failure) {
-      _handleFailure(failure);
-      return null;
-    }, (forked) async {
-      _applySessionLocally(forked);
-      unawaited(_persistSessionCacheBestEffort());
-      notifyListeners();
-      if (selectForked) {
-        await selectSession(forked);
-      }
-      return forked;
-    });
+    return result.fold(
+      (failure) {
+        _handleFailure(failure);
+        return null;
+      },
+      (forked) async {
+        _applySessionLocally(forked);
+        unawaited(_persistSessionCacheBestEffort());
+        notifyListeners();
+        if (selectForked) {
+          await selectSession(forked);
+        }
+        return forked;
+      },
+    );
   }
 
   /// Clear error
@@ -2165,19 +2490,22 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    result.fold((failure) {
-      _sessions = previousSessions;
-      _currentSession = previousCurrent;
-      _messages = previousMessages;
-      _sortSessionsInPlace();
-      _handleFailure(failure);
-    }, (_) async {
-      if (wasCurrent && _currentSession != null) {
-        await loadMessages(_currentSession!.id);
-        await loadSessionInsights(_currentSession!.id, silent: true);
-      }
-      notifyListeners();
-    });
+    result.fold(
+      (failure) {
+        _sessions = previousSessions;
+        _currentSession = previousCurrent;
+        _messages = previousMessages;
+        _sortSessionsInPlace();
+        _handleFailure(failure);
+      },
+      (_) async {
+        if (wasCurrent && _currentSession != null) {
+          await loadMessages(_currentSession!.id);
+          await loadSessionInsights(_currentSession!.id, silent: true);
+        }
+        notifyListeners();
+      },
+    );
   }
 
   /// Refresh current session
@@ -2200,6 +2528,8 @@ class ChatProvider extends ChangeNotifier {
     _messageSubscription?.cancel();
     _eventStreamGeneration += 1;
     _eventSubscription?.cancel();
+    _globalEventSubscription?.cancel();
+    _globalRefreshDebounce?.cancel();
     super.dispose();
   }
 }

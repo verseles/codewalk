@@ -1,159 +1,449 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/entities/project.dart';
-import '../../domain/repositories/project_repository.dart';
+
 import '../../core/errors/failures.dart';
 import '../../core/logging/app_logger.dart';
+import '../../data/datasources/app_local_datasource.dart';
+import '../../domain/entities/project.dart';
+import '../../domain/entities/worktree.dart';
+import '../../domain/repositories/project_repository.dart';
 
-/// Technical comment translated to English.
 enum ProjectStatus { initial, loading, loaded, error }
 
-/// Technical comment translated to English.
 class ProjectProvider extends ChangeNotifier {
-  final ProjectRepository _projectRepository;
+  ProjectProvider({
+    required ProjectRepository projectRepository,
+    required AppLocalDataSource localDataSource,
+  }) : _projectRepository = projectRepository,
+       _localDataSource = localDataSource;
 
-  ProjectProvider({required ProjectRepository projectRepository})
-    : _projectRepository = projectRepository;
+  final ProjectRepository _projectRepository;
+  final AppLocalDataSource _localDataSource;
 
   ProjectStatus _status = ProjectStatus.initial;
-  List<Project> _projects = [];
+  List<Project> _projects = <Project>[];
   Project? _currentProject;
+  List<String> _openProjectIds = <String>[];
+  List<Worktree> _worktrees = <Worktree>[];
+  bool _worktreeSupported = false;
+  String _activeServerId = 'legacy';
   String? _error;
 
-  // Getters
   ProjectStatus get status => _status;
-  List<Project> get projects => _projects;
+  List<Project> get projects => List<Project>.unmodifiable(_projects);
   Project? get currentProject => _currentProject;
   String? get error => _error;
   String get currentProjectId => _currentProject?.id ?? 'default';
+  String get activeServerId => _activeServerId;
+  List<String> get openProjectIds => List<String>.unmodifiable(_openProjectIds);
+  List<Worktree> get worktrees => List<Worktree>.unmodifiable(_worktrees);
+  bool get worktreeSupported => _worktreeSupported;
 
-  /// Technical comment translated to English.
-  Future<void> initializeProject() async {
+  String get currentScopeId => _currentProject?.path ?? currentProjectId;
+
+  String get contextKey => '${_activeServerId}::$currentScopeId';
+
+  List<Project> get openProjects {
+    final byId = <String, Project>{for (final item in _projects) item.id: item};
+    return _openProjectIds
+        .map((id) => byId[id])
+        .whereType<Project>()
+        .toList(growable: false);
+  }
+
+  List<Project> get closedProjects {
+    final openSet = _openProjectIds.toSet();
+    return _projects
+        .where((item) => !openSet.contains(item.id))
+        .toList(growable: false);
+  }
+
+  Future<void> initializeProject({bool forceReload = false}) async {
+    if (!forceReload &&
+        _status == ProjectStatus.loaded &&
+        _currentProject != null) {
+      return;
+    }
+
     _setStatus(ProjectStatus.loading);
 
     try {
-      // Technical comment translated to English.
-      final prefs = await SharedPreferences.getInstance();
-      final savedProjectId = prefs.getString('current_project_id');
+      _activeServerId = await _resolveServerId();
+      await _loadProjects(silent: true);
 
-      if (savedProjectId != null) {
-        // Technical comment translated to English.
-        final result = await _projectRepository.getProject(savedProjectId);
-        result.fold(
-          (failure) async {
-            // Technical comment translated to English.
-            await _getCurrentProject();
-          },
-          (project) {
-            _currentProject = project;
-            _setStatus(ProjectStatus.loaded);
-          },
-        );
-      } else {
-        // Technical comment translated to English.
-        await _loadProjects();
-
-        if (_projects.isNotEmpty) {
-          // Technical comment translated to English.
-          _currentProject = _projects.first;
-          await _saveCurrentProjectId(_currentProject!.id);
-          _setStatus(ProjectStatus.loaded);
-        } else {
-          // Technical comment translated to English.
-          await _getCurrentProject();
-        }
+      final savedProjectId = await _localDataSource.getCurrentProjectId(
+        serverId: _activeServerId,
+      );
+      if (savedProjectId != null && savedProjectId.trim().isNotEmpty) {
+        _currentProject = _projects
+            .where((p) => p.id == savedProjectId)
+            .firstOrNull;
       }
-    } catch (e) {
-      _setError('Failed to initialize project: $e');
+
+      if (_currentProject == null) {
+        await _hydrateCurrentProjectFromServer();
+      }
+
+      _currentProject ??= _projects.firstOrNull;
+      if (_currentProject == null) {
+        _setError('No project context available from server');
+        return;
+      }
+
+      await _restoreOpenProjects();
+      _ensureOpenProject(_currentProject!.id);
+      await _persistProjectState();
+      await loadWorktrees(silent: true);
+
+      _setStatus(ProjectStatus.loaded);
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Failed to initialize project context',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _setError('Failed to initialize project context: $e');
     }
   }
 
-  /// Technical comment translated to English.
+  Future<void> onServerScopeChanged() async {
+    await initializeProject(forceReload: true);
+  }
+
   Future<void> loadProjects() async {
     _setStatus(ProjectStatus.loading);
-    await _loadProjects();
-  }
-
-  /// Technical comment translated to English.
-  Future<void> _loadProjects() async {
-    try {
-      final result = await _projectRepository.getProjects();
-      result.fold(
-        (failure) {
-          _setError('Failed to load project list: ${failure.toString()}');
-        },
-        (projects) {
-          _projects = projects;
-          if (_status == ProjectStatus.loading) {
-            _setStatus(ProjectStatus.loaded);
-          }
-        },
-      );
-    } catch (e) {
-      _setError('Exception while loading project list: $e');
+    await _loadProjects(silent: false);
+    if (_status != ProjectStatus.error) {
+      _setStatus(ProjectStatus.loaded);
     }
   }
 
-  /// Technical comment translated to English.
-  Future<void> _getCurrentProject() async {
-    try {
-      final result = await _projectRepository.getCurrentProject();
-      result.fold(
-        (failure) {
-          // Technical comment translated to English.
-          if (failure is NetworkFailure) {
-            _setError(
-              'Network connection failed. Please check network settings',
-            );
-          } else if (failure is ServerFailure) {
-            // Technical comment translated to English.
-            _setError(
-              'Unable to load project info right now. Please try again later',
-            );
-          } else {
-            _setError(
-              'Failed to load project info. Please check server connection',
-            );
-          }
-        },
-        (project) async {
-          _currentProject = project;
-          // Technical comment translated to English.
-          if (!_projects.any((p) => p.id == project.id)) {
-            _projects = [project, ..._projects];
-          }
-          await _saveCurrentProjectId(project.id);
-          _setStatus(ProjectStatus.loaded);
-        },
-      );
-    } catch (e) {
-      _setError('Exception while loading project info. Please retry');
+  Future<bool> switchProject(String projectId) async {
+    final target = _projects.where((item) => item.id == projectId).firstOrNull;
+    if (target == null) {
+      _setError('Failed to switch project: project not found');
+      return false;
     }
+    if (_currentProject?.id == projectId) {
+      return false;
+    }
+
+    _currentProject = target;
+    _ensureOpenProject(projectId);
+    await _persistProjectState();
+    await loadWorktrees(silent: true);
+    notifyListeners();
+    return true;
   }
 
-  /// Technical comment translated to English.
-  Future<void> switchProject(String projectId) async {
-    try {
-      final project = _projects.firstWhere((p) => p.id == projectId);
+  Future<bool> closeProject(String projectId) async {
+    if (!_openProjectIds.contains(projectId)) {
+      return false;
+    }
+
+    if (_openProjectIds.length <= 1 && _currentProject?.id == projectId) {
+      _setError('At least one context must remain open');
+      return false;
+    }
+
+    _openProjectIds = _openProjectIds
+        .where((item) => item != projectId)
+        .toList(growable: false);
+
+    if (_currentProject?.id == projectId) {
+      Project? fallback;
+      for (final openId in _openProjectIds) {
+        fallback = _projects.where((item) => item.id == openId).firstOrNull;
+        if (fallback != null) {
+          break;
+        }
+      }
+      fallback ??= _projects.firstOrNull;
+      _currentProject = fallback;
+      if (_currentProject != null) {
+        _ensureOpenProject(_currentProject!.id);
+      }
+      await loadWorktrees(silent: true);
+    }
+
+    await _persistProjectState();
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> reopenProject(String projectId, {bool makeActive = true}) async {
+    final project = _projects.where((item) => item.id == projectId).firstOrNull;
+    if (project == null) {
+      _setError('Failed to reopen project: project not found');
+      return false;
+    }
+
+    _ensureOpenProject(projectId);
+    if (makeActive) {
       _currentProject = project;
-      await _saveCurrentProjectId(projectId);
-      notifyListeners();
-    } catch (e) {
-      _setError('Failed to switch project: $e');
+      await loadWorktrees(silent: true);
+    }
+
+    await _persistProjectState();
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> loadWorktrees({bool silent = false}) async {
+    final directory = _currentProject?.path;
+    if (directory == null || directory.trim().isEmpty) {
+      _worktrees = <Worktree>[];
+      _worktreeSupported = false;
+      if (!silent) {
+        notifyListeners();
+      }
+      return;
+    }
+
+    final result = await _projectRepository.getWorktrees(directory: directory);
+    result.fold(
+      (failure) {
+        if (failure is NetworkFailure && failure.code == 404) {
+          _worktrees = <Worktree>[];
+          _worktreeSupported = false;
+          if (!silent) {
+            notifyListeners();
+          }
+          return;
+        }
+        AppLogger.warn('Failed to load worktrees', error: failure);
+        if (!silent) {
+          _setError('Failed to load workspaces: ${failure.message}');
+        }
+      },
+      (worktrees) {
+        _worktrees = worktrees;
+        _worktreeSupported = true;
+        if (!silent) {
+          notifyListeners();
+        }
+      },
+    );
+  }
+
+  Future<Worktree?> createWorktree(
+    String name, {
+    bool switchToCreated = true,
+  }) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      _setError('Workspace name cannot be empty');
+      return null;
+    }
+
+    final result = await _projectRepository.createWorktree(
+      trimmed,
+      directory: _currentProject?.path,
+    );
+
+    return result.fold(
+      (failure) {
+        if (failure is NetworkFailure && failure.code == 404) {
+          _worktreeSupported = false;
+          notifyListeners();
+          return null;
+        }
+        _setError('Failed to create workspace: ${failure.message}');
+        return null;
+      },
+      (worktree) async {
+        _worktreeSupported = true;
+        await _loadProjects(silent: true);
+        await loadWorktrees(silent: true);
+
+        if (switchToCreated) {
+          final project = _projects
+              .where((item) => item.path == worktree.directory)
+              .firstOrNull;
+          if (project != null) {
+            _currentProject = project;
+            _ensureOpenProject(project.id);
+            await _persistProjectState();
+          }
+        }
+
+        notifyListeners();
+        return worktree;
+      },
+    );
+  }
+
+  Future<bool> resetWorktree(String worktreeId) async {
+    final result = await _projectRepository.resetWorktree(
+      worktreeId,
+      directory: _currentProject?.path,
+    );
+    return result.fold(
+      (failure) {
+        if (failure is NetworkFailure && failure.code == 404) {
+          _worktreeSupported = false;
+          notifyListeners();
+          return false;
+        }
+        _setError('Failed to reset workspace: ${failure.message}');
+        return false;
+      },
+      (_) {
+        unawaited(loadWorktrees(silent: true));
+        return true;
+      },
+    );
+  }
+
+  Future<bool> deleteWorktree(String worktreeId) async {
+    final removed = _worktrees
+        .where((item) => item.id == worktreeId)
+        .firstOrNull;
+    final result = await _projectRepository.deleteWorktree(
+      worktreeId,
+      directory: _currentProject?.path,
+    );
+
+    return result.fold(
+      (failure) {
+        if (failure is NetworkFailure && failure.code == 404) {
+          _worktreeSupported = false;
+          notifyListeners();
+          return false;
+        }
+        _setError('Failed to delete workspace: ${failure.message}');
+        return false;
+      },
+      (_) async {
+        if (removed != null && _currentProject?.path == removed.directory) {
+          final fallback = _projects
+              .where((item) => item.path != removed.directory)
+              .firstOrNull;
+          if (fallback != null) {
+            _currentProject = fallback;
+            _ensureOpenProject(fallback.id);
+            await _persistProjectState();
+          }
+        }
+        await loadWorktrees(silent: true);
+        notifyListeners();
+        return true;
+      },
+    );
+  }
+
+  void clearError() {
+    _error = null;
+    if (_status == ProjectStatus.error) {
+      _status = ProjectStatus.initial;
+    }
+    notifyListeners();
+  }
+
+  Future<void> _hydrateCurrentProjectFromServer() async {
+    final result = await _projectRepository.getCurrentProject();
+    result.fold(
+      (failure) {
+        AppLogger.warn(
+          'Failed to get current project from server',
+          error: failure,
+        );
+      },
+      (project) {
+        _currentProject = project;
+        if (!_projects.any((item) => item.id == project.id)) {
+          _projects = <Project>[project, ..._projects];
+        }
+      },
+    );
+  }
+
+  Future<void> _loadProjects({required bool silent}) async {
+    final result = await _projectRepository.getProjects();
+    result.fold(
+      (failure) {
+        if (!silent) {
+          _setError('Failed to load project list: ${failure.message}');
+        }
+      },
+      (projects) {
+        _projects = projects;
+        if (_currentProject != null) {
+          final refreshed = _projects
+              .where((item) => item.id == _currentProject!.id)
+              .firstOrNull;
+          if (refreshed != null) {
+            _currentProject = refreshed;
+          }
+        }
+      },
+    );
+  }
+
+  Future<String> _resolveServerId() async {
+    final stored = await _localDataSource.getActiveServerId();
+    if (stored == null || stored.trim().isEmpty) {
+      return 'legacy';
+    }
+    return stored.trim();
+  }
+
+  Future<void> _restoreOpenProjects() async {
+    _openProjectIds = <String>[];
+    final raw = await _localDataSource.getOpenProjectIdsJson(
+      serverId: _activeServerId,
+    );
+    if (raw != null && raw.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          _openProjectIds = decoded
+              .whereType<String>()
+              .where((id) => _projects.any((project) => project.id == id))
+              .toList(growable: false);
+        }
+      } catch (e, stackTrace) {
+        AppLogger.warn(
+          'Failed to restore open project contexts',
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+
+    if (_currentProject != null) {
+      _ensureOpenProject(_currentProject!.id);
+    }
+
+    if (_openProjectIds.isEmpty && _projects.isNotEmpty) {
+      _openProjectIds = <String>[_projects.first.id];
     }
   }
 
-  /// Technical comment translated to English.
-  Future<void> _saveCurrentProjectId(String projectId) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('current_project_id', projectId);
-    } catch (e) {
-      AppLogger.warn('Failed to save project ID', error: e);
+  void _ensureOpenProject(String projectId) {
+    if (_openProjectIds.contains(projectId)) {
+      return;
     }
+    _openProjectIds = <String>[..._openProjectIds, projectId];
   }
 
-  /// Technical comment translated to English.
+  Future<void> _persistProjectState() async {
+    final current = _currentProject;
+    if (current != null) {
+      await _localDataSource.saveCurrentProjectId(
+        current.id,
+        serverId: _activeServerId,
+      );
+    }
+
+    await _localDataSource.saveOpenProjectIdsJson(
+      jsonEncode(_openProjectIds),
+      serverId: _activeServerId,
+    );
+  }
+
   void _setStatus(ProjectStatus status) {
     _status = status;
     if (status != ProjectStatus.error) {
@@ -162,19 +452,9 @@ class ProjectProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Technical comment translated to English.
   void _setError(String error) {
     _error = error;
     _status = ProjectStatus.error;
-    notifyListeners();
-  }
-
-  /// Technical comment translated to English.
-  void clearError() {
-    _error = null;
-    if (_status == ProjectStatus.error) {
-      _status = ProjectStatus.initial;
-    }
     notifyListeners();
   }
 }

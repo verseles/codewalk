@@ -123,6 +123,9 @@ abstract class ChatRemoteDataSource {
   /// Subscribe to realtime event stream.
   Stream<ChatEventModel> subscribeEvents({String? directory});
 
+  /// Subscribe to global realtime event stream.
+  Stream<ChatEventModel> subscribeGlobalEvents();
+
   /// List pending permission requests.
   Future<List<ChatPermissionRequestModel>> listPermissions({String? directory});
 
@@ -547,7 +550,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final data = response.data as List<dynamic>? ?? const <dynamic>[];
       return data
           .whereType<Map>()
-          .map((item) => ChatSessionModel.fromJson(Map<String, dynamic>.from(item)))
+          .map(
+            (item) =>
+                ChatSessionModel.fromJson(Map<String, dynamic>.from(item)),
+          )
           .toList(growable: false);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
@@ -582,7 +588,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return data
           .whereType<Map>()
           .map(
-            (item) => SessionTodoModel.fromJson(Map<String, dynamic>.from(item)),
+            (item) =>
+                SessionTodoModel.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(growable: false);
     } on DioException catch (e) {
@@ -622,7 +629,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return data
           .whereType<Map>()
           .map(
-            (item) => SessionDiffModel.fromJson(Map<String, dynamic>.from(item)),
+            (item) =>
+                SessionDiffModel.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(growable: false);
     } on DioException catch (e) {
@@ -1240,6 +1248,26 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
   @override
   Stream<ChatEventModel> subscribeEvents({String? directory}) {
+    return _subscribeEventStream(
+      path: '/event',
+      directory: directory,
+      logLabel: 'Realtime event stream',
+    );
+  }
+
+  @override
+  Stream<ChatEventModel> subscribeGlobalEvents() {
+    return _subscribeEventStream(
+      path: '/global/event',
+      logLabel: 'Global realtime event stream',
+    );
+  }
+
+  Stream<ChatEventModel> _subscribeEventStream({
+    required String path,
+    String? directory,
+    required String logLabel,
+  }) {
     final queryParams = <String, String>{};
     if (directory != null && directory.trim().isNotEmpty) {
       queryParams['directory'] = directory;
@@ -1254,7 +1282,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       while (!cancelled) {
         try {
           final response = await dio.get(
-            '/event',
+            path,
             queryParameters: queryParams.isNotEmpty ? queryParams : null,
             options: Options(
               headers: {
@@ -1305,7 +1333,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                   }
                 },
                 onError: (error) {
-                  AppLogger.warn('Realtime event stream failure', error: error);
+                  AppLogger.warn('$logLabel failure', error: error);
                 },
               );
 
@@ -1322,14 +1350,11 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
                   error.type == DioExceptionType.unknown);
           if (isExpectedReconnect || isClosedHttpStream) {
             AppLogger.info(
-              'Realtime event stream reconnecting after transient failure',
+              '$logLabel reconnecting after transient failure',
               error: error,
             );
           } else {
-            AppLogger.warn(
-              'Failed to connect to realtime event stream',
-              error: error,
-            );
+            AppLogger.warn('Failed to connect to $logLabel', error: error);
           }
         } finally {
           await lineSubscription?.cancel();

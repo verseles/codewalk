@@ -9,7 +9,7 @@ class GetAppInfo {
 
   GetAppInfo(this.repository);
 
-  Future<Either<Failure, AppInfo>> call() async {
-    return await repository.getAppInfo();
+  Future<Either<Failure, AppInfo>> call({String? directory}) async {
+    return await repository.getAppInfo(directory: directory);
   }
 }

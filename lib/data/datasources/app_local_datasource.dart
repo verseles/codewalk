@@ -116,6 +116,21 @@ abstract class AppLocalDataSource {
   });
 
   /// Technical comment translated to English.
+  Future<String?> getCurrentProjectId({String? serverId});
+
+  /// Technical comment translated to English.
+  Future<void> saveCurrentProjectId(String projectId, {String? serverId});
+
+  /// Technical comment translated to English.
+  Future<String?> getOpenProjectIdsJson({String? serverId});
+
+  /// Technical comment translated to English.
+  Future<void> saveOpenProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  });
+
+  /// Technical comment translated to English.
   Future<String?> getCachedSessions({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
@@ -133,6 +148,12 @@ abstract class AppLocalDataSource {
     int epochMs, {
     String? serverId,
     String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<void> clearChatContextCache({
+    required String serverId,
+    required String scopeId,
   });
 
   /// Technical comment translated to English.
@@ -445,6 +466,42 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }
 
   @override
+  Future<String?> getCurrentProjectId({String? serverId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.currentProjectIdKey, serverId: serverId),
+    );
+  }
+
+  @override
+  Future<void> saveCurrentProjectId(
+    String projectId, {
+    String? serverId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(AppConstants.currentProjectIdKey, serverId: serverId),
+      projectId,
+    );
+  }
+
+  @override
+  Future<String?> getOpenProjectIdsJson({String? serverId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.openProjectIdsKey, serverId: serverId),
+    );
+  }
+
+  @override
+  Future<void> saveOpenProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(AppConstants.openProjectIdsKey, serverId: serverId),
+      projectIdsJson,
+    );
+  }
+
+  @override
   Future<void> saveCurrentSessionId(
     String sessionId, {
     String? serverId,
@@ -515,6 +572,39 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       ),
       epochMs,
     );
+  }
+
+  @override
+  Future<void> clearChatContextCache({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    final keys = <String>[
+      _scopedKey(
+        AppConstants.cachedSessionsKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      _scopedKey(
+        AppConstants.cachedSessionsUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      _scopedKey(
+        AppConstants.currentSessionIdKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      _scopedKey(
+        AppConstants.lastSessionIdKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    ];
+
+    for (final key in keys) {
+      await sharedPreferences.remove(key);
+    }
   }
 
   @override

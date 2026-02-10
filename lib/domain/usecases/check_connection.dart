@@ -8,7 +8,7 @@ class CheckConnection {
 
   CheckConnection(this.repository);
 
-  Future<Either<Failure, bool>> call() async {
-    return await repository.checkConnection();
+  Future<Either<Failure, bool>> call({String? directory}) async {
+    return await repository.checkConnection(directory: directory);
   }
 }

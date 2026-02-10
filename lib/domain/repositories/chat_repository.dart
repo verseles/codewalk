@@ -119,6 +119,9 @@ abstract class ChatRepository {
   /// Subscribe to global session/message events from SSE.
   Stream<Either<Failure, ChatEvent>> subscribeEvents({String? directory});
 
+  /// Subscribe to global context events (`/global/event`).
+  Stream<Either<Failure, ChatEvent>> subscribeGlobalEvents();
+
   /// List pending permission requests.
   Future<Either<Failure, List<ChatPermissionRequest>>> listPermissions({
     String? directory,

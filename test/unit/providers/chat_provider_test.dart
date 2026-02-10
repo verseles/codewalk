@@ -8,6 +8,7 @@ import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
@@ -30,6 +31,7 @@ import 'package:codewalk/domain/usecases/share_chat_session.dart';
 import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
 import 'package:codewalk/domain/usecases/update_chat_session.dart';
 import 'package:codewalk/domain/usecases/watch_chat_events.dart';
+import 'package:codewalk/domain/usecases/watch_global_chat_events.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
 
@@ -74,6 +76,7 @@ void main() {
         getSessionTodo: GetSessionTodo(chatRepository),
         getSessionDiff: GetSessionDiff(chatRepository),
         watchChatEvents: WatchChatEvents(chatRepository),
+        watchGlobalChatEvents: WatchGlobalChatEvents(chatRepository),
         listPendingPermissions: ListPendingPermissions(chatRepository),
         replyPermission: ReplyPermission(chatRepository),
         listPendingQuestions: ListPendingQuestions(chatRepository),
@@ -81,6 +84,7 @@ void main() {
         rejectQuestion: RejectQuestion(chatRepository),
         projectProvider: ProjectProvider(
           projectRepository: FakeProjectRepository(),
+          localDataSource: localDataSource,
         ),
         localDataSource: localDataSource,
       );
@@ -424,6 +428,7 @@ void main() {
           getSessionTodo: GetSessionTodo(chatRepository),
           getSessionDiff: GetSessionDiff(chatRepository),
           watchChatEvents: WatchChatEvents(chatRepository),
+          watchGlobalChatEvents: WatchGlobalChatEvents(chatRepository),
           listPendingPermissions: ListPendingPermissions(chatRepository),
           replyPermission: ReplyPermission(chatRepository),
           listPendingQuestions: ListPendingQuestions(chatRepository),
@@ -431,6 +436,7 @@ void main() {
           rejectQuestion: RejectQuestion(chatRepository),
           projectProvider: ProjectProvider(
             projectRepository: FakeProjectRepository(),
+            localDataSource: failingLocalDataSource,
           ),
           localDataSource: failingLocalDataSource,
         );
@@ -500,7 +506,10 @@ void main() {
         'Renamed Session',
       );
       expect(
-        chatRepository.sessions.where((item) => item.id == session.id).first.title,
+        chatRepository.sessions
+            .where((item) => item.id == session.id)
+            .first
+            .title,
         'Renamed Session',
       );
     });
@@ -508,7 +517,9 @@ void main() {
     test('renameSession rolls back optimistic title on failure', () async {
       await provider.loadSessions();
       final session = provider.sessions.first;
-      chatRepository.updateSessionFailure = const ServerFailure('update failed');
+      chatRepository.updateSessionFailure = const ServerFailure(
+        'update failed',
+      );
 
       final ok = await provider.renameSession(session, 'Broken Rename');
       await Future<void>.delayed(const Duration(milliseconds: 5));
@@ -521,92 +532,103 @@ void main() {
       expect(provider.state, ChatState.error);
     });
 
-    test('share/archive/fork lifecycle operations update provider state', () async {
-      chatRepository.sessions.add(
-        ChatSession(
-          id: 'ses_2',
+    test(
+      'share/archive/fork lifecycle operations update provider state',
+      () async {
+        chatRepository.sessions.add(
+          ChatSession(
+            id: 'ses_2',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1200),
+            title: 'Session 2',
+          ),
+        );
+
+        await provider.loadSessions();
+        await provider.selectSession(
+          provider.sessions.where((item) => item.id == 'ses_1').first,
+        );
+
+        final shared = await provider.toggleSessionShare(
+          provider.currentSession!,
+        );
+        expect(shared, isTrue);
+        expect(provider.currentSession?.shared, isTrue);
+        expect(provider.currentSession?.shareUrl, isNotNull);
+
+        final archived = await provider.setSessionArchived(
+          provider.currentSession!,
+          true,
+        );
+        expect(archived, isTrue);
+        final archivedSession = provider.sessions
+            .where((item) => item.id == 'ses_1')
+            .first;
+        expect(archivedSession.archived, isTrue);
+
+        final unarchived = await provider.setSessionArchived(
+          archivedSession,
+          false,
+        );
+        expect(unarchived, isTrue);
+        final unarchivedSession = provider.sessions
+            .where((item) => item.id == 'ses_1')
+            .first;
+        expect(unarchivedSession.archived, isFalse);
+
+        final forked = await provider.forkSession(unarchivedSession);
+        expect(forked, isNotNull);
+        expect(forked?.parentId, 'ses_1');
+        expect(provider.currentSession?.id, forked?.id);
+      },
+    );
+
+    test(
+      'loadSessionInsights updates children, todo, diff and status maps',
+      () async {
+        final child = ChatSession(
+          id: 'ses_child_1',
           workspaceId: 'default',
-          time: DateTime.fromMillisecondsSinceEpoch(1200),
-          title: 'Session 2',
-        ),
-      );
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          title: 'Child Session',
+          parentId: 'ses_1',
+        );
+        chatRepository.sessionChildrenById['ses_1'] = <ChatSession>[child];
+        chatRepository.sessionTodoById['ses_1'] = const <SessionTodo>[
+          SessionTodo(
+            id: 'todo_1',
+            content: 'Implement feature',
+            status: 'in_progress',
+            priority: 'high',
+          ),
+        ];
+        chatRepository.sessionDiffById['ses_1'] = const <SessionDiff>[
+          SessionDiff(
+            file: 'lib/main.dart',
+            before: '',
+            after: '',
+            additions: 10,
+            deletions: 2,
+            status: 'modified',
+          ),
+        ];
+        chatRepository.sessionStatusById = const <String, SessionStatusInfo>{
+          'ses_1': SessionStatusInfo(type: SessionStatusType.busy),
+        };
 
-      await provider.loadSessions();
-      await provider.selectSession(
-        provider.sessions.where((item) => item.id == 'ses_1').first,
-      );
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        await provider.loadSessionInsights('ses_1');
 
-      final shared = await provider.toggleSessionShare(provider.currentSession!);
-      expect(shared, isTrue);
-      expect(provider.currentSession?.shared, isTrue);
-      expect(provider.currentSession?.shareUrl, isNotNull);
-
-      final archived = await provider.setSessionArchived(
-        provider.currentSession!,
-        true,
-      );
-      expect(archived, isTrue);
-      final archivedSession = provider.sessions
-          .where((item) => item.id == 'ses_1')
-          .first;
-      expect(archivedSession.archived, isTrue);
-
-      final unarchived = await provider.setSessionArchived(archivedSession, false);
-      expect(unarchived, isTrue);
-      final unarchivedSession = provider.sessions
-          .where((item) => item.id == 'ses_1')
-          .first;
-      expect(unarchivedSession.archived, isFalse);
-
-      final forked = await provider.forkSession(unarchivedSession);
-      expect(forked, isNotNull);
-      expect(forked?.parentId, 'ses_1');
-      expect(provider.currentSession?.id, forked?.id);
-    });
-
-    test('loadSessionInsights updates children, todo, diff and status maps', () async {
-      final child = ChatSession(
-        id: 'ses_child_1',
-        workspaceId: 'default',
-        time: DateTime.fromMillisecondsSinceEpoch(2000),
-        title: 'Child Session',
-        parentId: 'ses_1',
-      );
-      chatRepository.sessionChildrenById['ses_1'] = <ChatSession>[child];
-      chatRepository.sessionTodoById['ses_1'] = const <SessionTodo>[
-        SessionTodo(
-          id: 'todo_1',
-          content: 'Implement feature',
-          status: 'in_progress',
-          priority: 'high',
-        ),
-      ];
-      chatRepository.sessionDiffById['ses_1'] = const <SessionDiff>[
-        SessionDiff(
-          file: 'lib/main.dart',
-          before: '',
-          after: '',
-          additions: 10,
-          deletions: 2,
-          status: 'modified',
-        ),
-      ];
-      chatRepository.sessionStatusById = const <String, SessionStatusInfo>{
-        'ses_1': SessionStatusInfo(type: SessionStatusType.busy),
-      };
-
-      await provider.loadSessions();
-      await provider.selectSession(provider.sessions.first);
-      await provider.loadSessionInsights('ses_1');
-
-      expect(provider.currentSessionChildren, hasLength(1));
-      expect(provider.currentSessionChildren.single.id, 'ses_child_1');
-      expect(provider.currentSessionTodo, hasLength(1));
-      expect(provider.currentSessionTodo.single.id, 'todo_1');
-      expect(provider.currentSessionDiff, hasLength(1));
-      expect(provider.currentSessionDiff.single.file, 'lib/main.dart');
-      expect(provider.currentSessionStatus?.type, SessionStatusType.busy);
-    });
+        expect(provider.currentSessionChildren, hasLength(1));
+        expect(provider.currentSessionChildren.single.id, 'ses_child_1');
+        expect(provider.currentSessionTodo, hasLength(1));
+        expect(provider.currentSessionTodo.single.id, 'todo_1');
+        expect(provider.currentSessionDiff, hasLength(1));
+        expect(provider.currentSessionDiff.single.file, 'lib/main.dart');
+        expect(provider.currentSessionStatus?.type, SessionStatusType.busy);
+      },
+    );
 
     test(
       'deleteSession clears current session when deleting active one',
@@ -791,6 +813,209 @@ void main() {
         expect(chatRepository.lastQuestionAnswers, const <List<String>>[
           <String>['Yes'],
         ]);
+      },
+    );
+
+    test(
+      'switches project context with isolated directory session state',
+      () async {
+        final scopedRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_a',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              title: 'Session A',
+            ),
+          ],
+        );
+        final scopedLocal = InMemoryAppLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final scopedProvider = ChatProvider(
+          sendChatMessage: SendChatMessage(scopedRepository),
+          getChatSessions: GetChatSessions(scopedRepository),
+          createChatSession: CreateChatSession(scopedRepository),
+          getChatMessages: GetChatMessages(scopedRepository),
+          getChatMessage: GetChatMessage(scopedRepository),
+          getProviders: GetProviders(appRepository),
+          deleteChatSession: DeleteChatSession(scopedRepository),
+          updateChatSession: UpdateChatSession(scopedRepository),
+          shareChatSession: ShareChatSession(scopedRepository),
+          unshareChatSession: UnshareChatSession(scopedRepository),
+          forkChatSession: ForkChatSession(scopedRepository),
+          getSessionStatus: GetSessionStatus(scopedRepository),
+          getSessionChildren: GetSessionChildren(scopedRepository),
+          getSessionTodo: GetSessionTodo(scopedRepository),
+          getSessionDiff: GetSessionDiff(scopedRepository),
+          watchChatEvents: WatchChatEvents(scopedRepository),
+          watchGlobalChatEvents: WatchGlobalChatEvents(scopedRepository),
+          listPendingPermissions: ListPendingPermissions(scopedRepository),
+          replyPermission: ReplyPermission(scopedRepository),
+          listPendingQuestions: ListPendingQuestions(scopedRepository),
+          replyQuestion: ReplyQuestion(scopedRepository),
+          rejectQuestion: RejectQuestion(scopedRepository),
+          projectProvider: ProjectProvider(
+            projectRepository: FakeProjectRepository(
+              currentProject: Project(
+                id: 'proj_a',
+                name: 'Project A',
+                path: '/repo/a',
+                createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+              ),
+              projects: <Project>[
+                Project(
+                  id: 'proj_a',
+                  name: 'Project A',
+                  path: '/repo/a',
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+                ),
+                Project(
+                  id: 'proj_b',
+                  name: 'Project B',
+                  path: '/repo/b',
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+                ),
+              ],
+            ),
+            localDataSource: scopedLocal,
+          ),
+          localDataSource: scopedLocal,
+        );
+
+        await scopedProvider.projectProvider.initializeProject();
+        await scopedProvider.initializeProviders();
+        await scopedProvider.loadSessions();
+        expect(scopedRepository.lastGetSessionsDirectory, '/repo/a');
+        expect(scopedProvider.sessions.first.id, 'ses_a');
+
+        scopedRepository.sessions
+          ..clear()
+          ..add(
+            ChatSession(
+              id: 'ses_b',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(2000),
+              title: 'Session B',
+            ),
+          );
+        await scopedProvider.projectProvider.switchProject('proj_b');
+        await scopedProvider.onProjectScopeChanged();
+        expect(scopedRepository.lastGetSessionsDirectory, '/repo/b');
+        expect(scopedProvider.sessions.first.id, 'ses_b');
+
+        await scopedProvider.projectProvider.switchProject('proj_a');
+        await scopedProvider.onProjectScopeChanged();
+        expect(scopedProvider.sessions.first.id, 'ses_a');
+      },
+    );
+
+    test(
+      'global event marks non-active context dirty and reloads on return',
+      () async {
+        final scopedRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_a_old',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              title: 'Session A Old',
+            ),
+          ],
+        );
+        final scopedLocal = InMemoryAppLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final scopedProvider = ChatProvider(
+          sendChatMessage: SendChatMessage(scopedRepository),
+          getChatSessions: GetChatSessions(scopedRepository),
+          createChatSession: CreateChatSession(scopedRepository),
+          getChatMessages: GetChatMessages(scopedRepository),
+          getChatMessage: GetChatMessage(scopedRepository),
+          getProviders: GetProviders(appRepository),
+          deleteChatSession: DeleteChatSession(scopedRepository),
+          updateChatSession: UpdateChatSession(scopedRepository),
+          shareChatSession: ShareChatSession(scopedRepository),
+          unshareChatSession: UnshareChatSession(scopedRepository),
+          forkChatSession: ForkChatSession(scopedRepository),
+          getSessionStatus: GetSessionStatus(scopedRepository),
+          getSessionChildren: GetSessionChildren(scopedRepository),
+          getSessionTodo: GetSessionTodo(scopedRepository),
+          getSessionDiff: GetSessionDiff(scopedRepository),
+          watchChatEvents: WatchChatEvents(scopedRepository),
+          watchGlobalChatEvents: WatchGlobalChatEvents(scopedRepository),
+          listPendingPermissions: ListPendingPermissions(scopedRepository),
+          replyPermission: ReplyPermission(scopedRepository),
+          listPendingQuestions: ListPendingQuestions(scopedRepository),
+          replyQuestion: ReplyQuestion(scopedRepository),
+          rejectQuestion: RejectQuestion(scopedRepository),
+          projectProvider: ProjectProvider(
+            projectRepository: FakeProjectRepository(
+              currentProject: Project(
+                id: 'proj_a',
+                name: 'Project A',
+                path: '/repo/a',
+                createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+              ),
+              projects: <Project>[
+                Project(
+                  id: 'proj_a',
+                  name: 'Project A',
+                  path: '/repo/a',
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+                ),
+                Project(
+                  id: 'proj_b',
+                  name: 'Project B',
+                  path: '/repo/b',
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+                ),
+              ],
+            ),
+            localDataSource: scopedLocal,
+          ),
+          localDataSource: scopedLocal,
+        );
+
+        await scopedProvider.projectProvider.initializeProject();
+        await scopedProvider.initializeProviders();
+        await scopedProvider.loadSessions();
+        expect(scopedProvider.sessions.first.id, 'ses_a_old');
+
+        scopedRepository.sessions
+          ..clear()
+          ..add(
+            ChatSession(
+              id: 'ses_b',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(2000),
+              title: 'Session B',
+            ),
+          );
+        await scopedProvider.projectProvider.switchProject('proj_b');
+        await scopedProvider.onProjectScopeChanged();
+        expect(scopedProvider.sessions.first.id, 'ses_b');
+
+        scopedRepository.emitGlobalEvent(
+          const ChatEvent(
+            type: 'session.updated',
+            properties: <String, dynamic>{'directory': '/repo/a'},
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+
+        scopedRepository.sessions
+          ..clear()
+          ..add(
+            ChatSession(
+              id: 'ses_a_new',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(3000),
+              title: 'Session A New',
+            ),
+          );
+        await scopedProvider.projectProvider.switchProject('proj_a');
+        await scopedProvider.onProjectScopeChanged();
+
+        expect(scopedProvider.sessions.first.id, 'ses_a_new');
       },
     );
   });

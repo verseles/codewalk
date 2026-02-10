@@ -225,9 +225,7 @@ class ChatRepositoryImpl implements ChatRepository {
   }) async {
     try {
       final map = await remoteDataSource.getSessionStatus(directory: directory);
-      return Right(
-        map.map((key, value) => MapEntry(key, value.toDomain())),
-      );
+      return Right(map.map((key, value) => MapEntry(key, value.toDomain())));
     } on NotFoundException {
       return const Left(NotFoundFailure('Session status not found'));
     } on ServerException {
@@ -417,6 +415,22 @@ class ChatRepositoryImpl implements ChatRepository {
       }
     } on ServerException {
       yield const Left(ServerFailure('Failed to subscribe to realtime events'));
+    } on NetworkException {
+      yield const Left(NetworkFailure('Network connection failed'));
+    } catch (_) {
+      yield const Left(UnknownFailure('Unknown error'));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, ChatEvent>> subscribeGlobalEvents() async* {
+    try {
+      final eventStream = remoteDataSource.subscribeGlobalEvents();
+      await for (final event in eventStream) {
+        yield Right(event.toDomain());
+      }
+    } on ServerException {
+      yield const Left(ServerFailure('Failed to subscribe to global events'));
     } on NetworkException {
       yield const Left(NetworkFailure('Network connection failed'));
     } catch (_) {

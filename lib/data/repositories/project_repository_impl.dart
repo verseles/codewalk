@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../../core/errors/failures.dart';
 import '../../domain/entities/project.dart';
+import '../../domain/entities/worktree.dart';
 import '../../domain/repositories/project_repository.dart';
 import '../datasources/project_remote_datasource.dart';
 
@@ -44,6 +45,70 @@ class ProjectRepositoryImpl implements ProjectRepository {
     try {
       final projectModel = await remoteDataSource.getProject(projectId);
       return Right(projectModel.toDomain());
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Worktree>>> getWorktrees({
+    String? directory,
+  }) async {
+    try {
+      final models = await remoteDataSource.getWorktrees(directory: directory);
+      return Right(
+        models.map((item) => item.toDomain()).toList(growable: false),
+      );
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Worktree>> createWorktree(
+    String name, {
+    String? directory,
+  }) async {
+    try {
+      final model = await remoteDataSource.createWorktree(
+        name,
+        directory: directory,
+      );
+      return Right(model.toDomain());
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetWorktree(
+    String worktreeId, {
+    String? directory,
+  }) async {
+    try {
+      await remoteDataSource.resetWorktree(worktreeId, directory: directory);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteWorktree(
+    String worktreeId, {
+    String? directory,
+  }) async {
+    try {
+      await remoteDataSource.deleteWorktree(worktreeId, directory: directory);
+      return const Right(null);
     } on DioException catch (e) {
       return Left(_handleDioException(e));
     } on Exception catch (e) {

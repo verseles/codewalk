@@ -1,6 +1,6 @@
 # CodeWalk - Codebase Baseline Snapshot
 
-> Captured: 2026-02-09
+> Captured: 2026-02-10
 > Git baseline: `57633fa8c113c2e53c77acb905e7cca627a29d0d` (main)
 > Flutter: 3.38.9 (stable)
 
@@ -70,12 +70,12 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 74 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 81 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 15 | Test files (unit, widget, integration, support) |
-| `.dart` (total) | 93 | Repository files excluding build artifacts |
+| `.dart` (tests) | 16 | Test files (unit, widget, integration, support) |
+| `.dart` (total) | 97 | Repository files excluding build artifacts |
 | `.md` (markdown) | 15 | Docs + roadmap + CONTRIBUTING.md |
-| `.sh` (scripts) | 3 | CI validation + installer scripts |
+| `.sh` (scripts) | 4 | CI validation + installer/smoke scripts |
 
 ## Legacy Naming References
 
@@ -117,6 +117,7 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 | GET | `/session/{id}/message/{messageId}` | Get specific message |
 | POST | `/session/{id}/message` | Send message (streaming via SSE) |
 | GET | `/event` | SSE event stream |
+| GET | `/global/event` | Global SSE event stream (cross-context sync) |
 | GET | `/permission` | List pending permission requests |
 | POST | `/permission/{requestId}/reply` | Reply to permission request (`once`, `always`, `reject`) |
 | GET | `/question` | List pending question requests |
@@ -134,8 +135,13 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 |--------|------|-------------|
 | GET | `/project` | List all projects |
 | GET | `/project/current` | Get current project |
+| PATCH | `/project/{id}` | Set current project |
+| GET | `/experimental/worktree` | List worktrees |
+| POST | `/experimental/worktree` | Create worktree |
+| DELETE | `/experimental/worktree` | Delete worktree (`id` query) |
+| POST | `/experimental/worktree/reset` | Reset worktree (`id` payload) |
 
-**Total: 34 endpoint operations used by client (including legacy fallbacks)**
+**Total: 40 endpoint operations used by client (including legacy fallbacks)**
 
 ### Feature 010 Parity Contract Baseline (Locked 2026-02-09)
 
@@ -157,10 +163,10 @@ Compatibility tiers:
 | Family | Current client | Required in parity wave (Features 011-015) | Optional post-wave |
 |---|---|---|---|
 | App bootstrap/config | Partial | `/path`, `/provider`, `/config`, `/project`, `/project/current` (+ `/app` fallback) | `/global/config`, `/global/dispose` |
-| Core sessions/messages | Partial | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event` | `/global/event` |
+| Core sessions/messages | Implemented | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event`, `/global/event` | Extended global orchestration routes not used by mobile client |
 | Session lifecycle advanced | Implemented (Feature 014) | `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff`, plus existing share/revert/abort/init/summarize paths | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
 | Interactive flows | Implemented (Feature 013) | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
-| Tooling/context | Mostly missing | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) | `/lsp`, `/experimental/worktree*`, `/pty*` |
+| Tooling/context | Partial | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) + `/experimental/worktree*` | `/lsp`, `/pty*` |
 
 ### Feature 013 Realtime Architecture (Implemented 2026-02-09)
 
@@ -210,6 +216,27 @@ Compatibility tiers:
 - Updated lifecycle UI surfaces:
   - `lib/presentation/widgets/chat_session_list.dart` action menu (rename/share/archive/fork/delete)
   - `lib/presentation/pages/chat_page.dart` session controls and insight chips/panel
+
+### Feature 015 Project/Workspace Context Architecture (Implemented 2026-02-10)
+
+- Added project/worktree domain and remote contracts:
+  - `lib/domain/entities/worktree.dart`
+  - `lib/domain/repositories/project_repository.dart` (worktree methods)
+  - `lib/data/models/worktree_model.dart`
+  - `lib/data/datasources/project_remote_datasource.dart` (`/project/{id}`, `/experimental/worktree*`)
+- Added global event stream use case and repository support:
+  - `lib/domain/usecases/watch_global_chat_events.dart`
+  - `lib/domain/repositories/chat_repository.dart` (`subscribeGlobalEvents`)
+  - `lib/data/repositories/chat_repository_impl.dart`
+  - `lib/data/datasources/chat_remote_datasource.dart` (`/global/event`)
+- Expanded local persistence for project context scoping:
+  - `lib/data/datasources/app_local_datasource.dart`
+  - `lib/core/constants/app_constants.dart` (`currentProjectId`, `openProjectIds`)
+- Evolved provider orchestration for deterministic context isolation:
+  - `lib/presentation/providers/project_provider.dart` (open/close/reopen/switch + worktree actions)
+  - `lib/presentation/providers/chat_provider.dart` (context snapshots, dirty-context invalidation, global event sync, resilient SSE teardown)
+- Updated chat UI with project/workspace controls and active-context indicator:
+  - `lib/presentation/pages/chat_page.dart`
 
 ### ChatInput Schema
 
@@ -261,14 +288,12 @@ Required for parity wave:
 
 Deferred/optional after parity wave:
 
-- `/global/event`
 - `/global/config`
 - `/global/dispose`
 - `/session/:id/permissions/:id`
 - `/session/:id/command`
 - `/session/:id/shell`
 - `/lsp`
-- `/experimental/worktree*`
 - `/pty*`
 - `/mode`
 - `/agent`
@@ -330,12 +355,12 @@ Deferred/optional after parity wave:
 
 ### flutter test
 
-- **Result: 58 tests, all passed**
+- **Result: 66 tests, all passed**
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
-  - Unit: providers/usecases/models with migration, server-scope assertions, and lifecycle optimistic-rollback flows
+  - Unit: providers/usecases/models with migration, server/context-scope assertions, lifecycle optimistic-rollback, and project/worktree orchestration
   - Widget: responsive shell, app shell navigation, server settings, interaction cards, and session lifecycle action menu
-  - Integration: mock-server coverage for SSE reconnect + permission/question flows + lifecycle endpoints + server-switch isolation
+  - Integration: mock-server coverage for SSE reconnect + permission/question flows + lifecycle/worktree endpoints + server-switch/context isolation
 - **Test tags:** `requires_server`, `hardware` (defined in dart_test.yaml)
 
 ## CI/CD and Automation
@@ -474,11 +499,13 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 
 ### Chat Module
 - Streaming send/receive flow (SSE via `/event`)
+- Global context sync stream (`/global/event`) for cross-directory invalidation
 - Realtime event reducer for `session.*`, `message.*`, `permission.*`, and `question.*`
 - Message list rendering with incremental updates + targeted full-message fallback fetch
 - Chat input and provider/model context
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-chat permission/question cards with actionable replies
+- Directory-scoped context snapshots and dirty-context refresh strategy
 - Responsive shell with mobile drawer and desktop split-view layout
 - Desktop shortcuts for new chat, refresh, and input focus
 
@@ -499,6 +526,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 
 ### Streaming Flow
 - Uses SSE events (`/event`) for incremental message updates
+- Uses `/global/event` for cross-context invalidation signals
 - Send flow forwards active `directory` scope to `/event` and message fallback fetch
 - `ChatRemoteDataSource.subscribeEvents()` maintains reconnect/backoff loop
 - `ChatProvider` applies reducer transitions per event type
@@ -506,6 +534,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Send path records release-visible lifecycle logs (`info`/`warn`) for stream connect/fallback/poll completion diagnostics in `LogsPage`
 - Send path includes watchdog polling fallback when stream is connected but no per-message events are emitted
 - Provider startup guards cancel stale realtime subscriptions to avoid duplicate `/event` streams
+- Subscription teardown uses bounded timeout to avoid server-switch deadlocks
 - Standard prompt sends omit `messageID`; that field is reserved for explicit message-targeted workflows
 - Provider send setup is wrapped with stage logs and non-blocking selection persistence so local storage issues cannot prevent network send dispatch
 - Recent-model preference restoration keeps mutable lists for model-usage updates, avoiding fixed-length list mutation crashes during send setup
@@ -525,7 +554,8 @@ test/
 │   │   └── provider_model_test.dart          # Provider model serialization
 │   ├── providers/
 │   │   ├── app_provider_test.dart            # AppProvider state management + migration/health/switch rules
-│   │   └── chat_provider_test.dart           # ChatProvider state + server-scoped cache behavior
+│   │   ├── chat_provider_test.dart           # ChatProvider state + server/context-scoped cache behavior
+│   │   └── project_provider_test.dart        # ProjectProvider context/worktree orchestration
 │   └── usecases/
 │       └── chat_usecases_test.dart           # ChatUseCases domain logic
 ├── widget/
@@ -535,7 +565,7 @@ test/
 │   ├── interaction_cards_test.dart           # Permission/question UI action dispatch
 │   └── server_settings_page_test.dart        # Multi-server manager rendering and unhealthy-switch guard
 ├── integration/
-│   └── opencode_server_integration_test.dart # Mock server SSE flow/reconnect + interaction endpoints + lifecycle endpoints + server-switch cache isolation
+│   └── opencode_server_integration_test.dart # Mock server SSE/global-event flow + interaction/lifecycle/worktree endpoints + server-switch cache isolation
 └── support/
     ├── fakes.dart                             # Fake implementations for testing
     └── mock_opencode_server.dart              # Shelf-based mock OpenCode API server
@@ -544,11 +574,12 @@ test/
 ### Test Support Infrastructure
 
 **mock_opencode_server.dart:**
-- Shelf-based HTTP server emulating OpenCode API
+- In-process `dart:io` HTTP server emulating OpenCode API
 - Supports `/session`, `/session/{id}/message` endpoints
 - Supports advanced lifecycle routes (`/session/status`, `/children`, `/todo`, `/diff`, `/fork`, `/share`, `PATCH /session/{id}`)
 - Supports `/permission*` and `/question*` interaction endpoints
 - Supports `/global/health` for server-health orchestration tests
+- Supports `/global/event` and `/experimental/worktree*` routes for context/workspace parity tests
 - SSE event stream simulation for real-time updates and reconnect scenarios
 - Controllable error injection for fault testing
 - Captures outbound send payload for integration assertions (`variant`, etc.)
@@ -686,3 +717,18 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Added `variant` serialization in outbound chat payloads for parity with OpenCode v2 prompt schema.
 - Added server-scoped recent/frequent model usage tracking and restoration across launches.
 - Expanded unit/widget/integration coverage for variant parsing, cycling, persistence, and payload assertions (40 tests passing).
+
+**Feature 013 (completed):**
+- Added resilient realtime reducer architecture for `session.*`, `message.*`, `permission.*`, `question.*`.
+- Added interactive permission/question flows and message fallback fetch for partial event payloads.
+- Hardened send-path diagnostics, directory-forwarding for stream/message fetch, and watchdog fallback for stalled event flows.
+
+**Feature 014 (completed):**
+- Added advanced session lifecycle operations (rename/archive/share/unshare/fork/delete) with optimistic updates + rollback.
+- Added session insight hydration (`status`, `children`, `todo`, `diff`) and richer session list controls (search/filter/sort/load-more).
+
+**Feature 015 (completed):**
+- Added project/workspace context orchestration with deterministic `serverId::directory` snapshot isolation.
+- Added worktree operations (`create/reset/delete/open`) and current-project switching via `/project` + `/experimental/worktree*`.
+- Added `/global/event` subscription for cross-context invalidation and resilient subscription teardown during server switches.
+- Expanded tests for project/worktree/global-event/context isolation and raised total passing tests to 66.

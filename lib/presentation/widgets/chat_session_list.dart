@@ -21,7 +21,8 @@ class ChatSessionList extends StatelessWidget {
   final ChatSession? currentSession;
   final Future<void> Function(ChatSession session)? onSessionSelected;
   final Future<void> Function(ChatSession session)? onSessionDeleted;
-  final Future<bool> Function(ChatSession session, String title)? onSessionRenamed;
+  final Future<bool> Function(ChatSession session, String title)?
+  onSessionRenamed;
   final Future<bool> Function(ChatSession session)? onSessionShareToggled;
   final Future<bool> Function(ChatSession session, bool archived)?
   onSessionArchiveToggled;
@@ -221,7 +222,9 @@ class ChatSessionList extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(
-                          session.archived ? Icons.unarchive_outlined : Icons.archive_outlined,
+                          session.archived
+                              ? Icons.unarchive_outlined
+                              : Icons.archive_outlined,
                         ),
                         const SizedBox(width: 8),
                         Text(session.archived ? 'Unarchive' : 'Archive'),
@@ -339,7 +342,9 @@ class ChatSessionList extends StatelessWidget {
               final ok = await callback(session, newTitle);
               if (!ok && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to rename conversation')),
+                  const SnackBar(
+                    content: Text('Failed to rename conversation'),
+                  ),
                 );
               }
             },
@@ -368,9 +373,9 @@ class ChatSessionList extends StatelessWidget {
     }
 
     final nextAction = session.shared ? 'unshared' : 'shared';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Conversation $nextAction')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Conversation $nextAction')));
   }
 
   Future<void> _copyShareLink(BuildContext context, ChatSession session) async {
@@ -382,9 +387,9 @@ class ChatSessionList extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share link copied')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Share link copied')));
   }
 
   Future<void> _toggleArchive(BuildContext context, ChatSession session) async {

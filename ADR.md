@@ -17,6 +17,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-011: Model Selection and Variant Preference Orchestration (2026-02-09) [Accepted]
 - ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration (2026-02-09) [Accepted]
 - ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration (2026-02-10) [Accepted]
+- ADR-014: Project/Workspace Context Orchestration with Global Event Sync (2026-02-10) [Accepted]
 
 ---
 
@@ -493,6 +494,66 @@ Basic session CRUD was no longer enough for parity with current OpenCode flows. 
 
 ### References
 
+- `ROADMAP.md`
+- https://opencode.ai/docs/server/
+- https://github.com/anomalyco/opencode
+
+---
+
+## ADR-014: Project/Workspace Context Orchestration with Global Event Sync
+
+Status: Accepted  
+Date: 2026-02-10
+
+### Context
+
+After multi-server/model/session parity improvements, CodeWalk still risked context bleed between directories/projects because not all calls/events were consistently scoped. Workspace/worktree lifecycle operations were also missing, and project switching lacked deterministic state restoration for open/closed contexts.
+
+### Decision
+
+1. Adopt canonical context identity `contextKey = <serverId>::<directory-or-projectId>` for chat/session/model state snapshots and invalidation.
+2. Expand project layer contracts with worktree operations:
+   - `GET/POST/DELETE /experimental/worktree`
+   - `POST /experimental/worktree/reset`
+3. Add project/workspace context controls in chat UX:
+   - switch active project
+   - close/reopen project contexts
+   - create/reset/delete/open worktrees
+4. Scope app/chat use cases by active directory for provider/bootstrap/session/message/event calls.
+5. Introduce global synchronization stream (`/global/event`) and mark non-active contexts dirty for deterministic refresh on return.
+6. Harden realtime subscription cancellation with bounded timeout to prevent server-switch deadlocks during SSE teardown.
+
+### Rationale
+
+- OpenCode parity requires directory-aware orchestration, not only server-aware persistence.
+- Context-keyed snapshots allow fast switching without leaking stale state across directories.
+- Global event routing gives low-latency cross-context coherence while keeping active-context updates lightweight.
+- Worktree endpoints are required to expose upstream workspace workflows in mobile UX.
+- Bounded cancellation protects responsiveness when SSE streams are slow/unstable.
+
+### Consequences
+
+- Positive: project/workspace switching is deterministic and directory-isolated.
+- Positive: workspace/worktree lifecycle actions are available in app where server supports routes.
+- Positive: non-active contexts are refreshed only when needed (dirty-bit model), reducing unnecessary reloads.
+- Trade-off: provider orchestration complexity increased (snapshot map + dirty context set + global stream coordination).
+- Trade-off: additional test/mocking surface required for `/global/event` and worktree endpoints.
+
+### Key Files
+
+- `lib/presentation/providers/project_provider.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `lib/data/datasources/project_remote_datasource.dart`
+- `lib/data/datasources/chat_remote_datasource.dart`
+- `lib/domain/entities/worktree.dart`
+- `lib/domain/usecases/watch_global_chat_events.dart`
+- `test/integration/opencode_server_integration_test.dart`
+- `test/support/mock_opencode_server.dart`
+
+### References
+
+- `ROADMAP.feat015.md`
 - `ROADMAP.md`
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode

@@ -305,5 +305,12 @@ class SessionDiff extends Equatable {
   final String? status;
 
   @override
-  List<Object?> get props => [file, before, after, additions, deletions, status];
+  List<Object?> get props => [
+    file,
+    before,
+    after,
+    additions,
+    deletions,
+    status,
+  ];
 }

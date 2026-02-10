@@ -23,6 +23,7 @@ import '../../domain/usecases/get_session_diff.dart';
 import '../../domain/usecases/get_session_status.dart';
 import '../../domain/usecases/get_session_todo.dart';
 import '../../domain/usecases/watch_chat_events.dart';
+import '../../domain/usecases/watch_global_chat_events.dart';
 import '../../domain/usecases/list_pending_permissions.dart';
 import '../../domain/usecases/reply_permission.dart';
 import '../../domain/usecases/list_pending_questions.dart';
@@ -106,6 +107,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetSessionTodo(sl()));
   sl.registerLazySingleton(() => GetSessionDiff(sl()));
   sl.registerLazySingleton(() => WatchChatEvents(sl()));
+  sl.registerLazySingleton(() => WatchGlobalChatEvents(sl()));
   sl.registerLazySingleton(() => ListPendingPermissions(sl()));
   sl.registerLazySingleton(() => ReplyPermission(sl()));
   sl.registerLazySingleton(() => ListPendingQuestions(sl()));
@@ -140,6 +142,7 @@ Future<void> init() async {
       getSessionTodo: sl(),
       getSessionDiff: sl(),
       watchChatEvents: sl(),
+      watchGlobalChatEvents: sl(),
       listPendingPermissions: sl(),
       replyPermission: sl(),
       listPendingQuestions: sl(),
@@ -150,7 +153,9 @@ Future<void> init() async {
     ),
   );
 
-  sl.registerFactory(() => ProjectProvider(projectRepository: sl()));
+  sl.registerLazySingleton<ProjectProvider>(
+    () => ProjectProvider(projectRepository: sl(), localDataSource: sl()),
+  );
 
   // Load local configuration
   await _loadLocalConfig();

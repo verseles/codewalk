@@ -36,8 +36,12 @@ class ChatSessionModel {
 
   factory ChatSessionModel.fromJson(Map<String, dynamic> json) {
     final rawShare = json['share'];
-    final shareMap = rawShare is Map ? Map<String, dynamic>.from(rawShare) : null;
-    final share = shareMap == null ? null : SessionShareModel.fromJson(shareMap);
+    final shareMap = rawShare is Map
+        ? Map<String, dynamic>.from(rawShare)
+        : null;
+    final share = shareMap == null
+        ? null
+        : SessionShareModel.fromJson(shareMap);
     final rawPath = json['path'];
     final pathMap = rawPath is Map ? Map<String, dynamic>.from(rawPath) : null;
 

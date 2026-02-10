@@ -9,7 +9,7 @@ class GetProviders {
 
   GetProviders(this.repository);
 
-  Future<Either<Failure, ProvidersResponse>> call() async {
-    return await repository.getProviders();
+  Future<Either<Failure, ProvidersResponse>> call({String? directory}) async {
+    return await repository.getProviders(directory: directory);
   }
 }

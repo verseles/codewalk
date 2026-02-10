@@ -11,6 +11,7 @@ import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
+import 'package:codewalk/domain/entities/worktree.dart';
 import 'package:codewalk/domain/repositories/app_repository.dart';
 import 'package:codewalk/domain/repositories/chat_repository.dart';
 import 'package:codewalk/domain/repositories/project_repository.dart';
@@ -30,6 +31,8 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? themeMode;
   String? lastSessionId;
   String? currentSessionId;
+  String? currentProjectId;
+  String? openProjectIdsJson;
   String? cachedSessions;
   int? cachedSessionsUpdatedAt;
   bool? basicAuthEnabled;
@@ -65,6 +68,8 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     themeMode = null;
     lastSessionId = null;
     currentSessionId = null;
+    currentProjectId = null;
+    openProjectIdsJson = null;
     cachedSessions = null;
     cachedSessionsUpdatedAt = null;
     basicAuthEnabled = null;
@@ -136,6 +141,18 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
       serverId: serverId,
       scopeId: scopeId,
     )];
+  }
+
+  @override
+  Future<String?> getCurrentProjectId({String? serverId}) async {
+    if (serverId == null) return currentProjectId;
+    return scopedStrings[_key('current_project_id', serverId: serverId)];
+  }
+
+  @override
+  Future<String?> getOpenProjectIdsJson({String? serverId}) async {
+    if (serverId == null) return openProjectIdsJson;
+    return scopedStrings[_key('open_project_ids', serverId: serverId)];
   }
 
   @override
@@ -320,6 +337,31 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
+  Future<void> saveCurrentProjectId(
+    String projectId, {
+    String? serverId,
+  }) async {
+    if (serverId == null) {
+      currentProjectId = projectId;
+      return;
+    }
+    scopedStrings[_key('current_project_id', serverId: serverId)] = projectId;
+  }
+
+  @override
+  Future<void> saveOpenProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  }) async {
+    if (serverId == null) {
+      openProjectIdsJson = projectIdsJson;
+      return;
+    }
+    scopedStrings[_key('open_project_ids', serverId: serverId)] =
+        projectIdsJson;
+  }
+
+  @override
   Future<void> saveDefaultServerId(String? serverId) async {
     defaultServerId = serverId;
   }
@@ -447,6 +489,25 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   Future<void> saveThemeMode(String themeMode) async {
     this.themeMode = themeMode;
   }
+
+  @override
+  Future<void> clearChatContextCache({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    scopedStrings.remove(
+      _key('cached_sessions', serverId: serverId, scopeId: scopeId),
+    );
+    scopedInts.remove(
+      _key('cached_sessions_updated_at', serverId: serverId, scopeId: scopeId),
+    );
+    scopedStrings.remove(
+      _key('current_session_id', serverId: serverId, scopeId: scopeId),
+    );
+    scopedStrings.remove(
+      _key('last_session_id', serverId: serverId, scopeId: scopeId),
+    );
+  }
 }
 
 class FakeChatRepository implements ChatRepository {
@@ -491,6 +552,8 @@ class FakeChatRepository implements ChatRepository {
   Failure? sessionDiffFailure;
   final StreamController<Either<Failure, ChatEvent>> eventController =
       StreamController<Either<Failure, ChatEvent>>.broadcast();
+  final StreamController<Either<Failure, ChatEvent>> globalEventController =
+      StreamController<Either<Failure, ChatEvent>>.broadcast();
   List<ChatPermissionRequest> pendingPermissions = <ChatPermissionRequest>[];
   List<ChatQuestionRequest> pendingQuestions = <ChatQuestionRequest>[];
   String? lastPermissionRequestId;
@@ -514,6 +577,10 @@ class FakeChatRepository implements ChatRepository {
 
   void emitEventFailure(Failure failure) {
     eventController.add(Left(failure));
+  }
+
+  void emitGlobalEvent(ChatEvent event) {
+    globalEventController.add(Right(event));
   }
 
   @override
@@ -606,7 +673,9 @@ class FakeChatRepository implements ChatRepository {
     if (getSessionsFailure != null) return Left(getSessionsFailure!);
     var list = List<ChatSession>.from(sessions);
     if (rootsOnly == true) {
-      list = list.where((item) => item.parentId == null).toList(growable: false);
+      list = list
+          .where((item) => item.parentId == null)
+          .toList(growable: false);
     }
     if (search != null && search.trim().isNotEmpty) {
       final term = search.trim().toLowerCase();
@@ -649,7 +718,9 @@ class FakeChatRepository implements ChatRepository {
       return Left(sessionChildrenFailure!);
     }
     return Right(
-      List<ChatSession>.from(sessionChildrenById[sessionId] ?? const <ChatSession>[]),
+      List<ChatSession>.from(
+        sessionChildrenById[sessionId] ?? const <ChatSession>[],
+      ),
     );
   }
 
@@ -663,7 +734,9 @@ class FakeChatRepository implements ChatRepository {
       return Left(sessionTodoFailure!);
     }
     return Right(
-      List<SessionTodo>.from(sessionTodoById[sessionId] ?? const <SessionTodo>[]),
+      List<SessionTodo>.from(
+        sessionTodoById[sessionId] ?? const <SessionTodo>[],
+      ),
     );
   }
 
@@ -678,7 +751,9 @@ class FakeChatRepository implements ChatRepository {
       return Left(sessionDiffFailure!);
     }
     return Right(
-      List<SessionDiff>.from(sessionDiffById[sessionId] ?? const <SessionDiff>[]),
+      List<SessionDiff>.from(
+        sessionDiffById[sessionId] ?? const <SessionDiff>[],
+      ),
     );
   }
 
@@ -759,6 +834,11 @@ class FakeChatRepository implements ChatRepository {
   @override
   Stream<Either<Failure, ChatEvent>> subscribeEvents({String? directory}) {
     return eventController.stream;
+  }
+
+  @override
+  Stream<Either<Failure, ChatEvent>> subscribeGlobalEvents() {
+    return globalEventController.stream;
   }
 
   @override
@@ -953,33 +1033,47 @@ class FakeAppRepository implements AppRepository {
 }
 
 class FakeProjectRepository implements ProjectRepository {
-  FakeProjectRepository({Project? currentProject, List<Project>? projects})
-    : _currentProject =
-          currentProject ??
-          Project(
-            id: 'default',
-            name: 'Default',
-            path: '/tmp',
-            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-          ),
-      _projects =
-          projects ??
-          <Project>[
-            Project(
-              id: 'default',
-              name: 'Default',
-              path: '/tmp',
-              createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-            ),
-          ];
+  FakeProjectRepository({
+    Project? currentProject,
+    List<Project>? projects,
+    List<Worktree>? worktrees,
+  }) : _currentProject =
+           currentProject ??
+           Project(
+             id: 'default',
+             name: 'Default',
+             path: '/tmp',
+             createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+           ),
+       _projects =
+           projects ??
+           <Project>[
+             Project(
+               id: 'default',
+               name: 'Default',
+               path: '/tmp',
+               createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+             ),
+           ],
+       _worktrees = List<Worktree>.from(worktrees ?? <Worktree>[]);
 
-  final Project _currentProject;
+  Project _currentProject;
   final List<Project> _projects;
+  final List<Worktree> _worktrees;
+  Failure? worktreeFailure;
 
   @override
   Future<Either<Failure, Project>> getCurrentProject({
     String? directory,
   }) async {
+    if (directory != null && directory.trim().isNotEmpty) {
+      final byDirectory = _projects
+          .where((project) => project.path == directory)
+          .firstOrNull;
+      if (byDirectory != null) {
+        return Right(byDirectory);
+      }
+    }
     return Right(_currentProject);
   }
 
@@ -996,6 +1090,68 @@ class FakeProjectRepository implements ProjectRepository {
   @override
   Future<Either<Failure, List<Project>>> getProjects() async {
     return Right(_projects);
+  }
+
+  @override
+  Future<Either<Failure, List<Worktree>>> getWorktrees({
+    String? directory,
+  }) async {
+    if (worktreeFailure != null) {
+      return Left(worktreeFailure!);
+    }
+    if (directory == null || directory.trim().isEmpty) {
+      return Right(List<Worktree>.from(_worktrees));
+    }
+    return Right(
+      _worktrees
+          .where((item) => item.directory.startsWith(directory))
+          .toList(growable: false),
+    );
+  }
+
+  @override
+  Future<Either<Failure, Worktree>> createWorktree(
+    String name, {
+    String? directory,
+  }) async {
+    if (worktreeFailure != null) {
+      return Left(worktreeFailure!);
+    }
+    final normalized = name.trim().toLowerCase().replaceAll(' ', '-');
+    final base = directory ?? '/tmp';
+    final created = Worktree(
+      id: 'wt_${_worktrees.length + 1}',
+      name: name,
+      directory: '$base/$normalized',
+      projectId: _currentProject.id,
+      active: false,
+      createdAt: DateTime.now(),
+    );
+    _worktrees.add(created);
+    return Right(created);
+  }
+
+  @override
+  Future<Either<Failure, void>> resetWorktree(
+    String worktreeId, {
+    String? directory,
+  }) async {
+    if (worktreeFailure != null) {
+      return Left(worktreeFailure!);
+    }
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteWorktree(
+    String worktreeId, {
+    String? directory,
+  }) async {
+    if (worktreeFailure != null) {
+      return Left(worktreeFailure!);
+    }
+    _worktrees.removeWhere((item) => item.id == worktreeId);
+    return const Right(null);
   }
 }
 

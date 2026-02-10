@@ -26,6 +26,8 @@ class AppConstants {
   static const String cachedSessionsKey = 'cached_sessions';
   static const String cachedSessionsUpdatedAtKey = 'cached_sessions_updated_at';
   static const String currentSessionIdKey = 'current_session_id';
+  static const String currentProjectIdKey = 'current_project_id';
+  static const String openProjectIdsKey = 'open_project_ids';
 
   // Basic auth storage keys
   static const String basicAuthEnabledKey = 'basic_auth_enabled';

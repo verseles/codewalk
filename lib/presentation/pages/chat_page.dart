@@ -8,6 +8,7 @@ import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
+import '../providers/project_provider.dart';
 
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
@@ -104,6 +105,11 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _initializeChatProvider(ChatProvider chatProvider) async {
     try {
       await context.read<AppProvider>().initialize();
+      final projectProvider = context.read<ProjectProvider>();
+      await projectProvider.initializeProject();
+      await context.read<AppProvider>().checkConnection(
+        directory: projectProvider.currentProject?.path,
+      );
       // Technical comment translated to English.
       await chatProvider.initializeProviders();
 
@@ -122,7 +128,16 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
     _lastServerId = currentServerId;
-    unawaited(_chatProvider?.onServerScopeChanged());
+    unawaited(_handleServerScopeChange());
+  }
+
+  Future<void> _handleServerScopeChange() async {
+    if (!mounted) {
+      return;
+    }
+    final projectProvider = context.read<ProjectProvider>();
+    await projectProvider.onServerScopeChanged();
+    await _chatProvider?.onServerScopeChanged();
   }
 
   void _scrollToBottom({bool force = false}) {
@@ -165,6 +180,143 @@ class _ChatPageState extends State<ChatPage> {
     final chatProvider = context.read<ChatProvider>();
     await chatProvider.loadSessions();
     await chatProvider.refresh();
+  }
+
+  Future<void> _switchProjectContext(String projectId) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
+    final changed = await projectProvider.switchProject(projectId);
+    if (!changed) {
+      return;
+    }
+    await chatProvider.onProjectScopeChanged();
+  }
+
+  Future<void> _closeProjectContext(String projectId) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
+    final changed = await projectProvider.closeProject(projectId);
+    if (!changed) {
+      return;
+    }
+    await chatProvider.onProjectScopeChanged();
+  }
+
+  Future<void> _reopenProjectContext(String projectId) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
+    final changed = await projectProvider.reopenProject(
+      projectId,
+      makeActive: true,
+    );
+    if (!changed) {
+      return;
+    }
+    await chatProvider.onProjectScopeChanged();
+  }
+
+  Future<void> _createWorkspace() async {
+    final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
+    final controller = TextEditingController();
+    final createdName = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Create Workspace'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Workspace name',
+              hintText: 'ex: feature-branch',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(controller.text.trim());
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || createdName == null || createdName.trim().isEmpty) {
+      return;
+    }
+
+    final created = await projectProvider.createWorktree(
+      createdName,
+      switchToCreated: true,
+    );
+    if (!mounted) {
+      return;
+    }
+    if (created == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(projectProvider.error ?? 'Failed to create workspace'),
+        ),
+      );
+      return;
+    }
+    await chatProvider.onProjectScopeChanged();
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Workspace created: ${created.name}')),
+    );
+  }
+
+  Future<void> _resetWorkspace(String worktreeId) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final ok = await projectProvider.resetWorktree(worktreeId);
+    if (!mounted) {
+      return;
+    }
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(projectProvider.error ?? 'Failed to reset workspace'),
+        ),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Workspace reset')));
+  }
+
+  Future<void> _deleteWorkspace(String worktreeId) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
+    final ok = await projectProvider.deleteWorktree(worktreeId);
+    if (!mounted) {
+      return;
+    }
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(projectProvider.error ?? 'Failed to delete workspace'),
+        ),
+      );
+      return;
+    }
+    await chatProvider.onProjectScopeChanged();
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Workspace deleted')));
   }
 
   void _focusInput() {
@@ -306,24 +458,212 @@ class _ChatPageState extends State<ChatPage> {
     final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       titleSpacing: 12,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'CodeWalk',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          Text(
-            'Conversational workspace',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+      title: Consumer<ProjectProvider>(
+        builder: (context, projectProvider, child) {
+          final currentPath = projectProvider.currentProject?.path ?? '-';
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'CodeWalk',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              Text(
+                'Context: $currentPath',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          );
+        },
       ),
       actions: [
+        Consumer<ProjectProvider>(
+          builder: (context, projectProvider, child) {
+            final currentProject = projectProvider.currentProject;
+            return PopupMenuButton<String>(
+              tooltip: 'Switch Project Context',
+              onSelected: (value) async {
+                if (value == '__refresh_projects__') {
+                  await projectProvider.loadProjects();
+                  return;
+                }
+                if (value == '__refresh_workspaces__') {
+                  await projectProvider.loadWorktrees();
+                  return;
+                }
+                if (value == '__create_workspace__') {
+                  await _createWorkspace();
+                  return;
+                }
+                if (value.startsWith('switch:')) {
+                  await _switchProjectContext(
+                    value.substring('switch:'.length),
+                  );
+                  return;
+                }
+                if (value.startsWith('close:')) {
+                  await _closeProjectContext(value.substring('close:'.length));
+                  return;
+                }
+                if (value.startsWith('reopen:')) {
+                  await _reopenProjectContext(
+                    value.substring('reopen:'.length),
+                  );
+                  return;
+                }
+                if (value.startsWith('switch-workspace:')) {
+                  final directory = value.substring('switch-workspace:'.length);
+                  final project = projectProvider.projects
+                      .where((item) => item.path == directory)
+                      .firstOrNull;
+                  if (project != null) {
+                    await _switchProjectContext(project.id);
+                  }
+                  return;
+                }
+                if (value.startsWith('reset-workspace:')) {
+                  await _resetWorkspace(
+                    value.substring('reset-workspace:'.length),
+                  );
+                  return;
+                }
+                if (value.startsWith('delete-workspace:')) {
+                  await _deleteWorkspace(
+                    value.substring('delete-workspace:'.length),
+                  );
+                }
+              },
+              itemBuilder: (context) {
+                final items = <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    child: Text(
+                      currentProject == null
+                          ? 'No active context'
+                          : 'Current: ${currentProject.name}',
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '__refresh_projects__',
+                    child: Text('Refresh projects'),
+                  ),
+                  const PopupMenuDivider(),
+                ];
+
+                for (final project in projectProvider.openProjects) {
+                  items.add(
+                    PopupMenuItem<String>(
+                      value: 'switch:${project.id}',
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              project.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (project.id == currentProject?.id)
+                            const Icon(Icons.check, size: 16),
+                        ],
+                      ),
+                    ),
+                  );
+                  if (project.id != currentProject?.id) {
+                    items.add(
+                      PopupMenuItem<String>(
+                        value: 'close:${project.id}',
+                        child: Text('Close ${project.name}'),
+                      ),
+                    );
+                  }
+                }
+
+                if (projectProvider.closedProjects.isNotEmpty) {
+                  items.add(const PopupMenuDivider());
+                  for (final project in projectProvider.closedProjects) {
+                    items.add(
+                      PopupMenuItem<String>(
+                        value: 'reopen:${project.id}',
+                        child: Text('Reopen ${project.name}'),
+                      ),
+                    );
+                  }
+                }
+
+                if (projectProvider.worktreeSupported ||
+                    projectProvider.worktrees.isNotEmpty) {
+                  items.add(const PopupMenuDivider());
+                  items.add(
+                    const PopupMenuItem<String>(
+                      value: '__create_workspace__',
+                      child: Text('Create workspace'),
+                    ),
+                  );
+                  items.add(
+                    const PopupMenuItem<String>(
+                      value: '__refresh_workspaces__',
+                      child: Text('Refresh workspaces'),
+                    ),
+                  );
+                  for (final worktree in projectProvider.worktrees) {
+                    items.add(
+                      PopupMenuItem<String>(
+                        value: 'switch-workspace:${worktree.directory}',
+                        child: Text('Open ${worktree.name}'),
+                      ),
+                    );
+                    items.add(
+                      PopupMenuItem<String>(
+                        value: 'reset-workspace:${worktree.id}',
+                        child: Text('Reset ${worktree.name}'),
+                      ),
+                    );
+                    items.add(
+                      PopupMenuItem<String>(
+                        value: 'delete-workspace:${worktree.id}',
+                        child: Text('Delete ${worktree.name}'),
+                      ),
+                    );
+                  }
+                }
+
+                return items;
+              },
+              child: Container(
+                margin: const EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: colorScheme.outline.withOpacity(0.4),
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.folder_open_outlined, size: 16),
+                    const SizedBox(width: 6),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 120),
+                      child: Text(
+                        currentProject?.name ?? 'Context',
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.arrow_drop_down, size: 18),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
         Consumer<AppProvider>(
           builder: (context, appProvider, child) {
             final active = appProvider.activeServer;
@@ -606,7 +946,10 @@ class _ChatPageState extends State<ChatPage> {
                         return chatProvider.toggleSessionShare(session);
                       },
                       onSessionArchiveToggled: (session, archived) {
-                        return chatProvider.setSessionArchived(session, archived);
+                        return chatProvider.setSessionArchived(
+                          session,
+                          archived,
+                        );
                       },
                       onSessionForked: (session) async {
                         final created = await chatProvider.forkSession(session);
@@ -729,7 +1072,9 @@ class _ChatPageState extends State<ChatPage> {
                           onPressed: () {
                             final session = chatProvider.currentSession;
                             if (session != null) {
-                              unawaited(chatProvider.loadSessionInsights(session.id));
+                              unawaited(
+                                chatProvider.loadSessionInsights(session.id),
+                              );
                             }
                           },
                           icon: const Icon(Icons.sync, size: 18),
@@ -741,7 +1086,9 @@ class _ChatPageState extends State<ChatPage> {
                     Text(
                       _sessionStatusLabel(
                         chatProvider.currentSessionStatus ??
-                            const SessionStatusInfo(type: SessionStatusType.idle),
+                            const SessionStatusInfo(
+                              type: SessionStatusType.idle,
+                            ),
                       ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -769,7 +1116,9 @@ class _ChatPageState extends State<ChatPage> {
                         child: Text(
                           chatProvider.sessionInsightsError!,
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Theme.of(context).colorScheme.error),
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
                         ),
                       ),
                   ],
@@ -856,7 +1205,8 @@ class _ChatPageState extends State<ChatPage> {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  chatProvider.currentSession!.title ?? 'New Chat',
+                                  chatProvider.currentSession!.title ??
+                                      'New Chat',
                                   style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(
                                         color: Theme.of(
@@ -882,7 +1232,9 @@ class _ChatPageState extends State<ChatPage> {
                                     _sessionStatusLabel(
                                       chatProvider.currentSessionStatus!,
                                     ),
-                                    style: Theme.of(context).textTheme.labelSmall,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall,
                                   ),
                                 ),
                             ],
@@ -901,12 +1253,14 @@ class _ChatPageState extends State<ChatPage> {
                               _metaChip(
                                 context,
                                 icon: Icons.checklist,
-                                label: 'Todos: ${chatProvider.currentSessionTodo.length}',
+                                label:
+                                    'Todos: ${chatProvider.currentSessionTodo.length}',
                               ),
                               _metaChip(
                                 context,
                                 icon: Icons.compare_arrows,
-                                label: 'Diff: ${chatProvider.currentSessionDiff.length}',
+                                label:
+                                    'Diff: ${chatProvider.currentSessionDiff.length}',
                               ),
                             ],
                           ),

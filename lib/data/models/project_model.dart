@@ -18,12 +18,34 @@ class ProjectModel {
 
   /// Technical comment translated to English.
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
+    String parseDate(dynamic value) {
+      if (value is String && value.trim().isNotEmpty) {
+        return value;
+      }
+      if (value is num && value > 0) {
+        return DateTime.fromMillisecondsSinceEpoch(
+          value.toInt(),
+        ).toIso8601String();
+      }
+      return DateTime.fromMillisecondsSinceEpoch(0).toIso8601String();
+    }
+
+    final parsedPath =
+        (json['path'] as String?) ??
+        (json['directory'] as String?) ??
+        (json['root'] as String?) ??
+        '/';
+    final parsedId = (json['id'] as String?) ?? parsedPath;
+    final parsedName = (json['name'] as String?) ?? parsedPath;
+
     return ProjectModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      path: json['path'] as String,
-      createdAt: json['createdAt'] as String,
-      updatedAt: json['updatedAt'] as String?,
+      id: parsedId,
+      name: parsedName,
+      path: parsedPath,
+      createdAt: parseDate(json['createdAt']),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : parseDate(json['updatedAt']),
     );
   }
 

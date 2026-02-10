@@ -30,6 +30,7 @@ import 'package:codewalk/domain/usecases/share_chat_session.dart';
 import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
 import 'package:codewalk/domain/usecases/update_chat_session.dart';
 import 'package:codewalk/domain/usecases/watch_chat_events.dart';
+import 'package:codewalk/domain/usecases/watch_global_chat_events.dart';
 import 'package:codewalk/presentation/pages/app_shell_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
@@ -87,6 +88,9 @@ Widget _testApp(ChatProvider chatProvider, AppProvider appProvider, Size size) {
     providers: [
       ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
       ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+      ChangeNotifierProvider<ProjectProvider>.value(
+        value: chatProvider.projectProvider,
+      ),
     ],
     child: MaterialApp(
       home: MediaQuery(
@@ -134,6 +138,7 @@ ChatProvider _buildChatProvider({
     getSessionTodo: GetSessionTodo(chatRepo),
     getSessionDiff: GetSessionDiff(chatRepo),
     watchChatEvents: WatchChatEvents(chatRepo),
+    watchGlobalChatEvents: WatchGlobalChatEvents(chatRepo),
     listPendingPermissions: ListPendingPermissions(chatRepo),
     replyPermission: ReplyPermission(chatRepo),
     listPendingQuestions: ListPendingQuestions(chatRepo),
@@ -141,6 +146,7 @@ ChatProvider _buildChatProvider({
     rejectQuestion: RejectQuestion(chatRepo),
     projectProvider: ProjectProvider(
       projectRepository: FakeProjectRepository(),
+      localDataSource: localDataSource,
     ),
     localDataSource: localDataSource,
   );

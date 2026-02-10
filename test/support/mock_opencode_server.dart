@@ -13,12 +13,15 @@ class MockOpenCodeServer {
   bool streamMessageUpdates = false;
   String? requiredEventDirectory;
   String? requiredMessageDirectory;
+  String? requiredProjectDirectory;
   Map<String, dynamic>? lastSendMessagePayload;
   int eventConnectionCount = 0;
+  int globalEventConnectionCount = 0;
   int eventCloseDelayMs = 900;
   List<Map<String, dynamic>> scriptedEvents = <Map<String, dynamic>>[];
   List<List<Map<String, dynamic>>> scriptedEventsByConnection =
       <List<Map<String, dynamic>>>[];
+  List<Map<String, dynamic>> scriptedGlobalEvents = <Map<String, dynamic>>[];
   List<Map<String, dynamic>> pendingPermissions = <Map<String, dynamic>>[];
   List<Map<String, dynamic>> pendingQuestions = <Map<String, dynamic>>[];
   String? lastPermissionReplyRequestId;
@@ -39,6 +42,11 @@ class MockOpenCodeServer {
       <String, List<Map<String, dynamic>>>{};
   final Map<String, Map<String, dynamic>> _messageDetails =
       <String, Map<String, dynamic>>{};
+  final Map<String, Map<String, dynamic>> _projectsById =
+      <String, Map<String, dynamic>>{};
+  final Map<String, Map<String, dynamic>> _worktreesById =
+      <String, Map<String, dynamic>>{};
+  String _currentProjectId = 'proj_1';
 
   Future<void> start() async {
     _seedData();
@@ -68,10 +76,13 @@ class MockOpenCodeServer {
 
     _messageDetails.clear();
     eventConnectionCount = 0;
+    globalEventConnectionCount = 0;
     scriptedEvents = <Map<String, dynamic>>[];
     scriptedEventsByConnection = <List<Map<String, dynamic>>>[];
+    scriptedGlobalEvents = <Map<String, dynamic>>[];
     requiredEventDirectory = null;
     requiredMessageDirectory = null;
+    requiredProjectDirectory = null;
     pendingPermissions = <Map<String, dynamic>>[];
     pendingQuestions = <Map<String, dynamic>>[];
     lastPermissionReplyRequestId = null;
@@ -88,6 +99,28 @@ class MockOpenCodeServer {
     sessionDiffById
       ..clear()
       ..['ses_1'] = <Map<String, dynamic>>[];
+
+    _projectsById
+      ..clear()
+      ..['proj_1'] = _project('proj_1', 'Project One', '/workspace/project')
+      ..['proj_2'] = _project('proj_2', 'Project Two', '/workspace/alt');
+    _currentProjectId = 'proj_1';
+
+    _worktreesById
+      ..clear()
+      ..['wt_1'] = _worktree(
+        id: 'wt_1',
+        name: 'default',
+        directory: '/workspace/project',
+        projectId: 'proj_1',
+        active: true,
+      )
+      ..['wt_2'] = _worktree(
+        id: 'wt_2',
+        name: 'alt',
+        directory: '/workspace/alt',
+        projectId: 'proj_2',
+      );
   }
 
   Map<String, dynamic> _session(
@@ -111,6 +144,32 @@ class MockOpenCodeServer {
       if (shareUrl != null) 'share': <String, dynamic>{'url': shareUrl},
     };
     return map;
+  }
+
+  Map<String, dynamic> _project(String id, String name, String path) {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'path': path,
+      'createdAt': DateTime.now().toIso8601String(),
+    };
+  }
+
+  Map<String, dynamic> _worktree({
+    required String id,
+    required String name,
+    required String directory,
+    required String projectId,
+    bool active = false,
+  }) {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'directory': directory,
+      'projectID': projectId,
+      'active': active,
+      'createdAt': DateTime.now().toIso8601String(),
+    };
   }
 
   Future<void> _handleRequest(HttpRequest request) async {
@@ -164,6 +223,170 @@ class MockOpenCodeServer {
         'default': <String, String>{'mock-provider': 'mock-model'},
         'connected': <String>['mock-provider'],
       });
+      return;
+    }
+
+    if (method == 'GET' && request.uri.path == '/global/event') {
+      globalEventConnectionCount += 1;
+      request.response.statusCode = 200;
+      request.response.headers.set('content-type', 'text/event-stream');
+      request.response.headers.set('cache-control', 'no-cache');
+      request.response.headers.set('connection', 'keep-alive');
+
+      for (final event in scriptedGlobalEvents) {
+        request.response.write('data: ${jsonEncode(event)}\n\n');
+        await request.response.flush();
+      }
+
+      await Future<void>.delayed(Duration(milliseconds: eventCloseDelayMs));
+      await request.response.close();
+      return;
+    }
+
+    if (method == 'GET' && request.uri.path == '/project') {
+      final directory = request.uri.queryParameters['directory'];
+      if (directory != null && directory.trim().isNotEmpty) {
+        final filtered = _projectsById.values
+            .where((project) => project['path'] == directory)
+            .toList(growable: false);
+        await _writeJson(request.response, 200, filtered);
+        return;
+      }
+      await _writeJson(
+        request.response,
+        200,
+        _projectsById.values.toList(growable: false),
+      );
+      return;
+    }
+
+    if (method == 'GET' && request.uri.path == '/project/current') {
+      final directory = request.uri.queryParameters['directory'];
+      if (requiredProjectDirectory != null &&
+          directory != requiredProjectDirectory) {
+        await _writeJson(request.response, 404, <String, dynamic>{
+          'error': 'project directory mismatch',
+        });
+        return;
+      }
+
+      if (directory != null && directory.trim().isNotEmpty) {
+        final byDirectory = _projectsById.values
+            .where((project) => project['path'] == directory)
+            .firstOrNull;
+        if (byDirectory != null) {
+          await _writeJson(request.response, 200, byDirectory);
+          return;
+        }
+      }
+
+      final current =
+          _projectsById[_currentProjectId] ?? _projectsById.values.first;
+      await _writeJson(request.response, 200, current);
+      return;
+    }
+
+    if (method == 'PATCH' && segments.length == 2 && segments[0] == 'project') {
+      final projectId = segments[1];
+      final project = _projectsById[projectId];
+      if (project == null) {
+        await _writeJson(request.response, 404, <String, dynamic>{
+          'error': 'not found',
+        });
+        return;
+      }
+      _currentProjectId = projectId;
+      await _writeJson(request.response, 200, project);
+      return;
+    }
+
+    if (segments.length == 2 &&
+        segments[0] == 'experimental' &&
+        segments[1] == 'worktree') {
+      if (method == 'GET') {
+        final directory = request.uri.queryParameters['directory'];
+        var items = _worktreesById.values.toList(growable: false);
+        if (directory != null && directory.trim().isNotEmpty) {
+          items = items
+              .where(
+                (item) => (item['directory'] as String).startsWith(directory),
+              )
+              .toList(growable: false);
+        }
+        await _writeJson(request.response, 200, items);
+        return;
+      }
+
+      if (method == 'POST') {
+        final payload = await _readJsonBody(request);
+        final rawName = (payload['name'] as String?)?.trim();
+        if (rawName == null || rawName.isEmpty) {
+          await _writeJson(request.response, 400, <String, dynamic>{
+            'error': 'name required',
+          });
+          return;
+        }
+        final baseDirectory =
+            request.uri.queryParameters['directory'] ?? '/workspace/project';
+        final slug = rawName.toLowerCase().replaceAll(' ', '-');
+        final directory = '$baseDirectory/$slug';
+        final id = 'wt_${_worktreesById.length + 1}';
+        final projectId = 'proj_${_projectsById.length + 1}';
+        final created = _worktree(
+          id: id,
+          name: rawName,
+          directory: directory,
+          projectId: projectId,
+        );
+        _worktreesById[id] = created;
+        _projectsById[projectId] = _project(projectId, rawName, directory);
+        await _writeJson(request.response, 200, created);
+        return;
+      }
+
+      if (method == 'DELETE') {
+        final worktreeId = request.uri.queryParameters['id'];
+        if (worktreeId == null || worktreeId.isEmpty) {
+          await _writeJson(request.response, 400, <String, dynamic>{
+            'error': 'id required',
+          });
+          return;
+        }
+        final removed = _worktreesById.remove(worktreeId);
+        if (removed == null) {
+          await _writeJson(request.response, 404, <String, dynamic>{
+            'error': 'not found',
+          });
+          return;
+        }
+        final removedDirectory = removed['directory'] as String?;
+        if (removedDirectory != null) {
+          final projectEntry = _projectsById.entries
+              .where((entry) => entry.value['path'] == removedDirectory)
+              .firstOrNull;
+          if (projectEntry != null) {
+            _projectsById.remove(projectEntry.key);
+          }
+        }
+        await _writeJson(request.response, 200, <String, dynamic>{'ok': true});
+        return;
+      }
+    }
+
+    if (segments.length == 3 &&
+        segments[0] == 'experimental' &&
+        segments[1] == 'worktree' &&
+        segments[2] == 'reset' &&
+        method == 'POST') {
+      final payload = await _readJsonBody(request);
+      final worktreeId = payload['id'] as String?;
+      if (worktreeId == null || !_worktreesById.containsKey(worktreeId)) {
+        await _writeJson(request.response, 404, <String, dynamic>{
+          'error': 'not found',
+        });
+        return;
+      }
+      await _writeJson(request.response, 200, <String, dynamic>{'ok': true});
       return;
     }
 
@@ -318,7 +541,8 @@ class MockOpenCodeServer {
           sessions = sessions
               .where(
                 (session) =>
-                    ((session['time'] as Map<String, dynamic>)['updated'] as int) >=
+                    ((session['time'] as Map<String, dynamic>)['updated']
+                        as int) >=
                     start,
               )
               .toList(growable: false);

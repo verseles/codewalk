@@ -480,11 +480,11 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getAppInfo() async {
+  Future<void> getAppInfo({String? directory}) async {
     await initialize();
     _setStatus(AppStatus.loading);
 
-    final result = await _getAppInfo();
+    final result = await _getAppInfo(directory: directory);
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -502,9 +502,9 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> checkConnection() async {
+  Future<void> checkConnection({String? directory}) async {
     await initialize();
-    final result = await _checkConnection();
+    final result = await _checkConnection(directory: directory);
     result.fold(
       (failure) {
         _errorMessage = failure.message;

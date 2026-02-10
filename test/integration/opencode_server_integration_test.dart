@@ -5,6 +5,7 @@ import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/data/datasources/app_remote_datasource.dart';
 import 'package:codewalk/data/datasources/chat_remote_datasource.dart';
+import 'package:codewalk/data/datasources/project_remote_datasource.dart';
 import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/data/repositories/app_repository_impl.dart';
 import 'package:codewalk/data/repositories/chat_repository_impl.dart';
@@ -32,6 +33,7 @@ import 'package:codewalk/domain/usecases/share_chat_session.dart';
 import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
 import 'package:codewalk/domain/usecases/update_chat_session.dart';
 import 'package:codewalk/domain/usecases/watch_chat_events.dart';
+import 'package:codewalk/domain/usecases/watch_global_chat_events.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
@@ -77,6 +79,56 @@ void main() {
         expect(providers.providers, hasLength(1));
         expect(providers.defaultModels['mock-provider'], 'mock-model');
       });
+    });
+
+    test(
+      'ProjectRemoteDataSource supports project context and worktrees',
+      () async {
+        final remote = ProjectRemoteDataSourceImpl(
+          dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+        );
+
+        final projects = await remote.getProjects();
+        expect(projects.projects.length, 2);
+
+        final current = await remote.getCurrentProject(
+          directory: '/workspace/alt',
+        );
+        expect(current.path, '/workspace/alt');
+
+        final worktreesBefore = await remote.getWorktrees(
+          directory: '/workspace',
+        );
+        expect(worktreesBefore, isNotEmpty);
+
+        final created = await remote.createWorktree(
+          'feature-15',
+          directory: '/workspace/project',
+        );
+        expect(created.directory, '/workspace/project/feature-15');
+
+        await remote.resetWorktree(created.id, directory: '/workspace/project');
+        await remote.deleteWorktree(
+          created.id,
+          directory: '/workspace/project',
+        );
+      },
+    );
+
+    test('ChatRemoteDataSource subscribes to /global/event stream', () async {
+      server.scriptedGlobalEvents = <Map<String, dynamic>>[
+        <String, dynamic>{
+          'type': 'session.updated',
+          'properties': <String, dynamic>{'directory': '/workspace/project'},
+        },
+      ];
+      final remote = ChatRemoteDataSourceImpl(
+        dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+      );
+
+      final events = await remote.subscribeGlobalEvents().take(1).toList();
+      expect(events.single.type, 'session.updated');
+      expect(events.single.properties['directory'], '/workspace/project');
     });
 
     test(
@@ -430,6 +482,7 @@ void main() {
         );
         final projectProvider = ProjectProvider(
           projectRepository: FakeProjectRepository(),
+          localDataSource: localDataSource,
         );
 
         final appProvider = AppProvider(
@@ -471,6 +524,7 @@ void main() {
           getSessionTodo: GetSessionTodo(chatRepository),
           getSessionDiff: GetSessionDiff(chatRepository),
           watchChatEvents: WatchChatEvents(chatRepository),
+          watchGlobalChatEvents: WatchGlobalChatEvents(chatRepository),
           listPendingPermissions: ListPendingPermissions(chatRepository),
           replyPermission: ReplyPermission(chatRepository),
           listPendingQuestions: ListPendingQuestions(chatRepository),
