@@ -140,6 +140,7 @@ Completed project/workspace parity across domain/data/provider/UI layers with de
 Applied a post-completion chat UX refinement so conversation view opens at the latest message and exposes a jump-to-latest FAB that is visually highlighted when new messages arrive while the user is reading older content.
 Adjusted project-context switching to auto-open the last session per directory (with fallback to most recent when no stored selection exists), reducing empty-state friction during A/B project navigation.
 Aligned main navigation with chat-first workflow by moving `Chat / Logs / Settings` controls to the top of the conversations sidebar and making `Logs`/`Settings` secondary routes with explicit back navigation to chat.
+Refined the sidebar navigation style to match area semantics: replaced segmented options with an `Areas` section where `Chat` is static primary context and only `Logs`/`Settings` are actionable destinations.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes

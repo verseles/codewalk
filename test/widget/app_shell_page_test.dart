@@ -60,6 +60,8 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(NavigationRail), findsNothing);
     expect(find.text('Conversations'), findsOneWidget);
+    expect(find.text('Areas'), findsOneWidget);
+    expect(find.text('Primary'), findsOneWidget);
   });
 
   testWidgets('opens logs from sidebar and returns to chat via back arrow', (

@@ -508,7 +508,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Directory-scoped context snapshots and dirty-context refresh strategy
 - Chat-first shell: `AppShellPage` mounts `ChatPage` as primary route; `Logs` and `Settings` open as secondary routes with native back navigation to chat
 - Responsive shell with mobile drawer and desktop split-view layout
-- Sidebar top navigation: `Chat / Logs / Settings` segment appears above `Conversations` controls
+- Sidebar top area section (`Areas`) appears above `Conversations`: `Chat` is a static primary indicator and `Logs/Settings` are secondary navigation destinations
 - Desktop shortcuts for new chat, refresh, and input focus
 
 ### Settings Module

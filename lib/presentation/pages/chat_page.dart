@@ -35,8 +35,6 @@ class _EscapeIntent extends Intent {
   const _EscapeIntent();
 }
 
-enum _SidebarDestination { chat, logs, settings }
-
 /// Chat page
 class ChatPage extends StatefulWidget {
   final String? projectId;
@@ -980,49 +978,49 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildSidebarNavigation({required bool closeOnSelect}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: SegmentedButton<_SidebarDestination>(
-            showSelectedIcon: false,
-            segments: const <ButtonSegment<_SidebarDestination>>[
-              ButtonSegment<_SidebarDestination>(
-                value: _SidebarDestination.chat,
-                icon: Icon(Icons.chat_bubble_rounded),
-                label: Text('Chat'),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+              child: Text(
+                'Areas',
+                style: Theme.of(context).textTheme.titleSmall,
               ),
-              ButtonSegment<_SidebarDestination>(
-                value: _SidebarDestination.logs,
-                icon: Icon(Icons.receipt_long_rounded),
-                label: Text('Logs'),
+            ),
+            ListTile(
+              enabled: false,
+              leading: const Icon(Icons.chat_bubble_rounded),
+              title: const Text('Chat'),
+              subtitle: const Text('Primary'),
+              trailing: Icon(
+                Icons.check_circle,
+                size: 18,
+                color: colorScheme.primary,
               ),
-              ButtonSegment<_SidebarDestination>(
-                value: _SidebarDestination.settings,
-                icon: Icon(Icons.tune_rounded),
-                label: Text('Settings'),
-              ),
-            ],
-            selected: const <_SidebarDestination>{_SidebarDestination.chat},
-            onSelectionChanged: (selection) {
-              if (selection.isEmpty) {
-                return;
-              }
-              final destination = selection.first;
-              switch (destination) {
-                case _SidebarDestination.chat:
-                  unawaited(_closeDrawerIfNeeded(closeOnSelect: closeOnSelect));
-                  return;
-                case _SidebarDestination.logs:
-                  unawaited(_openLogsPage(closeOnSelect: closeOnSelect));
-                  return;
-                case _SidebarDestination.settings:
-                  unawaited(_openSettingsPage(closeOnSelect: closeOnSelect));
-                  return;
-              }
-            },
-          ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.receipt_long_rounded),
+              title: const Text('Logs'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () =>
+                  unawaited(_openLogsPage(closeOnSelect: closeOnSelect)),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.tune_rounded),
+              title: const Text('Settings'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () =>
+                  unawaited(_openSettingsPage(closeOnSelect: closeOnSelect)),
+            ),
+          ],
         ),
       ),
     );
