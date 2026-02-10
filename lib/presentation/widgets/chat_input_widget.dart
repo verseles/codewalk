@@ -837,13 +837,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   Widget _buildSuggestionPopover(ColorScheme colorScheme) {
     final media = MediaQuery.of(context);
-    final maxHeight =
-        (media.size.height -
-                media.viewPadding.top -
-                media.viewInsets.bottom -
-                150)
-            .clamp(220.0, media.size.height * 0.78)
-            .toDouble();
+    final availableViewportHeight =
+        media.size.height - media.viewPadding.top - media.viewInsets.bottom;
+    final reservedForComposer = 130.0;
+    final maxHeight = (availableViewportHeight - reservedForComposer)
+        .clamp(160.0, availableViewportHeight * 0.9)
+        .toDouble();
     final isMention = _popoverType == ChatComposerPopoverType.mention;
     final suggestions = isMention
         ? _mentionSuggestions

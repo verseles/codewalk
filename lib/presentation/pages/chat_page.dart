@@ -765,6 +765,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               autofocus: true,
               child: Scaffold(
                 backgroundColor: Theme.of(context).colorScheme.background,
+                resizeToAvoidBottomInset: false,
                 appBar: _buildAppBar(),
                 drawer: isMobile ? _buildSessionDrawer() : null,
                 body: Consumer<ChatProvider>(
@@ -1911,152 +1912,160 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required double horizontalPadding,
     required double verticalPadding,
   }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxContentWidth),
-          child: Column(
-            children: [
-              // Current session info - modern design
-              if (chatProvider.currentSession != null)
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.all(8),
-                  child: Card(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.chat_bubble_outline,
-                                size: 18,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSecondaryContainer,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  chatProvider.currentSession!.title ??
-                                      'New Chat',
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSecondaryContainer,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: Column(
+              children: [
+                // Current session info - modern design
+                if (chatProvider.currentSession != null)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(8),
+                    child: Card(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 18,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer,
                                 ),
-                              ),
-                              if (chatProvider.currentSessionStatus != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceContainerHighest,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
+                                const SizedBox(width: 10),
+                                Expanded(
                                   child: Text(
-                                    _sessionStatusLabel(
-                                      chatProvider.currentSessionStatus!,
-                                    ),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelSmall,
+                                    chatProvider.currentSession!.title ??
+                                        'New Chat',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondaryContainer,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              _metaChip(
-                                context,
-                                icon: Icons.call_split,
-                                label:
-                                    'Children: ${chatProvider.currentSessionChildren.length}',
-                              ),
-                              _metaChip(
-                                context,
-                                icon: Icons.checklist,
-                                label:
-                                    'Todos: ${chatProvider.currentSessionTodo.length}',
-                              ),
-                              _metaChip(
-                                context,
-                                icon: Icons.compare_arrows,
-                                label:
-                                    'Diff: ${chatProvider.currentSessionDiff.length}',
-                              ),
-                            ],
-                          ),
-                        ],
+                                if (chatProvider.currentSessionStatus != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      _sessionStatusLabel(
+                                        chatProvider.currentSessionStatus!,
+                                      ),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelSmall,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _metaChip(
+                                  context,
+                                  icon: Icons.call_split,
+                                  label:
+                                      'Children: ${chatProvider.currentSessionChildren.length}',
+                                ),
+                                _metaChip(
+                                  context,
+                                  icon: Icons.checklist,
+                                  label:
+                                      'Todos: ${chatProvider.currentSessionTodo.length}',
+                                ),
+                                _metaChip(
+                                  context,
+                                  icon: Icons.compare_arrows,
+                                  label:
+                                      'Diff: ${chatProvider.currentSessionDiff.length}',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
+
+                // Message list
+                Expanded(child: _buildMessageViewport(chatProvider)),
+
+                _buildInteractionPrompts(chatProvider),
+
+                _buildModelControls(chatProvider),
+
+                // Input field
+                Builder(
+                  builder: (context) {
+                    final selectedModel = chatProvider.selectedModel;
+                    final supportsImages = _supportsImageAttachments(
+                      selectedModel,
+                    );
+                    final supportsPdf = _supportsPdfAttachments(selectedModel);
+                    return ChatInputWidget(
+                      onSendMessage: (submission) async {
+                        await chatProvider.sendMessage(
+                          submission.text,
+                          attachments: submission.attachments,
+                          shellMode: submission.mode == ChatComposerMode.shell,
+                        );
+                        // Technical comment translated to English.
+                        _scrollToBottom(force: true);
+                      },
+                      onMentionQuery: _queryMentionSuggestions,
+                      onSlashQuery: _querySlashSuggestions,
+                      onBuiltinSlashCommand: (commandName) =>
+                          _handleBuiltinSlashCommand(
+                            commandName: commandName,
+                            chatProvider: chatProvider,
+                          ),
+                      enabled:
+                          chatProvider.currentSession != null &&
+                          chatProvider.state != ChatState.sending,
+                      focusNode: _inputFocusNode,
+                      showAttachmentButton: supportsImages || supportsPdf,
+                      allowImageAttachment: supportsImages,
+                      allowPdfAttachment: supportsPdf,
+                    );
+                  },
                 ),
-
-              // Message list
-              Expanded(child: _buildMessageViewport(chatProvider)),
-
-              _buildInteractionPrompts(chatProvider),
-
-              _buildModelControls(chatProvider),
-
-              // Input field
-              Builder(
-                builder: (context) {
-                  final selectedModel = chatProvider.selectedModel;
-                  final supportsImages = _supportsImageAttachments(
-                    selectedModel,
-                  );
-                  final supportsPdf = _supportsPdfAttachments(selectedModel);
-                  return ChatInputWidget(
-                    onSendMessage: (submission) async {
-                      await chatProvider.sendMessage(
-                        submission.text,
-                        attachments: submission.attachments,
-                        shellMode: submission.mode == ChatComposerMode.shell,
-                      );
-                      // Technical comment translated to English.
-                      _scrollToBottom(force: true);
-                    },
-                    onMentionQuery: _queryMentionSuggestions,
-                    onSlashQuery: _querySlashSuggestions,
-                    onBuiltinSlashCommand: (commandName) =>
-                        _handleBuiltinSlashCommand(
-                          commandName: commandName,
-                          chatProvider: chatProvider,
-                        ),
-                    enabled:
-                        chatProvider.currentSession != null &&
-                        chatProvider.state != ChatState.sending,
-                    focusNode: _inputFocusNode,
-                    showAttachmentButton: supportsImages || supportsPdf,
-                    allowImageAttachment: supportsImages,
-                    allowPdfAttachment: supportsPdf,
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
