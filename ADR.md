@@ -19,6 +19,8 @@ This document tracks technical decisions for CodeWalk.
 - ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration (2026-02-10) [Accepted]
 - ADR-014: Project/Workspace Context Orchestration with Global Event Sync (2026-02-10) [Accepted]
 - ADR-015: Parity Wave Release Gate and QA Evidence Contract (2026-02-10) [Accepted]
+- ADR-016: Chat-First Navigation Architecture (2026-02-10) [Accepted]
+- ADR-017: Composer Multimodal Input Pipeline (2026-02-10) [Accepted]
 
 ---
 
@@ -401,6 +403,7 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 3. Add targeted message fallback fetch (`GetChatMessage`) when event payloads are partial/delta-based.
 4. Expand message part taxonomy support in parser + UI for:
    - `agent`, `step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, `patch`
+   - Note (2026-02-10): `step-start` and `step-finish` details were later moved from inline rendering to the assistant info menu to reduce visual noise in the message flow.
 5. Add interactive UI cards for pending permission/question requests and connect them to response endpoints.
 
 ### Rationale
@@ -597,6 +600,10 @@ Adopt a release-readiness contract for Feature 016 with explicit evidence requir
 - Trade-off: release cadence is slower due to additional QA and documentation gates.
 - Trade-off: maintaining matrix artifacts increases process overhead for each parity release wave.
 
+### Post-Gate Note (2026-02-10)
+
+After the Feature 016 release gate was finalized, a series of post-release enhancements were shipped on the same wave: composer attachments (image/PDF), speech-to-text input, text selection unification, navigation restructure to chat-first layout, and project context dialog improvements. These changes followed the same quality discipline (precommit gate, test coverage, doc updates) but were not gated by a formal QA matrix. Future waves may benefit from defining a lightweight post-gate enhancement contract to track these incremental improvements.
+
 ### Key Files
 
 - `QA.feat016.release-readiness.md`
@@ -609,3 +616,104 @@ Adopt a release-readiness contract for Feature 016 with explicit evidence requir
 
 - `ROADMAP.md`
 - `QA.feat016.release-readiness.md`
+
+---
+
+## ADR-016: Chat-First Navigation Architecture
+
+Status: Accepted
+Date: 2026-02-10
+
+### Context
+
+CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `StatefulWidget` managing a `NavigationBar` (mobile) and `NavigationRail` (desktop) with three equal-weight destinations (Chat, Logs, Settings). This gave equal visual priority to all three sections, even though Chat is used ~95% of the time while Logs and Settings are accessed occasionally.
+
+### Decision
+
+1. Reduce `AppShellPage` to a `StatelessWidget` that renders `ChatPage` as the sole root.
+2. Move Logs and Settings access into the chat sidebar as tonal button pairs above the session list.
+3. Open Logs and Settings as push routes (`Navigator.push`) with native back navigation.
+4. Remove `NavigationBar`, `NavigationRail`, and the `_selectedIndex` state machine entirely.
+
+### Rationale
+
+- Chat-first layout matches actual usage patterns: the primary interaction is always chat.
+- Eliminating the navigation state machine reduces widget tree complexity and removes a class of index-based bugs.
+- Push routes for secondary pages provide clear entry/exit semantics and work consistently across mobile (drawer close + push) and desktop (sidebar + push).
+- Sidebar placement keeps Logs/Settings discoverable without competing for primary screen real estate.
+
+### Consequences
+
+- Positive: simpler `AppShellPage` (StatelessWidget, single child), fewer test permutations.
+- Positive: chat always occupies full screen, no tab-switching latency or state restoration needed.
+- Positive: Logs/Settings pages can be opened from both drawer and permanent sidebar with the same code path.
+- Trade-off: users lose one-tap tab switching between Chat/Logs/Settings; secondary pages now require a back action to return.
+- Trade-off: sidebar mixes app navigation (Logs/Settings buttons) with session management (session list), coupling two concerns in one panel.
+
+### Key Files
+
+- `lib/presentation/pages/app_shell_page.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `test/widget/app_shell_page_test.dart`
+
+### References
+
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-017: Composer Multimodal Input Pipeline
+
+Status: Accepted
+Date: 2026-02-10
+
+### Context
+
+The chat composer only supported plain text input. OpenCode server accepts file parts (images, PDFs) in message payloads and exposes model capability metadata that indicates which input modalities each model supports. Without multimodal input, CodeWalk could not leverage image/document-aware models. Additionally, mobile users benefit from voice dictation as an alternative text input method, but the app had no speech integration.
+
+### Decision
+
+1. Extend `FileInputPart` entity with required `mime` and `url` fields (replacing the previous `source`-only contract) to match the server file part schema.
+2. Add a file picker action in `ChatInputWidget` using `file_picker` for images and PDFs, with queued attachment chips and remove actions.
+3. Wire `ChatProvider.sendMessage` to accept an optional `attachments` list and serialize file parts in the outbound payload alongside text parts.
+4. Parse model `capabilities.input`/`capabilities.output` maps into normalized `modalities` lists in `ModelModel.fromJson`, supporting both list and map formats from the server.
+5. Gate attachment and speech actions on model capability: hide the attachment button when the selected model does not support image/pdf input modalities.
+6. Integrate `speech_to_text` package for voice dictation:
+   - Add `RECORD_AUDIO` permission and `RecognitionService` query to Android manifest.
+   - Lazy-initialize speech recognition with graceful fallback when unavailable.
+   - Append recognized words to existing composer text with space-aware concatenation.
+   - Auto-stop dictation on send.
+7. Add a 300ms hold action on the send button to insert a newline (alternative to Shift+Enter on mobile).
+
+### Rationale
+
+- File part schema (`mime` + `url`) aligns with the server's expected payload format and enables future media types without entity changes.
+- Capability-aware UI prevents users from attaching files to models that cannot process them, avoiding silent server errors.
+- Normalizing capabilities from both list and map formats handles server API inconsistencies observed in practice.
+- Speech-to-text is a platform capability that significantly improves mobile input ergonomics without adding server-side complexity.
+- Lazy speech initialization avoids blocking app startup on devices without microphone support.
+
+### Consequences
+
+- Positive: users can send images and PDFs to capable models directly from the composer.
+- Positive: voice input is available on supported devices with automatic fallback messaging.
+- Positive: composer UI adapts dynamically to model capabilities, preventing invalid payloads.
+- Trade-off: `FileInputPart` contract change is not backward-compatible; existing serialized data with only `source` field will not deserialize correctly (mitigated by the field being used only in transient input, not persisted).
+- Trade-off: `speech_to_text` introduces a native platform dependency with per-platform permission requirements (Android manifest, iOS Info.plist).
+- Trade-off: `ChatInputWidget` state grew significantly (attachment queue, speech state machine, hold timer).
+
+### Key Files
+
+- `lib/domain/entities/chat_session.dart` - `FileInputPart` entity with `mime`/`url`
+- `lib/data/models/provider_model.dart` - `_normalizeModalityList`, `_modalitiesFromCapabilities`
+- `lib/data/models/chat_session_model.dart` - file part serialization
+- `lib/presentation/providers/chat_provider.dart` - `sendMessage` with attachments
+- `lib/presentation/widgets/chat_input_widget.dart` - attachment picker, speech-to-text, hold-to-newline
+- `android/app/src/main/AndroidManifest.xml` - `RECORD_AUDIO` permission
+- `pubspec.yaml` - `speech_to_text` and `file_picker` dependencies
+
+### References
+
+- `ROADMAP.md`
+- `CODEBASE.md`

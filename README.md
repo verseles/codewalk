@@ -6,14 +6,20 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 
 ## Features
 
-- AI chat interface with streaming responses
-- Server connection with configurable host, port, and authentication
-- Session management (create, switch, delete, share)
-- Multi-provider and model selection
-- Responsive chat layout (mobile drawer, desktop split view)
+- AI chat interface with streaming responses and realtime event sync (SSE)
+- Multi-server profile management (add, edit, remove, switch, health checks)
+- Multi-provider and model selection with variant/reasoning effort controls
+- Session lifecycle (create, rename, archive, fork, share, delete)
+- Project/workspace context switching with directory-scoped state isolation
+- Worktree management (create, reset, delete)
+- Image and PDF attachments with model capability gating
+- Speech-to-text voice input
+- Interactive permission and question prompts from the server
+- Chat-first layout with responsive sidebar (mobile drawer, desktop split view)
 - Desktop keyboard shortcuts (`Ctrl/Cmd + N`, `Ctrl/Cmd + R`, `Ctrl/Cmd + L`, `Esc`)
-- Markdown rendering with syntax highlighting
+- Markdown rendering with syntax highlighting and text selection
 - Dark theme with Material Design 3
+- Cross-platform: Linux, Web, Android (Windows and macOS buildable)
 
 ## Getting Started
 
@@ -59,10 +65,11 @@ make precommit  # check + android
 
 ### Server Configuration
 
-1. Launch the app and navigate to **Server Settings**
-2. Enter your server host and port (e.g., `127.0.0.1:4096`)
+1. Launch the app and open **Settings** from the sidebar
+2. Add a server profile with host and port (e.g., `127.0.0.1:4096`)
 3. Configure authentication if required (API key or basic auth)
 4. Use **Test Connection** to verify connectivity
+5. Multiple server profiles can be added and switched at any time
 
 ## Installer Scripts
 
