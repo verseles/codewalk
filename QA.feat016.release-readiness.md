@@ -56,6 +56,15 @@ No product defects with severity P0/P1 were reproduced in the Feature 016 QA mat
 - Linux/Web/Android build gates are green.
 - No open product-critical defects (P0/P1) remain for this feature wave.
 
+## Post-QA Release Gates
+
+- `make precommit`: PASS
+  - Evidence: `/tmp/codewalk_feat016_gate/20260210_024416_precommit/make_precommit_success.txt`
+- CI-equivalent local checks: PASS
+  - Coverage gate (`flutter test --coverage` + `check_coverage.sh`): PASS at 59.44%
+  - Linux/Web release builds: PASS
+  - Evidence: `/tmp/codewalk_feat016_gate/20260210_024255_ci`
+
 ## Known Limitations
 
 - Interactive Android runtime validation is currently blocked on this host by emulator startup failure (`-6`), so Android runtime checks rely on built APK artifacts and external device smoke.

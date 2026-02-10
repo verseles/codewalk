@@ -375,7 +375,7 @@ Deferred/optional after parity wave:
 
 ### flutter test
 
-- **Result: 66 tests, all passed**
+- **Result: 97 tests, all passed** (latest full run with coverage)
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
   - Unit: providers/usecases/models with migration, server/context-scope assertions, lifecycle optimistic-rollback, and project/worktree orchestration
@@ -437,6 +437,7 @@ Deferred/optional after parity wave:
 **Telegram Integration:**
 - If `tdl` is available, uploads APK to VerselesBot channel
 - APK renamed to `codewalk.apk` before upload
+- Caption is dynamic by default (latest commit subject) and can be overridden via `TDL_CAPTION`
 
 ### Installation Scripts
 
@@ -639,7 +640,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Patch coverage target: 30% (±10% threshold)
 - Ignores: test/**, *.g.dart, generated_plugin_registrant.dart, lib/l10n/**
 
-**Current coverage: 35% minimum enforced by CI**
+**Current coverage:** 59.44% in latest local CI-equivalent run (`4223/7105`), with 35% minimum enforced by CI
 
 ## Contribution Standards (CONTRIBUTING.md)
 
@@ -706,6 +707,8 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 | `Makefile` | Build automation (13 targets, 158 lines) |
 | `.github/workflows/ci.yml` | CI/CD pipeline (5 jobs) |
 | `CONTRIBUTING.md` | Contribution guidelines and standards |
+| `QA.feat016.release-readiness.md` | Feature 016 QA matrix, platform smoke, and defect triage |
+| `RELEASE_NOTES.md` | Release signoff checklist and known limitations |
 
 ## Recent Changes Since Previous Baseline
 
@@ -723,7 +726,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Mock OpenCode server for integration testing
 - Fake data sources for isolated unit tests
 - Coverage reporting with Codecov integration
-- Automated APK builds with optional Telegram upload
+- Automated APK builds with Telegram upload and dynamic caption defaults
 - Generated code verification in CI
 
 **Quality metrics evolution:**
@@ -770,4 +773,5 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Expanded parity regression coverage across unit/widget/integration suites (including server-scoped model restore and reject-question flows).
 - Executed QA matrix `PAR-001..PAR-008` with artifacts in `/tmp/codewalk_feat016/20260210_022919`.
 - Added release-readiness report (`QA.feat016.release-readiness.md`) and release notes (`RELEASE_NOTES.md`).
+- Validated final release gates via `make precommit` and CI-equivalent local checks (coverage + Linux/Web builds), with logs in `/tmp/codewalk_feat016_gate/20260210_024416_precommit` and `/tmp/codewalk_feat016_gate/20260210_024255_ci`.
 - Documented one reproducible host-environment limitation (Android emulator startup `-6`) with mitigation via build/artifact validation and APK upload path.

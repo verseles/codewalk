@@ -5,7 +5,6 @@ APK_PATH = $(APK_DIR)/codewalk.apk
 ANALYZE_LOG = /tmp/flutter_analyze.log
 TDL_CHANNEL = VerselesBot
 TDL_TARGET = 6
-TDL_CAPTION_BASE = Ajustes mais recentes feitos
 
 help:
 	@echo "CodeWalk Make Targets"
@@ -54,7 +53,7 @@ icons:
 	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 1024x1024\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
 	dart run flutter_launcher_icons
 	# Web maskable icons with safe zone: keep critical subject inside center area.
-	magick -size 1024x1024 xc:'#7EAFC2' \( assets/images/original.png -gravity center -crop 90%x90%+0+0 +repage -resize 840x840\! \) -gravity center -composite -strip -define png:compression-level=9 web/icons/Icon-maskable-512.png
+	magick -size 512x512 xc:'#7EAFC2' \( assets/images/original.png -gravity center -crop 90%x90%+0+0 +repage -resize 420x420\! \) -gravity center -composite -strip -define png:compression-level=9 web/icons/Icon-maskable-512.png
 	magick web/icons/Icon-maskable-512.png -resize 192x192\! -strip -define png:compression-level=9 web/icons/Icon-maskable-192.png
 	@echo "Icons regenerated for Android + Linux + Windows + macOS."
 
@@ -139,8 +138,9 @@ android:
 	fi
 	@if command -v tdl >/dev/null 2>&1; then \
 		echo "Uploading APK via tdl..."; \
-		CAPTION_TEXT="$${TDL_CAPTION:-$(TDL_CAPTION_BASE) em $$(date +%Y-%m-%d\ %H:%M)}"; \
-		CAPTION_EXPR="\"$$CAPTION_TEXT\""; \
+		CAPTION_TEXT="$${TDL_CAPTION:-$$(git log -1 --pretty=%s 2>/dev/null || echo CodeWalk-Android-build)}"; \
+		CAPTION_ESCAPED="$$(printf '%s' "$$CAPTION_TEXT" | sed 's/\\/\\\\/g; s/\"/\\"/g')"; \
+		CAPTION_EXPR="\"$$CAPTION_ESCAPED\""; \
 		if tdl up -c "$(TDL_CHANNEL)" -t "$(TDL_TARGET)" --caption="$$CAPTION_EXPR" --path="$(APK_PATH)"; then \
 			echo "APK uploaded via tdl."; \
 		else \

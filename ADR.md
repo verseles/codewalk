@@ -607,6 +607,5 @@ Adopt a release-readiness contract for Feature 016 with explicit evidence requir
 
 ### References
 
-- `ROADMAP.feat016.md`
 - `ROADMAP.md`
 - `QA.feat016.release-readiness.md`

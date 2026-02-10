@@ -12,6 +12,8 @@ ChatSessionModel _$ChatSessionModelFromJson(Map<String, dynamic> json) =>
       time: SessionTimeModel.fromJson(json['time'] as Map<String, dynamic>),
       workspaceId: json['workspaceId'] as String?,
       title: json['title'] as String?,
+      parentId: json['parentID'] as String?,
+      directory: json['directory'] as String?,
       version: json['version'] as String?,
       shared: json['shared'] as bool? ?? false,
       summary: ChatSessionModel._summaryFromJson(json['summary']),
@@ -29,6 +31,8 @@ Map<String, dynamic> _$ChatSessionModelToJson(ChatSessionModel instance) =>
       'workspaceId': instance.workspaceId,
       'time': instance.time,
       'title': instance.title,
+      'parentID': instance.parentId,
+      'directory': instance.directory,
       'version': instance.version,
       'shared': instance.shared,
       'summary': instance.summary,
@@ -40,10 +44,15 @@ SessionTimeModel _$SessionTimeModelFromJson(Map<String, dynamic> json) =>
     SessionTimeModel(
       created: (json['created'] as num).toInt(),
       updated: (json['updated'] as num).toInt(),
+      archived: (json['archived'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$SessionTimeModelToJson(SessionTimeModel instance) =>
-    <String, dynamic>{'created': instance.created, 'updated': instance.updated};
+    <String, dynamic>{
+      'created': instance.created,
+      'updated': instance.updated,
+      'archived': instance.archived,
+    };
 
 SessionShareModel _$SessionShareModelFromJson(Map<String, dynamic> json) =>
     SessionShareModel(url: json['url'] as String);
@@ -68,6 +77,7 @@ ChatInputModel _$ChatInputModelFromJson(Map<String, dynamic> json) =>
           .toList(),
       providerId: json['providerID'] as String,
       modelId: json['modelID'] as String,
+      variant: json['variant'] as String?,
       mode: json['mode'] as String?,
       system: json['system'] as String?,
       tools: (json['tools'] as Map<String, dynamic>?)?.map(
@@ -80,6 +90,7 @@ Map<String, dynamic> _$ChatInputModelToJson(ChatInputModel instance) =>
       'messageID': instance.messageId,
       'providerID': instance.providerId,
       'modelID': instance.modelId,
+      'variant': instance.variant,
       'mode': instance.mode,
       'system': instance.system,
       'tools': instance.tools,
@@ -122,8 +133,14 @@ Map<String, dynamic> _$SessionCreateInputModelToJson(
 
 SessionUpdateInputModel _$SessionUpdateInputModelFromJson(
   Map<String, dynamic> json,
-) => SessionUpdateInputModel(title: json['title'] as String?);
+) => SessionUpdateInputModel(
+  title: json['title'] as String?,
+  archivedAtEpochMs: (json['archivedAtEpochMs'] as num?)?.toInt(),
+);
 
 Map<String, dynamic> _$SessionUpdateInputModelToJson(
   SessionUpdateInputModel instance,
-) => <String, dynamic>{'title': instance.title};
+) => <String, dynamic>{
+  'title': instance.title,
+  'archivedAtEpochMs': instance.archivedAtEpochMs,
+};

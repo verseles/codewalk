@@ -157,12 +157,10 @@ Added explicit git-only warning inside directory picker and reinforced post-crea
 - [x] 15.05 Add tests for project/workspace switching, context isolation, and stale-state race conditions
 
 ### Feature 016: Reliability Hardening, QA, and Release Readiness for Parity Wave
-Description: Validate and harden all parity features with measurable quality gates before production rollout. (Visit file ROADMAP.feat016.md for full research details)
+Description: Validate and harden all parity features with measurable quality gates before production rollout.
 
-- [x] 16.01 Expand automated test matrix (unit/widget/integration) for multi-server + model/variant + event + session/workspace flows
-- [x] 16.02 Run manual QA campaign on Android + desktop/web parity scenarios and log reproducible defects
-- [x] 16.03 Update technical docs and decisions (`ADR.md`, `CODEBASE.md`, release notes) for new architecture/state model
-- [ ] 16.04 Validate `make precommit` + CI stability and publish rollout checklist/known limitations
+Completed parity hardening and release readiness by expanding regression coverage across unit/widget/integration suites (including server-scoped model restore and question-reject flows), executing the `PAR-001..PAR-008` QA matrix with reproducible artifacts, and finalizing architecture/release documentation (`ADR.md`, `CODEBASE.md`, `RELEASE_NOTES.md`, `QA.feat016.release-readiness.md`). Final rollout gates were validated via `make precommit`, coverage gate pass at 59.44%, and Linux/Web release builds, with one documented non-product host limitation (Android emulator startup failure code `-6`) mitigated by successful APK build/upload validation.
+Commits: d568f22, 47ecddb, 3081b2e
 
 ## Dependency Order
 

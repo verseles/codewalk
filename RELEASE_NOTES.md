@@ -19,6 +19,16 @@ Scope: reliability hardening and release-readiness closure for the parity wave.
 - Verified runtime smokes (Linux + Chrome) and build gates (`flutter build linux`, `flutter build web`, `flutter build apk --debug`).
 - Verified Android release artifact generation and upload path through `make android`.
 
+### Rollout Checklist
+
+| Gate | Status | Evidence |
+|------|--------|----------|
+| `make precommit` (deps + gen + analyze + test + icons-check + android upload) | PASS | `/tmp/codewalk_feat016_gate/20260210_024416_precommit/make_precommit_success.txt` |
+| Coverage gate (`flutter test --coverage` + `check_coverage.sh >=35%`) | PASS (59.44%) | `/tmp/codewalk_feat016_gate/20260210_024255_ci/flutter_test_coverage.txt`, `/tmp/codewalk_feat016_gate/20260210_024255_ci/check_coverage.txt` |
+| Linux release build | PASS | `/tmp/codewalk_feat016_gate/20260210_024255_ci/build_linux_release.txt` |
+| Web release build | PASS | `/tmp/codewalk_feat016_gate/20260210_024255_ci/build_web_release.txt` |
+| Android release build + Telegram upload caption flow | PASS | `make precommit` log above (caption derived from last commit subject unless `TDL_CAPTION` override is provided) |
+
 ### Known Limitations
 
 - Local Android emulator startup (`Pixel_7_API_34`) fails on this host with emulator exit code `-6`; interactive Android runtime validation remains environment-blocked in this session.
