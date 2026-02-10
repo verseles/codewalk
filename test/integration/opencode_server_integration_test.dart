@@ -9,6 +9,7 @@ import 'package:codewalk/data/datasources/project_remote_datasource.dart';
 import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/data/repositories/app_repository_impl.dart';
 import 'package:codewalk/data/repositories/chat_repository_impl.dart';
+import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
@@ -481,7 +482,22 @@ void main() {
           remoteDataSource: ChatRemoteDataSourceImpl(dio: dioClient.dio),
         );
         final projectProvider = ProjectProvider(
-          projectRepository: FakeProjectRepository(),
+          projectRepository: FakeProjectRepository(
+            currentProject: Project(
+              id: 'proj_workspace',
+              name: 'Workspace',
+              path: '/workspace/project',
+              createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+            ),
+            projects: <Project>[
+              Project(
+                id: 'proj_workspace',
+                name: 'Workspace',
+                path: '/workspace/project',
+                createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+              ),
+            ],
+          ),
           localDataSource: localDataSource,
         );
 

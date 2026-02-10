@@ -478,7 +478,7 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
-    _sessions = snapshot.sessions;
+    _sessions = _filterSessionsForCurrentContext(snapshot.sessions);
     _currentSession = snapshot.currentSession;
     _messages = snapshot.messages;
     _sessionStatusById = snapshot.sessionStatusById;
@@ -491,6 +491,60 @@ class ChatProvider extends ChangeNotifier {
     _sessionListFilter = snapshot.sessionListFilter;
     _sessionListSort = snapshot.sessionListSort;
     _sessionVisibleLimit = snapshot.sessionVisibleLimit;
+  }
+
+  List<ChatSession> _filterSessionsForCurrentContext(
+    List<ChatSession> sessions,
+  ) {
+    final currentDirectory = _normalizeDirectory(
+      projectProvider.currentDirectory,
+    );
+    if (currentDirectory == null) {
+      return sessions;
+    }
+
+    final hasDirectoryMetadata = sessions.any((session) {
+      return _normalizeDirectory(_sessionDirectory(session)) != null;
+    });
+    if (!hasDirectoryMetadata) {
+      return sessions;
+    }
+
+    return sessions
+        .where((session) {
+          final sessionDirectory = _normalizeDirectory(
+            _sessionDirectory(session),
+          );
+          return sessionDirectory == currentDirectory;
+        })
+        .toList(growable: false);
+  }
+
+  String? _sessionDirectory(ChatSession session) {
+    final direct = _normalizeDirectory(session.directory);
+    if (direct != null) {
+      return direct;
+    }
+    final workspace = _normalizeDirectory(session.path?.workspace);
+    if (workspace != null) {
+      return workspace;
+    }
+    return _normalizeDirectory(session.path?.root);
+  }
+
+  String? _normalizeDirectory(String? raw) {
+    if (raw == null) {
+      return null;
+    }
+    var normalized = raw.trim();
+    if (normalized.isEmpty || normalized == '-') {
+      return null;
+    }
+    normalized = normalized.replaceAll('\\', '/');
+    if (normalized.length > 1) {
+      normalized = normalized.replaceAll(RegExp(r'/+$'), '');
+    }
+    return normalized;
   }
 
   Future<void> _loadModelPreferenceState({
@@ -1822,15 +1876,20 @@ class ChatProvider extends ChangeNotifier {
       }
 
       final sessions = result.fold((_) => <ChatSession>[], (value) => value);
+      final filteredSessions = _filterSessionsForCurrentContext(sessions);
       if (fetchId != _sessionsFetchId) {
         return;
       }
-      _sessions = sessions;
+      _sessions = filteredSessions;
       _sessionVisibleLimit = 40;
       _sortSessionsInPlace();
       _setState(ChatState.loaded);
 
-      await _saveCachedSessions(sessions, serverId: serverId, scopeId: scopeId);
+      await _saveCachedSessions(
+        filteredSessions,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
 
       if (fetchId != _sessionsFetchId) {
         return;
@@ -1873,9 +1932,11 @@ class ChatProvider extends ChangeNotifier {
               _sessionsCacheTtl;
       if (cachedData != null) {
         final List<dynamic> jsonList = json.decode(cachedData);
-        final cachedSessions = jsonList
-            .map((json) => ChatSessionModel.fromJson(json).toDomain())
-            .toList();
+        final cachedSessions = _filterSessionsForCurrentContext(
+          jsonList
+              .map((json) => ChatSessionModel.fromJson(json).toDomain())
+              .toList(),
+        );
 
         if (cachedSessions.isNotEmpty) {
           _sessions = cachedSessions;
