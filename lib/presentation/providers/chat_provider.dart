@@ -1720,9 +1720,7 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
-    if (_currentSession != null && _messages.isEmpty) {
-      await loadMessages(_currentSession!.id);
-    }
+    await loadLastSession(serverId: serverId, scopeId: nextScope);
   }
 
   Future<void> _persistSelection() async {
@@ -2033,15 +2031,46 @@ class ChatProvider extends ChangeNotifier {
     required String scopeId,
   }) async {
     try {
-      final sessionId = await localDataSource.getCurrentSessionId(
+      if (_sessions.isEmpty) {
+        _currentSession = null;
+        _messages = <ChatMessage>[];
+        return;
+      }
+
+      final storedSessionId = await localDataSource.getCurrentSessionId(
         serverId: serverId,
         scopeId: scopeId,
       );
-      if (sessionId != null) {
-        final session = _sessions.where((s) => s.id == sessionId).firstOrNull;
-        if (session != null) {
-          await selectSession(session);
-        }
+
+      ChatSession? targetSession;
+      if (storedSessionId != null && storedSessionId.trim().isNotEmpty) {
+        targetSession = _sessions
+            .where((session) => session.id == storedSessionId)
+            .firstOrNull;
+      }
+
+      targetSession ??= _sessions
+          .where((session) => session.id == _currentSession?.id)
+          .firstOrNull;
+      targetSession ??= _sessions.reduce((left, right) {
+        return left.time.isAfter(right.time) ? left : right;
+      });
+
+      if (_currentSession?.id != targetSession.id) {
+        await selectSession(targetSession);
+        return;
+      }
+
+      if (_messages.isEmpty) {
+        await loadMessages(targetSession.id);
+      }
+
+      if (storedSessionId != targetSession.id) {
+        await _saveCurrentSessionId(
+          targetSession.id,
+          serverId: serverId,
+          scopeId: scopeId,
+        );
       }
     } catch (e, stackTrace) {
       AppLogger.warn(

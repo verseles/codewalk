@@ -910,6 +910,133 @@ void main() {
     );
 
     test(
+      'switching project restores last session for each directory automatically',
+      () async {
+        final scopedRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_a_old',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              title: 'Session A Old',
+            ),
+            ChatSession(
+              id: 'ses_a_new',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(3000),
+              title: 'Session A New',
+            ),
+          ],
+        );
+        final scopedLocal = InMemoryAppLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final scopedProvider = ChatProvider(
+          sendChatMessage: SendChatMessage(scopedRepository),
+          getChatSessions: GetChatSessions(scopedRepository),
+          createChatSession: CreateChatSession(scopedRepository),
+          getChatMessages: GetChatMessages(scopedRepository),
+          getChatMessage: GetChatMessage(scopedRepository),
+          getProviders: GetProviders(appRepository),
+          deleteChatSession: DeleteChatSession(scopedRepository),
+          updateChatSession: UpdateChatSession(scopedRepository),
+          shareChatSession: ShareChatSession(scopedRepository),
+          unshareChatSession: UnshareChatSession(scopedRepository),
+          forkChatSession: ForkChatSession(scopedRepository),
+          getSessionStatus: GetSessionStatus(scopedRepository),
+          getSessionChildren: GetSessionChildren(scopedRepository),
+          getSessionTodo: GetSessionTodo(scopedRepository),
+          getSessionDiff: GetSessionDiff(scopedRepository),
+          watchChatEvents: WatchChatEvents(scopedRepository),
+          watchGlobalChatEvents: WatchGlobalChatEvents(scopedRepository),
+          listPendingPermissions: ListPendingPermissions(scopedRepository),
+          replyPermission: ReplyPermission(scopedRepository),
+          listPendingQuestions: ListPendingQuestions(scopedRepository),
+          replyQuestion: ReplyQuestion(scopedRepository),
+          rejectQuestion: RejectQuestion(scopedRepository),
+          projectProvider: ProjectProvider(
+            projectRepository: FakeProjectRepository(
+              currentProject: Project(
+                id: 'proj_a',
+                name: 'Project A',
+                path: '/repo/a',
+                createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+              ),
+              projects: <Project>[
+                Project(
+                  id: 'proj_a',
+                  name: 'Project A',
+                  path: '/repo/a',
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+                ),
+                Project(
+                  id: 'proj_b',
+                  name: 'Project B',
+                  path: '/repo/b',
+                  createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+                ),
+              ],
+            ),
+            localDataSource: scopedLocal,
+          ),
+          localDataSource: scopedLocal,
+        );
+
+        await scopedProvider.projectProvider.initializeProject();
+        await scopedProvider.initializeProviders();
+        await scopedProvider.loadSessions();
+
+        expect(scopedProvider.currentSession?.id, 'ses_a_new');
+        expect(
+          scopedLocal.scopedStrings['current_session_id::srv_test::/repo/a'],
+          'ses_a_new',
+        );
+
+        scopedRepository.sessions
+          ..clear()
+          ..addAll(<ChatSession>[
+            ChatSession(
+              id: 'ses_b_old',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1500),
+              title: 'Session B Old',
+            ),
+            ChatSession(
+              id: 'ses_b_new',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(2500),
+              title: 'Session B New',
+            ),
+          ]);
+        await scopedProvider.projectProvider.switchProject('proj_b');
+        await scopedProvider.onProjectScopeChanged();
+
+        expect(scopedProvider.currentSession?.id, 'ses_b_new');
+        expect(
+          scopedLocal.scopedStrings['current_session_id::srv_test::/repo/b'],
+          'ses_b_new',
+        );
+
+        final oldSessionB = scopedProvider.sessions
+            .where((session) => session.id == 'ses_b_old')
+            .first;
+        await scopedProvider.selectSession(oldSessionB);
+        expect(scopedProvider.currentSession?.id, 'ses_b_old');
+        expect(
+          scopedLocal.scopedStrings['current_session_id::srv_test::/repo/b'],
+          'ses_b_old',
+        );
+
+        await scopedProvider.projectProvider.switchProject('proj_a');
+        await scopedProvider.onProjectScopeChanged();
+        expect(scopedProvider.currentSession?.id, 'ses_a_new');
+
+        await scopedProvider.projectProvider.switchProject('proj_b');
+        await scopedProvider.onProjectScopeChanged();
+        expect(scopedProvider.currentSession?.id, 'ses_b_old');
+      },
+    );
+
+    test(
       'filters mixed session list to active directory when server returns unscoped data',
       () async {
         final scopedRepository = FakeChatRepository(

@@ -253,7 +253,7 @@ void main() {
     await provider.loadSessions();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Session 1'));
+    await tester.tap(find.text('Session 1').first);
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField).last, 'hello from widget');
