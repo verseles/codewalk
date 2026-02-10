@@ -146,6 +146,7 @@ Fixed a visual duplicate-send issue where a local optimistic user bubble and ser
 Unified provider/model controls into a single searchable selector grouped by provider, with compact closed-state label showing only the active model name.
 Refined selection UX so model/provider uses searchable bottom sheet (with alphabetical providers + 3 recent models), while reasoning effort uses a fast anchored popup selector; also removed the outer border wrapper around both selector chips.
 Clarified workspace creation UX by allowing users to choose an explicit base directory in the "Create workspace" dialog, instead of always using the current context directory implicitly.
+Added explicit workspace-operation telemetry in app logs (`create/reset/delete` start/success/failure + provider error mirroring) to diagnose silent failures directly from the Logs tab.
 
 - [x] 15.01 Implement project switcher UX with explicit current-context indicator and close/reopen behaviors
 - [x] 15.02 Add workspace/worktree operations (`create`, `reset`, `delete`) where server exposes corresponding routes

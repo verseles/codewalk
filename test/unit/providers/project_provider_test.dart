@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:codewalk/core/errors/failures.dart';
+import 'package:codewalk/core/logging/app_logger.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/worktree.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
@@ -15,6 +17,7 @@ void main() {
     late ProjectProvider provider;
 
     setUp(() {
+      AppLogger.clearEntries();
       localDataSource = InMemoryAppLocalDataSource()
         ..activeServerId = 'srv_test';
       projectRepository = FakeProjectRepository(
@@ -51,6 +54,10 @@ void main() {
         projectRepository: projectRepository,
         localDataSource: localDataSource,
       );
+    });
+
+    tearDown(() {
+      AppLogger.clearEntries();
     });
 
     test('initializeProject restores scoped current project id', () async {
@@ -126,6 +133,34 @@ void main() {
 
       final deleteOk = await provider.deleteWorktree(created.id);
       expect(deleteOk, isTrue);
+    });
+
+    test('logs workspace create failure in app logger', () async {
+      await provider.initializeProject();
+      projectRepository.worktreeFailure = const NetworkFailure(
+        'Client error',
+        400,
+      );
+
+      final created = await provider.createWorktree(
+        'Feature Broken',
+        directory: '/repo/a',
+      );
+
+      expect(created, isNull);
+      expect(provider.error, 'Failed to create workspace: Client error');
+      expect(
+        AppLogger.entries.value.any(
+          (entry) => entry.message.contains('Workspace create failed'),
+        ),
+        isTrue,
+      );
+      expect(
+        AppLogger.entries.value.any(
+          (entry) => entry.message.contains('Failed to create workspace'),
+        ),
+        isTrue,
+      );
     });
 
     test('filters synthetic root project when real contexts exist', () async {

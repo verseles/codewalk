@@ -256,25 +256,41 @@ class ProjectProvider extends ChangeNotifier {
     }
 
     final targetDirectory = directory?.trim();
+    final requestDirectory =
+        (targetDirectory == null || targetDirectory.isEmpty)
+        ? currentDirectory
+        : targetDirectory;
+    AppLogger.info(
+      'Workspace create start name=$trimmed directory=${requestDirectory ?? "-"}',
+    );
 
     final result = await _projectRepository.createWorktree(
       trimmed,
-      directory: (targetDirectory == null || targetDirectory.isEmpty)
-          ? currentDirectory
-          : targetDirectory,
+      directory: requestDirectory,
     );
 
     return result.fold(
       (failure) {
         if (failure is NetworkFailure && failure.code == 404) {
+          AppLogger.warn(
+            'Workspace create unsupported by server (404) directory=${requestDirectory ?? "-"}',
+            error: failure,
+          );
           _worktreeSupported = false;
           notifyListeners();
           return null;
         }
+        AppLogger.warn(
+          'Workspace create failed name=$trimmed directory=${requestDirectory ?? "-"}',
+          error: failure,
+        );
         _setError('Failed to create workspace: ${failure.message}');
         return null;
       },
       (worktree) async {
+        AppLogger.info(
+          'Workspace created id=${worktree.id} directory=${worktree.directory}',
+        );
         _worktreeSupported = true;
         await _loadProjects(silent: true);
         await loadWorktrees(silent: true);
@@ -297,6 +313,9 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   Future<bool> resetWorktree(String worktreeId) async {
+    AppLogger.info(
+      'Workspace reset start id=$worktreeId directory=${currentDirectory ?? "-"}',
+    );
     final result = await _projectRepository.resetWorktree(
       worktreeId,
       directory: currentDirectory,
@@ -304,14 +323,20 @@ class ProjectProvider extends ChangeNotifier {
     return result.fold(
       (failure) {
         if (failure is NetworkFailure && failure.code == 404) {
+          AppLogger.warn(
+            'Workspace reset unsupported by server (404) id=$worktreeId',
+            error: failure,
+          );
           _worktreeSupported = false;
           notifyListeners();
           return false;
         }
+        AppLogger.warn('Workspace reset failed id=$worktreeId', error: failure);
         _setError('Failed to reset workspace: ${failure.message}');
         return false;
       },
       (_) {
+        AppLogger.info('Workspace reset succeeded id=$worktreeId');
         unawaited(loadWorktrees(silent: true));
         return true;
       },
@@ -319,6 +344,9 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   Future<bool> deleteWorktree(String worktreeId) async {
+    AppLogger.info(
+      'Workspace delete start id=$worktreeId directory=${currentDirectory ?? "-"}',
+    );
     final removed = _worktrees
         .where((item) => item.id == worktreeId)
         .firstOrNull;
@@ -330,14 +358,23 @@ class ProjectProvider extends ChangeNotifier {
     return result.fold(
       (failure) {
         if (failure is NetworkFailure && failure.code == 404) {
+          AppLogger.warn(
+            'Workspace delete unsupported by server (404) id=$worktreeId',
+            error: failure,
+          );
           _worktreeSupported = false;
           notifyListeners();
           return false;
         }
+        AppLogger.warn(
+          'Workspace delete failed id=$worktreeId',
+          error: failure,
+        );
         _setError('Failed to delete workspace: ${failure.message}');
         return false;
       },
       (_) async {
+        AppLogger.info('Workspace delete succeeded id=$worktreeId');
         if (removed != null && currentDirectory == removed.directory) {
           final fallback = _projects
               .where((item) => item.path != removed.directory)
@@ -480,6 +517,7 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   void _setError(String error) {
+    AppLogger.warn(error);
     _error = error;
     _status = ProjectStatus.error;
     notifyListeners();
