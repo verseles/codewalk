@@ -9,6 +9,22 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../../domain/entities/chat_session.dart';
 
+@visibleForTesting
+Color microphoneButtonBackgroundColor({
+  required bool isListening,
+  required ColorScheme colorScheme,
+}) {
+  return isListening ? colorScheme.error : colorScheme.secondaryContainer;
+}
+
+@visibleForTesting
+Color microphoneButtonForegroundColor({
+  required bool isListening,
+  required ColorScheme colorScheme,
+}) {
+  return isListening ? colorScheme.onError : colorScheme.onSecondaryContainer;
+}
+
 /// Chat input widget
 class ChatInputWidget extends StatefulWidget {
   const ChatInputWidget({
@@ -237,6 +253,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     tooltip: _isListening
                         ? 'Stop voice input'
                         : 'Start voice input',
+                    style: IconButton.styleFrom(
+                      backgroundColor: microphoneButtonBackgroundColor(
+                        isListening: _isListening,
+                        colorScheme: colorScheme,
+                      ),
+                      foregroundColor: microphoneButtonForegroundColor(
+                        isListening: _isListening,
+                        colorScheme: colorScheme,
+                      ),
+                    ),
                     icon: Icon(
                       _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
                     ),

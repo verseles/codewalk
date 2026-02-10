@@ -782,6 +782,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Added post-release chat composer attachment flow (image/PDF), including model-capability-based button visibility and payload parity for `file` parts (`mime` + `url`).
 - Refined post-release attachment UX so image/PDF options are filtered independently by model input modalities instead of relying only on generic attachment support.
 - Added post-release voice input support with `speech_to_text`, including microphone button UX in the composer and Android manifest updates for speech recognition availability.
+- Refined microphone UX feedback so the button switches to a red visual state while voice capture is actively listening.
 - Added post-release secondary send-button behavior: hold for 300ms inserts newline and shows a corner indicator icon for this non-send action.
 - Restored staged assistant progress feedback in chat list using provider realtime state (`ChatState.sending`, `session.status`, and in-progress `AssistantMessage` parts) to render `Thinking...`, `Receiving response...`, and `Retrying model request...` indicators until completion.
 - Removed inline `Step started`/`Step finished` render blocks from assistant message body and exposed their details through the assistant header info menu (`Icons.info_outline`) to reduce visual noise.

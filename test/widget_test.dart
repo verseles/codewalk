@@ -69,4 +69,40 @@ void main() {
       expect(textField.controller!.text, 'hello\n');
     },
   );
+
+  test('microphone button uses default palette when inactive', () {
+    const colorScheme = ColorScheme.light();
+    expect(
+      microphoneButtonBackgroundColor(
+        isListening: false,
+        colorScheme: colorScheme,
+      ),
+      colorScheme.secondaryContainer,
+    );
+    expect(
+      microphoneButtonForegroundColor(
+        isListening: false,
+        colorScheme: colorScheme,
+      ),
+      colorScheme.onSecondaryContainer,
+    );
+  });
+
+  test('microphone button turns red while listening', () {
+    const colorScheme = ColorScheme.light();
+    expect(
+      microphoneButtonBackgroundColor(
+        isListening: true,
+        colorScheme: colorScheme,
+      ),
+      colorScheme.error,
+    );
+    expect(
+      microphoneButtonForegroundColor(
+        isListening: true,
+        colorScheme: colorScheme,
+      ),
+      colorScheme.onError,
+    );
+  });
 }
