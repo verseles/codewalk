@@ -127,5 +127,68 @@ void main() {
       final deleteOk = await provider.deleteWorktree(created.id);
       expect(deleteOk, isTrue);
     });
+
+    test('filters synthetic root project when real contexts exist', () async {
+      final rootProject = Project(
+        id: '/',
+        name: '/',
+        path: '/',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      );
+      projectRepository = FakeProjectRepository(
+        currentProject: rootProject,
+        projects: <Project>[
+          rootProject,
+          Project(
+            id: 'proj_real',
+            name: 'Project Real',
+            path: '/repo/real',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+          ),
+        ],
+      );
+      provider = ProjectProvider(
+        projectRepository: projectRepository,
+        localDataSource: localDataSource,
+      );
+
+      await provider.initializeProject();
+
+      expect(provider.projects.map((item) => item.id), isNot(contains('/')));
+      expect(provider.currentProject?.id, 'proj_real');
+      expect(provider.currentDirectory, '/repo/real');
+    });
+
+    test(
+      'root path uses project id as scope and no directory filter',
+      () async {
+        projectRepository = FakeProjectRepository(
+          currentProject: Project(
+            id: 'proj_root',
+            name: 'Root',
+            path: '/',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+          projects: <Project>[
+            Project(
+              id: 'proj_root',
+              name: 'Root',
+              path: '/',
+              createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+            ),
+          ],
+        );
+        provider = ProjectProvider(
+          projectRepository: projectRepository,
+          localDataSource: localDataSource,
+        );
+
+        await provider.initializeProject();
+
+        expect(provider.currentDirectory, isNull);
+        expect(provider.currentScopeId, 'proj_root');
+        expect(provider.contextKey, 'srv_test::proj_root');
+      },
+    );
   });
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_realtime.dart';
+import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
@@ -108,7 +109,7 @@ class _ChatPageState extends State<ChatPage> {
       final projectProvider = context.read<ProjectProvider>();
       await projectProvider.initializeProject();
       await context.read<AppProvider>().checkConnection(
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       );
       // Technical comment translated to English.
       await chatProvider.initializeProviders();
@@ -460,7 +461,7 @@ class _ChatPageState extends State<ChatPage> {
       titleSpacing: 12,
       title: Consumer<ProjectProvider>(
         builder: (context, projectProvider, child) {
-          final currentPath = projectProvider.currentProject?.path ?? '-';
+          final currentPath = projectProvider.currentDirectory ?? 'Global';
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -485,6 +486,18 @@ class _ChatPageState extends State<ChatPage> {
         Consumer<ProjectProvider>(
           builder: (context, projectProvider, child) {
             final currentProject = projectProvider.currentProject;
+            String projectLabel(Project project) {
+              final rawName = '${project.name}'.trim();
+              final rawPath = '${project.path}'.trim();
+              if ((rawName.isEmpty || rawName == '/') && rawPath == '/') {
+                return 'Global';
+              }
+              if (rawName.isEmpty || rawName == '/') {
+                return rawPath.isEmpty ? '-' : rawPath;
+              }
+              return rawName;
+            }
+
             return PopupMenuButton<String>(
               tooltip: 'Switch Project Context',
               onSelected: (value) async {
@@ -545,7 +558,7 @@ class _ChatPageState extends State<ChatPage> {
                     child: Text(
                       currentProject == null
                           ? 'No active context'
-                          : 'Current: ${currentProject.name}',
+                          : 'Current: ${projectLabel(currentProject)}',
                     ),
                   ),
                   const PopupMenuItem<String>(
@@ -563,7 +576,7 @@ class _ChatPageState extends State<ChatPage> {
                         children: [
                           Expanded(
                             child: Text(
-                              project.name,
+                              projectLabel(project),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -577,7 +590,7 @@ class _ChatPageState extends State<ChatPage> {
                     items.add(
                       PopupMenuItem<String>(
                         value: 'close:${project.id}',
-                        child: Text('Close ${project.name}'),
+                        child: Text('Close ${projectLabel(project)}'),
                       ),
                     );
                   }
@@ -589,7 +602,7 @@ class _ChatPageState extends State<ChatPage> {
                     items.add(
                       PopupMenuItem<String>(
                         value: 'reopen:${project.id}',
-                        child: Text('Reopen ${project.name}'),
+                        child: Text('Reopen ${projectLabel(project)}'),
                       ),
                     );
                   }

@@ -41,7 +41,15 @@ class ProjectProvider extends ChangeNotifier {
   List<Worktree> get worktrees => List<Worktree>.unmodifiable(_worktrees);
   bool get worktreeSupported => _worktreeSupported;
 
-  String get currentScopeId => _currentProject?.path ?? currentProjectId;
+  String? get currentDirectory {
+    final path = _currentProject?.path.trim();
+    if (path == null || path.isEmpty || path == '/' || path == '-') {
+      return null;
+    }
+    return path;
+  }
+
+  String get currentScopeId => currentDirectory ?? currentProjectId;
 
   String get contextKey => '${_activeServerId}::$currentScopeId';
 
@@ -84,6 +92,14 @@ class ProjectProvider extends ChangeNotifier {
 
       if (_currentProject == null) {
         await _hydrateCurrentProjectFromServer();
+      }
+
+      if (_currentProject != null &&
+          _isPlaceholderRootProject(_currentProject!) &&
+          _projects.any((item) => !_isPlaceholderRootProject(item))) {
+        _currentProject = _projects
+            .where((item) => !_isPlaceholderRootProject(item))
+            .firstOrNull;
       }
 
       _currentProject ??= _projects.firstOrNull;
@@ -192,7 +208,7 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   Future<void> loadWorktrees({bool silent = false}) async {
-    final directory = _currentProject?.path;
+    final directory = currentDirectory;
     if (directory == null || directory.trim().isEmpty) {
       _worktrees = <Worktree>[];
       _worktreeSupported = false;
@@ -240,7 +256,7 @@ class ProjectProvider extends ChangeNotifier {
 
     final result = await _projectRepository.createWorktree(
       trimmed,
-      directory: _currentProject?.path,
+      directory: currentDirectory,
     );
 
     return result.fold(
@@ -278,7 +294,7 @@ class ProjectProvider extends ChangeNotifier {
   Future<bool> resetWorktree(String worktreeId) async {
     final result = await _projectRepository.resetWorktree(
       worktreeId,
-      directory: _currentProject?.path,
+      directory: currentDirectory,
     );
     return result.fold(
       (failure) {
@@ -303,7 +319,7 @@ class ProjectProvider extends ChangeNotifier {
         .firstOrNull;
     final result = await _projectRepository.deleteWorktree(
       worktreeId,
-      directory: _currentProject?.path,
+      directory: currentDirectory,
     );
 
     return result.fold(
@@ -317,7 +333,7 @@ class ProjectProvider extends ChangeNotifier {
         return false;
       },
       (_) async {
-        if (removed != null && _currentProject?.path == removed.directory) {
+        if (removed != null && currentDirectory == removed.directory) {
           final fallback = _projects
               .where((item) => item.path != removed.directory)
               .firstOrNull;
@@ -352,6 +368,12 @@ class ProjectProvider extends ChangeNotifier {
         );
       },
       (project) {
+        final ignoreSyntheticRoot =
+            _isPlaceholderRootProject(project) &&
+            _projects.any((item) => !_isPlaceholderRootProject(item));
+        if (ignoreSyntheticRoot) {
+          return;
+        }
         _currentProject = project;
         if (!_projects.any((item) => item.id == project.id)) {
           _projects = <Project>[project, ..._projects];
@@ -369,7 +391,7 @@ class ProjectProvider extends ChangeNotifier {
         }
       },
       (projects) {
-        _projects = projects;
+        _projects = _sanitizeProjects(projects);
         if (_currentProject != null) {
           final refreshed = _projects
               .where((item) => item.id == _currentProject!.id)
@@ -456,5 +478,28 @@ class ProjectProvider extends ChangeNotifier {
     _error = error;
     _status = ProjectStatus.error;
     notifyListeners();
+  }
+
+  bool _isPlaceholderRootProject(Project project) {
+    final id = project.id.trim();
+    final name = project.name.trim();
+    final path = project.path.trim();
+    if (path != '/') {
+      return false;
+    }
+    final idLooksSynthetic = id.isEmpty || id == '/' || id == path;
+    final nameLooksSynthetic = name.isEmpty || name == '/' || name == path;
+    return idLooksSynthetic && nameLooksSynthetic;
+  }
+
+  List<Project> _sanitizeProjects(List<Project> projects) {
+    var sanitized = List<Project>.from(projects);
+    if (sanitized.length <= 1) {
+      return sanitized;
+    }
+    sanitized = sanitized
+        .where((item) => !_isPlaceholderRootProject(item))
+        .toList(growable: false);
+    return sanitized.isEmpty ? projects : sanitized;
   }
 }

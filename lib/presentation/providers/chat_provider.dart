@@ -695,7 +695,7 @@ class ChatProvider extends ChangeNotifier {
       label: 'global event',
     );
 
-    final directory = projectProvider.currentProject?.path;
+    final directory = projectProvider.currentDirectory;
     final newSubscription = watchChatEvents(directory: directory).listen(
       (result) {
         if (generation != _eventStreamGeneration) {
@@ -749,7 +749,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> _loadPendingInteractions() async {
-    final directory = projectProvider.currentProject?.path;
+    final directory = projectProvider.currentDirectory;
 
     final permissionsResult = await listPendingPermissions(
       directory: directory,
@@ -1192,7 +1192,7 @@ class ChatProvider extends ChangeNotifier {
         projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
         messageId: messageId,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
     result.fold((failure) {
@@ -1204,7 +1204,7 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> refreshSessionStatusSnapshot({bool silent = true}) async {
     final result = await getSessionStatus(
-      GetSessionStatusParams(directory: projectProvider.currentProject?.path),
+      GetSessionStatusParams(directory: projectProvider.currentDirectory),
     );
     result.fold(
       (failure) {
@@ -1235,7 +1235,7 @@ class ChatProvider extends ChangeNotifier {
       notifyListeners();
     }
 
-    final directory = projectProvider.currentProject?.path;
+    final directory = projectProvider.currentDirectory;
     final projectId = projectProvider.currentProjectId;
 
     final childrenResult = await getSessionChildren(
@@ -1325,7 +1325,7 @@ class ChatProvider extends ChangeNotifier {
         requestId: requestId,
         reply: reply,
         message: message,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
     _isRespondingInteraction = false;
@@ -1357,7 +1357,7 @@ class ChatProvider extends ChangeNotifier {
       ReplyQuestionParams(
         requestId: requestId,
         answers: answers,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
     _isRespondingInteraction = false;
@@ -1385,7 +1385,7 @@ class ChatProvider extends ChangeNotifier {
     final result = await rejectQuestion(
       RejectQuestionParams(
         requestId: requestId,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
     _isRespondingInteraction = false;
@@ -1413,7 +1413,7 @@ class ChatProvider extends ChangeNotifier {
       var failed = false;
       var connected = <String>[];
       final result = await getProviders(
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       );
       if (fetchId != _providersFetchId) {
         return;
@@ -1580,8 +1580,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   String _resolveContextScopeId() {
-    return projectProvider.currentProject?.path ??
-        projectProvider.currentProjectId;
+    return projectProvider.currentDirectory ?? projectProvider.currentProjectId;
   }
 
   Future<String> _resolveServerScopeId() async {
@@ -1804,7 +1803,7 @@ class ChatProvider extends ChangeNotifier {
 
       // Then fetch latest data from server
       final result = await getChatSessions(
-        GetChatSessionsParams(directory: projectProvider.currentProject?.path),
+        GetChatSessionsParams(directory: projectProvider.currentDirectory),
       );
 
       if (fetchId != _sessionsFetchId) {
@@ -1995,7 +1994,7 @@ class ChatProvider extends ChangeNotifier {
   /// Create new session
   Future<void> createNewSession({String? parentId, String? title}) async {
     final projectId = projectProvider.currentProjectId;
-    final directory = projectProvider.currentProject?.path;
+    final directory = projectProvider.currentDirectory;
     _setState(ChatState.loading);
 
     // Generate time-based title
@@ -2085,7 +2084,7 @@ class ChatProvider extends ChangeNotifier {
       GetChatMessagesParams(
         projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
 
@@ -2178,7 +2177,7 @@ class ChatProvider extends ChangeNotifier {
       _messageSubscription?.cancel();
 
       AppLogger.info(
-        'Provider send subscribing stream session=${_currentSession!.id} directory=${projectProvider.currentProject?.path ?? "-"}',
+        'Provider send subscribing stream session=${_currentSession!.id} directory=${projectProvider.currentDirectory ?? "-"}',
       );
 
       // Send message and listen for streaming response
@@ -2188,7 +2187,7 @@ class ChatProvider extends ChangeNotifier {
               projectId: projectProvider.currentProjectId,
               sessionId: _currentSession!.id,
               input: input,
-              directory: projectProvider.currentProject?.path,
+              directory: projectProvider.currentDirectory,
             ),
           ).listen(
             (result) {
@@ -2308,7 +2307,7 @@ class ChatProvider extends ChangeNotifier {
         projectId: projectProvider.currentProjectId,
         sessionId: session.id,
         input: SessionUpdateInput(title: trimmed),
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
 
@@ -2358,7 +2357,7 @@ class ChatProvider extends ChangeNotifier {
         input: SessionUpdateInput(
           archivedAtEpochMs: archived ? archivedAt!.millisecondsSinceEpoch : 0,
         ),
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
 
@@ -2399,14 +2398,14 @@ class ChatProvider extends ChangeNotifier {
             UnshareChatSessionParams(
               projectId: projectProvider.currentProjectId,
               sessionId: session.id,
-              directory: projectProvider.currentProject?.path,
+              directory: projectProvider.currentDirectory,
             ),
           )
         : await shareChatSession(
             ShareChatSessionParams(
               projectId: projectProvider.currentProjectId,
               sessionId: session.id,
-              directory: projectProvider.currentProject?.path,
+              directory: projectProvider.currentDirectory,
             ),
           );
 
@@ -2436,7 +2435,7 @@ class ChatProvider extends ChangeNotifier {
         projectId: projectProvider.currentProjectId,
         sessionId: session.id,
         messageId: messageId,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
 
@@ -2486,7 +2485,7 @@ class ChatProvider extends ChangeNotifier {
       DeleteChatSessionParams(
         projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
-        directory: projectProvider.currentProject?.path,
+        directory: projectProvider.currentDirectory,
       ),
     );
 
