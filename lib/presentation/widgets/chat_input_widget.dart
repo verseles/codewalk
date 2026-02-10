@@ -259,29 +259,44 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                const Icon(Icons.send_rounded),
-                                Positioned(
-                                  right: 8,
-                                  bottom: 8,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primaryContainer,
-                                      borderRadius: BorderRadius.circular(99),
-                                    ),
+                          : SizedBox(
+                              width: 52,
+                              height: 52,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  const Align(
+                                    alignment: Alignment.center,
+                                    child: Icon(Icons.send_rounded),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
                                     child: Padding(
-                                      padding: const EdgeInsets.all(1),
-                                      child: Icon(
-                                        Icons.keyboard_return_rounded,
-                                        size: 10,
-                                        color: colorScheme.onPrimaryContainer,
+                                      padding: const EdgeInsets.only(
+                                        right: 4,
+                                        bottom: 4,
+                                      ),
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primaryContainer,
+                                          borderRadius: BorderRadius.circular(
+                                            99,
+                                          ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(1),
+                                          child: Icon(
+                                            Icons.keyboard_return_rounded,
+                                            size: 10,
+                                            color:
+                                                colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                     ),
                   ),
