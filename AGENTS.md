@@ -6,12 +6,14 @@ CodeWalk é um projeto que visa permitir acessar agents de código de qualquer l
   - Essa mudança requer um novo test ou atualização de um existente
 
 - Antes de seguir para uma outra tarefa, baseado na tarefa anterior:
-  - Verifique se requer atualização em @./ADR.md ou sugerir criar uma nova
-  - Verifique se requer atualização em @./CODEBASE.md
-  - Verifique se @./ROADMAP.md precisa ser atualizado
-  - Faça commit descritivo: titulo + detalhes
+  1. Execute `make android` e logo em seguida notifique o usuário usando play_notification
+  2. Verifique se requer atualização em @./ADR.md ou sugerir criar uma nova
+  3. Verifique se requer atualização em @./CODEBASE.md
+  4. Verifique se @./ROADMAP.md precisa ser atualizado
+  5. Faça commit descritivo: titulo + detalhes
 
 
 - Sempre que concluir qualquer tarefa, execute `make android` para que o usuario teste no celular.
 - No upload via `tdl` (feito em `make android`), o `--caption` deve ser dinâmico e direto, descrevendo objetivamente o que foi alterado na última task.
 - Evite caption genérico como "Ajustes mais recentes feitos"; prefira algo como "Corrigida altura da caixa Thinking Process".
+- Após concluir a tarefa é importante executar logo `make android` para que o usuario teste no celular para que as outras tarefas continuem enquanto o usuário já vai testando a implementação.
