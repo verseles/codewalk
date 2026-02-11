@@ -11,6 +11,13 @@ String _normalizeFilePath(String raw) {
   return value;
 }
 
+String _joinParentPath(String parent, String child) {
+  if (parent.isEmpty || parent == '/' || parent == '.') {
+    return child;
+  }
+  return '$parent/$child';
+}
+
 String _fileBasename(String path) {
   final normalized = _normalizeFilePath(path);
   if (normalized.isEmpty || normalized == '/') {
@@ -48,11 +55,13 @@ String _coercePath(
     if (normalized.startsWith('/')) {
       return normalized;
     }
-    final parent = _normalizeFilePath(parentPath);
-    if (parent.isEmpty || parent == '/' || parent == '.') {
-      return _normalizeFilePath('/$normalized');
+    // Some servers already return a rooted-relative path (eg: lib/main.dart).
+    // In this case, avoid re-joining with parent to prevent duplicated segments.
+    if (normalized.contains('/')) {
+      return normalized;
     }
-    return _normalizeFilePath('$parent/$normalized');
+    final parent = _normalizeFilePath(parentPath);
+    return _normalizeFilePath(_joinParentPath(parent, normalized));
   }
 
   final safeFallbackName = fallbackName?.trim() ?? '';
@@ -60,10 +69,7 @@ String _coercePath(
     return _normalizeFilePath(parentPath);
   }
   final parent = _normalizeFilePath(parentPath);
-  if (parent.isEmpty || parent == '/' || parent == '.') {
-    return _normalizeFilePath('/$safeFallbackName');
-  }
-  return _normalizeFilePath('$parent/$safeFallbackName');
+  return _normalizeFilePath(_joinParentPath(parent, safeFallbackName));
 }
 
 class FileNodeModel {

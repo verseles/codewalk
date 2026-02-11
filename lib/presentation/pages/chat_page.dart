@@ -2231,13 +2231,17 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       requestPath: requestPath,
       contextDirectory: projectProvider.currentDirectory,
     );
+    List<FileNode>? emptyFallback;
     for (final candidate in candidates) {
       final listed = await projectProvider.listFiles(path: candidate);
       if (listed != null) {
-        return listed;
+        if (listed.isNotEmpty) {
+          return listed;
+        }
+        emptyFallback ??= listed;
       }
     }
-    return null;
+    return emptyFallback;
   }
 
   List<String> _listPathCandidates({
@@ -2303,13 +2307,17 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       path: path,
       contextDirectory: projectProvider.currentDirectory,
     );
+    FileContent? emptyFallback;
     for (final candidate in candidates) {
       final content = await projectProvider.readFileContent(path: candidate);
       if (content != null) {
-        return content;
+        if (content.isBinary || content.content.isNotEmpty) {
+          return content;
+        }
+        emptyFallback ??= content;
       }
     }
-    return null;
+    return emptyFallback;
   }
 
   Future<void> _openQuickFileDialogFromCurrentContext() async {

@@ -588,6 +588,64 @@ void main() {
     expect(find.text('void main() => print("ok");'), findsOneWidget);
   });
 
+  testWidgets(
+    'file viewer fallback retries relative path when absolute result is empty',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1300, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final projectRepository = FakeProjectRepository(
+        currentProject: Project(
+          id: 'proj_files_fallback',
+          name: 'Project Files Fallback',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+        projects: <Project>[
+          Project(
+            id: 'proj_files_fallback',
+            name: 'Project Files Fallback',
+            path: '/repo/a',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      );
+      projectRepository.filesByPath['.'] = const <FileNode>[
+        FileNode(
+          path: '/repo/a/lib/main.dart',
+          name: 'main.dart',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.fileContentsByPath['lib/main.dart'] = const FileContent(
+        path: 'lib/main.dart',
+        content: 'void fallbackPath() {}',
+        isBinary: false,
+      );
+
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        projectRepository: projectRepository,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('void fallbackPath() {}'), findsOneWidget);
+      expect(find.text('File is empty.'), findsNothing);
+    },
+  );
+
   testWidgets('quick open finds file and opens viewer tab', (
     WidgetTester tester,
   ) async {
