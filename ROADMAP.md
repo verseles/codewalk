@@ -284,8 +284,26 @@ Description: Expandir configurações para incluir notificações e sons por cat
 - [ ] Usar https://github.com/jlnrrg/simple_icons para exibir icones mais bonitos na lista de arquivos e na lista de providers/icone do modelo selecionado
 - [ ] Desktop: seta pra cima edita a última mensagem enviada (via backend), mobile: touch & hold
 - [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
+- [ ] Opções em Settings para decidir se app fica em background. Mobile: persistente notification, desktop: tray
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclades/dispositivos (validar em device real com Gboard e Samsung Keyboard)
 - [ ] Transformar o botão `Send` em `Stop` enquanto o assistant estiver respondendo e integrar com `POST /session/{id}/abort` para interromper o pensamento/execução em andamento
 - [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
 - [ ] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
+
+## Code Quality and Technical Debt
+
+### Feature 023: Critical Code Issues Resolution (2026-02-11)
+
+Description: Corrigir problemas críticos de código identificados via análise estática e padrões, focando em APIs deprecated e anti-patterns que afetam compatibilidade e maintainability.
+
+- [x] 023.01 Mapear e catalogar 134 problemas de código (59 deprecated APIs, 6 BuildContext async, 67 outras issues) - Analysis: `flutter analyze` saída completa
+- [ ] 023.02 Migrar todas as ocorrências de `withOpacity` para `withValues` (59 arquivos afetados em chat_page, chat_message_widget, etc.)
+- [ ] 023.03 Migrar `surfaceVariant` para `surfaceContainerHighest` (8 ocorrências em múltiplos widgets)
+- [ ] 023.04 Migrar `background` para `surface` em usos de cores (3 ocorrências principais)
+- [ ] 023.05 Migrar `value` para `initialValue` em TextFormField (1 ocorrência em server_settings_page)
+- [ ] 023.06 Corrigir uso de BuildContext assíncrono (6 ocorrências em chat_page.dart)
+- [ ] 023.07 Atualizar dependências descontinuadas (flutter_markdown_plus para substituir flutter_markdown)
+- [ ] 023.08 Executar `flutter analyze` para validar zero issues após correções
+- [ ] 023.09 Executar testes completos para garantir não regressões
+- [ ] 023.10 Build Android via `make android` e validar deploy

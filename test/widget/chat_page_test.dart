@@ -542,82 +542,93 @@ void main() {
     );
   });
 
-  testWidgets('desktop file explorer expands tree and opens file viewer tab', (
-    WidgetTester tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1300, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+    'desktop file explorer expands tree and opens open-files dialog',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1300, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    final localDataSource = InMemoryAppLocalDataSource()
-      ..activeServerId = 'srv_test';
-    final projectRepository = FakeProjectRepository(
-      currentProject: Project(
-        id: 'proj_files',
-        name: 'Project Files',
-        path: '/repo/a',
-        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-      ),
-      projects: <Project>[
-        Project(
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final projectRepository = FakeProjectRepository(
+        currentProject: Project(
           id: 'proj_files',
           name: 'Project Files',
           path: '/repo/a',
           createdAt: DateTime.fromMillisecondsSinceEpoch(0),
         ),
-      ],
-    );
-    projectRepository.filesByPath['.'] = const <FileNode>[
-      FileNode(path: '/repo/a/lib', name: 'lib', type: FileNodeType.directory),
-      FileNode(
-        path: '/repo/a/README.md',
-        name: 'README.md',
-        type: FileNodeType.file,
-      ),
-    ];
-    projectRepository.filesByPath['/repo/a/lib'] = const <FileNode>[
-      FileNode(
-        path: '/repo/a/lib/main.dart',
-        name: 'main.dart',
-        type: FileNodeType.file,
-      ),
-    ];
-    projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
-        const FileContent(
+        projects: <Project>[
+          Project(
+            id: 'proj_files',
+            name: 'Project Files',
+            path: '/repo/a',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      );
+      projectRepository.filesByPath['.'] = const <FileNode>[
+        FileNode(
+          path: '/repo/a/lib',
+          name: 'lib',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/README.md',
+          name: 'README.md',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.filesByPath['/repo/a/lib'] = const <FileNode>[
+        FileNode(
           path: '/repo/a/lib/main.dart',
-          content: 'void main() => print("ok");',
-          isBinary: false,
-        );
+          name: 'main.dart',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
+          const FileContent(
+            path: '/repo/a/lib/main.dart',
+            content: 'void main() => print("ok");',
+            isBinary: false,
+          );
 
-    final provider = _buildChatProvider(
-      localDataSource: localDataSource,
-      projectRepository: projectRepository,
-    );
-    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        projectRepository: projectRepository,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-    await tester.pumpWidget(_testApp(provider, appProvider));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey<String>('file_tree_list')),
-      findsOneWidget,
-    );
-    await tester.tap(
-      find.byKey(const ValueKey<String>('file_tree_item_/repo/a/lib')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('file_tree_list')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('file_tree_item_/repo/a/lib')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey<String>('file_viewer_panel')),
-      findsOneWidget,
-    );
-    expect(find.text('void main() => print("ok");'), findsOneWidget);
-  });
+      expect(
+        find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+          matching: find.text('void main() => print("ok");'),
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('desktop open files button opens centered dialog with tabs', (
     WidgetTester tester,
@@ -669,6 +680,14 @@ void main() {
     await tester.tap(
       find.byKey(
         const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.byTooltip('Close'),
       ),
     );
     await tester.pumpAndSettle();
@@ -746,12 +765,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('void fallbackPath() {}'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+          matching: find.text('void fallbackPath() {}'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('File is empty.'), findsNothing);
     },
   );
 
-  testWidgets('quick open finds file and opens viewer tab', (
+  testWidgets('quick open finds file and opens open-files dialog', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1300, 900));
@@ -822,10 +847,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const ValueKey<String>('file_viewer_panel')),
+      find.byKey(const ValueKey<String>('open_files_dialog_centered')),
       findsOneWidget,
     );
-    expect(find.text('class ChatProvider {}'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.text('class ChatProvider {}'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('mobile open files button opens fullscreen tab dialog', (
@@ -903,11 +934,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('file_tree_open_files_button')),
-    );
-    await tester.pumpAndSettle();
-
     expect(
       find.byKey(const ValueKey<String>('open_files_dialog_fullscreen')),
       findsOneWidget,
@@ -980,7 +1006,21 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Binary file preview is not available.'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.text('Binary file preview is not available.'),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.byTooltip('Close'),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     projectRepository.fileContentFailure = const ServerFailure(
       'forced read failure',
@@ -993,10 +1033,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const ValueKey<String>('file_viewer_retry_button')),
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_retry_button'),
+        ),
+      ),
       findsOneWidget,
     );
-    expect(find.textContaining('Failed to read file'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.textContaining('Failed to read file'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('sends message from chat input and renders assistant response', (

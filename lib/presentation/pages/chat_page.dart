@@ -2433,6 +2433,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     await _openQuickFileDialog(
       fileState: fileState,
       projectProvider: projectProvider,
+      openInDialogAfterSelect: true,
+      dialogFullscreen: MediaQuery.sizeOf(context).width < _mobileBreakpoint,
     );
   }
 
@@ -2440,6 +2442,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
     VoidCallback? onFileOpened,
+    required bool openInDialogAfterSelect,
+    required bool dialogFullscreen,
   }) async {
     final queryController = TextEditingController();
     var loading = false;
@@ -2619,13 +2623,23 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   onTap: () async {
                                     dialogActive = false;
                                     Navigator.of(dialogContext).pop();
-                                    await _openFileInTab(
-                                      fileState: fileState,
-                                      projectProvider: projectProvider,
-                                      path: normalizedPath,
-                                      onUpdated: onFileOpened,
-                                    );
-                                    onFileOpened?.call();
+                                    if (openInDialogAfterSelect) {
+                                      await _openFileAndFocusDialog(
+                                        fileState: fileState,
+                                        projectProvider: projectProvider,
+                                        path: normalizedPath,
+                                        dialogFullscreen: dialogFullscreen,
+                                        onUpdated: onFileOpened,
+                                      );
+                                    } else {
+                                      await _openFileInTab(
+                                        fileState: fileState,
+                                        projectProvider: projectProvider,
+                                        path: normalizedPath,
+                                        onUpdated: onFileOpened,
+                                      );
+                                      onFileOpened?.call();
+                                    }
                                   },
                                 );
                               },
@@ -2684,6 +2698,29 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       projectProvider: projectProvider,
       path: normalizedPath,
       onUpdated: onUpdated,
+    );
+  }
+
+  Future<void> _openFileAndFocusDialog({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required String path,
+    required bool dialogFullscreen,
+    VoidCallback? onUpdated,
+  }) async {
+    await _openFileInTab(
+      fileState: fileState,
+      projectProvider: projectProvider,
+      path: path,
+      onUpdated: onUpdated,
+    );
+    if (!mounted) {
+      return;
+    }
+    await _openOpenFilesDialog(
+      fileState: fileState,
+      projectProvider: projectProvider,
+      fullscreen: dialogFullscreen,
     );
   }
 
@@ -2937,6 +2974,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                           fileState: fileState,
                           projectProvider: projectProvider,
                           onFileOpened: onStateChanged,
+                          openInDialogAfterSelect: true,
+                          dialogFullscreen: isMobileLayout,
                         ),
                       );
                     },
@@ -3021,6 +3060,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     children: _buildFileTreeChildren(
                       fileState: fileState,
                       projectProvider: projectProvider,
+                      dialogFullscreen: isMobileLayout,
                       onStateChanged: onStateChanged,
                       parentCacheKey: _rootTreeCacheKey,
                       depth: 0,
@@ -3029,14 +3069,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 },
               ),
             ),
-            if (fileState.tabSelection.hasOpenTabs) ...[
-              const Divider(height: 1),
-              _buildFileViewerPanel(
-                fileState: fileState,
-                projectProvider: projectProvider,
-                onStateChanged: onStateChanged,
-              ),
-            ],
           ],
         ),
       ),
@@ -3046,6 +3078,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   List<Widget> _buildFileTreeChildren({
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
+    required bool dialogFullscreen,
     VoidCallback? onStateChanged,
     required String parentCacheKey,
     required int depth,
@@ -3084,10 +3117,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               return;
             }
             unawaited(
-              _openFileInTab(
+              _openFileAndFocusDialog(
                 fileState: fileState,
                 projectProvider: projectProvider,
                 path: node.path,
+                dialogFullscreen: dialogFullscreen,
                 onUpdated: onStateChanged,
               ),
             );
@@ -3139,6 +3173,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           _buildFileTreeChildren(
             fileState: fileState,
             projectProvider: projectProvider,
+            dialogFullscreen: dialogFullscreen,
             onStateChanged: onStateChanged,
             parentCacheKey: node.path,
             depth: depth + 1,
