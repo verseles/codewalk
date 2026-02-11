@@ -73,6 +73,7 @@ dependencies:
   dynamic_color: ^1.8.1
   speech_to_text: ^7.3.0
   flutter_local_notifications: ^19.4.2
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:

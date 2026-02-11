@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,8 +7,29 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../domain/entities/experience_settings.dart';
 import '../../../providers/settings_provider.dart';
 
-class NotificationsSettingsSection extends StatelessWidget {
+class NotificationsSettingsSection extends StatefulWidget {
   const NotificationsSettingsSection({super.key});
+
+  @override
+  State<NotificationsSettingsSection> createState() =>
+      _NotificationsSettingsSectionState();
+}
+
+class _NotificationsSettingsSectionState
+    extends State<NotificationsSettingsSection> {
+  bool _synced = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_synced) {
+      return;
+    }
+    _synced = true;
+    unawaited(
+      context.read<SettingsProvider>().syncNotificationsFromServerConfig(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,47 +47,39 @@ class NotificationsSettingsSection extends StatelessWidget {
               'Choose which events can trigger system notifications.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+            const SizedBox(height: 8),
+            Text(
+              settingsProvider.hasAnyServerBackedNotificationCategory
+                  ? 'Some categories are synced from /config on the active server.'
+                  : 'Current server does not expose notification toggles in /config; local fallback is active.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 16),
             Card(
               child: Column(
                 children: [
-                  SwitchListTile(
-                    value: settingsProvider.isNotificationEnabled(
-                      NotificationCategory.agent,
-                    ),
-                    onChanged: (value) =>
-                        settingsProvider.setNotificationEnabled(
-                          NotificationCategory.agent,
-                          value,
-                        ),
-                    title: const Text('Agent updates'),
-                    subtitle: const Text('When an agent response is finished'),
+                  _toggleTile(
+                    context: context,
+                    settingsProvider: settingsProvider,
+                    category: NotificationCategory.agent,
+                    title: 'Agent updates',
+                    subtitle: 'When an agent response is finished',
                   ),
                   const Divider(height: 1),
-                  SwitchListTile(
-                    value: settingsProvider.isNotificationEnabled(
-                      NotificationCategory.permissions,
-                    ),
-                    onChanged: (value) =>
-                        settingsProvider.setNotificationEnabled(
-                          NotificationCategory.permissions,
-                          value,
-                        ),
-                    title: const Text('Permissions and questions'),
-                    subtitle: const Text('When a tool asks for your input'),
+                  _toggleTile(
+                    context: context,
+                    settingsProvider: settingsProvider,
+                    category: NotificationCategory.permissions,
+                    title: 'Permissions and questions',
+                    subtitle: 'When a tool asks for your input',
                   ),
                   const Divider(height: 1),
-                  SwitchListTile(
-                    value: settingsProvider.isNotificationEnabled(
-                      NotificationCategory.errors,
-                    ),
-                    onChanged: (value) =>
-                        settingsProvider.setNotificationEnabled(
-                          NotificationCategory.errors,
-                          value,
-                        ),
-                    title: const Text('Errors'),
-                    subtitle: const Text('When a session error is received'),
+                  _toggleTile(
+                    context: context,
+                    settingsProvider: settingsProvider,
+                    category: NotificationCategory.errors,
+                    title: 'Errors',
+                    subtitle: 'When a session error is received',
                   ),
                 ],
               ),
@@ -72,6 +87,40 @@ class NotificationsSettingsSection extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _toggleTile({
+    required BuildContext context,
+    required SettingsProvider settingsProvider,
+    required NotificationCategory category,
+    required String title,
+    required String subtitle,
+  }) {
+    final serverBacked = settingsProvider.isServerBackedNotification(category);
+    return SwitchListTile(
+      value: settingsProvider.isNotificationEnabled(category),
+      onChanged: (value) =>
+          settingsProvider.setNotificationEnabled(category, value),
+      title: Row(
+        children: [
+          Expanded(child: Text(title)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: serverBacked
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              serverBacked ? 'Server' : 'Local',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
+        ],
+      ),
+      subtitle: Text(subtitle),
     );
   }
 }

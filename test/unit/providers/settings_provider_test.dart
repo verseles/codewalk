@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
@@ -34,6 +35,7 @@ void main() {
       final soundService = _FakeSoundService();
       final provider = SettingsProvider(
         localDataSource: local,
+        dioClient: DioClient(),
         soundService: soundService,
       );
 
@@ -55,6 +57,7 @@ void main() {
       final local = InMemoryAppLocalDataSource();
       final provider = SettingsProvider(
         localDataSource: local,
+        dioClient: DioClient(),
         soundService: _FakeSoundService(),
       );
       await provider.initialize();
@@ -73,6 +76,7 @@ void main() {
       final soundService = _FakeSoundService();
       final provider = SettingsProvider(
         localDataSource: local,
+        dioClient: DioClient(),
         soundService: soundService,
       );
       await provider.initialize();

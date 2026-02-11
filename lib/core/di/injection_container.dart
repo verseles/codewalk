@@ -169,7 +169,11 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<SettingsProvider>(
-    () => SettingsProvider(localDataSource: sl(), soundService: sl()),
+    () => SettingsProvider(
+      localDataSource: sl(),
+      dioClient: sl(),
+      soundService: sl(),
+    ),
   );
 
   sl.registerLazySingleton<EventFeedbackDispatcher>(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../core/constants/app_constants.dart';
 import 'settings/sections/notifications_settings_section.dart';
@@ -65,23 +66,49 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
   ];
 
+  bool get _supportsShortcutsSection {
+    if (kIsWeb) {
+      return true;
+    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => true,
+      _ => false,
+    };
+  }
+
+  List<_SettingsSection> get _visibleSections {
+    if (_supportsShortcutsSection) {
+      return _sections;
+    }
+    return _sections
+        .where((section) => section.id != 'shortcuts')
+        .toList(growable: false);
+  }
+
   String? _selectedSectionId;
   bool _showMobileDetail = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedSectionId = _sections
+    final visibleSections = _visibleSections;
+    _selectedSectionId = visibleSections
         .where((section) => section.id == widget.initialSectionId)
         .firstOrNull
         ?.id;
-    _selectedSectionId ??= _sections.first.id;
+    _selectedSectionId ??= visibleSections.first.id;
     _showMobileDetail = widget.initialSectionId.isNotEmpty;
   }
 
   @override
   Widget build(BuildContext context) {
-    final section = _sections
+    final visibleSections = _visibleSections;
+    if (!visibleSections.any((item) => item.id == _selectedSectionId)) {
+      _selectedSectionId = visibleSections.first.id;
+    }
+    final section = visibleSections
         .where((item) => item.id == _selectedSectionId)
         .firstOrNull;
     final width = MediaQuery.of(context).size.width;
@@ -134,7 +161,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (!isSplit)
           Text('Settings', style: Theme.of(context).textTheme.headlineSmall),
         if (!isSplit) const SizedBox(height: 8),
-        ..._sections.map((section) {
+        ..._visibleSections.map((section) {
           final selected = section.id == _selectedSectionId;
           return Card(
             margin: const EdgeInsets.only(bottom: 10),

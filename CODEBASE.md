@@ -619,8 +619,12 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
   - desktop/web: split layout (left navigation + right content)
 - Experience settings persistence (`experience_settings`) for:
   - notification toggles by category (`agent`, `permissions`, `errors`)
+    - sync from `/config` when server exposes compatible notification keys (`settings-notifications-*` or `notifications.*`)
+    - fallback to local-only persistence when server config keys are unavailable
   - sound preference by category with preview and fallback behavior
+    - sound playback uses generated in-memory WAV tones via `audioplayers` for consistent output across platforms
   - editable shortcut bindings with conflict validation and reset
+    - shortcuts section is available on desktop/web and hidden on mobile platforms
 - Server management moved into a dedicated `Servers` section:
   - add/edit/remove, active/default, health badges and activation guard
 - Chat keyboard shortcuts are now resolved from persisted settings via runtime binding parsing

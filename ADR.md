@@ -986,11 +986,13 @@ Feature 022 required parity with OpenCode settings behaviors across:
    - desktop split layout (section list + content pane).
 2. Keep server management as one section (`Servers`) and preserve existing route entry compatibility via `ServerSettingsPage` wrapper.
 3. Introduce `SettingsProvider` + persisted `ExperienceSettings` schema for notification, sound, and shortcut preferences.
+   - notifications read server-backed values from `/config` when known keys are exposed, with local fallback when absent.
 4. Add platform adapters for experience feedback:
    - `NotificationService` using local notifications with platform fallback,
-   - `SoundService` using system sounds with graceful fallback.
+   - `SoundService` using generated in-memory WAV playback (`audioplayers`) with graceful fallback.
 5. Integrate event feedback through a dedicated dispatcher (`EventFeedbackDispatcher`) wired into `ChatProvider` reducer events.
 6. Move chat keyboard activation to runtime-configurable bindings resolved from persisted shortcuts (`ShortcutBindingCodec`) with conflict validation in settings UI.
+   - expose shortcut-management section only on desktop/web platforms.
 7. Enable Android compatibility requirements for notification plugin:
    - `POST_NOTIFICATIONS` permission,
    - core library desugaring in Gradle.

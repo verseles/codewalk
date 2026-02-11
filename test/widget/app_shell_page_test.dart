@@ -126,6 +126,7 @@ void main() {
 Widget _testApp(ChatProvider chatProvider, AppProvider appProvider) {
   final settingsProvider = SettingsProvider(
     localDataSource: chatProvider.localDataSource,
+    dioClient: DioClient(),
     soundService: SoundService(),
   );
   unawaited(settingsProvider.initialize());

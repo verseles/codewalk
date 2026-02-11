@@ -215,6 +215,7 @@ Description: Expandir configurações para incluir notificações e sons por cat
 - [x] 22.05 Cobrir persistência e comportamento de settings com testes unit/widget/integration
 
 Concluída a paridade de Settings com redesign estrutural da área para múltiplas seções escaláveis (Notifications, Sounds, Shortcuts, Servers), migrando o antigo fluxo focado em servidores para um hub modular responsivo (mobile e desktop). Foi implementada persistência versionada de preferências de experiência, integração de notificações por categoria com fallback por plataforma, matriz de sons por categoria com pré-escuta, central dedicada de atalhos com captura de keybind, busca e validação de conflitos, além da adoção de atalhos dinâmicos no `ChatPage` com base nas preferências salvas. A entrega incluiu ajustes Android para compatibilidade do plugin de notificações (permission + desugaring) e ampliação de cobertura automatizada com testes unitários/widget para settings.
+Aplicado ajuste pós-entrega para tornar `Shortcuts` exclusivo de desktop/web, sincronizar preferências de `Notifications` com `/config` quando o servidor expõe chaves compatíveis (fallback local quando ausente), e substituir o playback de som por geração/execução de áudio em memória para evitar cenários sem áudio em `SystemSound`.
 
 ## Dependency Order
 
