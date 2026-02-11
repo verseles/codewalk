@@ -106,6 +106,12 @@ abstract class AppLocalDataSource {
   Future<void> saveThemeMode(String themeMode);
 
   /// Technical comment translated to English.
+  Future<String?> getExperienceSettingsJson();
+
+  /// Technical comment translated to English.
+  Future<void> saveExperienceSettingsJson(String settingsJson);
+
+  /// Technical comment translated to English.
   Future<String?> getLastSessionId();
 
   /// Technical comment translated to English.
@@ -467,6 +473,19 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   @override
   Future<void> saveThemeMode(String themeMode) async {
     await sharedPreferences.setString(AppConstants.themeKey, themeMode);
+  }
+
+  @override
+  Future<String?> getExperienceSettingsJson() async {
+    return sharedPreferences.getString(AppConstants.experienceSettingsKey);
+  }
+
+  @override
+  Future<void> saveExperienceSettingsJson(String settingsJson) async {
+    await sharedPreferences.setString(
+      AppConstants.experienceSettingsKey,
+      settingsJson,
+    );
   }
 
   @override

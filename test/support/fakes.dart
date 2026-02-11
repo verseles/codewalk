@@ -32,6 +32,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? recentModelsJson;
   String? modelUsageCountsJson;
   String? themeMode;
+  String? experienceSettingsJson;
   String? lastSessionId;
   String? currentSessionId;
   String? currentProjectId;
@@ -70,6 +71,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     recentModelsJson = null;
     modelUsageCountsJson = null;
     themeMode = null;
+    experienceSettingsJson = null;
     lastSessionId = null;
     currentSessionId = null;
     currentProjectId = null;
@@ -248,6 +250,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
 
   @override
   Future<String?> getThemeMode() async => themeMode;
+
+  @override
+  Future<String?> getExperienceSettingsJson() async => experienceSettingsJson;
 
   @override
   Future<void> saveActiveServerId(String serverId) async {
@@ -520,6 +525,11 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   @override
   Future<void> saveThemeMode(String themeMode) async {
     this.themeMode = themeMode;
+  }
+
+  @override
+  Future<void> saveExperienceSettingsJson(String settingsJson) async {
+    experienceSettingsJson = settingsJson;
   }
 
   @override

@@ -29,6 +29,7 @@ class AppConstants {
   static const String currentSessionIdKey = 'current_session_id';
   static const String currentProjectIdKey = 'current_project_id';
   static const String openProjectIdsKey = 'open_project_ids';
+  static const String experienceSettingsKey = 'experience_settings';
 
   // Basic auth storage keys
   static const String basicAuthEnabledKey = 'basic_auth_enabled';

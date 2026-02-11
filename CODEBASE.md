@@ -614,8 +614,16 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Desktop shortcuts for new chat, refresh, input focus, and agent cycle
 
 ### Settings Module
-- Runtime configuration and theme preferences
-- Full server manager UI (add/edit/remove, default, active, health badges)
+- Modular settings hub (`SettingsPage`) with responsive section navigation:
+  - mobile: section list -> detail flow
+  - desktop/web: split layout (left navigation + right content)
+- Experience settings persistence (`experience_settings`) for:
+  - notification toggles by category (`agent`, `permissions`, `errors`)
+  - sound preference by category with preview and fallback behavior
+  - editable shortcut bindings with conflict validation and reset
+- Server management moved into a dedicated `Servers` section:
+  - add/edit/remove, active/default, health badges and activation guard
+- Chat keyboard shortcuts are now resolved from persisted settings via runtime binding parsing
 
 ## Chat System Details
 
@@ -659,7 +667,8 @@ test/
 │   ├── providers/
 │   │   ├── app_provider_test.dart            # AppProvider state management + migration/health/switch rules
 │   │   ├── chat_provider_test.dart           # ChatProvider state + server/context-scoped cache behavior
-│   │   └── project_provider_test.dart        # ProjectProvider context/worktree orchestration
+│   │   ├── project_provider_test.dart        # ProjectProvider context/worktree orchestration
+│   │   └── settings_provider_test.dart       # Experience settings persistence + shortcut conflict logic
 │   ├── utils/
 │   │   └── file_explorer_logic_test.dart     # Quick-open ranking and file-tab reducer behavior
 │   └── usecases/
@@ -669,7 +678,8 @@ test/
 │   ├── app_shell_page_test.dart              # Chat-first shell and sidebar Logs/Settings back-navigation flow
 │   ├── chat_session_list_test.dart           # Session lifecycle menu actions (rename/share/archive/delete)
 │   ├── interaction_cards_test.dart           # Permission/question UI action dispatch
-│   └── server_settings_page_test.dart        # Multi-server manager rendering and unhealthy-switch guard
+│   ├── server_settings_page_test.dart        # Servers section rendering and unhealthy-switch guard through Settings route
+│   └── settings_page_test.dart               # Modular Settings sections navigation and rendering
 ├── integration/
 │   └── opencode_server_integration_test.dart # Mock server SSE/global-event flow + interaction/lifecycle/worktree endpoints + server-switch cache isolation
 └── support/

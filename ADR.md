@@ -25,6 +25,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-019: Prompt Power Composer Triggers (`@`, `!`, `/`) (2026-02-10) [Accepted]
 - ADR-020: File Explorer State and Context-Scoped Viewer Orchestration (2026-02-11) [Accepted]
 - ADR-021: Responsive Dialog Sizing Standard and Files-Centered Viewer Surface (2026-02-11) [Accepted]
+- ADR-022: Modular Settings Hub and Experience Preference Orchestration (2026-02-11) [Accepted]
 
 ---
 
@@ -956,5 +957,80 @@ At the same time, multiple dialogs used different sizing rules. The project need
 
 ### References
 
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-022: Modular Settings Hub and Experience Preference Orchestration
+
+Status: Accepted  
+Date: 2026-02-11
+
+### Context
+
+CodeWalk settings had become a server-centric screen (`ServerSettingsPage`) while product scope expanded to include broader operational preferences (notifications, sounds, shortcuts). This structure did not scale to future settings domains and created tight coupling between server controls and unrelated UX preferences.
+
+Feature 022 required parity with OpenCode settings behaviors across:
+
+- category-level notifications (`agent`, `permissions`, `errors`),
+- category-level sound preferences with preview,
+- dedicated shortcut management (search/edit/reset/conflict validation),
+- responsive behavior for both mobile and desktop.
+
+### Decision
+
+1. Replace settings-as-server-screen with a modular `SettingsPage` hub:
+   - section descriptors with stable IDs,
+   - mobile list->detail flow,
+   - desktop split layout (section list + content pane).
+2. Keep server management as one section (`Servers`) and preserve existing route entry compatibility via `ServerSettingsPage` wrapper.
+3. Introduce `SettingsProvider` + persisted `ExperienceSettings` schema for notification, sound, and shortcut preferences.
+4. Add platform adapters for experience feedback:
+   - `NotificationService` using local notifications with platform fallback,
+   - `SoundService` using system sounds with graceful fallback.
+5. Integrate event feedback through a dedicated dispatcher (`EventFeedbackDispatcher`) wired into `ChatProvider` reducer events.
+6. Move chat keyboard activation to runtime-configurable bindings resolved from persisted shortcuts (`ShortcutBindingCodec`) with conflict validation in settings UI.
+7. Enable Android compatibility requirements for notification plugin:
+   - `POST_NOTIFICATIONS` permission,
+   - core library desugaring in Gradle.
+
+### Rationale
+
+- A settings hub with sections is the minimal scalable architecture for future domains while keeping current UX stable.
+- Separating server orchestration from experience preferences reduces coupling and avoids turning settings into a single monolith page.
+- Provider-backed persisted preference state enables deterministic behavior across restart and platform differences.
+- Dynamic shortcut binding keeps parity with upstream keybind editing while preserving existing defaults.
+- Event dispatcher centralizes feedback triggering rules and avoids spreading platform effect logic across chat state mutations.
+
+### Consequences
+
+- Positive: settings now support multiple independent domains without navigation redesign.
+- Positive: users can control notification/sound behavior by category and adjust shortcut bindings safely.
+- Positive: chat shortcut behavior and settings UI are now synchronized through one persisted source of truth.
+- Positive: platform differences are handled via adapter fallback and logged diagnostics.
+- Trade-off: additional provider/service layers increase initialization and DI complexity.
+- Trade-off: notification plugin introduces Android build constraints (desugaring + permission maintenance).
+
+### Key Files
+
+- `lib/presentation/pages/settings_page.dart`
+- `lib/presentation/pages/settings/sections/servers_settings_section.dart`
+- `lib/presentation/pages/settings/sections/notifications_settings_section.dart`
+- `lib/presentation/pages/settings/sections/sounds_settings_section.dart`
+- `lib/presentation/pages/settings/sections/shortcuts_settings_section.dart`
+- `lib/domain/entities/experience_settings.dart`
+- `lib/presentation/providers/settings_provider.dart`
+- `lib/presentation/services/event_feedback_dispatcher.dart`
+- `lib/presentation/services/notification_service.dart`
+- `lib/presentation/services/sound_service.dart`
+- `lib/presentation/utils/shortcut_binding_codec.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `android/app/build.gradle.kts`
+- `android/app/src/main/AndroidManifest.xml`
+
+### References
+
+- `ROADMAP.feat022.md`
 - `ROADMAP.md`
 - `CODEBASE.md`

@@ -209,10 +209,12 @@ Description: Melhorar a UX de sessão para sempre exibir título de conversa de 
 Description: Expandir configurações para incluir notificações e sons por categoria (agente/permissões/erros) e uma tela dedicada de atalhos com busca e detecção de conflito. (Visit file ROADMAP.feat022.md for full research details)
 
 - [x] 22.01 Pesquisa e freeze de escopo de settings (toggles, sound selectors, keybind groups/search/conflict)
-- [ ] 22.02 Implementar preferências de notificação por categoria com integração de plataforma (desktop/web/mobile) e persistência
-- [ ] 22.03 Implementar preferências de som por categoria com pré-escuta, persistência e fallback quando áudio não estiver disponível
-- [ ] 22.04 Implementar tela de atalhos dedicada com grupos, busca fuzzy, redefinição global e validação de conflitos
-- [ ] 22.05 Cobrir persistência e comportamento de settings com testes unit/widget/integration
+- [x] 22.02 Implementar preferências de notificação por categoria com integração de plataforma (desktop/web/mobile) e persistência
+- [x] 22.03 Implementar preferências de som por categoria com pré-escuta, persistência e fallback quando áudio não estiver disponível
+- [x] 22.04 Implementar tela de atalhos dedicada com grupos, busca fuzzy, redefinição global e validação de conflitos
+- [x] 22.05 Cobrir persistência e comportamento de settings com testes unit/widget/integration
+
+Concluída a paridade de Settings com redesign estrutural da área para múltiplas seções escaláveis (Notifications, Sounds, Shortcuts, Servers), migrando o antigo fluxo focado em servidores para um hub modular responsivo (mobile e desktop). Foi implementada persistência versionada de preferências de experiência, integração de notificações por categoria com fallback por plataforma, matriz de sons por categoria com pré-escuta, central dedicada de atalhos com captura de keybind, busca e validação de conflitos, além da adoção de atalhos dinâmicos no `ChatPage` com base nas preferências salvas. A entrega incluiu ajustes Android para compatibilidade do plugin de notificações (permission + desugaring) e ampliação de cobertura automatizada com testes unitários/widget para settings.
 
 ## Dependency Order
 

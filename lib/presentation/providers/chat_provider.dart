@@ -36,6 +36,7 @@ import '../../domain/usecases/update_chat_session.dart';
 import '../../domain/usecases/watch_chat_events.dart';
 import '../../domain/usecases/watch_global_chat_events.dart';
 import '../../core/errors/failures.dart';
+import '../services/event_feedback_dispatcher.dart';
 import '../utils/session_title_formatter.dart';
 import 'project_provider.dart';
 
@@ -108,6 +109,7 @@ class ChatProvider extends ChangeNotifier {
     required this.rejectQuestion,
     required this.projectProvider,
     required this.localDataSource,
+    this.eventFeedbackDispatcher,
     Duration syncSignalStaleThreshold = const Duration(seconds: 20),
     Duration syncHealthCheckInterval = const Duration(seconds: 5),
     Duration degradedPollingInterval = const Duration(seconds: 30),
@@ -153,6 +155,7 @@ class ChatProvider extends ChangeNotifier {
   final RejectQuestion rejectQuestion;
   final ProjectProvider projectProvider;
   final AppLocalDataSource localDataSource;
+  final EventFeedbackDispatcher? eventFeedbackDispatcher;
 
   ChatState _state = ChatState.initial;
   List<ChatSession> _sessions = [];
@@ -1191,6 +1194,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _applyChatEvent(ChatEvent event) {
+    unawaited(eventFeedbackDispatcher?.handle(event));
     final properties = event.properties;
     switch (event.type) {
       case 'server.connected':

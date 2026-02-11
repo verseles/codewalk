@@ -36,6 +36,8 @@ import 'package:codewalk/presentation/pages/app_shell_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
+import 'package:codewalk/presentation/providers/settings_provider.dart';
+import 'package:codewalk/presentation/services/sound_service.dart';
 
 import '../support/fakes.dart';
 
@@ -111,7 +113,7 @@ void main() {
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Server Manager'), findsOneWidget);
+      expect(find.text('Settings'), findsWidgets);
 
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
@@ -122,6 +124,11 @@ void main() {
 }
 
 Widget _testApp(ChatProvider chatProvider, AppProvider appProvider) {
+  final settingsProvider = SettingsProvider(
+    localDataSource: chatProvider.localDataSource,
+    soundService: SoundService(),
+  );
+  unawaited(settingsProvider.initialize());
   return MultiProvider(
     providers: [
       ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
@@ -129,6 +136,7 @@ Widget _testApp(ChatProvider chatProvider, AppProvider appProvider) {
       ChangeNotifierProvider<ProjectProvider>.value(
         value: chatProvider.projectProvider,
       ),
+      ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
     ],
     child: MaterialApp(home: const AppShellPage()),
   );

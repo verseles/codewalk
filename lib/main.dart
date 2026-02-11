@@ -8,6 +8,7 @@ import 'presentation/theme/app_theme.dart';
 import 'presentation/providers/app_provider.dart';
 import 'presentation/providers/project_provider.dart';
 import 'presentation/providers/chat_provider.dart';
+import 'presentation/providers/settings_provider.dart';
 import 'presentation/pages/app_shell_page.dart';
 import 'core/constants/app_constants.dart';
 
@@ -43,6 +44,13 @@ class MyApp extends StatelessWidget {
           },
         ),
         ChangeNotifierProvider(create: (_) => di.sl<ProjectProvider>()),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = di.sl<SettingsProvider>();
+            unawaited(provider.initialize());
+            return provider;
+          },
+        ),
       ],
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {

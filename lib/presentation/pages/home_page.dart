@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/project_provider.dart';
-import 'server_settings_page.dart';
+import 'settings_page.dart';
 import 'chat_page.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection_container.dart';
@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ServerSettingsPage(),
+                          builder: (context) => const SettingsPage(),
                         ),
                       );
                     },
@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ServerSettingsPage(),
+                      builder: (context) => const SettingsPage(),
                     ),
                   );
                 },
@@ -292,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ServerSettingsPage(),
+                        builder: (context) => const SettingsPage(),
                       ),
                     );
                   },

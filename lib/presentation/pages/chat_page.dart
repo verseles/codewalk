@@ -13,11 +13,14 @@ import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
+import '../../domain/entities/experience_settings.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/project_provider.dart';
+import '../providers/settings_provider.dart';
 import '../utils/session_title_formatter.dart';
 import '../utils/file_explorer_logic.dart';
+import '../utils/shortcut_binding_codec.dart';
 
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
@@ -26,7 +29,7 @@ import '../widgets/permission_request_card.dart';
 import '../widgets/question_request_card.dart';
 import '../widgets/session_title_inline_editor.dart';
 import 'logs_page.dart';
-import 'server_settings_page.dart';
+import 'settings_page.dart';
 
 class _NewSessionIntent extends Intent {
   const _NewSessionIntent();
@@ -731,40 +734,28 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             : _desktopSessionPaneWidth;
         final mainContentWidth = isLargeDesktop ? 960.0 : double.infinity;
         final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
-        final shortcutMap = <ShortcutActivator, Intent>{
-          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
-              const _NewSessionIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyN, meta: true):
-              const _NewSessionIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyL, control: true):
-              const _FocusInputIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyL, meta: true):
-              const _FocusInputIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyP, control: true):
-              const _QuickOpenIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyP, meta: true):
-              const _QuickOpenIntent(),
-          const SingleActivator(LogicalKeyboardKey.escape):
-              const _EscapeIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyJ, control: true):
-              const _CycleAgentIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyJ, meta: true):
-              const _CycleAgentIntent(),
-          const SingleActivator(
-            LogicalKeyboardKey.keyJ,
-            control: true,
-            shift: true,
-          ): const _CycleAgentIntent(
-            reverse: true,
-          ),
-          const SingleActivator(
-            LogicalKeyboardKey.keyJ,
-            meta: true,
-            shift: true,
-          ): const _CycleAgentIntent(
-            reverse: true,
-          ),
-        };
+        final settingsProvider = context.watch<SettingsProvider>();
+        final shortcutMap = <ShortcutActivator, Intent>{};
+        void addShortcut(ShortcutAction action, Intent intent) {
+          final binding = settingsProvider.bindingFor(action);
+          final activator = ShortcutBindingCodec.parse(binding);
+          if (activator != null) {
+            shortcutMap[activator] = intent;
+          }
+        }
+
+        addShortcut(ShortcutAction.newChat, const _NewSessionIntent());
+        addShortcut(ShortcutAction.focusInput, const _FocusInputIntent());
+        addShortcut(ShortcutAction.quickOpen, const _QuickOpenIntent());
+        addShortcut(ShortcutAction.escape, const _EscapeIntent());
+        addShortcut(
+          ShortcutAction.cycleAgentForward,
+          const _CycleAgentIntent(),
+        );
+        addShortcut(
+          ShortcutAction.cycleAgentBackward,
+          const _CycleAgentIntent(reverse: true),
+        );
         final actionMap = <Type, Action<Intent>>{
           _NewSessionIntent: CallbackAction<_NewSessionIntent>(
             onInvoke: (_) {
@@ -799,16 +790,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
         };
         if (!refreshlessEnabled) {
-          shortcutMap[const SingleActivator(
-                LogicalKeyboardKey.keyR,
-                control: true,
-              )] =
-              const _RefreshIntent();
-          shortcutMap[const SingleActivator(
-                LogicalKeyboardKey.keyR,
-                meta: true,
-              )] =
-              const _RefreshIntent();
+          addShortcut(ShortcutAction.refresh, const _RefreshIntent());
           actionMap[_RefreshIntent] = CallbackAction<_RefreshIntent>(
             onInvoke: (_) {
               _refreshData();
@@ -970,7 +952,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 if (value == '__manage__') {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => const ServerSettingsPage(),
+                      builder: (_) =>
+                          const SettingsPage(initialSectionId: 'servers'),
                     ),
                   );
                   return;
@@ -1648,7 +1631,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     }
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const ServerSettingsPage()));
+    ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
   }
 
   Widget _buildSidebarNavigation({required bool closeOnSelect}) {

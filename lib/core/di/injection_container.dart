@@ -42,6 +42,10 @@ import '../../domain/repositories/project_repository.dart';
 import '../../presentation/providers/app_provider.dart';
 import '../../presentation/providers/chat_provider.dart';
 import '../../presentation/providers/project_provider.dart';
+import '../../presentation/providers/settings_provider.dart';
+import '../../presentation/services/event_feedback_dispatcher.dart';
+import '../../presentation/services/notification_service.dart';
+import '../../presentation/services/sound_service.dart';
 
 final sl = GetIt.instance;
 
@@ -70,6 +74,9 @@ Future<void> init() async {
   sl.registerLazySingleton<ProjectRemoteDataSource>(
     () => ProjectRemoteDataSourceImpl(dio: sl<DioClient>().dio),
   );
+
+  sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(() => SoundService());
 
   // Repositories
   sl.registerLazySingleton<AppRepository>(
@@ -153,11 +160,24 @@ Future<void> init() async {
       rejectQuestion: sl(),
       projectProvider: sl(),
       localDataSource: sl(),
+      eventFeedbackDispatcher: sl(),
     ),
   );
 
   sl.registerLazySingleton<ProjectProvider>(
     () => ProjectProvider(projectRepository: sl(), localDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<SettingsProvider>(
+    () => SettingsProvider(localDataSource: sl(), soundService: sl()),
+  );
+
+  sl.registerLazySingleton<EventFeedbackDispatcher>(
+    () => EventFeedbackDispatcher(
+      settingsProvider: sl(),
+      notificationService: sl(),
+      soundService: sl(),
+    ),
   );
 
   // Load local configuration

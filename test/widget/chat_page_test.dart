@@ -44,6 +44,8 @@ import 'package:codewalk/presentation/pages/chat_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
+import 'package:codewalk/presentation/providers/settings_provider.dart';
+import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/utils/session_title_formatter.dart';
 
 import '../support/fakes.dart';
@@ -1881,6 +1883,11 @@ void main() {
 }
 
 Widget _testApp(ChatProvider provider, AppProvider appProvider) {
+  final settingsProvider = SettingsProvider(
+    localDataSource: provider.localDataSource,
+    soundService: SoundService(),
+  );
+  unawaited(settingsProvider.initialize());
   return MultiProvider(
     providers: [
       ChangeNotifierProvider<ChatProvider>.value(value: provider),
@@ -1888,6 +1895,7 @@ Widget _testApp(ChatProvider provider, AppProvider appProvider) {
       ChangeNotifierProvider<ProjectProvider>.value(
         value: provider.projectProvider,
       ),
+      ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
     ],
     child: const MaterialApp(home: ChatPage()),
   );

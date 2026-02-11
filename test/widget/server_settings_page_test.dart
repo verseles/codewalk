@@ -51,7 +51,7 @@ void main() {
     await tester.pumpWidget(_testApp(appProvider));
     await tester.pumpAndSettle();
 
-    expect(find.text('Server Manager'), findsOneWidget);
+    expect(find.text('Servers'), findsOneWidget);
     expect(find.text('Alpha'), findsWidgets);
     expect(find.text('Beta'), findsOneWidget);
     expect(find.text('Active'), findsWidgets);
