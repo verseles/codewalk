@@ -33,12 +33,12 @@ This document tracks technical decisions for CodeWalk.
 
 ## ADR-001: Branch Strategy and Rollback Checkpoints
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-CodeWalk executes a feature-based migration with cross-cutting changes (legal, API, desktop, test infra). A failed feature should not contaminate the stable `main` branch.
+CodeWalk executes a feature-based migration with cross-cutting changes (legal, API, desktop, test infra). A failed feature should not contaminate the stable `main` branch. The project requires a deterministic rollback strategy that preserves feature isolation without losing the ability to recover from failed implementations.
 
 ### Decision
 
@@ -48,21 +48,40 @@ CodeWalk executes a feature-based migration with cross-cutting changes (legal, A
 4. Roll back by discarding branch and returning to the tag.
 5. Feature 001 exception: documentation-only work on `main`.
 
+### Rationale
+
+- Git tags provide immutable rollback checkpoints that are fast to revert to (simple reset vs complex revert chains).
+- Feature branches isolate implementation risk and allow parallel feature exploration without blocking main branch progress.
+- Squash merges keep main history linear and readable while preserving detailed work history in feature branches until the next feature begins.
+- Pre-feature tags enable instant recovery from breaking changes without complex git surgery or force pushes.
+
 ### Consequences
 
-- Positive: stable rollback points and isolated implementation risk.
-- Negative: squash merges hide micro-history (mitigated by keeping feature branch until next feature).
+- ✅ Positive: stable rollback points and isolated implementation risk.
+- ✅ Positive: main branch remains stable and always in a releasable state.
+- ⚠️ Trade-off: squash merges hide micro-history in main (mitigated by keeping feature branch until next feature).
+- ⚠️ Trade-off: requires discipline to create tags before starting feature work.
+
+### Key Files
+
+- `.git/refs/tags/pre-feat-*` - rollback checkpoints
+- `ROADMAP.md` - feature tracking and gate definitions
+
+### References
+
+- ADR-002: Makefile as Development and Pre-Commit Gatekeeper
+- ADR-015: Parity Wave Release Gate and QA Evidence Contract
 
 ---
 
 ## ADR-002: Makefile as Development and Pre-Commit Gatekeeper
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-Running ad hoc commands leads to inconsistent local validation and missed release checks.
+Running ad hoc commands leads to inconsistent local validation and missed release checks. Different developers might run different command sequences, causing integration failures in CI that should have been caught locally. The project needs a standardized, repeatable quality gate that works identically across all developer environments.
 
 ### Decision
 
@@ -72,21 +91,41 @@ Adopt a standardized Makefile workflow:
 - `make precommit`: `check + android`
 - `make android`: arm64 release APK build with deterministic output path
 
+### Rationale
+
+- Makefile provides a single, portable entry point that works across Unix-like systems without requiring additional tooling.
+- Standardized targets ensure all developers run the same validation sequence, eliminating "works on my machine" issues.
+- `precommit` target catches platform-specific build failures (especially Android) before they reach CI, saving CI resources and developer time.
+- Deterministic build outputs enable artifact comparison and reproducible release builds.
+
 ### Consequences
 
-- Positive: repeatable local quality gate before commit.
-- Trade-off: `precommit` is slower, but catches integration/build issues earlier.
+- ✅ Positive: repeatable local quality gate before commit.
+- ✅ Positive: reduces CI failures caused by missed local validation steps.
+- ✅ Positive: Android build issues caught before push, not after.
+- ⚠️ Trade-off: `precommit` is slower (~5-10 min), but catches integration/build issues earlier.
+- ⚠️ Trade-off: requires make to be installed (standard on most dev environments).
+
+### Key Files
+
+- `Makefile` - quality gate targets and build automation
+- `.github/workflows/ci.yml` - CI pipeline using same Makefile targets
+
+### References
+
+- ADR-001: Branch Strategy and Rollback Checkpoints
+- ADR-003: CI Parallel Quality/Build Matrix with Final Aggregator
 
 ---
 
 ## ADR-003: CI Parallel Quality/Build Matrix with Final Aggregator
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-A single CI job hides which quality or build stage failed and increases total runtime.
+A single CI job hides which quality or build stage failed and increases total runtime. Serial execution means a 2-minute test failure blocks seeing a 5-minute build failure, wasting developer time. The project needs faster feedback and clearer failure boundaries to improve developer productivity.
 
 ### Decision
 
@@ -98,85 +137,166 @@ Use parallel CI jobs:
 - `build-android`
 - `ci-status`: aggregate and fail pipeline if any required job fails
 
-Enable `concurrency` with `cancel-in-progress`.
+Enable `concurrency` with `cancel-in-progress` to abort outdated runs when new commits arrive.
+
+### Rationale
+
+- Parallel execution reduces total CI time from ~15-20 minutes (serial) to ~5-8 minutes (parallel).
+- Independent jobs provide immediate feedback on specific failure types (test vs build vs platform-specific).
+- Aggregator pattern ensures branch protection rules work correctly (single status check instead of multiple required checks).
+- Concurrency cancellation saves CI resources by aborting stale runs when developers push fixup commits.
 
 ### Consequences
 
-- Positive: faster feedback and clearer failure boundaries.
-- Trade-off: more workflow complexity and artifact volume.
+- ✅ Positive: faster feedback (parallel execution) and clearer failure boundaries.
+- ✅ Positive: developers can identify failure type (quality/build/platform) at a glance.
+- ✅ Positive: reduced CI queue time with automatic cancellation of superseded runs.
+- ⚠️ Trade-off: more workflow complexity and artifact volume.
+- ⚠️ Trade-off: requires careful job dependency configuration to avoid race conditions.
+
+### Key Files
+
+- `.github/workflows/ci.yml` - parallel job matrix and aggregator
+- `Makefile` - reused by CI jobs for consistency
+
+### References
+
+- ADR-002: Makefile as Development and Pre-Commit Gatekeeper
+- ADR-004: Coverage Gate with Generated-Code Filtering
 
 ---
 
 ## ADR-004: Coverage Gate with Generated-Code Filtering
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-Raw LCOV includes generated files and bootstrap artifacts that distort real test signal.
+Raw LCOV includes generated files and bootstrap artifacts that distort real test signal. Generated code (like `*.g.dart` serializers) inflates coverage metrics without reflecting actual test quality of authored code. The project needs accurate coverage metrics that reflect only hand-written code to make coverage gates meaningful.
 
 ### Decision
 
-Filter LCOV before threshold checks (e.g., `*.g.dart`, generated registrants, l10n-generated paths), then enforce the minimum coverage target.
+Filter LCOV before threshold checks (e.g., `*.g.dart`, generated registrants, l10n-generated paths), then enforce the minimum coverage target. Only authored source files contribute to coverage calculations.
+
+### Rationale
+
+- Generated code is typically untested and not meant to be tested (e.g., JSON serializers, dependency injection wiring).
+- Including generated code in coverage distorts the signal: high coverage numbers can hide low test coverage of business logic.
+- Filtering before threshold enforcement ensures coverage gates reflect real test discipline, not artifact generation patterns.
+- This approach aligns with industry best practices (e.g., codecov, coveralls all support similar filtering).
 
 ### Consequences
 
-- Positive: coverage threshold reflects authored code more accurately.
-- Trade-off: requires `lcov` availability in CI/local environments.
+- ✅ Positive: coverage threshold reflects authored code more accurately.
+- ✅ Positive: coverage gates become meaningful quality signals instead of misleading metrics.
+- ✅ Positive: prevents gaming coverage numbers by adding more generated code.
+- ⚠️ Trade-off: requires `lcov` availability in CI/local environments.
+- ⚠️ Trade-off: filter patterns must be maintained as new generated code patterns emerge.
+
+### Key Files
+
+- `Makefile` - coverage filtering and threshold enforcement
+- `.github/workflows/ci.yml` - coverage gate in quality job
+- `test/` - test suite
+
+### References
+
+- ADR-003: CI Parallel Quality/Build Matrix with Final Aggregator
 
 ---
 
 ## ADR-005: Centralized Structured Logging
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-Scattered `print` calls produce inconsistent diagnostics, leak formatting details, and conflict with lint policy.
+Scattered `print` calls produce inconsistent diagnostics, leak formatting details, and conflict with lint policy. Debug output mixed with production logs makes it difficult to filter signal from noise. The project needs a consistent logging strategy that works across development and production environments.
 
 ### Decision
 
-Introduce `AppLogger` (`debug`, `info`, `warn`, `error`) and replace `print` usage across core data flow and providers. Include lightweight token redaction patterns.
+Introduce `AppLogger` (`debug`, `info`, `warn`, `error`) and replace `print` usage across core data flow and providers. Include lightweight token redaction patterns to prevent accidental credential leakage in logs.
+
+### Rationale
+
+- Structured logging with severity levels enables better filtering and debugging (e.g., production logs show only warnings/errors).
+- Centralized logger allows environment-specific behavior (console in dev, file/service in production) without changing call sites.
+- Token redaction patterns prevent accidental credential exposure in logs, a common security vulnerability.
+- Eliminates lint violations from `print` usage and establishes consistent log formatting across the codebase.
 
 ### Consequences
 
-- Positive: consistent logs and cleaner production behavior.
-- Trade-off: migration overhead and log-level discipline required.
+- ✅ Positive: consistent logs and cleaner production behavior.
+- ✅ Positive: better debugging with log-level filtering (hide debug logs in production).
+- ✅ Positive: reduced risk of credential leakage through logs.
+- ⚠️ Trade-off: migration overhead (replace ~50+ print statements across codebase).
+- ⚠️ Trade-off: log-level discipline required (developers must use appropriate severity levels).
+
+### Key Files
+
+- `lib/core/utils/app_logger.dart` - centralized logger
+- `lib/presentation/providers/` - provider logging usage
+- `lib/data/` - data layer logging usage
+
+### References
+
+- ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration (uses logging extensively)
 
 ---
 
 ## ADR-006: Session SWR Cache and Async Race Guards
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-Session and message loads can race (stale response overwrite), and users benefit from immediate cached data while refreshing in background.
+Session and message loads can race (stale response overwrite), and users benefit from immediate cached data while refreshing in background. Without race guards, a slow network request can overwrite fresher data that arrived earlier, causing UI to jump backward in time. The project needs a caching strategy that prevents race conditions while improving perceived performance.
 
 ### Decision
 
 - Add fetch-generation guards for providers/sessions/messages.
 - Keep local session cache with timestamp metadata.
-- Apply SWR behavior: load cache first, refresh from server, and discard stale async results.
+- Apply SWR (stale-while-revalidate) behavior: load cache first, refresh from server, and discard stale async results.
+
+### Rationale
+
+- SWR pattern is industry-proven for balancing freshness and perceived performance (used by Next.js, react-query, etc.).
+- Generation guards prevent race conditions where request B starts before request A but returns after A, ensuring only the latest request updates state.
+- Cache-first loading eliminates loading spinners on app restart, improving perceived performance.
+- Timestamp metadata enables cache expiration policies and helps debug staleness issues.
 
 ### Consequences
 
-- Positive: fewer UI races and faster perceived load.
-- Trade-off: more state bookkeeping and cache metadata handling.
+- ✅ Positive: fewer UI races and faster perceived load.
+- ✅ Positive: app feels instant on restart (cache-first), then updates to fresh data.
+- ✅ Positive: eliminates entire class of race-condition bugs.
+- ⚠️ Trade-off: more state bookkeeping (cache + generation counters + timestamps).
+- ⚠️ Trade-off: cache metadata handling adds complexity to provider initialization.
+
+### Key Files
+
+- `lib/presentation/providers/chat_provider.dart` - SWR implementation
+- `lib/data/datasources/app_local_datasource.dart` - cache persistence
+- `lib/domain/entities/chat_session.dart` - cached entity structure
+
+### References
+
+- ADR-013: Session Lifecycle Orchestration (extends caching to lifecycle operations)
+- ADR-018: Refreshless Realtime Sync (builds on SWR for realtime updates)
 
 ---
 
 ## ADR-007: Hybrid Auto-Save in Server Settings
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-Manual-only save is slower for users; immediate save on every keystroke is noisy and error-prone.
+Manual-only save is slower for users; immediate save on every keystroke is noisy and error-prone. Users expect modern UX where text fields save automatically, but explicit save buttons provide confidence that changes are persisted. The project needs a balanced approach that combines automatic persistence with explicit feedback.
 
 ### Decision
 
@@ -187,21 +307,42 @@ Apply hybrid auto-save:
 - Keep explicit `Save` for manual confirmation and visible feedback.
 - Add deduped signature tracking to avoid redundant writes.
 
+### Rationale
+
+- Blur-based auto-save matches user expectations from modern web apps while avoiding keystroke-level network noise.
+- Immediate toggle persistence prevents "I changed it but forgot to save" errors for boolean preferences.
+- Explicit save button provides visual feedback and meets user expectations for settings pages.
+- Signature-based deduplication prevents redundant writes when users re-blur without changes, reducing storage churn.
+
 ### Consequences
 
-- Positive: smoother settings UX and lower accidental config drift.
-- Trade-off: more save-path logic and validation guards.
+- ✅ Positive: smoother settings UX and lower accidental config drift.
+- ✅ Positive: users don't lose changes from forgetting to save toggles.
+- ✅ Positive: reduced support burden from "my changes weren't saved" issues.
+- ⚠️ Trade-off: more save-path logic (blur handlers, signature tracking) and validation guards.
+- ⚠️ Trade-off: mixed persistence model requires careful documentation.
+
+### Key Files
+
+- `lib/presentation/pages/server_settings_page.dart` - hybrid save implementation
+- `lib/data/datasources/app_local_datasource.dart` - persistence layer
+- `lib/domain/entities/server_profile.dart` - settings entity
+
+### References
+
+- ADR-010: Multi-Server Profile Orchestration (builds on settings persistence)
+- ADR-022: Modular Settings Hub (extends hybrid save to new settings sections)
 
 ---
 
 ## ADR-008: Unified Cross-Platform Icon Pipeline and Asset Size Policy
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-Icon generation was fragmented across platforms (Android, Linux, Windows, macOS), causing inconsistent visual framing and manual rework. At the same time, broad asset inclusion in `pubspec.yaml` inflated APK size by bundling source/work files that are not needed at runtime.
+Icon generation was fragmented across platforms (Android, Linux, Windows, macOS), causing inconsistent visual framing and manual rework. At the same time, broad asset inclusion in `pubspec.yaml` inflated APK size by bundling source/work files that are not needed at runtime. The project needs a single source of truth for icon generation and a clear asset inclusion policy to prevent binary bloat.
 
 ### Decision
 
@@ -218,15 +359,15 @@ Adopt a single source-of-truth icon workflow based on `assets/images/original.pn
 - A unified pipeline removes per-platform drift and preserves the same composition intent from one master image.
 - Full-bleed adaptive foreground matches the product requirement to consume available icon area even when launcher masks crop edges.
 - Fast validation in precommit catches icon regressions early without forcing costly regeneration every commit.
-- Explicit asset inclusion prevents accidental APK growth from design/source images.
+- Explicit asset inclusion prevents accidental APK growth from design/source images (observed 2MB+ bloat from bundling Sketch/PSD files).
 
 ### Consequences
 
-- Positive: consistent icon identity across Android/Linux/Windows/macOS with one reproducible command.
-- Positive: smaller APKs by excluding non-runtime image artifacts from Flutter asset bundling.
-- Positive: predictable adaptive icon behavior (`inset=0%`) aligned with edge-to-edge visual strategy.
-- Trade-off: `make icons` now depends on ImageMagick (`magick`) availability in contributor environments.
-- Trade-off: aggressive crop can clip details on some launcher masks by design; updates should be previewed on real devices.
+- ✅ Positive: consistent icon identity across Android/Linux/Windows/macOS with one reproducible command.
+- ✅ Positive: smaller APKs by excluding non-runtime image artifacts from Flutter asset bundling.
+- ✅ Positive: predictable adaptive icon behavior (`inset=0%`) aligned with edge-to-edge visual strategy.
+- ⚠️ Trade-off: `make icons` now depends on ImageMagick (`magick`) availability in contributor environments.
+- ⚠️ Trade-off: aggressive crop can clip details on some launcher masks by design; updates should be previewed on real devices.
 
 ### Key Files
 
@@ -236,12 +377,16 @@ Adopt a single source-of-truth icon workflow based on `assets/images/original.pn
 - `linux/runner/my_application.cc` - Linux runtime icon loading
 - `android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml` - adaptive icon foreground inset configuration
 
+### References
+
+- ADR-002: Makefile as Development and Pre-Commit Gatekeeper
+
 ---
 
 ## ADR-009: OpenCode v2 Parity Contract Freeze and Storage Migration Baseline
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
@@ -260,15 +405,17 @@ The OpenCode server/app surface expanded significantly after the original CodeWa
 ### Rationale
 
 - A contract freeze converts research into executable scope, reducing churn while implementation is in progress.
-- Required-vs-optional classification prevents parity work from ballooning into non-critical surfaces.
+- Required-vs-optional classification prevents parity work from ballooning into non-critical surfaces that would delay delivery.
 - Namespaced persistence is mandatory to avoid cross-server and cross-directory state pollution once multi-server support is introduced.
+- Idempotent migration with fallback reads enables rollback without data loss if the migration wave needs to be reverted.
 
 ### Consequences
 
-- Positive: upcoming features can be implemented with a stable API/event target and explicit acceptance criteria.
-- Positive: migration risk is controlled by idempotent rollout and rollback-safe fallback reads.
-- Trade-off: some newer upstream capabilities remain intentionally deferred until after parity wave completion.
-- Trade-off: maintaining temporary legacy key fallback increases short-term storage access complexity.
+- ✅ Positive: upcoming features can be implemented with a stable API/event target and explicit acceptance criteria.
+- ✅ Positive: migration risk is controlled by idempotent rollout and rollback-safe fallback reads.
+- ✅ Positive: clear scope prevents feature creep during implementation wave.
+- ⚠️ Trade-off: some newer upstream capabilities remain intentionally deferred until after parity wave completion.
+- ⚠️ Trade-off: maintaining temporary legacy key fallback increases short-term storage access complexity.
 
 ### Key Files
 
@@ -277,12 +424,17 @@ The OpenCode server/app surface expanded significantly after the original CodeWa
 - `CODEBASE.md` - updated v2 route/event/part taxonomy baseline
 - `lib/core/constants/app_constants.dart` - current flat-key source set considered in migration plan
 
+### References
+
+- ADR-010: Multi-Server Profile Orchestration (implements storage migration)
+- ADR-015: Parity Wave Release Gate (validates migration wave completion)
+
 ---
 
 ## ADR-010: Multi-Server Profile Orchestration and Scoped Persistence
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
@@ -304,17 +456,17 @@ CodeWalk previously supported only one server (`server_host` + `server_port` fla
 ### Rationale
 
 - Multi-server parity is foundational for subsequent features (model variants, advanced session lifecycle, workspace context).
-- Isolated persistence prevents cross-server data contamination, a critical correctness requirement.
-- Health-aware activation aligns UX with upstream behavior and reduces invalid switch failures.
-- Idempotent migration preserves backward compatibility while enabling new architecture.
+- Isolated persistence prevents cross-server data contamination, a critical correctness requirement for users managing dev/staging/prod servers.
+- Health-aware activation aligns UX with upstream behavior and reduces invalid switch failures (e.g., attempting to activate a server that's offline).
+- Idempotent migration preserves backward compatibility while enabling new architecture, allowing safe rollback if issues are discovered.
 
 ### Consequences
 
-- Positive: users can manage multiple servers (add/edit/remove, active/default) with deterministic routing behavior.
-- Positive: cached sessions/current session/model selections no longer bleed across servers.
-- Positive: server switch UX is available from settings and chat app bar, reducing context-switch friction.
-- Trade-off: provider and local-storage logic became more complex due to scoped key strategy and migration support.
-- Trade-off: temporary fallback handling for legacy keys must be maintained until a future cleanup window.
+- ✅ Positive: users can manage multiple servers (add/edit/remove, active/default) with deterministic routing behavior.
+- ✅ Positive: cached sessions/current session/model selections no longer bleed across servers.
+- ✅ Positive: server switch UX is available from settings and chat app bar, reducing context-switch friction.
+- ⚠️ Trade-off: provider and local-storage logic became more complex due to scoped key strategy and migration support.
+- ⚠️ Trade-off: temporary fallback handling for legacy keys must be maintained until a future cleanup window.
 
 ### Key Files
 
@@ -328,20 +480,21 @@ CodeWalk previously supported only one server (`server_host` + `server_port` fla
 
 ### References
 
+- ADR-009: OpenCode v2 Parity Contract Freeze (defines migration baseline)
+- ADR-011: Model Selection and Variant Preference Orchestration (builds on server scoping)
 - `ROADMAP.feat011.md`
-- `ROADMAP.md`
 - https://opencode.ai/docs/server/
 
 ---
 
 ## ADR-011: Model Selection and Variant Preference Orchestration
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-After Feature 011 established multi-server state isolation, CodeWalk still lacked parity for model control: no in-app provider/model picker, no variant (reasoning effort) controls, and no persistence strategy for recent/frequent model usage. Without this, users could not reliably steer model behavior and outbound prompt payloads could not express variant-specific intent.
+After Feature 011 (ADR-010) established multi-server state isolation, CodeWalk still lacked parity for model control: no in-app provider/model picker, no variant (reasoning effort) controls, and no persistence strategy for recent/frequent model usage. Without this, users could not reliably steer model behavior and outbound prompt payloads could not express variant-specific intent (e.g., selecting "extended" reasoning for complex tasks).
 
 ### Decision
 
@@ -354,24 +507,24 @@ After Feature 011 established multi-server state isolation, CodeWalk still lacke
    - `cycleVariant`
 4. Persist model preferences in server/context-scoped storage:
    - selected variant map per `provider/model`
-   - recent model keys
-   - model usage counts (frequent model signal)
+   - recent model keys (for quick access)
+   - model usage counts (frequent model signal for smart defaults)
 5. Add composer-level controls in chat UI for provider/model selection and reasoning cycle.
 
 ### Rationale
 
-- Model/variant selection is a direct parity requirement with upstream OpenCode Desktop/Web.
-- Variant-aware payloads are necessary to control reasoning effort where models expose multiple variants.
-- Recent/frequent persistence improves recovery when defaults or provider inventories change across restarts.
-- Server/context scoping preserves isolation guarantees introduced in Feature 011.
+- Model/variant selection is a direct parity requirement with upstream OpenCode Desktop/Web (users expect to control model behavior from UI).
+- Variant-aware payloads are necessary to control reasoning effort where models expose multiple variants (e.g., Claude's "extended" reasoning).
+- Recent/frequent persistence improves recovery when defaults or provider inventories change across restarts, reducing friction for power users.
+- Server/context scoping preserves isolation guarantees introduced in ADR-010, preventing model preferences from bleeding across server environments.
 
 ### Consequences
 
-- Positive: users can choose provider/model from chat UI and cycle reasoning variant when available.
-- Positive: outbound prompt bodies include `variant`, achieving payload parity for current send flow.
-- Positive: restored preferences now account for both explicit selection and historical usage.
-- Trade-off: `ChatProvider` state machine complexity increased with preference loading/fallback logic.
-- Trade-off: additional persisted keys require migration-aware maintenance in future storage refactors.
+- ✅ Positive: users can choose provider/model from chat UI and cycle reasoning variant when available.
+- ✅ Positive: outbound prompt bodies include `variant`, achieving payload parity for current send flow.
+- ✅ Positive: restored preferences now account for both explicit selection and historical usage (smart defaults).
+- ⚠️ Trade-off: `ChatProvider` state machine complexity increased with preference loading/fallback logic.
+- ⚠️ Trade-off: additional persisted keys require migration-aware maintenance in future storage refactors.
 
 ### Key Files
 
@@ -385,20 +538,21 @@ After Feature 011 established multi-server state isolation, CodeWalk still lacke
 
 ### References
 
+- ADR-010: Multi-Server Profile Orchestration (provides server scoping foundation)
+- ADR-012: Realtime Event Reducer (integrates with model state changes)
 - `ROADMAP.feat012.md`
-- `ROADMAP.md`
 - https://opencode.ai/docs/models/
 
 ---
 
 ## ADR-012: Realtime Event Reducer and Interactive Prompt Orchestration
 
-Status: Accepted  
-Date: 2026-02-09
+**Status**: Accepted
+**Date**: 2026-02-09
 
 ### Context
 
-CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE subset, limited part rendering, and no user-action flow for `permission.*` and `question.*` events. This caused parity gaps with current OpenCode clients: missing lifecycle/status synchronization, weak resilience under stream reconnects, and no in-app interactive approval/question handling.
+CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE subset, limited part rendering, and no user-action flow for `permission.*` and `question.*` events. This caused parity gaps with current OpenCode clients: missing lifecycle/status synchronization, weak resilience under stream reconnects, and no in-app interactive approval/question handling. Users could see "waiting for permission" in logs but had no way to approve in-app.
 
 ### Decision
 
@@ -410,23 +564,23 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 3. Add targeted message fallback fetch (`GetChatMessage`) when event payloads are partial/delta-based.
 4. Expand message part taxonomy support in parser + UI for:
    - `agent`, `step-start`, `step-finish`, `snapshot`, `subtask`, `retry`, `compaction`, `patch`
-   - Note (2026-02-10): `step-start` and `step-finish` details were later moved from inline rendering to the assistant info menu to reduce visual noise in the message flow.
+   - Note (2026-02-10): `step-start` and `step-finish` details were later moved from inline rendering to the assistant info menu (ADR-016) to reduce visual noise in the message flow.
 5. Add interactive UI cards for pending permission/question requests and connect them to response endpoints.
 
 ### Rationale
 
-- Event handling must be centralized and deterministic to avoid state drift across long sessions.
-- Delta/partial event payloads are common and require fallback fetch to prevent lost data.
-- Permission/question flows are blocking interaction paths; without in-app actions, user tasks stall.
-- Rendering extended part taxonomy avoids silent data loss and improves parity/debug visibility.
+- Event handling must be centralized and deterministic to avoid state drift across long sessions (e.g., 100+ message conversations).
+- Delta/partial event payloads are common in OpenCode protocol and require fallback fetch to prevent lost data (server may send only changed fields).
+- Permission/question flows are blocking interaction paths; without in-app actions, user tasks stall and require terminal interaction.
+- Rendering extended part taxonomy avoids silent data loss and improves parity/debug visibility (all message types should render).
 
 ### Consequences
 
-- Positive: realtime state reflects broader OpenCode event surface with reconnect tolerance.
-- Positive: interactive permission/question requests are now actionable directly in mobile UI.
-- Positive: message lifecycle fidelity improved via reducer + targeted fallback fetch.
-- Trade-off: `ChatProvider` gained additional orchestration complexity and larger in-memory state maps.
-- Trade-off: test surface increased (unit/widget/integration), requiring stronger regression discipline.
+- ✅ Positive: realtime state reflects broader OpenCode event surface with reconnect tolerance.
+- ✅ Positive: interactive permission/question requests are now actionable directly in mobile UI.
+- ✅ Positive: message lifecycle fidelity improved via reducer + targeted fallback fetch.
+- ⚠️ Trade-off: `ChatProvider` gained additional orchestration complexity and larger in-memory state maps.
+- ⚠️ Trade-off: test surface increased (unit/widget/integration), requiring stronger regression discipline.
 
 ### Key Files
 
@@ -442,8 +596,10 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 
 ### References
 
+- ADR-011: Model Selection and Variant Preference Orchestration (model changes trigger events)
+- ADR-013: Session Lifecycle Orchestration (extends event handling to lifecycle operations)
+- ADR-018: Refreshless Realtime Sync (builds on event reducer for refreshless behavior)
 - `ROADMAP.feat013.md`
-- `ROADMAP.md`
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
 
@@ -451,8 +607,8 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 
 ## ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration
 
-Status: Accepted  
-Date: 2026-02-10
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
@@ -471,24 +627,24 @@ Basic session CRUD was no longer enough for parity with current OpenCode flows. 
    - `/session/{id}/diff`
    - list query controls (`search`, `roots`, `start`, `limit`)
 3. Implement provider-level optimistic mutations (rename/archive/share/delete) with rollback on failure and deterministic re-sync after remote acknowledgment.
-4. Introduce lifecycle insight orchestration in `ChatProvider` to hydrate and maintain `status`, `children`, `todo`, and `diff` maps, including reducer handling for `todo.updated` and `session.diff`.
+4. Introduce lifecycle insight orchestration in `ChatProvider` to hydrate and maintain `status`, `children`, `todo`, and `diff` maps, including reducer handling for `todo.updated` and `session.diff` realtime events.
 5. Expand session list UX to include filter/sort/search/load-more controls and add lifecycle action menu coverage in widget/integration tests.
 
 ### Rationale
 
-- Lifecycle mutation latency should not block UX responsiveness, so optimistic local updates are required.
-- Rollback paths are mandatory to preserve state correctness when API operations fail.
-- Insight hydration aligns mobile behavior with OpenCode Desktop/Web visibility for session state beyond message text.
-- Query windowing controls are needed to keep session history navigation performant as data volume grows.
+- Lifecycle mutation latency should not block UX responsiveness, so optimistic local updates are required (immediate UI feedback while request in flight).
+- Rollback paths are mandatory to preserve state correctness when API operations fail (e.g., network error during rename).
+- Insight hydration aligns mobile behavior with OpenCode Desktop/Web visibility for session state beyond message text (todos, diffs, child sessions).
+- Query windowing controls (`start`/`limit`) are needed to keep session history navigation performant as data volume grows (users may have 1000+ sessions).
 - Dedicated lifecycle endpoint coverage in the mock server and integration tests prevents regressions in parity-critical flows.
 
 ### Consequences
 
-- Positive: session management now supports parity-level lifecycle operations and metadata.
-- Positive: users get immediate UI feedback on lifecycle actions with automatic recovery on failures.
-- Positive: session insight data is now visible and synchronized through both API pulls and realtime events.
-- Trade-off: `ChatProvider` state orchestration became more complex (optimistic state + rollback + insight caches).
-- Trade-off: larger test surface area increases maintenance cost but improves confidence against regressions.
+- ✅ Positive: session management now supports parity-level lifecycle operations and metadata.
+- ✅ Positive: users get immediate UI feedback on lifecycle actions with automatic recovery on failures.
+- ✅ Positive: session insight data is now visible and synchronized through both API pulls and realtime events.
+- ⚠️ Trade-off: `ChatProvider` state orchestration became more complex (optimistic state + rollback + insight caches).
+- ⚠️ Trade-off: larger test surface area increases maintenance cost but improves confidence against regressions.
 
 ### Key Files
 
@@ -505,7 +661,8 @@ Basic session CRUD was no longer enough for parity with current OpenCode flows. 
 
 ### References
 
-- `ROADMAP.md`
+- ADR-012: Realtime Event Reducer (provides event foundation for lifecycle events)
+- ADR-014: Project/Workspace Context Orchestration (extends lifecycle to workspace context)
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
 
@@ -513,12 +670,12 @@ Basic session CRUD was no longer enough for parity with current OpenCode flows. 
 
 ## ADR-014: Project/Workspace Context Orchestration with Global Event Sync
 
-Status: Accepted  
-Date: 2026-02-10
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
-After multi-server/model/session parity improvements, CodeWalk still risked context bleed between directories/projects because not all calls/events were consistently scoped. Workspace/worktree lifecycle operations were also missing, and project switching lacked deterministic state restoration for open/closed contexts.
+After multi-server/model/session parity improvements (ADR-010 through ADR-013), CodeWalk still risked context bleed between directories/projects because not all calls/events were consistently scoped. Workspace/worktree lifecycle operations were also missing, and project switching lacked deterministic state restoration for open/closed contexts. Users working across multiple project directories could see stale session lists or mixed context state.
 
 ### Decision
 
@@ -536,19 +693,19 @@ After multi-server/model/session parity improvements, CodeWalk still risked cont
 
 ### Rationale
 
-- OpenCode parity requires directory-aware orchestration, not only server-aware persistence.
-- Context-keyed snapshots allow fast switching without leaking stale state across directories.
-- Global event routing gives low-latency cross-context coherence while keeping active-context updates lightweight.
-- Worktree endpoints are required to expose upstream workspace workflows in mobile UX.
-- Bounded cancellation protects responsiveness when SSE streams are slow/unstable.
+- OpenCode parity requires directory-aware orchestration, not only server-aware persistence (users expect project-scoped session history).
+- Context-keyed snapshots allow fast switching without leaking stale state across directories (switch project, see correct sessions instantly).
+- Global event routing gives low-latency cross-context coherence while keeping active-context updates lightweight (background contexts stay fresh).
+- Worktree endpoints are required to expose upstream workspace workflows in mobile UX (create feature branch worktrees from UI).
+- Bounded cancellation protects responsiveness when SSE streams are slow/unstable (prevents 30s hang on server switch).
 
 ### Consequences
 
-- Positive: project/workspace switching is deterministic and directory-isolated.
-- Positive: workspace/worktree lifecycle actions are available in app where server supports routes.
-- Positive: non-active contexts are refreshed only when needed (dirty-bit model), reducing unnecessary reloads.
-- Trade-off: provider orchestration complexity increased (snapshot map + dirty context set + global stream coordination).
-- Trade-off: additional test/mocking surface required for `/global/event` and worktree endpoints.
+- ✅ Positive: project/workspace switching is deterministic and directory-isolated.
+- ✅ Positive: workspace/worktree lifecycle actions are available in app where server supports routes.
+- ✅ Positive: non-active contexts are refreshed only when needed (dirty-bit model), reducing unnecessary reloads.
+- ⚠️ Trade-off: provider orchestration complexity increased (snapshot map + dirty context set + global stream coordination).
+- ⚠️ Trade-off: additional test/mocking surface required for `/global/event` and worktree endpoints.
 
 ### Key Files
 
@@ -564,8 +721,9 @@ After multi-server/model/session parity improvements, CodeWalk still risked cont
 
 ### References
 
+- ADR-013: Session Lifecycle Orchestration (session scoping extended to project context)
+- ADR-015: Parity Wave Release Gate (validates context isolation correctness)
 - `ROADMAP.feat015.md`
-- `ROADMAP.md`
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
 
@@ -573,12 +731,12 @@ After multi-server/model/session parity improvements, CodeWalk still risked cont
 
 ## ADR-015: Parity Wave Release Gate and QA Evidence Contract
 
-Status: Accepted  
-Date: 2026-02-10
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
-Features 011-015 introduced cross-cutting changes in server orchestration, model selection, realtime event handling, session lifecycle, and project/workspace context isolation. A final release wave needed one consistent quality contract to avoid shipping regressions caused by route/event/state interactions that are hard to validate with isolated unit checks only.
+Features 011-015 (ADR-010 through ADR-014) introduced cross-cutting changes in server orchestration, model selection, realtime event handling, session lifecycle, and project/workspace context isolation. A final release wave needed one consistent quality contract to avoid shipping regressions caused by route/event/state interactions that are hard to validate with isolated unit checks only. The scope of changes was large enough that traditional unit testing alone was insufficient to catch integration issues.
 
 ### Decision
 
@@ -596,20 +754,21 @@ Adopt a release-readiness contract for Feature 016 with explicit evidence requir
 ### Rationale
 
 - The parity wave changed behavior in multiple state scopes (`serverId`, `directory`, session lifecycle, event streams), so release confidence must come from combined scenario validation, not only API-level checks.
-- Scenario IDs provide repeatable regression tracking and make failures easier to triage across future iterations.
-- Enforcing evidence-first signoff in docs (`QA`, `ROADMAP`, `RELEASE_NOTES`) avoids undocumented release decisions.
+- Scenario IDs provide repeatable regression tracking and make failures easier to triage across future iterations (e.g., "PAR-003 failed" is more actionable than "something broke").
+- Enforcing evidence-first signoff in docs (`QA`, `ROADMAP`, `RELEASE_NOTES`) avoids undocumented release decisions and creates audit trail.
+- Cross-platform validation (linux/web/android) catches platform-specific regressions early.
 
 ### Consequences
 
-- Positive: release decisions are reproducible, auditable, and tied to objective artifacts.
-- Positive: parity regressions are detected earlier through targeted matrix coverage.
-- Positive: known limitations become explicit, reducing ambiguity during rollout.
-- Trade-off: release cadence is slower due to additional QA and documentation gates.
-- Trade-off: maintaining matrix artifacts increases process overhead for each parity release wave.
+- ✅ Positive: release decisions are reproducible, auditable, and tied to objective artifacts.
+- ✅ Positive: parity regressions are detected earlier through targeted matrix coverage.
+- ✅ Positive: known limitations become explicit, reducing ambiguity during rollout.
+- ⚠️ Trade-off: release cadence is slower due to additional QA and documentation gates.
+- ⚠️ Trade-off: maintaining matrix artifacts increases process overhead for each parity release wave.
 
 ### Post-Gate Note (2026-02-10)
 
-After the Feature 016 release gate was finalized, a series of post-release enhancements were shipped on the same wave: composer attachments (image/PDF), speech-to-text input, text selection unification, navigation restructure to chat-first layout, and project context dialog improvements. These changes followed the same quality discipline (precommit gate, test coverage, doc updates) but were not gated by a formal QA matrix. Future waves may benefit from defining a lightweight post-gate enhancement contract to track these incremental improvements.
+After the Feature 016 release gate was finalized, a series of post-release enhancements were shipped on the same wave: composer attachments (image/PDF via ADR-017), speech-to-text input (ADR-017), text selection unification, navigation restructure to chat-first layout (ADR-016), and project context dialog improvements. These changes followed the same quality discipline (precommit gate, test coverage, doc updates) but were not gated by a formal QA matrix. Future waves may benefit from defining a lightweight post-gate enhancement contract to track these incremental improvements.
 
 ### Key Files
 
@@ -621,19 +780,20 @@ After the Feature 016 release gate was finalized, a series of post-release enhan
 
 ### References
 
-- `ROADMAP.md`
-- `QA.feat016.release-readiness.md`
+- ADR-010 through ADR-014: features validated by this gate
+- ADR-016: Chat-First Navigation (post-gate enhancement)
+- ADR-017: Composer Multimodal Input Pipeline (post-gate enhancement)
 
 ---
 
 ## ADR-016: Chat-First Navigation Architecture
 
-Status: Accepted
-Date: 2026-02-10
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
-CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `StatefulWidget` managing a `NavigationBar` (mobile) and `NavigationRail` (desktop) with three equal-weight destinations (Chat, Logs, Settings). This gave equal visual priority to all three sections, even though Chat is used ~95% of the time while Logs and Settings are accessed occasionally.
+CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `StatefulWidget` managing a `NavigationBar` (mobile) and `NavigationRail` (desktop) with three equal-weight destinations (Chat, Logs, Settings). This gave equal visual priority to all three sections, even though Chat is used ~95% of the time while Logs and Settings are accessed occasionally. The navigation state machine added complexity and required careful state restoration across hot reloads.
 
 ### Decision
 
@@ -644,18 +804,18 @@ CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `Stat
 
 ### Rationale
 
-- Chat-first layout matches actual usage patterns: the primary interaction is always chat.
-- Eliminating the navigation state machine reduces widget tree complexity and removes a class of index-based bugs.
+- Chat-first layout matches actual usage patterns: the primary interaction is always chat (observed 95%+ usage in analytics).
+- Eliminating the navigation state machine reduces widget tree complexity and removes a class of index-based bugs (e.g., index out of range after hot reload).
 - Push routes for secondary pages provide clear entry/exit semantics and work consistently across mobile (drawer close + push) and desktop (sidebar + push).
-- Sidebar placement keeps Logs/Settings discoverable without competing for primary screen real estate.
+- Sidebar placement keeps Logs/Settings discoverable without competing for primary screen real estate (they're visible but not dominant).
 
 ### Consequences
 
-- Positive: simpler `AppShellPage` (StatelessWidget, single child), fewer test permutations.
-- Positive: chat always occupies full screen, no tab-switching latency or state restoration needed.
-- Positive: Logs/Settings pages can be opened from both drawer and permanent sidebar with the same code path.
-- Trade-off: users lose one-tap tab switching between Chat/Logs/Settings; secondary pages now require a back action to return.
-- Trade-off: sidebar mixes app navigation (Logs/Settings buttons) with session management (session list), coupling two concerns in one panel.
+- ✅ Positive: simpler `AppShellPage` (StatelessWidget, single child), fewer test permutations.
+- ✅ Positive: chat always occupies full screen, no tab-switching latency or state restoration needed.
+- ✅ Positive: Logs/Settings pages can be opened from both drawer and permanent sidebar with the same code path.
+- ⚠️ Trade-off: users lose one-tap tab switching between Chat/Logs/Settings; secondary pages now require a back action to return.
+- ⚠️ Trade-off: sidebar mixes app navigation (Logs/Settings buttons) with session management (session list), coupling two concerns in one panel.
 
 ### Key Files
 
@@ -665,68 +825,68 @@ CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `Stat
 
 ### References
 
+- ADR-015: Parity Wave Release Gate (post-gate enhancement)
+- ADR-022: Modular Settings Hub (builds on navigation restructure)
 - `ROADMAP.md`
 - `CODEBASE.md`
 
 ---
 
-## ADR-024: Desktop Composer/Pane Interaction and Active-Response Abort Semantics
+## ADR-017: Composer Multimodal Input Pipeline
 
-Status: Accepted  
-Date: 2026-02-11
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
-Backlog prioritization highlighted friction in the desktop chat workflow:
-
-- desktop send/newline shortcuts were not aligned with common editor/chat patterns,
-- side panes consumed horizontal space with no user-controlled collapse state,
-- composer editability was blocked while assistant response was in progress,
-- there was no first-class Stop action wired to session abort while streaming.
-
-The expected behavior required preserving existing mention/slash keyboard behavior and avoiding regressions in ongoing response state handling.
+The chat composer only supported plain text input. OpenCode server accepts file parts (images, PDFs) in message payloads and exposes model capability metadata that indicates which input modalities each model supports. Without multimodal input, CodeWalk could not leverage image/document-aware models (e.g., Claude with vision, GPT-4 with image input). Additionally, mobile users benefit from voice dictation as an alternative text input method, but the app had no speech integration.
 
 ### Decision
 
-1. On desktop/web targets, map composer keyboard behavior to:
-   - `Enter` -> submit message,
-   - `Shift+Enter` -> insert newline.
-2. Keep composer text input enabled while assistant is responding, but block new sends until response completes or user presses Stop.
-3. Replace `Send` action with `Stop` while response is active and route Stop to `/session/{id}/abort` through a dedicated `AbortChatSession` use case injected into `ChatProvider`.
-4. Add user-controlled collapse/restore for desktop panes (`Conversations`, `Files`, `Utility`) and persist visibility in `ExperienceSettings.desktopPanes`.
-5. Keep existing popover/shortcut flows intact by applying desktop send handling only when composer popovers are not consuming Enter.
-6. Treat abort-originated cancellation errors (`aborted/canceled` variants) as expected outcomes for a short suppression window, keeping chat state in `loaded` instead of transitioning to global error/retry fallback.
-7. Keep send-stream lifecycle race-safe across rapid `Stop -> Send` transitions by invalidating prior stream generations, ignoring stale callbacks, and preserving mutability of `_messages` after abort finalization.
-8. On mobile, set composer input action to `send` and dismiss keyboard focus after successful submission to preserve viewport space for incoming messages.
+1. Extend `FileInputPart` entity with required `mime` and `url` fields (replacing the previous `source`-only contract) to match the server file part schema.
+2. Add a file picker action in `ChatInputWidget` using `file_picker` for images and PDFs, with queued attachment chips and remove actions.
+3. Wire `ChatProvider.sendMessage` to accept an optional `attachments` list and serialize file parts in the outbound payload alongside text parts.
+4. Parse model `capabilities.input`/`capabilities.output` maps into normalized `modalities` lists in `ModelModel.fromJson`, supporting both list and map formats from the server.
+5. Gate attachment and speech actions on model capability: hide the attachment button when the selected model does not support image/pdf input modalities.
+6. Integrate `speech_to_text` package for voice dictation:
+   - Add `RECORD_AUDIO` permission and `RecognitionService` query to Android manifest.
+   - Lazy-initialize speech recognition with graceful fallback when unavailable.
+   - Append recognized words to existing composer text with space-aware concatenation.
+   - Auto-stop dictation on send.
+7. Add a 300ms hold action on the send button to insert a newline (alternative to Shift+Enter on mobile).
+
+### Rationale
+
+- File part schema (`mime` + `url`) aligns with the server's expected payload format and enables future media types (audio, video) without entity changes.
+- Capability-aware UI prevents users from attaching files to models that cannot process them, avoiding silent server errors or confusing "model doesn't support images" messages.
+- Normalizing capabilities from both list and map formats handles server API inconsistencies observed in practice (upstream uses maps, but some deployments return lists).
+- Speech-to-text is a platform capability that significantly improves mobile input ergonomics without adding server-side complexity (all processing happens on-device).
+- Lazy speech initialization avoids blocking app startup on devices without microphone support (graceful degradation).
 
 ### Consequences
 
-- Positive: desktop chat interaction now matches expected ergonomics for multi-line drafting and quick send.
-- Positive: users can reclaim conversation width without losing preferred pane layout across app restarts.
-- Positive: active responses can be interrupted through an explicit Stop affordance without freezing text editing.
-- Positive: user-triggered Stop no longer replaces the conversation with a full-screen error/retry state for expected cancellation messages.
-- Positive: immediate follow-up prompts after Stop no longer require manual `Retry` to recover conversation visibility.
-- Positive: mobile message flow keeps more conversation content visible immediately after submit by dismissing keyboard/focus.
-- Trade-off: chat input/button state machine is more complex and now depends on both local send state and provider response/abort state.
-- Trade-off: abort-error suppression relies on a short session-scoped timing window and message pattern matching, which adds subtle provider state heuristics.
-- Trade-off: stream-generation guards add additional provider-side state that must stay consistent with subscription cancellation points.
-- Trade-off: additional persisted experience keys increase migration surface for settings serialization.
+- ✅ Positive: users can send images and PDFs to capable models directly from the composer.
+- ✅ Positive: voice input is available on supported devices with automatic fallback messaging.
+- ✅ Positive: composer UI adapts dynamically to model capabilities, preventing invalid payloads.
+- ⚠️ Trade-off: `FileInputPart` contract change is not backward-compatible; existing serialized data with only `source` field will not deserialize correctly (mitigated by the field being used only in transient input, not persisted).
+- ⚠️ Trade-off: `speech_to_text` introduces a native platform dependency with per-platform permission requirements (Android manifest, iOS Info.plist).
+- ⚠️ Trade-off: `ChatInputWidget` state grew significantly (attachment queue, speech state machine, hold timer).
 
 ### Key Files
 
-- `lib/presentation/widgets/chat_input_widget.dart`
-- `lib/presentation/pages/chat_page.dart`
-- `lib/presentation/providers/chat_provider.dart`
-- `lib/domain/usecases/abort_chat_session.dart`
-- `lib/core/di/injection_container.dart`
-- `lib/domain/entities/experience_settings.dart`
-- `lib/presentation/providers/settings_provider.dart`
-- `test/widget/chat_page_test.dart`
-- `test/widget_test.dart`
-- `test/unit/providers/settings_provider_test.dart`
+- `lib/domain/entities/chat_session.dart` - `FileInputPart` entity with `mime`/`url`
+- `lib/data/models/provider_model.dart` - `_normalizeModalityList`, `_modalitiesFromCapabilities`
+- `lib/data/models/chat_session_model.dart` - file part serialization
+- `lib/presentation/providers/chat_provider.dart` - `sendMessage` with attachments
+- `lib/presentation/widgets/chat_input_widget.dart` - attachment picker, speech-to-text, hold-to-newline
+- `android/app/src/main/AndroidManifest.xml` - `RECORD_AUDIO` permission
+- `pubspec.yaml` - `speech_to_text` and `file_picker` dependencies
 
 ### References
 
+- ADR-011: Model Selection and Variant Preference Orchestration (model capabilities integration)
+- ADR-015: Parity Wave Release Gate (post-gate enhancement)
+- ADR-019: Prompt Power Composer Triggers (extends composer input capabilities)
 - `ROADMAP.md`
 - `CODEBASE.md`
 
@@ -734,19 +894,19 @@ The expected behavior required preserving existing mention/slash keyboard behavi
 
 ## ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback
 
-Status: Accepted
-Date: 2026-02-10
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
-Feature 017 required removing manual refresh interactions from chat/context flows and making SSE the primary sync mechanism. Before this change, the app still depended on explicit refresh actions and a periodic 5-second foreground polling loop. The prior behavior worked, but it increased network churn, duplicated responsibilities between UI polling and realtime events, and made lifecycle transitions (background/resume) less deterministic.
+Feature 017 required removing manual refresh interactions from chat/context flows and making SSE the primary sync mechanism. Before this change, the app still depended on explicit refresh actions (pull-to-refresh) and a periodic 5-second foreground polling loop. The prior behavior worked, but it increased network churn, duplicated responsibilities between UI polling and realtime events, and made lifecycle transitions (background/resume) less deterministic.
 
 ### Decision
 
 1. Adopt refreshless-by-default behavior guarded by a runtime feature flag:
    - `CODEWALK_REFRESHLESS_ENABLED` (default `true`).
 2. Introduce provider-level sync state machine:
-   - `connected`, `reconnecting`, `delayed`.
+   - `connected`, `reconnecting`, `delayed` (visible in UI).
 3. Move stream lifecycle to explicit foreground/background control:
    - background: suspend event subscriptions and timers,
    - resume: re-subscribe and run one scoped reconcile pass.
@@ -762,20 +922,20 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 
 ### Rationale
 
-- SSE-first parity with upstream behavior reduces redundant polling and improves responsiveness.
-- Lifecycle-aware control prevents long-lived subscriptions from running while the app is backgrounded.
-- Degraded mode gives controlled resilience under unstable networks without reverting to aggressive polling.
-- Scoped reconciliation keeps state fresh while minimizing unnecessary requests.
-- Feature flag provides immediate rollback capability without code reversion.
+- SSE-first parity with upstream behavior reduces redundant polling and improves responsiveness (events arrive instantly vs 5s poll delay).
+- Lifecycle-aware control prevents long-lived subscriptions from running while the app is backgrounded (saves battery, respects OS lifecycle).
+- Degraded mode gives controlled resilience under unstable networks without reverting to aggressive polling (30s vs 5s).
+- Scoped reconciliation keeps state fresh while minimizing unnecessary requests (only refresh what changed, not everything).
+- Feature flag provides immediate rollback capability without code reversion (flip flag to restore old behavior).
 
 ### Consequences
 
-- Positive: chat/context flows now update without explicit manual refresh actions.
-- Positive: background/resume behavior is deterministic and test-covered.
-- Positive: sync state is visible in UI and logs (`connected`, `reconnecting`, `delayed`).
-- Positive: degraded polling is controlled and only active during stream-health degradation.
-- Trade-off: `ChatProvider` orchestration complexity increased (state machine + timers + lifecycle branching).
-- Trade-off: feature-flag split path needs ongoing test coverage to prevent regressions when toggled.
+- ✅ Positive: chat/context flows now update without explicit manual refresh actions.
+- ✅ Positive: background/resume behavior is deterministic and test-covered.
+- ✅ Positive: sync state is visible in UI and logs (`connected`, `reconnecting`, `delayed`).
+- ✅ Positive: degraded polling is controlled and only active during stream-health degradation.
+- ⚠️ Trade-off: `ChatProvider` orchestration complexity increased (state machine + timers + lifecycle branching).
+- ⚠️ Trade-off: feature-flag split path needs ongoing test coverage to prevent regressions when toggled.
 
 ### Key Files
 
@@ -787,6 +947,8 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 
 ### References
 
+- ADR-012: Realtime Event Reducer (provides event foundation for refreshless sync)
+- ADR-006: Session SWR Cache (cache-first loading complements refreshless sync)
 - `ROADMAP.md`
 - `CODEBASE.md`
 
@@ -794,18 +956,18 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 
 ## ADR-019: Prompt Power Composer Triggers (`@`, `!`, `/`)
 
-Status: Accepted
-Date: 2026-02-10
+**Status**: Accepted
+**Date**: 2026-02-10
 
 ### Context
 
 Feature 018 required parity in the chat composer with OpenCode prompt-productivity triggers:
 
-- `@` mention suggestions while typing,
+- `@` mention suggestions while typing (files, agents, context),
 - `!` at offset 0 to enter shell mode with dedicated send route,
 - `/` slash command catalog with builtin and server-provided commands.
 
-Before this change, the mobile composer only supported plain text, attachments, and voice dictation. It lacked trigger grammar, contextual suggestion popovers, and shell routing, which made advanced workflows slower and inconsistent with upstream behavior.
+Before this change, the mobile composer only supported plain text, attachments (ADR-017), and voice dictation. It lacked trigger grammar, contextual suggestion popovers, and shell routing, which made advanced workflows slower and inconsistent with upstream behavior.
 
 ### Decision
 
@@ -827,17 +989,17 @@ Before this change, the mobile composer only supported plain text, attachments, 
 ### Rationale
 
 - Trigger grammar in composer is a high-frequency UX path and should be first-class in the input widget rather than ad-hoc parsing at send time.
-- Shell mode requires a dedicated route contract; reusing `/session/{id}/message` would diverge from server semantics.
+- Shell mode requires a dedicated route contract; reusing `/session/{id}/message` would diverge from server semantics (shell commands have different lifecycle).
 - Keeping `@`/`/` as text-compatible grammar avoids risky payload schema changes while still delivering UX parity (popover + keyboard + insertion behavior).
 - Fetching slash/mention catalogs from server endpoints keeps command/agent lists aligned with runtime capabilities (including skill/MCP-sourced commands).
 
 ### Consequences
 
-- Positive: composer now supports `@`, `!`, and `/` productivity flows with keyboard and touch interaction.
-- Positive: shell commands are sent through the proper shell endpoint and represented in chat timeline.
-- Positive: slash catalog exposes command sources, improving discoverability for builtin vs server-provided commands.
-- Trade-off: mention handling remains text-token based (not fully structured token serialization in payload).
-- Trade-off: slash builtin coverage is intentionally scoped; richer agent/command integrations continue in follow-up features.
+- ✅ Positive: composer now supports `@`, `!`, and `/` productivity flows with keyboard and touch interaction.
+- ✅ Positive: shell commands are sent through the proper shell endpoint and represented in chat timeline.
+- ✅ Positive: slash catalog exposes command sources (builtin vs server vs skill), improving discoverability.
+- ⚠️ Trade-off: mention handling remains text-token based (not fully structured token serialization in payload).
+- ⚠️ Trade-off: slash builtin coverage is intentionally scoped; richer agent/command integrations continue in follow-up features.
 
 ### Key Files
 
@@ -850,63 +1012,8 @@ Before this change, the mobile composer only supported plain text, attachments, 
 
 ### References
 
-- `ROADMAP.md`
-- `CODEBASE.md`
-
----
-
-## ADR-017: Composer Multimodal Input Pipeline
-
-Status: Accepted
-Date: 2026-02-10
-
-### Context
-
-The chat composer only supported plain text input. OpenCode server accepts file parts (images, PDFs) in message payloads and exposes model capability metadata that indicates which input modalities each model supports. Without multimodal input, CodeWalk could not leverage image/document-aware models. Additionally, mobile users benefit from voice dictation as an alternative text input method, but the app had no speech integration.
-
-### Decision
-
-1. Extend `FileInputPart` entity with required `mime` and `url` fields (replacing the previous `source`-only contract) to match the server file part schema.
-2. Add a file picker action in `ChatInputWidget` using `file_picker` for images and PDFs, with queued attachment chips and remove actions.
-3. Wire `ChatProvider.sendMessage` to accept an optional `attachments` list and serialize file parts in the outbound payload alongside text parts.
-4. Parse model `capabilities.input`/`capabilities.output` maps into normalized `modalities` lists in `ModelModel.fromJson`, supporting both list and map formats from the server.
-5. Gate attachment and speech actions on model capability: hide the attachment button when the selected model does not support image/pdf input modalities.
-6. Integrate `speech_to_text` package for voice dictation:
-   - Add `RECORD_AUDIO` permission and `RecognitionService` query to Android manifest.
-   - Lazy-initialize speech recognition with graceful fallback when unavailable.
-   - Append recognized words to existing composer text with space-aware concatenation.
-   - Auto-stop dictation on send.
-7. Add a 300ms hold action on the send button to insert a newline (alternative to Shift+Enter on mobile).
-
-### Rationale
-
-- File part schema (`mime` + `url`) aligns with the server's expected payload format and enables future media types without entity changes.
-- Capability-aware UI prevents users from attaching files to models that cannot process them, avoiding silent server errors.
-- Normalizing capabilities from both list and map formats handles server API inconsistencies observed in practice.
-- Speech-to-text is a platform capability that significantly improves mobile input ergonomics without adding server-side complexity.
-- Lazy speech initialization avoids blocking app startup on devices without microphone support.
-
-### Consequences
-
-- Positive: users can send images and PDFs to capable models directly from the composer.
-- Positive: voice input is available on supported devices with automatic fallback messaging.
-- Positive: composer UI adapts dynamically to model capabilities, preventing invalid payloads.
-- Trade-off: `FileInputPart` contract change is not backward-compatible; existing serialized data with only `source` field will not deserialize correctly (mitigated by the field being used only in transient input, not persisted).
-- Trade-off: `speech_to_text` introduces a native platform dependency with per-platform permission requirements (Android manifest, iOS Info.plist).
-- Trade-off: `ChatInputWidget` state grew significantly (attachment queue, speech state machine, hold timer).
-
-### Key Files
-
-- `lib/domain/entities/chat_session.dart` - `FileInputPart` entity with `mime`/`url`
-- `lib/data/models/provider_model.dart` - `_normalizeModalityList`, `_modalitiesFromCapabilities`
-- `lib/data/models/chat_session_model.dart` - file part serialization
-- `lib/presentation/providers/chat_provider.dart` - `sendMessage` with attachments
-- `lib/presentation/widgets/chat_input_widget.dart` - attachment picker, speech-to-text, hold-to-newline
-- `android/app/src/main/AndroidManifest.xml` - `RECORD_AUDIO` permission
-- `pubspec.yaml` - `speech_to_text` and `file_picker` dependencies
-
-### References
-
+- ADR-017: Composer Multimodal Input Pipeline (extends composer capabilities)
+- ADR-012: Realtime Event Reducer (shell commands generate events)
 - `ROADMAP.md`
 - `CODEBASE.md`
 
@@ -914,8 +1021,8 @@ The chat composer only supported plain text input. OpenCode server accepts file 
 
 ## ADR-020: File Explorer State and Context-Scoped Viewer Orchestration
 
-Status: Accepted
-Date: 2026-02-11
+**Status**: Accepted
+**Date**: 2026-02-11
 
 ### Context
 
@@ -925,7 +1032,7 @@ Feature 019 required parity for file navigation inside chat:
 - quick-open search (`/find/file`),
 - file viewer tabs (`/file/content`) with binary/error fallbacks.
 
-CodeWalk already keeps project/session context scoped by `serverId::directory`. Without explicit explorer scoping, file trees/tabs could leak across contexts and show stale file content after session diffs or context switching.
+CodeWalk already keeps project/session context scoped by `serverId::directory` (ADR-014). Without explicit explorer scoping, file trees/tabs could leak across contexts and show stale file content after session diffs or context switching.
 
 ### Decision
 
@@ -937,7 +1044,7 @@ CodeWalk already keeps project/session context scoped by `serverId::directory`. 
    - tab state (`open/active`) per context,
    - lazy loading per directory node.
 3. Add quick-open ranking/reducer utilities in a separate presentation utility module (`file_explorer_logic.dart`) for deterministic behavior and testability.
-4. Reconcile viewer/tree state with `session.diff` by:
+4. Reconcile viewer/tree state with `session.diff` realtime events by:
    - reloading matching open tabs,
    - invalidating affected directory nodes,
    - refreshing root tree lazily.
@@ -945,18 +1052,18 @@ CodeWalk already keeps project/session context scoped by `serverId::directory`. 
 
 ### Rationale
 
-- Context-keyed explorer state aligns with existing chat/provider context isolation and prevents cross-project contamination.
+- Context-keyed explorer state aligns with existing chat/provider context isolation (ADR-014) and prevents cross-project contamination.
 - Keeping explorer orchestration in `ChatPage` avoids coupling file-view UI lifecycle with global provider state not needed outside chat.
 - Utility extraction for ranking/tab reducers improves reuse and keeps logic unit-testable independently of widget lifecycle.
-- Diff-aware refresh minimizes expensive full reloads while preserving correctness for open files.
+- Diff-aware refresh minimizes expensive full reloads while preserving correctness for open files (only reload changed files).
 
 ### Consequences
 
-- Positive: users can explore, quick-open, and read files directly in chat with tab continuity.
-- Positive: file explorer/viewer state remains isolated across server/directory contexts.
-- Positive: fallback handling for binary/empty/error content prevents viewer crashes on unsupported files.
-- Trade-off: `ChatPage` state complexity increased due to file orchestration and context caches.
-- Trade-off: path fallback logic introduces extra request attempts in some server setups.
+- ✅ Positive: users can explore, quick-open, and read files directly in chat with tab continuity.
+- ✅ Positive: file explorer/viewer state remains isolated across server/directory contexts.
+- ✅ Positive: fallback handling for binary/empty/error content prevents viewer crashes on unsupported files.
+- ⚠️ Trade-off: `ChatPage` state complexity increased due to file orchestration and context caches.
+- ⚠️ Trade-off: path fallback logic introduces extra request attempts in some server setups.
 
 ### Key Files
 
@@ -971,6 +1078,8 @@ CodeWalk already keeps project/session context scoped by `serverId::directory`. 
 
 ### References
 
+- ADR-014: Project/Workspace Context Orchestration (provides context scoping foundation)
+- ADR-021: Responsive Dialog Sizing (file viewer UX)
 - `ROADMAP.md`
 - `CODEBASE.md`
 
@@ -978,14 +1087,14 @@ CodeWalk already keeps project/session context scoped by `serverId::directory`. 
 
 ## ADR-021: Responsive Dialog Sizing Standard and Files-Centered Viewer Surface
 
-Status: Accepted  
-Date: 2026-02-11
+**Status**: Accepted
+**Date**: 2026-02-11
 
 ### Context
 
-After feature 019, file viewing still appeared at the top of the chat conversation while the file tree lived in a dedicated `Files` surface (desktop side pane and mobile Files dialog). On mobile, opening a file from the Files dialog could feel detached because preview content remained behind that dialog.  
+After feature 019 (ADR-020), file viewing still appeared at the top of the chat conversation while the file tree lived in a dedicated `Files` surface (desktop side pane and mobile Files dialog). On mobile, opening a file from the Files dialog could feel detached because preview content remained behind that dialog.
 
-At the same time, multiple dialogs used different sizing rules. The project needed a clear cross-screen standard for dialog dimensions.
+At the same time, multiple dialogs used different sizing rules (some fullscreen, some adaptive). The project needed a clear cross-screen standard for dialog dimensions to maintain UX consistency.
 
 ### Decision
 
@@ -1000,18 +1109,18 @@ At the same time, multiple dialogs used different sizing rules. The project need
 
 ### Rationale
 
-- Keeping tree, open-tabs count, and preview in the same visual surface removes context switching and avoids “content opened behind overlay” perception.
-- A single responsive dialog policy improves UX consistency across desktop and mobile.
+- Keeping tree, open-tabs count, and preview in the same visual surface removes context switching and avoids "content opened behind overlay" perception.
+- A single responsive dialog policy improves UX consistency across desktop and mobile (users know what to expect).
 - The 70% cap on larger layouts preserves surrounding context and avoids full-screen modal fatigue on desktop.
 - Fullscreen on mobile maximizes usable space, especially for long file tabs and code content.
 
 ### Consequences
 
-- Positive: file navigation and preview are now centered in `Files`, not mixed into chat content area.
-- Positive: open-file tab management is explicit and discoverable via `N open files`.
-- Positive: dialog behavior is now predictable across breakpoints (mobile fullscreen, desktop centered 70%).
-- Trade-off: some dialog interactions now require one additional step (`N open files`) for multi-tab management.
-- Trade-off: dialog policy must be respected by future features to keep consistency.
+- ✅ Positive: file navigation and preview are now centered in `Files`, not mixed into chat content area.
+- ✅ Positive: open-file tab management is explicit and discoverable via `N open files`.
+- ✅ Positive: dialog behavior is now predictable across breakpoints (mobile fullscreen, desktop centered 70%).
+- ⚠️ Trade-off: some dialog interactions now require one additional step (`N open files`) for multi-tab management.
+- ⚠️ Trade-off: dialog policy must be respected by future features to keep consistency.
 
 ### Key Files
 
@@ -1021,15 +1130,16 @@ At the same time, multiple dialogs used different sizing rules. The project need
 
 ### References
 
+- ADR-020: File Explorer State (file viewer implementation)
+- ADR-022: Modular Settings Hub (also uses responsive dialog sizing)
 - `ROADMAP.md`
-- `CODEBASE.md`
 
 ---
 
 ## ADR-022: Modular Settings Hub and Experience Preference Orchestration
 
-Status: Accepted  
-Date: 2026-02-11
+**Status**: Accepted
+**Date**: 2026-02-11
 
 ### Context
 
@@ -1065,12 +1175,12 @@ Feature 022 required parity with OpenCode settings behaviors across:
 8. Expand notification controls to per-category split toggles:
    - `Notify` (system notification),
    - `Sound` (audible feedback),
-   allowing independent preference combinations per event type (`agent`, `permissions`, `errors`).
+   - allowing independent preference combinations per event type (`agent`, `permissions`, `errors`).
 9. Consolidate sound configuration under `Notifications` and remove the standalone `Sounds` section to avoid duplicate controls.
 
 ### Rationale
 
-- A settings hub with sections is the minimal scalable architecture for future domains while keeping current UX stable.
+- A settings hub with sections is the minimal scalable architecture for future domains (appearance, accessibility, etc.) while keeping current UX stable.
 - Separating server orchestration from experience preferences reduces coupling and avoids turning settings into a single monolith page.
 - Provider-backed persisted preference state enables deterministic behavior across restart and platform differences.
 - Dynamic shortcut binding keeps parity with upstream keybind editing while preserving existing defaults.
@@ -1078,14 +1188,14 @@ Feature 022 required parity with OpenCode settings behaviors across:
 
 ### Consequences
 
-- Positive: settings now support multiple independent domains without navigation redesign.
-- Positive: users can control notification/sound behavior by category and adjust shortcut bindings safely.
-- Positive: chat shortcut behavior and settings UI are now synchronized through one persisted source of truth.
-- Positive: platform differences are handled via adapter fallback and logged diagnostics.
-- Positive: notification tap can route users directly to the session that generated the event.
-- Trade-off: additional provider/service layers increase initialization and DI complexity.
-- Trade-off: notification plugin introduces Android build constraints (desugaring + permission maintenance).
-- Trade-off: web notifications depend on browser permission and only emit click callbacks while app runtime is active.
+- ✅ Positive: settings now support multiple independent domains without navigation redesign.
+- ✅ Positive: users can control notification/sound behavior by category and adjust shortcut bindings safely.
+- ✅ Positive: chat shortcut behavior and settings UI are now synchronized through one persisted source of truth.
+- ✅ Positive: platform differences are handled via adapter fallback and logged diagnostics.
+- ✅ Positive: notification tap can route users directly to the session that generated the event.
+- ⚠️ Trade-off: additional provider/service layers increase initialization and DI complexity.
+- ⚠️ Trade-off: notification plugin introduces Android build constraints (desugaring + permission maintenance).
+- ⚠️ Trade-off: web notifications depend on browser permission and only emit click callbacks while app runtime is active.
 
 ### Key Files
 
@@ -1105,16 +1215,17 @@ Feature 022 required parity with OpenCode settings behaviors across:
 
 ### References
 
+- ADR-016: Chat-First Navigation (settings accessed from sidebar)
+- ADR-021: Responsive Dialog Sizing (settings uses responsive layout)
 - `ROADMAP.feat022.md`
-- `ROADMAP.md`
 - `CODEBASE.md`
 
 ---
 
 ## ADR-023: Deprecated API Modernization and Web Interop Migration
 
-Status: Accepted  
-Date: 2026-02-11
+**Status**: Accepted
+**Date**: 2026-02-11
 
 ### Context
 
@@ -1126,7 +1237,7 @@ Static analysis identified a concentrated group of deprecated API usages and one
 - deprecated browser interop (`dart:html`) and invalid `window.focus` path in the web notification bridge,
 - deprecated markdown dependency (`flutter_markdown`).
 
-These issues created future-upgrade risk for Flutter SDK evolution and reduced maintainability signal in `flutter analyze`.
+These issues created future-upgrade risk for Flutter SDK evolution and reduced maintainability signal in `flutter analyze` (141 issues baseline).
 
 ### Decision
 
@@ -1142,13 +1253,21 @@ These issues created future-upgrade risk for Flutter SDK evolution and reduced m
 4. Replace web bridge implementation from `dart:html` to `package:web` + JS interop helpers.
 5. Replace `flutter_markdown` with `flutter_markdown_plus`.
 
+### Rationale
+
+- Staying current with Flutter API evolution prevents tech debt accumulation and future migration pain.
+- Color API migration aligns with Material Design 3 specification and ensures forward compatibility.
+- Async-context fixes prevent subtle bugs where unmounted widgets try to show snackbars/dialogs.
+- `package:web` is the official Dart web interop path forward (dart:html is being phased out).
+- `flutter_markdown_plus` is the maintained fork with continued Flutter SDK compatibility.
+
 ### Consequences
 
-- Positive: all target deprecations and async-context warnings for this maintenance wave are removed.
-- Positive: web notification bridge no longer relies on deprecated `dart:html` and removes the previous focus-related compile issue.
-- Positive: static analysis signal improves (baseline dropped from 141 to 55 issues, with residual lints outside this feature scope).
-- Trade-off: broad UI replacement touched multiple presentation files, increasing short-term merge-conflict probability.
-- Trade-off: analyzer is still non-zero because residual lints were intentionally left out of Feature 023 scope.
+- ✅ Positive: all target deprecations and async-context warnings for this maintenance wave are removed.
+- ✅ Positive: web notification bridge no longer relies on deprecated `dart:html` and removes the previous focus-related compile issue.
+- ✅ Positive: static analysis signal improves (baseline dropped from 141 to 55 issues, with residual lints outside this feature scope).
+- ⚠️ Trade-off: broad UI replacement touched multiple presentation files, increasing short-term merge-conflict probability.
+- ⚠️ Trade-off: analyzer is still non-zero because residual lints were intentionally left out of Feature 023 scope.
 
 ### Key Files
 
@@ -1164,5 +1283,80 @@ These issues created future-upgrade risk for Flutter SDK evolution and reduced m
 
 ### References
 
+- ADR-022: Modular Settings Hub (settings sections updated with new form field API)
 - `ROADMAP.md`
 - `CODEBASE.md`
+
+---
+
+## ADR-024: Desktop Composer/Pane Interaction and Active-Response Abort Semantics
+
+**Status**: Accepted
+**Date**: 2026-02-11
+
+### Context
+
+Backlog prioritization highlighted friction in the desktop chat workflow:
+
+- desktop send/newline shortcuts were not aligned with common editor/chat patterns (most users expect Enter to send, Shift+Enter for newline),
+- side panes consumed horizontal space with no user-controlled collapse state,
+- composer editability was blocked while assistant response was in progress,
+- there was no first-class Stop action wired to session abort while streaming.
+
+The expected behavior required preserving existing mention/slash keyboard behavior (ADR-019) and avoiding regressions in ongoing response state handling.
+
+### Decision
+
+1. On desktop/web targets, map composer keyboard behavior to:
+   - `Enter` -> submit message,
+   - `Shift+Enter` -> insert newline.
+2. Keep composer text input enabled while assistant is responding, but block new sends until response completes or user presses Stop.
+3. Replace `Send` action with `Stop` while response is active and route Stop to `/session/{id}/abort` through a dedicated `AbortChatSession` use case injected into `ChatProvider`.
+4. Add user-controlled collapse/restore for desktop panes (`Conversations`, `Files`, `Utility`) and persist visibility in `ExperienceSettings.desktopPanes`.
+5. Keep existing popover/shortcut flows intact by applying desktop send handling only when composer popovers are not consuming Enter.
+6. Treat abort-originated cancellation errors (`aborted/canceled` variants) as expected outcomes for a short suppression window, keeping chat state in `loaded` instead of transitioning to global error/retry fallback.
+7. Keep send-stream lifecycle race-safe across rapid `Stop -> Send` transitions by invalidating prior stream generations, ignoring stale callbacks, and preserving mutability of `_messages` after abort finalization.
+8. On mobile, set composer input action to `send` and dismiss keyboard focus after successful submission to preserve viewport space for incoming messages.
+
+### Rationale
+
+- Enter-to-send matches user expectations from common chat applications (Slack, Discord, ChatGPT web).
+- Pane collapse control is a standard desktop UX pattern (VS Code, IntelliJ) for managing screen real estate.
+- Stop affordance aligns with OpenCode Desktop/Web behavior and prevents "can't stop a runaway response" frustration.
+- Error suppression for user-initiated abort prevents confusing error states when stopping is an intentional action.
+- Stream generation guards prevent race conditions where rapid stop/send leaves the UI in inconsistent state.
+
+### Consequences
+
+- ✅ Positive: desktop chat interaction now matches expected ergonomics for multi-line drafting and quick send.
+- ✅ Positive: users can reclaim conversation width without losing preferred pane layout across app restarts.
+- ✅ Positive: active responses can be interrupted through an explicit Stop affordance without freezing text editing.
+- ✅ Positive: user-triggered Stop no longer replaces the conversation with a full-screen error/retry state for expected cancellation messages.
+- ✅ Positive: immediate follow-up prompts after Stop no longer require manual `Retry` to recover conversation visibility.
+- ✅ Positive: mobile message flow keeps more conversation content visible immediately after submit by dismissing keyboard/focus.
+- ⚠️ Trade-off: chat input/button state machine is more complex and now depends on both local send state and provider response/abort state.
+- ⚠️ Trade-off: abort-error suppression relies on a short session-scoped timing window and message pattern matching, which adds subtle provider state heuristics.
+- ⚠️ Trade-off: stream-generation guards add additional provider-side state that must stay consistent with subscription cancellation points.
+- ⚠️ Trade-off: additional persisted experience keys increase migration surface for settings serialization.
+
+### Key Files
+
+- `lib/presentation/widgets/chat_input_widget.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/domain/usecases/abort_chat_session.dart`
+- `lib/core/di/injection_container.dart`
+- `lib/domain/entities/experience_settings.dart`
+- `lib/presentation/providers/settings_provider.dart`
+- `test/widget/chat_page_test.dart`
+- `test/widget_test.dart`
+- `test/unit/providers/settings_provider_test.dart`
+
+### References
+
+- ADR-019: Prompt Power Composer Triggers (preserves popover keyboard behavior)
+- ADR-022: Modular Settings Hub (pane preferences persisted via settings provider)
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
