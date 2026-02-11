@@ -2402,6 +2402,100 @@ void main() {
     expect(find.text('message 39'), findsOneWidget);
   });
 
+  testWidgets('auto-follows incoming messages while user stays at latest', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_follow',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Follow Session',
+        ),
+      ],
+    );
+    repository.messagesBySession['ses_follow'] = _threadMessages(
+      'ses_follow',
+      40,
+    );
+
+    final streamController = StreamController<Either<Failure, ChatMessage>>();
+    addTearDown(() async {
+      await streamController.close();
+    });
+    repository.sendMessageHandler = (_, __, ___, ____) =>
+        streamController.stream;
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await provider.initializeProviders();
+    await tester.pumpAndSettle();
+
+    final listFinder = find.byKey(const ValueKey<String>('chat_message_list'));
+    final scrollableFinder = find.descendant(
+      of: listFinder,
+      matching: find.byType(Scrollable),
+    );
+    final scrollableBefore = tester.state<ScrollableState>(scrollableFinder);
+    expect(
+      scrollableBefore.position.maxScrollExtent -
+          scrollableBefore.position.pixels,
+      lessThanOrEqualTo(1),
+    );
+    expect(find.byTooltip('Go to latest message'), findsNothing);
+
+    await provider.sendMessage('trigger auto follow');
+    await tester.pump();
+
+    streamController.add(
+      Right(
+        AssistantMessage(
+          id: 'msg_follow_1',
+          sessionId: 'ses_follow',
+          time: DateTime.fromMillisecondsSinceEpoch(3000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(3200),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_follow_1',
+              messageId: 'msg_follow_1',
+              sessionId: 'ses_follow',
+              text:
+                  'auto-follow should keep chat pinned to the latest message even when new content arrives while user is already at the bottom',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final scrollableAfter = tester.state<ScrollableState>(scrollableFinder);
+    expect(
+      scrollableAfter.position.maxScrollExtent -
+          scrollableAfter.position.pixels,
+      lessThanOrEqualTo(1),
+    );
+    expect(
+      find.textContaining('auto-follow should keep chat pinned'),
+      findsOneWidget,
+    );
+    expect(find.byTooltip('Go to latest message'), findsNothing);
+  });
+
   testWidgets('highlights jump FAB when new messages arrive below viewport', (
     WidgetTester tester,
   ) async {
@@ -2449,6 +2543,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final listFinder = find.byKey(const ValueKey<String>('chat_message_list'));
+    final scrollableFinder = find.descendant(
+      of: listFinder,
+      matching: find.byType(Scrollable),
+    );
+    final scrollableBefore = tester.state<ScrollableState>(scrollableFinder);
+    final pixelsBeforeIncoming = scrollableBefore.position.pixels;
+
     final fabFinder = find.byKey(const ValueKey<String>('jump_to_latest_fab'));
     expect(fabFinder, findsOneWidget);
     expect(
@@ -2481,6 +2583,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
+    final scrollableAfter = tester.state<ScrollableState>(scrollableFinder);
+    expect(scrollableAfter.position.pixels, closeTo(pixelsBeforeIncoming, 1));
 
     expect(
       find.descendant(

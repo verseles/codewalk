@@ -109,6 +109,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   bool? _lastServerConnectionState;
   String? _trackedSessionId;
   String? _pendingInitialScrollSessionId;
+  bool _autoFollowToLatest = true;
   bool _showScrollToLatestFab = false;
   bool _hasUnreadMessagesBelow = false;
   bool _isAppInForeground = true;
@@ -312,10 +313,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return;
     }
 
-    final awayFromBottom = !_isNearBottom();
-    if (!awayFromBottom) {
-      if (_showScrollToLatestFab || _hasUnreadMessagesBelow) {
+    final nearBottom = _isNearBottom();
+    if (nearBottom) {
+      if (!_autoFollowToLatest ||
+          _showScrollToLatestFab ||
+          _hasUnreadMessagesBelow) {
         setState(() {
+          _autoFollowToLatest = true;
           _showScrollToLatestFab = false;
           _hasUnreadMessagesBelow = false;
         });
@@ -323,8 +327,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return;
     }
 
-    if (!_showScrollToLatestFab) {
+    if (_autoFollowToLatest || !_showScrollToLatestFab) {
       setState(() {
+        _autoFollowToLatest = false;
         _showScrollToLatestFab = true;
       });
     }
@@ -335,21 +340,27 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     if (sessionId != _trackedSessionId) {
       _trackedSessionId = sessionId;
       _pendingInitialScrollSessionId = sessionId;
-      if (_showScrollToLatestFab || _hasUnreadMessagesBelow) {
+      if (!_autoFollowToLatest ||
+          _showScrollToLatestFab ||
+          _hasUnreadMessagesBelow) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) {
             return;
           }
           setState(() {
+            _autoFollowToLatest = true;
             _showScrollToLatestFab = false;
             _hasUnreadMessagesBelow = false;
           });
         });
+      } else {
+        _autoFollowToLatest = true;
       }
     }
 
     if (sessionId == null) {
       _pendingInitialScrollSessionId = null;
+      _autoFollowToLatest = true;
       return;
     }
 
@@ -367,10 +378,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   void _markUnreadMessagesBelow() {
-    if (_showScrollToLatestFab && _hasUnreadMessagesBelow) {
+    if (!_autoFollowToLatest &&
+        _showScrollToLatestFab &&
+        _hasUnreadMessagesBelow) {
       return;
     }
     setState(() {
+      _autoFollowToLatest = false;
       _showScrollToLatestFab = true;
       _hasUnreadMessagesBelow = true;
     });
@@ -382,7 +396,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         return;
       }
 
-      final shouldScroll = force || _isNearBottom();
+      final shouldScroll = force || _autoFollowToLatest;
       if (!shouldScroll) {
         _markUnreadMessagesBelow();
         return;
@@ -394,8 +408,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         curve: Curves.easeOut,
       );
 
-      if (_showScrollToLatestFab || _hasUnreadMessagesBelow) {
+      if (!_autoFollowToLatest ||
+          _showScrollToLatestFab ||
+          _hasUnreadMessagesBelow) {
         setState(() {
+          _autoFollowToLatest = true;
           _showScrollToLatestFab = false;
           _hasUnreadMessagesBelow = false;
         });

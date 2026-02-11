@@ -306,7 +306,7 @@ Refinamento de conflito de foco: durante hold em bolha o toque é absorvido e o 
 - [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
 - [x] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
-- [ ] Auto-scroll para última mensagem como conversa de IM (WhatsApp/Telegram): avançar automaticamente para mensagens novas enquanto chegam, exceto quando usuário rolou para cima intencionalmente (detectar via botão seta pra baixo que aparece ao subir - significa que usuário está lendo histórico e não quer ser interrompido por auto-scroll)
+- [x] Auto-scroll para última mensagem como conversa de IM (WhatsApp/Telegram): avançar automaticamente para mensagens novas enquanto chegam, exceto quando usuário rolou para cima intencionalmente (detectar via botão seta pra baixo que aparece ao subir - significa que usuário está lendo histórico e não quer ser interrompido por auto-scroll)
 - [ ] Tool bash: mostrar o comando executado junto com o resultado (atualmente só mostra o output, não mostra qual comando gerou aquele resultado)
 - [ ] Fazer atalhos de teclado funcionarem de verdade
 - [ ] Exibir seção `Shortcuts` no mobile quando houver teclado físico conectado
@@ -321,6 +321,7 @@ Refinamento de conflito de foco: durante hold em bolha o toque é absorvido e o 
 - [ ] Subir o botão attach para ficar ao lado do select de agent, liberando mais espaço pro input de texto
 
 Pronta para análise: adicionada ação de arquivamento na seção de contextos fechados para ocultar projects fechados sem depender de `worktree`, com persistência por servidor para manter a curadoria da lista ao reiniciar/recarregar. Também foi implementado cache persistido da última sessão (sessão + mensagens) por escopo (`server + directory`) com restore instantâneo na abertura e revalidação silenciosa em background (SWR), preservando usabilidade mesmo com latência alta do servidor remoto. No mobile, o envio pelo teclado agora usa ação `send` e oculta o teclado/foco após submissão para liberar mais espaço da conversa.
+Pronta para análise: comportamento de auto-scroll estilo IM foi finalizado no chat. Enquanto o usuário permanece no final da conversa, novas mensagens continuam acompanhando automaticamente; ao subir o histórico intencionalmente, o auto-follow pausa e a UI preserva a posição de leitura, destacando o FAB de retorno ao último item. Ao tocar no FAB, a conversa volta ao fim e o auto-follow é reativado.
 
 ## Code Quality and Technical Debt
 
