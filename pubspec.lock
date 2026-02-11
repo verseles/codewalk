@@ -872,6 +872,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  simple_icons:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "381d0cbd7e75591c9e3c81058b86b7dda6a89e07"
+      resolved-ref: "381d0cbd7e75591c9e3c81058b86b7dda6a89e07"
+      url: "https://github.com/jlnrrg/simple_icons.git"
+    source: git
+    version: "16.8.0"
   sky_engine:
     dependency: transitive
     description: flutter

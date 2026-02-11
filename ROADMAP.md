@@ -286,7 +286,7 @@ Aplicado refinamento de UX em Settings removendo a seção separada `Sounds` (co
 - [x] Mobile e desktop: input de texto não deve ficar bloqueado enquanto recebe mensagem, apenas não deve poder enviar antes de terminar de receber as respostas do servidor, ou clicar no botão stop pra abortar
 - [ ] No desktop, pesquisar como usar microfone speech-to-text no linux. Pesquisar também se a API atual já funciona no mac/windows/iOS
 - [x] Context Project / Workspace: opção para arquivar project fechado (ocultar da lista de fechados)
-- [ ] Usar https://github.com/jlnrrg/simple_icons para exibir icones mais bonitos na lista de arquivos e na lista de providers/icone do modelo selecionado
+- [x] Usar https://github.com/jlnrrg/simple_icons para exibir icones mais bonitos na lista de arquivos e na lista de providers/icone do modelo selecionado
 - [x] Desktop: seta pra cima edita a última mensagem enviada (via backend), mobile: touch & hold
 - [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
 - [ ] Opções em Settings para decidir se app fica em background. Mobile: persistente notification, desktop: tray
@@ -308,6 +308,17 @@ Refinamento de conflito de foco: durante hold em bolha o toque é absorvido e o 
 - [x] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
 - [ ] Auto-scroll para última mensagem como conversa de IM (WhatsApp/Telegram): avançar automaticamente para mensagens novas enquanto chegam, exceto quando usuário rolou para cima intencionalmente (detectar via botão seta pra baixo que aparece ao subir - significa que usuário está lendo histórico e não quer ser interrompido por auto-scroll)
 - [ ] Tool bash: mostrar o comando executado junto com o resultado (atualmente só mostra o output, não mostra qual comando gerou aquele resultado)
+- [ ] Fazer atalhos de teclado funcionarem de verdade
+- [ ] Exibir seção `Shortcuts` no mobile quando houver teclado físico conectado
+- [ ] Cada tool call deve mostrar no máximo duas linhas com opção discreta de expandir para exibir todo o conteúdo
+- [ ] Remover o texto `tool call` das bolhas de tool call
+- [ ] Verificar atualizações baseadas nos releases do GitHub usando a API pública do GitHub
+- [ ] Em mobile, exibir apenas o ícone de status nas tool calls (sem textos como `Running`, `Completed`, `Finished`); manter o texto de status apenas no desktop
+- [ ] Usar o serviço `ch.at` para gerar títulos automaticamente
+- [ ] Usar a cor fornecida pelo agent via backend
+- [ ] Remover ícone do seletor de agente
+- [ ] Remover bordas dos selects de agent, provider/model e thinking
+- [ ] Subir o botão attach para ficar ao lado do select de agent, liberando mais espaço pro input de texto
 
 Pronta para análise: adicionada ação de arquivamento na seção de contextos fechados para ocultar projects fechados sem depender de `worktree`, com persistência por servidor para manter a curadoria da lista ao reiniciar/recarregar. Também foi implementado cache persistido da última sessão (sessão + mensagens) por escopo (`server + directory`) com restore instantâneo na abertura e revalidação silenciosa em background (SWR), preservando usabilidade mesmo com latência alta do servidor remoto. No mobile, o envio pelo teclado agora usa ação `send` e oculta o teclado/foco após submissão para liberar mais espaço da conversa.
 

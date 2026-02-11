@@ -75,6 +75,10 @@ dependencies:
   audioplayers: ^6.5.1
   flutter_markdown_plus: ^1.0.7
   web: ^1.1.1
+  simple_icons:
+    git:
+      url: https://github.com/jlnrrg/simple_icons.git
+      ref: 381d0cbd7e75591c9e3c81058b86b7dda6a89e07
 
 dev_dependencies:
   flutter_test:

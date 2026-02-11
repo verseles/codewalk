@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart' hide Provider;
+import 'package:simple_icons/simple_icons.dart';
 
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
@@ -662,20 +663,164 @@ void main() {
       );
       projectRepository.filesByPath['.'] = const <FileNode>[
         FileNode(
+          path: '/repo/a/.github',
+          name: '.github',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/.vscode',
+          name: '.vscode',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/.idea',
+          name: '.idea',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/.dart_tool',
+          name: '.dart_tool',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/android',
+          name: 'android',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/ios',
+          name: 'ios',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/macos',
+          name: 'macos',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
           path: '/repo/a/lib',
           name: 'lib',
           type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/src',
+          name: 'src',
+          type: FileNodeType.directory,
+        ),
+        FileNode(
+          path: '/repo/a/package.json',
+          name: 'package.json',
+          type: FileNodeType.file,
         ),
         FileNode(
           path: '/repo/a/README.md',
           name: 'README.md',
           type: FileNodeType.file,
         ),
+        FileNode(
+          path: '/repo/a/scripts/setup.sh',
+          name: 'setup.sh',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/scripts/login.ash',
+          name: 'login.ash',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/Jenkinsfile',
+          name: 'Jenkinsfile',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/jenkins.yaml',
+          name: 'jenkins.yaml',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/vite.config.ts',
+          name: 'vite.config.ts',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/vite-env.d.ts',
+          name: 'vite-env.d.ts',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/vite.svg',
+          name: 'vite.svg',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/id_rsa',
+          name: 'id_rsa',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/id_ed25519',
+          name: 'id_ed25519',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/dev.pem',
+          name: 'dev.pem',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/logo.svg',
+          name: 'logo.svg',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/vector.svgz',
+          name: 'vector.svgz',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/photo.png',
+          name: 'photo.png',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/.env.production',
+          name: '.env.production',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/notes.txt',
+          name: 'notes.txt',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/data.csv',
+          name: 'data.csv',
+          type: FileNodeType.file,
+        ),
+        FileNode(
+          path: '/repo/a/data.tsv',
+          name: 'data.tsv',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.filesByPath['/repo/a/.github'] = const <FileNode>[
+        FileNode(
+          path: '/repo/a/.github/workflows',
+          name: 'workflows',
+          type: FileNodeType.directory,
+        ),
       ];
       projectRepository.filesByPath['/repo/a/lib'] = const <FileNode>[
         FileNode(
           path: '/repo/a/lib/main.dart',
           name: 'main.dart',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.filesByPath['/repo/a/src'] = const <FileNode>[
+        FileNode(
+          path: '/repo/a/src/App.vue',
+          name: 'App.vue',
           type: FileNodeType.file,
         ),
       ];
@@ -697,6 +842,246 @@ void main() {
 
       expect(
         find.byKey(const ValueKey<String>('file_tree_list')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/package.json'),
+          ),
+          matching: find.byIcon(SimpleIcons.npm),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/.github'),
+          ),
+          matching: find.byIcon(SimpleIcons.github),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/.idea'),
+          ),
+          matching: find.byIcon(SimpleIcons.jetbrains),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/.dart_tool'),
+          ),
+          matching: find.byIcon(SimpleIcons.dart),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/android'),
+          ),
+          matching: find.byIcon(SimpleIcons.android),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('file_tree_item_/repo/a/ios')),
+          matching: find.byIcon(SimpleIcons.ios),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/macos'),
+          ),
+          matching: find.byIcon(SimpleIcons.macos),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/.vscode'),
+          ),
+          matching: find.byIcon(SimpleIcons.vscodium),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/scripts/setup.sh'),
+          ),
+          matching: find.byIcon(SimpleIcons.iterm2),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/scripts/login.ash'),
+          ),
+          matching: find.byIcon(SimpleIcons.iterm2),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/Jenkinsfile'),
+          ),
+          matching: find.byIcon(SimpleIcons.jenkins),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/jenkins.yaml'),
+          ),
+          matching: find.byIcon(SimpleIcons.jenkins),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/vite.config.ts'),
+          ),
+          matching: find.byIcon(SimpleIcons.vite),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/vite-env.d.ts'),
+          ),
+          matching: find.byIcon(SimpleIcons.vite),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/id_rsa'),
+          ),
+          matching: find.byIcon(SimpleIcons.passbolt),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/id_ed25519'),
+          ),
+          matching: find.byIcon(SimpleIcons.passbolt),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/dev.pem'),
+          ),
+          matching: find.byIcon(SimpleIcons.passbolt),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/logo.svg'),
+          ),
+          matching: find.byIcon(SimpleIcons.svg),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/vector.svgz'),
+          ),
+          matching: find.byIcon(SimpleIcons.inkscape),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/photo.png'),
+          ),
+          matching: find.byIcon(SimpleIcons.googlephotos),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/.env.production'),
+          ),
+          matching: find.byIcon(SimpleIcons.dotenv),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/notes.txt'),
+          ),
+          matching: find.byIcon(Icons.article),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/data.csv'),
+          ),
+          matching: find.byIcon(Icons.table_chart),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/data.tsv'),
+          ),
+          matching: find.byIcon(Icons.table_rows),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('file_tree_item_/repo/a/.github')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/.github/workflows'),
+          ),
+          matching: find.byIcon(SimpleIcons.githubactions),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('file_tree_item_/repo/a/src')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('file_tree_item_/repo/a/src/App.vue'),
+          ),
+          matching: find.byIcon(SimpleIcons.vuedotjs),
+        ),
         findsOneWidget,
       );
       await tester.tap(
@@ -1538,6 +1923,207 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Low'), findsOneWidget);
   });
+
+  testWidgets(
+    'uses provider brand icons for selected model and model selector items',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_1',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Session 1',
+          ),
+        ],
+      );
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+        providersResponse: ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'anthropic',
+              name: 'Anthropic',
+              env: const <String>[],
+              models: <String, Model>{
+                'claude-sonnet-4-5': _model(
+                  'claude-sonnet-4-5',
+                  name: 'Claude Sonnet 4.5',
+                ),
+              },
+            ),
+            Provider(
+              id: 'google',
+              name: 'Google',
+              env: const <String>[],
+              models: <String, Model>{
+                'claude-opus-via-google': _model(
+                  'claude-opus-via-google',
+                  name: 'Claude Opus via Google',
+                ),
+                'gemini-2.5-pro': _model(
+                  'gemini-2.5-pro',
+                  name: 'Gemini 2.5 Pro',
+                ),
+              },
+            ),
+            Provider(
+              id: 'minimax',
+              name: 'MiniMax',
+              env: const <String>[],
+              models: <String, Model>{
+                'minimax-m1': _model('minimax-m1', name: 'MiniMax M1'),
+              },
+            ),
+            Provider(
+              id: 'xai',
+              name: 'xAI',
+              env: const <String>[],
+              models: <String, Model>{
+                'grok-3': _model('grok-3', name: 'Grok 3'),
+              },
+            ),
+            Provider(
+              id: 'mistral',
+              name: 'Mistral',
+              env: const <String>[],
+              models: <String, Model>{
+                'mistral-large': _model('mistral-large', name: 'Mistral Large'),
+              },
+            ),
+            Provider(
+              id: 'openrouter',
+              name: 'OpenRouter',
+              env: const <String>[],
+              models: <String, Model>{
+                'openrouter-model': _model(
+                  'openrouter-model',
+                  name: 'OpenRouter Model',
+                ),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{
+            'anthropic': 'claude-sonnet-4-5',
+            'google': 'claude-opus-via-google',
+            'minimax': 'minimax-m1',
+            'xai': 'grok-3',
+            'mistral': 'mistral-large',
+            'openrouter': 'openrouter-model',
+          },
+          connected: const <String>[
+            'anthropic',
+            'google',
+            'minimax',
+            'xai',
+            'mistral',
+            'openrouter',
+          ],
+        ),
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await provider.setSelectedModelByProvider(
+        providerId: 'google',
+        modelId: 'claude-opus-via-google',
+      );
+      await tester.pumpAndSettle();
+
+      final modelSelectorChip = tester.widget<ActionChip>(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      final selectedAvatar = modelSelectorChip.avatar as Icon?;
+      expect(selectedAvatar?.icon, SimpleIcons.google);
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      await tester.pumpAndSettle();
+
+      final anthropicTile = tester.widget<ListTile>(
+        find.byKey(
+          const ValueKey<String>(
+            'model_selector_item_anthropic_claude-sonnet-4-5',
+          ),
+        ),
+      );
+      final anthropicLeadingIcon = anthropicTile.leading as Icon?;
+      expect(anthropicLeadingIcon?.icon, SimpleIcons.claude);
+
+      final googleClaudeTile = tester.widget<ListTile>(
+        find.byKey(
+          const ValueKey<String>(
+            'model_selector_item_google_claude-opus-via-google',
+          ),
+        ),
+      );
+      final googleClaudeLeadingIcon = googleClaudeTile.leading as Icon?;
+      expect(googleClaudeLeadingIcon?.icon, SimpleIcons.claude);
+
+      final googleTile = tester.widget<ListTile>(
+        find.byKey(
+          const ValueKey<String>('model_selector_item_google_gemini-2.5-pro'),
+        ),
+      );
+      final googleLeadingIcon = googleTile.leading as Icon?;
+      expect(googleLeadingIcon?.icon, SimpleIcons.googlegemini);
+
+      await tester.tapAt(const Offset(8, 8));
+      await tester.pumpAndSettle();
+
+      await provider.setSelectedModelByProvider(
+        providerId: 'minimax',
+        modelId: 'minimax-m1',
+      );
+      await tester.pumpAndSettle();
+      final minimaxChip = tester.widget<ActionChip>(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      expect((minimaxChip.avatar as Icon?)?.icon, SimpleIcons.minimax);
+
+      await provider.setSelectedModelByProvider(
+        providerId: 'xai',
+        modelId: 'grok-3',
+      );
+      await tester.pumpAndSettle();
+      final xaiChip = tester.widget<ActionChip>(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      expect((xaiChip.avatar as Icon?)?.icon, SimpleIcons.spacex);
+
+      await provider.setSelectedModelByProvider(
+        providerId: 'mistral',
+        modelId: 'mistral-large',
+      );
+      await tester.pumpAndSettle();
+      final mistralChip = tester.widget<ActionChip>(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      expect((mistralChip.avatar as Icon?)?.icon, SimpleIcons.mistralai);
+
+      await provider.setSelectedModelByProvider(
+        providerId: 'openrouter',
+        modelId: 'openrouter-model',
+      );
+      await tester.pumpAndSettle();
+      final openrouterChip = tester.widget<ActionChip>(
+        find.byKey(const ValueKey<String>('model_selector_button')),
+      );
+      expect((openrouterChip.avatar as Icon?)?.icon, SimpleIcons.openrouter);
+    },
+  );
 
   testWidgets('shows agent selector and updates selected agent', (
     WidgetTester tester,

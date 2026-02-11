@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' hide Provider;
+import 'package:simple_icons/simple_icons.dart';
 import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
@@ -3408,49 +3409,355 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   IconData _fileIconForNode(FileNode node) {
     if (node.isDirectory) {
-      return Icons.folder_outlined;
+      return _directoryIconForPath(node.path);
     }
     return _fileIconForPath(node.path);
   }
 
+  IconData _directoryIconForPath(String path) {
+    final normalizedPath = _normalizeFilePath(path).toLowerCase();
+    if (normalizedPath.endsWith('/.github/workflows')) {
+      return SimpleIcons.githubactions;
+    }
+    final folderName = _fileNameFromPath(normalizedPath);
+    switch (folderName) {
+      case '.github':
+        return SimpleIcons.github;
+      case '.vscode':
+        return SimpleIcons.vscodium;
+      case '.idea':
+        return SimpleIcons.jetbrains;
+      case '.dart_tool':
+        return SimpleIcons.dart;
+      case '.vite':
+        return SimpleIcons.vite;
+      case '.husky':
+        return SimpleIcons.git;
+      case 'android':
+        return SimpleIcons.android;
+      case 'ios':
+        return SimpleIcons.ios;
+      case 'macos':
+        return SimpleIcons.macos;
+      case 'linux':
+        return SimpleIcons.linux;
+      case '.git':
+        return SimpleIcons.git;
+      case '.gradle':
+        return SimpleIcons.gradle;
+      case '.firebase':
+        return SimpleIcons.firebase;
+      case 'node_modules':
+        return SimpleIcons.nodedotjs;
+      case 'docker':
+        return SimpleIcons.docker;
+      case 'scripts':
+        return SimpleIcons.iterm2;
+      case 'k8s':
+      case 'kubernetes':
+        return SimpleIcons.kubernetes;
+      case 'infra':
+      case 'infrastructure':
+      case 'terraform':
+      case '.terraform':
+        return SimpleIcons.terraform;
+      case '.next':
+        return SimpleIcons.nextdotjs;
+      case 'venv':
+      case '.venv':
+        return SimpleIcons.python;
+      default:
+        return Icons.folder_outlined;
+    }
+  }
+
   IconData _fileIconForPath(String path) {
-    final lower = path.toLowerCase();
-    if (lower.endsWith('.md') || lower.endsWith('.txt')) {
-      return Icons.description_outlined;
+    final normalizedPath = path.trim().replaceAll('\\', '/').toLowerCase();
+    final fileName = _fileNameFromPath(normalizedPath);
+    final extension = _fileExtension(fileName);
+
+    // Prefer filename-based mappings for canonical config/build files.
+    switch (fileName) {
+      case 'package.json':
+      case 'package-lock.json':
+      case 'npm-shrinkwrap.json':
+      case '.npmrc':
+        return SimpleIcons.npm;
+      case 'pnpm-lock.yaml':
+      case 'pnpm-lock.yml':
+      case '.pnpmfile.cjs':
+        return SimpleIcons.pnpm;
+      case 'yarn.lock':
+      case '.yarnrc':
+      case '.yarnrc.yml':
+        return SimpleIcons.yarn;
+      case 'bun.lockb':
+      case 'bunfig.toml':
+        return SimpleIcons.bun;
+      case 'dockerfile':
+      case '.dockerignore':
+      case 'docker-compose.yml':
+      case 'docker-compose.yaml':
+      case 'compose.yml':
+      case 'compose.yaml':
+        return SimpleIcons.docker;
+      case '.gitignore':
+      case '.gitattributes':
+      case '.gitmodules':
+        return SimpleIcons.git;
+      case 'readme.md':
+      case 'changelog.md':
+      case 'contributing.md':
+      case 'license':
+      case 'license.md':
+        return SimpleIcons.markdown;
+      case 'pubspec.yaml':
+      case 'pubspec.lock':
+      case 'analysis_options.yaml':
+        return SimpleIcons.flutter;
+      case 'tsconfig.json':
+      case 'tsconfig.base.json':
+        return SimpleIcons.typescript;
+      case 'vite.config.ts':
+      case 'vite.config.js':
+      case 'vite.config.mjs':
+      case 'vite.config.cjs':
+      case 'vite.config.mts':
+      case 'vite.config.cts':
+      case 'vite-env.d.ts':
+      case 'vite.svg':
+      case 'vitest.config.ts':
+      case 'vitest.config.js':
+      case 'vitest.config.mjs':
+      case 'vitest.config.cjs':
+      case 'vitest.config.mts':
+      case 'vitest.config.cts':
+        return SimpleIcons.vite;
+      case 'next.config.ts':
+      case 'next.config.js':
+      case 'next.config.mjs':
+      case 'next.config.cjs':
+        return SimpleIcons.nextdotjs;
+      case 'webpack.config.ts':
+      case 'webpack.config.js':
+      case 'webpack.config.mjs':
+      case 'webpack.config.cjs':
+        return SimpleIcons.webpack;
+      case 'rollup.config.ts':
+      case 'rollup.config.js':
+      case 'rollup.config.mjs':
+      case 'rollup.config.cjs':
+        return SimpleIcons.rollupdotjs;
+      case '.eslintrc':
+      case '.eslintrc.js':
+      case '.eslintrc.cjs':
+      case '.eslintrc.json':
+      case '.eslintrc.yml':
+      case '.eslintrc.yaml':
+      case 'eslint.config.js':
+      case 'eslint.config.mjs':
+      case 'eslint.config.cjs':
+      case 'eslint.config.ts':
+        return SimpleIcons.eslint;
+      case '.prettierrc':
+      case '.prettierrc.js':
+      case '.prettierrc.cjs':
+      case '.prettierrc.json':
+      case '.prettierrc.yml':
+      case '.prettierrc.yaml':
+      case 'prettier.config.js':
+      case 'prettier.config.mjs':
+      case 'prettier.config.cjs':
+      case 'prettier.config.ts':
+        return SimpleIcons.prettier;
+      case 'tailwind.config.js':
+      case 'tailwind.config.mjs':
+      case 'tailwind.config.cjs':
+      case 'tailwind.config.ts':
+        return SimpleIcons.tailwindcss;
+      case 'firebase.json':
+      case '.firebaserc':
+        return SimpleIcons.firebase;
+      case 'go.mod':
+      case 'go.sum':
+        return SimpleIcons.go;
+      case 'cargo.toml':
+      case 'cargo.lock':
+        return SimpleIcons.rust;
+      case 'composer.json':
+      case 'composer.lock':
+        return SimpleIcons.php;
+      case 'requirements.txt':
+      case 'pyproject.toml':
+        return SimpleIcons.python;
+      case 'gemfile':
+      case 'gemfile.lock':
+        return SimpleIcons.ruby;
+      case '.nvmrc':
+      case 'nodemon.json':
+        return SimpleIcons.nodedotjs;
+      case 'jenkinsfile':
+      case 'jenkins.yaml':
+      case 'jenkins.yml':
+        return SimpleIcons.jenkins;
+      case 'makefile':
+        return Icons.build_outlined;
+      case '.bashrc':
+      case '.bash_profile':
+      case '.bash_aliases':
+      case '.zshrc':
+      case '.zprofile':
+      case '.zshenv':
+      case '.profile':
+        return SimpleIcons.iterm2;
+      case 'id_rsa':
+      case 'id_rsa.pub':
+      case 'id_dsa':
+      case 'id_dsa.pub':
+      case 'id_ecdsa':
+      case 'id_ecdsa.pub':
+      case 'id_ed25519':
+      case 'id_ed25519.pub':
+        return SimpleIcons.passbolt;
+      case '.env':
+      case '.env.local':
+      case '.env.development':
+      case '.env.production':
+        return SimpleIcons.dotenv;
     }
-    if (lower.endsWith('.dart') ||
-        lower.endsWith('.ts') ||
-        lower.endsWith('.tsx') ||
-        lower.endsWith('.js') ||
-        lower.endsWith('.jsx') ||
-        lower.endsWith('.py') ||
-        lower.endsWith('.go') ||
-        lower.endsWith('.rs') ||
-        lower.endsWith('.java') ||
-        lower.endsWith('.kt') ||
-        lower.endsWith('.swift')) {
-      return Icons.code_outlined;
+
+    // Then apply extension-based mappings.
+    switch (extension) {
+      case 'dart':
+        return SimpleIcons.dart;
+      case 'ts':
+      case 'mts':
+      case 'cts':
+        return SimpleIcons.typescript;
+      case 'tsx':
+      case 'jsx':
+        return SimpleIcons.react;
+      case 'js':
+      case 'mjs':
+      case 'cjs':
+        return SimpleIcons.javascript;
+      case 'vue':
+        return SimpleIcons.vuedotjs;
+      case 'html':
+      case 'htm':
+        return SimpleIcons.html5;
+      case 'css':
+        return SimpleIcons.css;
+      case 'scss':
+      case 'sass':
+        return SimpleIcons.sass;
+      case 'less':
+        return SimpleIcons.less;
+      case 'styl':
+      case 'stylus':
+        return SimpleIcons.stylus;
+      case 'md':
+      case 'mdx':
+      case 'rst':
+        return SimpleIcons.markdown;
+      case 'txt':
+        return Icons.article;
+      case 'json':
+        return SimpleIcons.json;
+      case 'yaml':
+      case 'yml':
+        return SimpleIcons.yaml;
+      case 'toml':
+        return SimpleIcons.toml;
+      case 'py':
+        return SimpleIcons.python;
+      case 'go':
+        return SimpleIcons.go;
+      case 'rs':
+        return SimpleIcons.rust;
+      case 'java':
+        return SimpleIcons.openjdk;
+      case 'kt':
+      case 'kts':
+        return SimpleIcons.kotlin;
+      case 'swift':
+        return SimpleIcons.swift;
+      case 'php':
+        return SimpleIcons.php;
+      case 'rb':
+        return SimpleIcons.ruby;
+      case 'lua':
+        return SimpleIcons.lua;
+      case 'sh':
+      case 'ash':
+      case 'bash':
+      case 'zsh':
+        return SimpleIcons.iterm2;
+      case 'csv':
+        return Icons.table_chart;
+      case 'tsv':
+        return Icons.table_rows;
+      case 'sql':
+        return SimpleIcons.postgresql;
+      case 'pem':
+      case 'key':
+      case 'crt':
+      case 'cer':
+      case 'p12':
+      case 'pfx':
+        return SimpleIcons.passbolt;
+      case 'sqlite':
+      case 'db':
+        return SimpleIcons.sqlite;
+      case 'mysql':
+        return SimpleIcons.mysql;
+      case 'redis':
+        return SimpleIcons.redis;
+      case 'xml':
+      case 'ini':
+      case 'cfg':
+      case 'conf':
+      case 'properties':
+        return Icons.data_object_rounded;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+      case 'tif':
+      case 'tiff':
+      case 'avif':
+      case 'ico':
+        return SimpleIcons.googlephotos;
+      case 'svg':
+        return SimpleIcons.svg;
+      case 'svgz':
+        return SimpleIcons.inkscape;
+      case 'pdf':
+        return Icons.picture_as_pdf_outlined;
+      default:
+        return Icons.insert_drive_file_outlined;
     }
-    if (lower.endsWith('.json') ||
-        lower.endsWith('.yaml') ||
-        lower.endsWith('.yml') ||
-        lower.endsWith('.toml') ||
-        lower.endsWith('.ini') ||
-        lower.endsWith('.xml')) {
-      return Icons.data_object_rounded;
+  }
+
+  String _fileNameFromPath(String normalizedPath) {
+    if (normalizedPath.isEmpty) {
+      return normalizedPath;
     }
-    if (lower.endsWith('.png') ||
-        lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.gif') ||
-        lower.endsWith('.webp') ||
-        lower.endsWith('.svg')) {
-      return Icons.image_outlined;
+    final separator = normalizedPath.lastIndexOf('/');
+    if (separator < 0 || separator == normalizedPath.length - 1) {
+      return normalizedPath;
     }
-    if (lower.endsWith('.pdf')) {
-      return Icons.picture_as_pdf_outlined;
+    return normalizedPath.substring(separator + 1);
+  }
+
+  String _fileExtension(String fileName) {
+    final separator = fileName.lastIndexOf('.');
+    if (separator <= 0 || separator == fileName.length - 1) {
+      return '';
     }
-    return Icons.insert_drive_file_outlined;
+    return fileName.substring(separator + 1);
   }
 
   Widget _buildFileViewerPanel({
@@ -3861,9 +4168,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   Widget _buildModelControls(ChatProvider chatProvider) {
     final selectedModel = chatProvider.selectedModel;
+    final selectedProvider = chatProvider.selectedProvider;
     final selectedAgent = chatProvider.selectedAgentName;
     final selectableAgents = chatProvider.selectableAgents;
     final variants = chatProvider.availableVariants;
+    final selectedModelIcon = _providerBrandIcon(
+      providerId: chatProvider.selectedProviderId,
+      providerName: selectedProvider?.name,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
@@ -3899,7 +4211,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             message: 'Choose model',
             child: ActionChip(
               key: const ValueKey<String>('model_selector_button'),
-              avatar: const Icon(Icons.smart_toy_outlined, size: 18),
+              avatar: Icon(selectedModelIcon, size: 18),
               label: Text(selectedModel?.name ?? 'Select model'),
               onPressed: chatProvider.providers.isEmpty
                   ? null
@@ -3931,6 +4243,115 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return value;
     }
     return '${trimmed[0].toUpperCase()}${trimmed.substring(1)}';
+  }
+
+  IconData _providerBrandIcon({
+    required String? providerId,
+    required String? providerName,
+  }) {
+    final normalizedProvider = '${providerId ?? ''} ${providerName ?? ''}'
+        .trim()
+        .toLowerCase();
+
+    if (_containsAnyBrandToken(normalizedProvider, const ['anthropic'])) {
+      return SimpleIcons.anthropic;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['google'])) {
+      return SimpleIcons.google;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['openrouter'])) {
+      return SimpleIcons.openrouter;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['minimax'])) {
+      return SimpleIcons.minimax;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['mistral'])) {
+      return SimpleIcons.mistralai;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['xai'])) {
+      return SimpleIcons.spacex;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['github'])) {
+      return SimpleIcons.github;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['gitlab'])) {
+      return SimpleIcons.gitlab;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['cloudflare'])) {
+      return SimpleIcons.cloudflare;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['ollama'])) {
+      return SimpleIcons.ollama;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['huggingface'])) {
+      return SimpleIcons.huggingface;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['vercel'])) {
+      return SimpleIcons.vercel;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['perplexity'])) {
+      return SimpleIcons.perplexity;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['nvidia'])) {
+      return SimpleIcons.nvidia;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['alibaba'])) {
+      return SimpleIcons.alibabacloud;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['poe'])) {
+      return SimpleIcons.poe;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['scaleway'])) {
+      return SimpleIcons.scaleway;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['sap'])) {
+      return SimpleIcons.sap;
+    }
+    if (_containsAnyBrandToken(normalizedProvider, const ['v0'])) {
+      return SimpleIcons.v0;
+    }
+
+    return Icons.smart_toy_outlined;
+  }
+
+  IconData _modelSelectorListIcon({
+    required String? providerId,
+    required String? providerName,
+    required String? modelId,
+    required String? modelName,
+  }) {
+    final normalizedModel = '${modelId ?? ''} ${modelName ?? ''}'
+        .trim()
+        .toLowerCase();
+    final normalizedProvider = '${providerId ?? ''} ${providerName ?? ''}'
+        .trim()
+        .toLowerCase();
+
+    // Model-aware matching first to avoid ambiguous provider IDs.
+    if (_containsAnyBrandToken(normalizedModel, const [
+      'claude',
+      'anthropic',
+    ])) {
+      return SimpleIcons.claude;
+    }
+    if (_containsAnyBrandToken(normalizedModel, const ['gemini', 'google'])) {
+      return SimpleIcons.googlegemini;
+    }
+
+    final providerIcon = _providerBrandIcon(
+      providerId: providerId,
+      providerName: providerName,
+    );
+    return providerIcon;
+  }
+
+  bool _containsAnyBrandToken(String source, List<String> tokens) {
+    for (final token in tokens) {
+      if (source.contains(token)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   List<String> _collectSentMessageHistory(List<ChatMessage> messages) {
@@ -4291,6 +4712,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                         key: ValueKey<String>(
                                           'model_selector_recent_${entry.providerId}_${entry.modelId}',
                                         ),
+                                        leading: Icon(
+                                          _modelSelectorListIcon(
+                                            providerId: entry.providerId,
+                                            providerName: entry.providerName,
+                                            modelId: entry.modelId,
+                                            modelName: entry.modelName,
+                                          ),
+                                          size: 18,
+                                        ),
                                         title: Text(entry.modelName),
                                         subtitle: Text(entry.providerName),
                                         trailing:
@@ -4345,6 +4775,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                         ListTile(
                                           key: ValueKey<String>(
                                             'model_selector_item_${entry.providerId}_${entry.modelId}',
+                                          ),
+                                          leading: Icon(
+                                            _modelSelectorListIcon(
+                                              providerId: entry.providerId,
+                                              providerName: entry.providerName,
+                                              modelId: entry.modelId,
+                                              modelName: entry.modelName,
+                                            ),
+                                            size: 18,
                                           ),
                                           title: Text(entry.modelName),
                                           subtitle:
