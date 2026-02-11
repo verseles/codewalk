@@ -5150,6 +5150,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     }
 
     final progressStage = _resolveAssistantProgressStage(chatProvider);
+    final latestReasoningPartKey = _resolveLatestReasoningPartKey(
+      chatProvider.messages,
+    );
 
     return ListView.builder(
       key: const ValueKey<String>('chat_message_list'),
@@ -5162,6 +5165,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           return ChatMessageWidget(
             key: ValueKey(message.id),
             message: message,
+            activeReasoningPartKey: latestReasoningPartKey,
             onBackgroundLongPress: () =>
                 _handleMessageBackgroundLongPress(message),
             onBackgroundLongPressEnd: () =>
@@ -5217,6 +5221,27 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         );
       },
     );
+  }
+
+  String? _resolveLatestReasoningPartKey(List<ChatMessage> messages) {
+    for (
+      var messageIndex = messages.length - 1;
+      messageIndex >= 0;
+      messageIndex -= 1
+    ) {
+      final message = messages[messageIndex];
+      for (
+        var partIndex = message.parts.length - 1;
+        partIndex >= 0;
+        partIndex -= 1
+      ) {
+        final part = message.parts[partIndex];
+        if (part is ReasoningPart) {
+          return '${part.messageId}::${part.id}';
+        }
+      }
+    }
+    return null;
   }
 
   _AssistantProgressStage? _resolveAssistantProgressStage(

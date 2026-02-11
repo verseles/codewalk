@@ -13,11 +13,13 @@ class ChatMessageWidget extends StatelessWidget {
   const ChatMessageWidget({
     super.key,
     required this.message,
+    this.activeReasoningPartKey,
     this.onBackgroundLongPress,
     this.onBackgroundLongPressEnd,
   });
 
   final ChatMessage message;
+  final String? activeReasoningPartKey;
   final VoidCallback? onBackgroundLongPress;
   final VoidCallback? onBackgroundLongPressEnd;
 
@@ -124,6 +126,7 @@ class ChatMessageWidget extends StatelessWidget {
                                 context,
                                 part,
                                 latestReasoningPartId: latestReasoningPartId,
+                                activeReasoningPartKey: activeReasoningPartKey,
                               ),
                             ),
                           ],
@@ -138,6 +141,8 @@ class ChatMessageWidget extends StatelessWidget {
                                   context,
                                   part,
                                   latestReasoningPartId: latestReasoningPartId,
+                                  activeReasoningPartKey:
+                                      activeReasoningPartKey,
                                 ),
                               ),
                             ],
@@ -235,6 +240,7 @@ class ChatMessageWidget extends StatelessWidget {
     BuildContext context,
     MessagePart part, {
     required String? latestReasoningPartId,
+    required String? activeReasoningPartKey,
   }) {
     switch (part.type) {
       case PartType.text:
@@ -247,10 +253,17 @@ class ChatMessageWidget extends StatelessWidget {
         return _buildAgentPart(context, part as AgentPart);
       case PartType.reasoning:
         final reasoningPart = part as ReasoningPart;
+        final reasoningPartKey = _reasoningPartKey(
+          messageId: reasoningPart.messageId,
+          partId: reasoningPart.id,
+        );
         return _buildReasoningPart(
           context,
           reasoningPart,
-          isLatestReasoningPart: reasoningPart.id == latestReasoningPartId,
+          partKey: reasoningPartKey,
+          isLatestReasoningPart: activeReasoningPartKey == null
+              ? reasoningPart.id == latestReasoningPartId
+              : reasoningPartKey == activeReasoningPartKey,
         );
       case PartType.stepStart:
         return const SizedBox.shrink();
@@ -420,6 +433,7 @@ class ChatMessageWidget extends StatelessWidget {
   Widget _buildReasoningPart(
     BuildContext context,
     ReasoningPart part, {
+    required String partKey,
     required bool isLatestReasoningPart,
   }) {
     // Don't display if reasoning text is empty or only whitespace
@@ -461,7 +475,7 @@ class ChatMessageWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _CollapsibleReasoningContent(
-            partId: part.id,
+            partKey: partKey,
             text: part.text,
             collapsedMaxLines: _collapsedReasoningMaxLines,
             isLatestReasoningPart: isLatestReasoningPart,
@@ -761,6 +775,13 @@ class ChatMessageWidget extends StatelessWidget {
       return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
   }
+
+  String _reasoningPartKey({
+    required String messageId,
+    required String partId,
+  }) {
+    return '$messageId::$partId';
+  }
 }
 
 class _CollapsibleToolContent extends StatefulWidget {
@@ -837,14 +858,14 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
 
 class _CollapsibleReasoningContent extends StatefulWidget {
   const _CollapsibleReasoningContent({
-    required this.partId,
+    required this.partKey,
     required this.text,
     required this.collapsedMaxLines,
     required this.isLatestReasoningPart,
     this.textStyle,
   });
 
-  final String partId;
+  final String partKey;
   final String text;
   final int collapsedMaxLines;
   final bool isLatestReasoningPart;
@@ -897,7 +918,7 @@ class _CollapsibleReasoningContentState
   Widget build(BuildContext context) {
     final textWidget = Text(
       widget.text,
-      key: ValueKey<String>('thinking_content_text_${widget.partId}'),
+      key: ValueKey<String>('thinking_content_text_${widget.partKey}'),
       maxLines: _expanded ? null : widget.collapsedMaxLines,
       overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
       style: widget.textStyle,
@@ -913,7 +934,7 @@ class _CollapsibleReasoningContentState
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            key: ValueKey<String>('thinking_content_toggle_${widget.partId}'),
+            key: ValueKey<String>('thinking_content_toggle_${widget.partKey}'),
             onPressed: () {
               setState(() {
                 _expanded = !_expanded;

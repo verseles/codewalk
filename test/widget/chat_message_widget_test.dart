@@ -447,12 +447,18 @@ void main() {
       );
 
       Text firstThinking = tester.widget<Text>(
-        find.byKey(const ValueKey<String>('thinking_content_text_thinking_1')),
+        find.byKey(
+          const ValueKey<String>(
+            'thinking_content_text_msg_thinking::thinking_1',
+          ),
+        ),
       );
       expect(firstThinking.maxLines, isNull);
       expect(
         find.byKey(
-          const ValueKey<String>('thinking_content_toggle_thinking_1'),
+          const ValueKey<String>(
+            'thinking_content_toggle_msg_thinking::thinking_1',
+          ),
         ),
         findsOneWidget,
       );
@@ -465,10 +471,18 @@ void main() {
       await tester.pumpAndSettle();
 
       firstThinking = tester.widget<Text>(
-        find.byKey(const ValueKey<String>('thinking_content_text_thinking_1')),
+        find.byKey(
+          const ValueKey<String>(
+            'thinking_content_text_msg_thinking::thinking_1',
+          ),
+        ),
       );
       final secondThinking = tester.widget<Text>(
-        find.byKey(const ValueKey<String>('thinking_content_text_thinking_2')),
+        find.byKey(
+          const ValueKey<String>(
+            'thinking_content_text_msg_thinking::thinking_2',
+          ),
+        ),
       );
 
       expect(firstThinking.maxLines, 2);
@@ -476,15 +490,77 @@ void main() {
 
       await tester.tap(
         find.byKey(
-          const ValueKey<String>('thinking_content_toggle_thinking_1'),
+          const ValueKey<String>(
+            'thinking_content_toggle_msg_thinking::thinking_1',
+          ),
         ),
       );
       await tester.pumpAndSettle();
 
       firstThinking = tester.widget<Text>(
-        find.byKey(const ValueKey<String>('thinking_content_text_thinking_1')),
+        find.byKey(
+          const ValueKey<String>(
+            'thinking_content_text_msg_thinking::thinking_1',
+          ),
+        ),
       );
       expect(firstThinking.maxLines, isNull);
+    },
+  );
+
+  testWidgets(
+    'thinking auto-collapses when latest reasoning moves to another message',
+    (WidgetTester tester) async {
+      final message = AssistantMessage(
+        id: 'msg_a',
+        sessionId: 'ses_thinking',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        parts: const <MessagePart>[
+          ReasoningPart(
+            id: 'thinking_a',
+            messageId: 'msg_a',
+            sessionId: 'ses_thinking',
+            text: 'line 1\nline 2\nline 3\nline 4',
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: message,
+              activeReasoningPartKey: 'msg_a::thinking_a',
+            ),
+          ),
+        ),
+      );
+
+      Text thinkingText = tester.widget<Text>(
+        find.byKey(
+          const ValueKey<String>('thinking_content_text_msg_a::thinking_a'),
+        ),
+      );
+      expect(thinkingText.maxLines, isNull);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: message,
+              activeReasoningPartKey: 'msg_b::thinking_b',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      thinkingText = tester.widget<Text>(
+        find.byKey(
+          const ValueKey<String>('thinking_content_text_msg_a::thinking_a'),
+        ),
+      );
+      expect(thinkingText.maxLines, 2);
     },
   );
 }

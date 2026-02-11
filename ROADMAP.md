@@ -324,6 +324,7 @@ Pronta para análise: adicionada ação de arquivamento na seção de contextos 
 Pronta para análise: comportamento de auto-scroll estilo IM foi finalizado no chat. Enquanto o usuário permanece no final da conversa, novas mensagens continuam acompanhando automaticamente; ao subir o histórico intencionalmente, o auto-follow pausa e a UI preserva a posição de leitura, destacando o FAB de retorno ao último item. Ao tocar no FAB, a conversa volta ao fim e o auto-follow é reativado.
 Pronta para análise: tool calls agora iniciam com preview compacto de no máximo duas linhas para saída/erro e exibem ação discreta de expandir/recolher (`Show more`/`Show less`) para alternar entre visão resumida e conteúdo completo, reduzindo ruído visual sem perder acesso ao detalhe.
 Refinamento pós-entrega aplicado nos blocos de thinking: o bloco mais recente permanece expandido por padrão, e blocos anteriores são automaticamente colapsados quando um novo bloco de thinking é adicionado, mantendo opção manual de expandir/recolher em cada bloco.
+Correção pós-validação aplicada: o critério de "bloco mais recente" passou a ser global na conversa (não apenas dentro da mesma mensagem), garantindo que thinkings anteriores realmente colapsem quando um novo thinking surgir em outro bloco/mensagem.
 
 ## Code Quality and Technical Debt
 
