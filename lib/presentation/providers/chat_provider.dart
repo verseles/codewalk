@@ -3566,22 +3566,17 @@ class ChatProvider extends ChangeNotifier {
     AppLogger.warn(
       'Chat failure handled type=${failure.runtimeType} message=${failure.message}',
     );
-    switch (failure.runtimeType) {
-      case NetworkFailure:
+    switch (failure) {
+      case NetworkFailure _:
         _setError('Network connection failed. Please check network settings');
-        break;
-      case ServerFailure:
+      case ServerFailure _:
         _setError('Server error. Please try again later');
-        break;
-      case NotFoundFailure:
+      case NotFoundFailure _:
         _setError('Resource not found');
-        break;
-      case ValidationFailure:
+      case ValidationFailure _:
         _setError('Invalid input parameters');
-        break;
       default:
         _setError('Unknown error. Please try again later');
-        break;
     }
   }
 

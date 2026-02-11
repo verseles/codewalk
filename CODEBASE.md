@@ -427,14 +427,15 @@ Deferred/optional after parity wave:
 
 ### flutter analyze
 
-- **Total issues: 125**
+- **Total issues: 121**
   - Errors: 0
   - Warnings: 0
-  - Info: 125 (mostly deprecated API usage and lint modernization opportunities)
+  - Info: 121 (mostly deprecated API usage and lint modernization opportunities)
 - **Top issue categories:**
   - `deprecated_member_use` (majority): `withOpacity`, `surfaceVariant`, old color roles
   - `overridden_fields` (~5): field overrides in model classes
   - `unnecessary_underscores` (~6): test parameter naming
+  - `type_literal_in_constant_pattern` (0): resolved by migrating to Dart 3 variable patterns (`TypeName _`)
 - **CI Budget:** 186 issues maximum (enforced via `tool/ci/check_analyze_budget.sh`)
 
 ### flutter test
