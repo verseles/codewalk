@@ -1109,41 +1109,53 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     if (!mounted) {
       return;
     }
+    final projectProvider = context.read<ProjectProvider>();
+    final appProvider = context.read<AppProvider>();
+    final chatProvider = context.read<ChatProvider>();
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) {
-        return Dialog.fullscreen(
-          key: const ValueKey<String>('mobile_files_dialog_fullscreen'),
-          child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Files'),
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                tooltip: 'Close',
-                onPressed: () => Navigator.of(dialogContext).pop(),
-              ),
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider<ProjectProvider>.value(
+              value: projectProvider,
             ),
-            body: Consumer3<ProjectProvider, AppProvider, ChatProvider>(
-              builder:
-                  (context, projectProvider, appProvider, chatProvider, _) {
-                    final fileState = _resolveFileContextState(
-                      projectProvider: projectProvider,
-                      appProvider: appProvider,
-                    );
-                    _reconcileFileContextWithSessionDiff(
-                      contextKey: projectProvider.contextKey,
-                      fileState: fileState,
-                      chatProvider: chatProvider,
-                      projectProvider: projectProvider,
-                    );
-                    return SafeArea(
-                      child: _buildFileExplorerPanel(
-                        fileState: fileState,
+            ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+            ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
+          ],
+          child: Dialog.fullscreen(
+            key: const ValueKey<String>('mobile_files_dialog_fullscreen'),
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Files'),
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: 'Close',
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+              ),
+              body: Consumer3<ProjectProvider, AppProvider, ChatProvider>(
+                builder:
+                    (context, projectProvider, appProvider, chatProvider, _) {
+                      final fileState = _resolveFileContextState(
                         projectProvider: projectProvider,
-                      ),
-                    );
-                  },
+                        appProvider: appProvider,
+                      );
+                      _reconcileFileContextWithSessionDiff(
+                        contextKey: projectProvider.contextKey,
+                        fileState: fileState,
+                        chatProvider: chatProvider,
+                        projectProvider: projectProvider,
+                      );
+                      return SafeArea(
+                        child: _buildFileExplorerPanel(
+                          fileState: fileState,
+                          projectProvider: projectProvider,
+                        ),
+                      );
+                    },
+              ),
             ),
           ),
         );
