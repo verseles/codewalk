@@ -1,5 +1,7 @@
 CodeWalk é um projeto que visa permitir acessar agents de código de qualquer lugar, seja por desktop, seja pelo celular.
 
+- Toda implementação deve ser pensada para mobile e desktop. Preferencialmente de maneira unificada e responsiva. Prioridade para UX no mobile.
+
 - Sempre que concluir uma tarefa, verifique se:
   - Essa mudança requer um novo test ou atualização de um existente
 
