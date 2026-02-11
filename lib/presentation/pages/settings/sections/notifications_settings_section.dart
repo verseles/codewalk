@@ -147,13 +147,13 @@ class _NotificationsSettingsSectionState
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _SwitchPill(
+              _LabeledSwitch(
                 label: 'Notify',
                 value: notifyEnabled,
                 onChanged: (value) =>
                     settingsProvider.setNotificationEnabled(category, value),
               ),
-              _SwitchPill(
+              _LabeledSwitch(
                 label: 'Sound',
                 value: soundEnabled,
                 onChanged: (value) => settingsProvider
@@ -207,8 +207,8 @@ class _NotificationsSettingsSectionState
   }
 }
 
-class _SwitchPill extends StatelessWidget {
-  const _SwitchPill({
+class _LabeledSwitch extends StatelessWidget {
+  const _LabeledSwitch({
     required this.label,
     required this.value,
     required this.onChanged,
@@ -220,22 +220,13 @@ class _SwitchPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 4, top: 2, bottom: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label, style: Theme.of(context).textTheme.labelLarge),
-            const SizedBox(width: 4),
-            Switch(value: value, onChanged: onChanged),
-          ],
-        ),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(width: 4),
+        Switch(value: value, onChanged: onChanged),
+      ],
     );
   }
 }

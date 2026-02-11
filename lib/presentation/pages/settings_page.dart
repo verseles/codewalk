@@ -5,7 +5,6 @@ import '../../core/constants/app_constants.dart';
 import 'settings/sections/notifications_settings_section.dart';
 import 'settings/sections/servers_settings_section.dart';
 import 'settings/sections/shortcuts_settings_section.dart';
-import 'settings/sections/sounds_settings_section.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, this.initialSectionId = ''});
@@ -39,16 +38,9 @@ class _SettingsPageState extends State<SettingsPage> {
     _SettingsSection(
       id: 'notifications',
       title: 'Notifications',
-      description: 'Category alerts and permission prompts',
+      description: 'Per-category notify and sound controls',
       icon: Icons.notifications_active_outlined,
       builder: (_) => const NotificationsSettingsSection(),
-    ),
-    _SettingsSection(
-      id: 'sounds',
-      title: 'Sounds',
-      description: 'Category sounds and preview',
-      icon: Icons.volume_up_outlined,
-      builder: (_) => const SoundsSettingsSection(),
     ),
     _SettingsSection(
       id: 'shortcuts',

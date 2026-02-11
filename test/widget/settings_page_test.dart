@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Notifications'), findsOneWidget);
-    expect(find.text('Sounds'), findsOneWidget);
+    expect(find.text('Sounds'), findsNothing);
     expect(find.text('Shortcuts'), findsNothing);
     expect(find.text('Servers'), findsOneWidget);
 

@@ -1002,6 +1002,7 @@ Feature 022 required parity with OpenCode settings behaviors across:
    - `Notify` (system notification),
    - `Sound` (audible feedback),
    allowing independent preference combinations per event type (`agent`, `permissions`, `errors`).
+9. Consolidate sound configuration under `Notifications` and remove the standalone `Sounds` section to avoid duplicate controls.
 
 ### Rationale
 
@@ -1027,7 +1028,6 @@ Feature 022 required parity with OpenCode settings behaviors across:
 - `lib/presentation/pages/settings_page.dart`
 - `lib/presentation/pages/settings/sections/servers_settings_section.dart`
 - `lib/presentation/pages/settings/sections/notifications_settings_section.dart`
-- `lib/presentation/pages/settings/sections/sounds_settings_section.dart`
 - `lib/presentation/pages/settings/sections/shortcuts_settings_section.dart`
 - `lib/domain/entities/experience_settings.dart`
 - `lib/presentation/providers/settings_provider.dart`

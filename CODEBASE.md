@@ -621,12 +621,13 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
   - notification controls by category (`agent`, `permissions`, `errors`)
     - sync from `/config` when server exposes compatible notification keys (`settings-notifications-*` or `notifications.*`)
     - fallback to local-only persistence when server config keys are unavailable
-  - per-category split controls for `Notify` and `Sound` (users can enable only one of them)
-  - sound preference by category with preview and fallback behavior
+  - per-category split controls for `Notify` and `Sound` in the Notifications section (users can enable only one of them)
+  - sound preference by category (configured in Notifications) with preview and fallback behavior
     - sound playback uses generated in-memory WAV tones via `audioplayers` for consistent output across platforms
   - notification payload includes `sessionId` for deep-link on notification tap back to the originating session
 - editable shortcut bindings with conflict validation and reset
   - shortcuts section is available on desktop/web and hidden on mobile platforms
+- dedicated Sounds section was removed after Notifications absorbed all per-category sound controls
 - Server management moved into a dedicated `Servers` section:
   - add/edit/remove, active/default, health badges and activation guard
 - Chat keyboard shortcuts are now resolved from persisted settings via runtime binding parsing
