@@ -192,6 +192,9 @@ class ChatProvider extends ChangeNotifier {
   final Set<String> _pendingLocalUserMessageIds = <String>{};
   bool _activeSessionRefreshInFlight = false;
   bool _isAbortingResponse = false;
+  String? _abortSuppressionSessionId;
+  DateTime? _abortSuppressionStartedAt;
+  int _messageStreamGeneration = 0;
 
   // Project and provider-related state
   String? _currentProjectId;
@@ -233,7 +236,9 @@ class ChatProvider extends ChangeNotifier {
   late final bool _refreshlessRealtimeEnabled;
 
   static const Duration _sessionsCacheTtl = Duration(days: 3);
+  static const Duration _lastSessionSnapshotTtl = Duration(days: 7);
   static const int _maxRecentModels = 8;
+  static const Duration _abortSuppressionWindow = Duration(seconds: 8);
 
   // Getters
   ChatState get state => _state;
@@ -468,9 +473,67 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Set error
-  void _setError(String message) {
+  void _setError(String message, {String? sessionId}) {
+    final effectiveSessionId = sessionId ?? _currentSession?.id;
+    if (_shouldSuppressAbortError(
+      sessionId: effectiveSessionId,
+      message: message,
+    )) {
+      AppLogger.info(
+        'Suppressing expected abort error session=${effectiveSessionId ?? "-"} message=$message',
+      );
+      _errorMessage = null;
+      _setState(ChatState.loaded);
+      return;
+    }
     _errorMessage = message;
     _setState(ChatState.error);
+  }
+
+  bool _isAbortSuppressionActiveForSession(String? sessionId) {
+    if (sessionId == null ||
+        _abortSuppressionSessionId == null ||
+        _abortSuppressionStartedAt == null ||
+        sessionId != _abortSuppressionSessionId) {
+      return false;
+    }
+    final startedAt = _abortSuppressionStartedAt!;
+    if (DateTime.now().difference(startedAt) > _abortSuppressionWindow) {
+      _clearAbortSuppression();
+      return false;
+    }
+    return true;
+  }
+
+  bool _isAbortLikeMessage(String message) {
+    final normalized = message.trim().toLowerCase();
+    return normalized.contains('aborted') ||
+        normalized.contains('abort') ||
+        normalized.contains('retry') ||
+        normalized.contains('cancelled') ||
+        normalized.contains('canceled') ||
+        normalized.contains('cancelled by user') ||
+        normalized.contains('canceled by user');
+  }
+
+  bool _shouldSuppressAbortError({
+    required String? sessionId,
+    required String message,
+  }) {
+    if (!_isAbortSuppressionActiveForSession(sessionId)) {
+      return false;
+    }
+    return _isAbortLikeMessage(message);
+  }
+
+  void _startAbortSuppression(String sessionId) {
+    _abortSuppressionSessionId = sessionId;
+    _abortSuppressionStartedAt = DateTime.now();
+  }
+
+  void _clearAbortSuppression() {
+    _abortSuppressionSessionId = null;
+    _abortSuppressionStartedAt = null;
   }
 
   String _modelKey(String providerId, String modelId) {
@@ -896,6 +959,18 @@ class ChatProvider extends ChangeNotifier {
     } catch (error) {
       AppLogger.warn('Failed to cancel $label subscription', error: error);
     }
+  }
+
+  Future<void> _cancelActiveMessageSubscription({
+    required String reason,
+    bool invalidateGeneration = false,
+  }) async {
+    if (invalidateGeneration) {
+      _messageStreamGeneration += 1;
+    }
+    final active = _messageSubscription;
+    _messageSubscription = null;
+    await _cancelSubscriptionSafely(active, label: 'message stream ($reason)');
   }
 
   void _setSyncState(ChatSyncState nextState, {String? reason}) {
@@ -1343,6 +1418,17 @@ class ChatProvider extends ChangeNotifier {
               data['message'] as String? ??
               error?['message'] as String? ??
               'Session error';
+          if (_shouldSuppressAbortError(
+            sessionId: sessionId,
+            message: message,
+          )) {
+            _sessionStatusById[sessionId] = const SessionStatusInfo(
+              type: SessionStatusType.idle,
+            );
+            _errorMessage = null;
+            _setState(ChatState.loaded);
+            break;
+          }
           _setError(message);
         }
         break;
@@ -2278,9 +2364,9 @@ class ChatProvider extends ChangeNotifier {
     _sessionsFetchId += 1;
     _messagesFetchId += 1;
     _eventStreamGeneration += 1;
-    await _cancelSubscriptionSafely(
-      _messageSubscription,
-      label: 'message stream',
+    await _cancelActiveMessageSubscription(
+      reason: 'context-switch',
+      invalidateGeneration: true,
     );
     await _cancelSubscriptionSafely(
       _eventSubscription,
@@ -2290,7 +2376,6 @@ class ChatProvider extends ChangeNotifier {
       _globalEventSubscription,
       label: 'global event',
     );
-    _messageSubscription = null;
     _eventSubscription = null;
     _globalEventSubscription = null;
     _consecutiveRealtimeFailures = 0;
@@ -2528,10 +2613,19 @@ class ChatProvider extends ChangeNotifier {
 
     final serverId = await _resolveServerScopeId();
     final scopeId = _resolveContextScopeId();
+    final storedSessionId = await localDataSource.getCurrentSessionId(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
 
     try {
       // First try loading from cache
       await _loadCachedSessions(serverId: serverId, scopeId: scopeId);
+      await _restoreLastSessionSnapshotFromCache(
+        serverId: serverId,
+        scopeId: scopeId,
+        preferredSessionId: storedSessionId,
+      );
 
       // Then fetch latest data from server
       final result = await getChatSessions(
@@ -2573,7 +2667,11 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
 
-      await loadLastSession(serverId: serverId, scopeId: scopeId);
+      await loadLastSession(
+        serverId: serverId,
+        scopeId: scopeId,
+        storedSessionId: storedSessionId,
+      );
       await refreshSessionStatusSnapshot();
     } catch (e, stackTrace) {
       if (fetchId != _sessionsFetchId) {
@@ -2666,9 +2764,157 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> _restoreLastSessionSnapshotFromCache({
+    required String serverId,
+    required String scopeId,
+    required String? preferredSessionId,
+  }) async {
+    try {
+      final snapshotJson = await localDataSource.getLastSessionSnapshot(
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+      if (snapshotJson == null || snapshotJson.trim().isEmpty) {
+        return;
+      }
+
+      final updatedAtMs = await localDataSource.getLastSessionSnapshotUpdatedAt(
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+      final isFresh =
+          updatedAtMs != null &&
+          DateTime.now().difference(
+                DateTime.fromMillisecondsSinceEpoch(updatedAtMs),
+              ) <=
+              _lastSessionSnapshotTtl;
+
+      final decoded = json.decode(snapshotJson);
+      if (decoded is! Map<String, dynamic>) {
+        return;
+      }
+
+      final sessionJson = decoded['session'];
+      final messagesJson = decoded['messages'];
+      if (sessionJson is! Map<String, dynamic> || messagesJson is! List) {
+        return;
+      }
+
+      final session = ChatSessionModel.fromJson(sessionJson).toDomain();
+      if (_filterSessionsForCurrentContext(<ChatSession>[session]).isEmpty) {
+        return;
+      }
+
+      if (preferredSessionId != null &&
+          preferredSessionId.trim().isNotEmpty &&
+          preferredSessionId != session.id) {
+        return;
+      }
+
+      final selectedSession =
+          _sessions.where((item) => item.id == session.id).firstOrNull ??
+          session;
+      final cachedMessages = messagesJson
+          .whereType<Map<String, dynamic>>()
+          .map((item) => ChatMessageModel.fromJson(item).toDomain())
+          .where((message) => message.sessionId == selectedSession.id)
+          .toList(growable: false);
+      if (cachedMessages.isEmpty) {
+        return;
+      }
+
+      _currentSession = selectedSession;
+      _messages = cachedMessages;
+      _pendingLocalUserMessageIds.clear();
+      _setState(ChatState.loaded);
+
+      if (!isFresh) {
+        AppLogger.info(
+          'Last session snapshot is stale (> ${_lastSessionSnapshotTtl.inDays} days). Revalidating in background.',
+        );
+      }
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to restore last session snapshot',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<void> _saveLastSessionSnapshot(
+    ChatSession session,
+    List<ChatMessage> messages, {
+    required String serverId,
+    required String scopeId,
+  }) async {
+    final payload = <String, dynamic>{
+      'session': ChatSessionModel.fromDomain(session).toJson(),
+      'messages': messages
+          .map((message) => ChatMessageModel.fromDomain(message).toJson())
+          .toList(growable: false),
+    };
+    await localDataSource.saveLastSessionSnapshot(
+      json.encode(payload),
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    await localDataSource.saveLastSessionSnapshotUpdatedAt(
+      DateTime.now().millisecondsSinceEpoch,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+  }
+
+  Future<void> _persistLastSessionSnapshotBestEffort({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    try {
+      final current = _currentSession;
+      if (current == null) {
+        return;
+      }
+      final resolvedServerId = serverId ?? await _resolveServerIdForStorage();
+      final resolvedScopeId = scopeId ?? _resolveContextScopeId();
+      await _saveLastSessionSnapshot(
+        current,
+        _messages,
+        serverId: resolvedServerId,
+        scopeId: resolvedScopeId,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to persist last session snapshot',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<void> _clearLastSessionSnapshotBestEffort({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    try {
+      final resolvedServerId = serverId ?? await _resolveServerIdForStorage();
+      final resolvedScopeId = scopeId ?? _resolveContextScopeId();
+      await localDataSource.clearLastSessionSnapshot(
+        serverId: resolvedServerId,
+        scopeId: resolvedScopeId,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to clear last session snapshot',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   Future<void> _persistSessionCacheBestEffort() async {
     try {
-      final serverId = await _resolveServerScopeId();
+      final serverId = await _resolveServerIdForStorage();
       final scopeId = _resolveContextScopeId();
       await _saveCachedSessions(
         _sessions,
@@ -2682,6 +2928,18 @@ class ChatProvider extends ChangeNotifier {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  Future<String> _resolveServerIdForStorage() async {
+    final stored = await localDataSource.getActiveServerId();
+    if (stored != null && stored.trim().isNotEmpty) {
+      return stored.trim();
+    }
+    final current = _activeServerId.trim();
+    if (current.isNotEmpty) {
+      return current;
+    }
+    return 'legacy';
   }
 
   /// Save current session ID
@@ -2709,23 +2967,31 @@ class ChatProvider extends ChangeNotifier {
   Future<void> loadLastSession({
     required String serverId,
     required String scopeId,
+    String? storedSessionId,
   }) async {
     try {
       if (_sessions.isEmpty) {
         _currentSession = null;
         _messages = <ChatMessage>[];
+        await _clearLastSessionSnapshotBestEffort(
+          serverId: serverId,
+          scopeId: scopeId,
+        );
         return;
       }
 
-      final storedSessionId = await localDataSource.getCurrentSessionId(
-        serverId: serverId,
-        scopeId: scopeId,
-      );
+      final resolvedStoredSessionId =
+          storedSessionId ??
+          await localDataSource.getCurrentSessionId(
+            serverId: serverId,
+            scopeId: scopeId,
+          );
 
       ChatSession? targetSession;
-      if (storedSessionId != null && storedSessionId.trim().isNotEmpty) {
+      if (resolvedStoredSessionId != null &&
+          resolvedStoredSessionId.trim().isNotEmpty) {
         targetSession = _sessions
-            .where((session) => session.id == storedSessionId)
+            .where((session) => session.id == resolvedStoredSessionId)
             .firstOrNull;
       }
 
@@ -2743,9 +3009,11 @@ class ChatProvider extends ChangeNotifier {
 
       if (_messages.isEmpty) {
         await loadMessages(targetSession.id);
+      } else {
+        unawaited(loadMessages(targetSession.id, preserveVisibleState: true));
       }
 
-      if (storedSessionId != targetSession.id) {
+      if (resolvedStoredSessionId != targetSession.id) {
         await _saveCurrentSessionId(
           targetSession.id,
           serverId: serverId,
@@ -2809,6 +3077,12 @@ class ChatProvider extends ChangeNotifier {
       serverId: serverId,
       scopeId: scopeId,
     );
+    unawaited(
+      _persistLastSessionSnapshotBestEffort(
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
     unawaited(_persistSessionCacheBestEffort());
     unawaited(loadSessionInsights(session.id, silent: true));
     _setState(ChatState.loaded);
@@ -2847,12 +3121,21 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Load message list
-  Future<void> loadMessages(String sessionId) async {
+  Future<void> loadMessages(
+    String sessionId, {
+    bool preserveVisibleState = false,
+  }) async {
     final fetchId = ++_messagesFetchId;
     // Sync project ID from ProjectProvider; projectId is optional for the new API
     _currentProjectId = projectProvider.currentProjectId;
 
-    _setState(ChatState.loading);
+    final canKeepVisibleState =
+        preserveVisibleState &&
+        _currentSession?.id == sessionId &&
+        _messages.isNotEmpty;
+    if (!canKeepVisibleState) {
+      _setState(ChatState.loading);
+    }
 
     final result = await getChatMessages(
       GetChatMessagesParams(
@@ -2871,6 +3154,14 @@ class ChatProvider extends ChangeNotifier {
         if (fetchId != _messagesFetchId) {
           return;
         }
+        if (canKeepVisibleState) {
+          AppLogger.warn(
+            'Background session revalidation failed session=$sessionId',
+            error: failure,
+          );
+          _setState(ChatState.loaded);
+          return;
+        }
         _handleFailure(failure);
       },
       (messages) {
@@ -2880,6 +3171,7 @@ class ChatProvider extends ChangeNotifier {
         _messages = messages;
         _pendingLocalUserMessageIds.clear();
         _setState(ChatState.loaded);
+        unawaited(_persistLastSessionSnapshotBestEffort());
       },
     );
   }
@@ -2949,6 +3241,7 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(userMessage);
       _pendingLocalUserMessageIds.add(localMessageId);
       notifyListeners();
+      unawaited(_persistLastSessionSnapshotBestEffort());
 
       // Ensure providers are initialized
       if (_selectedProviderId == null || _selectedModelId == null) {
@@ -2992,8 +3285,12 @@ class ChatProvider extends ChangeNotifier {
         parts: inputParts,
       );
 
-      // Cancel previous subscription
-      _messageSubscription?.cancel();
+      // Cancel previous subscription and invalidate stale callbacks.
+      await _cancelActiveMessageSubscription(
+        reason: 'start-send',
+        invalidateGeneration: true,
+      );
+      final streamGeneration = _messageStreamGeneration;
 
       AppLogger.info(
         'Provider send subscribing stream session=${_currentSession!.id} directory=${projectProvider.currentDirectory ?? "-"}',
@@ -3010,18 +3307,53 @@ class ChatProvider extends ChangeNotifier {
             ),
           ).listen(
             (result) {
-              result.fold((failure) => _handleFailure(failure), (message) {
-                // Update or add assistant message
-                _updateOrAddMessage(message);
-              });
+              if (streamGeneration != _messageStreamGeneration) {
+                AppLogger.debug(
+                  'Ignoring stale send stream event generation=$streamGeneration active=$_messageStreamGeneration',
+                );
+                return;
+              }
+              result.fold(
+                (failure) {
+                  if (_shouldSuppressAbortError(
+                    sessionId: _currentSession?.id,
+                    message: failure.message,
+                  )) {
+                    AppLogger.info(
+                      'Suppressing expected abort failure session=${_currentSession?.id ?? "-"}',
+                    );
+                    _errorMessage = null;
+                    _setState(ChatState.loaded);
+                    return;
+                  }
+                  _handleFailure(failure);
+                },
+                (message) {
+                  // Update or add assistant message
+                  _updateOrAddMessage(message);
+                },
+              );
             },
             onError: (error) {
+              if (streamGeneration != _messageStreamGeneration) {
+                AppLogger.debug(
+                  'Ignoring stale send stream error generation=$streamGeneration active=$_messageStreamGeneration',
+                );
+                return;
+              }
               AppLogger.error('Provider send stream error', error: error);
               _setError('Failed to send message: $error');
             },
             onDone: () {
+              if (streamGeneration != _messageStreamGeneration) {
+                AppLogger.debug(
+                  'Ignoring stale send stream completion generation=$streamGeneration active=$_messageStreamGeneration',
+                );
+                return;
+              }
               AppLogger.info('Provider send stream finished');
               _setState(ChatState.loaded);
+              unawaited(_persistLastSessionSnapshotBestEffort());
               final sessionId = _currentSession?.id;
               if (sessionId != null) {
                 unawaited(loadSessionInsights(sessionId, silent: true));
@@ -3035,6 +3367,14 @@ class ChatProvider extends ChangeNotifier {
         error: error,
         stackTrace: stackTrace,
       );
+      if (_shouldSuppressAbortError(
+        sessionId: _currentSession?.id,
+        message: error.toString(),
+      )) {
+        _errorMessage = null;
+        _setState(ChatState.loaded);
+        return;
+      }
       _setError('Failed to start message send');
     }
   }
@@ -3050,6 +3390,7 @@ class ChatProvider extends ChangeNotifier {
       return false;
     }
 
+    _startAbortSuppression(session.id);
     _isAbortingResponse = true;
     notifyListeners();
     final previousError = _errorMessage;
@@ -3063,29 +3404,36 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    final success = result.fold(
-      (failure) {
+    late final bool success;
+    if (result.isLeft()) {
+      final failure = result.fold((value) => value, (_) => null);
+      _clearAbortSuppression();
+      if (failure != null) {
         _handleFailure(failure);
-        return false;
-      },
-      (_) {
-        _messageSubscription?.cancel();
-        _messageSubscription = null;
-        _setState(ChatState.loaded);
-        _markIncompleteAssistantMessagesAsCompleted();
-        _sessionStatusById[session.id] = const SessionStatusInfo(
-          type: SessionStatusType.idle,
-        );
-        _errorMessage = null;
-        return true;
-      },
-    );
+      }
+      success = false;
+    } else {
+      await _cancelActiveMessageSubscription(
+        reason: 'abort-success',
+        invalidateGeneration: true,
+      );
+      _setState(ChatState.loaded);
+      _markIncompleteAssistantMessagesAsCompleted();
+      _sessionStatusById[session.id] = const SessionStatusInfo(
+        type: SessionStatusType.idle,
+      );
+      _errorMessage = null;
+      success = true;
+    }
 
     _isAbortingResponse = false;
     if (!success && _errorMessage == null) {
       _errorMessage = previousError ?? 'Failed to stop current response';
     }
     notifyListeners();
+    if (success) {
+      unawaited(_persistLastSessionSnapshotBestEffort());
+    }
     return success;
   }
 
@@ -3113,7 +3461,7 @@ class ChatProvider extends ChangeNotifier {
             summary: message.summary,
           );
         })
-        .toList(growable: false);
+        .toList(growable: true);
     if (!changed) {
       return;
     }
@@ -3463,12 +3811,18 @@ class ChatProvider extends ChangeNotifier {
         _currentSession = previousCurrent;
         _messages = previousMessages;
         _sortSessionsInPlace();
+        unawaited(_persistLastSessionSnapshotBestEffort());
         _handleFailure(failure);
       },
       (_) async {
         if (wasCurrent && _currentSession != null) {
           await loadMessages(_currentSession!.id);
           await loadSessionInsights(_currentSession!.id, silent: true);
+        }
+        if (_currentSession == null) {
+          unawaited(_clearLastSessionSnapshotBestEffort());
+        } else {
+          unawaited(_persistLastSessionSnapshotBestEffort());
         }
         notifyListeners();
       },
@@ -3491,7 +3845,12 @@ class ChatProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _messageSubscription?.cancel();
+    unawaited(
+      _cancelActiveMessageSubscription(
+        reason: 'dispose',
+        invalidateGeneration: true,
+      ),
+    );
     _eventStreamGeneration += 1;
     _eventSubscription?.cancel();
     _globalEventSubscription?.cancel();

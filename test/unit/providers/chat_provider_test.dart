@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:codewalk/core/errors/failures.dart';
+import 'package:codewalk/data/models/chat_message_model.dart';
 import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/domain/entities/agent.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
@@ -15,6 +16,7 @@ import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
 import 'package:codewalk/domain/usecases/fork_chat_session.dart';
+import 'package:codewalk/domain/usecases/abort_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
 import 'package:codewalk/domain/usecases/get_agents.dart';
@@ -64,6 +66,7 @@ void main() {
 
       provider = ChatProvider(
         sendChatMessage: SendChatMessage(chatRepository),
+        abortChatSession: AbortChatSession(chatRepository),
         getChatSessions: GetChatSessions(chatRepository),
         createChatSession: CreateChatSession(chatRepository),
         getChatMessages: GetChatMessages(chatRepository),
@@ -496,6 +499,72 @@ void main() {
     });
 
     test(
+      'loadSessions restores cached last-session snapshot and revalidates silently',
+      () async {
+        await provider.projectProvider.initializeProject();
+
+        final snapshotSession = chatRepository.sessions.first;
+        final snapshotMessage = AssistantMessage(
+          id: 'msg_cached',
+          sessionId: snapshotSession.id,
+          time: DateTime.fromMillisecondsSinceEpoch(1010),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(1011),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_cached',
+              messageId: 'msg_cached',
+              sessionId: 'ses_1',
+              text: 'cached assistant reply',
+            ),
+          ],
+        );
+        final snapshotPayload = jsonEncode(<String, dynamic>{
+          'session': ChatSessionModel.fromDomain(snapshotSession).toJson(),
+          'messages': <Map<String, dynamic>>[
+            ChatMessageModel.fromDomain(snapshotMessage).toJson(),
+          ],
+        });
+
+        await localDataSource.saveCurrentSessionId(
+          snapshotSession.id,
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+        await localDataSource.saveLastSessionSnapshot(
+          snapshotPayload,
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+        await localDataSource.saveLastSessionSnapshotUpdatedAt(
+          DateTime.now().millisecondsSinceEpoch,
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+
+        chatRepository.getMessagesFailure = const NetworkFailure(
+          'offline',
+          503,
+        );
+
+        await provider.loadSessions();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(provider.state, ChatState.loaded);
+        expect(provider.currentSession?.id, snapshotSession.id);
+        expect(provider.messages, hasLength(1));
+        expect(
+          (provider.messages.first as AssistantMessage).parts
+              .whereType<TextPart>()
+              .single
+              .text,
+          'cached assistant reply',
+        );
+        expect(provider.errorMessage, isNull);
+        expect(chatRepository.getMessagesCallCount, greaterThan(0));
+      },
+    );
+
+    test(
       'createNewSession selects created session in directory-scoped context',
       () async {
         final scopedRepository = FakeChatRepository(
@@ -660,6 +729,178 @@ void main() {
       );
       final userMessage = provider.messages.first as UserMessage;
       expect((userMessage.parts.first as TextPart).text, '!pwd');
+    });
+
+    test(
+      'session.error with aborted message after stop does not replace chat with global error',
+      () async {
+        final streamController =
+            StreamController<Either<Failure, ChatMessage>>();
+        addTearDown(() async {
+          await streamController.close();
+        });
+        chatRepository.sendMessageHandler = (_, __, ___, ____) =>
+            streamController.stream;
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        await provider.sendMessage('stop me');
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        final stopped = await provider.abortActiveResponse();
+        expect(stopped, isTrue);
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.error',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'error': <String, dynamic>{
+                'message': 'The operation was aborted.',
+              },
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+
+        expect(provider.state, ChatState.loaded);
+        expect(provider.errorMessage, isNull);
+      },
+    );
+
+    test(
+      'session.error with retry marker after stop does not replace chat with global error',
+      () async {
+        final streamController =
+            StreamController<Either<Failure, ChatMessage>>();
+        addTearDown(() async {
+          await streamController.close();
+        });
+        chatRepository.sendMessageHandler = (_, __, ___, ____) =>
+            streamController.stream;
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        await provider.sendMessage('stop me');
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+
+        final stopped = await provider.abortActiveResponse();
+        expect(stopped, isTrue);
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.error',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'error': <String, dynamic>{'message': 'retry'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+
+        expect(provider.state, ChatState.loaded);
+        expect(provider.errorMessage, isNull);
+      },
+    );
+
+    test(
+      'sending again immediately after stop keeps provider stable and delivers next reply',
+      () async {
+        final firstStreamController =
+            StreamController<Either<Failure, ChatMessage>>();
+        addTearDown(() async {
+          await firstStreamController.close();
+        });
+        final assistantAfterStop = AssistantMessage(
+          id: 'msg_after_stop',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(3000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(3100),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_after_stop',
+              messageId: 'msg_after_stop',
+              sessionId: 'ses_1',
+              text: 'new reply after stop',
+            ),
+          ],
+        );
+        var sendCalls = 0;
+        chatRepository.sendMessageHandler = (_, __, ___, ____) {
+          sendCalls += 1;
+          if (sendCalls == 1) {
+            return firstStreamController.stream;
+          }
+          return Stream<Either<Failure, ChatMessage>>.value(
+            Right(assistantAfterStop),
+          );
+        };
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        await provider.sendMessage('first prompt');
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        final stopped = await provider.abortActiveResponse();
+        expect(stopped, isTrue);
+
+        await provider.sendMessage('prompt after stop');
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(provider.state, ChatState.loaded);
+        expect(provider.errorMessage, isNull);
+        final sentAfterStop = provider.messages.whereType<UserMessage>().any((
+          message,
+        ) {
+          return message.parts.whereType<TextPart>().any(
+            (part) => part.text == 'prompt after stop',
+          );
+        });
+        expect(sentAfterStop, isTrue);
+        final assistant = provider.messages.last as AssistantMessage;
+        expect(
+          (assistant.parts.single as TextPart).text,
+          'new reply after stop',
+        );
+      },
+    );
+
+    test('session.error after stop still surfaces non-abort errors', () async {
+      final streamController = StreamController<Either<Failure, ChatMessage>>();
+      addTearDown(() async {
+        await streamController.close();
+      });
+      chatRepository.sendMessageHandler = (_, __, ___, ____) =>
+          streamController.stream;
+
+      await provider.projectProvider.initializeProject();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+
+      await provider.sendMessage('stop me');
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      final stopped = await provider.abortActiveResponse();
+      expect(stopped, isTrue);
+
+      chatRepository.emitEvent(
+        const ChatEvent(
+          type: 'session.error',
+          properties: <String, dynamic>{
+            'sessionID': 'ses_1',
+            'error': <String, dynamic>{'message': 'Rate limit exceeded'},
+          },
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+
+      expect(provider.state, ChatState.error);
+      expect(provider.errorMessage, 'Rate limit exceeded');
     });
 
     test(

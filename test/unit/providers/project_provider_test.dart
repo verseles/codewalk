@@ -133,6 +133,11 @@ void main() {
 
       final deleteOk = await provider.deleteWorktree(created.id);
       expect(deleteOk, isTrue);
+      expect(
+        provider.projects.any((item) => item.path == created.directory),
+        isFalse,
+      );
+      expect(provider.currentProject?.path, isNot(created.directory));
     });
 
     test('listDirectories returns sorted unique directories', () async {

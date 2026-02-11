@@ -432,15 +432,42 @@ class ProjectProvider extends ChangeNotifier {
       },
       (_) async {
         AppLogger.info('Workspace delete succeeded id=$worktreeId');
-        if (removed != null && currentDirectory == removed.directory) {
-          final fallback = _projects
-              .where((item) => item.path != removed.directory)
-              .firstOrNull;
-          if (fallback != null) {
-            _currentProject = fallback;
-            _ensureOpenProject(fallback.id);
-            await _persistProjectState();
+        var projectStateChanged = false;
+        if (removed != null) {
+          final removedProjectIds = _projects
+              .where((item) => item.path == removed.directory)
+              .map((item) => item.id)
+              .toSet();
+          if (removedProjectIds.isNotEmpty) {
+            _projects = _projects
+                .where((item) => !removedProjectIds.contains(item.id))
+                .toList(growable: false);
+            _openProjectIds = _openProjectIds
+                .where((id) => !removedProjectIds.contains(id))
+                .toList(growable: false);
+
+            if (_currentProject != null &&
+                removedProjectIds.contains(_currentProject!.id)) {
+              Project? fallback;
+              for (final openId in _openProjectIds) {
+                fallback = _projects
+                    .where((item) => item.id == openId)
+                    .firstOrNull;
+                if (fallback != null) {
+                  break;
+                }
+              }
+              fallback ??= _projects.firstOrNull;
+              _currentProject = fallback;
+            }
+            if (_currentProject != null) {
+              _ensureOpenProject(_currentProject!.id);
+            }
+            projectStateChanged = true;
           }
+        }
+        if (projectStateChanged) {
+          await _persistProjectState();
         }
         await loadWorktrees(silent: true);
         notifyListeners();

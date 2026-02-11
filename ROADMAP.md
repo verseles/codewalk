@@ -285,7 +285,7 @@ Aplicado refinamento de UX em Settings removendo a seção separada `Sounds` (co
 - [x] Desktop: botão em cada sidebar para ocultar o sidebar como opção
 - [x] Mobile e desktop: input de texto não deve ficar bloqueado enquanto recebe mensagem, apenas não deve poder enviar antes de terminar de receber as respostas do servidor, ou clicar no botão stop pra abortar
 - [ ] No desktop, pesquisar como usar microfone speech-to-text no linux. Pesquisar também se a API atual já funciona no mac/windows/iOS
-- [ ] Context Project / Workspace: botão para deletar workspace fechado
+- [x] Context Project / Workspace: botão para deletar workspace fechado
 - [ ] Usar https://github.com/jlnrrg/simple_icons para exibir icones mais bonitos na lista de arquivos e na lista de providers/icone do modelo selecionado
 - [ ] Desktop: seta pra cima edita a última mensagem enviada (via backend), mobile: touch & hold
 - [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
@@ -294,9 +294,13 @@ Aplicado refinamento de UX em Settings removendo a seção separada `Sounds` (co
 - [x] Transformar o botão `Send` em `Stop` enquanto o assistant estiver respondendo e integrar com `POST /session/{id}/abort` para interromper o pensamento/execução em andamento
 
 Pronta para análise: backlog de ergonomia do composer/desktop concluído com Enter/Shift+Enter no desktop, sidebars recolhíveis com persistência por pane, input editável durante resposta e ação Stop integrada ao abort de sessão com cobertura automatizada.
+Ajuste pós-entrega aplicado: ao acionar `Stop`, erros esperados de cancelamento (`The operation was aborted`/equivalentes) não derrubam mais a conversa para tela global de erro com `Retry`; a interrupção agora mantém o contexto para continuação imediata.
+Ajuste pós-entrega complementar aplicado: corrigido erro ao enviar imediatamente após `Stop` (`Failed to start message send`/`retry`) causado por coleção de mensagens tornada imutável no fluxo de abort; o envio subsequente agora funciona sem exigir `Retry` manual.
 - [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
-- [ ] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
+- [x] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
+
+Pronta para análise: adicionada ação de exclusão na seção de contextos fechados quando o item corresponde a um workspace (`worktree`) e alinhado o estado local de projetos após exclusão para remover imediatamente o contexto órfão da lista. Também foi implementado cache persistido da última sessão (sessão + mensagens) por escopo (`server + directory`) com restore instantâneo na abertura e revalidação silenciosa em background (SWR), preservando usabilidade mesmo com latência alta do servidor remoto.
 
 ## Code Quality and Technical Debt
 

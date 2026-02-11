@@ -12,6 +12,7 @@ import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
+import '../../domain/entities/worktree.dart';
 import '../../domain/entities/experience_settings.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
@@ -1533,24 +1534,55 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   const SizedBox(height: 8),
                   _buildSelectorSectionHeader(dialogContext, 'Closed projects'),
                   for (final project in projectProvider.closedProjects)
-                    ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      leading: const Icon(Icons.folder_off_outlined, size: 20),
-                      title: Text(
-                        _projectDisplayLabel(project),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        _directoryLabel(project.path),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.undo_rounded),
-                        tooltip: 'Reopen ${_projectDisplayLabel(project)}',
-                        onPressed: () =>
-                            unawaited(_reopenProjectContext(project.id)),
-                      ),
+                    Builder(
+                      builder: (_) {
+                        final matchingWorktree = _worktreeForProject(
+                          projectProvider,
+                          project,
+                        );
+                        final displayName = _projectDisplayLabel(project);
+                        return ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                          ),
+                          leading: const Icon(
+                            Icons.folder_off_outlined,
+                            size: 20,
+                          ),
+                          title: Text(
+                            displayName,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            _directoryLabel(project.path),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: Wrap(
+                            spacing: 2,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.undo_rounded),
+                                tooltip: 'Reopen $displayName',
+                                onPressed: () => unawaited(
+                                  _reopenProjectContext(project.id),
+                                ),
+                              ),
+                              if (matchingWorktree != null)
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                  ),
+                                  tooltip:
+                                      'Delete closed workspace $displayName',
+                                  onPressed: () => unawaited(
+                                    _deleteWorkspace(matchingWorktree.id),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                 ],
                 if (worktreeEnabled) ...[
@@ -1724,6 +1756,28 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return path;
     }
     return name;
+  }
+
+  Worktree? _worktreeForProject(
+    ProjectProvider projectProvider,
+    Project project,
+  ) {
+    final projectPath = _normalizedComparablePath(project.path);
+    if (projectPath == null) {
+      return null;
+    }
+    return projectProvider.worktrees.where((worktree) {
+      final worktreePath = _normalizedComparablePath(worktree.directory);
+      return worktreePath != null && worktreePath == projectPath;
+    }).firstOrNull;
+  }
+
+  String? _normalizedComparablePath(String? rawPath) {
+    final normalized = rawPath?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return null;
+    }
+    return normalized.replaceAll(RegExp(r'[\\/]+$'), '');
   }
 
   Widget _buildSessionDrawer() {

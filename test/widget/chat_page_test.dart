@@ -14,6 +14,7 @@ import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/file_node.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
+import 'package:codewalk/domain/entities/worktree.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
@@ -337,6 +338,71 @@ void main() {
     expect(find.text('Current directory: /repo/a'), findsOneWidget);
     expect(find.text('Select a directory/workspace below'), findsOneWidget);
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+  });
+
+  testWidgets('closed workspace shows delete action and removes entry', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_main',
+        name: 'Main',
+        path: '/repo/main',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_main',
+          name: 'Main',
+          path: '/repo/main',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+        Project(
+          id: 'proj_ws',
+          name: 'Workspace Feature',
+          path: '/repo/main/feature-a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+        ),
+      ],
+      worktrees: const <Worktree>[
+        Worktree(
+          id: 'wt_feature_a',
+          name: 'Feature A',
+          directory: '/repo/main/feature-a',
+          projectId: 'proj_main',
+        ),
+      ],
+    );
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Workspace Feature'), findsOneWidget);
+    await tester.tap(
+      find.byTooltip('Delete closed workspace Workspace Feature'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      provider.projectProvider.projects.any(
+        (project) => project.path == '/repo/main/feature-a',
+      ),
+      isFalse,
+    );
+    expect(find.text('Workspace Feature'), findsNothing);
   });
 
   testWidgets('shows basename directory and compact controls on mobile', (

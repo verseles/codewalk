@@ -167,6 +167,32 @@ abstract class AppLocalDataSource {
   });
 
   /// Technical comment translated to English.
+  Future<String?> getLastSessionSnapshot({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveLastSessionSnapshot(
+    String snapshotJson, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<int?> getLastSessionSnapshotUpdatedAt({
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<void> saveLastSessionSnapshotUpdatedAt(
+    int epochMs, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<void> clearLastSessionSnapshot({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
   Future<void> clearChatContextCache({
     required String serverId,
     required String scopeId,
@@ -633,6 +659,87 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }
 
   @override
+  Future<String?> getLastSessionSnapshot({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.lastSessionSnapshotKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveLastSessionSnapshot(
+    String snapshotJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.lastSessionSnapshotKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      snapshotJson,
+    );
+  }
+
+  @override
+  Future<int?> getLastSessionSnapshotUpdatedAt({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getInt(
+      _scopedKey(
+        AppConstants.lastSessionSnapshotUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveLastSessionSnapshotUpdatedAt(
+    int epochMs, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setInt(
+      _scopedKey(
+        AppConstants.lastSessionSnapshotUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      epochMs,
+    );
+  }
+
+  @override
+  Future<void> clearLastSessionSnapshot({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.remove(
+      _scopedKey(
+        AppConstants.lastSessionSnapshotKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+    await sharedPreferences.remove(
+      _scopedKey(
+        AppConstants.lastSessionSnapshotUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
   Future<void> clearChatContextCache({
     required String serverId,
     required String scopeId,
@@ -655,6 +762,16 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       ),
       _scopedKey(
         AppConstants.lastSessionIdKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      _scopedKey(
+        AppConstants.lastSessionSnapshotKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      _scopedKey(
+        AppConstants.lastSessionSnapshotUpdatedAtKey,
         serverId: serverId,
         scopeId: scopeId,
       ),

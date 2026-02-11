@@ -39,6 +39,8 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? openProjectIdsJson;
   String? cachedSessions;
   int? cachedSessionsUpdatedAt;
+  String? lastSessionSnapshot;
+  int? lastSessionSnapshotUpdatedAt;
   bool? basicAuthEnabled;
   String? basicAuthUsername;
   String? basicAuthPassword;
@@ -78,6 +80,8 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     openProjectIdsJson = null;
     cachedSessions = null;
     cachedSessionsUpdatedAt = null;
+    lastSessionSnapshot = null;
+    lastSessionSnapshotUpdatedAt = null;
     basicAuthEnabled = null;
     basicAuthUsername = null;
     basicAuthPassword = null;
@@ -131,6 +135,34 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     if (serverId == null && scopeId == null) return cachedSessionsUpdatedAt;
     return scopedInts[_key(
       'cached_sessions_updated_at',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getLastSessionSnapshot({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) return lastSessionSnapshot;
+    return scopedStrings[_key(
+      'last_session_snapshot',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<int?> getLastSessionSnapshotUpdatedAt({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      return lastSessionSnapshotUpdatedAt;
+    }
+    return scopedInts[_key(
+      'last_session_snapshot_updated_at',
       serverId: serverId,
       scopeId: scopeId,
     )];
@@ -331,6 +363,42 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     }
     scopedInts[_key(
           'cached_sessions_updated_at',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        epochMs;
+  }
+
+  @override
+  Future<void> saveLastSessionSnapshot(
+    String snapshotJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      lastSessionSnapshot = snapshotJson;
+      return;
+    }
+    scopedStrings[_key(
+          'last_session_snapshot',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        snapshotJson;
+  }
+
+  @override
+  Future<void> saveLastSessionSnapshotUpdatedAt(
+    int epochMs, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      lastSessionSnapshotUpdatedAt = epochMs;
+      return;
+    }
+    scopedInts[_key(
+          'last_session_snapshot_updated_at',
           serverId: serverId,
           scopeId: scopeId,
         )] =
@@ -548,6 +616,38 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     );
     scopedStrings.remove(
       _key('last_session_id', serverId: serverId, scopeId: scopeId),
+    );
+    scopedStrings.remove(
+      _key('last_session_snapshot', serverId: serverId, scopeId: scopeId),
+    );
+    scopedInts.remove(
+      _key(
+        'last_session_snapshot_updated_at',
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearLastSessionSnapshot({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      lastSessionSnapshot = null;
+      lastSessionSnapshotUpdatedAt = null;
+      return;
+    }
+    scopedStrings.remove(
+      _key('last_session_snapshot', serverId: serverId, scopeId: scopeId),
+    );
+    scopedInts.remove(
+      _key(
+        'last_session_snapshot_updated_at',
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
     );
   }
 }
