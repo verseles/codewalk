@@ -1,4 +1,6 @@
 import '../models/project_model.dart';
+import '../models/file_content_model.dart';
+import '../models/file_node_model.dart';
 import '../models/worktree_model.dart';
 
 /// Technical comment translated to English.
@@ -29,6 +31,25 @@ abstract class ProjectRemoteDataSource {
 
   /// Technical comment translated to English.
   Future<bool> isGitDirectory(String directory);
+
+  /// List file/directory nodes from a path in current context.
+  Future<List<FileNodeModel>> listFiles({
+    String? directory,
+    required String path,
+  });
+
+  /// Search files by query in current context.
+  Future<List<FileNodeModel>> findFiles({
+    String? directory,
+    required String query,
+    int limit,
+  });
+
+  /// Read file content by path.
+  Future<FileContentModel> readFileContent({
+    String? directory,
+    required String path,
+  });
 }
 
 /// Technical comment translated to English.
@@ -179,5 +200,94 @@ class ProjectRemoteDataSourceImpl implements ProjectRemoteDataSource {
     final map = Map<String, dynamic>.from(data);
     final branch = map['branch'] as String?;
     return branch != null && branch.trim().isNotEmpty;
+  }
+
+  @override
+  Future<List<FileNodeModel>> listFiles({
+    String? directory,
+    required String path,
+  }) async {
+    final queryParams = <String, dynamic>{'path': path.trim()};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory.trim();
+    }
+    final response = await dio.get('/file', queryParameters: queryParams);
+    final data = response.data;
+    if (data is! List) {
+      return const <FileNodeModel>[];
+    }
+    final normalizedPath = path.trim();
+    final normalizedDirectory = directory?.trim();
+    final parentPath = normalizedPath.isEmpty
+        ? '.'
+        : (normalizedPath == '.' &&
+              normalizedDirectory != null &&
+              normalizedDirectory.isNotEmpty)
+        ? normalizedDirectory
+        : normalizedPath;
+    return data
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .map((item) => FileNodeModel.fromJson(item, parentPath: parentPath))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<FileNodeModel>> findFiles({
+    String? directory,
+    required String query,
+    int limit = 50,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'query': query.trim(),
+      'limit': '$limit',
+    };
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory.trim();
+    }
+    final response = await dio.get('/find/file', queryParameters: queryParams);
+    final data = response.data;
+    if (data is! List) {
+      return const <FileNodeModel>[];
+    }
+    return data
+        .map((item) {
+          if (item is String) {
+            return FileNodeModel.fromJson(<String, dynamic>{
+              'path': item,
+              'name': item.split('/').last,
+              'type': 'file',
+            }, parentPath: '/');
+          }
+          if (item is Map) {
+            return FileNodeModel.fromJson(
+              Map<String, dynamic>.from(item),
+              parentPath: '/',
+            );
+          }
+          return FileNodeModel.fromJson(const <String, dynamic>{
+            'path': '',
+            'name': 'file',
+            'type': 'unknown',
+          }, parentPath: '/');
+        })
+        .where((item) => item.path.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  @override
+  Future<FileContentModel> readFileContent({
+    String? directory,
+    required String path,
+  }) async {
+    final queryParams = <String, dynamic>{'path': path.trim()};
+    if (directory != null && directory.trim().isNotEmpty) {
+      queryParams['directory'] = directory.trim();
+    }
+    final response = await dio.get(
+      '/file/content',
+      queryParameters: queryParams,
+    );
+    return FileContentModel.fromResponse(response.data, path: path.trim());
   }
 }

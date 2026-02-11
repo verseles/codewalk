@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
+import '../entities/file_node.dart';
 import '../entities/project.dart';
 import '../entities/worktree.dart';
 
@@ -40,4 +41,23 @@ abstract class ProjectRepository {
 
   /// Determine whether a directory is a Git repository context.
   Future<Either<Failure, bool>> isGitDirectory(String directory);
+
+  /// List file tree nodes for a path.
+  Future<Either<Failure, List<FileNode>>> listFiles({
+    String? directory,
+    required String path,
+  });
+
+  /// Search files for quick open.
+  Future<Either<Failure, List<FileNode>>> findFiles({
+    String? directory,
+    required String query,
+    int limit,
+  });
+
+  /// Read file content.
+  Future<Either<Failure, FileContent>> readFileContent({
+    String? directory,
+    required String path,
+  });
 }

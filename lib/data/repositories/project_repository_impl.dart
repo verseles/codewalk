@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../../core/errors/failures.dart';
+import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/worktree.dart';
 import '../../domain/repositories/project_repository.dart';
@@ -135,6 +136,66 @@ class ProjectRepositoryImpl implements ProjectRepository {
     try {
       final result = await remoteDataSource.isGitDirectory(directory);
       return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<FileNode>>> listFiles({
+    String? directory,
+    required String path,
+  }) async {
+    try {
+      final items = await remoteDataSource.listFiles(
+        directory: directory,
+        path: path,
+      );
+      return Right(
+        items.map((item) => item.toDomain()).toList(growable: false),
+      );
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<FileNode>>> findFiles({
+    String? directory,
+    required String query,
+    int limit = 50,
+  }) async {
+    try {
+      final items = await remoteDataSource.findFiles(
+        directory: directory,
+        query: query,
+        limit: limit,
+      );
+      return Right(
+        items.map((item) => item.toDomain()).toList(growable: false),
+      );
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, FileContent>> readFileContent({
+    String? directory,
+    required String path,
+  }) async {
+    try {
+      final content = await remoteDataSource.readFileContent(
+        directory: directory,
+        path: path,
+      );
+      return Right(content.toDomain());
     } on DioException catch (e) {
       return Left(_handleDioException(e));
     } on Exception catch (e) {

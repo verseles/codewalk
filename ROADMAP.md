@@ -186,13 +186,9 @@ Concluída a paridade de gatilhos no composer com estado dedicado para shell (`!
 Commits: e97544b, 094057a, 8be2d81, ef0a1e7, 53da769, 7ff7b71, 6d0ebe8, dfbda1b
 
 ### Feature 019: File Explorer and Viewer Parity
-Description: Entregar navegação completa de arquivos com ícones, busca rápida, abertura em abas e visualização de conteúdo diretamente na UI, alinhado ao OpenCode Web. (Visit file ROADMAP.feat019.md for full research details)
+Description: Entregar navegação completa de arquivos com ícones, busca rápida, abertura em abas e visualização de conteúdo diretamente na UI, alinhado ao OpenCode Web.
 
-- [x] 19.01 Pesquisa e contrato de dados (`/file`, `/file/content`, `/find/file`, estados da árvore e tabs)
-- [ ] 19.02 Implementar painel de arquivos com árvore expansível, ícones por tipo e ações de abrir/alternar contexto
-- [ ] 19.03 Implementar busca de arquivos (fuzzy/ranqueada) com diálogo dedicado e atalhos para abertura rápida
-- [ ] 19.04 Implementar visualizador de arquivo (texto/binário/diff quando aplicável) com cache e reconciliação com eventos de mudança
-- [ ] 19.05 Adicionar testes para árvore, busca, abertura de tabs e renderização de conteúdo
+Concluída a paridade de exploração/abertura/visualização de arquivos no chat principal com base nos endpoints `/file`, `/find/file` e `/file/content`: foi adicionada árvore expansível com ícones por tipo/extensão, quick open com ranking e atalho (`Ctrl/Cmd+P`), integração do comando builtin `/open`, viewer em abas com estados `loading/ready/empty/binary/error`, invalidação de nós/abas por `session.diff`, e fallback de resolução de path absoluto/relativo por contexto para manter robustez entre servidores. A fundação de dados foi formalizada no domínio/repositório de projeto (`FileNode`, `FileContent`) e a cobertura foi ampliada com testes unitários de ranking/reducer de tabs e testes de widget para árvore, quick open, renderização de conteúdo textual e fallbacks binário/erro.
 
 ### Feature 020: Agent Selector in Composer (Model/Thinking Bar)
 Description: Incluir seletor explícito de agente (Build, Plan e demais permitidos) ao lado de provider/model e thinking, com persistência por contexto e integração de envio. (Visit file ROADMAP.feat020.md for full research details)
@@ -286,3 +282,5 @@ Description: Expandir configurações para incluir notificações e sons por cat
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclados/dispositivos (validar em device real com Gboard e Samsung Keyboard)
 - [ ] Transformar o botão `Send` em `Stop` enquanto o assistant estiver respondendo e integrar com `POST /session/{id}/abort` para interromper o pensamento/execução em andamento
 - [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
+- [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
+- [ ] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)

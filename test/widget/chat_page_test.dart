@@ -10,6 +10,7 @@ import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/domain/entities/file_node.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
@@ -508,6 +509,238 @@ void main() {
       projectRepository.lastCreatedWorktreeDirectory,
       '/repo/a/client/app',
     );
+  });
+
+  testWidgets('desktop file explorer expands tree and opens file viewer tab', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_files',
+        name: 'Project Files',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_files',
+          name: 'Project Files',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(path: '/repo/a/lib', name: 'lib', type: FileNodeType.directory),
+      FileNode(
+        path: '/repo/a/README.md',
+        name: 'README.md',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.filesByPath['/repo/a/lib'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/main.dart',
+        name: 'main.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/main.dart',
+          content: 'void main() => print("ok");',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('file_tree_list')),
+      findsOneWidget,
+    );
+    await tester.tap(
+      find.byKey(const ValueKey<String>('file_tree_item_/repo/a/lib')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('file_viewer_panel')),
+      findsOneWidget,
+    );
+    expect(find.text('void main() => print("ok");'), findsOneWidget);
+  });
+
+  testWidgets('quick open finds file and opens viewer tab', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_search',
+        name: 'Project Search',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_search',
+          name: 'Project Search',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.searchResultsByQuery['chat'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/chat_provider.dart',
+        name: 'chat_provider.dart',
+        type: FileNodeType.file,
+      ),
+      FileNode(
+        path: '/repo/a/docs/chat.md',
+        name: 'chat.md',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/chat_provider.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/chat_provider.dart',
+          content: 'class ChatProvider {}',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('chat_quick_open_chip')),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('quick_open_input')),
+      'chat',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>(
+          'quick_open_result_/repo/a/lib/chat_provider.dart',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('file_viewer_panel')),
+      findsOneWidget,
+    );
+    expect(find.text('class ChatProvider {}'), findsOneWidget);
+  });
+
+  testWidgets('file viewer shows binary and error states', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_binary',
+        name: 'Project Binary',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_binary',
+          name: 'Project Binary',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/assets/logo.png',
+        name: 'logo.png',
+        type: FileNodeType.file,
+      ),
+      FileNode(
+        path: '/repo/a/lib/error.dart',
+        name: 'error.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/assets/logo.png'] =
+        const FileContent(
+          path: '/repo/a/assets/logo.png',
+          content: '',
+          isBinary: true,
+          mimeType: 'image/png',
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('file_tree_item_/repo/a/assets/logo.png'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Binary file preview is not available.'), findsOneWidget);
+
+    projectRepository.fileContentFailure = const ServerFailure(
+      'forced read failure',
+    );
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('file_tree_item_/repo/a/lib/error.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('file_viewer_retry_button')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Failed to read file'), findsOneWidget);
   });
 
   testWidgets('sends message from chat input and renders assistant response', (

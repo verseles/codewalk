@@ -23,6 +23,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-017: Composer Multimodal Input Pipeline (2026-02-10) [Accepted]
 - ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback (2026-02-10) [Accepted]
 - ADR-019: Prompt Power Composer Triggers (`@`, `!`, `/`) (2026-02-10) [Accepted]
+- ADR-020: File Explorer State and Context-Scoped Viewer Orchestration (2026-02-11) [Accepted]
 
 ---
 
@@ -837,6 +838,70 @@ The chat composer only supported plain text input. OpenCode server accepts file 
 - `lib/presentation/widgets/chat_input_widget.dart` - attachment picker, speech-to-text, hold-to-newline
 - `android/app/src/main/AndroidManifest.xml` - `RECORD_AUDIO` permission
 - `pubspec.yaml` - `speech_to_text` and `file_picker` dependencies
+
+### References
+
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-020: File Explorer State and Context-Scoped Viewer Orchestration
+
+Status: Accepted
+Date: 2026-02-11
+
+### Context
+
+Feature 019 required parity for file navigation inside chat:
+
+- expandable file tree (`/file`),
+- quick-open search (`/find/file`),
+- file viewer tabs (`/file/content`) with binary/error fallbacks.
+
+CodeWalk already keeps project/session context scoped by `serverId::directory`. Without explicit explorer scoping, file trees/tabs could leak across contexts and show stale file content after session diffs or context switching.
+
+### Decision
+
+1. Introduce explicit file domain contracts in the project layer:
+   - `FileNode` and `FileContent` entities
+   - `ProjectRepository` methods: `listFiles`, `findFiles`, `readFileContent`
+2. Keep explorer UI state local to `ChatPage`, keyed by `ProjectProvider.contextKey`, with:
+   - directory tree cache per context,
+   - tab state (`open/active`) per context,
+   - lazy loading per directory node.
+3. Add quick-open ranking/reducer utilities in a separate presentation utility module (`file_explorer_logic.dart`) for deterministic behavior and testability.
+4. Reconcile viewer/tree state with `session.diff` by:
+   - reloading matching open tabs,
+   - invalidating affected directory nodes,
+   - refreshing root tree lazily.
+5. Use path-resolution fallback (absolute + context-relative candidates) for list/read operations to tolerate server differences around `path` handling.
+
+### Rationale
+
+- Context-keyed explorer state aligns with existing chat/provider context isolation and prevents cross-project contamination.
+- Keeping explorer orchestration in `ChatPage` avoids coupling file-view UI lifecycle with global provider state not needed outside chat.
+- Utility extraction for ranking/tab reducers improves reuse and keeps logic unit-testable independently of widget lifecycle.
+- Diff-aware refresh minimizes expensive full reloads while preserving correctness for open files.
+
+### Consequences
+
+- Positive: users can explore, quick-open, and read files directly in chat with tab continuity.
+- Positive: file explorer/viewer state remains isolated across server/directory contexts.
+- Positive: fallback handling for binary/empty/error content prevents viewer crashes on unsupported files.
+- Trade-off: `ChatPage` state complexity increased due to file orchestration and context caches.
+- Trade-off: path fallback logic introduces extra request attempts in some server setups.
+
+### Key Files
+
+- `lib/domain/entities/file_node.dart`
+- `lib/domain/repositories/project_repository.dart`
+- `lib/data/models/file_node_model.dart`
+- `lib/data/models/file_content_model.dart`
+- `lib/data/datasources/project_remote_datasource.dart`
+- `lib/presentation/providers/project_provider.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `lib/presentation/utils/file_explorer_logic.dart`
 
 ### References
 

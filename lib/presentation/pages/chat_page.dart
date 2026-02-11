@@ -9,11 +9,13 @@ import '../../core/network/dio_client.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
+import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/project_provider.dart';
+import '../utils/file_explorer_logic.dart';
 
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
@@ -33,6 +35,10 @@ class _RefreshIntent extends Intent {
 
 class _FocusInputIntent extends Intent {
   const _FocusInputIntent();
+}
+
+class _QuickOpenIntent extends Intent {
+  const _QuickOpenIntent();
 }
 
 class _EscapeIntent extends Intent {
@@ -66,10 +72,13 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   static const double _mobileBreakpoint = 840;
   static const double _largeDesktopBreakpoint = 1200;
+  static const double _filePaneBreakpoint = 1100;
   static const double _desktopSessionPaneWidth = 300;
   static const double _largeDesktopSessionPaneWidth = 320;
+  static const double _desktopFilePaneWidth = 280;
   static const double _largeDesktopUtilityPaneWidth = 280;
   static const double _nearBottomThreshold = 200;
+  static const String _rootTreeCacheKey = '__root__';
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
@@ -84,6 +93,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   bool _showScrollToLatestFab = false;
   bool _hasUnreadMessagesBelow = false;
   bool _isAppInForeground = true;
+  final Map<String, _FileExplorerContextState> _fileContextStates =
+      <String, _FileExplorerContextState>{};
+  final Map<String, String> _fileDiffSignaturesByContext = <String, String>{};
 
   @override
   void initState() {
@@ -701,6 +713,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         final width = constraints.maxWidth;
         final isMobile = width < _mobileBreakpoint;
         final isLargeDesktop = width >= _largeDesktopBreakpoint;
+        final showDesktopFilePane = !isMobile && width >= _filePaneBreakpoint;
         final sessionPaneWidth = isLargeDesktop
             ? _largeDesktopSessionPaneWidth
             : _desktopSessionPaneWidth;
@@ -715,6 +728,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               const _FocusInputIntent(),
           const SingleActivator(LogicalKeyboardKey.keyL, meta: true):
               const _FocusInputIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyP, control: true):
+              const _QuickOpenIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyP, meta: true):
+              const _QuickOpenIntent(),
           const SingleActivator(LogicalKeyboardKey.escape):
               const _EscapeIntent(),
         };
@@ -728,6 +745,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           _FocusInputIntent: CallbackAction<_FocusInputIntent>(
             onInvoke: (_) {
               _focusInput();
+              return null;
+            },
+          ),
+          _QuickOpenIntent: CallbackAction<_QuickOpenIntent>(
+            onInvoke: (_) {
+              _openQuickFileDialogFromCurrentContext();
               return null;
             },
           ),
@@ -766,7 +789,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               child: Scaffold(
                 backgroundColor: Theme.of(context).colorScheme.background,
                 resizeToAvoidBottomInset: true,
-                appBar: _buildAppBar(),
+                appBar: _buildAppBar(
+                  isMobile: isMobile,
+                  showDesktopFilePane: showDesktopFilePane,
+                ),
                 drawer: isMobile ? _buildSessionDrawer() : null,
                 body: Consumer<ChatProvider>(
                   builder: (context, chatProvider, child) {
@@ -794,6 +820,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             context,
                           ).colorScheme.outline.withOpacity(0.12),
                         ),
+                        if (showDesktopFilePane) ...[
+                          SizedBox(
+                            width: _desktopFilePaneWidth,
+                            child: _buildDesktopFilePane(chatProvider),
+                          ),
+                          VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withOpacity(0.12),
+                          ),
+                        ],
                         Expanded(
                           child: _buildChatContent(
                             chatProvider: chatProvider,
@@ -827,9 +866,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar({
+    required bool isMobile,
+    required bool showDesktopFilePane,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isMobile = MediaQuery.sizeOf(context).width < _mobileBreakpoint;
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
       titleSpacing: isMobile ? 0 : 8,
@@ -1011,6 +1052,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           icon: const Icon(Icons.add_comment_outlined),
           tooltip: 'New Chat',
           onPressed: _createNewSession,
+        ),
+        IconButton(
+          key: const ValueKey<String>('appbar_quick_open_button'),
+          icon: Icon(
+            showDesktopFilePane
+                ? Icons.find_in_page_outlined
+                : Icons.folder_open_outlined,
+          ),
+          tooltip: showDesktopFilePane ? 'Quick Open File' : 'Open Files',
+          onPressed: _openQuickFileDialogFromCurrentContext,
         ),
         if (!refreshlessEnabled)
           IconButton(
@@ -1875,6 +1926,1174 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildDesktopFilePane(ChatProvider chatProvider) {
+    return Consumer2<ProjectProvider, AppProvider>(
+      builder: (context, projectProvider, appProvider, child) {
+        final fileState = _resolveFileContextState(
+          projectProvider: projectProvider,
+          appProvider: appProvider,
+        );
+        _reconcileFileContextWithSessionDiff(
+          contextKey: projectProvider.contextKey,
+          fileState: fileState,
+          chatProvider: chatProvider,
+          projectProvider: projectProvider,
+        );
+        return SafeArea(
+          child: _buildFileExplorerPanel(
+            fileState: fileState,
+            projectProvider: projectProvider,
+          ),
+        );
+      },
+    );
+  }
+
+  String _normalizeFilePath(String value) {
+    var normalized = value.trim().replaceAll('\\', '/');
+    if (normalized.length > 1) {
+      normalized = normalized.replaceAll(RegExp(r'/+$'), '');
+    }
+    return normalized;
+  }
+
+  String _fileBasename(String path) {
+    final normalized = _normalizeFilePath(path);
+    if (normalized.isEmpty || normalized == '/') {
+      return normalized.isEmpty ? 'file' : '/';
+    }
+    final separator = normalized.lastIndexOf('/');
+    if (separator < 0 || separator == normalized.length - 1) {
+      return normalized;
+    }
+    return normalized.substring(separator + 1);
+  }
+
+  String _resolveFileRootDirectory({
+    required ProjectProvider projectProvider,
+    required AppProvider appProvider,
+  }) {
+    final directory = projectProvider.currentDirectory;
+    if (directory != null && directory.trim().isNotEmpty) {
+      return _normalizeFilePath(directory);
+    }
+    final appPath = appProvider.appInfo?.path.data;
+    if (appPath != null && appPath.trim().isNotEmpty) {
+      return _normalizeFilePath(appPath);
+    }
+    return '/';
+  }
+
+  _FileExplorerContextState _resolveFileContextState({
+    required ProjectProvider projectProvider,
+    required AppProvider appProvider,
+  }) {
+    final contextKey = projectProvider.contextKey;
+    final rootDirectory = _resolveFileRootDirectory(
+      projectProvider: projectProvider,
+      appProvider: appProvider,
+    );
+    final state = _fileContextStates.putIfAbsent(
+      contextKey,
+      () => _FileExplorerContextState(rootDirectory: rootDirectory),
+    );
+    if (state.rootDirectory != rootDirectory) {
+      state.resetForRoot(rootDirectory);
+    }
+    _ensureFileRootLoaded(state: state, projectProvider: projectProvider);
+    return state;
+  }
+
+  void _ensureFileRootLoaded({
+    required _FileExplorerContextState state,
+    required ProjectProvider projectProvider,
+  }) {
+    if (state.rootLoadScheduled) {
+      return;
+    }
+    if (state.loadingDirectories.contains(_rootTreeCacheKey)) {
+      return;
+    }
+    if (state.directoryChildren.containsKey(_rootTreeCacheKey)) {
+      return;
+    }
+    state.rootLoadScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      state.rootLoadScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      if (state.loadingDirectories.contains(_rootTreeCacheKey)) {
+        return;
+      }
+      if (state.directoryChildren.containsKey(_rootTreeCacheKey)) {
+        return;
+      }
+      unawaited(
+        _loadRootDirectoryNodes(state: state, projectProvider: projectProvider),
+      );
+    });
+  }
+
+  void _reconcileFileContextWithSessionDiff({
+    required String contextKey,
+    required _FileExplorerContextState fileState,
+    required ChatProvider chatProvider,
+    required ProjectProvider projectProvider,
+  }) {
+    final diffFiles =
+        chatProvider.currentSessionDiff
+            .map((item) => item.file.trim())
+            .where((item) => item.isNotEmpty)
+            .toSet()
+            .toList(growable: false)
+          ..sort();
+    final signature = diffFiles.join('|');
+    if (_fileDiffSignaturesByContext[contextKey] == signature) {
+      return;
+    }
+    _fileDiffSignaturesByContext[contextKey] = signature;
+    if (signature.isEmpty) {
+      return;
+    }
+
+    final staleDirectoryKeys = fileState.directoryChildren.keys
+        .where((key) {
+          if (key == _rootTreeCacheKey) {
+            return false;
+          }
+          final normalizedDirectory = _normalizeFilePath(key);
+          return diffFiles.any((diffFile) {
+            final absoluteDiff = _resolveDiffAbsolutePath(
+              diffFile: diffFile,
+              rootDirectory: projectProvider.currentDirectory,
+            );
+            if (absoluteDiff == null) {
+              return false;
+            }
+            return absoluteDiff == normalizedDirectory ||
+                absoluteDiff.startsWith('$normalizedDirectory/');
+          });
+        })
+        .toList(growable: false);
+    for (final key in staleDirectoryKeys) {
+      fileState.directoryChildren.remove(key);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      for (final tabPath in fileState.tabSelection.openPaths) {
+        if (_diffMatchesPath(
+          tabPath: tabPath,
+          diffFiles: diffFiles,
+          rootDirectory: projectProvider.currentDirectory,
+        )) {
+          unawaited(
+            _reloadFileTab(
+              fileState: fileState,
+              projectProvider: projectProvider,
+              path: tabPath,
+              silent: true,
+            ),
+          );
+        }
+      }
+
+      unawaited(
+        _loadRootDirectoryNodes(
+          state: fileState,
+          projectProvider: projectProvider,
+          force: true,
+          showLoader: false,
+        ),
+      );
+    });
+  }
+
+  bool _diffMatchesPath({
+    required String tabPath,
+    required List<String> diffFiles,
+    required String? rootDirectory,
+  }) {
+    final normalizedTabPath = _normalizeFilePath(tabPath);
+    for (final diffFile in diffFiles) {
+      final normalizedDiff = _normalizeFilePath(diffFile);
+      if (normalizedDiff.isEmpty) {
+        continue;
+      }
+      if (normalizedTabPath == normalizedDiff ||
+          normalizedTabPath.endsWith('/$normalizedDiff')) {
+        return true;
+      }
+      final absoluteDiff = _resolveDiffAbsolutePath(
+        diffFile: diffFile,
+        rootDirectory: rootDirectory,
+      );
+      if (absoluteDiff != null && normalizedTabPath == absoluteDiff) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  String? _resolveDiffAbsolutePath({
+    required String diffFile,
+    required String? rootDirectory,
+  }) {
+    final normalizedDiff = _normalizeFilePath(diffFile);
+    if (normalizedDiff.isEmpty) {
+      return null;
+    }
+    if (normalizedDiff.startsWith('/')) {
+      return normalizedDiff;
+    }
+    final normalizedRoot = _normalizeFilePath(rootDirectory ?? '');
+    if (normalizedRoot.isEmpty || normalizedRoot == '/') {
+      return _normalizeFilePath('/$normalizedDiff');
+    }
+    return _normalizeFilePath('$normalizedRoot/$normalizedDiff');
+  }
+
+  Future<void> _loadRootDirectoryNodes({
+    required _FileExplorerContextState state,
+    required ProjectProvider projectProvider,
+    bool force = false,
+    bool showLoader = true,
+  }) async {
+    final contextDirectory = projectProvider.currentDirectory?.trim();
+    final requestPath =
+        (contextDirectory != null && contextDirectory.isNotEmpty)
+        ? '.'
+        : state.rootDirectory;
+    await _loadDirectoryNodes(
+      state: state,
+      projectProvider: projectProvider,
+      cacheKey: _rootTreeCacheKey,
+      requestPath: requestPath,
+      force: force,
+      showLoader: showLoader,
+    );
+  }
+
+  Future<void> _loadDirectoryNodes({
+    required _FileExplorerContextState state,
+    required ProjectProvider projectProvider,
+    required String cacheKey,
+    required String requestPath,
+    bool force = false,
+    bool showLoader = true,
+  }) async {
+    if (state.loadingDirectories.contains(cacheKey)) {
+      return;
+    }
+    if (!force && state.directoryChildren.containsKey(cacheKey)) {
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        state.loadingDirectories.add(cacheKey);
+      });
+    }
+
+    final listed = await _listFilesWithFallback(
+      projectProvider: projectProvider,
+      requestPath: requestPath,
+    );
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      state.loadingDirectories.remove(cacheKey);
+      if (listed == null) {
+        if (cacheKey == _rootTreeCacheKey) {
+          state.treeError = projectProvider.error ?? 'Failed to load files';
+        }
+        return;
+      }
+      state.directoryChildren[cacheKey] = listed;
+      if (cacheKey == _rootTreeCacheKey) {
+        state.treeError = null;
+      }
+      if (showLoader) {
+        state.lastLoadedAt = DateTime.now();
+      }
+    });
+  }
+
+  Future<List<FileNode>?> _listFilesWithFallback({
+    required ProjectProvider projectProvider,
+    required String requestPath,
+  }) async {
+    final candidates = _listPathCandidates(
+      requestPath: requestPath,
+      contextDirectory: projectProvider.currentDirectory,
+    );
+    for (final candidate in candidates) {
+      final listed = await projectProvider.listFiles(path: candidate);
+      if (listed != null) {
+        return listed;
+      }
+    }
+    return null;
+  }
+
+  List<String> _listPathCandidates({
+    required String requestPath,
+    required String? contextDirectory,
+  }) {
+    final normalizedPath = _normalizeFilePath(requestPath);
+    final normalizedContext = contextDirectory == null
+        ? ''
+        : _normalizeFilePath(contextDirectory);
+    final candidates = <String>{};
+
+    if (normalizedPath.isEmpty || normalizedPath == '.') {
+      candidates.add('.');
+    } else {
+      candidates.add(normalizedPath);
+    }
+
+    if (normalizedContext.isNotEmpty && normalizedPath.isNotEmpty) {
+      if (normalizedPath == normalizedContext) {
+        candidates.add('.');
+      }
+      final contextPrefix = '$normalizedContext/';
+      if (normalizedPath.startsWith(contextPrefix)) {
+        final relative = normalizedPath.substring(contextPrefix.length);
+        if (relative.isNotEmpty) {
+          candidates.add(relative);
+          candidates.add('./$relative');
+        }
+      }
+    }
+
+    return candidates.toList(growable: false);
+  }
+
+  List<String> _contentPathCandidates({
+    required String path,
+    required String? contextDirectory,
+  }) {
+    final normalizedPath = _normalizeFilePath(path);
+    final normalizedContext = contextDirectory == null
+        ? ''
+        : _normalizeFilePath(contextDirectory);
+    final candidates = <String>{normalizedPath};
+    if (normalizedContext.isNotEmpty) {
+      final contextPrefix = '$normalizedContext/';
+      if (normalizedPath.startsWith(contextPrefix)) {
+        final relative = normalizedPath.substring(contextPrefix.length);
+        if (relative.isNotEmpty) {
+          candidates.add(relative);
+          candidates.add('./$relative');
+        }
+      }
+    }
+    return candidates.toList(growable: false);
+  }
+
+  Future<FileContent?> _readFileContentWithFallback({
+    required ProjectProvider projectProvider,
+    required String path,
+  }) async {
+    final candidates = _contentPathCandidates(
+      path: path,
+      contextDirectory: projectProvider.currentDirectory,
+    );
+    for (final candidate in candidates) {
+      final content = await projectProvider.readFileContent(path: candidate);
+      if (content != null) {
+        return content;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _openQuickFileDialogFromCurrentContext() async {
+    if (!mounted) {
+      return;
+    }
+    final projectProvider = context.read<ProjectProvider>();
+    final appProvider = context.read<AppProvider>();
+    final fileState = _resolveFileContextState(
+      projectProvider: projectProvider,
+      appProvider: appProvider,
+    );
+    await _openQuickFileDialog(
+      fileState: fileState,
+      projectProvider: projectProvider,
+    );
+  }
+
+  Future<void> _openQuickFileDialog({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+  }) async {
+    final queryController = TextEditingController();
+    var loading = false;
+    var errorMessage = '';
+    var resultNodes = <FileNode>[];
+    var searchRequestId = 0;
+    var dialogActive = true;
+
+    resultNodes = fileState.tabSelection.openPaths
+        .map(
+          (path) => FileNode(
+            path: path,
+            name: _fileBasename(path),
+            type: FileNodeType.file,
+          ),
+        )
+        .toList(growable: false);
+
+    Future<void> runSearch(StateSetter setModalState, String query) async {
+      final normalized = query.trim();
+      final requestId = ++searchRequestId;
+
+      if (normalized.isEmpty) {
+        final recent = fileState.tabSelection.openPaths
+            .map(
+              (path) => FileNode(
+                path: path,
+                name: _fileBasename(path),
+                type: FileNodeType.file,
+              ),
+            )
+            .toList(growable: false);
+        if (!dialogActive) {
+          return;
+        }
+        setModalState(() {
+          loading = false;
+          errorMessage = '';
+          resultNodes = recent;
+        });
+        return;
+      }
+
+      if (!dialogActive) {
+        return;
+      }
+      setModalState(() {
+        loading = true;
+        errorMessage = '';
+      });
+
+      final found = await projectProvider.findFiles(
+        query: normalized,
+        limit: 120,
+      );
+      if (!mounted || requestId != searchRequestId || !dialogActive) {
+        return;
+      }
+      if (found == null) {
+        setModalState(() {
+          loading = false;
+          resultNodes = <FileNode>[];
+          errorMessage = projectProvider.error ?? 'Failed to search files';
+        });
+        return;
+      }
+
+      final byPath = <String, FileNode>{
+        for (final node in found)
+          if (node.path.trim().isNotEmpty) _normalizeFilePath(node.path): node,
+      };
+      final rankedPaths = rankQuickOpenPaths(
+        byPath.keys,
+        normalized,
+        limit: 40,
+      );
+      setModalState(() {
+        loading = false;
+        errorMessage = '';
+        resultNodes = rankedPaths
+            .map((path) {
+              final node = byPath[path];
+              if (node != null) {
+                return node;
+              }
+              return FileNode(
+                path: path,
+                name: _fileBasename(path),
+                type: FileNodeType.file,
+              );
+            })
+            .where((node) => !node.isDirectory)
+            .toList(growable: false);
+      });
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setModalState) {
+            return AlertDialog(
+              title: const Text('Quick Open File'),
+              content: SizedBox(
+                width: 520,
+                height: 420,
+                child: Column(
+                  children: [
+                    TextField(
+                      key: const ValueKey<String>('quick_open_input'),
+                      controller: queryController,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Search files by name or path',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        unawaited(runSearch(setModalState, value));
+                      },
+                      onSubmitted: (value) async {
+                        if (resultNodes.isEmpty) {
+                          return;
+                        }
+                        final selected = resultNodes.first;
+                        dialogActive = false;
+                        Navigator.of(dialogContext).pop();
+                        await _openFileInTab(
+                          fileState: fileState,
+                          projectProvider: projectProvider,
+                          path: selected.path,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : errorMessage.isNotEmpty
+                          ? Center(
+                              child: Text(
+                                errorMessage,
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : resultNodes.isEmpty
+                          ? Center(
+                              child: Text(
+                                queryController.text.trim().isEmpty
+                                    ? 'No open files yet. Type to search.'
+                                    : 'No files found',
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: resultNodes.length,
+                              itemBuilder: (context, index) {
+                                final node = resultNodes[index];
+                                final normalizedPath = _normalizeFilePath(
+                                  node.path,
+                                );
+                                return ListTile(
+                                  key: ValueKey<String>(
+                                    'quick_open_result_$normalizedPath',
+                                  ),
+                                  dense: true,
+                                  leading: Icon(
+                                    _fileIconForNode(node),
+                                    size: 18,
+                                  ),
+                                  title: Text(
+                                    node.name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    normalizedPath,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  onTap: () async {
+                                    dialogActive = false;
+                                    Navigator.of(dialogContext).pop();
+                                    await _openFileInTab(
+                                      fileState: fileState,
+                                      projectProvider: projectProvider,
+                                      path: normalizedPath,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    dialogActive = false;
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    dialogActive = false;
+  }
+
+  Future<void> _openFileInTab({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required String path,
+  }) async {
+    final normalizedPath = _normalizeFilePath(path);
+    if (normalizedPath.isEmpty) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        fileState.tabSelection = openFileTab(
+          fileState.tabSelection,
+          normalizedPath,
+        );
+      });
+    }
+
+    final cached = fileState.tabsByPath[normalizedPath];
+    if (cached != null &&
+        cached.status != _FileTabLoadStatus.error &&
+        cached.status != _FileTabLoadStatus.loading) {
+      return;
+    }
+
+    await _reloadFileTab(
+      fileState: fileState,
+      projectProvider: projectProvider,
+      path: normalizedPath,
+    );
+  }
+
+  void _activateFileTab({
+    required _FileExplorerContextState fileState,
+    required String path,
+  }) {
+    setState(() {
+      fileState.tabSelection = activateFileTab(fileState.tabSelection, path);
+    });
+  }
+
+  void _closeFileTab({
+    required _FileExplorerContextState fileState,
+    required String path,
+  }) {
+    setState(() {
+      fileState.tabSelection = closeFileTab(fileState.tabSelection, path);
+    });
+  }
+
+  Future<void> _reloadFileTab({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required String path,
+    bool silent = false,
+  }) async {
+    final normalizedPath = _normalizeFilePath(path);
+    if (!silent && mounted) {
+      setState(() {
+        fileState.tabsByPath[normalizedPath] = const _FileTabViewState(
+          status: _FileTabLoadStatus.loading,
+          content: '',
+        );
+      });
+    }
+
+    final content = await _readFileContentWithFallback(
+      projectProvider: projectProvider,
+      path: normalizedPath,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      if (content == null) {
+        fileState.tabsByPath[normalizedPath] = _FileTabViewState(
+          status: _FileTabLoadStatus.error,
+          content: '',
+          errorMessage: projectProvider.error ?? 'Failed to load file content',
+        );
+        return;
+      }
+      if (content.isBinary) {
+        fileState.tabsByPath[normalizedPath] = _FileTabViewState(
+          status: _FileTabLoadStatus.binary,
+          content: '',
+          mimeType: content.mimeType,
+        );
+        return;
+      }
+      final text = content.content;
+      if (text.isEmpty) {
+        fileState.tabsByPath[normalizedPath] = _FileTabViewState(
+          status: _FileTabLoadStatus.empty,
+          content: '',
+          mimeType: content.mimeType,
+        );
+        return;
+      }
+      fileState.tabsByPath[normalizedPath] = _FileTabViewState(
+        status: _FileTabLoadStatus.ready,
+        content: text,
+        mimeType: content.mimeType,
+      );
+    });
+  }
+
+  Widget _buildFileExplorerPanel({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+  }) {
+    final rootNodes = fileState.directoryChildren[_rootTreeCacheKey];
+    final rootLoading = fileState.loadingDirectories.contains(
+      _rootTreeCacheKey,
+    );
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Files',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  IconButton(
+                    key: const ValueKey<String>('file_tree_quick_open_button'),
+                    tooltip: 'Quick Open',
+                    onPressed: () {
+                      unawaited(
+                        _openQuickFileDialog(
+                          fileState: fileState,
+                          projectProvider: projectProvider,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.search),
+                  ),
+                  IconButton(
+                    key: const ValueKey<String>('file_tree_refresh_button'),
+                    tooltip: 'Refresh files',
+                    onPressed: () {
+                      unawaited(
+                        _loadRootDirectoryNodes(
+                          state: fileState,
+                          projectProvider: projectProvider,
+                          force: true,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.refresh_rounded),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Text(
+                _directoryLabel(projectProvider.currentDirectory),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: Builder(
+                builder: (_) {
+                  if (rootLoading && (rootNodes == null || rootNodes.isEmpty)) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (fileState.treeError != null &&
+                      (rootNodes == null || rootNodes.isEmpty)) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              fileState.treeError!,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            OutlinedButton(
+                              onPressed: () {
+                                unawaited(
+                                  _loadRootDirectoryNodes(
+                                    state: fileState,
+                                    projectProvider: projectProvider,
+                                    force: true,
+                                  ),
+                                );
+                              },
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  if (rootNodes == null || rootNodes.isEmpty) {
+                    return const Center(child: Text('No files found'));
+                  }
+                  return ListView(
+                    key: const ValueKey<String>('file_tree_list'),
+                    children: _buildFileTreeChildren(
+                      fileState: fileState,
+                      projectProvider: projectProvider,
+                      parentCacheKey: _rootTreeCacheKey,
+                      depth: 0,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildFileTreeChildren({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required String parentCacheKey,
+    required int depth,
+  }) {
+    final nodes =
+        fileState.directoryChildren[parentCacheKey] ?? const <FileNode>[];
+    final rows = <Widget>[];
+    for (final node in nodes) {
+      final isExpanded = fileState.expandedDirectories.contains(node.path);
+      final isLoading = fileState.loadingDirectories.contains(node.path);
+      final isActiveFile = fileState.tabSelection.activePath == node.path;
+      rows.add(
+        InkWell(
+          key: ValueKey<String>(
+            'file_tree_item_${_normalizeFilePath(node.path)}',
+          ),
+          onTap: () {
+            if (node.isDirectory) {
+              if (isExpanded) {
+                setState(() {
+                  fileState.expandedDirectories.remove(node.path);
+                });
+                return;
+              }
+              setState(() {
+                fileState.expandedDirectories.add(node.path);
+              });
+              unawaited(
+                _loadDirectoryNodes(
+                  state: fileState,
+                  projectProvider: projectProvider,
+                  cacheKey: node.path,
+                  requestPath: node.path,
+                ),
+              );
+              return;
+            }
+            unawaited(
+              _openFileInTab(
+                fileState: fileState,
+                projectProvider: projectProvider,
+                path: node.path,
+              ),
+            );
+          },
+          child: Container(
+            color: isActiveFile
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.12)
+                : null,
+            padding: EdgeInsets.fromLTRB(8 + (depth * 14), 6, 8, 6),
+            child: Row(
+              children: [
+                if (node.isDirectory)
+                  Icon(
+                    isExpanded ? Icons.expand_more : Icons.chevron_right,
+                    size: 16,
+                  )
+                else
+                  const SizedBox(width: 16),
+                const SizedBox(width: 2),
+                Icon(
+                  _fileIconForNode(node),
+                  size: 16,
+                  color: node.isDirectory
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    node.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                if (isLoading)
+                  const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 1.6),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+      if (node.isDirectory && isExpanded) {
+        rows.addAll(
+          _buildFileTreeChildren(
+            fileState: fileState,
+            projectProvider: projectProvider,
+            parentCacheKey: node.path,
+            depth: depth + 1,
+          ),
+        );
+      }
+    }
+    return rows;
+  }
+
+  IconData _fileIconForNode(FileNode node) {
+    if (node.isDirectory) {
+      return Icons.folder_outlined;
+    }
+    return _fileIconForPath(node.path);
+  }
+
+  IconData _fileIconForPath(String path) {
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.md') || lower.endsWith('.txt')) {
+      return Icons.description_outlined;
+    }
+    if (lower.endsWith('.dart') ||
+        lower.endsWith('.ts') ||
+        lower.endsWith('.tsx') ||
+        lower.endsWith('.js') ||
+        lower.endsWith('.jsx') ||
+        lower.endsWith('.py') ||
+        lower.endsWith('.go') ||
+        lower.endsWith('.rs') ||
+        lower.endsWith('.java') ||
+        lower.endsWith('.kt') ||
+        lower.endsWith('.swift')) {
+      return Icons.code_outlined;
+    }
+    if (lower.endsWith('.json') ||
+        lower.endsWith('.yaml') ||
+        lower.endsWith('.yml') ||
+        lower.endsWith('.toml') ||
+        lower.endsWith('.ini') ||
+        lower.endsWith('.xml')) {
+      return Icons.data_object_rounded;
+    }
+    if (lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.webp') ||
+        lower.endsWith('.svg')) {
+      return Icons.image_outlined;
+    }
+    if (lower.endsWith('.pdf')) {
+      return Icons.picture_as_pdf_outlined;
+    }
+    return Icons.insert_drive_file_outlined;
+  }
+
+  Widget _buildFileViewerPanel({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+  }) {
+    if (!fileState.tabSelection.hasOpenTabs) {
+      return const SizedBox.shrink();
+    }
+
+    final activePath =
+        fileState.tabSelection.activePath ??
+        fileState.tabSelection.openPaths.first;
+    final active =
+        fileState.tabsByPath[activePath] ??
+        const _FileTabViewState(
+          status: _FileTabLoadStatus.loading,
+          content: '',
+        );
+
+    return Container(
+      key: const ValueKey<String>('file_viewer_panel'),
+      height: 250,
+      margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+      child: Card(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                children: [
+                  for (final path in fileState.tabSelection.openPaths)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: Container(
+                        key: ValueKey<String>(
+                          'file_viewer_tab_${_normalizeFilePath(path)}',
+                        ),
+                        decoration: BoxDecoration(
+                          color: path == activePath
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.14)
+                              : Theme.of(context).colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                _activateFileTab(
+                                  fileState: fileState,
+                                  path: path,
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(999),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(_fileIconForPath(path), size: 14),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _fileBasename(path),
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelSmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              key: ValueKey<String>(
+                                'file_viewer_tab_close_${_normalizeFilePath(path)}',
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 22,
+                                minHeight: 22,
+                              ),
+                              icon: const Icon(Icons.close, size: 14),
+                              onPressed: () {
+                                _closeFileTab(fileState: fileState, path: path);
+                              },
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: Builder(
+                builder: (_) {
+                  switch (active.status) {
+                    case _FileTabLoadStatus.loading:
+                      return const Center(child: CircularProgressIndicator());
+                    case _FileTabLoadStatus.error:
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                active.errorMessage ?? 'Failed to load file',
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              OutlinedButton(
+                                key: const ValueKey<String>(
+                                  'file_viewer_retry_button',
+                                ),
+                                onPressed: () {
+                                  unawaited(
+                                    _reloadFileTab(
+                                      fileState: fileState,
+                                      projectProvider: projectProvider,
+                                      path: activePath,
+                                    ),
+                                  );
+                                },
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    case _FileTabLoadStatus.binary:
+                      return const Center(
+                        child: Text('Binary file preview is not available.'),
+                      );
+                    case _FileTabLoadStatus.empty:
+                      return const Center(child: Text('File is empty.'));
+                    case _FileTabLoadStatus.ready:
+                      return SelectionArea(
+                        child: SingleChildScrollView(
+                          key: ValueKey<String>(
+                            'file_viewer_scroll_${_normalizeFilePath(activePath)}',
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            active.content,
+                            key: const ValueKey<String>(
+                              'file_viewer_content_text',
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  fontFamily: 'monospace',
+                                  height: 1.4,
+                                ),
+                          ),
+                        ),
+                      );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildShortcutHint(String shortcut, String description) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -1912,6 +3131,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required double horizontalPadding,
     required double verticalPadding,
   }) {
+    final projectProvider = context.watch<ProjectProvider>();
+    final appProvider = context.watch<AppProvider>();
+    final fileState = _resolveFileContextState(
+      projectProvider: projectProvider,
+      appProvider: appProvider,
+    );
+    _reconcileFileContextWithSessionDiff(
+      contextKey: projectProvider.contextKey,
+      fileState: fileState,
+      chatProvider: chatProvider,
+      projectProvider: projectProvider,
+    );
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
@@ -2014,6 +3246,51 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ActionChip(
+                      key: const ValueKey<String>('chat_quick_open_chip'),
+                      avatar: const Icon(Icons.search, size: 18),
+                      label: const Text('Quick Open'),
+                      onPressed: () {
+                        unawaited(
+                          _openQuickFileDialog(
+                            fileState: fileState,
+                            projectProvider: projectProvider,
+                          ),
+                        );
+                      },
+                    ),
+                    if (fileState.tabSelection.hasOpenTabs)
+                      InputChip(
+                        avatar: const Icon(Icons.tab_outlined, size: 16),
+                        label: Text(
+                          '${fileState.tabSelection.openPaths.length} open file${fileState.tabSelection.openPaths.length == 1 ? "" : "s"}',
+                        ),
+                        onPressed: () {
+                          final activePath = fileState.tabSelection.activePath;
+                          if (activePath == null) {
+                            return;
+                          }
+                          _activateFileTab(
+                            fileState: fileState,
+                            path: activePath,
+                          );
+                        },
+                      ),
+                  ],
+                ),
+              ),
+
+              _buildFileViewerPanel(
+                fileState: fileState,
+                projectProvider: projectProvider,
+              ),
 
               // Message list
               Expanded(child: _buildMessageViewport(chatProvider)),
@@ -3029,11 +4306,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         if (!mounted) {
           return true;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('File-open dialog is planned in Feature 019'),
-          ),
-        );
+        await _openQuickFileDialogFromCurrentContext();
         return true;
       case 'help':
         if (!mounted) {
@@ -3049,6 +4322,48 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         return false;
     }
   }
+}
+
+class _FileExplorerContextState {
+  _FileExplorerContextState({required this.rootDirectory});
+
+  String rootDirectory;
+  DateTime? lastLoadedAt;
+  final Map<String, List<FileNode>> directoryChildren =
+      <String, List<FileNode>>{};
+  final Set<String> expandedDirectories = <String>{};
+  final Set<String> loadingDirectories = <String>{};
+  final Map<String, _FileTabViewState> tabsByPath =
+      <String, _FileTabViewState>{};
+  FileTabSelectionState tabSelection = const FileTabSelectionState();
+  bool rootLoadScheduled = false;
+  String? treeError;
+
+  void resetForRoot(String nextRootDirectory) {
+    rootDirectory = nextRootDirectory;
+    lastLoadedAt = null;
+    directoryChildren.clear();
+    expandedDirectories.clear();
+    loadingDirectories.clear();
+    rootLoadScheduled = false;
+    treeError = null;
+  }
+}
+
+enum _FileTabLoadStatus { loading, ready, binary, empty, error }
+
+class _FileTabViewState {
+  const _FileTabViewState({
+    required this.status,
+    required this.content,
+    this.errorMessage,
+    this.mimeType,
+  });
+
+  final _FileTabLoadStatus status;
+  final String content;
+  final String? errorMessage;
+  final String? mimeType;
 }
 
 enum _AssistantProgressStage { thinking, receiving, retrying }

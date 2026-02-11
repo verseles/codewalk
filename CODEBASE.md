@@ -170,7 +170,7 @@ Compatibility tiers:
 | Core sessions/messages | Implemented | `/session`, `/session/{id}`, `/session/{id}/message`, `/session/{id}/message/{messageId}`, `/event`, `/global/event` | Extended global orchestration routes not used by mobile client |
 | Session lifecycle advanced | Implemented (Feature 014) | `/session/status`, `/session/{id}/children`, `/session/{id}/fork`, `/session/{id}/todo`, `/session/{id}/diff`, plus existing share/revert/abort/init/summarize paths | `/session/{id}/command`, `/session/{id}/shell`, `/session/{id}/permissions/{permissionID}` |
 | Interactive flows | Implemented (Feature 013) | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
-| Tooling/context | Partial | `/find/*`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) + `/experimental/worktree*` | `/lsp`, `/pty*` |
+| Tooling/context | Partial | `/find/file`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) + `/experimental/worktree*` | `/lsp`, `/pty*` |
 
 ### Feature 013 Realtime Architecture (Implemented 2026-02-09)
 
@@ -279,6 +279,27 @@ Compatibility tiers:
   - unit tests for degraded enter/recover, foreground resume reconcile, and global incremental updates
   - widget tests for reconnect behavior without periodic polling and refresh-control absence
 
+### Feature 019 File Explorer and Viewer Parity (Implemented 2026-02-11)
+
+- Added project-layer file domain/contracts for parity endpoints:
+  - `lib/domain/entities/file_node.dart`
+  - `lib/domain/repositories/project_repository.dart` (`listFiles`, `findFiles`, `readFileContent`)
+  - `lib/data/models/file_node_model.dart`
+  - `lib/data/models/file_content_model.dart`
+  - `lib/data/datasources/project_remote_datasource.dart` (`/file`, `/find/file`, `/file/content`)
+  - `lib/data/repositories/project_repository_impl.dart`
+  - `lib/presentation/providers/project_provider.dart` (file list/search/read wrappers with provider-level error handling)
+- Extended `ChatPage` with file explorer/viewer orchestration:
+  - context-keyed explorer state, root/tree lazy loading, quick-open dialog, and tab lifecycle
+  - builtin `/open` now invokes quick-open instead of placeholder snackbar
+  - file viewer panel integrated above message viewport in chat flow
+  - diff-aware tab reload + tree invalidation based on `session.diff`
+- Added reusable ranking/reducer logic:
+  - `lib/presentation/utils/file_explorer_logic.dart` (quick-open ranking + tab open/close/activate reducers)
+- Expanded coverage:
+  - `test/unit/utils/file_explorer_logic_test.dart`
+  - `test/widget/chat_page_test.dart` cases for tree expand/open, quick-open, and viewer text/binary/error rendering
+
 ### Feature 018 Prompt Power Composer Architecture (Implemented 2026-02-10)
 
 - Extended composer state machine in `ChatInputWidget`:
@@ -348,8 +369,6 @@ Compatibility tiers:
 Required for parity wave:
 
 - `/find/*` (except `/find/file`)
-- `/file/*`
-- `/vcs`
 - `/mcp/*`
 
 Deferred/optional after parity wave:
@@ -576,6 +595,11 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Send button has a secondary composer action: hold for 300ms inserts a newline at cursor/selection instead of sending, with a small corner icon indicator for discoverability
 - Chat composer supports prompt power triggers: `@` contextual mentions (files/agents), leading `!` shell mode, and leading `/` slash command catalog with source badges
 - Shell-mode sends use a dedicated server route (`/session/{id}/shell`) through datasource-level routing
+- File explorer parity in chat:
+  - server-backed tree listing (`/file`) with expandable directories and file-type icons
+  - quick-open dialog (`Ctrl/Cmd+P` + app bar action + `/open`) using ranked search from `/find/file`
+  - in-chat file viewer tabs with states `loading`, `ready`, `empty`, `binary`, and `error` sourced from `/file/content`
+  - context-keyed explorer/tab state with diff-aware refresh to avoid cross-directory leakage
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
@@ -631,6 +655,8 @@ test/
 │   │   ├── app_provider_test.dart            # AppProvider state management + migration/health/switch rules
 │   │   ├── chat_provider_test.dart           # ChatProvider state + server/context-scoped cache behavior
 │   │   └── project_provider_test.dart        # ProjectProvider context/worktree orchestration
+│   ├── utils/
+│   │   └── file_explorer_logic_test.dart     # Quick-open ranking and file-tab reducer behavior
 │   └── usecases/
 │       └── chat_usecases_test.dart           # ChatUseCases domain logic
 ├── widget/

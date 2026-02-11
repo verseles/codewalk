@@ -9,6 +9,7 @@ import 'package:codewalk/domain/entities/app_info.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/domain/entities/file_node.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/entities/worktree.dart';
@@ -1068,10 +1069,15 @@ class FakeProjectRepository implements ProjectRepository {
   final List<Worktree> _worktrees;
   Failure? worktreeFailure;
   Failure? directoryFailure;
+  Failure? fileContentFailure;
   String? lastCreatedWorktreeName;
   String? lastCreatedWorktreeDirectory;
   final Set<String> gitDirectories = <String>{};
   final Map<String, List<String>> directoriesByPath = <String, List<String>>{};
+  final Map<String, List<FileNode>> filesByPath = <String, List<FileNode>>{};
+  final Map<String, FileContent> fileContentsByPath = <String, FileContent>{};
+  final Map<String, List<FileNode>> searchResultsByQuery =
+      <String, List<FileNode>>{};
 
   @override
   Future<Either<Failure, Project>> getCurrentProject({
@@ -1203,6 +1209,58 @@ class FakeProjectRepository implements ProjectRepository {
       return Left(directoryFailure!);
     }
     return Right(gitDirectories.contains(directory.trim()));
+  }
+
+  @override
+  Future<Either<Failure, List<FileNode>>> listFiles({
+    String? directory,
+    required String path,
+  }) async {
+    if (directoryFailure != null) {
+      return Left(directoryFailure!);
+    }
+    final key = path.trim();
+    final seeded = filesByPath[key];
+    if (seeded != null) {
+      return Right(List<FileNode>.from(seeded));
+    }
+    return const Right(<FileNode>[]);
+  }
+
+  @override
+  Future<Either<Failure, List<FileNode>>> findFiles({
+    String? directory,
+    required String query,
+    int limit = 50,
+  }) async {
+    if (directoryFailure != null) {
+      return Left(directoryFailure!);
+    }
+    final normalized = query.trim().toLowerCase();
+    final seeded = searchResultsByQuery[normalized];
+    if (seeded != null) {
+      return Right(List<FileNode>.from(seeded.take(limit)));
+    }
+    return const Right(<FileNode>[]);
+  }
+
+  @override
+  Future<Either<Failure, FileContent>> readFileContent({
+    String? directory,
+    required String path,
+  }) async {
+    if (fileContentFailure != null) {
+      return Left(fileContentFailure!);
+    }
+    if (directoryFailure != null) {
+      return Left(directoryFailure!);
+    }
+    final normalized = path.trim();
+    final seeded = fileContentsByPath[normalized];
+    if (seeded != null) {
+      return Right(seeded);
+    }
+    return Right(FileContent(path: normalized, content: '', isBinary: false));
   }
 }
 

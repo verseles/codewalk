@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/errors/failures.dart';
 import '../../core/logging/app_logger.dart';
 import '../../data/datasources/app_local_datasource.dart';
+import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/worktree.dart';
 import '../../domain/repositories/project_repository.dart';
@@ -505,6 +506,100 @@ class ProjectProvider extends ChangeNotifier {
         return isGit;
       },
     );
+  }
+
+  Future<List<FileNode>?> listFiles({
+    required String path,
+    String? directory,
+  }) async {
+    final normalizedPath = path.trim();
+    if (normalizedPath.isEmpty) {
+      _setError('Path cannot be empty');
+      return null;
+    }
+    final requestDirectory = directory?.trim();
+    final targetDirectory = requestDirectory == null || requestDirectory.isEmpty
+        ? currentDirectory
+        : requestDirectory;
+    final result = await _projectRepository.listFiles(
+      directory: targetDirectory,
+      path: normalizedPath,
+    );
+    return result.fold(
+      (failure) {
+        AppLogger.warn(
+          'File list failed path=$normalizedPath directory=${targetDirectory ?? "-"}',
+          error: failure,
+        );
+        _setError('Failed to list files: ${failure.message}');
+        return null;
+      },
+      (nodes) {
+        final sorted = List<FileNode>.from(nodes)
+          ..sort((a, b) {
+            if (a.isDirectory != b.isDirectory) {
+              return a.isDirectory ? -1 : 1;
+            }
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          });
+        return sorted;
+      },
+    );
+  }
+
+  Future<List<FileNode>?> findFiles({
+    required String query,
+    String? directory,
+    int limit = 50,
+  }) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      return const <FileNode>[];
+    }
+    final requestDirectory = directory?.trim();
+    final targetDirectory = requestDirectory == null || requestDirectory.isEmpty
+        ? currentDirectory
+        : requestDirectory;
+    final result = await _projectRepository.findFiles(
+      directory: targetDirectory,
+      query: normalizedQuery,
+      limit: limit,
+    );
+    return result.fold((failure) {
+      AppLogger.warn(
+        'File search failed query=$normalizedQuery directory=${targetDirectory ?? "-"}',
+        error: failure,
+      );
+      _setError('Failed to search files: ${failure.message}');
+      return null;
+    }, (nodes) => nodes);
+  }
+
+  Future<FileContent?> readFileContent({
+    required String path,
+    String? directory,
+  }) async {
+    final normalizedPath = path.trim();
+    if (normalizedPath.isEmpty) {
+      _setError('Path cannot be empty');
+      return null;
+    }
+    final requestDirectory = directory?.trim();
+    final targetDirectory = requestDirectory == null || requestDirectory.isEmpty
+        ? currentDirectory
+        : requestDirectory;
+    final result = await _projectRepository.readFileContent(
+      directory: targetDirectory,
+      path: normalizedPath,
+    );
+    return result.fold((failure) {
+      AppLogger.warn(
+        'File read failed path=$normalizedPath directory=${targetDirectory ?? "-"}',
+        error: failure,
+      );
+      _setError('Failed to read file: ${failure.message}');
+      return null;
+    }, (content) => content);
   }
 
   void clearError() {
