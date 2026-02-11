@@ -7,6 +7,8 @@ import '../../domain/entities/chat_message.dart';
 
 /// Chat message widget
 class ChatMessageWidget extends StatelessWidget {
+  static const int _collapsedToolDetailMaxLines = 2;
+
   const ChatMessageWidget({
     super.key,
     required this.message,
@@ -632,18 +634,16 @@ class ChatMessageWidget extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.all(8),
-                constraints: const BoxConstraints(maxHeight: 600),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: SingleChildScrollView(
-                  child: Text(
-                    completedState.output,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
-                  ),
+                child: _CollapsibleToolContent(
+                  text: completedState.output,
+                  collapsedMaxLines: _collapsedToolDetailMaxLines,
+                  textStyle: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                 ),
               ),
           ],
@@ -652,17 +652,18 @@ class ChatMessageWidget extends StatelessWidget {
         final errorState = state as ToolStateError;
         return Container(
           padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(maxHeight: 600),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: SingleChildScrollView(
-            child: Text(
-              errorState.error,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onErrorContainer,
-              ),
+          child: _CollapsibleToolContent(
+            text: errorState.error,
+            collapsedMaxLines: _collapsedToolDetailMaxLines,
+            textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+            toggleTextStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onErrorContainer,
             ),
           ),
         );
@@ -746,6 +747,78 @@ class ChatMessageWidget extends StatelessWidget {
     } else {
       return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
+  }
+}
+
+class _CollapsibleToolContent extends StatefulWidget {
+  const _CollapsibleToolContent({
+    required this.text,
+    required this.collapsedMaxLines,
+    this.textStyle,
+    this.toggleTextStyle,
+  });
+
+  final String text;
+  final int collapsedMaxLines;
+  final TextStyle? textStyle;
+  final TextStyle? toggleTextStyle;
+
+  @override
+  State<_CollapsibleToolContent> createState() =>
+      _CollapsibleToolContentState();
+}
+
+class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
+  bool _expanded = false;
+
+  bool get _canExpand {
+    if (widget.text.trim().isEmpty) {
+      return false;
+    }
+    final lineCount = '\n'.allMatches(widget.text).length + 1;
+    return lineCount > widget.collapsedMaxLines || widget.text.length > 160;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final contentWidget = Text(
+      widget.text,
+      key: const ValueKey<String>('tool_content_text'),
+      maxLines: _expanded ? null : widget.collapsedMaxLines,
+      overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+      style: widget.textStyle,
+    );
+
+    if (!_canExpand) {
+      return contentWidget;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        contentWidget,
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            key: const ValueKey<String>('tool_content_toggle_button'),
+            onPressed: () {
+              setState(() {
+                _expanded = !_expanded;
+              });
+            },
+            style: TextButton.styleFrom(
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            ),
+            child: Text(
+              _expanded ? 'Show less' : 'Show more',
+              style: widget.toggleTextStyle,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

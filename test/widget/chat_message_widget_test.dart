@@ -306,4 +306,108 @@ void main() {
 
     expect(find.text('Copied to clipboard'), findsNothing);
   });
+
+  testWidgets('tool completed output starts collapsed and can expand', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_tool_completed',
+              sessionId: 'ses_tool',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'part_tool_completed',
+                  messageId: 'msg_tool_completed',
+                  sessionId: 'ses_tool',
+                  callId: 'call_1',
+                  tool: 'bash',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{'cmd': 'ls -la'},
+                    output: 'line 1\nline 2\nline 3\nline 4',
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1200),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Text outputText = tester.widget<Text>(
+      find.byKey(const ValueKey<String>('tool_content_text')),
+    );
+    expect(outputText.maxLines, 2);
+    expect(find.text('Show more'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('tool_content_toggle_button')),
+    );
+    await tester.pumpAndSettle();
+
+    outputText = tester.widget<Text>(
+      find.byKey(const ValueKey<String>('tool_content_text')),
+    );
+    expect(outputText.maxLines, isNull);
+    expect(find.text('Show less'), findsOneWidget);
+  });
+
+  testWidgets('tool error output starts collapsed and can expand', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_tool_error',
+              sessionId: 'ses_tool',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'part_tool_error',
+                  messageId: 'msg_tool_error',
+                  sessionId: 'ses_tool',
+                  callId: 'call_2',
+                  tool: 'bash',
+                  state: ToolStateError(
+                    input: const <String, dynamic>{'cmd': 'cat missing.txt'},
+                    error: 'error line 1\nerror line 2\nerror line 3',
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1200),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Text outputText = tester.widget<Text>(
+      find.byKey(const ValueKey<String>('tool_content_text')),
+    );
+    expect(outputText.maxLines, 2);
+    expect(find.text('Show more'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('tool_content_toggle_button')),
+    );
+    await tester.pumpAndSettle();
+
+    outputText = tester.widget<Text>(
+      find.byKey(const ValueKey<String>('tool_content_text')),
+    );
+    expect(outputText.maxLines, isNull);
+    expect(find.text('Show less'), findsOneWidget);
+  });
 }
