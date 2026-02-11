@@ -1110,11 +1110,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             );
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.add_comment_outlined),
-          tooltip: 'New Chat',
-          onPressed: _createNewSession,
-        ),
         if (isMobile)
           IconButton(
             key: const ValueKey<String>('appbar_quick_open_button'),
@@ -1122,17 +1117,23 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             tooltip: 'Open Files',
             onPressed: () => unawaited(_openMobileFilesDialog()),
           ),
+        if (!isMobile)
+          IconButton(
+            icon: const Icon(Icons.add_comment_outlined),
+            tooltip: 'New Chat',
+            onPressed: _createNewSession,
+          ),
         if (!refreshlessEnabled)
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: _refreshData,
           ),
-        if (!isMobile)
+        if (isMobile)
           IconButton(
-            icon: const Icon(Icons.edit_note),
-            tooltip: 'Focus Input',
-            onPressed: _focusInput,
+            icon: const Icon(Icons.add_comment_outlined),
+            tooltip: 'New Chat',
+            onPressed: _createNewSession,
           ),
         const SizedBox(width: 4),
       ],

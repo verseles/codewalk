@@ -916,6 +916,16 @@ void main() {
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
 
+    final newChatX = tester.getCenter(find.byTooltip('New Chat').first).dx;
+    final openFilesX = tester.getCenter(find.byTooltip('Open Files')).dx;
+    expect(newChatX, greaterThan(openFilesX));
+
+    final refreshFinder = find.byTooltip('Refresh');
+    if (refreshFinder.evaluate().isNotEmpty) {
+      final refreshX = tester.getCenter(refreshFinder.first).dx;
+      expect(newChatX, greaterThan(refreshX));
+    }
+
     await tester.tap(
       find.byKey(const ValueKey<String>('appbar_quick_open_button')),
     );
