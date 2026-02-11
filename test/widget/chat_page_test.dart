@@ -98,6 +98,35 @@ void main() {
       expect(find.text('Keyboard shortcuts'), findsOneWidget);
       expect(find.text('Conversations'), findsOneWidget);
     });
+
+    testWidgets('mobile app bar opens files dialog in fullscreen', (
+      WidgetTester tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(700, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('appbar_quick_open_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey<String>('mobile_files_dialog_fullscreen')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
+        findsOneWidget,
+      );
+    });
   });
 
   testWidgets(
@@ -651,7 +680,7 @@ void main() {
   testWidgets('quick open finds file and opens viewer tab', (
     WidgetTester tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final localDataSource = InMemoryAppLocalDataSource()
@@ -701,7 +730,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(
-      find.byKey(const ValueKey<String>('chat_quick_open_chip')),
+      find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
     );
     await tester.pumpAndSettle();
     await tester.enterText(

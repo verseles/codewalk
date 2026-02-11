@@ -823,10 +823,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               child: Scaffold(
                 backgroundColor: Theme.of(context).colorScheme.background,
                 resizeToAvoidBottomInset: true,
-                appBar: _buildAppBar(
-                  isMobile: isMobile,
-                  showDesktopFilePane: showDesktopFilePane,
-                ),
+                appBar: _buildAppBar(isMobile: isMobile),
                 drawer: isMobile ? _buildSessionDrawer() : null,
                 body: Consumer<ChatProvider>(
                   builder: (context, chatProvider, child) {
@@ -900,10 +897,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  AppBar _buildAppBar({
-    required bool isMobile,
-    required bool showDesktopFilePane,
-  }) {
+  AppBar _buildAppBar({required bool isMobile}) {
     final colorScheme = Theme.of(context).colorScheme;
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
@@ -1087,16 +1081,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           tooltip: 'New Chat',
           onPressed: _createNewSession,
         ),
-        IconButton(
-          key: const ValueKey<String>('appbar_quick_open_button'),
-          icon: Icon(
-            showDesktopFilePane
-                ? Icons.find_in_page_outlined
-                : Icons.folder_open_outlined,
+        if (isMobile)
+          IconButton(
+            key: const ValueKey<String>('appbar_quick_open_button'),
+            icon: const Icon(Icons.folder_open_outlined),
+            tooltip: 'Open Files',
+            onPressed: () => unawaited(_openMobileFilesDialog()),
           ),
-          tooltip: showDesktopFilePane ? 'Quick Open File' : 'Open Files',
-          onPressed: _openQuickFileDialogFromCurrentContext,
-        ),
         if (!refreshlessEnabled)
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -1111,6 +1102,52 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           ),
         const SizedBox(width: 4),
       ],
+    );
+  }
+
+  Future<void> _openMobileFilesDialog() async {
+    if (!mounted) {
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return Dialog.fullscreen(
+          key: const ValueKey<String>('mobile_files_dialog_fullscreen'),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Files'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Close',
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+            ),
+            body: Consumer3<ProjectProvider, AppProvider, ChatProvider>(
+              builder:
+                  (context, projectProvider, appProvider, chatProvider, _) {
+                    final fileState = _resolveFileContextState(
+                      projectProvider: projectProvider,
+                      appProvider: appProvider,
+                    );
+                    _reconcileFileContextWithSessionDiff(
+                      contextKey: projectProvider.contextKey,
+                      fileState: fileState,
+                      chatProvider: chatProvider,
+                      projectProvider: projectProvider,
+                    );
+                    return SafeArea(
+                      child: _buildFileExplorerPanel(
+                        fileState: fileState,
+                        projectProvider: projectProvider,
+                      ),
+                    );
+                  },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -3292,27 +3329,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
-
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ActionChip(
-                      key: const ValueKey<String>('chat_quick_open_chip'),
-                      avatar: const Icon(Icons.search, size: 18),
-                      label: const Text('Quick Open'),
-                      onPressed: () {
-                        unawaited(
-                          _openQuickFileDialog(
-                            fileState: fileState,
-                            projectProvider: projectProvider,
-                          ),
-                        );
-                      },
-                    ),
-                    if (fileState.tabSelection.hasOpenTabs)
+              if (fileState.tabSelection.hasOpenTabs)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
                       InputChip(
                         avatar: const Icon(Icons.tab_outlined, size: 16),
                         label: Text(
@@ -3329,9 +3352,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                           );
                         },
                       ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
               _buildFileViewerPanel(
                 fileState: fileState,
