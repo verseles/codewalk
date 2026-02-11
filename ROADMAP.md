@@ -191,13 +191,10 @@ Description: Entregar navegação completa de arquivos com ícones, busca rápid
 Concluída a paridade de exploração/abertura/visualização de arquivos no chat principal com base nos endpoints `/file`, `/find/file` e `/file/content`: foi adicionada árvore expansível com ícones por tipo/extensão, quick open com ranking e atalho (`Ctrl/Cmd+P`), integração do comando builtin `/open`, viewer em abas com estados `loading/ready/empty/binary/error`, invalidação de nós/abas por `session.diff`, e fallback de resolução de path absoluto/relativo por contexto para manter robustez entre servidores. A fundação de dados foi formalizada no domínio/repositório de projeto (`FileNode`, `FileContent`) e a cobertura foi ampliada com testes unitários de ranking/reducer de tabs e testes de widget para árvore, quick open, renderização de conteúdo textual e fallbacks binário/erro.
 
 ### Feature 020: Agent Selector in Composer (Model/Thinking Bar)
-Description: Incluir seletor explícito de agente (Build, Plan e demais permitidos) ao lado de provider/model e thinking, com persistência por contexto e integração de envio. (Visit file ROADMAP.feat020.md for full research details)
+Description: Incluir seletor explícito de agente (Build, Plan e demais permitidos) ao lado de provider/model e thinking, com persistência por contexto e integração de envio.
 
-- [x] 20.01 Pesquisa e freeze de contrato (`/agent`, regras de `mode`/`hidden`, compatibilidade com variant/model)
-- [ ] 20.02 Implementar seletor de agente na barra de controles do composer com ordem e labels consistentes
-- [ ] 20.03 Persistir seleção por escopo (`server + directory`) e restaurar com fallback seguro quando agente/modelo não existir
-- [ ] 20.04 Integrar seleção ao payload de prompt e aos comandos rápidos (ciclo de agente + slash/atalho quando aplicável)
-- [ ] 20.05 Cobrir seleção/persistência/fallback em testes unit/widget/integration
+Concluída a entrega do seletor de agente no composer ao lado de model/variant com ordenação estável e labels consistentes, carregamento do contrato `/agent` na camada de app, persistência/restauração por escopo (`server + directory`) com fallback seguro para agentes válidos, integração completa da seleção no payload de prompt (`agent`) sem regressão de shell mode, comandos rápidos com ciclo por atalho (`Ctrl/Cmd+J`, reverso com `Shift`) e ação builtin `/agent`, além de cobertura ampliada em testes unit/widget/integration para seleção, persistência e payload.
+Commits: bf20bde, c75df1d
 
 ### Feature 021: Session Title Visibility and Quick Rename Parity
 Description: Melhorar a UX de sessão para sempre exibir título de conversa de forma clara e permitir renomeação rápida/inline sem fricção. (Visit file ROADMAP.feat021.md for full research details)
@@ -279,7 +276,15 @@ Description: Expandir configurações para incluir notificações e sons por cat
 
 ## Pending Backlog
 
-- [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclados/dispositivos (validar em device real com Gboard e Samsung Keyboard)
+- [ ] Desktop: enter deve enviar mensagem, shift+enter quebrar linha
+- [ ] Desktop: botão em cada sidebar para ocultar o sidebar como opção
+- [ ] Mobile e desktop: input de texto não deve ficar bloqueado enquanto recebe mensagem, apenas não deve poder enviar antes de terminar de receber as respostas do servidor, ou clicar no botão stop pra abortar
+- [ ] No desktop, pesquisar como usar microfone speech-to-text no linux. Pesquisar também se a API atual já funciona no mac/windows/iOS
+- [ ] Context Project / Workspace: botão para deletar workspace fechado
+- [ ] Usar https://github.com/jlnrrg/simple_icons para exibir icones mais bonitos na lista de arquivos e na lista de providers/icone do modelo selecionado
+- [ ] Desktop: seta pra cima edita a última mensagem enviada (via backend), mobile: touch & hold
+- [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
+- [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclades/dispositivos (validar em device real com Gboard e Samsung Keyboard)
 - [ ] Transformar o botão `Send` em `Stop` enquanto o assistant estiver respondendo e integrar com `POST /session/{id}/abort` para interromper o pensamento/execução em andamento
 - [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
