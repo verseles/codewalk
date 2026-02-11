@@ -71,7 +71,7 @@ dependencies:
   get_it: ^9.2.0
   dynamic_color: ^1.8.1
   speech_to_text: ^7.3.0
-  flutter_local_notifications: ^19.4.2
+  flutter_local_notifications: ^20.0.0
   audioplayers: ^6.5.1
   flutter_markdown_plus: ^1.0.7
   web: ^1.1.1

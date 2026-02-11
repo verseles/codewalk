@@ -92,7 +92,7 @@ class NotificationService {
       );
 
       await _plugin.initialize(
-        settings,
+        settings: settings,
         onDidReceiveNotificationResponse: (response) {
           _handleRawTap(response.payload);
         },
@@ -169,10 +169,10 @@ class NotificationService {
       );
 
       await _plugin.show(
-        DateTime.now().microsecondsSinceEpoch % 100000,
-        title,
-        body,
-        details,
+        id: DateTime.now().microsecondsSinceEpoch % 100000,
+        title: title,
+        body: body,
+        notificationDetails: details,
         payload: payload,
       );
       return true;
