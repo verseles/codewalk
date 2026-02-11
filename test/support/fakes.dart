@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/data/datasources/app_local_datasource.dart';
+import 'package:codewalk/domain/entities/agent.dart';
 import 'package:codewalk/domain/entities/app_info.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
@@ -26,6 +27,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? apiKey;
   String? selectedProvider;
   String? selectedModel;
+  String? selectedAgent;
   String? selectedVariantMapJson;
   String? recentModelsJson;
   String? modelUsageCountsJson;
@@ -63,6 +65,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     apiKey = null;
     selectedProvider = null;
     selectedModel = null;
+    selectedAgent = null;
     selectedVariantMapJson = null;
     recentModelsJson = null;
     modelUsageCountsJson = null;
@@ -167,6 +170,16 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     if (serverId == null && scopeId == null) return selectedModel;
     return scopedStrings[_key(
       'selected_model',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getSelectedAgent({String? serverId, String? scopeId}) async {
+    if (serverId == null && scopeId == null) return selectedAgent;
+    return scopedStrings[_key(
+      'selected_agent',
       serverId: serverId,
       scopeId: scopeId,
     )];
@@ -401,6 +414,24 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
           scopeId: scopeId,
         )] =
         modelId;
+  }
+
+  @override
+  Future<void> saveSelectedAgent(
+    String? agentName, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      selectedAgent = agentName;
+      return;
+    }
+    final key = _key('selected_agent', serverId: serverId, scopeId: scopeId);
+    if (agentName == null || agentName.trim().isEmpty) {
+      scopedStrings.remove(key);
+      return;
+    }
+    scopedStrings[key] = agentName;
   }
 
   @override
@@ -1003,6 +1034,10 @@ class FakeAppRepository implements AppRepository {
       connected: <String>[],
     ),
   );
+  Either<Failure, List<Agent>> agentsResult = const Right(<Agent>[
+    Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+    Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+  ]);
   String? updatedHost;
   int? updatedPort;
 
@@ -1021,6 +1056,11 @@ class FakeAppRepository implements AppRepository {
     String? directory,
   }) async {
     return providersResult;
+  }
+
+  @override
+  Future<Either<Failure, List<Agent>>> getAgents({String? directory}) async {
+    return agentsResult;
   }
 
   @override

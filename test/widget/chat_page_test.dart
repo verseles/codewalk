@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart' hide Provider;
 
@@ -20,6 +21,7 @@ import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
+import 'package:codewalk/domain/usecases/get_agents.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
 import 'package:codewalk/domain/usecases/get_session_children.dart';
@@ -1100,6 +1102,110 @@ void main() {
     expect(find.text('Low'), findsOneWidget);
   });
 
+  testWidgets('shows agent selector and updates selected agent', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_1',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
+        ),
+      ],
+    );
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(
+      find.byKey(const ValueKey<String>('agent_selector_button')),
+      findsOneWidget,
+    );
+    expect(find.text('Build'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('agent_selector_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Search agent'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('agent_selector_item_build')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('agent_selector_item_plan')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('agent_selector_item_plan')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Plan'), findsOneWidget);
+    expect(provider.selectedAgentName, 'plan');
+  });
+
+  testWidgets('desktop shortcut cycles selected agent', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_1',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
+        ),
+      ],
+    );
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    expect(provider.selectedAgentName, 'build');
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyJ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyJ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+
+    expect(provider.selectedAgentName, 'plan');
+  });
+
   testWidgets(
     'model selector shows top 3 recent models and alphabetical providers',
     (WidgetTester tester) async {
@@ -1493,6 +1599,7 @@ ChatProvider _buildChatProvider({
     createChatSession: CreateChatSession(chatRepo),
     getChatMessages: GetChatMessages(chatRepo),
     getChatMessage: GetChatMessage(chatRepo),
+    getAgents: GetAgents(appRepo),
     getProviders: GetProviders(appRepo),
     deleteChatSession: DeleteChatSession(chatRepo),
     updateChatSession: UpdateChatSession(chatRepo),

@@ -313,9 +313,9 @@ Compatibility tiers:
   - mention insertion normalizes trailing spacing to avoid token/punctuation glue on mobile
   - mention token chips rendered from prompt text
 - Added contextual suggestion fetching in `ChatPage`:
-  - mention sources from `/find/file` and `/agent`
+  - mention sources from `/find/file` plus provider-managed agent cache loaded from `/agent`
   - slash catalog from builtin commands plus `/command` (with `source` badges)
-  - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/help`) executed directly in UI context
+  - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/help`) executed directly in UI context (`/agent` opens agent selector)
   - composer returned to scaffold-native keyboard inset handling (`resizeToAvoidBottomInset`) to keep input above mobile keyboard consistently
 - Added shell send-path routing:
   - `ChatProvider.sendMessage(..., shellMode: true)` marks payload mode as shell
@@ -333,7 +333,7 @@ Compatibility tiers:
 { model: { providerID, modelID }, variant?, parts: [{type, text}|{type, mime, url}], agent?, system?, tools?, messageID?, noReply? }
 ```
 
-> **Note:** Current server schema expects `agent`; client domain field `mode` is mapped to `agent` at request serialization.
+> **Note:** Current server schema expects `agent`; client domain field `mode` is mapped to `agent` at request serialization. `mode='shell'` is still reserved for shell route handling.
 
 ### MessageTokens Schema
 
@@ -601,12 +601,14 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
   - in-chat file viewer tabs with states `loading`, `ready`, `empty`, `binary`, and `error` sourced from `/file/content`
   - context-keyed explorer/tab state with diff-aware refresh to avoid cross-directory leakage
 - In-app provider/model picker and reasoning-variant cycle controls
+- In-app agent selector beside model/variant controls with ordered options (`build`, `plan`, then others), context-scoped persistence (`server + directory`) and safe fallback when persisted selection disappears
+- Agent quick actions include desktop shortcut cycle (`Ctrl/Cmd+J`, `Shift` reverse) and builtin `/agent` command opening the selector
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
 - Chat-first shell: `AppShellPage` mounts `ChatPage` as primary route; `Logs` and `Settings` open as secondary routes with native back navigation to chat
 - Responsive shell with mobile drawer and desktop split-view layout
 - Sidebar top action row appears above `Conversations`: compact one-line `Logs` and `Settings` buttons open secondary routes while chat remains implicit as the primary area
-- Desktop shortcuts for new chat, refresh, and input focus
+- Desktop shortcuts for new chat, refresh, input focus, and agent cycle
 
 ### Settings Module
 - Runtime configuration and theme preferences

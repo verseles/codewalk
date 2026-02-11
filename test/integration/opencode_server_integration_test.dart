@@ -18,6 +18,7 @@ import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
+import 'package:codewalk/domain/usecases/get_agents.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
 import 'package:codewalk/domain/usecases/get_session_children.dart';
@@ -55,32 +56,42 @@ void main() {
       await server.close();
     });
 
-    test('AppRepository reads /path and /provider successfully', () async {
-      final dioClient = DioClient();
-      dioClient.updateBaseUrl(server.baseUrl);
+    test(
+      'AppRepository reads /path, /provider and /agent successfully',
+      () async {
+        final dioClient = DioClient();
+        dioClient.updateBaseUrl(server.baseUrl);
 
-      final repository = AppRepositoryImpl(
-        remoteDataSource: AppRemoteDataSourceImpl(dio: dioClient.dio),
-        localDataSource: InMemoryAppLocalDataSource(),
-        dioClient: dioClient,
-      );
+        final repository = AppRepositoryImpl(
+          remoteDataSource: AppRemoteDataSourceImpl(dio: dioClient.dio),
+          localDataSource: InMemoryAppLocalDataSource(),
+          dioClient: dioClient,
+        );
 
-      final appInfoResult = await repository.getAppInfo();
-      final providersResult = await repository.getProviders();
+        final appInfoResult = await repository.getAppInfo();
+        final providersResult = await repository.getProviders();
+        final agentsResult = await repository.getAgents();
 
-      expect(appInfoResult.isRight(), isTrue);
-      expect(providersResult.isRight(), isTrue);
+        expect(appInfoResult.isRight(), isTrue);
+        expect(providersResult.isRight(), isTrue);
+        expect(agentsResult.isRight(), isTrue);
 
-      appInfoResult.fold((_) => fail('expected app info'), (appInfo) {
-        expect(appInfo.path.root, '/workspace/project');
-        expect(appInfo.path.cwd, '/workspace/project');
-      });
+        appInfoResult.fold((_) => fail('expected app info'), (appInfo) {
+          expect(appInfo.path.root, '/workspace/project');
+          expect(appInfo.path.cwd, '/workspace/project');
+        });
 
-      providersResult.fold((_) => fail('expected providers'), (providers) {
-        expect(providers.providers, hasLength(1));
-        expect(providers.defaultModels['mock-provider'], 'mock-model');
-      });
-    });
+        providersResult.fold((_) => fail('expected providers'), (providers) {
+          expect(providers.providers, hasLength(1));
+          expect(providers.defaultModels['mock-provider'], 'mock-model');
+        });
+
+        agentsResult.fold((_) => fail('expected agents'), (agents) {
+          expect(agents.any((agent) => agent.name == 'build'), isTrue);
+          expect(agents.any((agent) => agent.name == 'plan'), isTrue);
+        });
+      },
+    );
 
     test(
       'ProjectRemoteDataSource supports project context and worktrees',
@@ -317,6 +328,31 @@ void main() {
 
       expect(server.lastSendMessagePayload, isNotNull);
       expect(server.lastSendMessagePayload?['variant'], 'high');
+    });
+
+    test('ChatRemoteDataSource includes agent in outbound payload', () async {
+      final remote = ChatRemoteDataSourceImpl(
+        dio: Dio(BaseOptions(baseUrl: server.baseUrl)),
+      );
+
+      await remote
+          .sendMessage(
+            'default',
+            'ses_1',
+            const ChatInputModel(
+              messageId: 'msg_user_agent',
+              providerId: 'mock-provider',
+              modelId: 'mock-model',
+              mode: 'plan',
+              parts: <ChatInputPartModel>[
+                ChatInputPartModel(type: 'text', text: 'agent please'),
+              ],
+            ),
+          )
+          .first;
+
+      expect(server.lastSendMessagePayload, isNotNull);
+      expect(server.lastSendMessagePayload?['agent'], 'plan');
     });
 
     test(
@@ -563,6 +599,7 @@ void main() {
           createChatSession: CreateChatSession(chatRepository),
           getChatMessages: GetChatMessages(chatRepository),
           getChatMessage: GetChatMessage(chatRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(chatRepository),
           updateChatSession: UpdateChatSession(chatRepository),

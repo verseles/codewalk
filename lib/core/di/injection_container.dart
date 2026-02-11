@@ -15,6 +15,7 @@ import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/create_chat_session.dart';
 import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/get_chat_message.dart';
+import '../../domain/usecases/get_agents.dart';
 import '../../domain/usecases/get_providers.dart';
 import '../../domain/usecases/delete_chat_session.dart';
 import '../../domain/usecases/fork_chat_session.dart';
@@ -96,6 +97,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateChatSession(sl()));
   sl.registerLazySingleton(() => GetChatMessages(sl()));
   sl.registerLazySingleton(() => GetChatMessage(sl()));
+  sl.registerLazySingleton(() => GetAgents(sl()));
   sl.registerLazySingleton(() => GetProviders(sl()));
   sl.registerLazySingleton(() => DeleteChatSession(sl()));
   sl.registerLazySingleton(() => UpdateChatSession(sl()));
@@ -131,6 +133,7 @@ Future<void> init() async {
       createChatSession: sl(),
       getChatMessages: sl(),
       getChatMessage: sl(),
+      getAgents: sl(),
       getProviders: sl(),
       deleteChatSession: sl(),
       updateChatSession: sl(),

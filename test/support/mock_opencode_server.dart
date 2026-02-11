@@ -226,6 +226,36 @@ class MockOpenCodeServer {
       return;
     }
 
+    if (method == 'GET' && request.uri.path == '/agent') {
+      await _writeJson(request.response, 200, <Map<String, dynamic>>[
+        <String, dynamic>{
+          'name': 'build',
+          'mode': 'primary',
+          'hidden': false,
+          'native': false,
+        },
+        <String, dynamic>{
+          'name': 'plan',
+          'mode': 'primary',
+          'hidden': false,
+          'native': false,
+        },
+        <String, dynamic>{
+          'name': 'internal-tool',
+          'mode': 'subagent',
+          'hidden': false,
+          'native': true,
+        },
+        <String, dynamic>{
+          'name': 'hidden-helper',
+          'mode': 'primary',
+          'hidden': true,
+          'native': false,
+        },
+      ]);
+      return;
+    }
+
     if (method == 'GET' && request.uri.path == '/global/event') {
       globalEventConnectionCount += 1;
       request.response.statusCode = 200;

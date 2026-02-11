@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/data/models/chat_session_model.dart';
+import 'package:codewalk/domain/entities/agent.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
@@ -15,6 +16,7 @@ import 'package:codewalk/domain/usecases/delete_chat_session.dart';
 import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
+import 'package:codewalk/domain/usecases/get_agents.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
 import 'package:codewalk/domain/usecases/get_session_children.dart';
@@ -65,6 +67,7 @@ void main() {
         createChatSession: CreateChatSession(chatRepository),
         getChatMessages: GetChatMessages(chatRepository),
         getChatMessage: GetChatMessage(chatRepository),
+        getAgents: GetAgents(appRepository),
         getProviders: GetProviders(appRepository),
         deleteChatSession: DeleteChatSession(chatRepository),
         updateChatSession: UpdateChatSession(chatRepository),
@@ -121,6 +124,90 @@ void main() {
         expect(provider.selectedModelId, 'model_b');
       },
     );
+
+    test(
+      'initializeProviders restores persisted agent and filters selector',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+          Agent(name: 'support', mode: 'all', hidden: false, native: false),
+          Agent(
+            name: 'internal',
+            mode: 'subagent',
+            hidden: false,
+            native: true,
+          ),
+          Agent(name: 'hidden', mode: 'primary', hidden: true, native: false),
+        ]);
+
+        await localDataSource.saveSelectedAgent(
+          'plan',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedAgentName, 'plan');
+        expect(provider.selectableAgents.map((agent) => agent.name), <String>[
+          'build',
+          'plan',
+          'support',
+        ]);
+      },
+    );
+
+    test('setSelectedAgent and cycleAgent update payload mode', () async {
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{'model_a': _model('model_a')},
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a'},
+          connected: const <String>['provider_a'],
+        ),
+      );
+      appRepository.agentsResult = const Right(<Agent>[
+        Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+        Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+      ]);
+
+      await provider.initializeProviders();
+      expect(provider.selectedAgentName, 'build');
+
+      await provider.setSelectedAgent('plan');
+      expect(provider.selectedAgentName, 'plan');
+
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await provider.sendMessage('agent payload');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(chatRepository.lastSendInput?.mode, 'plan');
+
+      await provider.cycleAgent(reverse: true);
+      expect(provider.selectedAgentName, 'build');
+    });
 
     test(
       'setSelectedModel and cycleVariant update selection and payload',
@@ -263,6 +350,45 @@ void main() {
       },
     );
 
+    test(
+      'onServerScopeChanged restores agent selection per server scope',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+          Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        await provider.projectProvider.initializeProject();
+        await provider.initializeProviders();
+        expect(provider.selectedAgentName, 'build');
+
+        await provider.setSelectedAgent('plan');
+        expect(provider.selectedAgentName, 'plan');
+
+        localDataSource.activeServerId = 'srv_other';
+        await provider.onServerScopeChanged();
+        expect(provider.selectedAgentName, 'build');
+
+        localDataSource.activeServerId = 'srv_test';
+        await provider.onServerScopeChanged();
+        expect(provider.selectedAgentName, 'plan');
+      },
+    );
+
     test('cycleVariant is no-op when current model has no variants', () async {
       appRepository.providersResult = Right(
         ProvidersResponse(
@@ -388,6 +514,7 @@ void main() {
           createChatSession: CreateChatSession(scopedRepository),
           getChatMessages: GetChatMessages(scopedRepository),
           getChatMessage: GetChatMessage(scopedRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(scopedRepository),
           updateChatSession: UpdateChatSession(scopedRepository),
@@ -670,6 +797,7 @@ void main() {
           createChatSession: CreateChatSession(chatRepository),
           getChatMessages: GetChatMessages(chatRepository),
           getChatMessage: GetChatMessage(chatRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(chatRepository),
           updateChatSession: UpdateChatSession(chatRepository),
@@ -1363,6 +1491,7 @@ void main() {
           createChatSession: CreateChatSession(scopedRepository),
           getChatMessages: GetChatMessages(scopedRepository),
           getChatMessage: GetChatMessage(scopedRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(scopedRepository),
           updateChatSession: UpdateChatSession(scopedRepository),
@@ -1462,6 +1591,7 @@ void main() {
           createChatSession: CreateChatSession(scopedRepository),
           getChatMessages: GetChatMessages(scopedRepository),
           getChatMessage: GetChatMessage(scopedRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(scopedRepository),
           updateChatSession: UpdateChatSession(scopedRepository),
@@ -1598,6 +1728,7 @@ void main() {
           createChatSession: CreateChatSession(scopedRepository),
           getChatMessages: GetChatMessages(scopedRepository),
           getChatMessage: GetChatMessage(scopedRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(scopedRepository),
           updateChatSession: UpdateChatSession(scopedRepository),
@@ -1683,6 +1814,7 @@ void main() {
           createChatSession: CreateChatSession(scopedRepository),
           getChatMessages: GetChatMessages(scopedRepository),
           getChatMessage: GetChatMessage(scopedRepository),
+          getAgents: GetAgents(appRepository),
           getProviders: GetProviders(appRepository),
           deleteChatSession: DeleteChatSession(scopedRepository),
           updateChatSession: UpdateChatSession(scopedRepository),

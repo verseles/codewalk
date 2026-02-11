@@ -60,6 +60,16 @@ abstract class AppLocalDataSource {
   });
 
   /// Technical comment translated to English.
+  Future<String?> getSelectedAgent({String? serverId, String? scopeId});
+
+  /// Technical comment translated to English.
+  Future<void> saveSelectedAgent(
+    String? agentName, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
   Future<String?> getSelectedVariantMap({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
@@ -328,6 +338,35 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       ),
       modelId,
     );
+  }
+
+  @override
+  Future<String?> getSelectedAgent({String? serverId, String? scopeId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.selectedAgentKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveSelectedAgent(
+    String? agentName, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    final key = _scopedKey(
+      AppConstants.selectedAgentKey,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (agentName == null || agentName.trim().isEmpty) {
+      await sharedPreferences.remove(key);
+      return;
+    }
+    await sharedPreferences.setString(key, agentName);
   }
 
   @override

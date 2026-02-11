@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import '../../core/errors/failures.dart';
+import '../../domain/entities/agent.dart';
 import '../../domain/entities/app_info.dart';
 import '../../domain/entities/provider.dart';
 import '../../domain/repositories/app_repository.dart';
@@ -115,6 +116,23 @@ class AppRepositoryImpl implements AppRepository {
         directory: directory,
       );
       return Right(providersModel.toDomain());
+    } on DioException catch (e) {
+      return Left(_handleDioException(e));
+    } on Exception catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Agent>>> getAgents({String? directory}) async {
+    try {
+      final agentModels = await remoteDataSource.getAgents(
+        directory: directory,
+      );
+      final agents = agentModels
+          .map((model) => model.toDomain())
+          .toList(growable: false);
+      return Right(agents);
     } on DioException catch (e) {
       return Left(_handleDioException(e));
     } on Exception catch (e) {

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../core/errors/failures.dart';
+import '../entities/agent.dart';
 import '../entities/app_info.dart';
 import '../entities/provider.dart';
 
@@ -19,4 +20,7 @@ abstract class AppRepository {
 
   /// Technical comment translated to English.
   Future<Either<Failure, ProvidersResponse>> getProviders({String? directory});
+
+  /// Technical comment translated to English.
+  Future<Either<Failure, List<Agent>>> getAgents({String? directory});
 }

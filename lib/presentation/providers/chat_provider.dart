@@ -10,12 +10,14 @@ import '../../data/models/chat_session_model.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/chat_session.dart';
+import '../../domain/entities/agent.dart';
 import '../../domain/entities/provider.dart';
 import '../../domain/usecases/create_chat_session.dart';
 import '../../domain/usecases/delete_chat_session.dart';
 import '../../domain/usecases/fork_chat_session.dart';
 import '../../domain/usecases/get_chat_message.dart';
 import '../../domain/usecases/get_chat_messages.dart';
+import '../../domain/usecases/get_agents.dart';
 import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/get_providers.dart';
 import '../../domain/usecases/get_session_children.dart';
@@ -85,6 +87,7 @@ class ChatProvider extends ChangeNotifier {
     required this.createChatSession,
     required this.getChatMessages,
     required this.getChatMessage,
+    required this.getAgents,
     required this.getProviders,
     required this.deleteChatSession,
     required this.updateChatSession,
@@ -129,6 +132,7 @@ class ChatProvider extends ChangeNotifier {
   final CreateChatSession createChatSession;
   final GetChatMessages getChatMessages;
   final GetChatMessage getChatMessage;
+  final GetAgents getAgents;
   final GetProviders getProviders;
   final DeleteChatSession deleteChatSession;
   final UpdateChatSession updateChatSession;
@@ -185,8 +189,10 @@ class ChatProvider extends ChangeNotifier {
   String? _currentProjectId;
   List<Provider> _providers = [];
   Map<String, String> _defaultModels = {};
+  List<Agent> _agents = <Agent>[];
   String? _selectedProviderId;
   String? _selectedModelId;
+  String? _selectedAgentName;
   String? _selectedVariantId;
   List<String> _recentModelKeys = <String>[];
   Map<String, int> _modelUsageCounts = <String, int>{};
@@ -234,6 +240,12 @@ class ChatProvider extends ChangeNotifier {
   String? get currentProjectId => _currentProjectId;
   List<Provider> get providers => _providers;
   Map<String, String> get defaultModels => _defaultModels;
+  List<Agent> get agents => List<Agent>.unmodifiable(_agents);
+  List<Agent> get selectableAgents =>
+      List<Agent>.unmodifiable(_sortedSelectableAgents(_agents));
+  String? get selectedAgentName => _selectedAgentName;
+  String get selectedAgentLabel =>
+      _selectedAgentName == null ? 'Select agent' : _selectedAgentName!;
   String? get selectedProviderId => _selectedProviderId;
   String? get selectedModelId => _selectedModelId;
   String? get selectedVariantId => _selectedVariantId;
@@ -456,6 +468,80 @@ class ChatProvider extends ChangeNotifier {
     return modelKey.substring(separatorIndex + 1);
   }
 
+  bool _isSelectableAgent(Agent agent) {
+    if (agent.hidden) {
+      return false;
+    }
+    final mode = agent.mode.trim().toLowerCase();
+    return mode.isEmpty || mode == 'primary' || mode == 'all';
+  }
+
+  int _agentNamePriority(String name) {
+    final normalized = name.trim().toLowerCase();
+    if (normalized == 'build') {
+      return 0;
+    }
+    if (normalized == 'plan') {
+      return 1;
+    }
+    return 2;
+  }
+
+  int _agentModePriority(String mode) {
+    switch (mode.trim().toLowerCase()) {
+      case 'primary':
+        return 0;
+      case 'all':
+        return 1;
+      default:
+        return 2;
+    }
+  }
+
+  List<Agent> _sortedSelectableAgents(List<Agent> agents) {
+    final selectable = agents.where(_isSelectableAgent).toList(growable: false)
+      ..sort((a, b) {
+        final byPinned = _agentNamePriority(
+          a.name,
+        ).compareTo(_agentNamePriority(b.name));
+        if (byPinned != 0) {
+          return byPinned;
+        }
+        final byMode = _agentModePriority(
+          a.mode,
+        ).compareTo(_agentModePriority(b.mode));
+        if (byMode != 0) {
+          return byMode;
+        }
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+    return selectable;
+  }
+
+  String? _resolvePreferredAgentName(List<Agent> available, String? persisted) {
+    final selectable = _sortedSelectableAgents(available);
+    if (selectable.isEmpty) {
+      return null;
+    }
+    final persistedName = persisted?.trim();
+    if (persistedName != null && persistedName.isNotEmpty) {
+      final exact = selectable
+          .where((agent) => agent.name == persistedName)
+          .firstOrNull;
+      if (exact != null) {
+        return exact.name;
+      }
+      final normalized = persistedName.toLowerCase();
+      final caseInsensitive = selectable
+          .where((agent) => agent.name.toLowerCase() == normalized)
+          .firstOrNull;
+      if (caseInsensitive != null) {
+        return caseInsensitive.name;
+      }
+    }
+    return selectable.first.name;
+  }
+
   String _composeContextKey(String serverId, String scopeId) {
     return '$serverId::$scopeId';
   }
@@ -667,6 +753,27 @@ class ChatProvider extends ChangeNotifier {
       serverId: serverId,
       scopeId: scopeId,
     );
+  }
+
+  Future<void> _refreshAgents({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    final result = await getAgents(directory: projectProvider.currentDirectory);
+    if (result.isLeft()) {
+      final failure = result.fold((value) => value, (_) => null);
+      AppLogger.warn('Failed to load agents: ${failure.toString()}');
+      _agents = <Agent>[];
+      _selectedAgentName = null;
+      return;
+    }
+    final agents = result.fold((_) => const <Agent>[], (value) => value);
+    _agents = List<Agent>.from(agents);
+    final persisted = await localDataSource.getSelectedAgent(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    _selectedAgentName = _resolvePreferredAgentName(_agents, persisted);
   }
 
   String? _resolveStoredVariantForSelection() {
@@ -1891,6 +1998,8 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
 
+      await _refreshAgents(serverId: serverId, scopeId: scopeId);
+
       if (_providers.isNotEmpty) {
         await _loadModelPreferenceState(serverId: serverId, scopeId: scopeId);
 
@@ -2005,13 +2114,18 @@ class ChatProvider extends ChangeNotifier {
             scopeId: scopeId,
           );
         }
+        await localDataSource.saveSelectedAgent(
+          _selectedAgentName,
+          serverId: serverId,
+          scopeId: scopeId,
+        );
         await _persistModelPreferenceState(
           serverId: serverId,
           scopeId: scopeId,
         );
 
         AppLogger.debug(
-          'Selected provider=$_selectedProviderId model=$_selectedModelId variant=$_selectedVariantId server=$serverId',
+          'Selected agent=$_selectedAgentName provider=$_selectedProviderId model=$_selectedModelId variant=$_selectedVariantId server=$serverId',
         );
       } else {
         _selectedProviderId = null;
@@ -2116,6 +2230,8 @@ class ChatProvider extends ChangeNotifier {
     _isRespondingInteraction = false;
     _providers = <Provider>[];
     _defaultModels = <String, String>{};
+    _agents = <Agent>[];
+    _selectedAgentName = null;
     _selectedProviderId = null;
     _selectedModelId = null;
     _selectedVariantId = null;
@@ -2156,6 +2272,11 @@ class ChatProvider extends ChangeNotifier {
         scopeId: scopeId,
       );
     }
+    await localDataSource.saveSelectedAgent(
+      _selectedAgentName,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
     await _persistModelPreferenceState(serverId: serverId, scopeId: scopeId);
   }
 
@@ -2223,6 +2344,23 @@ class ChatProvider extends ChangeNotifier {
     await setSelectedModelByProvider(providerId: provider.id, modelId: modelId);
   }
 
+  Future<void> setSelectedAgent(String agentName) async {
+    final candidate = agentName.trim();
+    if (candidate.isEmpty) {
+      return;
+    }
+    final next = _resolvePreferredAgentName(_agents, candidate);
+    if (next == null) {
+      return;
+    }
+    if (_selectedAgentName == next) {
+      return;
+    }
+    _selectedAgentName = next;
+    await _persistSelection();
+    notifyListeners();
+  }
+
   Future<void> setSelectedVariant(String? variantId) async {
     final providerId = _selectedProviderId;
     final modelId = _selectedModelId;
@@ -2264,6 +2402,34 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
     await setSelectedVariant(variantIds[currentIndex + 1]);
+  }
+
+  Future<void> cycleAgent({bool reverse = false}) async {
+    final available = selectableAgents;
+    if (available.isEmpty) {
+      return;
+    }
+
+    final selected = _selectedAgentName;
+    if (selected == null) {
+      await setSelectedAgent(available.first.name);
+      return;
+    }
+
+    final currentIndex = available.indexWhere(
+      (agent) => agent.name == selected,
+    );
+    if (currentIndex == -1) {
+      await setSelectedAgent(available.first.name);
+      return;
+    }
+
+    final delta = reverse ? -1 : 1;
+    final nextIndex = (currentIndex + delta) % available.length;
+    final normalizedIndex = nextIndex < 0
+        ? nextIndex + available.length
+        : nextIndex;
+    await setSelectedAgent(available[normalizedIndex].name);
   }
 
   /// Load session list
@@ -2669,7 +2835,7 @@ class ChatProvider extends ChangeNotifier {
     }
 
     AppLogger.info(
-      'Provider send start session=${_currentSession!.id} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"} variant=${_selectedVariantId ?? "auto"}',
+      'Provider send start session=${_currentSession!.id} agent=${_selectedAgentName ?? "-"} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"} variant=${_selectedVariantId ?? "auto"}',
     );
     _setState(ChatState.sending);
 
@@ -2729,6 +2895,14 @@ class ChatProvider extends ChangeNotifier {
       }
 
       _recordModelUsage();
+      final selectedAgentForSend = _resolvePreferredAgentName(
+        _agents,
+        _selectedAgentName,
+      );
+      if (selectedAgentForSend != null &&
+          selectedAgentForSend != _selectedAgentName) {
+        _selectedAgentName = selectedAgentForSend;
+      }
       // Persisting selection is best-effort; it must not block message sending.
       unawaited(
         _persistSelection().catchError(
@@ -2749,7 +2923,7 @@ class ChatProvider extends ChangeNotifier {
         providerId: _selectedProviderId ?? 'anthropic',
         modelId: _selectedModelId ?? 'claude-3-5-sonnet-20241022',
         variant: _selectedVariantId,
-        mode: shellMode ? 'shell' : null,
+        mode: shellMode ? 'shell' : selectedAgentForSend,
         parts: inputParts,
       );
 

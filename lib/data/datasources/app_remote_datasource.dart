@@ -1,3 +1,4 @@
+import '../models/agent_model.dart';
 import '../models/provider_model.dart';
 import '../models/app_info_model.dart';
 import '../../core/logging/app_logger.dart';
@@ -12,6 +13,9 @@ abstract class AppRemoteDataSource {
 
   /// Technical comment translated to English.
   Future<ProvidersResponseModel> getProviders({String? directory});
+
+  /// Technical comment translated to English.
+  Future<List<AgentModel>> getAgents({String? directory});
 
   /// Technical comment translated to English.
   Future<Map<String, dynamic>> getConfig({String? directory});
@@ -84,6 +88,19 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
     return ProvidersResponseModel.fromJson(
       response.data as Map<String, dynamic>,
     );
+  }
+
+  @override
+  Future<List<AgentModel>> getAgents({String? directory}) async {
+    final queryParams = directory != null
+        ? {'directory': directory}
+        : <String, dynamic>{};
+    final response = await dio.get('/agent', queryParameters: queryParams);
+    final data = response.data as List<dynamic>? ?? const <dynamic>[];
+    return data
+        .whereType<Map>()
+        .map((item) => AgentModel.fromJson(Map<String, dynamic>.from(item)))
+        .toList(growable: false);
   }
 
   @override

@@ -45,6 +45,12 @@ class _EscapeIntent extends Intent {
   const _EscapeIntent();
 }
 
+class _CycleAgentIntent extends Intent {
+  const _CycleAgentIntent({this.reverse = false});
+
+  final bool reverse;
+}
+
 class _ModelSelectorEntry {
   const _ModelSelectorEntry({
     required this.providerId,
@@ -734,6 +740,24 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               const _QuickOpenIntent(),
           const SingleActivator(LogicalKeyboardKey.escape):
               const _EscapeIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyJ, control: true):
+              const _CycleAgentIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyJ, meta: true):
+              const _CycleAgentIntent(),
+          const SingleActivator(
+            LogicalKeyboardKey.keyJ,
+            control: true,
+            shift: true,
+          ): const _CycleAgentIntent(
+            reverse: true,
+          ),
+          const SingleActivator(
+            LogicalKeyboardKey.keyJ,
+            meta: true,
+            shift: true,
+          ): const _CycleAgentIntent(
+            reverse: true,
+          ),
         };
         final actionMap = <Type, Action<Intent>>{
           _NewSessionIntent: CallbackAction<_NewSessionIntent>(
@@ -757,6 +781,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           _EscapeIntent: CallbackAction<_EscapeIntent>(
             onInvoke: (_) {
               _handleEscape();
+              return null;
+            },
+          ),
+          _CycleAgentIntent: CallbackAction<_CycleAgentIntent>(
+            onInvoke: (intent) {
+              final chatProvider = context.read<ChatProvider>();
+              unawaited(chatProvider.cycleAgent(reverse: intent.reverse));
               return null;
             },
           ),
@@ -1827,6 +1858,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   if (!FeatureFlags.refreshlessRealtime)
                     _buildShortcutHint('Ctrl/Cmd + R', 'Refresh chat data'),
                   _buildShortcutHint('Ctrl/Cmd + L', 'Focus message input'),
+                  _buildShortcutHint(
+                    'Ctrl/Cmd + J',
+                    'Cycle selected agent (Shift reverses)',
+                  ),
                   _buildShortcutHint('Esc', 'Close drawer or unfocus input'),
                 ],
               ),
@@ -3351,6 +3386,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   Widget _buildModelControls(ChatProvider chatProvider) {
     final selectedModel = chatProvider.selectedModel;
+    final selectedAgent = chatProvider.selectedAgentName;
+    final selectableAgents = chatProvider.selectableAgents;
     final variants = chatProvider.availableVariants;
 
     return Padding(
@@ -3360,6 +3397,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          Tooltip(
+            message: 'Choose agent',
+            child: ActionChip(
+              key: const ValueKey<String>('agent_selector_button'),
+              avatar: const Icon(Icons.support_agent_outlined, size: 18),
+              label: Text(
+                selectedAgent == null
+                    ? 'Select agent'
+                    : _formatAgentLabel(selectedAgent),
+              ),
+              onPressed: selectableAgents.isEmpty
+                  ? null
+                  : () => unawaited(_openAgentSelector(chatProvider)),
+            ),
+          ),
           Tooltip(
             message: 'Choose model',
             child: ActionChip(
@@ -3387,6 +3439,117 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ),
         ],
       ),
+    );
+  }
+
+  String _formatAgentLabel(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return value;
+    }
+    return '${trimmed[0].toUpperCase()}${trimmed.substring(1)}';
+  }
+
+  String _agentKey(String name) {
+    return name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+  }
+
+  Future<void> _openAgentSelector(ChatProvider chatProvider) async {
+    var query = '';
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (bottomSheetContext, setModalState) {
+            final normalizedQuery = query.trim().toLowerCase();
+            final entries = chatProvider.selectableAgents
+                .where((agent) {
+                  if (normalizedQuery.isEmpty) {
+                    return true;
+                  }
+                  return agent.name.toLowerCase().contains(normalizedQuery) ||
+                      agent.mode.toLowerCase().contains(normalizedQuery);
+                })
+                .toList(growable: false);
+            final selectedAgent = chatProvider.selectedAgentName;
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(bottomSheetContext).bottom,
+                ),
+                child: SizedBox(
+                  height: MediaQuery.sizeOf(bottomSheetContext).height * 0.62,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                        child: TextField(
+                          autofocus: true,
+                          onChanged: (value) {
+                            setModalState(() {
+                              query = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search agent',
+                            prefixIcon: const Icon(Icons.search),
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: entries.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No agents found',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              )
+                            : ListView(
+                                children: [
+                                  for (final entry in entries)
+                                    ListTile(
+                                      key: ValueKey<String>(
+                                        'agent_selector_item_${_agentKey(entry.name)}',
+                                      ),
+                                      title: Text(
+                                        _formatAgentLabel(entry.name),
+                                      ),
+                                      subtitle: Text(
+                                        entry.mode.trim().isEmpty
+                                            ? 'agent'
+                                            : entry.mode,
+                                      ),
+                                      trailing: selectedAgent == entry.name
+                                          ? const Icon(Icons.check_rounded)
+                                          : null,
+                                      onTap: () async {
+                                        await chatProvider.setSelectedAgent(
+                                          entry.name,
+                                        );
+                                        if (!mounted) {
+                                          return;
+                                        }
+                                        Navigator.of(bottomSheetContext).pop();
+                                      },
+                                    ),
+                                ],
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -4104,25 +4267,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   ) async {
     final normalizedQuery = query.trim().toLowerCase();
     final projectProvider = context.read<ProjectProvider>();
+    final chatProvider = context.read<ChatProvider>();
     final dio = di.sl<DioClient>().dio;
 
     try {
-      final responses = await Future.wait([
-        dio.get(
-          '/find/file',
-          queryParameters: <String, String>{
-            'query': normalizedQuery,
-            if ((projectProvider.currentDirectory ?? '').isNotEmpty)
-              'directory': projectProvider.currentDirectory!,
-            'limit': '12',
-          },
-        ),
-        dio.get('/agent'),
-      ]);
+      final response = await dio.get(
+        '/find/file',
+        queryParameters: <String, String>{
+          'query': normalizedQuery,
+          if ((projectProvider.currentDirectory ?? '').isNotEmpty)
+            'directory': projectProvider.currentDirectory!,
+          'limit': '12',
+        },
+      );
 
-      final fileData = responses[0].data as List<dynamic>? ?? const <dynamic>[];
-      final agentData =
-          responses[1].data as List<dynamic>? ?? const <dynamic>[];
+      final fileData = response.data as List<dynamic>? ?? const <dynamic>[];
       final suggestions = <ChatComposerMentionSuggestion>[];
 
       for (final raw in fileData) {
@@ -4147,25 +4306,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         );
       }
 
-      for (final raw in agentData) {
-        if (raw is! Map) {
+      for (final agent in chatProvider.agents) {
+        final name = agent.name.trim();
+        if (name.isEmpty || agent.hidden) {
           continue;
         }
-        final name = raw['name'] as String?;
-        final hidden = raw['hidden'] == true;
-        if (name == null || name.trim().isEmpty || hidden) {
-          continue;
-        }
-        final normalizedName = name.trim().toLowerCase();
+        final normalizedName = name.toLowerCase();
         if (normalizedQuery.isNotEmpty &&
             !normalizedName.contains(normalizedQuery)) {
           continue;
         }
         suggestions.add(
           ChatComposerMentionSuggestion(
-            value: name.trim(),
+            value: name,
             type: ChatComposerSuggestionType.agent,
-            subtitle: raw['mode'] as String? ?? 'agent',
+            subtitle: agent.mode.isEmpty ? 'agent' : agent.mode,
           ),
         );
       }
@@ -4198,7 +4353,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       ChatComposerSlashCommandSuggestion(
         name: 'agent',
         source: 'builtin',
-        description: 'Agent quick action',
+        description: 'Open agent selector',
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
@@ -4301,14 +4456,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         await _openModelSelector(chatProvider);
         return true;
       case 'agent':
-        if (!mounted) {
+        if (!mounted || chatProvider.selectableAgents.isEmpty) {
           return true;
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Agent picker will be expanded in Feature 020'),
-          ),
-        );
+        await _openAgentSelector(chatProvider);
         return true;
       case 'open':
         if (!mounted) {

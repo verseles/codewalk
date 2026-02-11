@@ -14,6 +14,7 @@ import 'package:codewalk/domain/usecases/fork_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
+import 'package:codewalk/domain/usecases/get_agents.dart';
 import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
 import 'package:codewalk/domain/usecases/get_providers.dart';
 import 'package:codewalk/domain/usecases/get_session_children.dart';
@@ -159,6 +160,7 @@ ChatProvider _buildChatProvider({
     createChatSession: CreateChatSession(chatRepo),
     getChatMessages: GetChatMessages(chatRepo),
     getChatMessage: GetChatMessage(chatRepo),
+    getAgents: GetAgents(appRepo),
     getProviders: GetProviders(appRepo),
     deleteChatSession: DeleteChatSession(chatRepo),
     updateChatSession: UpdateChatSession(chatRepo),
