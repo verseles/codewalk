@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../domain/entities/chat_session.dart';
+import '../utils/session_title_formatter.dart';
 
 /// Chat session list widget
 class ChatSessionList extends StatelessWidget {
@@ -92,7 +93,10 @@ class ChatSessionList extends StatelessWidget {
                 ),
               ),
               title: Text(
-                _displayTitle(session),
+                SessionTitleFormatter.displayTitle(
+                  time: session.time,
+                  title: session.title,
+                ),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? colorScheme.onSecondaryContainer : null,
@@ -285,36 +289,6 @@ class ChatSessionList extends StatelessWidget {
     }
   }
 
-  String _displayTitle(ChatSession session) {
-    final raw = session.title?.trim();
-    if (raw == null || raw.isEmpty) {
-      return _generateFallbackTitle(session.time);
-    }
-    return raw;
-  }
-
-  /// Generate fallback session title
-  String _generateFallbackTitle(DateTime time) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final sessionDate = DateTime(time.year, time.month, time.day);
-
-    if (sessionDate == today) {
-      return 'Today ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-    } else {
-      final difference = today.difference(sessionDate).inDays;
-      if (difference == 1) {
-        return 'Yesterday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-      } else if (difference < 7) {
-        final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        final weekday = weekdays[time.weekday - 1];
-        return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-      } else {
-        return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-      }
-    }
-  }
-
   void _showRenameDialog(BuildContext context, ChatSession session) {
     final callback = onSessionRenamed;
     if (callback == null) {
@@ -441,7 +415,7 @@ class ChatSessionList extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Delete Conversation'),
         content: Text(
-          'Are you sure you want to delete the conversation "${session.title ?? _generateFallbackTitle(session.time)}"? This action cannot be undone.',
+          'Are you sure you want to delete the conversation "${SessionTitleFormatter.displayTitle(time: session.time, title: session.title)}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(

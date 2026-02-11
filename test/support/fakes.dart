@@ -572,6 +572,13 @@ class FakeChatRepository implements ChatRepository {
     String? directory,
   )?
   sendMessageHandler;
+  Future<Either<Failure, ChatSession>> Function(
+    String projectId,
+    String sessionId,
+    SessionUpdateInput input,
+    String? directory,
+  )?
+  updateSessionHandler;
 
   Failure? getSessionsFailure;
   Failure? createSessionFailure;
@@ -995,6 +1002,9 @@ class FakeChatRepository implements ChatRepository {
     SessionUpdateInput input, {
     String? directory,
   }) async {
+    if (updateSessionHandler != null) {
+      return updateSessionHandler!(projectId, sessionId, input, directory);
+    }
     if (updateSessionFailure != null) return Left(updateSessionFailure!);
     final index = sessions.indexWhere((s) => s.id == sessionId);
     if (index == -1) return const Left(NotFoundFailure('Session not found'));

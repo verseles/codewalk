@@ -44,6 +44,7 @@ import 'package:codewalk/presentation/pages/chat_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
+import 'package:codewalk/presentation/utils/session_title_formatter.dart';
 
 import '../support/fakes.dart';
 
@@ -1789,6 +1790,94 @@ void main() {
       expect(find.text('Thinking...'), findsNothing);
     },
   );
+
+  testWidgets('shows consistent fallback title in active session header', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final untitledTime = DateTime(2026, 2, 11, 10, 30);
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_untitled',
+          workspaceId: 'default',
+          time: untitledTime,
+          title: null,
+        ),
+      ],
+    );
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    final expected = SessionTitleFormatter.fallbackTitle(time: untitledTime);
+    expect(find.text(expected), findsWidgets);
+  });
+
+  testWidgets('renames current session through inline header editor', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_inline',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
+        ),
+      ],
+    );
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('session_title_edit_button')).first,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('session_title_editor_field')).first,
+      'Renamed Inline',
+    );
+    await tester.tap(
+      find.byKey(const ValueKey<String>('session_title_save_button')).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(provider.currentSession?.title, 'Renamed Inline');
+    expect(
+      provider.sessions.where((item) => item.id == 'ses_inline').first.title,
+      'Renamed Inline',
+    );
+  });
 }
 
 Widget _testApp(ChatProvider provider, AppProvider appProvider) {

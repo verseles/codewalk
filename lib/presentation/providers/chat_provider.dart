@@ -36,6 +36,7 @@ import '../../domain/usecases/update_chat_session.dart';
 import '../../domain/usecases/watch_chat_events.dart';
 import '../../domain/usecases/watch_global_chat_events.dart';
 import '../../core/errors/failures.dart';
+import '../utils/session_title_formatter.dart';
 import 'project_provider.dart';
 
 /// Chat state
@@ -217,6 +218,7 @@ class ChatProvider extends ChangeNotifier {
   bool _pendingRefreshStatus = false;
   bool _pendingRefreshActiveSession = false;
   bool _featureFlagLogged = false;
+  final Map<String, String> _pendingRenameTitleBySessionId = <String, String>{};
   late final Duration _syncSignalStaleThreshold;
   late final Duration _syncHealthCheckInterval;
   late final Duration _degradedPollingInterval;
@@ -1174,6 +1176,7 @@ class ChatProvider extends ChangeNotifier {
 
   void _removeSessionById(String sessionId) {
     _sessions.removeWhere((item) => item.id == sessionId);
+    _pendingRenameTitleBySessionId.remove(sessionId);
     if (_currentSession?.id == sessionId) {
       _currentSession = _sessions.firstOrNull;
       _messages = <ChatMessage>[];
@@ -1200,6 +1203,25 @@ class ChatProvider extends ChangeNotifier {
         final info = properties['info'];
         if (info is Map<String, dynamic>) {
           final nextSession = ChatSessionModel.fromJson(info).toDomain();
+          final existing = _sessionById(nextSession.id);
+          if (existing != null && nextSession.time.isBefore(existing.time)) {
+            AppLogger.debug(
+              'Ignoring stale session event for ${nextSession.id}: incoming=${nextSession.time.toIso8601String()} existing=${existing.time.toIso8601String()}',
+            );
+            break;
+          }
+          final pendingRename = _pendingRenameTitleBySessionId[nextSession.id];
+          if (pendingRename != null) {
+            final incomingTitle = nextSession.title?.trim();
+            if (incomingTitle == pendingRename) {
+              _pendingRenameTitleBySessionId.remove(nextSession.id);
+            } else {
+              AppLogger.debug(
+                'Ignoring conflicting session.updated while rename is pending for ${nextSession.id}',
+              );
+              break;
+            }
+          }
           _upsertSession(nextSession);
           if (_currentSession?.id == nextSession.id) {
             _currentSession = nextSession;
@@ -2730,28 +2752,7 @@ class ChatProvider extends ChangeNotifier {
 
   /// Generate time-based session title
   String _generateSessionTitle(DateTime time) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final sessionDate = DateTime(time.year, time.month, time.day);
-
-    if (sessionDate == today) {
-      // Show time for today's conversations
-      return 'Today ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-    } else {
-      final difference = today.difference(sessionDate).inDays;
-      if (difference == 1) {
-        // Yesterday conversation
-        return 'Yesterday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-      } else if (difference < 7) {
-        // Show weekday for conversations within a week
-        final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        final weekday = weekdays[time.weekday - 1];
-        return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-      } else {
-        // Show date for older conversations
-        return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-      }
-    }
+    return SessionTitleFormatter.fallbackTitle(time: time);
   }
 
   /// Select session
@@ -3105,7 +3106,7 @@ class ChatProvider extends ChangeNotifier {
 
   Future<bool> renameSession(ChatSession session, String title) async {
     final trimmed = title.trim();
-    if (trimmed.isEmpty || trimmed == (session.title ?? '').trim()) {
+    if (trimmed.isEmpty) {
       return false;
     }
 
@@ -3113,8 +3114,13 @@ class ChatProvider extends ChangeNotifier {
     if (previous == null) {
       return false;
     }
+    final previousTitle = previous.title?.trim();
+    if (trimmed == previousTitle) {
+      return true;
+    }
 
     final optimistic = previous.copyWith(title: trimmed);
+    _pendingRenameTitleBySessionId[session.id] = trimmed;
     _applySessionLocally(optimistic);
     notifyListeners();
 
@@ -3129,12 +3135,14 @@ class ChatProvider extends ChangeNotifier {
 
     return result.fold(
       (failure) {
+        _pendingRenameTitleBySessionId.remove(session.id);
         _applySessionLocally(previous);
         _handleFailure(failure);
         notifyListeners();
         return false;
       },
       (updated) {
+        _pendingRenameTitleBySessionId.remove(session.id);
         _applySessionLocally(updated);
         unawaited(_persistSessionCacheBestEffort());
         notifyListeners();

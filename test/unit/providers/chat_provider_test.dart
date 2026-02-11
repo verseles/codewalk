@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
@@ -895,6 +896,22 @@ void main() {
       );
     });
 
+    test(
+      'renameSession returns true for no-op rename with same title',
+      () async {
+        await provider.loadSessions();
+        final session = provider.sessions.first;
+
+        final ok = await provider.renameSession(session, 'Session 1');
+
+        expect(ok, isTrue);
+        expect(
+          provider.sessions.where((item) => item.id == session.id).first.title,
+          'Session 1',
+        );
+      },
+    );
+
     test('renameSession rolls back optimistic title on failure', () async {
       await provider.loadSessions();
       final session = provider.sessions.first;
@@ -1351,6 +1368,68 @@ void main() {
 
         expect(provider.sessions.first.title, 'Session 1 renamed');
         expect(chatRepository.getSessionsCallCount, sessionsBefore);
+      },
+    );
+
+    test(
+      'ignores conflicting session.updated events while rename is pending',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        final renameCompleter = Completer<Either<Failure, ChatSession>>();
+        chatRepository.updateSessionHandler = (_, sessionId, input, __) {
+          return renameCompleter.future;
+        };
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        final session = provider.sessions.first;
+        final activeDirectory = provider.projectProvider.currentDirectory;
+
+        final renameFuture = provider.renameSession(session, 'Local Rename');
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+        expect(provider.sessions.first.title, 'Local Rename');
+
+        chatRepository.emitGlobalEvent(
+          ChatEvent(
+            type: 'session.updated',
+            properties: <String, dynamic>{
+              if (activeDirectory != null) 'directory': activeDirectory,
+              'info': <String, dynamic>{
+                'id': session.id,
+                'workspaceId': session.workspaceId,
+                'title': 'Remote Old Title',
+                'time': <String, dynamic>{
+                  'created': session.time.millisecondsSinceEpoch,
+                  'updated': session.time.millisecondsSinceEpoch,
+                },
+              },
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        expect(provider.sessions.first.title, 'Local Rename');
+
+        final renamedSession = session.copyWith(title: 'Local Rename');
+        renameCompleter.complete(Right(renamedSession));
+        final ok = await renameFuture;
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+
+        expect(ok, isTrue);
+        expect(provider.sessions.first.title, 'Local Rename');
       },
     );
 

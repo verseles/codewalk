@@ -200,10 +200,10 @@ Commits: bf20bde, c75df1d
 Description: Melhorar a UX de sessão para sempre exibir título de conversa de forma clara e permitir renomeação rápida/inline sem fricção. (Visit file ROADMAP.feat021.md for full research details)
 
 - [x] 21.01 Pesquisa e freeze de comportamento (display de título no header, rename inline/menu e contrato `session.update`)
-- [ ] 21.02 Garantir exibição consistente do título da sessão ativa nas áreas primárias da tela (mobile e desktop)
-- [ ] 21.03 Implementar renomeação inline com fluxo otimista + rollback em erro e sincronização imediata da lista de sessões
-- [ ] 21.04 Refinar fallback de títulos automáticos (`Today ...`) para reduzir ambiguidade e melhorar legibilidade temporal
-- [ ] 21.05 Cobrir render/rename/fallback com testes automatizados
+- [x] 21.02 Garantir exibição consistente do título da sessão ativa nas áreas primárias da tela (mobile e desktop)
+- [x] 21.03 Implementar renomeação inline com fluxo otimista + rollback em erro e sincronização imediata da lista de sessões
+- [x] 21.04 Refinar fallback de títulos automáticos (`Today ...`) para reduzir ambiguidade e melhorar legibilidade temporal
+- [x] 21.05 Cobrir render/rename/fallback com testes automatizados
 
 ### Feature 022: Settings Parity (Notifications, Sounds, Shortcuts)
 Description: Expandir configurações para incluir notificações e sons por categoria (agente/permissões/erros) e uma tela dedicada de atalhos com busca e detecção de conflito. (Visit file ROADMAP.feat022.md for full research details)

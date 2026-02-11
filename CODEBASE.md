@@ -866,3 +866,11 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Enabled selectable message content for both assistant and user messages via a shared `SelectionArea`, removed inline `Copy` buttons, changed full-message copy to trigger only from double-tap/double-click on bubble background (text double-click keeps native word selection), and disabled in-app copy snackbar on Android in favor of native clipboard feedback.
 - Updated top bar project-context selector visual hierarchy: removed rounded border container and moved the selector from right-side actions to the left-aligned app-bar title slot.
 - Reworked project selector interaction into an adaptive dialog (`Dialog.fullscreen` on compact screens, centered `Dialog` on larger layouts) with top-level persistent actions and list-item close controls beside each project entry.
+
+**Feature 021 (completed):**
+- Added a shared session-title formatting contract (`SessionTitleFormatter`) to unify explicit title/fallback rendering across list and active-session surfaces.
+- Replaced ambiguous relative-only fallback titles with relative + absolute date format (e.g. `Today HH:mm (M/D/YYYY)`), and reused the same strategy when creating new sessions.
+- Added inline rename UX in active conversation headers (mobile + desktop) with keyboard support (`Enter` save, `Esc` cancel), touch-friendly edit controls, save/loading feedback, and inline validation/error state.
+- Hardened rename synchronization in `ChatProvider`: no-op rename now succeeds without error noise, optimistic rename tracks pending local intent, stale/conflicting `session.updated` events are ignored while rename is pending, and rollback remains intact on API failure.
+- Expanded tests with new unit/widget coverage for formatter behavior, inline editor interactions, header fallback rendering, inline rename flow, and pending-rename conflict handling in provider realtime events.
+- Validation executed: targeted feature test matrix (`flutter test` on formatter/editor/provider/chat_page), full regression suite (`flutter test`), and static analysis (`flutter analyze --no-fatal-infos --no-fatal-warnings`).
