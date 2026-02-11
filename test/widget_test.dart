@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -109,6 +110,71 @@ void main() {
 
     expect(sentSubmission?.mode, ChatComposerMode.shell);
     expect(sentSubmission?.text, 'pwd');
+  });
+
+  testWidgets('desktop Enter sends and Shift+Enter inserts newline', (
+    WidgetTester tester,
+  ) async {
+    ChatInputSubmission? sentSubmission;
+    final previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    try {
+      await tester.pumpWidget(
+        _buildChatInputHarness(
+          child: ChatInputWidget(
+            onSendMessage: (submission) {
+              sentSubmission = submission;
+            },
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'hello');
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+
+      final textFieldAfterShift = tester.widget<TextField>(
+        find.byType(TextField),
+      );
+      expect(textFieldAfterShift.controller!.text, 'hello\n');
+      expect(sentSubmission, isNull);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      expect(sentSubmission?.text, 'hello');
+    } finally {
+      debugDefaultTargetPlatformOverride = previousPlatform;
+    }
+  });
+
+  testWidgets('shows Stop action while responding and calls callback', (
+    WidgetTester tester,
+  ) async {
+    var stopCount = 0;
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          isResponding: true,
+          onStopRequested: () {
+            stopCount += 1;
+          },
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.stop_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.send_rounded), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.stop_rounded));
+    await tester.pumpAndSettle();
+
+    expect(stopCount, 1);
   });
 
   testWidgets('slash popover inserts selected command prefix', (

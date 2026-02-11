@@ -29,6 +29,7 @@ import '../../domain/usecases/list_pending_questions.dart';
 import '../../domain/usecases/reject_question.dart';
 import '../../domain/usecases/reply_permission.dart';
 import '../../domain/usecases/reply_question.dart';
+import '../../domain/usecases/abort_chat_session.dart';
 import '../../domain/usecases/send_chat_message.dart';
 import '../../domain/usecases/share_chat_session.dart';
 import '../../domain/usecases/unshare_chat_session.dart';
@@ -85,6 +86,7 @@ class _ChatContextSnapshot {
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
     required this.sendChatMessage,
+    this.abortChatSession,
     required this.getChatSessions,
     required this.createChatSession,
     required this.getChatMessages,
@@ -131,6 +133,7 @@ class ChatProvider extends ChangeNotifier {
   VoidCallback? _scrollToBottomCallback;
 
   final SendChatMessage sendChatMessage;
+  final AbortChatSession? abortChatSession;
   final GetChatSessions getChatSessions;
   final CreateChatSession createChatSession;
   final GetChatMessages getChatMessages;
@@ -188,6 +191,7 @@ class ChatProvider extends ChangeNotifier {
   String? _sessionInsightsError;
   final Set<String> _pendingLocalUserMessageIds = <String>{};
   bool _activeSessionRefreshInFlight = false;
+  bool _isAbortingResponse = false;
 
   // Project and provider-related state
   String? _currentProjectId;
@@ -263,8 +267,24 @@ class ChatProvider extends ChangeNotifier {
   ChatSyncState get syncState => _syncState;
   bool get isInDegradedMode => _degradedMode;
   bool get refreshlessRealtimeEnabled => _refreshlessRealtimeEnabled;
+  bool get isAbortingResponse => _isAbortingResponse;
   Map<String, SessionStatusInfo> get sessionStatusById =>
       Map<String, SessionStatusInfo>.unmodifiable(_sessionStatusById);
+
+  bool get canAbortActiveResponse {
+    if (_isAbortingResponse || _currentSession == null) {
+      return false;
+    }
+    final status = currentSessionStatus?.type;
+    final hasBusyStatus =
+        status == SessionStatusType.busy || status == SessionStatusType.retry;
+    final hasInProgressAssistant = _messages.whereType<AssistantMessage>().any(
+      (message) => !message.isCompleted,
+    );
+    return _state == ChatState.sending ||
+        hasBusyStatus ||
+        hasInProgressAssistant;
+  }
 
   List<ChatSession> get visibleSessions {
     final query = _sessionSearchQuery.trim().toLowerCase();
@@ -3016,6 +3036,86 @@ class ChatProvider extends ChangeNotifier {
         stackTrace: stackTrace,
       );
       _setError('Failed to start message send');
+    }
+  }
+
+  Future<bool> abortActiveResponse() async {
+    if (!canAbortActiveResponse) {
+      return false;
+    }
+    final session = _currentSession;
+    final usecase = abortChatSession;
+    if (session == null || usecase == null) {
+      _setError('Stop is unavailable for the current session');
+      return false;
+    }
+
+    _isAbortingResponse = true;
+    notifyListeners();
+    final previousError = _errorMessage;
+    _errorMessage = null;
+
+    final result = await usecase(
+      AbortChatSessionParams(
+        projectId: projectProvider.currentProjectId,
+        sessionId: session.id,
+        directory: projectProvider.currentDirectory,
+      ),
+    );
+
+    final success = result.fold(
+      (failure) {
+        _handleFailure(failure);
+        return false;
+      },
+      (_) {
+        _messageSubscription?.cancel();
+        _messageSubscription = null;
+        _setState(ChatState.loaded);
+        _markIncompleteAssistantMessagesAsCompleted();
+        _sessionStatusById[session.id] = const SessionStatusInfo(
+          type: SessionStatusType.idle,
+        );
+        _errorMessage = null;
+        return true;
+      },
+    );
+
+    _isAbortingResponse = false;
+    if (!success && _errorMessage == null) {
+      _errorMessage = previousError ?? 'Failed to stop current response';
+    }
+    notifyListeners();
+    return success;
+  }
+
+  void _markIncompleteAssistantMessagesAsCompleted() {
+    final now = DateTime.now();
+    var changed = false;
+    _messages = _messages
+        .map((message) {
+          if (message is! AssistantMessage || message.isCompleted) {
+            return message;
+          }
+          changed = true;
+          return AssistantMessage(
+            id: message.id,
+            sessionId: message.sessionId,
+            time: message.time,
+            parts: message.parts,
+            completedTime: now,
+            providerId: message.providerId,
+            modelId: message.modelId,
+            cost: message.cost,
+            tokens: message.tokens,
+            error: message.error,
+            mode: message.mode,
+            summary: message.summary,
+          );
+        })
+        .toList(growable: false);
+    if (!changed) {
+      return;
     }
   }
 

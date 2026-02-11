@@ -14,6 +14,8 @@ enum ShortcutAction {
   cycleAgentBackward,
 }
 
+enum DesktopPane { conversations, files, utility }
+
 class ShortcutDefinition {
   const ShortcutDefinition({
     required this.action,
@@ -157,16 +159,35 @@ ShortcutAction? shortcutActionFromKey(String value) {
   };
 }
 
+String desktopPaneKey(DesktopPane pane) {
+  return switch (pane) {
+    DesktopPane.conversations => 'conversations',
+    DesktopPane.files => 'files',
+    DesktopPane.utility => 'utility',
+  };
+}
+
+DesktopPane? desktopPaneFromKey(String value) {
+  return switch (value) {
+    'conversations' => DesktopPane.conversations,
+    'files' => DesktopPane.files,
+    'utility' => DesktopPane.utility,
+    _ => null,
+  };
+}
+
 class ExperienceSettings {
   const ExperienceSettings({
     required this.notifications,
     required this.sounds,
     required this.shortcuts,
+    required this.desktopPanes,
   });
 
   final Map<NotificationCategory, bool> notifications;
   final Map<SoundCategory, SoundOption> sounds;
   final Map<ShortcutAction, String> shortcuts;
+  final Map<DesktopPane, bool> desktopPanes;
 
   factory ExperienceSettings.defaults() {
     final shortcuts = <ShortcutAction, String>{
@@ -185,6 +206,11 @@ class ExperienceSettings {
         SoundCategory.errors: SoundOption.alert,
       },
       shortcuts: shortcuts,
+      desktopPanes: const <DesktopPane, bool>{
+        DesktopPane.conversations: true,
+        DesktopPane.files: true,
+        DesktopPane.utility: true,
+      },
     );
   }
 
@@ -192,11 +218,13 @@ class ExperienceSettings {
     Map<NotificationCategory, bool>? notifications,
     Map<SoundCategory, SoundOption>? sounds,
     Map<ShortcutAction, String>? shortcuts,
+    Map<DesktopPane, bool>? desktopPanes,
   }) {
     return ExperienceSettings(
       notifications: notifications ?? this.notifications,
       sounds: sounds ?? this.sounds,
       shortcuts: shortcuts ?? this.shortcuts,
+      desktopPanes: desktopPanes ?? this.desktopPanes,
     );
   }
 
@@ -214,6 +242,10 @@ class ExperienceSettings {
         for (final entry in shortcuts.entries)
           shortcutActionKey(entry.key): entry.value,
       },
+      'desktopPanes': <String, bool>{
+        for (final entry in desktopPanes.entries)
+          desktopPaneKey(entry.key): entry.value,
+      },
     };
   }
 
@@ -225,6 +257,7 @@ class ExperienceSettings {
     );
     final sounds = Map<SoundCategory, SoundOption>.from(defaults.sounds);
     final shortcuts = Map<ShortcutAction, String>.from(defaults.shortcuts);
+    final desktopPanes = Map<DesktopPane, bool>.from(defaults.desktopPanes);
 
     final notificationsJson = json['notifications'];
     if (notificationsJson is Map) {
@@ -262,10 +295,22 @@ class ExperienceSettings {
       }
     }
 
+    final desktopPanesJson = json['desktopPanes'];
+    if (desktopPanesJson is Map) {
+      for (final entry in desktopPanesJson.entries) {
+        final pane = desktopPaneFromKey(entry.key.toString());
+        if (pane == null) {
+          continue;
+        }
+        desktopPanes[pane] = entry.value == true;
+      }
+    }
+
     return ExperienceSettings(
       notifications: notifications,
       sounds: sounds,
       shortcuts: shortcuts,
+      desktopPanes: desktopPanes,
     );
   }
 }

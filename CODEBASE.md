@@ -529,7 +529,7 @@ Deferred/optional after parity wave:
 | dio | ^5.4.0 | HTTP client |
 | provider | ^6.1.1 | State management |
 | shared_preferences | ^2.2.2 | Local storage |
-| flutter_markdown | ^0.7.7+1 | Markdown rendering |
+| flutter_markdown_plus | ^1.0.7 | Markdown rendering |
 | flutter_highlight | ^0.7.0 | Code syntax highlighting |
 | file_picker | ^10.3.10 | File picker |
 | speech_to_text | ^7.3.0 | Voice input dictation |
@@ -539,6 +539,7 @@ Deferred/optional after parity wave:
 | equatable | ^2.0.5 | Value equality |
 | dartz | ^0.10.1 | Functional programming (Either) |
 | get_it | ^9.2.0 | Dependency injection |
+| web | ^1.1.1 | Web API interop for browser notification bridge |
 
 ### Dev
 
@@ -894,3 +895,18 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Hardened rename synchronization in `ChatProvider`: no-op rename now succeeds without error noise, optimistic rename tracks pending local intent, stale/conflicting `session.updated` events are ignored while rename is pending, and rollback remains intact on API failure.
 - Expanded tests with new unit/widget coverage for formatter behavior, inline editor interactions, header fallback rendering, inline rename flow, and pending-rename conflict handling in provider realtime events.
 - Validation executed: targeted feature test matrix (`flutter test` on formatter/editor/provider/chat_page), full regression suite (`flutter test`), and static analysis (`flutter analyze --no-fatal-infos --no-fatal-warnings`).
+
+**Feature 023 (completed):**
+- Migrated deprecated Flutter color APIs across app UI (`withOpacity` -> `withValues`, `surfaceVariant` -> `surfaceContainerHighest`, `background` -> `surface`, `onBackground` -> `onSurface`).
+- Migrated deprecated form-field initialization API in settings (`DropdownButtonFormField.value` -> `initialValue`).
+- Fixed asynchronous `BuildContext` usage hotspots in `ChatPage` (`use_build_context_synchronously`).
+- Reworked web notification bridge from deprecated `dart:html` to `package:web` + JS interop and removed window-focus compile error path.
+- Replaced deprecated markdown package (`flutter_markdown`) with `flutter_markdown_plus`.
+- Validation executed: `flutter analyze` (targeted issues removed), full tests (`make test`), and Android build/upload (`make android`).
+
+**Backlog UX batch (completed):**
+- Desktop composer shortcut behavior now sends on `Enter` and inserts newline on `Shift+Enter` without breaking mention/slash popover keyboard flows.
+- Desktop sidebars (`Conversations`, `Files`, `Utility`) now support user-driven collapse/restore with persisted visibility via `ExperienceSettings.desktopPanes`.
+- Composer input remains editable while assistant response is in progress; send stays blocked until completion.
+- Send action now switches to `Stop` while response is active and triggers `/session/{id}/abort` through `AbortChatSession` use case wired into `ChatProvider`.
+- Expanded automated coverage for desktop shortcut send/newline behavior, persisted sidebar visibility toggles, stop/abort success path, and stop failure snackbar fallback.

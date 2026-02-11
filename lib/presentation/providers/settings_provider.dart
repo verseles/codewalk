@@ -98,6 +98,18 @@ class SettingsProvider extends ChangeNotifier {
             .defaultBinding;
   }
 
+  bool isDesktopPaneVisible(DesktopPane pane) {
+    return _settings.desktopPanes[pane] ?? true;
+  }
+
+  Future<void> setDesktopPaneVisible(DesktopPane pane, bool visible) async {
+    final next = Map<DesktopPane, bool>.from(_settings.desktopPanes);
+    next[pane] = visible;
+    _settings = _settings.copyWith(desktopPanes: next);
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> setNotificationEnabled(
     NotificationCategory category,
     bool value,

@@ -123,5 +123,27 @@ void main() {
         isFalse,
       );
     });
+
+    test('persists desktop pane visibility preferences', () async {
+      final local = InMemoryAppLocalDataSource();
+      final first = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await first.initialize();
+      await first.setDesktopPaneVisible(DesktopPane.files, false);
+
+      final second = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await second.initialize();
+
+      expect(second.isDesktopPaneVisible(DesktopPane.files), isFalse);
+      expect(second.isDesktopPaneVisible(DesktopPane.conversations), isTrue);
+      expect(second.isDesktopPaneVisible(DesktopPane.utility), isTrue);
+    });
   });
 }

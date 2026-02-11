@@ -18,6 +18,7 @@ import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
 import 'package:codewalk/domain/usecases/fork_chat_session.dart';
+import 'package:codewalk/domain/usecases/abort_chat_session.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/domain/usecases/get_chat_message.dart';
 import 'package:codewalk/domain/usecases/get_chat_messages.dart';
@@ -99,6 +100,44 @@ void main() {
 
       expect(find.byIcon(Icons.menu), findsNothing);
       expect(find.text('Keyboard shortcuts'), findsOneWidget);
+      expect(find.text('Conversations'), findsOneWidget);
+    });
+
+    testWidgets('desktop sidebars can be hidden and restored from menu', (
+      WidgetTester tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(1300, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Conversations'), findsOneWidget);
+      expect(find.text('Files'), findsOneWidget);
+      expect(find.text('Keyboard shortcuts'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('hide_conversations_sidebar_button')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Conversations'), findsNothing);
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('desktop_sidebars_menu_button')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('desktop_sidebar_menu_item_conversations'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('Conversations'), findsOneWidget);
     });
 
@@ -1803,6 +1842,123 @@ void main() {
     },
   );
 
+  testWidgets('keeps input editable while responding and stop aborts session', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_stop',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Stop Session',
+        ),
+      ],
+    );
+    final streamController = StreamController<Either<Failure, ChatMessage>>();
+    addTearDown(() async {
+      await streamController.close();
+    });
+    repository.sendMessageHandler = (_, __, ___, ____) =>
+        streamController.stream;
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await provider.initializeProviders();
+    await tester.pumpAndSettle();
+
+    await provider.sendMessage('trigger stop');
+    await tester.pump();
+
+    final chatInputFieldFinder = find.descendant(
+      of: find.byKey(const ValueKey<String>('composer_input_row')),
+      matching: find.byType(TextField),
+    );
+    final inputField = tester.widget<TextField>(chatInputFieldFinder);
+    expect(inputField.enabled, isTrue);
+    expect(find.byIcon(Icons.stop_rounded), findsOneWidget);
+
+    await tester.enterText(chatInputFieldFinder, 'draft while receiving');
+    await tester.pump();
+    final updatedInputField = tester.widget<TextField>(chatInputFieldFinder);
+    expect(updatedInputField.controller!.text, 'draft while receiving');
+
+    await tester.tap(find.byIcon(Icons.stop_rounded));
+    await tester.pumpAndSettle();
+
+    expect(repository.abortSessionCallCount, 1);
+    expect(repository.lastAbortSessionId, 'ses_stop');
+  });
+
+  testWidgets('shows snackbar when stop request fails', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_stop_fail',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Stop Fail Session',
+        ),
+      ],
+    )..abortSessionFailure = const ServerFailure('abort failed');
+    final streamController = StreamController<Either<Failure, ChatMessage>>();
+    addTearDown(() async {
+      await streamController.close();
+    });
+    repository.sendMessageHandler = (_, __, ___, ____) =>
+        streamController.stream;
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await provider.initializeProviders();
+    await tester.pumpAndSettle();
+
+    await provider.sendMessage('trigger failing stop');
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.stop_rounded));
+    await tester.pumpAndSettle();
+
+    expect(provider.errorMessage, 'Server error. Please try again later');
+    expect(find.byType(SnackBar), findsOneWidget);
+    final chatInputFieldFinder = find.descendant(
+      of: find.byKey(const ValueKey<String>('composer_input_row')),
+      matching: find.byType(TextField),
+    );
+    final inputField = tester.widget<TextField>(chatInputFieldFinder);
+    expect(inputField.enabled, isTrue);
+  });
+
   testWidgets('shows consistent fallback title in active session header', (
     WidgetTester tester,
   ) async {
@@ -1966,6 +2122,7 @@ ChatProvider _buildChatProvider({
     getSessionDiff: GetSessionDiff(chatRepo),
     watchChatEvents: WatchChatEvents(chatRepo),
     watchGlobalChatEvents: WatchGlobalChatEvents(chatRepo),
+    abortChatSession: AbortChatSession(chatRepo),
     listPendingPermissions: ListPendingPermissions(chatRepo),
     replyPermission: ReplyPermission(chatRepo),
     listPendingQuestions: ListPendingQuestions(chatRepo),

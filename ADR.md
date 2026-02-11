@@ -26,6 +26,8 @@ This document tracks technical decisions for CodeWalk.
 - ADR-020: File Explorer State and Context-Scoped Viewer Orchestration (2026-02-11) [Accepted]
 - ADR-021: Responsive Dialog Sizing Standard and Files-Centered Viewer Surface (2026-02-11) [Accepted]
 - ADR-022: Modular Settings Hub and Experience Preference Orchestration (2026-02-11) [Accepted]
+- ADR-023: Deprecated API Modernization and Web Interop Migration (2026-02-11) [Accepted]
+- ADR-024: Desktop Composer/Pane Interaction and Active-Response Abort Semantics (2026-02-11) [Accepted]
 
 ---
 
@@ -668,6 +670,60 @@ CodeWalk used a traditional multi-destination layout: `AppShellPage` was a `Stat
 
 ---
 
+## ADR-024: Desktop Composer/Pane Interaction and Active-Response Abort Semantics
+
+Status: Accepted  
+Date: 2026-02-11
+
+### Context
+
+Backlog prioritization highlighted friction in the desktop chat workflow:
+
+- desktop send/newline shortcuts were not aligned with common editor/chat patterns,
+- side panes consumed horizontal space with no user-controlled collapse state,
+- composer editability was blocked while assistant response was in progress,
+- there was no first-class Stop action wired to session abort while streaming.
+
+The expected behavior required preserving existing mention/slash keyboard behavior and avoiding regressions in ongoing response state handling.
+
+### Decision
+
+1. On desktop/web targets, map composer keyboard behavior to:
+   - `Enter` -> submit message,
+   - `Shift+Enter` -> insert newline.
+2. Keep composer text input enabled while assistant is responding, but block new sends until response completes or user presses Stop.
+3. Replace `Send` action with `Stop` while response is active and route Stop to `/session/{id}/abort` through a dedicated `AbortChatSession` use case injected into `ChatProvider`.
+4. Add user-controlled collapse/restore for desktop panes (`Conversations`, `Files`, `Utility`) and persist visibility in `ExperienceSettings.desktopPanes`.
+5. Keep existing popover/shortcut flows intact by applying desktop send handling only when composer popovers are not consuming Enter.
+
+### Consequences
+
+- Positive: desktop chat interaction now matches expected ergonomics for multi-line drafting and quick send.
+- Positive: users can reclaim conversation width without losing preferred pane layout across app restarts.
+- Positive: active responses can be interrupted through an explicit Stop affordance without freezing text editing.
+- Trade-off: chat input/button state machine is more complex and now depends on both local send state and provider response/abort state.
+- Trade-off: additional persisted experience keys increase migration surface for settings serialization.
+
+### Key Files
+
+- `lib/presentation/widgets/chat_input_widget.dart`
+- `lib/presentation/pages/chat_page.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/domain/usecases/abort_chat_session.dart`
+- `lib/core/di/injection_container.dart`
+- `lib/domain/entities/experience_settings.dart`
+- `lib/presentation/providers/settings_provider.dart`
+- `test/widget/chat_page_test.dart`
+- `test/widget_test.dart`
+- `test/unit/providers/settings_provider_test.dart`
+
+### References
+
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
 ## ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback
 
 Status: Accepted
@@ -1042,5 +1098,63 @@ Feature 022 required parity with OpenCode settings behaviors across:
 ### References
 
 - `ROADMAP.feat022.md`
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-023: Deprecated API Modernization and Web Interop Migration
+
+Status: Accepted  
+Date: 2026-02-11
+
+### Context
+
+Static analysis identified a concentrated group of deprecated API usages and one web bridge compile/runtime risk:
+
+- deprecated color API usage (`withOpacity`, `surfaceVariant`, `background`, `onBackground`),
+- deprecated form field initialization usage (`DropdownButtonFormField.value`),
+- async context usage warnings in `ChatPage`,
+- deprecated browser interop (`dart:html`) and invalid `window.focus` path in the web notification bridge,
+- deprecated markdown dependency (`flutter_markdown`).
+
+These issues created future-upgrade risk for Flutter SDK evolution and reduced maintainability signal in `flutter analyze`.
+
+### Decision
+
+1. Replace color API deprecations with current Material/Color APIs:
+   - `withOpacity` -> `withValues(alpha: ...)`,
+   - `surfaceVariant` -> `surfaceContainerHighest`,
+   - `background` -> `surface`,
+   - `onBackground` -> `onSurface`.
+2. Replace deprecated `DropdownButtonFormField.value` with `initialValue` in settings sections.
+3. Resolve async-context warnings in `ChatPage` by:
+   - capturing providers/messenger before `await`,
+   - validating the correct mounted context before post-await UI operations.
+4. Replace web bridge implementation from `dart:html` to `package:web` + JS interop helpers.
+5. Replace `flutter_markdown` with `flutter_markdown_plus`.
+
+### Consequences
+
+- Positive: all target deprecations and async-context warnings for this maintenance wave are removed.
+- Positive: web notification bridge no longer relies on deprecated `dart:html` and removes the previous focus-related compile issue.
+- Positive: static analysis signal improves (baseline dropped from 141 to 55 issues, with residual lints outside this feature scope).
+- Trade-off: broad UI replacement touched multiple presentation files, increasing short-term merge-conflict probability.
+- Trade-off: analyzer is still non-zero because residual lints were intentionally left out of Feature 023 scope.
+
+### Key Files
+
+- `lib/presentation/pages/chat_page.dart`
+- `lib/presentation/pages/home_page.dart`
+- `lib/presentation/pages/logs_page.dart`
+- `lib/presentation/widgets/chat_message_widget.dart`
+- `lib/presentation/services/web_notification_bridge_web.dart`
+- `lib/presentation/pages/settings/sections/notifications_settings_section.dart`
+- `lib/presentation/pages/settings/sections/servers_settings_section.dart`
+- `lib/presentation/theme/app_theme.dart`
+- `pubspec.yaml`
+
+### References
+
 - `ROADMAP.md`
 - `CODEBASE.md`

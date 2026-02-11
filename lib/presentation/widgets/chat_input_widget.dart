@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -80,6 +81,8 @@ class ChatInputWidget extends StatefulWidget {
     this.onSlashQuery,
     this.onBuiltinSlashCommand,
     this.enabled = true,
+    this.isResponding = false,
+    this.onStopRequested,
     this.focusNode,
     this.showAttachmentButton = false,
     this.allowImageAttachment = true,
@@ -93,6 +96,8 @@ class ChatInputWidget extends StatefulWidget {
   onSlashQuery;
   final FutureOr<bool> Function(String commandName)? onBuiltinSlashCommand;
   final bool enabled;
+  final bool isResponding;
+  final FutureOr<void> Function()? onStopRequested;
   final FocusNode? focusNode;
   final bool showAttachmentButton;
   final bool allowImageAttachment;
@@ -133,6 +138,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   DateTime? _lastSecondarySendActionAt;
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
+
+  bool get _isDesktopPlatform {
+    return kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
 
   @override
   void initState() {
@@ -181,7 +193,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     final payloadText = _mode == ChatComposerMode.shell
         ? _normalizeShellPayload(text)
         : text;
-    if (!widget.enabled || _isSending) {
+    if (!widget.enabled || _isSending || widget.isResponding) {
       return;
     }
     if (payloadText.isEmpty &&
@@ -462,6 +474,19 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       }
     }
 
+    if (hasPopover) {
+      return KeyEventResult.ignored;
+    }
+
+    if (_isDesktopPlatform && logicalKey == LogicalKeyboardKey.enter) {
+      if (HardwareKeyboard.instance.isShiftPressed) {
+        _insertComposerNewline();
+        return KeyEventResult.handled;
+      }
+      unawaited(_handleSendMessage());
+      return KeyEventResult.handled;
+    }
+
     return KeyEventResult.ignored;
   }
 
@@ -586,7 +611,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         (_isComposing ||
             (_attachments.isNotEmpty && _mode == ChatComposerMode.normal)) &&
         widget.enabled &&
-        !_isSending;
+        !_isSending &&
+        !widget.isResponding;
     final showPopover = _popoverType != ChatComposerPopoverType.none;
 
     return Container(
@@ -757,7 +783,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filledTonal(
-                    onPressed: widget.enabled && !_isSending
+                    onPressed:
+                        widget.enabled && !_isSending && !widget.isResponding
                         ? () => unawaited(_toggleVoiceInput())
                         : null,
                     tooltip: _isListening
@@ -784,7 +811,15 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     onPointerUp: (_) => _handleSendButtonPressEnd(),
                     onPointerCancel: (_) => _handleSendButtonPressEnd(),
                     child: FilledButton(
-                      onPressed: canSend ? _handleSendButtonTap : null,
+                      onPressed: widget.isResponding
+                          ? (widget.enabled &&
+                                    !_isSending &&
+                                    widget.onStopRequested != null
+                                ? () => unawaited(
+                                    Future<void>.sync(widget.onStopRequested!),
+                                  )
+                                : null)
+                          : (canSend ? _handleSendButtonTap : null),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(52, 52),
                         padding: EdgeInsets.zero,
@@ -795,6 +830,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
+                          : widget.isResponding
+                          ? const Icon(Icons.stop_rounded)
                           : SizedBox(
                               width: 52,
                               height: 52,

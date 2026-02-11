@@ -614,6 +614,11 @@ class FakeChatRepository implements ChatRepository {
   String? lastQuestionReplyRequestId;
   List<List<String>>? lastQuestionAnswers;
   String? lastQuestionRejectRequestId;
+  int abortSessionCallCount = 0;
+  String? lastAbortProjectId;
+  String? lastAbortSessionId;
+  String? lastAbortDirectory;
+  Failure? abortSessionFailure;
   Map<String, SessionStatusInfo> sessionStatusById =
       <String, SessionStatusInfo>{};
   final Map<String, List<ChatSession>> sessionChildrenById =
@@ -640,7 +645,16 @@ class FakeChatRepository implements ChatRepository {
     String projectId,
     String sessionId, {
     String? directory,
-  }) async => const Right(null);
+  }) async {
+    abortSessionCallCount += 1;
+    lastAbortProjectId = projectId;
+    lastAbortSessionId = sessionId;
+    lastAbortDirectory = directory;
+    if (abortSessionFailure != null) {
+      return Left(abortSessionFailure!);
+    }
+    return const Right(null);
+  }
 
   @override
   Future<Either<Failure, ChatSession>> createSession(

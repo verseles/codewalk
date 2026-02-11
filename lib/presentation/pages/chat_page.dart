@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' hide Provider;
 import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
@@ -193,11 +192,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeChatProvider(ChatProvider chatProvider) async {
+    final appProvider = context.read<AppProvider>();
+    final projectProvider = context.read<ProjectProvider>();
     try {
-      await context.read<AppProvider>().initialize();
-      final projectProvider = context.read<ProjectProvider>();
+      await appProvider.initialize();
       await projectProvider.initializeProject();
-      await context.read<AppProvider>().checkConnection(
+      await appProvider.checkConnection(
         directory: projectProvider.currentDirectory,
       );
       // Technical comment translated to English.
@@ -776,13 +776,22 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         final width = constraints.maxWidth;
         final isMobile = width < _mobileBreakpoint;
         final isLargeDesktop = width >= _largeDesktopBreakpoint;
-        final showDesktopFilePane = !isMobile && width >= _filePaneBreakpoint;
+        final settingsProvider = context.watch<SettingsProvider>();
+        final showConversationPane =
+            !isMobile &&
+            settingsProvider.isDesktopPaneVisible(DesktopPane.conversations);
+        final showDesktopFilePane =
+            !isMobile &&
+            width >= _filePaneBreakpoint &&
+            settingsProvider.isDesktopPaneVisible(DesktopPane.files);
+        final showDesktopUtilityPane =
+            isLargeDesktop &&
+            settingsProvider.isDesktopPaneVisible(DesktopPane.utility);
         final sessionPaneWidth = isLargeDesktop
             ? _largeDesktopSessionPaneWidth
             : _desktopSessionPaneWidth;
         final mainContentWidth = isLargeDesktop ? 960.0 : double.infinity;
         final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
-        final settingsProvider = context.watch<SettingsProvider>();
         final shortcutMap = <ShortcutActivator, Intent>{};
         void addShortcut(ShortcutAction action, Intent intent) {
           final binding = settingsProvider.bindingFor(action);
@@ -854,9 +863,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             child: Focus(
               autofocus: true,
               child: Scaffold(
-                backgroundColor: Theme.of(context).colorScheme.background,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 resizeToAvoidBottomInset: true,
-                appBar: _buildAppBar(isMobile: isMobile),
+                appBar: _buildAppBar(
+                  isMobile: isMobile,
+                  settingsProvider: settingsProvider,
+                ),
                 drawer: isMobile ? _buildSessionDrawer() : null,
                 body: Consumer<ChatProvider>(
                   builder: (context, chatProvider, child) {
@@ -870,55 +882,70 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       );
                     }
 
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
+                    final rowChildren = <Widget>[
+                      if (showConversationPane) ...[
                         SizedBox(
                           width: sessionPaneWidth,
-                          child: _buildSessionPanel(closeOnSelect: false),
-                        ),
-                        VerticalDivider(
-                          width: 1,
-                          thickness: 1,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outline.withOpacity(0.12),
-                        ),
-                        if (showDesktopFilePane) ...[
-                          SizedBox(
-                            width: _desktopFilePaneWidth,
-                            child: _buildDesktopFilePane(chatProvider),
-                          ),
-                          VerticalDivider(
-                            width: 1,
-                            thickness: 1,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outline.withOpacity(0.12),
-                          ),
-                        ],
-                        Expanded(
-                          child: _buildChatContent(
-                            chatProvider: chatProvider,
-                            maxContentWidth: mainContentWidth,
-                            horizontalPadding: 12,
-                            verticalPadding: 8,
+                          child: _buildSessionPanel(
+                            closeOnSelect: false,
+                            onCollapseRequested: () {
+                              unawaited(
+                                settingsProvider.setDesktopPaneVisible(
+                                  DesktopPane.conversations,
+                                  false,
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        if (isLargeDesktop) ...[
-                          VerticalDivider(
-                            width: 1,
-                            thickness: 1,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outline.withOpacity(0.12),
-                          ),
-                          SizedBox(
-                            width: _largeDesktopUtilityPaneWidth,
-                            child: _buildDesktopUtilityPane(chatProvider),
-                          ),
-                        ],
+                        _buildPaneDivider(),
                       ],
+                      if (showDesktopFilePane) ...[
+                        SizedBox(
+                          width: _desktopFilePaneWidth,
+                          child: _buildDesktopFilePane(
+                            chatProvider,
+                            onCollapseRequested: () {
+                              unawaited(
+                                settingsProvider.setDesktopPaneVisible(
+                                  DesktopPane.files,
+                                  false,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        _buildPaneDivider(),
+                      ],
+                      Expanded(
+                        child: _buildChatContent(
+                          chatProvider: chatProvider,
+                          maxContentWidth: mainContentWidth,
+                          horizontalPadding: 12,
+                          verticalPadding: 8,
+                        ),
+                      ),
+                      if (showDesktopUtilityPane) ...[
+                        _buildPaneDivider(),
+                        SizedBox(
+                          width: _largeDesktopUtilityPaneWidth,
+                          child: _buildDesktopUtilityPane(
+                            chatProvider,
+                            onCollapseRequested: () {
+                              unawaited(
+                                settingsProvider.setDesktopPaneVisible(
+                                  DesktopPane.utility,
+                                  false,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ];
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: rowChildren,
                     );
                   },
                 ),
@@ -930,13 +957,66 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  AppBar _buildAppBar({required bool isMobile}) {
+  VerticalDivider _buildPaneDivider() {
+    return VerticalDivider(
+      width: 1,
+      thickness: 1,
+      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12),
+    );
+  }
+
+  String _desktopPaneLabel(DesktopPane pane) {
+    return switch (pane) {
+      DesktopPane.conversations => 'Conversations',
+      DesktopPane.files => 'Files',
+      DesktopPane.utility => 'Utility',
+    };
+  }
+
+  AppBar _buildAppBar({
+    required bool isMobile,
+    required SettingsProvider settingsProvider,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
       titleSpacing: isMobile ? 0 : 8,
       title: _buildProjectSelectorTitle(isMobile: isMobile),
       actions: [
+        if (!isMobile)
+          PopupMenuButton<DesktopPane>(
+            key: const ValueKey<String>('desktop_sidebars_menu_button'),
+            tooltip: 'Toggle sidebars',
+            onSelected: (pane) {
+              final next = !settingsProvider.isDesktopPaneVisible(pane);
+              unawaited(settingsProvider.setDesktopPaneVisible(pane, next));
+            },
+            itemBuilder: (context) {
+              return DesktopPane.values
+                  .map(
+                    (pane) => PopupMenuItem<DesktopPane>(
+                      key: ValueKey<String>(
+                        'desktop_sidebar_menu_item_${pane.name}',
+                      ),
+                      value: pane,
+                      child: Row(
+                        children: [
+                          Icon(
+                            settingsProvider.isDesktopPaneVisible(pane)
+                                ? Icons.check_box_rounded
+                                : Icons.check_box_outline_blank_rounded,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(_desktopPaneLabel(pane)),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(growable: false);
+            },
+            icon: const Icon(Icons.view_sidebar_outlined),
+          ),
         if (refreshlessEnabled && !isMobile)
           Consumer2<ChatProvider, AppProvider>(
             builder: (context, chatProvider, appProvider, child) {
@@ -958,7 +1038,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.14),
+                    color: color.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -997,6 +1077,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             return PopupMenuButton<String>(
               tooltip: 'Switch Server',
               onSelected: (value) async {
+                final messenger = ScaffoldMessenger.of(context);
                 if (value == '__manage__') {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
@@ -1008,8 +1089,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 }
 
                 final ok = await appProvider.setActiveServer(value);
-                if (!ok && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                if (!ok) {
+                  messenger.showSnackBar(
                     SnackBar(content: Text(appProvider.errorMessage)),
                   );
                 }
@@ -1065,7 +1146,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: colorScheme.outline.withOpacity(0.4),
+                    color: colorScheme.outline.withValues(alpha: 0.4),
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -1723,7 +1804,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildSessionPanel({required bool closeOnSelect}) {
+  Widget _buildSessionPanel({
+    required bool closeOnSelect,
+    VoidCallback? onCollapseRequested,
+  }) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
         if (_sessionSearchController.text != chatProvider.sessionSearchQuery) {
@@ -1764,6 +1848,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                               icon: const Icon(Icons.refresh),
                               onPressed: _refreshData,
                               tooltip: 'Refresh',
+                            ),
+                          if (onCollapseRequested != null)
+                            IconButton(
+                              key: const ValueKey<String>(
+                                'hide_conversations_sidebar_button',
+                              ),
+                              icon: const Icon(Icons.visibility_off_outlined),
+                              onPressed: onCollapseRequested,
+                              tooltip: 'Hide Conversations sidebar',
                             ),
                         ],
                       ),
@@ -1935,11 +2028,24 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildDesktopUtilityPane(ChatProvider chatProvider) {
+  Widget _buildDesktopUtilityPane(
+    ChatProvider chatProvider, {
+    VoidCallback? onCollapseRequested,
+  }) {
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(12),
         children: [
+          if (onCollapseRequested != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                key: const ValueKey<String>('hide_utility_sidebar_button'),
+                tooltip: 'Hide Utility sidebar',
+                onPressed: onCollapseRequested,
+                icon: const Icon(Icons.visibility_off_outlined),
+              ),
+            ),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -2078,7 +2184,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildDesktopFilePane(ChatProvider chatProvider) {
+  Widget _buildDesktopFilePane(
+    ChatProvider chatProvider, {
+    VoidCallback? onCollapseRequested,
+  }) {
     return Consumer2<ProjectProvider, AppProvider>(
       builder: (context, projectProvider, appProvider, child) {
         final fileState = _resolveFileContextState(
@@ -2096,6 +2205,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             fileState: fileState,
             projectProvider: projectProvider,
             isMobileLayout: false,
+            onCollapseRequested: onCollapseRequested,
           ),
         );
       },
@@ -2962,6 +3072,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required ProjectProvider projectProvider,
     required bool isMobileLayout,
     VoidCallback? onStateChanged,
+    VoidCallback? onCollapseRequested,
   }) {
     final rootNodes = fileState.directoryChildren[_rootTreeCacheKey];
     final rootLoading = fileState.loadingDirectories.contains(
@@ -3053,6 +3164,18 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     },
                     icon: const Icon(Icons.refresh_rounded),
                   ),
+                  if (onCollapseRequested != null)
+                    IconButton(
+                      key: const ValueKey<String>('hide_files_sidebar_button'),
+                      tooltip: 'Hide Files sidebar',
+                      visualDensity: VisualDensity.compact,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      onPressed: onCollapseRequested,
+                      icon: const Icon(Icons.visibility_off_outlined),
+                    ),
                 ],
               ),
             ),
@@ -3181,7 +3304,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           },
           child: Container(
             color: isActiveFile
-                ? Theme.of(context).colorScheme.primary.withOpacity(0.12)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
                 : null,
             padding: EdgeInsets.fromLTRB(8 + (depth * 14), 6, 8, 6),
             child: Row(
@@ -3329,7 +3452,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                           color: path == activePath
                               ? Theme.of(
                                   context,
-                                ).colorScheme.primary.withOpacity(0.14)
+                                ).colorScheme.primary.withValues(alpha: 0.14)
                               : Theme.of(context).colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(999),
                         ),
@@ -3473,7 +3596,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -3646,6 +3769,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       // Technical comment translated to English.
                       _scrollToBottom(force: true);
                     },
+                    onStopRequested: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final stopped = await chatProvider.abortActiveResponse();
+                      if (stopped || !context.mounted) {
+                        return;
+                      }
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            chatProvider.errorMessage ??
+                                'Failed to stop current response',
+                          ),
+                        ),
+                      );
+                    },
                     onMentionQuery: _queryMentionSuggestions,
                     onSlashQuery: _querySlashSuggestions,
                     onBuiltinSlashCommand: (commandName) =>
@@ -3653,9 +3791,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                           commandName: commandName,
                           chatProvider: chatProvider,
                         ),
-                    enabled:
-                        chatProvider.currentSession != null &&
-                        chatProvider.state != ChatState.sending,
+                    enabled: chatProvider.currentSession != null,
+                    isResponding: chatProvider.canAbortActiveResponse,
                     focusNode: _inputFocusNode,
                     showAttachmentButton: supportsImages || supportsPdf,
                     allowImageAttachment: supportsImages,
@@ -4051,7 +4188,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                                 providerId: entry.providerId,
                                                 modelId: entry.modelId,
                                               );
-                                          if (!mounted) {
+                                          if (!bottomSheetContext.mounted) {
                                             return;
                                           }
                                           Navigator.of(
@@ -4109,7 +4246,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                                   providerId: entry.providerId,
                                                   modelId: entry.modelId,
                                                 );
-                                            if (!mounted) {
+                                            if (!bottomSheetContext.mounted) {
                                               return;
                                             }
                                             Navigator.of(
@@ -4967,7 +5104,7 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
-                ).colorScheme.surfaceContainerHighest.withOpacity(0.45),
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
