@@ -180,6 +180,7 @@ Commits: f190e02
 
 ### Feature 018: Prompt Power Features Parity (`@`, `!`, `/`)
 Description: Replicar no composer os gatilhos de produtividade do OpenCode Web: menção de arquivos/agentes com `@`, modo shell com `!` no início, e catálogo de comandos por `/` no começo do input.
+Status: [x] Concluída
 
 Concluída a paridade de gatilhos no composer com estado dedicado para shell (`!`), popovers contextuais para menções `@` (arquivos + agentes) e slash `/` (builtin + comandos remotos com `source`), incluindo navegação por teclado (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`), inserção de tokens/prefixos no input, e ações builtin consistentes no contexto da chat page. O envio shell foi integrado ao fluxo de provider/datasource com roteamento para `POST /session/{id}/shell`, e a cobertura foi expandida com testes de widget para `@`/`!`/`/` e teste unitário de payload shell. Na sequência, a UX do composer foi estabilizada para mobile/desktop com preservação de foco do input durante digitação em sugestões, painel de sugestões crescendo para cima sem cobrir o input, input mantendo-se acima do teclado, e inserção de menção com espaço seguro antes de pontuação. O painel de sugestões foi simplificado para renderização inline imediatamente acima do input (sem overlay global), com altura máxima fixa de `3x` a altura do input em mobile/desktop, limitada pela área visível e com rolagem interna da lista para conjuntos grandes. Foi aplicado ajuste adicional específico de teclado Android para não deixar o painel cobrir o campo de texto: o cálculo de altura agora reserva espaço do input no viewport visível e remove padding superior desnecessário do composer.
 Commits: e97544b, 094057a, 8be2d81, ef0a1e7, 53da769, 7ff7b71, 6d0ebe8, dfbda1b
@@ -279,3 +280,7 @@ Description: Expandir configurações para incluir notificações e sons por cat
 | 020 | 012, 018 complete | Agent selector is first-class beside model/thinking, persisted per context, and reflected in outbound prompts |
 | 021 | 014, 017 complete | Active session title is always visible and rename-inline flow updates state/UI reliably with rollback safety |
 | 022 | 018, 020 complete | Settings include notification/sound categories and searchable shortcut management with persistence/conflict checks |
+
+## Pending Backlog
+
+- [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclados/dispositivos (validar em device real com Gboard e Samsung Keyboard)
