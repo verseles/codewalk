@@ -88,6 +88,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
+  final GlobalKey _agentSelectorChipKey = GlobalKey(
+    debugLabel: 'agent_selector_chip',
+  );
   final TextEditingController _sessionSearchController =
       TextEditingController();
   ChatProvider? _chatProvider;
@@ -3399,17 +3402,25 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         children: [
           Tooltip(
             message: 'Choose agent',
-            child: ActionChip(
-              key: const ValueKey<String>('agent_selector_button'),
-              avatar: const Icon(Icons.support_agent_outlined, size: 18),
-              label: Text(
-                selectedAgent == null
-                    ? 'Select agent'
-                    : _formatAgentLabel(selectedAgent),
+            child: Builder(
+              key: _agentSelectorChipKey,
+              builder: (chipContext) => ActionChip(
+                key: const ValueKey<String>('agent_selector_button'),
+                avatar: const Icon(Icons.support_agent_outlined, size: 18),
+                label: Text(
+                  selectedAgent == null
+                      ? 'Select agent'
+                      : _formatAgentLabel(selectedAgent),
+                ),
+                onPressed: selectableAgents.isEmpty
+                    ? null
+                    : () => unawaited(
+                        _openAgentQuickSelector(
+                          chatProvider,
+                          anchorContext: chipContext,
+                        ),
+                      ),
               ),
-              onPressed: selectableAgents.isEmpty
-                  ? null
-                  : () => unawaited(_openAgentSelector(chatProvider)),
             ),
           ),
           Tooltip(
@@ -3454,103 +3465,70 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
   }
 
-  Future<void> _openAgentSelector(ChatProvider chatProvider) async {
-    var query = '';
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (bottomSheetContext) {
-        return StatefulBuilder(
-          builder: (bottomSheetContext, setModalState) {
-            final normalizedQuery = query.trim().toLowerCase();
-            final entries = chatProvider.selectableAgents
-                .where((agent) {
-                  if (normalizedQuery.isEmpty) {
-                    return true;
-                  }
-                  return agent.name.toLowerCase().contains(normalizedQuery) ||
-                      agent.mode.toLowerCase().contains(normalizedQuery);
-                })
-                .toList(growable: false);
-            final selectedAgent = chatProvider.selectedAgentName;
+  Future<void> _openAgentQuickSelector(
+    ChatProvider chatProvider, {
+    required BuildContext anchorContext,
+  }) async {
+    final entries = chatProvider.selectableAgents;
+    if (entries.isEmpty) {
+      return;
+    }
+    final buttonBox = anchorContext.findRenderObject() as RenderBox?;
+    final overlayBox =
+        Overlay.of(anchorContext).context.findRenderObject() as RenderBox?;
+    if (buttonBox == null || overlayBox == null) {
+      return;
+    }
+    final buttonTopLeft = buttonBox.localToGlobal(
+      Offset.zero,
+      ancestor: overlayBox,
+    );
+    final buttonRect = buttonTopLeft & buttonBox.size;
+    const margin = 8.0;
+    const menuWidth = 260.0;
+    final left = (buttonRect.center.dx - (menuWidth / 2))
+        .clamp(margin, overlayBox.size.width - menuWidth - margin)
+        .toDouble();
+    final top = (buttonRect.top - 4).clamp(margin, overlayBox.size.height - 48);
 
-            return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.viewInsetsOf(bottomSheetContext).bottom,
-                ),
-                child: SizedBox(
-                  height: MediaQuery.sizeOf(bottomSheetContext).height * 0.62,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                        child: TextField(
-                          autofocus: true,
-                          onChanged: (value) {
-                            setModalState(() {
-                              query = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Search agent',
-                            prefixIcon: const Icon(Icons.search),
-                            isDense: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: entries.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'No agents found',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              )
-                            : ListView(
-                                children: [
-                                  for (final entry in entries)
-                                    ListTile(
-                                      key: ValueKey<String>(
-                                        'agent_selector_item_${_agentKey(entry.name)}',
-                                      ),
-                                      title: Text(
-                                        _formatAgentLabel(entry.name),
-                                      ),
-                                      subtitle: Text(
-                                        entry.mode.trim().isEmpty
-                                            ? 'agent'
-                                            : entry.mode,
-                                      ),
-                                      trailing: selectedAgent == entry.name
-                                          ? const Icon(Icons.check_rounded)
-                                          : null,
-                                      onTap: () async {
-                                        await chatProvider.setSelectedAgent(
-                                          entry.name,
-                                        );
-                                        if (!mounted) {
-                                          return;
-                                        }
-                                        Navigator.of(bottomSheetContext).pop();
-                                      },
-                                    ),
-                                ],
-                              ),
-                      ),
-                    ],
+    final selected = await showMenu<String>(
+      context: context,
+      constraints: const BoxConstraints(
+        minWidth: menuWidth,
+        maxWidth: menuWidth,
+      ),
+      position: RelativeRect.fromLTRB(
+        left,
+        top.toDouble(),
+        overlayBox.size.width - left - menuWidth,
+        overlayBox.size.height - top.toDouble(),
+      ),
+      items: [
+        for (final entry in entries)
+          PopupMenuItem<String>(
+            key: ValueKey<String>(
+              'agent_selector_item_${_agentKey(entry.name)}',
+            ),
+            value: entry.name,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _formatAgentLabel(entry.name),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+                if (chatProvider.selectedAgentName == entry.name)
+                  const Icon(Icons.check_rounded, size: 18),
+              ],
+            ),
+          ),
+      ],
     );
+    if (selected == null) {
+      return;
+    }
+    await chatProvider.setSelectedAgent(selected);
   }
 
   List<_ModelSelectorEntry> _buildModelSelectorEntries(
@@ -4459,7 +4437,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         if (!mounted || chatProvider.selectableAgents.isEmpty) {
           return true;
         }
-        await _openAgentSelector(chatProvider);
+        final anchorContext = _agentSelectorChipKey.currentContext;
+        if (anchorContext != null) {
+          await _openAgentQuickSelector(
+            chatProvider,
+            anchorContext: anchorContext,
+          );
+        }
         return true;
       case 'open':
         if (!mounted) {

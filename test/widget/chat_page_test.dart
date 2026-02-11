@@ -1144,7 +1144,6 @@ void main() {
       find.byKey(const ValueKey<String>('agent_selector_button')),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Search agent'), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('agent_selector_item_build')),
       findsOneWidget,
