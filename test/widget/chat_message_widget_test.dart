@@ -410,4 +410,81 @@ void main() {
     expect(outputText.maxLines, isNull);
     expect(find.text('Show less'), findsOneWidget);
   });
+
+  testWidgets(
+    'latest thinking stays expanded and previous thinking collapses on new block',
+    (WidgetTester tester) async {
+      AssistantMessage buildMessage(List<MessagePart> parts) {
+        return AssistantMessage(
+          id: 'msg_thinking',
+          sessionId: 'ses_thinking',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          parts: parts,
+        );
+      }
+
+      Widget buildWidget(AssistantMessage message) {
+        return MaterialApp(
+          home: Scaffold(body: ChatMessageWidget(message: message)),
+        );
+      }
+
+      const reasoningOne = ReasoningPart(
+        id: 'thinking_1',
+        messageId: 'msg_thinking',
+        sessionId: 'ses_thinking',
+        text: 'line 1\nline 2\nline 3\nline 4',
+      );
+      const reasoningTwo = ReasoningPart(
+        id: 'thinking_2',
+        messageId: 'msg_thinking',
+        sessionId: 'ses_thinking',
+        text: 'step 1\nstep 2\nstep 3\nstep 4',
+      );
+
+      await tester.pumpWidget(
+        buildWidget(buildMessage(const <MessagePart>[reasoningOne])),
+      );
+
+      Text firstThinking = tester.widget<Text>(
+        find.byKey(const ValueKey<String>('thinking_content_text_thinking_1')),
+      );
+      expect(firstThinking.maxLines, isNull);
+      expect(
+        find.byKey(
+          const ValueKey<String>('thinking_content_toggle_thinking_1'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.pumpWidget(
+        buildWidget(
+          buildMessage(const <MessagePart>[reasoningOne, reasoningTwo]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      firstThinking = tester.widget<Text>(
+        find.byKey(const ValueKey<String>('thinking_content_text_thinking_1')),
+      );
+      final secondThinking = tester.widget<Text>(
+        find.byKey(const ValueKey<String>('thinking_content_text_thinking_2')),
+      );
+
+      expect(firstThinking.maxLines, 2);
+      expect(secondThinking.maxLines, isNull);
+
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('thinking_content_toggle_thinking_1'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      firstThinking = tester.widget<Text>(
+        find.byKey(const ValueKey<String>('thinking_content_text_thinking_1')),
+      );
+      expect(firstThinking.maxLines, isNull);
+    },
+  );
 }

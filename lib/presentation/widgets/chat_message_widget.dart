@@ -8,6 +8,7 @@ import '../../domain/entities/chat_message.dart';
 /// Chat message widget
 class ChatMessageWidget extends StatelessWidget {
   static const int _collapsedToolDetailMaxLines = 2;
+  static const int _collapsedReasoningMaxLines = 2;
 
   const ChatMessageWidget({
     super.key,
@@ -36,6 +37,10 @@ class ChatMessageWidget extends StatelessWidget {
       }
       return true; // Non-text parts are considered valid by default
     });
+    final latestReasoningPartId = message.parts
+        .whereType<ReasoningPart>()
+        .lastOrNull
+        ?.id;
 
     // Don't display message if no valid content
     if (!hasValidContent) {
@@ -115,7 +120,11 @@ class ChatMessageWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ...message.parts.map(
-                              (part) => _buildMessagePart(context, part),
+                              (part) => _buildMessagePart(
+                                context,
+                                part,
+                                latestReasoningPartId: latestReasoningPartId,
+                              ),
                             ),
                           ],
                         )
@@ -125,7 +134,11 @@ class ChatMessageWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ...message.parts.map(
-                                (part) => _buildMessagePart(context, part),
+                                (part) => _buildMessagePart(
+                                  context,
+                                  part,
+                                  latestReasoningPartId: latestReasoningPartId,
+                                ),
                               ),
                             ],
                           ),
@@ -218,7 +231,11 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildMessagePart(BuildContext context, MessagePart part) {
+  Widget _buildMessagePart(
+    BuildContext context,
+    MessagePart part, {
+    required String? latestReasoningPartId,
+  }) {
     switch (part.type) {
       case PartType.text:
         return _buildTextPart(context, part as TextPart);
@@ -229,7 +246,12 @@ class ChatMessageWidget extends StatelessWidget {
       case PartType.agent:
         return _buildAgentPart(context, part as AgentPart);
       case PartType.reasoning:
-        return _buildReasoningPart(context, part as ReasoningPart);
+        final reasoningPart = part as ReasoningPart;
+        return _buildReasoningPart(
+          context,
+          reasoningPart,
+          isLatestReasoningPart: reasoningPart.id == latestReasoningPartId,
+        );
       case PartType.stepStart:
         return const SizedBox.shrink();
       case PartType.stepFinish:
@@ -395,14 +417,15 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildReasoningPart(BuildContext context, ReasoningPart part) {
+  Widget _buildReasoningPart(
+    BuildContext context,
+    ReasoningPart part, {
+    required bool isLatestReasoningPart,
+  }) {
     // Don't display if reasoning text is empty or only whitespace
     if (part.text.trim().isEmpty) {
       return const SizedBox.shrink();
     }
-
-    final lineCount = '\n'.allMatches(part.text).length + 1;
-    final isLongReasoning = part.text.length > 600 || lineCount > 12;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -437,25 +460,15 @@ class ChatMessageWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          if (isLongReasoning)
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 240),
-              child: SingleChildScrollView(
-                child: Text(
-                  part.text,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                ),
-              ),
-            )
-          else
-            Text(
-              part.text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-            ),
+          _CollapsibleReasoningContent(
+            partId: part.id,
+            text: part.text,
+            collapsedMaxLines: _collapsedReasoningMaxLines,
+            isLatestReasoningPart: isLatestReasoningPart,
+            textStyle: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+          ),
         ],
       ),
     );
@@ -815,6 +828,103 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
               _expanded ? 'Show less' : 'Show more',
               style: widget.toggleTextStyle,
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CollapsibleReasoningContent extends StatefulWidget {
+  const _CollapsibleReasoningContent({
+    required this.partId,
+    required this.text,
+    required this.collapsedMaxLines,
+    required this.isLatestReasoningPart,
+    this.textStyle,
+  });
+
+  final String partId;
+  final String text;
+  final int collapsedMaxLines;
+  final bool isLatestReasoningPart;
+  final TextStyle? textStyle;
+
+  @override
+  State<_CollapsibleReasoningContent> createState() =>
+      _CollapsibleReasoningContentState();
+}
+
+class _CollapsibleReasoningContentState
+    extends State<_CollapsibleReasoningContent> {
+  late bool _expanded;
+
+  bool get _canExpand {
+    if (widget.text.trim().isEmpty) {
+      return false;
+    }
+    final lineCount = '\n'.allMatches(widget.text).length + 1;
+    return lineCount > widget.collapsedMaxLines || widget.text.length > 160;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.isLatestReasoningPart;
+  }
+
+  @override
+  void didUpdateWidget(covariant _CollapsibleReasoningContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLatestReasoningPart && !widget.isLatestReasoningPart) {
+      if (_expanded) {
+        setState(() {
+          _expanded = false;
+        });
+      }
+      return;
+    }
+    if (!oldWidget.isLatestReasoningPart && widget.isLatestReasoningPart) {
+      if (!_expanded) {
+        setState(() {
+          _expanded = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textWidget = Text(
+      widget.text,
+      key: ValueKey<String>('thinking_content_text_${widget.partId}'),
+      maxLines: _expanded ? null : widget.collapsedMaxLines,
+      overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+      style: widget.textStyle,
+    );
+    if (!_canExpand) {
+      return textWidget;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        textWidget,
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            key: ValueKey<String>('thinking_content_toggle_${widget.partId}'),
+            onPressed: () {
+              setState(() {
+                _expanded = !_expanded;
+              });
+            },
+            style: TextButton.styleFrom(
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            ),
+            child: Text(_expanded ? 'Show less' : 'Show more'),
           ),
         ),
       ],
