@@ -1299,6 +1299,92 @@ void main() {
     },
   );
 
+  testWidgets(
+    'mobile long-press on user message bubble pre-fills composer input',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_mobile_hold',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Mobile Hold Session',
+          ),
+        ],
+      );
+      repository.messagesBySession['ses_mobile_hold'] = <ChatMessage>[
+        UserMessage(
+          id: 'msg_user_hold',
+          sessionId: 'ses_mobile_hold',
+          time: DateTime.fromMillisecondsSinceEpoch(1200),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_user_hold',
+              messageId: 'msg_user_hold',
+              sessionId: 'ses_mobile_hold',
+              text: 'reusar esse prompt',
+            ),
+          ],
+        ),
+      ];
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await tester.pumpAndSettle();
+
+      final backgroundHoldListenerFinder = find.byWidgetPredicate(
+        (widget) =>
+            widget is Listener &&
+            widget.behavior == HitTestBehavior.opaque &&
+            widget.onPointerDown != null &&
+            widget.onPointerMove != null,
+      );
+      expect(backgroundHoldListenerFinder, findsWidgets);
+
+      final listener = tester.widget<Listener>(
+        backgroundHoldListenerFinder.first,
+      );
+      listener.onPointerDown?.call(
+        const PointerDownEvent(pointer: 1, position: Offset.zero),
+      );
+      await tester.pump(const Duration(milliseconds: 350));
+      final chatInputFieldFinder = find.descendant(
+        of: find.byKey(const ValueKey<String>('composer_input_row')),
+        matching: find.byType(TextField),
+      );
+      var inputField = tester.widget<TextField>(chatInputFieldFinder);
+      expect(inputField.controller!.text, 'reusar esse prompt');
+      expect(
+        inputField.focusNode?.hasFocus,
+        isFalse,
+        reason: 'Input must stay unfocused until finger is released',
+      );
+
+      listener.onPointerUp?.call(
+        const PointerUpEvent(pointer: 1, position: Offset.zero),
+      );
+      await tester.pumpAndSettle();
+
+      inputField = tester.widget<TextField>(chatInputFieldFinder);
+      expect(inputField.controller!.text, 'reusar esse prompt');
+      expect(inputField.focusNode?.hasFocus, isTrue);
+    },
+  );
+
   testWidgets('hides refresh actions in refreshless mode', (
     WidgetTester tester,
   ) async {

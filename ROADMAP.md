@@ -287,7 +287,7 @@ Aplicado refinamento de UX em Settings removendo a seção separada `Sounds` (co
 - [ ] No desktop, pesquisar como usar microfone speech-to-text no linux. Pesquisar também se a API atual já funciona no mac/windows/iOS
 - [x] Context Project / Workspace: opção para arquivar project fechado (ocultar da lista de fechados)
 - [ ] Usar https://github.com/jlnrrg/simple_icons para exibir icones mais bonitos na lista de arquivos e na lista de providers/icone do modelo selecionado
-- [ ] Desktop: seta pra cima edita a última mensagem enviada (via backend), mobile: touch & hold
+- [x] Desktop: seta pra cima edita a última mensagem enviada (via backend), mobile: touch & hold
 - [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
 - [ ] Opções em Settings para decidir se app fica em background. Mobile: persistente notification, desktop: tray
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclades/dispositivos (validar em device real com Gboard e Samsung Keyboard)
@@ -296,9 +296,18 @@ Aplicado refinamento de UX em Settings removendo a seção separada `Sounds` (co
 Pronta para análise: backlog de ergonomia do composer/desktop concluído com Enter/Shift+Enter no desktop, sidebars recolhíveis com persistência por pane, input editável durante resposta e ação Stop integrada ao abort de sessão com cobertura automatizada.
 Ajuste pós-entrega aplicado: ao acionar `Stop`, erros esperados de cancelamento (`The operation was aborted`/equivalentes) não derrubam mais a conversa para tela global de erro com `Retry`; a interrupção agora mantém o contexto para continuação imediata.
 Ajuste pós-entrega complementar aplicado: corrigido erro ao enviar imediatamente após `Stop` (`Failed to start message send`/`retry`) causado por coleção de mensagens tornada imutável no fluxo de abort; o envio subsequente agora funciona sem exigir `Retry` manual.
+- [x] Navegação de histórico no composer: `ArrowUp`/`ArrowDown` com semântica de cursor (início/fim do texto) para percorrer mensagens enviadas como navegador de histórico, com recuperação do draft ao retornar ao ponto mais recente; no mobile, `touch & hold` no input aciona recuperação da última mensagem enviada.
+Refinamento pós-validação em device: removido comportamento de histórico por `touch & hold` no input mobile (evita conflito com seleção de texto por toque) e migrado para `touch & hold` no fundo da bolha de mensagem do usuário, preenchendo o composer com o texto selecionado.
+Refinamento adicional de UX: gesto de hold na bolha ficou mais responsivo (threshold reduzido com cancelamento por movimento) e agora aplica feedback visual de flash na bolha + `HapticFeedback.selectionClick` ao selecionar uma mensagem para o composer.
+Refinamento de foco mobile: o composer só recebe foco após o usuário soltar o dedo (`pointer up`) depois do hold na bolha, evitando conflito de teclado enquanto o toque ainda está ativo.
+Refinamento final de touch area: captura de `touch & hold` expandida para toda a bolha (não apenas áreas internas sem conteúdo), mantendo feedback visual/tátil e comportamento de foco pós-soltar.
+Refinamento de UX de seleção/cópia: mensagens do usuário deixaram de usar seleção de texto por palavra (seleção permanece apenas para mensagens do assistente), mantendo cópia de mensagens do usuário via fluxo do input/histórico.
+Refinamento de conflito de foco: durante hold em bolha o toque é absorvido e o prefill não solicita foco imediato; foco do teclado segue restrito ao evento de soltar o dedo para evitar flicker de show/hide.
 - [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
 - [x] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
+- [ ] Auto-scroll para última mensagem como conversa de IM (WhatsApp/Telegram): avançar automaticamente para mensagens novas enquanto chegam, exceto quando usuário rolou para cima intencionalmente (detectar via botão seta pra baixo que aparece ao subir - significa que usuário está lendo histórico e não quer ser interrompido por auto-scroll)
+- [ ] Tool bash: mostrar o comando executado junto com o resultado (atualmente só mostra o output, não mostra qual comando gerou aquele resultado)
 
 Pronta para análise: adicionada ação de arquivamento na seção de contextos fechados para ocultar projects fechados sem depender de `worktree`, com persistência por servidor para manter a curadoria da lista ao reiniciar/recarregar. Também foi implementado cache persistido da última sessão (sessão + mensagens) por escopo (`server + directory`) com restore instantâneo na abertura e revalidação silenciosa em background (SWR), preservando usabilidade mesmo com latência alta do servidor remoto. No mobile, o envio pelo teclado agora usa ação `send` e oculta o teclado/foco após submissão para liberar mais espaço da conversa.
 

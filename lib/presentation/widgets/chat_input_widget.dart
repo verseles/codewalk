@@ -77,6 +77,9 @@ class ChatInputWidget extends StatefulWidget {
   const ChatInputWidget({
     super.key,
     required this.onSendMessage,
+    this.sentMessageHistory = const <String>[],
+    this.prefilledText,
+    this.prefilledTextVersion = 0,
     this.onMentionQuery,
     this.onSlashQuery,
     this.onBuiltinSlashCommand,
@@ -90,6 +93,9 @@ class ChatInputWidget extends StatefulWidget {
   });
 
   final FutureOr<void> Function(ChatInputSubmission submission) onSendMessage;
+  final List<String> sentMessageHistory;
+  final String? prefilledText;
+  final int prefilledTextVersion;
   final Future<List<ChatComposerMentionSuggestion>> Function(String query)?
   onMentionQuery;
   final Future<List<ChatComposerSlashCommandSuggestion>> Function(String query)?
@@ -136,6 +142,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   Timer? _sendHoldTimer;
   Timer? _suggestionDebounce;
   DateTime? _lastSecondarySendActionAt;
+  int? _historyIndexFromNewest;
+  TextEditingValue? _historyDraftValue;
+  bool _isApplyingHistoryValue = false;
+  bool _suppressEnsureInputFocus = false;
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
 
@@ -167,6 +177,19 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   @override
   void didUpdateWidget(covariant ChatInputWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.prefilledTextVersion != oldWidget.prefilledTextVersion) {
+      final prefilledText = widget.prefilledText?.trim();
+      if (prefilledText != null && prefilledText.isNotEmpty) {
+        _exitHistoryNavigation(updateDraft: false);
+        _historyDraftValue = null;
+        _suppressEnsureInputFocus = true;
+        _applyHistoryMessage(prefilledText);
+      }
+    }
+    if (!listEquals(oldWidget.sentMessageHistory, widget.sentMessageHistory)) {
+      _exitHistoryNavigation(updateDraft: false);
+      _historyDraftValue = null;
+    }
     if (!widget.showAttachmentButton && _attachments.isNotEmpty) {
       setState(() {
         _attachments.clear();
@@ -256,6 +279,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _handleTextChanged(String text) {
+    if (!_isApplyingHistoryValue) {
+      _exitHistoryNavigation(updateDraft: true);
+    }
     _refreshComposerMode(text);
     _scheduleSuggestionQuery();
     if (_popoverType != ChatComposerPopoverType.none &&
@@ -267,6 +293,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     setState(() {
       _isComposing = text.trim().isNotEmpty;
     });
+    if (_suppressEnsureInputFocus) {
+      _suppressEnsureInputFocus = false;
+      return;
+    }
     _ensureInputFocus();
   }
 
@@ -486,6 +516,18 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       return KeyEventResult.ignored;
     }
 
+    if (_isDesktopPlatform && logicalKey == LogicalKeyboardKey.arrowUp) {
+      if (_navigateHistoryUp()) {
+        return KeyEventResult.handled;
+      }
+    }
+
+    if (_isDesktopPlatform && logicalKey == LogicalKeyboardKey.arrowDown) {
+      if (_navigateHistoryDown()) {
+        return KeyEventResult.handled;
+      }
+    }
+
     if (_isDesktopPlatform && logicalKey == LogicalKeyboardKey.enter) {
       if (HardwareKeyboard.instance.isShiftPressed) {
         _insertComposerNewline();
@@ -496,6 +538,110 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     }
 
     return KeyEventResult.ignored;
+  }
+
+  bool _navigateHistoryUp() {
+    final history = widget.sentMessageHistory;
+    if (history.isEmpty) {
+      return false;
+    }
+
+    if (_historyIndexFromNewest == null) {
+      _historyDraftValue = _controller.value;
+      _historyIndexFromNewest = 0;
+      _applyHistoryMessage(history.last, caretAtStart: false);
+      return true;
+    }
+
+    final selectionOffset = _safeSelectionOffset(_controller.value);
+    if (selectionOffset > 0) {
+      _moveCaretToBoundary(atStart: true);
+      return true;
+    }
+
+    final nextIndex = _historyIndexFromNewest! + 1;
+    if (nextIndex >= history.length) {
+      return true;
+    }
+    _historyIndexFromNewest = nextIndex;
+    _applyHistoryMessage(history[history.length - 1 - nextIndex]);
+    return true;
+  }
+
+  bool _navigateHistoryDown() {
+    if (_historyIndexFromNewest == null) {
+      return false;
+    }
+
+    final selectionOffset = _safeSelectionOffset(_controller.value);
+    final textLength = _controller.text.length;
+    if (selectionOffset < textLength) {
+      _moveCaretToBoundary(atStart: false);
+      return true;
+    }
+
+    final currentIndex = _historyIndexFromNewest!;
+    if (currentIndex == 0) {
+      final draft = _historyDraftValue;
+      _exitHistoryNavigation(updateDraft: false);
+      if (draft != null) {
+        _applyTextValue(draft);
+      }
+      return true;
+    }
+
+    final nextIndex = currentIndex - 1;
+    final history = widget.sentMessageHistory;
+    if (nextIndex >= history.length) {
+      return true;
+    }
+    _historyIndexFromNewest = nextIndex;
+    _applyHistoryMessage(history[history.length - 1 - nextIndex]);
+    return true;
+  }
+
+  int _safeSelectionOffset(TextEditingValue value) {
+    final length = value.text.length;
+    if (!value.selection.isValid) {
+      return length;
+    }
+    return value.selection.baseOffset.clamp(0, length).toInt();
+  }
+
+  void _moveCaretToBoundary({required bool atStart}) {
+    final length = _controller.text.length;
+    _controller.value = _controller.value.copyWith(
+      selection: TextSelection.collapsed(offset: atStart ? 0 : length),
+      composing: TextRange.empty,
+    );
+  }
+
+  void _applyHistoryMessage(String text, {bool caretAtStart = false}) {
+    _applyTextValue(
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(
+          offset: caretAtStart ? 0 : text.length,
+        ),
+      ),
+    );
+  }
+
+  void _applyTextValue(TextEditingValue value) {
+    _isApplyingHistoryValue = true;
+    _controller.value = value.copyWith(composing: TextRange.empty);
+    _handleTextChanged(value.text);
+    _isApplyingHistoryValue = false;
+  }
+
+  void _exitHistoryNavigation({required bool updateDraft}) {
+    if (_historyIndexFromNewest == null && _historyDraftValue == null) {
+      return;
+    }
+    if (updateDraft) {
+      _historyDraftValue = _controller.value;
+    }
+    _historyIndexFromNewest = null;
   }
 
   Future<void> _applyActiveSuggestion() async {

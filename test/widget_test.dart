@@ -195,6 +195,80 @@ void main() {
     }
   });
 
+  testWidgets(
+    'desktop ArrowUp and ArrowDown navigate sent-message history with caret boundaries',
+    (WidgetTester tester) async {
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      try {
+        await tester.pumpWidget(
+          _buildChatInputHarness(
+            child: ChatInputWidget(
+              onSendMessage: (_) {},
+              sentMessageHistory: const <String>[
+                'first prompt',
+                'second prompt',
+                'third prompt',
+              ],
+            ),
+          ),
+        );
+
+        await tester.showKeyboard(find.byType(TextField));
+        await tester.pumpAndSettle();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pumpAndSettle();
+        var textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, 'third prompt');
+        expect(
+          textField.controller!.selection.baseOffset,
+          'third prompt'.length,
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pumpAndSettle();
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, 'third prompt');
+        expect(textField.controller!.selection.baseOffset, 0);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pumpAndSettle();
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, 'second prompt');
+        expect(
+          textField.controller!.selection.baseOffset,
+          'second prompt'.length,
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pumpAndSettle();
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.selection.baseOffset, 0);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pumpAndSettle();
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(
+          textField.controller!.selection.baseOffset,
+          'second prompt'.length,
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pumpAndSettle();
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, 'third prompt');
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pumpAndSettle();
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, '');
+      } finally {
+        debugDefaultTargetPlatformOverride = previousPlatform;
+      }
+    },
+  );
+
   testWidgets('shows Stop action while responding and calls callback', (
     WidgetTester tester,
   ) async {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -5,14 +7,25 @@ import '../../domain/entities/chat_message.dart';
 
 /// Chat message widget
 class ChatMessageWidget extends StatelessWidget {
-  const ChatMessageWidget({super.key, required this.message});
+  const ChatMessageWidget({
+    super.key,
+    required this.message,
+    this.onBackgroundLongPress,
+    this.onBackgroundLongPressEnd,
+  });
 
   final ChatMessage message;
+  final VoidCallback? onBackgroundLongPress;
+  final VoidCallback? onBackgroundLongPressEnd;
 
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
     final colorScheme = Theme.of(context).colorScheme;
+    final bubbleBorderRadius = BorderRadius.circular(18).copyWith(
+      bottomRight: isUser ? const Radius.circular(6) : null,
+      bottomLeft: !isUser ? const Radius.circular(6) : null,
+    );
 
     // Check if message has valid content
     final hasValidContent = message.parts.any((part) {
@@ -33,85 +46,98 @@ class ChatMessageWidget extends StatelessWidget {
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-            decoration: BoxDecoration(
-              color: isUser
-                  ? colorScheme.primaryContainer.withValues(alpha: 0.45)
-                  : colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(18).copyWith(
-                bottomRight: isUser ? const Radius.circular(6) : null,
-                bottomLeft: !isUser ? const Radius.circular(6) : null,
-              ),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onDoubleTap: () {
-                      final copyText = _composeMessageCopyText(message);
-                      if (copyText.isNotEmpty) {
-                        _copyTextToClipboard(context, copyText);
-                      }
-                    },
-                  ),
+          child: _BubbleTouchHoldLayer(
+            borderRadius: bubbleBorderRadius,
+            flashColor: colorScheme.primary.withValues(alpha: 0.16),
+            onLongPress: onBackgroundLongPress,
+            onLongPressRelease: onBackgroundLongPressEnd,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+              decoration: BoxDecoration(
+                color: isUser
+                    ? colorScheme.primaryContainer.withValues(alpha: 0.45)
+                    : colorScheme.surfaceContainerHigh,
+                borderRadius: bubbleBorderRadius,
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.45),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          isUser ? 'You' : 'Assistant',
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: isUser
-                                    ? colorScheme.primary
-                                    : colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _formatTime(message.time),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                                fontSize: 11,
-                              ),
-                        ),
-                        const Spacer(),
-                        if (!isUser && message is AssistantMessage)
-                          _buildAssistantInfo(
-                            context,
-                            message as AssistantMessage,
-                          ),
-                      ],
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onDoubleTap: () {
+                        final copyText = _composeMessageCopyText(message);
+                        if (copyText.isNotEmpty) {
+                          _copyTextToClipboard(context, copyText);
+                        }
+                      },
                     ),
-                    const SizedBox(height: 8),
-                    SelectionArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          ...message.parts.map(
-                            (part) => _buildMessagePart(context, part),
+                          Text(
+                            isUser ? 'You' : 'Assistant',
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: isUser
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _formatTime(message.time),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontSize: 11,
+                                ),
+                          ),
+                          const Spacer(),
+                          if (!isUser && message is AssistantMessage)
+                            _buildAssistantInfo(
+                              context,
+                              message as AssistantMessage,
+                            ),
                         ],
                       ),
-                    ),
-                    if (message is AssistantMessage &&
-                        (message as AssistantMessage).error != null)
-                      _buildErrorInfo(
-                        context,
-                        (message as AssistantMessage).error!,
-                      ),
-                  ],
-                ),
-              ],
+                      const SizedBox(height: 8),
+                      if (isUser)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ...message.parts.map(
+                              (part) => _buildMessagePart(context, part),
+                            ),
+                          ],
+                        )
+                      else
+                        SelectionArea(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ...message.parts.map(
+                                (part) => _buildMessagePart(context, part),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (message is AssistantMessage &&
+                          (message as AssistantMessage).error != null)
+                        _buildErrorInfo(
+                          context,
+                          (message as AssistantMessage).error!,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -720,5 +746,152 @@ class ChatMessageWidget extends StatelessWidget {
     } else {
       return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
+  }
+}
+
+class _BubbleTouchHoldLayer extends StatefulWidget {
+  const _BubbleTouchHoldLayer({
+    required this.child,
+    required this.borderRadius,
+    required this.flashColor,
+    this.onLongPress,
+    this.onLongPressRelease,
+  });
+
+  final Widget child;
+  final BorderRadius borderRadius;
+  final Color flashColor;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onLongPressRelease;
+
+  @override
+  State<_BubbleTouchHoldLayer> createState() => _BubbleTouchHoldLayerState();
+}
+
+class _BubbleTouchHoldLayerState extends State<_BubbleTouchHoldLayer> {
+  static const Duration _holdDelay = Duration(milliseconds: 260);
+  static const Duration _flashDuration = Duration(milliseconds: 170);
+  static const double _moveTolerance = 14;
+
+  Timer? _holdTimer;
+  Timer? _flashTimer;
+  int? _activePointer;
+  Offset? _pointerDownPosition;
+  bool _longPressTriggered = false;
+  bool _isFlashing = false;
+
+  @override
+  void dispose() {
+    _holdTimer?.cancel();
+    _flashTimer?.cancel();
+    super.dispose();
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (widget.onLongPress == null) {
+      return;
+    }
+    _holdTimer?.cancel();
+    _activePointer = event.pointer;
+    _pointerDownPosition = event.localPosition;
+    _longPressTriggered = false;
+    _holdTimer = Timer(_holdDelay, _triggerLongPress);
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (event.pointer != _activePointer || _pointerDownPosition == null) {
+      return;
+    }
+    final movedDistance =
+        (event.localPosition - _pointerDownPosition!).distance;
+    if (!_longPressTriggered && movedDistance > _moveTolerance) {
+      _cancelHold();
+    }
+  }
+
+  void _handlePointerUp(PointerUpEvent event) {
+    if (event.pointer == _activePointer) {
+      final shouldDispatchLongPressRelease = _longPressTriggered;
+      _cancelHold();
+      if (shouldDispatchLongPressRelease) {
+        widget.onLongPressRelease?.call();
+      }
+    }
+  }
+
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (event.pointer == _activePointer) {
+      _cancelHold();
+    }
+  }
+
+  void _triggerLongPress() {
+    _holdTimer?.cancel();
+    _holdTimer = null;
+    if (!mounted || widget.onLongPress == null) {
+      return;
+    }
+    _longPressTriggered = true;
+    widget.onLongPress!();
+    _triggerFlash();
+  }
+
+  void _cancelHold() {
+    _holdTimer?.cancel();
+    _holdTimer = null;
+    _activePointer = null;
+    _pointerDownPosition = null;
+    _longPressTriggered = false;
+  }
+
+  void _triggerFlash() {
+    if (!mounted) {
+      return;
+    }
+    _flashTimer?.cancel();
+    setState(() {
+      _isFlashing = true;
+    });
+    _flashTimer = Timer(_flashDuration, () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isFlashing = false;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          onPointerUp: _handlePointerUp,
+          onPointerCancel: _handlePointerCancel,
+          child: AbsorbPointer(
+            absorbing: _longPressTriggered,
+            child: widget.child,
+          ),
+        ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: _isFlashing ? 1 : 0,
+              duration: const Duration(milliseconds: 120),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: widget.flashColor,
+                  borderRadius: widget.borderRadius,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

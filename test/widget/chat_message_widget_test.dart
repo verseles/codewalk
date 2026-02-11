@@ -159,7 +159,7 @@ void main() {
     expect(find.byTooltip('Copy'), findsNothing);
   });
 
-  testWidgets('user text is selectable and has no copy button', (
+  testWidgets('user text is not selectable and has no copy button', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -184,7 +184,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(SelectionArea), findsOneWidget);
+    expect(find.byType(SelectionArea), findsNothing);
     expect(find.byTooltip('Copy'), findsNothing);
   });
 

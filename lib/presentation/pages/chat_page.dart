@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart' hide Provider;
 import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
@@ -110,6 +111,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   bool _showScrollToLatestFab = false;
   bool _hasUnreadMessagesBelow = false;
   bool _isAppInForeground = true;
+  String? _composerPrefilledText;
+  int _composerPrefilledTextVersion = 0;
   final Map<String, _FileExplorerContextState> _fileContextStates =
       <String, _FileExplorerContextState>{};
   final Map<String, String> _fileDiffSignaturesByContext = <String, String>{};
@@ -3802,6 +3805,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     selectedModel,
                   );
                   final supportsPdf = _supportsPdfAttachments(selectedModel);
+                  final sentMessageHistory = _collectSentMessageHistory(
+                    chatProvider.messages,
+                  );
                   return ChatInputWidget(
                     onSendMessage: (submission) async {
                       await chatProvider.sendMessage(
@@ -3834,6 +3840,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                           commandName: commandName,
                           chatProvider: chatProvider,
                         ),
+                    sentMessageHistory: sentMessageHistory,
+                    prefilledText: _composerPrefilledText,
+                    prefilledTextVersion: _composerPrefilledTextVersion,
                     enabled: chatProvider.currentSession != null,
                     isResponding: chatProvider.canAbortActiveResponse,
                     focusNode: _inputFocusNode,
@@ -3922,6 +3931,73 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return value;
     }
     return '${trimmed[0].toUpperCase()}${trimmed.substring(1)}';
+  }
+
+  List<String> _collectSentMessageHistory(List<ChatMessage> messages) {
+    final history = <String>[];
+    for (final message in messages) {
+      if (message.role != MessageRole.user) {
+        continue;
+      }
+      final text = message.parts
+          .whereType<TextPart>()
+          .map((part) => part.text)
+          .join('\n')
+          .trim();
+      if (text.isEmpty) {
+        continue;
+      }
+      history.add(text);
+    }
+    return List<String>.unmodifiable(history);
+  }
+
+  String _extractUserMessageText(ChatMessage message) {
+    return message.parts
+        .whereType<TextPart>()
+        .map((part) => part.text)
+        .join('\n')
+        .trim();
+  }
+
+  bool get _isMobileViewport {
+    if (!mounted) {
+      return false;
+    }
+    return MediaQuery.sizeOf(context).width < _mobileBreakpoint;
+  }
+
+  void _handleMessageBackgroundLongPress(ChatMessage message) {
+    if (!_isMobileViewport || message.role != MessageRole.user) {
+      return;
+    }
+    final text = _extractUserMessageText(message);
+    if (text.isEmpty) {
+      return;
+    }
+    setState(() {
+      _composerPrefilledText = text;
+      _composerPrefilledTextVersion += 1;
+    });
+    unawaited(HapticFeedback.selectionClick());
+  }
+
+  void _handleMessageBackgroundLongPressEnd(ChatMessage message) {
+    if (!_isMobileViewport || message.role != MessageRole.user) {
+      return;
+    }
+    final text = _extractUserMessageText(message);
+    if (text.isEmpty) {
+      return;
+    }
+    unawaited(
+      Future<void>.delayed(const Duration(milliseconds: 16), () {
+        if (!mounted) {
+          return;
+        }
+        _inputFocusNode.requestFocus();
+      }),
+    );
   }
 
   String _agentKey(String name) {
@@ -4627,7 +4703,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       itemBuilder: (context, index) {
         if (index < chatProvider.messages.length) {
           final message = chatProvider.messages[index];
-          return ChatMessageWidget(key: ValueKey(message.id), message: message);
+          return ChatMessageWidget(
+            key: ValueKey(message.id),
+            message: message,
+            onBackgroundLongPress: () =>
+                _handleMessageBackgroundLongPress(message),
+            onBackgroundLongPressEnd: () =>
+                _handleMessageBackgroundLongPressEnd(message),
+          );
         }
 
         final indicator = switch (progressStage) {
