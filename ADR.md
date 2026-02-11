@@ -24,6 +24,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-018: Refreshless Realtime Sync with Lifecycle and Degraded Fallback (2026-02-10) [Accepted]
 - ADR-019: Prompt Power Composer Triggers (`@`, `!`, `/`) (2026-02-10) [Accepted]
 - ADR-020: File Explorer State and Context-Scoped Viewer Orchestration (2026-02-11) [Accepted]
+- ADR-021: Responsive Dialog Sizing Standard and Files-Centered Viewer Surface (2026-02-11) [Accepted]
 
 ---
 
@@ -902,6 +903,56 @@ CodeWalk already keeps project/session context scoped by `serverId::directory`. 
 - `lib/presentation/providers/project_provider.dart`
 - `lib/presentation/pages/chat_page.dart`
 - `lib/presentation/utils/file_explorer_logic.dart`
+
+### References
+
+- `ROADMAP.md`
+- `CODEBASE.md`
+
+---
+
+## ADR-021: Responsive Dialog Sizing Standard and Files-Centered Viewer Surface
+
+Status: Accepted  
+Date: 2026-02-11
+
+### Context
+
+After feature 019, file viewing still appeared at the top of the chat conversation while the file tree lived in a dedicated `Files` surface (desktop side pane and mobile Files dialog). On mobile, opening a file from the Files dialog could feel detached because preview content remained behind that dialog.  
+
+At the same time, multiple dialogs used different sizing rules. The project needed a clear cross-screen standard for dialog dimensions.
+
+### Decision
+
+1. Move file preview focus from chat header area to the `Files` surface:
+   - desktop: file preview remains in the Files pane,
+   - mobile: file preview remains inside Files-related dialogs.
+2. Add an explicit `N open files` control in the Files header (between title and quick actions) to open tab-management view.
+3. Standardize open-files tab management UX in an adaptive dialog:
+   - mobile/compact: `Dialog.fullscreen`,
+   - larger screens: centered dialog constrained to approximately 70% of viewport width and height.
+4. Adopt this sizing rule as the default dialog policy for new product dialogs unless a feature needs a documented exception.
+
+### Rationale
+
+- Keeping tree, open-tabs count, and preview in the same visual surface removes context switching and avoids “content opened behind overlay” perception.
+- A single responsive dialog policy improves UX consistency across desktop and mobile.
+- The 70% cap on larger layouts preserves surrounding context and avoids full-screen modal fatigue on desktop.
+- Fullscreen on mobile maximizes usable space, especially for long file tabs and code content.
+
+### Consequences
+
+- Positive: file navigation and preview are now centered in `Files`, not mixed into chat content area.
+- Positive: open-file tab management is explicit and discoverable via `N open files`.
+- Positive: dialog behavior is now predictable across breakpoints (mobile fullscreen, desktop centered 70%).
+- Trade-off: some dialog interactions now require one additional step (`N open files`) for multi-tab management.
+- Trade-off: dialog policy must be respected by future features to keep consistency.
+
+### Key Files
+
+- `lib/presentation/pages/chat_page.dart`
+- `test/widget/chat_page_test.dart`
+- `CODEBASE.md`
 
 ### References
 

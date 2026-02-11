@@ -1135,26 +1135,38 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   onPressed: () => Navigator.of(dialogContext).pop(),
                 ),
               ),
-              body: Consumer3<ProjectProvider, AppProvider, ChatProvider>(
-                builder:
-                    (context, projectProvider, appProvider, chatProvider, _) {
-                      final fileState = _resolveFileContextState(
-                        projectProvider: projectProvider,
-                        appProvider: appProvider,
-                      );
-                      _reconcileFileContextWithSessionDiff(
-                        contextKey: projectProvider.contextKey,
-                        fileState: fileState,
-                        chatProvider: chatProvider,
-                        projectProvider: projectProvider,
-                      );
-                      return SafeArea(
-                        child: _buildFileExplorerPanel(
-                          fileState: fileState,
-                          projectProvider: projectProvider,
-                        ),
-                      );
-                    },
+              body: StatefulBuilder(
+                builder: (context, setDialogState) {
+                  return Consumer3<ProjectProvider, AppProvider, ChatProvider>(
+                    builder:
+                        (
+                          context,
+                          projectProvider,
+                          appProvider,
+                          chatProvider,
+                          _,
+                        ) {
+                          final fileState = _resolveFileContextState(
+                            projectProvider: projectProvider,
+                            appProvider: appProvider,
+                          );
+                          _reconcileFileContextWithSessionDiff(
+                            contextKey: projectProvider.contextKey,
+                            fileState: fileState,
+                            chatProvider: chatProvider,
+                            projectProvider: projectProvider,
+                          );
+                          return SafeArea(
+                            child: _buildFileExplorerPanel(
+                              fileState: fileState,
+                              projectProvider: projectProvider,
+                              isMobileLayout: true,
+                              onStateChanged: () => setDialogState(() {}),
+                            ),
+                          );
+                        },
+                  );
+                },
               ),
             ),
           ),
@@ -2030,6 +2042,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           child: _buildFileExplorerPanel(
             fileState: fileState,
             projectProvider: projectProvider,
+            isMobileLayout: false,
           ),
         );
       },
@@ -2426,6 +2439,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   Future<void> _openQuickFileDialog({
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
+    VoidCallback? onFileOpened,
   }) async {
     final queryController = TextEditingController();
     var loading = false;
@@ -2609,7 +2623,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                       fileState: fileState,
                                       projectProvider: projectProvider,
                                       path: normalizedPath,
+                                      onUpdated: onFileOpened,
                                     );
+                                    onFileOpened?.call();
                                   },
                                 );
                               },
@@ -2639,6 +2655,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
     required String path,
+    VoidCallback? onUpdated,
   }) async {
     final normalizedPath = _normalizeFilePath(path);
     if (normalizedPath.isEmpty) {
@@ -2651,12 +2668,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           normalizedPath,
         );
       });
+      onUpdated?.call();
     }
 
     final cached = fileState.tabsByPath[normalizedPath];
     if (cached != null &&
         cached.status != _FileTabLoadStatus.error &&
         cached.status != _FileTabLoadStatus.loading) {
+      onUpdated?.call();
       return;
     }
 
@@ -2664,25 +2683,30 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       fileState: fileState,
       projectProvider: projectProvider,
       path: normalizedPath,
+      onUpdated: onUpdated,
     );
   }
 
   void _activateFileTab({
     required _FileExplorerContextState fileState,
     required String path,
+    VoidCallback? onUpdated,
   }) {
     setState(() {
       fileState.tabSelection = activateFileTab(fileState.tabSelection, path);
     });
+    onUpdated?.call();
   }
 
   void _closeFileTab({
     required _FileExplorerContextState fileState,
     required String path,
+    VoidCallback? onUpdated,
   }) {
     setState(() {
       fileState.tabSelection = closeFileTab(fileState.tabSelection, path);
     });
+    onUpdated?.call();
   }
 
   Future<void> _reloadFileTab({
@@ -2690,6 +2714,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required ProjectProvider projectProvider,
     required String path,
     bool silent = false,
+    VoidCallback? onUpdated,
   }) async {
     final normalizedPath = _normalizeFilePath(path);
     if (!silent && mounted) {
@@ -2699,6 +2724,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           content: '',
         );
       });
+      onUpdated?.call();
     }
 
     final content = await _readFileContentWithFallback(
@@ -2740,11 +2766,112 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         mimeType: content.mimeType,
       );
     });
+    onUpdated?.call();
+  }
+
+  Future<void> _openOpenFilesDialog({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required bool fullscreen,
+  }) async {
+    if (!fileState.tabSelection.hasOpenTabs || !mounted) {
+      return;
+    }
+    final mediaQuery = MediaQuery.of(context);
+    final dialogWidth = (mediaQuery.size.width * 0.7).clamp(560.0, 1200.0);
+    final dialogHeight = (mediaQuery.size.height * 0.7).clamp(420.0, 900.0);
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            if (fullscreen) {
+              return Dialog.fullscreen(
+                key: const ValueKey<String>('open_files_dialog_fullscreen'),
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: Text(
+                      'Open files (${fileState.tabSelection.openPaths.length})',
+                    ),
+                    leading: IconButton(
+                      icon: const Icon(Icons.close),
+                      tooltip: 'Close',
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                    ),
+                  ),
+                  body: _buildFileViewerPanel(
+                    fileState: fileState,
+                    projectProvider: projectProvider,
+                    height: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    onStateChanged: () => setDialogState(() {}),
+                  ),
+                ),
+              );
+            }
+            return Dialog(
+              key: const ValueKey<String>('open_files_dialog_centered'),
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 24,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SizedBox(
+                width: dialogWidth.toDouble(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 300,
+                    maxHeight: dialogHeight.toDouble(),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Open files (${fileState.tabSelection.openPaths.length})',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Close',
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildFileViewerPanel(
+                          fileState: fileState,
+                          projectProvider: projectProvider,
+                          height: double.infinity,
+                          margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                          onStateChanged: () => setDialogState(() {}),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildFileExplorerPanel({
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
+    required bool isMobileLayout,
+    VoidCallback? onStateChanged,
   }) {
     final rootNodes = fileState.directoryChildren[_rootTreeCacheKey];
     final rootLoading = fileState.loadingDirectories.contains(
@@ -2768,14 +2895,48 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
+                  if (fileState.tabSelection.hasOpenTabs)
+                    Flexible(
+                      child: TextButton(
+                        key: const ValueKey<String>(
+                          'file_tree_open_files_button',
+                        ),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {
+                          unawaited(
+                            _openOpenFilesDialog(
+                              fileState: fileState,
+                              projectProvider: projectProvider,
+                              fullscreen: isMobileLayout,
+                            ),
+                          );
+                        },
+                        child: Text(
+                          '${fileState.tabSelection.openPaths.length} open file${fileState.tabSelection.openPaths.length == 1 ? '' : 's'}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
                   IconButton(
                     key: const ValueKey<String>('file_tree_quick_open_button'),
                     tooltip: 'Quick Open',
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
                     onPressed: () {
                       unawaited(
                         _openQuickFileDialog(
                           fileState: fileState,
                           projectProvider: projectProvider,
+                          onFileOpened: onStateChanged,
                         ),
                       );
                     },
@@ -2784,6 +2945,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   IconButton(
                     key: const ValueKey<String>('file_tree_refresh_button'),
                     tooltip: 'Refresh files',
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
                     onPressed: () {
                       unawaited(
                         _loadRootDirectoryNodes(
@@ -2855,6 +3021,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     children: _buildFileTreeChildren(
                       fileState: fileState,
                       projectProvider: projectProvider,
+                      onStateChanged: onStateChanged,
                       parentCacheKey: _rootTreeCacheKey,
                       depth: 0,
                     ),
@@ -2862,6 +3029,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 },
               ),
             ),
+            if (fileState.tabSelection.hasOpenTabs) ...[
+              const Divider(height: 1),
+              _buildFileViewerPanel(
+                fileState: fileState,
+                projectProvider: projectProvider,
+                onStateChanged: onStateChanged,
+              ),
+            ],
           ],
         ),
       ),
@@ -2871,6 +3046,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   List<Widget> _buildFileTreeChildren({
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
+    VoidCallback? onStateChanged,
     required String parentCacheKey,
     required int depth,
   }) {
@@ -2912,6 +3088,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 fileState: fileState,
                 projectProvider: projectProvider,
                 path: node.path,
+                onUpdated: onStateChanged,
               ),
             );
           },
@@ -2962,6 +3139,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           _buildFileTreeChildren(
             fileState: fileState,
             projectProvider: projectProvider,
+            onStateChanged: onStateChanged,
             parentCacheKey: node.path,
             depth: depth + 1,
           ),
@@ -3021,6 +3199,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   Widget _buildFileViewerPanel({
     required _FileExplorerContextState fileState,
     required ProjectProvider projectProvider,
+    double height = 250,
+    EdgeInsetsGeometry margin = const EdgeInsets.fromLTRB(8, 0, 8, 8),
+    VoidCallback? onStateChanged,
   }) {
     if (!fileState.tabSelection.hasOpenTabs) {
       return const SizedBox.shrink();
@@ -3038,8 +3219,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
     return Container(
       key: const ValueKey<String>('file_viewer_panel'),
-      height: 250,
-      margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+      height: height,
+      margin: margin,
       child: Card(
         child: Column(
           children: [
@@ -3072,6 +3253,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                 _activateFileTab(
                                   fileState: fileState,
                                   path: path,
+                                  onUpdated: onStateChanged,
                                 );
                               },
                               borderRadius: BorderRadius.circular(999),
@@ -3104,7 +3286,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                               ),
                               icon: const Icon(Icons.close, size: 14),
                               onPressed: () {
-                                _closeFileTab(fileState: fileState, path: path);
+                                _closeFileTab(
+                                  fileState: fileState,
+                                  path: path,
+                                  onUpdated: onStateChanged,
+                                );
                               },
                             ),
                             const SizedBox(width: 4),
@@ -3144,6 +3330,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                       fileState: fileState,
                                       projectProvider: projectProvider,
                                       path: activePath,
+                                      onUpdated: onStateChanged,
                                     ),
                                   );
                                 },
@@ -3226,19 +3413,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required double horizontalPadding,
     required double verticalPadding,
   }) {
-    final projectProvider = context.watch<ProjectProvider>();
-    final appProvider = context.watch<AppProvider>();
-    final fileState = _resolveFileContextState(
-      projectProvider: projectProvider,
-      appProvider: appProvider,
-    );
-    _reconcileFileContextWithSessionDiff(
-      contextKey: projectProvider.contextKey,
-      fileState: fileState,
-      chatProvider: chatProvider,
-      projectProvider: projectProvider,
-    );
-
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
@@ -3341,38 +3515,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
-              if (fileState.tabSelection.hasOpenTabs)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      InputChip(
-                        avatar: const Icon(Icons.tab_outlined, size: 16),
-                        label: Text(
-                          '${fileState.tabSelection.openPaths.length} open file${fileState.tabSelection.openPaths.length == 1 ? "" : "s"}',
-                        ),
-                        onPressed: () {
-                          final activePath = fileState.tabSelection.activePath;
-                          if (activePath == null) {
-                            return;
-                          }
-                          _activateFileTab(
-                            fileState: fileState,
-                            path: activePath,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-              _buildFileViewerPanel(
-                fileState: fileState,
-                projectProvider: projectProvider,
-              ),
-
               // Message list
               Expanded(child: _buildMessageViewport(chatProvider)),
 

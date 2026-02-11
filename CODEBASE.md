@@ -292,7 +292,9 @@ Compatibility tiers:
 - Extended `ChatPage` with file explorer/viewer orchestration:
   - context-keyed explorer state, root/tree lazy loading, quick-open dialog, and tab lifecycle
   - builtin `/open` now invokes quick-open instead of placeholder snackbar
-  - file viewer panel integrated above message viewport in chat flow
+  - file viewer moved from chat header area into the `Files` surface (desktop pane + mobile Files dialog)
+  - `N open files` action added in the `Files` header (between title and quick actions) to open tab management dialog
+  - open-files dialog policy: fullscreen on compact/mobile, centered at ~70% viewport on larger screens
   - diff-aware tab reload + tree invalidation based on `session.diff`
 - Added reusable ranking/reducer logic:
   - `lib/presentation/utils/file_explorer_logic.dart` (quick-open ranking + tab open/close/activate reducers)
@@ -597,8 +599,9 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Shell-mode sends use a dedicated server route (`/session/{id}/shell`) through datasource-level routing
 - File explorer parity in chat:
   - server-backed tree listing (`/file`) with expandable directories and file-type icons
-  - quick-open dialog (`Ctrl/Cmd+P` + app bar action + `/open`) using ranked search from `/find/file`
-  - in-chat file viewer tabs with states `loading`, `ready`, `empty`, `binary`, and `error` sourced from `/file/content`
+  - quick-open dialog (`Ctrl/Cmd+P` + `/open`, plus `Files` panel quick action) using ranked search from `/find/file`
+  - file viewer tabs with states `loading`, `ready`, `empty`, `binary`, and `error` sourced from `/file/content`, now centered in the `Files` surface (not in chat header area)
+  - `Open files` dialog with tab close controls (`X`) and adaptive sizing (mobile fullscreen, desktop centered ~70% viewport)
   - context-keyed explorer/tab state with diff-aware refresh to avoid cross-directory leakage
 - In-app provider/model picker and reasoning-variant cycle controls
 - In-app agent selector beside model/variant controls with ordered options (`build`, `plan`, then others), context-scoped persistence (`server + directory`) and safe fallback when persisted selection disappears

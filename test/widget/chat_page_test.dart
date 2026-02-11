@@ -619,6 +619,80 @@ void main() {
     expect(find.text('void main() => print("ok");'), findsOneWidget);
   });
 
+  testWidgets('desktop open files button opens centered dialog with tabs', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_tabs_desktop',
+        name: 'Project Tabs Desktop',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_tabs_desktop',
+          name: 'Project Tabs Desktop',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/main.dart',
+        name: 'main.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/main.dart',
+          content: 'void desktopTabs() {}',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('file_tree_open_files_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_tab_/repo/a/lib/main.dart'),
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets(
     'file viewer fallback retries relative path when absolute result is empty',
     (WidgetTester tester) async {
@@ -752,6 +826,99 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('class ChatProvider {}'), findsOneWidget);
+  });
+
+  testWidgets('mobile open files button opens fullscreen tab dialog', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(700, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_tabs_mobile',
+        name: 'Project Tabs Mobile',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_tabs_mobile',
+          name: 'Project Tabs Mobile',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/mobile.dart',
+        name: 'mobile.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.searchResultsByQuery['mobile'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/mobile.dart',
+        name: 'mobile.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/mobile.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/mobile.dart',
+          content: 'void mobileTabs() {}',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('appbar_quick_open_button')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('quick_open_input')),
+      'mobile',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('quick_open_result_/repo/a/lib/mobile.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('file_tree_open_files_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('open_files_dialog_fullscreen')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_fullscreen')),
+        matching: find.text('void mobileTabs() {}'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('file viewer shows binary and error states', (
