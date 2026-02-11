@@ -285,3 +285,4 @@ Description: Expandir configurações para incluir notificações e sons por cat
 
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclados/dispositivos (validar em device real com Gboard e Samsung Keyboard)
 - [ ] Transformar o botão `Send` em `Stop` enquanto o assistant estiver respondendo e integrar com `POST /session/{id}/abort` para interromper o pensamento/execução em andamento
+- [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
