@@ -89,5 +89,39 @@ void main() {
 
       expect(soundService.playCount, 1);
     });
+
+    test('allows toggling sound independently from notification', () async {
+      final local = InMemoryAppLocalDataSource();
+      final provider = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await provider.initialize();
+
+      await provider.setNotificationEnabled(NotificationCategory.agent, false);
+      await provider.setSoundEnabledForNotification(
+        NotificationCategory.agent,
+        true,
+      );
+
+      expect(
+        provider.isNotificationEnabled(NotificationCategory.agent),
+        isFalse,
+      );
+      expect(
+        provider.isSoundEnabledForNotification(NotificationCategory.agent),
+        isTrue,
+      );
+
+      await provider.setSoundEnabledForNotification(
+        NotificationCategory.agent,
+        false,
+      );
+      expect(
+        provider.isSoundEnabledForNotification(NotificationCategory.agent),
+        isFalse,
+      );
+    });
   });
 }

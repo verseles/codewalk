@@ -21,8 +21,8 @@ class EventFeedbackDispatcher {
   final SoundService _soundService;
   final Map<String, DateTime> _lastDispatchByCategory = <String, DateTime>{};
 
-  Future<void> handle(ChatEvent event) async {
-    final signal = _signalForEvent(event);
+  Future<void> handle(ChatEvent event, {String? sessionTitleHint}) async {
+    final signal = _signalForEvent(event, sessionTitleHint: sessionTitleHint);
     if (signal == null) {
       return;
     }
@@ -40,6 +40,7 @@ class EventFeedbackDispatcher {
           title: signal.title,
           body: signal.body,
           category: signal.categoryKey,
+          sessionId: signal.sessionId,
         ),
       );
     }
@@ -51,37 +52,104 @@ class EventFeedbackDispatcher {
     }
   }
 
-  _FeedbackSignal? _signalForEvent(ChatEvent event) {
+  _FeedbackSignal? _signalForEvent(
+    ChatEvent event, {
+    String? sessionTitleHint,
+  }) {
+    final properties = event.properties;
+    final sessionId = _extractSessionId(properties);
+    final sessionTitle = _extractSessionTitle(
+      properties,
+      sessionTitleHint: sessionTitleHint,
+    );
     switch (event.type) {
       case 'permission.asked':
       case 'question.asked':
       case 'question.updated':
-        return const _FeedbackSignal(
+        return _FeedbackSignal(
           notificationCategory: NotificationCategory.permissions,
           soundCategory: SoundCategory.permissions,
           categoryKey: 'permissions',
           title: 'Action required',
           body: 'A tool permission or question needs your input.',
+          sessionId: sessionId,
         );
       case 'session.error':
-        return const _FeedbackSignal(
+        return _FeedbackSignal(
           notificationCategory: NotificationCategory.errors,
           soundCategory: SoundCategory.errors,
           categoryKey: 'errors',
-          title: 'Session error',
-          body: 'The current session reported an error.',
+          title: sessionTitle == null
+              ? 'Session error'
+              : 'Error: $sessionTitle',
+          body: 'A session reported an error.',
+          sessionId: sessionId,
         );
       case 'session.idle':
-        return const _FeedbackSignal(
+        return _FeedbackSignal(
           notificationCategory: NotificationCategory.agent,
           soundCategory: SoundCategory.agent,
           categoryKey: 'agent',
-          title: 'Response ready',
+          title: 'Finished: ${sessionTitle ?? 'Session'}',
           body: 'Agent finished the current response.',
+          sessionId: sessionId,
         );
       default:
         return null;
     }
+  }
+
+  String? _extractSessionId(Map<String, dynamic> properties) {
+    final direct = properties['sessionID']?.toString().trim();
+    if (direct != null && direct.isNotEmpty) {
+      return direct;
+    }
+
+    final info = properties['info'];
+    if (info is Map) {
+      final nested = info['sessionID']?.toString().trim();
+      if (nested != null && nested.isNotEmpty) {
+        return nested;
+      }
+      final nestedId = info['id']?.toString().trim();
+      if (nestedId != null && nestedId.isNotEmpty) {
+        return nestedId;
+      }
+    }
+    return null;
+  }
+
+  String? _extractSessionTitle(
+    Map<String, dynamic> properties, {
+    String? sessionTitleHint,
+  }) {
+    final direct = properties['sessionTitle']?.toString().trim();
+    if (direct != null && direct.isNotEmpty) {
+      return direct;
+    }
+
+    final title = properties['title']?.toString().trim();
+    if (title != null && title.isNotEmpty) {
+      return title;
+    }
+
+    final info = properties['info'];
+    if (info is Map) {
+      final nestedSessionTitle = info['sessionTitle']?.toString().trim();
+      if (nestedSessionTitle != null && nestedSessionTitle.isNotEmpty) {
+        return nestedSessionTitle;
+      }
+      final nestedTitle = info['title']?.toString().trim();
+      if (nestedTitle != null && nestedTitle.isNotEmpty) {
+        return nestedTitle;
+      }
+    }
+
+    final normalizedHint = sessionTitleHint?.trim();
+    if (normalizedHint != null && normalizedHint.isNotEmpty) {
+      return normalizedHint;
+    }
+    return null;
   }
 }
 
@@ -92,6 +160,7 @@ class _FeedbackSignal {
     required this.categoryKey,
     required this.title,
     required this.body,
+    this.sessionId,
   });
 
   final NotificationCategory notificationCategory;
@@ -99,4 +168,5 @@ class _FeedbackSignal {
   final String categoryKey;
   final String title;
   final String body;
+  final String? sessionId;
 }

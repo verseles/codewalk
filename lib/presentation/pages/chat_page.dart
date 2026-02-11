@@ -18,6 +18,7 @@ import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/notification_service.dart';
 import '../utils/session_title_formatter.dart';
 import '../utils/file_explorer_logic.dart';
 import '../utils/shortcut_binding_codec.dart';
@@ -99,6 +100,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   );
   final TextEditingController _sessionSearchController =
       TextEditingController();
+  NotificationService? _notificationService;
+  StreamSubscription<NotificationTapPayload>? _notificationTapSubscription;
   ChatProvider? _chatProvider;
   AppProvider? _appProvider;
   String? _lastServerId;
@@ -135,6 +138,22 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       _lastServerConnectionState = nextAppProvider.isConnected;
       _appProvider?.addListener(_handleAppProviderChange);
     }
+    if (di.sl.isRegistered<NotificationService>()) {
+      final nextNotificationService = di.sl<NotificationService>();
+      if (!identical(_notificationService, nextNotificationService)) {
+        _notificationTapSubscription?.cancel();
+        _notificationService = nextNotificationService;
+        _notificationTapSubscription = nextNotificationService
+            .onNotificationTapped
+            .listen((payload) {
+              unawaited(_handleNotificationTap(payload));
+            });
+        final pendingPayload = nextNotificationService.consumePendingTap();
+        if (pendingPayload != null) {
+          unawaited(_handleNotificationTap(pendingPayload));
+        }
+      }
+    }
   }
 
   @override
@@ -143,6 +162,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     _chatProvider?.setScrollToBottomCallback(null);
     unawaited(_chatProvider?.setForegroundActive(false));
     _appProvider?.removeListener(_handleAppProviderChange);
+    _notificationTapSubscription?.cancel();
     _scrollController.removeListener(_handleScrollChanged);
     WidgetsBinding.instance.removeObserver(this);
 
@@ -234,6 +254,34 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     await chatProvider.refreshActiveSessionView(
       reason: 'app-provider-reconnected',
     );
+  }
+
+  Future<void> _handleNotificationTap(NotificationTapPayload payload) async {
+    if (!mounted) {
+      return;
+    }
+    final sessionId = payload.sessionId;
+    if (sessionId == null || sessionId.isEmpty) {
+      return;
+    }
+
+    final chatProvider = _chatProvider ?? context.read<ChatProvider>();
+    var targetSession = chatProvider.sessions
+        .where((item) => item.id == sessionId)
+        .firstOrNull;
+    if (targetSession == null) {
+      await chatProvider.loadSessions();
+      if (!mounted) {
+        return;
+      }
+      targetSession = chatProvider.sessions
+          .where((item) => item.id == sessionId)
+          .firstOrNull;
+    }
+    if (targetSession == null) {
+      return;
+    }
+    await chatProvider.selectSession(targetSession);
   }
 
   bool _isChatScreenActive() {

@@ -1194,7 +1194,14 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _applyChatEvent(ChatEvent event) {
-    unawaited(eventFeedbackDispatcher?.handle(event));
+    final eventSessionId = _extractEventSessionId(event.properties);
+    final sessionTitleHint = _sessionTitleForNotification(eventSessionId);
+    unawaited(
+      eventFeedbackDispatcher?.handle(
+        event,
+        sessionTitleHint: sessionTitleHint,
+      ),
+    );
     final properties = event.properties;
     switch (event.type) {
       case 'server.connected':
@@ -1483,6 +1490,39 @@ class ChatProvider extends ChangeNotifier {
       default:
         break;
     }
+  }
+
+  String? _extractEventSessionId(Map<String, dynamic> properties) {
+    final direct = properties['sessionID']?.toString().trim();
+    if (direct != null && direct.isNotEmpty) {
+      return direct;
+    }
+    final info = properties['info'];
+    if (info is Map) {
+      final nested = info['sessionID']?.toString().trim();
+      if (nested != null && nested.isNotEmpty) {
+        return nested;
+      }
+      final nestedId = info['id']?.toString().trim();
+      if (nestedId != null && nestedId.isNotEmpty) {
+        return nestedId;
+      }
+    }
+    return null;
+  }
+
+  String? _sessionTitleForNotification(String? sessionId) {
+    if (sessionId == null || sessionId.isEmpty) {
+      return null;
+    }
+    final session = _sessionById(sessionId);
+    if (session == null) {
+      return null;
+    }
+    return SessionTitleFormatter.displayTitle(
+      time: session.time,
+      title: session.title,
+    );
   }
 
   void _handleGlobalEvent(ChatEvent event) {

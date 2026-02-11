@@ -618,16 +618,21 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
   - mobile: section list -> detail flow
   - desktop/web: split layout (left navigation + right content)
 - Experience settings persistence (`experience_settings`) for:
-  - notification toggles by category (`agent`, `permissions`, `errors`)
+  - notification controls by category (`agent`, `permissions`, `errors`)
     - sync from `/config` when server exposes compatible notification keys (`settings-notifications-*` or `notifications.*`)
     - fallback to local-only persistence when server config keys are unavailable
+  - per-category split controls for `Notify` and `Sound` (users can enable only one of them)
   - sound preference by category with preview and fallback behavior
     - sound playback uses generated in-memory WAV tones via `audioplayers` for consistent output across platforms
-  - editable shortcut bindings with conflict validation and reset
-    - shortcuts section is available on desktop/web and hidden on mobile platforms
+  - notification payload includes `sessionId` for deep-link on notification tap back to the originating session
+- editable shortcut bindings with conflict validation and reset
+  - shortcuts section is available on desktop/web and hidden on mobile platforms
 - Server management moved into a dedicated `Servers` section:
   - add/edit/remove, active/default, health badges and activation guard
 - Chat keyboard shortcuts are now resolved from persisted settings via runtime binding parsing
+- Notification runtime adapters:
+  - Android/Linux/macOS/Windows through `flutter_local_notifications`
+  - Web through browser Notification API permission flow + click callback wiring
 
 ## Chat System Details
 

@@ -991,11 +991,17 @@ Feature 022 required parity with OpenCode settings behaviors across:
    - `NotificationService` using local notifications with platform fallback,
    - `SoundService` using generated in-memory WAV playback (`audioplayers`) with graceful fallback.
 5. Integrate event feedback through a dedicated dispatcher (`EventFeedbackDispatcher`) wired into `ChatProvider` reducer events.
+   - finish notifications use focused title format `Finished: <session title>` when session context is available.
+   - notification payload carries `sessionId` to support deep-linking to the originating session on tap.
 6. Move chat keyboard activation to runtime-configurable bindings resolved from persisted shortcuts (`ShortcutBindingCodec`) with conflict validation in settings UI.
    - expose shortcut-management section only on desktop/web platforms.
 7. Enable Android compatibility requirements for notification plugin:
    - `POST_NOTIFICATIONS` permission,
    - core library desugaring in Gradle.
+8. Expand notification controls to per-category split toggles:
+   - `Notify` (system notification),
+   - `Sound` (audible feedback),
+   allowing independent preference combinations per event type (`agent`, `permissions`, `errors`).
 
 ### Rationale
 
@@ -1011,8 +1017,10 @@ Feature 022 required parity with OpenCode settings behaviors across:
 - Positive: users can control notification/sound behavior by category and adjust shortcut bindings safely.
 - Positive: chat shortcut behavior and settings UI are now synchronized through one persisted source of truth.
 - Positive: platform differences are handled via adapter fallback and logged diagnostics.
+- Positive: notification tap can route users directly to the session that generated the event.
 - Trade-off: additional provider/service layers increase initialization and DI complexity.
 - Trade-off: notification plugin introduces Android build constraints (desugaring + permission maintenance).
+- Trade-off: web notifications depend on browser permission and only emit click callbacks while app runtime is active.
 
 ### Key Files
 

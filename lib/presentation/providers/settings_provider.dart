@@ -74,6 +74,18 @@ class SettingsProvider extends ChangeNotifier {
     return _settings.notifications[category] ?? true;
   }
 
+  SoundCategory soundCategoryForNotification(NotificationCategory category) {
+    return switch (category) {
+      NotificationCategory.agent => SoundCategory.agent,
+      NotificationCategory.permissions => SoundCategory.permissions,
+      NotificationCategory.errors => SoundCategory.errors,
+    };
+  }
+
+  bool isSoundEnabledForNotification(NotificationCategory category) {
+    return soundFor(soundCategoryForNotification(category)) != SoundOption.off;
+  }
+
   SoundOption soundFor(SoundCategory category) {
     return _settings.sounds[category] ?? SoundOption.off;
   }
@@ -107,6 +119,28 @@ class SettingsProvider extends ChangeNotifier {
     _settings = _settings.copyWith(sounds: next);
     notifyListeners();
     await _persist();
+  }
+
+  Future<void> setSoundEnabledForNotification(
+    NotificationCategory category,
+    bool enabled,
+  ) async {
+    final soundCategory = soundCategoryForNotification(category);
+    final current = soundFor(soundCategory);
+    if (enabled) {
+      if (current != SoundOption.off) {
+        return;
+      }
+      final fallback =
+          ExperienceSettings.defaults().sounds[soundCategory] ??
+          SoundOption.alert;
+      await setSoundOption(soundCategory, fallback);
+      return;
+    }
+    if (current == SoundOption.off) {
+      return;
+    }
+    await setSoundOption(soundCategory, SoundOption.off);
   }
 
   Future<void> previewSound(SoundCategory category) async {
