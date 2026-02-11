@@ -695,13 +695,21 @@ The expected behavior required preserving existing mention/slash keyboard behavi
 3. Replace `Send` action with `Stop` while response is active and route Stop to `/session/{id}/abort` through a dedicated `AbortChatSession` use case injected into `ChatProvider`.
 4. Add user-controlled collapse/restore for desktop panes (`Conversations`, `Files`, `Utility`) and persist visibility in `ExperienceSettings.desktopPanes`.
 5. Keep existing popover/shortcut flows intact by applying desktop send handling only when composer popovers are not consuming Enter.
+6. Treat abort-originated cancellation errors (`aborted/canceled` variants) as expected outcomes for a short suppression window, keeping chat state in `loaded` instead of transitioning to global error/retry fallback.
+7. Keep send-stream lifecycle race-safe across rapid `Stop -> Send` transitions by invalidating prior stream generations, ignoring stale callbacks, and preserving mutability of `_messages` after abort finalization.
+8. On mobile, set composer input action to `send` and dismiss keyboard focus after successful submission to preserve viewport space for incoming messages.
 
 ### Consequences
 
 - Positive: desktop chat interaction now matches expected ergonomics for multi-line drafting and quick send.
 - Positive: users can reclaim conversation width without losing preferred pane layout across app restarts.
 - Positive: active responses can be interrupted through an explicit Stop affordance without freezing text editing.
+- Positive: user-triggered Stop no longer replaces the conversation with a full-screen error/retry state for expected cancellation messages.
+- Positive: immediate follow-up prompts after Stop no longer require manual `Retry` to recover conversation visibility.
+- Positive: mobile message flow keeps more conversation content visible immediately after submit by dismissing keyboard/focus.
 - Trade-off: chat input/button state machine is more complex and now depends on both local send state and provider response/abort state.
+- Trade-off: abort-error suppression relies on a short session-scoped timing window and message pattern matching, which adds subtle provider state heuristics.
+- Trade-off: stream-generation guards add additional provider-side state that must stay consistent with subscription cancellation points.
 - Trade-off: additional persisted experience keys increase migration surface for settings serialization.
 
 ### Key Files

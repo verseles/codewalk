@@ -146,6 +146,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         defaultTargetPlatform == TargetPlatform.linux;
   }
 
+  bool get _shouldHideKeyboardAfterSend => !_isDesktopPlatform;
+
   @override
   void initState() {
     super.initState();
@@ -231,6 +233,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
         _activeSuggestionIndex = 0;
       });
+      if (_shouldHideKeyboardAfterSend) {
+        _effectiveFocusNode.unfocus();
+        unawaited(
+          SystemChannels.textInput.invokeMethod<void>('TextInput.hide'),
+        );
+      }
     } catch (error) {
       if (!mounted) {
         return;
@@ -754,7 +762,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                         focusNode: _effectiveFocusNode,
                         enabled: widget.enabled,
                         maxLines: null,
-                        textInputAction: TextInputAction.newline,
+                        textInputAction: _isDesktopPlatform
+                            ? TextInputAction.newline
+                            : TextInputAction.send,
                         keyboardType: TextInputType.multiline,
                         onChanged: _handleTextChanged,
                         onSubmitted: (_) => unawaited(_handleSendMessage()),
@@ -823,6 +833,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(52, 52),
                         padding: EdgeInsets.zero,
+                        backgroundColor: widget.isResponding
+                            ? const Color(0xFF424242)
+                            : null,
                       ),
                       child: _isSending
                           ? const SizedBox(
@@ -831,7 +844,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : widget.isResponding
-                          ? const Icon(Icons.stop_rounded)
+                          ? Icon(
+                              Icons.stop_rounded,
+                              size: 26,
+                              color: colorScheme.error,
+                            )
                           : SizedBox(
                               width: 52,
                               height: 52,
@@ -840,7 +857,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                 children: [
                                   const Align(
                                     alignment: Alignment.center,
-                                    child: Icon(Icons.send_rounded),
+                                    child: Icon(Icons.send_rounded, size: 26),
                                   ),
                                   Align(
                                     alignment: Alignment.bottomRight,

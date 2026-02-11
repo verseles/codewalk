@@ -60,9 +60,9 @@ class _QuestionRequestCardState extends State<QuestionRequestCard> {
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.22),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.25)),
+        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

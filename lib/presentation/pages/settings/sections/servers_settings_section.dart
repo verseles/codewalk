@@ -107,7 +107,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
-              value: activeId,
+              initialValue: activeId,
               items: appProvider.serverProfiles
                   .map(
                     (profile) => DropdownMenuItem<String>(

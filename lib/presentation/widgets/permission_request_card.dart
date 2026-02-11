@@ -22,9 +22,9 @@ class PermissionRequestCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.24)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

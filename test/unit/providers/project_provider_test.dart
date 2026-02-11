@@ -118,6 +118,32 @@ void main() {
       },
     );
 
+    test(
+      'archiveClosedProject hides project from closed list and persists',
+      () async {
+        await provider.initializeProject();
+        await provider.switchProject('proj_b');
+        await provider.closeProject('proj_a');
+
+        expect(
+          provider.closedProjects.any((project) => project.id == 'proj_a'),
+          isTrue,
+        );
+
+        final archived = await provider.archiveClosedProject('proj_a');
+        expect(archived, isTrue);
+        expect(
+          provider.closedProjects.any((project) => project.id == 'proj_a'),
+          isFalse,
+        );
+        expect(provider.archivedProjectIds, contains('proj_a'));
+        expect(
+          localDataSource.scopedStrings['archived_project_ids::srv_test'],
+          isNotNull,
+        );
+      },
+    );
+
     test('worktree operations load/create/reset/delete', () async {
       await provider.initializeProject();
 

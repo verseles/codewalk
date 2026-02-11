@@ -129,6 +129,11 @@ void main() {
         ),
       );
 
+      final desktopInputField = tester.widget<TextField>(
+        find.byType(TextField),
+      );
+      expect(desktopInputField.textInputAction, TextInputAction.newline);
+
       await tester.enterText(find.byType(TextField), 'hello');
       await tester.pumpAndSettle();
 
@@ -147,6 +152,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(sentSubmission?.text, 'hello');
+    } finally {
+      debugDefaultTargetPlatformOverride = previousPlatform;
+    }
+  });
+
+  testWidgets('mobile Enter action sends and hides keyboard focus', (
+    WidgetTester tester,
+  ) async {
+    ChatInputSubmission? sentSubmission;
+    final previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      await tester.pumpWidget(
+        _buildChatInputHarness(
+          child: ChatInputWidget(
+            onSendMessage: (submission) {
+              sentSubmission = submission;
+            },
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'hello');
+      await tester.pumpAndSettle();
+
+      final mobileInputField = tester.widget<TextField>(find.byType(TextField));
+      expect(mobileInputField.textInputAction, TextInputAction.send);
+      expect(mobileInputField.focusNode?.hasFocus, isTrue);
+
+      mobileInputField.onSubmitted?.call('hello');
+      await tester.pumpAndSettle();
+
+      expect(sentSubmission?.text, 'hello');
+
+      final updatedInputField = tester.widget<TextField>(
+        find.byType(TextField),
+      );
+      expect(updatedInputField.focusNode?.hasFocus, isFalse);
     } finally {
       debugDefaultTargetPlatformOverride = previousPlatform;
     }

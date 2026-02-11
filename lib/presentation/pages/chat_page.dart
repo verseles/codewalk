@@ -12,7 +12,6 @@ import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
-import '../../domain/entities/worktree.dart';
 import '../../domain/entities/experience_settings.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
@@ -437,6 +436,26 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return;
     }
     await chatProvider.onProjectScopeChanged();
+  }
+
+  Future<void> _archiveClosedProjectContext(String projectId) async {
+    final projectProvider = context.read<ProjectProvider>();
+    final ok = await projectProvider.archiveClosedProject(projectId);
+    if (!mounted) {
+      return;
+    }
+    if (!ok) {
+      final error = projectProvider.error;
+      if (error != null && error.trim().isNotEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error)));
+      }
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Project archived from closed list')),
+    );
   }
 
   Future<void> _createWorkspace() async {
@@ -1536,10 +1555,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   for (final project in projectProvider.closedProjects)
                     Builder(
                       builder: (_) {
-                        final matchingWorktree = _worktreeForProject(
-                          projectProvider,
-                          project,
-                        );
                         final displayName = _projectDisplayLabel(project);
                         return ListTile(
                           dense: true,
@@ -1568,17 +1583,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   _reopenProjectContext(project.id),
                                 ),
                               ),
-                              if (matchingWorktree != null)
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline_rounded,
-                                  ),
-                                  tooltip:
-                                      'Delete closed workspace $displayName',
-                                  onPressed: () => unawaited(
-                                    _deleteWorkspace(matchingWorktree.id),
-                                  ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline_rounded),
+                                tooltip: 'Archive closed project $displayName',
+                                onPressed: () => unawaited(
+                                  _archiveClosedProjectContext(project.id),
                                 ),
+                              ),
                             ],
                           ),
                         );
@@ -1756,28 +1767,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return path;
     }
     return name;
-  }
-
-  Worktree? _worktreeForProject(
-    ProjectProvider projectProvider,
-    Project project,
-  ) {
-    final projectPath = _normalizedComparablePath(project.path);
-    if (projectPath == null) {
-      return null;
-    }
-    return projectProvider.worktrees.where((worktree) {
-      final worktreePath = _normalizedComparablePath(worktree.directory);
-      return worktreePath != null && worktreePath == projectPath;
-    }).firstOrNull;
-  }
-
-  String? _normalizedComparablePath(String? rawPath) {
-    final normalized = rawPath?.trim();
-    if (normalized == null || normalized.isEmpty) {
-      return null;
-    }
-    return normalized.replaceAll(RegExp(r'[\\/]+$'), '');
   }
 
   Widget _buildSessionDrawer() {

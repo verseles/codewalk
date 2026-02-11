@@ -1,17 +1,25 @@
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
+
+import 'package:web/web.dart' as web;
 
 final StreamController<String> _tapController =
     StreamController<String>.broadcast();
 
 Stream<String> get webNotificationTapStream => _tapController.stream;
 
+bool _notificationsSupported() {
+  return web.window.hasProperty('Notification'.toJS).toDart;
+}
+
 Future<bool> requestWebNotificationPermission() async {
-  if (!html.Notification.supported) {
+  if (!_notificationsSupported()) {
     return false;
   }
-  final permission = await html.Notification.requestPermission();
-  return permission == 'granted';
+  final permission = await web.Notification.requestPermission().toDart;
+  final permissionText = permission.toDart;
+  return permissionText == 'granted';
 }
 
 Future<bool> showWebNotification({
@@ -19,18 +27,21 @@ Future<bool> showWebNotification({
   required String body,
   required String payload,
 }) async {
-  if (!html.Notification.supported) {
+  if (!_notificationsSupported()) {
     return false;
   }
-  if (html.Notification.permission != 'granted') {
+  if (web.Notification.permission != 'granted') {
     return false;
   }
 
-  final notification = html.Notification(title, body: body);
-  notification.onClick.listen((_) {
-    html.window.focus();
+  final notification = web.Notification(
+    title,
+    web.NotificationOptions(body: body),
+  );
+  notification.onclick = ((web.Event _) {
+    web.window.focus();
     _tapController.add(payload);
     notification.close();
-  });
+  }).toJS;
   return true;
 }

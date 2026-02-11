@@ -14,7 +14,6 @@ import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/file_node.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
-import 'package:codewalk/domain/entities/worktree.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
 import 'package:codewalk/domain/usecases/delete_chat_session.dart';
@@ -340,7 +339,7 @@ void main() {
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
   });
 
-  testWidgets('closed workspace shows delete action and removes entry', (
+  testWidgets('closed project can be archived from closed list', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1000, 900));
@@ -369,14 +368,6 @@ void main() {
           createdAt: DateTime.fromMillisecondsSinceEpoch(1),
         ),
       ],
-      worktrees: const <Worktree>[
-        Worktree(
-          id: 'wt_feature_a',
-          name: 'Feature A',
-          directory: '/repo/main/feature-a',
-          projectId: 'proj_main',
-        ),
-      ],
     );
     final provider = _buildChatProvider(
       localDataSource: localDataSource,
@@ -392,16 +383,11 @@ void main() {
 
     expect(find.text('Workspace Feature'), findsOneWidget);
     await tester.tap(
-      find.byTooltip('Delete closed workspace Workspace Feature'),
+      find.byTooltip('Archive closed project Workspace Feature'),
     );
     await tester.pumpAndSettle();
 
-    expect(
-      provider.projectProvider.projects.any(
-        (project) => project.path == '/repo/main/feature-a',
-      ),
-      isFalse,
-    );
+    expect(provider.projectProvider.archivedProjectIds, contains('proj_ws'));
     expect(find.text('Workspace Feature'), findsNothing);
   });
 

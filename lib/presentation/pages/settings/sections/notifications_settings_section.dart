@@ -163,7 +163,7 @@ class _NotificationsSettingsSectionState
                 SizedBox(
                   width: 180,
                   child: DropdownButtonFormField<SoundOption>(
-                    value: selectedSound,
+                    initialValue: selectedSound,
                     items: SoundOption.values
                         .where((option) => option != SoundOption.off)
                         .map(

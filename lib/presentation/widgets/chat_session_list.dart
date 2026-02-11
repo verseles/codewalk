@@ -115,7 +115,9 @@ class ChatSessionList extends StatelessWidget {
                       session.summary!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isSelected
-                            ? colorScheme.onSecondaryContainer.withOpacity(0.8)
+                            ? colorScheme.onSecondaryContainer.withValues(
+                                alpha: 0.8,
+                              )
                             : colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 2,
@@ -130,8 +132,8 @@ class ChatSessionList extends StatelessWidget {
                         _formatTime(session.time),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: isSelected
-                              ? colorScheme.onSecondaryContainer.withOpacity(
-                                  0.7,
+                              ? colorScheme.onSecondaryContainer.withValues(
+                                  alpha: 0.7,
                                 )
                               : colorScheme.onSurfaceVariant,
                         ),
@@ -141,8 +143,8 @@ class ChatSessionList extends StatelessWidget {
                           Icons.share,
                           size: 12,
                           color: isSelected
-                              ? colorScheme.onSecondaryContainer.withOpacity(
-                                  0.7,
+                              ? colorScheme.onSecondaryContainer.withValues(
+                                  alpha: 0.7,
                                 )
                               : colorScheme.onSurfaceVariant,
                         ),
@@ -151,8 +153,8 @@ class ChatSessionList extends StatelessWidget {
                           Icons.archive,
                           size: 12,
                           color: isSelected
-                              ? colorScheme.onSecondaryContainer.withOpacity(
-                                  0.7,
+                              ? colorScheme.onSecondaryContainer.withValues(
+                                  alpha: 0.7,
                                 )
                               : colorScheme.onSurfaceVariant,
                         ),

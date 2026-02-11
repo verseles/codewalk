@@ -908,11 +908,12 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 
 **Backlog UX batch (completed):**
 - Desktop composer shortcut behavior now sends on `Enter` and inserts newline on `Shift+Enter` without breaking mention/slash popover keyboard flows.
+- On mobile, composer submit now uses keyboard `send` action and automatically hides keyboard focus after a successful send to maximize visible message area.
 - Desktop sidebars (`Conversations`, `Files`, `Utility`) now support user-driven collapse/restore with persisted visibility via `ExperienceSettings.desktopPanes`.
 - Composer input remains editable while assistant response is in progress; send stays blocked until completion.
 - Send action now switches to `Stop` while response is active and triggers `/session/{id}/abort` through `AbortChatSession` use case wired into `ChatProvider`.
 - Stop/abort now suppresses expected cancelation errors from realtime/session stream, preventing full-screen `Retry` fallback when the user intentionally interrupted the response.
 - Post-stop send-path is now stable: provider keeps message list mutable after abort completion and ignores stale send-stream callbacks via generation guards, preventing transient `Failed to start message send` / `retry` fallback when sending immediately after `Stop`.
-- Project context dialog now exposes delete action for closed workspace entries (when a matching `worktree` exists), reducing reopen/delete friction.
-- Workspace deletion now also removes matching closed project context entries from local provider state, preventing stale/ghost contexts after delete.
+- Project context dialog now exposes archive action for closed project entries (local curation), independent of `worktree` APIs.
+- `ProjectProvider` now persists archived closed-project IDs per server and filters them from the "Closed projects" section while keeping normal reopen/switch flows for active contexts.
 - Expanded automated coverage for desktop shortcut send/newline behavior, persisted sidebar visibility toggles, stop/abort success path, and stop failure snackbar fallback.

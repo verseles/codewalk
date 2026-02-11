@@ -37,6 +37,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? currentSessionId;
   String? currentProjectId;
   String? openProjectIdsJson;
+  String? archivedProjectIdsJson;
   String? cachedSessions;
   int? cachedSessionsUpdatedAt;
   String? lastSessionSnapshot;
@@ -78,6 +79,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     currentSessionId = null;
     currentProjectId = null;
     openProjectIdsJson = null;
+    archivedProjectIdsJson = null;
     cachedSessions = null;
     cachedSessionsUpdatedAt = null;
     lastSessionSnapshot = null;
@@ -191,6 +193,12 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   Future<String?> getOpenProjectIdsJson({String? serverId}) async {
     if (serverId == null) return openProjectIdsJson;
     return scopedStrings[_key('open_project_ids', serverId: serverId)];
+  }
+
+  @override
+  Future<String?> getArchivedProjectIdsJson({String? serverId}) async {
+    if (serverId == null) return archivedProjectIdsJson;
+    return scopedStrings[_key('archived_project_ids', serverId: serverId)];
   }
 
   @override
@@ -445,6 +453,19 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
       return;
     }
     scopedStrings[_key('open_project_ids', serverId: serverId)] =
+        projectIdsJson;
+  }
+
+  @override
+  Future<void> saveArchivedProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  }) async {
+    if (serverId == null) {
+      archivedProjectIdsJson = projectIdsJson;
+      return;
+    }
+    scopedStrings[_key('archived_project_ids', serverId: serverId)] =
         projectIdsJson;
   }
 

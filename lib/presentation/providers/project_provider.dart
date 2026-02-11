@@ -27,6 +27,7 @@ class ProjectProvider extends ChangeNotifier {
   List<Project> _projects = <Project>[];
   Project? _currentProject;
   List<String> _openProjectIds = <String>[];
+  List<String> _archivedProjectIds = <String>[];
   List<Worktree> _worktrees = <Worktree>[];
   bool _worktreeSupported = false;
   String _activeServerId = 'legacy';
@@ -39,6 +40,8 @@ class ProjectProvider extends ChangeNotifier {
   String get currentProjectId => _currentProject?.id ?? 'default';
   String get activeServerId => _activeServerId;
   List<String> get openProjectIds => List<String>.unmodifiable(_openProjectIds);
+  List<String> get archivedProjectIds =>
+      List<String>.unmodifiable(_archivedProjectIds);
   List<Worktree> get worktrees => List<Worktree>.unmodifiable(_worktrees);
   bool get worktreeSupported => _worktreeSupported;
 
@@ -64,8 +67,10 @@ class ProjectProvider extends ChangeNotifier {
 
   List<Project> get closedProjects {
     final openSet = _openProjectIds.toSet();
+    final archivedSet = _archivedProjectIds.toSet();
     return _projects
         .where((item) => !openSet.contains(item.id))
+        .where((item) => !archivedSet.contains(item.id))
         .toList(growable: false);
   }
 
@@ -109,6 +114,7 @@ class ProjectProvider extends ChangeNotifier {
         return;
       }
 
+      await _restoreArchivedProjects();
       await _restoreOpenProjects();
       _ensureOpenProject(_currentProject!.id);
       await _persistProjectState();
@@ -261,6 +267,25 @@ class ProjectProvider extends ChangeNotifier {
       await loadWorktrees(silent: true);
     }
 
+    await _persistProjectState();
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> archiveClosedProject(String projectId) async {
+    if (_openProjectIds.contains(projectId)) {
+      _setError('Only closed projects can be archived');
+      return false;
+    }
+    final exists = _projects.any((item) => item.id == projectId);
+    if (!exists) {
+      _setError('Failed to archive project: project not found');
+      return false;
+    }
+    if (_archivedProjectIds.contains(projectId)) {
+      return false;
+    }
+    _archivedProjectIds = <String>[..._archivedProjectIds, projectId];
     await _persistProjectState();
     notifyListeners();
     return true;
@@ -671,6 +696,12 @@ class ProjectProvider extends ChangeNotifier {
       },
       (projects) {
         _projects = _sanitizeProjects(projects);
+        _openProjectIds = _openProjectIds
+            .where((id) => _projects.any((item) => item.id == id))
+            .toList(growable: false);
+        _archivedProjectIds = _archivedProjectIds
+            .where((id) => _projects.any((item) => item.id == id))
+            .toList(growable: false);
         if (_currentProject != null) {
           final refreshed = _projects
               .where((item) => item.id == _currentProject!.id)
@@ -723,11 +754,46 @@ class ProjectProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> _restoreArchivedProjects() async {
+    _archivedProjectIds = <String>[];
+    final raw = await _localDataSource.getArchivedProjectIdsJson(
+      serverId: _activeServerId,
+    );
+    if (raw == null || raw.trim().isEmpty) {
+      return;
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) {
+        _archivedProjectIds = decoded
+            .whereType<String>()
+            .where((id) => _projects.any((project) => project.id == id))
+            .toList(growable: false);
+      }
+    } catch (e, stackTrace) {
+      AppLogger.warn(
+        'Failed to restore archived project contexts',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   void _ensureOpenProject(String projectId) {
+    _unarchiveProject(projectId);
     if (_openProjectIds.contains(projectId)) {
       return;
     }
     _openProjectIds = <String>[..._openProjectIds, projectId];
+  }
+
+  void _unarchiveProject(String projectId) {
+    if (!_archivedProjectIds.contains(projectId)) {
+      return;
+    }
+    _archivedProjectIds = _archivedProjectIds
+        .where((id) => id != projectId)
+        .toList(growable: false);
   }
 
   Future<void> _persistProjectState() async {
@@ -741,6 +807,10 @@ class ProjectProvider extends ChangeNotifier {
 
     await _localDataSource.saveOpenProjectIdsJson(
       jsonEncode(_openProjectIds),
+      serverId: _activeServerId,
+    );
+    await _localDataSource.saveArchivedProjectIdsJson(
+      jsonEncode(_archivedProjectIds),
       serverId: _activeServerId,
     );
   }

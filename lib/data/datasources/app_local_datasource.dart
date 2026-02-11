@@ -147,6 +147,15 @@ abstract class AppLocalDataSource {
   });
 
   /// Technical comment translated to English.
+  Future<String?> getArchivedProjectIdsJson({String? serverId});
+
+  /// Technical comment translated to English.
+  Future<void> saveArchivedProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  });
+
+  /// Technical comment translated to English.
   Future<String?> getCachedSessions({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
@@ -581,6 +590,24 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }) async {
     await sharedPreferences.setString(
       _scopedKey(AppConstants.openProjectIdsKey, serverId: serverId),
+      projectIdsJson,
+    );
+  }
+
+  @override
+  Future<String?> getArchivedProjectIdsJson({String? serverId}) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.archivedProjectIdsKey, serverId: serverId),
+    );
+  }
+
+  @override
+  Future<void> saveArchivedProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(AppConstants.archivedProjectIdsKey, serverId: serverId),
       projectIdsJson,
     );
   }

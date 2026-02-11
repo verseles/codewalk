@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Row(
           children: [
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
                   BoxShadow(
                     color: Theme.of(
                       context,
-                    ).colorScheme.primary.withOpacity(0.3),
+                    ).colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -99,19 +99,19 @@ class _HomePageState extends State<HomePage> {
                         color: appProvider.isConnected
                             ? Theme.of(
                                 context,
-                              ).colorScheme.tertiary.withOpacity(0.2)
+                              ).colorScheme.tertiary.withValues(alpha: 0.2)
                             : Theme.of(
                                 context,
-                              ).colorScheme.error.withOpacity(0.2),
+                              ).colorScheme.error.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: appProvider.isConnected
                               ? Theme.of(
                                   context,
-                                ).colorScheme.tertiary.withOpacity(0.3)
+                                ).colorScheme.tertiary.withValues(alpha: 0.3)
                               : Theme.of(
                                   context,
-                                ).colorScheme.error.withOpacity(0.3),
+                                ).colorScheme.error.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Icon(
@@ -147,14 +147,13 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceVariant.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: Theme.of(
                         context,
-                      ).colorScheme.outline.withOpacity(0.2),
+                      ).colorScheme.outline.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Icon(
@@ -188,8 +187,8 @@ class _HomePageState extends State<HomePage> {
           center: Alignment.topCenter,
           radius: 1.5,
           colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.05),
-            Theme.of(context).colorScheme.background,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+            Theme.of(context).colorScheme.surface,
           ],
         ),
       ),
@@ -205,13 +204,19 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Theme.of(context).colorScheme.error.withOpacity(0.1),
-                      Theme.of(context).colorScheme.error.withOpacity(0.05),
+                      Theme.of(
+                        context,
+                      ).colorScheme.error.withValues(alpha: 0.1),
+                      Theme.of(
+                        context,
+                      ).colorScheme.error.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(40),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.error.withValues(alpha: 0.2),
                     width: 2,
                   ),
                 ),
@@ -235,10 +240,10 @@ class _HomePageState extends State<HomePage> {
                     colors: [
                       Theme.of(
                         context,
-                      ).colorScheme.onBackground.withOpacity(0.1),
+                      ).colorScheme.onSurface.withValues(alpha: 0.1),
                       Theme.of(
                         context,
-                      ).colorScheme.onBackground.withOpacity(0.05),
+                      ).colorScheme.onSurface.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -281,7 +286,7 @@ class _HomePageState extends State<HomePage> {
                     BoxShadow(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primary.withOpacity(0.3),
+                      ).colorScheme.primary.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -333,8 +338,8 @@ class _HomePageState extends State<HomePage> {
           center: Alignment.topCenter,
           radius: 1.5,
           colors: [
-            Theme.of(context).colorScheme.tertiary.withOpacity(0.05),
-            Theme.of(context).colorScheme.background,
+            Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.05),
+            Theme.of(context).colorScheme.surface,
           ],
         ),
       ),
@@ -349,8 +354,12 @@ class _HomePageState extends State<HomePage> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
-                    Theme.of(context).colorScheme.tertiary.withOpacity(0.05),
+                    Theme.of(
+                      context,
+                    ).colorScheme.tertiary.withValues(alpha: 0.1),
+                    Theme.of(
+                      context,
+                    ).colorScheme.tertiary.withValues(alpha: 0.05),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -359,13 +368,13 @@ class _HomePageState extends State<HomePage> {
                 border: Border.all(
                   color: Theme.of(
                     context,
-                  ).colorScheme.tertiary.withOpacity(0.2),
+                  ).colorScheme.tertiary.withValues(alpha: 0.2),
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: Theme.of(
                       context,
-                    ).colorScheme.tertiary.withOpacity(0.1),
+                    ).colorScheme.tertiary.withValues(alpha: 0.1),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -384,7 +393,7 @@ class _HomePageState extends State<HomePage> {
                               Theme.of(context).colorScheme.tertiary,
                               Theme.of(
                                 context,
-                              ).colorScheme.tertiary.withOpacity(0.8),
+                              ).colorScheme.tertiary.withValues(alpha: 0.8),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -392,7 +401,7 @@ class _HomePageState extends State<HomePage> {
                             BoxShadow(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.tertiary.withOpacity(0.3),
+                              ).colorScheme.tertiary.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -426,9 +435,10 @@ class _HomePageState extends State<HomePage> {
                         return Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceVariant.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
@@ -521,7 +531,9 @@ class _HomePageState extends State<HomePage> {
                     subtitle: 'Browse and edit files',
                     gradientColors: [
                       Theme.of(context).colorScheme.secondary,
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.7),
+                      Theme.of(
+                        context,
+                      ).colorScheme.secondary.withValues(alpha: 0.7),
                     ],
                     onTap: () {
                       _showComingSoon(context);
@@ -534,7 +546,9 @@ class _HomePageState extends State<HomePage> {
                     subtitle: 'View chat history',
                     gradientColors: [
                       Theme.of(context).colorScheme.tertiary,
-                      Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
+                      Theme.of(
+                        context,
+                      ).colorScheme.tertiary.withValues(alpha: 0.7),
                     ],
                     onTap: () {
                       _showComingSoon(context);
@@ -546,8 +560,12 @@ class _HomePageState extends State<HomePage> {
                     title: 'AI Agents',
                     subtitle: 'Select AI agents',
                     gradientColors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+                      Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.8),
+                      Theme.of(
+                        context,
+                      ).colorScheme.secondary.withValues(alpha: 0.8),
                     ],
                     onTap: () {
                       _showComingSoon(context);
@@ -575,19 +593,23 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-            Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.1),
+            Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -615,7 +637,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: gradientColors.first.withOpacity(0.3),
+                        color: gradientColors.first.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
