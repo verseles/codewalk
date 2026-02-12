@@ -8,6 +8,7 @@ use Exception;
 use JsonException;
 use RuntimeException;
 use Symfony\Component\Process\Process;
+use Verseles\Flyclone\Exception\SyntaxErrorException;
 use Verseles\Flyclone\Providers\LocalProvider;
 use Verseles\Flyclone\Providers\Provider;
 
@@ -1040,13 +1041,28 @@ class Rclone
      * @param array         $flags       Additional flags.
      * @param callable|null $onProgress  Optional progress callback.
      *
-     * @return bool True if check succeeds.
+     * @return bool True if check succeeds (files match), false if differences found.
+     * @throws Exception\SyntaxErrorException If a syntax or usage error occurs.
      */
     public function check(string $source_path, string $dest_path, array $flags = [], ?callable $onProgress = null): bool
     {
-        $this->directTwinRun('check', $source_path, $dest_path, $flags, $onProgress);
+        try {
+            $this->directTwinRun('check', $source_path, $dest_path, $flags, $onProgress);
 
-        return true;
+            return true;
+        } catch (SyntaxErrorException $e) {
+            // Exit code 1 can mean differences found or syntax error.
+            // We check the output to distinguish.
+            $message = $e->getMessage();
+
+            // If it looks like a syntax error ("Error: ...") re-throw
+            if (str_contains($message, 'Error: ')) {
+                throw $e;
+            }
+
+            // Otherwise assume differences found
+            return false;
+        }
     }
 
     /**
@@ -1341,5 +1357,18 @@ class Rclone
     public function setRightSide(Provider $right_side): void
     {
         $this->right_side = $right_side;
+    }
+
+    /**
+     * Set the ProcessManager instance to use.
+     * Useful for testing or custom process management.
+     *
+     * @param ProcessManager $processManager The ProcessManager instance.
+     */
+    public function setProcessManager(ProcessManager $processManager): self
+    {
+        $this->processManager = $processManager;
+
+        return $this;
     }
 }
