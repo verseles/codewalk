@@ -7,13 +7,15 @@ class Agent extends Equatable {
     required this.mode,
     required this.hidden,
     required this.native,
+    this.color,
   });
 
   final String name;
   final String mode;
   final bool hidden;
   final bool native;
+  final String? color;
 
   @override
-  List<Object?> get props => [name, mode, hidden, native];
+  List<Object?> get props => [name, mode, hidden, native, color];
 }
