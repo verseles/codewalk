@@ -968,7 +968,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                           chatProvider: chatProvider,
                           maxContentWidth: mainContentWidth,
                           horizontalPadding: 12,
-                          verticalPadding: 8,
+                          verticalPadding: 2,
                         ),
                       ),
                       if (showDesktopUtilityPane) ...[
@@ -1025,8 +1025,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }) {
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
-      toolbarHeight: isMobile ? 50 : 48,
-      leadingWidth: isMobile ? 46 : null,
+      toolbarHeight: isMobile ? 48 : 46,
+      leadingWidth: isMobile ? 44 : null,
       leading: isMobile
           ? Builder(
               builder: (leadingContext) {
@@ -4168,7 +4168,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                         'chat_compact_session_header',
                       ),
                       width: double.infinity,
-                      margin: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+                      margin: const EdgeInsets.fromLTRB(8, 2, 8, 2),
                       child: Card(
                         color: Theme.of(
                           context,
@@ -4176,7 +4176,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
-                            vertical: 8,
+                            vertical: 6,
                           ),
                           child: Row(
                             children: [
@@ -4289,7 +4289,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     final variants = chatProvider.availableVariants;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 2),
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -5356,7 +5356,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return ListView.builder(
       key: const ValueKey<String>('chat_message_list'),
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       itemCount: chatProvider.messages.length + (progressStage == null ? 0 : 1),
       itemBuilder: (context, index) {
         if (index < chatProvider.messages.length) {

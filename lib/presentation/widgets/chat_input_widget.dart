@@ -18,6 +18,27 @@ enum ChatComposerSuggestionType { file, agent }
 
 enum ChatComposerPopoverType { none, mention, slash }
 
+class ChatInputController {
+  _ChatInputWidgetState? _state;
+
+  bool get canOpenAttachmentOptions =>
+      _state?._canOpenAttachmentOptions ?? false;
+
+  void openAttachmentOptions() {
+    _state?._openAttachmentOptionsFromExternal();
+  }
+
+  void _attach(_ChatInputWidgetState state) {
+    _state = state;
+  }
+
+  void _detach(_ChatInputWidgetState state) {
+    if (identical(_state, state)) {
+      _state = null;
+    }
+  }
+}
+
 class ChatInputSubmission {
   const ChatInputSubmission({
     required this.text,
@@ -88,8 +109,10 @@ class ChatInputWidget extends StatefulWidget {
     this.onStopRequested,
     this.focusNode,
     this.showAttachmentButton = false,
+    this.showInlineAttachmentButton = true,
     this.allowImageAttachment = true,
     this.allowPdfAttachment = true,
+    this.controller,
   });
 
   final FutureOr<void> Function(ChatInputSubmission submission) onSendMessage;
@@ -106,8 +129,10 @@ class ChatInputWidget extends StatefulWidget {
   final FutureOr<void> Function()? onStopRequested;
   final FocusNode? focusNode;
   final bool showAttachmentButton;
+  final bool showInlineAttachmentButton;
   final bool allowImageAttachment;
   final bool allowPdfAttachment;
+  final ChatInputController? controller;
 
   @override
   State<ChatInputWidget> createState() => _ChatInputWidgetState();
@@ -116,6 +141,8 @@ class ChatInputWidget extends StatefulWidget {
 class _ChatInputWidgetState extends State<ChatInputWidget> {
   static const double _inputRowHeight = 52;
   static const double _popoverInputHeightMultiplier = 3;
+  static const int _composerMaxLines = 6;
+  static const double _composerActionButtonSize = 46;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _internalFocusNode = FocusNode();
   final List<FileInputPart> _attachments = <FileInputPart>[];
@@ -142,6 +169,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   Timer? _sendHoldTimer;
   Timer? _suggestionDebounce;
   DateTime? _lastSecondarySendActionAt;
+  bool _holdSendTriggered = false;
   int? _historyIndexFromNewest;
   TextEditingValue? _historyDraftValue;
   bool _isApplyingHistoryValue = false;
@@ -161,11 +189,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   @override
   void initState() {
     super.initState();
+    widget.controller?._attach(this);
     unawaited(_initializeSpeech());
   }
 
   @override
   void dispose() {
+    widget.controller?._detach(this);
     _sendHoldTimer?.cancel();
     _suggestionDebounce?.cancel();
     unawaited(_speechToText.stop());
@@ -177,6 +207,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   @override
   void didUpdateWidget(covariant ChatInputWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller?._detach(this);
+      widget.controller?._attach(this);
+    }
     if (widget.prefilledTextVersion != oldWidget.prefilledTextVersion) {
       final prefilledText = widget.prefilledText?.trim();
       if (prefilledText != null && prefilledText.isNotEmpty) {
@@ -768,6 +802,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         !_isSending &&
         !widget.isResponding;
     final showPopover = _popoverType != ChatComposerPopoverType.none;
+    final inputBubbleColor = _mode == ChatComposerMode.shell
+        ? colorScheme.tertiaryContainer.withValues(alpha: 0.5)
+        : colorScheme.surface;
+    final inputBubbleBorderColor = _mode == ChatComposerMode.shell
+        ? colorScheme.tertiary.withValues(alpha: 0.25)
+        : colorScheme.outlineVariant.withValues(alpha: 0.6);
 
     return Container(
       decoration: BoxDecoration(
@@ -786,7 +826,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             if (_mode == ChatComposerMode.shell)
               Padding(
                 key: const ValueKey<String>('composer_shell_mode_row'),
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Chip(
@@ -808,7 +848,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             if (mentionTokens.isNotEmpty)
               Padding(
                 key: const ValueKey<String>('composer_mention_tokens_row'),
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Wrap(
@@ -852,7 +892,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             if (showAttachments)
               Padding(
                 key: const ValueKey<String>('composer_attachments_row'),
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -888,10 +928,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
               ),
             Padding(
               key: const ValueKey<String>('composer_input_row'),
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (widget.showAttachmentButton &&
+                      widget.showInlineAttachmentButton &&
                       _mode == ChatComposerMode.normal) ...[
                     IconButton.filledTonal(
                       onPressed: widget.enabled ? _showAttachmentOptions : null,
@@ -901,63 +943,104 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     const SizedBox(width: 8),
                   ],
                   Expanded(
-                    child: Focus(
-                      onKeyEvent: _handleInputKeyEvent,
-                      child: TextField(
-                        controller: _controller,
-                        focusNode: _effectiveFocusNode,
-                        enabled: widget.enabled,
-                        maxLines: null,
-                        textInputAction: _isDesktopPlatform
-                            ? TextInputAction.newline
-                            : TextInputAction.send,
-                        keyboardType: TextInputType.multiline,
-                        onChanged: _handleTextChanged,
-                        onSubmitted: (_) => unawaited(_handleSendMessage()),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: InputDecoration(
-                          hintText: _composerHintText(),
-                          filled: true,
-                          fillColor: _mode == ChatComposerMode.shell
-                              ? colorScheme.tertiaryContainer
-                              : colorScheme.surfaceContainerHighest,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(26),
-                            borderSide: BorderSide.none,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: _composerActionButtonSize,
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: inputBubbleColor,
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(
+                            color: inputBubbleBorderColor,
+                            width: 1,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(26),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 14,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 12,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Focus(
+                          onKeyEvent: _handleInputKeyEvent,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _controller,
+                                  focusNode: _effectiveFocusNode,
+                                  enabled: widget.enabled,
+                                  minLines: 1,
+                                  maxLines: _composerMaxLines,
+                                  textAlignVertical: TextAlignVertical.center,
+                                  textInputAction: _isDesktopPlatform
+                                      ? TextInputAction.newline
+                                      : TextInputAction.send,
+                                  keyboardType: TextInputType.multiline,
+                                  onChanged: _handleTextChanged,
+                                  onSubmitted: (_) =>
+                                      unawaited(_handleSendMessage()),
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  decoration: InputDecoration(
+                                    hintText: _composerHintText(),
+                                    isDense: true,
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    contentPadding: const EdgeInsets.fromLTRB(
+                                      18,
+                                      9,
+                                      10,
+                                      9,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: IconButton.filledTonal(
+                                  onPressed:
+                                      widget.enabled &&
+                                          !_isSending &&
+                                          !widget.isResponding
+                                      ? () => unawaited(_toggleVoiceInput())
+                                      : null,
+                                  tooltip: _isListening
+                                      ? 'Stop voice input'
+                                      : 'Start voice input',
+                                  style: IconButton.styleFrom(
+                                    minimumSize: const Size(40, 40),
+                                    maximumSize: const Size(40, 40),
+                                    padding: EdgeInsets.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    visualDensity: VisualDensity.compact,
+                                    backgroundColor:
+                                        microphoneButtonBackgroundColor(
+                                          isListening: _isListening,
+                                          colorScheme: colorScheme,
+                                        ),
+                                    foregroundColor:
+                                        microphoneButtonForegroundColor(
+                                          isListening: _isListening,
+                                          colorScheme: colorScheme,
+                                        ),
+                                  ),
+                                  icon: Icon(
+                                    _isListening
+                                        ? Icons.mic_rounded
+                                        : Icons.mic_none_rounded,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filledTonal(
-                    onPressed:
-                        widget.enabled && !_isSending && !widget.isResponding
-                        ? () => unawaited(_toggleVoiceInput())
-                        : null,
-                    tooltip: _isListening
-                        ? 'Stop voice input'
-                        : 'Start voice input',
-                    style: IconButton.styleFrom(
-                      backgroundColor: microphoneButtonBackgroundColor(
-                        isListening: _isListening,
-                        colorScheme: colorScheme,
-                      ),
-                      foregroundColor: microphoneButtonForegroundColor(
-                        isListening: _isListening,
-                        colorScheme: colorScheme,
-                      ),
-                    ),
-                    icon: Icon(
-                      _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -977,11 +1060,26 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                 : null)
                           : (canSend ? _handleSendButtonTap : null),
                       style: FilledButton.styleFrom(
-                        minimumSize: const Size(52, 52),
+                        minimumSize: const Size(
+                          _composerActionButtonSize,
+                          _composerActionButtonSize,
+                        ),
+                        shape: const CircleBorder(),
                         padding: EdgeInsets.zero,
                         backgroundColor: widget.isResponding
                             ? const Color(0xFF424242)
-                            : null,
+                            : (canSend
+                                  ? colorScheme.primary
+                                  : colorScheme.surfaceContainerHighest),
+                        foregroundColor: widget.isResponding
+                            ? colorScheme.error
+                            : (canSend
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurfaceVariant),
+                        elevation: canSend ? 1.5 : 0,
+                        shadowColor: colorScheme.primary.withValues(alpha: 0.3),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
                       ),
                       child: _isSending
                           ? const SizedBox(
@@ -992,29 +1090,32 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                           : widget.isResponding
                           ? Icon(
                               Icons.stop_rounded,
-                              size: 26,
+                              size: 24,
                               color: colorScheme.error,
                             )
                           : SizedBox(
-                              width: 52,
-                              height: 52,
+                              width: _composerActionButtonSize,
+                              height: _composerActionButtonSize,
                               child: Stack(
                                 fit: StackFit.expand,
                                 children: [
                                   const Align(
                                     alignment: Alignment.center,
-                                    child: Icon(Icons.send_rounded, size: 26),
+                                    child: Icon(Icons.send_rounded, size: 24),
                                   ),
                                   Align(
                                     alignment: Alignment.bottomRight,
                                     child: Padding(
                                       padding: const EdgeInsets.only(
-                                        right: 4,
-                                        bottom: 4,
+                                        right: 3,
+                                        bottom: 3,
                                       ),
                                       child: DecoratedBox(
                                         decoration: BoxDecoration(
-                                          color: colorScheme.primaryContainer,
+                                          color: canSend
+                                              ? colorScheme.onPrimary
+                                                    .withValues(alpha: 0.16)
+                                              : colorScheme.primaryContainer,
                                           borderRadius: BorderRadius.circular(
                                             99,
                                           ),
@@ -1023,9 +1124,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                           padding: const EdgeInsets.all(1),
                                           child: Icon(
                                             Icons.keyboard_return_rounded,
-                                            size: 10,
-                                            color:
-                                                colorScheme.onPrimaryContainer,
+                                            size: 9,
+                                            color: canSend
+                                                ? colorScheme.onPrimary
+                                                : colorScheme
+                                                      .onPrimaryContainer,
                                           ),
                                         ),
                                       ),
@@ -1200,6 +1303,19 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     );
   }
 
+  bool get _canOpenAttachmentOptions =>
+      widget.showAttachmentButton &&
+      widget.enabled &&
+      _mode == ChatComposerMode.normal &&
+      (widget.allowImageAttachment || widget.allowPdfAttachment);
+
+  void _openAttachmentOptionsFromExternal() {
+    if (!_canOpenAttachmentOptions) {
+      return;
+    }
+    _showAttachmentOptions();
+  }
+
   Future<void> _pickImages() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -1318,6 +1434,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _handleSendButtonTap() {
+    if (_holdSendTriggered) {
+      _holdSendTriggered = false;
+      return;
+    }
     final lastSecondaryAction = _lastSecondarySendActionAt;
     if (lastSecondaryAction != null &&
         DateTime.now().difference(lastSecondaryAction) <
@@ -1331,11 +1451,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     if (!canSend || _isSending) {
       return;
     }
+    _holdSendTriggered = false;
     _sendHoldTimer?.cancel();
     _sendHoldTimer = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) {
         return;
       }
+      _holdSendTriggered = true;
       _lastSecondarySendActionAt = DateTime.now();
       _insertComposerNewline();
     });
