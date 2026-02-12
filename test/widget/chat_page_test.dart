@@ -86,7 +86,7 @@ void main() {
       expect(find.text('Desktop Shortcuts'), findsNothing);
     });
 
-    testWidgets('shows hamburger alert badge when server status is not green', (
+    testWidgets('delays hamburger alert badge during initial server issues', (
       WidgetTester tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(700, 900));
@@ -113,12 +113,21 @@ void main() {
       await tester.pumpWidget(_testApp(provider, appProvider));
       await tester.pumpAndSettle();
 
-      appProvider.setHealthForTesting('srv_test', ServerHealthStatus.unhealthy);
+      appProvider.reset();
       await tester.pump();
-
+      expect(
+        find.byKey(const ValueKey<String>('appbar_drawer_button')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const ValueKey<String>('appbar_drawer_alert_badge')),
-        findsOneWidget,
+        findsNothing,
+      );
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey<String>('appbar_drawer_alert_badge')),
+        findsNothing,
       );
     });
 

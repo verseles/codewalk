@@ -93,6 +93,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   static const double _largeDesktopUtilityPaneWidth = 280;
   static const double _nearBottomThreshold = 200;
   static const String _rootTreeCacheKey = '__root__';
+  static const Duration _serverAlertGracePeriod = Duration(seconds: 10);
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
@@ -119,6 +120,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final Map<String, _FileExplorerContextState> _fileContextStates =
       <String, _FileExplorerContextState>{};
   final Map<String, String> _fileDiffSignaturesByContext = <String, String>{};
+  DateTime? _serverAlertIssueStartedAt;
+  Timer? _serverAlertRevealTimer;
 
   @override
   void initState() {
@@ -168,6 +171,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     unawaited(_chatProvider?.setForegroundActive(false));
     _appProvider?.removeListener(_handleAppProviderChange);
     _notificationTapSubscription?.cancel();
+    _serverAlertRevealTimer?.cancel();
     _scrollController.removeListener(_handleScrollChanged);
     WidgetsBinding.instance.removeObserver(this);
 
@@ -1036,22 +1040,38 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       appProvider: appProvider,
                     );
                     final menuIcon = const Icon(Icons.menu);
+                    final alertIcon = SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Positioned.fill(child: Icon(Icons.menu)),
+                          Positioned(
+                            top: -1,
+                            right: -1,
+                            child: Container(
+                              key: const ValueKey<String>(
+                                'appbar_drawer_alert_badge',
+                              ),
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: alertColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                     return IconButton(
                       key: const ValueKey<String>('appbar_drawer_button'),
                       tooltip: MaterialLocalizations.of(
                         leadingContext,
                       ).openAppDrawerTooltip,
                       onPressed: () => Scaffold.of(leadingContext).openDrawer(),
-                      icon: hasAlert
-                          ? Badge(
-                              key: const ValueKey<String>(
-                                'appbar_drawer_alert_badge',
-                              ),
-                              backgroundColor: alertColor,
-                              smallSize: 8,
-                              child: menuIcon,
-                            )
-                          : menuIcon,
+                      icon: hasAlert ? alertIcon : menuIcon,
                     );
                   },
                 );
@@ -1316,7 +1336,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  bool _hasServerStatusAlert({
+  bool _hasImmediateServerStatusAlert({
     required ChatProvider chatProvider,
     required AppProvider appProvider,
   }) {
@@ -1334,6 +1354,49 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return true;
     }
     return chatProvider.isInDegradedMode;
+  }
+
+  void _resetServerAlertGraceState() {
+    _serverAlertIssueStartedAt = null;
+    _serverAlertRevealTimer?.cancel();
+    _serverAlertRevealTimer = null;
+  }
+
+  bool _hasServerStatusAlert({
+    required ChatProvider chatProvider,
+    required AppProvider appProvider,
+  }) {
+    final immediateAlert = _hasImmediateServerStatusAlert(
+      chatProvider: chatProvider,
+      appProvider: appProvider,
+    );
+    if (!immediateAlert) {
+      _resetServerAlertGraceState();
+      return false;
+    }
+
+    final now = DateTime.now();
+    _serverAlertIssueStartedAt ??= now;
+
+    final startedAt = _serverAlertIssueStartedAt ?? now;
+    final elapsed = now.difference(startedAt);
+    if (elapsed >= _serverAlertGracePeriod) {
+      _serverAlertRevealTimer?.cancel();
+      _serverAlertRevealTimer = null;
+      return true;
+    }
+
+    final remaining = _serverAlertGracePeriod - elapsed;
+    if (!(_serverAlertRevealTimer?.isActive ?? false)) {
+      _serverAlertRevealTimer = Timer(remaining, () {
+        _serverAlertRevealTimer = null;
+        if (!mounted) {
+          return;
+        }
+        setState(() {});
+      });
+    }
+    return false;
   }
 
   Widget _buildServerStatusControl({required bool closeOnSelect}) {
