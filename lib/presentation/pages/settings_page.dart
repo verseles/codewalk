@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/constants/app_constants.dart';
+import 'settings/sections/logs_settings_section.dart';
 import 'settings/sections/notifications_settings_section.dart';
 import 'settings/sections/servers_settings_section.dart';
 import 'settings/sections/shortcuts_settings_section.dart';
@@ -41,6 +42,13 @@ class _SettingsPageState extends State<SettingsPage> {
       description: 'Per-category notify and sound controls',
       icon: Icons.notifications_active_outlined,
       builder: (_) => const NotificationsSettingsSection(),
+    ),
+    _SettingsSection(
+      id: 'logs',
+      title: 'Logs',
+      description: 'Runtime diagnostics and troubleshooting data',
+      icon: Icons.receipt_long_rounded,
+      builder: (_) => const LogsSettingsSection(),
     ),
     _SettingsSection(
       id: 'shortcuts',

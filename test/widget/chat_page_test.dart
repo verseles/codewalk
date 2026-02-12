@@ -9,6 +9,7 @@ import 'package:provider/provider.dart' hide Provider;
 import 'package:simple_icons/simple_icons.dart';
 
 import 'package:codewalk/core/errors/failures.dart';
+import 'package:codewalk/domain/entities/agent.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
@@ -83,6 +84,42 @@ void main() {
 
       expect(find.byIcon(Icons.menu), findsOneWidget);
       expect(find.text('Desktop Shortcuts'), findsNothing);
+    });
+
+    testWidgets('shows hamburger alert badge when server status is not green', (
+      WidgetTester tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(700, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test'
+        ..defaultServerId = 'srv_test'
+        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 'srv_test',
+            'url': 'http://127.0.0.1:4096',
+            'label': 'Test Server',
+            'basicAuthEnabled': false,
+            'basicAuthUsername': '',
+            'basicAuthPassword': '',
+            'createdAt': 0,
+            'updatedAt': 0,
+          },
+        ]);
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      appProvider.setHealthForTesting('srv_test', ServerHealthStatus.unhealthy);
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey<String>('appbar_drawer_alert_badge')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows utility pane on large desktop width', (
@@ -227,6 +264,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('Add attachment'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('composer_input_row')),
+        matching: find.byTooltip('Add attachment'),
+      ),
+      findsNothing,
+    );
     await tester.tap(find.byTooltip('New Chat').first);
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Add attachment'));
@@ -2044,8 +2088,7 @@ void main() {
       final modelSelectorChip = tester.widget<ActionChip>(
         find.byKey(const ValueKey<String>('model_selector_button')),
       );
-      final selectedAvatar = modelSelectorChip.avatar as Icon?;
-      expect(selectedAvatar?.icon, SimpleIcons.google);
+      expect(modelSelectorChip.avatar, isNull);
 
       await tester.tap(
         find.byKey(const ValueKey<String>('model_selector_button')),
@@ -2091,7 +2134,7 @@ void main() {
       final minimaxChip = tester.widget<ActionChip>(
         find.byKey(const ValueKey<String>('model_selector_button')),
       );
-      expect((minimaxChip.avatar as Icon?)?.icon, SimpleIcons.minimax);
+      expect(minimaxChip.avatar, isNull);
 
       await provider.setSelectedModelByProvider(
         providerId: 'xai',
@@ -2101,7 +2144,7 @@ void main() {
       final xaiChip = tester.widget<ActionChip>(
         find.byKey(const ValueKey<String>('model_selector_button')),
       );
-      expect((xaiChip.avatar as Icon?)?.icon, SimpleIcons.spacex);
+      expect(xaiChip.avatar, isNull);
 
       await provider.setSelectedModelByProvider(
         providerId: 'mistral',
@@ -2111,7 +2154,7 @@ void main() {
       final mistralChip = tester.widget<ActionChip>(
         find.byKey(const ValueKey<String>('model_selector_button')),
       );
-      expect((mistralChip.avatar as Icon?)?.icon, SimpleIcons.mistralai);
+      expect(mistralChip.avatar, isNull);
 
       await provider.setSelectedModelByProvider(
         providerId: 'openrouter',
@@ -2121,7 +2164,7 @@ void main() {
       final openrouterChip = tester.widget<ActionChip>(
         find.byKey(const ValueKey<String>('model_selector_button')),
       );
-      expect((openrouterChip.avatar as Icon?)?.icon, SimpleIcons.openrouter);
+      expect(openrouterChip.avatar, isNull);
     },
   );
 
@@ -2162,6 +2205,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Build'), findsOneWidget);
+    final agentChip = tester.widget<ActionChip>(
+      find.byKey(const ValueKey<String>('agent_selector_button')),
+    );
+    expect(agentChip.avatar, isNull);
 
     await tester.tap(
       find.byKey(const ValueKey<String>('agent_selector_button')),
@@ -2183,6 +2230,65 @@ void main() {
 
     expect(find.text('Plan'), findsOneWidget);
     expect(provider.selectedAgentName, 'plan');
+  });
+
+  testWidgets('uses backend agent color on selector label', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_1',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Session 1',
+        ),
+      ],
+    );
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final appRepository = FakeAppRepository()
+      ..agentsResult = const Right(<Agent>[
+        Agent(
+          name: 'build',
+          mode: 'primary',
+          hidden: false,
+          native: false,
+          color: '#ff6b00',
+        ),
+        Agent(
+          name: 'plan',
+          mode: 'primary',
+          hidden: false,
+          native: false,
+          color: '#00a8ff',
+        ),
+      ]);
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      appRepository: appRepository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pump(const Duration(milliseconds: 150));
+
+    final chipText = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('agent_selector_button')),
+        matching: find.text('Build'),
+      ),
+    );
+    expect(chipText.style?.color, const Color(0xFFFF6B00));
   });
 
   testWidgets('desktop shortcut cycles selected agent', (
@@ -2900,37 +3006,38 @@ Widget _testApp(ChatProvider provider, AppProvider appProvider) {
 ChatProvider _buildChatProvider({
   FakeChatRepository? chatRepository,
   FakeProjectRepository? projectRepository,
+  FakeAppRepository? appRepository,
   required InMemoryAppLocalDataSource localDataSource,
   bool includeVariants = false,
   ProvidersResponse? providersResponse,
 }) {
   final chatRepo = chatRepository ?? FakeChatRepository();
-  final appRepo = FakeAppRepository()
-    ..providersResult = Right(
-      providersResponse ??
-          ProvidersResponse(
-            providers: <Provider>[
-              Provider(
-                id: 'provider_1',
-                name: 'Provider 1',
-                env: const <String>[],
-                models: <String, Model>{
-                  'model_1': _model(
-                    'model_1',
-                    variants: includeVariants
-                        ? const <String, ModelVariant>{
-                            'low': ModelVariant(id: 'low', name: 'Low'),
-                            'high': ModelVariant(id: 'high', name: 'High'),
-                          }
-                        : const <String, ModelVariant>{},
-                  ),
-                },
-              ),
-            ],
-            defaultModels: const <String, String>{'provider_1': 'model_1'},
-            connected: const <String>['provider_1'],
-          ),
-    );
+  final appRepo = appRepository ?? FakeAppRepository();
+  appRepo.providersResult = Right(
+    providersResponse ??
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_1',
+              name: 'Provider 1',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_1': _model(
+                  'model_1',
+                  variants: includeVariants
+                      ? const <String, ModelVariant>{
+                          'low': ModelVariant(id: 'low', name: 'Low'),
+                          'high': ModelVariant(id: 'high', name: 'High'),
+                        }
+                      : const <String, ModelVariant>{},
+                ),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_1': 'model_1'},
+          connected: const <String>['provider_1'],
+        ),
+  );
 
   return ChatProvider(
     sendChatMessage: SendChatMessage(chatRepo),

@@ -11,6 +11,7 @@ import '../../core/di/injection_container.dart' as di;
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/chat_session.dart';
+import '../../domain/entities/agent.dart';
 import '../../domain/entities/file_node.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/provider.dart';
@@ -30,7 +31,6 @@ import '../widgets/chat_session_list.dart';
 import '../widgets/permission_request_card.dart';
 import '../widgets/question_request_card.dart';
 import '../widgets/session_title_inline_editor.dart';
-import 'logs_page.dart';
 import 'settings_page.dart';
 
 class _NewSessionIntent extends Intent {
@@ -96,6 +96,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode(debugLabel: 'chat_input');
+  final ChatInputController _chatInputController = ChatInputController();
   final GlobalKey _agentSelectorChipKey = GlobalKey(
     debugLabel: 'agent_selector_chip',
   );
@@ -1018,9 +1019,45 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required bool isMobile,
     required SettingsProvider settingsProvider,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
+      leading: isMobile
+          ? Builder(
+              builder: (leadingContext) {
+                return Consumer2<ChatProvider, AppProvider>(
+                  builder: (context, chatProvider, appProvider, _) {
+                    final hasAlert = _hasServerStatusAlert(
+                      chatProvider: chatProvider,
+                      appProvider: appProvider,
+                    );
+                    final alertColor = _serverStatusColor(
+                      context: context,
+                      chatProvider: chatProvider,
+                      appProvider: appProvider,
+                    );
+                    final menuIcon = const Icon(Icons.menu);
+                    return IconButton(
+                      key: const ValueKey<String>('appbar_drawer_button'),
+                      tooltip: MaterialLocalizations.of(
+                        leadingContext,
+                      ).openAppDrawerTooltip,
+                      onPressed: () => Scaffold.of(leadingContext).openDrawer(),
+                      icon: hasAlert
+                          ? Badge(
+                              key: const ValueKey<String>(
+                                'appbar_drawer_alert_badge',
+                              ),
+                              backgroundColor: alertColor,
+                              smallSize: 8,
+                              child: menuIcon,
+                            )
+                          : menuIcon,
+                    );
+                  },
+                );
+              },
+            )
+          : null,
       titleSpacing: isMobile ? 0 : 8,
       title: _buildProjectSelectorTitle(isMobile: isMobile),
       actions: [
@@ -1104,134 +1141,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               );
             },
           ),
-        Consumer<AppProvider>(
-          builder: (context, appProvider, child) {
-            final active = appProvider.activeServer;
-            final status = active == null
-                ? ServerHealthStatus.unknown
-                : appProvider.healthFor(active.id);
-            final statusColor = switch (status) {
-              ServerHealthStatus.healthy => Colors.green,
-              ServerHealthStatus.unhealthy => Colors.red,
-              ServerHealthStatus.unknown => colorScheme.outline,
-            };
-            return PopupMenuButton<String>(
-              tooltip: 'Switch Server',
-              onSelected: (value) async {
-                final messenger = ScaffoldMessenger.of(context);
-                if (value == '__manage__') {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          const SettingsPage(initialSectionId: 'servers'),
-                    ),
-                  );
-                  return;
-                }
-
-                final ok = await appProvider.setActiveServer(value);
-                if (!ok) {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(appProvider.errorMessage)),
-                  );
-                }
-              },
-              itemBuilder: (context) {
-                final items = <PopupMenuEntry<String>>[];
-                for (final server in appProvider.serverProfiles) {
-                  final serverHealth = appProvider.healthFor(server.id);
-                  final disabled = serverHealth == ServerHealthStatus.unhealthy;
-                  items.add(
-                    PopupMenuItem<String>(
-                      value: server.id,
-                      enabled: !disabled,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: switch (serverHealth) {
-                                ServerHealthStatus.healthy => Colors.green,
-                                ServerHealthStatus.unhealthy => Colors.red,
-                                ServerHealthStatus.unknown => Colors.grey,
-                              },
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              server.displayName,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (server.id == appProvider.activeServerId)
-                            const Icon(Icons.check, size: 16),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                items.add(const PopupMenuDivider());
-                items.add(
-                  const PopupMenuItem<String>(
-                    value: '__manage__',
-                    child: Text('Manage Servers'),
-                  ),
-                );
-                return items;
-              },
-              child: Container(
-                margin: const EdgeInsets.only(right: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: colorScheme.outline.withValues(alpha: 0.4),
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isMobile) ...[
-                      const Icon(Icons.cloud_outlined, size: 16),
-                      const SizedBox(width: 6),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ] else ...[
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 120),
-                        child: Text(
-                          active?.displayName ?? 'Server',
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      const Icon(Icons.arrow_drop_down, size: 18),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
         if (isMobile)
           IconButton(
             key: const ValueKey<String>('appbar_quick_open_button'),
@@ -1361,6 +1270,197 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       return Colors.orange;
     }
     return Colors.green;
+  }
+
+  ServerHealthStatus _activeServerHealth(AppProvider appProvider) {
+    final active = appProvider.activeServer;
+    if (active == null) {
+      return ServerHealthStatus.unknown;
+    }
+    return appProvider.healthFor(active.id);
+  }
+
+  Color _serverStatusColor({
+    required BuildContext context,
+    required ChatProvider chatProvider,
+    required AppProvider appProvider,
+  }) {
+    final health = _activeServerHealth(appProvider);
+    if (health == ServerHealthStatus.unhealthy) {
+      return Theme.of(context).colorScheme.error;
+    }
+    if (health == ServerHealthStatus.unknown) {
+      return Theme.of(context).colorScheme.outline;
+    }
+    return _syncStatusColor(
+      context: context,
+      chatProvider: chatProvider,
+      appProvider: appProvider,
+    );
+  }
+
+  String _serverStatusLabel({
+    required ChatProvider chatProvider,
+    required AppProvider appProvider,
+  }) {
+    final health = _activeServerHealth(appProvider);
+    if (health == ServerHealthStatus.unhealthy) {
+      return 'Unhealthy';
+    }
+    if (health == ServerHealthStatus.unknown) {
+      return 'Unknown';
+    }
+    return _syncStatusLabel(
+      chatProvider: chatProvider,
+      appProvider: appProvider,
+    );
+  }
+
+  bool _hasServerStatusAlert({
+    required ChatProvider chatProvider,
+    required AppProvider appProvider,
+  }) {
+    final health = _activeServerHealth(appProvider);
+    if (health != ServerHealthStatus.healthy) {
+      return true;
+    }
+    if (!appProvider.isConnected) {
+      return true;
+    }
+    if (!FeatureFlags.refreshlessRealtime) {
+      return false;
+    }
+    if (chatProvider.syncState != ChatSyncState.connected) {
+      return true;
+    }
+    return chatProvider.isInDegradedMode;
+  }
+
+  Widget _buildServerStatusControl({required bool closeOnSelect}) {
+    return Consumer2<AppProvider, ChatProvider>(
+      builder: (context, appProvider, chatProvider, _) {
+        final active = appProvider.activeServer;
+        final statusColor = _serverStatusColor(
+          context: context,
+          chatProvider: chatProvider,
+          appProvider: appProvider,
+        );
+        final statusLabel = _serverStatusLabel(
+          chatProvider: chatProvider,
+          appProvider: appProvider,
+        );
+        final colorScheme = Theme.of(context).colorScheme;
+
+        return PopupMenuButton<String>(
+          key: const ValueKey<String>('sidebar_server_switch_button'),
+          tooltip: 'Switch Server',
+          onSelected: (value) async {
+            final messenger = ScaffoldMessenger.of(context);
+            if (value == '__manage__') {
+              await _openSettingsPage(
+                closeOnSelect: closeOnSelect,
+                initialSectionId: 'servers',
+              );
+              return;
+            }
+
+            final ok = await appProvider.setActiveServer(value);
+            if (!ok && mounted) {
+              messenger.showSnackBar(
+                SnackBar(content: Text(appProvider.errorMessage)),
+              );
+            }
+          },
+          itemBuilder: (context) {
+            final items = <PopupMenuEntry<String>>[];
+            for (final server in appProvider.serverProfiles) {
+              final serverHealth = appProvider.healthFor(server.id);
+              final disabled = serverHealth == ServerHealthStatus.unhealthy;
+              items.add(
+                PopupMenuItem<String>(
+                  value: server.id,
+                  enabled: !disabled,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: switch (serverHealth) {
+                            ServerHealthStatus.healthy => Colors.green,
+                            ServerHealthStatus.unhealthy => Colors.red,
+                            ServerHealthStatus.unknown => Colors.grey,
+                          },
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          server.displayName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (server.id == appProvider.activeServerId)
+                        const Icon(Icons.check, size: 16),
+                    ],
+                  ),
+                ),
+              );
+            }
+            items.add(const PopupMenuDivider());
+            items.add(
+              const PopupMenuItem<String>(
+                value: '__manage__',
+                child: Text('Manage Servers'),
+              ),
+            );
+            return items;
+          },
+          child: Container(
+            key: const ValueKey<String>('sidebar_server_status_control'),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.4),
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.cloud_outlined, size: 16),
+                const SizedBox(width: 8),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    active?.displayName ?? 'Server',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  statusLabel,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                const SizedBox(width: 2),
+                const Icon(Icons.arrow_drop_down, size: 18),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildProjectSelectorTitle({required bool isMobile}) {
@@ -1808,24 +1908,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     await Future<void>.delayed(Duration.zero);
   }
 
-  Future<void> _openLogsPage({required bool closeOnSelect}) async {
+  Future<void> _openSettingsPage({
+    required bool closeOnSelect,
+    String initialSectionId = '',
+  }) async {
     await _closeDrawerIfNeeded(closeOnSelect: closeOnSelect);
     if (!mounted) {
       return;
     }
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const LogsPage()));
-  }
-
-  Future<void> _openSettingsPage({required bool closeOnSelect}) async {
-    await _closeDrawerIfNeeded(closeOnSelect: closeOnSelect);
-    if (!mounted) {
-      return;
-    }
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SettingsPage(initialSectionId: initialSectionId),
+      ),
+    );
   }
 
   Widget _buildSidebarNavigation({required bool closeOnSelect}) {
@@ -1841,22 +1936,26 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               child: Row(
                 children: [
                   Expanded(
-                    child: FilledButton.tonalIcon(
-                      onPressed: () => unawaited(
-                        _openLogsPage(closeOnSelect: closeOnSelect),
-                      ),
-                      icon: const Icon(Icons.receipt_long_rounded),
-                      label: const Text('Logs'),
+                    child: _buildServerStatusControl(
+                      closeOnSelect: closeOnSelect,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton.tonalIcon(
-                      onPressed: () => unawaited(
-                        _openSettingsPage(closeOnSelect: closeOnSelect),
+                  Tooltip(
+                    message: 'Settings',
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: FilledButton.tonal(
+                        key: const ValueKey<String>(
+                          'sidebar_settings_icon_button',
+                        ),
+                        style: FilledButton.styleFrom(padding: EdgeInsets.zero),
+                        onPressed: () => unawaited(
+                          _openSettingsPage(closeOnSelect: closeOnSelect),
+                        ),
+                        child: const Icon(Icons.settings_outlined),
                       ),
-                      icon: const Icon(Icons.tune_rounded),
-                      label: const Text('Settings'),
                     ),
                   ),
                 ],
@@ -3994,6 +4093,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     required double horizontalPadding,
     required double verticalPadding,
   }) {
+    final selectedModel = chatProvider.selectedModel;
+    final supportsImages = _supportsImageAttachments(selectedModel);
+    final supportsPdf = _supportsPdfAttachments(selectedModel);
+    final attachmentsEnabled = supportsImages || supportsPdf;
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
@@ -4119,16 +4223,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
               _buildInteractionPrompts(chatProvider),
 
-              _buildModelControls(chatProvider),
+              _buildModelControls(
+                chatProvider,
+                attachmentsEnabled: attachmentsEnabled,
+              ),
 
               // Input field
               Builder(
                 builder: (context) {
-                  final selectedModel = chatProvider.selectedModel;
-                  final supportsImages = _supportsImageAttachments(
-                    selectedModel,
-                  );
-                  final supportsPdf = _supportsPdfAttachments(selectedModel);
                   final sentMessageHistory = _collectSentMessageHistory(
                     chatProvider.messages,
                   );
@@ -4170,7 +4272,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     enabled: chatProvider.currentSession != null,
                     isResponding: chatProvider.canAbortActiveResponse,
                     focusNode: _inputFocusNode,
-                    showAttachmentButton: supportsImages || supportsPdf,
+                    controller: _chatInputController,
+                    showAttachmentButton: attachmentsEnabled,
+                    showInlineAttachmentButton: false,
                     allowImageAttachment: supportsImages,
                     allowPdfAttachment: supportsPdf,
                   );
@@ -4183,16 +4287,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildModelControls(ChatProvider chatProvider) {
+  Widget _buildModelControls(
+    ChatProvider chatProvider, {
+    required bool attachmentsEnabled,
+  }) {
     final selectedModel = chatProvider.selectedModel;
-    final selectedProvider = chatProvider.selectedProvider;
     final selectedAgent = chatProvider.selectedAgentName;
     final selectableAgents = chatProvider.selectableAgents;
+    final selectedAgentEntry = _selectedAgentEntry(chatProvider);
+    final selectedAgentColor = _parseAgentColor(selectedAgentEntry?.color);
     final variants = chatProvider.availableVariants;
-    final selectedModelIcon = _providerBrandIcon(
-      providerId: chatProvider.selectedProviderId,
-      providerName: selectedProvider?.name,
-    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
@@ -4207,11 +4311,16 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               key: _agentSelectorChipKey,
               builder: (chipContext) => ActionChip(
                 key: const ValueKey<String>('agent_selector_button'),
-                avatar: const Icon(Icons.support_agent_outlined, size: 18),
+                side: BorderSide.none,
+                shape: const StadiumBorder(),
+                backgroundColor: selectedAgentColor?.withValues(alpha: 0.16),
                 label: Text(
                   selectedAgent == null
                       ? 'Select agent'
                       : _formatAgentLabel(selectedAgent),
+                  style: selectedAgentColor == null
+                      ? null
+                      : TextStyle(color: selectedAgentColor),
                 ),
                 onPressed: selectableAgents.isEmpty
                     ? null
@@ -4228,7 +4337,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             message: 'Choose model',
             child: ActionChip(
               key: const ValueKey<String>('model_selector_button'),
-              avatar: Icon(selectedModelIcon, size: 18),
+              side: BorderSide.none,
+              shape: const StadiumBorder(),
               label: Text(selectedModel?.name ?? 'Select model'),
               onPressed: chatProvider.providers.isEmpty
                   ? null
@@ -4236,22 +4346,87 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ),
           ),
           if (variants.isNotEmpty)
-            Builder(
-              builder: (chipContext) => ActionChip(
-                key: const ValueKey<String>('variant_selector_button'),
-                avatar: const Icon(Icons.psychology_alt_outlined, size: 18),
-                label: Text(chatProvider.selectedVariantLabel),
-                onPressed: () => unawaited(
-                  _openVariantQuickSelector(
-                    chatProvider,
-                    anchorContext: chipContext,
+            Tooltip(
+              message: 'Choose effort',
+              child: Builder(
+                builder: (chipContext) => ActionChip(
+                  key: const ValueKey<String>('variant_selector_button'),
+                  side: BorderSide.none,
+                  shape: const StadiumBorder(),
+                  label: Text(chatProvider.selectedVariantLabel),
+                  onPressed: () => unawaited(
+                    _openVariantQuickSelector(
+                      chatProvider,
+                      anchorContext: chipContext,
+                    ),
                   ),
                 ),
+              ),
+            ),
+          if (attachmentsEnabled)
+            Tooltip(
+              message: 'Add attachment',
+              child: IconButton.filledTonal(
+                onPressed: chatProvider.currentSession == null
+                    ? null
+                    : _chatInputController.openAttachmentOptions,
+                icon: const Icon(Icons.attach_file_rounded),
               ),
             ),
         ],
       ),
     );
+  }
+
+  Agent? _selectedAgentEntry(ChatProvider chatProvider) {
+    final selectedName = chatProvider.selectedAgentName;
+    if (selectedName == null || selectedName.trim().isEmpty) {
+      return null;
+    }
+    for (final agent in chatProvider.selectableAgents) {
+      if (agent.name == selectedName) {
+        return agent;
+      }
+    }
+    final normalized = selectedName.toLowerCase();
+    for (final agent in chatProvider.selectableAgents) {
+      if (agent.name.toLowerCase() == normalized) {
+        return agent;
+      }
+    }
+    return null;
+  }
+
+  Color? _parseAgentColor(String? rawColor) {
+    if (rawColor == null) {
+      return null;
+    }
+    var normalized = rawColor.trim();
+    if (normalized.isEmpty) {
+      return null;
+    }
+    if (normalized.startsWith('#')) {
+      normalized = normalized.substring(1);
+    } else if (normalized.startsWith('0x')) {
+      normalized = normalized.substring(2);
+    }
+    if (normalized.length == 3) {
+      normalized = normalized
+          .split('')
+          .map((segment) => '$segment$segment')
+          .join();
+    }
+    if (normalized.length == 6) {
+      normalized = 'FF$normalized';
+    }
+    if (normalized.length != 8) {
+      return null;
+    }
+    final parsedValue = int.tryParse(normalized, radix: 16);
+    if (parsedValue == null) {
+      return null;
+    }
+    return Color(parsedValue);
   }
 
   String _formatAgentLabel(String value) {
@@ -4489,6 +4664,18 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             value: entry.name,
             child: Row(
               children: [
+                if (_parseAgentColor(entry.color) case final color?)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
                 Expanded(
                   child: Text(
                     _formatAgentLabel(entry.name),

@@ -63,11 +63,13 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(NavigationRail), findsNothing);
     expect(find.text('Conversations'), findsOneWidget);
-    expect(find.text('Logs'), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('sidebar_settings_icon_button')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('opens logs from sidebar and returns to chat via back arrow', (
+  testWidgets('opens logs from settings and returns to chat via back arrow', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 900));
@@ -83,7 +85,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Logs'));
+    await tester.tap(
+      find.byKey(const ValueKey<String>('sidebar_settings_icon_button')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Logs').first);
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('settings_open_logs_button')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('App Logs'), findsOneWidget);
@@ -91,7 +103,10 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Conversations'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('settings_open_logs_button')),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -110,7 +125,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Settings'));
+      await tester.tap(
+        find.byKey(const ValueKey<String>('sidebar_settings_icon_button')),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Settings'), findsWidgets);
