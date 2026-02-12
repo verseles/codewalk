@@ -312,6 +312,7 @@ Refinamento de conflito de foco: durante hold em bolha o toque é absorvido e o 
 - [ ] Exibir seção `Shortcuts` no mobile quando houver teclado físico conectado
 - [x] Cada tool call deve mostrar no máximo duas linhas com opção discreta de expandir para exibir todo o conteúdo
 - [x] Remover o texto `tool call` das bolhas de tool call
+- [ ] A tool apply_patch deve ter cores apropriadas para linhas removidas (vermelho) e linhas adicionadas (verde)
 - [ ] Verificar atualizações baseadas nos releases do GitHub usando a API pública do GitHub
 - [x] Em mobile, exibir apenas o ícone de status nas tool calls (sem textos como `Running`, `Completed`, `Finished`); manter o texto de status apenas no desktop
 - [x] Usar o serviço `ch.at` para gerar títulos automaticamente
