@@ -792,6 +792,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final mentionTokens = _extractMentionTokens(_controller.text);
     final showAttachments =
         _attachments.isNotEmpty && _mode == ChatComposerMode.normal;
@@ -802,15 +803,25 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         !_isSending &&
         !widget.isResponding;
     final showPopover = _popoverType != ChatComposerPopoverType.none;
+    final composerBackgroundColor = Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.08),
+      colorScheme.surface,
+    );
     final inputBubbleColor = _mode == ChatComposerMode.shell
         ? colorScheme.tertiaryContainer.withValues(alpha: 0.5)
-        : colorScheme.surface;
+        : Color.alphaBlend(
+            (isDark
+                    ? colorScheme.surfaceContainerHigh
+                    : colorScheme.surfaceContainerLowest)
+                .withValues(alpha: isDark ? 0.82 : 0.95),
+            composerBackgroundColor,
+          );
     final inputBubbleBorderColor = _mode == ChatComposerMode.shell
         ? colorScheme.tertiary.withValues(alpha: 0.25)
-        : colorScheme.outlineVariant.withValues(alpha: 0.6);
+        : colorScheme.outlineVariant.withValues(alpha: isDark ? 0.45 : 0.28);
 
     return Container(
-      decoration: BoxDecoration(color: colorScheme.surfaceContainerLow),
+      decoration: BoxDecoration(color: composerBackgroundColor),
       child: SafeArea(
         top: false,
         left: false,
@@ -981,6 +992,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   decoration: InputDecoration(
                                     hintText: _composerHintText(),
+                                    hintStyle: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: isDark
+                                              ? colorScheme.onSurface
+                                                    .withValues(alpha: 0.72)
+                                              : colorScheme.onSurfaceVariant
+                                                    .withValues(alpha: 0.88),
+                                        ),
                                     isDense: true,
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
