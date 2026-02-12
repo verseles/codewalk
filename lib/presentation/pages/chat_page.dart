@@ -1025,8 +1025,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }) {
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
-      toolbarHeight: isMobile ? 48 : 46,
-      leadingWidth: isMobile ? 44 : null,
+      toolbarHeight: isMobile ? 46 : 44,
+      leadingWidth: isMobile ? 42 : null,
       leading: isMobile
           ? Builder(
               builder: (leadingContext) {
@@ -1533,7 +1533,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 key: const ValueKey<String>('project_selector_button'),
                 padding: EdgeInsets.symmetric(
                   horizontal: isMobile ? 2 : 4,
-                  vertical: 3,
+                  vertical: 2,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -4168,15 +4168,17 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                         'chat_compact_session_header',
                       ),
                       width: double.infinity,
-                      margin: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+                      margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                       child: Card(
+                        margin: EdgeInsets.zero,
+                        elevation: 0,
                         color: Theme.of(
                           context,
                         ).colorScheme.surfaceContainerLow,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
-                            vertical: 6,
+                            vertical: 4,
                           ),
                           child: Row(
                             children: [
@@ -5356,7 +5358,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return ListView.builder(
       key: const ValueKey<String>('chat_message_list'),
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 0),
       itemCount: chatProvider.messages.length + (progressStage == null ? 0 : 1),
       itemBuilder: (context, index) {
         if (index < chatProvider.messages.length) {

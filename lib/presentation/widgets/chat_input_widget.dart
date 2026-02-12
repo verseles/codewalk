@@ -142,7 +142,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   static const double _inputRowHeight = 52;
   static const double _popoverInputHeightMultiplier = 3;
   static const int _composerMaxLines = 6;
-  static const double _composerActionButtonSize = 46;
+  static const double _composerActionButtonSize = 42;
   final TextEditingController _controller = TextEditingController();
   final FocusNode _internalFocusNode = FocusNode();
   final List<FileInputPart> _attachments = <FileInputPart>[];
@@ -810,12 +810,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         : colorScheme.outlineVariant.withValues(alpha: 0.6);
 
     return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        border: Border(
-          top: BorderSide(color: colorScheme.outlineVariant, width: 1),
-        ),
-      ),
+      decoration: BoxDecoration(color: colorScheme.surfaceContainerLow),
       child: SafeArea(
         top: false,
         left: false,
@@ -826,7 +821,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             if (_mode == ChatComposerMode.shell)
               Padding(
                 key: const ValueKey<String>('composer_shell_mode_row'),
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Chip(
@@ -848,7 +843,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             if (mentionTokens.isNotEmpty)
               Padding(
                 key: const ValueKey<String>('composer_mention_tokens_row'),
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Wrap(
@@ -892,7 +887,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             if (showAttachments)
               Padding(
                 key: const ValueKey<String>('composer_attachments_row'),
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -928,7 +923,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
               ),
             Padding(
               key: const ValueKey<String>('composer_input_row'),
-              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -991,10 +986,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
                                     contentPadding: const EdgeInsets.fromLTRB(
-                                      18,
-                                      9,
-                                      10,
-                                      9,
+                                      16,
+                                      7,
+                                      8,
+                                      7,
                                     ),
                                   ),
                                 ),

@@ -230,13 +230,13 @@ void main() {
       await tester.pumpAndSettle();
 
       final desktopAppBar = tester.widget<AppBar>(find.byType(AppBar).first);
-      expect(desktopAppBar.toolbarHeight, 46);
+      expect(desktopAppBar.toolbarHeight, 44);
 
       await tester.binding.setSurfaceSize(const Size(700, 900));
       await tester.pumpAndSettle();
 
       final mobileAppBar = tester.widget<AppBar>(find.byType(AppBar).first);
-      expect(mobileAppBar.toolbarHeight, 48);
+      expect(mobileAppBar.toolbarHeight, 46);
 
       addTearDown(() => tester.binding.setSurfaceSize(null));
     });
