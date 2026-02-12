@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import '../../domain/entities/chat_message.dart';
+import '../utils/diff_parser.dart';
 
 /// Chat message widget
 class ChatMessageWidget extends StatelessWidget {
@@ -424,7 +425,7 @@ class ChatMessageWidget extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Tool status details
-          _buildToolStateDetails(context, part.state),
+          _buildToolStateDetails(context, part.state, part.tool),
         ],
       ),
     );
@@ -630,7 +631,7 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildToolStateDetails(BuildContext context, ToolState state) {
+  Widget _buildToolStateDetails(BuildContext context, ToolState state, String toolName) {
     switch (state.status) {
       case ToolStatus.running:
         final runningState = state as ToolStateRunning;
@@ -668,6 +669,7 @@ class ChatMessageWidget extends StatelessWidget {
                 child: _CollapsibleToolContent(
                   text: completedState.output,
                   collapsedMaxLines: _collapsedToolDetailMaxLines,
+                  toolName: toolName,
                   textStyle: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
@@ -686,6 +688,7 @@ class ChatMessageWidget extends StatelessWidget {
           child: _CollapsibleToolContent(
             text: errorState.error,
             collapsedMaxLines: _collapsedToolDetailMaxLines,
+            toolName: toolName,
             textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onErrorContainer,
             ),
@@ -788,12 +791,14 @@ class _CollapsibleToolContent extends StatefulWidget {
   const _CollapsibleToolContent({
     required this.text,
     required this.collapsedMaxLines,
+    required this.toolName,
     this.textStyle,
     this.toggleTextStyle,
   });
 
   final String text;
   final int collapsedMaxLines;
+  final String toolName;
   final TextStyle? textStyle;
   final TextStyle? toggleTextStyle;
 
@@ -813,15 +818,111 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
     return lineCount > widget.collapsedMaxLines || widget.text.length > 160;
   }
 
+  /// Detecção híbrida: nome da tool + heurística de conteúdo
+  bool _isDiffContent(String toolName, String text) {
+    final toolLower = toolName.toLowerCase();
+    if (toolLower.contains('apply_patch') ||
+        toolLower.contains('patch') ||
+        toolLower == 'edit') {
+      return true;
+    }
+
+    // Heurística para bash/outros (primeiras 20 linhas)
+    return isDiffFormat(text);
+  }
+
+  /// Cores adaptativas ao tema (dark/light)
+  Color _getDiffAddColor(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark
+        ? Colors.green.shade400
+        : Colors.green.shade700;
+  }
+
+  Color _getDiffRemoveColor(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark
+        ? Colors.red.shade400
+        : Colors.red.shade700;
+  }
+
+  Color _getDiffHunkColor(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark
+        ? Colors.blue.shade300
+        : Colors.blue.shade700;
+  }
+
+  Color _getDiffMetadataColor(BuildContext context) {
+    return Theme.of(context).colorScheme.onSurfaceVariant;
+  }
+
+  /// Renderização colorizada (só quando expandido)
+  Widget _buildColorizedDiffContent(BuildContext context, String text) {
+    final lines = text.split('\n');
+    final spans = <TextSpan>[];
+
+    for (final line in lines) {
+      Color? color;
+
+      if (line.startsWith('+') && !line.startsWith('+++')) {
+        color = _getDiffAddColor(context);
+      } else if (line.startsWith('-') && !line.startsWith('---')) {
+        color = _getDiffRemoveColor(context);
+      } else if (line.startsWith('@@')) {
+        color = _getDiffHunkColor(context);
+      } else if (line.startsWith('diff --git') ||
+                 line.startsWith('index ') ||
+                 line.startsWith('--- ') ||
+                 line.startsWith('+++ ')) {
+        color = _getDiffMetadataColor(context);
+      }
+
+      spans.add(TextSpan(
+        text: line,
+        style: color != null ? TextStyle(color: color) : null,
+      ));
+      spans.add(const TextSpan(text: '\n'));
+    }
+
+    if (spans.isNotEmpty) spans.removeLast(); // Remove trailing \n
+
+    return RichText(
+      text: TextSpan(
+        style: widget.textStyle,
+        children: spans,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final contentWidget = Text(
-      widget.text,
-      key: const ValueKey<String>('tool_content_text'),
-      maxLines: _expanded ? null : widget.collapsedMaxLines,
-      overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-      style: widget.textStyle,
-    );
+    final isDiff = _isDiffContent(widget.toolName, widget.text);
+
+    Widget contentWidget;
+
+    if (isDiff && _expanded) {
+      // Expandido + diff → RichText colorizado
+      contentWidget = _buildColorizedDiffContent(context, widget.text);
+    } else if (isDiff && !_expanded) {
+      // Colapsado + diff → Text plano (performance)
+      contentWidget = Text(
+        widget.text,
+        key: const ValueKey<String>('tool_content_text'),
+        maxLines: widget.collapsedMaxLines,
+        overflow: TextOverflow.ellipsis,
+        style: widget.textStyle,
+      );
+    } else {
+      // Não é diff → comportamento original
+      contentWidget = Text(
+        widget.text,
+        key: const ValueKey<String>('tool_content_text'),
+        maxLines: _expanded ? null : widget.collapsedMaxLines,
+        overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+        style: widget.textStyle,
+      );
+    }
 
     if (!_canExpand) {
       return contentWidget;

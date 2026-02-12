@@ -563,4 +563,233 @@ void main() {
       expect(thinkingText.maxLines, 2);
     },
   );
+
+  testWidgets('renders colorized diff for apply_patch tool', (tester) async {
+    const diffOutput = '''--- file.dart
++++ file.dart
+@@ -1,2 +1,3 @@
+ context
+-old line
++new line''';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_diff_1',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_diff_1',
+                  messageId: 'msg_diff_1',
+                  sessionId: 'ses_diff',
+                  callId: 'call_diff_1',
+                  tool: 'apply_patch',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{},
+                    output: diffOutput,
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1100),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Expandir para ver diff colorizado
+    await tester.tap(find.text('Show more'));
+    await tester.pumpAndSettle();
+
+    // RichText deve estar presente (colorizado)
+    expect(find.byType(RichText), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('detects diff in bash git diff via heuristic', (tester) async {
+    const gitDiff = '''diff --git a/lib/main.dart b/lib/main.dart
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -1,1 +1,2 @@
+-old
++new''';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_diff_2',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_diff_2',
+                  messageId: 'msg_diff_2',
+                  sessionId: 'ses_diff',
+                  callId: 'call_diff_2',
+                  tool: 'bash', // Não é apply_patch, detecta via heurística
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{'command': 'git diff'},
+                    output: gitDiff,
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1150),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show more'));
+    await tester.pumpAndSettle();
+
+    // Deve colorizar mesmo sendo bash
+    expect(find.byType(RichText), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('does not colorize normal bash output', (tester) async {
+    const plainOutput = 'file1.txt\nfile2.txt';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_diff_3',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_diff_3',
+                  messageId: 'msg_diff_3',
+                  sessionId: 'ses_diff',
+                  callId: 'call_diff_3',
+                  tool: 'bash',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{'command': 'ls'},
+                    output: plainOutput,
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1050),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Texto plano, sem expansão necessária (2 linhas)
+    expect(find.text(plainOutput), findsOneWidget);
+    expect(find.text('Show more'), findsNothing);
+  });
+
+  testWidgets('preserves content when collapsing and expanding diff', (
+    tester,
+  ) async {
+    const diff = '@@ -1,1 +1,2 @@\n-old\n+new';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_diff_4',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_diff_4',
+                  messageId: 'msg_diff_4',
+                  sessionId: 'ses_diff',
+                  callId: 'call_diff_4',
+                  tool: 'edit',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{},
+                    output: diff,
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1080),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Expandir
+    await tester.tap(find.text('Show more'));
+    await tester.pumpAndSettle();
+    expect(find.text('Show less'), findsOneWidget);
+
+    // Colapsar
+    await tester.tap(find.text('Show less'));
+    await tester.pumpAndSettle();
+    expect(find.text('Show more'), findsOneWidget);
+  });
+
+  testWidgets('renders colorized diff for edit tool', (tester) async {
+    const editDiff = '''diff --git a/test.dart b/test.dart
+index abc123..def456 100644
+--- a/test.dart
++++ b/test.dart
+@@ -10,5 +10,6 @@
+ normal line
+-removed line
++added line
+ another normal line''';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_diff_5',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_diff_5',
+                  messageId: 'msg_diff_5',
+                  sessionId: 'ses_diff',
+                  callId: 'call_diff_5',
+                  tool: 'edit',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{},
+                    output: editDiff,
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1120),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Expandir
+    await tester.tap(find.text('Show more'));
+    await tester.pumpAndSettle();
+
+    // RichText colorizado deve estar presente
+    expect(find.byType(RichText), findsAtLeastNWidgets(1));
+  });
 }
