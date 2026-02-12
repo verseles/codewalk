@@ -579,14 +579,10 @@ void main() {
           enableHealthPolling: false,
         );
         await appProvider.initialize();
-        final initial = appProvider.activeServer!;
-        await appProvider.updateServerProfile(
-          id: initial.id,
+        await appProvider.addServerProfile(
           url: server.baseUrl,
           label: 'Server A',
-          basicAuthEnabled: false,
-          basicAuthUsername: '',
-          basicAuthPassword: '',
+          setAsActive: true,
         );
         await appProvider.addServerProfile(
           url: serverB.baseUrl,

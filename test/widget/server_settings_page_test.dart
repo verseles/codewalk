@@ -82,6 +82,22 @@ void main() {
 
     expect(find.text('Cannot activate an unhealthy server'), findsOneWidget);
   });
+
+  testWidgets('add/edit dialog exposes AI generated title privacy toggle', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_testApp(appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Server'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enable AI generated titles'), findsOneWidget);
+    expect(
+      find.textContaining('This is a free service powered by https://ch.at'),
+      findsOneWidget,
+    );
+  });
 }
 
 Widget _testApp(AppProvider appProvider) {

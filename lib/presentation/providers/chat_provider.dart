@@ -38,6 +38,7 @@ import '../../domain/usecases/watch_chat_events.dart';
 import '../../domain/usecases/watch_global_chat_events.dart';
 import '../../core/errors/failures.dart';
 import '../services/event_feedback_dispatcher.dart';
+import '../services/chat_title_generator.dart';
 import '../utils/session_title_formatter.dart';
 import 'project_provider.dart';
 
@@ -82,6 +83,34 @@ class _ChatContextSnapshot {
   final int sessionVisibleLimit;
 }
 
+class _AutoTitleCandidateMessage {
+  const _AutoTitleCandidateMessage({
+    required this.id,
+    required this.role,
+    required this.text,
+  });
+
+  final String id;
+  final MessageRole role;
+  final String text;
+}
+
+class _AutoTitleSnapshot {
+  const _AutoTitleSnapshot({
+    required this.messages,
+    required this.signature,
+    required this.userCount,
+    required this.assistantCount,
+  });
+
+  final List<_AutoTitleCandidateMessage> messages;
+  final String signature;
+  final int userCount;
+  final int assistantCount;
+
+  bool get isConsolidated => userCount >= 3 && assistantCount >= 3;
+}
+
 /// Chat provider
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
@@ -112,6 +141,7 @@ class ChatProvider extends ChangeNotifier {
     required this.projectProvider,
     required this.localDataSource,
     this.eventFeedbackDispatcher,
+    this.titleGenerator,
     Duration syncSignalStaleThreshold = const Duration(seconds: 20),
     Duration syncHealthCheckInterval = const Duration(seconds: 5),
     Duration degradedPollingInterval = const Duration(seconds: 30),
@@ -159,6 +189,7 @@ class ChatProvider extends ChangeNotifier {
   final ProjectProvider projectProvider;
   final AppLocalDataSource localDataSource;
   final EventFeedbackDispatcher? eventFeedbackDispatcher;
+  final ChatTitleGenerator? titleGenerator;
 
   ChatState _state = ChatState.initial;
   List<ChatSession> _sessions = [];
@@ -229,6 +260,11 @@ class ChatProvider extends ChangeNotifier {
   bool _pendingRefreshActiveSession = false;
   bool _featureFlagLogged = false;
   final Map<String, String> _pendingRenameTitleBySessionId = <String, String>{};
+  final Set<String> _autoTitleConsolidatedSessionIds = <String>{};
+  final Map<String, String> _autoTitleLastSignatureBySessionId =
+      <String, String>{};
+  final Set<String> _autoTitleInFlightSessionIds = <String>{};
+  final Set<String> _autoTitleQueuedSessionIds = <String>{};
   late final Duration _syncSignalStaleThreshold;
   late final Duration _syncHealthCheckInterval;
   late final Duration _degradedPollingInterval;
@@ -1275,6 +1311,10 @@ class ChatProvider extends ChangeNotifier {
   void _removeSessionById(String sessionId) {
     _sessions.removeWhere((item) => item.id == sessionId);
     _pendingRenameTitleBySessionId.remove(sessionId);
+    _autoTitleConsolidatedSessionIds.remove(sessionId);
+    _autoTitleLastSignatureBySessionId.remove(sessionId);
+    _autoTitleInFlightSessionIds.remove(sessionId);
+    _autoTitleQueuedSessionIds.remove(sessionId);
     if (_currentSession?.id == sessionId) {
       _currentSession = _sessions.firstOrNull;
       _messages = <ChatMessage>[];
@@ -1835,6 +1875,272 @@ class ChatProvider extends ChangeNotifier {
     );
   }
 
+  String _extractAutoTitleText(ChatMessage message) {
+    if (message is AssistantMessage && message.summary == true) {
+      return '';
+    }
+    final text = message.parts
+        .whereType<TextPart>()
+        .map((part) => part.text.trim())
+        .where((part) => part.isNotEmpty)
+        .join('\n')
+        .trim();
+    return text;
+  }
+
+  _AutoTitleSnapshot? _buildAutoTitleSnapshot(String sessionId) {
+    final ordered =
+        _messages
+            .where((message) => message.sessionId == sessionId)
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byTime = a.time.compareTo(b.time);
+            if (byTime != 0) {
+              return byTime;
+            }
+            return a.id.compareTo(b.id);
+          });
+
+    final selected = <_AutoTitleCandidateMessage>[];
+    var userCount = 0;
+    var assistantCount = 0;
+
+    for (final message in ordered) {
+      if (message is AssistantMessage && !message.isCompleted) {
+        continue;
+      }
+      final text = _extractAutoTitleText(message);
+      if (text.isEmpty) {
+        continue;
+      }
+
+      if (message.role == MessageRole.user) {
+        if (userCount >= 3) {
+          continue;
+        }
+        userCount += 1;
+      } else {
+        if (assistantCount >= 3) {
+          continue;
+        }
+        assistantCount += 1;
+      }
+
+      selected.add(
+        _AutoTitleCandidateMessage(
+          id: message.id,
+          role: message.role,
+          text: text,
+        ),
+      );
+
+      if (userCount >= 3 && assistantCount >= 3) {
+        break;
+      }
+    }
+
+    if (selected.isEmpty) {
+      return null;
+    }
+
+    final signature = selected
+        .map((message) => '${message.role.name}:${message.id}:${message.text}')
+        .join('|');
+    return _AutoTitleSnapshot(
+      messages: selected,
+      signature: signature,
+      userCount: userCount,
+      assistantCount: assistantCount,
+    );
+  }
+
+  Future<bool> _isAutoTitleEnabledForActiveServer() async {
+    final activeServerId = await localDataSource.getActiveServerId();
+    if (activeServerId == null || activeServerId.trim().isEmpty) {
+      return false;
+    }
+
+    final rawProfiles = await localDataSource.getServerProfilesJson();
+    if (rawProfiles == null || rawProfiles.trim().isEmpty) {
+      return false;
+    }
+
+    try {
+      final decoded = jsonDecode(rawProfiles);
+      if (decoded is! List) {
+        return false;
+      }
+
+      for (final entry in decoded) {
+        if (entry is! Map) {
+          continue;
+        }
+        final map = Map<String, dynamic>.from(entry);
+        final id = map['id'] as String?;
+        if (id != activeServerId) {
+          continue;
+        }
+        return map['aiGeneratedTitlesEnabled'] as bool? ?? false;
+      }
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to read AI title toggle from server profile',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return false;
+  }
+
+  int _resolveAutoTitleMaxWords() {
+    final platform = defaultTargetPlatform;
+    final isMobile =
+        platform == TargetPlatform.android || platform == TargetPlatform.iOS;
+    if (!isMobile && _isForegroundActive) {
+      return 6;
+    }
+    return 4;
+  }
+
+  void _scheduleAutoTitleRefresh(String sessionId) {
+    if (titleGenerator == null || sessionId.isEmpty) {
+      return;
+    }
+    if (_autoTitleConsolidatedSessionIds.contains(sessionId)) {
+      return;
+    }
+    if (_autoTitleInFlightSessionIds.contains(sessionId)) {
+      _autoTitleQueuedSessionIds.add(sessionId);
+      return;
+    }
+    unawaited(_processAutoTitleQueue(sessionId));
+  }
+
+  Future<void> _processAutoTitleQueue(String sessionId) async {
+    if (_autoTitleInFlightSessionIds.contains(sessionId)) {
+      _autoTitleQueuedSessionIds.add(sessionId);
+      return;
+    }
+
+    _autoTitleInFlightSessionIds.add(sessionId);
+    try {
+      var keepProcessing = true;
+      while (keepProcessing) {
+        _autoTitleQueuedSessionIds.remove(sessionId);
+        await _runAutoTitlePass(sessionId);
+        keepProcessing = _autoTitleQueuedSessionIds.contains(sessionId);
+      }
+    } finally {
+      _autoTitleQueuedSessionIds.remove(sessionId);
+      _autoTitleInFlightSessionIds.remove(sessionId);
+    }
+  }
+
+  Future<void> _runAutoTitlePass(String sessionId) async {
+    final generator = titleGenerator;
+    if (generator == null ||
+        _autoTitleConsolidatedSessionIds.contains(sessionId)) {
+      return;
+    }
+
+    final runContextKey = _activeContextKey;
+    final runProjectId = projectProvider.currentProjectId;
+    final runDirectory = projectProvider.currentDirectory;
+
+    final session = _sessionById(sessionId);
+    if (session == null || _currentSession?.id != sessionId) {
+      return;
+    }
+
+    if (!await _isAutoTitleEnabledForActiveServer()) {
+      return;
+    }
+
+    final snapshot = _buildAutoTitleSnapshot(sessionId);
+    if (snapshot == null) {
+      return;
+    }
+
+    final lastSignature = _autoTitleLastSignatureBySessionId[sessionId];
+    if (lastSignature == snapshot.signature) {
+      if (snapshot.isConsolidated) {
+        _autoTitleConsolidatedSessionIds.add(sessionId);
+      }
+      return;
+    }
+
+    if (snapshot.isConsolidated && lastSignature == null) {
+      _autoTitleLastSignatureBySessionId[sessionId] = snapshot.signature;
+      _autoTitleConsolidatedSessionIds.add(sessionId);
+      return;
+    }
+
+    _autoTitleLastSignatureBySessionId[sessionId] = snapshot.signature;
+
+    final promptMessages = snapshot.messages
+        .map(
+          (message) => ChatTitleGeneratorMessage(
+            role: message.role == MessageRole.user ? 'user' : 'assistant',
+            text: message.text,
+          ),
+        )
+        .toList(growable: false);
+
+    final generatedTitle = await generator.generateTitle(
+      promptMessages,
+      maxWords: _resolveAutoTitleMaxWords(),
+    );
+    final normalized = generatedTitle?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return;
+    }
+
+    final liveSession = _sessionById(sessionId);
+    if (liveSession == null ||
+        _currentSession?.id != sessionId ||
+        _activeContextKey != runContextKey ||
+        projectProvider.currentProjectId != runProjectId ||
+        projectProvider.currentDirectory != runDirectory) {
+      return;
+    }
+
+    final currentTitle = liveSession.title?.trim();
+    if (currentTitle == normalized) {
+      if (snapshot.isConsolidated) {
+        _autoTitleConsolidatedSessionIds.add(sessionId);
+      }
+      return;
+    }
+
+    final result = await updateChatSession(
+      UpdateChatSessionParams(
+        projectId: runProjectId,
+        sessionId: sessionId,
+        input: SessionUpdateInput(title: normalized),
+        directory: runDirectory,
+      ),
+    );
+
+    result.fold(
+      (failure) {
+        AppLogger.warn(
+          'Auto title update failed for session=$sessionId: ${failure.message}',
+        );
+      },
+      (updated) {
+        _applySessionLocally(updated);
+        notifyListeners();
+        unawaited(_persistSessionCacheBestEffort());
+        unawaited(_persistLastSessionSnapshotBestEffort());
+      },
+    );
+
+    if (snapshot.isConsolidated) {
+      _autoTitleConsolidatedSessionIds.add(sessionId);
+    }
+  }
+
   Future<void> _fetchMessageFallback(String sessionId, String messageId) async {
     final result = await getChatMessage(
       GetChatMessageParams(
@@ -1921,6 +2227,7 @@ class ChatProvider extends ChangeNotifier {
           }
           _messages = _mergeServerMessagesWithPendingLocalUsers(messages);
           notifyListeners();
+          _scheduleAutoTitleRefresh(session.id);
         },
       );
 
@@ -2409,6 +2716,10 @@ class ChatProvider extends ChangeNotifier {
     _recentModelKeys = <String>[];
     _modelUsageCounts = <String, int>{};
     _selectedVariantByModel = <String, String>{};
+    _autoTitleConsolidatedSessionIds.clear();
+    _autoTitleLastSignatureBySessionId.clear();
+    _autoTitleInFlightSessionIds.clear();
+    _autoTitleQueuedSessionIds.clear();
     _state = _sessions.isEmpty ? ChatState.initial : ChatState.loaded;
     notifyListeners();
 
@@ -3170,6 +3481,7 @@ class ChatProvider extends ChangeNotifier {
         }
         _messages = messages;
         _pendingLocalUserMessageIds.clear();
+        _scheduleAutoTitleRefresh(sessionId);
         _setState(ChatState.loaded);
         unawaited(_persistLastSessionSnapshotBestEffort());
       },
@@ -3241,6 +3553,7 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(userMessage);
       _pendingLocalUserMessageIds.add(localMessageId);
       notifyListeners();
+      _scheduleAutoTitleRefresh(_currentSession!.id);
       unawaited(_persistLastSessionSnapshotBestEffort());
 
       // Ensure providers are initialized
@@ -3476,6 +3789,7 @@ class ChatProvider extends ChangeNotifier {
         _pendingLocalUserMessageIds.remove(previousId);
         _messages[pendingLocalIndex] = message;
         notifyListeners();
+        _scheduleAutoTitleRefresh(message.sessionId);
         _scrollToBottomCallback?.call();
         return;
       }
@@ -3509,6 +3823,7 @@ class ChatProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+    _scheduleAutoTitleRefresh(message.sessionId);
 
     // Trigger auto-scroll
     _scrollToBottomCallback?.call();

@@ -45,6 +45,7 @@ import '../../presentation/providers/chat_provider.dart';
 import '../../presentation/providers/project_provider.dart';
 import '../../presentation/providers/settings_provider.dart';
 import '../../presentation/services/event_feedback_dispatcher.dart';
+import '../../presentation/services/chat_title_generator.dart';
 import '../../presentation/services/notification_service.dart';
 import '../../presentation/services/sound_service.dart';
 
@@ -78,6 +79,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(() => SoundService());
+  sl.registerLazySingleton<ChatTitleGenerator>(() => ChatAtTitleGenerator());
 
   // Repositories
   sl.registerLazySingleton<AppRepository>(
@@ -164,6 +166,7 @@ Future<void> init() async {
       projectProvider: sl(),
       localDataSource: sl(),
       eventFeedbackDispatcher: sl(),
+      titleGenerator: sl(),
     ),
   );
 

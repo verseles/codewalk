@@ -8,6 +8,7 @@ class ServerProfile extends Equatable {
     this.basicAuthEnabled = false,
     this.basicAuthUsername = '',
     this.basicAuthPassword = '',
+    this.aiGeneratedTitlesEnabled = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -18,6 +19,7 @@ class ServerProfile extends Equatable {
   final bool basicAuthEnabled;
   final String basicAuthUsername;
   final String basicAuthPassword;
+  final bool aiGeneratedTitlesEnabled;
   final int createdAt;
   final int updatedAt;
 
@@ -37,6 +39,7 @@ class ServerProfile extends Equatable {
       'basicAuthEnabled': basicAuthEnabled,
       'basicAuthUsername': basicAuthUsername,
       'basicAuthPassword': basicAuthPassword,
+      'aiGeneratedTitlesEnabled': aiGeneratedTitlesEnabled,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -50,6 +53,8 @@ class ServerProfile extends Equatable {
       basicAuthEnabled: json['basicAuthEnabled'] as bool? ?? false,
       basicAuthUsername: json['basicAuthUsername'] as String? ?? '',
       basicAuthPassword: json['basicAuthPassword'] as String? ?? '',
+      aiGeneratedTitlesEnabled:
+          json['aiGeneratedTitlesEnabled'] as bool? ?? false,
       createdAt: json['createdAt'] as int? ?? 0,
       updatedAt: json['updatedAt'] as int? ?? 0,
     );
@@ -62,6 +67,7 @@ class ServerProfile extends Equatable {
     bool? basicAuthEnabled,
     String? basicAuthUsername,
     String? basicAuthPassword,
+    bool? aiGeneratedTitlesEnabled,
     int? createdAt,
     int? updatedAt,
   }) {
@@ -72,6 +78,8 @@ class ServerProfile extends Equatable {
       basicAuthEnabled: basicAuthEnabled ?? this.basicAuthEnabled,
       basicAuthUsername: basicAuthUsername ?? this.basicAuthUsername,
       basicAuthPassword: basicAuthPassword ?? this.basicAuthPassword,
+      aiGeneratedTitlesEnabled:
+          aiGeneratedTitlesEnabled ?? this.aiGeneratedTitlesEnabled,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -85,6 +93,7 @@ class ServerProfile extends Equatable {
     basicAuthEnabled,
     basicAuthUsername,
     basicAuthPassword,
+    aiGeneratedTitlesEnabled,
     createdAt,
     updatedAt,
   ];

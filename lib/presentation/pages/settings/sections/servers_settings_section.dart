@@ -303,6 +303,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
       text: initial?.basicAuthPassword ?? '',
     );
     var basicAuthEnabled = initial?.basicAuthEnabled ?? false;
+    var aiGeneratedTitlesEnabled = initial?.aiGeneratedTitlesEnabled ?? false;
     final formKey = GlobalKey<FormState>();
 
     final shouldSave = await showDialog<bool>(
@@ -384,6 +385,24 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                           },
                         ),
                       ],
+                      const SizedBox(height: 6),
+                      SwitchListTile(
+                        value: aiGeneratedTitlesEnabled,
+                        onChanged: (value) {
+                          setState(() {
+                            aiGeneratedTitlesEnabled = value;
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Enable AI generated titles'),
+                      ),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'This is a free service powered by https://ch.at. Disable if you mind about your privacy.',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -424,6 +443,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
             basicAuthEnabled: basicAuthEnabled,
             basicAuthUsername: usernameController.text.trim(),
             basicAuthPassword: passwordController.text.trim(),
+            aiGeneratedTitlesEnabled: aiGeneratedTitlesEnabled,
             setAsActive: appProvider.serverProfiles.isEmpty,
           )
         : await appProvider.updateServerProfile(
@@ -433,6 +453,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
             basicAuthEnabled: basicAuthEnabled,
             basicAuthUsername: usernameController.text.trim(),
             basicAuthPassword: passwordController.text.trim(),
+            aiGeneratedTitlesEnabled: aiGeneratedTitlesEnabled,
           );
 
     if (!success) {

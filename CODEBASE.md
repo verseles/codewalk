@@ -575,6 +575,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Multi-server profile management (`ServerProfile`) with active/default selection
 - Per-server basic auth configuration and URL normalization
 - Health-aware activation (`/global/health`, fallback `/path`)
+- Legacy migration creates a profile only when legacy server/auth keys exist; clean installs now keep an empty server list until the user adds one
 
 ### Session Module
 - Session list loading and caching
@@ -584,6 +585,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Last-session snapshot persistence (`session + messages`) scoped by `server + directory` for instant startup restore
 - Stale-while-revalidate startup flow: cached last conversation renders immediately and message list revalidates silently in background
 - Full lifecycle operations: create/delete/rename/archive/unarchive/share/unshare/fork
+- Automatic AI title generation via `ch.at` after each user/assistant turn using up to the first 3 user + 3 assistant text messages, with per-session consolidation guard to stop after the 3+3 baseline is reached
 - Session insights orchestration: status snapshot + children/todo/diff hydration
 - Optimistic session mutations with rollback on API failure
 - Server-scoped cache isolation to prevent cross-server leakage
@@ -613,6 +615,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
 - Chat-first shell: `AppShellPage` mounts `ChatPage` as primary route; `Logs` and `Settings` open as secondary routes with native back navigation to chat
+- Startup onboarding guard: when no server profile exists, `AppShellPage` routes directly to `Settings > Servers` (mobile and desktop)
 - Responsive shell with mobile drawer and desktop split-view layout
 - Sidebar top action row appears above `Conversations`: compact one-line `Logs` and `Settings` buttons open secondary routes while chat remains implicit as the primary area
 - Desktop shortcuts for new chat, refresh, input focus, and agent cycle
@@ -634,6 +637,7 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - dedicated Sounds section was removed after Notifications absorbed all per-category sound controls
 - Server management moved into a dedicated `Servers` section:
   - add/edit/remove, active/default, health badges and activation guard
+  - per-server privacy toggle `Enable AI generated titles` controls whether background title generation is allowed for that server profile
 - Chat keyboard shortcuts are now resolved from persisted settings via runtime binding parsing
 - Notification runtime adapters:
   - Android/Linux/macOS/Windows through `flutter_local_notifications`

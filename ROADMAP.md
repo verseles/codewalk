@@ -307,24 +307,37 @@ Refinamento de conflito de foco: durante hold em bolha o toque é absorvido e o 
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
 - [x] Adotar stale-while-revalidate e manter a última sessão em cache local para UX instantânea ao abrir o app (servidores remotos podem levar até ~10s para responder, causando lag perceptível na abertura da última conversa)
 - [x] Auto-scroll para última mensagem como conversa de IM (WhatsApp/Telegram): avançar automaticamente para mensagens novas enquanto chegam, exceto quando usuário rolou para cima intencionalmente (detectar via botão seta pra baixo que aparece ao subir - significa que usuário está lendo histórico e não quer ser interrompido por auto-scroll)
-- [ ] Tool bash: mostrar o comando executado junto com o resultado (atualmente só mostra o output, não mostra qual comando gerou aquele resultado)
+- [x] Tool bash: mostrar o comando executado junto com o resultado (atualmente só mostra o output, não mostra qual comando gerou aquele resultado)
 - [ ] Fazer atalhos de teclado funcionarem de verdade
 - [ ] Exibir seção `Shortcuts` no mobile quando houver teclado físico conectado
 - [x] Cada tool call deve mostrar no máximo duas linhas com opção discreta de expandir para exibir todo o conteúdo
-- [ ] Remover o texto `tool call` das bolhas de tool call
+- [x] Remover o texto `tool call` das bolhas de tool call
 - [ ] Verificar atualizações baseadas nos releases do GitHub usando a API pública do GitHub
-- [ ] Em mobile, exibir apenas o ícone de status nas tool calls (sem textos como `Running`, `Completed`, `Finished`); manter o texto de status apenas no desktop
-- [ ] Usar o serviço `ch.at` para gerar títulos automaticamente
-- [ ] Usar a cor fornecida pelo agent via backend
-- [ ] Remover ícone do seletor de agente
-- [ ] Remover bordas dos selects de agent, provider/model e thinking
-- [ ] Subir o botão attach para ficar ao lado do select de agent, liberando mais espaço pro input de texto
+- [x] Em mobile, exibir apenas o ícone de status nas tool calls (sem textos como `Running`, `Completed`, `Finished`); manter o texto de status apenas no desktop
+- [x] Usar o serviço `ch.at` para gerar títulos automaticamente
+- [x] Usar a cor fornecida pelo agent via backend
+- [x] Remover ícone do seletor de agente
+- [x] Remover bordas dos selects de agent, provider/model e thinking
+- [x] Subir o botão attach para ficar ao lado do select de agent, liberando mais espaço pro input de texto
+- [ ] Inserir botão de fácil acesso para exibir/ocultar o Thinking (toggle rápido no header da mensagem ou área do composer)
+- [x] Simplificar barra de título: reduzir altura/padding, ocultar rótulos secundários, priorizar informações essenciais apenas
+- [x] Mover ícone/botão de status do servidor para dentro da barra lateral; mostrar pontinho indicador no menu hamburguer quando servidor não estiver verde (desconectado/degradado)
+- [x] Mover botão de logs para dentro de Settings (consolidar navegação secundária)
+- [x] Transformar botão Settings em apenas um ícone (⚙️), removendo rótulo de texto
+- [x] Quando não houver nenhum servidor cadastrado, redirecionar automaticamente para tela de servidores ao abrir o app
+- [ ] Adicionar opção em Settings para escolher densidade de todos os elementos do app (denso, normal, espaçoso)
+- [ ] Refresh providers/model em background de forma assíncrona ao abrir o app
+- [ ] Adicionar instruções básicas de como instalar e executar um servidor OpenCode na tela de adicionar servidor
 
 Pronta para análise: adicionada ação de arquivamento na seção de contextos fechados para ocultar projects fechados sem depender de `worktree`, com persistência por servidor para manter a curadoria da lista ao reiniciar/recarregar. Também foi implementado cache persistido da última sessão (sessão + mensagens) por escopo (`server + directory`) com restore instantâneo na abertura e revalidação silenciosa em background (SWR), preservando usabilidade mesmo com latência alta do servidor remoto. No mobile, o envio pelo teclado agora usa ação `send` e oculta o teclado/foco após submissão para liberar mais espaço da conversa.
+Pronta para análise: o status/switch de servidor foi movido do app bar para a sidebar com controle centralizado e indicador de alerta no botão hambúrguer quando a conexão/saúde não está verde; `Logs` foi consolidado dentro de `Settings` como seção dedicada; e o acesso de `Settings` na sidebar foi simplificado para botão somente com ícone (sem rótulo textual), mantendo tooltip e cobertura de testes de navegação/UX.
 Pronta para análise: comportamento de auto-scroll estilo IM foi finalizado no chat. Enquanto o usuário permanece no final da conversa, novas mensagens continuam acompanhando automaticamente; ao subir o histórico intencionalmente, o auto-follow pausa e a UI preserva a posição de leitura, destacando o FAB de retorno ao último item. Ao tocar no FAB, a conversa volta ao fim e o auto-follow é reativado.
+Pronta para análise: os controles de agent/model/thinking foram refinados para visual sem borda, o seletor de agente ficou sem ícone e passou a aplicar a `color` recebida do backend (quando disponível) no chip e no menu de seleção. O botão de anexos foi movido para a barra de controles ao lado dos seletores, liberando espaço horizontal no composer sem alterar o fluxo de anexar imagens/PDF.
 Pronta para análise: tool calls agora iniciam com preview compacto de no máximo duas linhas para saída/erro e exibem ação discreta de expandir/recolher (`Show more`/`Show less`) para alternar entre visão resumida e conteúdo completo, reduzindo ruído visual sem perder acesso ao detalhe.
 Refinamento pós-entrega aplicado nos blocos de thinking: o bloco mais recente permanece expandido por padrão, e blocos anteriores são automaticamente colapsados quando um novo bloco de thinking é adicionado, mantendo opção manual de expandir/recolher em cada bloco.
 Correção pós-validação aplicada: o critério de "bloco mais recente" passou a ser global na conversa (não apenas dentro da mesma mensagem), garantindo que thinkings anteriores realmente colapsem quando um novo thinking surgir em outro bloco/mensagem.
+Pronta para análise: tool calls agora exibem comando executado (com extração resiliente de `input.command`/`input.cmd` e fallback legível), removeram o prefixo textual `Tool Call` do cabeçalho e aplicam status compacto por ícone no mobile, preservando label textual apenas no desktop/web. Cobertura de widget foi ampliada para validar comando visível, remoção do texto antigo e diferença mobile/desktop no chip de status.
+Pronta para análise: onboarding de servidores aplicado no shell principal. Quando não há nenhum servidor configurado, o app abre automaticamente em `Settings > Servers` (mobile e desktop), com guarda de inicialização para evitar redirecionamento incorreto antes de carregar estado local. Também foi removida a criação automática de servidor padrão em instalações sem legado, habilitando estado inicial realmente vazio.
 
 ## Code Quality and Technical Debt
 

@@ -159,6 +159,17 @@ class AppProvider extends ChangeNotifier {
     final oldBasicUser = await _localDataSource.getBasicAuthUsername();
     final oldBasicPassword = await _localDataSource.getBasicAuthPassword();
 
+    final hasLegacyHost = oldHost != null && oldHost.trim().isNotEmpty;
+    final hasLegacyPort = oldPort != null;
+    final hasLegacyAuth =
+        (oldBasicEnabled ?? false) ||
+        (oldBasicUser != null && oldBasicUser.trim().isNotEmpty) ||
+        (oldBasicPassword != null && oldBasicPassword.trim().isNotEmpty);
+    if (!hasLegacyHost && !hasLegacyPort && !hasLegacyAuth) {
+      _serverProfiles = <ServerProfile>[];
+      return;
+    }
+
     final host = (oldHost == null || oldHost.trim().isEmpty)
         ? ApiConstants.defaultHost
         : oldHost.trim();
@@ -172,6 +183,7 @@ class AppProvider extends ChangeNotifier {
       basicAuthEnabled: oldBasicEnabled ?? false,
       basicAuthUsername: oldBasicUser ?? '',
       basicAuthPassword: oldBasicPassword ?? '',
+      aiGeneratedTitlesEnabled: false,
       createdAt: now,
       updatedAt: now,
     );
@@ -183,6 +195,9 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> _ensureActiveSelection() async {
     if (_serverProfiles.isEmpty) {
+      _activeServerId = null;
+      _defaultServerId = null;
+      await _localDataSource.saveDefaultServerId(null);
       return;
     }
 
@@ -226,6 +241,9 @@ class AppProvider extends ChangeNotifier {
   void _applyActiveServerToClient() {
     final profile = activeServer;
     if (profile == null) {
+      _dioClient.clearAuth();
+      _serverHost = ApiConstants.defaultHost;
+      _serverPort = ApiConstants.defaultPort;
       return;
     }
     _dioClient.updateBaseUrl(profile.url);
@@ -253,6 +271,7 @@ class AppProvider extends ChangeNotifier {
     bool basicAuthEnabled = false,
     String basicAuthUsername = '',
     String basicAuthPassword = '',
+    bool aiGeneratedTitlesEnabled = false,
     bool setAsActive = false,
   }) async {
     await initialize();
@@ -275,6 +294,7 @@ class AppProvider extends ChangeNotifier {
       basicAuthEnabled: basicAuthEnabled,
       basicAuthUsername: basicAuthUsername.trim(),
       basicAuthPassword: basicAuthPassword.trim(),
+      aiGeneratedTitlesEnabled: aiGeneratedTitlesEnabled,
       createdAt: now,
       updatedAt: now,
     );
@@ -298,6 +318,7 @@ class AppProvider extends ChangeNotifier {
     required bool basicAuthEnabled,
     required String basicAuthUsername,
     required String basicAuthPassword,
+    required bool aiGeneratedTitlesEnabled,
   }) async {
     await initialize();
     final index = _serverProfiles.indexWhere((p) => p.id == id);
@@ -327,6 +348,7 @@ class AppProvider extends ChangeNotifier {
       basicAuthEnabled: basicAuthEnabled,
       basicAuthUsername: basicAuthUsername.trim(),
       basicAuthPassword: basicAuthPassword.trim(),
+      aiGeneratedTitlesEnabled: aiGeneratedTitlesEnabled,
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
     final copied = List<ServerProfile>.from(_serverProfiles);
@@ -346,11 +368,6 @@ class AppProvider extends ChangeNotifier {
 
   Future<bool> removeServerProfile(String id) async {
     await initialize();
-    if (_serverProfiles.length <= 1) {
-      _setError('At least one server profile is required');
-      return false;
-    }
-
     final exists = _serverProfiles.any((p) => p.id == id);
     if (!exists) {
       _setError('Server profile not found');
@@ -359,6 +376,18 @@ class AppProvider extends ChangeNotifier {
 
     _serverProfiles = _serverProfiles.where((p) => p.id != id).toList();
     _serverHealthById.remove(id);
+
+    if (_serverProfiles.isEmpty) {
+      _activeServerId = null;
+      _defaultServerId = null;
+      _isConnected = false;
+      _appInfo = null;
+      _applyActiveServerToClient();
+      await _persistServerProfiles();
+      _errorMessage = '';
+      notifyListeners();
+      return true;
+    }
 
     if (_defaultServerId == id) {
       _defaultServerId = _serverProfiles.first.id;
@@ -531,6 +560,7 @@ class AppProvider extends ChangeNotifier {
         basicAuthEnabled: current.basicAuthEnabled,
         basicAuthUsername: current.basicAuthUsername,
         basicAuthPassword: current.basicAuthPassword,
+        aiGeneratedTitlesEnabled: current.aiGeneratedTitlesEnabled,
       );
     }
 

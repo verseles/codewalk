@@ -81,6 +81,17 @@ void main() {
       },
     );
 
+    test(
+      'initialize keeps empty server list when no legacy config exists',
+      () async {
+        await provider.initialize();
+
+        expect(provider.serverProfiles, isEmpty);
+        expect(provider.activeServerId, isNull);
+        expect(provider.defaultServerId, isNull);
+      },
+    );
+
     test('addServerProfile rejects duplicates after normalization', () async {
       await provider.initialize();
       final created = await provider.addServerProfile(
@@ -106,6 +117,36 @@ void main() {
 
       expect(ok, isFalse);
       expect(provider.errorMessage, 'Cannot activate an unhealthy server');
+    });
+
+    test('persists AI-generated-title toggle in server profiles', () async {
+      await provider.initialize();
+      final created = await provider.addServerProfile(
+        url: 'http://127.0.0.1:5010',
+        aiGeneratedTitlesEnabled: true,
+      );
+
+      expect(created, isTrue);
+      final profile = provider.serverProfiles
+          .where((item) => item.url == 'http://127.0.0.1:5010')
+          .first;
+      expect(profile.aiGeneratedTitlesEnabled, isTrue);
+
+      final updated = await provider.updateServerProfile(
+        id: profile.id,
+        url: profile.url,
+        label: profile.label,
+        basicAuthEnabled: profile.basicAuthEnabled,
+        basicAuthUsername: profile.basicAuthUsername,
+        basicAuthPassword: profile.basicAuthPassword,
+        aiGeneratedTitlesEnabled: false,
+      );
+
+      expect(updated, isTrue);
+      final refreshed = provider.serverProfiles
+          .where((item) => item.id == profile.id)
+          .first;
+      expect(refreshed.aiGeneratedTitlesEnabled, isFalse);
     });
   });
 }
