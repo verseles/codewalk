@@ -1025,6 +1025,8 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }) {
     final refreshlessEnabled = FeatureFlags.refreshlessRealtime;
     return AppBar(
+      toolbarHeight: isMobile ? 50 : 48,
+      leadingWidth: isMobile ? 46 : null,
       leading: isMobile
           ? Builder(
               builder: (leadingContext) {
@@ -1078,7 +1080,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               },
             )
           : null,
-      titleSpacing: isMobile ? 0 : 8,
+      titleSpacing: isMobile ? 0 : 4,
       title: _buildProjectSelectorTitle(isMobile: isMobile),
       actions: [
         if (!isMobile)
@@ -1127,35 +1129,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 chatProvider: chatProvider,
                 appProvider: appProvider,
               );
-              return Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: Container(
-                  key: const ValueKey<String>('chat_sync_status_chip'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        label,
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ],
+              return Tooltip(
+                message: 'Sync: $label',
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Container(
+                    key: const ValueKey<String>('chat_sync_status_chip'),
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Icon(Icons.sync_rounded, size: 14, color: color),
                   ),
                 ),
               );
@@ -1186,7 +1172,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             tooltip: 'New Chat',
             onPressed: _createNewSession,
           ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 2),
       ],
     );
   }
@@ -1546,26 +1532,26 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               child: Padding(
                 key: const ValueKey<String>('project_selector_button'),
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 2 : 6,
-                  vertical: 6,
+                  horizontal: isMobile ? 2 : 4,
+                  vertical: 3,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.folder_open_outlined, size: 16),
-                    SizedBox(width: isMobile ? 4 : 6),
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: isMobile ? 100 : 280,
+                        maxWidth: isMobile ? 100 : 240,
                       ),
                       child: Text(
                         currentDirectoryChip,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.arrow_drop_down, size: 18),
+                    const SizedBox(width: 1),
+                    const Icon(Icons.arrow_drop_down, size: 16),
                   ],
                 ),
               ),
@@ -4172,108 +4158,49 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           constraints: BoxConstraints(maxWidth: maxContentWidth),
           child: Column(
             children: [
-              // Current session info - modern design
+              // Active session header
               if (chatProvider.currentSession != null)
                 Builder(
                   builder: (context) {
                     final currentSession = chatProvider.currentSession!;
                     return Container(
+                      key: const ValueKey<String>(
+                        'chat_compact_session_header',
+                      ),
                       width: double.infinity,
-                      margin: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.fromLTRB(8, 6, 8, 4),
                       child: Card(
-                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerLow,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                            horizontal: 12,
+                            vertical: 8,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.chat_bubble_outline,
-                                    size: 18,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSecondaryContainer,
+                              Expanded(
+                                child: SessionTitleInlineEditor(
+                                  key: ValueKey<String>(
+                                    'chat_header_session_title_editor_${currentSession.id}',
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: SessionTitleInlineEditor(
-                                      key: ValueKey<String>(
-                                        'chat_header_session_title_editor_${currentSession.id}',
-                                      ),
-                                      title: _sessionDisplayTitle(
-                                        currentSession,
-                                      ),
-                                      editingValue: _sessionEditingValue(
-                                        currentSession,
-                                      ),
-                                      textStyle: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall
-                                          ?.copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondaryContainer,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                      onRename: (title) => chatProvider
-                                          .renameSession(currentSession, title),
-                                    ),
+                                  title: _sessionDisplayTitle(currentSession),
+                                  editingValue: _sessionEditingValue(
+                                    currentSession,
                                   ),
-                                  if (chatProvider.currentSessionStatus != null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        _sessionStatusLabel(
-                                          chatProvider.currentSessionStatus!,
-                                        ),
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.labelSmall,
-                                      ),
-                                    ),
-                                ],
+                                  textStyle: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                  onRename: (title) => chatProvider
+                                      .renameSession(currentSession, title),
+                                ),
                               ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  _metaChip(
-                                    context,
-                                    icon: Icons.call_split,
-                                    label:
-                                        'Children: ${chatProvider.currentSessionChildren.length}',
-                                  ),
-                                  _metaChip(
-                                    context,
-                                    icon: Icons.checklist,
-                                    label:
-                                        'Todos: ${chatProvider.currentSessionTodo.length}',
-                                  ),
-                                  _metaChip(
-                                    context,
-                                    icon: Icons.compare_arrows,
-                                    label:
-                                        'Diff: ${chatProvider.currentSessionDiff.length}',
-                                  ),
-                                ],
-                              ),
+                              if (chatProvider.currentSessionStatus != null)
+                                _buildSessionStatusBadge(
+                                  chatProvider.currentSessionStatus!,
+                                ),
                             ],
                           ),
                         ),
@@ -5228,26 +5155,48 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     }
   }
 
-  Widget _metaChip(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-  }) {
+  Widget _buildSessionStatusBadge(SessionStatusInfo status) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = _sessionStatusColorForBadge(status, colorScheme);
+    final icon = _sessionStatusIcon(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      key: const ValueKey<String>('chat_header_session_status_badge'),
+      margin: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14),
-          const SizedBox(width: 4),
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-        ],
+      child: Tooltip(
+        message: _sessionStatusLabel(status),
+        child: Icon(icon, size: 14, color: color),
       ),
     );
+  }
+
+  Color _sessionStatusColorForBadge(
+    SessionStatusInfo status,
+    ColorScheme colorScheme,
+  ) {
+    switch (status.type) {
+      case SessionStatusType.busy:
+        return colorScheme.primary;
+      case SessionStatusType.retry:
+        return colorScheme.error;
+      case SessionStatusType.idle:
+        return colorScheme.tertiary;
+    }
+  }
+
+  IconData _sessionStatusIcon(SessionStatusInfo status) {
+    switch (status.type) {
+      case SessionStatusType.busy:
+        return Icons.hourglass_top_rounded;
+      case SessionStatusType.retry:
+        return Icons.refresh_rounded;
+      case SessionStatusType.idle:
+        return Icons.check_circle_outline_rounded;
+    }
   }
 
   String _sessionDisplayTitle(ChatSession session) {

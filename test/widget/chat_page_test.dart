@@ -216,6 +216,30 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('applies compact app bar toolbar heights', (
+      WidgetTester tester,
+    ) async {
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      final desktopAppBar = tester.widget<AppBar>(find.byType(AppBar).first);
+      expect(desktopAppBar.toolbarHeight, 48);
+
+      await tester.binding.setSurfaceSize(const Size(700, 900));
+      await tester.pumpAndSettle();
+
+      final mobileAppBar = tester.widget<AppBar>(find.byType(AppBar).first);
+      expect(mobileAppBar.toolbarHeight, 50);
+
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+    });
   });
 
   testWidgets(
@@ -2937,6 +2961,46 @@ void main() {
 
     final expected = SessionTitleFormatter.fallbackTitle(time: untitledTime);
     expect(find.text(expected), findsWidgets);
+  });
+
+  testWidgets('active session header keeps only essential info', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_compact_header',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Compact Header Session',
+        ),
+      ],
+    );
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('chat_compact_session_header')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Children:'), findsNothing);
+    expect(find.textContaining('Todos:'), findsNothing);
+    expect(find.textContaining('Diff:'), findsNothing);
   });
 
   testWidgets('renames current session through inline header editor', (
