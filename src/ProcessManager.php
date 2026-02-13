@@ -32,6 +32,9 @@ class ProcessManager
 
     private static string $input = '';
 
+    /** @var ExecutableFinder|null Finder instance for mocking in tests */
+    private static ?ExecutableFinder $executableFinder = null;
+
     /** @var array Secrets to redact from error messages */
     private array $secrets = [];
 
@@ -81,14 +84,24 @@ class ProcessManager
         self::$bin = $bin;
     }
 
+    /**
+     * Set the ExecutableFinder instance for testing.
+     *
+     * @param ExecutableFinder|null $finder The finder instance or null to use default.
+     */
+    public static function setExecutableFinder(?ExecutableFinder $finder): void
+    {
+        self::$executableFinder = $finder;
+    }
+
     public static function guessBin(): string
     {
         if (isset(self::$bin) && self::$bin !== '') {
             return self::$bin;
         }
 
-        $finder = new ExecutableFinder();
-        $rclonePath = $finder->find('rclone', '/usr/bin/rclone', [
+        $finder = self::$executableFinder ?? new ExecutableFinder();
+        $rclonePath = $finder->find('rclone', null, [
             '/usr/local/bin',
             '/usr/bin',
             '/bin',

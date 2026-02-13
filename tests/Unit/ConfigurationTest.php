@@ -6,6 +6,7 @@ namespace Verseles\Flyclone\Test\Unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\ExecutableFinder;
 use Verseles\Flyclone\CommandBuilder;
 use Verseles\Flyclone\ProcessManager;
 use Verseles\Flyclone\Providers\LocalProvider;
@@ -13,6 +14,21 @@ use Verseles\Flyclone\Rclone;
 
 class ConfigurationTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Mock ExecutableFinder to ensure tests run even without rclone installed
+        $mockFinder = $this->createMock(ExecutableFinder::class);
+        $mockFinder->method('find')->willReturn('/mock/path/to/rclone');
+        ProcessManager::setExecutableFinder($mockFinder);
+        ProcessManager::setBin(''); // Force re-guess
+    }
+
+    protected function tearDown(): void
+    {
+        ProcessManager::setExecutableFinder(null);
+        ProcessManager::setBin('');
+    }
+
     #[Test]
     public function set_and_get_timeout(): void
     {
