@@ -478,6 +478,8 @@ Deferred/optional after parity wave:
 | **build-android** | ubuntu-latest | 35min | Android arm64 release APK |
 | **create-release** | ubuntu-latest | 10min | Downloads artifacts and publishes GitHub Release |
 
+macOS release builds pin CocoaPods deployment target to 11.0 in `macos/Podfile` to satisfy plugin minimum requirements (notably `speech_to_text`).
+
 ### Quality Gates
 
 **Static Analysis (check_analyze_budget.sh):**

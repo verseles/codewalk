@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   build-linux:
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -45,6 +46,7 @@ jobs:
           path: codewalk-linux-x64.tar.gz
 
   build-windows:
+    if: false
     runs-on: windows-latest
     timeout-minutes: 35
     steps:
@@ -90,7 +92,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS (arm64)
-        run: flutter build macos --release
+        run: MACOSX_DEPLOYMENT_TARGET=11.0 flutter build macos --release
 
       - name: Package macOS arm64 artifact
         run: tar -czf codewalk-macos-arm64.tar.gz -C build/macos/Build/Products/Release codewalk.app
@@ -118,7 +120,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS (x64)
-        run: flutter build macos --release
+        run: MACOSX_DEPLOYMENT_TARGET=11.0 flutter build macos --release
 
       - name: Package macOS x64 artifact
         run: tar -czf codewalk-macos-x64.tar.gz -C build/macos/Build/Products/Release codewalk.app
@@ -130,6 +132,7 @@ jobs:
           path: codewalk-macos-x64.tar.gz
 
   build-android:
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
