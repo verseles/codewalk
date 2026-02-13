@@ -4,9 +4,10 @@ $ErrorActionPreference = "Stop"
 # CodeWalk installer (Windows)
 # Usage: irm https://raw.githubusercontent.com/<owner>/<repo>/main/install.ps1 | iex
 
-$Repo = if ($env:CODEWALK_REPO) { $env:CODEWALK_REPO } else { "helio/codewalk" }
+$Repo = if ($env:CODEWALK_REPO) { $env:CODEWALK_REPO } else { "verseles/codewalk" }
 $InstallDir = Join-Path $env:LOCALAPPDATA "CodeWalk"
 $BinaryPath = Join-Path $InstallDir "codewalk.exe"
+$VersionFile = Join-Path $InstallDir ".installed-version"
 $StartMenuShortcutPath = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\CodeWalk.lnk"
 
 function Info([string]$Message) {
@@ -56,6 +57,19 @@ function New-StartMenuShortcut([string]$TargetExePath) {
   $shortcut.Save()
 }
 
+function Get-InstalledVersion {
+  if (-not (Test-Path $VersionFile)) {
+    return ""
+  }
+
+  try {
+    return (Get-Content -Path $VersionFile -Raw).Trim()
+  }
+  catch {
+    return ""
+  }
+}
+
 $archTag = Get-ArchTag
 $asset = "codewalk-windows-$archTag.zip"
 
@@ -63,6 +77,22 @@ Info "Fetching latest release from $Repo"
 $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest" -Headers @{ "User-Agent" = "codewalk-install" }
 if (-not $release.tag_name) {
   Fail "Could not determine latest release tag."
+}
+
+$installedVersion = Get-InstalledVersion
+if ($installedVersion) {
+  if ($installedVersion -eq $release.tag_name) {
+    Info "Reinstalling CodeWalk $installedVersion"
+  }
+  else {
+    Info "Updating CodeWalk from $installedVersion to $($release.tag_name)"
+  }
+}
+elseif (Test-Path $InstallDir) {
+  Info "Existing installation detected. Installing latest release $($release.tag_name)"
+}
+else {
+  Info "Installing CodeWalk $($release.tag_name)"
 }
 
 $match = $release.assets | Where-Object { $_.name -eq $asset } | Select-Object -First 1
@@ -107,8 +137,10 @@ try {
     Warn "Could not create Start Menu shortcut: $($_.Exception.Message)"
   }
 
+  Set-Content -Path $VersionFile -Value $release.tag_name -NoNewline
+
   Write-Host ""
-  Write-Host "CodeWalk installed successfully at $InstallDir" -ForegroundColor Green
+  Write-Host "CodeWalk installed successfully at $InstallDir ($($release.tag_name))" -ForegroundColor Green
   Write-Host "Open a new terminal and run: codewalk"
 }
 finally {

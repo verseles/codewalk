@@ -66,6 +66,8 @@ codewalk/
 ├── RELEASE_NOTES.md   # Release signoff notes and known limitations
 ├── install.sh         # Unix installer script
 ├── install.ps1        # Windows installer script
+├── uninstall.sh       # Unix uninstaller script
+├── uninstall.ps1      # Windows uninstaller script
 └── Makefile           # Build automation and packaging gates
 ```
 
@@ -78,7 +80,7 @@ codewalk/
 | `.dart` (tests) | 27 | Test files (unit, widget, integration, support) |
 | `.dart` (total) | 135 | Repository files excluding build artifacts |
 | `.md` (markdown) | 9 | Docs + roadmap + release artifacts |
-| `.sh` (scripts) | 5 | CI validation + installer/smoke scripts |
+| `.sh` (scripts) | 7 | CI validation + installer/uninstaller scripts |
 
 ## Legacy Naming References
 
@@ -507,18 +509,28 @@ Deferred/optional after parity wave:
 **install.sh (Unix/Linux/macOS):**
 - Detects platform (Linux/Darwin) and architecture (x86_64/arm64/aarch64)
 - Fetches latest GitHub release via API
+- Supports idempotent reruns (fresh install, update, or reinstall)
 - Downloads tarball and extracts to user-local application data path
 - Creates CLI link in `~/.local/bin/codewalk`
 - Linux: registers Freedesktop desktop entry + icon in user scope
 - macOS: if an app bundle exists, installs it to `~/Applications/CodeWalk.app`
+- Persists installed version marker for future update/reinstall detection
 
 **install.ps1 (Windows PowerShell):**
 - Detects architecture (AMD64/ARM64)
 - Fetches latest GitHub release via API
+- Supports idempotent reruns (fresh install, update, or reinstall)
 - Downloads ZIP, extracts to `%LOCALAPPDATA%\CodeWalk`
 - Automatically adds to user PATH
 - Creates Start Menu shortcut with executable icon
+- Persists installed version marker for future update/reinstall detection
 - Cleanup of temporary files
+
+**uninstall.sh / uninstall.ps1:**
+- Remove local installation folders and launcher integrations
+- Linux: remove user desktop entry and icon cache references
+- macOS: remove `~/Applications/CodeWalk.app`
+- Windows: remove Start Menu shortcut and user PATH entry
 
 ## Dependencies
 

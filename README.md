@@ -74,12 +74,21 @@ make precommit  # check + android
 ## Installer Scripts
 
 - Linux/macOS: `install.sh`
+  - Idempotent: if run again, it auto-detects and performs update/reinstall from latest release.
   - Linux: installs CLI + registers Freedesktop desktop entry and icon in user scope.
   - macOS: installs CLI and, when a `.app` bundle is present, places it in `~/Applications`.
 - Windows: `install.ps1`
+  - Idempotent: if run again, it auto-detects and performs update/reinstall from latest release.
   - Installs to `%LOCALAPPDATA%\\CodeWalk`, adds user PATH, and creates a Start Menu shortcut.
 
-Both scripts consume the latest GitHub release artifacts by default.
+Both installers consume the latest GitHub release artifacts by default.
+
+### Uninstall
+
+- Linux/macOS: `uninstall.sh`
+  - Removes user-scoped install directory, CLI symlink, and desktop integration artifacts.
+- Windows: `uninstall.ps1`
+  - Removes `%LOCALAPPDATA%\\CodeWalk`, Start Menu shortcut, and PATH entry.
 
 ## Architecture
 

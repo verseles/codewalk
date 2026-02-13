@@ -4,11 +4,12 @@ set -eu
 # CodeWalk installer
 # Usage: curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | sh
 
-REPO="${CODEWALK_REPO:-helio/codewalk}"
+REPO="${CODEWALK_REPO:-verseles/codewalk}"
 APP_ID="com.verseles.codewalk"
 APP_NAME="CodeWalk"
 XDG_DATA_HOME_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 INSTALL_DIR="${XDG_DATA_HOME_DIR}/codewalk"
+VERSION_FILE="$INSTALL_DIR/.installed-version"
 BIN_DIR="$HOME/.local/bin"
 LINUX_DESKTOP_DIR="${XDG_DATA_HOME_DIR}/applications"
 LINUX_ICON_DIR="${XDG_DATA_HOME_DIR}/icons/hicolor/512x512/apps"
@@ -50,6 +51,33 @@ latest_release() {
   json="$(fetch "https://api.github.com/repos/$REPO/releases/latest")"
   version="$(printf '%s' "$json" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
   [ -n "$version" ] || fail "Could not determine latest release for $REPO"
+}
+
+detect_install_mode() {
+  installed_version=""
+  if [ -f "$VERSION_FILE" ]; then
+    installed_version="$(sed -n '1p' "$VERSION_FILE" | tr -d '\r' || true)"
+  fi
+
+  if [ -n "$installed_version" ]; then
+    if [ "$installed_version" = "$version" ]; then
+      install_mode="reinstall"
+      info "Reinstalling CodeWalk $version"
+    else
+      install_mode="update"
+      info "Updating CodeWalk from $installed_version to $version"
+    fi
+    return 0
+  fi
+
+  if [ -d "$INSTALL_DIR" ] || [ -L "$BIN_DIR/codewalk" ] || [ -f "$BIN_DIR/codewalk" ]; then
+    install_mode="update"
+    info "Existing installation detected. Installing latest release $version"
+    return 0
+  fi
+
+  install_mode="install"
+  info "Installing CodeWalk $version"
 }
 
 find_macos_bundle() {
@@ -174,11 +202,13 @@ download_and_install() {
   fi
 
   integrate_linux_desktop
+  printf '%s\n' "$version" > "$VERSION_FILE"
 }
 
 print_done() {
   info ""
   info "CodeWalk installed to $INSTALL_DIR"
+  info "Version: $version"
   info "Binary link: $BIN_DIR/codewalk"
 
   if [ "$platform" = "linux" ]; then
@@ -203,5 +233,6 @@ print_done() {
 
 detect_platform
 latest_release
+detect_install_mode
 download_and_install
 print_done
