@@ -27,11 +27,6 @@ jobs:
             flutter_arch: x64
             bundle_dir: build/linux/x64/release/bundle
             asset_name: codewalk-linux-x64.tar.gz
-          - runner: ubuntu-24.04-arm
-            arch_tag: arm64
-            flutter_arch: arm64
-            bundle_dir: build/linux/arm64/release/bundle
-            asset_name: codewalk-linux-arm64.tar.gz
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,11 +73,6 @@ jobs:
             flutter_arch: x64
             build_dir: build/windows/x64/runner/Release
             asset_name: codewalk-windows-x64.zip
-          - runner: windows-11-arm
-            arch_tag: arm64
-            flutter_arch: arm64
-            build_dir: build/windows/arm64/runner/Release
-            asset_name: codewalk-windows-arm64.zip
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -233,9 +223,7 @@ jobs:
         with:
           files: |
             artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
-            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
             artifacts/codewalk-windows-x64/codewalk-windows-x64.zip
-            artifacts/codewalk-windows-arm64/codewalk-windows-arm64.zip
             artifacts/codewalk-macos-arm64/codewalk-macos-arm64.tar.gz
             artifacts/codewalk-macos-x64/codewalk-macos-x64.tar.gz
             artifacts/codewalk-android/codewalk-android-arm64.apk
