@@ -184,196 +184,50 @@ Compatibility tiers:
 | Interactive flows | Implemented (Feature 013) | `/permission`, `/permission/{requestID}/reply`, `/question`, `/question/{requestID}/reply`, `/question/{requestID}/reject` | Extended decision workflows not covered by app parity tests |
 | Tooling/context | Partial | `/find/file`, `/file/*`, `/vcs`, `/mcp/*` (priority subset) + `/experimental/worktree*` | `/lsp`, `/pty*` |
 
-### Feature 013 Realtime Architecture (Implemented 2026-02-09)
+### Feature 013 Realtime Architecture (2026-02-09)
+Resilient SSE-based realtime event reducer for `session.*`, `message.*`, `permission.*`, `question.*` with interactive cards and fallback fetch.
+📋 **Arquitetura**: Ver [ADR-012: Realtime Event Reducer](#adr-012-realtime-event-reducer-and-interactive-prompt-orchestration)
+📁 **Módulos**: `chat_realtime.dart`, `watch_chat_events.dart`, interaction cards
 
-- Added dedicated realtime domain and parsing models:
-  - `lib/domain/entities/chat_realtime.dart`
-  - `lib/data/models/chat_realtime_model.dart`
-- Added realtime/interactions use cases:
-  - `lib/domain/usecases/watch_chat_events.dart`
-  - `lib/domain/usecases/get_chat_message.dart`
-  - `lib/domain/usecases/list_pending_permissions.dart`
-  - `lib/domain/usecases/reply_permission.dart`
-  - `lib/domain/usecases/list_pending_questions.dart`
-  - `lib/domain/usecases/reply_question.dart`
-  - `lib/domain/usecases/reject_question.dart`
-- Extended `ChatProvider` with provider-level reducer and interaction queues:
-  - resilient `/event` subscription lifecycle with reconnect
-  - state maps for `session.status`, pending permission, pending question
-  - fallback full-message fetch on partial/delta events
-- Added interaction UI widgets:
-  - `lib/presentation/widgets/permission_request_card.dart`
-  - `lib/presentation/widgets/question_request_card.dart`
+### Feature 014 Session Lifecycle Architecture (2026-02-10)
+Advanced session lifecycle operations (rename/archive/share/fork/delete) with optimistic mutations, rollback, and insight hydration (status/children/todo/diff).
+📋 **Arquitetura**: Ver [ADR-013: Session Lifecycle Orchestration](#adr-013-session-lifecycle-orchestration-with-optimistic-mutations-and-insight-hydration)
+📁 **Módulos**: lifecycle use cases, `session_lifecycle_model.dart`, session list action menu
 
-### Feature 014 Session Lifecycle Architecture (Implemented 2026-02-10)
+### Feature 015 Project/Workspace Context Architecture (2026-02-10)
+Project/workspace context orchestration with deterministic `serverId::directory` isolation, worktree lifecycle (create/reset/delete/open), and global event sync.
+📋 **Arquitetura**: Ver [ADR-014: Project/Workspace Context Orchestration](#adr-014-projectworkspace-context-orchestration-with-global-event-sync)
+📁 **Módulos**: `worktree.dart`, `watch_global_chat_events.dart`, `ProjectProvider`, context snapshots
+🔧 **UX**: workspace creation with directory browser/Git validation, telemetry for workspace operations
 
-- Added domain lifecycle entities and contracts:
-  - `lib/domain/entities/chat_session.dart` (`archivedAt`, `shareUrl`, `parentId`, `SessionTodo`, `SessionDiff`)
-  - `lib/domain/repositories/chat_repository.dart` (fork/status/children/todo/diff operations)
-- Added lifecycle use cases:
-  - `lib/domain/usecases/update_chat_session.dart`
-  - `lib/domain/usecases/share_chat_session.dart`
-  - `lib/domain/usecases/unshare_chat_session.dart`
-  - `lib/domain/usecases/fork_chat_session.dart`
-  - `lib/domain/usecases/get_session_status.dart`
-  - `lib/domain/usecases/get_session_children.dart`
-  - `lib/domain/usecases/get_session_todo.dart`
-  - `lib/domain/usecases/get_session_diff.dart`
-  - `lib/domain/usecases/abort_chat_session.dart` (stop active response)
-  - `lib/domain/usecases/summarize_chat_session.dart` (context compaction)
-- Expanded data layer for lifecycle endpoints and models:
-  - `lib/data/datasources/chat_remote_datasource.dart`
-  - `lib/data/models/chat_session_model.dart`
-  - `lib/data/models/session_lifecycle_model.dart`
-  - `lib/data/repositories/chat_repository_impl.dart`
-- Extended `ChatProvider` lifecycle orchestration:
-  - optimistic rename/archive/share/delete with rollback
-  - session insight hydration (`status`, `children`, `todo`, `diff`)
-  - session list search/filter/sort/load-more state
-  - reducer support for `todo.updated` and `session.diff`
-- Updated lifecycle UI surfaces:
-  - `lib/presentation/widgets/chat_session_list.dart` action menu (rename/share/archive/fork/delete)
-  - `lib/presentation/pages/chat_page.dart` session controls and insight chips/panel
+### Feature 016 Reliability and Release-Readiness Architecture (2026-02-10)
+Parity-wave release gate with evidence contract (automated coverage + QA matrix `PAR-001`..`PAR-008` + platform smoke + known limitations).
+📋 **Arquitetura**: Ver [ADR-015: Parity Wave Release Gate](#adr-015-parity-wave-release-gate-and-qa-evidence-contract)
+📁 **Artefatos**: `QA.feat016.release-readiness.md`, `RELEASE_NOTES.md`
 
-### Feature 015 Project/Workspace Context Architecture (Implemented 2026-02-10)
+### Feature 017 Realtime-First Refreshless Architecture (2026-02-10)
+Refreshless SSE-first sync with lifecycle-aware streams (background suspend, foreground reconcile), degraded fallback (30s scoped polling), and sync state UI.
+📋 **Arquitetura**: Ver [ADR-018: Refreshless Realtime Sync](#adr-018-refreshless-realtime-sync-with-lifecycle-and-degraded-fallback)
+📁 **Módulos**: `feature_flags.dart` (CODEWALK_REFRESHLESS_ENABLED), sync state machine, `/config` reconcile
+🔧 **UX**: removed manual refresh, sync status indicator (Connected/Reconnecting/Delayed)
 
-- Added project/worktree domain and remote contracts:
-  - `lib/domain/entities/worktree.dart`
-  - `lib/domain/repositories/project_repository.dart` (worktree methods)
-  - `lib/data/models/worktree_model.dart`
-  - `lib/data/datasources/project_remote_datasource.dart` (`/project/{id}`, `/experimental/worktree*`)
-- Added global event stream use case and repository support:
-  - `lib/domain/usecases/watch_global_chat_events.dart`
-  - `lib/domain/repositories/chat_repository.dart` (`subscribeGlobalEvents`)
-  - `lib/data/repositories/chat_repository_impl.dart`
-  - `lib/data/datasources/chat_remote_datasource.dart` (`/global/event`)
-- Expanded local persistence for project context scoping:
-  - `lib/data/datasources/app_local_datasource.dart`
-  - `lib/core/constants/app_constants.dart` (`currentProjectId`, `openProjectIds`)
-- Evolved provider orchestration for deterministic context isolation:
-  - `lib/presentation/providers/project_provider.dart` (open/close/reopen/switch + worktree actions)
-  - `lib/presentation/providers/chat_provider.dart` (context snapshots, dirty-context invalidation, global event sync, resilient SSE teardown)
-- Updated chat UI with project/workspace controls and active-context indicator:
-  - `lib/presentation/pages/chat_page.dart`
-  - Workspace creation dialog now accepts optional base-directory override to make project-folder targeting explicit.
-  - Workspace creation now includes a server-backed directory browser (`/file`) and validates Git context (`/vcs`) before submit.
-  - Directory picker now surfaces a git-only warning, and successful workspace creation force-switches context to the newly created directory.
-- Added workspace operation telemetry in `ProjectProvider` so `create/reset/delete` failures and user-facing provider errors are emitted to the in-app Logs stream.
+### Feature 019 File Explorer and Viewer Parity (2026-02-11)
+File explorer/viewer with tree navigation, quick-open search, tab management, and diff-aware refresh in Files surface (desktop pane + mobile dialog).
+📋 **Arquitetura**: Ver [ADR-020: File Explorer State](#adr-020-file-explorer-state-and-context-scoped-viewer-orchestration) + [ADR-021: Files-Centered Viewer](#adr-021-responsive-dialog-sizing-standard-and-files-centered-viewer-surface)
+📁 **Módulos**: `file_node.dart`, `file_explorer_logic.dart`, `session_title_formatter.dart`, presentation services
+🔧 **Endpoints**: `/file`, `/find/file`, `/file/content`
+🎯 **UX**: context-keyed explorer state, `N open files` dialog (responsive ~70% viewport), builtin `/open`
 
-### Feature 016 Reliability and Release-Readiness Architecture (Implemented 2026-02-10)
-
-- Added parity-wave release gate with explicit evidence contract:
-  - automated coverage expansion (unit/widget/integration),
-  - manual scenario matrix IDs `PAR-001`..`PAR-008`,
-  - platform runtime/build smoke requirements and documented known limitations.
-- Added release-readiness artifacts:
-  - `QA.feat016.release-readiness.md` for matrix execution and defect triage,
-  - `RELEASE_NOTES.md` for parity-wave signoff summary.
-- Expanded parity-focused tests for:
-  - server-scoped model selection restore across server switches,
-  - question reject flow in provider + chat widget integration,
-  - `/question/{id}/reject` integration coverage in mock server route contract.
-
-### Feature 017 Realtime-First Refreshless Architecture (Implemented 2026-02-10)
-
-- Added refreshless rollout guardrail:
-  - `lib/core/config/feature_flags.dart` (`CODEWALK_REFRESHLESS_ENABLED`, default `true`)
-- Expanded `ChatProvider` realtime orchestration:
-  - sync state machine (`connected` / `reconnecting` / `delayed`)
-  - lifecycle-aware stream policy (`setForegroundActive`) with background suspend and resume reconcile
-  - degraded mode with slow scoped polling (`30s`) only when SSE health degrades
-  - scoped reconcile queue replacing broad refresh patterns
-  - broader incremental reducer support (`message.created`, `permission.updated`, `question.updated`) plus global-event incremental application
-- Updated `ChatPage` UX to refreshless-first:
-  - removed manual refresh affordances in target chat/context flows when feature flag is enabled
-  - removed legacy 5-second active-screen refresh loop
-  - added sync status indicator (`Connected`, `Reconnecting`, `Sync delayed`) in the app bar on non-mobile layouts
-  - kept rollback path: manual refresh controls are conditionally available when feature flag is disabled
-- Expanded coverage:
-  - unit tests for degraded enter/recover, foreground resume reconcile, and global incremental updates
-  - widget tests for reconnect behavior without periodic polling and refresh-control absence
-
-### Feature 019 File Explorer and Viewer Parity (Implemented 2026-02-11)
-
-- Added project-layer file domain/contracts for parity endpoints:
-  - `lib/domain/entities/file_node.dart`
-  - `lib/domain/repositories/project_repository.dart` (`listFiles`, `findFiles`, `readFileContent`)
-  - `lib/data/models/file_node_model.dart`
-  - `lib/data/models/file_content_model.dart`
-  - `lib/data/datasources/project_remote_datasource.dart` (`/file`, `/find/file`, `/file/content`)
-  - `lib/data/repositories/project_repository_impl.dart`
-  - `lib/presentation/providers/project_provider.dart` (file list/search/read wrappers with provider-level error handling)
-- Extended `ChatPage` with file explorer/viewer orchestration:
-  - context-keyed explorer state, root/tree lazy loading, quick-open dialog, and tab lifecycle
-  - builtin `/open` now invokes quick-open instead of placeholder snackbar
-  - file viewer moved from chat header area into the `Files` surface (desktop pane + mobile Files dialog)
-  - `N open files` action added in the `Files` header (between title and quick actions) to open tab management dialog
-  - open-files dialog policy: fullscreen on compact/mobile, centered at ~70% viewport on larger screens
-  - diff-aware tab reload + tree invalidation based on `session.diff`
-- Added reusable ranking/reducer logic and formatters:
-  - `lib/presentation/utils/file_explorer_logic.dart` (quick-open ranking + tab open/close/activate reducers)
-  - `lib/presentation/utils/session_title_formatter.dart` (unified session title display with relative+absolute fallback)
-  - `lib/presentation/utils/shortcut_binding_codec.dart` (parse/serialize keyboard shortcut bindings)
-- Added presentation services:
-  - `lib/presentation/services/chat_title_generator.dart` (`ChatAtTitleGenerator` via ch.at API for automatic session titles)
-  - `lib/presentation/services/sound_service.dart` (generated WAV tone playback for notification sounds)
-  - `lib/presentation/services/event_feedback_dispatcher.dart` (notification/sound orchestration from chat reducer events)
-- Expanded coverage:
-  - `test/unit/utils/file_explorer_logic_test.dart`
-  - `test/widget/chat_page_test.dart` cases for tree expand/open, quick-open, and viewer text/binary/error rendering
-
-### Feature 018 Prompt Power Composer Architecture (Implemented 2026-02-10)
-
-- Extended composer state machine in `ChatInputWidget`:
-  - trigger-aware mode orchestration (`normal`/`shell`) with `!` activation at offset 0
-  - popover orchestration for `@` mentions and `/` slash commands
-  - suggestion popover rendered inline above the input row (without global overlay), keeping input + keyboard interaction stable on mobile and desktop
-  - popover sizing uses a single cap rule for all layouts: up to `3x` input height, clamped by visible viewport after reserving input space; long lists scroll internally
-  - composer `SafeArea` now ignores top inset to avoid unnecessary vertical growth while keyboard is open on Android
-  - keyboard navigation and selection (`ArrowUp/Down`, `Enter`, `Tab`, `Esc`)
-  - input focus persistence while mention/slash suggestions refresh
-  - mention insertion normalizes trailing spacing to avoid token/punctuation glue on mobile
-  - mention token chips rendered from prompt text
-- Added contextual suggestion fetching in `ChatPage`:
-  - mention sources from `/find/file` plus provider-managed agent cache loaded from `/agent`
-  - slash catalog from builtin commands plus `/command` (with `source` badges)
-  - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/compact`, `/help`) executed directly in UI context (`/agent` opens agent selector, `/compact` triggers session summarize)
-  - composer returned to scaffold-native keyboard inset handling (`resizeToAvoidBottomInset`) to keep input above mobile keyboard consistently
-- Added shell send-path routing:
-  - `ChatProvider.sendMessage(..., shellMode: true)` marks payload mode as shell
-  - `ChatRemoteDataSource.sendMessage` routes shell-mode payloads to `POST /session/{id}/shell`
-  - shell request contract currently uses `{agent: "build", command: "<text>"}` and returns assistant message payload
-- Expanded coverage:
-  - widget tests for shell-mode submit and `@`/`/` popover insertion flows
-  - provider unit test for shell payload mode propagation
+### Feature 018 Prompt Power Composer Architecture (2026-02-10)
+Composer power triggers (`@` mentions, `!` shell mode, `/` slash commands) with inline popovers, keyboard navigation, and shell-mode routing.
+📋 **Arquitetura**: Ver [ADR-019: Prompt Power Composer Triggers](#adr-019-prompt-power-composer-triggers)
+📁 **Módulos**: `ChatInputWidget` state machine, contextual suggestion fetching, `/session/{id}/shell` routing
+🔧 **UX**: inline suggestions (3x input height cap), mention chips, builtin slash handlers
 
 ### Feature 023 Deprecated API Migration (2026-02-11)
-
-- Migrated Flutter deprecated color APIs across app UI:
-  - `withOpacity` → `withValues` for opacity adjustments
-  - `surfaceVariant` → `surfaceContainerHighest` for surface hierarchy
-  - `background` → `surface` for base surface colors
-  - `onBackground` → `onSurface` for text on base surfaces
-- Migrated deprecated form-field initialization API:
-  - `DropdownButtonFormField.value` → `initialValue` in settings forms
-- Fixed asynchronous `BuildContext` usage hotspots in `ChatPage` (`use_build_context_synchronously` violations)
-- Migrated web notification bridge from deprecated `dart:html` to `package:web` + JS interop:
-  - Removed window-focus compile error path
-  - Updated browser Notification API integration for web platform
-- Replaced deprecated markdown package:
-  - `flutter_markdown` → `flutter_markdown_plus` (v1.0.7)
-- Validation: `flutter analyze` (targeted issues removed), full test suite, Android build/upload
-
-### ADR Coverage Clarifications (ADR-017/020/021/022/024)
-
-- `FileInputPart` contract note (ADR-017): outbound file parts are `mime` + `url` (no legacy `source` compatibility). This is acceptable because attachments are transient compose input and not persisted as long-lived local data.
-- File path resolution fallback (ADR-020): file list/read operations attempt absolute and context-relative path candidates to tolerate server differences in `path` handling.
-- Responsive dialog default policy (ADR-021): unless a feature documents an exception, product dialogs follow mobile/compact fullscreen and large-screen centered `~70%` viewport constraints.
-- Settings event feedback contract (ADR-022): `EventFeedbackDispatcher` is the single orchestration point for notification/sound feedback from chat reducer events.
-- Notification title contract (ADR-022): completion notifications should prefer `Finished: <session title>` when session context is available, with fallback to generic completion text when title context is missing.
-- Android notification build constraints (ADR-022): runtime notification support depends on `POST_NOTIFICATIONS` permission and core-library desugaring in Gradle.
-- Abort semantics contract (ADR-024): while a response is active, composer action switches to `Stop` and routes to `/session/{id}/abort`; user-initiated cancelation errors (`aborted/canceled`) are treated as expected in a short suppression window.
-- Stop->Send race guard contract (ADR-024): provider ignores stale stream callbacks across abort/send generation boundaries to keep post-stop sends in `loaded` state without transient retry fallback.
+Flutter API modernization (color/form field/async context/web interop/markdown package) with analyzer issue reduction.
+📋 **Arquitetura**: Ver [ADR-023: Deprecated API Modernization](#adr-023-deprecated-api-modernization-and-web-interop-migration)
+🔧 **Migrações**: `withOpacity→withValues`, `dart:html→package:web`, `flutter_markdown→flutter_markdown_plus`
 
 ### ChatInput Schema
 
@@ -575,45 +429,15 @@ Deferred/optional after parity wave:
 
 ### Installation Scripts
 
-**install.sh (Unix/Linux/macOS):**
-- Detects platform (Linux/Darwin) and architecture
-- macOS: downloads arch-specific asset (`codewalk-macos-arm64` or `codewalk-macos-x64`)
-- Linux: downloads arch-specific asset (`codewalk-linux-x64`, arm64 removed from releases)
-- Fetches latest GitHub release via API
-- **Supports idempotent reruns with install/update/reinstall detection:**
-  - Fresh install: no version marker exists
-  - Update: installed version differs from latest release
-  - Reinstall: installed version matches latest release (forces reinstall)
-- Downloads tarball and extracts to user-local application data path (`~/.local/share/codewalk`)
-- Creates CLI symlink in `~/.local/bin/codewalk`
-- Linux: registers Freedesktop desktop entry + icon in user scope (`~/.local/share/applications`, `~/.local/share/icons`)
-- macOS: if an app bundle exists in release, installs it to `~/Applications/CodeWalk.app`
-- Persists installed version marker (`.version` file) for future update/reinstall detection
+| Script | Platform | Features |
+|--------|----------|----------|
+| `install.sh` | Linux/macOS | Arch detection, idempotent install/update/reinstall, desktop entry (Linux), app bundle (macOS), version marker persistence |
+| `install.ps1` | Windows | Arch detection, PATH integration, Start Menu shortcut, version marker persistence |
+| `uninstall.sh` | Linux/macOS | Complete removal: binary, symlink, desktop entry (Linux), app bundle (macOS) |
+| `uninstall.ps1` | Windows | Complete removal: binary, Start Menu shortcut, PATH cleanup |
 
-**install.ps1 (Windows PowerShell):**
-- Detects architecture and resolves best available Windows asset
-- Prefers x64 asset (ARM64 removed from releases after runner unavailability)
-- Fetches latest GitHub release via API
-- **Supports idempotent reruns with install/update/reinstall detection:**
-  - Fresh install: no version marker exists
-  - Update: installed version differs from latest release
-  - Reinstall: installed version matches latest release (forces reinstall)
-- Downloads ZIP, extracts to `%LOCALAPPDATA%\CodeWalk`
-- Automatically adds installation directory to user PATH (if not already present)
-- Creates Start Menu shortcut with executable icon
-- Persists installed version marker (`.version` file) for future update/reinstall detection
-- Cleanup of temporary files
-
-**uninstall.sh (Unix/Linux/macOS):**
-- Removes local installation folder (`~/.local/share/codewalk`)
-- Removes CLI symlink (`~/.local/bin/codewalk`)
-- Linux: removes user desktop entry (`~/.local/share/applications/com.verseles.codewalk.desktop`) and icon cache references
-- macOS: removes app bundle (`~/Applications/CodeWalk.app`)
-
-**uninstall.ps1 (Windows PowerShell):**
-- Removes local installation folder (`%LOCALAPPDATA%\CodeWalk`)
-- Removes Start Menu shortcut
-- Removes installation directory from user PATH
+**Detalhes completos**: Ver scripts inline ou `--help` flags
+**Idempotência**: todos os installers detectam fresh install vs update vs reinstall via `.version` marker
 
 ## Dependencies
 
@@ -665,11 +489,9 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 ## Module Overview
 
 ### Logging System
-- Centralized logging via `AppLogger` (lib/core/logging/app_logger.dart)
-- Debug-only gate (no-op in release builds)
-- Automatic sanitization of auth tokens (Basic Auth, Bearer)
-- Severity levels: debug, info, warn, error
-- Replaces direct `print()` calls (deprecated in codebase per CONTRIBUTING.md)
+Centralized structured logging via `AppLogger` with severity levels and token redaction.
+📋 **Decisão**: Ver [ADR-005: Centralized Structured Logging](#adr-005-centralized-structured-logging)
+📁 **Localização**: `lib/core/logging/app_logger.dart`
 
 ### Authentication and Server Config
 - Multi-server profile management (`ServerProfile`) with active/default selection
@@ -678,102 +500,29 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Legacy migration creates a profile only when legacy server/auth keys exist; clean installs now keep an empty server list until the user adds one
 
 ### Session Module
-- Session list loading and caching
-- Session list controls: search/filter/sort/load-more windowing
-- Session selection and current session persistence
-- New-session creation now guarantees immediate focus on the created session and persists scoped `current_session_id`
-- Last-session snapshot persistence (`session + messages`) scoped by `server + directory` for instant startup restore
-- Stale-while-revalidate startup flow: cached last conversation renders immediately and message list revalidates silently in background
-- Full lifecycle operations: create/delete/rename/archive/unarchive/share/unshare/fork
-- Automatic AI title generation via `ch.at` API (`ChatAtTitleGenerator`) after each user/assistant turn using up to the first 3 user + 3 assistant text messages, with per-session consolidation guard to stop after the 3+3 baseline is reached
-  - Per-server privacy toggle `Enable AI generated titles` (default off) in Settings > Servers
-  - Platform-aware word limits: 4 words on mobile, 6 on desktop
-  - Background generation with stale-guard to prevent overwriting on context/session switches
-- Session title formatting via `SessionTitleFormatter`:
-  - Explicit titles displayed as-is (trimmed)
-  - Fallback titles use relative + absolute format: "Today HH:mm (M/D/YYYY)", "Yesterday HH:mm", "Weekday HH:mm", or full date
-  - Inline rename UX in active conversation headers with keyboard support (`Enter` save, `Esc` cancel) and optimistic updates with rollback
-- Session insights orchestration: status snapshot + children/todo/diff hydration
-- Optimistic session mutations with rollback on API failure
-- Server-scoped cache isolation to prevent cross-server leakage
+Session lifecycle orchestration with server/directory-scoped cache isolation, optimistic mutations (create/delete/rename/archive/share/fork), auto-title generation via ch.at API, and insight hydration (status/children/todo/diff).
+📋 **Arquitetura**: Ver [ADR-013: Session Lifecycle Orchestration](#adr-013-session-lifecycle-orchestration-with-optimistic-mutations-and-insight-hydration) + [ADR-025: Auto Session Titles](#adr-025-automatic-session-title-generation-via-chat-api)
+🔧 **Features**: SWR cache, title formatter, search/filter/sort, rollback on failure
+🎯 **Auto-titles**: per-server privacy toggle, platform-aware word limits (4 mobile/6 desktop), consolidation guard
 
 ### Chat Module
-- Streaming send/receive flow (SSE via `/event`)
-- Global context sync stream (`/global/event`) for cross-directory invalidation
-- Realtime event reducer for `session.*`, `message.*`, `permission.*`, and `question.*`
-- Message list rendering with incremental updates + targeted full-message fallback fetch
-- Optimistic local user messages are reconciled with server-confirmed user messages to prevent duplicate visual bubbles
-- Chat input and provider/model context
-- Chat composer supports image/PDF attachments via `file_picker`, serializes `file` parts with `mime` + `url`, and hides the attachment action when the selected model does not advertise attachment/image/pdf input support
-- Attachment menu options are modality-aware per model: when a model supports only image or only PDF, the composer sheet exposes only the supported option(s)
-- Chat composer includes a microphone action (next to send) that runs speech-to-text via `speech_to_text` and writes live dictation into the same text input
-- Send button has a secondary composer action: hold for 300ms inserts a newline at cursor/selection instead of sending, with a small corner icon indicator for discoverability
-- Chat composer supports prompt power triggers: `@` contextual mentions (files/agents), leading `!` shell mode, and leading `/` slash command catalog with source badges
-- Context compaction UX (`SummarizeChatSession` use case):
-  - Knob control in app bar with usage percentage indicator inside circle
-  - Popover shows metrics: usage %, tokens, cost, and context limit
-  - Manual `Compact now` action triggers `/session/{id}/summarize` with current provider/model
-- Shell-mode sends use a dedicated server route (`/session/{id}/shell`) through datasource-level routing
-- Tool-call rendering improvements:
-  - Headers show tool name directly (without `Tool Call:` prefix)
-  - Status chip is responsive: desktop shows icon + text (`Completed`, `Running`), mobile/compact shows icon-only at right edge
-  - Detail blocks render extracted input command metadata (`Command`/`Input`) before output/error content
-  - Tool `output` normalization: non-string payloads (map/list/scalar) converted to displayable text
-  - Diff extraction from common keys (`diff`, `patch`, `unified_diff`) in tool output
-  - Synthetic unified diff generation for `edit` tool with `old_string`/`new_string` when server doesn't return textual output
-  - Input fallback: when `output` is empty, display structured `input` with direct patch/diff extraction for `apply_patch`
-  - Colorized diff rendering with accessible text scaling (additions in green, deletions in red)
-- Tool output collapse: initial display limited to 2 lines with expand affordance for full content
-- Thinking blocks: latest block stays expanded, older blocks collapsed across conversation
-- File explorer parity in chat:
-  - server-backed tree listing (`/file`) with expandable directories and file-type icons
-  - quick-open dialog (`Ctrl/Cmd+P` + `/open`, plus `Files` panel quick action) using ranked search from `/find/file`
-  - file viewer tabs with states `loading`, `ready`, `empty`, `binary`, and `error` sourced from `/file/content`, now centered in the `Files` surface (not in chat header area)
-  - `Open files` dialog with tab close controls (`X`) and adaptive sizing (mobile fullscreen, desktop centered ~70% viewport)
-  - context-keyed explorer/tab state with diff-aware refresh to avoid cross-directory leakage
-- In-app provider/model picker and reasoning-variant cycle controls
-- In-app agent selector beside model/variant controls with ordered options (`build`, `plan`, then others), context-scoped persistence (`server + directory`) and safe fallback when persisted selection disappears
-- Agent quick actions include desktop shortcut cycle (`Ctrl/Cmd+J`, `Shift` reverse) and builtin `/agent` command opening the selector
-- In-chat permission/question cards with actionable replies
-- Directory-scoped context snapshots and dirty-context refresh strategy
-- Stop/abort flow (`AbortChatSession` use case):
-  - Send button switches to `Stop` while assistant response is active
-  - Stop triggers `/session/{id}/abort` and suppresses expected cancelation errors (aborted/canceled) in short window
-  - Provider ignores stale stream callbacks via generation guards to keep post-stop sends stable
-  - Composer input remains editable during active response (send blocked until completion)
-- Chat-first shell: `AppShellPage` mounts `ChatPage` as primary route; `Logs` and `Settings` open as secondary routes with native back navigation to chat
-- Startup onboarding guard: when no server profile exists, `AppShellPage` routes directly to `Settings > Servers` (mobile and desktop)
-- Responsive shell with mobile drawer and desktop split-view layout
-- Sidebar top action row appears above `Conversations`: compact one-line `Logs` and `Settings` buttons open secondary routes while chat remains implicit as the primary area
-- Desktop pane collapse: `Conversations`, `Files`, and `Utility` sidebars support user-driven collapse/restore with persisted visibility via `ExperienceSettings.desktopPanes`
-- Desktop shortcuts for new chat, refresh, input focus, and agent cycle
-- Desktop composer shortcuts: `Enter` sends, `Shift+Enter` inserts newline (without breaking mention/slash popover flows)
-- Mobile composer: submit uses keyboard `send` action and auto-hides keyboard after successful send to maximize visible message area
-- Hold-to-reuse send button: 300ms hold inserts newline at cursor/selection with corner indicator icon
-- Server status moved from chat header to sidebar with health badge
+SSE-first realtime sync with event reducer, composer power triggers (@/!/), multimodal input (image/PDF/voice), file explorer/viewer parity, context compaction UX, and stop/abort flow.
+📋 **Arquiteturas principais**:
+  - [ADR-012: Realtime Event Reducer](#adr-012-realtime-event-reducer-and-interactive-prompt-orchestration)
+  - [ADR-016: Chat-First Navigation](#adr-016-chat-first-navigation-architecture)
+  - [ADR-017: Multimodal Input](#adr-017-composer-multimodal-input-pipeline)
+  - [ADR-018: Refreshless Sync](#adr-018-refreshless-realtime-sync-with-lifecycle-and-degraded-fallback)
+  - [ADR-019: Prompt Power Composer](#adr-019-prompt-power-composer-triggers)
+  - [ADR-024: Stop/Abort Flow](#adr-024-desktop-composerpane-interaction-and-active-response-abort-semantics)
+🔧 **Componentes**: `ChatProvider` (reducer + optimistic updates), tool diff rendering, thinking/output collapse
+🎯 **UX**: responsive shell, chat-first navigation, desktop shortcuts (Enter/Shift+Enter), mobile auto-scroll, collapsible panes
 
 ### Settings Module
-- Modular settings hub (`SettingsPage`) with responsive section navigation:
-  - mobile: section list -> detail flow
-  - desktop/web: split layout (left navigation + right content)
-- Experience settings orchestration (`SettingsProvider` + `ExperienceSettings` entity):
-  - notification controls by category (`agent`, `permissions`, `errors`)
-    - sync from `/config` when server exposes compatible notification keys (`settings-notifications-*` or `notifications.*`)
-    - fallback to local-only persistence when server config keys are unavailable
-  - per-category split controls for `Notify` and `Sound` in the Notifications section (users can enable only one of them)
-  - sound preference by category (configured in Notifications) with preview and fallback behavior
-    - sound playback uses generated in-memory WAV tones via `audioplayers` for consistent output across platforms
-  - notification payload includes `sessionId` for deep-link on notification tap back to the originating session
-  - desktop pane visibility preferences (`desktopPanes` map) for collapsible sidebar state persistence
-- Editable shortcut bindings with conflict validation and reset:
-  - shortcuts section is available on desktop/web and hidden on mobile platforms
-  - runtime binding parsing from persisted settings via `ShortcutBindingCodec`
-- Server management in dedicated `Servers` section:
-  - add/edit/remove, active/default, health badges and activation guard
-  - per-server privacy toggle `Enable AI generated titles` controls whether background title generation is allowed for that server profile
-- Notification runtime adapters:
-  - Android/Linux/macOS/Windows through `flutter_local_notifications`
-  - Web through browser Notification API permission flow + click callback wiring
+Modular settings hub with responsive navigation (mobile list-to-detail, desktop split layout), notification/sound/shortcut preferences, and server management.
+📋 **Arquitetura**: Ver [ADR-022: Modular Settings Hub](#adr-022-modular-settings-hub-and-experience-preference-orchestration)
+🔧 **Componentes**: `SettingsPage`, `SettingsProvider`, `ExperienceSettings`
+🔔 **Features**: per-category notifications/sounds (agent/permissions/errors), shortcut bindings (desktop/web), desktop pane visibility, server config sync (`/config`)
+📱 **Adapters**: `flutter_local_notifications` (Android/Linux/macOS/Windows), browser Notification API (Web)
 
 ## Chat System Details
 

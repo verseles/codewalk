@@ -28,6 +28,7 @@ This document tracks technical decisions for CodeWalk.
 - ADR-022: Modular Settings Hub and Experience Preference Orchestration (2026-02-11) [Accepted]
 - ADR-023: Deprecated API Modernization and Web Interop Migration (2026-02-11) [Accepted]
 - ADR-024: Desktop Composer/Pane Interaction and Active-Response Abort Semantics (2026-02-11) [Accepted]
+- ADR-025: Automatic Session Title Generation via ch.at API (2026-02-12) [Accepted]
 
 ---
 
@@ -526,6 +527,16 @@ After Feature 011 (ADR-010) established multi-server state isolation, CodeWalk s
 - ⚠️ Trade-off: `ChatProvider` state machine complexity increased with preference loading/fallback logic.
 - ⚠️ Trade-off: additional persisted keys require migration-aware maintenance in future storage refactors.
 
+### Post-Decision Update (2026-02-13)
+
+- Model selection is now treated as server-authoritative for cross-device parity:
+  - `ChatProvider` reads `/config.model` and prioritizes it over local persisted selection during initialization.
+  - Local provider/model changes are written back to `/config` (`PATCH { model: "provider/model" }`).
+- Agent selection is now also synchronized through server config:
+  - `ChatProvider` writes selected agent to `/config.default_agent`.
+  - On initialization, `/config.default_agent` is preferred over local persisted agent when valid.
+- Variant/reasoning preference remains local-per-client because OpenCode config schema does not currently expose a stable top-level field for variant state.
+
 ### Key Files
 
 - `lib/domain/entities/provider.dart`
@@ -603,6 +614,13 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
 
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Chat Module](CODEBASE.md#chat-module)
+- [Feature 013: Realtime Architecture](CODEBASE.md#feature-013-realtime-architecture-2026-02-09)
+- [Chat System Details](CODEBASE.md#chat-system-details)
+
 ---
 
 ## ADR-013: Session Lifecycle Orchestration with Optimistic Mutations and Insight Hydration
@@ -666,6 +684,13 @@ Basic session CRUD was no longer enough for parity with current OpenCode flows. 
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
 
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Session Module](CODEBASE.md#session-module)
+- [Feature 014: Session Lifecycle Architecture](CODEBASE.md#feature-014-session-lifecycle-architecture-2026-02-10)
+- [Chat System Details](CODEBASE.md#chat-system-details)
+
 ---
 
 ## ADR-014: Project/Workspace Context Orchestration with Global Event Sync
@@ -726,6 +751,12 @@ After multi-server/model/session parity improvements (ADR-010 through ADR-013), 
 - `ROADMAP.feat015.md`
 - https://opencode.ai/docs/server/
 - https://github.com/anomalyco/opencode
+
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Feature 015: Project/Workspace Context Architecture](CODEBASE.md#feature-015-projectworkspace-context-architecture-2026-02-10)
+- [Module Overview](CODEBASE.md#module-overview)
 
 ---
 
@@ -937,6 +968,14 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 - ⚠️ Trade-off: `ChatProvider` orchestration complexity increased (state machine + timers + lifecycle branching).
 - ⚠️ Trade-off: feature-flag split path needs ongoing test coverage to prevent regressions when toggled.
 
+### Post-Decision Update (2026-02-13)
+
+- Added config-backed selection reconciliation while app is active to reduce cross-device drift in open conversations:
+  - periodic reconcile on sync-health ticks,
+  - forced reconcile on `server.connected`,
+  - forced reconcile on foreground resume and degraded sync passes.
+- Reconcile scope is intentionally targeted to config-backed selection (`model`, `default_agent`) to preserve refreshless behavior and avoid broad polling regression.
+
 ### Key Files
 
 - `lib/core/config/feature_flags.dart`
@@ -951,6 +990,12 @@ Feature 017 required removing manual refresh interactions from chat/context flow
 - ADR-006: Session SWR Cache (cache-first loading complements refreshless sync)
 - `ROADMAP.md`
 - `CODEBASE.md`
+
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Chat Module](CODEBASE.md#chat-module)
+- [Feature 017: Realtime-First Refreshless Architecture](CODEBASE.md#feature-017-realtime-first-refreshless-architecture-2026-02-10)
 
 ---
 
@@ -1017,6 +1062,12 @@ Before this change, the mobile composer only supported plain text, attachments (
 - `ROADMAP.md`
 - `CODEBASE.md`
 
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Chat Module](CODEBASE.md#chat-module)
+- [Feature 018: Prompt Power Composer Architecture](CODEBASE.md#feature-018-prompt-power-composer-architecture-2026-02-10)
+
 ---
 
 ## ADR-020: File Explorer State and Context-Scoped Viewer Orchestration
@@ -1082,6 +1133,12 @@ CodeWalk already keeps project/session context scoped by `serverId::directory` (
 - ADR-021: Responsive Dialog Sizing (file viewer UX)
 - `ROADMAP.md`
 - `CODEBASE.md`
+
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Chat Module](CODEBASE.md#chat-module)
+- [Feature 019: File Explorer and Viewer Parity](CODEBASE.md#feature-019-file-explorer-and-viewer-parity-2026-02-11)
 
 ---
 
@@ -1219,6 +1276,12 @@ Feature 022 required parity with OpenCode settings behaviors across:
 - ADR-021: Responsive Dialog Sizing (settings uses responsive layout)
 - `ROADMAP.feat022.md`
 - `CODEBASE.md`
+
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Settings Module](CODEBASE.md#settings-module)
+- [Module Overview](CODEBASE.md#module-overview)
 
 ---
 
@@ -1358,5 +1421,60 @@ The expected behavior required preserving existing mention/slash keyboard behavi
 - ADR-022: Modular Settings Hub (pane preferences persisted via settings provider)
 - `ROADMAP.md`
 - `CODEBASE.md`
+
+### Implementation Reference
+
+See CODEBASE.md for current module structure, file locations, and operational details:
+- [Chat Module](CODEBASE.md#chat-module)
+- [Settings Module](CODEBASE.md#settings-module)
+
+---
+
+## ADR-025: Automatic Session Title Generation via ch.at API
+
+**Status**: Accepted
+**Date**: 2026-02-12
+
+### Context
+
+Sessions created without explicit titles fell back to timestamp-only labels (e.g., "2/12 14:23"), which provided no semantic context in session lists. Users had to manually rename sessions or open them to identify content. OpenCode Desktop/Web address this with background AI title generation, creating a parity gap and friction in mobile session management.
+
+### Decision
+
+1. Integrate external title generation service (`ch.at` API) for background session labeling.
+2. Generate titles after each user/assistant turn using first 3 user + 3 assistant text messages.
+3. Add per-server privacy toggle `Enable AI generated titles` (default off) in Settings > Servers.
+4. Apply platform-aware word limits: 4 words on mobile, 6 on desktop.
+5. Use consolidation guard to stop after 3+3 baseline is reached.
+6. Add stale-guard to prevent overwrites on rapid context/session switches.
+
+### Rationale
+
+- AI-generated titles improve session list UX without manual intervention (mobile users benefit most).
+- External service (`ch.at`) avoids bundling model inference in mobile app.
+- Privacy toggle respects user preference for AI processing of conversation content.
+- Platform-aware limits optimize for screen real estate (mobile = shorter).
+- Consolidation guard prevents redundant API calls after baseline context is captured.
+
+### Consequences
+
+- ✅ Positive: session titles are semantic and require no manual naming.
+- ✅ Positive: privacy-aware with explicit opt-in per server.
+- ⚠️ Trade-off: external API dependency introduces network requirement for titles.
+- ⚠️ Trade-off: failure fallback is timestamp label (acceptable degradation).
+- ⚠️ Trade-off: titles are best-effort approximations, not perfect summaries.
+
+### Key Files
+
+- `lib/presentation/services/chat_title_generator.dart`
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/domain/entities/server_profile.dart`
+- Settings > Servers section
+
+### References
+
+- Commit: 8c49591
+- CODEBASE.md: Session Module (auto-title generation)
+- ADR-013: Session Lifecycle Orchestration
 
 ---

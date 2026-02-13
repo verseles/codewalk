@@ -211,7 +211,9 @@ Concluída a remoção dos problemas-alvo de deprecação/compatibilidade, com v
 ## Pending Backlog
 
 - [ ] No desktop, pesquisar como usar microfone speech-to-text no linux. Pesquisar também se a API atual já funciona no mac/windows/iOS
-- [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
+- [x] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
+- [x] Sincronizar agente selecionado entre desktop/mobile via `/config.default_agent` com reconciliação ativa enquanto o app estiver aberto
+- [/] Sincronizar variant/thinking em tempo real entre dispositivos (bloqueado por ausência de campo estável server-side no schema de `/config`)
 - [ ] Opções em Settings para decidir se app fica em background. Mobile: persistente notification, desktop: tray
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclades/dispositivos (validar em device real com Gboard e Samsung Keyboard)
 - [x] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
@@ -230,3 +232,4 @@ Concluída a remoção dos problemas-alvo de deprecação/compatibilidade, com v
 - [x] Restaurar ação de compactar contexto (`/summarize`) com botão dedicado ao lado de `New Chat` e comando builtin `/compact`
 - [x] Restaurar cabeçalho das tool calls sem prefixo redundante, exibir comando de entrada (`Command/Input`) e aplicar status responsivo (desktop: ícone + texto; mobile/tela compacta: apenas ícone)
 - [x] Evoluir controle de compactação para knob único com percentual dentro do próprio círculo e popover (uso %, tokens e custo) mantendo ação `Compact now` com ícone de colapso
+- [ ] Retirar o fundo diferente do input do composer ao passar o mouse no desktop (hover)

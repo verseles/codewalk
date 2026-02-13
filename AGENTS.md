@@ -26,7 +26,7 @@ Observe a ordem acima! make android deve ser executado logo após concluída as 
 ## Liberação de nova tag / release
 - Quando solicitado, "minor", "patch", ou "major":
   - atualize arquivos relevantes com a nova versão
-  - atualize o arquivo CHANGELOG.md com a nova versão e data
+  - atualize o arquivo CHANGELOG.md com a nova versão e data. Liste o título dos commits desde a última tag.
   - faça push
   - adicione a tag no git
     - E faça watch a cada 60s da pipeline de release @.github/workflows/release.yml
