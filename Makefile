@@ -42,7 +42,7 @@ icons:
 	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 1024x1024\! -strip -define png:compression-level=9 assets/images/logo.1024.png
 	magick assets/images/original.png -gravity center -crop 78%x78%+0+0 +repage -resize 1024x1024\! -strip -define png:compression-level=9 assets/images/adaptive_foreground.png
 	mkdir -p linux/runner/resources
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 512x512\! -strip -define png:compression-level=9 linux/runner/resources/app_icon.png
+	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 512x512\! -strip -define png:compression-level=9 \( -size 512x512 xc:none -fill white -draw "roundrectangle 0,0 511,511 56,56" \) -compose CopyOpacity -composite linux/runner/resources/app_icon.png
 	cp -f linux/runner/resources/app_icon.png linux/runner/resources/com.verseles.codewalk.png
 	printf '%s\n' \
 		'[Desktop Entry]' \
@@ -101,6 +101,9 @@ icons-check:
 	@test "$$(magick identify -format '%wx%h' assets/images/adaptive_foreground.png)" = "1024x1024" || (echo "Invalid assets/images/adaptive_foreground.png size"; exit 1)
 	@test "$$(magick identify -format '%wx%h' linux/runner/resources/app_icon.png)" = "512x512" || (echo "Invalid linux app icon size"; exit 1)
 	@test "$$(magick identify -format '%wx%h' linux/runner/resources/com.verseles.codewalk.png)" = "512x512" || (echo "Invalid linux app-id icon size"; exit 1)
+	@magick identify -format '%[opaque]' linux/runner/resources/app_icon.png | grep -qi '^false$$' || (echo "Linux app icon must keep rounded transparency"; exit 1)
+	@magick identify -format '%[opaque]' linux/runner/resources/com.verseles.codewalk.png | grep -qi '^false$$' || (echo "Linux app-id icon must keep rounded transparency"; exit 1)
+	@cmp -s linux/runner/resources/app_icon.png linux/runner/resources/com.verseles.codewalk.png || (echo "Linux icon files must stay in sync"; exit 1)
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png)" = "16x16" || (echo "Invalid macOS 16x16 icon"; exit 1)
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png)" = "32x32" || (echo "Invalid macOS 32x32 icon"; exit 1)
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png)" = "64x64" || (echo "Invalid macOS 64x64 icon"; exit 1)
