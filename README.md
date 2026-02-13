@@ -4,7 +4,7 @@
 
 A native (really fast!!) cross-platform client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
-## Features
+## Highlights
 
 - AI chat interface with streaming responses and realtime event sync (SSE)
 - Multi-server profile management (add, edit, remove, switch, health checks)
@@ -20,6 +20,38 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 - Markdown rendering with syntax highlighting and text selection
 - Dark theme with Material Design 3
 - Cross-platform: Linux, Web, Android (Windows and macOS buildable)
+
+## Install in One Command
+
+Install using the `install.cat` pattern:
+
+- Linux & macOS
+
+  ```bash
+  curl -fsSL install.cat/verseles/codewalk | sh
+  ```
+
+- Windows (PowerShell)
+
+  ```powershell
+  irm install.cat/verseles/codewalk | iex
+  ```
+
+Run the same command again any time to update/reinstall to the latest GitHub release.
+
+### Uninstall
+
+- Linux & macOS
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/verseles/codewalk/main/uninstall.sh | sh
+  ```
+
+- Windows (PowerShell)
+
+  ```powershell
+  irm https://raw.githubusercontent.com/verseles/codewalk/main/uninstall.ps1 | iex
+  ```
 
 ## Getting Started
 
@@ -70,25 +102,6 @@ make precommit  # check + android
 3. Configure authentication if required (API key or basic auth)
 4. Use **Test Connection** to verify connectivity
 5. Multiple server profiles can be added and switched at any time
-
-## Installer Scripts
-
-- Linux/macOS: `install.sh`
-  - Idempotent: if run again, it auto-detects and performs update/reinstall from latest release.
-  - Linux: installs CLI + registers Freedesktop desktop entry and icon in user scope.
-  - macOS: installs CLI and, when a `.app` bundle is present, places it in `~/Applications`.
-- Windows: `install.ps1`
-  - Idempotent: if run again, it auto-detects and performs update/reinstall from latest release.
-  - Installs to `%LOCALAPPDATA%\\CodeWalk`, adds user PATH, and creates a Start Menu shortcut.
-
-Both installers consume the latest GitHub release artifacts by default.
-
-### Uninstall
-
-- Linux/macOS: `uninstall.sh`
-  - Removes user-scoped install directory, CLI symlink, and desktop integration artifacts.
-- Windows: `uninstall.ps1`
-  - Removes `%LOCALAPPDATA%\\CodeWalk`, Start Menu shortcut, and PATH entry.
 
 ## Architecture
 
