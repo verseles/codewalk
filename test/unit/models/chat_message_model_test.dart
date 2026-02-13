@@ -152,5 +152,37 @@ void main() {
       expect(message.parts.whereType<RetryPart>().single.attempt, 2);
       expect(message.parts.whereType<CompactionPart>().single.auto, isTrue);
     });
+
+    test('normalizes structured tool output to text', () {
+      final model = ChatMessageModel.fromJson(<String, dynamic>{
+        'id': 'msg_ai_tool',
+        'sessionID': 'ses_1',
+        'role': 'assistant',
+        'time': <String, dynamic>{'created': 1000, 'completed': 1100},
+        'parts': <dynamic>[
+          <String, dynamic>{
+            'id': 'prt_tool',
+            'messageID': 'msg_ai_tool',
+            'sessionID': 'ses_1',
+            'type': 'tool',
+            'tool': 'apply_patch',
+            'state': <String, dynamic>{
+              'status': 'completed',
+              'input': <String, dynamic>{'patch': 'ignored'},
+              'output': <String, dynamic>{
+                'diff': '--- a/file.txt\n+++ b/file.txt\n-old\n+new',
+              },
+              'time': <String, dynamic>{'start': 1000, 'end': 1100},
+            },
+          },
+        ],
+      });
+
+      final message = model.toDomain() as AssistantMessage;
+      final tool = message.parts.whereType<ToolPart>().single;
+      final completed = tool.state as ToolStateCompleted;
+      expect(completed.output, contains('--- a/file.txt'));
+      expect(completed.output, contains('+new'));
+    });
   });
 }

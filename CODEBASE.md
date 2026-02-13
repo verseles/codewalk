@@ -922,3 +922,9 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Project context dialog now exposes archive action for closed project entries (local curation), independent of `worktree` APIs.
 - `ProjectProvider` now persists archived closed-project IDs per server and filters them from the "Closed projects" section while keeping normal reopen/switch flows for active contexts.
 - Expanded automated coverage for desktop shortcut send/newline behavior, persisted sidebar visibility toggles, stop/abort success path, and stop failure snackbar fallback.
+
+**Tool diff rendering hardening (2026-02-13):**
+- `ToolState` parsing now normalizes non-string `output` payloads (map/list/scalar) into displayable text and extracts common diff keys (`diff`, `patch`, `unified_diff`).
+- Tool output UI now falls back to structured tool `input` when `output` is empty, including direct `patch/diff` extraction for `apply_patch`.
+- `edit` tool calls with `old_string`/`new_string` now generate a synthetic unified diff when upstream does not return textual output.
+- Added regression coverage for parser normalization and input-fallback diff rendering in widget/unit tests.

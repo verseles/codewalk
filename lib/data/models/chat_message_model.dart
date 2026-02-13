@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/chat_message.dart';
 
@@ -788,12 +790,13 @@ class MessagePartModel {
 
   static ToolState _parseToolState(Map<String, dynamic> state) {
     final status = state['status'] as String?;
+    final parsedInput = _parseToolInput(state['input']);
     switch (status) {
       case 'pending':
         return const ToolStatePending();
       case 'running':
         return ToolStateRunning(
-          input: state['input'] as Map<String, dynamic>? ?? {},
+          input: parsedInput,
           time: DateTime.fromMillisecondsSinceEpoch(
             (state['time']?['start'] as int?) ?? 0,
           ),
@@ -803,8 +806,8 @@ class MessagePartModel {
       case 'completed':
         final time = state['time'] as Map<String, dynamic>?;
         return ToolStateCompleted(
-          input: state['input'] as Map<String, dynamic>? ?? {},
-          output: state['output'] as String? ?? '',
+          input: parsedInput,
+          output: _parseToolOutput(state['output']),
           time: ToolTime(
             start: DateTime.fromMillisecondsSinceEpoch(
               (time?['start'] as int?) ?? 0,
@@ -819,7 +822,7 @@ class MessagePartModel {
       case 'error':
         final time = state['time'] as Map<String, dynamic>?;
         return ToolStateError(
-          input: state['input'] as Map<String, dynamic>? ?? {},
+          input: parsedInput,
           error: state['error'] as String? ?? '',
           time: ToolTime(
             start: DateTime.fromMillisecondsSinceEpoch(
@@ -835,6 +838,55 @@ class MessagePartModel {
       default:
         return const ToolStatePending();
     }
+  }
+
+  static Map<String, dynamic> _parseToolInput(dynamic rawInput) {
+    if (rawInput is Map<String, dynamic>) {
+      return rawInput;
+    }
+    if (rawInput is Map) {
+      return Map<String, dynamic>.from(rawInput);
+    }
+    if (rawInput == null) {
+      return <String, dynamic>{};
+    }
+    return <String, dynamic>{'value': rawInput.toString()};
+  }
+
+  static String _parseToolOutput(dynamic rawOutput) {
+    if (rawOutput == null) {
+      return '';
+    }
+    if (rawOutput is String) {
+      return rawOutput;
+    }
+    if (rawOutput is num || rawOutput is bool) {
+      return rawOutput.toString();
+    }
+    if (rawOutput is List) {
+      if (rawOutput.every((item) => item is String)) {
+        return rawOutput.cast<String>().join('\n');
+      }
+      return const JsonEncoder.withIndent('  ').convert(rawOutput);
+    }
+    if (rawOutput is Map) {
+      final map = Map<String, dynamic>.from(rawOutput);
+      for (final key in const [
+        'diff',
+        'patch',
+        'unified_diff',
+        'unifiedDiff',
+        'text',
+        'content',
+      ]) {
+        final candidate = map[key];
+        if (candidate is String && candidate.trim().isNotEmpty) {
+          return candidate;
+        }
+      }
+      return const JsonEncoder.withIndent('  ').convert(map);
+    }
+    return rawOutput.toString();
   }
 
   static Map<String, dynamic> _toolStateToMap(ToolState state) {

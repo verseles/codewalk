@@ -648,6 +648,10 @@ class ChatMessageWidget extends StatelessWidget {
         );
       case ToolStatus.completed:
         final completedState = state as ToolStateCompleted;
+        final resolvedOutput = _resolveToolOutput(
+          toolName: toolName,
+          state: completedState,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -658,7 +662,7 @@ class ChatMessageWidget extends StatelessWidget {
                   context,
                 ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
               ),
-            if (completedState.output.isNotEmpty)
+            if (resolvedOutput.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.all(8),
@@ -667,7 +671,7 @@ class ChatMessageWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: _CollapsibleToolContent(
-                  text: completedState.output,
+                  text: resolvedOutput,
                   collapsedMaxLines: _collapsedToolDetailMaxLines,
                   toolName: toolName,
                   textStyle: Theme.of(
@@ -700,6 +704,79 @@ class ChatMessageWidget extends StatelessWidget {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  String _resolveToolOutput({
+    required String toolName,
+    required ToolStateCompleted state,
+  }) {
+    final output = state.output.trim();
+    if (output.isNotEmpty) {
+      return state.output;
+    }
+
+    final input = state.input;
+    final tool = toolName.toLowerCase();
+    final directDiff = _firstInputString(input, const [
+      'diff',
+      'patch',
+      'unified_diff',
+      'unifiedDiff',
+      'content',
+      'text',
+    ]);
+    if (directDiff != null && directDiff.trim().isNotEmpty) {
+      return directDiff;
+    }
+
+    if (tool == 'edit' || tool.contains('edit') || tool.contains('patch')) {
+      final syntheticDiff = _buildSyntheticEditDiff(input);
+      if (syntheticDiff != null) {
+        return syntheticDiff;
+      }
+    }
+
+    return '';
+  }
+
+  String? _firstInputString(Map<String, dynamic> input, List<String> keys) {
+    for (final key in keys) {
+      final value = input[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  String? _buildSyntheticEditDiff(Map<String, dynamic> input) {
+    final before = _firstInputString(input, const [
+      'old_string',
+      'oldString',
+      'before',
+      'old',
+    ]);
+    final after = _firstInputString(input, const [
+      'new_string',
+      'newString',
+      'after',
+      'new',
+    ]);
+    if (before == null || after == null || before == after) {
+      return null;
+    }
+
+    final path = _firstInputString(input, const [
+      'file_path',
+      'path',
+      'file',
+      'target',
+    ]) ??
+        'file';
+
+    final beforeLines = before.split('\n').map((line) => '-$line').join('\n');
+    final afterLines = after.split('\n').map((line) => '+$line').join('\n');
+    return '--- $path\n+++ $path\n@@\n$beforeLines\n$afterLines';
   }
 
   Widget _buildErrorInfo(BuildContext context, MessageError error) {

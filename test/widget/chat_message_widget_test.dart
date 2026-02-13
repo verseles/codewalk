@@ -611,6 +611,54 @@ void main() {
     expect(find.byType(RichText), findsAtLeastNWidgets(1));
   });
 
+  testWidgets(
+    'renders colorized diff from apply_patch input when output is empty',
+    (tester) async {
+      const patchInput = '''*** Begin Patch
+*** Update File: lib/main.dart
+@@
+-old line
++new line
+*** End Patch''';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: AssistantMessage(
+                id: 'msg_diff_input_1',
+                sessionId: 'ses_diff',
+                time: DateTime.fromMillisecondsSinceEpoch(1000),
+                parts: <MessagePart>[
+                  ToolPart(
+                    id: 'tool_diff_input_1',
+                    messageId: 'msg_diff_input_1',
+                    sessionId: 'ses_diff',
+                    callId: 'call_diff_input_1',
+                    tool: 'apply_patch',
+                    state: ToolStateCompleted(
+                      input: const <String, dynamic>{'patch': patchInput},
+                      output: '',
+                      time: ToolTime(
+                        start: DateTime.fromMillisecondsSinceEpoch(1000),
+                        end: DateTime.fromMillisecondsSinceEpoch(1100),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show more'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RichText), findsAtLeastNWidgets(1));
+    },
+  );
+
   testWidgets('uses MediaQuery textScaler in expanded colorized diff', (
     tester,
   ) async {
@@ -856,4 +904,49 @@ index abc123..def456 100644
     // RichText colorizado deve estar presente
     expect(find.byType(RichText), findsAtLeastNWidgets(1));
   });
+
+  testWidgets(
+    'builds synthetic diff for edit tool when output is empty',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: AssistantMessage(
+                id: 'msg_edit_input',
+                sessionId: 'ses_diff',
+                time: DateTime.fromMillisecondsSinceEpoch(1000),
+                parts: <MessagePart>[
+                  ToolPart(
+                    id: 'tool_edit_input',
+                    messageId: 'msg_edit_input',
+                    sessionId: 'ses_diff',
+                    callId: 'call_edit_input',
+                    tool: 'edit',
+                    state: ToolStateCompleted(
+                      input: const <String, dynamic>{
+                        'file_path': 'lib/sample.dart',
+                        'old_string': 'line old',
+                        'new_string': 'line new',
+                      },
+                      output: '',
+                      time: ToolTime(
+                        start: DateTime.fromMillisecondsSinceEpoch(1000),
+                        end: DateTime.fromMillisecondsSinceEpoch(1100),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show more'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RichText), findsAtLeastNWidgets(1));
+    },
+  );
 }

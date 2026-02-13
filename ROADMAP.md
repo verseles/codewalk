@@ -218,7 +218,7 @@ Concluída a remoção dos problemas-alvo de deprecação/compatibilidade, com v
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
 - [ ] Fazer atalhos de teclado funcionarem de verdade
 - [ ] Exibir seção `Shortcuts` no mobile quando houver teclado físico conectado
-- [ ] A tool apply_patch deve ter cores apropriadas para linhas removidas (vermelho) e linhas adicionadas (verde)
+- [x] A tool apply_patch deve ter cores apropriadas para linhas removidas (vermelho) e linhas adicionadas (verde)
 - [ ] Verificar atualizações baseadas nos releases do GitHub usando a API pública do GitHub
 - [ ] Inserir botão de fácil acesso para exibir/ocultar o Thinking (toggle rápido no header da mensagem ou área do composer)
 - [ ] Adicionar opção em Settings para escolher densidade de todos os elementos do app (denso, normal, espaçoso)
