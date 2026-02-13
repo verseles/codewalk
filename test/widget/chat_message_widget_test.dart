@@ -310,6 +310,10 @@ void main() {
   testWidgets('tool completed output starts collapsed and can expand', (
     WidgetTester tester,
   ) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(1280, 800);
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -341,6 +345,19 @@ void main() {
       ),
     );
 
+    expect(find.text('Tool Call: bash'), findsNothing);
+    expect(find.text('bash'), findsOneWidget);
+    expect(find.text('Completed'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is RichText &&
+            widget.key == const ValueKey<String>('tool_command_text') &&
+            widget.text.toPlainText().contains('Command: ls -la'),
+      ),
+      findsOneWidget,
+    );
+
     Text outputText = tester.widget<Text>(
       find.byKey(const ValueKey<String>('tool_content_text')),
     );
@@ -362,6 +379,10 @@ void main() {
   testWidgets('tool error output starts collapsed and can expand', (
     WidgetTester tester,
   ) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(1280, 800);
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -393,6 +414,19 @@ void main() {
       ),
     );
 
+    expect(find.text('Tool Call: bash'), findsNothing);
+    expect(find.text('bash'), findsOneWidget);
+    expect(find.text('Error'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is RichText &&
+            widget.key == const ValueKey<String>('tool_command_text') &&
+            widget.text.toPlainText().contains('Command: cat missing.txt'),
+      ),
+      findsOneWidget,
+    );
+
     Text outputText = tester.widget<Text>(
       find.byKey(const ValueKey<String>('tool_content_text')),
     );
@@ -409,6 +443,57 @@ void main() {
     );
     expect(outputText.maxLines, isNull);
     expect(find.text('Show less'), findsOneWidget);
+  });
+
+  testWidgets('mobile tool status chip shows icon without label text', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_tool_mobile_status',
+              sessionId: 'ses_tool',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'part_tool_mobile_status',
+                  messageId: 'msg_tool_mobile_status',
+                  sessionId: 'ses_tool',
+                  callId: 'call_mobile_1',
+                  tool: 'bash',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{'command': 'pwd'},
+                    output: '/tmp',
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1200),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Completed'), findsNothing);
+    expect(find.byIcon(Icons.check), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is RichText &&
+            widget.key == const ValueKey<String>('tool_command_text') &&
+            widget.text.toPlainText().contains('Command: pwd'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -905,48 +990,47 @@ index abc123..def456 100644
     expect(find.byType(RichText), findsAtLeastNWidgets(1));
   });
 
-  testWidgets(
-    'builds synthetic diff for edit tool when output is empty',
-    (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ChatMessageWidget(
-              message: AssistantMessage(
-                id: 'msg_edit_input',
-                sessionId: 'ses_diff',
-                time: DateTime.fromMillisecondsSinceEpoch(1000),
-                parts: <MessagePart>[
-                  ToolPart(
-                    id: 'tool_edit_input',
-                    messageId: 'msg_edit_input',
-                    sessionId: 'ses_diff',
-                    callId: 'call_edit_input',
-                    tool: 'edit',
-                    state: ToolStateCompleted(
-                      input: const <String, dynamic>{
-                        'file_path': 'lib/sample.dart',
-                        'old_string': 'line old',
-                        'new_string': 'line new',
-                      },
-                      output: '',
-                      time: ToolTime(
-                        start: DateTime.fromMillisecondsSinceEpoch(1000),
-                        end: DateTime.fromMillisecondsSinceEpoch(1100),
-                      ),
+  testWidgets('builds synthetic diff for edit tool when output is empty', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_edit_input',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_edit_input',
+                  messageId: 'msg_edit_input',
+                  sessionId: 'ses_diff',
+                  callId: 'call_edit_input',
+                  tool: 'edit',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{
+                      'file_path': 'lib/sample.dart',
+                      'old_string': 'line old',
+                      'new_string': 'line new',
+                    },
+                    output: '',
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1100),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Show more'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Show more'));
+    await tester.pumpAndSettle();
 
-      expect(find.byType(RichText), findsAtLeastNWidgets(1));
-    },
-  );
+    expect(find.byType(RichText), findsAtLeastNWidgets(1));
+  });
 }

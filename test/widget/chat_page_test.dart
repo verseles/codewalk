@@ -1470,7 +1470,12 @@ void main() {
     await tester.pumpAndSettle();
 
     final newChatX = tester.getCenter(find.byTooltip('New Chat').first).dx;
+    final compactX = tester
+        .getCenter(find.byTooltip('Compact Context').first)
+        .dx;
     final openFilesX = tester.getCenter(find.byTooltip('Open Files')).dx;
+    expect(compactX, greaterThan(openFilesX));
+    expect(newChatX, greaterThan(compactX));
     expect(newChatX, greaterThan(openFilesX));
 
     final refreshFinder = find.byTooltip('Refresh');
@@ -1511,6 +1516,88 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('context usage knob shows percent and popover metrics', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_context_usage',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Context Usage',
+        ),
+      ],
+    );
+    repository.messagesBySession['ses_context_usage'] = <ChatMessage>[
+      AssistantMessage(
+        id: 'msg_context_usage',
+        sessionId: 'ses_context_usage',
+        time: DateTime.fromMillisecondsSinceEpoch(1100),
+        completedTime: DateTime.fromMillisecondsSinceEpoch(1200),
+        providerId: 'provider_1',
+        modelId: 'model_1',
+        cost: 0,
+        tokens: const MessageTokens(
+          input: 200,
+          output: 50,
+          reasoning: 25,
+          cacheRead: 25,
+          cacheWrite: 0,
+        ),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'part_context_usage',
+            messageId: 'msg_context_usage',
+            sessionId: 'ses_context_usage',
+            text: 'Done',
+          ),
+        ],
+      ),
+    ];
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('appbar_context_usage_button')),
+        matching: find.text('30%'),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('appbar_context_usage_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('context_usage_popover')),
+      findsOneWidget,
+    );
+    expect(find.text('Usage'), findsOneWidget);
+    expect(find.text('Tokens'), findsOneWidget);
+    expect(find.text('Cost'), findsOneWidget);
+    expect(find.text('300'), findsOneWidget);
+    expect(find.text(r'$0.0000'), findsOneWidget);
   });
 
   testWidgets('file viewer shows binary and error states', (

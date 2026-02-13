@@ -30,6 +30,7 @@ import '../../domain/usecases/reject_question.dart';
 import '../../domain/usecases/reply_permission.dart';
 import '../../domain/usecases/reply_question.dart';
 import '../../domain/usecases/abort_chat_session.dart';
+import '../../domain/usecases/summarize_chat_session.dart';
 import '../../domain/usecases/send_chat_message.dart';
 import '../../domain/usecases/share_chat_session.dart';
 import '../../domain/usecases/unshare_chat_session.dart';
@@ -116,6 +117,7 @@ class ChatProvider extends ChangeNotifier {
   ChatProvider({
     required this.sendChatMessage,
     this.abortChatSession,
+    this.summarizeChatSession,
     required this.getChatSessions,
     required this.createChatSession,
     required this.getChatMessages,
@@ -164,6 +166,7 @@ class ChatProvider extends ChangeNotifier {
 
   final SendChatMessage sendChatMessage;
   final AbortChatSession? abortChatSession;
+  final SummarizeChatSession? summarizeChatSession;
   final GetChatSessions getChatSessions;
   final CreateChatSession createChatSession;
   final GetChatMessages getChatMessages;
@@ -223,6 +226,7 @@ class ChatProvider extends ChangeNotifier {
   final Set<String> _pendingLocalUserMessageIds = <String>{};
   bool _activeSessionRefreshInFlight = false;
   bool _isAbortingResponse = false;
+  bool _isCompactingContext = false;
   String? _abortSuppressionSessionId;
   DateTime? _abortSuppressionStartedAt;
   int _messageStreamGeneration = 0;
@@ -309,6 +313,7 @@ class ChatProvider extends ChangeNotifier {
   bool get isInDegradedMode => _degradedMode;
   bool get refreshlessRealtimeEnabled => _refreshlessRealtimeEnabled;
   bool get isAbortingResponse => _isAbortingResponse;
+  bool get isCompactingContext => _isCompactingContext;
   Map<String, SessionStatusInfo> get sessionStatusById =>
       Map<String, SessionStatusInfo>.unmodifiable(_sessionStatusById);
 
@@ -3747,6 +3752,76 @@ class ChatProvider extends ChangeNotifier {
     if (success) {
       unawaited(_persistLastSessionSnapshotBestEffort());
     }
+    return success;
+  }
+
+  Future<bool> compactCurrentSession() async {
+    if (_isCompactingContext) {
+      return false;
+    }
+    if (canAbortActiveResponse) {
+      _errorMessage =
+          'Wait for the current response to finish before compacting';
+      notifyListeners();
+      return false;
+    }
+
+    final session = _currentSession;
+    final usecase = summarizeChatSession;
+    if (session == null || usecase == null) {
+      _errorMessage = 'Compact context is unavailable for the current session';
+      notifyListeners();
+      return false;
+    }
+
+    if (_selectedProviderId == null || _selectedModelId == null) {
+      await initializeProviders();
+    }
+
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    if (providerId == null || modelId == null) {
+      _errorMessage = 'Select a model before compacting context';
+      notifyListeners();
+      return false;
+    }
+
+    _isCompactingContext = true;
+    final previousError = _errorMessage;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await usecase(
+      SummarizeChatSessionParams(
+        projectId: projectProvider.currentProjectId,
+        sessionId: session.id,
+        providerId: providerId,
+        modelId: modelId,
+        directory: projectProvider.currentDirectory,
+      ),
+    );
+
+    var success = false;
+    result.fold(
+      (failure) {
+        _errorMessage = failure.message.isEmpty
+            ? 'Failed to compact session context'
+            : failure.message;
+      },
+      (_) {
+        success = true;
+      },
+    );
+
+    _isCompactingContext = false;
+    if (success) {
+      _errorMessage = null;
+      unawaited(loadSessionInsights(session.id, silent: true));
+      unawaited(_persistLastSessionSnapshotBestEffort());
+    } else if (_errorMessage == null) {
+      _errorMessage = previousError ?? 'Failed to compact session context';
+    }
+    notifyListeners();
     return success;
   }
 

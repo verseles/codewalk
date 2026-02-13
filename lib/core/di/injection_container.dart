@@ -11,6 +11,7 @@ import '../../domain/usecases/get_app_info.dart';
 import '../../domain/usecases/check_connection.dart';
 import '../../domain/usecases/update_server_config.dart';
 import '../../domain/usecases/abort_chat_session.dart';
+import '../../domain/usecases/summarize_chat_session.dart';
 import '../../domain/usecases/send_chat_message.dart';
 import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/create_chat_session.dart';
@@ -103,6 +104,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CheckConnection(sl()));
   sl.registerLazySingleton(() => UpdateServerConfig(sl()));
   sl.registerLazySingleton(() => AbortChatSession(sl()));
+  sl.registerLazySingleton(() => SummarizeChatSession(sl()));
   sl.registerLazySingleton(() => SendChatMessage(sl()));
   sl.registerLazySingleton(() => GetChatSessions(sl()));
   sl.registerLazySingleton(() => CreateChatSession(sl()));
@@ -141,6 +143,7 @@ Future<void> init() async {
     () => ChatProvider(
       sendChatMessage: sl(),
       abortChatSession: sl(),
+      summarizeChatSession: sl(),
       getChatSessions: sl(),
       createChatSession: sl(),
       getChatMessages: sl(),

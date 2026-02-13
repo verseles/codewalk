@@ -319,7 +319,7 @@ Compatibility tiers:
 - Added contextual suggestion fetching in `ChatPage`:
   - mention sources from `/find/file` plus provider-managed agent cache loaded from `/agent`
   - slash catalog from builtin commands plus `/command` (with `source` badges)
-  - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/help`) executed directly in UI context (`/agent` opens agent selector)
+  - builtin slash handlers (`/new`, `/model`, `/agent`, `/open`, `/compact`, `/help`) executed directly in UI context (`/agent` opens agent selector, `/compact` triggers session summarize)
   - composer returned to scaffold-native keyboard inset handling (`resizeToAvoidBottomInset`) to keep input above mobile keyboard consistently
 - Added shell send-path routing:
   - `ChatProvider.sendMessage(..., shellMode: true)` marks payload mode as shell
@@ -641,7 +641,9 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Chat composer includes a microphone action (next to send) that runs speech-to-text via `speech_to_text` and writes live dictation into the same text input
 - Send button has a secondary composer action: hold for 300ms inserts a newline at cursor/selection instead of sending, with a small corner icon indicator for discoverability
 - Chat composer supports prompt power triggers: `@` contextual mentions (files/agents), leading `!` shell mode, and leading `/` slash command catalog with source badges
+- Chat app bar includes a dedicated compact-context action (`Compact Context`, knob icon) beside `New Chat`, wired to `/session/{id}/summarize` using current provider/model selection
 - Shell-mode sends use a dedicated server route (`/session/{id}/shell`) through datasource-level routing
+- Tool-call headers show the tool name directly (without `Tool Call:` prefix), and detail blocks render extracted input command metadata (`Command`/`Input`) before output/error content
 - File explorer parity in chat:
   - server-backed tree listing (`/file`) with expandable directories and file-type icons
   - quick-open dialog (`Ctrl/Cmd+P` + `/open`, plus `Files` panel quick action) using ranked search from `/find/file`
@@ -966,6 +968,8 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - `ToolState` parsing now normalizes non-string `output` payloads (map/list/scalar) into displayable text and extracts common diff keys (`diff`, `patch`, `unified_diff`).
 - Tool output UI now falls back to structured tool `input` when `output` is empty, including direct `patch/diff` extraction for `apply_patch`.
 - `edit` tool calls with `old_string`/`new_string` now generate a synthetic unified diff when upstream does not return textual output.
+- Tool call status chip is now responsive: desktop keeps icon + text (`Completed`, `Running`, etc.), while compact/mobile layouts render icon-only status at the right edge.
+- Chat app bar compact control now mirrors OpenCode usage semantics as a single knob (percentage rendered inside the circle) with popover metrics (usage %, tokens, cost, limit), retaining manual `Compact now` action with collapse icon.
 - Added regression coverage for parser normalization and input-fallback diff rendering in widget/unit tests.
 - Fixed missing `color` field in Agent entity and model (commit 63d6155).
 - Added colorized diff rendering in tool outputs with accessible text scaling (commit 52c6e8b).

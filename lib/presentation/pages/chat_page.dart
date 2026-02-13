@@ -73,6 +73,22 @@ class _ModelSelectorEntry {
   final String modelName;
 }
 
+enum _ContextUsageAction { compactNow }
+
+class _SessionContextUsageSnapshot {
+  const _SessionContextUsageSnapshot({
+    required this.usagePercent,
+    required this.totalTokens,
+    required this.totalCost,
+    required this.modelLimit,
+  });
+
+  final int usagePercent;
+  final int totalTokens;
+  final double totalCost;
+  final int? modelLimit;
+}
+
 /// Chat page
 class ChatPage extends StatefulWidget {
   final String? projectId;
@@ -1154,6 +1170,70 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             tooltip: 'Open Files',
             onPressed: () => unawaited(_openMobileFilesDialog()),
           ),
+        Consumer<ChatProvider>(
+          builder: (context, chatProvider, _) {
+            final usage = _resolveSessionContextUsage(chatProvider);
+            final canOpenMenu = chatProvider.currentSession != null;
+            final canCompact =
+                canOpenMenu &&
+                !chatProvider.isCompactingContext &&
+                !chatProvider.canAbortActiveResponse;
+
+            return PopupMenuButton<_ContextUsageAction>(
+              key: const ValueKey<String>('appbar_context_usage_button'),
+              tooltip: 'Compact Context',
+              enabled: canOpenMenu,
+              onSelected: (action) {
+                if (action == _ContextUsageAction.compactNow) {
+                  unawaited(_compactCurrentSession(chatProvider));
+                }
+              },
+              itemBuilder: (context) {
+                return [
+                  PopupMenuItem<_ContextUsageAction>(
+                    enabled: false,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: _buildContextUsagePopover(
+                      context,
+                      usage: usage,
+                      isCompacting: chatProvider.isCompactingContext,
+                    ),
+                  ),
+                  const PopupMenuDivider(height: 0),
+                  PopupMenuItem<_ContextUsageAction>(
+                    value: _ContextUsageAction.compactNow,
+                    enabled: canCompact,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.compress_outlined,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          chatProvider.isCompactingContext
+                              ? 'Compacting...'
+                              : 'Compact now',
+                        ),
+                      ],
+                    ),
+                  ),
+                ];
+              },
+              child: _buildContextUsageControl(
+                context,
+                usage: usage,
+                isCompacting: chatProvider.isCompactingContext,
+                enabled: canOpenMenu,
+              ),
+            );
+          },
+        ),
         if (!isMobile)
           IconButton(
             icon: const Icon(Icons.add_comment_outlined),
@@ -1245,6 +1325,266 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         );
       },
     );
+  }
+
+  Future<void> _compactCurrentSession(ChatProvider chatProvider) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final success = await chatProvider.compactCurrentSession();
+    if (!mounted) {
+      return;
+    }
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Context compacted'
+              : (chatProvider.errorMessage ?? 'Failed to compact context'),
+        ),
+      ),
+    );
+  }
+
+  _SessionContextUsageSnapshot _resolveSessionContextUsage(
+    ChatProvider chatProvider,
+  ) {
+    AssistantMessage? latestAssistantWithTokens;
+    var totalCost = 0.0;
+
+    for (final message in chatProvider.messages) {
+      if (message is! AssistantMessage) {
+        continue;
+      }
+      totalCost += message.cost ?? 0;
+    }
+
+    for (final message in chatProvider.messages.reversed) {
+      if (message is! AssistantMessage) {
+        continue;
+      }
+      final tokens = message.tokens;
+      if (tokens == null) {
+        continue;
+      }
+      final total =
+          tokens.input +
+          tokens.output +
+          tokens.reasoning +
+          tokens.cacheRead +
+          tokens.cacheWrite;
+      if (total <= 0) {
+        continue;
+      }
+      latestAssistantWithTokens = message;
+      break;
+    }
+
+    final totalTokens = latestAssistantWithTokens == null
+        ? 0
+        : (latestAssistantWithTokens.tokens!.input +
+              latestAssistantWithTokens.tokens!.output +
+              latestAssistantWithTokens.tokens!.reasoning +
+              latestAssistantWithTokens.tokens!.cacheRead +
+              latestAssistantWithTokens.tokens!.cacheWrite);
+
+    final providerId =
+        latestAssistantWithTokens?.providerId ??
+        chatProvider.selectedProviderId;
+    final modelId =
+        latestAssistantWithTokens?.modelId ?? chatProvider.selectedModelId;
+
+    Model? model;
+    if (providerId != null && modelId != null) {
+      for (final provider in chatProvider.providers) {
+        if (provider.id != providerId) {
+          continue;
+        }
+        model = provider.models[modelId];
+        break;
+      }
+    }
+    model ??= chatProvider.selectedModel;
+
+    final limit = model?.limit.context;
+    final rawUsagePercent = (limit != null && limit > 0)
+        ? ((totalTokens / limit) * 100).round()
+        : 0;
+
+    return _SessionContextUsageSnapshot(
+      usagePercent: rawUsagePercent.clamp(0, 999).toInt(),
+      totalTokens: totalTokens,
+      totalCost: totalCost,
+      modelLimit: limit,
+    );
+  }
+
+  Widget _buildContextUsageControl(
+    BuildContext context, {
+    required _SessionContextUsageSnapshot usage,
+    required bool isCompacting,
+    required bool enabled,
+  }) {
+    final usagePercent = usage.usagePercent;
+    final color = _contextUsageColor(
+      context,
+      usagePercent: usagePercent,
+      enabled: enabled,
+    );
+    final progress = (usagePercent / 100).clamp(0.0, 1.0);
+    final knobTextColor = enabled
+        ? Theme.of(context).colorScheme.onSurface
+        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38);
+
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularProgressIndicator(
+            value: 1,
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              color.withValues(alpha: 0.22),
+            ),
+          ),
+          CircularProgressIndicator(
+            value: isCompacting ? null : progress,
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
+          Text(
+            '$usagePercent%',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontSize: usagePercent >= 100 ? 7 : 8,
+              fontWeight: FontWeight.w700,
+              color: knobTextColor,
+              height: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _contextUsageColor(
+    BuildContext context, {
+    required int usagePercent,
+    required bool enabled,
+  }) {
+    if (!enabled) {
+      return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38);
+    }
+    if (usagePercent >= 85) {
+      return Theme.of(context).colorScheme.error;
+    }
+    if (usagePercent >= 65) {
+      return Colors.orange;
+    }
+    return Theme.of(context).colorScheme.primary;
+  }
+
+  Widget _buildContextUsagePopover(
+    BuildContext context, {
+    required _SessionContextUsageSnapshot usage,
+    required bool isCompacting,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return SizedBox(
+      key: const ValueKey<String>('context_usage_popover'),
+      width: 220,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Context usage',
+            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          _buildContextUsageRow(
+            context,
+            label: 'Usage',
+            value: '${usage.usagePercent}%',
+          ),
+          const SizedBox(height: 6),
+          _buildContextUsageRow(
+            context,
+            label: 'Tokens',
+            value: _formatIntWithGroup(usage.totalTokens),
+          ),
+          const SizedBox(height: 6),
+          _buildContextUsageRow(
+            context,
+            label: 'Cost',
+            value: _formatUsd(usage.totalCost),
+          ),
+          if (usage.modelLimit != null) ...[
+            const SizedBox(height: 6),
+            _buildContextUsageRow(
+              context,
+              label: 'Limit',
+              value: _formatIntWithGroup(usage.modelLimit!),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Text(
+            isCompacting
+                ? 'Compacting context now...'
+                : 'Automatic compaction happens as context usage grows.',
+            style: textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContextUsageRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+
+  String _formatUsd(double value) {
+    if (value.isNaN || value.isInfinite) {
+      return r'$0.0000';
+    }
+    return r'$' + value.toStringAsFixed(4);
+  }
+
+  String _formatIntWithGroup(int value) {
+    final sign = value < 0 ? '-' : '';
+    final digits = value.abs().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i += 1) {
+      final remaining = digits.length - i;
+      buffer.write(digits[i]);
+      if (remaining > 1 && remaining % 3 == 1) {
+        buffer.write(',');
+      }
+    }
+    return '$sign$buffer';
   }
 
   String _syncStatusLabel({
@@ -5589,6 +5929,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         description: 'Show command help',
         isBuiltin: true,
       ),
+      ChatComposerSlashCommandSuggestion(
+        name: 'compact',
+        source: 'builtin',
+        description: 'Compact current session context',
+        isBuiltin: true,
+      ),
     ];
   }
 
@@ -5703,6 +6049,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             content: Text('Use @ for mentions, ! for shell, / for commands'),
           ),
         );
+        return true;
+      case 'compact':
+        if (!mounted) {
+          return true;
+        }
+        await _compactCurrentSession(chatProvider);
         return true;
       default:
         return false;

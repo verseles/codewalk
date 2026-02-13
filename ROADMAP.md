@@ -227,3 +227,6 @@ Concluída a remoção dos problemas-alvo de deprecação/compatibilidade, com v
 - [ ] Limitar altura ao expandir conteúdo de uma tool call
 - [ ] Personalizar título das tool calls mais comuns, e tratar respostas para aparência mais suave visando UX
 - [ ] Condensar as chamas de tool calls em um collapsable quando a resposta final do assistente chegar
+- [x] Restaurar ação de compactar contexto (`/summarize`) com botão dedicado ao lado de `New Chat` e comando builtin `/compact`
+- [x] Restaurar cabeçalho das tool calls sem prefixo redundante, exibir comando de entrada (`Command/Input`) e aplicar status responsivo (desktop: ícone + texto; mobile/tela compacta: apenas ícone)
+- [x] Evoluir controle de compactação para knob único com percentual dentro do próprio círculo e popover (uso %, tokens e custo) mantendo ação `Compact now` com ícone de colapso

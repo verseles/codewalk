@@ -391,6 +391,8 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildToolPart(BuildContext context, ToolPart part) {
+    final isCompactToolStatus = MediaQuery.sizeOf(context).width < 600;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
@@ -412,14 +414,22 @@ class ChatMessageWidget extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Text(
-                'Tool Call: ${part.tool}',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              Expanded(
+                child: Text(
+                  part.tool,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
               ),
-              const Spacer(),
-              _buildToolStatusChip(context, part.state.status),
+              const SizedBox(width: 8),
+              _buildToolStatusChip(
+                context,
+                part.state.status,
+                showLabel: !isCompactToolStatus,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -593,7 +603,11 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildToolStatusChip(BuildContext context, ToolStatus status) {
+  Widget _buildToolStatusChip(
+    BuildContext context,
+    ToolStatus status, {
+    required bool showLabel,
+  }) {
     Color color;
     String label;
     IconData icon;
@@ -621,6 +635,18 @@ class ChatMessageWidget extends StatelessWidget {
         break;
     }
 
+    if (!showLabel) {
+      return Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Icon(icon, size: 16, color: color),
+      );
+    }
+
     return Chip(
       avatar: Icon(icon, size: 16, color: color),
       label: Text(label),
@@ -631,13 +657,24 @@ class ChatMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildToolStateDetails(BuildContext context, ToolState state, String toolName) {
+  Widget _buildToolStateDetails(
+    BuildContext context,
+    ToolState state,
+    String toolName,
+  ) {
+    final command = _extractToolCommand(state);
     switch (state.status) {
       case ToolStatus.running:
         final runningState = state as ToolStateRunning;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (command != null)
+              _buildToolCommandSection(
+                context,
+                toolName: toolName,
+                command: command,
+              ),
             if (runningState.title != null)
               Text(
                 runningState.title!,
@@ -655,6 +692,12 @@ class ChatMessageWidget extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (command != null)
+              _buildToolCommandSection(
+                context,
+                toolName: toolName,
+                command: command,
+              ),
             if (completedState.title != null)
               Text(
                 completedState.title!,
@@ -689,21 +732,144 @@ class ChatMessageWidget extends StatelessWidget {
             color: Theme.of(context).colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: _CollapsibleToolContent(
-            text: errorState.error,
-            collapsedMaxLines: _collapsedToolDetailMaxLines,
-            toolName: toolName,
-            textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
-            toggleTextStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (command != null)
+                _buildToolCommandSection(
+                  context,
+                  toolName: toolName,
+                  command: command,
+                  inErrorContainer: true,
+                ),
+              _CollapsibleToolContent(
+                text: errorState.error,
+                collapsedMaxLines: _collapsedToolDetailMaxLines,
+                toolName: toolName,
+                textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                ),
+                toggleTextStyle: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+              ),
+            ],
           ),
         );
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildToolCommandSection(
+    BuildContext context, {
+    required String toolName,
+    required String command,
+    bool inErrorContainer = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final labelColor = inErrorContainer
+        ? colorScheme.onErrorContainer.withValues(alpha: 0.84)
+        : colorScheme.onSurfaceVariant;
+    final valueColor = inErrorContainer
+        ? colorScheme.onErrorContainer
+        : colorScheme.onSurface;
+    final backgroundColor = inErrorContainer
+        ? colorScheme.onErrorContainer.withValues(alpha: 0.08)
+        : colorScheme.surface;
+    final prefix = toolName.trim().toLowerCase() == 'bash'
+        ? 'Command'
+        : 'Input';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: RichText(
+        key: const ValueKey<String>('tool_command_text'),
+        textScaler: MediaQuery.textScalerOf(context),
+        text: TextSpan(
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+          children: [
+            TextSpan(
+              text: '$prefix: ',
+              style: TextStyle(color: labelColor, fontWeight: FontWeight.w600),
+            ),
+            TextSpan(
+              text: command,
+              style: TextStyle(color: valueColor),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String? _extractToolCommand(ToolState state) {
+    switch (state.status) {
+      case ToolStatus.pending:
+        return null;
+      case ToolStatus.running:
+        final runningState = state as ToolStateRunning;
+        return _extractCommandFromInputMap(runningState.input);
+      case ToolStatus.completed:
+        final completedState = state as ToolStateCompleted;
+        return _extractCommandFromInputMap(completedState.input);
+      case ToolStatus.error:
+        final errorState = state as ToolStateError;
+        return _extractCommandFromInputMap(errorState.input);
+    }
+  }
+
+  String? _extractCommandFromInputMap(Map<String, dynamic> input) {
+    if (input.isEmpty) {
+      return null;
+    }
+
+    String? readString(dynamic value) {
+      if (value is! String) {
+        return null;
+      }
+      final trimmed = value.trim();
+      return trimmed.isEmpty ? null : trimmed;
+    }
+
+    Map<String, dynamic>? readMap(dynamic value) {
+      if (value is Map<String, dynamic>) {
+        return value;
+      }
+      if (value is Map) {
+        return Map<String, dynamic>.from(value);
+      }
+      return null;
+    }
+
+    final command = readString(input['command']) ?? readString(input['cmd']);
+    if (command != null) {
+      return command;
+    }
+
+    final nestedInput = readMap(input['input']);
+    if (nestedInput != null) {
+      final nestedCommand = _extractCommandFromInputMap(nestedInput);
+      if (nestedCommand != null) {
+        return nestedCommand;
+      }
+    }
+
+    final fallback = input.entries
+        .where((entry) => entry.value != null)
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join(' | ')
+        .trim();
+    return fallback.isEmpty ? null : fallback;
   }
 
   String _resolveToolOutput({
@@ -766,12 +932,13 @@ class ChatMessageWidget extends StatelessWidget {
       return null;
     }
 
-    final path = _firstInputString(input, const [
-      'file_path',
-      'path',
-      'file',
-      'target',
-    ]) ??
+    final path =
+        _firstInputString(input, const [
+          'file_path',
+          'path',
+          'file',
+          'target',
+        ]) ??
         'file';
 
     final beforeLines = before.split('\n').map((line) => '-$line').join('\n');
@@ -949,16 +1116,18 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
       } else if (line.startsWith('@@')) {
         color = _getDiffHunkColor(context);
       } else if (line.startsWith('diff --git') ||
-                 line.startsWith('index ') ||
-                 line.startsWith('--- ') ||
-                 line.startsWith('+++ ')) {
+          line.startsWith('index ') ||
+          line.startsWith('--- ') ||
+          line.startsWith('+++ ')) {
         color = _getDiffMetadataColor(context);
       }
 
-      spans.add(TextSpan(
-        text: line,
-        style: color != null ? TextStyle(color: color) : null,
-      ));
+      spans.add(
+        TextSpan(
+          text: line,
+          style: color != null ? TextStyle(color: color) : null,
+        ),
+      );
       spans.add(const TextSpan(text: '\n'));
     }
 
@@ -966,10 +1135,7 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
 
     return RichText(
       textScaler: MediaQuery.textScalerOf(context),
-      text: TextSpan(
-        style: widget.textStyle,
-        children: spans,
-      ),
+      text: TextSpan(style: widget.textStyle, children: spans),
     );
   }
 
