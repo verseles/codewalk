@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 $Repo = if ($env:CODEWALK_REPO) { $env:CODEWALK_REPO } else { "helio/codewalk" }
 $InstallDir = Join-Path $env:LOCALAPPDATA "CodeWalk"
 $BinaryPath = Join-Path $InstallDir "codewalk.exe"
+$StartMenuShortcutPath = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\CodeWalk.lnk"
 
 function Info([string]$Message) {
   Write-Host ":: $Message" -ForegroundColor Cyan
@@ -14,6 +15,10 @@ function Info([string]$Message) {
 
 function Fail([string]$Message) {
   throw $Message
+}
+
+function Warn([string]$Message) {
+  Write-Host ":: $Message" -ForegroundColor Yellow
 }
 
 function Get-ArchTag {
@@ -36,6 +41,19 @@ function Add-ToUserPath([string]$PathEntry) {
   }
   $updated = if ($parts.Count -eq 0) { $PathEntry } else { ($parts + $PathEntry) -join ";" }
   [Environment]::SetEnvironmentVariable("Path", $updated, "User")
+}
+
+function New-StartMenuShortcut([string]$TargetExePath) {
+  $shortcutDir = Split-Path -Parent $StartMenuShortcutPath
+  New-Item -ItemType Directory -Force -Path $shortcutDir | Out-Null
+
+  $shell = New-Object -ComObject WScript.Shell
+  $shortcut = $shell.CreateShortcut($StartMenuShortcutPath)
+  $shortcut.TargetPath = $TargetExePath
+  $shortcut.WorkingDirectory = Split-Path -Parent $TargetExePath
+  $shortcut.IconLocation = "$TargetExePath,0"
+  $shortcut.Description = "CodeWalk"
+  $shortcut.Save()
 }
 
 $archTag = Get-ArchTag
@@ -80,6 +98,14 @@ try {
   }
 
   Add-ToUserPath -PathEntry $InstallDir
+
+  try {
+    New-StartMenuShortcut -TargetExePath $BinaryPath
+    Info "Start Menu shortcut created at $StartMenuShortcutPath"
+  }
+  catch {
+    Warn "Could not create Start Menu shortcut: $($_.Exception.Message)"
+  }
 
   Write-Host ""
   Write-Host "CodeWalk installed successfully at $InstallDir" -ForegroundColor Green

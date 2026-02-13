@@ -214,7 +214,7 @@ Concluída a remoção dos problemas-alvo de deprecação/compatibilidade, com v
 - [ ] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
 - [ ] Opções em Settings para decidir se app fica em background. Mobile: persistente notification, desktop: tray
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclades/dispositivos (validar em device real com Gboard e Samsung Keyboard)
-- [ ] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
+- [x] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)
 - [ ] Emular `opencode serve` internamente como opção de servidor local (permitir ao CodeWalk iniciar e gerenciar um servidor OpenCode embutido sem depender de instância externa)
 - [ ] Fazer atalhos de teclado funcionarem de verdade
 - [ ] Exibir seção `Shortcuts` no mobile quando houver teclado físico conectado

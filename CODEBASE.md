@@ -479,15 +479,15 @@ Deferred/optional after parity wave:
 
 ### Makefile Automation
 
-158-line Makefile with 13 targets:
+181-line Makefile with 13 targets:
 
 | Target | Description |
 |--------|-------------|
 | `help` | Show available targets (default) |
 | `deps` | Install Flutter dependencies (`flutter pub get`) |
 | `gen` | Run code generation (`dart run build_runner`) |
-| `icons` | Regenerate app icons for all supported platforms |
-| `icons-check` | Validate icon assets and expected dimensions |
+| `icons` | Regenerate app icons for all supported platforms, including Linux Freedesktop metadata |
+| `icons-check` | Validate icon assets, expected dimensions, and Linux desktop entry fields |
 | `analyze` | Static analysis with budget check (186 max) |
 | `test` | Run all tests |
 | `coverage` | Generate coverage report with threshold check (35% min) |
@@ -507,14 +507,17 @@ Deferred/optional after parity wave:
 **install.sh (Unix/Linux/macOS):**
 - Detects platform (Linux/Darwin) and architecture (x86_64/arm64/aarch64)
 - Fetches latest GitHub release via API
-- Downloads tarball, extracts to `~/.local/bin`
-- Verifies PATH includes installation directory
+- Downloads tarball and extracts to user-local application data path
+- Creates CLI link in `~/.local/bin/codewalk`
+- Linux: registers Freedesktop desktop entry + icon in user scope
+- macOS: if an app bundle exists, installs it to `~/Applications/CodeWalk.app`
 
 **install.ps1 (Windows PowerShell):**
 - Detects architecture (AMD64/ARM64)
 - Fetches latest GitHub release via API
 - Downloads ZIP, extracts to `%LOCALAPPDATA%\CodeWalk`
 - Automatically adds to user PATH
+- Creates Start Menu shortcut with executable icon
 - Cleanup of temporary files
 
 ## Dependencies

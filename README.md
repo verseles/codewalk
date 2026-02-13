@@ -74,9 +74,12 @@ make precommit  # check + android
 ## Installer Scripts
 
 - Linux/macOS: `install.sh`
+  - Linux: installs CLI + registers Freedesktop desktop entry and icon in user scope.
+  - macOS: installs CLI and, when a `.app` bundle is present, places it in `~/Applications`.
 - Windows: `install.ps1`
+  - Installs to `%LOCALAPPDATA%\\CodeWalk`, adds user PATH, and creates a Start Menu shortcut.
 
-Both scripts install latest GitHub release artifacts to user-local paths.
+Both scripts consume the latest GitHub release artifacts by default.
 
 ## Architecture
 

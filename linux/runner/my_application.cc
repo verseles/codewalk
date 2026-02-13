@@ -26,17 +26,22 @@ static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
-  // Load the desktop icon from the bundled Linux resources if available.
+  // Load the desktop icon from bundled Linux resources if available.
+  // Prefer the app-id icon for Freedesktop/GNOME alignment, then fallback.
   g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);
   if (exe_path != nullptr) {
     g_autofree gchar* exe_dir = g_path_get_dirname(exe_path);
-    g_autofree gchar* icon_path =
-        g_build_filename(exe_dir, "data", "app_icon.png", nullptr);
-    if (g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
-      g_autoptr(GError) icon_error = nullptr;
-      gtk_window_set_icon_from_file(window, icon_path, &icon_error);
-      if (icon_error != nullptr) {
-        g_warning("Failed to load app icon: %s", icon_error->message);
+    const gchar* icon_names[] = {"com.verseles.codewalk.png", "app_icon.png"};
+    for (guint i = 0; i < G_N_ELEMENTS(icon_names); ++i) {
+      g_autofree gchar* icon_path =
+          g_build_filename(exe_dir, "data", icon_names[i], nullptr);
+      if (g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
+        g_autoptr(GError) icon_error = nullptr;
+        gtk_window_set_icon_from_file(window, icon_path, &icon_error);
+        if (icon_error != nullptr) {
+          g_warning("Failed to load app icon: %s", icon_error->message);
+        }
+        break;
       }
     }
   }

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CodeWalk
+Comment=Cross-platform OpenCode client
+Exec=codewalk %U
+Icon=com.verseles.codewalk
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=true
+StartupWMClass=com.verseles.codewalk
+Keywords=AI;Code;Assistant;OpenCode;

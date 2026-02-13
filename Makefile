@@ -11,7 +11,7 @@ help:
 	@echo ""
 	@echo "  make deps       Install dependencies"
 	@echo "  make gen        Run build_runner"
-	@echo "  make icons      Regenerate app icons (standard + adaptive)"
+	@echo "  make icons      Regenerate app icons (standard + adaptive + desktop metadata)"
 	@echo "  make icons-check Validate icon artifacts and dimensions"
 	@echo "  make analyze    Run static analysis + issue budget gate"
 	@echo "  make test       Run tests"
@@ -43,19 +43,34 @@ icons:
 	magick assets/images/original.png -gravity center -crop 78%x78%+0+0 +repage -resize 1024x1024\! -strip -define png:compression-level=9 assets/images/adaptive_foreground.png
 	mkdir -p linux/runner/resources
 	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 512x512\! -strip -define png:compression-level=9 linux/runner/resources/app_icon.png
+	cp -f linux/runner/resources/app_icon.png linux/runner/resources/com.verseles.codewalk.png
+	printf '%s\n' \
+		'[Desktop Entry]' \
+		'Version=1.0' \
+		'Type=Application' \
+		'Name=CodeWalk' \
+		'Comment=Cross-platform OpenCode client' \
+		'Exec=codewalk %U' \
+		'Icon=com.verseles.codewalk' \
+		'Terminal=false' \
+		'Categories=Development;Utility;' \
+		'StartupNotify=true' \
+		'StartupWMClass=com.verseles.codewalk' \
+		'Keywords=AI;Code;Assistant;OpenCode;' \
+		> linux/runner/resources/com.verseles.codewalk.desktop
 	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 1024x1024\! -define icon:auto-resize=256,128,64,48,32,24,16 windows/runner/resources/app_icon.ico
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 16x16\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 32x32\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 64x64\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 128x128\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 256x256\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 512x512\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png
-	magick assets/images/original.png -gravity center -crop 84%x84%+0+0 +repage -resize 1024x1024\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
+	magick assets/images/logo.1024.png -resize 16x16\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png
+	magick assets/images/logo.1024.png -resize 32x32\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png
+	magick assets/images/logo.1024.png -resize 64x64\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png
+	magick assets/images/logo.1024.png -resize 128x128\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png
+	magick assets/images/logo.1024.png -resize 256x256\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png
+	magick assets/images/logo.1024.png -resize 512x512\! -strip -define png:compression-level=9 macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png
+	cp -f assets/images/logo.1024.png macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
 	dart run flutter_launcher_icons
 	# Web maskable icons with safe zone: keep critical subject inside center area.
 	magick -size 512x512 xc:'#7EAFC2' \( assets/images/original.png -gravity center -crop 90%x90%+0+0 +repage -resize 420x420\! \) -gravity center -composite -strip -define png:compression-level=9 web/icons/Icon-maskable-512.png
 	magick web/icons/Icon-maskable-512.png -resize 192x192\! -strip -define png:compression-level=9 web/icons/Icon-maskable-192.png
-	@echo "Icons regenerated for Android + Linux + Windows + macOS."
+	@echo "Icons regenerated for Android + Linux/Freedesktop + Windows + macOS."
 
 icons-check:
 	@if ! command -v magick >/dev/null 2>&1; then \
@@ -67,6 +82,8 @@ icons-check:
 		assets/images/icon.png \
 		assets/images/adaptive_foreground.png \
 		linux/runner/resources/app_icon.png \
+		linux/runner/resources/com.verseles.codewalk.png \
+		linux/runner/resources/com.verseles.codewalk.desktop \
 		windows/runner/resources/app_icon.ico \
 		android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml \
 		macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png \
@@ -83,6 +100,7 @@ icons-check:
 	@test "$$(magick identify -format '%wx%h' assets/images/icon.png)" = "720x775" || (echo "Invalid assets/images/icon.png size"; exit 1)
 	@test "$$(magick identify -format '%wx%h' assets/images/adaptive_foreground.png)" = "1024x1024" || (echo "Invalid assets/images/adaptive_foreground.png size"; exit 1)
 	@test "$$(magick identify -format '%wx%h' linux/runner/resources/app_icon.png)" = "512x512" || (echo "Invalid linux app icon size"; exit 1)
+	@test "$$(magick identify -format '%wx%h' linux/runner/resources/com.verseles.codewalk.png)" = "512x512" || (echo "Invalid linux app-id icon size"; exit 1)
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png)" = "16x16" || (echo "Invalid macOS 16x16 icon"; exit 1)
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png)" = "32x32" || (echo "Invalid macOS 32x32 icon"; exit 1)
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png)" = "64x64" || (echo "Invalid macOS 64x64 icon"; exit 1)
@@ -92,6 +110,11 @@ icons-check:
 	@test "$$(magick identify -format '%wx%h' macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png)" = "1024x1024" || (echo "Invalid macOS 1024x1024 icon"; exit 1)
 	@test "$$(magick identify -format '%wx%h' web/icons/Icon-maskable-192.png)" = "192x192" || (echo "Invalid web maskable 192 icon"; exit 1)
 	@test "$$(magick identify -format '%wx%h' web/icons/Icon-maskable-512.png)" = "512x512" || (echo "Invalid web maskable 512 icon"; exit 1)
+	@grep -q '^\[Desktop Entry\]$$' linux/runner/resources/com.verseles.codewalk.desktop || (echo "Missing Desktop Entry header"; exit 1)
+	@grep -q '^Type=Application$$' linux/runner/resources/com.verseles.codewalk.desktop || (echo "Desktop entry must be Type=Application"; exit 1)
+	@grep -q '^Icon=com\.verseles\.codewalk$$' linux/runner/resources/com.verseles.codewalk.desktop || (echo "Desktop entry icon is not app-id based"; exit 1)
+	@grep -q '^Exec=codewalk %U$$' linux/runner/resources/com.verseles.codewalk.desktop || (echo "Desktop entry Exec is unexpected"; exit 1)
+	@grep -q '^StartupWMClass=com\.verseles\.codewalk$$' linux/runner/resources/com.verseles.codewalk.desktop || (echo "Desktop entry StartupWMClass mismatch"; exit 1)
 	@grep -q 'android:inset="0%"' android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml || (echo "Adaptive icon inset is not 0%"; exit 1)
 	@echo "Icon checks passed."
 
