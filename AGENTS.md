@@ -19,3 +19,4 @@ Observe a ordem acima! make android deve ser executado logo após concluída as 
 - Evite caption genérico como "Ajustes mais recentes feitos"; prefira algo como "Corrigida altura da caixa Thinking Process".
 - Após concluir a tarefa é importante executar logo `make android` para que o usuario teste no celular para que as outras tarefas continuem enquanto o usuário já vai testando a implementação.
 - Após planejamento, criação de tests automatizados ou atualização de arquivos .md não é necessário executar `make android`, ele deve ser executado apenas ao finalizar tarefas solicitadas que modifiquem o código do app.
+- `make precommit` não deve ser executado antes de commits que envolvam apenas arquivos estáticos (ou seja, mudanças que não alteram nem testes nem o aplicativo).
