@@ -86,6 +86,8 @@ codewalk/
 
 All runtime/build/config references to `open_mode`/`OpenMode` were renamed to `codewalk`/`CodeWalk` in Feature 003. Remaining references exist only in historical documentation files (NOTICE, ADR.md, ROADMAP files) as intentional attribution to the original project.
 
+`easychen/openMode` is considered a legacy source and is outdated for current implementation decisions. Do not use it as a technical reference; use OpenCode official docs and the upstream OpenCode repository listed below.
+
 ## API Endpoints
 
 Extracted from `lib/data/datasources/*.dart`. Server base URL is configurable.
@@ -157,6 +159,11 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
   - `https://opencode.ai/docs/server/`
   - `https://opencode.ai/docs/models/`
   - `https://opencode.ai/docs/web/`
+
+Reference policy:
+
+- `easychen/openMode` is historical attribution only (non-reference).
+- Canonical references for implementation are OpenCode docs + OpenCode upstream.
 
 Compatibility tiers:
 
@@ -328,6 +335,17 @@ Compatibility tiers:
 - Expanded coverage:
   - widget tests for shell-mode submit and `@`/`/` popover insertion flows
   - provider unit test for shell payload mode propagation
+
+### ADR Coverage Clarifications (ADR-017/020/021/022/024)
+
+- `FileInputPart` contract note (ADR-017): outbound file parts are `mime` + `url` (no legacy `source` compatibility). This is acceptable because attachments are transient compose input and not persisted as long-lived local data.
+- File path resolution fallback (ADR-020): file list/read operations attempt absolute and context-relative path candidates to tolerate server differences in `path` handling.
+- Responsive dialog default policy (ADR-021): unless a feature documents an exception, product dialogs follow mobile/compact fullscreen and large-screen centered `~70%` viewport constraints.
+- Settings event feedback contract (ADR-022): `EventFeedbackDispatcher` is the single orchestration point for notification/sound feedback from chat reducer events.
+- Notification title contract (ADR-022): completion notifications should prefer `Finished: <session title>` when session context is available, with fallback to generic completion text when title context is missing.
+- Android notification build constraints (ADR-022): runtime notification support depends on `POST_NOTIFICATIONS` permission and core-library desugaring in Gradle.
+- Abort semantics contract (ADR-024): while a response is active, composer action switches to `Stop` and routes to `/session/{id}/abort`; user-initiated cancelation errors (`aborted/canceled`) are treated as expected in a short suppression window.
+- Stop->Send race guard contract (ADR-024): provider ignores stale stream callbacks across abort/send generation boundaries to keep post-stop sends in `loaded` state without transient retry fallback.
 
 ### ChatInput Schema
 
@@ -767,6 +785,8 @@ test/
 - Used for isolated unit testing without network dependencies
 
 **tool/qa/feat008_smoke.sh (live smoke):**
+- Real OpenCode verification server (shared): `http://100.68.105.54:4096`
+- Usage policy: non-destructive checks only (connectivity, provider/model discovery, session creation, event stream, and message turns). Do not run destructive routes against this server.
 - Verifies `/provider`, `/session`, `/event`, and two sequential `/session/{id}/message` turns in the same session
 - Uses preferred defaults (`openai` + `gpt-5.1-codex-mini`, variant `low`) with fallback only if unavailable
 - Fails when assistant returns `info.error`, when second turn reuses previous assistant ID, or when no non-empty text is produced
