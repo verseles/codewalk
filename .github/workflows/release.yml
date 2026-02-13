@@ -102,7 +102,7 @@ jobs:
           path: codewalk-macos-arm64.tar.gz
 
   build-macos-x64:
-    runs-on: macos-13
+    runs-on: macos-15-intel
     timeout-minutes: 35
     steps:
       - name: Checkout

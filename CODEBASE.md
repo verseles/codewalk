@@ -474,7 +474,7 @@ Deferred/optional after parity wave:
 | **build-linux** | ubuntu-latest | 30min | Linux release build + `codewalk-linux-x64.tar.gz` |
 | **build-windows** | windows-latest | 35min | Windows release build + `codewalk-windows-x64.zip` |
 | **build-macos-arm64** | macos-15 | 35min | macOS arm64 release build + `codewalk-macos-arm64.tar.gz` |
-| **build-macos-x64** | macos-13 | 35min | macOS x64 release build + `codewalk-macos-x64.tar.gz` |
+| **build-macos-x64** | macos-15-intel | 35min | macOS x64 release build + `codewalk-macos-x64.tar.gz` |
 | **build-android** | ubuntu-latest | 35min | Android arm64 release APK |
 | **create-release** | ubuntu-latest | 10min | Downloads artifacts and publishes GitHub Release |
 
