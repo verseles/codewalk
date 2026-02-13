@@ -29,7 +29,7 @@ Observe a ordem acima! make android deve ser executado logo após concluída as 
   - atualize o arquivo CHANGELOG.md com a nova versão e data
   - faça push
   - adicione a tag no git
-  - E faça watch a cada 60s da pipeline de release @.github/workflows/release.yml
+    - E faça watch a cada 60s da pipeline de release @.github/workflows/release.yml
     - A cada resultado atualize o usuário com informações
     - Caso qualquer etapa do workflow de release falhe, cancele a pipeline por completo
       - Analise os erros e decida:
