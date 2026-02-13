@@ -888,6 +888,7 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
     if (spans.isNotEmpty) spans.removeLast(); // Remove trailing \n
 
     return RichText(
+      textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         style: widget.textStyle,
         children: spans,

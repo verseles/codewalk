@@ -611,6 +611,70 @@ void main() {
     expect(find.byType(RichText), findsAtLeastNWidgets(1));
   });
 
+  testWidgets('uses MediaQuery textScaler in expanded colorized diff', (
+    tester,
+  ) async {
+    const diffOutput = '''--- file.dart
++++ file.dart
+@@ -1,2 +1,3 @@
+ context
+-old line
++new line''';
+    const expectedScaler = TextScaler.linear(1.2);
+    tester.view.physicalSize = const Size(1920, 1080);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) {
+          final mediaQuery = MediaQuery.of(
+            context,
+          ).copyWith(textScaler: expectedScaler);
+          return MediaQuery(data: mediaQuery, child: child!);
+        },
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_diff_scaler',
+              sessionId: 'ses_diff',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'tool_diff_scaler',
+                  messageId: 'msg_diff_scaler',
+                  sessionId: 'ses_diff',
+                  callId: 'call_diff_scaler',
+                  tool: 'apply_patch',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{},
+                    output: diffOutput,
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1100),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show more'));
+    await tester.pumpAndSettle();
+
+    final richTexts = tester.widgetList<RichText>(find.byType(RichText));
+    final diffRichText = richTexts.firstWhere(
+      (richText) => richText.text.toPlainText().contains('+new line'),
+    );
+
+    expect(diffRichText.textScaler, isNotNull);
+    expect(diffRichText.textScaler!.scale(10), expectedScaler.scale(10));
+  });
+
   testWidgets('detects diff in bash git diff via heuristic', (tester) async {
     const gitDiff = '''diff --git a/lib/main.dart b/lib/main.dart
 --- a/lib/main.dart
