@@ -450,9 +450,14 @@ Deferred/optional after parity wave:
 
 ## CI/CD and Automation
 
-### GitHub Actions Workflow
+### GitHub Actions Workflows
 
-`.github/workflows/ci.yml` implements a complete CI/CD pipeline with 5 parallel jobs:
+`codewalk` uses two GitHub Actions workflows:
+
+1. `.github/workflows/ci.yml` for continuous integration on pushes/PRs.
+2. `.github/workflows/release.yml` for GitHub Releases on version tags (`v*`) or manual dispatch.
+
+`ci.yml` implements a complete CI/CD validation pipeline with 5 parallel jobs:
 
 | Job | Platform | Timeout | Description |
 |-----|----------|---------|-------------|
@@ -461,6 +466,16 @@ Deferred/optional after parity wave:
 | **build-web** | ubuntu-latest | 20min | Web release build |
 | **build-android** | ubuntu-latest | 30min | APK arm64 release build with signing |
 | **ci-status** | ubuntu-latest | 5min | Aggregate status reporter |
+
+`release.yml` publishes installable artifacts and a GitHub Release with 5 jobs:
+
+| Job | Platform | Timeout | Description |
+|-----|----------|---------|-------------|
+| **build-linux** | ubuntu-latest | 30min | Linux release build + `codewalk-linux-x64.tar.gz` |
+| **build-windows** | windows-latest | 35min | Windows release build + `codewalk-windows-x64.zip` |
+| **build-macos** | macos-latest | 35min | macOS universal release build + arm64/x64 tarballs |
+| **build-android** | ubuntu-latest | 35min | Android arm64 release APK |
+| **create-release** | ubuntu-latest | 10min | Downloads artifacts and publishes GitHub Release |
 
 ### Quality Gates
 
