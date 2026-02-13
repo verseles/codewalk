@@ -467,13 +467,14 @@ Deferred/optional after parity wave:
 | **build-android** | ubuntu-latest | 30min | APK arm64 release build with signing |
 | **ci-status** | ubuntu-latest | 5min | Aggregate status reporter |
 
-`release.yml` publishes installable artifacts and a GitHub Release with 5 jobs:
+`release.yml` publishes installable artifacts and a GitHub Release with 6 jobs:
 
 | Job | Platform | Timeout | Description |
 |-----|----------|---------|-------------|
 | **build-linux** | ubuntu-latest | 30min | Linux release build + `codewalk-linux-x64.tar.gz` |
 | **build-windows** | windows-latest | 35min | Windows release build + `codewalk-windows-x64.zip` |
-| **build-macos** | macos-latest | 35min | macOS universal release build + arm64/x64 tarballs |
+| **build-macos-arm64** | macos-15 | 35min | macOS arm64 release build + `codewalk-macos-arm64.tar.gz` |
+| **build-macos-x64** | macos-13 | 35min | macOS x64 release build + `codewalk-macos-x64.tar.gz` |
 | **build-android** | ubuntu-latest | 35min | Android arm64 release APK |
 | **create-release** | ubuntu-latest | 10min | Downloads artifacts and publishes GitHub Release |
 
