@@ -1,7 +1,7 @@
 # CodeWalk - Codebase Baseline Snapshot
 
-> Captured: 2026-02-10
-> Git baseline: `6e0135106ef03c59b54077d49ce23fd56a5ce463` (main)
+> Captured: 2026-02-13
+> Git baseline: `b6f8d7f fix(diff): render edit/patch tool diffs reliably` (main)
 > Flutter: 3.38.9 (stable)
 
 ## Project Structure
@@ -73,11 +73,11 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 77 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 104 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
-| `.dart` (tests) | 18 | Test files (unit, widget, integration, support) |
-| `.dart` (total) | 99 | Repository files excluding build artifacts |
-| `.md` (markdown) | 22 | Docs + roadmap + release/QA artifacts |
+| `.dart` (tests) | 27 | Test files (unit, widget, integration, support) |
+| `.dart` (total) | 135 | Repository files excluding build artifacts |
+| `.md` (markdown) | 9 | Docs + roadmap + release artifacts |
 | `.sh` (scripts) | 5 | CI validation + installer/smoke scripts |
 
 ## Legacy Naming References
@@ -427,20 +427,18 @@ Deferred/optional after parity wave:
 
 ### flutter analyze
 
-- **Total issues: 121**
+- **Total issues: 83**
   - Errors: 0
-  - Warnings: 0
-  - Info: 121 (mostly deprecated API usage and lint modernization opportunities)
+  - Warnings: 1 (`unnecessary_non_null_assertion`)
+  - Info: 82 (mostly `unnecessary_underscores` in test parameter naming)
 - **Top issue categories:**
-  - `deprecated_member_use` (majority): `withOpacity`, `surfaceVariant`, old color roles
-  - `overridden_fields` (~5): field overrides in model classes
-  - `unnecessary_underscores` (~6): test parameter naming
-  - `type_literal_in_constant_pattern` (0): resolved by migrating to Dart 3 variable patterns (`TypeName _`)
+  - `unnecessary_underscores` (majority): test parameter naming conventions
+  - `unnecessary_non_null_assertion` (1): test assertion cleanup opportunity
 - **CI Budget:** 186 issues maximum (enforced via `tool/ci/check_analyze_budget.sh`)
 
 ### flutter test
 
-- **Result: 113 tests, all passed** (latest full run with coverage)
+- **Result: 218 tests, all passed** (latest full run with coverage)
 - **Coverage: 35% minimum** (enforced via `tool/ci/check_coverage.sh`)
 - **Test structure:**
   - Unit: providers/usecases/models with migration, server/context-scope assertions, lifecycle optimistic-rollback, and project/worktree orchestration
@@ -541,6 +539,10 @@ Deferred/optional after parity wave:
 | dartz | ^0.10.1 | Functional programming (Either) |
 | get_it | ^9.2.0 | Dependency injection |
 | web | ^1.1.1 | Web API interop for browser notification bridge |
+| dynamic_color | ^1.8.1 | Material You dynamic color schemes |
+| flutter_local_notifications | ^20.0.0 | Cross-platform local notifications |
+| audioplayers | ^6.5.1 | Sound playback for notification audio |
+| simple_icons | git (381d0cb) | Simple Icons brand icons |
 
 ### Dev
 
@@ -749,7 +751,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Patch coverage target: 30% (±10% threshold)
 - Ignores: test/**, *.g.dart, generated_plugin_registrant.dart, lib/l10n/**
 
-**Current coverage:** 59.44% in latest local CI-equivalent run (`4223/7105`), with 35% minimum enforced by CI
+**Current coverage:** 65.11% in latest local CI-equivalent run (`7693/11816`), with 35% minimum enforced by CI
 
 ## Contribution Standards (CONTRIBUTING.md)
 
@@ -923,8 +925,11 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - `ProjectProvider` now persists archived closed-project IDs per server and filters them from the "Closed projects" section while keeping normal reopen/switch flows for active contexts.
 - Expanded automated coverage for desktop shortcut send/newline behavior, persisted sidebar visibility toggles, stop/abort success path, and stop failure snackbar fallback.
 
-**Tool diff rendering hardening (2026-02-13):**
+**Tool diff rendering hardening (2026-02-13, commits b6f8d7f..082ea92):**
 - `ToolState` parsing now normalizes non-string `output` payloads (map/list/scalar) into displayable text and extracts common diff keys (`diff`, `patch`, `unified_diff`).
 - Tool output UI now falls back to structured tool `input` when `output` is empty, including direct `patch/diff` extraction for `apply_patch`.
 - `edit` tool calls with `old_string`/`new_string` now generate a synthetic unified diff when upstream does not return textual output.
 - Added regression coverage for parser normalization and input-fallback diff rendering in widget/unit tests.
+- Fixed missing `color` field in Agent entity and model (commit 63d6155).
+- Added colorized diff rendering in tool outputs with accessible text scaling (commit 52c6e8b).
+- Consolidated feature roadmaps and improved diff text scaling accessibility (commit 082ea92).
