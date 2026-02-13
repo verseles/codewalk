@@ -22,11 +22,13 @@ function Warn([string]$Message) {
   Write-Host ":: $Message" -ForegroundColor Yellow
 }
 
-function Get-ArchTag {
+function Get-WindowsAssetCandidates {
   $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
   switch ($arch) {
-    "X64" { return "x64" }
-    "Arm64" { return "arm64" }
+    "X64" { return @("codewalk-windows-x64.zip") }
+    "Arm64" {
+      return @("codewalk-windows-arm64.zip", "codewalk-windows-x64.zip")
+    }
     default { Fail "Unsupported architecture: $arch" }
   }
 }
@@ -70,8 +72,7 @@ function Get-InstalledVersion {
   }
 }
 
-$archTag = Get-ArchTag
-$asset = "codewalk-windows-$archTag.zip"
+$assetCandidates = Get-WindowsAssetCandidates
 
 Info "Fetching latest release from $Repo"
 $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest" -Headers @{ "User-Agent" = "codewalk-install" }
@@ -95,10 +96,21 @@ else {
   Info "Installing CodeWalk $($release.tag_name)"
 }
 
-$match = $release.assets | Where-Object { $_.name -eq $asset } | Select-Object -First 1
+$match = $null
+$asset = $null
+foreach ($candidate in $assetCandidates) {
+  $found = $release.assets | Where-Object { $_.name -eq $candidate } | Select-Object -First 1
+  if ($found) {
+    $match = $found
+    $asset = $candidate
+    break
+  }
+}
+
 if (-not $match) {
   $available = ($release.assets | ForEach-Object { $_.name }) -join ", "
-  Fail "Asset '$asset' not found. Available: $available"
+  $requested = $assetCandidates -join ", "
+  Fail "None of the expected assets were found ($requested). Available: $available"
 }
 
 $tmpRoot = Join-Path $env:TEMP ("codewalk-install-" + [Guid]::NewGuid().ToString("N"))

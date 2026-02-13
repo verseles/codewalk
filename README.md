@@ -19,7 +19,7 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 - Desktop keyboard shortcuts (`Ctrl/Cmd + N`, `Ctrl/Cmd + R`, `Ctrl/Cmd + L`, `Esc`)
 - Markdown rendering with syntax highlighting and text selection
 - Dark theme with Material Design 3
-- Cross-platform: Linux, Web, Android (Windows and macOS buildable)
+- Cross-platform: Linux, Windows, macOS, Web, Android
 
 ## Install in One Command
 
@@ -38,6 +38,14 @@ Install using the `install.cat` pattern:
   ```
 
 Run the same command again any time to update/reinstall to the latest GitHub release.
+
+Installers automatically select the best artifact for your OS/CPU:
+
+- Linux: `x64` and `arm64`
+- Windows: `x64` and `arm64` (ARM64 falls back to x64 when needed)
+- macOS: `x64` and `arm64`
+
+Release assets are published per OS/architecture (no universal desktop archive).
 
 ### Uninstall
 

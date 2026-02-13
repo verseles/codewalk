@@ -38,13 +38,31 @@ detect_platform() {
     *) fail "Unsupported OS: $os" ;;
   esac
 
-  case "$arch" in
-    x86_64|amd64) arch_tag="x64" ;;
-    aarch64|arm64) arch_tag="arm64" ;;
-    *) fail "Unsupported architecture: $arch" ;;
+  case "$platform" in
+    macos)
+      case "$arch" in
+        x86_64|amd64) arch_tag="x64" ;;
+        aarch64|arm64) arch_tag="arm64" ;;
+        *) fail "Unsupported macOS architecture: $arch" ;;
+      esac
+      asset="codewalk-macos-${arch_tag}.tar.gz"
+      ;;
+    linux)
+      case "$arch" in
+        x86_64|amd64)
+          arch_tag="x64"
+          asset="codewalk-linux-x64.tar.gz"
+          ;;
+        aarch64|arm64)
+          arch_tag="arm64"
+          asset="codewalk-linux-arm64.tar.gz"
+          ;;
+        *)
+          fail "Unsupported Linux architecture: $arch"
+          ;;
+      esac
+      ;;
   esac
-
-  asset="codewalk-${platform}-${arch_tag}.tar.gz"
 }
 
 latest_release() {

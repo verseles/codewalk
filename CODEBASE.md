@@ -467,18 +467,19 @@ Deferred/optional after parity wave:
 | **build-android** | ubuntu-latest | 30min | APK arm64 release build with signing |
 | **ci-status** | ubuntu-latest | 5min | Aggregate status reporter |
 
-`release.yml` publishes installable artifacts and a GitHub Release with 6 jobs:
+`release.yml` publishes installable artifacts and a GitHub Release with parallel matrix jobs:
 
 | Job | Platform | Timeout | Description |
 |-----|----------|---------|-------------|
-| **build-linux** | ubuntu-latest | 30min | Linux release build + `codewalk-linux-x64.tar.gz` |
-| **build-windows** | windows-latest | 35min | Windows release build + `codewalk-windows-x64.zip` |
-| **build-macos-arm64** | macos-15 | 35min | macOS arm64 release build + `codewalk-macos-arm64.tar.gz` |
-| **build-macos-x64** | macos-15-intel | 35min | macOS x64 release build + `codewalk-macos-x64.tar.gz` |
+| **build-linux** | ubuntu-latest + ubuntu-24.04-arm | 30min | Linux x64 + arm64 release builds |
+| **build-windows** | windows-latest + windows-11-arm | 35min | Windows x64 + arm64 release builds |
+| **build-macos** | macos-15 + macos-15-intel | 35min | macOS arm64 + x64 release builds |
 | **build-android** | ubuntu-latest | 35min | Android arm64 release APK |
 | **create-release** | ubuntu-latest | 10min | Downloads artifacts and publishes GitHub Release |
 
 macOS release builds pin CocoaPods deployment target to 11.0 in `macos/Podfile` to satisfy plugin minimum requirements (notably `speech_to_text`).
+All release artifact uploads use `retention-days: 2`.
+Flutter SDK setup in release jobs uses `subosito/flutter-action@v2` with `cache: true` and pinned version (`3.41.0`) to improve cache hit rate.
 
 ### Quality Gates
 
@@ -525,7 +526,9 @@ macOS release builds pin CocoaPods deployment target to 11.0 in `macos/Podfile` 
 ### Installation Scripts
 
 **install.sh (Unix/Linux/macOS):**
-- Detects platform (Linux/Darwin) and architecture (x86_64/arm64/aarch64)
+- Detects platform (Linux/Darwin) and architecture
+- macOS: downloads arch-specific asset (`codewalk-macos-arm64` or `codewalk-macos-x64`)
+- Linux: downloads arch-specific asset (`codewalk-linux-x64` or `codewalk-linux-arm64`)
 - Fetches latest GitHub release via API
 - Supports idempotent reruns (fresh install, update, or reinstall)
 - Downloads tarball and extracts to user-local application data path
@@ -535,7 +538,8 @@ macOS release builds pin CocoaPods deployment target to 11.0 in `macos/Podfile` 
 - Persists installed version marker for future update/reinstall detection
 
 **install.ps1 (Windows PowerShell):**
-- Detects architecture (AMD64/ARM64)
+- Detects architecture and resolves best available Windows asset
+- Prefers ARM64 asset on Windows ARM64 and falls back to x64 only when ARM64 artifact is unavailable
 - Fetches latest GitHub release via API
 - Supports idempotent reruns (fresh install, update, or reinstall)
 - Downloads ZIP, extracts to `%LOCALAPPDATA%\CodeWalk`
