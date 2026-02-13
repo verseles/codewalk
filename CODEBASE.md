@@ -1,8 +1,8 @@
 # CodeWalk - Codebase Baseline Snapshot
 
 > Captured: 2026-02-13
-> Git baseline: `b6f8d7f fix(diff): render edit/patch tool diffs reliably` (main)
-> Flutter: 3.38.9 (stable)
+> Git baseline: `a3ba190 docs(agents): skip precommit for static-only commits` (main)
+> Flutter: 3.41.0 (stable)
 
 ## Project Structure
 
@@ -33,9 +33,11 @@ codewalk/
 │   │   └── usecases/    # Application use cases
 │   ├── presentation/
 │   │   ├── pages/       # App Shell, Chat, Home, Logs, Server Settings
-│   │   ├── providers/   # State management (Provider)
+│   │   ├── providers/   # State management (Provider, ChatProvider, SettingsProvider, etc.)
+│   │   ├── services/    # UI services (ChatTitleGenerator, SoundService, EventFeedbackDispatcher)
 │   │   ├── theme/       # App theme configuration
-│   │   └── widgets/     # Chat input, message, session list
+│   │   ├── utils/       # UI utilities (SessionTitleFormatter, FileExplorerLogic, ShortcutBindingCodec)
+│   │   └── widgets/     # Chat input, message, session list, interaction cards
 │   └── main.dart
 ├── test/
 │   ├── widget_test.dart        # Original widget test
@@ -75,12 +77,13 @@ codewalk/
 
 | Type | Count | Notes |
 |------|-------|-------|
-| `.dart` (source) | 104 | Under `lib/` (excluding generated) |
+| `.dart` (source) | 105 | Under `lib/` (excluding generated) |
 | `.g.dart` (generated) | 4 | JSON serialization models |
 | `.dart` (tests) | 27 | Test files (unit, widget, integration, support) |
-| `.dart` (total) | 135 | Repository files excluding build artifacts |
+| `.dart` (total) | 136 | Repository files excluding build artifacts |
 | `.md` (markdown) | 9 | Docs + roadmap + release artifacts |
-| `.sh` (scripts) | 7 | CI validation + installer/uninstaller scripts |
+| `.sh` (scripts) | 2 | Unix installer/uninstaller scripts |
+| `.ps1` (scripts) | 2 | Windows PowerShell installer/uninstaller scripts |
 
 ## Legacy Naming References
 
@@ -216,6 +219,8 @@ Compatibility tiers:
   - `lib/domain/usecases/get_session_children.dart`
   - `lib/domain/usecases/get_session_todo.dart`
   - `lib/domain/usecases/get_session_diff.dart`
+  - `lib/domain/usecases/abort_chat_session.dart` (stop active response)
+  - `lib/domain/usecases/summarize_chat_session.dart` (context compaction)
 - Expanded data layer for lifecycle endpoints and models:
   - `lib/data/datasources/chat_remote_datasource.dart`
   - `lib/data/models/chat_session_model.dart`
@@ -305,8 +310,14 @@ Compatibility tiers:
   - `N open files` action added in the `Files` header (between title and quick actions) to open tab management dialog
   - open-files dialog policy: fullscreen on compact/mobile, centered at ~70% viewport on larger screens
   - diff-aware tab reload + tree invalidation based on `session.diff`
-- Added reusable ranking/reducer logic:
+- Added reusable ranking/reducer logic and formatters:
   - `lib/presentation/utils/file_explorer_logic.dart` (quick-open ranking + tab open/close/activate reducers)
+  - `lib/presentation/utils/session_title_formatter.dart` (unified session title display with relative+absolute fallback)
+  - `lib/presentation/utils/shortcut_binding_codec.dart` (parse/serialize keyboard shortcut bindings)
+- Added presentation services:
+  - `lib/presentation/services/chat_title_generator.dart` (`ChatAtTitleGenerator` via ch.at API for automatic session titles)
+  - `lib/presentation/services/sound_service.dart` (generated WAV tone playback for notification sounds)
+  - `lib/presentation/services/event_feedback_dispatcher.dart` (notification/sound orchestration from chat reducer events)
 - Expanded coverage:
   - `test/unit/utils/file_explorer_logic_test.dart`
   - `test/widget/chat_page_test.dart` cases for tree expand/open, quick-open, and viewer text/binary/error rendering
@@ -335,6 +346,23 @@ Compatibility tiers:
 - Expanded coverage:
   - widget tests for shell-mode submit and `@`/`/` popover insertion flows
   - provider unit test for shell payload mode propagation
+
+### Feature 023 Deprecated API Migration (2026-02-11)
+
+- Migrated Flutter deprecated color APIs across app UI:
+  - `withOpacity` → `withValues` for opacity adjustments
+  - `surfaceVariant` → `surfaceContainerHighest` for surface hierarchy
+  - `background` → `surface` for base surface colors
+  - `onBackground` → `onSurface` for text on base surfaces
+- Migrated deprecated form-field initialization API:
+  - `DropdownButtonFormField.value` → `initialValue` in settings forms
+- Fixed asynchronous `BuildContext` usage hotspots in `ChatPage` (`use_build_context_synchronously` violations)
+- Migrated web notification bridge from deprecated `dart:html` to `package:web` + JS interop:
+  - Removed window-focus compile error path
+  - Updated browser Notification API integration for web platform
+- Replaced deprecated markdown package:
+  - `flutter_markdown` → `flutter_markdown_plus` (v1.0.7)
+- Validation: `flutter analyze` (targeted issues removed), full test suite, Android build/upload
 
 ### ADR Coverage Clarifications (ADR-017/020/021/022/024)
 
@@ -473,7 +501,7 @@ Deferred/optional after parity wave:
 `codewalk` uses two GitHub Actions workflows:
 
 1. `.github/workflows/ci.yml` for continuous integration on pushes/PRs.
-2. `.github/workflows/release.yml` for GitHub Releases on version tags (`v*`) or manual dispatch.
+2. `.github/workflows/release.yml` for automated GitHub Releases on version tags (`v*`) or manual dispatch.
 
 `ci.yml` implements a complete CI/CD validation pipeline with 5 parallel jobs:
 
@@ -489,15 +517,19 @@ Deferred/optional after parity wave:
 
 | Job | Platform | Timeout | Description |
 |-----|----------|---------|-------------|
-| **build-linux** | ubuntu-latest + ubuntu-24.04-arm | 30min | Linux x64 + arm64 release builds |
-| **build-windows** | windows-latest + windows-11-arm | 35min | Windows x64 + arm64 release builds |
-| **build-macos** | macos-15 + macos-15-intel | 35min | macOS arm64 + x64 release builds |
+| **build-linux** | ubuntu-latest | 30min | Linux x64 release builds (arm64 removed: unsupported runner) |
+| **build-windows** | windows-latest | 35min | Windows x64 release builds (arm64 removed: unsupported runner) |
+| **build-macos** | macos-15 + macos-15-intel | 35min | macOS arm64 + x64 release builds (separate jobs) |
 | **build-android** | ubuntu-latest | 35min | Android arm64 release APK |
 | **create-release** | ubuntu-latest | 10min | Downloads artifacts and publishes GitHub Release |
 
-macOS release builds pin CocoaPods deployment target to 11.0 in `macos/Podfile` to satisfy plugin minimum requirements (notably `speech_to_text`).
-All release artifact uploads use `retention-days: 2`.
-Flutter SDK setup in release jobs uses `subosito/flutter-action@v2` with `cache: true` and pinned version (`3.41.0`) to improve cache hit rate.
+**Release workflow notes:**
+- macOS builds split into separate jobs (arm64 on `macos-15`, x64 on `macos-15-intel`) to avoid cross-compilation issues
+- macOS Podfile pins CocoaPods deployment target to 11.0 to satisfy plugin minimum requirements (notably `speech_to_text`)
+- Linux and Windows arm64 desktop runners removed after GitHub Actions compatibility issues (ubuntu-24.04-arm, windows-11-arm unavailable)
+- All release artifact uploads use `retention-days: 2`
+- Flutter SDK setup uses `subosito/flutter-action@v2` with `cache: true` and pinned version (`3.41.0`) for consistent cache hits
+- Release triggered on version tags (`v*`) or manual workflow dispatch
 
 ### Quality Gates
 
@@ -546,31 +578,42 @@ Flutter SDK setup in release jobs uses `subosito/flutter-action@v2` with `cache:
 **install.sh (Unix/Linux/macOS):**
 - Detects platform (Linux/Darwin) and architecture
 - macOS: downloads arch-specific asset (`codewalk-macos-arm64` or `codewalk-macos-x64`)
-- Linux: downloads arch-specific asset (`codewalk-linux-x64` or `codewalk-linux-arm64`)
+- Linux: downloads arch-specific asset (`codewalk-linux-x64`, arm64 removed from releases)
 - Fetches latest GitHub release via API
-- Supports idempotent reruns (fresh install, update, or reinstall)
-- Downloads tarball and extracts to user-local application data path
-- Creates CLI link in `~/.local/bin/codewalk`
-- Linux: registers Freedesktop desktop entry + icon in user scope
-- macOS: if an app bundle exists, installs it to `~/Applications/CodeWalk.app`
-- Persists installed version marker for future update/reinstall detection
+- **Supports idempotent reruns with install/update/reinstall detection:**
+  - Fresh install: no version marker exists
+  - Update: installed version differs from latest release
+  - Reinstall: installed version matches latest release (forces reinstall)
+- Downloads tarball and extracts to user-local application data path (`~/.local/share/codewalk`)
+- Creates CLI symlink in `~/.local/bin/codewalk`
+- Linux: registers Freedesktop desktop entry + icon in user scope (`~/.local/share/applications`, `~/.local/share/icons`)
+- macOS: if an app bundle exists in release, installs it to `~/Applications/CodeWalk.app`
+- Persists installed version marker (`.version` file) for future update/reinstall detection
 
 **install.ps1 (Windows PowerShell):**
 - Detects architecture and resolves best available Windows asset
-- Prefers ARM64 asset on Windows ARM64 and falls back to x64 only when ARM64 artifact is unavailable
+- Prefers x64 asset (ARM64 removed from releases after runner unavailability)
 - Fetches latest GitHub release via API
-- Supports idempotent reruns (fresh install, update, or reinstall)
+- **Supports idempotent reruns with install/update/reinstall detection:**
+  - Fresh install: no version marker exists
+  - Update: installed version differs from latest release
+  - Reinstall: installed version matches latest release (forces reinstall)
 - Downloads ZIP, extracts to `%LOCALAPPDATA%\CodeWalk`
-- Automatically adds to user PATH
+- Automatically adds installation directory to user PATH (if not already present)
 - Creates Start Menu shortcut with executable icon
-- Persists installed version marker for future update/reinstall detection
+- Persists installed version marker (`.version` file) for future update/reinstall detection
 - Cleanup of temporary files
 
-**uninstall.sh / uninstall.ps1:**
-- Remove local installation folders and launcher integrations
-- Linux: remove user desktop entry and icon cache references
-- macOS: remove `~/Applications/CodeWalk.app`
-- Windows: remove Start Menu shortcut and user PATH entry
+**uninstall.sh (Unix/Linux/macOS):**
+- Removes local installation folder (`~/.local/share/codewalk`)
+- Removes CLI symlink (`~/.local/bin/codewalk`)
+- Linux: removes user desktop entry (`~/.local/share/applications/com.verseles.codewalk.desktop`) and icon cache references
+- macOS: removes app bundle (`~/Applications/CodeWalk.app`)
+
+**uninstall.ps1 (Windows PowerShell):**
+- Removes local installation folder (`%LOCALAPPDATA%\CodeWalk`)
+- Removes Start Menu shortcut
+- Removes installation directory from user PATH
 
 ## Dependencies
 
@@ -642,7 +685,14 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Last-session snapshot persistence (`session + messages`) scoped by `server + directory` for instant startup restore
 - Stale-while-revalidate startup flow: cached last conversation renders immediately and message list revalidates silently in background
 - Full lifecycle operations: create/delete/rename/archive/unarchive/share/unshare/fork
-- Automatic AI title generation via `ch.at` after each user/assistant turn using up to the first 3 user + 3 assistant text messages, with per-session consolidation guard to stop after the 3+3 baseline is reached
+- Automatic AI title generation via `ch.at` API (`ChatAtTitleGenerator`) after each user/assistant turn using up to the first 3 user + 3 assistant text messages, with per-session consolidation guard to stop after the 3+3 baseline is reached
+  - Per-server privacy toggle `Enable AI generated titles` (default off) in Settings > Servers
+  - Platform-aware word limits: 4 words on mobile, 6 on desktop
+  - Background generation with stale-guard to prevent overwriting on context/session switches
+- Session title formatting via `SessionTitleFormatter`:
+  - Explicit titles displayed as-is (trimmed)
+  - Fallback titles use relative + absolute format: "Today HH:mm (M/D/YYYY)", "Yesterday HH:mm", "Weekday HH:mm", or full date
+  - Inline rename UX in active conversation headers with keyboard support (`Enter` save, `Esc` cancel) and optimistic updates with rollback
 - Session insights orchestration: status snapshot + children/todo/diff hydration
 - Optimistic session mutations with rollback on API failure
 - Server-scoped cache isolation to prevent cross-server leakage
@@ -659,9 +709,22 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Chat composer includes a microphone action (next to send) that runs speech-to-text via `speech_to_text` and writes live dictation into the same text input
 - Send button has a secondary composer action: hold for 300ms inserts a newline at cursor/selection instead of sending, with a small corner icon indicator for discoverability
 - Chat composer supports prompt power triggers: `@` contextual mentions (files/agents), leading `!` shell mode, and leading `/` slash command catalog with source badges
-- Chat app bar includes a dedicated compact-context action (`Compact Context`, knob icon) beside `New Chat`, wired to `/session/{id}/summarize` using current provider/model selection
+- Context compaction UX (`SummarizeChatSession` use case):
+  - Knob control in app bar with usage percentage indicator inside circle
+  - Popover shows metrics: usage %, tokens, cost, and context limit
+  - Manual `Compact now` action triggers `/session/{id}/summarize` with current provider/model
 - Shell-mode sends use a dedicated server route (`/session/{id}/shell`) through datasource-level routing
-- Tool-call headers show the tool name directly (without `Tool Call:` prefix), and detail blocks render extracted input command metadata (`Command`/`Input`) before output/error content
+- Tool-call rendering improvements:
+  - Headers show tool name directly (without `Tool Call:` prefix)
+  - Status chip is responsive: desktop shows icon + text (`Completed`, `Running`), mobile/compact shows icon-only at right edge
+  - Detail blocks render extracted input command metadata (`Command`/`Input`) before output/error content
+  - Tool `output` normalization: non-string payloads (map/list/scalar) converted to displayable text
+  - Diff extraction from common keys (`diff`, `patch`, `unified_diff`) in tool output
+  - Synthetic unified diff generation for `edit` tool with `old_string`/`new_string` when server doesn't return textual output
+  - Input fallback: when `output` is empty, display structured `input` with direct patch/diff extraction for `apply_patch`
+  - Colorized diff rendering with accessible text scaling (additions in green, deletions in red)
+- Tool output collapse: initial display limited to 2 lines with expand affordance for full content
+- Thinking blocks: latest block stays expanded, older blocks collapsed across conversation
 - File explorer parity in chat:
   - server-backed tree listing (`/file`) with expandable directories and file-type icons
   - quick-open dialog (`Ctrl/Cmd+P` + `/open`, plus `Files` panel quick action) using ranked search from `/find/file`
@@ -673,17 +736,27 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
 - Agent quick actions include desktop shortcut cycle (`Ctrl/Cmd+J`, `Shift` reverse) and builtin `/agent` command opening the selector
 - In-chat permission/question cards with actionable replies
 - Directory-scoped context snapshots and dirty-context refresh strategy
+- Stop/abort flow (`AbortChatSession` use case):
+  - Send button switches to `Stop` while assistant response is active
+  - Stop triggers `/session/{id}/abort` and suppresses expected cancelation errors (aborted/canceled) in short window
+  - Provider ignores stale stream callbacks via generation guards to keep post-stop sends stable
+  - Composer input remains editable during active response (send blocked until completion)
 - Chat-first shell: `AppShellPage` mounts `ChatPage` as primary route; `Logs` and `Settings` open as secondary routes with native back navigation to chat
 - Startup onboarding guard: when no server profile exists, `AppShellPage` routes directly to `Settings > Servers` (mobile and desktop)
 - Responsive shell with mobile drawer and desktop split-view layout
 - Sidebar top action row appears above `Conversations`: compact one-line `Logs` and `Settings` buttons open secondary routes while chat remains implicit as the primary area
+- Desktop pane collapse: `Conversations`, `Files`, and `Utility` sidebars support user-driven collapse/restore with persisted visibility via `ExperienceSettings.desktopPanes`
 - Desktop shortcuts for new chat, refresh, input focus, and agent cycle
+- Desktop composer shortcuts: `Enter` sends, `Shift+Enter` inserts newline (without breaking mention/slash popover flows)
+- Mobile composer: submit uses keyboard `send` action and auto-hides keyboard after successful send to maximize visible message area
+- Hold-to-reuse send button: 300ms hold inserts newline at cursor/selection with corner indicator icon
+- Server status moved from chat header to sidebar with health badge
 
 ### Settings Module
 - Modular settings hub (`SettingsPage`) with responsive section navigation:
   - mobile: section list -> detail flow
   - desktop/web: split layout (left navigation + right content)
-- Experience settings persistence (`experience_settings`) for:
+- Experience settings orchestration (`SettingsProvider` + `ExperienceSettings` entity):
   - notification controls by category (`agent`, `permissions`, `errors`)
     - sync from `/config` when server exposes compatible notification keys (`settings-notifications-*` or `notifications.*`)
     - fallback to local-only persistence when server config keys are unavailable
@@ -691,13 +764,13 @@ Dependency injection via `get_it`. HTTP via `dio`. State management via `provide
   - sound preference by category (configured in Notifications) with preview and fallback behavior
     - sound playback uses generated in-memory WAV tones via `audioplayers` for consistent output across platforms
   - notification payload includes `sessionId` for deep-link on notification tap back to the originating session
-- editable shortcut bindings with conflict validation and reset
+  - desktop pane visibility preferences (`desktopPanes` map) for collapsible sidebar state persistence
+- Editable shortcut bindings with conflict validation and reset:
   - shortcuts section is available on desktop/web and hidden on mobile platforms
-- dedicated Sounds section was removed after Notifications absorbed all per-category sound controls
-- Server management moved into a dedicated `Servers` section:
+  - runtime binding parsing from persisted settings via `ShortcutBindingCodec`
+- Server management in dedicated `Servers` section:
   - add/edit/remove, active/default, health badges and activation guard
   - per-server privacy toggle `Enable AI generated titles` controls whether background title generation is allowed for that server profile
-- Chat keyboard shortcuts are now resolved from persisted settings via runtime binding parsing
 - Notification runtime adapters:
   - Android/Linux/macOS/Windows through `flutter_local_notifications`
   - Web through browser Notification API permission flow + click callback wiring
@@ -851,10 +924,11 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 
 ## Version and Release
 
-**Current version:** `1.0.1+2` (defined in pubspec.yaml)
+**Current version:** `1.1.0+3` (defined in pubspec.yaml)
 - Version format: `MAJOR.MINOR.PATCH+BUILD`
-- Android: versionName = 1.0.1, versionCode = 2
+- Android: versionName = 1.1.0, versionCode = 3
 - Build artifacts uploaded via CI on successful builds
+- Release artifacts published via automated GitHub Release workflow on version tags
 
 **Release artifacts:**
 - Linux: tarball with binary
@@ -876,6 +950,7 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 | `pubspec.yaml` | Dependency and version management |
 | `Makefile` | Build automation (13 targets, 158 lines) |
 | `.github/workflows/ci.yml` | CI/CD pipeline (5 jobs) |
+| `.github/workflows/release.yml` | GitHub Release automation (5 jobs: Linux/Windows/macOS/Android builds + release creation) |
 | `CONTRIBUTING.md` | Contribution guidelines and standards |
 | `QA.feat016.release-readiness.md` | Feature 016 QA matrix, platform smoke, and defect triage |
 | `RELEASE_NOTES.md` | Release signoff checklist and known limitations |
@@ -964,6 +1039,22 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Expanded tests with new unit/widget coverage for formatter behavior, inline editor interactions, header fallback rendering, inline rename flow, and pending-rename conflict handling in provider realtime events.
 - Validation executed: targeted feature test matrix (`flutter test` on formatter/editor/provider/chat_page), full regression suite (`flutter test`), and static analysis (`flutter analyze --no-fatal-infos --no-fatal-warnings`).
 
+**Feature 021 (completed):**
+- Added shared session-title formatting contract (`SessionTitleFormatter`) to unify explicit title/fallback rendering across list and active-session surfaces.
+- Replaced ambiguous relative-only fallback titles with relative + absolute date format (e.g. `Today HH:mm (M/D/YYYY)`), and reused the same strategy when creating new sessions.
+- Added inline rename UX in active conversation headers (mobile + desktop) with keyboard support (`Enter` save, `Esc` cancel), touch-friendly edit controls, save/loading feedback, and inline validation/error state.
+- Hardened rename synchronization in `ChatProvider`: no-op rename now succeeds without error noise, optimistic rename tracks pending local intent, stale/conflicting `session.updated` events are ignored while rename is pending, and rollback remains intact on API failure.
+- Expanded tests with new unit/widget coverage for formatter behavior, inline editor interactions, header fallback rendering, inline rename flow, and pending-rename conflict handling in provider realtime events.
+
+**Feature 022 (completed):**
+- Added modular settings hub with responsive navigation (mobile list-to-detail, desktop split layout).
+- Implemented `SettingsProvider` and `ExperienceSettings` entity for notification/sound/shortcut/pane preferences.
+- Added per-category notification controls (`agent`, `permissions`, `errors`) with server config sync when available.
+- Added per-category sound preferences with preview, generated WAV tone playback, and split `Notify`/`Sound` toggles.
+- Added searchable shortcut bindings with conflict validation, reset, and persistence (desktop/web only).
+- Added desktop pane visibility preferences for collapsible sidebar state persistence.
+- Integrated deep-link notification payload with `sessionId` for tap-to-session navigation.
+
 **Feature 023 (completed):**
 - Migrated deprecated Flutter color APIs across app UI (`withOpacity` -> `withValues`, `surfaceVariant` -> `surfaceContainerHighest`, `background` -> `surface`, `onBackground` -> `onSurface`).
 - Migrated deprecated form-field initialization API in settings (`DropdownButtonFormField.value` -> `initialValue`).
@@ -972,17 +1063,25 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Replaced deprecated markdown package (`flutter_markdown`) with `flutter_markdown_plus`.
 - Validation executed: `flutter analyze` (targeted issues removed), full tests (`make test`), and Android build/upload (`make android`).
 
-**Backlog UX batch (completed):**
+**Backlog UX batch (completed, 2026-02-11):**
 - Desktop composer shortcut behavior now sends on `Enter` and inserts newline on `Shift+Enter` without breaking mention/slash popover keyboard flows.
 - On mobile, composer submit now uses keyboard `send` action and automatically hides keyboard focus after a successful send to maximize visible message area.
 - Desktop sidebars (`Conversations`, `Files`, `Utility`) now support user-driven collapse/restore with persisted visibility via `ExperienceSettings.desktopPanes`.
 - Composer input remains editable while assistant response is in progress; send stays blocked until completion.
-- Send action now switches to `Stop` while response is active and triggers `/session/{id}/abort` through `AbortChatSession` use case wired into `ChatProvider`.
-- Stop/abort now suppresses expected cancelation errors from realtime/session stream, preventing full-screen `Retry` fallback when the user intentionally interrupted the response.
-- Post-stop send-path is now stable: provider keeps message list mutable after abort completion and ignores stale send-stream callbacks via generation guards, preventing transient `Failed to start message send` / `retry` fallback when sending immediately after `Stop`.
+- **Stop/abort flow (`AbortChatSession` use case):**
+  - Send action switches to `Stop` while response is active and triggers `/session/{id}/abort` through `ChatProvider`.
+  - Stop/abort suppresses expected cancelation errors from realtime/session stream, preventing full-screen `Retry` fallback when user intentionally interrupted response.
+  - Post-stop send-path stability: provider keeps message list mutable after abort completion and ignores stale send-stream callbacks via generation guards, preventing transient `Failed to start message send` / `retry` fallback when sending immediately after `Stop`.
 - Project context dialog now exposes archive action for closed project entries (local curation), independent of `worktree` APIs.
 - `ProjectProvider` now persists archived closed-project IDs per server and filters them from the "Closed projects" section while keeping normal reopen/switch flows for active contexts.
 - Expanded automated coverage for desktop shortcut send/newline behavior, persisted sidebar visibility toggles, stop/abort success path, and stop failure snackbar fallback.
+
+**Context compaction restoration (2026-02-13, commit 98cf446):**
+- Restored context compaction UX with dedicated `SummarizeChatSession` use case wired to `/session/{id}/summarize`.
+- Knob control in app bar displays usage percentage inside circle (mirrors OpenCode usage semantics).
+- Popover shows detailed metrics: usage %, tokens, cost, and context limit.
+- Manual `Compact now` action available with collapse icon for explicit context summarization.
+- Integrated with current provider/model selection for summarization request.
 
 **Tool diff rendering hardening (2026-02-13, commits b6f8d7f..082ea92):**
 - `ToolState` parsing now normalizes non-string `output` payloads (map/list/scalar) into displayable text and extracts common diff keys (`diff`, `patch`, `unified_diff`).
@@ -994,3 +1093,32 @@ lcov_branch_coverage=0  # Disable branch coverage, focus on line coverage
 - Fixed missing `color` field in Agent entity and model (commit 63d6155).
 - Added colorized diff rendering in tool outputs with accessible text scaling (commit 52c6e8b).
 - Consolidated feature roadmaps and improved diff text scaling accessibility (commit 082ea92).
+
+**Auto-generated session titles via ch.at API (2026-02-12, commit 8c49591):**
+- Integrated `ChatAtTitleGenerator` for automatic session title generation using first 3 user + 3 assistant text messages
+- Per-server privacy toggle `Enable AI generated titles` (default off) in Settings > Servers
+- Platform-aware word limits: 4 words on mobile, 6 on desktop
+- Background generation with consolidation guard and stale-guard to prevent overwrites on context switches
+- Expanded provider/widget/integration test coverage
+
+**Desktop/mobile UX improvements batch (2026-02-11..2026-02-13):**
+- Collapsed thinking blocks: latest block stays expanded, older blocks auto-collapse
+- Collapsed tool outputs: initial 2-line display with expand affordance
+- Hold-to-reuse send button: 300ms hold inserts newline with corner indicator
+- Desktop pane collapse: user-driven sidebar visibility with persistence
+- Server status relocated from chat header to sidebar with health badge
+- Simplified title bar and session header layouts
+- Tightened mobile header spacing and removed composer divider
+- Stabilized composer button size and input bubble clipping
+- Refreshed composer surface tone and hint contrast
+- Increased hamburger menu alert grace period to 10s
+- IM-style auto-scroll behavior finalization
+- Provider/file icon mapping finalized with `simple_icons` integration
+
+**Release infrastructure enhancements (2026-02-13, commits dcfc792..711f019):**
+- Automated GitHub Release publication workflow (`release.yml`)
+- Per-architecture parallel desktop builds (Linux x64, Windows x64, macOS arm64/x64)
+- macOS deployment target enforcement (11.0) in Podfile for plugin compatibility
+- Unified icon pipeline across all platforms with validation gate
+- Installer scripts with update/reinstall detection and uninstall support
+- Flutter SDK version pinned to 3.41.0 in release workflow for cache consistency
