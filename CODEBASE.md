@@ -613,13 +613,17 @@ test/
 - `FakeProjectRemoteDataSource`: Static project list
 - Used for isolated unit testing without network dependencies
 
-**tool/qa/feat008_smoke.sh (live smoke):**
-- Real OpenCode verification server (shared): `http://100.68.105.54:4096`
+**tool/qa/smoke_test.sh (integration smoke):**
+- Permanent integration test suite for validating OpenCode server compatibility
+- Default test server (shared): `http://100.68.105.54:4096`
 - API reference (complete JSON): `http://100.68.105.54:4096/doc`
-- Usage policy: non-destructive checks only (connectivity, provider/model discovery, session creation, event stream, and message turns). Do not run destructive routes against this server.
-- Verifies `/provider`, `/session`, `/event`, and two sequential `/session/{id}/message` turns in the same session
-- Uses preferred defaults (`openai` + `gpt-5.1-codex-mini`, variant `low`) with fallback only if unavailable
-- Fails when assistant returns `info.error`, when second turn reuses previous assistant ID, or when no non-empty text is produced
+- Configurable via arguments and environment variables (provider, model, variant, server URL)
+- Verifies critical endpoints: `/provider`, `/session`, `/event`, and message flow (two sequential turns)
+- Tests complete session lifecycle: create → send → poll → verify → delete
+- Uses preferred defaults (`openai` + `gpt-5.1-codex-mini`, variant `low`) with automatic fallback
+- Generates detailed test artifacts in `/tmp/codewalk_smoke/` with pass/fail report
+- Usage: `./tool/qa/smoke_test.sh [BASE_URL] [OUT_DIR]`
+- Non-destructive by design; safe to run against shared verification servers
 
 ### Test Tags (dart_test.yaml)
 

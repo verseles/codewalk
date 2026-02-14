@@ -1,8 +1,28 @@
 #!/usr/bin/env bash
+#
+# CodeWalk Smoke Test - Integration test suite for OpenCode server compatibility
+#
+# Usage:
+#   ./smoke_test.sh [BASE_URL] [OUT_DIR]
+#
+# Arguments:
+#   BASE_URL  - OpenCode server URL (default: http://100.68.105.54:4096)
+#   OUT_DIR   - Output directory for test artifacts (default: /tmp/codewalk_smoke)
+#
+# Environment Variables:
+#   PREFERRED_PROVIDER  - Preferred provider ID (default: openai)
+#   PREFERRED_MODEL     - Preferred model ID (default: gpt-5.1-codex-mini)
+#   REQUEST_VARIANT     - Reasoning variant (default: low)
+#
+# Examples:
+#   ./smoke_test.sh
+#   ./smoke_test.sh http://localhost:4096
+#   PREFERRED_PROVIDER=anthropic ./smoke_test.sh
+#
 set -euo pipefail
 
 BASE_URL="${1:-http://100.68.105.54:4096}"
-OUT_DIR="${2:-/tmp/codewalk_feat008}"
+OUT_DIR="${2:-/tmp/codewalk_smoke}"
 PREFERRED_PROVIDER="${PREFERRED_PROVIDER:-openai}"
 PREFERRED_MODEL="${PREFERRED_MODEL:-gpt-5.1-codex-mini}"
 REQUEST_VARIANT="${REQUEST_VARIANT:-low}"
@@ -181,7 +201,7 @@ send_turn() {
   return 0
 }
 
-log "Starting Feature 008 smoke run"
+log "Starting CodeWalk smoke test run"
 log "Base URL: ${BASE_URL}"
 log "Run dir: ${RUN_DIR}"
 
@@ -237,7 +257,7 @@ rm -f "${RUN_DIR}/provider_raw.json"
 record_pass "QA-001" "provider/model resolved (${PROVIDER_ID}/${MODEL_ID})"
 
 # QA-002: Session lifecycle create
-jq -n --arg title "QA Feature 008 ${RUN_ID}" '{title: $title}' > "${RUN_DIR}/session_create_payload.json"
+jq -n --arg title "CodeWalk Smoke Test ${RUN_ID}" '{title: $title}' > "${RUN_DIR}/session_create_payload.json"
 if ! curl -fsS -X POST "${BASE_URL}/session" \
   -H "Content-Type: application/json" \
   --data @"${RUN_DIR}/session_create_payload.json" > "${RUN_DIR}/session_create.json"; then

@@ -1,4 +1,4 @@
-.PHONY: help deps gen icons icons-check analyze test coverage check desktop android precommit clean
+.PHONY: help deps gen icons icons-check analyze test coverage smoke check desktop android precommit clean
 
 APK_DIR = build/app/outputs/flutter-apk
 APK_PATH = $(APK_DIR)/codewalk.apk
@@ -16,6 +16,7 @@ help:
 	@echo "  make analyze    Run static analysis + issue budget gate"
 	@echo "  make test       Run tests"
 	@echo "  make coverage   Run tests with coverage + threshold gate"
+	@echo "  make smoke      Run integration smoke test against OpenCode server"
 	@echo "  make check      deps + gen + analyze + test"
 	@echo "  make desktop    Build desktop app for current host OS"
 	@echo "  make android    Build Android APK (arm64)"
@@ -131,6 +132,9 @@ test:
 coverage:
 	flutter test --coverage
 	bash tool/ci/check_coverage.sh coverage/lcov.info 35
+
+smoke:
+	bash tool/qa/smoke_test.sh
 
 check: deps gen analyze test
 
