@@ -420,7 +420,6 @@ The OpenCode server/app surface expanded significantly after the original CodeWa
 
 ### Key Files
 
-- `ROADMAP.feat010.md` - frozen parity contract, Required vs Optional matrix, migration checklist
 - `ROADMAP.md` - execution tracking for Feature 010 tasks and dependencies
 - `CODEBASE.md` - updated v2 route/event/part taxonomy baseline
 - `lib/core/constants/app_constants.dart` - current flat-key source set considered in migration plan
@@ -483,8 +482,7 @@ CodeWalk previously supported only one server (`server_host` + `server_port` fla
 
 - ADR-009: OpenCode v2 Parity Contract Freeze (defines migration baseline)
 - ADR-011: Model Selection and Variant Preference Orchestration (builds on server scoping)
-- `ROADMAP.feat011.md`
-- https://opencode.ai/docs/server/
+- `ai-docs/opencode_server.md`
 
 ---
 
@@ -563,8 +561,7 @@ After Feature 011 (ADR-010) established multi-server state isolation, CodeWalk s
 
 - ADR-010: Multi-Server Profile Orchestration (provides server scoping foundation)
 - ADR-012: Realtime Event Reducer (integrates with model state changes)
-- `ROADMAP.feat012.md`
-- https://opencode.ai/docs/models/
+- `ai-docs/opencode_models.md`
 
 ---
 
@@ -622,8 +619,7 @@ CodeWalk handled message updates mostly inside `sendMessage()` with a narrow SSE
 - ADR-011: Model Selection and Variant Preference Orchestration (model changes trigger events)
 - ADR-013: Session Lifecycle Orchestration (extends event handling to lifecycle operations)
 - ADR-018: Refreshless Realtime Sync (builds on event reducer for refreshless behavior)
-- `ROADMAP.feat013.md`
-- https://opencode.ai/docs/server/
+- `ai-docs/opencode_server.md`
 - https://github.com/anomalyco/opencode
 
 ### Implementation Reference
@@ -693,7 +689,7 @@ Basic session CRUD was no longer enough for parity with current OpenCode flows. 
 
 - ADR-012: Realtime Event Reducer (provides event foundation for lifecycle events)
 - ADR-014: Project/Workspace Context Orchestration (extends lifecycle to workspace context)
-- https://opencode.ai/docs/server/
+- `ai-docs/opencode_server.md`
 - https://github.com/anomalyco/opencode
 
 ### Implementation Reference
@@ -760,8 +756,7 @@ After multi-server/model/session parity improvements (ADR-010 through ADR-013), 
 
 - ADR-013: Session Lifecycle Orchestration (session scoping extended to project context)
 - ADR-015: Parity Wave Release Gate (validates context isolation correctness)
-- `ROADMAP.feat015.md`
-- https://opencode.ai/docs/server/
+- `ai-docs/opencode_server.md`
 - https://github.com/anomalyco/opencode
 
 ### Implementation Reference
@@ -1288,7 +1283,6 @@ Feature 022 required parity with OpenCode settings behaviors across:
 
 - ADR-016: Chat-First Navigation (settings accessed from sidebar)
 - ADR-021: Responsive Dialog Sizing (settings uses responsive layout)
-- `ROADMAP.feat022.md`
 - `CODEBASE.md`
 
 ### Implementation Reference

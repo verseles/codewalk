@@ -94,7 +94,7 @@ All runtime/build/config references to `open_mode`/`OpenMode` were renamed to `c
 ## API Endpoints
 
 Extracted from `lib/data/datasources/*.dart`. Server base URL is configurable.
-Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `anomalyco/opencode-sdk-js`).
+Aligned with OpenCode Server Mode API (source: `ai-docs/opencode_server.md`, SDK: `anomalyco/opencode-sdk-js`).
 
 ### AppRemoteDataSource (`app_remote_datasource.dart`)
 
@@ -159,9 +159,9 @@ Aligned with OpenCode Server Mode API (source: `opencode.ai/docs/server`, SDK: `
 - Upstream lock: `anomalyco/opencode@24fd8c1` (`dev`)
 - OpenAPI lock: `packages/sdk/openapi.json` (82 route paths at lock time)
 - Source references:
-  - `https://opencode.ai/docs/server/`
-  - `https://opencode.ai/docs/models/`
-  - `https://opencode.ai/docs/web/`
+  - `ai-docs/opencode_server.md`
+  - `ai-docs/opencode_models.md`
+  - `ai-docs/opencode_web.md`
 
 Reference policy:
 
@@ -615,6 +615,7 @@ test/
 
 **tool/qa/feat008_smoke.sh (live smoke):**
 - Real OpenCode verification server (shared): `http://100.68.105.54:4096`
+- API reference (complete JSON): `http://100.68.105.54:4096/doc`
 - Usage policy: non-destructive checks only (connectivity, provider/model discovery, session creation, event stream, and message turns). Do not run destructive routes against this server.
 - Verifies `/provider`, `/session`, `/event`, and two sequential `/session/{id}/message` turns in the same session
 - Uses preferred defaults (`openai` + `gpt-5.1-codex-mini`, variant `low`) with fallback only if unavailable

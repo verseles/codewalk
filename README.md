@@ -2,7 +2,7 @@
 
 ![CodeWalk Logo](assets/images/logo.256.png)
 
-A native (really fast!!) cross-platform client for [OpenCode](https://github.com/sst/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
+A native (really fast!!) cross-platform client for [OpenCode](https://github.com/anomalyco/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
 ## Highlights
 
