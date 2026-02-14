@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:codewalk/core/errors/failures.dart';
+import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/data/models/chat_message_model.dart';
 import 'package:codewalk/data/models/chat_session_model.dart';
 import 'package:codewalk/domain/entities/agent.dart';
@@ -43,6 +45,53 @@ import 'package:codewalk/presentation/services/chat_title_generator.dart';
 
 import '../../support/fakes.dart';
 
+class _RecordingDioClient extends DioClient {
+  _RecordingDioClient({Map<String, dynamic>? configResponse})
+    : _configResponse = configResponse ?? <String, dynamic>{},
+      super(baseUrl: 'http://localhost');
+
+  final Map<String, dynamic> _configResponse;
+  final List<Map<String, dynamic>?> getQueries = <Map<String, dynamic>?>[];
+  final List<Map<String, dynamic>?> patchQueries = <Map<String, dynamic>?>[];
+  final List<dynamic> patchBodies = <dynamic>[];
+
+  @override
+  Future<Response<T>> get<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    if (path == '/config') {
+      getQueries.add(queryParameters);
+      return Response<T>(
+        requestOptions: RequestOptions(path: path),
+        statusCode: 200,
+        data: _configResponse as T,
+      );
+    }
+    throw UnimplementedError('Unexpected GET path in test: $path');
+  }
+
+  @override
+  Future<Response<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    if (path == '/config') {
+      patchQueries.add(queryParameters);
+      patchBodies.add(data);
+      return Response<T>(
+        requestOptions: RequestOptions(path: path),
+        statusCode: 200,
+        data: _configResponse as T,
+      );
+    }
+    throw UnimplementedError('Unexpected PATCH path in test: $path');
+  }
+}
+
 void main() {
   group('ChatProvider', () {
     late FakeChatRepository chatRepository;
@@ -50,22 +99,8 @@ void main() {
     late InMemoryAppLocalDataSource localDataSource;
     late ChatProvider provider;
 
-    setUp(() {
-      chatRepository = FakeChatRepository(
-        sessions: <ChatSession>[
-          ChatSession(
-            id: 'ses_1',
-            workspaceId: 'default',
-            time: DateTime.fromMillisecondsSinceEpoch(1000),
-            title: 'Session 1',
-          ),
-        ],
-      );
-      appRepository = FakeAppRepository();
-      localDataSource = InMemoryAppLocalDataSource();
-      localDataSource.activeServerId = 'srv_test';
-
-      provider = ChatProvider(
+    ChatProvider buildProvider({DioClient? dioClient}) {
+      return ChatProvider(
         sendChatMessage: SendChatMessage(chatRepository),
         abortChatSession: AbortChatSession(chatRepository),
         getChatSessions: GetChatSessions(chatRepository),
@@ -95,7 +130,26 @@ void main() {
           localDataSource: localDataSource,
         ),
         localDataSource: localDataSource,
+        dioClient: dioClient,
       );
+    }
+
+    setUp(() {
+      chatRepository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_1',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Session 1',
+          ),
+        ],
+      );
+      appRepository = FakeAppRepository();
+      localDataSource = InMemoryAppLocalDataSource();
+      localDataSource.activeServerId = 'srv_test';
+
+      provider = buildProvider();
     });
 
     test(
@@ -127,6 +181,702 @@ void main() {
         expect(provider.providers, hasLength(2));
         expect(provider.selectedProviderId, 'provider_b');
         expect(provider.selectedModelId, 'model_b');
+      },
+    );
+
+    test(
+      'initializeProviders prioritizes server config model over local persisted selection',
+      () async {
+        await localDataSource.saveSelectedProvider(
+          'provider_a',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+        await localDataSource.saveSelectedModel(
+          'model_a',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{'model': 'provider_b/model_b'},
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+      },
+    );
+
+    test(
+      'setSelectedModelByProvider syncs model selection to server config',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{'model': 'provider_a/model_a'},
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+        dioClient.patchBodies.clear();
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+
+        final hasModelPatch = dioClient.patchBodies.whereType<Map>().any(
+          (body) => body['model'] == 'provider_b/model_b',
+        );
+        expect(hasModelPatch, isTrue);
+      },
+    );
+
+    test(
+      'initializeProviders prioritizes server default_agent over local persisted agent',
+      () async {
+        await localDataSource.saveSelectedAgent(
+          'plan',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+          Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{
+            'model': 'provider_a/model_a',
+            'default_agent': 'build',
+          },
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedAgentName, 'build');
+      },
+    );
+
+    test('setSelectedAgent syncs agent selection to server config', () async {
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{'model_a': _model('model_a')},
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a'},
+          connected: const <String>['provider_a'],
+        ),
+      );
+      appRepository.agentsResult = const Right(<Agent>[
+        Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+        Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+      ]);
+
+      final dioClient = _RecordingDioClient(
+        configResponse: <String, dynamic>{
+          'model': 'provider_a/model_a',
+          'default_agent': 'build',
+        },
+      );
+      provider = buildProvider(dioClient: dioClient);
+
+      await provider.initializeProviders();
+      dioClient.patchBodies.clear();
+
+      await provider.setSelectedAgent('plan');
+
+      final hasAgentPatch = dioClient.patchBodies.whereType<Map>().any(
+        (body) => body['default_agent'] == 'plan',
+      );
+      expect(hasAgentPatch, isTrue);
+    });
+
+    test(
+      'initializeProviders prioritizes remote variant map over local variant map',
+      () async {
+        await localDataSource.saveSelectedVariantMap(
+          json.encode(<String, String>{'provider_a/model_reasoning': 'low'}),
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': _model(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'low': ModelVariant(id: 'low', name: 'Low'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+          Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{
+            'model': 'provider_a/model_reasoning',
+            'default_agent': 'build',
+            'agent': <String, dynamic>{
+              'build': <String, dynamic>{
+                'options': <String, dynamic>{
+                  'codewalk': <String, dynamic>{
+                    'variantByModel': <String, String>{
+                      'provider_a/model_reasoning': 'high',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedVariantId, 'high');
+      },
+    );
+
+    test('setSelectedVariant syncs variant map to server config', () async {
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_reasoning': _model(
+                  'model_reasoning',
+                  variants: const <String, ModelVariant>{
+                    'low': ModelVariant(id: 'low', name: 'Low'),
+                    'high': ModelVariant(id: 'high', name: 'High'),
+                  },
+                ),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{
+            'provider_a': 'model_reasoning',
+          },
+          connected: const <String>['provider_a'],
+        ),
+      );
+      appRepository.agentsResult = const Right(<Agent>[
+        Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+      ]);
+
+      final dioClient = _RecordingDioClient(
+        configResponse: <String, dynamic>{
+          'model': 'provider_a/model_reasoning',
+          'default_agent': 'build',
+        },
+      );
+      provider = buildProvider(dioClient: dioClient);
+
+      await provider.initializeProviders();
+      dioClient.patchBodies.clear();
+
+      await provider.setSelectedVariant('high');
+
+      final variantPatch = dioClient.patchBodies
+          .whereType<Map<String, dynamic>>()
+          .where((body) => body.containsKey('agent'))
+          .cast<Map<String, dynamic>>()
+          .first;
+      final agentMap =
+          (variantPatch['agent'] as Map<String, dynamic>)['build']
+              as Map<String, dynamic>;
+      final options = agentMap['options'] as Map<String, dynamic>;
+      final codewalk = options['codewalk'] as Map<String, dynamic>;
+      final variantByModel = codewalk['variantByModel'] as Map<String, dynamic>;
+
+      expect(variantByModel['provider_a/model_reasoning'], 'high');
+    });
+
+    test(
+      'model sync is deferred while response is active and flushed on idle',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{'model': 'provider_a/model_a'},
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        dioClient.patchBodies.clear();
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'busy'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+
+        final hasImmediateModelPatch = dioClient.patchBodies
+            .whereType<Map>()
+            .any((body) => body['model'] == 'provider_b/model_b');
+        expect(hasImmediateModelPatch, isFalse);
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'idle'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+
+        final hasFlushedModelPatch = dioClient.patchBodies.whereType<Map>().any(
+          (body) => body['model'] == 'provider_b/model_b',
+        );
+        expect(hasFlushedModelPatch, isTrue);
+      },
+    );
+
+    test('session selection override wins when switching sessions', () async {
+      chatRepository.sessions.add(
+        ChatSession(
+          id: 'ses_2',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          title: 'Session 2',
+        ),
+      );
+
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{'model_a': _model('model_a')},
+            ),
+            Provider(
+              id: 'provider_b',
+              name: 'Provider B',
+              env: const <String>[],
+              models: <String, Model>{'model_b': _model('model_b')},
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a'},
+          connected: const <String>['provider_a', 'provider_b'],
+        ),
+      );
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+
+      final session1 = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+      final session2 = provider.sessions.firstWhere((s) => s.id == 'ses_2');
+
+      await provider.selectSession(session1);
+      await provider.setSelectedModelByProvider(
+        providerId: 'provider_b',
+        modelId: 'model_b',
+      );
+
+      await provider.selectSession(session2);
+      await provider.setSelectedModelByProvider(
+        providerId: 'provider_a',
+        modelId: 'model_a',
+      );
+
+      await provider.selectSession(session1);
+
+      expect(provider.selectedProviderId, 'provider_b');
+      expect(provider.selectedModelId, 'model_b');
+    });
+
+    test(
+      'session selection override persists across provider restart',
+      () async {
+        chatRepository.sessions.add(
+          ChatSession(
+            id: 'ses_2',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(2000),
+            title: 'Session 2',
+          ),
+        );
+
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        final session1 = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(session1);
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+
+        provider = buildProvider();
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        final restoredSession = provider.sessions.firstWhere(
+          (s) => s.id == 'ses_1',
+        );
+        await provider.selectSession(restoredSession);
+
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+      },
+    );
+
+    test(
+      'setSelectedModelByProvider syncs session selection override map to server config',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{'model': 'provider_a/model_a'},
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        dioClient.patchBodies.clear();
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+
+        final overridePatch = dioClient.patchBodies
+            .whereType<Map<String, dynamic>>()
+            .where((body) {
+              final agent = body['agent'];
+              return agent is Map && agent.containsKey('__codewalk');
+            })
+            .cast<Map<String, dynamic>>()
+            .first;
+        final agent = overridePatch['agent'] as Map<String, dynamic>;
+        final syncAgent = agent['__codewalk'] as Map<String, dynamic>;
+        final options = syncAgent['options'] as Map<String, dynamic>;
+        final codewalk = options['codewalk'] as Map<String, dynamic>;
+        final sessionSelections =
+            codewalk['sessionSelections'] as Map<String, dynamic>;
+        final sessionOverride =
+            sessionSelections['ses_1'] as Map<String, dynamic>;
+
+        expect(sessionOverride['providerId'], 'provider_b');
+        expect(sessionOverride['modelId'], 'model_b');
+      },
+    );
+
+    test(
+      'initializeProviders applies remote session selection override after restart',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': _model('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': _model('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{
+            'model': 'provider_a/model_a',
+            'default_agent': 'build',
+            'agent': <String, dynamic>{
+              '__codewalk': <String, dynamic>{
+                'options': <String, dynamic>{
+                  'codewalk': <String, dynamic>{
+                    'sessionSelections': <String, dynamic>{
+                      'ses_1': <String, dynamic>{
+                        'providerId': 'provider_b',
+                        'modelId': 'model_b',
+                        'agentName': 'build',
+                        'variantId': '__auto__',
+                        'updatedAt': 10,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(session);
+
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+      },
+    );
+
+    test(
+      'open-session realtime events reconcile model agent and variant selects',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_a': _model(
+                    'model_a',
+                    variants: const <String, ModelVariant>{
+                      'low': ModelVariant(id: 'low', name: 'Low'),
+                    },
+                  ),
+                },
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_b': _model(
+                    'model_b',
+                    variants: const <String, ModelVariant>{
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+          Agent(name: 'plan', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        final config = <String, dynamic>{
+          'model': 'provider_a/model_a',
+          'default_agent': 'build',
+          'agent': <String, dynamic>{
+            'build': <String, dynamic>{
+              'options': <String, dynamic>{
+                'codewalk': <String, dynamic>{
+                  'variantByModel': <String, String>{
+                    'provider_a/model_a': 'low',
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        final dioClient = _RecordingDioClient(configResponse: config);
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+        expect(provider.selectedProviderId, 'provider_a');
+        expect(provider.selectedModelId, 'model_a');
+        expect(provider.selectedAgentName, 'build');
+        expect(provider.selectedVariantId, 'low');
+
+        config
+          ..['model'] = 'provider_b/model_b'
+          ..['default_agent'] = 'plan'
+          ..['agent'] = <String, dynamic>{
+            'plan': <String, dynamic>{
+              'options': <String, dynamic>{
+                'codewalk': <String, dynamic>{
+                  'variantByModel': <String, String>{
+                    'provider_b/model_b': 'high',
+                  },
+                },
+              },
+            },
+          };
+
+        await Future<void>.delayed(const Duration(milliseconds: 2100));
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'idle'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+
+        expect(provider.selectedProviderId, 'provider_b');
+        expect(provider.selectedModelId, 'model_b');
+        expect(provider.selectedAgentName, 'plan');
+        expect(provider.selectedVariantId, 'high');
       },
     );
 

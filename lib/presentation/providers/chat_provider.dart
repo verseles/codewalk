@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../../core/network/dio_client.dart';
 import '../../core/config/feature_flags.dart';
 import '../../core/logging/app_logger.dart';
 import '../../data/datasources/app_local_datasource.dart';
@@ -112,6 +113,56 @@ class _AutoTitleSnapshot {
   bool get isConsolidated => userCount >= 3 && assistantCount >= 3;
 }
 
+class _RemoteChatSelection {
+  const _RemoteChatSelection({
+    this.providerId,
+    this.modelId,
+    this.agentName,
+    this.variantByAgentAndModel = const <String, Map<String, String>>{},
+    this.sessionOverridesBySessionId =
+        const <String, _SessionSelectionOverride>{},
+  });
+
+  final String? providerId;
+  final String? modelId;
+  final String? agentName;
+  final Map<String, Map<String, String>> variantByAgentAndModel;
+  final Map<String, _SessionSelectionOverride> sessionOverridesBySessionId;
+
+  bool get hasModel =>
+      providerId != null &&
+      providerId!.trim().isNotEmpty &&
+      modelId != null &&
+      modelId!.trim().isNotEmpty;
+
+  String? variantForModel({
+    required String agentName,
+    required String modelKey,
+  }) {
+    final byModel = variantByAgentAndModel[agentName];
+    if (byModel == null) {
+      return null;
+    }
+    return byModel[modelKey];
+  }
+}
+
+class _SessionSelectionOverride {
+  const _SessionSelectionOverride({
+    required this.providerId,
+    required this.modelId,
+    required this.agentName,
+    required this.variantId,
+    required this.updatedAtEpochMs,
+  });
+
+  final String providerId;
+  final String modelId;
+  final String agentName;
+  final String? variantId;
+  final int updatedAtEpochMs;
+}
+
 /// Chat provider
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
@@ -142,6 +193,7 @@ class ChatProvider extends ChangeNotifier {
     required this.rejectQuestion,
     required this.projectProvider,
     required this.localDataSource,
+    this.dioClient,
     this.eventFeedbackDispatcher,
     this.titleGenerator,
     Duration syncSignalStaleThreshold = const Duration(seconds: 20),
@@ -191,6 +243,7 @@ class ChatProvider extends ChangeNotifier {
   final RejectQuestion rejectQuestion;
   final ProjectProvider projectProvider;
   final AppLocalDataSource localDataSource;
+  final DioClient? dioClient;
   final EventFeedbackDispatcher? eventFeedbackDispatcher;
   final ChatTitleGenerator? titleGenerator;
 
@@ -247,9 +300,19 @@ class ChatProvider extends ChangeNotifier {
   int _providersFetchId = 0;
   int _sessionsFetchId = 0;
   int _messagesFetchId = 0;
+  String? _lastSyncedRemoteModelKey;
+  String? _lastSyncedRemoteAgentName;
+  String? _lastSyncedRemoteVariantKey;
+  String? _lastSyncedRemoteSessionOverridesSignature;
+  bool _pendingRemoteSelectionSync = false;
+  DateTime? _pendingRemoteSelectionSyncSince;
+  DateTime? _lastRemoteSelectionSyncAt;
+  bool _remoteSelectionSyncInFlight = false;
   String _activeContextKey = 'legacy::default';
   final Map<String, _ChatContextSnapshot> _contextSnapshots =
       <String, _ChatContextSnapshot>{};
+  final Map<String, _SessionSelectionOverride> _sessionSelectionOverridesByKey =
+      <String, _SessionSelectionOverride>{};
   final Set<String> _dirtyContextKeys = <String>{};
   Timer? _syncHealthTimer;
   Timer? _degradedPollingTimer;
@@ -279,6 +342,13 @@ class ChatProvider extends ChangeNotifier {
   static const Duration _lastSessionSnapshotTtl = Duration(days: 7);
   static const int _maxRecentModels = 8;
   static const Duration _abortSuppressionWindow = Duration(seconds: 8);
+  static const Duration _remoteSelectionSyncThrottle = Duration(seconds: 2);
+  static const Duration _maxRemoteSelectionDefer = Duration(seconds: 12);
+  static const String _configCodewalkNamespace = 'codewalk';
+  static const String _configVariantByModelKey = 'variantByModel';
+  static const String _configSessionSelectionsKey = 'sessionSelections';
+  static const String _configSyncAgentName = '__codewalk';
+  static const String _remoteAutoVariantValue = '__auto__';
 
   // Getters
   ChatState get state => _state;
@@ -330,6 +400,16 @@ class ChatProvider extends ChangeNotifier {
     return _state == ChatState.sending ||
         hasBusyStatus ||
         hasInProgressAssistant;
+  }
+
+  bool get _shouldDeferRemoteSelectionSync {
+    if (_isAbortingResponse || _currentSession == null) {
+      return false;
+    }
+    final status = currentSessionStatus?.type;
+    final hasBusyStatus =
+        status == SessionStatusType.busy || status == SessionStatusType.retry;
+    return _state == ChatState.sending || hasBusyStatus;
   }
 
   List<ChatSession> get visibleSessions {
@@ -511,6 +591,7 @@ class ChatProvider extends ChangeNotifier {
   void _setState(ChatState newState) {
     _state = newState;
     notifyListeners();
+    _attemptPendingRemoteSelectionSync(reason: 'state-$newState');
   }
 
   /// Set error
@@ -595,6 +676,479 @@ class ChatProvider extends ChangeNotifier {
       return null;
     }
     return modelKey.substring(separatorIndex + 1);
+  }
+
+  Map<String, dynamic>? _configQueryParameters() {
+    final directory = projectProvider.currentDirectory;
+    if (directory == null || directory.trim().isEmpty) {
+      return null;
+    }
+    return <String, dynamic>{'directory': directory};
+  }
+
+  Map<String, Map<String, String>> _parseRemoteVariantByAgent(
+    Map<String, dynamic> config,
+  ) {
+    final rawAgentConfig = config['agent'] ?? config['mode'];
+    if (rawAgentConfig is! Map) {
+      return const <String, Map<String, String>>{};
+    }
+
+    final parsed = <String, Map<String, String>>{};
+    for (final entry in rawAgentConfig.entries) {
+      final agentName = entry.key.toString().trim();
+      if (agentName.isEmpty || entry.value is! Map) {
+        continue;
+      }
+      final agentConfig = Map<String, dynamic>.from(entry.value as Map);
+      final optionsRaw = agentConfig['options'];
+      if (optionsRaw is! Map) {
+        continue;
+      }
+      final options = Map<String, dynamic>.from(optionsRaw);
+
+      dynamic variantByModelRaw;
+      final codewalkRaw = options[_configCodewalkNamespace];
+      if (codewalkRaw is Map) {
+        final codewalk = Map<String, dynamic>.from(codewalkRaw);
+        variantByModelRaw = codewalk[_configVariantByModelKey];
+      }
+      variantByModelRaw ??= options['codewalkVariantByModel'];
+
+      if (variantByModelRaw is! Map) {
+        continue;
+      }
+
+      final byModel = <String, String>{};
+      for (final variantEntry in variantByModelRaw.entries) {
+        final modelKey = variantEntry.key.toString().trim();
+        final value = variantEntry.value?.toString().trim();
+        if (modelKey.isEmpty || value == null || value.isEmpty) {
+          continue;
+        }
+        byModel[modelKey] = value;
+      }
+      if (byModel.isNotEmpty) {
+        parsed[agentName] = byModel;
+      }
+    }
+    return parsed;
+  }
+
+  _RemoteChatSelection _parseRemoteChatSelection(dynamic rawConfig) {
+    if (rawConfig is! Map) {
+      return const _RemoteChatSelection();
+    }
+
+    final config = Map<String, dynamic>.from(rawConfig);
+    String? providerId;
+    String? modelId;
+    final model = config['model'];
+
+    if (model is String) {
+      providerId = _providerFromModelKey(model.trim());
+      modelId = _modelFromModelKey(model.trim());
+    } else if (model is Map) {
+      providerId =
+          (model['providerID'] ?? model['providerId'] ?? model['provider'])
+              as String?;
+      modelId =
+          (model['modelID'] ?? model['modelId'] ?? model['id']) as String?;
+    }
+
+    providerId = providerId?.trim();
+    modelId = modelId?.trim();
+    if (providerId != null && providerId.isEmpty) {
+      providerId = null;
+    }
+    if (modelId != null && modelId.isEmpty) {
+      modelId = null;
+    }
+
+    final remoteAgent =
+        (config['default_agent'] ?? config['defaultAgent']) as String?;
+    final normalizedAgent = remoteAgent?.trim();
+    final variantByAgentAndModel = _parseRemoteVariantByAgent(config);
+    final sessionOverridesBySessionId = _parseRemoteSessionSelectionOverrides(
+      config,
+    );
+
+    return _RemoteChatSelection(
+      providerId: providerId,
+      modelId: modelId,
+      agentName: (normalizedAgent == null || normalizedAgent.isEmpty)
+          ? null
+          : normalizedAgent,
+      variantByAgentAndModel: variantByAgentAndModel,
+      sessionOverridesBySessionId: sessionOverridesBySessionId,
+    );
+  }
+
+  Future<_RemoteChatSelection?> _loadRemoteChatSelection() async {
+    final client = dioClient;
+    if (client == null) {
+      return null;
+    }
+    try {
+      final response = await client.get<Map<String, dynamic>>(
+        '/config',
+        queryParameters: _configQueryParameters(),
+      );
+      return _parseRemoteChatSelection(response.data);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _syncSelectionFromRemote({
+    required String reason,
+    bool force = false,
+  }) async {
+    final client = dioClient;
+    if (client == null || (_providers.isEmpty && _agents.isEmpty)) {
+      return;
+    }
+    if (_pendingRemoteSelectionSync && _shouldDeferRemoteSelectionSync) {
+      return;
+    }
+    if (_remoteSelectionSyncInFlight) {
+      return;
+    }
+    final lastSyncAt = _lastRemoteSelectionSyncAt;
+    if (!force &&
+        lastSyncAt != null &&
+        DateTime.now().difference(lastSyncAt) < _remoteSelectionSyncThrottle) {
+      return;
+    }
+
+    _remoteSelectionSyncInFlight = true;
+    try {
+      final remoteSelection = await _loadRemoteChatSelection();
+      _lastRemoteSelectionSyncAt = DateTime.now();
+      if (remoteSelection == null) {
+        return;
+      }
+      await _applyRemoteSelection(
+        remoteSelection,
+        reason: reason,
+        persistLocal: true,
+      );
+    } finally {
+      _remoteSelectionSyncInFlight = false;
+    }
+  }
+
+  String? _currentModelKey() {
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    if (providerId == null || modelId == null) {
+      return null;
+    }
+    return _modelKey(providerId, modelId);
+  }
+
+  String _remoteVariantSyncKey({
+    required String agentName,
+    required String modelKey,
+    required String variantValue,
+  }) {
+    return '$agentName|$modelKey|$variantValue';
+  }
+
+  bool _applyRemoteVariantSelection(_RemoteChatSelection remoteSelection) {
+    final agentName = _selectedAgentName?.trim();
+    final modelKey = _currentModelKey();
+    final model = selectedModel;
+    if (agentName == null ||
+        agentName.isEmpty ||
+        modelKey == null ||
+        model == null) {
+      return false;
+    }
+
+    final remoteVariantValue = remoteSelection.variantForModel(
+      agentName: agentName,
+      modelKey: modelKey,
+    );
+    if (remoteVariantValue == null || remoteVariantValue.trim().isEmpty) {
+      return false;
+    }
+
+    final normalizedRemoteValue = remoteVariantValue.trim();
+    String? nextVariantId;
+    if (normalizedRemoteValue == _remoteAutoVariantValue) {
+      nextVariantId = null;
+    } else {
+      if (!model.variants.containsKey(normalizedRemoteValue)) {
+        return false;
+      }
+      nextVariantId = normalizedRemoteValue;
+    }
+
+    if (_selectedVariantId == nextVariantId) {
+      _lastSyncedRemoteVariantKey = _remoteVariantSyncKey(
+        agentName: agentName,
+        modelKey: modelKey,
+        variantValue: normalizedRemoteValue,
+      );
+      return false;
+    }
+
+    _selectedVariantId = nextVariantId;
+    if (nextVariantId == null) {
+      _selectedVariantByModel.remove(modelKey);
+    } else {
+      _selectedVariantByModel[modelKey] = nextVariantId;
+    }
+    _lastSyncedRemoteVariantKey = _remoteVariantSyncKey(
+      agentName: agentName,
+      modelKey: modelKey,
+      variantValue: normalizedRemoteValue,
+    );
+    return true;
+  }
+
+  Future<void> _applyRemoteSelection(
+    _RemoteChatSelection remoteSelection, {
+    required String reason,
+    required bool persistLocal,
+  }) async {
+    var changed = false;
+
+    final mergedSessionOverrides = _mergeRemoteSessionSelectionOverrides(
+      remoteSelection.sessionOverridesBySessionId,
+    );
+    changed = changed || mergedSessionOverrides;
+
+    if (remoteSelection.hasModel) {
+      final remoteProviderId = remoteSelection.providerId!;
+      final remoteModelId = remoteSelection.modelId!;
+      final provider = _providers
+          .where((p) => p.id == remoteProviderId)
+          .firstOrNull;
+      if (provider != null && provider.models.containsKey(remoteModelId)) {
+        if (_selectedProviderId != remoteProviderId ||
+            _selectedModelId != remoteModelId) {
+          _selectedProviderId = remoteProviderId;
+          _selectedModelId = remoteModelId;
+          _selectedVariantId = _resolveStoredVariantForSelection();
+          changed = true;
+        }
+        _lastSyncedRemoteModelKey = _modelKey(remoteProviderId, remoteModelId);
+      }
+    }
+
+    final remoteAgentName = remoteSelection.agentName;
+    if (remoteAgentName != null && remoteAgentName.isNotEmpty) {
+      final resolvedAgent = _resolvePreferredAgentName(
+        _agents,
+        remoteAgentName,
+      );
+      if (resolvedAgent != null) {
+        _lastSyncedRemoteAgentName = resolvedAgent;
+        if (_selectedAgentName != resolvedAgent) {
+          _selectedAgentName = resolvedAgent;
+          changed = true;
+        }
+      }
+    }
+
+    final variantChanged = _applyRemoteVariantSelection(remoteSelection);
+    changed = changed || variantChanged;
+
+    final sessionPriorityChanged = _applySelectionPriorityForCurrentSession();
+    changed = changed || sessionPriorityChanged;
+
+    if (!changed) {
+      return;
+    }
+
+    AppLogger.info(
+      'Applied remote chat selection reason=$reason agent=${_selectedAgentName ?? "-"} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"}',
+    );
+
+    if (persistLocal) {
+      await _persistSelection(syncRemote: false);
+    }
+    notifyListeners();
+  }
+
+  Future<void> _syncSelectedModelToRemoteConfig() async {
+    final client = dioClient;
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    if (client == null || providerId == null || modelId == null) {
+      return;
+    }
+
+    final modelKey = _modelKey(providerId, modelId);
+    if (_lastSyncedRemoteModelKey == modelKey) {
+      return;
+    }
+
+    try {
+      await client.patch<void>(
+        '/config',
+        data: <String, dynamic>{'model': modelKey},
+        queryParameters: _configQueryParameters(),
+      );
+      _lastSyncedRemoteModelKey = modelKey;
+    } catch (_) {
+      // Remote sync is best-effort; local state remains source of truth.
+    }
+  }
+
+  Future<void> _syncSelectedVariantToRemoteConfig() async {
+    final client = dioClient;
+    final agentName = _selectedAgentName?.trim();
+    final modelKey = _currentModelKey();
+    if (client == null ||
+        agentName == null ||
+        agentName.isEmpty ||
+        modelKey == null) {
+      return;
+    }
+
+    final variantValue =
+        (_selectedVariantId == null || _selectedVariantId!.trim().isEmpty)
+        ? _remoteAutoVariantValue
+        : _selectedVariantId!.trim();
+    final syncKey = _remoteVariantSyncKey(
+      agentName: agentName,
+      modelKey: modelKey,
+      variantValue: variantValue,
+    );
+    if (_lastSyncedRemoteVariantKey == syncKey) {
+      return;
+    }
+
+    final variantByModelPayload = <String, String>{};
+    for (final entry in _selectedVariantByModel.entries) {
+      final key = entry.key.trim();
+      final value = entry.value.trim();
+      if (key.isEmpty || value.isEmpty) {
+        continue;
+      }
+      variantByModelPayload[key] = value;
+    }
+    variantByModelPayload[modelKey] = variantValue;
+
+    try {
+      await client.patch<void>(
+        '/config',
+        data: <String, dynamic>{
+          'agent': <String, dynamic>{
+            agentName: <String, dynamic>{
+              'options': <String, dynamic>{
+                _configCodewalkNamespace: <String, dynamic>{
+                  _configVariantByModelKey: variantByModelPayload,
+                  'updatedAt': DateTime.now().millisecondsSinceEpoch,
+                },
+              },
+            },
+          },
+        },
+        queryParameters: _configQueryParameters(),
+      );
+      _lastSyncedRemoteVariantKey = syncKey;
+    } catch (_) {
+      // Remote sync is best-effort; local state remains source of truth.
+    }
+  }
+
+  Future<void> _syncSelectedAgentToRemoteConfig() async {
+    final client = dioClient;
+    final agentName = _selectedAgentName?.trim();
+    if (client == null || agentName == null || agentName.isEmpty) {
+      return;
+    }
+    if (_lastSyncedRemoteAgentName == agentName) {
+      return;
+    }
+
+    try {
+      await client.patch<void>(
+        '/config',
+        data: <String, dynamic>{'default_agent': agentName},
+        queryParameters: _configQueryParameters(),
+      );
+      _lastSyncedRemoteAgentName = agentName;
+    } catch (_) {
+      // Remote sync is best-effort; local state remains source of truth.
+    }
+  }
+
+  Future<void> _syncSessionSelectionOverridesToRemoteConfig() async {
+    final client = dioClient;
+    if (client == null) {
+      return;
+    }
+
+    final overrides = _sessionOverridesForContext(_activeContextKey);
+    final signature = _sessionOverridesSignature(overrides);
+    if (_lastSyncedRemoteSessionOverridesSignature == signature) {
+      return;
+    }
+
+    final payload = <String, dynamic>{};
+    for (final entry in overrides.entries) {
+      payload[entry.key] = _sessionOverrideToJson(entry.value);
+    }
+
+    try {
+      await client.patch<void>(
+        '/config',
+        data: <String, dynamic>{
+          'agent': <String, dynamic>{
+            _configSyncAgentName: <String, dynamic>{
+              'options': <String, dynamic>{
+                _configCodewalkNamespace: <String, dynamic>{
+                  _configSessionSelectionsKey: payload,
+                  'updatedAt': DateTime.now().millisecondsSinceEpoch,
+                },
+              },
+            },
+          },
+        },
+        queryParameters: _configQueryParameters(),
+      );
+      _lastSyncedRemoteSessionOverridesSignature = signature;
+    } catch (_) {
+      // Remote sync is best-effort; local state remains source of truth.
+    }
+  }
+
+  Future<void> _syncSelectionToRemoteConfig() async {
+    await _syncSelectedModelToRemoteConfig();
+    await _syncSelectedAgentToRemoteConfig();
+    await _syncSelectedVariantToRemoteConfig();
+    await _syncSessionSelectionOverridesToRemoteConfig();
+  }
+
+  void _markPendingRemoteSelectionSync({required String reason}) {
+    if (_pendingRemoteSelectionSync) {
+      return;
+    }
+    _pendingRemoteSelectionSync = true;
+    _pendingRemoteSelectionSyncSince = DateTime.now();
+    AppLogger.info('Deferring remote selection sync reason=$reason');
+  }
+
+  void _attemptPendingRemoteSelectionSync({required String reason}) {
+    if (!_pendingRemoteSelectionSync) {
+      return;
+    }
+    final pendingSince = _pendingRemoteSelectionSyncSince;
+    final hasTimedOut =
+        pendingSince != null &&
+        DateTime.now().difference(pendingSince) >= _maxRemoteSelectionDefer;
+    if (_shouldDeferRemoteSelectionSync && !hasTimedOut) {
+      return;
+    }
+    _pendingRemoteSelectionSync = false;
+    _pendingRemoteSelectionSyncSince = null;
+    AppLogger.info('Flushing deferred remote selection sync reason=$reason');
+    unawaited(_syncSelectionToRemoteConfig());
   }
 
   bool _isSelectableAgent(Agent agent) {
@@ -689,6 +1243,368 @@ class ChatProvider extends ChangeNotifier {
       return null;
     }
     return contextKey.substring(0, separatorIndex);
+  }
+
+  String _sessionSelectionKeyForContext(String contextKey, String sessionId) {
+    return '$contextKey::$sessionId';
+  }
+
+  String _sessionSelectionKey(String sessionId) {
+    return _sessionSelectionKeyForContext(_activeContextKey, sessionId);
+  }
+
+  Map<String, _SessionSelectionOverride> _sessionOverridesForContext(
+    String contextKey,
+  ) {
+    final prefix = '$contextKey::';
+    final result = <String, _SessionSelectionOverride>{};
+    for (final entry in _sessionSelectionOverridesByKey.entries) {
+      if (!entry.key.startsWith(prefix)) {
+        continue;
+      }
+      final sessionId = entry.key.substring(prefix.length);
+      if (sessionId.isEmpty) {
+        continue;
+      }
+      result[sessionId] = entry.value;
+    }
+    return result;
+  }
+
+  void _replaceSessionOverridesForContext(
+    String contextKey,
+    Map<String, _SessionSelectionOverride> overrides,
+  ) {
+    final prefix = '$contextKey::';
+    final keysToRemove = _sessionSelectionOverridesByKey.keys
+        .where((key) => key.startsWith(prefix))
+        .toList(growable: false);
+    for (final key in keysToRemove) {
+      _sessionSelectionOverridesByKey.remove(key);
+    }
+    for (final entry in overrides.entries) {
+      final sessionId = entry.key.trim();
+      if (sessionId.isEmpty) {
+        continue;
+      }
+      _sessionSelectionOverridesByKey[_sessionSelectionKeyForContext(
+            contextKey,
+            sessionId,
+          )] =
+          entry.value;
+    }
+  }
+
+  String _sessionOverridesSignature(
+    Map<String, _SessionSelectionOverride> overrides,
+  ) {
+    final sessionIds = overrides.keys.toList(growable: false)..sort();
+    final buffer = StringBuffer();
+    for (final sessionId in sessionIds) {
+      final override = overrides[sessionId];
+      if (override == null) {
+        continue;
+      }
+      buffer
+        ..write(sessionId)
+        ..write('|')
+        ..write(override.providerId)
+        ..write('|')
+        ..write(override.modelId)
+        ..write('|')
+        ..write(override.agentName)
+        ..write('|')
+        ..write(override.variantId ?? _remoteAutoVariantValue)
+        ..write('|')
+        ..write(override.updatedAtEpochMs)
+        ..write(';');
+    }
+    return buffer.toString();
+  }
+
+  Map<String, dynamic> _sessionOverrideToJson(_SessionSelectionOverride value) {
+    return <String, dynamic>{
+      'providerId': value.providerId,
+      'modelId': value.modelId,
+      'agentName': value.agentName,
+      'variantId': value.variantId ?? _remoteAutoVariantValue,
+      'updatedAt': value.updatedAtEpochMs,
+    };
+  }
+
+  _SessionSelectionOverride? _sessionOverrideFromJson(dynamic raw) {
+    if (raw is! Map) {
+      return null;
+    }
+    final json = Map<String, dynamic>.from(raw);
+    final providerId =
+        (json['providerId'] ?? json['providerID'] ?? json['provider'])
+            as String?;
+    final modelId =
+        (json['modelId'] ?? json['modelID'] ?? json['id']) as String?;
+    final agentName = (json['agentName'] ?? json['agent']) as String?;
+    if (providerId == null ||
+        providerId.trim().isEmpty ||
+        modelId == null ||
+        modelId.trim().isEmpty ||
+        agentName == null ||
+        agentName.trim().isEmpty) {
+      return null;
+    }
+
+    final rawVariant = json['variantId'] as String?;
+    final normalizedVariant = rawVariant?.trim();
+    final variantId =
+        (normalizedVariant == null ||
+            normalizedVariant.isEmpty ||
+            normalizedVariant == _remoteAutoVariantValue)
+        ? null
+        : normalizedVariant;
+    final updatedAt = json['updatedAt'];
+    final updatedAtEpochMs = updatedAt is int
+        ? updatedAt
+        : int.tryParse(updatedAt?.toString() ?? '') ?? 0;
+
+    return _SessionSelectionOverride(
+      providerId: providerId.trim(),
+      modelId: modelId.trim(),
+      agentName: agentName.trim(),
+      variantId: variantId,
+      updatedAtEpochMs: updatedAtEpochMs,
+    );
+  }
+
+  Map<String, _SessionSelectionOverride> _parseRemoteSessionSelectionOverrides(
+    Map<String, dynamic> config,
+  ) {
+    final agentsRaw = config['agent'] ?? config['mode'];
+    if (agentsRaw is! Map) {
+      return const <String, _SessionSelectionOverride>{};
+    }
+    final agents = Map<String, dynamic>.from(agentsRaw);
+    final syncAgentRaw = agents[_configSyncAgentName];
+    if (syncAgentRaw is! Map) {
+      return const <String, _SessionSelectionOverride>{};
+    }
+    final syncAgent = Map<String, dynamic>.from(syncAgentRaw);
+    final optionsRaw = syncAgent['options'];
+    if (optionsRaw is! Map) {
+      return const <String, _SessionSelectionOverride>{};
+    }
+    final options = Map<String, dynamic>.from(optionsRaw);
+    final codewalkRaw = options[_configCodewalkNamespace];
+    if (codewalkRaw is! Map) {
+      return const <String, _SessionSelectionOverride>{};
+    }
+    final codewalk = Map<String, dynamic>.from(codewalkRaw);
+    final sessionSelectionsRaw = codewalk[_configSessionSelectionsKey];
+    if (sessionSelectionsRaw is! Map) {
+      return const <String, _SessionSelectionOverride>{};
+    }
+
+    final parsed = <String, _SessionSelectionOverride>{};
+    for (final entry in sessionSelectionsRaw.entries) {
+      final sessionId = entry.key.toString().trim();
+      if (sessionId.isEmpty) {
+        continue;
+      }
+      final override = _sessionOverrideFromJson(entry.value);
+      if (override != null) {
+        parsed[sessionId] = override;
+      }
+    }
+    return parsed;
+  }
+
+  Future<void> _loadSessionSelectionOverridesState({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    final raw = await localDataSource.getSessionSelectionOverridesJson(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (raw == null || raw.trim().isEmpty) {
+      _replaceSessionOverridesForContext(
+        _activeContextKey,
+        const <String, _SessionSelectionOverride>{},
+      );
+      return;
+    }
+
+    try {
+      final decoded = json.decode(raw);
+      if (decoded is! Map) {
+        _replaceSessionOverridesForContext(
+          _activeContextKey,
+          const <String, _SessionSelectionOverride>{},
+        );
+        return;
+      }
+
+      final parsed = <String, _SessionSelectionOverride>{};
+      for (final entry in decoded.entries) {
+        final sessionId = entry.key.toString().trim();
+        if (sessionId.isEmpty) {
+          continue;
+        }
+        final override = _sessionOverrideFromJson(entry.value);
+        if (override != null) {
+          parsed[sessionId] = override;
+        }
+      }
+      _replaceSessionOverridesForContext(_activeContextKey, parsed);
+    } catch (_) {
+      _replaceSessionOverridesForContext(
+        _activeContextKey,
+        const <String, _SessionSelectionOverride>{},
+      );
+    }
+  }
+
+  Future<void> _persistSessionSelectionOverridesState({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    final overrides = _sessionOverridesForContext(_activeContextKey);
+    final serialized = <String, dynamic>{};
+    for (final entry in overrides.entries) {
+      serialized[entry.key] = _sessionOverrideToJson(entry.value);
+    }
+    await localDataSource.saveSessionSelectionOverridesJson(
+      json.encode(serialized),
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+  }
+
+  bool _mergeRemoteSessionSelectionOverrides(
+    Map<String, _SessionSelectionOverride> remoteOverrides,
+  ) {
+    if (remoteOverrides.isEmpty) {
+      return false;
+    }
+    final current = _sessionOverridesForContext(_activeContextKey);
+    final merged = Map<String, _SessionSelectionOverride>.from(current);
+    var changed = false;
+
+    for (final entry in remoteOverrides.entries) {
+      final sessionId = entry.key;
+      final remote = entry.value;
+      final local = merged[sessionId];
+      if (local == null || remote.updatedAtEpochMs >= local.updatedAtEpochMs) {
+        final shouldReplace =
+            local == null ||
+            local.providerId != remote.providerId ||
+            local.modelId != remote.modelId ||
+            local.agentName != remote.agentName ||
+            local.variantId != remote.variantId ||
+            local.updatedAtEpochMs != remote.updatedAtEpochMs;
+        if (shouldReplace) {
+          merged[sessionId] = remote;
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      _replaceSessionOverridesForContext(_activeContextKey, merged);
+    }
+    return changed;
+  }
+
+  void _storeCurrentSessionSelectionOverride() {
+    final sessionId = _currentSession?.id;
+    final providerId = _selectedProviderId;
+    final modelId = _selectedModelId;
+    final agentName = _selectedAgentName;
+    if (sessionId == null ||
+        providerId == null ||
+        modelId == null ||
+        agentName == null ||
+        agentName.trim().isEmpty) {
+      return;
+    }
+
+    _sessionSelectionOverridesByKey[_sessionSelectionKey(
+      sessionId,
+    )] = _SessionSelectionOverride(
+      providerId: providerId,
+      modelId: modelId,
+      agentName: agentName,
+      variantId: _selectedVariantId,
+      updatedAtEpochMs: DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  void _removeSessionSelectionOverride(String sessionId) {
+    _sessionSelectionOverridesByKey.remove(_sessionSelectionKey(sessionId));
+  }
+
+  bool _applySessionSelectionOverride(String? sessionId) {
+    if (sessionId == null || sessionId.trim().isEmpty) {
+      return false;
+    }
+    final override =
+        _sessionSelectionOverridesByKey[_sessionSelectionKey(sessionId)];
+    if (override == null) {
+      return false;
+    }
+
+    final provider = _providers
+        .where((p) => p.id == override.providerId)
+        .firstOrNull;
+    if (provider == null || !provider.models.containsKey(override.modelId)) {
+      _removeSessionSelectionOverride(sessionId);
+      return false;
+    }
+
+    final resolvedAgent = _resolvePreferredAgentName(
+      _agents,
+      override.agentName,
+    );
+    if (resolvedAgent == null) {
+      _removeSessionSelectionOverride(sessionId);
+      return false;
+    }
+
+    final model = provider.models[override.modelId];
+    String? nextVariantId = override.variantId;
+    if (nextVariantId != null &&
+        (model == null || !model.variants.containsKey(nextVariantId))) {
+      nextVariantId = null;
+    }
+
+    var changed = false;
+    if (_selectedProviderId != provider.id) {
+      _selectedProviderId = provider.id;
+      changed = true;
+    }
+    if (_selectedModelId != override.modelId) {
+      _selectedModelId = override.modelId;
+      changed = true;
+    }
+    if (_selectedAgentName != resolvedAgent) {
+      _selectedAgentName = resolvedAgent;
+      changed = true;
+    }
+    if (_selectedVariantId != nextVariantId) {
+      _selectedVariantId = nextVariantId;
+      changed = true;
+    }
+
+    final modelKey = _modelKey(provider.id, override.modelId);
+    if (nextVariantId == null) {
+      _selectedVariantByModel.remove(modelKey);
+    } else {
+      _selectedVariantByModel[modelKey] = nextVariantId;
+    }
+
+    return changed;
+  }
+
+  bool _applySelectionPriorityForCurrentSession() {
+    return _applySessionSelectionOverride(_currentSession?.id);
   }
 
   void _storeCurrentContextSnapshot() {
@@ -1048,9 +1964,6 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _startSyncHealthMonitor() {
-    if (!_refreshlessRealtimeEnabled) {
-      return;
-    }
     _syncHealthTimer?.cancel();
     _syncHealthTimer = Timer.periodic(_syncHealthCheckInterval, (_) {
       _evaluateSyncHealth();
@@ -1058,7 +1971,12 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _evaluateSyncHealth() {
-    if (!_refreshlessRealtimeEnabled || !_isForegroundActive) {
+    if (!_isForegroundActive) {
+      return;
+    }
+    unawaited(_syncSelectionFromRemote(reason: 'sync-health-tick'));
+    _attemptPendingRemoteSelectionSync(reason: 'sync-health-tick');
+    if (!_refreshlessRealtimeEnabled) {
       return;
     }
     final signalAt = _lastRealtimeSignalAt;
@@ -1115,6 +2033,10 @@ class ChatProvider extends ChangeNotifier {
     AppLogger.info('sync_degraded_poll_tick reason=$reason');
     await loadSessions();
     await refreshActiveSessionView(reason: 'degraded-sync:$reason');
+    await _syncSelectionFromRemote(
+      reason: 'degraded-sync:$reason',
+      force: true,
+    );
   }
 
   Future<void> setForegroundActive(bool isActive) async {
@@ -1159,6 +2081,7 @@ class ChatProvider extends ChangeNotifier {
     await _loadPendingInteractions();
     await loadSessions();
     await refreshActiveSessionView(reason: 'foreground-resume');
+    await _syncSelectionFromRemote(reason: 'foreground-resume', force: true);
     AppLogger.info('sync_resume_reconcile_complete');
   }
 
@@ -1315,6 +2238,7 @@ class ChatProvider extends ChangeNotifier {
 
   void _removeSessionById(String sessionId) {
     _sessions.removeWhere((item) => item.id == sessionId);
+    _removeSessionSelectionOverride(sessionId);
     _pendingRenameTitleBySessionId.remove(sessionId);
     _autoTitleConsolidatedSessionIds.remove(sessionId);
     _autoTitleLastSignatureBySessionId.remove(sessionId);
@@ -1324,6 +2248,7 @@ class ChatProvider extends ChangeNotifier {
       _currentSession = _sessions.firstOrNull;
       _messages = <ChatMessage>[];
       _pendingLocalUserMessageIds.clear();
+      _applySelectionPriorityForCurrentSession();
     }
     _sessionStatusById.remove(sessionId);
     _pendingPermissionsBySession.remove(sessionId);
@@ -1343,10 +2268,24 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
     final properties = event.properties;
+    if (event.type != 'server.connected' &&
+        (event.type == 'session.status' ||
+            event.type == 'message.created' ||
+            event.type == 'message.updated' ||
+            event.type == 'session.updated' ||
+            event.type == 'session.created')) {
+      unawaited(_syncSelectionFromRemote(reason: 'event-${event.type}'));
+    }
     switch (event.type) {
       case 'server.connected':
         unawaited(
           refreshActiveSessionView(reason: 'realtime-server-connected'),
+        );
+        unawaited(
+          _syncSelectionFromRemote(
+            reason: 'event-server-connected',
+            force: true,
+          ),
         );
         break;
       case 'session.created':
@@ -1403,6 +2342,7 @@ class ChatProvider extends ChangeNotifier {
           final status = SessionStatusModel.fromJson(statusMap).toDomain();
           _sessionStatusById[sessionId] = status;
           notifyListeners();
+          _attemptPendingRemoteSelectionSync(reason: 'event-session.status');
         }
         break;
       case 'session.diff':
@@ -1452,6 +2392,7 @@ class ChatProvider extends ChangeNotifier {
             type: SessionStatusType.idle,
           );
           notifyListeners();
+          _attemptPendingRemoteSelectionSync(reason: 'event-session.idle');
         }
         break;
       case 'session.error':
@@ -2486,6 +3427,17 @@ class ChatProvider extends ChangeNotifier {
 
       if (_providers.isNotEmpty) {
         await _loadModelPreferenceState(serverId: serverId, scopeId: scopeId);
+        await _loadSessionSelectionOverridesState(
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+
+        final remoteSelection = await _loadRemoteChatSelection();
+        if (remoteSelection != null) {
+          _mergeRemoteSessionSelectionOverrides(
+            remoteSelection.sessionOverridesBySessionId,
+          );
+        }
 
         final persistedProvider = await localDataSource.getSelectedProvider(
           serverId: serverId,
@@ -2498,7 +3450,17 @@ class ChatProvider extends ChangeNotifier {
 
         Provider? selectedProvider;
 
-        if (persistedProvider != null) {
+        if (remoteSelection != null && remoteSelection.hasModel) {
+          selectedProvider = _providers
+              .where((p) => p.id == remoteSelection.providerId)
+              .firstOrNull;
+          if (selectedProvider != null &&
+              !selectedProvider.models.containsKey(remoteSelection.modelId)) {
+            selectedProvider = null;
+          }
+        }
+
+        if (selectedProvider == null && persistedProvider != null) {
           selectedProvider = _providers
               .where((p) => p.id == persistedProvider)
               .firstOrNull;
@@ -2534,7 +3496,12 @@ class ChatProvider extends ChangeNotifier {
         selectedProvider ??= _providers.first;
         _selectedProviderId = selectedProvider.id;
 
-        if (persistedModel != null &&
+        if (remoteSelection != null &&
+            remoteSelection.hasModel &&
+            remoteSelection.providerId == selectedProvider.id &&
+            selectedProvider.models.containsKey(remoteSelection.modelId)) {
+          _selectedModelId = remoteSelection.modelId;
+        } else if (persistedModel != null &&
             selectedProvider.models.containsKey(persistedModel)) {
           _selectedModelId = persistedModel;
         } else {
@@ -2582,7 +3549,22 @@ class ChatProvider extends ChangeNotifier {
           _selectedModelId = selectedProvider.models.keys.first;
         }
 
+        final remoteAgentName = remoteSelection?.agentName;
+        if (remoteAgentName != null && remoteAgentName.isNotEmpty) {
+          final resolvedAgent = _resolvePreferredAgentName(
+            _agents,
+            remoteAgentName,
+          );
+          if (resolvedAgent != null) {
+            _selectedAgentName = resolvedAgent;
+          }
+        }
+
         _selectedVariantId = _resolveStoredVariantForSelection();
+        if (remoteSelection != null) {
+          _applyRemoteVariantSelection(remoteSelection);
+        }
+        _applySelectionPriorityForCurrentSession();
 
         if (_selectedProviderId != null) {
           await localDataSource.saveSelectedProvider(
@@ -2608,6 +3590,34 @@ class ChatProvider extends ChangeNotifier {
           scopeId: scopeId,
         );
 
+        if (_selectedProviderId != null && _selectedModelId != null) {
+          _lastSyncedRemoteModelKey = _modelKey(
+            _selectedProviderId!,
+            _selectedModelId!,
+          );
+        } else {
+          _lastSyncedRemoteModelKey = null;
+        }
+        _lastSyncedRemoteAgentName = _selectedAgentName;
+        if (_lastSyncedRemoteVariantKey == null) {
+          final modelKey = _currentModelKey();
+          final agentName = _selectedAgentName;
+          if (modelKey != null && agentName != null && agentName.isNotEmpty) {
+            final variantValue =
+                (_selectedVariantId == null || _selectedVariantId!.isEmpty)
+                ? _remoteAutoVariantValue
+                : _selectedVariantId!;
+            _lastSyncedRemoteVariantKey = _remoteVariantSyncKey(
+              agentName: agentName,
+              modelKey: modelKey,
+              variantValue: variantValue,
+            );
+          }
+        }
+        _lastSyncedRemoteSessionOverridesSignature = _sessionOverridesSignature(
+          _sessionOverridesForContext(_activeContextKey),
+        );
+
         AppLogger.debug(
           'Selected agent=$_selectedAgentName provider=$_selectedProviderId model=$_selectedModelId variant=$_selectedVariantId server=$serverId',
         );
@@ -2618,6 +3628,12 @@ class ChatProvider extends ChangeNotifier {
         _recentModelKeys = <String>[];
         _modelUsageCounts = <String, int>{};
         _selectedVariantByModel = <String, String>{};
+        _lastSyncedRemoteModelKey = null;
+        _lastSyncedRemoteAgentName = null;
+        _lastSyncedRemoteVariantKey = null;
+        _lastSyncedRemoteSessionOverridesSignature = null;
+        _pendingRemoteSelectionSync = false;
+        _pendingRemoteSelectionSyncSince = null;
       }
     } catch (e, stackTrace) {
       AppLogger.error(
@@ -2721,6 +3737,14 @@ class ChatProvider extends ChangeNotifier {
     _recentModelKeys = <String>[];
     _modelUsageCounts = <String, int>{};
     _selectedVariantByModel = <String, String>{};
+    _lastSyncedRemoteModelKey = null;
+    _lastSyncedRemoteAgentName = null;
+    _lastSyncedRemoteVariantKey = null;
+    _lastSyncedRemoteSessionOverridesSignature = null;
+    _pendingRemoteSelectionSync = false;
+    _pendingRemoteSelectionSyncSince = null;
+    _lastRemoteSelectionSyncAt = null;
+    _remoteSelectionSyncInFlight = false;
     _autoTitleConsolidatedSessionIds.clear();
     _autoTitleLastSignatureBySessionId.clear();
     _autoTitleInFlightSessionIds.clear();
@@ -2742,7 +3766,7 @@ class ChatProvider extends ChangeNotifier {
     await loadLastSession(serverId: serverId, scopeId: nextScope);
   }
 
-  Future<void> _persistSelection() async {
+  Future<void> _persistSelection({bool syncRemote = true}) async {
     final serverId = await _resolveServerScopeId();
     final scopeId = _resolveContextScopeId();
     if (_selectedProviderId != null) {
@@ -2765,6 +3789,19 @@ class ChatProvider extends ChangeNotifier {
       scopeId: scopeId,
     );
     await _persistModelPreferenceState(serverId: serverId, scopeId: scopeId);
+    await _persistSessionSelectionOverridesState(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (syncRemote) {
+      if (_shouldDeferRemoteSelectionSync) {
+        _markPendingRemoteSelectionSync(reason: 'active-response');
+      } else {
+        _pendingRemoteSelectionSync = false;
+        _pendingRemoteSelectionSyncSince = null;
+        await _syncSelectionToRemoteConfig();
+      }
+    }
   }
 
   Future<void> setSelectedProvider(String providerId) async {
@@ -2804,6 +3841,7 @@ class ChatProvider extends ChangeNotifier {
     nextModelId ??= provider.models.keys.firstOrNull;
     _selectedModelId = nextModelId;
     _selectedVariantId = _resolveStoredVariantForSelection();
+    _storeCurrentSessionSelectionOverride();
     await _persistSelection();
     notifyListeners();
   }
@@ -2819,6 +3857,7 @@ class ChatProvider extends ChangeNotifier {
     _selectedProviderId = providerId;
     _selectedModelId = modelId;
     _selectedVariantId = _resolveStoredVariantForSelection();
+    _storeCurrentSessionSelectionOverride();
     await _persistSelection();
     notifyListeners();
   }
@@ -2844,6 +3883,7 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
     _selectedAgentName = next;
+    _storeCurrentSessionSelectionOverride();
     await _persistSelection();
     notifyListeners();
   }
@@ -2868,6 +3908,7 @@ class ChatProvider extends ChangeNotifier {
       _selectedVariantByModel.remove(modelKey);
     }
 
+    _storeCurrentSessionSelectionOverride();
     await _persistSelection();
     notifyListeners();
   }
@@ -3323,6 +4364,11 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
 
+      final appliedSessionOverride = _applySelectionPriorityForCurrentSession();
+      if (appliedSessionOverride) {
+        notifyListeners();
+      }
+
       if (_messages.isEmpty) {
         await loadMessages(targetSession.id);
       } else {
@@ -3393,6 +4439,7 @@ class ChatProvider extends ChangeNotifier {
       serverId: serverId,
       scopeId: scopeId,
     );
+    _storeCurrentSessionSelectionOverride();
     unawaited(
       _persistLastSessionSnapshotBestEffort(
         serverId: serverId,
@@ -3420,6 +4467,7 @@ class ChatProvider extends ChangeNotifier {
     _messages.clear();
     _pendingLocalUserMessageIds.clear();
     _currentSession = session;
+    _applySelectionPriorityForCurrentSession();
     notifyListeners();
 
     // Save current session ID
@@ -3864,6 +4912,7 @@ class ChatProvider extends ChangeNotifier {
         _pendingLocalUserMessageIds.remove(previousId);
         _messages[pendingLocalIndex] = message;
         notifyListeners();
+        _attemptPendingRemoteSelectionSync(reason: 'message-user-replaced');
         _scheduleAutoTitleRefresh(message.sessionId);
         _scrollToBottomCallback?.call();
         return;
@@ -3888,6 +4937,7 @@ class ChatProvider extends ChangeNotifier {
 
     // Check if there is an unfinished assistant message
     if (message is AssistantMessage) {
+      _adoptSelectionFromAssistantMessage(message, reason: 'assistant-message');
       AppLogger.debug(
         'Assistant message status: ${message.isCompleted ? "completed" : "in_progress"}',
       );
@@ -3898,10 +4948,60 @@ class ChatProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+    _attemptPendingRemoteSelectionSync(reason: 'message-update');
     _scheduleAutoTitleRefresh(message.sessionId);
 
     // Trigger auto-scroll
     _scrollToBottomCallback?.call();
+  }
+
+  void _adoptSelectionFromAssistantMessage(
+    AssistantMessage message, {
+    required String reason,
+  }) {
+    var changed = false;
+
+    final providerId = message.providerId?.trim();
+    final modelId = message.modelId?.trim();
+    if (providerId != null &&
+        providerId.isNotEmpty &&
+        modelId != null &&
+        modelId.isNotEmpty) {
+      final provider = _providers.where((p) => p.id == providerId).firstOrNull;
+      if (provider != null && provider.models.containsKey(modelId)) {
+        if (_selectedProviderId != providerId || _selectedModelId != modelId) {
+          _selectedProviderId = providerId;
+          _selectedModelId = modelId;
+          _selectedVariantId = _resolveStoredVariantForSelection();
+          _lastSyncedRemoteVariantKey = null;
+          changed = true;
+        }
+        _lastSyncedRemoteModelKey = _modelKey(providerId, modelId);
+      }
+    }
+
+    final mode = message.mode?.trim();
+    if (mode != null && mode.isNotEmpty && mode.toLowerCase() != 'shell') {
+      final resolved = _resolvePreferredAgentName(_agents, mode);
+      if (resolved != null) {
+        _lastSyncedRemoteAgentName = resolved;
+        if (_selectedAgentName != resolved) {
+          _selectedAgentName = resolved;
+          _lastSyncedRemoteVariantKey = null;
+          changed = true;
+        }
+      }
+    }
+
+    if (!changed) {
+      return;
+    }
+
+    AppLogger.info(
+      'Adopted assistant selection reason=$reason agent=${_selectedAgentName ?? "-"} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"}',
+    );
+    _storeCurrentSessionSelectionOverride();
+    unawaited(_persistSelection(syncRemote: false));
   }
 
   String _normalizedUserMessageSignature(UserMessage message) {

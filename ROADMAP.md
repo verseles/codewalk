@@ -213,7 +213,11 @@ Concluída a remoção dos problemas-alvo de deprecação/compatibilidade, com v
 - [ ] No desktop, pesquisar como usar microfone speech-to-text no linux. Pesquisar também se a API atual já funciona no mac/windows/iOS
 - [x] Manter o modelo selecionado sincronizado, atualmente o modelo selecionado no desktop, não é o mesmo selecionado no app mobile, o servidor backend deve passar essa informação
 - [x] Sincronizar agente selecionado entre desktop/mobile via `/config.default_agent` com reconciliação ativa enquanto o app estiver aberto
-- [/] Sincronizar variant/thinking em tempo real entre dispositivos (bloqueado por ausência de campo estável server-side no schema de `/config`)
+- [x] Sincronizar variant/thinking em tempo real entre dispositivos via namespace do app em `/config.agent.<agent>.options.codewalk.variantByModel`
+- [x] Sincronizar model/agent/variant entre apps abertos sem depender de envio de nova mensagem (reconcile periódico em foreground)
+- [x] Evitar abort de resposta ativa ao trocar selects (sync remoto diferido e flush automático quando sessão volta para idle)
+- [x] Aplicar prioridade de seleção por sessão no cliente ativo (conversa > projeto/local do contexto)
+- [x] Persistir overrides de seleção por sessão para sobreviver restart (local por escopo + remoto em `/config.agent.__codewalk.options.codewalk.sessionSelections`)
 - [ ] Opções em Settings para decidir se app fica em background. Mobile: persistente notification, desktop: tray
 - [ ] Ajustar popover de sugestões no Android para nunca cobrir o input com teclado aberto em todos os teclades/dispositivos (validar em device real com Gboard e Samsung Keyboard)
 - [x] Aplicar ícones de app para Linux (GNOME/Freedesktop) e alinhar equivalentes para os demais OS (Windows/macOS)

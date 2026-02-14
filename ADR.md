@@ -535,7 +535,19 @@ After Feature 011 (ADR-010) established multi-server state isolation, CodeWalk s
 - Agent selection is now also synchronized through server config:
   - `ChatProvider` writes selected agent to `/config.default_agent`.
   - On initialization, `/config.default_agent` is preferred over local persisted agent when valid.
-- Variant/reasoning preference remains local-per-client because OpenCode config schema does not currently expose a stable top-level field for variant state.
+- Variant/reasoning selection is synchronized cross-device via app namespace under agent options:
+  - write path: `/config.agent.<agent>.options.codewalk.variantByModel[provider/model]`.
+  - reconcile path: read remote map and apply selected variant for the active `agent + provider/model` pair.
+  - `__auto__` sentinel is used to represent "Auto" variant explicitly for deterministic cross-client convergence.
+- Select changes no longer force remote config writes while a response is active:
+  - remote sync is deferred during `sending/busy/retry` states,
+  - deferred writes are flushed automatically when session status returns to idle.
+- Session-scoped selection override is applied in the active client:
+  - conversation selection is remembered per session and reused on session switch,
+  - fallback remains context/project-local persisted selection.
+- Session-scoped override now survives app restarts and converges cross-device:
+  - local persistence is stored per `serverId + scopeId` in app storage,
+  - remote persistence is stored in `/config.agent.__codewalk.options.codewalk.sessionSelections`.
 
 ### Key Files
 
@@ -974,7 +986,9 @@ Feature 017 required removing manual refresh interactions from chat/context flow
   - periodic reconcile on sync-health ticks,
   - forced reconcile on `server.connected`,
   - forced reconcile on foreground resume and degraded sync passes.
-- Reconcile scope is intentionally targeted to config-backed selection (`model`, `default_agent`) to preserve refreshless behavior and avoid broad polling regression.
+- Reconcile scope is intentionally targeted to config-backed selection (`model`, `default_agent`, and app-scoped variant map) to preserve refreshless behavior and avoid broad polling regression.
+- Selection reconcile tick runs in foreground even when refreshless feature flag is disabled, so model/agent/variant sync still converges without requiring a new outgoing message.
+- Session-level selection overrides are merged by per-session `updatedAt` timestamp to reduce cross-device overwrite conflicts and keep restart hydration deterministic.
 
 ### Key Files
 

@@ -29,6 +29,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? selectedModel;
   String? selectedAgent;
   String? selectedVariantMapJson;
+  String? sessionSelectionOverridesJson;
   String? recentModelsJson;
   String? modelUsageCountsJson;
   String? themeMode;
@@ -71,6 +72,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     selectedModel = null;
     selectedAgent = null;
     selectedVariantMapJson = null;
+    sessionSelectionOverridesJson = null;
     recentModelsJson = null;
     modelUsageCountsJson = null;
     themeMode = null;
@@ -235,6 +237,21 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     if (serverId == null && scopeId == null) return selectedVariantMapJson;
     return scopedStrings[_key(
       'selected_variant_map',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<String?> getSessionSelectionOverridesJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      return sessionSelectionOverridesJson;
+    }
+    return scopedStrings[_key(
+      'session_selection_overrides',
       serverId: serverId,
       scopeId: scopeId,
     )];
@@ -547,6 +564,24 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
+  Future<void> saveSessionSelectionOverridesJson(
+    String overridesJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
+      sessionSelectionOverridesJson = overridesJson;
+      return;
+    }
+    scopedStrings[_key(
+          'session_selection_overrides',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
+        overridesJson;
+  }
+
+  @override
   Future<void> saveRecentModelsJson(
     String recentModelsJson, {
     String? serverId,
@@ -647,6 +682,9 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
         serverId: serverId,
         scopeId: scopeId,
       ),
+    );
+    scopedStrings.remove(
+      _key('session_selection_overrides', serverId: serverId, scopeId: scopeId),
     );
   }
 

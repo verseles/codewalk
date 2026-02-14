@@ -80,6 +80,19 @@ abstract class AppLocalDataSource {
   });
 
   /// Technical comment translated to English.
+  Future<String?> getSessionSelectionOverridesJson({
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
+  Future<void> saveSessionSelectionOverridesJson(
+    String overridesJson, {
+    String? serverId,
+    String? scopeId,
+  });
+
+  /// Technical comment translated to English.
   Future<String?> getRecentModelsJson({String? serverId, String? scopeId});
 
   /// Technical comment translated to English.
@@ -437,6 +450,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
         scopeId: scopeId,
       ),
       variantMapJson,
+    );
+  }
+
+  @override
+  Future<String?> getSessionSelectionOverridesJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(
+        AppConstants.sessionSelectionOverridesKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveSessionSelectionOverridesJson(
+    String overridesJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    await sharedPreferences.setString(
+      _scopedKey(
+        AppConstants.sessionSelectionOverridesKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      overridesJson,
     );
   }
 
@@ -799,6 +842,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       ),
       _scopedKey(
         AppConstants.lastSessionSnapshotUpdatedAtKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+      _scopedKey(
+        AppConstants.sessionSelectionOverridesKey,
         serverId: serverId,
         scopeId: scopeId,
       ),

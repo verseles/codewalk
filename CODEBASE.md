@@ -548,6 +548,13 @@ Modular settings hub with responsive navigation (mobile list-to-detail, desktop 
 - Subscription teardown uses bounded timeout to avoid server-switch deadlocks
 - Standard prompt sends omit `messageID`; that field is reserved for explicit message-targeted workflows
 - Provider send setup is wrapped with stage logs and non-blocking selection persistence so local storage issues cannot prevent network send dispatch
+- Selection sync is config-backed across devices: `/config.model`, `/config.default_agent`, and app-scoped variant map at `/config.agent.<agent>.options.codewalk.variantByModel`
+- Realtime reconcile applies remote selection while app is open (sync health tick, `server.connected`, foreground resume, degraded sync pass)
+- Reconcile tick for model/agent/variant runs in foreground even when refreshless fallback logic is disabled, so select sync does not depend on sending a new message
+- Select changes during active response are queued for remote sync and flushed on idle to avoid unintended abort/regression while preserving cross-device convergence
+- Session-level override persistence is applied on session switch (`conversation > context/project local`) so each conversation keeps its own select trio across runtime and restart
+- Session override state is persisted locally per `serverId + scopeId` and mirrored remotely at `/config.agent.__codewalk.options.codewalk.sessionSelections`
+- Remote session override merges use per-session `updatedAt` timestamp precedence to reduce cross-device clobbering
 - Recent-model preference restoration keeps mutable lists for model-usage updates, avoiding fixed-length list mutation crashes during send setup
 - Handles transient errors and stale subscription generation guards
 
