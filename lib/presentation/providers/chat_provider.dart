@@ -343,7 +343,6 @@ class ChatProvider extends ChangeNotifier {
   static const int _maxRecentModels = 8;
   static const Duration _abortSuppressionWindow = Duration(seconds: 8);
   static const Duration _remoteSelectionSyncThrottle = Duration(seconds: 2);
-  static const Duration _maxRemoteSelectionDefer = Duration(seconds: 12);
   static const String _configCodewalkNamespace = 'codewalk';
   static const String _configVariantByModelKey = 'variantByModel';
   static const String _configSessionSelectionsKey = 'sessionSelections';
@@ -402,14 +401,34 @@ class ChatProvider extends ChangeNotifier {
         hasInProgressAssistant;
   }
 
+  bool get _hasLocalActiveSelectionSyncWork {
+    final hasInProgressAssistant = _messages.whereType<AssistantMessage>().any(
+      (message) => !message.isCompleted,
+    );
+    return _state == ChatState.sending ||
+        _isAbortingResponse ||
+        _messageSubscription != null ||
+        hasInProgressAssistant;
+  }
+
   bool get _shouldDeferRemoteSelectionSync {
-    if (_isAbortingResponse || _currentSession == null) {
+    if (_currentSession == null) {
       return false;
+    }
+    if (_hasLocalActiveSelectionSyncWork) {
+      return true;
     }
     final status = currentSessionStatus?.type;
     final hasBusyStatus =
         status == SessionStatusType.busy || status == SessionStatusType.retry;
-    return _state == ChatState.sending || hasBusyStatus;
+    return hasBusyStatus;
+  }
+
+  bool get _canFlushPendingRemoteSelectionSync {
+    if (_currentSession == null) {
+      return true;
+    }
+    return !_hasLocalActiveSelectionSyncWork;
   }
 
   List<ChatSession> get visibleSessions {
@@ -808,7 +827,7 @@ class ChatProvider extends ChangeNotifier {
     if (client == null || (_providers.isEmpty && _agents.isEmpty)) {
       return;
     }
-    if (_pendingRemoteSelectionSync && _shouldDeferRemoteSelectionSync) {
+    if (_pendingRemoteSelectionSync && !_canFlushPendingRemoteSelectionSync) {
       return;
     }
     if (_remoteSelectionSyncInFlight) {
@@ -876,13 +895,32 @@ class ChatProvider extends ChangeNotifier {
 
     final normalizedRemoteValue = remoteVariantValue.trim();
     String? nextVariantId;
-    if (normalizedRemoteValue == _remoteAutoVariantValue) {
+    final normalizedForCompare = normalizedRemoteValue.toLowerCase();
+    if (normalizedForCompare == _remoteAutoVariantValue) {
       nextVariantId = null;
     } else {
-      if (!model.variants.containsKey(normalizedRemoteValue)) {
-        return false;
+      if (model.variants.containsKey(normalizedRemoteValue)) {
+        nextVariantId = normalizedRemoteValue;
+      } else {
+        final byCaseInsensitiveKey = model.variants.entries
+            .where((entry) => entry.key.toLowerCase() == normalizedForCompare)
+            .firstOrNull;
+        if (byCaseInsensitiveKey != null) {
+          nextVariantId = byCaseInsensitiveKey.key;
+        } else {
+          final byName = model.variants.entries
+              .where(
+                (entry) =>
+                    entry.value.name.trim().toLowerCase() ==
+                    normalizedForCompare,
+              )
+              .firstOrNull;
+          if (byName == null) {
+            return false;
+          }
+          nextVariantId = byName.key;
+        }
       }
-      nextVariantId = normalizedRemoteValue;
     }
 
     if (_selectedVariantId == nextVariantId) {
@@ -1138,16 +1176,18 @@ class ChatProvider extends ChangeNotifier {
     if (!_pendingRemoteSelectionSync) {
       return;
     }
-    final pendingSince = _pendingRemoteSelectionSyncSince;
-    final hasTimedOut =
-        pendingSince != null &&
-        DateTime.now().difference(pendingSince) >= _maxRemoteSelectionDefer;
-    if (_shouldDeferRemoteSelectionSync && !hasTimedOut) {
+    if (!_canFlushPendingRemoteSelectionSync) {
       return;
     }
+    final pendingSince = _pendingRemoteSelectionSyncSince;
+    final waitMs = pendingSince == null
+        ? 0
+        : DateTime.now().difference(pendingSince).inMilliseconds;
     _pendingRemoteSelectionSync = false;
     _pendingRemoteSelectionSyncSince = null;
-    AppLogger.info('Flushing deferred remote selection sync reason=$reason');
+    AppLogger.info(
+      'Flushing deferred remote selection sync reason=$reason wait_ms=$waitMs',
+    );
     unawaited(_syncSelectionToRemoteConfig());
   }
 
@@ -4707,6 +4747,7 @@ class ChatProvider extends ChangeNotifier {
                 );
                 return;
               }
+              _messageSubscription = null;
               AppLogger.error('Provider send stream error', error: error);
               _setError('Failed to send message: $error');
             },
@@ -4717,6 +4758,7 @@ class ChatProvider extends ChangeNotifier {
                 );
                 return;
               }
+              _messageSubscription = null;
               AppLogger.info('Provider send stream finished');
               _setState(ChatState.loaded);
               unawaited(_persistLastSessionSnapshotBestEffort());

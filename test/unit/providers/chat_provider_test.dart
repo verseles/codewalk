@@ -99,7 +99,10 @@ void main() {
     late InMemoryAppLocalDataSource localDataSource;
     late ChatProvider provider;
 
-    ChatProvider buildProvider({DioClient? dioClient}) {
+    ChatProvider buildProvider({
+      DioClient? dioClient,
+      Duration syncHealthCheckInterval = const Duration(seconds: 5),
+    }) {
       return ChatProvider(
         sendChatMessage: SendChatMessage(chatRepository),
         abortChatSession: AbortChatSession(chatRepository),
@@ -131,6 +134,7 @@ void main() {
         ),
         localDataSource: localDataSource,
         dioClient: dioClient,
+        syncHealthCheckInterval: syncHealthCheckInterval,
       );
     }
 
@@ -419,6 +423,62 @@ void main() {
       },
     );
 
+    test(
+      'initializeProviders resolves remote variant value case-insensitively',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': _model(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'low': ModelVariant(id: 'low', name: 'Low'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{
+            'model': 'provider_a/model_reasoning',
+            'default_agent': 'build',
+            'agent': <String, dynamic>{
+              'build': <String, dynamic>{
+                'options': <String, dynamic>{
+                  'codewalk': <String, dynamic>{
+                    'variantByModel': <String, String>{
+                      'provider_a/model_reasoning': 'HIGH',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedVariantId, 'high');
+      },
+    );
+
     test('setSelectedVariant syncs variant map to server config', () async {
       appRepository.providersResult = Right(
         ProvidersResponse(
@@ -474,6 +534,197 @@ void main() {
       final variantByModel = codewalk['variantByModel'] as Map<String, dynamic>;
 
       expect(variantByModel['provider_a/model_reasoning'], 'high');
+    });
+
+    test(
+      'deferred variant sync flushes on health tick when local work is idle',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': _model(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'low': ModelVariant(id: 'low', name: 'Low'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{
+            'model': 'provider_a/model_reasoning',
+            'default_agent': 'build',
+          },
+        );
+        provider = buildProvider(
+          dioClient: dioClient,
+          syncHealthCheckInterval: const Duration(milliseconds: 50),
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        dioClient.patchBodies.clear();
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'busy'},
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+
+        await provider.setSelectedVariant('high');
+
+        final hasImmediateVariantPatch = dioClient.patchBodies
+            .whereType<Map<String, dynamic>>()
+            .any((body) {
+              final agent = body['agent'];
+              if (agent is! Map<String, dynamic>) {
+                return false;
+              }
+              final build = agent['build'];
+              if (build is! Map<String, dynamic>) {
+                return false;
+              }
+              final options = build['options'];
+              if (options is! Map<String, dynamic>) {
+                return false;
+              }
+              final codewalk = options['codewalk'];
+              if (codewalk is! Map<String, dynamic>) {
+                return false;
+              }
+              final variantByModel = codewalk['variantByModel'];
+              return variantByModel is Map<String, dynamic> &&
+                  variantByModel['provider_a/model_reasoning'] == 'high';
+            });
+        expect(hasImmediateVariantPatch, isFalse);
+
+        await Future<void>.delayed(const Duration(milliseconds: 180));
+
+        final hasFlushedVariantPatch = dioClient.patchBodies
+            .whereType<Map<String, dynamic>>()
+            .any((body) {
+              final agent = body['agent'];
+              if (agent is! Map<String, dynamic>) {
+                return false;
+              }
+              final build = agent['build'];
+              if (build is! Map<String, dynamic>) {
+                return false;
+              }
+              final options = build['options'];
+              if (options is! Map<String, dynamic>) {
+                return false;
+              }
+              final codewalk = options['codewalk'];
+              if (codewalk is! Map<String, dynamic>) {
+                return false;
+              }
+              final variantByModel = codewalk['variantByModel'];
+              return variantByModel is Map<String, dynamic> &&
+                  variantByModel['provider_a/model_reasoning'] == 'high';
+            });
+        expect(hasFlushedVariantPatch, isTrue);
+      },
+    );
+
+    test('variant sync is not blocked after a completed send stream', () async {
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_reasoning': _model(
+                  'model_reasoning',
+                  variants: const <String, ModelVariant>{
+                    'low': ModelVariant(id: 'low', name: 'Low'),
+                    'high': ModelVariant(id: 'high', name: 'High'),
+                  },
+                ),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{
+            'provider_a': 'model_reasoning',
+          },
+          connected: const <String>['provider_a'],
+        ),
+      );
+      appRepository.agentsResult = const Right(<Agent>[
+        Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+      ]);
+
+      final dioClient = _RecordingDioClient(
+        configResponse: <String, dynamic>{
+          'model': 'provider_a/model_reasoning',
+          'default_agent': 'build',
+        },
+      );
+      provider = buildProvider(
+        dioClient: dioClient,
+        syncHealthCheckInterval: const Duration(milliseconds: 50),
+      );
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+
+      await provider.sendMessage('first send');
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      dioClient.patchBodies.clear();
+
+      await provider.setSelectedVariant('high');
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+
+      final hasVariantPatch = dioClient.patchBodies
+          .whereType<Map<String, dynamic>>()
+          .any((body) {
+            final agent = body['agent'];
+            if (agent is! Map<String, dynamic>) {
+              return false;
+            }
+            final build = agent['build'];
+            if (build is! Map<String, dynamic>) {
+              return false;
+            }
+            final options = build['options'];
+            if (options is! Map<String, dynamic>) {
+              return false;
+            }
+            final codewalk = options['codewalk'];
+            if (codewalk is! Map<String, dynamic>) {
+              return false;
+            }
+            final variantByModel = codewalk['variantByModel'];
+            return variantByModel is Map<String, dynamic> &&
+                variantByModel['provider_a/model_reasoning'] == 'high';
+          });
+      expect(hasVariantPatch, isTrue);
     });
 
     test(
