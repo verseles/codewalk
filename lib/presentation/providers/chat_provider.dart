@@ -902,24 +902,13 @@ class ChatProvider extends ChangeNotifier {
       if (model.variants.containsKey(normalizedRemoteValue)) {
         nextVariantId = normalizedRemoteValue;
       } else {
-        final byCaseInsensitiveKey = model.variants.entries
+        final caseInsensitiveMatches = model.variants.entries
             .where((entry) => entry.key.toLowerCase() == normalizedForCompare)
-            .firstOrNull;
-        if (byCaseInsensitiveKey != null) {
-          nextVariantId = byCaseInsensitiveKey.key;
-        } else {
-          final byName = model.variants.entries
-              .where(
-                (entry) =>
-                    entry.value.name.trim().toLowerCase() ==
-                    normalizedForCompare,
-              )
-              .firstOrNull;
-          if (byName == null) {
-            return false;
-          }
-          nextVariantId = byName.key;
+            .toList(growable: false);
+        if (caseInsensitiveMatches.length != 1) {
+          return false;
         }
+        nextVariantId = caseInsensitiveMatches.first.key;
       }
     }
 

@@ -479,6 +479,68 @@ void main() {
       },
     );
 
+    test(
+      'initializeProviders ignores remote variant display names and expects canonical id',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': _model(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'reasoning_low': ModelVariant(
+                        id: 'reasoning_low',
+                        name: 'Low',
+                      ),
+                      'reasoning_high': ModelVariant(
+                        id: 'reasoning_high',
+                        name: 'High',
+                      ),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(name: 'build', mode: 'primary', hidden: false, native: false),
+        ]);
+
+        final dioClient = _RecordingDioClient(
+          configResponse: <String, dynamic>{
+            'model': 'provider_a/model_reasoning',
+            'default_agent': 'build',
+            'agent': <String, dynamic>{
+              'build': <String, dynamic>{
+                'options': <String, dynamic>{
+                  'codewalk': <String, dynamic>{
+                    'variantByModel': <String, String>{
+                      'provider_a/model_reasoning': 'High',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        );
+        provider = buildProvider(dioClient: dioClient);
+
+        await provider.initializeProviders();
+
+        expect(provider.selectedVariantId, isNull);
+      },
+    );
+
     test('setSelectedVariant syncs variant map to server config', () async {
       appRepository.providersResult = Right(
         ProvidersResponse(
