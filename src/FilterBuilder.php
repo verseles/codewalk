@@ -12,10 +12,10 @@ namespace Verseles\Flyclone;
  */
 class FilterBuilder
 {
-    /** @var array Include patterns */
+    /** @var array<int, string> Include patterns */
     private array $includes = [];
 
-    /** @var array Exclude patterns */
+    /** @var array<int, string> Exclude patterns */
     private array $excludes = [];
 
     /** @var int|null Minimum file size in bytes */
@@ -56,7 +56,7 @@ class FilterBuilder
     /**
      * Add multiple include patterns.
      *
-     * @param array $patterns Array of glob patterns
+     * @param array<int, string> $patterns Array of glob patterns
      */
     public function includeMany(array $patterns): self
     {
@@ -82,7 +82,7 @@ class FilterBuilder
     /**
      * Add multiple exclude patterns.
      *
-     * @param array $patterns Array of glob patterns
+     * @param array<int, string> $patterns Array of glob patterns
      */
     public function excludeMany(array $patterns): self
     {
@@ -96,7 +96,7 @@ class FilterBuilder
     /**
      * Include only files with specific extensions.
      *
-     * @param string|array $extensions Extension(s) without dot (e.g., "jpg", ["jpg", "png"])
+     * @param string|array<int, string> $extensions Extension(s) without dot (e.g., "jpg", ["jpg", "png"])
      */
     public function extensions(string|array $extensions): self
     {
@@ -197,7 +197,7 @@ class FilterBuilder
     /**
      * Convert the filter to rclone flags array.
      *
-     * @return array Flags to be merged with operation flags
+     * @return array<string, mixed> Flags to be merged with operation flags
      */
     public function toFlags(): array
     {
@@ -240,7 +240,7 @@ class FilterBuilder
     /**
      * Convert to command line arguments.
      *
-     * @return array Command line arguments
+     * @return array<int, string> Command line arguments
      */
     public function toArgs(): array
     {

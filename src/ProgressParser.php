@@ -18,6 +18,7 @@ class ProgressParser
     /** @var string Buffer for incomplete lines */
     private string $lineBuffer = '';
 
+    /** @var array<string, mixed> Default progress values */
     private static array $defaultProgress = [
         'raw' => '',
         'dataSent' => '0 B',
@@ -135,6 +136,8 @@ class ProgressParser
 
     /**
      * Get progress as array for easier manipulation.
+     *
+     * @return array<string, mixed>
      */
     public function getProgressArray(): array
     {

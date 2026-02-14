@@ -203,6 +203,8 @@ class RetryHandler
 
     /**
      * Get current configuration as array.
+     *
+     * @return array<string, mixed>
      */
     public function getConfig(): array
     {

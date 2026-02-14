@@ -10,6 +10,9 @@ class S3Provider extends Provider
 
     protected bool   $dirAgnostic = true;
 
+    /**
+     * @param array<string, mixed> $flags
+     */
     public function __construct(string $name, array $flags = [])
     {
         parent::__construct($this->provider, $name, $flags);

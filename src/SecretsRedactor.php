@@ -66,7 +66,7 @@ class SecretsRedactor
      * Redact sensitive information from a message.
      *
      * @param string $message The message that may contain secrets.
-     * @param array  $knownSecrets Additional secrets to redact (values from provider config).
+     * @param array<int, string> $knownSecrets Additional secrets to redact (values from provider config).
      *
      * @return string The message with secrets replaced by [REDACTED].
      */
@@ -90,6 +90,8 @@ class SecretsRedactor
 
     /**
      * Redact known secret values from the message.
+     *
+     * @param array<int, string> $secrets
      */
     private static function redactKnownSecrets(string $message, array $secrets): string
     {
@@ -141,9 +143,9 @@ class SecretsRedactor
     /**
      * Extract secrets from provider configuration for targeted redaction.
      *
-     * @param array $providerFlags The flags array from a Provider.
+     * @param array<string, mixed> $providerFlags The flags array from a Provider.
      *
-     * @return array List of secret values that should be redacted.
+     * @return array<int, string> List of secret values that should be redacted.
      */
     public static function extractSecretsFromFlags(array $providerFlags): array
     {

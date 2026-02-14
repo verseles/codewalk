@@ -13,6 +13,9 @@ class UnionProvider extends Provider
     /** @var Provider[] */
     protected array $upstreamProviders = [];
 
+    /**
+     * @param array<string, mixed> $flags
+     */
     public function __construct(string $name, array $flags = [])
     {
         if (isset($flags['upstream_providers'])) {
@@ -28,6 +31,9 @@ class UnionProvider extends Provider
         parent::__construct($this->provider, $name, $flags);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function flags(): array
     {
         $allFlags = parent::flags();

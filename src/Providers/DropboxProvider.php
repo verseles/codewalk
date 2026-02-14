@@ -8,6 +8,9 @@ class DropboxProvider extends Provider
 {
     protected string $provider = 'dropbox';
 
+    /**
+     * @param array<string, mixed> $flags
+     */
     public function __construct(string $name, array $flags = [])
     {
         parent::__construct($this->provider, $name, $flags);

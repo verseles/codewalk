@@ -8,6 +8,10 @@ use Verseles\Flyclone\Providers\Provider;
 
 class CommandBuilder
 {
+    /**
+     * @param array<string, mixed> $arr
+     * @return array<string, string>
+     */
     public static function prefixFlags(array $arr, string $prefix = 'RCLONE_'): array
     {
         $newArr = [];
@@ -31,6 +35,12 @@ class CommandBuilder
         return $newArr;
     }
 
+    /**
+     * @param array<string, mixed> $globalFlags
+     * @param array<string, mixed> $globalEnvs
+     * @param array<string, mixed> $operationFlags
+     * @return array<string, string>
+     */
     public static function buildEnvironment(
         Provider $leftSide,
         Provider $rightSide,
@@ -51,6 +61,10 @@ class CommandBuilder
         return $envVars;
     }
 
+    /**
+     * @param array<int, string> $args
+     * @return array<int, string>
+     */
     public static function buildCommandArgs(string $binary, string $command, array $args = []): array
     {
         return array_merge([$binary, $command], $args);

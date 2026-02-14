@@ -11,6 +11,9 @@ namespace Verseles\Flyclone\Providers;
  */
 class Provider extends AbstractProvider
 {
+    /**
+     * @param array<string, mixed> $flags
+     */
     protected function __construct(string $provider, string $name, array $flags = [])
     {
         $this->provider = $provider;

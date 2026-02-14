@@ -12,6 +12,9 @@ class CryptProvider extends Provider
 
     protected Provider $wrappedProvider;
 
+    /**
+     * @param array<string, mixed> $flags
+     */
     public function __construct(string $name, array $flags = [])
     {
         if (! isset($flags['remote']) || ! $flags['remote'] instanceof Provider) {
@@ -26,6 +29,9 @@ class CryptProvider extends Provider
         parent::__construct($this->provider, $name, $flags);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function flags(): array
     {
         $cryptFlags = parent::flags();

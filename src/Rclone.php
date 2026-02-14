@@ -22,8 +22,10 @@ class Rclone
     private ProcessManager $processManager;
 
     // Static configuration - delegated to ProcessManager but kept for backward compatibility
+    /** @var array<string, mixed> */
     private static array  $flags = [];
 
+    /** @var array<string, string> */
     private static array  $envs = [];
 
     /** @var RetryHandler|null Retry handler for transient failures */
@@ -188,6 +190,8 @@ class Rclone
     /**
      * Get the last environment variables (for debugging).
      * Sensitive values are redacted.
+     *
+     * @return array<string, string>
      */
     public function getLastEnvs(): array
     {
@@ -237,7 +241,7 @@ class Rclone
     /**
      * Gets the globally set rclone flags.
      *
-     * @return array Array of flags.
+     * @return array<string, mixed> Array of flags.
      */
     public static function getFlags(): array
     {
@@ -248,7 +252,7 @@ class Rclone
      * Sets global rclone flags. These flags are applied to most rclone commands.
      * Example: ['retries' => 3, 'verbose' => true]
      *
-     * @param array $flags Array of flags. Boolean true will be converted to "true", false to "false".
+     * @param array<string, mixed> $flags Array of flags. Boolean true will be converted to "true", false to "false".
      */
     public static function setFlags(array $flags): void
     {
@@ -258,7 +262,7 @@ class Rclone
     /**
      * Gets the custom environment variables.
      *
-     * @return array Array of environment variables.
+     * @return array<string, string> Array of environment variables.
      */
     public static function getEnvs(): array
     {
@@ -268,7 +272,7 @@ class Rclone
     /**
      * Sets custom environment variables, typically used for rclone parameters.
      *
-     * @param array $envs Array of environment variables. Boolean true will be converted to "true", false to "false".
+     * @param array<string, string> $envs Array of environment variables. Boolean true will be converted to "true", false to "false".
      */
     public static function setEnvs(array $envs): void
     {
@@ -358,10 +362,10 @@ class Rclone
     /**
      * Prefixes array keys for rclone environment variables and transforms them.
      *
-     * @param array  $arr    The input array of flags or parameters.
+     * @param array<string, mixed> $arr    The input array of flags or parameters.
      * @param string $prefix The prefix to apply (e.g., 'RCLONE_', 'RCLONE_CONFIG_MYREMOTE_').
      *
-     * @return array The processed array with prefixed keys and string-cast values.
+     * @return array<string, string> The processed array with prefixed keys and string-cast values.
      */
     public static function prefix_flags(array $arr, string $prefix = 'RCLONE_'): array
     {
@@ -371,9 +375,9 @@ class Rclone
     /**
      * Consolidates all environment variables for the rclone process.
      *
-     * @param array $additional_operation_flags Flags specific to the current rclone operation.
+     * @param array<string, mixed> $additional_operation_flags Flags specific to the current rclone operation.
      *
-     * @return array An array of environment variables to be passed to Symfony Process.
+     * @return array<string, string> An array of environment variables to be passed to Symfony Process.
      */
     private function allEnvs(array $additional_operation_flags = []): array
     {
@@ -402,8 +406,8 @@ class Rclone
      * Centralized method to prepare and execute an rclone command.
      *
      * @param string        $command         The rclone command (e.g., 'lsjson', 'copy').
-     * @param array         $args            Arguments for the command.
-     * @param array         $operation_flags Additional operation flags.
+     * @param array<int, string> $args       Arguments for the command.
+     * @param array<string, mixed> $operation_flags Additional operation flags.
      * @param callable|null $onProgress      Optional progress callback.
      * @param int|null      $timeout         Optional per-operation timeout in seconds.
      *
@@ -461,8 +465,8 @@ class Rclone
      * Executes a simple rclone command that returns a string output.
      *
      * @param string        $command         The rclone command (e.g., 'lsjson').
-     * @param array         $args            Arguments for the command.
-     * @param array         $operation_flags Additional operation flags.
+     * @param array<int, string> $args       Arguments for the command.
+     * @param array<string, mixed> $operation_flags Additional operation flags.
      * @param callable|null $onProgress      Optional progress callback.
      *
      * @return string The trimmed standard output.
@@ -478,8 +482,8 @@ class Rclone
      * Executes an rclone command that performs a transfer and returns statistics.
      *
      * @param string        $command         The rclone command (e.g., 'copy', 'sync').
-     * @param array         $args            Arguments for the command (source, destination).
-     * @param array         $operation_flags Additional operation flags.
+     * @param array<int, string> $args       Arguments for the command (source, destination).
+     * @param array<string, mixed> $operation_flags Additional operation flags.
      * @param callable|null $onProgress      Optional progress callback.
      *
      * @return object An object containing the success status and transfer statistics.
@@ -518,7 +522,7 @@ class Rclone
      *
      * @param string        $command    The rclone command.
      * @param string|null   $path       The path on the left-side provider.
-     * @param array         $flags      Additional flags for the operation.
+     * @param array<string, mixed> $flags Additional flags for the operation.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return string The output of the command.
@@ -536,7 +540,7 @@ class Rclone
      * @param string        $command    The rclone command.
      * @param string|null   $left_path  Path on the left-side provider.
      * @param string|null   $right_path Path on the right-side provider.
-     * @param array         $flags      Additional flags for the operation.
+     * @param array<string, mixed> $flags Additional flags for the operation.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return string The output of the command.
@@ -618,9 +622,9 @@ class Rclone
      * Lists objects at the source path. (rclone lsjson)
      *
      * @param string $path  Path to list.
-     * @param array  $flags Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
-     * @return array Array of objects, each representing a file or directory.
+     * @return array<int, \stdClass> Array of objects, each representing a file or directory.
      * @throws JsonException If JSON decoding fails.
      */
     public function ls(string $path, array $flags = []): array
@@ -714,7 +718,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_touch/
      *
      * @param string        $path       Path to touch.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return bool True on success.
@@ -732,7 +736,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_mkdir/
      *
      * @param string        $path       Path to create.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return bool True on success.
@@ -750,7 +754,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_rmdir/
      *
      * @param string        $path       Path to remove.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return bool True on success.
@@ -768,7 +772,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_rmdirs/
      *
      * @param string        $path       Root path to search for empty directories.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return bool True on success.
@@ -786,7 +790,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_purge/
      *
      * @param string        $path       Path to purge.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -802,7 +806,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_delete/
      *
      * @param string|null   $path       Path containing files to delete.
-     * @param array         $flags      Additional flags (e.g. --include, --exclude).
+     * @param array<string, mixed> $flags Additional flags (e.g. --include, --exclude).
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -818,7 +822,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_deletefile/
      *
      * @param string        $path       Path to the file to delete.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -832,7 +836,7 @@ class Rclone
      * Prints the total size and number of objects in remote:path. (rclone size)
      *
      * @param string|null   $path       Path to get size of.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return object Object with 'count' and 'bytes' properties.
@@ -852,7 +856,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_cat/
      *
      * @param string        $path       Path to the file.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return string The file content.
@@ -869,7 +873,7 @@ class Rclone
      *
      * @param string        $path       Destination path on remote.
      * @param string        $input      Content to send.
-     * @param array         $flags      Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -886,7 +890,7 @@ class Rclone
      *
      * @param string        $local_path  Path to the local file.
      * @param string        $remote_path Destination path on the remote.
-     * @param array         $flags       Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress  Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -903,7 +907,7 @@ class Rclone
      *
      * @param string    $remote_path            The path of the file on the remote server.
      * @param ?string   $local_destination_path The local path where the file should be saved.
-     * @param array     $flags                  Additional flags for the download operation.
+     * @param array<string, mixed> $flags       Additional flags for the download operation.
      * @param ?callable $onProgress             A callback function to track download progress.
      *
      * @return object The result object from the copy operation, with an added `local_path` property on success.
@@ -952,7 +956,7 @@ class Rclone
      *
      * @param string        $source_path   Source path (file or directory).
      * @param string        $dest_DIR_path Destination directory path.
-     * @param array         $flags         Additional flags.
+     * @param array<string, mixed> $flags  Additional flags.
      * @param callable|null $onProgress    Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -969,7 +973,7 @@ class Rclone
      *
      * @param string        $source_path Source file or directory path.
      * @param string        $dest_path   Destination file or directory path.
-     * @param array         $flags       Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress  Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -986,7 +990,7 @@ class Rclone
      *
      * @param string        $source_path   Source path (file or directory).
      * @param string        $dest_DIR_path Destination directory path.
-     * @param array         $flags         Additional flags.
+     * @param array<string, mixed> $flags  Additional flags.
      * @param callable|null $onProgress    Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -1003,7 +1007,7 @@ class Rclone
      *
      * @param string        $source_path Source file or directory path.
      * @param string        $dest_path   Destination file or directory path.
-     * @param array         $flags       Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress  Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -1020,7 +1024,7 @@ class Rclone
      *
      * @param string        $source_path Source directory path.
      * @param string        $dest_path   Destination directory path.
-     * @param array         $flags       Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress  Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -1037,7 +1041,7 @@ class Rclone
      *
      * @param string        $source_path Source directory path.
      * @param string        $dest_path   Destination directory path.
-     * @param array         $flags       Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      * @param callable|null $onProgress  Optional progress callback.
      *
      * @return bool True if check succeeds.
@@ -1055,7 +1059,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_about/
      *
      * @param string|null $path  Path on the provider.
-     * @param array       $flags Additional flags for the operation.
+     * @param array<string, mixed> $flags Additional flags for the operation.
      *
      * @return object An object with quota details.
      * @throws JsonException
@@ -1074,7 +1078,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_tree/
      *
      * @param string|null $path  The root path to list from.
-     * @param array       $flags Additional rclone flags.
+     * @param array<string, mixed> $flags Additional rclone flags.
      *
      * @return string The tree structure as a string.
      */
@@ -1090,7 +1094,7 @@ class Rclone
      *
      * @param string $path  The path to check for duplicates.
      * @param string $mode  Deduplication strategy.
-     * @param array  $flags Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
      * @return object Object with 'success' status and 'stats' from the operation.
      */
@@ -1107,7 +1111,7 @@ class Rclone
      * @see https://rclone.org/commands/rclone_cleanup/
      *
      * @param string|null $path  The path to clean up.
-     * @param array       $flags Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
      * @return object Object with 'success' status and 'stats'.
      */
@@ -1123,8 +1127,8 @@ class Rclone
      *
      * @param string      $command   The backend command to run.
      * @param string|null $path      The remote path for the command.
-     * @param array       $options   Associative array of options.
-     * @param array       $arguments Positional arguments for the command.
+     * @param array<string, mixed> $options Associative array of options.
+     * @param array<int, string> $arguments Positional arguments for the command.
      *
      * @return string The raw output from the command.
      */
@@ -1157,9 +1161,9 @@ class Rclone
      *
      * @see https://rclone.org/commands/rclone_listremotes/
      *
-     * @param array $flags Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
-     * @return array List of remote names (without the trailing colon).
+     * @return array<int, string> List of remote names (without the trailing colon).
      */
     public static function listRemotes(array $flags = []): array
     {
@@ -1224,7 +1228,7 @@ class Rclone
      *
      * @param string        $path1      First path (source or destination).
      * @param string        $path2      Second path (source or destination).
-     * @param array         $flags      Additional flags (e.g., 'resync' => true for initial sync).
+     * @param array<string, mixed> $flags Additional flags (e.g., 'resync' => true for initial sync).
      * @param callable|null $onProgress Optional progress callback.
      *
      * @return object Object with 'success' status and 'stats'.
@@ -1246,9 +1250,9 @@ class Rclone
      *
      * @param string      $hashAlgorithm The hash algorithm to use (e.g., 'md5', 'sha1', 'dropbox').
      * @param string|null $path          Path to checksum.
-     * @param array       $flags         Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
-     * @return array Associative array of [path => hash].
+     * @return array<string, string> Associative array of [path => hash].
      */
     public function hashsum(string $hashAlgorithm, ?string $path = null, array $flags = []): array
     {
@@ -1279,9 +1283,9 @@ class Rclone
      * @see https://rclone.org/commands/rclone_md5sum/
      *
      * @param string|null $path  Path to checksum.
-     * @param array       $flags Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
-     * @return array Associative array of [path => md5hash].
+     * @return array<string, string> Associative array of [path => md5hash].
      */
     public function md5sum(?string $path = null, array $flags = []): array
     {
@@ -1294,9 +1298,9 @@ class Rclone
      * @see https://rclone.org/commands/rclone_sha1sum/
      *
      * @param string|null $path  Path to checksum.
-     * @param array       $flags Additional flags.
+     * @param array<string, mixed> $flags Additional flags.
      *
-     * @return array Associative array of [path => sha1hash].
+     * @return array<string, string> Associative array of [path => sha1hash].
      */
     public function sha1sum(?string $path = null, array $flags = []): array
     {
