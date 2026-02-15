@@ -32,6 +32,8 @@ class ProcessManager
 
     private static string $input = '';
 
+    private static ?ExecutableFinder $executableFinder = null;
+
     /** @var array Secrets to redact from error messages */
     private array $secrets = [];
 
@@ -81,14 +83,19 @@ class ProcessManager
         self::$bin = $bin;
     }
 
+    public static function setExecutableFinder(?ExecutableFinder $executableFinder): void
+    {
+        self::$executableFinder = $executableFinder;
+    }
+
     public static function guessBin(): string
     {
         if (isset(self::$bin) && self::$bin !== '') {
             return self::$bin;
         }
 
-        $finder = new ExecutableFinder();
-        $rclonePath = $finder->find('rclone', '/usr/bin/rclone', [
+        $finder = self::$executableFinder ?? new ExecutableFinder();
+        $rclonePath = $finder->find('rclone', null, [
             '/usr/local/bin',
             '/usr/bin',
             '/bin',
