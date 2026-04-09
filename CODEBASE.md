@@ -6,7 +6,7 @@
 - Architecture follows `presentation -> domain -> data` with `get_it` + `provider`.
 - Multi-platform targets in repo: Android, Linux, macOS, Windows, Web.
 - Chat stack is decomposed into orchestrators plus focused cluster modules.
-- Material icon migration in UI/tests is mostly on `Symbols.*` (`material_symbols_icons`), with a small remaining `Icons.*` usage in notifications settings UI.
+- Material icon migration in UI is complete on `Symbols.*` (`material_symbols_icons`).
 - Theme system follows Material You (MD3): user-controlled theme mode, dynamic color toggle, AMOLED dark toggle, brand color seeds, contrast level, and responsive window size classes.
 
 ## Folder Structure

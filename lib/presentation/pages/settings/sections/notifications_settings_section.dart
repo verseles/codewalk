@@ -341,9 +341,9 @@ class _NotificationsSettingsSectionState
       null => Theme.of(context).colorScheme.onSurfaceVariant,
     };
     final statusIcon = switch (status) {
-      true => Icons.check_circle_outline,
-      false => Icons.warning_amber_rounded,
-      null => Icons.help_outline,
+      true => Symbols.check_circle,
+      false => Symbols.warning,
+      null => Symbols.help,
     };
     final statusText = switch (status) {
       true => 'Battery optimization is disabled for CodeWalk.',

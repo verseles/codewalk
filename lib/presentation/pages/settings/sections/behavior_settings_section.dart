@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_constants.dart';
@@ -160,7 +161,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection> {
                       : () => unawaited(
                           settingsProvider.refreshOpenCodeBackedDefaults(),
                         ),
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Symbols.refresh),
                 ),
               ],
             ),
@@ -277,7 +278,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection> {
                   onPressed: settingsProvider.openCodeDefaultsLoading
                       ? null
                       : () => unawaited(_applyUsername(context)),
-                  icon: const Icon(Icons.save),
+                  icon: const Icon(Symbols.save),
                   label: const Text('Save username'),
                 ),
               ),
