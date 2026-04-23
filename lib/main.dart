@@ -3,14 +3,16 @@ import 'dart:async';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/constants/app_constants.dart';
-import 'domain/entities/experience_settings.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/logging/app_logger.dart';
+import 'domain/entities/experience_settings.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'presentation/pages/app_shell_page.dart';
 import 'presentation/providers/app_provider.dart';
 import 'presentation/providers/chat_provider.dart';
@@ -22,37 +24,32 @@ import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/opencode_theme_presets.dart';
 
 void main() {
-  runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      AppLogger.installGlobalHandlers();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    AppLogger.installGlobalHandlers();
 
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
-          systemNavigationBarDividerColor: Colors.transparent,
-        ),
-      );
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+      ),
+    );
 
-      if (_isDesktopRuntime()) {
-        await windowManager.ensureInitialized();
-      }
+    if (_isDesktopRuntime()) {
+      await windowManager.ensureInitialized();
+    }
 
-      if (_isAndroidRuntime()) {
-        await AndroidBackgroundAlertWorker.syncRegistrationFromPersistedSettings();
-      }
+    if (_isAndroidRuntime()) {
+      await AndroidBackgroundAlertWorker.syncRegistrationFromPersistedSettings();
+    }
 
-      // Initialize dependency injection
-      await di.init();
+    // Initialize dependency injection
+    await di.init();
 
-      runApp(const MyApp());
-    },
-    (error, stackTrace) {
-      AppLogger.recordZoneError(error, stackTrace);
-    },
-  );
+    runApp(const MyApp());
+  }, AppLogger.recordZoneError);
 }
 
 class MyApp extends StatelessWidget {
@@ -119,7 +116,7 @@ class MyApp extends StatelessWidget {
 
               // Use dynamic platform colors when available and enabled
               final lightScheme = usePresetSchemes
-                  ? presetLightScheme!
+                  ? presetLightScheme
                   : useDynamic && lightDynamic != null
                   ? lightDynamic
                   : ColorScheme.fromSeed(
@@ -128,7 +125,7 @@ class MyApp extends StatelessWidget {
                       contrastLevel: contrastLevel,
                     );
               final darkScheme = usePresetSchemes
-                  ? presetDarkScheme!
+                  ? presetDarkScheme
                   : useDynamic && darkDynamic != null
                   ? darkDynamic
                   : ColorScheme.fromSeed(
@@ -158,6 +155,14 @@ class MyApp extends StatelessWidget {
               };
               return MaterialApp(
                 title: AppConstants.appName,
+                locale: settingsProvider.preferredLocale,
+                localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
                 theme: AppTheme.lightFrom(
                   lightScheme,
                   appDensity: appDensity,
