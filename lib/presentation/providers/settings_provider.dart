@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,6 +15,7 @@ import '../../data/datasources/app_local_datasource.dart';
 import '../../data/models/agent_model.dart';
 import '../../data/models/provider_model.dart';
 import '../../domain/entities/experience_settings.dart';
+import '../../l10n/l10n.dart';
 import '../services/android_background_alert_logic.dart';
 import '../services/android_background_alert_worker.dart';
 import '../services/android_foreground_monitor_service.dart';
@@ -139,6 +141,8 @@ class SettingsProvider extends ChangeNotifier {
   List<String> get openCodeDefaultAgentOptions =>
       List<String>.unmodifiable(_openCodeDefaultAgentOptions);
   ThemeModeOption get themeMode => _settings.themeMode;
+  String? get preferredLocaleTag => _settings.preferredLocaleTag;
+  Locale? get preferredLocale => appLocaleFromTag(_settings.preferredLocaleTag);
   bool get useAmoledDark => _settings.useAmoledDark;
   bool get useDynamicColor => _settings.useDynamicColor;
   int? get customColorSeed => _settings.customColorSeed;
@@ -440,6 +444,19 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(themeMode: mode);
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setPreferredLocaleTag(String? localeTag) async {
+    final normalizedTag = localeTag?.trim();
+    final nextTag = (normalizedTag == null || normalizedTag.isEmpty)
+        ? null
+        : appLocaleToTag(appLocaleFromTag(normalizedTag));
+    if (_settings.preferredLocaleTag == nextTag) {
+      return;
+    }
+    _settings = _settings.copyWith(preferredLocaleTag: () => nextTag);
     notifyListeners();
     await _persist();
   }

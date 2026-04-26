@@ -151,6 +151,26 @@ void main() {
       expect(settingsJson['composerAutoApprovePermissions'], isFalse);
     });
 
+    test('persists preferred locale selection', () async {
+      final local = InMemoryAppLocalDataSource();
+      final provider = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+
+      await provider.initialize();
+      await provider.setPreferredLocaleTag('zh');
+
+      expect(provider.preferredLocaleTag, 'zh');
+      expect(provider.preferredLocale?.languageCode, 'zh');
+
+      final raw = local.experienceSettingsJson;
+      expect(raw, isNotNull);
+      final settingsJson = jsonDecode(raw!) as Map<String, dynamic>;
+      expect(settingsJson['preferredLocaleTag'], 'zh');
+    });
+
     test('persists pending post-onboarding chat tour flag', () async {
       final local = InMemoryAppLocalDataSource();
       final first = SettingsProvider(
