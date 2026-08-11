@@ -2,6 +2,15 @@ part of '../chat_provider.dart';
 
 extension _ChatProviderEventReducerGlobalOps on ChatProvider {
   void _handleGlobalEvent(ChatEvent event) {
+    if (event.type == 'session.idle') {
+      final sessionId = _effectiveEventSessionIdForEvent(event);
+      if (sessionId != null) {
+        titleGenerator?.notifySessionIdle(
+          sessionId: sessionId,
+          directory: _extractDirectoryFromEvent(event),
+        );
+      }
+    }
     if (_isEphemeralTitleEvent(event)) return;
 
     if (event.type == 'catalog.updated') {

@@ -39,6 +39,7 @@ import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/cellular_data_saver_service.dart';
+import 'package:codewalk/presentation/services/chat_title_generator.dart';
 import 'package:codewalk/presentation/services/event_feedback_dispatcher.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:dartz/dartz.dart';
@@ -215,6 +216,7 @@ ChatProvider buildChatProvider({
   SettingsProvider? settingsProvider,
   CellularDataSaverService? cellularDataSaverService,
   EventFeedbackDispatcher? eventFeedbackDispatcher,
+  ChatTitleGenerator? titleGenerator,
   Future<void> Function(SessionAttentionAggregate aggregate)?
   sessionAttentionAggregatePublisher,
   Future<void> Function(bool isForeground)?
@@ -259,6 +261,7 @@ ChatProvider buildChatProvider({
     dioClient: dioClient,
     cellularDataSaverService: cellularDataSaverService,
     eventFeedbackDispatcher: eventFeedbackDispatcher,
+    titleGenerator: titleGenerator,
     sessionAttentionAggregatePublisher: sessionAttentionAggregatePublisher,
     sessionAttentionAppForegroundPublisher:
         sessionAttentionAppForegroundPublisher,

@@ -4938,6 +4938,7 @@ class ChatProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    titleGenerator?.cancelPendingWaiters();
     _sessionTabsDisposed = true;
     _sessionTabsGeneration += 1;
     _cellularDataSaverService.removeListener(_handleCellularDataSaverChanged);

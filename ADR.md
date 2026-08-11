@@ -394,31 +394,39 @@ Implement a context-scoped file state model in chat runtime, with tree cache + t
 
 ### Context
 
-Session title generation must be server-native and event-safe, without relying on external title services. The flow must avoid polluting user-visible session history while still participating in runtime event streams.
+Session title generation must be server-native and event-safe, without relying on external title services. The flow must avoid polluting user-visible session history while still participating in runtime event streams, keep requests scoped to the active directory, and avoid polling for completion.
 
 ### Decision
 
-Generate titles through an internal ephemeral session flow using OpenCode agent `title`, filter ephemeral lifecycle events from chat state, and apply title updates only after contextual safety checks.
+Generate titles through a native ephemeral session titled `_title_gen` using OpenCode agent `title`, with directory-scoped create/prompt/GET/DELETE requests. `session.idle` from the official local and global SSE streams acts only as a completion trigger and is forwarded to the generator before ephemeral event filtering. After the SSE trigger, perform exactly one authoritative message GET; if the trigger is missed, wait on a bounded 15s timeout and then issue the same single GET. The title is never derived from event parts. Context switch/dispose cancel pending waiters and skip the GET, but still DELETE the ephemeral session and keep the trailing-event prune; realtime/data-saver stream teardown without background suppression may fall back to the timeout path. Ephemeral lifecycle events are filtered from chat state, and title updates are applied only after contextual safety checks.
 
 ### Rationale
 
 - Internal agent flow removes external dependency and alignment risk.
+- Directory-scoped requests keep generation tied to the active workspace.
+- `session.idle` as the sole trigger plus a single authoritative GET replaces polling and avoids event-part-derived titles.
 - Ephemeral session filtering prevents UI/state contamination.
 - Context safety checks prevent stale or cross-context title writes.
+- Cancellation on context switch/dispose avoids wasted GETs while preserving ephemeral session cleanup.
 
 ### Consequences
 
 - ✅ Title generation is now fully native to server capabilities.
 - ✅ Eliminates external service coupling for title synthesis.
-- ⚠ Adds polling and ephemeral-session handling logic.
+- ✅ Reduces request/byte volume versus polling: one authoritative message GET per title.
+- ⚠ Adds bounded waiter/ephemeral-session complexity (waiter map, 15s timeout fallback, cancellation paths).
 - ❌ External title providers are not part of the active architecture.
+
+**Note** (issue #139): Title generation reworked from polling to an SSE-triggered flow — `session.idle` from local/global SSE (forwarded before ephemeral filtering) completes a bounded waiter with a 15s timeout fallback, followed by exactly one authoritative message GET; requests are directory-scoped; context switch/dispose cancel pending waiters and skip the GET while still deleting the ephemeral session and pruning trailing events.
 
 ### Key Files
 
 - `lib/presentation/services/chat_title_generator.dart`
 - `lib/presentation/providers/chat_provider/chat_provider_auto_title_ops.dart`
 - `lib/presentation/providers/chat_provider/chat_provider_realtime_aux_ops.dart`
-- `lib/presentation/pages/settings/sections/servers_settings_section.dart`
+- `lib/presentation/providers/chat_provider/chat_provider_event_reducer_session_ops.dart`
+- `lib/presentation/providers/chat_provider/chat_provider_event_reducer_global_ops.dart`
+- `lib/presentation/pages/onboarding_wizard_page.dart`
 
 ---
 

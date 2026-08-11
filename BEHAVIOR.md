@@ -638,6 +638,11 @@
 - **Then** the app automatically generates (or re-generates) a title based on the conversation content
 - **Then** title generation stops once the session has accumulated 3 or more user messages **and** 3 or more assistant messages — sufficient context has been established by that point
 - **Then** dynamic title generation runs only for main/root sessions; subsessions (child sessions with `parentId`) do not trigger auto-title updates
+- **Then** generation runs in an internal ephemeral OpenCode `title` session created in the active directory, kept separate from the visible conversation
+- **Then** completion is triggered by the official `session.idle` SSE event, followed by exactly one authoritative message snapshot GET
+- **Then** if that event is missed or the stream is paused, a bounded 15-second fallback performs the same single snapshot GET
+- **Then** a context switch or chat runtime disposal cancels a pending generation without performing the snapshot GET, while cleanup still deletes the ephemeral session
+- **Then** ephemeral events never enter the visible chat state, and SSE event parts are never used as the title authority
 
 ### Session reopening is cache-first
 

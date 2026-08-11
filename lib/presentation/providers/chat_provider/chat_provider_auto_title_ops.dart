@@ -160,7 +160,11 @@ extension _ChatProviderAutoTitleOps on ChatProvider {
     if (!await _isAutoTitleEnabledForActiveServer()) {
       return;
     }
-    if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
+    if (_cellularDataSaverService.shouldSuppressBackgroundWork ||
+        _activeContextKey != runContextKey ||
+        projectProvider.currentProjectId != runProjectId ||
+        projectProvider.currentDirectory != runDirectory ||
+        _currentSession?.id != sessionId) {
       return;
     }
 
@@ -200,6 +204,7 @@ extension _ChatProviderAutoTitleOps on ChatProvider {
     final generatedTitle = await generator.generateTitle(
       promptMessages,
       maxWords: _resolveAutoTitleMaxWords(),
+      directory: runDirectory,
     );
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;

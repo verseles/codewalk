@@ -6,6 +6,7 @@ extension _ChatProviderSessionOps on ChatProvider {
     bool waitForRevalidation = true,
     String? newlyOpenedDirectory,
   }) async {
+    titleGenerator?.cancelPendingWaiters();
     final useFastProjectTransition =
         reason == 'project' && !waitForRevalidation;
     _storeCurrentContextSnapshot();

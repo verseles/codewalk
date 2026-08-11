@@ -24,6 +24,15 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
   }
 
   void _applyChatEventInner(ChatEvent event) {
+    if (event.type == 'session.idle') {
+      final sessionId = _effectiveEventSessionIdForEvent(event);
+      if (sessionId != null) {
+        titleGenerator?.notifySessionIdle(
+          sessionId: sessionId,
+          directory: projectProvider.currentDirectory,
+        );
+      }
+    }
     if (_isEphemeralTitleEvent(event)) return;
     // Claim the event in the shared dedup buffer so the paired session/global
     // stream skips exact duplicates regardless of which stream arrives first.

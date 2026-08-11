@@ -67,6 +67,7 @@ void main() {
       SettingsProvider? settingsProvider,
       CellularDataSaverService? cellularDataSaverService,
       EventFeedbackDispatcher? eventFeedbackDispatcher,
+      ChatTitleGenerator? titleGenerator,
     }) {
       return buildChatProvider(
         chatRepository: chatRepository,
@@ -80,6 +81,7 @@ void main() {
         settingsProvider: settingsProvider,
         cellularDataSaverService: cellularDataSaverService,
         eventFeedbackDispatcher: eventFeedbackDispatcher,
+        titleGenerator: titleGenerator,
       );
     }
 
@@ -143,6 +145,24 @@ void main() {
       );
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
+
+    test('dispose cancels pending title waiters', () {
+      final titleGenerator = _FakeChatTitleGenerator();
+      provider = buildProvider(titleGenerator: titleGenerator);
+
+      provider.dispose();
+
+      expect(titleGenerator.cancelPendingWaitersCallCount, 1);
+    });
+
+    test('project context switch cancels pending title waiters', () async {
+      final titleGenerator = _FakeChatTitleGenerator();
+      provider = buildProvider(titleGenerator: titleGenerator);
+
+      await provider.onProjectScopeChanged(waitForRevalidation: false);
+
+      expect(titleGenerator.cancelPendingWaitersCallCount, 1);
+    });
 
     group('OpenCode v1.18.3 compatibility', () {
       for (final eventType in const <String>[
@@ -2924,6 +2944,78 @@ void main() {
     );
 
     test(
+      'session.idle wakes ephemeral title waiter before event filtering',
+      () async {
+        final titleGenerator = _FakeChatTitleGenerator();
+        provider = buildProvider(titleGenerator: titleGenerator);
+        ChatTitleGenerator.ephemeralSessionIds.add('ses_title_waiter');
+        addTearDown(
+          () =>
+              ChatTitleGenerator.ephemeralSessionIds.remove('ses_title_waiter'),
+        );
+
+        await initializeRealtimeProvider();
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.idle',
+            properties: <String, dynamic>{'sessionID': 'ses_title_waiter'},
+          ),
+        );
+        await settleUntil(
+          () => titleGenerator.idleSessionIds.isNotEmpty,
+          reason: 'Expected ephemeral session.idle to wake title waiter.',
+        );
+
+        expect(titleGenerator.idleSessionIds, <String>['ses_title_waiter']);
+        expect(titleGenerator.idleDirectories, <String?>[
+          provider.projectProvider.currentDirectory,
+        ]);
+        expect(
+          provider.sessions.any((session) => session.id == 'ses_title_waiter'),
+          isFalse,
+        );
+      },
+    );
+
+    test(
+      'global session.idle forwards its directory to ephemeral title waiter',
+      () async {
+        final titleGenerator = _FakeChatTitleGenerator();
+        provider = buildProvider(titleGenerator: titleGenerator);
+        ChatTitleGenerator.ephemeralSessionIds.add('ses_global_title_waiter');
+        addTearDown(
+          () => ChatTitleGenerator.ephemeralSessionIds.remove(
+            'ses_global_title_waiter',
+          ),
+        );
+
+        await initializeRealtimeProvider();
+        await settleUntil(
+          () => provider.debugHasGlobalEventSubscription,
+          reason: 'Expected global subscription before title waiter event.',
+        );
+        chatRepository.emitGlobalEvent(
+          const ChatEvent(
+            type: 'session.idle',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_global_title_waiter',
+              'directory': '/workspace/global',
+            },
+          ),
+        );
+        await settleUntil(
+          () => titleGenerator.idleSessionIds.isNotEmpty,
+          reason: 'Expected global session.idle to wake title waiter.',
+        );
+
+        expect(titleGenerator.idleSessionIds, <String>[
+          'ses_global_title_waiter',
+        ]);
+        expect(titleGenerator.idleDirectories, <String?>['/workspace/global']);
+      },
+    );
+
+    test(
       'session.status idle for selected session not on chat route notifies once',
       () async {
         final feedbackDispatcher = _RecordingEventFeedbackDispatcher(
@@ -5616,15 +5708,30 @@ class _ThrowingPersistenceLocalDataSource extends InMemoryAppLocalDataSource {
   }
 }
 
-class _FakeChatTitleGenerator implements ChatTitleGenerator {
+class _FakeChatTitleGenerator extends ChatTitleGenerator {
   int callCount = 0;
+  int cancelPendingWaitersCallCount = 0;
+  final List<String> idleSessionIds = <String>[];
+  final List<String?> idleDirectories = <String?>[];
   final List<List<ChatTitleGeneratorMessage>> payloads =
       <List<ChatTitleGeneratorMessage>>[];
+
+  @override
+  void notifySessionIdle({required String sessionId, String? directory}) {
+    idleSessionIds.add(sessionId);
+    idleDirectories.add(directory);
+  }
+
+  @override
+  void cancelPendingWaiters() {
+    cancelPendingWaitersCallCount += 1;
+  }
 
   @override
   Future<String?> generateTitle(
     List<ChatTitleGeneratorMessage> messages, {
     int maxWords = 6,
+    String? directory,
   }) async {
     callCount += 1;
     payloads.add(List<ChatTitleGeneratorMessage>.from(messages));
@@ -5632,7 +5739,7 @@ class _FakeChatTitleGenerator implements ChatTitleGenerator {
   }
 }
 
-class _BlockingChatTitleGenerator implements ChatTitleGenerator {
+class _BlockingChatTitleGenerator extends ChatTitleGenerator {
   _BlockingChatTitleGenerator(this._completer);
 
   final Completer<String?> _completer;
@@ -5642,6 +5749,7 @@ class _BlockingChatTitleGenerator implements ChatTitleGenerator {
   Future<String?> generateTitle(
     List<ChatTitleGeneratorMessage> messages, {
     int maxWords = 6,
+    String? directory,
   }) {
     callCount += 1;
     return _completer.future;
