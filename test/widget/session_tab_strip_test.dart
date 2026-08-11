@@ -21,6 +21,132 @@ void main() {
     );
   });
 
+  testWidgets(
+    'inactive pinned tabs stay compact in a separate leading region',
+    (tester) async {
+      final pinned = _tab('pinned', title: 'Pinned session', isPinned: true);
+      final regular = _tab('regular', isSelected: true);
+      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+
+      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned, regular]));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>('session_tab_pinned_region_scroll_view'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(ValueKey<String>('session_tab_title_$pinnedKey')),
+        findsNothing,
+      );
+      expect(find.byTooltip('Pinned session'), findsOneWidget);
+      expect(
+        tester
+            .getSize(find.byKey(ValueKey<String>('session_tab_$pinnedKey')))
+            .width,
+        lessThan(80),
+      );
+    },
+  );
+
+  testWidgets('selected pinned tab expands with title and trailing controls', (
+    tester,
+  ) async {
+    final pinned = _tab(
+      'pinned',
+      title: 'Selected pinned session',
+      isPinned: true,
+      isSelected: true,
+    );
+    final pinnedKey = sessionTabIdentityKey(pinned.identity);
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[pinned],
+        trailingBuilder: (context, tab) =>
+            const SizedBox(key: ValueKey<String>('pinned_trailing'), width: 24),
+      ),
+    );
+
+    expect(
+      find.byKey(ValueKey<String>('session_tab_title_$pinnedKey')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('pinned_trailing')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getSize(find.byKey(ValueKey<String>('session_tab_$pinnedKey')))
+          .width,
+      greaterThan(80),
+    );
+  });
+
+  testWidgets(
+    'pinned overflow scrolls independently and stays leading in RTL',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final pinned = List<SessionTabRecord>.generate(
+        8,
+        (index) => _tab('pinned_$index', isPinned: true),
+      );
+      final regular = _tab('regular', isSelected: true);
+
+      await tester.pumpWidget(
+        _app(
+          tabs: <SessionTabRecord>[...pinned, regular],
+          width: 320,
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 220));
+
+      final pinnedScrollView = find.byKey(
+        const ValueKey<String>('session_tab_pinned_region_scroll_view'),
+      );
+      final pinnedScrollable = find.descendant(
+        of: pinnedScrollView,
+        matching: find.byType(Scrollable),
+      );
+      final pinnedPosition = tester
+          .state<ScrollableState>(pinnedScrollable)
+          .position;
+      expect(pinnedPosition.maxScrollExtent, greaterThan(0));
+
+      final regularScrollView = find.byKey(
+        const ValueKey<String>('session_tab_strip_scroll_view'),
+      );
+      expect(
+        tester
+            .getRect(
+              find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+            )
+            .left,
+        greaterThan(tester.getRect(regularScrollView).left),
+      );
+
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: tester.getCenter(pinnedScrollView),
+          scrollDelta: const Offset(0, 80),
+        ),
+      );
+      await tester.pump();
+      expect(pinnedPosition.pixels, greaterThan(0));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('exposes selected title semantics and keyboard activation', (
     tester,
   ) async {
@@ -721,6 +847,7 @@ Widget _app({
   SessionTabTrailingBuilder? trailingBuilder,
   double width = 800,
   bool isCompact = false,
+  TextDirection textDirection = TextDirection.ltr,
 }) {
   return localizedMaterialApp(
     home: Scaffold(
@@ -728,16 +855,19 @@ Widget _app({
         alignment: Alignment.topLeft,
         child: SizedBox(
           width: width,
-          child: SessionTabStrip(
-            tabs: tabs,
-            projects: projects,
-            openProjectIds: openProjectIds,
-            isCompact: isCompact,
-            onActivate: (tab) => onActivate?.call(tab.identity),
-            onClose: (tab) => onClose?.call(tab.identity),
-            onContextMenu:
-                onContextMenu ?? (tab, position, {required haptic}) async {},
-            trailingBuilder: trailingBuilder ?? (context, tab) => null,
+          child: Directionality(
+            textDirection: textDirection,
+            child: SessionTabStrip(
+              tabs: tabs,
+              projects: projects,
+              openProjectIds: openProjectIds,
+              isCompact: isCompact,
+              onActivate: (tab) => onActivate?.call(tab.identity),
+              onClose: (tab) => onClose?.call(tab.identity),
+              onContextMenu:
+                  onContextMenu ?? (tab, position, {required haptic}) async {},
+              trailingBuilder: trailingBuilder ?? (context, tab) => null,
+            ),
           ),
         ),
       ),
@@ -750,6 +880,7 @@ SessionTabRecord _tab(
   String? title,
   SessionStatusType status = SessionStatusType.idle,
   bool isSelected = false,
+  bool isPinned = false,
   List<String> pendingQuestionIds = const <String>[],
   String? completionToken,
   String? errorToken,
@@ -764,6 +895,7 @@ SessionTabRecord _tab(
     completionToken: completionToken,
     errorToken: errorToken,
     isSelected: isSelected,
+    isPinned: isPinned,
   );
 }
 

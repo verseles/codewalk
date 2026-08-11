@@ -616,6 +616,32 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
+  Future<Map<String, Set<String>>> getPinnedSessionsByScope({
+    required String serverId,
+  }) async {
+    final prefix = 'pinned_sessions::$serverId::';
+    final result = <String, Set<String>>{};
+    for (final entry in scopedStrings.entries) {
+      if (!entry.key.startsWith(prefix)) continue;
+      final scopeId = entry.key.substring(prefix.length);
+      if (scopeId.isEmpty) continue;
+      try {
+        final decoded = jsonDecode(entry.value);
+        if (decoded is! List) continue;
+        final ids = decoded
+            .whereType<String>()
+            .map((id) => id.trim())
+            .where((id) => id.isNotEmpty)
+            .toSet();
+        if (ids.isNotEmpty) result[scopeId] = ids;
+      } catch (_) {
+        continue;
+      }
+    }
+    return result;
+  }
+
+  @override
   Future<String?> getCannedAnswersJson({
     String? serverId,
     String? scopeId,

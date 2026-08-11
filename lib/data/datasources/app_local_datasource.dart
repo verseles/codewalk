@@ -186,6 +186,11 @@ abstract class AppLocalDataSource {
   /// Retrieve locally-persisted pinned session IDs (scoped).
   Future<String?> getPinnedSessionsJson({String? serverId, String? scopeId});
 
+  /// Retrieve all scoped pinned-session payloads for one server.
+  Future<Map<String, Set<String>>> getPinnedSessionsByScope({
+    required String serverId,
+  });
+
   /// Save locally-persisted pinned session IDs (scoped).
   Future<void> savePinnedSessionsJson(
     String pinnedSessionsJson, {
@@ -1085,6 +1090,42 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
         scopeId: scopeId,
       ),
     );
+  }
+
+  @override
+  Future<Map<String, Set<String>>> getPinnedSessionsByScope({
+    required String serverId,
+  }) async {
+    final normalizedServerId = serverId.trim();
+    if (normalizedServerId.isEmpty) {
+      return const <String, Set<String>>{};
+    }
+    final prefix =
+        '${AppConstants.pinnedSessionsKey}::${Uri.encodeComponent(normalizedServerId)}::';
+    final result = <String, Set<String>>{};
+    for (final key in sharedPreferences.getKeys()) {
+      if (!key.startsWith(prefix)) continue;
+      final encodedScope = key.substring(prefix.length);
+      if (encodedScope.isEmpty) continue;
+      final raw = sharedPreferences.getString(key);
+      if (raw == null || raw.trim().isEmpty) continue;
+      try {
+        final scopeId = Uri.decodeComponent(encodedScope);
+        final decoded = jsonDecode(raw);
+        if (decoded is! List) continue;
+        final ids = decoded
+            .whereType<String>()
+            .map((id) => id.trim())
+            .where((id) => id.isNotEmpty)
+            .toSet();
+        if (ids.isNotEmpty) {
+          result[scopeId] = ids;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+    return result;
   }
 
   @override

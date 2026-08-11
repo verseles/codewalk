@@ -29,6 +29,9 @@ const double _kStripTopPadding = 4 * 0.8;
 
 const double _kSessionTabWidth = 244 * 1.3;
 const double _kCompactSessionTabWidth = 214 * 1.3;
+const double _kPinnedSessionTabWidth = 58;
+const double _kPinnedRegionMaxFraction = 0.5;
+const double _kMinimumRegularRegionWidth = 96;
 
 typedef SessionTabContextMenuCallback =
     Future<void> Function(
@@ -140,6 +143,7 @@ class SessionTabStrip extends StatefulWidget {
 
 class _SessionTabStripState extends State<SessionTabStrip> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _pinnedScrollController = ScrollController();
   final Map<SessionTabIdentity, GlobalKey> _tabKeys =
       <SessionTabIdentity, GlobalKey>{};
   final Map<SessionTabIdentity, FocusNode> _tabFocusNodes =
@@ -183,6 +187,7 @@ class _SessionTabStripState extends State<SessionTabStrip> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _pinnedScrollController.dispose();
     for (final focusNode in _tabFocusNodes.values) {
       focusNode.dispose();
     }
@@ -205,6 +210,38 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         final tabWidth = math.min(
           maxTabWidth,
           math.max(0.0, constraints.maxWidth - horizontalPadding * 2),
+        );
+        final pinnedTabs = widget.tabs
+            .where((tab) => tab.isPinned)
+            .toList(growable: false);
+        final regularTabs = widget.tabs
+            .where((tab) => !tab.isPinned)
+            .toList(growable: false);
+        final availableWidth = math.max(
+          0.0,
+          constraints.maxWidth - horizontalPadding * 2,
+        );
+        final desiredPinnedWidth = pinnedTabs.fold<double>(
+          0,
+          (width, tab) =>
+              width + (tab.isSelected ? tabWidth : _kPinnedSessionTabWidth),
+        );
+        final pinnedWidthLimit = regularTabs.isEmpty
+            ? availableWidth
+            : math.max(
+                0.0,
+                math.min(
+                  availableWidth * _kPinnedRegionMaxFraction,
+                  availableWidth -
+                      math.min(
+                        _kMinimumRegularRegionWidth,
+                        availableWidth * 0.5,
+                      ),
+                ),
+              );
+        final pinnedRegionWidth = math.min(
+          desiredPinnedWidth,
+          pinnedWidthLimit,
         );
         final selectedIdentity = _selectedIdentity();
         final selectedIndex = widget.tabs.indexWhere((tab) => tab.isSelected);
@@ -236,29 +273,83 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                 ? Colors.transparent
                 : colorScheme.surfaceContainerHigh,
           ),
-          child: Listener(
-            onPointerSignal: _handlePointerSignal,
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(
-                context,
-              ).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                key: const ValueKey<String>('session_tab_strip_scroll_view'),
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  horizontalPadding,
-                  _kStripTopPadding,
-                  horizontalPadding,
-                  0,
-                ),
-                child: Row(
-                  children: [
-                    for (final tab in widget.tabs)
-                      _buildTab(context, tab, tabWidth),
-                  ],
-                ),
-              ),
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              horizontalPadding,
+              _kStripTopPadding,
+              horizontalPadding,
+              0,
+            ),
+            child: Row(
+              mainAxisSize: widget.fillWidth
+                  ? MainAxisSize.max
+                  : MainAxisSize.min,
+              children: [
+                if (pinnedTabs.isNotEmpty && pinnedRegionWidth > 0)
+                  SizedBox(
+                    key: const ValueKey<String>('session_tab_pinned_region'),
+                    width: pinnedRegionWidth,
+                    child: Listener(
+                      onPointerSignal: (event) => _handlePointerSignal(
+                        event,
+                        controller: _pinnedScrollController,
+                      ),
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(
+                          context,
+                        ).copyWith(scrollbars: false),
+                        child: SingleChildScrollView(
+                          key: const ValueKey<String>(
+                            'session_tab_pinned_region_scroll_view',
+                          ),
+                          controller: _pinnedScrollController,
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              for (final tab in pinnedTabs)
+                                _buildTab(
+                                  context,
+                                  tab,
+                                  tab.isSelected
+                                      ? tabWidth
+                                      : _kPinnedSessionTabWidth,
+                                  compactPinned: !tab.isSelected,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (regularTabs.isNotEmpty)
+                  Flexible(
+                    fit: widget.fillWidth ? FlexFit.tight : FlexFit.loose,
+                    child: Listener(
+                      onPointerSignal: (event) => _handlePointerSignal(
+                        event,
+                        controller: _scrollController,
+                      ),
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(
+                          context,
+                        ).copyWith(scrollbars: false),
+                        child: SingleChildScrollView(
+                          key: const ValueKey<String>(
+                            'session_tab_strip_scroll_view',
+                          ),
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              for (final tab in regularTabs)
+                                _buildTab(context, tab, tabWidth),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         );
@@ -297,8 +388,9 @@ class _SessionTabStripState extends State<SessionTabStrip> {
   Widget _buildTab(
     BuildContext context,
     SessionTabRecord tab,
-    double tabWidth,
-  ) {
+    double tabWidth, {
+    bool compactPinned = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final title = tab.title.trim().isEmpty
         ? context.l10n.sessionExportUntitled
@@ -312,7 +404,9 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         ? colorScheme.onSurface
         : colorScheme.onSurfaceVariant;
     final hovered = _hoveredIdentity == tab.identity;
-    final trailing = widget.trailingBuilder(context, tab);
+    final trailing = compactPinned
+        ? null
+        : widget.trailingBuilder(context, tab);
 
     void openContextMenu({required bool haptic}) {
       unawaited(
@@ -448,27 +542,30 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                                               project,
                                               title,
                                             ),
-                                            const SizedBox(width: 7),
-                                            Expanded(
-                                              child: Text(
-                                                title,
-                                                key: ValueKey<String>(
-                                                  'session_tab_title_$key',
+                                            if (!compactPinned) ...[
+                                              const SizedBox(width: 7),
+                                              Expanded(
+                                                child: Text(
+                                                  title,
+                                                  key: ValueKey<String>(
+                                                    'session_tab_title_$key',
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelLarge
+                                                      ?.copyWith(
+                                                        color: foreground,
+                                                        fontWeight: selected
+                                                            ? FontWeight.w700
+                                                            : FontWeight.w600,
+                                                      ),
                                                 ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelLarge
-                                                    ?.copyWith(
-                                                      color: foreground,
-                                                      fontWeight: selected
-                                                          ? FontWeight.w700
-                                                          : FontWeight.w600,
-                                                    ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 2),
+                                              const SizedBox(width: 2),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -559,8 +656,8 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         children: [
           leading,
           if (tab.isBusy)
-            Positioned(
-              right: 0,
+            PositionedDirectional(
+              end: 0,
               bottom: 0,
               child: Container(
                 key: ValueKey<String>(
@@ -702,7 +799,14 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         return;
       }
       final tabContext = _tabKeys[pendingIdentity]?.currentContext;
-      if (!_scrollController.hasClients || tabContext == null) {
+      final selectedIndex = widget.tabs.indexWhere(
+        (tab) => tab.identity == pendingIdentity,
+      );
+      final selectedTab = selectedIndex < 0 ? null : widget.tabs[selectedIndex];
+      final controller = selectedTab?.isPinned ?? false
+          ? _pinnedScrollController
+          : _scrollController;
+      if (!controller.hasClients || tabContext == null) {
         _scheduleEnsureSelectedVisible(pendingIdentity);
         return;
       }
@@ -716,14 +820,14 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         _scheduleEnsureSelectedVisible(pendingIdentity);
         return;
       }
-      final position = _scrollController.position;
+      final position = controller.position;
       final target = viewport
           .getOffsetToReveal(tabRenderObject, 0.5)
           .offset
           .clamp(position.minScrollExtent, position.maxScrollExtent)
           .toDouble();
       unawaited(
-        _scrollController.animateTo(
+        controller.animateTo(
           target,
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOutCubic,
@@ -732,8 +836,11 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     });
   }
 
-  void _handlePointerSignal(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent || !_scrollController.hasClients) {
+  void _handlePointerSignal(
+    PointerSignalEvent event, {
+    required ScrollController controller,
+  }) {
+    if (event is! PointerScrollEvent || !controller.hasClients) {
       return;
     }
     final delta = event.scrollDelta.dy.abs() >= event.scrollDelta.dx.abs()
@@ -742,11 +849,11 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     if (delta == 0) {
       return;
     }
-    final position = _scrollController.position;
-    final next = (_scrollController.offset + delta).clamp(
+    final position = controller.position;
+    final next = (controller.offset + delta).clamp(
       position.minScrollExtent,
       position.maxScrollExtent,
     );
-    _scrollController.jumpTo(next.toDouble());
+    controller.jumpTo(next.toDouble());
   }
 }

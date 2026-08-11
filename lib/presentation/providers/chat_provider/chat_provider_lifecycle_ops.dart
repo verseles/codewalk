@@ -414,7 +414,7 @@ extension ChatProviderLifecycleOps on ChatProvider {
     _removeSessionMessagesCache(sessionId);
     unawaited(_clearSessionMessagesSnapshotBestEffort(sessionId));
 
-    _removeSessionById(sessionId);
+    _removeSessionById(sessionId, removePin: false);
     _sortSessionsInPlace();
 
     if (wasCurrent) {
@@ -459,7 +459,7 @@ extension ChatProviderLifecycleOps on ChatProvider {
       },
       (_) async {
         if (tabIdentity != null) {
-          _removeSessionTabAuthoritatively(tabIdentity);
+          _removeSessionTabAuthoritatively(tabIdentity, activeContext: true);
         }
         if (attentionIdentity != null) {
           _deleteSessionAttentionSnapshotIdentity(attentionIdentity);

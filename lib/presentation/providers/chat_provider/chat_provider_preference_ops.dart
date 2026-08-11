@@ -69,6 +69,15 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       providerCatalogFetchedAtEpochMs: _providerCatalogFetchedAtEpochMs,
       agentCatalogFetchedAtEpochMs: _agentCatalogFetchedAtEpochMs,
     );
+    final serverId = _serverIdFromContextKey(_activeContextKey);
+    final scopeId = _scopeIdFromContextKey(_activeContextKey);
+    if (serverId != null && scopeId != null) {
+      _writeThroughPinnedSessionScope(
+        serverId: serverId,
+        scopeId: scopeId,
+        ids: _pinnedSessionIds,
+      );
+    }
   }
 
   void _restoreContextSnapshot(String contextKey) {
@@ -95,6 +104,7 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       _sessionListFilter = SessionListFilter.active;
       _sessionListSort = SessionListSort.recent;
       _pinnedSessionIds = <String>{};
+      _loadedPinnedSessionContextKey = null;
       _sessionVisibleLimit = 40;
       _isNewChatDraftActive = false;
       _clearActiveSendDraft();
@@ -158,6 +168,16 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     _sessionListFilter = snapshot.sessionListFilter;
     _sessionListSort = snapshot.sessionListSort;
     _pinnedSessionIds = Set<String>.from(snapshot.pinnedSessionIds);
+    _loadedPinnedSessionContextKey = contextKey;
+    final serverId = _serverIdFromContextKey(contextKey);
+    final scopeId = _scopeIdFromContextKey(contextKey);
+    if (serverId != null && scopeId != null) {
+      _writeThroughPinnedSessionScope(
+        serverId: serverId,
+        scopeId: scopeId,
+        ids: _pinnedSessionIds,
+      );
+    }
     _sessionVisibleLimit = snapshot.sessionVisibleLimit;
     _isNewChatDraftActive = snapshot.isNewChatDraftActive;
     _activeSendDraft = snapshot.activeSendDraft;
@@ -207,6 +227,9 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     required int fetchId,
     required String contextKey,
   }) async {
+    final pinnedMutationRevision =
+        _pinnedSessionMutationRevisionByContext[contextKey] ?? 0;
+    final pinsAlreadyLoaded = _loadedPinnedSessionContextKey == contextKey;
     // Load every preference field into a local variable first, then swap
     // the instance fields atomically at the end. The previous clear-then-load
     // pattern opened an empty window for _favoriteModelKeys,
@@ -332,10 +355,25 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     // Atomic swap — no field is cleared until its replacement is ready.
     _recentModelKeys = loadedRecentModelKeys;
     _favoriteModelKeys = loadedFavoriteModelKeys;
-    _pinnedSessionIds = loadedPinnedSessionIds;
+    final pinsChangedWhileLoading =
+        (_pinnedSessionMutationRevisionByContext[contextKey] ?? 0) !=
+        pinnedMutationRevision;
+    if (!pinsAlreadyLoaded && !pinsChangedWhileLoading) {
+      _pinnedSessionIds = loadedPinnedSessionIds;
+      _writeThroughPinnedSessionScope(
+        serverId: serverId,
+        scopeId: scopeId,
+        ids: loadedPinnedSessionIds,
+      );
+    }
+    _loadedPinnedSessionContextKey = contextKey;
     _modelUsageCounts = loadedModelUsageCounts;
     _selectedVariantByModel = loadedSelectedVariantByModel;
     _agentSelectionMemoryByAgent = loadedAgentSelectionMemoryByAgent;
+    if (_hasLoadedSessionsAuthoritatively && contextKey == _activeContextKey) {
+      _prunePinnedSessionIdsToKnownSessions();
+      _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
+    }
   }
 
   Future<void> _persistModelPreferenceState({
@@ -351,10 +389,11 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       json.encode(_favoriteModelKeys),
       serverId: serverId,
     );
-    await localDataSource.savePinnedSessionsJson(
-      json.encode(_pinnedSessionIds.toList(growable: false)),
+    final pinnedSessionIds = Set<String>.from(_pinnedSessionIds);
+    await _persistPinnedSessionScope(
       serverId: serverId,
       scopeId: scopeId,
+      ids: pinnedSessionIds,
     );
     await localDataSource.saveModelUsageCountsJson(
       json.encode(_modelUsageCounts),

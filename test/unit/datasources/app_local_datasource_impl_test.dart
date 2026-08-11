@@ -212,6 +212,32 @@ void main() {
     },
   );
 
+  test('enumerates pinned sessions by scope for one server', () async {
+    const serverId = 'server/a';
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      '${AppConstants.pinnedSessionsKey}::${Uri.encodeComponent(serverId)}::${Uri.encodeComponent('/work/one')}':
+          '["session-a","session-b"]',
+      '${AppConstants.pinnedSessionsKey}::${Uri.encodeComponent(serverId)}::${Uri.encodeComponent('/work/two')}':
+          '["session-c","",7]',
+      '${AppConstants.pinnedSessionsKey}::${Uri.encodeComponent(serverId)}::${Uri.encodeComponent('/work/broken')}':
+          '{broken',
+      '${AppConstants.pinnedSessionsKey}::other::${Uri.encodeComponent('/work/one')}':
+          '["leaked"]',
+      AppConstants.pinnedSessionsKey: '["legacy"]',
+    });
+    final prefs = await SharedPreferences.getInstance();
+    final dataSource = AppLocalDataSourceImpl(sharedPreferences: prefs);
+
+    final result = await dataSource.getPinnedSessionsByScope(
+      serverId: serverId,
+    );
+
+    expect(result, <String, Set<String>>{
+      '/work/one': <String>{'session-a', 'session-b'},
+      '/work/two': <String>{'session-c'},
+    });
+  });
+
   test(
     'migrates legacy cached sessions payload from preferences to cache store',
     () async {

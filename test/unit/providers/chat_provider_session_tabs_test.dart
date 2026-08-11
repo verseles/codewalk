@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/persisted_session_tabs_state.dart';
@@ -74,6 +75,76 @@ PersistedSessionTab _persisted(
 
 void main() {
   group('SessionTabReconciler', () {
+    test('pinned identities bypass recency and local tombstones', () {
+      const nowMs = 10 * _hourMs;
+      final pinnedIdentity = _identity('pinned-old');
+      final result = SessionTabReconciler.reconcile(
+        serverId: 'server-a',
+        persistedState: const PersistedSessionTabsState(
+          closed: <PersistedClosedSessionTab>[
+            PersistedClosedSessionTab(
+              directory: '/work/project',
+              sessionId: 'pinned-old',
+              closedAtMs: 9 * _hourMs,
+              observedServerUpdatedAtMs: _hourMs,
+            ),
+          ],
+        ),
+        candidates: <SessionTabCandidate>[
+          _candidate('pinned-old', updatedAtMs: _hourMs),
+        ],
+        pinnedIdentities: <SessionTabIdentity>{pinnedIdentity},
+        nowMs: nowMs,
+      );
+
+      expect(result.tabs, hasLength(1));
+      expect(result.tabs.single.identity, pinnedIdentity);
+      expect(result.tabs.single.isPinned, isTrue);
+      expect(result.persistedState.closed, isEmpty);
+      expect(
+        result.persistedState.open.single.toJson(),
+        isNot(contains('isPinned')),
+      );
+    });
+
+    test('pins keep eligibility rules and stable-partition tab order', () {
+      const nowMs = 10 * _hourMs;
+      final result = SessionTabReconciler.reconcile(
+        serverId: 'server-a',
+        persistedState: PersistedSessionTabsState(
+          open: <PersistedSessionTab>[
+            _persisted('regular-a', lastOpenedAtMs: nowMs),
+            _persisted('pinned-b', lastOpenedAtMs: nowMs),
+            _persisted('regular-c', lastOpenedAtMs: nowMs),
+          ],
+        ),
+        candidates: <SessionTabCandidate>[
+          _candidate('regular-a', updatedAtMs: nowMs),
+          _candidate('pinned-b', updatedAtMs: nowMs),
+          _candidate('regular-c', updatedAtMs: nowMs),
+          _candidate('pinned-child', updatedAtMs: 1, isRoot: false),
+          _candidate('pinned-archived', updatedAtMs: 1, isArchived: true),
+        ],
+        pinnedIdentities: <SessionTabIdentity>{
+          _identity('pinned-b'),
+          _identity('pinned-child'),
+          _identity('pinned-archived'),
+        },
+        nowMs: nowMs,
+      );
+
+      expect(result.tabs.map((tab) => tab.identity.sessionId), <String>[
+        'pinned-b',
+        'regular-a',
+        'regular-c',
+      ]);
+      expect(result.tabs.map((tab) => tab.isPinned), <bool>[
+        true,
+        false,
+        false,
+      ]);
+    });
+
     test('uses the exact cutoff and retains selected or busy roots', () {
       const nowMs = 10 * _hourMs;
       const cutoffMs = nowMs - 3 * _hourMs;
@@ -465,6 +536,538 @@ void main() {
         expect(provider.restoreClosedSessionTab(tab, index: 0), isTrue);
       },
     );
+
+    test('sidebar pin reopens a tombstoned tab without navigation', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.single;
+      final identity = provider.sessionTabs.single.identity;
+      provider.closeSessionTab(identity);
+      expect(provider.sessionTabs, isEmpty);
+
+      await provider.toggleSessionPinned(session);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.currentSession?.id, session.id);
+      expect(provider.isSessionPinned(session.id), isTrue);
+      expect(provider.sessionTabs.single.identity, identity);
+      expect(provider.sessionTabs.single.isPinned, isTrue);
+      final persisted = PersistedSessionTabsState.decode(
+        await fixtures.localDataSource.getSessionTabsStateJson(
+          serverId: 'srv_test',
+        ),
+      );
+      expect(persisted.closed, isEmpty);
+    });
+
+    test(
+      'live active pins supersede a stale active-context snapshot',
+      () async {
+        await provider.loadSessions();
+        final session = provider.sessions.single;
+        await provider.toggleSessionPinned(session);
+        provider.debugStoreCurrentContextSnapshot();
+
+        await provider.toggleSessionPinned(session);
+        await provider.debugWaitForSessionTabPersistence();
+
+        expect(provider.isSessionPinned(session.id), isFalse);
+        expect(
+          provider.sessionTabs.any(
+            (tab) => tab.identity.sessionId == session.id && tab.isPinned,
+          ),
+          isFalse,
+        );
+      },
+    );
+
+    test('closing and restoring a pinned tab updates the shared pin', () async {
+      await fixtures.localDataSource.savePinnedSessionsJson(
+        '["other-scope-session"]',
+        serverId: 'srv_test',
+        scopeId: '/work/project',
+      );
+      await provider.loadSessions();
+      final session = provider.sessions.single;
+      await provider.toggleSessionPinned(session);
+      final pinnedTab = provider.sessionTabs.single;
+      expect(pinnedTab.isPinned, isTrue);
+
+      provider.closeSessionTab(pinnedTab.identity);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.isSessionPinned(session.id), isFalse);
+      expect(provider.sessionTabs, isEmpty);
+
+      expect(provider.restoreClosedSessionTab(pinnedTab, index: 0), isTrue);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.isSessionPinned(session.id), isTrue);
+      expect(provider.sessionTabs.single.isPinned, isTrue);
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: 'default',
+        ),
+        contains('session-live'),
+      );
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: '/work/project',
+        ),
+        '["other-scope-session"]',
+      );
+    });
+
+    test(
+      'cold scoped pin retains an old persisted tab after restart',
+      () async {
+        await fixtures.localDataSource.savePinnedSessionsJson(
+          '["session-cold"]',
+          serverId: 'srv_test',
+          scopeId: '/work/cold',
+        );
+        await fixtures.localDataSource.saveSessionTabsStateJson(
+          PersistedSessionTabsState(
+            open: <PersistedSessionTab>[
+              PersistedSessionTab(
+                directory: '/work/cold',
+                sessionId: 'session-cold',
+                title: 'Cold pinned session',
+                lastOpenedAtMs: now
+                    .subtract(const Duration(hours: 12))
+                    .millisecondsSinceEpoch,
+                serverUpdatedAtMs: now
+                    .subtract(const Duration(hours: 12))
+                    .millisecondsSinceEpoch,
+              ),
+            ],
+          ).encode(),
+          serverId: 'srv_test',
+        );
+
+        await provider.loadSessionTabs();
+
+        expect(provider.sessionTabs.single.identity.sessionId, 'session-cold');
+        expect(provider.sessionTabs.single.isPinned, isTrue);
+      },
+    );
+
+    test('active cold pin survives tab load before preferences', () async {
+      await fixtures.localDataSource.savePinnedSessionsJson(
+        '["session-active-cold"]',
+        serverId: 'srv_test',
+        scopeId: 'default',
+      );
+      await fixtures.localDataSource.saveSessionTabsStateJson(
+        PersistedSessionTabsState(
+          open: <PersistedSessionTab>[
+            PersistedSessionTab(
+              directory: '/work/active-cold',
+              sessionId: 'session-active-cold',
+              title: 'Active cold pin',
+              lastOpenedAtMs: now
+                  .subtract(const Duration(hours: 12))
+                  .millisecondsSinceEpoch,
+              serverUpdatedAtMs: now
+                  .subtract(const Duration(hours: 12))
+                  .millisecondsSinceEpoch,
+            ),
+          ],
+        ).encode(),
+        serverId: 'srv_test',
+      );
+
+      await provider.loadSessionTabs();
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(
+        provider.sessionTabs.single.identity.sessionId,
+        'session-active-cold',
+      );
+      expect(provider.sessionTabs.single.isPinned, isTrue);
+      final persisted = PersistedSessionTabsState.decode(
+        await fixtures.localDataSource.getSessionTabsStateJson(
+          serverId: 'srv_test',
+        ),
+      );
+      expect(persisted.open.single.sessionId, 'session-active-cold');
+
+      final tab = provider.sessionTabs.single;
+      provider.closeSessionTab(tab.identity);
+      await provider.debugWaitForSessionTabPersistence();
+      expect(provider.sessionTabs, isEmpty);
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: 'default',
+        ),
+        '[]',
+      );
+    });
+
+    test(
+      'active exact pin read recovers when scoped enumeration fails',
+      () async {
+        final fallbackLocalDataSource = _FailingPinnedScopeScanLocalDataSource()
+          ..activeServerId = 'srv_test';
+        await fallbackLocalDataSource.savePinnedSessionsJson(
+          '["session-fallback"]',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+        await fallbackLocalDataSource.saveSessionTabsStateJson(
+          PersistedSessionTabsState(
+            open: <PersistedSessionTab>[
+              PersistedSessionTab(
+                directory: '/work/fallback',
+                sessionId: 'session-fallback',
+                title: 'Fallback pin',
+                lastOpenedAtMs: _hourMs,
+                serverUpdatedAtMs: _hourMs,
+              ),
+            ],
+          ).encode(),
+          serverId: 'srv_test',
+        );
+        final fallbackProvider = buildChatProvider(
+          chatRepository: fixtures.chatRepository,
+          appRepository: fixtures.appRepository,
+          localDataSource: fallbackLocalDataSource,
+          defaultSettingsProvider: fixtures.defaultSettingsProvider,
+          sessionTabsNow: () => now,
+        );
+        addTearDown(fallbackProvider.dispose);
+
+        await fallbackProvider.loadSessionTabs();
+
+        expect(fallbackProvider.sessionTabs.single.isPinned, isTrue);
+        expect(
+          fallbackProvider.sessionTabs.single.identity.sessionId,
+          'session-fallback',
+        );
+      },
+    );
+
+    test('pin mutation wins over a delayed stale preference read', () async {
+      final delayedLocalDataSource = _DelayedPinnedPreferenceLocalDataSource()
+        ..activeServerId = 'srv_test';
+      await delayedLocalDataSource.savePinnedSessionsJson(
+        '["session-live"]',
+        serverId: 'srv_test',
+        scopeId: 'default',
+      );
+      await delayedLocalDataSource.saveSessionTabsStateJson(
+        PersistedSessionTabsState(
+          open: <PersistedSessionTab>[
+            PersistedSessionTab(
+              directory: '/work/project',
+              sessionId: 'session-live',
+              title: 'Live session',
+              lastOpenedAtMs: _hourMs,
+              serverUpdatedAtMs: _hourMs,
+            ),
+          ],
+        ).encode(),
+        serverId: 'srv_test',
+      );
+      final delayedProvider = buildChatProvider(
+        chatRepository: fixtures.chatRepository,
+        appRepository: fixtures.appRepository,
+        localDataSource: delayedLocalDataSource,
+        defaultSettingsProvider: fixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+      );
+      addTearDown(delayedProvider.dispose);
+      await delayedProvider.loadSessionTabs();
+      expect(delayedProvider.sessionTabs.single.isPinned, isTrue);
+
+      final initialization = delayedProvider.initializeProviders();
+      await delayedLocalDataSource.pinReadStarted.future;
+      await delayedProvider.toggleSessionPinned(
+        fixtures.chatRepository.sessions.single,
+      );
+      delayedLocalDataSource.releasePinRead.complete();
+      await initialization;
+      await delayedProvider.debugWaitForSessionTabPersistence();
+
+      expect(delayedProvider.isSessionPinned('session-live'), isFalse);
+      expect(delayedProvider.sessionTabs.any((tab) => tab.isPinned), isFalse);
+      expect(
+        await delayedLocalDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: 'default',
+        ),
+        '[]',
+      );
+    });
+
+    test('equivalent cold scope spellings union their pin sets', () async {
+      await fixtures.localDataSource.savePinnedSessionsJson(
+        '["session-a"]',
+        serverId: 'srv_test',
+        scopeId: '/work/cold',
+      );
+      await fixtures.localDataSource.savePinnedSessionsJson(
+        '["session-b"]',
+        serverId: 'srv_test',
+        scopeId: '/work/cold/',
+      );
+      await fixtures.localDataSource.saveSessionTabsStateJson(
+        PersistedSessionTabsState(
+          open: <PersistedSessionTab>[
+            _persisted(
+              'session-a',
+              directory: '/work/cold',
+              lastOpenedAtMs: _hourMs,
+            ),
+            _persisted(
+              'session-b',
+              directory: '/work/cold',
+              lastOpenedAtMs: _hourMs,
+            ),
+          ],
+        ).encode(),
+        serverId: 'srv_test',
+      );
+
+      await provider.loadSessionTabs();
+
+      expect(
+        provider.sessionTabs.map((tab) => tab.identity.sessionId).toSet(),
+        <String>{'session-a', 'session-b'},
+      );
+      expect(provider.sessionTabs.every((tab) => tab.isPinned), isTrue);
+    });
+
+    test(
+      'active equivalent scopes stay unioned after preference load',
+      () async {
+        await fixtures.localDataSource.savePinnedSessionsJson(
+          '["session-a"]',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+        await fixtures.localDataSource.savePinnedSessionsJson(
+          '["session-b"]',
+          serverId: 'srv_test',
+          scopeId: 'default/',
+        );
+        await fixtures.localDataSource.saveSessionTabsStateJson(
+          PersistedSessionTabsState(
+            open: <PersistedSessionTab>[
+              _persisted(
+                'session-a',
+                directory: '/work/a',
+                lastOpenedAtMs: _hourMs,
+              ),
+              _persisted(
+                'session-b',
+                directory: '/work/b',
+                lastOpenedAtMs: _hourMs,
+              ),
+            ],
+          ).encode(),
+          serverId: 'srv_test',
+        );
+
+        await provider.loadSessionTabs();
+        await provider.initializeProviders();
+
+        expect(provider.isSessionPinned('session-a'), isTrue);
+        expect(provider.isSessionPinned('session-b'), isTrue);
+        expect(provider.sessionTabs.every((tab) => tab.isPinned), isTrue);
+      },
+    );
+
+    test('closing a duplicate legacy pin clears every owning scope', () async {
+      await fixtures.localDataSource.savePinnedSessionsJson(
+        '["session-live"]',
+        serverId: 'srv_test',
+        scopeId: 'default',
+      );
+      await fixtures.localDataSource.savePinnedSessionsJson(
+        '["session-live"]',
+        serverId: 'srv_test',
+        scopeId: '/work/project',
+      );
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      final tab = provider.sessionTabs.single;
+      expect(tab.pinScopeIds, <String>{'default', '/work/project'});
+
+      provider.closeSessionTab(tab.identity);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.sessionTabs, isEmpty);
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: 'default',
+        ),
+        '[]',
+      );
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: '/work/project',
+        ),
+        '[]',
+      );
+
+      expect(provider.restoreClosedSessionTab(tab, index: 0), isTrue);
+      await provider.debugWaitForSessionTabPersistence();
+      expect(provider.sessionTabs.single.pinScopeIds, <String>{'default'});
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: 'default',
+        ),
+        '["session-live"]',
+      );
+      expect(
+        await fixtures.localDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: '/work/project',
+        ),
+        '[]',
+      );
+    });
+
+    test('preference save captures a concurrent pin at write time', () async {
+      final delayedLocalDataSource = _DelayedPreferenceSaveLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final delayedProvider = buildChatProvider(
+        chatRepository: fixtures.chatRepository,
+        appRepository: fixtures.appRepository,
+        localDataSource: delayedLocalDataSource,
+        defaultSettingsProvider: fixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+      );
+      addTearDown(delayedProvider.dispose);
+      await delayedProvider.loadSessions();
+      final session = delayedProvider.sessions.single;
+
+      final preferenceWrite = delayedProvider.toggleModelFavorite(
+        providerId: 'provider-a',
+        modelId: 'model-a',
+      );
+      await delayedLocalDataSource.recentWriteStarted.future;
+      await delayedProvider.toggleSessionPinned(session);
+      delayedLocalDataSource.releaseRecentWrite.complete();
+      await preferenceWrite;
+      await delayedProvider.debugWaitForSessionTabPersistence();
+
+      expect(
+        await delayedLocalDataSource.getPinnedSessionsJson(
+          serverId: 'srv_test',
+          scopeId: 'default',
+        ),
+        contains('session-live'),
+      );
+    });
+
+    test('successful archive clears both the tab and shared pin', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.single;
+      await provider.toggleSessionPinned(session);
+
+      expect(await provider.setSessionArchived(session, true), isTrue);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.isSessionPinned(session.id), isFalse);
+      expect(provider.sessionTabs, isEmpty);
+    });
+
+    test('failed archive preserves both the tab and shared pin', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.single;
+      await provider.toggleSessionPinned(session);
+      fixtures.chatRepository.updateSessionFailure = const ServerFailure(
+        'archive failed',
+      );
+
+      expect(await provider.setSessionArchived(session, true), isFalse);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.isSessionPinned(session.id), isTrue);
+      expect(provider.sessionTabs.single.identity.sessionId, session.id);
+      expect(provider.sessionTabs.single.isPinned, isTrue);
+    });
+
+    test(
+      'authoritative absence clears pin mirror, disk, and pinned tab',
+      () async {
+        await fixtures.localDataSource.savePinnedSessionsJson(
+          '["session-ghost"]',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+        await fixtures.localDataSource.saveSessionTabsStateJson(
+          PersistedSessionTabsState(
+            open: <PersistedSessionTab>[
+              PersistedSessionTab(
+                directory: '/work/ghost',
+                sessionId: 'session-ghost',
+                title: 'Ghost session',
+                lastOpenedAtMs: now.millisecondsSinceEpoch,
+                serverUpdatedAtMs: now.millisecondsSinceEpoch,
+              ),
+            ],
+          ).encode(),
+          serverId: 'srv_test',
+        );
+
+        await provider.initializeProviders();
+        await provider.loadSessionTabs();
+        expect(provider.sessionTabs.single.isPinned, isTrue);
+        await provider.loadSessions();
+        await provider.debugWaitForSessionTabPersistence();
+
+        expect(provider.isSessionPinned('session-ghost'), isFalse);
+        expect(
+          provider.sessionTabs.any(
+            (tab) => tab.identity.sessionId == 'session-ghost',
+          ),
+          isFalse,
+        );
+        expect(
+          await fixtures.localDataSource.getPinnedSessionsJson(
+            serverId: 'srv_test',
+            scopeId: 'default',
+          ),
+          '[]',
+        );
+      },
+    );
+
+    test('failed delete preserves both the tab and shared pin', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.single;
+      await provider.toggleSessionPinned(session);
+      fixtures.chatRepository.deleteSessionFailure = const ServerFailure(
+        'delete failed',
+      );
+
+      await provider.deleteSession(session.id);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.isSessionPinned(session.id), isTrue);
+      expect(provider.sessionTabs.single.identity.sessionId, session.id);
+      expect(provider.sessionTabs.single.isPinned, isTrue);
+    });
+
+    test('successful delete clears both the tab and shared pin', () async {
+      await provider.loadSessions();
+      final session = provider.sessions.single;
+      await provider.toggleSessionPinned(session);
+
+      await provider.deleteSession(session.id);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.isSessionPinned(session.id), isFalse);
+      expect(provider.sessionTabs, isEmpty);
+    });
 
     test(
       'restores a persisted tab without a loaded context candidate',
@@ -960,5 +1563,57 @@ class _DelayedSessionTabsLocalDataSource extends InMemoryAppLocalDataSource {
       await releaseServerARead.future;
     }
     return super.getSessionTabsStateJson(serverId: serverId);
+  }
+}
+
+class _DelayedPinnedPreferenceLocalDataSource
+    extends InMemoryAppLocalDataSource {
+  final Completer<void> pinReadStarted = Completer<void>();
+  final Completer<void> releasePinRead = Completer<void>();
+
+  @override
+  Future<String?> getPinnedSessionsJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    final value = await super.getPinnedSessionsJson(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (serverId == 'srv_test' && scopeId == 'default') {
+      if (!pinReadStarted.isCompleted) pinReadStarted.complete();
+      await releasePinRead.future;
+    }
+    return value;
+  }
+}
+
+class _DelayedPreferenceSaveLocalDataSource extends InMemoryAppLocalDataSource {
+  final Completer<void> recentWriteStarted = Completer<void>();
+  final Completer<void> releaseRecentWrite = Completer<void>();
+
+  @override
+  Future<void> saveRecentModelsJson(
+    String recentModelsJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (!recentWriteStarted.isCompleted) recentWriteStarted.complete();
+    await releaseRecentWrite.future;
+    await super.saveRecentModelsJson(
+      recentModelsJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+  }
+}
+
+class _FailingPinnedScopeScanLocalDataSource
+    extends InMemoryAppLocalDataSource {
+  @override
+  Future<Map<String, Set<String>>> getPinnedSessionsByScope({
+    required String serverId,
+  }) {
+    throw StateError('scope scan failed');
   }
 }

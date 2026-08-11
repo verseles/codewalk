@@ -113,8 +113,16 @@ class SessionTabRecord {
     this.errorToken,
     this.seenErrorToken,
     this.isSelected = false,
+    this.isPinned = false,
+    this.pinScopeId,
+    Iterable<String> pinScopeIds = const <String>[],
   }) : pendingQuestionIds = _normalizedSessionTabIds(pendingQuestionIds),
-       seenQuestionIds = _normalizedSessionTabIds(seenQuestionIds);
+       seenQuestionIds = _normalizedSessionTabIds(seenQuestionIds),
+       pinScopeIds = Set<String>.unmodifiable(
+         pinScopeIds
+             .map(normalizeFilePath)
+             .where((scopeId) => scopeId.isNotEmpty),
+       );
 
   final SessionTabIdentity identity;
   final String? projectId;
@@ -129,6 +137,9 @@ class SessionTabRecord {
   final String? errorToken;
   final String? seenErrorToken;
   final bool isSelected;
+  final bool isPinned;
+  final String? pinScopeId;
+  final Set<String> pinScopeIds;
 
   bool get isBusy =>
       status == SessionStatusType.busy || status == SessionStatusType.retry;
@@ -176,6 +187,9 @@ class SessionTabRecord {
     Object? errorToken = _sessionTabUnset,
     Object? seenErrorToken = _sessionTabUnset,
     bool? isSelected,
+    bool? isPinned,
+    Object? pinScopeId = _sessionTabUnset,
+    Iterable<String>? pinScopeIds,
   }) {
     return SessionTabRecord(
       identity: identity,
@@ -199,6 +213,11 @@ class SessionTabRecord {
           ? this.seenErrorToken
           : seenErrorToken as String?,
       isSelected: isSelected ?? this.isSelected,
+      isPinned: isPinned ?? this.isPinned,
+      pinScopeId: identical(pinScopeId, _sessionTabUnset)
+          ? this.pinScopeId
+          : pinScopeId as String?,
+      pinScopeIds: pinScopeIds ?? this.pinScopeIds,
     );
   }
 
@@ -217,7 +236,10 @@ class SessionTabRecord {
         other.seenCompletionToken == seenCompletionToken &&
         other.errorToken == errorToken &&
         other.seenErrorToken == seenErrorToken &&
-        other.isSelected == isSelected;
+        other.isSelected == isSelected &&
+        other.isPinned == isPinned &&
+        other.pinScopeId == pinScopeId &&
+        setEquals(other.pinScopeIds, pinScopeIds);
   }
 
   @override
@@ -235,6 +257,9 @@ class SessionTabRecord {
     errorToken,
     seenErrorToken,
     isSelected,
+    isPinned,
+    pinScopeId,
+    Object.hashAllUnordered(pinScopeIds),
   );
 }
 

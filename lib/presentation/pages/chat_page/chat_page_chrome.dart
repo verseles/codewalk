@@ -4,9 +4,12 @@ extension _ChatPageChrome on _ChatPageState {
   String _sessionActionLabel(
     _CurrentSessionAction action, {
     required bool isShared,
+    required bool isPinned,
   }) {
     return switch (action) {
       _CurrentSessionAction.rename => context.l10n.sessionTabRenameAction,
+      _CurrentSessionAction.pinToggle =>
+        isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
       _CurrentSessionAction.shareToggle =>
         isShared ? context.l10n.sessionUnshare : context.l10n.sessionShare,
       _CurrentSessionAction.copyLink => context.l10n.sessionCopyLink,
@@ -25,9 +28,12 @@ extension _ChatPageChrome on _ChatPageState {
   IconData _sessionActionIcon(
     _CurrentSessionAction action, {
     required bool isShared,
+    required bool isPinned,
   }) {
     return switch (action) {
       _CurrentSessionAction.rename => Symbols.edit,
+      _CurrentSessionAction.pinToggle =>
+        isPinned ? Symbols.keep_off : Symbols.keep,
       _CurrentSessionAction.shareToggle =>
         isShared ? Symbols.link_off : Symbols.link,
       _CurrentSessionAction.copyLink => Symbols.content_copy,
@@ -47,6 +53,7 @@ extension _ChatPageChrome on _ChatPageState {
   ) {
     final shareUrl = session.shareUrl?.trim();
     final hasShareUrl = shareUrl != null && shareUrl.isNotEmpty;
+    final isPinned = chatProvider.isSessionPinned(session.id);
     final canCompact =
         !chatProvider.isCompactingContext &&
         !chatProvider.canAbortActiveResponse;
@@ -61,13 +68,21 @@ extension _ChatPageChrome on _ChatPageState {
         child: Row(
           children: [
             Icon(
-              _sessionActionIcon(action, isShared: session.shared),
+              _sessionActionIcon(
+                action,
+                isShared: session.shared,
+                isPinned: isPinned,
+              ),
               size: 18,
             ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                _sessionActionLabel(action, isShared: session.shared),
+                _sessionActionLabel(
+                  action,
+                  isShared: session.shared,
+                  isPinned: isPinned,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -78,6 +93,7 @@ extension _ChatPageChrome on _ChatPageState {
 
     return [
       buildItem(_CurrentSessionAction.rename),
+      buildItem(_CurrentSessionAction.pinToggle),
       const PopupMenuDivider(),
       buildItem(_CurrentSessionAction.shareToggle),
       if (hasShareUrl) buildItem(_CurrentSessionAction.copyLink),
@@ -140,6 +156,19 @@ extension _ChatPageChrome on _ChatPageState {
           SessionContextMenuActions(
             onSessionRenamed: chatProvider.renameSession,
           ),
+        );
+        return;
+      case _CurrentSessionAction.pinToggle:
+        final wasPinned = chatProvider.isSessionPinned(session.id);
+        await chatProvider.toggleSessionPinned(session);
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          context.l10n.chatSessionConversationNextAction(
+            wasPinned
+                ? context.l10n.sessionActionUnpinned
+                : context.l10n.sessionActionPinned,
+          ),
+          hideCurrent: false,
         );
         return;
       case _CurrentSessionAction.shareToggle:

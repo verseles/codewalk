@@ -549,14 +549,27 @@
 - **Then** persisted tab order remains stable through selection, title, status, and attention changes; newly eligible or explicitly reopened tabs append to the end
 - **Then** explicitly closing a tab only writes local suppression, never archives, deletes, or mutates the OpenCode session, and ordinary refresh/replay does not resurrect it; a successful explicit reopen or strictly newer authoritative interaction can append it again
 
+- **Given** a root session is pinned in the Conversations sidebar for one of the active server's known project scopes
+- **When** session tabs are loaded or reconciled
+- **Then** the existing context-scoped sidebar pin is the sole durable pin authority, and the matching tab remains eligible even when it is older than 3 hours or locally suppressed
+- **Then** a matching cached or authoritative session materializes as a tab without navigating to it, while archived, deleted, child, or unknown sessions are not resurrected
+- **Then** tabs pinned in any equivalent known scope appear before regular tabs in stable order
+
+- **Given** the user opens the current session actions menu
+- **When** the current root session can be pinned or unpinned
+- **Then** the menu offers the matching localized `Pin` or `Unpin` action and updates the same persisted pin state used by the sidebar
+- **Then** pinning materializes and promotes the tab without changing the active session; unpinning returns it to normal tab eligibility
+
 - **Given** the user closes a session tab
 - **When** the closed tab is active or inactive
 - **Then** closing the active tab selects the tab to its right, then the tab to its left; closing the sole active tab enters a local `New Chat` draft, while closing an inactive tab does not navigate
 - **Then** CodeWalk shows a localized 3-second `Snackbar` with `Undo`
+- **Then** closing a pinned tab also removes its active pin before suppressing the tab
 
 - **Given** the user presses `Undo` on the closed-tab `Snackbar`
 - **When** the closed tab can be restored
 - **Then** only that local tab is restored at its original position, without navigating back or mutating the OpenCode session
+- **Then** if the closed tab was pinned, its primary active-scope pin is restored before the tab; legacy duplicate scope pins that were cleaned during close are not recreated
 
 - **Given** the user activates a tab for another project context
 - **When** that context is closed or not current
@@ -576,6 +589,8 @@
 - **Given** the tab strip is rendered
 - **When** the user swipes, uses the wheel or trackpad, or the app scrolls programmatically
 - **Then** horizontal scrolling remains available while the scrollbar is completely hidden visually
+- **Then** pinned tabs use a separate leading viewport: inactive pinned tabs are compact icon-only controls with tooltip and semantics, while the selected pinned tab expands to show its normal content
+- **Then** the pinned viewport scrolls independently and is responsively capped so regular tabs retain usable space on mobile and desktop, including right-to-left layouts
 
 - **Given** a tab is selected at startup or after selection, insertion, or reorder changes its horizontal position
 - **When** the tab strip updates

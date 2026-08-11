@@ -401,6 +401,10 @@ class ChatProvider extends ChangeNotifier {
       const PersistedSessionTabsState();
   final Map<String, Future<void>> _sessionTabsWriteQueueByServer =
       <String, Future<void>>{};
+  final Map<String, Future<void>> _pinnedSessionWriteQueueByScope =
+      <String, Future<void>>{};
+  final Map<String, Map<String, Set<String>>> _pinnedSessionIdsByServerScope =
+      <String, Map<String, Set<String>>>{};
   final Map<SessionTabIdentity, SessionTabCandidate>
   _sessionTabEventCandidates = <SessionTabIdentity, SessionTabCandidate>{};
   final Map<SessionTabIdentity, String> _sessionTabErrorTokens =
@@ -437,6 +441,9 @@ class ChatProvider extends ChangeNotifier {
       <String, List<String>>{};
   List<String> _favoriteModelKeys = <String>[];
   Set<String> _pinnedSessionIds = <String>{};
+  String? _loadedPinnedSessionContextKey;
+  final Map<String, int> _pinnedSessionMutationRevisionByContext =
+      <String, int>{};
   bool _hasLoadedSessionsAuthoritatively = false;
   Map<String, int> _modelUsageCounts = <String, int>{};
   Map<String, String> _selectedVariantByModel = <String, String>{};
@@ -1014,7 +1021,15 @@ class ChatProvider extends ChangeNotifier {
 
   @visibleForTesting
   Future<void> debugWaitForSessionTabPersistence() async {
-    await Future.wait(_sessionTabsWriteQueueByServer.values);
+    await Future.wait(<Future<void>>[
+      ..._sessionTabsWriteQueueByServer.values,
+      ..._pinnedSessionWriteQueueByScope.values,
+    ]);
+  }
+
+  @visibleForTesting
+  void debugStoreCurrentContextSnapshot() {
+    _storeCurrentContextSnapshot();
   }
 
   /// Request IDs whose last submit/dismiss attempt returned an error.
@@ -1374,10 +1389,44 @@ class ChatProvider extends ChangeNotifier {
     if (!_hasLoadedSessionsAuthoritatively || _pinnedSessionIds.isEmpty) {
       return;
     }
-    final knownSessionIds = _sessions.map((session) => session.id).toSet();
-    _pinnedSessionIds = _pinnedSessionIds
+    final knownSessionIds = _sessions
+        .where((session) => !session.archived)
+        .map((session) => session.id)
+        .toSet();
+    final previousPinnedSessionIds = Set<String>.from(_pinnedSessionIds);
+    final nextPinnedSessionIds = _pinnedSessionIds
         .where((id) => knownSessionIds.contains(id))
         .toSet();
+    if (setEquals(nextPinnedSessionIds, _pinnedSessionIds)) return;
+    _pinnedSessionIds = nextPinnedSessionIds;
+    _recordPinnedSessionMutation();
+    final scopeId = _activePinnedSessionScopeId() ?? _resolveContextScopeId();
+    _writeThroughPinnedSessionScope(
+      serverId: _activeServerId,
+      scopeId: scopeId,
+      ids: _pinnedSessionIds,
+    );
+    unawaited(
+      _persistPinnedSessionScope(
+        serverId: _activeServerId,
+        scopeId: scopeId,
+        ids: _pinnedSessionIds,
+      ),
+    );
+    final removedSessionIds = previousPinnedSessionIds.difference(
+      nextPinnedSessionIds,
+    );
+    final removedTabs = _sessionTabs
+        .where(
+          (tab) =>
+              tab.pinScopeId == normalizeOptionalFilePath(scopeId) &&
+              removedSessionIds.contains(tab.identity.sessionId),
+        )
+        .map((tab) => tab.identity)
+        .toList(growable: false);
+    for (final identity in removedTabs) {
+      _removeSessionTabAuthoritatively(identity, activeContext: true);
+    }
   }
 
   List<ChatSession> _includeVisibleSessionAncestors({
@@ -3086,18 +3135,40 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
-    if (_pinnedSessionIds.contains(sessionId)) {
-      _pinnedSessionIds.remove(sessionId);
-    } else {
-      _pinnedSessionIds.add(sessionId);
-    }
-
-    _sortSessionsInPlace();
-    notifyListeners();
-
     final serverId = await _resolveServerScopeId();
-    final scopeId = _resolveContextScopeId();
-    await _persistModelPreferenceState(serverId: serverId, scopeId: scopeId);
+    final identity = _sessionTabIdentityForSession(
+      session,
+      contextKey: _activeContextKey,
+    );
+    final scopeId = _activePinnedSessionScopeId() ?? _resolveContextScopeId();
+    final nextPinned = !_pinnedSessionIds.contains(sessionId);
+    final existingTab = identity == null
+        ? null
+        : _sessionTabs.where((tab) => tab.identity == identity).firstOrNull;
+    final changed = _setActiveSessionPin(
+      serverId: serverId,
+      scopeId: scopeId,
+      sessionId: sessionId,
+      pinned: nextPinned,
+    );
+    if (!changed) return;
+    if (!nextPinned && identity != null && existingTab != null) {
+      _setSessionTabPin(
+        identity,
+        pinned: false,
+        pinScopeIds: existingTab.pinScopeIds,
+        persist: true,
+      );
+    }
+    _sortSessionsInPlace();
+    await _persistPinnedSessionScope(
+      serverId: serverId,
+      scopeId: scopeId,
+      ids: _pinnedSessionIds,
+    );
+    await Future.wait(_pinnedSessionWriteQueueByScope.values.toList());
+    _reconcileSessionTabs(forcePersistence: true, notify: false);
+    notifyListeners();
   }
 
   /// Load session list
@@ -3561,7 +3632,7 @@ class ChatProvider extends ChangeNotifier {
     }
 
     _sessions = List<ChatSession>.from(_sessions);
-    _removeSessionById(session.id);
+    _removeSessionById(session.id, removePin: false);
     _sessions.add(session);
     _sortSessionsInPlace();
     _currentSession = session;
@@ -4865,6 +4936,21 @@ class ChatProvider extends ChangeNotifier {
         if (_currentSession?.id == updated.id) {
           _currentSession = updated;
           _dismissNotificationsForSession(updated.id);
+        }
+        if (archived) {
+          final identity = _sessionTabIdentityForSession(
+            updated,
+            contextKey: _activeContextKey,
+          );
+          if (identity != null) {
+            _setSessionTabPin(
+              identity,
+              pinned: false,
+              pinScopeId:
+                  _activePinnedSessionScopeId() ?? _resolveContextScopeId(),
+              persist: true,
+            );
+          }
         }
         _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
         unawaited(_persistSessionCacheBestEffort());

@@ -620,17 +620,25 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     _sortSessionsInPlace();
   }
 
-  void _removeSessionById(String sessionId) {
+  void _removeSessionById(String sessionId, {bool removePin = true}) {
     _dismissNotificationsForSession(sessionId);
     _sessions.removeWhere((item) => item.id == sessionId);
     final wasPinned =
+        removePin &&
         _hasLoadedSessionsAuthoritatively &&
         _pinnedSessionIds.remove(sessionId);
     if (wasPinned) {
+      final scopeId = _activePinnedSessionScopeId() ?? _resolveContextScopeId();
+      _writeThroughPinnedSessionScope(
+        serverId: _activeServerId,
+        scopeId: scopeId,
+        ids: _pinnedSessionIds,
+      );
       unawaited(
-        _persistModelPreferenceState(
+        _persistPinnedSessionScope(
           serverId: _activeServerId,
-          scopeId: _resolveContextScopeId(),
+          scopeId: scopeId,
+          ids: _pinnedSessionIds,
         ),
       );
     }

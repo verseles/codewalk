@@ -5804,6 +5804,9 @@ void main() {
         'session_tab_activate_${sessionTabIdentityKey(identityA)}',
       ),
     );
+    await provider.toggleSessionPinned(sessionA);
+    await tester.pumpAndSettle();
+    expect(provider.isSessionPinned(sessionA.id), isTrue);
     await tester.tap(tabA, kind: PointerDeviceKind.mouse);
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tap(tabA, kind: PointerDeviceKind.mouse);
@@ -5812,6 +5815,7 @@ void main() {
     }
 
     expect(provider.currentSession?.id, sessionB.id);
+    expect(provider.isSessionPinned(sessionA.id), isFalse);
     expect(
       provider.sessionTabs.map((tab) => tab.identity),
       <SessionTabIdentity>[identityB],
@@ -5833,6 +5837,7 @@ void main() {
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
     expect(provider.currentSession?.id, sessionB.id);
+    expect(provider.isSessionPinned(sessionA.id), isTrue);
     expect(
       provider.sessionTabs.map((tab) => tab.identity),
       <SessionTabIdentity>[identityA, identityB],
@@ -5847,6 +5852,7 @@ void main() {
       provider.sessionTabs.map((tab) => tab.identity),
       <SessionTabIdentity>[identityB],
     );
+    expect(provider.isSessionPinned(sessionA.id), isFalse);
     expect(closedMessage, findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
@@ -21106,6 +21112,7 @@ void main() {
     await _openActiveSessionTabMenu(tester, provider);
 
     expect(find.text('Rename session'), findsOneWidget);
+    expect(find.text('Pin'), findsOneWidget);
     expect(find.text('Share session'), findsOneWidget);
     expect(find.text('View tasks'), findsOneWidget);
     expect(find.text('Review changes'), findsOneWidget);
@@ -21119,6 +21126,14 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(provider.currentSession?.title, 'Renamed from tab');
+
+    await _openActiveSessionTabMenu(tester, provider);
+    await tester.tap(find.text('Pin'));
+    await tester.pumpAndSettle();
+    expect(provider.isSessionPinned('ses_session_actions'), isTrue);
+
+    await _openActiveSessionTabMenu(tester, provider);
+    expect(find.text('Unpin'), findsOneWidget);
   });
 
   testWidgets('session actions can open the current session details dialog', (

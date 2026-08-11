@@ -10,6 +10,7 @@ class SessionTabReconciler {
     required PersistedSessionTabsState persistedState,
     required Iterable<SessionTabCandidate> candidates,
     required int nowMs,
+    Set<SessionTabIdentity> pinnedIdentities = const <SessionTabIdentity>{},
     SessionTabIdentity? explicitlyOpened,
     String? bootstrapDirectory,
   }) {
@@ -91,6 +92,7 @@ class SessionTabReconciler {
       final persisted = openByIdentity[identity]!;
       handled.add(identity);
       final candidate = candidateByIdentity[identity];
+      final isPinned = pinnedIdentities.contains(identity);
       if (candidate != null && (!candidate.isRoot || candidate.isArchived)) {
         continue;
       }
@@ -99,6 +101,7 @@ class SessionTabReconciler {
         candidate: candidate,
         closedByIdentity: closedByIdentity,
         explicitlyOpened: explicitlyOpened,
+        isPinned: isPinned,
       )) {
         continue;
       }
@@ -113,6 +116,7 @@ class SessionTabReconciler {
       final isBusy = candidate?.isBusy ?? false;
       if (!isSelected &&
           !isBusy &&
+          !isPinned &&
           math.max(lastOpenedAtMs, serverUpdatedAtMs) < cutoffMs) {
         continue;
       }
@@ -135,6 +139,7 @@ class SessionTabReconciler {
           errorToken: candidate?.errorToken,
           seenErrorToken: persisted.seenErrorToken,
           isSelected: isSelected,
+          isPinned: isPinned,
         ),
       );
     }
@@ -149,15 +154,18 @@ class SessionTabReconciler {
             .map((identity) => candidateByIdentity[identity]!)
             .where((candidate) {
               if (!candidate.isRoot || candidate.isArchived) return false;
+              final isPinned = pinnedIdentities.contains(candidate.identity);
               if (_isSuppressedByClosedTab(
                 identity: candidate.identity,
                 candidate: candidate,
                 closedByIdentity: closedByIdentity,
                 explicitlyOpened: explicitlyOpened,
+                isPinned: isPinned,
               )) {
                 return false;
               }
-              return explicitlyOpened == candidate.identity ||
+              return isPinned ||
+                  explicitlyOpened == candidate.identity ||
                   candidate.isSelected ||
                   candidate.isBusy ||
                   candidate.serverUpdatedAtMs >= cutoffMs;
@@ -189,6 +197,7 @@ class SessionTabReconciler {
           completionToken: candidate.completionToken,
           errorToken: candidate.errorToken,
           isSelected: candidate.isSelected,
+          isPinned: pinnedIdentities.contains(candidate.identity),
         ),
       );
     }
@@ -205,6 +214,7 @@ class SessionTabReconciler {
         candidateByIdentity: candidateByIdentity,
         closedByIdentity: closedByIdentity,
         explicitlyOpened: explicitlyOpened,
+        pinnedIdentities: pinnedIdentities,
         nowMs: nowMs,
       );
       if (fallback != null) {
@@ -212,6 +222,10 @@ class SessionTabReconciler {
       }
     }
 
+    final partitionedTabs = <SessionTabRecord>[
+      ...tabs.where((tab) => tab.isPinned),
+      ...tabs.where((tab) => !tab.isPinned),
+    ];
     final retainedClosed = <PersistedClosedSessionTab>[];
     for (final identity in closedOrder) {
       final closed = closedByIdentity[identity];
@@ -220,9 +234,11 @@ class SessionTabReconciler {
     }
 
     return SessionTabReconciliationResult(
-      tabs: List<SessionTabRecord>.unmodifiable(tabs),
+      tabs: List<SessionTabRecord>.unmodifiable(partitionedTabs),
       persistedState: PersistedSessionTabsState(
-        open: tabs.map((tab) => tab.toPersisted()).toList(growable: false),
+        open: partitionedTabs
+            .map((tab) => tab.toPersisted())
+            .toList(growable: false),
         closed: List<PersistedClosedSessionTab>.unmodifiable(retainedClosed),
       ),
     );
@@ -284,10 +300,12 @@ class SessionTabReconciler {
     required Map<SessionTabIdentity, PersistedClosedSessionTab>
     closedByIdentity,
     required SessionTabIdentity? explicitlyOpened,
+    required bool isPinned,
   }) {
     final closed = closedByIdentity[identity];
     if (closed == null) return false;
     final shouldReopen =
+        isPinned ||
         explicitlyOpened == identity ||
         (candidate != null &&
             candidate.serverUpdatedAtMs > closed.observedServerUpdatedAtMs);
@@ -307,6 +325,7 @@ class SessionTabReconciler {
     required Map<SessionTabIdentity, PersistedClosedSessionTab>
     closedByIdentity,
     required SessionTabIdentity? explicitlyOpened,
+    required Set<SessionTabIdentity> pinnedIdentities,
     required int nowMs,
   }) {
     final identities = <SessionTabIdentity>[
@@ -321,6 +340,7 @@ class SessionTabReconciler {
       if (identity.directory != directory) continue;
       final persisted = openByIdentity[identity];
       final candidate = candidateByIdentity[identity];
+      final isPinned = pinnedIdentities.contains(identity);
       if (candidate != null && (!candidate.isRoot || candidate.isArchived)) {
         continue;
       }
@@ -329,6 +349,7 @@ class SessionTabReconciler {
         candidate: candidate,
         closedByIdentity: closedByIdentity,
         explicitlyOpened: explicitlyOpened,
+        isPinned: isPinned,
       )) {
         continue;
       }
@@ -360,6 +381,7 @@ class SessionTabReconciler {
         errorToken: candidate?.errorToken,
         seenErrorToken: persisted?.seenErrorToken,
         isSelected: candidate?.isSelected ?? false,
+        isPinned: isPinned,
       );
     }
     return latest;
@@ -486,6 +508,358 @@ extension _ChatProviderSessionTabOps on ChatProvider {
   bool get _isSessionTabRouteVisible =>
       _isForegroundActive && _isChatRouteActive;
 
+  String? _activePinnedSessionScopeId() {
+    return normalizeOptionalFilePath(
+          _scopeIdFromContextKey(_activeContextKey),
+        ) ??
+        normalizeOptionalFilePath(_resolveContextScopeId());
+  }
+
+  void _hydrateActivePinnedSessionIds({
+    required String serverId,
+    required String scopeId,
+  }) {
+    if (_loadedPinnedSessionContextKey == _activeContextKey) return;
+    final normalizedScopeId = normalizeOptionalFilePath(scopeId);
+    _pinnedSessionIds = Set<String>.from(
+      normalizedScopeId == null
+          ? const <String>{}
+          : _pinnedSessionIdsByServerScope[serverId]?[normalizedScopeId] ??
+                const <String>{},
+    );
+    _loadedPinnedSessionContextKey = _activeContextKey;
+  }
+
+  void _recordPinnedSessionMutation() {
+    _pinnedSessionMutationRevisionByContext[_activeContextKey] =
+        (_pinnedSessionMutationRevisionByContext[_activeContextKey] ?? 0) + 1;
+  }
+
+  Map<String, Set<String>> _effectivePinnedSessionScopes(String serverId) {
+    final result = <String, Set<String>>{
+      for (final entry
+          in _pinnedSessionIdsByServerScope[serverId]?.entries ??
+              const Iterable<MapEntry<String, Set<String>>>.empty())
+        entry.key: Set<String>.from(entry.value),
+    };
+    for (final entry in _contextSnapshots.entries) {
+      if (entry.key == _activeContextKey ||
+          _serverIdFromContextKey(entry.key) != serverId) {
+        continue;
+      }
+      final scopeId = normalizeOptionalFilePath(
+        _scopeIdFromContextKey(entry.key),
+      );
+      if (scopeId != null) {
+        result[scopeId] = Set<String>.from(entry.value.pinnedSessionIds);
+      }
+    }
+    if (_serverIdFromContextKey(_activeContextKey) == serverId &&
+        _loadedPinnedSessionContextKey == _activeContextKey) {
+      final scopeId = _activePinnedSessionScopeId();
+      if (scopeId != null) {
+        result[scopeId] = Set<String>.from(_pinnedSessionIds);
+      }
+    }
+    return result;
+  }
+
+  Map<SessionTabIdentity, Set<String>> _pinnedSessionTabScopes(
+    String serverId,
+    List<SessionTabCandidate> candidates,
+  ) {
+    final result = <SessionTabIdentity, Set<String>>{};
+    final effectiveScopes = _effectivePinnedSessionScopes(serverId);
+    for (final scopeEntry in effectiveScopes.entries) {
+      final scopeId = scopeEntry.key;
+      for (final sessionId in scopeEntry.value) {
+        SessionTabIdentity? identity;
+        if (_serverIdFromContextKey(_activeContextKey) == serverId &&
+            _activePinnedSessionScopeId() == scopeId) {
+          final session = _sessions
+              .where((candidate) => candidate.id == sessionId)
+              .firstOrNull;
+          if (session != null) {
+            identity = _sessionTabIdentityForSession(
+              session,
+              contextKey: _activeContextKey,
+            );
+          }
+        }
+        if (identity == null) {
+          for (final entry in _contextSnapshots.entries) {
+            if (entry.key == _activeContextKey ||
+                _serverIdFromContextKey(entry.key) != serverId ||
+                normalizeOptionalFilePath(_scopeIdFromContextKey(entry.key)) !=
+                    scopeId) {
+              continue;
+            }
+            final session = entry.value.sessions
+                .where((candidate) => candidate.id == sessionId)
+                .firstOrNull;
+            if (session != null) {
+              identity = _sessionTabIdentityForSession(
+                session,
+                contextKey: entry.key,
+              );
+              break;
+            }
+          }
+        }
+        identity ??= _resolvePinnedTabIdentityFromKnownTabs(
+          serverId: serverId,
+          scopeId: scopeId,
+          sessionId: sessionId,
+          candidates: candidates,
+        );
+        if (identity != null && identity.isValid) {
+          result.putIfAbsent(identity, () => <String>{}).add(scopeId);
+        }
+      }
+    }
+    return result;
+  }
+
+  SessionTabIdentity? _resolvePinnedTabIdentityFromKnownTabs({
+    required String serverId,
+    required String scopeId,
+    required String sessionId,
+    required List<SessionTabCandidate> candidates,
+  }) {
+    final candidateMatches = candidates
+        .where((candidate) => candidate.identity.sessionId == sessionId)
+        .map((candidate) => candidate.identity)
+        .toSet();
+    final exactCandidate = candidateMatches
+        .where((identity) => identity.directory == scopeId)
+        .firstOrNull;
+    if (exactCandidate != null) return exactCandidate;
+    if (candidateMatches.length == 1) return candidateMatches.single;
+
+    final persistedMatches = _sessionTabsPersistedState.open
+        .where((tab) => tab.sessionId.trim() == sessionId)
+        .map(
+          (tab) => SessionTabIdentity(
+            serverId: serverId,
+            directory: tab.directory,
+            sessionId: sessionId,
+          ),
+        )
+        .where((identity) => identity.isValid)
+        .toSet();
+    final exactPersisted = persistedMatches
+        .where((identity) => identity.directory == scopeId)
+        .firstOrNull;
+    if (exactPersisted != null) return exactPersisted;
+    if (persistedMatches.length == 1) return persistedMatches.single;
+    return null;
+  }
+
+  void _writeThroughPinnedSessionScope({
+    required String serverId,
+    required String scopeId,
+    required Iterable<String> ids,
+  }) {
+    final normalizedServerId = serverId.trim();
+    final normalizedScopeId = normalizeOptionalFilePath(scopeId);
+    if (normalizedServerId.isEmpty || normalizedScopeId == null) return;
+    _pinnedSessionIdsByServerScope.putIfAbsent(
+      normalizedServerId,
+      () => <String, Set<String>>{},
+    )[normalizedScopeId] = ids
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet();
+  }
+
+  bool _setActiveSessionPin({
+    required String serverId,
+    required String scopeId,
+    required String sessionId,
+    required bool pinned,
+  }) {
+    _hydrateActivePinnedSessionIds(serverId: serverId, scopeId: scopeId);
+    final changed = pinned
+        ? _pinnedSessionIds.add(sessionId)
+        : _pinnedSessionIds.remove(sessionId);
+    if (changed) {
+      _recordPinnedSessionMutation();
+      _loadedPinnedSessionContextKey = _activeContextKey;
+      _writeThroughPinnedSessionScope(
+        serverId: serverId,
+        scopeId: scopeId,
+        ids: _pinnedSessionIds,
+      );
+    }
+    return changed;
+  }
+
+  bool _setSessionTabPin(
+    SessionTabIdentity identity, {
+    required bool pinned,
+    String? pinScopeId,
+    Iterable<String>? pinScopeIds,
+    bool persist = false,
+  }) {
+    if (!identity.isValid) return false;
+    final explicitScopes = pinScopeIds
+        ?.map(normalizeFilePath)
+        .where((scopeId) => scopeId.isNotEmpty)
+        .toSet();
+    if (!pinned && explicitScopes != null && explicitScopes.isNotEmpty) {
+      var changed = false;
+      for (final scopeId in explicitScopes) {
+        changed =
+            _setSessionTabPin(
+              identity,
+              pinned: false,
+              pinScopeId: scopeId,
+              persist: persist,
+            ) ||
+            changed;
+      }
+      return changed;
+    }
+    var targetScopeId = normalizeOptionalFilePath(pinScopeId);
+    final activeScopeId = _activePinnedSessionScopeId();
+    final activeSessionMatches =
+        identity.serverId == _activeServerId &&
+        _sessions.any(
+          (session) =>
+              _sessionTabIdentityForSession(
+                session,
+                contextKey: _activeContextKey,
+              ) ==
+              identity,
+        );
+    if (targetScopeId == null && activeSessionMatches) {
+      targetScopeId = activeScopeId;
+    }
+    MapEntry<String, _ChatContextSnapshot>? snapshotEntry;
+    if (targetScopeId == null) {
+      snapshotEntry = _contextSnapshots.entries
+          .where(
+            (entry) =>
+                entry.key != _activeContextKey &&
+                _serverIdFromContextKey(entry.key) == identity.serverId &&
+                entry.value.sessions.any(
+                  (session) =>
+                      _sessionTabIdentityForSession(
+                        session,
+                        contextKey: entry.key,
+                      ) ==
+                      identity,
+                ),
+          )
+          .firstOrNull;
+      targetScopeId = normalizeOptionalFilePath(
+        snapshotEntry == null
+            ? null
+            : _scopeIdFromContextKey(snapshotEntry.key),
+      );
+    }
+    if (targetScopeId == null) {
+      final matchingScopes = _effectivePinnedSessionScopes(identity.serverId)
+          .entries
+          .where((entry) => entry.value.contains(identity.sessionId))
+          .map((entry) => entry.key)
+          .toList(growable: false);
+      if (matchingScopes.contains(identity.directory)) {
+        targetScopeId = identity.directory;
+      } else if (matchingScopes.length == 1) {
+        targetScopeId = matchingScopes.single;
+      }
+    }
+    if (targetScopeId == null) return false;
+
+    Set<String> ids;
+    if (identity.serverId == _activeServerId &&
+        targetScopeId == activeScopeId) {
+      _hydrateActivePinnedSessionIds(
+        serverId: identity.serverId,
+        scopeId: targetScopeId,
+      );
+      ids = _pinnedSessionIds;
+    } else {
+      snapshotEntry ??= _contextSnapshots.entries
+          .where(
+            (entry) =>
+                entry.key != _activeContextKey &&
+                _serverIdFromContextKey(entry.key) == identity.serverId &&
+                normalizeOptionalFilePath(_scopeIdFromContextKey(entry.key)) ==
+                    targetScopeId,
+          )
+          .firstOrNull;
+      ids =
+          snapshotEntry?.value.pinnedSessionIds ??
+          _pinnedSessionIdsByServerScope
+              .putIfAbsent(identity.serverId, () => <String, Set<String>>{})
+              .putIfAbsent(targetScopeId, () => <String>{});
+    }
+    final changed = pinned
+        ? ids.add(identity.sessionId)
+        : ids.remove(identity.sessionId);
+    if (!changed) return false;
+    if (identical(ids, _pinnedSessionIds)) {
+      _recordPinnedSessionMutation();
+    }
+    _writeThroughPinnedSessionScope(
+      serverId: identity.serverId,
+      scopeId: targetScopeId,
+      ids: ids,
+    );
+    if (persist) {
+      unawaited(
+        _persistPinnedSessionScope(
+          serverId: identity.serverId,
+          scopeId: targetScopeId,
+          ids: ids,
+        ),
+      );
+    }
+    return true;
+  }
+
+  Future<void> _persistPinnedSessionScope({
+    required String serverId,
+    required String scopeId,
+    required Iterable<String> ids,
+  }) {
+    final normalizedServerId = serverId.trim();
+    final normalizedScopeId = normalizeOptionalFilePath(scopeId);
+    if (normalizedServerId.isEmpty || normalizedScopeId == null) {
+      return Future<void>.value();
+    }
+    final payload = json.encode(
+      ids.map((id) => id.trim()).where((id) => id.isNotEmpty).toList(),
+    );
+    final queueKey = '$normalizedServerId\u0000$normalizedScopeId';
+    final previous =
+        _pinnedSessionWriteQueueByScope[queueKey] ?? Future<void>.value();
+    Future<void> persist() => localDataSource.savePinnedSessionsJson(
+      payload,
+      serverId: normalizedServerId,
+      scopeId: normalizedScopeId,
+    );
+    final operation = previous.then(
+      (_) => persist(),
+      onError: (Object _, StackTrace _) => persist(),
+    );
+    final next = operation.catchError((error, stackTrace) {
+      AppLogger.error(
+        'Failed to persist pinned sessions for server=$normalizedServerId',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    });
+    _pinnedSessionWriteQueueByScope[queueKey] = next;
+    return next.whenComplete(() {
+      if (identical(_pinnedSessionWriteQueueByScope[queueKey], next)) {
+        _pinnedSessionWriteQueueByScope.remove(queueKey);
+      }
+    });
+  }
+
   Future<void> _ensureSessionTabsLoaded({String? serverId}) async {
     final targetServerId = (serverId ?? _activeServerId).trim();
     if (targetServerId.isEmpty) return;
@@ -495,6 +869,39 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     }
     final generation = ++_sessionTabsGeneration;
     String? raw;
+    var scopedPins = const <String, Set<String>>{};
+    var scopedPinEnumerationSucceeded = false;
+    try {
+      scopedPins = await localDataSource.getPinnedSessionsByScope(
+        serverId: targetServerId,
+      );
+      scopedPinEnumerationSucceeded = true;
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to enumerate pinned session scopes for server=$targetServerId',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      final activeScopeId = _activePinnedSessionScopeId();
+      if (activeScopeId != null) {
+        try {
+          final activePinsRaw = await localDataSource.getPinnedSessionsJson(
+            serverId: targetServerId,
+            scopeId: activeScopeId,
+          );
+          scopedPins = <String, Set<String>>{
+            activeScopeId: _decodeStoredModelKeys(activePinsRaw).toSet(),
+          };
+          scopedPinEnumerationSucceeded = true;
+        } catch (fallbackError, fallbackStackTrace) {
+          AppLogger.warn(
+            'Failed to load active pinned sessions for server=$targetServerId',
+            error: fallbackError,
+            stackTrace: fallbackStackTrace,
+          );
+        }
+      }
+    }
     try {
       raw = await _enqueueSessionTabsPersistenceOperation<String?>(
         serverId: targetServerId,
@@ -524,6 +931,37 @@ extension _ChatProviderSessionTabOps on ChatProvider {
       return;
     }
     _sessionTabsLoadedServerId = targetServerId;
+    final normalizedScopedPins = <String, Set<String>>{};
+    for (final entry in scopedPins.entries) {
+      final scopeId = normalizeOptionalFilePath(entry.key);
+      if (scopeId != null) {
+        normalizedScopedPins
+            .putIfAbsent(scopeId, () => <String>{})
+            .addAll(entry.value);
+      }
+    }
+    final liveScopedPins = _pinnedSessionIdsByServerScope[targetServerId];
+    if (liveScopedPins != null) {
+      for (final entry in liveScopedPins.entries) {
+        normalizedScopedPins[entry.key] = Set<String>.from(entry.value);
+      }
+    }
+    if (scopedPinEnumerationSucceeded || liveScopedPins != null) {
+      _pinnedSessionIdsByServerScope[targetServerId] = normalizedScopedPins;
+    }
+    final activeScopeId = _activePinnedSessionScopeId();
+    final canHydrateActiveScope =
+        scopedPinEnumerationSucceeded ||
+        (activeScopeId != null &&
+            liveScopedPins?.containsKey(activeScopeId) == true);
+    if (canHydrateActiveScope &&
+        _serverIdFromContextKey(_activeContextKey) == targetServerId &&
+        activeScopeId != null) {
+      _hydrateActivePinnedSessionIds(
+        serverId: targetServerId,
+        scopeId: activeScopeId,
+      );
+    }
     _sessionTabsPersistedState = PersistedSessionTabsState.decode(raw);
     _reconcileSessionTabs();
   }
@@ -532,19 +970,36 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     SessionTabIdentity? explicitlyOpened,
     bool markCurrentViewed = false,
     bool forcePersistence = false,
+    bool notify = true,
   }) {
     final serverId = _activeServerId.trim();
     if (serverId.isEmpty || _sessionTabsLoadedServerId != serverId) return;
     final previousStateJson = _sessionTabsPersistedState.encode();
+    final candidates = _collectSessionTabCandidates(serverId).toList();
+    final pinnedScopes = _pinnedSessionTabScopes(serverId, candidates);
     final result = SessionTabReconciler.reconcile(
       serverId: serverId,
       persistedState: _sessionTabsPersistedState,
-      candidates: _collectSessionTabCandidates(serverId),
+      candidates: candidates,
       nowMs: _sessionTabsNow().millisecondsSinceEpoch,
+      pinnedIdentities: pinnedScopes.keys.toSet(),
       explicitlyOpened: explicitlyOpened,
       bootstrapDirectory: _sessionTabBootstrapDirectory,
     );
-    var nextTabs = result.tabs;
+    final activePinScopeId = _activePinnedSessionScopeId();
+    var nextTabs = result.tabs
+        .map((tab) {
+          if (!tab.isPinned) return tab;
+          final scopes = pinnedScopes[tab.identity] ?? const <String>{};
+          final primaryScope =
+              activePinScopeId != null && scopes.contains(activePinScopeId)
+              ? activePinScopeId
+              : scopes.contains(tab.identity.directory)
+              ? tab.identity.directory
+              : scopes.firstOrNull;
+          return tab.copyWith(pinScopeId: primaryScope, pinScopeIds: scopes);
+        })
+        .toList(growable: false);
     var nextPersistedState = result.persistedState;
     if (markCurrentViewed) {
       final viewed = _markCurrentSessionTabViewedIn(nextTabs);
@@ -562,7 +1017,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     if (persistedChanged || forcePersistence) {
       _scheduleSessionTabsPersistence();
     }
-    if (runtimeChanged) _notifyListeners();
+    if (runtimeChanged && notify) _notifyListeners();
   }
 
   void _markAuthoritativeSessionTabBootstrapOpened(String? directory) {
@@ -894,6 +1349,17 @@ extension _ChatProviderSessionTabOps on ChatProvider {
                     isArchived: session.archived,
                     isRoot: session.parentId?.trim().isEmpty ?? true,
                   );
+            if (session.archived &&
+                contextKey == _activeContextKey &&
+                _hasLoadedSessionsAuthoritatively) {
+              _setSessionTabPin(
+                identity,
+                pinned: false,
+                pinScopeId:
+                    _activePinnedSessionScopeId() ?? _resolveContextScopeId(),
+                persist: true,
+              );
+            }
           }
         } catch (error, stackTrace) {
           AppLogger.warn(
@@ -1095,10 +1561,51 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     return tab?.serverUpdatedAtMs ?? 0;
   }
 
-  void _removeSessionTabAuthoritatively(SessionTabIdentity identity) {
-    if (!identity.isValid || _sessionTabsLoadedServerId != identity.serverId) {
-      return;
+  void _removeSessionTabAuthoritatively(
+    SessionTabIdentity identity, {
+    bool activeContext = false,
+  }) {
+    if (!identity.isValid) return;
+    final runtimeTab = _sessionTabs
+        .where((candidate) => candidate.identity == identity)
+        .firstOrNull;
+    if (activeContext) {
+      if (runtimeTab != null && runtimeTab.pinScopeIds.isNotEmpty) {
+        _setSessionTabPin(
+          identity,
+          pinned: false,
+          pinScopeIds: runtimeTab.pinScopeIds,
+          persist: true,
+        );
+      } else {
+        final scopeId =
+            _activePinnedSessionScopeId() ?? _resolveContextScopeId();
+        final changed = _setActiveSessionPin(
+          serverId: identity.serverId,
+          scopeId: scopeId,
+          sessionId: identity.sessionId,
+          pinned: false,
+        );
+        if (changed) {
+          unawaited(
+            _persistPinnedSessionScope(
+              serverId: identity.serverId,
+              scopeId: scopeId,
+              ids: _pinnedSessionIds,
+            ),
+          );
+        }
+      }
+    } else if (_hasLoadedSessionsAuthoritatively) {
+      _setSessionTabPin(
+        identity,
+        pinned: false,
+        pinScopeId: runtimeTab?.pinScopeId,
+        pinScopeIds: runtimeTab?.pinScopeIds,
+        persist: true,
+      );
     }
+    if (_sessionTabsLoadedServerId != identity.serverId) return;
     final previous = _sessionTabsPersistedState.encode();
     _sessionTabsPersistedState = PersistedSessionTabsState(
       open: _sessionTabsPersistedState.open
@@ -1138,6 +1645,18 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         !_sessionTabs.any((tab) => tab.identity == identity)) {
       return;
     }
+    final tab = _sessionTabs
+        .where((candidate) => candidate.identity == identity)
+        .first;
+    if (tab.isPinned) {
+      _setSessionTabPin(
+        identity,
+        pinned: false,
+        pinScopeId: tab.pinScopeId,
+        pinScopeIds: tab.pinScopeIds,
+        persist: true,
+      );
+    }
     final nextState = SessionTabReconciler.close(
       state: _sessionTabsPersistedState,
       identity: identity,
@@ -1174,6 +1693,14 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     if (candidate != null && (!candidate.isRoot || candidate.isArchived)) {
       return false;
     }
+    final repinned =
+        tab.isPinned &&
+        _setSessionTabPin(
+          identity,
+          pinned: true,
+          pinScopeId: tab.pinScopeId,
+          persist: true,
+        );
 
     final open = _sessionTabsPersistedState.open
         .where(
@@ -1192,7 +1719,18 @@ extension _ChatProviderSessionTabOps on ChatProvider {
           .toList(growable: false),
     );
     _reconcileSessionTabs(explicitlyOpened: identity, forcePersistence: true);
-    return _sessionTabs.any((candidate) => candidate.identity == identity);
+    final restored = _sessionTabs.any(
+      (candidate) => candidate.identity == identity,
+    );
+    if (!restored && repinned) {
+      _setSessionTabPin(
+        identity,
+        pinned: false,
+        pinScopeId: tab.pinScopeId,
+        persist: true,
+      );
+    }
+    return restored;
   }
 
   Future<void> _removeSessionTabsForProjectHistory({
