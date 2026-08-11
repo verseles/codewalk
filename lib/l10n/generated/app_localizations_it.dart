@@ -3222,7 +3222,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsAboutDescription =>
-      'Versione, aggiornamenti e collegamenti';
+      'Versione, aggiornamenti, assistenza e dati dell\'app';
 
   @override
   String get settingsAboutDismiss => 'Ignora';
@@ -3395,7 +3395,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'Densità e visibilità delle bolle sulla cronologia';
+      'Scegli temi, colori, dimensione del testo e visualizzazione della chat';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3626,7 +3626,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'Impostazioni predefinite di OpenCode, provenienza e sicurezza di sincronizzazione del composer';
+      'Controlla lingua, comportamento della chat, utilizzo dei dati e impostazioni predefinite di OpenCode';
 
   @override
   String get settingsBehaviorEnableDataSaver =>
@@ -3792,7 +3792,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'Diagnostica di runtime e dati di risoluzione dei problemi';
+      'Rivedi le diagnosi dell\'app e i dettagli per la risoluzione dei problemi';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3874,7 +3874,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'Controlli di notifica e audio per categoria';
+      'Scegli quali eventi ti avvisano e come';
 
   @override
   String get settingsNotificationsDisableOptimization =>
@@ -4073,7 +4073,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsServersDescription =>
-      'Server OpenCode e instradamento dello stato di salute';
+      'Connettiti a OpenCode e gestisci i tuoi server';
 
   @override
   String get settingsServersTitle => 'Server';
@@ -4101,7 +4101,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsShortcutsDescription =>
-      'Associazioni di tasti dell\'applicazione portatile';
+      'Trova e personalizza le scorciatoie da tastiera';
 
   @override
   String get settingsShortcutsEdit => 'Modifica scorciatoia';
@@ -4135,7 +4135,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'Motore, timeout di silenzio e opzioni del modello';
+      'Configura input vocale, modelli offline e lettura ad alta voce';
 
   @override
   String get settingsSpeechRefreshStatus => 'Aggiorna stato';
@@ -4150,6 +4150,79 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsTitle => 'Impostazioni';
+
+  @override
+  String get settingsGroupAlertTypes => 'Tipi di avviso';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'Comportamento in background';
+
+  @override
+  String get settingsGroupChatDisplay => 'Visualizzazione della chat';
+
+  @override
+  String get settingsGroupCurrentConnection => 'Connessione attuale';
+
+  @override
+  String get settingsGroupDataAndSync => 'Dati e sincronizzazione';
+
+  @override
+  String get settingsGroupDataReset => 'Dati e ripristino';
+
+  @override
+  String get settingsGroupDelivery => 'Consegna';
+
+  @override
+  String get settingsGroupHelp => 'Assistenza';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'Lingua e chat';
+
+  @override
+  String get settingsGroupLayoutAndText => 'Layout e testo';
+
+  @override
+  String get settingsGroupOfflineModels => 'Modelli offline';
+
+  @override
+  String get settingsGroupOpenCodeDefaults =>
+      'Impostazioni predefinite di OpenCode';
+
+  @override
+  String get settingsGroupReadAloud => 'Lettura ad alta voce';
+
+  @override
+  String get settingsGroupSavedServers => 'Server salvati';
+
+  @override
+  String get settingsGroupThemeAndColor => 'Tema e colore';
+
+  @override
+  String get settingsGroupThisDevice => 'Questo dispositivo';
+
+  @override
+  String get settingsGroupVersionUpdates => 'Versione e aggiornamenti';
+
+  @override
+  String get settingsGroupVoiceInput => 'Input vocale';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Esperienza';
+
+  @override
+  String get settingsNavigationGroupInput => 'Input';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Configurazione';
+
+  @override
+  String get settingsNavigationGroupSupport => 'Assistenza e diagnostica';
+
+  @override
+  String get settingsNavigationNoResults => 'Nessuna impostazione trovata';
+
+  @override
+  String get settingsNavigationSearchHint => 'Cerca impostazioni';
 
   @override
   String get settingsUsernameClearHint =>

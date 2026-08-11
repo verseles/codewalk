@@ -1038,7 +1038,7 @@ const englishTemplate = <String, String>{
   'settingsAboutCheckOnOpenDescription':
       'Automatically check when the app starts',
   'settingsAboutChecking': 'Checking...',
-  'settingsAboutDescription': 'Version, updates and links',
+  'settingsAboutDescription': 'Version, updates, help, and app data',
   'settingsAboutDismiss': 'Dismiss',
   'settingsAboutDownloading': 'Downloading... {percent}%',
   'settingsAboutEraseAllData': 'Erase all data and restart',
@@ -1100,7 +1100,8 @@ const englishTemplate = <String, String>{
   'settingsAppearanceDensityExtraSpacious': 'Extra Spacious',
   'settingsAppearanceDensityNormal': 'Normal',
   'settingsAppearanceDensitySpacious': 'Spacious',
-  'settingsAppearanceDescription': 'Density and timeline bubble visibility',
+  'settingsAppearanceDescription':
+      'Choose themes, colors, text size, and chat display',
   'settingsAppearanceFontSize': 'Text size',
   'settingsAppearanceFontSizeDescription':
       'Adjust the size of system text, conversation text, and terminal text.',
@@ -1171,7 +1172,7 @@ const englishTemplate = <String, String>{
   'settingsBehaviorDefaultModelHelp':
       'Shared across OpenCode clients through config.',
   'settingsBehaviorDescription':
-      'OpenCode defaults, provenance, and composer sync safety',
+      'Control language, chat behavior, data use, and OpenCode defaults',
   'settingsBehaviorEnableDataSaver': 'Enable cellular data saver',
   'settingsBehaviorMultiDeviceSync': 'Enable experimental multi-device sync',
   'settingsBehaviorMultiDeviceSyncDescription':
@@ -1235,7 +1236,8 @@ const englishTemplate = <String, String>{
   'settingsLanguageSearchHint': 'Search languages',
   'settingsLanguageSystemDefault': 'System default',
   'settingsLanguageTitle': 'Language',
-  'settingsLogsDescription': 'Runtime diagnostics and troubleshooting data',
+  'settingsLogsDescription':
+      'Review app diagnostics and troubleshooting details',
   'settingsLogsTitle': 'Logs',
   'settingsNoAgentsFound': 'No agents found',
   'settingsNotificationsAgentSubtitle': 'When a response finishes',
@@ -1265,7 +1267,7 @@ const englishTemplate = <String, String>{
   'settingsNotificationsCloseToTray': 'Close to tray',
   'settingsNotificationsCloseToTrayDescription':
       'Hide window and keep running in system tray.',
-  'settingsNotificationsDescription': 'Per-category notify and sound controls',
+  'settingsNotificationsDescription': 'Choose which events alert you and how',
   'settingsNotificationsDisableOptimization': 'Disable optimization',
   'settingsNotificationsErrors': 'Errors',
   'settingsNotificationsErrorsSubtitle': 'When a session reports a failure',
@@ -1332,10 +1334,10 @@ const englishTemplate = <String, String>{
   'settingsServersActive': 'Active',
   'settingsServersChooseActive': 'Choose active server',
   'settingsServersDefault': 'Default',
-  'settingsServersDescription': 'OpenCode servers and health routing',
+  'settingsServersDescription': 'Connect to OpenCode and manage your servers',
   'settingsServersTitle': 'Servers',
   'settingsSetupWizard': 'Setup Wizard',
-  'settingsShortcutsDescription': 'Portable app key bindings',
+  'settingsShortcutsDescription': 'Find and customize keyboard shortcuts',
   'settingsShortcutsEdit': 'Edit shortcut',
   'settingsShortcutsKeyboard': 'Keyboard shortcuts',
   'settingsShortcutsReset': 'Reset shortcut',
@@ -1348,7 +1350,8 @@ const englishTemplate = <String, String>{
       'OpenCode automatic fallback is active because `small_model` is unset.',
   'settingsSoundPickerNotAvailable':
       'System sound picker is not available on this platform.',
-  'settingsSpeechDescription': 'Engine, silence timeout, and model options',
+  'settingsSpeechDescription':
+      'Set up voice input, offline models, and read aloud',
   'settingsSpeechRefreshStatus': 'Refresh status',
   'settingsSpeechSilenceTimeout': 'Silence timeout: {value}s',
   'settingsSpeechTitle': 'Speech to text',
@@ -1617,6 +1620,30 @@ const englishTemplate = <String, String>{
   'workspaceProjectHint': '/repo/my-project',
   'workspaceRemoveFromHistory': 'Remove {name} from history',
   'workspaceSuggestions': 'Suggestions',
+  'settingsGroupAlertTypes': 'Alert types',
+  'settingsGroupBackgroundBehavior': 'Background behavior',
+  'settingsGroupChatDisplay': 'Chat display',
+  'settingsGroupCurrentConnection': 'Current connection',
+  'settingsGroupDataAndSync': 'Data and sync',
+  'settingsGroupDataReset': 'Data and reset',
+  'settingsGroupDelivery': 'Delivery',
+  'settingsGroupHelp': 'Help',
+  'settingsGroupLanguageAndChat': 'Language and chat',
+  'settingsGroupLayoutAndText': 'Layout and text',
+  'settingsGroupOfflineModels': 'Offline models',
+  'settingsGroupOpenCodeDefaults': 'OpenCode defaults',
+  'settingsGroupReadAloud': 'Read aloud',
+  'settingsGroupSavedServers': 'Saved servers',
+  'settingsGroupThemeAndColor': 'Theme and color',
+  'settingsGroupThisDevice': 'This device',
+  'settingsGroupVersionUpdates': 'Version and updates',
+  'settingsGroupVoiceInput': 'Voice input',
+  'settingsNavigationGroupExperience': 'Experience',
+  'settingsNavigationGroupInput': 'Input',
+  'settingsNavigationGroupSetup': 'Setup',
+  'settingsNavigationGroupSupport': 'Help and diagnostics',
+  'settingsNavigationNoResults': 'No settings found',
+  'settingsNavigationSearchHint': 'Search settings',
 };
 
 /// Per-locale translations.
@@ -2631,7 +2658,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'التحقق تلقائياً عند بدء تشغيل التطبيق',
     'settingsAboutChecking': 'جاري التحقق...',
-    'settingsAboutDescription': 'الإصدار، والتحديثات، والروابط',
+    'settingsAboutDescription': 'الإصدار والتحديثات والمساعدة وبيانات التطبيق',
     'settingsAboutDismiss': 'تجاهل',
     'settingsAboutDownloading': 'جاري التنزيل... {percent}%',
     'settingsAboutEraseAllData': 'مسح جميع البيانات وإعادة التشغيل',
@@ -2693,7 +2720,8 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': 'متسع جداً',
     'settingsAppearanceDensityNormal': 'عادي',
     'settingsAppearanceDensitySpacious': 'متسع',
-    'settingsAppearanceDescription': 'الكثافة وظهور فقاعة المخطط الزمني',
+    'settingsAppearanceDescription':
+        'اختر المظاهر والألوان وحجم النص وعرض الدردشة',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -2762,7 +2790,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'مشارك عبر عملاء OpenCode من خلال التكوين.',
     'settingsBehaviorDescription':
-        'افتراضيات OpenCode، والمنشأ، وسلامة مزامنة الملحِّن (Composer)',
+        'تحكم في اللغة وسلوك الدردشة واستخدام البيانات وإعدادات OpenCode الافتراضية',
     'settingsBehaviorEnableDataSaver': 'تمكين موفر بيانات المحمول',
     'settingsBehaviorMultiDeviceSync':
         'تمكين المزامنة التجريبية متعددة الأجهزة',
@@ -2828,7 +2856,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSystemDefault': 'افتراضي النظام',
     'settingsLanguageTitle': 'اللغة',
     'settingsLogsDescription':
-        'تشخيصات وقت التشغيل وبيانات استكشاف الأخطاء وإصلاحها',
+        'راجع التشخيصات وتفاصيل استكشاف الأخطاء وإصلاحها',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'لم يتم العثور على وكلاء',
     'settingsNotificationsAgentSubtitle': 'عند انتهاء الاستجابة',
@@ -2859,7 +2887,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'إخفاء النافذة ومتابعة التشغيل في علبة النظام.',
     'settingsNotificationsDescription':
-        'عناصر التحكم في الصوت والإشعارات لكل فئة',
+        'اختر الأحداث التي تنبهك وطريقة التنبيه',
     'settingsNotificationsDisableOptimization': 'تعطيل التحسين',
     'settingsNotificationsErrors': 'الأخطاء',
     'settingsNotificationsErrorsSubtitle': 'عندما تبلغ جلسة ما عن فشل',
@@ -2925,10 +2953,10 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'نشط',
     'settingsServersChooseActive': 'اختر الخادم النشط',
     'settingsServersDefault': 'افتراضي',
-    'settingsServersDescription': 'خوادم OpenCode وتوجيه الحالة الصحية',
+    'settingsServersDescription': 'اتصل بـ OpenCode وأدر خوادمك',
     'settingsServersTitle': 'الخوادم',
     'settingsSetupWizard': 'معالج الإعداد',
-    'settingsShortcutsDescription': 'روابط مفاتيح التطبيق المحمول',
+    'settingsShortcutsDescription': 'ابحث عن اختصارات لوحة المفاتيح وخصصها',
     'settingsShortcutsEdit': 'تعديل الاختصار',
     'settingsShortcutsKeyboard': 'اختصارات لوحة المفاتيح',
     'settingsShortcutsReset': 'إعادة تعيين الاختصار',
@@ -2941,7 +2969,8 @@ const translations = <String, Map<String, String>>{
         'التراجع التلقائي لـ OpenCode نشط لأن `small_model` غير محدد.',
     'settingsSoundPickerNotAvailable':
         'منتقي أصوات النظام غير متاح على هذه المنصة.',
-    'settingsSpeechDescription': 'المحرك، ومهلة الصمت، وخيارات النموذج',
+    'settingsSpeechDescription':
+        'اضبط الإدخال الصوتي والنماذج دون اتصال والقراءة بصوت عالٍ',
     'settingsSpeechRefreshStatus': 'تحديث الحالة',
     'settingsSpeechSilenceTimeout': 'مهلة الصمت: {value} ثانية',
     'settingsSpeechTitle': 'تحويل الكلام إلى نص',
@@ -3197,6 +3226,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'إزالة {name} من السجل',
     'workspaceSuggestions': 'اقتراحات',
+    'settingsGroupAlertTypes': 'أنواع التنبيهات',
+    'settingsGroupBackgroundBehavior': 'السلوك في الخلفية',
+    'settingsGroupChatDisplay': 'عرض الدردشة',
+    'settingsGroupCurrentConnection': 'الاتصال الحالي',
+    'settingsGroupDataAndSync': 'البيانات والمزامنة',
+    'settingsGroupDataReset': 'البيانات وإعادة التعيين',
+    'settingsGroupDelivery': 'التوصيل',
+    'settingsGroupHelp': 'المساعدة',
+    'settingsGroupLanguageAndChat': 'اللغة والدردشة',
+    'settingsGroupLayoutAndText': 'التخطيط والنص',
+    'settingsGroupOfflineModels': 'النماذج دون اتصال',
+    'settingsGroupOpenCodeDefaults': 'إعدادات OpenCode الافتراضية',
+    'settingsGroupReadAloud': 'القراءة بصوت عالٍ',
+    'settingsGroupSavedServers': 'الخوادم المحفوظة',
+    'settingsGroupThemeAndColor': 'المظهر واللون',
+    'settingsGroupThisDevice': 'هذا الجهاز',
+    'settingsGroupVersionUpdates': 'الإصدار والتحديثات',
+    'settingsGroupVoiceInput': 'الإدخال الصوتي',
+    'settingsNavigationGroupExperience': 'التجربة',
+    'settingsNavigationGroupInput': 'الإدخال',
+    'settingsNavigationGroupSetup': 'الإعداد',
+    'settingsNavigationGroupSupport': 'المساعدة والتشخيص',
+    'settingsNavigationNoResults': 'لا توجد إعدادات',
+    'settingsNavigationSearchHint': 'ابحث في الإعدادات',
   },
   'bn': {
     'aboutGitHub': 'গিটহাব',
@@ -4266,7 +4319,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'অ্যাপটি শুরু হলে স্বয়ংক্রিয়ভাবে পরীক্ষা করুন',
     'settingsAboutChecking': 'পরীক্ষা করা হচ্ছে...',
-    'settingsAboutDescription': 'সংস্করণ, আপডেট এবং লিঙ্ক',
+    'settingsAboutDescription': 'সংস্করণ, আপডেট, সহায়তা এবং অ্যাপের তথ্য',
     'settingsAboutDismiss': 'খারিজ',
     'settingsAboutDownloading': 'ডাউনলোড হচ্ছে... {percent}%',
     'settingsAboutEraseAllData': 'সমস্ত ডেটা মুছুন এবং পুনরায় চালু করুন',
@@ -4329,7 +4382,8 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': 'অতিরিক্ত প্রশস্ত',
     'settingsAppearanceDensityNormal': 'স্বাভাবিক',
     'settingsAppearanceDensitySpacious': 'প্রশস্ত',
-    'settingsAppearanceDescription': 'ঘনত্ব এবং টাইমলাইন বুদবুদ দৃশ্যমানতা',
+    'settingsAppearanceDescription':
+        'থিম, রঙ, টেক্সট সাইজ এবং চ্যাট প্রদর্শন চয়ন করুন',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -4399,7 +4453,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'কনফিগারের মাধ্যমে OpenCode ক্লায়েন্ট জুড়ে শেয়ার করা হয়েছে।',
     'settingsBehaviorDescription':
-        'OpenCode ডিফল্ট, উদ্ভব, এবং সুরকার সিঙ্ক নিরাপত্তা',
+        'ভাষা, চ্যাট আচরণ, ডেটা ব্যবহার এবং OpenCode ডিফল্ট নিয়ন্ত্রণ করুন',
     'settingsBehaviorEnableDataSaver': 'সেলুলার ডেটা সেভার সক্ষম করুন৷',
     'settingsBehaviorMultiDeviceSync':
         'পরীক্ষামূলক মাল্টি-ডিভাইস সিঙ্ক সক্ষম করুন',
@@ -4464,7 +4518,8 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': 'ভাষা অনুসন্ধান করুন',
     'settingsLanguageSystemDefault': 'সিস্টেম ডিফল্ট',
     'settingsLanguageTitle': 'ভাষা',
-    'settingsLogsDescription': 'রানটাইম ডায়াগনস্টিকস এবং ট্রাবলশুটিং ডেটা',
+    'settingsLogsDescription':
+        'অ্যাপ ডায়াগনস্টিকস এবং সমস্যা সমাধানের বিবরণ পর্যালোচনা করুন',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'কোনো এজেন্ট পাওয়া যায়নি',
     'settingsNotificationsAgentSubtitle': 'একটি প্রতিক্রিয়া শেষ হলে',
@@ -4497,7 +4552,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'উইন্ডো লুকান এবং সিস্টেম ট্রেতে চালাতে থাকুন।',
     'settingsNotificationsDescription':
-        'প্রতি বিভাগ বিজ্ঞপ্তি এবং শব্দ নিয়ন্ত্রণ',
+        'কোন ইভেন্ট আপনাকে সতর্ক করবে এবং কীভাবে, তা চয়ন করুন',
     'settingsNotificationsDisableOptimization': 'অপ্টিমাইজেশান অক্ষম করুন',
     'settingsNotificationsErrors': 'ত্রুটি',
     'settingsNotificationsErrorsSubtitle':
@@ -4566,10 +4621,11 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'সক্রিয়',
     'settingsServersChooseActive': 'সক্রিয় সার্ভার নির্বাচন করুন',
     'settingsServersDefault': 'ডিফল্ট',
-    'settingsServersDescription': 'OpenCode সার্ভার এবং স্বাস্থ্য রাউটিং',
+    'settingsServersDescription':
+        'OpenCode-এ সংযোগ করুন এবং আপনার সার্ভার পরিচালনা করুন',
     'settingsServersTitle': 'সার্ভার',
     'settingsSetupWizard': 'সেটআপ উইজার্ড',
-    'settingsShortcutsDescription': 'পোর্টেবল অ্যাপ কী বাইন্ডিং',
+    'settingsShortcutsDescription': 'কীবোর্ড শর্টকাট খুঁজুন এবং কাস্টমাইজ করুন',
     'settingsShortcutsEdit': 'শর্টকাট সম্পাদনা করুন',
     'settingsShortcutsKeyboard': 'কীবোর্ড শর্টকাট',
     'settingsShortcutsReset': 'শর্টকাট রিসেট করুন',
@@ -4582,7 +4638,8 @@ const translations = <String, Map<String, String>>{
         'OpenCode স্বয়ংক্রিয় ফলব্যাক সক্রিয় কারণ `small_model` সেট করা নেই।',
     'settingsSoundPickerNotAvailable':
         'সিস্টেম সাউন্ড পিকার এই প্ল্যাটফর্মে উপলব্ধ নয়।',
-    'settingsSpeechDescription': 'ইঞ্জিন, সাইলেন্স টাইমআউট এবং মডেল অপশন',
+    'settingsSpeechDescription':
+        'ভয়েস ইনপুট, অফলাইন মডেল এবং উচ্চস্বরে পড়া সেট আপ করুন',
     'settingsSpeechRefreshStatus': 'স্থিতি রিফ্রেশ করুন',
     'settingsSpeechSilenceTimeout': 'নীরবতার সময়সীমা: {value}s',
     'settingsSpeechTitle': 'টেক্সট থেকে বক্তৃতা',
@@ -4846,6 +4903,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'ইতিহাস থেকে {name} সরান',
     'workspaceSuggestions': 'পরামর্শ',
+    'settingsGroupAlertTypes': 'সতর্কতা প্রকার',
+    'settingsGroupBackgroundBehavior': 'ব্যাকগ্রাউন্ড আচরণ',
+    'settingsGroupChatDisplay': 'চ্যাট প্রদর্শন',
+    'settingsGroupCurrentConnection': 'বর্তমান সংযোগ',
+    'settingsGroupDataAndSync': 'ডেটা এবং সিঙ্ক',
+    'settingsGroupDataReset': 'ডেটা এবং রিসেট',
+    'settingsGroupDelivery': 'ডেলিভারি',
+    'settingsGroupHelp': 'সহায়তা',
+    'settingsGroupLanguageAndChat': 'ভাষা এবং চ্যাট',
+    'settingsGroupLayoutAndText': 'লেআউট এবং টেক্সট',
+    'settingsGroupOfflineModels': 'অফলাইন মডেল',
+    'settingsGroupOpenCodeDefaults': 'OpenCode ডিফল্ট',
+    'settingsGroupReadAloud': 'উচ্চস্বরে পড়া',
+    'settingsGroupSavedServers': 'সংরক্ষিত সার্ভার',
+    'settingsGroupThemeAndColor': 'থিম এবং রঙ',
+    'settingsGroupThisDevice': 'এই ডিভাইস',
+    'settingsGroupVersionUpdates': 'সংস্করণ এবং আপডেট',
+    'settingsGroupVoiceInput': 'ভয়েস ইনপুট',
+    'settingsNavigationGroupExperience': 'অভিজ্ঞতা',
+    'settingsNavigationGroupInput': 'ইনপুট',
+    'settingsNavigationGroupSetup': 'সেটআপ',
+    'settingsNavigationGroupSupport': 'সহায়তা এবং ডায়াগনস্টিকস',
+    'settingsNavigationNoResults': 'কোনো সেটিংস পাওয়া যায়নি',
+    'settingsNavigationSearchHint': 'সেটিংস অনুসন্ধান করুন',
   },
   'de': {
     'aboutGitHub': 'GitHub',
@@ -5949,7 +6030,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'Automatisch prüfen, wenn die App startet',
     'settingsAboutChecking': 'Wird geprüft...',
-    'settingsAboutDescription': 'Version, Updates und Links',
+    'settingsAboutDescription': 'Version, Updates, Hilfe und App-Daten',
     'settingsAboutDismiss': 'Verwerfen',
     'settingsAboutDownloading': 'Wird heruntergeladen... {percent}%',
     'settingsAboutEraseAllData': 'Alle Daten löschen und neu starten',
@@ -6013,7 +6094,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityNormal': 'Normal',
     'settingsAppearanceDensitySpacious': 'Geräumig',
     'settingsAppearanceDescription':
-        'Dichte und Sichtbarkeit von Timeline-Blasen',
+        'Themes, Farben, Textgröße und Chatdarstellung wählen',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -6084,7 +6165,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'Wird über die Konfiguration mit anderen OpenCode-Clients geteilt.',
     'settingsBehaviorDescription':
-        'OpenCode-Standardwerte, Provenienz und Composer-Sync-Sicherheit',
+        'Sprache, Chatverhalten, Datennutzung und OpenCode-Standards steuern',
     'settingsBehaviorEnableDataSaver': 'Mobile Dateneinsparung aktivieren',
     'settingsBehaviorMultiDeviceSync':
         'Experimentelle Multi-Geräte-Synchronisierung aktivieren',
@@ -6151,7 +6232,8 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': 'Sprachen suchen',
     'settingsLanguageSystemDefault': 'Systemvorgabe',
     'settingsLanguageTitle': 'Sprache',
-    'settingsLogsDescription': 'Laufzeitdiagnose und Fehlerbehebungsdaten',
+    'settingsLogsDescription':
+        'App-Diagnosen und Details zur Fehlerbehebung ansehen',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'Keine Agenten gefunden',
     'settingsNotificationsAgentSubtitle': 'Wenn eine Antwort abgeschlossen ist',
@@ -6184,7 +6266,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'Fenster ausblenden und in der Systemleiste weiterlaufen lassen.',
     'settingsNotificationsDescription':
-        'Benachrichtigungs- und Soundeinstellungen pro Kategorie',
+        'Wählen, welche Ereignisse dich wie benachrichtigen',
     'settingsNotificationsDisableOptimization': 'Optimierung deaktivieren',
     'settingsNotificationsErrors': 'Fehler',
     'settingsNotificationsErrorsSubtitle':
@@ -6254,10 +6336,10 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'Aktiv',
     'settingsServersChooseActive': 'Aktiven Server auswählen',
     'settingsServersDefault': 'Standard',
-    'settingsServersDescription': 'OpenCode-Server und Health-Routing',
+    'settingsServersDescription': 'Mit OpenCode verbinden und Server verwalten',
     'settingsServersTitle': 'Server',
     'settingsSetupWizard': 'Einrichtungsassistent',
-    'settingsShortcutsDescription': 'Tragbare App-Tastenbelegungen',
+    'settingsShortcutsDescription': 'Tastaturkürzel finden und anpassen',
     'settingsShortcutsEdit': 'Kurzbefehl bearbeiten',
     'settingsShortcutsKeyboard': 'Tastaturkurzbefehle',
     'settingsShortcutsReset': 'Kurzbefehl zurücksetzen',
@@ -6270,7 +6352,8 @@ const translations = <String, Map<String, String>>{
         'OpenCode-Automatischer Fallback ist aktiv, da `small_model` nicht gesetzt ist.',
     'settingsSoundPickerNotAvailable':
         'System-Tonauswahl ist auf dieser Plattform nicht verfügbar.',
-    'settingsSpeechDescription': 'Engine, Stille-Timeout und Modelloptionen',
+    'settingsSpeechDescription':
+        'Spracheingabe, Offline-Modelle und Vorlesen einrichten',
     'settingsSpeechRefreshStatus': 'Status aktualisieren',
     'settingsSpeechSilenceTimeout': 'Stille-Timeout: {value}s',
     'settingsSpeechTitle': 'Sprache zu Text',
@@ -6539,6 +6622,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': '{name} aus dem Verlauf entfernen',
     'workspaceSuggestions': 'Vorschläge',
+    'settingsGroupAlertTypes': 'Benachrichtigungstypen',
+    'settingsGroupBackgroundBehavior': 'Verhalten im Hintergrund',
+    'settingsGroupChatDisplay': 'Chatdarstellung',
+    'settingsGroupCurrentConnection': 'Aktuelle Verbindung',
+    'settingsGroupDataAndSync': 'Daten und Synchronisierung',
+    'settingsGroupDataReset': 'Daten und Zurücksetzen',
+    'settingsGroupDelivery': 'Zustellung',
+    'settingsGroupHelp': 'Hilfe',
+    'settingsGroupLanguageAndChat': 'Sprache und Chat',
+    'settingsGroupLayoutAndText': 'Layout und Text',
+    'settingsGroupOfflineModels': 'Offline-Modelle',
+    'settingsGroupOpenCodeDefaults': 'OpenCode-Standardwerte',
+    'settingsGroupReadAloud': 'Vorlesen',
+    'settingsGroupSavedServers': 'Gespeicherte Server',
+    'settingsGroupThemeAndColor': 'Design und Farbe',
+    'settingsGroupThisDevice': 'Dieses Gerät',
+    'settingsGroupVersionUpdates': 'Version und Updates',
+    'settingsGroupVoiceInput': 'Spracheingabe',
+    'settingsNavigationGroupExperience': 'Erfahrung',
+    'settingsNavigationGroupInput': 'Eingabe',
+    'settingsNavigationGroupSetup': 'Einrichtung',
+    'settingsNavigationGroupSupport': 'Hilfe und Diagnose',
+    'settingsNavigationNoResults': 'Keine Einstellungen gefunden',
+    'settingsNavigationSearchHint': 'Einstellungen durchsuchen',
   },
   'es': {
     'aboutGitHub': 'GitHub',
@@ -7626,7 +7733,8 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'Comprobar automáticamente cuando inicia la app',
     'settingsAboutChecking': 'Comprobando...',
-    'settingsAboutDescription': 'Versión, actualizaciones y enlaces',
+    'settingsAboutDescription':
+        'Versión, actualizaciones, ayuda y datos de la app',
     'settingsAboutDismiss': 'Descartar',
     'settingsAboutDownloading': 'Descargando... {percent}%',
     'settingsAboutEraseAllData': 'Borrar todos los datos y reiniciar',
@@ -7690,7 +7798,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityNormal': 'Normal',
     'settingsAppearanceDensitySpacious': 'Espaciosa',
     'settingsAppearanceDescription':
-        'Densidad y visibilidad de burbujas de la línea de tiempo',
+        'Elige temas, colores, tamaño de texto y visualización del chat',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -7761,7 +7869,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'Compartido entre clientes OpenCode a través de config.',
     'settingsBehaviorDescription':
-        'Valores predeterminados de OpenCode, procedencia y seguridad de sincronización del compositor',
+        'Controla el idioma, el comportamiento del chat, el uso de datos y las opciones predeterminadas de OpenCode',
     'settingsBehaviorEnableDataSaver': 'Habilitar ahorro de datos móviles',
     'settingsBehaviorMultiDeviceSync':
         'Habilitar sincronización multidispositivo experimental',
@@ -7829,7 +7937,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSystemDefault': 'Predeterminado del sistema',
     'settingsLanguageTitle': 'Idioma',
     'settingsLogsDescription':
-        'Diagnóstico en tiempo de ejecución y solución de problemas',
+        'Revisa los diagnósticos de la app y los detalles de solución de problemas',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'No se encontraron agentes',
     'settingsNotificationsAgentSubtitle': 'Cuando una respuesta termina',
@@ -7863,8 +7971,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTray': 'Cerrar a la bandeja',
     'settingsNotificationsCloseToTrayDescription':
         'Ocultar ventana y seguir ejecutándose en la bandeja del sistema.',
-    'settingsNotificationsDescription':
-        'Controles de notificación y sonido por categoría',
+    'settingsNotificationsDescription': 'Elige qué eventos te notifican y cómo',
     'settingsNotificationsDisableOptimization': 'Desactivar optimización',
     'settingsNotificationsErrors': 'Errores',
     'settingsNotificationsErrorsSubtitle': 'Cuando una sesión informa un fallo',
@@ -7934,11 +8041,12 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'Activo',
     'settingsServersChooseActive': 'Elegir servidor activo',
     'settingsServersDefault': 'Predeterminado',
-    'settingsServersDescription': 'Servidores OpenCode y enrutamiento de salud',
+    'settingsServersDescription':
+        'Conéctate a OpenCode y administra tus servidores',
     'settingsServersTitle': 'Servidores',
     'settingsSetupWizard': 'Asistente de configuración',
     'settingsShortcutsDescription':
-        'Combinaciones de teclas portátiles de la app',
+        'Encuentra y personaliza los atajos de teclado',
     'settingsShortcutsEdit': 'Editar atajo',
     'settingsShortcutsKeyboard': 'Atajos de teclado',
     'settingsShortcutsReset': 'Restablecer atajo',
@@ -7952,7 +8060,7 @@ const translations = <String, Map<String, String>>{
     'settingsSoundPickerNotAvailable':
         'El selector de sonidos del sistema no está disponible en esta plataforma.',
     'settingsSpeechDescription':
-        'Motor, tiempo de silencio y opciones de modelo',
+        'Configura entrada de voz, modelos sin conexión y lectura en voz alta',
     'settingsSpeechRefreshStatus': 'Actualizar estado',
     'settingsSpeechSilenceTimeout': 'Tiempo de silencio: {value}s',
     'settingsSpeechTitle': 'Voz a texto',
@@ -8224,6 +8332,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/mi-proyecto',
     'workspaceRemoveFromHistory': 'Eliminar {name} del historial',
     'workspaceSuggestions': 'Sugerencias',
+    'settingsGroupAlertTypes': 'Tipos de alerta',
+    'settingsGroupBackgroundBehavior': 'Comportamiento en segundo plano',
+    'settingsGroupChatDisplay': 'Visualización del chat',
+    'settingsGroupCurrentConnection': 'Conexión actual',
+    'settingsGroupDataAndSync': 'Datos y sincronización',
+    'settingsGroupDataReset': 'Datos y restablecimiento',
+    'settingsGroupDelivery': 'Entrega',
+    'settingsGroupHelp': 'Ayuda',
+    'settingsGroupLanguageAndChat': 'Idioma y chat',
+    'settingsGroupLayoutAndText': 'Diseño y texto',
+    'settingsGroupOfflineModels': 'Modelos sin conexión',
+    'settingsGroupOpenCodeDefaults': 'Opciones predeterminadas de OpenCode',
+    'settingsGroupReadAloud': 'Leer en voz alta',
+    'settingsGroupSavedServers': 'Servidores guardados',
+    'settingsGroupThemeAndColor': 'Tema y color',
+    'settingsGroupThisDevice': 'Este dispositivo',
+    'settingsGroupVersionUpdates': 'Versión y actualizaciones',
+    'settingsGroupVoiceInput': 'Entrada de voz',
+    'settingsNavigationGroupExperience': 'Experiencia',
+    'settingsNavigationGroupInput': 'Entrada',
+    'settingsNavigationGroupSetup': 'Configuración',
+    'settingsNavigationGroupSupport': 'Ayuda y diagnóstico',
+    'settingsNavigationNoResults': 'No se encontraron ajustes',
+    'settingsNavigationSearchHint': 'Buscar ajustes',
   },
   'fr': {
     'aboutGitHub': 'GitHub',
@@ -9355,7 +9487,8 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'Vérifier automatiquement au démarrage de l\'application',
     'settingsAboutChecking': 'Vérification...',
-    'settingsAboutDescription': 'Version, mises à jour et liens',
+    'settingsAboutDescription':
+        'Version, mises à jour, aide et données de l\'app',
     'settingsAboutDismiss': 'Ignorer',
     'settingsAboutDownloading': 'Téléchargement... {percent}%',
     'settingsAboutEraseAllData': 'Effacer toutes les données et redémarrer',
@@ -9420,7 +9553,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityNormal': 'Normal',
     'settingsAppearanceDensitySpacious': 'Espacé',
     'settingsAppearanceDescription':
-        'Densité et visibilité des bulles de la chronologie',
+        'Choisissez les thèmes, couleurs, taille du texte et affichage du chat',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -9494,7 +9627,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'Partagé entre les clients OpenCode via la configuration.',
     'settingsBehaviorDescription':
-        'Valeurs par défaut d\'OpenCode, provenance et sécurité de la synchronisation de l\'éditeur de message',
+        'Contrôlez la langue, le comportement du chat, l\'utilisation des données et les réglages par défaut d\'OpenCode',
     'settingsBehaviorEnableDataSaver':
         'Activer l\'économiseur de données mobiles',
     'settingsBehaviorMultiDeviceSync':
@@ -9565,7 +9698,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSystemDefault': 'Langue par défaut du système',
     'settingsLanguageTitle': 'Langue',
     'settingsLogsDescription':
-        'Diagnostics d\'exécution et données de dépannage',
+        'Consultez les diagnostics de l\'app et les détails de dépannage',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'Aucun agent trouvé',
     'settingsNotificationsAgentSubtitle': 'Lorsqu\'une réponse se termine',
@@ -9598,7 +9731,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'Masquer la fenêtre et continuer l\'exécution dans la barre d\'état système.',
     'settingsNotificationsDescription':
-        'Contrôles de notification et de son par catégorie',
+        'Choisissez quels événements vous alertent et de quelle manière',
     'settingsNotificationsDisableOptimization': 'Désactiver l\'optimisation',
     'settingsNotificationsErrors': 'Erreurs',
     'settingsNotificationsErrorsSubtitle':
@@ -9671,11 +9804,11 @@ const translations = <String, Map<String, String>>{
     'settingsServersChooseActive': 'Choisir le serveur actif',
     'settingsServersDefault': 'Par défaut',
     'settingsServersDescription':
-        'Serveurs OpenCode et routage de l\'état de santé',
+        'Connectez-vous à OpenCode et gérez vos serveurs',
     'settingsServersTitle': 'Serveurs',
     'settingsSetupWizard': 'Assistant de configuration',
     'settingsShortcutsDescription':
-        'Raccourcis clavier portables de l\'application',
+        'Trouvez et personnalisez les raccourcis clavier',
     'settingsShortcutsEdit': 'Modifier le raccourci',
     'settingsShortcutsKeyboard': 'Raccourcis clavier',
     'settingsShortcutsReset': 'Réinitialiser le raccourci',
@@ -9689,7 +9822,7 @@ const translations = <String, Map<String, String>>{
     'settingsSoundPickerNotAvailable':
         'Le sélecteur de sons système n\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'est pas disponible sur cette plateforme.',
     'settingsSpeechDescription':
-        'Moteur, délai d\'inactivité de silence et options de modèle',
+        'Configurez la saisie vocale, les modèles hors ligne et la lecture à voix haute',
     'settingsSpeechRefreshStatus': 'Actualiser le statut',
     'settingsSpeechSilenceTimeout': 'Délai d\'inactivité de silence : {value}s',
     'settingsSpeechTitle': 'Reconnaissance vocale',
@@ -9969,6 +10102,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'Retirer {name} de l\'historique',
     'workspaceSuggestions': 'Suggestions',
+    'settingsGroupAlertTypes': 'Types d\'alerte',
+    'settingsGroupBackgroundBehavior': 'Comportement en arrière-plan',
+    'settingsGroupChatDisplay': 'Affichage du chat',
+    'settingsGroupCurrentConnection': 'Connexion actuelle',
+    'settingsGroupDataAndSync': 'Données et synchronisation',
+    'settingsGroupDataReset': 'Données et réinitialisation',
+    'settingsGroupDelivery': 'Livraison',
+    'settingsGroupHelp': 'Aide',
+    'settingsGroupLanguageAndChat': 'Langue et chat',
+    'settingsGroupLayoutAndText': 'Disposition et texte',
+    'settingsGroupOfflineModels': 'Modèles hors ligne',
+    'settingsGroupOpenCodeDefaults': 'Réglages par défaut d\'OpenCode',
+    'settingsGroupReadAloud': 'Lecture à voix haute',
+    'settingsGroupSavedServers': 'Serveurs enregistrés',
+    'settingsGroupThemeAndColor': 'Thème et couleur',
+    'settingsGroupThisDevice': 'Cet appareil',
+    'settingsGroupVersionUpdates': 'Version et mises à jour',
+    'settingsGroupVoiceInput': 'Saisie vocale',
+    'settingsNavigationGroupExperience': 'Expérience',
+    'settingsNavigationGroupInput': 'Saisie',
+    'settingsNavigationGroupSetup': 'Configuration',
+    'settingsNavigationGroupSupport': 'Aide et diagnostic',
+    'settingsNavigationNoResults': 'Aucun réglage trouvé',
+    'settingsNavigationSearchHint': 'Rechercher des réglages',
   },
   'hi': {
     'aboutGitHub': 'GitHub',
@@ -11034,7 +11191,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'ऐप शुरू होने पर स्वचालित रूप से जांचें',
     'settingsAboutChecking': 'जांच की जा रही है...',
-    'settingsAboutDescription': 'संस्करण, अपडेट और लिंक',
+    'settingsAboutDescription': 'संस्करण, अपडेट, सहायता और ऐप डेटा',
     'settingsAboutDismiss': 'खारिज करें',
     'settingsAboutDownloading': 'डाउनलोड हो रहा है... {percent}%',
     'settingsAboutEraseAllData': 'सारा डेटा मिटाएं और रीस्टार्ट करें',
@@ -11097,7 +11254,8 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': 'अत्यधिक विस्तृत',
     'settingsAppearanceDensityNormal': 'सामान्य',
     'settingsAppearanceDensitySpacious': 'विस्तृत',
-    'settingsAppearanceDescription': 'घनत्व (density) और टाइमलाइन बबल दृश्यता',
+    'settingsAppearanceDescription':
+        'थीम, रंग, टेक्स्ट आकार और चैट प्रदर्शन चुनें',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -11170,7 +11328,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'कॉन्फ़िगरेशन के माध्यम से OpenCode क्लाइंट्स में साझा किया गया।',
     'settingsBehaviorDescription':
-        'OpenCode डिफ़ॉल्ट, उत्पत्ति (provenance), और कंपोज़र सिंक सुरक्षा',
+        'भाषा, चैट व्यवहार, डेटा उपयोग और OpenCode डिफ़ॉल्ट नियंत्रित करें',
     'settingsBehaviorEnableDataSaver': 'सेलुलर डेटा सेवर सक्षम करें',
     'settingsBehaviorMultiDeviceSync': 'प्रायोगिक मल्टी-डिवाइस सिंक सक्षम करें',
     'settingsBehaviorMultiDeviceSyncDescription':
@@ -11235,7 +11393,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': 'भाषाएँ खोजें',
     'settingsLanguageSystemDefault': 'सिस्टम डिफ़ॉल्ट',
     'settingsLanguageTitle': 'भाषा',
-    'settingsLogsDescription': 'रनटाइम निदान और समस्या निवारण डेटा',
+    'settingsLogsDescription': 'ऐप डायग्नोस्टिक्स और समस्या निवारण विवरण देखें',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'कोई एजेंट नहीं मिला',
     'settingsNotificationsAgentSubtitle': 'जब कोई प्रतिक्रिया समाप्त होती है',
@@ -11266,7 +11424,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'विंडो छुपाएं और सिस्टम ट्रे में चलते रहें।',
     'settingsNotificationsDescription':
-        'प्रति-श्रेणी अधिसूचना और ध्वनि नियंत्रण',
+        'चुनें कि कौन सी घटनाएँ आपको सचेत करें और कैसे',
     'settingsNotificationsDisableOptimization': 'अनुकूलन अक्षम करें',
     'settingsNotificationsErrors': 'त्रुटियां',
     'settingsNotificationsErrorsSubtitle':
@@ -11336,10 +11494,11 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'सक्रिय',
     'settingsServersChooseActive': 'सक्रिय सर्वर चुनें',
     'settingsServersDefault': 'डिफ़ॉल्ट',
-    'settingsServersDescription': 'OpenCode सर्वर और हेल्थ राउटिंग',
+    'settingsServersDescription':
+        'OpenCode से कनेक्ट करें और अपने सर्वर प्रबंधित करें',
     'settingsServersTitle': 'सर्वर',
     'settingsSetupWizard': 'सेटअप विज़ार्ड',
-    'settingsShortcutsDescription': 'पोर्टेबल ऐप कुंजी बाइंडिंग',
+    'settingsShortcutsDescription': 'कीबोर्ड शॉर्टकट खोजें और अनुकूलित करें',
     'settingsShortcutsEdit': 'शॉर्टकट संपादित करें',
     'settingsShortcutsKeyboard': 'कीबोर्ड शॉर्टकट',
     'settingsShortcutsReset': 'शॉर्टकट रीसेट करें',
@@ -11352,7 +11511,8 @@ const translations = <String, Map<String, String>>{
         'OpenCode स्वचालित फ़ालबैक सक्रिय है क्योंकि `small_model` सेट नहीं है।',
     'settingsSoundPickerNotAvailable':
         'सिस्टम ध्वनि चयनकर्ता इस प्लेटफॉर्म पर उपलब्ध नहीं है।',
-    'settingsSpeechDescription': 'इंजन, मौन टाइमआउट और मॉडल विकल्प',
+    'settingsSpeechDescription':
+        'वॉइस इनपुट, ऑफ़लाइन मॉडल और पढ़कर सुनाना सेट करें',
     'settingsSpeechRefreshStatus': 'स्थिति रीफ़्रेश करें',
     'settingsSpeechSilenceTimeout': 'मौन टाइमआउट: {value}s',
     'settingsSpeechTitle': 'भाषण से पाठ',
@@ -11617,6 +11777,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'इतिहास से {name} निकालें',
     'workspaceSuggestions': 'सुझाव',
+    'settingsGroupAlertTypes': 'अलर्ट प्रकार',
+    'settingsGroupBackgroundBehavior': 'पृष्ठभूमि व्यवहार',
+    'settingsGroupChatDisplay': 'चैट प्रदर्शन',
+    'settingsGroupCurrentConnection': 'वर्तमान कनेक्शन',
+    'settingsGroupDataAndSync': 'डेटा और सिंक',
+    'settingsGroupDataReset': 'डेटा और रीसेट',
+    'settingsGroupDelivery': 'डिलीवरी',
+    'settingsGroupHelp': 'सहायता',
+    'settingsGroupLanguageAndChat': 'भाषा और चैट',
+    'settingsGroupLayoutAndText': 'लेआउट और टेक्स्ट',
+    'settingsGroupOfflineModels': 'ऑफ़लाइन मॉडल',
+    'settingsGroupOpenCodeDefaults': 'OpenCode डिफ़ॉल्ट',
+    'settingsGroupReadAloud': 'पढ़कर सुनाना',
+    'settingsGroupSavedServers': 'सहेजे गए सर्वर',
+    'settingsGroupThemeAndColor': 'थीम और रंग',
+    'settingsGroupThisDevice': 'यह डिवाइस',
+    'settingsGroupVersionUpdates': 'संस्करण और अपडेट',
+    'settingsGroupVoiceInput': 'वॉइस इनपुट',
+    'settingsNavigationGroupExperience': 'अनुभव',
+    'settingsNavigationGroupInput': 'इनपुट',
+    'settingsNavigationGroupSetup': 'सेटअप',
+    'settingsNavigationGroupSupport': 'सहायता और डायग्नोस्टिक्स',
+    'settingsNavigationNoResults': 'कोई सेटिंग नहीं मिली',
+    'settingsNavigationSearchHint': 'सेटिंग खोजें',
   },
   'it': {
     'aboutGitHub': 'GitHub',
@@ -12732,7 +12916,8 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'Controlla automaticamente all\'avvio dell\'applicazione',
     'settingsAboutChecking': 'Verifica in corso...',
-    'settingsAboutDescription': 'Versione, aggiornamenti e collegamenti',
+    'settingsAboutDescription':
+        'Versione, aggiornamenti, assistenza e dati dell\'app',
     'settingsAboutDismiss': 'Ignora',
     'settingsAboutDownloading': 'Download in corso... {percent}%',
     'settingsAboutEraseAllData': 'Cancella tutti i dati e riavvia',
@@ -12797,7 +12982,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityNormal': 'Normale',
     'settingsAppearanceDensitySpacious': 'Spazioso',
     'settingsAppearanceDescription':
-        'Densità e visibilità delle bolle sulla cronologia',
+        'Scegli temi, colori, dimensione del testo e visualizzazione della chat',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -12868,7 +13053,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'Condiviso tra i client OpenCode tramite la configurazione.',
     'settingsBehaviorDescription':
-        'Impostazioni predefinite di OpenCode, provenienza e sicurezza di sincronizzazione del composer',
+        'Controlla lingua, comportamento della chat, utilizzo dei dati e impostazioni predefinite di OpenCode',
     'settingsBehaviorEnableDataSaver': 'Abilita risparmio dati cellulare',
     'settingsBehaviorMultiDeviceSync':
         'Abilita la sincronizzazione multi-dispositivo sperimentale',
@@ -12939,7 +13124,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSystemDefault': 'Predefinita di sistema',
     'settingsLanguageTitle': 'Lingua',
     'settingsLogsDescription':
-        'Diagnostica di runtime e dati di risoluzione dei problemi',
+        'Rivedi le diagnosi dell\'app e i dettagli per la risoluzione dei problemi',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'Nessun agente trovato',
     'settingsNotificationsAgentSubtitle': 'Al termine di una risposta',
@@ -12971,7 +13156,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'Nascondi la finestra e continua l\'esecuzione nella barra di sistema.',
     'settingsNotificationsDescription':
-        'Controlli di notifica e audio per categoria',
+        'Scegli quali eventi ti avvisano e come',
     'settingsNotificationsDisableOptimization': 'Disabilita ottimizzazione',
     'settingsNotificationsErrors': 'Errori',
     'settingsNotificationsErrorsSubtitle':
@@ -13042,11 +13227,11 @@ const translations = <String, Map<String, String>>{
     'settingsServersChooseActive': 'Scegli server attivo',
     'settingsServersDefault': 'Predefinito',
     'settingsServersDescription':
-        'Server OpenCode e instradamento dello stato di salute',
+        'Connettiti a OpenCode e gestisci i tuoi server',
     'settingsServersTitle': 'Server',
     'settingsSetupWizard': 'Configurazione guidata',
     'settingsShortcutsDescription':
-        'Associazioni di tasti dell\'applicazione portatile',
+        'Trova e personalizza le scorciatoie da tastiera',
     'settingsShortcutsEdit': 'Modifica scorciatoia',
     'settingsShortcutsKeyboard': 'Scorciatoie da tastiera',
     'settingsShortcutsReset': 'Ripristina scorciatoia',
@@ -13060,7 +13245,7 @@ const translations = <String, Map<String, String>>{
     'settingsSoundPickerNotAvailable':
         'Il selettore dei suoni di sistema non è disponibile su questa piattaforma.',
     'settingsSpeechDescription':
-        'Motore, timeout di silenzio e opzioni del modello',
+        'Configura input vocale, modelli offline e lettura ad alta voce',
     'settingsSpeechRefreshStatus': 'Aggiorna stato',
     'settingsSpeechSilenceTimeout': 'Timeout di silenzio: {value}s',
     'settingsSpeechTitle': 'Trascrizione vocale',
@@ -13332,6 +13517,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'Rimuovi {name} dalla cronologia',
     'workspaceSuggestions': 'Suggerimenti',
+    'settingsGroupAlertTypes': 'Tipi di avviso',
+    'settingsGroupBackgroundBehavior': 'Comportamento in background',
+    'settingsGroupChatDisplay': 'Visualizzazione della chat',
+    'settingsGroupCurrentConnection': 'Connessione attuale',
+    'settingsGroupDataAndSync': 'Dati e sincronizzazione',
+    'settingsGroupDataReset': 'Dati e ripristino',
+    'settingsGroupDelivery': 'Consegna',
+    'settingsGroupHelp': 'Assistenza',
+    'settingsGroupLanguageAndChat': 'Lingua e chat',
+    'settingsGroupLayoutAndText': 'Layout e testo',
+    'settingsGroupOfflineModels': 'Modelli offline',
+    'settingsGroupOpenCodeDefaults': 'Impostazioni predefinite di OpenCode',
+    'settingsGroupReadAloud': 'Lettura ad alta voce',
+    'settingsGroupSavedServers': 'Server salvati',
+    'settingsGroupThemeAndColor': 'Tema e colore',
+    'settingsGroupThisDevice': 'Questo dispositivo',
+    'settingsGroupVersionUpdates': 'Versione e aggiornamenti',
+    'settingsGroupVoiceInput': 'Input vocale',
+    'settingsNavigationGroupExperience': 'Esperienza',
+    'settingsNavigationGroupInput': 'Input',
+    'settingsNavigationGroupSetup': 'Configurazione',
+    'settingsNavigationGroupSupport': 'Assistenza e diagnostica',
+    'settingsNavigationNoResults': 'Nessuna impostazione trovata',
+    'settingsNavigationSearchHint': 'Cerca impostazioni',
   },
   'ja': {
     'aboutGitHub': 'GitHub',
@@ -14286,7 +14495,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpen': '起動時にアップデートを確認',
     'settingsAboutCheckOnOpenDescription': 'アプリ起動時に自動的に確認します',
     'settingsAboutChecking': '確認中...',
-    'settingsAboutDescription': 'バージョン、アップデート、リンク',
+    'settingsAboutDescription': 'バージョン、更新、ヘルプ、アプリのデータ',
     'settingsAboutDismiss': '閉じる',
     'settingsAboutDownloading': 'ダウンロード中... {percent}%',
     'settingsAboutEraseAllData': 'すべてのデータを消去して再起動',
@@ -14342,7 +14551,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': '超低密度',
     'settingsAppearanceDensityNormal': '標準',
     'settingsAppearanceDensitySpacious': '低密度',
-    'settingsAppearanceDescription': '表示密度とタイムラインバブルの表示設定',
+    'settingsAppearanceDescription': 'テーマ、配色、文字サイズ、チャット表示を選択',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -14405,7 +14614,7 @@ const translations = <String, Map<String, String>>{
         'エージェントが明示的に選択されていない場合に使用されるプライマリエージェント。',
     'settingsBehaviorDefaultModel': 'デフォルトモデル',
     'settingsBehaviorDefaultModelHelp': '設定を通じて OpenCode クライアント間で共有されます。',
-    'settingsBehaviorDescription': 'OpenCodeのデフォルト、プロブナンス、およびコンポーザーの同期の安全性',
+    'settingsBehaviorDescription': '言語、チャットの動作、データ使用、OpenCode のデフォルトを管理',
     'settingsBehaviorEnableDataSaver': 'モバイルデータセーバーを有効にする',
     'settingsBehaviorMultiDeviceSync': '試験的な複数デバイス同期を有効にする',
     'settingsBehaviorMultiDeviceSyncDescription':
@@ -14466,7 +14675,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': '言語を検索',
     'settingsLanguageSystemDefault': 'システムデフォルト',
     'settingsLanguageTitle': '言語',
-    'settingsLogsDescription': '実行時診断とトラブルシューティングデータ',
+    'settingsLogsDescription': 'アプリの診断とトラブルシューティングの詳細を確認',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'エージェントが見つかりません',
     'settingsNotificationsAgentSubtitle': 'レスポンスが終了したとき',
@@ -14494,7 +14703,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTray': 'トレイに閉じる',
     'settingsNotificationsCloseToTrayDescription':
         'ウィンドウを非表示にし、システムトレイで実行を続けます。',
-    'settingsNotificationsDescription': 'カテゴリごとの通知とサウンドの設定',
+    'settingsNotificationsDescription': '通知するイベントと通知方法を選択',
     'settingsNotificationsDisableOptimization': '最適化を無効にする',
     'settingsNotificationsErrors': 'エラー',
     'settingsNotificationsErrorsSubtitle': 'セッションが失敗を報告したとき',
@@ -14557,10 +14766,10 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'アクティブ',
     'settingsServersChooseActive': 'アクティブなサーバーを選択',
     'settingsServersDefault': 'デフォルト',
-    'settingsServersDescription': 'OpenCodeサーバーとヘルスルーティング',
+    'settingsServersDescription': 'OpenCode に接続し、サーバーを管理',
     'settingsServersTitle': 'サーバー',
     'settingsSetupWizard': 'セットアップウィザード',
-    'settingsShortcutsDescription': 'ポータブルアプリのキーバインディング',
+    'settingsShortcutsDescription': 'キーボードショートカットを検索・カスタマイズ',
     'settingsShortcutsEdit': 'ショートカットを編集',
     'settingsShortcutsKeyboard': 'キーボードショートカット',
     'settingsShortcutsReset': 'ショートカットをリセット',
@@ -14572,7 +14781,7 @@ const translations = <String, Map<String, String>>{
     'settingsSmallModelUnsetExplanation':
         '`small_model` が設定されていないため、OpenCode の自動フォールバックが有効です。',
     'settingsSoundPickerNotAvailable': 'システムサウンドピッカーはこのプラットフォームでは利用できません。',
-    'settingsSpeechDescription': 'エンジン、無音タイムアウト、モデルのオプション',
+    'settingsSpeechDescription': '音声入力、オフラインモデル、読み上げを設定',
     'settingsSpeechRefreshStatus': 'ステータスを更新',
     'settingsSpeechSilenceTimeout': '無音タイムアウト: {value}秒',
     'settingsSpeechTitle': '音声文字変換',
@@ -14818,6 +15027,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': '履歴から {name} を削除',
     'workspaceSuggestions': '提案',
+    'settingsGroupAlertTypes': 'アラートの種類',
+    'settingsGroupBackgroundBehavior': 'バックグラウンド時の動作',
+    'settingsGroupChatDisplay': 'チャット表示',
+    'settingsGroupCurrentConnection': '現在の接続',
+    'settingsGroupDataAndSync': 'データと同期',
+    'settingsGroupDataReset': 'データとリセット',
+    'settingsGroupDelivery': '配信',
+    'settingsGroupHelp': 'ヘルプ',
+    'settingsGroupLanguageAndChat': '言語とチャット',
+    'settingsGroupLayoutAndText': 'レイアウトと文字',
+    'settingsGroupOfflineModels': 'オフラインモデル',
+    'settingsGroupOpenCodeDefaults': 'OpenCode のデフォルト',
+    'settingsGroupReadAloud': '読み上げ',
+    'settingsGroupSavedServers': '保存済みサーバー',
+    'settingsGroupThemeAndColor': 'テーマと配色',
+    'settingsGroupThisDevice': 'このデバイス',
+    'settingsGroupVersionUpdates': 'バージョンと更新',
+    'settingsGroupVoiceInput': '音声入力',
+    'settingsNavigationGroupExperience': '操作感',
+    'settingsNavigationGroupInput': '入力',
+    'settingsNavigationGroupSetup': 'セットアップ',
+    'settingsNavigationGroupSupport': 'ヘルプと診断',
+    'settingsNavigationNoResults': '設定が見つかりません',
+    'settingsNavigationSearchHint': '設定を検索',
   },
   'ko': {
     'aboutGitHub': 'GitHub',
@@ -15765,7 +15998,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpen': '앱 실행 시 업데이트 확인',
     'settingsAboutCheckOnOpenDescription': '앱이 시작될 때 업데이트를 자동으로 확인합니다',
     'settingsAboutChecking': '확인 중...',
-    'settingsAboutDescription': '버전, 업데이트 및 링크',
+    'settingsAboutDescription': '버전, 업데이트, 도움말 및 앱 데이터',
     'settingsAboutDismiss': '닫기',
     'settingsAboutDownloading': '다운로드 중... {percent}%',
     'settingsAboutEraseAllData': '모든 데이터 지우고 재시작',
@@ -15821,7 +16054,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': '매우 넓음',
     'settingsAppearanceDensityNormal': '보통',
     'settingsAppearanceDensitySpacious': '넓음',
-    'settingsAppearanceDescription': '간격 조밀도 및 타임라인 말풍선 표시 여부',
+    'settingsAppearanceDescription': '테마, 색상, 텍스트 크기 및 채팅 표시 선택',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -15884,7 +16117,7 @@ const translations = <String, Map<String, String>>{
         '에이전트가 명시적으로 선택되지 않았을 때 사용되는 기본 에이전트입니다.',
     'settingsBehaviorDefaultModel': '기본 모델',
     'settingsBehaviorDefaultModelHelp': '구성을 통해 OpenCode 클라이언트 간에 공유됩니다.',
-    'settingsBehaviorDescription': 'OpenCode 기본값, 출처(provenance) 및 컴포저 동기화 안정성',
+    'settingsBehaviorDescription': '언어, 채팅 동작, 데이터 사용 및 OpenCode 기본값 관리',
     'settingsBehaviorEnableDataSaver': '데이터 절약 모드 활성화',
     'settingsBehaviorMultiDeviceSync': '실험적 다중 기기 동기화 활성화',
     'settingsBehaviorMultiDeviceSyncDescription':
@@ -15945,7 +16178,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': '언어 검색',
     'settingsLanguageSystemDefault': '시스템 기본값',
     'settingsLanguageTitle': '언어',
-    'settingsLogsDescription': '런타임 진단 및 문제 해결 데이터',
+    'settingsLogsDescription': '앱 진단 및 문제 해결 세부 정보 확인',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': '에이전트를 찾을 수 없음',
     'settingsNotificationsAgentSubtitle': '응답이 완료되었을 때',
@@ -15973,7 +16206,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsChooseSystemSound': '시스템 소리 선택',
     'settingsNotificationsCloseToTray': '트레이로 닫기',
     'settingsNotificationsCloseToTrayDescription': '창을 숨기고 시스템 트레이에서 계속 실행합니다.',
-    'settingsNotificationsDescription': '카테고리별 알림 및 소리 제어',
+    'settingsNotificationsDescription': '알림받을 이벤트와 방법 선택',
     'settingsNotificationsDisableOptimization': '최적화 비활성화',
     'settingsNotificationsErrors': '오류',
     'settingsNotificationsErrorsSubtitle': '세션에 실패가 보고되었을 때',
@@ -16036,10 +16269,10 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': '활성',
     'settingsServersChooseActive': '활성 서버 선택',
     'settingsServersDefault': '기본값',
-    'settingsServersDescription': 'OpenCode 서버 및 헬스 라우팅',
+    'settingsServersDescription': 'OpenCode에 연결하고 서버 관리',
     'settingsServersTitle': '서버',
     'settingsSetupWizard': '설정 마법사',
-    'settingsShortcutsDescription': '이동식 앱 키 바인딩',
+    'settingsShortcutsDescription': '키보드 단축키 찾기 및 사용자 지정',
     'settingsShortcutsEdit': '단축키 편집',
     'settingsShortcutsKeyboard': '키보드 단축키',
     'settingsShortcutsReset': '단축키 초기화',
@@ -16051,7 +16284,7 @@ const translations = <String, Map<String, String>>{
     'settingsSmallModelUnsetExplanation':
         '`small_model`이 설정되지 않았으므로 OpenCode 자동 폴백이 활성화됩니다.',
     'settingsSoundPickerNotAvailable': '시스템 사운드 선택기는 이 플랫폼에서 사용할 수 없습니다.',
-    'settingsSpeechDescription': '엔진, 무음 제한 시간 및 모델 옵션',
+    'settingsSpeechDescription': '음성 입력, 오프라인 모델 및 소리내어 읽기 설정',
     'settingsSpeechRefreshStatus': '상태 새로고침',
     'settingsSpeechSilenceTimeout': '무음 제한 시간: {value}초',
     'settingsSpeechTitle': '음성 인식 (STT)',
@@ -16298,6 +16531,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': '기록에서 {name} 제거',
     'workspaceSuggestions': '추천 프로젝트',
+    'settingsGroupAlertTypes': '알림 유형',
+    'settingsGroupBackgroundBehavior': '백그라운드 동작',
+    'settingsGroupChatDisplay': '채팅 표시',
+    'settingsGroupCurrentConnection': '현재 연결',
+    'settingsGroupDataAndSync': '데이터 및 동기화',
+    'settingsGroupDataReset': '데이터 및 초기화',
+    'settingsGroupDelivery': '전달 방식',
+    'settingsGroupHelp': '도움말',
+    'settingsGroupLanguageAndChat': '언어 및 채팅',
+    'settingsGroupLayoutAndText': '레이아웃 및 텍스트',
+    'settingsGroupOfflineModels': '오프라인 모델',
+    'settingsGroupOpenCodeDefaults': 'OpenCode 기본값',
+    'settingsGroupReadAloud': '소리내어 읽기',
+    'settingsGroupSavedServers': '저장된 서버',
+    'settingsGroupThemeAndColor': '테마 및 색상',
+    'settingsGroupThisDevice': '이 기기',
+    'settingsGroupVersionUpdates': '버전 및 업데이트',
+    'settingsGroupVoiceInput': '음성 입력',
+    'settingsNavigationGroupExperience': '경험',
+    'settingsNavigationGroupInput': '입력',
+    'settingsNavigationGroupSetup': '설정',
+    'settingsNavigationGroupSupport': '도움말 및 진단',
+    'settingsNavigationNoResults': '설정 항목을 찾을 수 없음',
+    'settingsNavigationSearchHint': '설정 검색',
   },
   'pt': {
     'aboutGitHub': 'GitHub',
@@ -17372,7 +17629,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'Verificar automaticamente quando o app iniciar',
     'settingsAboutChecking': 'Verificando...',
-    'settingsAboutDescription': 'Versão, atualizações e links',
+    'settingsAboutDescription': 'Versão, atualizações, ajuda e dados do app',
     'settingsAboutDismiss': 'Dispensar',
     'settingsAboutDownloading': 'Baixando... {percent}%',
     'settingsAboutEraseAllData': 'Apagar todos os dados e reiniciar',
@@ -17436,7 +17693,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityNormal': 'Normal',
     'settingsAppearanceDensitySpacious': 'Espaçosa',
     'settingsAppearanceDescription':
-        'Densidade e visibilidade dos balões da timeline',
+        'Escolha temas, cores, tamanho do texto e exibição do chat',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -17507,7 +17764,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'Compartilhado entre clientes OpenCode via config.',
     'settingsBehaviorDescription':
-        'Padrões OpenCode, procedência e segurança de sincronização do composer',
+        'Controle idioma, comportamento do chat, uso de dados e padrões do OpenCode',
     'settingsBehaviorEnableDataSaver': 'Habilitar economia de dados móveis',
     'settingsBehaviorMultiDeviceSync':
         'Habilitar sincronização experimental entre dispositivos',
@@ -17574,7 +17831,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSystemDefault': 'Padrão do sistema',
     'settingsLanguageTitle': 'Idioma',
     'settingsLogsDescription':
-        'Diagnóstico em tempo de execução e dados de solução de problemas',
+        'Revise os diagnósticos do app e os detalhes de solução de problemas',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'Nenhum agente encontrado',
     'settingsNotificationsAgentSubtitle': 'Quando uma resposta termina',
@@ -17607,7 +17864,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'Ocultar janela e continuar executando na bandeja do sistema.',
     'settingsNotificationsDescription':
-        'Controles de notificação e som por categoria',
+        'Escolha quais eventos alertam você e como',
     'settingsNotificationsDisableOptimization': 'Desativar otimização',
     'settingsNotificationsErrors': 'Erros',
     'settingsNotificationsErrorsSubtitle': 'Quando uma sessão relata uma falha',
@@ -17676,10 +17933,12 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'Ativo',
     'settingsServersChooseActive': 'Escolher servidor ativo',
     'settingsServersDefault': 'Padrão',
-    'settingsServersDescription': 'Servidores OpenCode e roteamento de saúde',
+    'settingsServersDescription':
+        'Conecte-se ao OpenCode e gerencie seus servidores',
     'settingsServersTitle': 'Servidores',
     'settingsSetupWizard': 'Assistente de configuração',
-    'settingsShortcutsDescription': 'Atalhos de teclado portáteis do app',
+    'settingsShortcutsDescription':
+        'Encontre e personalize os atalhos de teclado',
     'settingsShortcutsEdit': 'Editar atalho',
     'settingsShortcutsKeyboard': 'Atalhos de teclado',
     'settingsShortcutsReset': 'Redefinir atalho',
@@ -17692,7 +17951,8 @@ const translations = <String, Map<String, String>>{
         'O fallback automático do OpenCode está ativo porque `small_model` não está definido.',
     'settingsSoundPickerNotAvailable':
         'O seletor de sons do sistema não está disponível nesta plataforma.',
-    'settingsSpeechDescription': 'Motor, tempo de silêncio e opções de modelo',
+    'settingsSpeechDescription':
+        'Configure entrada de voz, modelos offline e leitura em voz alta',
     'settingsSpeechRefreshStatus': 'Atualizar status',
     'settingsSpeechSilenceTimeout': 'Tempo de silêncio: {value}s',
     'settingsSpeechTitle': 'Fala para texto',
@@ -17961,6 +18221,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/meu-projeto',
     'workspaceRemoveFromHistory': 'Remover {name} do histórico',
     'workspaceSuggestions': 'Sugestões',
+    'settingsGroupAlertTypes': 'Tipos de alerta',
+    'settingsGroupBackgroundBehavior': 'Comportamento em segundo plano',
+    'settingsGroupChatDisplay': 'Exibição do chat',
+    'settingsGroupCurrentConnection': 'Conexão atual',
+    'settingsGroupDataAndSync': 'Dados e sincronização',
+    'settingsGroupDataReset': 'Dados e redefinição',
+    'settingsGroupDelivery': 'Entrega',
+    'settingsGroupHelp': 'Ajuda',
+    'settingsGroupLanguageAndChat': 'Idioma e chat',
+    'settingsGroupLayoutAndText': 'Layout e texto',
+    'settingsGroupOfflineModels': 'Modelos offline',
+    'settingsGroupOpenCodeDefaults': 'Padrões do OpenCode',
+    'settingsGroupReadAloud': 'Leitura em voz alta',
+    'settingsGroupSavedServers': 'Servidores salvos',
+    'settingsGroupThemeAndColor': 'Tema e cor',
+    'settingsGroupThisDevice': 'Este dispositivo',
+    'settingsGroupVersionUpdates': 'Versão e atualizações',
+    'settingsGroupVoiceInput': 'Entrada de voz',
+    'settingsNavigationGroupExperience': 'Experiência',
+    'settingsNavigationGroupInput': 'Entrada',
+    'settingsNavigationGroupSetup': 'Configuração',
+    'settingsNavigationGroupSupport': 'Ajuda e diagnóstico',
+    'settingsNavigationNoResults': 'Nenhuma configuração encontrada',
+    'settingsNavigationSearchHint': 'Pesquisar configurações',
   },
   'ru': {
     'aboutGitHub': 'GitHub',
@@ -19053,7 +19337,8 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'Автоматически проверять обновления при запуске приложения',
     'settingsAboutChecking': 'Проверка...',
-    'settingsAboutDescription': 'Версия, обновления и ссылки',
+    'settingsAboutDescription':
+        'Версия, обновления, справка и данные приложения',
     'settingsAboutDismiss': 'Закрыть',
     'settingsAboutDownloading': 'Загрузка... {percent}%',
     'settingsAboutEraseAllData': 'Стереть все данные и перезапустить',
@@ -19117,7 +19402,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityNormal': 'Обычная',
     'settingsAppearanceDensitySpacious': 'Просторная',
     'settingsAppearanceDescription':
-        'Плотность и видимость пузырей на шкале времени',
+        'Выбор темы, цветов, размера текста и отображения чата',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -19189,7 +19474,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'Доступно клиентам OpenCode через конфигурацию.',
     'settingsBehaviorDescription':
-        'Значения по умолчанию OpenCode, происхождение и безопасность синхронизации редактора',
+        'Управление языком, поведением чата, данными и параметрами OpenCode по умолчанию',
     'settingsBehaviorEnableDataSaver': 'Включить экономию мобильного трафика',
     'settingsBehaviorMultiDeviceSync':
         'Включить экспериментальную синхронизацию между устройствами',
@@ -19257,7 +19542,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSystemDefault': 'Системный по умолчанию',
     'settingsLanguageTitle': 'Язык',
     'settingsLogsDescription':
-        'Диагностика времени выполнения и данные для устранения неполадок',
+        'Просмотр диагностики приложения и сведений об устранении неполадок',
     'settingsLogsTitle': 'Журналы',
     'settingsNoAgentsFound': 'Агенты не найдены',
     'settingsNotificationsAgentSubtitle': 'Когда ответ завершен',
@@ -19288,7 +19573,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTrayDescription':
         'Сворачивать окно и продолжать работу в системном трее.',
     'settingsNotificationsDescription':
-        'Настройки уведомлений и звуков для каждой категории',
+        'Выбор событий для уведомлений и способа их показа',
     'settingsNotificationsDisableOptimization': 'Отключить оптимизацию',
     'settingsNotificationsErrors': 'Ошибки',
     'settingsNotificationsErrorsSubtitle': 'Когда сессия сообщает о сбое',
@@ -19357,10 +19642,10 @@ const translations = <String, Map<String, String>>{
     'settingsServersChooseActive': 'Выбрать активный сервер',
     'settingsServersDefault': 'По умолчанию',
     'settingsServersDescription':
-        'Серверы OpenCode и маршрутизация работоспособности',
+        'Подключение к OpenCode и управление серверами',
     'settingsServersTitle': 'Серверы',
     'settingsSetupWizard': 'Мастер настройки',
-    'settingsShortcutsDescription': 'Привязки клавиш портативного приложения',
+    'settingsShortcutsDescription': 'Поиск и настройка сочетаний клавиш',
     'settingsShortcutsEdit': 'Редактировать ярлык',
     'settingsShortcutsKeyboard': 'Горячие клавиши',
     'settingsShortcutsReset': 'Сбросить ярлык',
@@ -19373,7 +19658,8 @@ const translations = <String, Map<String, String>>{
         'Автоматический откат OpenCode активен, так как `small_model` не задана.',
     'settingsSoundPickerNotAvailable':
         'Выбор системного звука недоступен на этой платформе.',
-    'settingsSpeechDescription': 'Движок, таймаут тишины и параметры модели',
+    'settingsSpeechDescription':
+        'Настройка голосового ввода, офлайн-моделей и чтения вслух',
     'settingsSpeechRefreshStatus': 'Обновить статус',
     'settingsSpeechSilenceTimeout': 'Таймаут тишины: {value} с',
     'settingsSpeechTitle': 'Преобразование речи в текст',
@@ -19643,6 +19929,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'Удалить {name} из истории',
     'workspaceSuggestions': 'Предложения',
+    'settingsGroupAlertTypes': 'Типы уведомлений',
+    'settingsGroupBackgroundBehavior': 'Работа в фоне',
+    'settingsGroupChatDisplay': 'Отображение чата',
+    'settingsGroupCurrentConnection': 'Текущее подключение',
+    'settingsGroupDataAndSync': 'Данные и синхронизация',
+    'settingsGroupDataReset': 'Данные и сброс',
+    'settingsGroupDelivery': 'Доставка',
+    'settingsGroupHelp': 'Справка',
+    'settingsGroupLanguageAndChat': 'Язык и чат',
+    'settingsGroupLayoutAndText': 'Макет и текст',
+    'settingsGroupOfflineModels': 'Офлайн-модели',
+    'settingsGroupOpenCodeDefaults': 'Параметры OpenCode по умолчанию',
+    'settingsGroupReadAloud': 'Чтение вслух',
+    'settingsGroupSavedServers': 'Сохраненные серверы',
+    'settingsGroupThemeAndColor': 'Тема и цвет',
+    'settingsGroupThisDevice': 'Это устройство',
+    'settingsGroupVersionUpdates': 'Версия и обновления',
+    'settingsGroupVoiceInput': 'Голосовой ввод',
+    'settingsNavigationGroupExperience': 'Опыт',
+    'settingsNavigationGroupInput': 'Ввод',
+    'settingsNavigationGroupSetup': 'Настройка',
+    'settingsNavigationGroupSupport': 'Справка и диагностика',
+    'settingsNavigationNoResults': 'Настройки не найдены',
+    'settingsNavigationSearchHint': 'Поиск настроек',
   },
   'ur': {
     'aboutGitHub': 'گٹ ہب',
@@ -20699,7 +21009,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpenDescription':
         'ایپ کب شروع ہوتی ہے خود بخود چیک کریں۔',
     'settingsAboutChecking': 'چیک کر رہا ہے...',
-    'settingsAboutDescription': 'ورژن، اپ ڈیٹس اور لنکس',
+    'settingsAboutDescription': 'ورژن، اپ ڈیٹس، مدد اور ایپ کا ڈیٹا',
     'settingsAboutDismiss': 'برطرف کرنا',
     'settingsAboutDownloading': 'ڈاؤن لوڈ ہو رہا ہے... {percent} %',
     'settingsAboutEraseAllData': 'تمام ڈیٹا مٹائیں اور دوبارہ شروع کریں۔',
@@ -20761,7 +21071,8 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': 'اضافی کشادہ',
     'settingsAppearanceDensityNormal': 'نارمل',
     'settingsAppearanceDensitySpacious': 'کشادہ',
-    'settingsAppearanceDescription': 'کثافت اور ٹائم لائن ببل کی مرئیت',
+    'settingsAppearanceDescription':
+        'تھیمز، رنگ، متن کا سائز اور چیٹ ڈسپلے منتخب کریں',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -20832,7 +21143,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultModelHelp':
         'تشکیل کے ذریعے اوپن کوڈ کلائنٹس میں اشتراک کیا گیا۔',
     'settingsBehaviorDescription':
-        'اوپن کوڈ ڈیفالٹس، پرووینس، اور کمپوزر سنک سیفٹی',
+        'زبان، چیٹ رویے، ڈیٹا کے استعمال اور OpenCode ڈیفالٹس کو کنٹرول کریں',
     'settingsBehaviorEnableDataSaver': 'سیلولر ڈیٹا سیور کو فعال کریں۔',
     'settingsBehaviorMultiDeviceSync':
         'تجرباتی ملٹی ڈیوائس مطابقت پذیری کو فعال کریں۔',
@@ -20897,7 +21208,8 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': 'زبانیں تلاش کریں۔',
     'settingsLanguageSystemDefault': 'سسٹم ڈیفالٹ',
     'settingsLanguageTitle': 'زبان',
-    'settingsLogsDescription': 'رن ٹائم تشخیص اور خرابیوں کا سراغ لگانا ڈیٹا',
+    'settingsLogsDescription':
+        'ایپ کی تشخیصات اور خرابیوں کے حل کی تفصیلات دیکھیں',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': 'کوئی ایجنٹ نہیں ملا',
     'settingsNotificationsAgentSubtitle': 'جب جواب ختم ہوتا ہے۔',
@@ -20927,7 +21239,8 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsCloseToTray': 'ٹرے کے قریب',
     'settingsNotificationsCloseToTrayDescription':
         'ونڈو کو چھپائیں اور سسٹم ٹرے میں چلتے رہیں۔',
-    'settingsNotificationsDescription': 'فی زمرہ مطلع اور ساؤنڈ کنٹرولز',
+    'settingsNotificationsDescription':
+        'منتخب کریں کہ کون سے واقعات آپ کو آگاہ کریں اور کیسے',
     'settingsNotificationsDisableOptimization': 'اصلاح کو غیر فعال کریں۔',
     'settingsNotificationsErrors': 'غلطیاں',
     'settingsNotificationsErrorsSubtitle':
@@ -20996,10 +21309,11 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': 'فعال',
     'settingsServersChooseActive': 'فعال سرور کا انتخاب کریں۔',
     'settingsServersDefault': 'طے شدہ',
-    'settingsServersDescription': 'اوپن کوڈ سرورز اور ہیلتھ روٹنگ',
+    'settingsServersDescription': 'OpenCode سے جڑیں اور اپنے سرورز کا نظم کریں',
     'settingsServersTitle': 'سرورز',
     'settingsSetupWizard': 'سیٹ اپ وزرڈ',
-    'settingsShortcutsDescription': 'پورٹ ایبل ایپ کلیدی پابندیاں',
+    'settingsShortcutsDescription':
+        'کی بورڈ شارٹ کٹس تلاش کریں اور اپنی مرضی کے مطابق بنائیں',
     'settingsShortcutsEdit': 'شارٹ کٹ میں ترمیم کریں۔',
     'settingsShortcutsKeyboard': 'کی بورڈ شارٹ کٹس',
     'settingsShortcutsReset': 'شارٹ کٹ کو دوبارہ ترتیب دیں۔',
@@ -21013,7 +21327,7 @@ const translations = <String, Map<String, String>>{
     'settingsSoundPickerNotAvailable':
         'سسٹم ساؤنڈ پیکر اس پلیٹ فارم پر دستیاب نہیں ہے۔',
     'settingsSpeechDescription':
-        'انجن، خاموشی کا ٹائم آؤٹ، اور ماڈل کے اختیارات',
+        'وائس ان پٹ، آف لائن ماڈلز اور پڑھ کر سنانا سیٹ اپ کریں',
     'settingsSpeechRefreshStatus': 'حالت تازہ کریں۔',
     'settingsSpeechSilenceTimeout': 'خاموشی کا ٹائم آؤٹ: {value} s',
     'settingsSpeechTitle': 'متن سے تقریر',
@@ -21277,6 +21591,30 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': 'تاریخ سے {name} کو ہٹا دیں۔',
     'workspaceSuggestions': 'تجاویز',
+    'settingsGroupAlertTypes': 'الرٹ کی اقسام',
+    'settingsGroupBackgroundBehavior': 'بیک گراؤنڈ رویہ',
+    'settingsGroupChatDisplay': 'چیٹ ڈسپلے',
+    'settingsGroupCurrentConnection': 'موجودہ کنکشن',
+    'settingsGroupDataAndSync': 'ڈیٹا اور سنک',
+    'settingsGroupDataReset': 'ڈیٹا اور ری سیٹ',
+    'settingsGroupDelivery': 'ڈیلیوری',
+    'settingsGroupHelp': 'مدد',
+    'settingsGroupLanguageAndChat': 'زبان اور چیٹ',
+    'settingsGroupLayoutAndText': 'لے آؤٹ اور متن',
+    'settingsGroupOfflineModels': 'آف لائن ماڈلز',
+    'settingsGroupOpenCodeDefaults': 'OpenCode ڈیفالٹس',
+    'settingsGroupReadAloud': 'پڑھ کر سنانا',
+    'settingsGroupSavedServers': 'محفوظ شدہ سرورز',
+    'settingsGroupThemeAndColor': 'تھیم اور رنگ',
+    'settingsGroupThisDevice': 'یہ ڈیوائس',
+    'settingsGroupVersionUpdates': 'ورژن اور اپ ڈیٹس',
+    'settingsGroupVoiceInput': 'وائس ان پٹ',
+    'settingsNavigationGroupExperience': 'تجربہ',
+    'settingsNavigationGroupInput': 'ان پٹ',
+    'settingsNavigationGroupSetup': 'سیٹ اپ',
+    'settingsNavigationGroupSupport': 'مدد اور تشخیص',
+    'settingsNavigationNoResults': 'کوئی سیٹنگز نہیں ملیں',
+    'settingsNavigationSearchHint': 'سیٹنگز تلاش کریں',
   },
   'zh': {
     'aboutGitHub': 'GitHub',
@@ -22188,7 +22526,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutCheckOnOpen': '打开时检查更新',
     'settingsAboutCheckOnOpenDescription': '应用启动时自动检查',
     'settingsAboutChecking': '正在检查...',
-    'settingsAboutDescription': '版本、更新和链接',
+    'settingsAboutDescription': '版本、更新、帮助和应用数据',
     'settingsAboutDismiss': '忽略',
     'settingsAboutDownloading': '正在下载... {percent}%',
     'settingsAboutEraseAllData': '清除所有数据并重启',
@@ -22238,7 +22576,7 @@ const translations = <String, Map<String, String>>{
     'settingsAppearanceDensityExtraSpacious': '极宽松',
     'settingsAppearanceDensityNormal': '标准',
     'settingsAppearanceDensitySpacious': '宽松',
-    'settingsAppearanceDescription': '密度和时间线气泡可见性',
+    'settingsAppearanceDescription': '选择主题、颜色、文字大小和聊天显示方式',
     'settingsAppearanceFontSize': 'Text size',
     'settingsAppearanceFontSizeDescription':
         'Adjust the size of system text, conversation text, and terminal text.',
@@ -22292,7 +22630,7 @@ const translations = <String, Map<String, String>>{
     'settingsBehaviorDefaultAgentHelp': '在未明确选择 agent 时使用的主要 agent。',
     'settingsBehaviorDefaultModel': '默认模型',
     'settingsBehaviorDefaultModelHelp': '通过配置在 OpenCode 客户端之间共享。',
-    'settingsBehaviorDescription': 'OpenCode 默认设置、凭证以及 composer 同步安全',
+    'settingsBehaviorDescription': '管理语言、聊天行为、数据使用和 OpenCode 默认设置',
     'settingsBehaviorEnableDataSaver': '启用蜂窝数据节省程序',
     'settingsBehaviorMultiDeviceSync': '启用实验性多设备同步',
     'settingsBehaviorMultiDeviceSyncDescription':
@@ -22347,7 +22685,7 @@ const translations = <String, Map<String, String>>{
     'settingsLanguageSearchHint': '搜索语言',
     'settingsLanguageSystemDefault': '系统默认',
     'settingsLanguageTitle': '语言',
-    'settingsLogsDescription': '运行时诊断和故障排除数据',
+    'settingsLogsDescription': '查看应用诊断和故障排查详情',
     'settingsLogsTitle': 'Registros',
     'settingsNoAgentsFound': '未找到智能体',
     'settingsNotificationsAgentSubtitle': '当响应结束时',
@@ -22373,7 +22711,7 @@ const translations = <String, Map<String, String>>{
     'settingsNotificationsChooseSystemSound': '选择系统声音',
     'settingsNotificationsCloseToTray': '关闭至系统托盘',
     'settingsNotificationsCloseToTrayDescription': '隐藏窗口并继续在系统托盘中运行。',
-    'settingsNotificationsDescription': '按类别的通知和声音控制',
+    'settingsNotificationsDescription': '选择要提醒您的事件及提醒方式',
     'settingsNotificationsDisableOptimization': '禁用优化',
     'settingsNotificationsErrors': '错误',
     'settingsNotificationsErrorsSubtitle': '当会话报告失败时',
@@ -22431,10 +22769,10 @@ const translations = <String, Map<String, String>>{
     'settingsServersActive': '活动',
     'settingsServersChooseActive': '选择活动服务器',
     'settingsServersDefault': '默认',
-    'settingsServersDescription': 'OpenCode 服务器和健康路由',
+    'settingsServersDescription': '连接 OpenCode 并管理您的服务器',
     'settingsServersTitle': '服务器',
     'settingsSetupWizard': '设置向导',
-    'settingsShortcutsDescription': '便携式应用按键绑定',
+    'settingsShortcutsDescription': '查找和自定义键盘快捷键',
     'settingsShortcutsEdit': '编辑快捷键',
     'settingsShortcutsKeyboard': '键盘快捷键',
     'settingsShortcutsReset': '重置快捷键',
@@ -22446,7 +22784,7 @@ const translations = <String, Map<String, String>>{
     'settingsSmallModelUnsetExplanation':
         '由于未设置 `small_model`，OpenCode 自动回退已激活。',
     'settingsSoundPickerNotAvailable': '系统声音选择器在此平台上不可用。',
-    'settingsSpeechDescription': '引擎、静音超时和模型选项',
+    'settingsSpeechDescription': '设置语音输入、离线模型和朗读',
     'settingsSpeechRefreshStatus': '刷新状态',
     'settingsSpeechSilenceTimeout': '静音超时: {value}秒',
     'settingsSpeechTitle': '语音转文本',
@@ -22687,5 +23025,29 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectHint': '/repo/my-project',
     'workspaceRemoveFromHistory': '从历史记录中移除 {name}',
     'workspaceSuggestions': '建议',
+    'settingsGroupAlertTypes': '提醒类型',
+    'settingsGroupBackgroundBehavior': '后台行为',
+    'settingsGroupChatDisplay': '聊天显示',
+    'settingsGroupCurrentConnection': '当前连接',
+    'settingsGroupDataAndSync': '数据与同步',
+    'settingsGroupDataReset': '数据与重置',
+    'settingsGroupDelivery': '投递方式',
+    'settingsGroupHelp': '帮助',
+    'settingsGroupLanguageAndChat': '语言与聊天',
+    'settingsGroupLayoutAndText': '布局与文字',
+    'settingsGroupOfflineModels': '离线模型',
+    'settingsGroupOpenCodeDefaults': 'OpenCode 默认设置',
+    'settingsGroupReadAloud': '朗读',
+    'settingsGroupSavedServers': '已保存的服务器',
+    'settingsGroupThemeAndColor': '主题与颜色',
+    'settingsGroupThisDevice': '此设备',
+    'settingsGroupVersionUpdates': '版本与更新',
+    'settingsGroupVoiceInput': '语音输入',
+    'settingsNavigationGroupExperience': '体验',
+    'settingsNavigationGroupInput': '输入',
+    'settingsNavigationGroupSetup': '设置',
+    'settingsNavigationGroupSupport': '帮助与诊断',
+    'settingsNavigationNoResults': '未找到设置',
+    'settingsNavigationSearchHint': '搜索设置',
   },
 };

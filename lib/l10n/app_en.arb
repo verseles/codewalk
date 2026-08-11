@@ -3945,7 +3945,7 @@
   "@settingsAboutChecking": {
     "description": "CodeWalk UI string — settingsAboutChecking"
   },
-  "settingsAboutDescription": "Version, updates and links",
+  "settingsAboutDescription": "Version, updates, help, and app data",
   "@settingsAboutDescription": {
     "description": "CodeWalk UI string — settingsAboutDescription"
   },
@@ -4154,7 +4154,7 @@
   "@settingsAppearanceDensitySpacious": {
     "description": "CodeWalk UI string — settingsAppearanceDensitySpacious"
   },
-  "settingsAppearanceDescription": "Density and timeline bubble visibility",
+  "settingsAppearanceDescription": "Choose themes, colors, text size, and chat display",
   "@settingsAppearanceDescription": {
     "description": "CodeWalk UI string — settingsAppearanceDescription"
   },
@@ -4417,7 +4417,7 @@
   "@settingsBehaviorDefaultModelHelp": {
     "description": "CodeWalk UI string — settingsBehaviorDefaultModelHelp"
   },
-  "settingsBehaviorDescription": "OpenCode defaults, provenance, and composer sync safety",
+  "settingsBehaviorDescription": "Control language, chat behavior, data use, and OpenCode defaults",
   "@settingsBehaviorDescription": {
     "description": "CodeWalk UI string — settingsBehaviorDescription"
   },
@@ -4601,7 +4601,7 @@
   "@settingsLanguageTitle": {
     "description": "CodeWalk UI string — settingsLanguageTitle"
   },
-  "settingsLogsDescription": "Runtime diagnostics and troubleshooting data",
+  "settingsLogsDescription": "Review app diagnostics and troubleshooting details",
   "@settingsLogsDescription": {
     "description": "CodeWalk UI string — settingsLogsDescription"
   },
@@ -4689,7 +4689,7 @@
   "@settingsNotificationsCloseToTrayDescription": {
     "description": "CodeWalk UI string — settingsNotificationsCloseToTrayDescription"
   },
-  "settingsNotificationsDescription": "Per-category notify and sound controls",
+  "settingsNotificationsDescription": "Choose which events alert you and how",
   "@settingsNotificationsDescription": {
     "description": "CodeWalk UI string — settingsNotificationsDescription"
   },
@@ -4924,7 +4924,7 @@
   "@settingsServersDefault": {
     "description": "CodeWalk UI string — settingsServersDefault"
   },
-  "settingsServersDescription": "OpenCode servers and health routing",
+  "settingsServersDescription": "Connect to OpenCode and manage your servers",
   "@settingsServersDescription": {
     "description": "CodeWalk UI string — settingsServersDescription"
   },
@@ -4960,7 +4960,7 @@
   "@settingsSetupWizard": {
     "description": "CodeWalk UI string — settingsSetupWizard"
   },
-  "settingsShortcutsDescription": "Portable app key bindings",
+  "settingsShortcutsDescription": "Find and customize keyboard shortcuts",
   "@settingsShortcutsDescription": {
     "description": "CodeWalk UI string — settingsShortcutsDescription"
   },
@@ -5000,7 +5000,7 @@
   "@settingsSoundPickerNotAvailable": {
     "description": "CodeWalk UI string — settingsSoundPickerNotAvailable"
   },
-  "settingsSpeechDescription": "Engine, silence timeout, and model options",
+  "settingsSpeechDescription": "Set up voice input, offline models, and read aloud",
   "@settingsSpeechDescription": {
     "description": "CodeWalk UI string — settingsSpeechDescription"
   },
@@ -5022,6 +5022,102 @@
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "CodeWalk UI string — settingsTitle"
+  },
+  "settingsGroupAlertTypes": "Alert types",
+  "@settingsGroupAlertTypes": {
+    "description": "CodeWalk UI string — settingsGroupAlertTypes"
+  },
+  "settingsGroupBackgroundBehavior": "Background behavior",
+  "@settingsGroupBackgroundBehavior": {
+    "description": "CodeWalk UI string — settingsGroupBackgroundBehavior"
+  },
+  "settingsGroupChatDisplay": "Chat display",
+  "@settingsGroupChatDisplay": {
+    "description": "CodeWalk UI string — settingsGroupChatDisplay"
+  },
+  "settingsGroupCurrentConnection": "Current connection",
+  "@settingsGroupCurrentConnection": {
+    "description": "CodeWalk UI string — settingsGroupCurrentConnection"
+  },
+  "settingsGroupDataAndSync": "Data and sync",
+  "@settingsGroupDataAndSync": {
+    "description": "CodeWalk UI string — settingsGroupDataAndSync"
+  },
+  "settingsGroupDataReset": "Data and reset",
+  "@settingsGroupDataReset": {
+    "description": "CodeWalk UI string — settingsGroupDataReset"
+  },
+  "settingsGroupDelivery": "Delivery",
+  "@settingsGroupDelivery": {
+    "description": "CodeWalk UI string — settingsGroupDelivery"
+  },
+  "settingsGroupHelp": "Help",
+  "@settingsGroupHelp": {
+    "description": "CodeWalk UI string — settingsGroupHelp"
+  },
+  "settingsGroupLanguageAndChat": "Language and chat",
+  "@settingsGroupLanguageAndChat": {
+    "description": "CodeWalk UI string — settingsGroupLanguageAndChat"
+  },
+  "settingsGroupLayoutAndText": "Layout and text",
+  "@settingsGroupLayoutAndText": {
+    "description": "CodeWalk UI string — settingsGroupLayoutAndText"
+  },
+  "settingsGroupOfflineModels": "Offline models",
+  "@settingsGroupOfflineModels": {
+    "description": "CodeWalk UI string — settingsGroupOfflineModels"
+  },
+  "settingsGroupOpenCodeDefaults": "OpenCode defaults",
+  "@settingsGroupOpenCodeDefaults": {
+    "description": "CodeWalk UI string — settingsGroupOpenCodeDefaults"
+  },
+  "settingsGroupReadAloud": "Read aloud",
+  "@settingsGroupReadAloud": {
+    "description": "CodeWalk UI string — settingsGroupReadAloud"
+  },
+  "settingsGroupSavedServers": "Saved servers",
+  "@settingsGroupSavedServers": {
+    "description": "CodeWalk UI string — settingsGroupSavedServers"
+  },
+  "settingsGroupThemeAndColor": "Theme and color",
+  "@settingsGroupThemeAndColor": {
+    "description": "CodeWalk UI string — settingsGroupThemeAndColor"
+  },
+  "settingsGroupThisDevice": "This device",
+  "@settingsGroupThisDevice": {
+    "description": "CodeWalk UI string — settingsGroupThisDevice"
+  },
+  "settingsGroupVersionUpdates": "Version and updates",
+  "@settingsGroupVersionUpdates": {
+    "description": "CodeWalk UI string — settingsGroupVersionUpdates"
+  },
+  "settingsGroupVoiceInput": "Voice input",
+  "@settingsGroupVoiceInput": {
+    "description": "CodeWalk UI string — settingsGroupVoiceInput"
+  },
+  "settingsNavigationGroupExperience": "Experience",
+  "@settingsNavigationGroupExperience": {
+    "description": "CodeWalk UI string — settingsNavigationGroupExperience"
+  },
+  "settingsNavigationGroupInput": "Input",
+  "@settingsNavigationGroupInput": {
+    "description": "CodeWalk UI string — settingsNavigationGroupInput"
+  },
+  "settingsNavigationGroupSetup": "Setup",
+  "@settingsNavigationGroupSetup": {
+    "description": "CodeWalk UI string — settingsNavigationGroupSetup"
+  },
+  "settingsNavigationGroupSupport": "Help and diagnostics",
+  "@settingsNavigationGroupSupport": {
+    "description": "CodeWalk UI string — settingsNavigationGroupSupport"
+  },
+  "settingsNavigationNoResults": "No settings found",
+  "@settingsNavigationNoResults": {
+    "description": "CodeWalk UI string — settingsNavigationNoResults"
+  },
+  "settingsNavigationSearchHint": "Search settings",
+  "@settingsNavigationSearchHint": {
+    "description": "CodeWalk UI string — settingsNavigationSearchHint"
   },
   "settingsUsernameClearHint": "Clearing the OpenCode conversation username still requires editing config outside the app.",
   "@settingsUsernameClearHint": {

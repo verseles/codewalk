@@ -560,6 +560,22 @@ class _LogsToolbar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(context.l10n.logsEnableLogging),
+            subtitle: Text(context.l10n.logsEnableLoggingDescription),
+            value: loggingEnabled,
+            onChanged: onLoggingChanged,
+          ),
+          const SizedBox(height: 6),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(context.l10n.logsMeasurePerformance),
+            subtitle: Text(context.l10n.logsMeasurePerformanceDescription),
+            value: performanceLoggingEnabled,
+            onChanged: loggingEnabled ? onPerformanceLoggingChanged : null,
+          ),
+          const Divider(height: 24),
           Text(
             context.l10n.logsTimeRange,
             style: Theme.of(context).textTheme.labelLarge,
@@ -628,22 +644,6 @@ class _LogsToolbar extends StatelessWidget {
                 onPressed: loggingEnabled ? onCustomTagRequested : null,
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(context.l10n.logsEnableLogging),
-            subtitle: Text(context.l10n.logsEnableLoggingDescription),
-            value: loggingEnabled,
-            onChanged: onLoggingChanged,
-          ),
-          const SizedBox(height: 6),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(context.l10n.logsMeasurePerformance),
-            subtitle: Text(context.l10n.logsMeasurePerformanceDescription),
-            value: performanceLoggingEnabled,
-            onChanged: loggingEnabled ? onPerformanceLoggingChanged : null,
           ),
           const SizedBox(height: 6),
           Wrap(

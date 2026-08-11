@@ -3049,7 +3049,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAboutChecking => '확인 중...';
 
   @override
-  String get settingsAboutDescription => '버전, 업데이트 및 링크';
+  String get settingsAboutDescription => '버전, 업데이트, 도움말 및 앱 데이터';
 
   @override
   String get settingsAboutDismiss => '닫기';
@@ -3217,7 +3217,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAppearanceDensitySpacious => '넓음';
 
   @override
-  String get settingsAppearanceDescription => '간격 조밀도 및 타임라인 말풍선 표시 여부';
+  String get settingsAppearanceDescription => '테마, 색상, 텍스트 크기 및 채팅 표시 선택';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3442,7 +3442,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'OpenCode 기본값, 출처(provenance) 및 컴포저 동기화 안정성';
+      '언어, 채팅 동작, 데이터 사용 및 OpenCode 기본값 관리';
 
   @override
   String get settingsBehaviorEnableDataSaver => '데이터 절약 모드 활성화';
@@ -3596,7 +3596,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsLanguageTitle => '언어';
 
   @override
-  String get settingsLogsDescription => '런타임 진단 및 문제 해결 데이터';
+  String get settingsLogsDescription => '앱 진단 및 문제 해결 세부 정보 확인';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3669,7 +3669,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '창을 숨기고 시스템 트레이에서 계속 실행합니다.';
 
   @override
-  String get settingsNotificationsDescription => '카테고리별 알림 및 소리 제어';
+  String get settingsNotificationsDescription => '알림받을 이벤트와 방법 선택';
 
   @override
   String get settingsNotificationsDisableOptimization => '최적화 비활성화';
@@ -3853,7 +3853,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsServersDefault => '기본값';
 
   @override
-  String get settingsServersDescription => 'OpenCode 서버 및 헬스 라우팅';
+  String get settingsServersDescription => 'OpenCode에 연결하고 서버 관리';
 
   @override
   String get settingsServersTitle => '서버';
@@ -3880,7 +3880,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsSetupWizard => '설정 마법사';
 
   @override
-  String get settingsShortcutsDescription => '이동식 앱 키 바인딩';
+  String get settingsShortcutsDescription => '키보드 단축키 찾기 및 사용자 지정';
 
   @override
   String get settingsShortcutsEdit => '단축키 편집';
@@ -3913,7 +3913,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '시스템 사운드 선택기는 이 플랫폼에서 사용할 수 없습니다.';
 
   @override
-  String get settingsSpeechDescription => '엔진, 무음 제한 시간 및 모델 옵션';
+  String get settingsSpeechDescription => '음성 입력, 오프라인 모델 및 소리내어 읽기 설정';
 
   @override
   String get settingsSpeechRefreshStatus => '상태 새로고침';
@@ -3928,6 +3928,78 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsTitle => '설정';
+
+  @override
+  String get settingsGroupAlertTypes => '알림 유형';
+
+  @override
+  String get settingsGroupBackgroundBehavior => '백그라운드 동작';
+
+  @override
+  String get settingsGroupChatDisplay => '채팅 표시';
+
+  @override
+  String get settingsGroupCurrentConnection => '현재 연결';
+
+  @override
+  String get settingsGroupDataAndSync => '데이터 및 동기화';
+
+  @override
+  String get settingsGroupDataReset => '데이터 및 초기화';
+
+  @override
+  String get settingsGroupDelivery => '전달 방식';
+
+  @override
+  String get settingsGroupHelp => '도움말';
+
+  @override
+  String get settingsGroupLanguageAndChat => '언어 및 채팅';
+
+  @override
+  String get settingsGroupLayoutAndText => '레이아웃 및 텍스트';
+
+  @override
+  String get settingsGroupOfflineModels => '오프라인 모델';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode 기본값';
+
+  @override
+  String get settingsGroupReadAloud => '소리내어 읽기';
+
+  @override
+  String get settingsGroupSavedServers => '저장된 서버';
+
+  @override
+  String get settingsGroupThemeAndColor => '테마 및 색상';
+
+  @override
+  String get settingsGroupThisDevice => '이 기기';
+
+  @override
+  String get settingsGroupVersionUpdates => '버전 및 업데이트';
+
+  @override
+  String get settingsGroupVoiceInput => '음성 입력';
+
+  @override
+  String get settingsNavigationGroupExperience => '경험';
+
+  @override
+  String get settingsNavigationGroupInput => '입력';
+
+  @override
+  String get settingsNavigationGroupSetup => '설정';
+
+  @override
+  String get settingsNavigationGroupSupport => '도움말 및 진단';
+
+  @override
+  String get settingsNavigationNoResults => '설정 항목을 찾을 수 없음';
+
+  @override
+  String get settingsNavigationSearchHint => '설정 검색';
 
   @override
   String get settingsUsernameClearHint =>

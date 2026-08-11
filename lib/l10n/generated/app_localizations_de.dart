@@ -3217,7 +3217,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsAboutChecking => 'Wird geprüft...';
 
   @override
-  String get settingsAboutDescription => 'Version, Updates und Links';
+  String get settingsAboutDescription =>
+      'Version, Updates, Hilfe und App-Daten';
 
   @override
   String get settingsAboutDismiss => 'Verwerfen';
@@ -3390,7 +3391,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'Dichte und Sichtbarkeit von Timeline-Blasen';
+      'Themes, Farben, Textgröße und Chatdarstellung wählen';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3623,7 +3624,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'OpenCode-Standardwerte, Provenienz und Composer-Sync-Sicherheit';
+      'Sprache, Chatverhalten, Datennutzung und OpenCode-Standards steuern';
 
   @override
   String get settingsBehaviorEnableDataSaver =>
@@ -3786,7 +3787,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'Laufzeitdiagnose und Fehlerbehebungsdaten';
+      'App-Diagnosen und Details zur Fehlerbehebung ansehen';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3865,7 +3866,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'Benachrichtigungs- und Soundeinstellungen pro Kategorie';
+      'Wählen, welche Ereignisse dich wie benachrichtigen';
 
   @override
   String get settingsNotificationsDisableOptimization =>
@@ -4059,7 +4060,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsServersDefault => 'Standard';
 
   @override
-  String get settingsServersDescription => 'OpenCode-Server und Health-Routing';
+  String get settingsServersDescription =>
+      'Mit OpenCode verbinden und Server verwalten';
 
   @override
   String get settingsServersTitle => 'Server';
@@ -4086,7 +4088,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsSetupWizard => 'Einrichtungsassistent';
 
   @override
-  String get settingsShortcutsDescription => 'Tragbare App-Tastenbelegungen';
+  String get settingsShortcutsDescription =>
+      'Tastaturkürzel finden und anpassen';
 
   @override
   String get settingsShortcutsEdit => 'Kurzbefehl bearbeiten';
@@ -4120,7 +4123,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'Engine, Stille-Timeout und Modelloptionen';
+      'Spracheingabe, Offline-Modelle und Vorlesen einrichten';
 
   @override
   String get settingsSpeechRefreshStatus => 'Status aktualisieren';
@@ -4135,6 +4138,78 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsTitle => 'Einstellungen';
+
+  @override
+  String get settingsGroupAlertTypes => 'Benachrichtigungstypen';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'Verhalten im Hintergrund';
+
+  @override
+  String get settingsGroupChatDisplay => 'Chatdarstellung';
+
+  @override
+  String get settingsGroupCurrentConnection => 'Aktuelle Verbindung';
+
+  @override
+  String get settingsGroupDataAndSync => 'Daten und Synchronisierung';
+
+  @override
+  String get settingsGroupDataReset => 'Daten und Zurücksetzen';
+
+  @override
+  String get settingsGroupDelivery => 'Zustellung';
+
+  @override
+  String get settingsGroupHelp => 'Hilfe';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'Sprache und Chat';
+
+  @override
+  String get settingsGroupLayoutAndText => 'Layout und Text';
+
+  @override
+  String get settingsGroupOfflineModels => 'Offline-Modelle';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode-Standardwerte';
+
+  @override
+  String get settingsGroupReadAloud => 'Vorlesen';
+
+  @override
+  String get settingsGroupSavedServers => 'Gespeicherte Server';
+
+  @override
+  String get settingsGroupThemeAndColor => 'Design und Farbe';
+
+  @override
+  String get settingsGroupThisDevice => 'Dieses Gerät';
+
+  @override
+  String get settingsGroupVersionUpdates => 'Version und Updates';
+
+  @override
+  String get settingsGroupVoiceInput => 'Spracheingabe';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Erfahrung';
+
+  @override
+  String get settingsNavigationGroupInput => 'Eingabe';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Einrichtung';
+
+  @override
+  String get settingsNavigationGroupSupport => 'Hilfe und Diagnose';
+
+  @override
+  String get settingsNavigationNoResults => 'Keine Einstellungen gefunden';
+
+  @override
+  String get settingsNavigationSearchHint => 'Einstellungen durchsuchen';
 
   @override
   String get settingsUsernameClearHint =>

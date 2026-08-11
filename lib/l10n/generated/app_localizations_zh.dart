@@ -2991,7 +2991,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAboutChecking => '正在检查...';
 
   @override
-  String get settingsAboutDescription => '版本、更新和链接';
+  String get settingsAboutDescription => '版本、更新、帮助和应用数据';
 
   @override
   String get settingsAboutDismiss => '忽略';
@@ -3151,7 +3151,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAppearanceDensitySpacious => '宽松';
 
   @override
-  String get settingsAppearanceDescription => '密度和时间线气泡可见性';
+  String get settingsAppearanceDescription => '选择主题、颜色、文字大小和聊天显示方式';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3368,7 +3368,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsBehaviorDefaultModelHelp => '通过配置在 OpenCode 客户端之间共享。';
 
   @override
-  String get settingsBehaviorDescription => 'OpenCode 默认设置、凭证以及 composer 同步安全';
+  String get settingsBehaviorDescription => '管理语言、聊天行为、数据使用和 OpenCode 默认设置';
 
   @override
   String get settingsBehaviorEnableDataSaver => '启用蜂窝数据节省程序';
@@ -3520,7 +3520,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLanguageTitle => '语言';
 
   @override
-  String get settingsLogsDescription => '运行时诊断和故障排除数据';
+  String get settingsLogsDescription => '查看应用诊断和故障排查详情';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3590,7 +3590,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotificationsCloseToTrayDescription => '隐藏窗口并继续在系统托盘中运行。';
 
   @override
-  String get settingsNotificationsDescription => '按类别的通知和声音控制';
+  String get settingsNotificationsDescription => '选择要提醒您的事件及提醒方式';
 
   @override
   String get settingsNotificationsDisableOptimization => '禁用优化';
@@ -3769,7 +3769,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsServersDefault => '默认';
 
   @override
-  String get settingsServersDescription => 'OpenCode 服务器和健康路由';
+  String get settingsServersDescription => '连接 OpenCode 并管理您的服务器';
 
   @override
   String get settingsServersTitle => '服务器';
@@ -3796,7 +3796,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSetupWizard => '设置向导';
 
   @override
-  String get settingsShortcutsDescription => '便携式应用按键绑定';
+  String get settingsShortcutsDescription => '查找和自定义键盘快捷键';
 
   @override
   String get settingsShortcutsEdit => '编辑快捷键';
@@ -3828,7 +3828,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSoundPickerNotAvailable => '系统声音选择器在此平台上不可用。';
 
   @override
-  String get settingsSpeechDescription => '引擎、静音超时和模型选项';
+  String get settingsSpeechDescription => '设置语音输入、离线模型和朗读';
 
   @override
   String get settingsSpeechRefreshStatus => '刷新状态';
@@ -3843,6 +3843,78 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsTitle => '设置';
+
+  @override
+  String get settingsGroupAlertTypes => '提醒类型';
+
+  @override
+  String get settingsGroupBackgroundBehavior => '后台行为';
+
+  @override
+  String get settingsGroupChatDisplay => '聊天显示';
+
+  @override
+  String get settingsGroupCurrentConnection => '当前连接';
+
+  @override
+  String get settingsGroupDataAndSync => '数据与同步';
+
+  @override
+  String get settingsGroupDataReset => '数据与重置';
+
+  @override
+  String get settingsGroupDelivery => '投递方式';
+
+  @override
+  String get settingsGroupHelp => '帮助';
+
+  @override
+  String get settingsGroupLanguageAndChat => '语言与聊天';
+
+  @override
+  String get settingsGroupLayoutAndText => '布局与文字';
+
+  @override
+  String get settingsGroupOfflineModels => '离线模型';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode 默认设置';
+
+  @override
+  String get settingsGroupReadAloud => '朗读';
+
+  @override
+  String get settingsGroupSavedServers => '已保存的服务器';
+
+  @override
+  String get settingsGroupThemeAndColor => '主题与颜色';
+
+  @override
+  String get settingsGroupThisDevice => '此设备';
+
+  @override
+  String get settingsGroupVersionUpdates => '版本与更新';
+
+  @override
+  String get settingsGroupVoiceInput => '语音输入';
+
+  @override
+  String get settingsNavigationGroupExperience => '体验';
+
+  @override
+  String get settingsNavigationGroupInput => '输入';
+
+  @override
+  String get settingsNavigationGroupSetup => '设置';
+
+  @override
+  String get settingsNavigationGroupSupport => '帮助与诊断';
+
+  @override
+  String get settingsNavigationNoResults => '未找到设置';
+
+  @override
+  String get settingsNavigationSearchHint => '搜索设置';
 
   @override
   String get settingsUsernameClearHint => '清除 OpenCode 会话用户名后，仍需在应用外部编辑配置。';

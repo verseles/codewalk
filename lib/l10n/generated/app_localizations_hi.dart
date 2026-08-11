@@ -3187,7 +3187,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsAboutChecking => 'जांच की जा रही है...';
 
   @override
-  String get settingsAboutDescription => 'संस्करण, अपडेट और लिंक';
+  String get settingsAboutDescription => 'संस्करण, अपडेट, सहायता और ऐप डेटा';
 
   @override
   String get settingsAboutDismiss => 'खारिज करें';
@@ -3360,7 +3360,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'घनत्व (density) और टाइमलाइन बबल दृश्यता';
+      'थीम, रंग, टेक्स्ट आकार और चैट प्रदर्शन चुनें';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3590,7 +3590,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'OpenCode डिफ़ॉल्ट, उत्पत्ति (provenance), और कंपोज़र सिंक सुरक्षा';
+      'भाषा, चैट व्यवहार, डेटा उपयोग और OpenCode डिफ़ॉल्ट नियंत्रित करें';
 
   @override
   String get settingsBehaviorEnableDataSaver => 'सेलुलर डेटा सेवर सक्षम करें';
@@ -3748,7 +3748,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsLanguageTitle => 'भाषा';
 
   @override
-  String get settingsLogsDescription => 'रनटाइम निदान और समस्या निवारण डेटा';
+  String get settingsLogsDescription =>
+      'ऐप डायग्नोस्टिक्स और समस्या निवारण विवरण देखें';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3828,7 +3829,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'प्रति-श्रेणी अधिसूचना और ध्वनि नियंत्रण';
+      'चुनें कि कौन सी घटनाएँ आपको सचेत करें और कैसे';
 
   @override
   String get settingsNotificationsDisableOptimization => 'अनुकूलन अक्षम करें';
@@ -4020,7 +4021,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsServersDefault => 'डिफ़ॉल्ट';
 
   @override
-  String get settingsServersDescription => 'OpenCode सर्वर और हेल्थ राउटिंग';
+  String get settingsServersDescription =>
+      'OpenCode से कनेक्ट करें और अपने सर्वर प्रबंधित करें';
 
   @override
   String get settingsServersTitle => 'सर्वर';
@@ -4047,7 +4049,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsSetupWizard => 'सेटअप विज़ार्ड';
 
   @override
-  String get settingsShortcutsDescription => 'पोर्टेबल ऐप कुंजी बाइंडिंग';
+  String get settingsShortcutsDescription =>
+      'कीबोर्ड शॉर्टकट खोजें और अनुकूलित करें';
 
   @override
   String get settingsShortcutsEdit => 'शॉर्टकट संपादित करें';
@@ -4080,7 +4083,8 @@ class AppLocalizationsHi extends AppLocalizations {
       'सिस्टम ध्वनि चयनकर्ता इस प्लेटफॉर्म पर उपलब्ध नहीं है।';
 
   @override
-  String get settingsSpeechDescription => 'इंजन, मौन टाइमआउट और मॉडल विकल्प';
+  String get settingsSpeechDescription =>
+      'वॉइस इनपुट, ऑफ़लाइन मॉडल और पढ़कर सुनाना सेट करें';
 
   @override
   String get settingsSpeechRefreshStatus => 'स्थिति रीफ़्रेश करें';
@@ -4095,6 +4099,78 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get settingsTitle => 'सेटिंग्स';
+
+  @override
+  String get settingsGroupAlertTypes => 'अलर्ट प्रकार';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'पृष्ठभूमि व्यवहार';
+
+  @override
+  String get settingsGroupChatDisplay => 'चैट प्रदर्शन';
+
+  @override
+  String get settingsGroupCurrentConnection => 'वर्तमान कनेक्शन';
+
+  @override
+  String get settingsGroupDataAndSync => 'डेटा और सिंक';
+
+  @override
+  String get settingsGroupDataReset => 'डेटा और रीसेट';
+
+  @override
+  String get settingsGroupDelivery => 'डिलीवरी';
+
+  @override
+  String get settingsGroupHelp => 'सहायता';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'भाषा और चैट';
+
+  @override
+  String get settingsGroupLayoutAndText => 'लेआउट और टेक्स्ट';
+
+  @override
+  String get settingsGroupOfflineModels => 'ऑफ़लाइन मॉडल';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode डिफ़ॉल्ट';
+
+  @override
+  String get settingsGroupReadAloud => 'पढ़कर सुनाना';
+
+  @override
+  String get settingsGroupSavedServers => 'सहेजे गए सर्वर';
+
+  @override
+  String get settingsGroupThemeAndColor => 'थीम और रंग';
+
+  @override
+  String get settingsGroupThisDevice => 'यह डिवाइस';
+
+  @override
+  String get settingsGroupVersionUpdates => 'संस्करण और अपडेट';
+
+  @override
+  String get settingsGroupVoiceInput => 'वॉइस इनपुट';
+
+  @override
+  String get settingsNavigationGroupExperience => 'अनुभव';
+
+  @override
+  String get settingsNavigationGroupInput => 'इनपुट';
+
+  @override
+  String get settingsNavigationGroupSetup => 'सेटअप';
+
+  @override
+  String get settingsNavigationGroupSupport => 'सहायता और डायग्नोस्टिक्स';
+
+  @override
+  String get settingsNavigationNoResults => 'कोई सेटिंग नहीं मिली';
+
+  @override
+  String get settingsNavigationSearchHint => 'सेटिंग खोजें';
 
   @override
   String get settingsUsernameClearHint =>

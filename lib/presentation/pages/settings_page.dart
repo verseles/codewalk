@@ -36,6 +36,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsSection {
   const _SettingsSection({
     required this.id,
+    required this.group,
     required this.title,
     required this.description,
     required this.icon,
@@ -43,11 +44,14 @@ class _SettingsSection {
   });
 
   final String id;
+  final _SettingsNavigationGroup group;
   final String title;
   final String description;
   final IconData icon;
   final WidgetBuilder builder;
 }
+
+enum _SettingsNavigationGroup { setup, experience, input, support }
 
 class _SettingsPageState extends State<SettingsPage> {
   // Split layout when expanded or wider (840dp+)
@@ -62,6 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   _SettingsSection _section({
     required String id,
+    required _SettingsNavigationGroup group,
     required String title,
     required String description,
     required IconData icon,
@@ -69,6 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }) {
     return _SettingsSection(
       id: id,
+      group: group,
       title: title,
       description: description,
       icon: icon,
@@ -79,6 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
   List<_SettingsSection> get _sections => <_SettingsSection>[
     _section(
       id: 'servers',
+      group: _SettingsNavigationGroup.setup,
       title: context.l10n.settingsServersTitle,
       description: context.l10n.settingsServersDescription,
       icon: Symbols.dns,
@@ -86,6 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'appearance',
+      group: _SettingsNavigationGroup.experience,
       title: context.l10n.settingsAppearanceTitle,
       description: context.l10n.settingsAppearanceDescription,
       icon: Symbols.tune_rounded,
@@ -93,6 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'behavior',
+      group: _SettingsNavigationGroup.experience,
       title: context.l10n.settingsBehaviorTitle,
       description: context.l10n.settingsBehaviorDescription,
       icon: Symbols.settings,
@@ -100,6 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'notifications',
+      group: _SettingsNavigationGroup.experience,
       title: context.l10n.settingsNotificationsTitle,
       description: context.l10n.settingsNotificationsDescription,
       icon: Symbols.notifications_active,
@@ -107,6 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'speech',
+      group: _SettingsNavigationGroup.input,
       title: context.l10n.settingsSpeechTitle,
       description: context.l10n.settingsSpeechDescription,
       icon: Symbols.mic_none_rounded,
@@ -114,6 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'logs',
+      group: _SettingsNavigationGroup.support,
       title: context.l10n.settingsLogsTitle,
       description: context.l10n.settingsLogsDescription,
       icon: Symbols.receipt_long_rounded,
@@ -121,6 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'shortcuts',
+      group: _SettingsNavigationGroup.input,
       title: context.l10n.settingsShortcutsTitle,
       description: context.l10n.settingsShortcutsDescription,
       icon: Symbols.keyboard_command_key_rounded,
@@ -128,6 +141,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
     _section(
       id: 'about',
+      group: _SettingsNavigationGroup.support,
       title: context.l10n.settingsAboutTitle,
       description: context.l10n.settingsAboutDescription,
       icon: Symbols.info,
@@ -158,6 +172,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   String? _selectedSectionId;
   bool _showMobileDetail = false;
+  final TextEditingController _settingsSearchController =
+      TextEditingController();
+  String _settingsQuery = '';
 
   @override
   void initState() {
@@ -197,7 +214,38 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handleGlobalKeyEvent);
+    _settingsSearchController.dispose();
     super.dispose();
+  }
+
+  String _groupLabel(_SettingsNavigationGroup group) {
+    return switch (group) {
+      _SettingsNavigationGroup.setup =>
+        context.l10n.settingsNavigationGroupSetup,
+      _SettingsNavigationGroup.experience =>
+        context.l10n.settingsNavigationGroupExperience,
+      _SettingsNavigationGroup.input =>
+        context.l10n.settingsNavigationGroupInput,
+      _SettingsNavigationGroup.support =>
+        context.l10n.settingsNavigationGroupSupport,
+    };
+  }
+
+  List<_SettingsSection> get _filteredSections {
+    final query = _settingsQuery.trim().toLowerCase();
+    if (query.isEmpty) {
+      return _visibleSections;
+    }
+    return _visibleSections
+        .where((section) {
+          final searchable = <String>[
+            section.title,
+            section.description,
+            _groupLabel(section.group),
+          ].join(' ').toLowerCase();
+          return searchable.contains(query);
+        })
+        .toList(growable: false);
   }
 
   bool _handleGlobalKeyEvent(KeyEvent event) {
@@ -389,6 +437,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         final updateResult = settings.updateCheckResult;
+        final filteredSections = _filteredSections;
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
@@ -401,42 +450,91 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 10),
             ],
-            FilledButton.icon(
-              onPressed: _openSetupWizard,
-              icon: const Icon(Symbols.auto_fix_high_rounded),
-              label: Text(context.l10n.settingsSetupWizard),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              key: const ValueKey<String>('settings_replay_chat_tour_button'),
-              onPressed: () => unawaited(_replayChatTour()),
-              icon: const Icon(Symbols.play_circle_rounded),
-              label: Text(context.l10n.settingsAboutReplayChatTour),
+            TextField(
+              key: const ValueKey<String>('settings_navigation_search'),
+              controller: _settingsSearchController,
+              decoration: InputDecoration(
+                hintText: context.l10n.settingsNavigationSearchHint,
+                prefixIcon: const Icon(Symbols.search),
+                suffixIcon: _settingsQuery.isEmpty
+                    ? null
+                    : IconButton(
+                        key: const ValueKey<String>(
+                          'settings_navigation_search_clear',
+                        ),
+                        tooltip: context.l10n.logsCloseSearch,
+                        onPressed: () {
+                          _settingsSearchController.clear();
+                          setState(() => _settingsQuery = '');
+                        },
+                        icon: const Icon(Symbols.close),
+                      ),
+              ),
+              onChanged: (value) => setState(() => _settingsQuery = value),
             ),
             const SizedBox(height: 12),
-            ..._visibleSections.map((section) {
-              final selected = section.id == _selectedSectionId;
-              return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: ListTile(
-                  selected: selected,
-                  leading: Icon(section.icon),
-                  title: Text(section.title),
-                  subtitle: Text(section.description),
-                  trailing: const Icon(Symbols.chevron_right),
-                  onTap: () {
-                    if (section.id == 'logs') {
-                      _openLogsPage();
-                      return;
-                    }
-                    setState(() {
-                      _selectedSectionId = section.id;
-                      _showMobileDetail = true;
-                    });
-                  },
+            if (_settingsQuery.isEmpty) ...[
+              FilledButton.icon(
+                onPressed: _openSetupWizard,
+                icon: const Icon(Symbols.auto_fix_high_rounded),
+                label: Text(context.l10n.settingsSetupWizard),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                key: const ValueKey<String>('settings_replay_chat_tour_button'),
+                onPressed: () => unawaited(_replayChatTour()),
+                icon: const Icon(Symbols.play_circle_rounded),
+                label: Text(context.l10n.settingsAboutReplayChatTour),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (filteredSections.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Center(
+                  child: Text(context.l10n.settingsNavigationNoResults),
                 ),
-              );
-            }),
+              )
+            else
+              for (final group in _SettingsNavigationGroup.values) ...[
+                if (filteredSections.any((section) => section.group == group))
+                  Semantics(
+                    header: true,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                      child: Text(
+                        _groupLabel(group),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                for (final section in filteredSections.where(
+                  (section) => section.group == group,
+                ))
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      selected: section.id == _selectedSectionId,
+                      leading: Icon(section.icon),
+                      title: Text(section.title),
+                      subtitle: Text(section.description),
+                      trailing: const Icon(Symbols.chevron_right),
+                      onTap: () {
+                        if (section.id == 'logs') {
+                          _openLogsPage();
+                          return;
+                        }
+                        setState(() {
+                          _selectedSectionId = section.id;
+                          _showMobileDetail = true;
+                        });
+                      },
+                    ),
+                  ),
+              ],
           ],
         );
       },

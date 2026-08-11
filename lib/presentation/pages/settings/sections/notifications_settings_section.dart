@@ -14,7 +14,7 @@ import '../../../services/notification_sound_source_service.dart';
 import '../../../services/notification_sound_source_service_types.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../../widgets/settings_provenance_chip.dart';
-
+import '../widgets/settings_section_layout.dart';
 
 class NotificationsSettingsSection extends StatefulWidget {
   const NotificationsSettingsSection({super.key});
@@ -88,22 +88,22 @@ class _NotificationsSettingsSectionState
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
-            Text(
-              context.l10n.settingsNotificationsSectionTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.settingsNotificationsSectionDescription,
-              style: Theme.of(context).textTheme.bodyMedium,
+            SettingsSectionIntro(
+              title: context.l10n.settingsNotificationsSectionTitle,
+              description: context.l10n.settingsNotificationsSectionDescription,
             ),
             const SizedBox(height: 16),
+            SettingsGroupHeader(title: context.l10n.settingsGroupDelivery),
+            const SizedBox(height: 8),
             _buildSyncInfoCard(settingsProvider),
             const SizedBox(height: 16),
             if (_isAndroidPlatform) ...[
               _buildAndroidBackgroundAlertsCard(settingsProvider),
               const SizedBox(height: 16),
             ],
+            const SizedBox(height: 8),
+            SettingsGroupHeader(title: context.l10n.settingsGroupAlertTypes),
+            const SizedBox(height: 8),
             _buildCategoryCard(
               context: context,
               settingsProvider: settingsProvider,
@@ -133,6 +133,10 @@ class _NotificationsSettingsSectionState
             if (_isDesktopPlatform ||
                 (_isMobilePlatform && !_isAndroidPlatform)) ...[
               const SizedBox(height: 16),
+              SettingsGroupHeader(
+                title: context.l10n.settingsGroupBackgroundBehavior,
+              ),
+              const SizedBox(height: 8),
               _buildBackgroundBehaviorCard(settingsProvider),
             ],
           ],
@@ -143,8 +147,8 @@ class _NotificationsSettingsSectionState
 
   Widget _buildSyncInfoCard(SettingsProvider settingsProvider) {
     final text = settingsProvider.hasAnyServerBackedNotificationCategory
-        ? 'Some category on/off toggles are synced from /config on the active server.'
-        : 'Current server does not expose notification toggles in /config; local values are active.';
+        ? context.l10n.settingsNotificationsSyncInfo
+        : context.l10n.settingsNotificationsSyncInfoLocal;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -283,9 +287,13 @@ class _NotificationsSettingsSectionState
               ),
               RadioListTile<DesktopCloseBehavior>.adaptive(
                 contentPadding: EdgeInsets.zero,
-                title: Text(context.l10n.settingsNotificationsMinimizeWhenClose),
+                title: Text(
+                  context.l10n.settingsNotificationsMinimizeWhenClose,
+                ),
                 subtitle: Text(
-                  context.l10n.settingsNotificationsMinimizeWhenCloseDescription,
+                  context
+                      .l10n
+                      .settingsNotificationsMinimizeWhenCloseDescription,
                 ),
                 value: DesktopCloseBehavior.minimize,
                 groupValue: settingsProvider.desktopCloseBehavior,
@@ -299,7 +307,9 @@ class _NotificationsSettingsSectionState
               RadioListTile<DesktopCloseBehavior>.adaptive(
                 contentPadding: EdgeInsets.zero,
                 title: Text(context.l10n.settingsNotificationsJustClose),
-                subtitle: Text(context.l10n.settingsNotificationsJustCloseDescription),
+                subtitle: Text(
+                  context.l10n.settingsNotificationsJustCloseDescription,
+                ),
                 value: DesktopCloseBehavior.close,
                 groupValue: settingsProvider.desktopCloseBehavior,
                 onChanged: (value) {
@@ -315,9 +325,7 @@ class _NotificationsSettingsSectionState
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
                 title: Text(context.l10n.settingsNotificationsKeepLive),
-                subtitle: Text(
-                  context.l10n.notifResponseRunningKeep,
-                ),
+                subtitle: Text(context.l10n.notifResponseRunningKeep),
                 value: settingsProvider.keepMobileRealtimeForShortPeriod,
                 onChanged: (value) =>
                     settingsProvider.setKeepMobileRealtimeForShortPeriod(value),
@@ -592,7 +600,9 @@ class _NotificationsSettingsSectionState
                         ),
                       ),
                       icon: const Icon(Symbols.tune),
-                      label: Text(context.l10n.settingsNotificationsChooseSystemSound),
+                      label: Text(
+                        context.l10n.settingsNotificationsChooseSystemSound,
+                      ),
                     ),
                   if (soundOption == SoundOption.customFile)
                     OutlinedButton.icon(
@@ -603,7 +613,9 @@ class _NotificationsSettingsSectionState
                         ),
                       ),
                       icon: const Icon(Symbols.library_music),
-                      label: Text(context.l10n.settingsNotificationsChooseAudioFile),
+                      label: Text(
+                        context.l10n.settingsNotificationsChooseAudioFile,
+                      ),
                     ),
                   FilledButton.tonalIcon(
                     onPressed: () =>
@@ -691,7 +703,9 @@ class _NotificationsSettingsSectionState
               onSelected: onBackgroundChanged,
             ),
             FilterChip(
-              label: Text(context.l10n.settingsNotificationsAnotherConversation),
+              label: Text(
+                context.l10n.settingsNotificationsAnotherConversation,
+              ),
               selected: anotherSessionEnabled,
               onSelected: onAnotherSessionChanged,
             ),
@@ -911,11 +925,11 @@ class _NotificationsSettingsSectionState
     return switch (option) {
       SoundOption.off => context.l10n.settingsNotificationsSoundOff,
       SoundOption.systemDefault =>
-          context.l10n.settingsNotificationsSoundSystemDefault,
+        context.l10n.settingsNotificationsSoundSystemDefault,
       SoundOption.systemChoice =>
-          context.l10n.settingsNotificationsSoundPickFromSystem,
+        context.l10n.settingsNotificationsSoundPickFromSystem,
       SoundOption.customFile =>
-          context.l10n.settingsNotificationsSoundPickAudioFile,
+        context.l10n.settingsNotificationsSoundPickAudioFile,
       SoundOption.click => context.l10n.settingsNotificationsSoundBuiltInClick,
       SoundOption.alert => context.l10n.settingsNotificationsSoundBuiltInAlert,
     };

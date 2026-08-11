@@ -15,7 +15,7 @@ import '../../../utils/app_page_route.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../onboarding_wizard_page.dart';
 import '../../opencode_setup_debug_page.dart';
-
+import '../widgets/settings_section_layout.dart';
 
 class ServersSettingsSection extends StatefulWidget {
   const ServersSettingsSection({super.key});
@@ -66,55 +66,86 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return Padding(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _openSetupWizard,
-                    icon: const Icon(Symbols.auto_fix_high_rounded),
-                    label: Text(context.l10n.serversSetupWizard),
+        const padding = AppConstants.defaultPadding;
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  SettingsSectionIntro(
+                    title: context.l10n.settingsServersTitle,
+                    description: context.l10n.settingsServersDescription,
+                    hideTitleOnCompact: true,
                   ),
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        context.read<AppProvider>().refreshServerHealth(),
-                    icon: const Icon(Symbols.health_and_safety),
-                    label: Text(context.l10n.serversRefreshHealth),
-                  ),
-                  FilledButton.icon(
-                    onPressed: () => _openSetupWizard(
-                      initialFlow: SetupWizardInitialFlow.connectServer,
-                    ),
-                    icon: const Icon(Symbols.add),
-                    label: Text(context.l10n.serversAddServer),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.defaultPadding),
-              _buildActiveServerCard(appProvider),
-              const SizedBox(height: AppConstants.defaultPadding),
-              _buildLocalServerCard(appProvider),
-              const SizedBox(height: AppConstants.defaultPadding),
-              Expanded(
-                child: profiles.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.separated(
-                        itemCount: profiles.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (_, index) => _buildProfileTile(
-                          appProvider: appProvider,
-                          profile: profiles[index],
-                        ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: _openSetupWizard,
+                        icon: const Icon(Symbols.auto_fix_high_rounded),
+                        label: Text(context.l10n.serversSetupWizard),
                       ),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            context.read<AppProvider>().refreshServerHealth(),
+                        icon: const Icon(Symbols.health_and_safety),
+                        label: Text(context.l10n.serversRefreshHealth),
+                      ),
+                      FilledButton.icon(
+                        onPressed: () => _openSetupWizard(
+                          initialFlow: SetupWizardInitialFlow.connectServer,
+                        ),
+                        icon: const Icon(Symbols.add),
+                        label: Text(context.l10n.serversAddServer),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  SettingsGroupHeader(
+                    title: context.l10n.settingsGroupCurrentConnection,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildActiveServerCard(appProvider),
+                  const SizedBox(height: 20),
+                  SettingsGroupHeader(
+                    title: context.l10n.settingsGroupThisDevice,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildLocalServerCard(appProvider),
+                  const SizedBox(height: 20),
+                  SettingsGroupHeader(
+                    title: context.l10n.settingsGroupSavedServers,
+                  ),
+                  const SizedBox(height: 8),
+                ]),
               ),
-            ],
-          ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(padding, 0, padding, padding),
+              sliver: profiles.isEmpty
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: _buildEmptyState(),
+                      ),
+                    )
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index.isOdd) {
+                          return const SizedBox(height: 8);
+                        }
+                        return _buildProfileTile(
+                          appProvider: appProvider,
+                          profile: profiles[index ~/ 2],
+                        );
+                      }, childCount: profiles.length * 2 - 1),
+                    ),
+            ),
+          ],
         );
       },
     );
@@ -175,9 +206,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                   _activeServerDropdownKey.currentState?.didChange(
                     dropdownValue,
                   );
-                  _showMessage(
-                    context.l10n.serversUnhealthyActivateError,
-                  );
+                  _showMessage(context.l10n.serversUnhealthyActivateError);
                   return;
                 }
 
@@ -306,7 +335,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                 FilledButton.icon(
                   onPressed: () async {
                     final ok = await appProvider.authenticateTailscale();
-                    if (!ok) {
+                    if (!ok && mounted) {
                       _showMessage(context.l10n.onboardingOpenTailscaleLogin);
                     }
                   },
@@ -358,7 +387,10 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
         Colors.orange,
         context.l10n.statusStopping,
       ),
-      LocalServerRuntimeStatus.failed => (Colors.red, context.l10n.statusFailed),
+      LocalServerRuntimeStatus.failed => (
+        Colors.red,
+        context.l10n.statusFailed,
+      ),
       LocalServerRuntimeStatus.stopped => (
         Colors.grey,
         context.l10n.statusStopped,
@@ -408,7 +440,9 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
             if (appProvider.localServerCommandPath.trim().isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(
-                context.l10n.serversCommandAppProviderLocalServerCommandPath(appProvider.localServerCommandPath),
+                context.l10n.serversCommandAppProviderLocalServerCommandPath(
+                  appProvider.localServerCommandPath,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
@@ -417,7 +451,9 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
             if (appProvider.localServerLastOutput.trim().isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(
-                context.l10n.onboardingLatestOutputAppProvider(appProvider.localServerLastOutput),
+                context.l10n.onboardingLatestOutputAppProvider(
+                  appProvider.localServerLastOutput,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
@@ -554,7 +590,10 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
               value: _ServerAction.check,
               child: Text(context.l10n.serversCheckHealth),
             ),
-            PopupMenuItem(value: _ServerAction.edit, child: Text(context.l10n.serversEdit)),
+            PopupMenuItem(
+              value: _ServerAction.edit,
+              child: Text(context.l10n.serversEdit),
+            ),
             PopupMenuItem(
               value: _ServerAction.delete,
               child: Text(context.l10n.serversDelete),
@@ -681,7 +720,9 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
       builder: (_) {
         return AlertDialog(
           title: Text(context.l10n.serversDeleteServer),
-          content: Text(context.l10n.serversRemoveProfileDisplayName(profile.displayName)),
+          content: Text(
+            context.l10n.serversRemoveProfileDisplayName(profile.displayName),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -724,9 +765,18 @@ class _HealthDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, tooltip) = switch (status) {
-      ServerHealthStatus.healthy => (Colors.green, context.l10n.serverHealthHealthy),
-      ServerHealthStatus.unhealthy => (Colors.red, context.l10n.serverHealthUnhealthy),
-      ServerHealthStatus.unknown => (Colors.grey, context.l10n.serverHealthUnknown),
+      ServerHealthStatus.healthy => (
+        Colors.green,
+        context.l10n.serverHealthHealthy,
+      ),
+      ServerHealthStatus.unhealthy => (
+        Colors.red,
+        context.l10n.serverHealthUnhealthy,
+      ),
+      ServerHealthStatus.unknown => (
+        Colors.grey,
+        context.l10n.serverHealthUnknown,
+      ),
     };
 
     return Tooltip(

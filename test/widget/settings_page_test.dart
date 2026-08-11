@@ -98,6 +98,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Settings'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('settings_navigation_search')),
+      findsOneWidget,
+    );
+    expect(find.text('Setup'), findsOneWidget);
+    expect(find.text('Experience'), findsOneWidget);
     expect(find.text('Setup Wizard'), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('settings_replay_chat_tour_button')),
@@ -107,10 +113,37 @@ void main() {
     expect(find.text('Appearance'), findsOneWidget);
     expect(find.text('Behavior'), findsOneWidget);
     expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Servers'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Speech to text'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Speech to text'), findsOneWidget);
     expect(find.text('Sounds'), findsNothing);
     expect(find.text('Shortcuts'), findsNothing);
-    expect(find.text('Servers'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey<String>('settings_navigation_search')),
+      -120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('settings_navigation_search')),
+      'speech',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Speech to text'), findsOneWidget);
+    expect(find.text('Appearance'), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('settings_navigation_search')),
+      '',
+    );
+    await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(
       find.text('Logs'),
@@ -121,10 +154,17 @@ void main() {
 
     expect(find.text('Logs'), findsOneWidget);
 
+    await tester.scrollUntilVisible(
+      find.text('Appearance'),
+      -120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Appearance').first);
     await tester.pumpAndSettle();
 
     expect(find.text('CodeWalk Classic'), findsOneWidget);
+    expect(find.text('Theme and color'), findsOneWidget);
     expect(find.text('OpenCode Presets'), findsOneWidget);
     expect(
       find.byKey(const ValueKey<String>('settings_visual_style_segmented')),
@@ -205,6 +245,46 @@ void main() {
     await tester.tap(find.text('Behavior').first);
     await tester.pumpAndSettle();
 
+    expect(find.text('Language and chat'), findsOneWidget);
+    final sessionAttentionFinder = find.byKey(
+      const ValueKey<String>('settings_session_attention_mode'),
+    );
+    await tester.scrollUntilVisible(
+      sessionAttentionFinder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(sessionAttentionFinder, findsOneWidget);
+    expect(find.text('Session attention'), findsOneWidget);
+    expect(find.text('Bubble'), findsOneWidget);
+    expect(find.text('Panel'), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: sessionAttentionFinder,
+        matching: find.text('Bubble'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      settingsProvider.sessionAttentionPresentation,
+      SessionAttentionPresentation.bubble,
+    );
+    expect(
+      jsonDecode(local.experienceSettingsJson!)['sessionAttentionPresentation'],
+      'bubble',
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('OpenCode defaults'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('OpenCode defaults'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Permission handling provenance'),
       120,
@@ -291,38 +371,6 @@ void main() {
     expect(settingsProvider.dataSaverLevel, DataSaverLevel.off);
     expect(settingsProvider.dataSaverEnabled, isFalse);
 
-    final sessionAttentionFinder = find.byKey(
-      const ValueKey<String>('settings_session_attention_mode'),
-    );
-    await tester.scrollUntilVisible(
-      sessionAttentionFinder,
-      200,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.pumpAndSettle();
-
-    expect(sessionAttentionFinder, findsOneWidget);
-    expect(find.text('Session attention'), findsOneWidget);
-    expect(find.text('Bubble'), findsOneWidget);
-    expect(find.text('Panel'), findsOneWidget);
-
-    await tester.tap(
-      find.descendant(
-        of: sessionAttentionFinder,
-        matching: find.text('Bubble'),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      settingsProvider.sessionAttentionPresentation,
-      SessionAttentionPresentation.bubble,
-    );
-    expect(
-      jsonDecode(local.experienceSettingsJson!)['sessionAttentionPresentation'],
-      'bubble',
-    );
-
     final syncToggleFinder = find.byKey(
       const ValueKey<String>('settings_toggle_experimental_multi_device_sync'),
     );
@@ -366,6 +414,7 @@ void main() {
       find.byKey(const ValueKey<String>('about_replay_chat_tour_tile')),
       findsOneWidget,
     );
+    expect(find.text('Version and updates'), findsOneWidget);
     expect(find.text('Replay chat tour'), findsOneWidget);
     expect(
       find.text('Close settings and show the guided chat walkthrough'),
@@ -911,6 +960,60 @@ void main() {
     }
   });
 
+  testWidgets('desktop settings search keeps the active detail visible', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    try {
+      final local = InMemoryAppLocalDataSource()
+        ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+      final settingsProvider = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: SoundService(),
+      );
+      await settingsProvider.initialize();
+      addTearDown(settingsProvider.dispose);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SettingsProvider>.value(
+          value: settingsProvider,
+          child: _localizedMaterialApp(
+            home: const MediaQuery(
+              data: MediaQueryData(size: Size(1200, 800)),
+              child: SettingsPage(initialSectionId: 'behavior'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('OpenCode-backed defaults'), findsOneWidget);
+      final search = find.byKey(
+        const ValueKey<String>('settings_navigation_search'),
+      );
+      expect(search, findsOneWidget);
+      await tester.ensureVisible(search);
+      await tester.pumpAndSettle();
+      await tester.enterText(search, 'speech');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Speech to text'), findsOneWidget);
+      expect(find.text('Behavior'), findsOneWidget);
+      expect(find.text('OpenCode-backed defaults'), findsOneWidget);
+
+      await tester.enterText(search, 'no matching setting');
+      await tester.pumpAndSettle();
+
+      expect(find.text('No settings found'), findsOneWidget);
+      expect(find.text('OpenCode-backed defaults'), findsOneWidget);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets('shows Android background alert controls in notifications', (
     WidgetTester tester,
   ) async {
@@ -934,10 +1037,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('Notifications'),
+        120,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Notifications').first);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
+      expect(find.text('Delivery'), findsOneWidget);
       expect(find.text('Android background alerts'), findsOneWidget);
       expect(find.text('Background alerts on Android'), findsOneWidget);
       expect(

@@ -3175,7 +3175,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsAboutChecking => 'چیک کر رہا ہے...';
 
   @override
-  String get settingsAboutDescription => 'ورژن، اپ ڈیٹس اور لنکس';
+  String get settingsAboutDescription => 'ورژن، اپ ڈیٹس، مدد اور ایپ کا ڈیٹا';
 
   @override
   String get settingsAboutDismiss => 'برطرف کرنا';
@@ -3348,7 +3348,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'کثافت اور ٹائم لائن ببل کی مرئیت';
+      'تھیمز، رنگ، متن کا سائز اور چیٹ ڈسپلے منتخب کریں';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3577,7 +3577,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'اوپن کوڈ ڈیفالٹس، پرووینس، اور کمپوزر سنک سیفٹی';
+      'زبان، چیٹ رویے، ڈیٹا کے استعمال اور OpenCode ڈیفالٹس کو کنٹرول کریں';
 
   @override
   String get settingsBehaviorEnableDataSaver =>
@@ -3737,7 +3737,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'رن ٹائم تشخیص اور خرابیوں کا سراغ لگانا ڈیٹا';
+      'ایپ کی تشخیصات اور خرابیوں کے حل کی تفصیلات دیکھیں';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3817,7 +3817,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'فی زمرہ مطلع اور ساؤنڈ کنٹرولز';
+      'منتخب کریں کہ کون سے واقعات آپ کو آگاہ کریں اور کیسے';
 
   @override
   String get settingsNotificationsDisableOptimization =>
@@ -4010,7 +4010,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsServersDefault => 'طے شدہ';
 
   @override
-  String get settingsServersDescription => 'اوپن کوڈ سرورز اور ہیلتھ روٹنگ';
+  String get settingsServersDescription =>
+      'OpenCode سے جڑیں اور اپنے سرورز کا نظم کریں';
 
   @override
   String get settingsServersTitle => 'سرورز';
@@ -4037,7 +4038,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get settingsSetupWizard => 'سیٹ اپ وزرڈ';
 
   @override
-  String get settingsShortcutsDescription => 'پورٹ ایبل ایپ کلیدی پابندیاں';
+  String get settingsShortcutsDescription =>
+      'کی بورڈ شارٹ کٹس تلاش کریں اور اپنی مرضی کے مطابق بنائیں';
 
   @override
   String get settingsShortcutsEdit => 'شارٹ کٹ میں ترمیم کریں۔';
@@ -4071,7 +4073,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'انجن، خاموشی کا ٹائم آؤٹ، اور ماڈل کے اختیارات';
+      'وائس ان پٹ، آف لائن ماڈلز اور پڑھ کر سنانا سیٹ اپ کریں';
 
   @override
   String get settingsSpeechRefreshStatus => 'حالت تازہ کریں۔';
@@ -4086,6 +4088,78 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsTitle => 'ترتیبات';
+
+  @override
+  String get settingsGroupAlertTypes => 'الرٹ کی اقسام';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'بیک گراؤنڈ رویہ';
+
+  @override
+  String get settingsGroupChatDisplay => 'چیٹ ڈسپلے';
+
+  @override
+  String get settingsGroupCurrentConnection => 'موجودہ کنکشن';
+
+  @override
+  String get settingsGroupDataAndSync => 'ڈیٹا اور سنک';
+
+  @override
+  String get settingsGroupDataReset => 'ڈیٹا اور ری سیٹ';
+
+  @override
+  String get settingsGroupDelivery => 'ڈیلیوری';
+
+  @override
+  String get settingsGroupHelp => 'مدد';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'زبان اور چیٹ';
+
+  @override
+  String get settingsGroupLayoutAndText => 'لے آؤٹ اور متن';
+
+  @override
+  String get settingsGroupOfflineModels => 'آف لائن ماڈلز';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode ڈیفالٹس';
+
+  @override
+  String get settingsGroupReadAloud => 'پڑھ کر سنانا';
+
+  @override
+  String get settingsGroupSavedServers => 'محفوظ شدہ سرورز';
+
+  @override
+  String get settingsGroupThemeAndColor => 'تھیم اور رنگ';
+
+  @override
+  String get settingsGroupThisDevice => 'یہ ڈیوائس';
+
+  @override
+  String get settingsGroupVersionUpdates => 'ورژن اور اپ ڈیٹس';
+
+  @override
+  String get settingsGroupVoiceInput => 'وائس ان پٹ';
+
+  @override
+  String get settingsNavigationGroupExperience => 'تجربہ';
+
+  @override
+  String get settingsNavigationGroupInput => 'ان پٹ';
+
+  @override
+  String get settingsNavigationGroupSetup => 'سیٹ اپ';
+
+  @override
+  String get settingsNavigationGroupSupport => 'مدد اور تشخیص';
+
+  @override
+  String get settingsNavigationNoResults => 'کوئی سیٹنگز نہیں ملیں';
+
+  @override
+  String get settingsNavigationSearchHint => 'سیٹنگز تلاش کریں';
 
   @override
   String get settingsUsernameClearHint =>

@@ -3208,7 +3208,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsAboutChecking => 'Проверка...';
 
   @override
-  String get settingsAboutDescription => 'Версия, обновления и ссылки';
+  String get settingsAboutDescription =>
+      'Версия, обновления, справка и данные приложения';
 
   @override
   String get settingsAboutDismiss => 'Закрыть';
@@ -3380,7 +3381,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'Плотность и видимость пузырей на шкале времени';
+      'Выбор темы, цветов, размера текста и отображения чата';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3612,7 +3613,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'Значения по умолчанию OpenCode, происхождение и безопасность синхронизации редактора';
+      'Управление языком, поведением чата, данными и параметрами OpenCode по умолчанию';
 
   @override
   String get settingsBehaviorEnableDataSaver =>
@@ -3775,7 +3776,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'Диагностика времени выполнения и данные для устранения неполадок';
+      'Просмотр диагностики приложения и сведений об устранении неполадок';
 
   @override
   String get settingsLogsTitle => 'Журналы';
@@ -3855,7 +3856,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'Настройки уведомлений и звуков для каждой категории';
+      'Выбор событий для уведомлений и способа их показа';
 
   @override
   String get settingsNotificationsDisableOptimization =>
@@ -4050,7 +4051,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsServersDescription =>
-      'Серверы OpenCode и маршрутизация работоспособности';
+      'Подключение к OpenCode и управление серверами';
 
   @override
   String get settingsServersTitle => 'Серверы';
@@ -4078,7 +4079,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsShortcutsDescription =>
-      'Привязки клавиш портативного приложения';
+      'Поиск и настройка сочетаний клавиш';
 
   @override
   String get settingsShortcutsEdit => 'Редактировать ярлык';
@@ -4112,7 +4113,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'Движок, таймаут тишины и параметры модели';
+      'Настройка голосового ввода, офлайн-моделей и чтения вслух';
 
   @override
   String get settingsSpeechRefreshStatus => 'Обновить статус';
@@ -4127,6 +4128,78 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsTitle => 'Настройки';
+
+  @override
+  String get settingsGroupAlertTypes => 'Типы уведомлений';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'Работа в фоне';
+
+  @override
+  String get settingsGroupChatDisplay => 'Отображение чата';
+
+  @override
+  String get settingsGroupCurrentConnection => 'Текущее подключение';
+
+  @override
+  String get settingsGroupDataAndSync => 'Данные и синхронизация';
+
+  @override
+  String get settingsGroupDataReset => 'Данные и сброс';
+
+  @override
+  String get settingsGroupDelivery => 'Доставка';
+
+  @override
+  String get settingsGroupHelp => 'Справка';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'Язык и чат';
+
+  @override
+  String get settingsGroupLayoutAndText => 'Макет и текст';
+
+  @override
+  String get settingsGroupOfflineModels => 'Офлайн-модели';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'Параметры OpenCode по умолчанию';
+
+  @override
+  String get settingsGroupReadAloud => 'Чтение вслух';
+
+  @override
+  String get settingsGroupSavedServers => 'Сохраненные серверы';
+
+  @override
+  String get settingsGroupThemeAndColor => 'Тема и цвет';
+
+  @override
+  String get settingsGroupThisDevice => 'Это устройство';
+
+  @override
+  String get settingsGroupVersionUpdates => 'Версия и обновления';
+
+  @override
+  String get settingsGroupVoiceInput => 'Голосовой ввод';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Опыт';
+
+  @override
+  String get settingsNavigationGroupInput => 'Ввод';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Настройка';
+
+  @override
+  String get settingsNavigationGroupSupport => 'Справка и диагностика';
+
+  @override
+  String get settingsNavigationNoResults => 'Настройки не найдены';
+
+  @override
+  String get settingsNavigationSearchHint => 'Поиск настроек';
 
   @override
   String get settingsUsernameClearHint =>

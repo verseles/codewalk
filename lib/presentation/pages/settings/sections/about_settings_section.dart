@@ -14,6 +14,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_completion_resolver.dart';
 import '../../../widgets/settings_update_available_card.dart';
 import '../../app_shell_page.dart';
+import '../widgets/settings_section_layout.dart';
 
 class AboutSettingsSection extends StatefulWidget {
   const AboutSettingsSection({super.key});
@@ -52,6 +53,15 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
+            SettingsSectionIntro(
+              title: context.l10n.settingsAboutTitle,
+              description: context.l10n.settingsAboutDescription,
+            ),
+            const SizedBox(height: 16),
+            SettingsGroupHeader(
+              title: context.l10n.settingsGroupVersionUpdates,
+            ),
+            const SizedBox(height: 8),
             _buildVersionTile(context),
             if (updateResult != null && updateResult.isNewer)
               SettingsUpdateAvailableCard(
@@ -64,11 +74,15 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
             if (upToDate && updateResult == null) _buildUpToDateTile(context),
             _buildCheckUpdatesOnOpenTile(context, settings),
             _buildCheckForUpdatesTile(context, settings, checking),
-            const Divider(height: 32),
+            const SizedBox(height: 20),
+            SettingsGroupHeader(title: context.l10n.settingsGroupHelp),
+            const SizedBox(height: 8),
             _buildReplayChatTourTile(context, settings),
-            _buildResetAppTile(context),
-            const Divider(height: 32),
             _buildGitHubTile(context),
+            const SizedBox(height: 20),
+            SettingsGroupHeader(title: context.l10n.settingsGroupDataReset),
+            const SizedBox(height: 8),
+            _buildResetAppTile(context),
           ],
         );
       },

@@ -3045,7 +3045,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsAboutChecking => '確認中...';
 
   @override
-  String get settingsAboutDescription => 'バージョン、アップデート、リンク';
+  String get settingsAboutDescription => 'バージョン、更新、ヘルプ、アプリのデータ';
 
   @override
   String get settingsAboutDismiss => '閉じる';
@@ -3214,7 +3214,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsAppearanceDensitySpacious => '低密度';
 
   @override
-  String get settingsAppearanceDescription => '表示密度とタイムラインバブルの表示設定';
+  String get settingsAppearanceDescription => 'テーマ、配色、文字サイズ、チャット表示を選択';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3440,7 +3440,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'OpenCodeのデフォルト、プロブナンス、およびコンポーザーの同期の安全性';
+      '言語、チャットの動作、データ使用、OpenCode のデフォルトを管理';
 
   @override
   String get settingsBehaviorEnableDataSaver => 'モバイルデータセーバーを有効にする';
@@ -3594,7 +3594,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsLanguageTitle => '言語';
 
   @override
-  String get settingsLogsDescription => '実行時診断とトラブルシューティングデータ';
+  String get settingsLogsDescription => 'アプリの診断とトラブルシューティングの詳細を確認';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3668,7 +3668,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'ウィンドウを非表示にし、システムトレイで実行を続けます。';
 
   @override
-  String get settingsNotificationsDescription => 'カテゴリごとの通知とサウンドの設定';
+  String get settingsNotificationsDescription => '通知するイベントと通知方法を選択';
 
   @override
   String get settingsNotificationsDisableOptimization => '最適化を無効にする';
@@ -3852,7 +3852,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsServersDefault => 'デフォルト';
 
   @override
-  String get settingsServersDescription => 'OpenCodeサーバーとヘルスルーティング';
+  String get settingsServersDescription => 'OpenCode に接続し、サーバーを管理';
 
   @override
   String get settingsServersTitle => 'サーバー';
@@ -3879,7 +3879,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsSetupWizard => 'セットアップウィザード';
 
   @override
-  String get settingsShortcutsDescription => 'ポータブルアプリのキーバインディング';
+  String get settingsShortcutsDescription => 'キーボードショートカットを検索・カスタマイズ';
 
   @override
   String get settingsShortcutsEdit => 'ショートカットを編集';
@@ -3912,7 +3912,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'システムサウンドピッカーはこのプラットフォームでは利用できません。';
 
   @override
-  String get settingsSpeechDescription => 'エンジン、無音タイムアウト、モデルのオプション';
+  String get settingsSpeechDescription => '音声入力、オフラインモデル、読み上げを設定';
 
   @override
   String get settingsSpeechRefreshStatus => 'ステータスを更新';
@@ -3927,6 +3927,78 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsTitle => '設定';
+
+  @override
+  String get settingsGroupAlertTypes => 'アラートの種類';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'バックグラウンド時の動作';
+
+  @override
+  String get settingsGroupChatDisplay => 'チャット表示';
+
+  @override
+  String get settingsGroupCurrentConnection => '現在の接続';
+
+  @override
+  String get settingsGroupDataAndSync => 'データと同期';
+
+  @override
+  String get settingsGroupDataReset => 'データとリセット';
+
+  @override
+  String get settingsGroupDelivery => '配信';
+
+  @override
+  String get settingsGroupHelp => 'ヘルプ';
+
+  @override
+  String get settingsGroupLanguageAndChat => '言語とチャット';
+
+  @override
+  String get settingsGroupLayoutAndText => 'レイアウトと文字';
+
+  @override
+  String get settingsGroupOfflineModels => 'オフラインモデル';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode のデフォルト';
+
+  @override
+  String get settingsGroupReadAloud => '読み上げ';
+
+  @override
+  String get settingsGroupSavedServers => '保存済みサーバー';
+
+  @override
+  String get settingsGroupThemeAndColor => 'テーマと配色';
+
+  @override
+  String get settingsGroupThisDevice => 'このデバイス';
+
+  @override
+  String get settingsGroupVersionUpdates => 'バージョンと更新';
+
+  @override
+  String get settingsGroupVoiceInput => '音声入力';
+
+  @override
+  String get settingsNavigationGroupExperience => '操作感';
+
+  @override
+  String get settingsNavigationGroupInput => '入力';
+
+  @override
+  String get settingsNavigationGroupSetup => 'セットアップ';
+
+  @override
+  String get settingsNavigationGroupSupport => 'ヘルプと診断';
+
+  @override
+  String get settingsNavigationNoResults => '設定が見つかりません';
+
+  @override
+  String get settingsNavigationSearchHint => '設定を検索';
 
   @override
   String get settingsUsernameClearHint =>

@@ -5648,7 +5648,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsAboutDescription
   ///
   /// In en, this message translates to:
-  /// **'Version, updates and links'**
+  /// **'Version, updates, help, and app data'**
   String get settingsAboutDescription;
 
   /// CodeWalk UI string — settingsAboutDismiss
@@ -5939,7 +5939,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsAppearanceDescription
   ///
   /// In en, this message translates to:
-  /// **'Density and timeline bubble visibility'**
+  /// **'Choose themes, colors, text size, and chat display'**
   String get settingsAppearanceDescription;
 
   /// CodeWalk UI string — settingsAppearanceFontSize
@@ -6329,7 +6329,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsBehaviorDescription
   ///
   /// In en, this message translates to:
-  /// **'OpenCode defaults, provenance, and composer sync safety'**
+  /// **'Control language, chat behavior, data use, and OpenCode defaults'**
   String get settingsBehaviorDescription;
 
   /// CodeWalk UI string — settingsBehaviorEnableDataSaver
@@ -6605,7 +6605,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsLogsDescription
   ///
   /// In en, this message translates to:
-  /// **'Runtime diagnostics and troubleshooting data'**
+  /// **'Review app diagnostics and troubleshooting details'**
   String get settingsLogsDescription;
 
   /// CodeWalk UI string — settingsLogsTitle
@@ -6737,7 +6737,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsNotificationsDescription
   ///
   /// In en, this message translates to:
-  /// **'Per-category notify and sound controls'**
+  /// **'Choose which events alert you and how'**
   String get settingsNotificationsDescription;
 
   /// CodeWalk UI string — settingsNotificationsDisableOptimization
@@ -7085,7 +7085,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsServersDescription
   ///
   /// In en, this message translates to:
-  /// **'OpenCode servers and health routing'**
+  /// **'Connect to OpenCode and manage your servers'**
   String get settingsServersDescription;
 
   /// CodeWalk UI string — settingsServersTitle
@@ -7139,7 +7139,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsShortcutsDescription
   ///
   /// In en, this message translates to:
-  /// **'Portable app key bindings'**
+  /// **'Find and customize keyboard shortcuts'**
   String get settingsShortcutsDescription;
 
   /// CodeWalk UI string — settingsShortcutsEdit
@@ -7199,7 +7199,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — settingsSpeechDescription
   ///
   /// In en, this message translates to:
-  /// **'Engine, silence timeout, and model options'**
+  /// **'Set up voice input, offline models, and read aloud'**
   String get settingsSpeechDescription;
 
   /// CodeWalk UI string — settingsSpeechRefreshStatus
@@ -7225,6 +7225,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settingsTitle;
+
+  /// CodeWalk UI string — settingsGroupAlertTypes
+  ///
+  /// In en, this message translates to:
+  /// **'Alert types'**
+  String get settingsGroupAlertTypes;
+
+  /// CodeWalk UI string — settingsGroupBackgroundBehavior
+  ///
+  /// In en, this message translates to:
+  /// **'Background behavior'**
+  String get settingsGroupBackgroundBehavior;
+
+  /// CodeWalk UI string — settingsGroupChatDisplay
+  ///
+  /// In en, this message translates to:
+  /// **'Chat display'**
+  String get settingsGroupChatDisplay;
+
+  /// CodeWalk UI string — settingsGroupCurrentConnection
+  ///
+  /// In en, this message translates to:
+  /// **'Current connection'**
+  String get settingsGroupCurrentConnection;
+
+  /// CodeWalk UI string — settingsGroupDataAndSync
+  ///
+  /// In en, this message translates to:
+  /// **'Data and sync'**
+  String get settingsGroupDataAndSync;
+
+  /// CodeWalk UI string — settingsGroupDataReset
+  ///
+  /// In en, this message translates to:
+  /// **'Data and reset'**
+  String get settingsGroupDataReset;
+
+  /// CodeWalk UI string — settingsGroupDelivery
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get settingsGroupDelivery;
+
+  /// CodeWalk UI string — settingsGroupHelp
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get settingsGroupHelp;
+
+  /// CodeWalk UI string — settingsGroupLanguageAndChat
+  ///
+  /// In en, this message translates to:
+  /// **'Language and chat'**
+  String get settingsGroupLanguageAndChat;
+
+  /// CodeWalk UI string — settingsGroupLayoutAndText
+  ///
+  /// In en, this message translates to:
+  /// **'Layout and text'**
+  String get settingsGroupLayoutAndText;
+
+  /// CodeWalk UI string — settingsGroupOfflineModels
+  ///
+  /// In en, this message translates to:
+  /// **'Offline models'**
+  String get settingsGroupOfflineModels;
+
+  /// CodeWalk UI string — settingsGroupOpenCodeDefaults
+  ///
+  /// In en, this message translates to:
+  /// **'OpenCode defaults'**
+  String get settingsGroupOpenCodeDefaults;
+
+  /// CodeWalk UI string — settingsGroupReadAloud
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get settingsGroupReadAloud;
+
+  /// CodeWalk UI string — settingsGroupSavedServers
+  ///
+  /// In en, this message translates to:
+  /// **'Saved servers'**
+  String get settingsGroupSavedServers;
+
+  /// CodeWalk UI string — settingsGroupThemeAndColor
+  ///
+  /// In en, this message translates to:
+  /// **'Theme and color'**
+  String get settingsGroupThemeAndColor;
+
+  /// CodeWalk UI string — settingsGroupThisDevice
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get settingsGroupThisDevice;
+
+  /// CodeWalk UI string — settingsGroupVersionUpdates
+  ///
+  /// In en, this message translates to:
+  /// **'Version and updates'**
+  String get settingsGroupVersionUpdates;
+
+  /// CodeWalk UI string — settingsGroupVoiceInput
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input'**
+  String get settingsGroupVoiceInput;
+
+  /// CodeWalk UI string — settingsNavigationGroupExperience
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get settingsNavigationGroupExperience;
+
+  /// CodeWalk UI string — settingsNavigationGroupInput
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get settingsNavigationGroupInput;
+
+  /// CodeWalk UI string — settingsNavigationGroupSetup
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get settingsNavigationGroupSetup;
+
+  /// CodeWalk UI string — settingsNavigationGroupSupport
+  ///
+  /// In en, this message translates to:
+  /// **'Help and diagnostics'**
+  String get settingsNavigationGroupSupport;
+
+  /// CodeWalk UI string — settingsNavigationNoResults
+  ///
+  /// In en, this message translates to:
+  /// **'No settings found'**
+  String get settingsNavigationNoResults;
+
+  /// CodeWalk UI string — settingsNavigationSearchHint
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get settingsNavigationSearchHint;
 
   /// CodeWalk UI string — settingsUsernameClearHint
   ///

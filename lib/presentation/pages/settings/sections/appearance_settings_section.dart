@@ -13,6 +13,7 @@ import '../../../services/desktop_window_chrome_service.dart';
 import '../../../theme/brand_colors.dart';
 import '../../../theme/opencode_theme_presets.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
+import '../widgets/settings_section_layout.dart';
 
 enum _AppearanceThemeFamily { classic, presets }
 
@@ -142,16 +143,13 @@ class AppearanceSettingsSection extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
-            Text(
-              context.l10n.settingsAppearanceSectionTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.settingsAppearanceSectionDescription,
-              style: Theme.of(context).textTheme.bodyMedium,
+            SettingsSectionIntro(
+              title: context.l10n.settingsAppearanceSectionTitle,
+              description: context.l10n.settingsAppearanceSectionDescription,
             ),
             const SizedBox(height: 16),
+            SettingsGroupHeader(title: context.l10n.settingsGroupThemeAndColor),
+            const SizedBox(height: 8),
             // Theme mode card
             Card(
               child: Padding(
@@ -510,7 +508,9 @@ class AppearanceSettingsSection extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
+            SettingsGroupHeader(title: context.l10n.settingsGroupLayoutAndText),
+            const SizedBox(height: 8),
             // Density card
             Card(
               child: Padding(
@@ -624,7 +624,9 @@ class AppearanceSettingsSection extends StatelessWidget {
               const SizedBox(height: 12),
               _buildWindowChromeCard(context, settingsProvider),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
+            SettingsGroupHeader(title: context.l10n.settingsGroupChatDisplay),
+            const SizedBox(height: 8),
             Card(
               child: Column(
                 children: [

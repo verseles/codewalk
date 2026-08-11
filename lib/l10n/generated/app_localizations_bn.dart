@@ -3184,7 +3184,8 @@ class AppLocalizationsBn extends AppLocalizations {
   String get settingsAboutChecking => 'পরীক্ষা করা হচ্ছে...';
 
   @override
-  String get settingsAboutDescription => 'সংস্করণ, আপডেট এবং লিঙ্ক';
+  String get settingsAboutDescription =>
+      'সংস্করণ, আপডেট, সহায়তা এবং অ্যাপের তথ্য';
 
   @override
   String get settingsAboutDismiss => 'খারিজ';
@@ -3358,7 +3359,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'ঘনত্ব এবং টাইমলাইন বুদবুদ দৃশ্যমানতা';
+      'থিম, রঙ, টেক্সট সাইজ এবং চ্যাট প্রদর্শন চয়ন করুন';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3588,7 +3589,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'OpenCode ডিফল্ট, উদ্ভব, এবং সুরকার সিঙ্ক নিরাপত্তা';
+      'ভাষা, চ্যাট আচরণ, ডেটা ব্যবহার এবং OpenCode ডিফল্ট নিয়ন্ত্রণ করুন';
 
   @override
   String get settingsBehaviorEnableDataSaver =>
@@ -3750,7 +3751,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'রানটাইম ডায়াগনস্টিকস এবং ট্রাবলশুটিং ডেটা';
+      'অ্যাপ ডায়াগনস্টিকস এবং সমস্যা সমাধানের বিবরণ পর্যালোচনা করুন';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3828,7 +3829,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'প্রতি বিভাগ বিজ্ঞপ্তি এবং শব্দ নিয়ন্ত্রণ';
+      'কোন ইভেন্ট আপনাকে সতর্ক করবে এবং কীভাবে, তা চয়ন করুন';
 
   @override
   String get settingsNotificationsDisableOptimization =>
@@ -4025,7 +4026,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsServersDescription =>
-      'OpenCode সার্ভার এবং স্বাস্থ্য রাউটিং';
+      'OpenCode-এ সংযোগ করুন এবং আপনার সার্ভার পরিচালনা করুন';
 
   @override
   String get settingsServersTitle => 'সার্ভার';
@@ -4052,7 +4053,8 @@ class AppLocalizationsBn extends AppLocalizations {
   String get settingsSetupWizard => 'সেটআপ উইজার্ড';
 
   @override
-  String get settingsShortcutsDescription => 'পোর্টেবল অ্যাপ কী বাইন্ডিং';
+  String get settingsShortcutsDescription =>
+      'কীবোর্ড শর্টকাট খুঁজুন এবং কাস্টমাইজ করুন';
 
   @override
   String get settingsShortcutsEdit => 'শর্টকাট সম্পাদনা করুন';
@@ -4086,7 +4088,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'ইঞ্জিন, সাইলেন্স টাইমআউট এবং মডেল অপশন';
+      'ভয়েস ইনপুট, অফলাইন মডেল এবং উচ্চস্বরে পড়া সেট আপ করুন';
 
   @override
   String get settingsSpeechRefreshStatus => 'স্থিতি রিফ্রেশ করুন';
@@ -4101,6 +4103,78 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsTitle => 'সেটিংস';
+
+  @override
+  String get settingsGroupAlertTypes => 'সতর্কতা প্রকার';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'ব্যাকগ্রাউন্ড আচরণ';
+
+  @override
+  String get settingsGroupChatDisplay => 'চ্যাট প্রদর্শন';
+
+  @override
+  String get settingsGroupCurrentConnection => 'বর্তমান সংযোগ';
+
+  @override
+  String get settingsGroupDataAndSync => 'ডেটা এবং সিঙ্ক';
+
+  @override
+  String get settingsGroupDataReset => 'ডেটা এবং রিসেট';
+
+  @override
+  String get settingsGroupDelivery => 'ডেলিভারি';
+
+  @override
+  String get settingsGroupHelp => 'সহায়তা';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'ভাষা এবং চ্যাট';
+
+  @override
+  String get settingsGroupLayoutAndText => 'লেআউট এবং টেক্সট';
+
+  @override
+  String get settingsGroupOfflineModels => 'অফলাইন মডেল';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'OpenCode ডিফল্ট';
+
+  @override
+  String get settingsGroupReadAloud => 'উচ্চস্বরে পড়া';
+
+  @override
+  String get settingsGroupSavedServers => 'সংরক্ষিত সার্ভার';
+
+  @override
+  String get settingsGroupThemeAndColor => 'থিম এবং রঙ';
+
+  @override
+  String get settingsGroupThisDevice => 'এই ডিভাইস';
+
+  @override
+  String get settingsGroupVersionUpdates => 'সংস্করণ এবং আপডেট';
+
+  @override
+  String get settingsGroupVoiceInput => 'ভয়েস ইনপুট';
+
+  @override
+  String get settingsNavigationGroupExperience => 'অভিজ্ঞতা';
+
+  @override
+  String get settingsNavigationGroupInput => 'ইনপুট';
+
+  @override
+  String get settingsNavigationGroupSetup => 'সেটআপ';
+
+  @override
+  String get settingsNavigationGroupSupport => 'সহায়তা এবং ডায়াগনস্টিকস';
+
+  @override
+  String get settingsNavigationNoResults => 'কোনো সেটিংস পাওয়া যায়নি';
+
+  @override
+  String get settingsNavigationSearchHint => 'সেটিংস অনুসন্ধান করুন';
 
   @override
   String get settingsUsernameClearHint =>

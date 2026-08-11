@@ -22,6 +22,7 @@ import '../../../services/tts/openai_compatible_tts_backend.dart';
 import '../../../utils/speech_engine_platform_support.dart';
 import '../../../utils/windows_settings_links.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
+import '../widgets/settings_section_layout.dart';
 
 class _SherpaModelEntry {
   const _SherpaModelEntry({
@@ -232,51 +233,66 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         final silenceValue =
             _silenceDraftSeconds ??
             settingsProvider.speechSilenceTimeoutSeconds.toDouble();
+        final showOfflineModels =
+            _supportsSherpaModelManagement &&
+                selectedEngine == SpeechToTextEngine.sherpa ||
+            _isLinux && selectedEngine == SpeechToTextEngine.native ||
+            _supportsMoonshine &&
+                selectedEngine == SpeechToTextEngine.moonshine ||
+            _supportsParakeet &&
+                selectedEngine == SpeechToTextEngine.parakeet ||
+            _supportsSenseVoice &&
+                selectedEngine == SpeechToTextEngine.sensevoice;
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
-            Text(
-              context.l10n.speechSpeechText,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.speechChooseRecognitionEngine,
-              style: Theme.of(context).textTheme.bodyMedium,
+            SettingsSectionIntro(
+              title: context.l10n.speechSpeechText,
+              description: context.l10n.speechChooseRecognitionEngine,
             ),
             const SizedBox(height: 16),
+            SettingsGroupHeader(title: context.l10n.settingsGroupVoiceInput),
+            const SizedBox(height: 8),
             _buildEngineCard(settingsProvider),
             const SizedBox(height: 12),
             _buildSilenceCard(
               settingsProvider: settingsProvider,
               silenceValue: silenceValue,
             ),
+            if (showOfflineModels) ...[
+              const SizedBox(height: 20),
+              SettingsGroupHeader(
+                title: context.l10n.settingsGroupOfflineModels,
+              ),
+            ],
             if (_supportsSherpaModelManagement &&
                 selectedEngine == SpeechToTextEngine.sherpa) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildLinuxModelCard(settingsProvider),
             ],
             if (_isLinux && selectedEngine == SpeechToTextEngine.native) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildSherpaModelHintCard(),
             ],
-            const SizedBox(height: 12),
-            _buildReadAloudCard(settingsProvider),
             if (_supportsMoonshine &&
                 selectedEngine == SpeechToTextEngine.moonshine) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildMoonshineModelCard(settingsProvider),
             ],
             if (_supportsParakeet &&
                 selectedEngine == SpeechToTextEngine.parakeet) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildParakeetModelCard(settingsProvider),
             ],
             if (_supportsSenseVoice &&
                 selectedEngine == SpeechToTextEngine.sensevoice) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildSenseVoiceModelCard(settingsProvider),
             ],
+            const SizedBox(height: 20),
+            SettingsGroupHeader(title: context.l10n.settingsGroupReadAloud),
+            const SizedBox(height: 8),
+            _buildReadAloudCard(settingsProvider),
           ],
         );
       },

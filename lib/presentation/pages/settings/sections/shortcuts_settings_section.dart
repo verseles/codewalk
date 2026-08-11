@@ -11,7 +11,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../utils/shortcut_binding_codec.dart';
 import '../../../utils/shortcut_l10n.dart';
 import '../../../widgets/settings_provenance_chip.dart';
-
+import '../widgets/settings_section_layout.dart';
 
 class ShortcutsSettingsSection extends StatefulWidget {
   const ShortcutsSettingsSection({super.key});
@@ -42,28 +42,32 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
         );
         final visible = visibleDefinitions
             .where((definition) {
-          if (query.isEmpty) {
-            return true;
-          }
-          final l10n = context.l10n;
-          final raw =
-              '${definition.localizedGroup(l10n)} ${definition.localizedLabel(l10n)} ${definition.localizedDescription(l10n)} ${settingsProvider.bindingFor(definition.action)}'
-                  .toLowerCase();
-          return raw.contains(query);
-        })
+              if (query.isEmpty) {
+                return true;
+              }
+              final l10n = context.l10n;
+              final raw =
+                  '${definition.localizedGroup(l10n)} ${definition.localizedLabel(l10n)} ${definition.localizedDescription(l10n)} ${settingsProvider.bindingFor(definition.action)}'
+                      .toLowerCase();
+              return raw.contains(query);
+            })
             .toList(growable: false);
+        final grouped = <String, List<ShortcutDefinition>>{};
+        for (final definition in visible) {
+          grouped
+              .putIfAbsent(
+                definition.localizedGroup(context.l10n),
+                () => <ShortcutDefinition>[],
+              )
+              .add(definition);
+        }
 
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
-            Text(
-              context.l10n.shortcutsKeyboardShortcuts,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.shortcutsSearchEditBindings,
-              style: Theme.of(context).textTheme.bodyMedium,
+            SettingsSectionIntro(
+              title: context.l10n.shortcutsKeyboardShortcuts,
+              description: context.l10n.shortcutsSearchEditBindings,
             ),
             const SizedBox(height: 12),
             const SettingsProvenanceChip(
@@ -102,20 +106,24 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
               ),
             ),
             const SizedBox(height: 4),
-            ...visible.map(
-              (definition) => _ShortcutTile(
-                definition: definition,
-                binding: settingsProvider.bindingFor(definition.action),
-                conflict: settingsProvider.findShortcutConflict(
-                  definition.action,
-                  settingsProvider.bindingFor(definition.action),
+            for (final group in grouped.entries) ...[
+              SettingsGroupHeader(title: group.key),
+              const SizedBox(height: 8),
+              for (final definition in group.value)
+                _ShortcutTile(
+                  definition: definition,
+                  binding: settingsProvider.bindingFor(definition.action),
+                  conflict: settingsProvider.findShortcutConflict(
+                    definition.action,
+                    settingsProvider.bindingFor(definition.action),
+                  ),
+                  onEdit: () =>
+                      _editShortcut(context, settingsProvider, definition),
+                  onReset: () =>
+                      settingsProvider.clearShortcut(definition.action),
                 ),
-                onEdit: () =>
-                    _editShortcut(context, settingsProvider, definition),
-                onReset: () =>
-                    settingsProvider.clearShortcut(definition.action),
-              ),
-            ),
+              const SizedBox(height: 8),
+            ],
           ],
         );
       },
@@ -180,7 +188,7 @@ class _ShortcutTile extends StatelessWidget {
             ),
             if (conflict != null)
               Text(
-                  context.l10n.shortcutsConflictConflict(conflict!),
+                context.l10n.shortcutsConflictConflict(conflict!),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
           ],
@@ -235,7 +243,11 @@ class _ShortcutCaptureDialogState extends State<_ShortcutCaptureDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(context.l10n.shortcutsSetShortcutWidget(widget.definition.localizedLabel(context.l10n))),
+      title: Text(
+        context.l10n.shortcutsSetShortcutWidget(
+          widget.definition.localizedLabel(context.l10n),
+        ),
+      ),
       content: SizedBox(
         width: 360,
         child: Focus(

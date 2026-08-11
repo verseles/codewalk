@@ -1701,6 +1701,39 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 ## Settings
 
+### Settings landing has localized destination search
+
+- **Given** the user opens the `Settings` landing (master list, also rendered as the rail in split layouts)
+- **When** the user types in the destination search field
+- **Then** CodeWalk filters destinations locally by matching the localized title, description, or group label
+- **Then** while the query is non-empty, quick actions (setup wizard and replay chat tour) are hidden and only matching destinations are listed
+- **Then** when nothing matches, a localized empty state is shown
+- **Then** on desktop, filtering the rail does not change the currently open detail section
+- **Then** on mobile, opening a detail screen and going back preserves the query within the page
+
+### Settings destinations are grouped
+
+- **Given** the user opens the `Settings` landing
+- **When** the destination list is rendered with an empty search query
+- **Then** destinations appear grouped as `Setup` (Servers), `Experience` (Appearance, Behavior, Notifications), `Input` (Speech, Shortcuts), and `Help and diagnostics` (Logs, About)
+- **Then** the `Shortcuts` destination keeps its existing runtime visibility gate (web/desktop, or mobile when a physical keyboard is detected)
+
+### Settings detail screens show visible intent headers
+
+- **Given** the user opens a settings detail screen
+- **When** the section renders
+- **Then** the screen retains the section title and description context (with the normal compact app-bar treatment where applicable) and groups existing controls under visible intent headers
+- **Then** controls remain visible, not collapsed behind an accordion
+- **Then** existing section ids, deep links, settings persistence, providers, and OpenCode-backed behavior stay unchanged
+
+### Settings navigation stays responsive
+
+- **Given** the user browses settings
+- **When** the window is narrow (mobile)
+- **Then** the landing navigates master-to-detail with a back action returning to the same list state
+- **When** the window is expanded
+- **Then** a fixed-width rail (320px) and the detail pane are shown side by side
+
 ### Settings pickers are searchable
 
 - **Given** the user opens a settings select field (for example theme presets, OpenCode-backed defaults, sound type, active server, or Sherpa language)

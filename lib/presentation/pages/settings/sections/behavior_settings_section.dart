@@ -14,6 +14,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_host_service.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../../widgets/settings_provenance_chip.dart';
+import '../widgets/settings_section_layout.dart';
 
 class BehaviorSettingsSection extends StatefulWidget {
   const BehaviorSettingsSection({super.key});
@@ -82,23 +83,16 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
-            Text(
-              context.l10n.settingsBehaviorTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
+            SettingsSectionIntro(
+              title: context.l10n.settingsBehaviorTitle,
+              description: context.l10n.settingsBehaviorDescription,
+            ),
+            const SizedBox(height: 16),
+            SettingsGroupHeader(
+              title: context.l10n.settingsGroupLanguageAndChat,
             ),
             const SizedBox(height: 8),
-            Text(
-              context.l10n.settingsBehaviorDescription,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
             _buildLanguageCard(context),
-            const SizedBox(height: 16),
-            _buildOpenCodeDefaultsCard(context, settingsProvider),
-            const SizedBox(height: 16),
-            _buildPermissionParityCard(context),
-            const SizedBox(height: 16),
-            _buildDataSaverCard(context, settingsProvider),
             const SizedBox(height: 16),
             // Platforms without an attention surface (desktop and web) do not
             // show the control at all instead of showing a dead one.
@@ -109,6 +103,18 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
             _buildChatRenderModeCard(context, settingsProvider),
             const SizedBox(height: 16),
             _buildComposerSpellCheckCard(context, settingsProvider),
+            const SizedBox(height: 20),
+            SettingsGroupHeader(
+              title: context.l10n.settingsGroupOpenCodeDefaults,
+            ),
+            const SizedBox(height: 8),
+            _buildOpenCodeDefaultsCard(context, settingsProvider),
+            const SizedBox(height: 16),
+            _buildPermissionParityCard(context),
+            const SizedBox(height: 20),
+            SettingsGroupHeader(title: context.l10n.settingsGroupDataAndSync),
+            const SizedBox(height: 8),
+            _buildDataSaverCard(context, settingsProvider),
             const SizedBox(height: 16),
             Card(
               child: Column(

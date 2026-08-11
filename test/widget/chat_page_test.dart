@@ -13739,7 +13739,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Settings'), findsWidgets);
-    expect(find.text('Density and timeline bubble visibility'), findsOneWidget);
+    expect(
+      find.text('Choose themes, colors, text size, and chat display'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('desktop New Chat focuses composer input', (
@@ -14042,17 +14045,26 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
 
-    expect(find.text('Density and timeline bubble visibility'), findsOneWidget);
+    expect(
+      find.text('Choose themes, colors, text size, and chat display'),
+      findsOneWidget,
+    );
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
-    expect(find.text('Density and timeline bubble visibility'), findsOneWidget);
+    expect(
+      find.text('Choose themes, colors, text size, and chat display'),
+      findsOneWidget,
+    );
 
     await tester.pump(const Duration(milliseconds: 300));
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
 
-    expect(find.text('Density and timeline bubble visibility'), findsNothing);
+    expect(
+      find.text('Choose themes, colors, text size, and chat display'),
+      findsNothing,
+    );
     expect(find.text(L10nBridge.current!.chatConversations), findsOneWidget);
   });
 

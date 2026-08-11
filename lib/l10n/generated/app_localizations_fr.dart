@@ -3246,7 +3246,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAboutChecking => 'Vérification...';
 
   @override
-  String get settingsAboutDescription => 'Version, mises à jour et liens';
+  String get settingsAboutDescription =>
+      'Version, mises à jour, aide et données de l\'app';
 
   @override
   String get settingsAboutDismiss => 'Ignorer';
@@ -3422,7 +3423,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'Densité et visibilité des bulles de la chronologie';
+      'Choisissez les thèmes, couleurs, taille du texte et affichage du chat';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3655,7 +3656,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'Valeurs par défaut d\'OpenCode, provenance et sécurité de la synchronisation de l\'éditeur de message';
+      'Contrôlez la langue, le comportement du chat, l\'utilisation des données et les réglages par défaut d\'OpenCode';
 
   @override
   String get settingsBehaviorEnableDataSaver =>
@@ -3823,7 +3824,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'Diagnostics d\'exécution et données de dépannage';
+      'Consultez les diagnostics de l\'app et les détails de dépannage';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3905,7 +3906,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'Contrôles de notification et de son par catégorie';
+      'Choisissez quels événements vous alertent et de quelle manière';
 
   @override
   String get settingsNotificationsDisableOptimization =>
@@ -4106,7 +4107,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsServersDescription =>
-      'Serveurs OpenCode et routage de l\'état de santé';
+      'Connectez-vous à OpenCode et gérez vos serveurs';
 
   @override
   String get settingsServersTitle => 'Serveurs';
@@ -4134,7 +4135,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsShortcutsDescription =>
-      'Raccourcis clavier portables de l\'application';
+      'Trouvez et personnalisez les raccourcis clavier';
 
   @override
   String get settingsShortcutsEdit => 'Modifier le raccourci';
@@ -4168,7 +4169,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'Moteur, délai d\'inactivité de silence et options de modèle';
+      'Configurez la saisie vocale, les modèles hors ligne et la lecture à voix haute';
 
   @override
   String get settingsSpeechRefreshStatus => 'Actualiser le statut';
@@ -4183,6 +4184,78 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsTitle => 'Paramètres';
+
+  @override
+  String get settingsGroupAlertTypes => 'Types d\'alerte';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'Comportement en arrière-plan';
+
+  @override
+  String get settingsGroupChatDisplay => 'Affichage du chat';
+
+  @override
+  String get settingsGroupCurrentConnection => 'Connexion actuelle';
+
+  @override
+  String get settingsGroupDataAndSync => 'Données et synchronisation';
+
+  @override
+  String get settingsGroupDataReset => 'Données et réinitialisation';
+
+  @override
+  String get settingsGroupDelivery => 'Livraison';
+
+  @override
+  String get settingsGroupHelp => 'Aide';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'Langue et chat';
+
+  @override
+  String get settingsGroupLayoutAndText => 'Disposition et texte';
+
+  @override
+  String get settingsGroupOfflineModels => 'Modèles hors ligne';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'Réglages par défaut d\'OpenCode';
+
+  @override
+  String get settingsGroupReadAloud => 'Lecture à voix haute';
+
+  @override
+  String get settingsGroupSavedServers => 'Serveurs enregistrés';
+
+  @override
+  String get settingsGroupThemeAndColor => 'Thème et couleur';
+
+  @override
+  String get settingsGroupThisDevice => 'Cet appareil';
+
+  @override
+  String get settingsGroupVersionUpdates => 'Version et mises à jour';
+
+  @override
+  String get settingsGroupVoiceInput => 'Saisie vocale';
+
+  @override
+  String get settingsNavigationGroupExperience => 'Expérience';
+
+  @override
+  String get settingsNavigationGroupInput => 'Saisie';
+
+  @override
+  String get settingsNavigationGroupSetup => 'Configuration';
+
+  @override
+  String get settingsNavigationGroupSupport => 'Aide et diagnostic';
+
+  @override
+  String get settingsNavigationNoResults => 'Aucun réglage trouvé';
+
+  @override
+  String get settingsNavigationSearchHint => 'Rechercher des réglages';
 
   @override
   String get settingsUsernameClearHint =>

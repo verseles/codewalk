@@ -3133,7 +3133,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsAboutChecking => 'جاري التحقق...';
 
   @override
-  String get settingsAboutDescription => 'الإصدار، والتحديثات، والروابط';
+  String get settingsAboutDescription =>
+      'الإصدار والتحديثات والمساعدة وبيانات التطبيق';
 
   @override
   String get settingsAboutDismiss => 'تجاهل';
@@ -3306,7 +3307,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsAppearanceDescription =>
-      'الكثافة وظهور فقاعة المخطط الزمني';
+      'اختر المظاهر والألوان وحجم النص وعرض الدردشة';
 
   @override
   String get settingsAppearanceFontSize => 'Text size';
@@ -3535,7 +3536,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsBehaviorDescription =>
-      'افتراضيات OpenCode، والمنشأ، وسلامة مزامنة الملحِّن (Composer)';
+      'تحكم في اللغة وسلوك الدردشة واستخدام البيانات وإعدادات OpenCode الافتراضية';
 
   @override
   String get settingsBehaviorEnableDataSaver => 'تمكين موفر بيانات المحمول';
@@ -3696,7 +3697,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsLogsDescription =>
-      'تشخيصات وقت التشغيل وبيانات استكشاف الأخطاء وإصلاحها';
+      'راجع التشخيصات وتفاصيل استكشاف الأخطاء وإصلاحها';
 
   @override
   String get settingsLogsTitle => 'Registros';
@@ -3773,7 +3774,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsNotificationsDescription =>
-      'عناصر التحكم في الصوت والإشعارات لكل فئة';
+      'اختر الأحداث التي تنبهك وطريقة التنبيه';
 
   @override
   String get settingsNotificationsDisableOptimization => 'تعطيل التحسين';
@@ -3960,8 +3961,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsServersDefault => 'افتراضي';
 
   @override
-  String get settingsServersDescription =>
-      'خوادم OpenCode وتوجيه الحالة الصحية';
+  String get settingsServersDescription => 'اتصل بـ OpenCode وأدر خوادمك';
 
   @override
   String get settingsServersTitle => 'الخوادم';
@@ -3988,7 +3988,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsSetupWizard => 'معالج الإعداد';
 
   @override
-  String get settingsShortcutsDescription => 'روابط مفاتيح التطبيق المحمول';
+  String get settingsShortcutsDescription =>
+      'ابحث عن اختصارات لوحة المفاتيح وخصصها';
 
   @override
   String get settingsShortcutsEdit => 'تعديل الاختصار';
@@ -4022,7 +4023,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsSpeechDescription =>
-      'المحرك، ومهلة الصمت، وخيارات النموذج';
+      'اضبط الإدخال الصوتي والنماذج دون اتصال والقراءة بصوت عالٍ';
 
   @override
   String get settingsSpeechRefreshStatus => 'تحديث الحالة';
@@ -4037,6 +4038,78 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsTitle => 'الإعدادات';
+
+  @override
+  String get settingsGroupAlertTypes => 'أنواع التنبيهات';
+
+  @override
+  String get settingsGroupBackgroundBehavior => 'السلوك في الخلفية';
+
+  @override
+  String get settingsGroupChatDisplay => 'عرض الدردشة';
+
+  @override
+  String get settingsGroupCurrentConnection => 'الاتصال الحالي';
+
+  @override
+  String get settingsGroupDataAndSync => 'البيانات والمزامنة';
+
+  @override
+  String get settingsGroupDataReset => 'البيانات وإعادة التعيين';
+
+  @override
+  String get settingsGroupDelivery => 'التوصيل';
+
+  @override
+  String get settingsGroupHelp => 'المساعدة';
+
+  @override
+  String get settingsGroupLanguageAndChat => 'اللغة والدردشة';
+
+  @override
+  String get settingsGroupLayoutAndText => 'التخطيط والنص';
+
+  @override
+  String get settingsGroupOfflineModels => 'النماذج دون اتصال';
+
+  @override
+  String get settingsGroupOpenCodeDefaults => 'إعدادات OpenCode الافتراضية';
+
+  @override
+  String get settingsGroupReadAloud => 'القراءة بصوت عالٍ';
+
+  @override
+  String get settingsGroupSavedServers => 'الخوادم المحفوظة';
+
+  @override
+  String get settingsGroupThemeAndColor => 'المظهر واللون';
+
+  @override
+  String get settingsGroupThisDevice => 'هذا الجهاز';
+
+  @override
+  String get settingsGroupVersionUpdates => 'الإصدار والتحديثات';
+
+  @override
+  String get settingsGroupVoiceInput => 'الإدخال الصوتي';
+
+  @override
+  String get settingsNavigationGroupExperience => 'التجربة';
+
+  @override
+  String get settingsNavigationGroupInput => 'الإدخال';
+
+  @override
+  String get settingsNavigationGroupSetup => 'الإعداد';
+
+  @override
+  String get settingsNavigationGroupSupport => 'المساعدة والتشخيص';
+
+  @override
+  String get settingsNavigationNoResults => 'لا توجد إعدادات';
+
+  @override
+  String get settingsNavigationSearchHint => 'ابحث في الإعدادات';
 
   @override
   String get settingsUsernameClearHint =>
