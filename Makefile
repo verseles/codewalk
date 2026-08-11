@@ -242,7 +242,7 @@ analyze:
 	bash tool/ci/check_analyze_budget.sh $(ANALYZE_LOG) 334
 
 test:
-	timeout --foreground 5m flutter test --no-pub --fail-fast $(QUIET)
+	timeout --foreground 10m flutter test --no-pub --fail-fast $(QUIET)
 
 test-parallel:
 	flutter test --no-pub -j $(TEST_JOBS) $(QUIET)

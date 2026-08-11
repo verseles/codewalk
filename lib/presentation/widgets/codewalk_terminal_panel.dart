@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart'
+    show PointerDeviceKind, kLongPressTimeout, kPrimaryButton, kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -113,13 +115,6 @@ class _CodewalkTerminalPanelState extends State<CodewalkTerminalPanel> {
   }
 
   /// Records that a header control actually fired.
-  ///
-  /// #124 reports these buttons going dead intermittently while the terminal
-  /// below keeps accepting input. Everything downstream of the tap has been
-  /// ruled out by inspection — the handlers are unguarded, the provider
-  /// setters notify, and the page rebuilds on any settings change — so the
-  /// open question is whether the tap reaches the button at all. This makes
-  /// the next reproduction answer that instead of guessing.
   void _traceHeaderAction(String action) {
     AppLogger.debug(
       'terminal header action=$action maximized=${widget.isMaximized} '
@@ -222,16 +217,18 @@ class _CodewalkTerminalPanelState extends State<CodewalkTerminalPanel> {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
-                    IconButton(
-                      key: const ValueKey<String>(
+                    _TerminalHeaderIconButton(
+                      buttonKey: const ValueKey<String>(
                         'terminal_panel_reconnect_button',
                       ),
                       tooltip: context.l10n.terminalReconnect,
                       onPressed: _reconnect,
                       icon: const Icon(Symbols.refresh_rounded),
+                      keyboardInset: widget.keyboardInset,
+                      debugAction: 'reconnect',
                     ),
-                    IconButton(
-                      key: const ValueKey<String>(
+                    _TerminalHeaderIconButton(
+                      buttonKey: const ValueKey<String>(
                         'terminal_panel_maximize_button',
                       ),
                       tooltip: widget.isMaximized
@@ -243,18 +240,28 @@ class _CodewalkTerminalPanelState extends State<CodewalkTerminalPanel> {
                             ? Symbols.close_fullscreen_rounded
                             : Symbols.open_in_full_rounded,
                       ),
+                      keyboardInset: widget.keyboardInset,
+                      debugAction: 'toggleMaximize',
                     ),
-                    IconButton(
-                      key: const ValueKey<String>('terminal_panel_stop_button'),
+                    _TerminalHeaderIconButton(
+                      buttonKey: const ValueKey<String>(
+                        'terminal_panel_stop_button',
+                      ),
                       tooltip: context.l10n.terminalClose,
                       onPressed: _stop,
                       icon: const Icon(Symbols.close_rounded),
+                      keyboardInset: widget.keyboardInset,
+                      debugAction: 'stop',
                     ),
-                    IconButton(
-                      key: const ValueKey<String>('terminal_panel_hide_button'),
+                    _TerminalHeaderIconButton(
+                      buttonKey: const ValueKey<String>(
+                        'terminal_panel_hide_button',
+                      ),
                       tooltip: context.l10n.terminalMinimize,
                       onPressed: _hide,
                       icon: const Icon(Symbols.keyboard_arrow_down_rounded),
+                      keyboardInset: widget.keyboardInset,
+                      debugAction: 'hide',
                     ),
                   ],
                 ),
@@ -344,6 +351,132 @@ class _CodewalkTerminalPanelState extends State<CodewalkTerminalPanel> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TerminalHeaderIconButton extends StatefulWidget {
+  const _TerminalHeaderIconButton({
+    required this.buttonKey,
+    required this.tooltip,
+    required this.onPressed,
+    required this.icon,
+    required this.keyboardInset,
+    required this.debugAction,
+  });
+
+  final Key buttonKey;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Widget icon;
+  final double keyboardInset;
+  final String debugAction;
+
+  @override
+  State<_TerminalHeaderIconButton> createState() =>
+      _TerminalHeaderIconButtonState();
+}
+
+class _TerminalHeaderIconButtonState extends State<_TerminalHeaderIconButton> {
+  int? _pointer;
+  Offset? _pointerOrigin;
+  Duration? _pointerDownTime;
+  bool _movedBeyondSlop = false;
+  bool _keyboardWasVisible = false;
+  int _activationGeneration = 0;
+
+  bool get _canRecoverAndroidImeTap =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (!_canRecoverAndroidImeTap ||
+        widget.keyboardInset <= 0 ||
+        event.kind != PointerDeviceKind.touch ||
+        event.buttons != kPrimaryButton ||
+        _pointer != null) {
+      return;
+    }
+    _pointer = event.pointer;
+    _pointerOrigin = event.position;
+    _pointerDownTime = event.timeStamp;
+    _movedBeyondSlop = false;
+    _keyboardWasVisible = true;
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    final origin = _pointerOrigin;
+    if (event.pointer != _pointer || origin == null) {
+      return;
+    }
+    if ((event.position - origin).distance > kTouchSlop) {
+      _movedBeyondSlop = true;
+    }
+  }
+
+  void _handlePointerEnd(PointerEvent event) {
+    if (event.pointer != _pointer) {
+      return;
+    }
+    final pointerDownTime = _pointerDownTime;
+    final pressDuration = pointerDownTime == null
+        ? kLongPressTimeout
+        : event.timeStamp - pointerDownTime;
+    final shouldRecover =
+        _keyboardWasVisible &&
+        !_movedBeyondSlop &&
+        _pointerOrigin != null &&
+        pressDuration >= Duration.zero &&
+        pressDuration < kLongPressTimeout;
+    final activationGeneration = _activationGeneration;
+    _clearPointerTracking();
+    if (!shouldRecover) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final lifecycleState = WidgetsBinding.instance.lifecycleState;
+      if (!mounted ||
+          activationGeneration != _activationGeneration ||
+          (lifecycleState != null &&
+              lifecycleState != AppLifecycleState.resumed)) {
+        return;
+      }
+      _activationGeneration += 1;
+      AppLogger.debug(
+        'terminal header recovered cancelled Android IME tap '
+        'action=${widget.debugAction}',
+      );
+      widget.onPressed();
+    });
+  }
+
+  void _clearPointerTracking() {
+    _pointer = null;
+    _pointerOrigin = null;
+    _pointerDownTime = null;
+    _movedBeyondSlop = false;
+    _keyboardWasVisible = false;
+  }
+
+  void _handlePressed() {
+    _activationGeneration += 1;
+    _clearPointerTracking();
+    widget.onPressed();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      onPointerMove: _handlePointerMove,
+      onPointerUp: _handlePointerEnd,
+      onPointerCancel: _handlePointerEnd,
+      child: IconButton(
+        key: widget.buttonKey,
+        tooltip: widget.tooltip,
+        onPressed: _handlePressed,
+        icon: widget.icon,
       ),
     );
   }

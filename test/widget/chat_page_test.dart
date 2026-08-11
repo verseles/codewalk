@@ -3219,6 +3219,54 @@ void main() {
         );
         expect(tester.takeException(), isNull);
 
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          final maximizeButton = find.byKey(
+            const ValueKey<String>('terminal_panel_maximize_button'),
+          );
+
+          Future<void> endTouch({
+            Offset movement = Offset.zero,
+            Duration duration = const Duration(milliseconds: 120),
+            bool cancel = true,
+          }) async {
+            final gesture = await tester.createGesture(
+              kind: PointerDeviceKind.touch,
+            );
+            await gesture.down(
+              tester.getCenter(maximizeButton),
+              timeStamp: Duration.zero,
+            );
+            await tester.pump(duration);
+            if (movement != Offset.zero) {
+              await gesture.moveBy(movement, timeStamp: duration);
+              await tester.pump();
+            }
+            if (cancel) {
+              await gesture.cancel(timeStamp: duration);
+            } else {
+              await gesture.up(timeStamp: duration);
+            }
+            await _pumpUiFrames(tester);
+          }
+
+          await endTouch();
+          expect(settingsProvider.terminalPanelMaximized, isTrue);
+          expect(terminalRemoteDataSource.createPtyCount, 1);
+
+          await endTouch();
+          expect(settingsProvider.terminalPanelMaximized, isFalse);
+          expect(terminalRemoteDataSource.createPtyCount, 1);
+
+          await endTouch(movement: const Offset(kTouchSlop * 2, 0));
+          expect(settingsProvider.terminalPanelMaximized, isFalse);
+
+          await endTouch(
+            duration: kLongPressTimeout + const Duration(milliseconds: 100),
+            cancel: false,
+          );
+          expect(settingsProvider.terminalPanelMaximized, isFalse);
+        }
+
         bool modifierIsToggled(String key) {
           final keyFinder = find.byKey(ValueKey<String>(key));
           final semantics = tester.widget<Semantics>(

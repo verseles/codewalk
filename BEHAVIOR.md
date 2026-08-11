@@ -1273,6 +1273,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Given** an active embedded terminal has the software keyboard open on Android or iOS
 - **When** the terminal input controls appear above the keyboard
 - **Then** CodeWalk shows localized, accessible keys for `Escape`, `Tab`, one-shot `Ctrl` and `Alt`, and all four arrow directions while keeping terminal focus and the keyboard input connection active
+- **Then** on Android, reconnect, maximize/restore, close, and minimize respond to the first quick, stationary touch even if the IME cancels the normal tap sequence; holds past the long-press threshold, drags, background transitions, and a normally completed tap never trigger a recovery action
 - **Then** `Ctrl` and `Alt` can be armed independently, apply together when both are selected, and clear after the next terminal input that produces output; empty IME updates and physical modifier keys do not consume them
 - **Then** tapping an arrow sends one movement, while holding it repeats the same resolved movement until release or cancellation
 - **Then** the controls scroll horizontally on narrow screens, respect the platform safe area, and disappear when the keyboard closes, the terminal becomes inactive, or the terminal surface is replaced
