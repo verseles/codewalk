@@ -869,6 +869,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     }
     final generation = ++_sessionTabsGeneration;
     String? raw;
+    SessionTabIconOverridesState? iconOverridesState;
     var scopedPins = const <String, Set<String>>{};
     var scopedPinEnumerationSucceeded = false;
     try {
@@ -925,6 +926,17 @@ extension _ChatProviderSessionTabOps on ChatProvider {
       }
       return;
     }
+    try {
+      iconOverridesState = await _sessionTabIconOverrideStore.load(
+        targetServerId,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to load session tab icon overrides for server=$targetServerId',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
     if (_sessionTabsDisposed ||
         generation != _sessionTabsGeneration ||
         targetServerId != _activeServerId) {
@@ -962,6 +974,9 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         scopeId: activeScopeId,
       );
     }
+    if (iconOverridesState != null) {
+      _applySessionTabIconOverrideState(targetServerId, iconOverridesState);
+    }
     _sessionTabsPersistedState = PersistedSessionTabsState.decode(raw);
     _reconcileSessionTabs();
   }
@@ -989,7 +1004,12 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     final activePinScopeId = _activePinnedSessionScopeId();
     var nextTabs = result.tabs
         .map((tab) {
-          if (!tab.isPinned) return tab;
+          final iconPresetId =
+              _sessionTabIconOverridesByServer[serverId]?[tab.identity]
+                  ?.presetId;
+          if (!tab.isPinned) {
+            return tab.copyWith(iconPresetId: iconPresetId);
+          }
           final scopes = pinnedScopes[tab.identity] ?? const <String>{};
           final primaryScope =
               activePinScopeId != null && scopes.contains(activePinScopeId)
@@ -997,7 +1017,11 @@ extension _ChatProviderSessionTabOps on ChatProvider {
               : scopes.contains(tab.identity.directory)
               ? tab.identity.directory
               : scopes.firstOrNull;
-          return tab.copyWith(pinScopeId: primaryScope, pinScopeIds: scopes);
+          return tab.copyWith(
+            pinScopeId: primaryScope,
+            pinScopeIds: scopes,
+            iconPresetId: iconPresetId,
+          );
         })
         .toList(growable: false);
     var nextPersistedState = result.persistedState;
@@ -1268,6 +1292,103 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     return result.future;
   }
 
+  void _applySessionTabIconOverrideState(
+    String serverId,
+    SessionTabIconOverridesState state,
+  ) {
+    _sessionTabIconOverridesByServer[serverId] = {
+      for (final entry in state.entries)
+        if (entry.serverId == serverId)
+          SessionTabIdentity(
+            serverId: entry.serverId,
+            directory: entry.directory,
+            sessionId: entry.sessionId,
+          ): entry,
+    };
+  }
+
+  Future<bool> _setSessionTabIconPreset(
+    SessionTabIdentity identity,
+    String? presetId,
+  ) async {
+    final normalizedPresetId = presetId?.trim();
+    if (!identity.isValid ||
+        identity.serverId != _sessionTabsLoadedServerId ||
+        !_sessionTabs.any((tab) => tab.identity == identity) ||
+        (normalizedPresetId != null &&
+            normalizedPresetId.isNotEmpty &&
+            SessionTabIconPreset.fromId(normalizedPresetId) == null)) {
+      return false;
+    }
+    try {
+      final state = await _sessionTabIconOverrideStore.setPreset(
+        serverId: identity.serverId,
+        directory: identity.directory,
+        sessionId: identity.sessionId,
+        presetId: normalizedPresetId,
+        updatedAtMs: _sessionTabsNow().millisecondsSinceEpoch,
+      );
+      if (_sessionTabsDisposed ||
+          identity.serverId != _sessionTabsLoadedServerId) {
+        return true;
+      }
+      _applySessionTabIconOverrideState(identity.serverId, state);
+      _reconcileSessionTabs(forcePersistence: false);
+      return true;
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to set session tab icon for ${identity.sessionId}',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  void _removeSessionTabIconOverride(SessionTabIdentity identity) {
+    unawaited(() async {
+      try {
+        final state = await _sessionTabIconOverrideStore.removeIdentity(
+          serverId: identity.serverId,
+          directory: identity.directory,
+          sessionId: identity.sessionId,
+        );
+        if (_sessionTabsDisposed ||
+            identity.serverId != _sessionTabsLoadedServerId) {
+          return;
+        }
+        _applySessionTabIconOverrideState(identity.serverId, state);
+      } catch (error, stackTrace) {
+        AppLogger.error(
+          'Failed to remove session tab icon for ${identity.sessionId}',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }());
+  }
+
+  Future<void> _removeSessionTabIconOverridesForDirectory({
+    required String serverId,
+    required String directory,
+  }) async {
+    try {
+      final state = await _sessionTabIconOverrideStore.removeDirectory(
+        serverId: serverId,
+        directory: directory,
+      );
+      if (!_sessionTabsDisposed && serverId == _sessionTabsLoadedServerId) {
+        _applySessionTabIconOverrideState(serverId, state);
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to remove session tab icon overrides for directory=$directory',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   void _pruneSessionTabEventState(String serverId) {
     final retained = <SessionTabIdentity>{
       ..._sessionTabs.map((tab) => tab.identity),
@@ -1305,7 +1426,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         contextKey: contextKey,
       );
       if (identity != null) {
-        _removeSessionTabAuthoritatively(identity);
+        _removeSessionTabAuthoritatively(identity, removeIconOverride: true);
       }
       return;
     }
@@ -1564,8 +1685,10 @@ extension _ChatProviderSessionTabOps on ChatProvider {
   void _removeSessionTabAuthoritatively(
     SessionTabIdentity identity, {
     bool activeContext = false,
+    bool removeIconOverride = false,
   }) {
     if (!identity.isValid) return;
+    if (removeIconOverride) _removeSessionTabIconOverride(identity);
     final runtimeTab = _sessionTabs
         .where((candidate) => candidate.identity == identity)
         .firstOrNull;
@@ -1740,6 +1863,11 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     final normalizedServerId = serverId.trim();
     final normalizedDirectory = normalizeOptionalFilePath(directory);
     if (normalizedServerId.isEmpty || normalizedDirectory == null) return;
+
+    await _removeSessionTabIconOverridesForDirectory(
+      serverId: normalizedServerId,
+      directory: normalizedDirectory,
+    );
 
     _removeSessionTabsForDirectory(
       serverId: normalizedServerId,

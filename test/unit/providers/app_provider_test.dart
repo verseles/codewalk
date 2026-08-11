@@ -189,6 +189,28 @@ void main() {
       expect(provider.errorMessage, 'A server with this URL already exists');
     });
 
+    test('removing a server clears its tab icon overrides', () async {
+      await provider.initialize();
+      expect(
+        await provider.addServerProfile(url: 'http://127.0.0.1:5010'),
+        isTrue,
+      );
+      final serverId = provider.activeServer!.id;
+      await localDataSource.saveSessionTabIconOverridesJson(
+        '{"version":1,"entries":[]}',
+        serverId: serverId,
+      );
+
+      expect(await provider.removeServerProfile(serverId), isTrue);
+
+      expect(
+        await localDataSource.getSessionTabIconOverridesJson(
+          serverId: serverId,
+        ),
+        isNull,
+      );
+    });
+
     test('addServerProfile allows OAuth on Android', () async {
       final previous = debugDefaultTargetPlatformOverride;
       debugDefaultTargetPlatformOverride = TargetPlatform.android;

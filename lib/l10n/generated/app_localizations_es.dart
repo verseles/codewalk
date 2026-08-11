@@ -5050,4 +5050,55 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sessionTabRestoreFailed => 'Tab could not be restored.';
+
+  @override
+  String get sessionTabChangeIconAction => 'Change icon';
+
+  @override
+  String get sessionTabIconPickerTitle => 'Choose tab icon';
+
+  @override
+  String get sessionTabIconUseProjectIcon => 'Use project icon';
+
+  @override
+  String get sessionTabIconApplied => 'Tab icon updated.';
+
+  @override
+  String get sessionTabIconSaveFailed => 'Tab icon could not be saved.';
+
+  @override
+  String get sessionTabIconPresetCode => 'Code';
+
+  @override
+  String get sessionTabIconPresetTerminal => 'Terminal';
+
+  @override
+  String get sessionTabIconPresetBug => 'Bug';
+
+  @override
+  String get sessionTabIconPresetTasks => 'Tasks';
+
+  @override
+  String get sessionTabIconPresetLaunch => 'Launch';
+
+  @override
+  String get sessionTabIconPresetIdea => 'Idea';
+
+  @override
+  String get sessionTabIconPresetResearch => 'Research';
+
+  @override
+  String get sessionTabIconPresetDesign => 'Design';
+
+  @override
+  String get sessionTabIconPresetData => 'Data';
+
+  @override
+  String get sessionTabIconPresetCloud => 'Cloud';
+
+  @override
+  String get sessionTabIconPresetSecurity => 'Security';
+
+  @override
+  String get sessionTabIconPresetTools => 'Tools';
 }

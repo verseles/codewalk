@@ -389,6 +389,88 @@ void main() {
     expect(badgeRect.bottom, leadingRect.bottom);
   });
 
+  testWidgets('custom icon replaces base icon and keeps busy overlay', (
+    tester,
+  ) async {
+    final tab = _tab(
+      'custom',
+      status: SessionStatusType.busy,
+      isPinned: true,
+      iconPresetId: 'terminal',
+    );
+    final identityKey = sessionTabIdentityKey(tab.identity);
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
+
+    expect(
+      find.byKey(ValueKey<String>('session_tab_custom_icon_$identityKey')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(ValueKey<String>('session_tab_project_icon_$identityKey')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(ValueKey<String>('session_tab_busy_busy_$identityKey')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(ValueKey<String>('session_tab_title_$identityKey')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('unknown custom icon falls back to the project icon', (
+    tester,
+  ) async {
+    final tab = _tab('unknown-icon', iconPresetId: 'future-preset');
+    final identityKey = sessionTabIdentityKey(tab.identity);
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
+
+    expect(
+      find.byKey(ValueKey<String>('session_tab_custom_icon_$identityKey')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(ValueKey<String>('session_tab_project_icon_$identityKey')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('attention overrides custom icon until attention clears', (
+    tester,
+  ) async {
+    final attention = _tab(
+      'custom-attention',
+      iconPresetId: 'bug',
+      errorToken: 'error-1',
+    );
+    final identityKey = sessionTabIdentityKey(attention.identity);
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[attention]));
+
+    expect(
+      find.byKey(ValueKey<String>('session_tab_leading_error_$identityKey')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(ValueKey<String>('session_tab_custom_icon_$identityKey')),
+      findsNothing,
+    );
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[_tab('custom-attention', iconPresetId: 'bug')],
+      ),
+    );
+
+    expect(
+      find.byKey(ValueKey<String>('session_tab_custom_icon_$identityKey')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('discovers icons only for open projects', (tester) async {
     final tab = _tab('project');
     final project = Project(
@@ -881,6 +963,7 @@ SessionTabRecord _tab(
   SessionStatusType status = SessionStatusType.idle,
   bool isSelected = false,
   bool isPinned = false,
+  String? iconPresetId,
   List<String> pendingQuestionIds = const <String>[],
   String? completionToken,
   String? errorToken,
@@ -896,6 +979,7 @@ SessionTabRecord _tab(
     errorToken: errorToken,
     isSelected: isSelected,
     isPinned: isPinned,
+    iconPresetId: iconPresetId,
   );
 }
 

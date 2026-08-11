@@ -116,6 +116,7 @@ class SessionTabRecord {
     this.isPinned = false,
     this.pinScopeId,
     Iterable<String> pinScopeIds = const <String>[],
+    this.iconPresetId,
   }) : pendingQuestionIds = _normalizedSessionTabIds(pendingQuestionIds),
        seenQuestionIds = _normalizedSessionTabIds(seenQuestionIds),
        pinScopeIds = Set<String>.unmodifiable(
@@ -140,6 +141,7 @@ class SessionTabRecord {
   final bool isPinned;
   final String? pinScopeId;
   final Set<String> pinScopeIds;
+  final String? iconPresetId;
 
   bool get isBusy =>
       status == SessionStatusType.busy || status == SessionStatusType.retry;
@@ -190,6 +192,7 @@ class SessionTabRecord {
     bool? isPinned,
     Object? pinScopeId = _sessionTabUnset,
     Iterable<String>? pinScopeIds,
+    Object? iconPresetId = _sessionTabUnset,
   }) {
     return SessionTabRecord(
       identity: identity,
@@ -218,6 +221,9 @@ class SessionTabRecord {
           ? this.pinScopeId
           : pinScopeId as String?,
       pinScopeIds: pinScopeIds ?? this.pinScopeIds,
+      iconPresetId: identical(iconPresetId, _sessionTabUnset)
+          ? this.iconPresetId
+          : iconPresetId as String?,
     );
   }
 
@@ -239,6 +245,7 @@ class SessionTabRecord {
         other.isSelected == isSelected &&
         other.isPinned == isPinned &&
         other.pinScopeId == pinScopeId &&
+        other.iconPresetId == iconPresetId &&
         setEquals(other.pinScopeIds, pinScopeIds);
   }
 
@@ -259,6 +266,7 @@ class SessionTabRecord {
     isSelected,
     isPinned,
     pinScopeId,
+    iconPresetId,
     Object.hashAllUnordered(pinScopeIds),
   );
 }

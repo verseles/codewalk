@@ -461,4 +461,38 @@ void main() {
       '{"version":1,"open":["first"]}',
     );
   });
+
+  test('stores and deletes tab icon overrides per server', () async {
+    final prefs = await SharedPreferences.getInstance();
+    final dataSource = AppLocalDataSourceImpl(sharedPreferences: prefs);
+
+    await dataSource.saveSessionTabIconOverridesJson(
+      '{"version":1,"entries":["one"]}',
+      serverId: 'srv/one',
+    );
+    await dataSource.saveSessionTabIconOverridesJson(
+      '{"version":1,"entries":["two"]}',
+      serverId: 'srv/two',
+    );
+
+    expect(
+      await dataSource.getSessionTabIconOverridesJson(serverId: 'srv/one'),
+      '{"version":1,"entries":["one"]}',
+    );
+    expect(
+      await dataSource.getSessionTabIconOverridesJson(serverId: 'srv/two'),
+      '{"version":1,"entries":["two"]}',
+    );
+
+    await dataSource.deleteSessionTabIconOverrides(serverId: 'srv/one');
+
+    expect(
+      await dataSource.getSessionTabIconOverridesJson(serverId: 'srv/one'),
+      isNull,
+    );
+    expect(
+      await dataSource.getSessionTabIconOverridesJson(serverId: 'srv/two'),
+      isNotNull,
+    );
+  });
 }

@@ -459,7 +459,11 @@ extension ChatProviderLifecycleOps on ChatProvider {
       },
       (_) async {
         if (tabIdentity != null) {
-          _removeSessionTabAuthoritatively(tabIdentity, activeContext: true);
+          _removeSessionTabAuthoritatively(
+            tabIdentity,
+            activeContext: true,
+            removeIconOverride: true,
+          );
         }
         if (attentionIdentity != null) {
           _deleteSessionAttentionSnapshotIdentity(attentionIdentity);

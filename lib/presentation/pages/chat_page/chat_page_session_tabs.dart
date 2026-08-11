@@ -70,6 +70,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
     await _showCurrentSessionActionsMenu(
       globalPosition: globalPosition,
       haptic: haptic,
+      tabIdentity: tab.identity,
     );
   }
 

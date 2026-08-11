@@ -8,6 +8,8 @@ extension _ChatPageChrome on _ChatPageState {
   }) {
     return switch (action) {
       _CurrentSessionAction.rename => context.l10n.sessionTabRenameAction,
+      _CurrentSessionAction.changeIcon =>
+        context.l10n.sessionTabChangeIconAction,
       _CurrentSessionAction.pinToggle =>
         isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
       _CurrentSessionAction.shareToggle =>
@@ -32,6 +34,7 @@ extension _ChatPageChrome on _ChatPageState {
   }) {
     return switch (action) {
       _CurrentSessionAction.rename => Symbols.edit,
+      _CurrentSessionAction.changeIcon => Symbols.category,
       _CurrentSessionAction.pinToggle =>
         isPinned ? Symbols.keep_off : Symbols.keep,
       _CurrentSessionAction.shareToggle =>
@@ -49,8 +52,9 @@ extension _ChatPageChrome on _ChatPageState {
 
   List<PopupMenuEntry<_CurrentSessionAction>> _buildCurrentSessionActionItems(
     ChatProvider chatProvider,
-    ChatSession session,
-  ) {
+    ChatSession session, {
+    SessionTabIdentity? tabIdentity,
+  }) {
     final shareUrl = session.shareUrl?.trim();
     final hasShareUrl = shareUrl != null && shareUrl.isNotEmpty;
     final isPinned = chatProvider.isSessionPinned(session.id);
@@ -93,6 +97,7 @@ extension _ChatPageChrome on _ChatPageState {
 
     return [
       buildItem(_CurrentSessionAction.rename),
+      if (tabIdentity != null) buildItem(_CurrentSessionAction.changeIcon),
       buildItem(_CurrentSessionAction.pinToggle),
       const PopupMenuDivider(),
       buildItem(_CurrentSessionAction.shareToggle),
@@ -118,6 +123,7 @@ extension _ChatPageChrome on _ChatPageState {
   Future<void> _showCurrentSessionActionsMenu({
     required Offset globalPosition,
     required bool haptic,
+    SessionTabIdentity? tabIdentity,
   }) async {
     final chatProvider = context.read<ChatProvider>();
     final session = chatProvider.currentSession;
@@ -133,15 +139,24 @@ extension _ChatPageChrome on _ChatPageState {
         Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 1, 1),
         Offset.zero & overlay.size,
       ),
-      items: _buildCurrentSessionActionItems(chatProvider, session),
+      items: _buildCurrentSessionActionItems(
+        chatProvider,
+        session,
+        tabIdentity: tabIdentity,
+      ),
     );
     if (!mounted || selected == null) return;
-    await _handleCurrentSessionAction(chatProvider, action: selected);
+    await _handleCurrentSessionAction(
+      chatProvider,
+      action: selected,
+      tabIdentity: tabIdentity,
+    );
   }
 
   Future<void> _handleCurrentSessionAction(
     ChatProvider chatProvider, {
     required _CurrentSessionAction action,
+    SessionTabIdentity? tabIdentity,
   }) async {
     final session = chatProvider.currentSession;
     if (session == null) {
@@ -156,6 +171,34 @@ extension _ChatPageChrome on _ChatPageState {
           SessionContextMenuActions(
             onSessionRenamed: chatProvider.renameSession,
           ),
+        );
+        return;
+      case _CurrentSessionAction.changeIcon:
+        if (tabIdentity == null) return;
+        final tab = chatProvider.sessionTabs
+            .where((candidate) => candidate.identity == tabIdentity)
+            .firstOrNull;
+        if (tab == null) return;
+        final projectProvider = context.read<ProjectProvider>();
+        final project = projectProvider.projects
+            .where((candidate) => candidate.id == tab.projectId)
+            .firstOrNull;
+        final selection = await showSessionTabIconPicker(
+          context,
+          currentPresetId: tab.iconPresetId,
+          project: project,
+        );
+        if (!mounted || selection == null) return;
+        final saved = await chatProvider.setSessionTabIconPreset(
+          tabIdentity,
+          selection.presetId,
+        );
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          saved
+              ? context.l10n.sessionTabIconApplied
+              : context.l10n.sessionTabIconSaveFailed,
+          hideCurrent: false,
         );
         return;
       case _CurrentSessionAction.pinToggle:

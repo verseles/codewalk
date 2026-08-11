@@ -49,6 +49,7 @@ class AppConstants {
   static const String hiddenProjectPathsKey = 'hidden_project_paths';
   static const String experienceSettingsKey = 'experience_settings';
   static const String sessionTabsStateKey = 'session_tabs_state';
+  static const String sessionTabIconOverridesKey = 'session_tab_icon_overrides';
   static const String sessionAttentionPresentationOverrideKey =
       'session_attention_presentation_override';
   static const String sessionAttentionMainHeartbeatEpochMsKey =

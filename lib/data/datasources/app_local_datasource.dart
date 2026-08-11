@@ -237,6 +237,15 @@ abstract class AppLocalDataSource {
     required String serverId,
   });
 
+  Future<String?> getSessionTabIconOverridesJson({required String serverId});
+
+  Future<void> saveSessionTabIconOverridesJson(
+    String stateJson, {
+    required String serverId,
+  });
+
+  Future<void> deleteSessionTabIconOverrides({required String serverId});
+
   /// Technical comment translated to English.
   Future<String?> getLastSessionId();
 
@@ -1243,6 +1252,39 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       _scopedKey(AppConstants.sessionTabsStateKey, serverId: serverId),
       stateJson,
     );
+  }
+
+  @override
+  Future<String?> getSessionTabIconOverridesJson({
+    required String serverId,
+  }) async {
+    return sharedPreferences.getString(
+      _scopedKey(AppConstants.sessionTabIconOverridesKey, serverId: serverId),
+    );
+  }
+
+  @override
+  Future<void> saveSessionTabIconOverridesJson(
+    String stateJson, {
+    required String serverId,
+  }) async {
+    final saved = await sharedPreferences.setString(
+      _scopedKey(AppConstants.sessionTabIconOverridesKey, serverId: serverId),
+      stateJson,
+    );
+    if (!saved) {
+      throw StateError('Failed to persist session tab icon overrides');
+    }
+  }
+
+  @override
+  Future<void> deleteSessionTabIconOverrides({required String serverId}) async {
+    final removed = await sharedPreferences.remove(
+      _scopedKey(AppConstants.sessionTabIconOverridesKey, serverId: serverId),
+    );
+    if (!removed) {
+      throw StateError('Failed to remove session tab icon overrides');
+    }
   }
 
   @override

@@ -23,6 +23,7 @@ import '../services/cellular_data_saver_service.dart';
 import '../services/local_opencode_server_runtime.dart';
 import '../services/local_opencode_server_runtime_types.dart';
 import '../services/session_attention/session_attention_completion_resolver.dart';
+import '../services/session_tab_icon_override_store.dart';
 
 enum AppStatus { initial, loading, loaded, error, disconnected }
 
@@ -72,6 +73,7 @@ class AppProvider extends ChangeNotifier {
     Duration serverHealthRequestTimeout = const Duration(seconds: 3),
     bool enableHealthPolling = true,
     OAuthServiceFactory? oauthServiceFactory,
+    SessionTabIconOverrideStore? sessionTabIconOverrideStore,
   }) : _getAppInfo = getAppInfo,
        _checkConnection = checkConnection,
        _localDataSource = localDataSource,
@@ -84,6 +86,9 @@ class AppProvider extends ChangeNotifier {
        _cellularDataSaverService =
            cellularDataSaverService ?? CellularDataSaverService.disabled(),
        _sessionAttentionCompletionResolver = sessionAttentionCompletionResolver,
+       _sessionTabIconOverrideStore =
+           sessionTabIconOverrideStore ??
+           SessionTabIconOverrideStore(localDataSource: localDataSource),
        _localServerRuntime =
            localServerRuntime ?? createLocalOpencodeServerRuntime(),
        _serverHealthProbe = serverHealthProbe,
@@ -117,6 +122,7 @@ class AppProvider extends ChangeNotifier {
   final Future<bool> Function(Uri authUrl) _tailscaleAuthLauncher;
   final CellularDataSaverService _cellularDataSaverService;
   final SessionAttentionCompletionResolver? _sessionAttentionCompletionResolver;
+  final SessionTabIconOverrideStore _sessionTabIconOverrideStore;
   final LocalOpencodeServerRuntime _localServerRuntime;
   final Future<ServerHealthStatus> Function(ServerProfile profile)?
   _serverHealthProbe;
@@ -953,6 +959,17 @@ class AppProvider extends ChangeNotifier {
 
     _invalidatedOAuthProfileIds.add(id);
     try {
+      try {
+        await _sessionTabIconOverrideStore.removeServer(id);
+      } catch (error, stackTrace) {
+        AppLogger.error(
+          'Failed to remove session tab icon overrides for server=$id',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        _setError('Failed to remove local session tab icon data');
+        return false;
+      }
       if (removed.oauthEnabled) {
         await _clearOAuthCredentialForProfile(removed);
       }

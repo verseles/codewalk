@@ -71,6 +71,7 @@ import '../../presentation/services/session_attention/session_attention_completi
 import '../../presentation/services/session_attention/session_attention_coordinator.dart';
 import '../../presentation/services/session_attention/session_attention_host_protocol.dart';
 import '../../presentation/services/session_attention/session_attention_host_service.dart';
+import '../../presentation/services/session_tab_icon_override_store.dart';
 import '../../presentation/services/sherpa_model_manager.dart';
 import '../../presentation/services/sound_service.dart';
 import '../../presentation/services/speech_input_service_moonshine.dart';
@@ -346,6 +347,9 @@ Future<void> init() async {
   sl.registerLazySingleton(
     () => createProjectIconDiscoveryService(dio: sl<DioClient>().dio),
   );
+  sl.registerLazySingleton(
+    () => SessionTabIconOverrideStore(localDataSource: sl()),
+  );
 
   // Repositories
   sl.registerLazySingleton<AppRepository>(
@@ -406,6 +410,7 @@ Future<void> init() async {
       tailscaleService: sl(),
       cellularDataSaverService: sl(),
       sessionAttentionCompletionResolver: sl(),
+      sessionTabIconOverrideStore: sl(),
     ),
   );
 
@@ -445,6 +450,7 @@ Future<void> init() async {
       cellularDataSaverService: sl(),
       sessionAttentionCoordinator: sl(),
       sessionAttentionCompletionResolver: sl(),
+      sessionTabIconOverrideStore: sl(),
       sessionAttentionAggregatePublisher: (aggregate) async {
         liveAttention = aggregate;
         await publishSessionAttention();

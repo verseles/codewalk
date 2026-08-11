@@ -27,6 +27,7 @@ import '../../domain/entities/experience_settings.dart';
 import '../../domain/entities/persisted_session_tabs_state.dart';
 import '../../domain/entities/provider.dart';
 import '../../domain/entities/session.dart';
+import '../../domain/entities/session_tab_icon_overrides.dart';
 import '../../domain/entities/session_attention_overlay/session_attention_models.dart';
 import '../../domain/usecases/abort_chat_session.dart';
 import '../../domain/usecases/create_chat_session.dart';
@@ -62,6 +63,8 @@ import '../services/event_feedback_dispatcher.dart';
 import '../services/read_aloud_service.dart';
 import '../services/session_attention/session_attention_completion_resolver.dart';
 import '../services/session_attention/session_attention_coordinator.dart';
+import '../services/session_tab_icon_override_store.dart';
+import '../services/session_tab_icon_presets.dart';
 import '../utils/chat_abort_message.dart';
 import '../utils/chat_assistant_settlement.dart';
 import '../utils/chat_event_property_extractors.dart';
@@ -188,6 +191,7 @@ class ChatProvider extends ChangeNotifier {
     Duration abortSuppressionWindow = const Duration(seconds: 8),
     Duration shortcutCycleWindow = const Duration(seconds: 3),
     DateTime Function()? sessionTabsNow,
+    SessionTabIconOverrideStore? sessionTabIconOverrideStore,
   }) {
     _cellularDataSaverService =
         cellularDataSaverService ?? CellularDataSaverService.disabled();
@@ -216,6 +220,9 @@ class ChatProvider extends ChangeNotifier {
     _abortSuppressionWindow = abortSuppressionWindow;
     _shortcutCycleWindow = shortcutCycleWindow;
     _sessionTabsNow = sessionTabsNow ?? DateTime.now;
+    _sessionTabIconOverrideStore =
+        sessionTabIconOverrideStore ??
+        SessionTabIconOverrideStore(localDataSource: localDataSource);
     _activeContextKey = _composeContextKey(
       _activeServerId,
       _resolveContextScopeId(),
@@ -401,6 +408,10 @@ class ChatProvider extends ChangeNotifier {
       const PersistedSessionTabsState();
   final Map<String, Future<void>> _sessionTabsWriteQueueByServer =
       <String, Future<void>>{};
+  late final SessionTabIconOverrideStore _sessionTabIconOverrideStore;
+  final Map<String, Map<SessionTabIdentity, SessionTabIconOverride>>
+  _sessionTabIconOverridesByServer =
+      <String, Map<SessionTabIdentity, SessionTabIconOverride>>{};
   final Map<String, Future<void>> _pinnedSessionWriteQueueByScope =
       <String, Future<void>>{};
   final Map<String, Map<String, Set<String>>> _pinnedSessionIdsByServerScope =
@@ -1000,6 +1011,18 @@ class ChatProvider extends ChangeNotifier {
     _closeSessionTab(identity);
   }
 
+  String? sessionTabIconPresetId(SessionTabIdentity identity) {
+    return _sessionTabIconOverridesByServer[identity.serverId]?[identity]
+        ?.presetId;
+  }
+
+  Future<bool> setSessionTabIconPreset(
+    SessionTabIdentity identity,
+    String? presetId,
+  ) {
+    return _setSessionTabIconPreset(identity, presetId);
+  }
+
   bool restoreClosedSessionTab(SessionTabRecord tab, {required int index}) {
     return _restoreClosedSessionTab(tab, index: index);
   }
@@ -1025,6 +1048,7 @@ class ChatProvider extends ChangeNotifier {
       ..._sessionTabsWriteQueueByServer.values,
       ..._pinnedSessionWriteQueueByScope.values,
     ]);
+    await _sessionTabIconOverrideStore.drain();
   }
 
   @visibleForTesting

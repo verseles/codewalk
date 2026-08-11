@@ -12,6 +12,7 @@ import '../../core/utils/path_utils.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/project.dart';
 import '../providers/chat_provider.dart';
+import '../services/session_tab_icon_presets.dart';
 import 'project_icon.dart';
 
 /// Height of the tab strip, also used by the integrated window chrome so the
@@ -628,23 +629,38 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         foreground: colorScheme.onPrimaryContainer,
       );
     } else {
-      final resolvedProject = project ?? _fallbackProject(tab);
-      final projectLabel = resolvedProject.name.trim().isEmpty
-          ? fileBasename(tab.identity.directory)
-          : resolvedProject.name.trim();
-      leading = Tooltip(
-        message: projectLabel,
-        child: ProjectIcon(
-          key: ValueKey<String>('session_tab_project_icon_$key'),
-          project: resolvedProject,
-          size: 20,
-          color: tab.isSelected
-              ? colorScheme.primary
-              : colorScheme.onSurfaceVariant,
-          autoDiscover:
-              project != null && widget.openProjectIds.contains(project.id),
-        ),
-      );
+      final preset = SessionTabIconPreset.fromId(tab.iconPresetId);
+      if (preset != null) {
+        leading = Tooltip(
+          message: sessionTabIconPresetLabel(context.l10n, preset),
+          child: Icon(
+            preset.icon,
+            key: ValueKey<String>('session_tab_custom_icon_$key'),
+            size: 20,
+            color: tab.isSelected
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
+          ),
+        );
+      } else {
+        final resolvedProject = project ?? _fallbackProject(tab);
+        final projectLabel = resolvedProject.name.trim().isEmpty
+            ? fileBasename(tab.identity.directory)
+            : resolvedProject.name.trim();
+        leading = Tooltip(
+          message: projectLabel,
+          child: ProjectIcon(
+            key: ValueKey<String>('session_tab_project_icon_$key'),
+            project: resolvedProject,
+            size: 20,
+            color: tab.isSelected
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
+            autoDiscover:
+                project != null && widget.openProjectIds.contains(project.id),
+          ),
+        );
+      }
     }
 
     return SizedBox(

@@ -4,7 +4,9 @@ import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/persisted_session_tabs_state.dart';
+import 'package:codewalk/domain/entities/session_tab_icon_overrides.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
+import 'package:codewalk/presentation/services/session_tab_icon_override_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
@@ -515,6 +517,117 @@ void main() {
     });
 
     test(
+      'tab icon persists separately and survives close and reload',
+      () async {
+        await provider.loadSessions();
+        final tab = provider.sessionTabs.single;
+
+        expect(
+          await provider.setSessionTabIconPreset(tab.identity, 'terminal'),
+          isTrue,
+        );
+        provider.closeSessionTab(tab.identity);
+        await provider.debugWaitForSessionTabPersistence();
+
+        final iconState = SessionTabIconOverridesState.decode(
+          await fixtures.localDataSource.getSessionTabIconOverridesJson(
+            serverId: 'srv_test',
+          ),
+        );
+        expect(iconState.entries.single.presetId, 'terminal');
+        final tabStateRaw = await fixtures.localDataSource
+            .getSessionTabsStateJson(serverId: 'srv_test');
+        expect(tabStateRaw, isNot(contains('iconPreset')));
+
+        final reloaded = buildChatProvider(
+          chatRepository: fixtures.chatRepository,
+          appRepository: fixtures.appRepository,
+          localDataSource: fixtures.localDataSource,
+          defaultSettingsProvider: fixtures.defaultSettingsProvider,
+          sessionTabsNow: () => now,
+        );
+        addTearDown(reloaded.dispose);
+        await reloaded.loadSessions();
+
+        expect(reloaded.sessionTabs.single.iconPresetId, 'terminal');
+      },
+    );
+
+    test(
+      'tab bootstrap observes an icon mutation during its tab read',
+      () async {
+        final delayedLocalDataSource = _DelayedIconBootstrapLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final store = SessionTabIconOverrideStore(
+          localDataSource: delayedLocalDataSource,
+        );
+        await delayedLocalDataSource.saveSessionTabsStateJson(
+          PersistedSessionTabsState(
+            open: <PersistedSessionTab>[
+              PersistedSessionTab(
+                directory: '/work/project',
+                sessionId: 'session-live',
+                title: 'Live session',
+                lastOpenedAtMs: now.millisecondsSinceEpoch,
+                serverUpdatedAtMs: now.millisecondsSinceEpoch,
+              ),
+            ],
+          ).encode(),
+          serverId: 'srv_test',
+        );
+        await store.setPreset(
+          serverId: 'srv_test',
+          directory: '/work/project',
+          sessionId: 'session-live',
+          presetId: 'code',
+          updatedAtMs: 1,
+        );
+        final delayedProvider = buildChatProvider(
+          chatRepository: fixtures.chatRepository,
+          appRepository: fixtures.appRepository,
+          localDataSource: delayedLocalDataSource,
+          defaultSettingsProvider: fixtures.defaultSettingsProvider,
+          sessionTabsNow: () => now,
+          sessionTabIconOverrideStore: store,
+        );
+        addTearDown(delayedProvider.dispose);
+
+        final load = delayedProvider.loadSessionTabs();
+        await delayedLocalDataSource.tabReadStarted.future;
+        await store.setPreset(
+          serverId: 'srv_test',
+          directory: '/work/project',
+          sessionId: 'session-live',
+          presetId: 'bug',
+          updatedAtMs: 2,
+        );
+        delayedLocalDataSource.releaseTabRead.complete();
+        await load;
+
+        expect(delayedProvider.sessionTabs.single.iconPresetId, 'bug');
+      },
+    );
+
+    test('reset removes the tab icon override entry', () async {
+      await provider.loadSessions();
+      final identity = provider.sessionTabs.single.identity;
+      await provider.setSessionTabIconPreset(identity, 'bug');
+
+      expect(await provider.setSessionTabIconPreset(identity, ' '), isTrue);
+      await provider.debugWaitForSessionTabPersistence();
+
+      expect(provider.sessionTabs.single.iconPresetId, isNull);
+      expect(
+        SessionTabIconOverridesState.decode(
+          await fixtures.localDataSource.getSessionTabIconOverridesJson(
+            serverId: 'srv_test',
+          ),
+        ).entries,
+        isEmpty,
+      );
+    });
+
+    test(
       'restoring a closed tab removes its tombstone and keeps order',
       () async {
         await provider.loadSessions();
@@ -589,6 +702,10 @@ void main() {
       await provider.loadSessions();
       final session = provider.sessions.single;
       await provider.toggleSessionPinned(session);
+      await provider.setSessionTabIconPreset(
+        provider.sessionTabs.single.identity,
+        'research',
+      );
       final pinnedTab = provider.sessionTabs.single;
       expect(pinnedTab.isPinned, isTrue);
 
@@ -597,6 +714,14 @@ void main() {
 
       expect(provider.isSessionPinned(session.id), isFalse);
       expect(provider.sessionTabs, isEmpty);
+      expect(
+        SessionTabIconOverridesState.decode(
+          await fixtures.localDataSource.getSessionTabIconOverridesJson(
+            serverId: 'srv_test',
+          ),
+        ).entries.single.presetId,
+        'research',
+      );
 
       expect(provider.restoreClosedSessionTab(pinnedTab, index: 0), isTrue);
       await provider.debugWaitForSessionTabPersistence();
@@ -1311,6 +1436,8 @@ void main() {
 
     test('confirmed deletion removes tab without a tombstone', () async {
       await provider.loadSessions();
+      final identity = provider.sessionTabs.single.identity;
+      await provider.setSessionTabIconPreset(identity, 'code');
 
       await provider.deleteSession('session-live');
       await provider.debugWaitForSessionTabPersistence();
@@ -1323,6 +1450,14 @@ void main() {
       );
       expect(persisted.open, isEmpty);
       expect(persisted.closed, isEmpty);
+      expect(
+        SessionTabIconOverridesState.decode(
+          await fixtures.localDataSource.getSessionTabIconOverridesJson(
+            serverId: 'srv_test',
+          ),
+        ).entries,
+        isEmpty,
+      );
     });
 
     test(
@@ -1385,6 +1520,27 @@ void main() {
         ).encode(),
         serverId: 'srv_test',
       );
+      await fixtures.localDataSource.saveSessionTabIconOverridesJson(
+        SessionTabIconOverridesState(
+          entries: <SessionTabIconOverride>[
+            SessionTabIconOverride(
+              serverId: 'srv_test',
+              directory: '/work/other',
+              sessionId: 'session-other',
+              presetId: 'bug',
+              updatedAtMs: 1,
+            ),
+            SessionTabIconOverride(
+              serverId: 'srv_test',
+              directory: '/work/project',
+              sessionId: 'session-live',
+              presetId: 'code',
+              updatedAtMs: 2,
+            ),
+          ],
+        ).encode(),
+        serverId: 'srv_test',
+      );
       await provider.loadSessions();
 
       await provider.removeSessionTabsForProjectHistory('/work/other/');
@@ -1409,6 +1565,13 @@ void main() {
         persisted.closed.any((tab) => tab.directory == '/work/other'),
         isFalse,
       );
+      final iconState = SessionTabIconOverridesState.decode(
+        await fixtures.localDataSource.getSessionTabIconOverridesJson(
+          serverId: 'srv_test',
+        ),
+      );
+      expect(iconState.entries, hasLength(1));
+      expect(iconState.entries.single.directory, '/work/project');
     });
 
     test(
@@ -1423,6 +1586,20 @@ void main() {
                 title: 'Other session',
                 lastOpenedAtMs: now.millisecondsSinceEpoch,
                 serverUpdatedAtMs: now.millisecondsSinceEpoch,
+              ),
+            ],
+          ).encode(),
+          serverId: 'server-a',
+        );
+        await fixtures.localDataSource.saveSessionTabIconOverridesJson(
+          SessionTabIconOverridesState(
+            entries: <SessionTabIconOverride>[
+              SessionTabIconOverride(
+                serverId: 'server-a',
+                directory: '/work/other',
+                sessionId: 'session-other',
+                presetId: 'tools',
+                updatedAtMs: 1,
               ),
             ],
           ).encode(),
@@ -1444,6 +1621,14 @@ void main() {
         );
         expect(persisted.open, isEmpty);
         expect(persisted.closed, isEmpty);
+        expect(
+          SessionTabIconOverridesState.decode(
+            await fixtures.localDataSource.getSessionTabIconOverridesJson(
+              serverId: 'server-a',
+            ),
+          ).entries,
+          isEmpty,
+        );
       },
     );
 
@@ -1615,5 +1800,17 @@ class _FailingPinnedScopeScanLocalDataSource
     required String serverId,
   }) {
     throw StateError('scope scan failed');
+  }
+}
+
+class _DelayedIconBootstrapLocalDataSource extends InMemoryAppLocalDataSource {
+  final Completer<void> tabReadStarted = Completer<void>();
+  final Completer<void> releaseTabRead = Completer<void>();
+
+  @override
+  Future<String?> getSessionTabsStateJson({required String serverId}) async {
+    if (!tabReadStarted.isCompleted) tabReadStarted.complete();
+    await releaseTabRead.future;
+    return super.getSessionTabsStateJson(serverId: serverId);
   }
 }

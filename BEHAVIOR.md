@@ -620,6 +620,15 @@
 - **When** a hint request is pending while the chat is inactive
 - **Then** the request is shown when the chat becomes active again
 
+- **Given** a session tab is visible
+- **When** the user opens the current session actions menu and chooses `Change icon`
+- **Then** CodeWalk shows a responsive, accessible picker of curated Material Symbols with a preview of the current icon, and choosing `Use project icon` clears any custom icon and resets the tab to its project-derived icon
+- **Then** the override is local-only, keyed by the full server, normalized directory, and session identity in a separate bounded store, and it survives tab close, recency loss, restart, project changes, and archive
+- **Then** no OpenCode or OpenChamber session, project, or file is mutated
+- **Then** the custom icon replaces only the base `ProjectIcon` visual, attention indicators keep their priority and the busy/retry overlay remains, and a pinned inactive compact tab shows the custom icon
+- **Then** unknown or corrupt stored entries fall back to the default project icon
+- **Then** authoritatively deleting a session or removing a project context or server profile removes the matching stored overrides
+
 ### Sidebar session actions are available from row gestures
 
 - **Given** a session row is visible in the main Conversations list

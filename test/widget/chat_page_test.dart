@@ -21112,6 +21112,7 @@ void main() {
     await _openActiveSessionTabMenu(tester, provider);
 
     expect(find.text('Rename session'), findsOneWidget);
+    expect(find.text('Change icon'), findsOneWidget);
     expect(find.text('Pin'), findsOneWidget);
     expect(find.text('Share session'), findsOneWidget);
     expect(find.text('View tasks'), findsOneWidget);
@@ -21120,6 +21121,22 @@ void main() {
     expect(find.text('Redo last undone turn'), findsOneWidget);
     expect(find.text('Compact context'), findsOneWidget);
 
+    await tester.tap(find.text('Change icon'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose tab icon'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('session_tab_icon_option_terminal')),
+    );
+    await tester.pumpAndSettle();
+    expect(provider.sessionTabs.single.iconPresetId, 'terminal');
+    expect(
+      await localDataSource.getSessionTabIconOverridesJson(
+        serverId: 'srv_test',
+      ),
+      contains('terminal'),
+    );
+
+    await _openActiveSessionTabMenu(tester, provider);
     await tester.tap(find.text('Rename session'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).last, 'Renamed from tab');

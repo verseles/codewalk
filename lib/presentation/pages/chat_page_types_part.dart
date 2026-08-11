@@ -593,6 +593,7 @@ enum _HistoryToolbarAction { undo, redo }
 
 enum _CurrentSessionAction {
   rename,
+  changeIcon,
   pinToggle,
   shareToggle,
   copyLink,

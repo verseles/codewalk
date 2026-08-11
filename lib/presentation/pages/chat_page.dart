@@ -95,6 +95,7 @@ import '../widgets/session_attention_overlay/session_attention_overlay.dart';
 import '../widgets/session_attention_overlay/session_attention_overlay_controller.dart';
 import '../widgets/session_context_menu.dart';
 import '../widgets/session_diff_viewer.dart';
+import '../widgets/session_tab_icon_picker.dart';
 import '../widgets/session_tab_strip.dart';
 import '../widgets/session_title_inline_editor.dart';
 import '../widgets/session_todo_list_widget.dart';

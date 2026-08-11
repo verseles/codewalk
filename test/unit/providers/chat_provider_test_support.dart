@@ -41,6 +41,7 @@ import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/cellular_data_saver_service.dart';
 import 'package:codewalk/presentation/services/chat_title_generator.dart';
 import 'package:codewalk/presentation/services/event_feedback_dispatcher.dart';
+import 'package:codewalk/presentation/services/session_tab_icon_override_store.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -222,6 +223,7 @@ ChatProvider buildChatProvider({
   Future<void> Function(bool isForeground)?
   sessionAttentionAppForegroundPublisher,
   ProjectProvider? projectProvider,
+  SessionTabIconOverrideStore? sessionTabIconOverrideStore,
 }) {
   return ChatProvider(
     sendChatMessage: SendChatMessage(chatRepository),
@@ -270,6 +272,7 @@ ChatProvider buildChatProvider({
     abortSuppressionWindow: abortSuppressionWindow,
     shortcutCycleWindow: shortcutCycleWindow,
     sessionTabsNow: sessionTabsNow,
+    sessionTabIconOverrideStore: sessionTabIconOverrideStore,
   );
 }
 

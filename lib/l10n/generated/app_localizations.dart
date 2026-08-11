@@ -8857,6 +8857,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tab could not be restored.'**
   String get sessionTabRestoreFailed;
+
+  /// Action that opens the icon picker for a session tab
+  ///
+  /// In en, this message translates to:
+  /// **'Change icon'**
+  String get sessionTabChangeIconAction;
+
+  /// Title for the session tab icon picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose tab icon'**
+  String get sessionTabIconPickerTitle;
+
+  /// Option that removes a session tab icon override
+  ///
+  /// In en, this message translates to:
+  /// **'Use project icon'**
+  String get sessionTabIconUseProjectIcon;
+
+  /// Snackbar shown after a tab icon is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Tab icon updated.'**
+  String get sessionTabIconApplied;
+
+  /// Snackbar shown when a tab icon cannot be saved
+  ///
+  /// In en, this message translates to:
+  /// **'Tab icon could not be saved.'**
+  String get sessionTabIconSaveFailed;
+
+  /// Label for the Code tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get sessionTabIconPresetCode;
+
+  /// Label for the Terminal tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal'**
+  String get sessionTabIconPresetTerminal;
+
+  /// Label for the Bug tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Bug'**
+  String get sessionTabIconPresetBug;
+
+  /// Label for the Tasks tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get sessionTabIconPresetTasks;
+
+  /// Label for the Launch tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Launch'**
+  String get sessionTabIconPresetLaunch;
+
+  /// Label for the Idea tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Idea'**
+  String get sessionTabIconPresetIdea;
+
+  /// Label for the Research tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Research'**
+  String get sessionTabIconPresetResearch;
+
+  /// Label for the Design tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Design'**
+  String get sessionTabIconPresetDesign;
+
+  /// Label for the Data tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get sessionTabIconPresetData;
+
+  /// Label for the Cloud tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud'**
+  String get sessionTabIconPresetCloud;
+
+  /// Label for the Security tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get sessionTabIconPresetSecurity;
+
+  /// Label for the Tools tab icon preset
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get sessionTabIconPresetTools;
 }
 
 class _AppLocalizationsDelegate

@@ -701,6 +701,16 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
+  Future<String?> getSessionTabIconOverridesJson({
+    required String serverId,
+  }) async {
+    return scopedStrings[_key(
+      'session_tab_icon_overrides',
+      serverId: serverId,
+    )];
+  }
+
+  @override
   Future<void> saveActiveServerId(String serverId) async {
     activeServerId = serverId;
   }
@@ -1257,6 +1267,22 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     required String serverId,
   }) async {
     scopedStrings[_key('session_tabs_state', serverId: serverId)] = stateJson;
+  }
+
+  @override
+  Future<void> saveSessionTabIconOverridesJson(
+    String stateJson, {
+    required String serverId,
+  }) async {
+    scopedStrings[_key('session_tab_icon_overrides', serverId: serverId)] =
+        stateJson;
+  }
+
+  @override
+  Future<void> deleteSessionTabIconOverrides({required String serverId}) async {
+    scopedStrings.remove(
+      _key('session_tab_icon_overrides', serverId: serverId),
+    );
   }
 
   @override
