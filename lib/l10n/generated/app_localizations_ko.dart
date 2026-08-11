@@ -760,6 +760,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get chatMainConversationUnavailable => '메인 대화를 아직 사용할 수 없습니다.';
 
   @override
+  String get chatParentConversationUnavailable => '상위 대화를 아직 사용할 수 없습니다.';
+
+  @override
   String get chatMentionAgentSubtitle => '에이전트';
 
   @override
@@ -1059,6 +1062,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => '기본 대화로 돌아가기';
+
+  @override
+  String get chatReturnToParentConversation => '상위 대화로 돌아가기';
 
   @override
   String get chatReviewChanges => '변경 사항 검토';

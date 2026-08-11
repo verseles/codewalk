@@ -971,6 +971,10 @@
   "@chatMainConversationUnavailable": {
     "description": "CodeWalk UI string — chatMainConversationUnavailable"
   },
+  "chatParentConversationUnavailable": "Parent conversation is not available yet.",
+  "@chatParentConversationUnavailable": {
+    "description": "CodeWalk UI string — chatParentConversationUnavailable"
+  },
   "chatMentionAgentSubtitle": "agent",
   "@chatMentionAgentSubtitle": {
     "description": "CodeWalk UI string — chatMentionAgentSubtitle"
@@ -1372,6 +1376,10 @@
   "chatReturnToMainConversation": "Return to main conversation",
   "@chatReturnToMainConversation": {
     "description": "CodeWalk UI string — chatReturnToMainConversation"
+  },
+  "chatReturnToParentConversation": "Return to parent conversation",
+  "@chatReturnToParentConversation": {
+    "description": "CodeWalk UI string — chatReturnToParentConversation"
   },
   "chatReviewChanges": "Review changes",
   "@chatReviewChanges": {

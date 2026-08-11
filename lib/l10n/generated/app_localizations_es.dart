@@ -819,6 +819,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'La conversación principal no está disponible.';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'La conversación superior aún no está disponible.';
+
+  @override
   String get chatMentionAgentSubtitle => 'agente';
 
   @override
@@ -1135,6 +1139,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get chatReturnToMainConversation =>
       'Volver a la conversación principal';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Volver a la conversación superior';
 
   @override
   String get chatReviewChanges => 'Revisar cambios';

@@ -1646,6 +1646,31 @@ class ChatProvider extends ChangeNotifier {
     );
   }
 
+  ChatSession? knownSessionById(String sessionId) {
+    final normalizedId = sessionId.trim();
+    if (normalizedId.isEmpty) {
+      return null;
+    }
+    if (_currentSession?.id == normalizedId) {
+      return _currentSession;
+    }
+    final listedSession = _sessions
+        .where((session) => session.id == normalizedId)
+        .firstOrNull;
+    if (listedSession != null) {
+      return listedSession;
+    }
+    for (final children in _sessionChildrenById.values) {
+      final cachedSession = children
+          .where((session) => session.id == normalizedId)
+          .firstOrNull;
+      if (cachedSession != null) {
+        return cachedSession;
+      }
+    }
+    return null;
+  }
+
   List<SessionTodo> get currentSessionTodo {
     final sessionId = _currentSession?.id;
     if (sessionId == null) {

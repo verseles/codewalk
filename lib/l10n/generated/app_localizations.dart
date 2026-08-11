@@ -1475,6 +1475,12 @@ abstract class AppLocalizations {
   /// **'Main conversation is not available yet.'**
   String get chatMainConversationUnavailable;
 
+  /// CodeWalk UI string — chatParentConversationUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Parent conversation is not available yet.'**
+  String get chatParentConversationUnavailable;
+
   /// CodeWalk UI string — chatMentionAgentSubtitle
   ///
   /// In en, this message translates to:
@@ -2032,6 +2038,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Return to main conversation'**
   String get chatReturnToMainConversation;
+
+  /// CodeWalk UI string — chatReturnToParentConversation
+  ///
+  /// In en, this message translates to:
+  /// **'Return to parent conversation'**
+  String get chatReturnToParentConversation;
 
   /// CodeWalk UI string — chatReviewChanges
   ///

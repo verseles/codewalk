@@ -787,6 +787,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'المحادثة الرئيسية غير متاحة بعد.';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'المحادثة الأصلية غير متاحة بعد.';
+
+  @override
   String get chatMentionAgentSubtitle => 'وكيل';
 
   @override
@@ -1093,6 +1097,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => 'العودة إلى المحادثة الرئيسية';
+
+  @override
+  String get chatReturnToParentConversation => 'العودة إلى المحادثة الأصلية';
 
   @override
   String get chatReviewChanges => 'مراجعة التغييرات';

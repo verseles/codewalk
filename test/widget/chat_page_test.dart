@@ -12256,6 +12256,251 @@ void main() {
   });
 
   testWidgets(
+    'nested sub-conversations open and return one parent at a time',
+    (WidgetTester tester) async {
+      final isMobile = defaultTargetPlatform == TargetPlatform.android;
+      await tester.binding.setSurfaceSize(
+        isMobile ? const Size(390, 844) : const Size(1000, 900),
+      );
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final rootSession = ChatSession(
+        id: 'ses_nested_root',
+        workspaceId: 'default',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        title: 'Nested root',
+      );
+      final childSession = ChatSession(
+        id: 'ses_nested_child',
+        workspaceId: 'default',
+        time: DateTime.fromMillisecondsSinceEpoch(1100),
+        title: 'Nested child',
+        parentId: rootSession.id,
+      );
+      final grandchildSession = ChatSession(
+        id: 'ses_nested_grandchild',
+        workspaceId: 'default',
+        time: DateTime.fromMillisecondsSinceEpoch(1200),
+        title: 'Nested grandchild',
+        parentId: childSession.id,
+      );
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[rootSession],
+      );
+      repository.messagesBySession[rootSession.id] = <ChatMessage>[
+        AssistantMessage(
+          id: 'msg_nested_root',
+          sessionId: rootSession.id,
+          time: DateTime.fromMillisecondsSinceEpoch(1300),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(1310),
+          parts: <MessagePart>[
+            ToolPart(
+              id: 'part_nested_root_task',
+              messageId: 'msg_nested_root',
+              sessionId: rootSession.id,
+              callId: 'call_nested_root_task',
+              tool: 'task',
+              state: ToolStateCompleted(
+                input: const <String, dynamic>{},
+                output:
+                    '<task id="${childSession.id}" state="completed">\n'
+                    '<task_result>child</task_result>\n'
+                    '</task>',
+                time: ToolTime(
+                  start: DateTime.fromMillisecondsSinceEpoch(1300),
+                  end: DateTime.fromMillisecondsSinceEpoch(1305),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ];
+      repository.messagesBySession[childSession.id] = <ChatMessage>[
+        AssistantMessage(
+          id: 'msg_nested_child',
+          sessionId: childSession.id,
+          time: DateTime.fromMillisecondsSinceEpoch(1400),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(1410),
+          parts: <MessagePart>[
+            TextPart(
+              id: 'part_nested_child_text',
+              messageId: 'msg_nested_child',
+              sessionId: childSession.id,
+              text: 'Child-level context',
+            ),
+            SubtaskPart(
+              id: 'part_nested_child_subtask',
+              messageId: 'msg_nested_child',
+              sessionId: childSession.id,
+              prompt: 'inspect grandchild',
+              description: 'Open nested grandchild',
+              agent: 'reviewer',
+            ),
+          ],
+        ),
+      ];
+      repository.messagesBySession[grandchildSession.id] = <ChatMessage>[
+        AssistantMessage(
+          id: 'msg_nested_grandchild',
+          sessionId: grandchildSession.id,
+          time: DateTime.fromMillisecondsSinceEpoch(1500),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(1510),
+          parts: <MessagePart>[
+            TextPart(
+              id: 'part_nested_grandchild_text',
+              messageId: 'msg_nested_grandchild',
+              sessionId: grandchildSession.id,
+              text: 'Grandchild-level context',
+            ),
+            ToolPart(
+              id: 'part_nested_repeated_task',
+              messageId: 'msg_nested_grandchild',
+              sessionId: grandchildSession.id,
+              callId: 'call_nested_repeated_task',
+              tool: 'task',
+              state: ToolStateCompleted(
+                input: const <String, dynamic>{},
+                output:
+                    '<task id="${childSession.id}" state="completed">\n'
+                    '<task_result>repeat ancestor</task_result>\n'
+                    '</task>',
+                time: ToolTime(
+                  start: DateTime.fromMillisecondsSinceEpoch(1500),
+                  end: DateTime.fromMillisecondsSinceEpoch(1505),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ];
+      repository.sessionChildrenById[rootSession.id] = <ChatSession>[
+        childSession,
+      ];
+      repository.sessionChildrenById[childSession.id] = <ChatSession>[
+        grandchildSession,
+      ];
+      repository.sessionChildrenById[grandchildSession.id] = <ChatSession>[];
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      addTearDown(provider.dispose);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+      await provider.loadSessions();
+      await provider.selectSession(rootSession);
+      await provider.loadSessionInsights(rootSession.id, silent: true);
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'task_tool_open_session_part_nested_root_task',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, childSession.id);
+      expect(find.text('Child-level context'), findsOneWidget);
+      await provider.loadSessionInsights(childSession.id, silent: true);
+      await tester.pumpAndSettle();
+
+      final nestedTask = find.byKey(
+        const ValueKey<String>(
+          'subtask_open_session_part_nested_child_subtask',
+        ),
+      );
+      expect(nestedTask, findsOneWidget);
+      expect(tester.widget(nestedTask), isA<TextButton>());
+      await tester.tap(nestedTask);
+      await tester.pumpAndSettle();
+
+      expect(provider.currentSession?.id, grandchildSession.id);
+      expect(find.text('Grandchild-level context'), findsOneWidget);
+      expect(find.text('Child-level context'), findsNothing);
+      expect(find.text('Return to parent conversation'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'task_tool_open_session_part_nested_repeated_task',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, grandchildSession.id);
+      expect(
+        find.text('No sub-conversation found for this task.'),
+        findsOneWidget,
+      );
+
+      final refreshStarted = Completer<void>();
+      final allowRefresh = Completer<void>();
+      repository.getSessionChildrenDelay = () async {
+        if (!refreshStarted.isCompleted) {
+          refreshStarted.complete();
+        }
+        await allowRefresh.future;
+      };
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'task_tool_open_session_part_nested_repeated_task',
+          ),
+        ),
+      );
+      await tester.pump();
+      await refreshStarted.future.timeout(const Duration(seconds: 1));
+
+      await provider.selectSession(childSession);
+      expect(provider.currentSession?.id, childSession.id);
+      allowRefresh.complete();
+      repository.getSessionChildrenDelay = null;
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, childSession.id);
+
+      await tester.tap(nestedTask);
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, grandchildSession.id);
+
+      if (isMobile) {
+        await tester.binding.handlePopRoute();
+      } else {
+        await tester.tap(
+          find.byKey(
+            const ValueKey<String>('subconversation_return_main_button'),
+          ),
+        );
+      }
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, childSession.id);
+      expect(find.text('Child-level context'), findsOneWidget);
+      expect(find.text('Grandchild-level context'), findsNothing);
+
+      if (isMobile) {
+        await tester.binding.handlePopRoute();
+      } else {
+        await tester.tap(
+          find.byKey(
+            const ValueKey<String>('subconversation_return_main_button'),
+          ),
+        );
+      }
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, rootSession.id);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.linux,
+    }),
+  );
+
+  testWidgets(
     'sub-conversation shows composer parity and keeps sends scoped to the child session',
     (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 900));

@@ -743,6 +743,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatMainConversationUnavailable => '主对话尚不可用。';
 
   @override
+  String get chatParentConversationUnavailable => '父会话尚不可用。';
+
+  @override
   String get chatMentionAgentSubtitle => '智能体';
 
   @override
@@ -1041,6 +1044,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => '返回主会话';
+
+  @override
+  String get chatReturnToParentConversation => '返回父会话';
 
   @override
   String get chatReviewChanges => '审查更改';

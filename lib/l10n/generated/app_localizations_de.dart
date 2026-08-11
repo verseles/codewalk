@@ -817,6 +817,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Hauptkonversation noch nicht verfügbar.';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'Die übergeordnete Unterhaltung ist noch nicht verfügbar.';
+
+  @override
   String get chatMentionAgentSubtitle => 'Agent';
 
   @override
@@ -1134,6 +1138,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get chatReturnToMainConversation =>
       'Zur Hauptkonversation zurückkehren';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Zur übergeordneten Unterhaltung zurückkehren';
 
   @override
   String get chatReviewChanges => 'Änderungen überprüfen';

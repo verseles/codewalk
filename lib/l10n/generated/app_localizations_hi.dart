@@ -807,6 +807,10 @@ class AppLocalizationsHi extends AppLocalizations {
       'मुख्य वार्तालाप अभी उपलब्ध नहीं है।';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'पैरेंट बातचीत अभी उपलब्ध नहीं है।';
+
+  @override
   String get chatMentionAgentSubtitle => 'एजेंट';
 
   @override
@@ -1118,6 +1122,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => 'मुख्य बातचीत पर लौटें';
+
+  @override
+  String get chatReturnToParentConversation => 'पैरेंट बातचीत पर लौटें';
 
   @override
   String get chatReviewChanges => 'परिवर्तनों की समीक्षा करें';

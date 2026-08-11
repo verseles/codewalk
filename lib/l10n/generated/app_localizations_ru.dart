@@ -816,6 +816,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Основная беседа пока недоступна.';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'Родительская беседа пока недоступна.';
+
+  @override
   String get chatMentionAgentSubtitle => 'агент';
 
   @override
@@ -1128,6 +1132,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => 'Вернуться к основной беседе';
+
+  @override
+  String get chatReturnToParentConversation =>
+      'Вернуться к родительской беседе';
 
   @override
   String get chatReviewChanges => 'Просмотр изменений';

@@ -1011,7 +1011,7 @@
 - **Then** the entire task bubble surface acts as the navigation affordance instead of rendering a dedicated `View` button
 - **When** the child thread is active (`parentId` is set)
 - **Then** the full chat composer remains available inside the child thread, including text send, slash input, attachments, and voice input
-- **Then** a dedicated `Return to main conversation` control remains visible so the user can navigate back to the parent thread at any time
+- **Then** a dedicated `Return to parent conversation` control remains visible so the user can navigate back exactly one level at any time
 - **Then** when that child thread is actively responding, the same composer stop behavior remains available without leaving the child thread
 - **Then** agent/model/variant selectors remain non-interactive in the child thread
 - **Then** the locked model chip reflects the child-thread metadata (not the parent selection)
@@ -1019,11 +1019,13 @@
 
 ### Sub-conversation navigation is deterministic
 
-- **Given** assistant output contains a `SubtaskPart` or `task` tool bubble in the main conversation
+- **Given** assistant output contains a `SubtaskPart` or `task` tool bubble in a root or nested sub-conversation
 - **When** the user taps `Open sub-conversation`
 - **Then** navigation prefers explicit child-session IDs from the part payload
 - **Then** if explicit IDs are unavailable, fallback mapping uses anchor order for the same part type (`SubtaskPart`→subtask anchors, `task` tool→task anchors) against child sessions sorted by creation time
 - **Then** if no mapping can be resolved, the app keeps the current session and shows non-blocking feedback
+- **Then** nested task/subtask surfaces retain their normal tap/click affordance and may open direct children at any available depth
+- **Then** references to ancestors or other non-child sessions are rejected rather than creating a navigation loop
 
 ### Compact mobile collapsed copy is concise
 
@@ -1525,7 +1527,7 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 
 - **Given** the app is running on mobile and the chat page owns the system back action
 - **When** the current session is a sub-conversation
-- **Then** the first back action returns to the parent/root conversation
+- **Then** the first back action returns to the immediate parent conversation; repeated back actions walk the hierarchy one level at a time
 - **When** the current session is already the root conversation and the drawer is closed
 - **Then** the next back action opens the conversations drawer
 - **When** the drawer is already open
@@ -2247,6 +2249,12 @@ Opening a subagent from a task part prefers the child session id carried by the
 part metadata or the official completed-output `<task id="...">` envelope.
 When the part does not carry one and there is exactly one child candidate, that
 candidate is used.
+
+The same resolver and visible task/subtask affordances apply inside every
+subagent level. Each navigation step resolves only children of the session
+currently on screen, and desktop/mobile back returns only to that session's
+immediate `parentId`; repeated references outside the direct child set are
+rejected with non-blocking feedback instead of creating a loop.
 
 Otherwise the Nth task part is paired with the Nth child session by start time,
 but only when the number of task parts equals the number of candidates. With

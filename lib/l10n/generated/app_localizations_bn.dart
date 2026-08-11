@@ -804,6 +804,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get chatMainConversationUnavailable => 'মূল কথোপকথন এখনও উপলব্ধ নয়।';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'প্যারেন্ট কথোপকথন এখনও উপলব্ধ নয়।';
+
+  @override
   String get chatMentionAgentSubtitle => 'এজেন্ট';
 
   @override
@@ -1116,6 +1120,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => 'মূল কথোপকথনে ফিরে যান';
+
+  @override
+  String get chatReturnToParentConversation => 'প্যারেন্ট কথোপকথনে ফিরে যান';
 
   @override
   String get chatReviewChanges => 'পরিবর্তনগুলি পর্যালোচনা করুন';

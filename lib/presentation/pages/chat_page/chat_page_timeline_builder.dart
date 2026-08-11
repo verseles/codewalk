@@ -7,7 +7,6 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
     required SettingsProvider settingsProvider,
     required String? latestReasoningPartKey,
     required String? latestRevertibleMessageId,
-    required bool isSubConversation,
     required String? finalAssistantRevealMessageId,
     bool wrapRevealAnchor = true,
     String? keyPrefix,
@@ -47,16 +46,10 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
       onBackgroundLongPress: () => _handleMessageBackgroundLongPress(message),
       onBackgroundLongPressEnd: () =>
           _handleMessageBackgroundLongPressEnd(message),
-      onSubtaskNavigate: isSubConversation
-          ? null
-          : (part) => unawaited(
-              _openSubConversationFromSubtaskPart(chatProvider, part),
-            ),
-      onTaskToolNavigate: isSubConversation
-          ? null
-          : (part) => unawaited(
-              _openSubConversationFromTaskToolPart(chatProvider, part),
-            ),
+      onSubtaskNavigate: (part) =>
+          unawaited(_openSubConversationFromSubtaskPart(chatProvider, part)),
+      onTaskToolNavigate: (part) =>
+          unawaited(_openSubConversationFromTaskToolPart(chatProvider, part)),
       onFileTap: _onFilePathTap,
       onForwardMessage: _canForwardMessage(message)
           ? () => _openForwardDialog(message)
@@ -930,51 +923,36 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
         width: double.infinity,
         child: FilledButton.icon(
           key: const ValueKey<String>('subconversation_return_main_button'),
-          onPressed: () => unawaited(_returnToMainConversation(chatProvider)),
+          onPressed: () => unawaited(_returnToParentConversation(chatProvider)),
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
           icon: const Icon(Symbols.arrow_back_rounded),
-          label: Text(context.l10n.chatReturnToMainConversation),
+          label: Text(context.l10n.chatReturnToParentConversation),
         ),
       ),
     );
   }
 
-  Future<void> _returnToMainConversation(ChatProvider chatProvider) async {
-    final mainConversation = _resolveMainConversation(chatProvider);
-    if (mainConversation == null) {
-      _showSubConversationNotice(context.l10n.chatMainConversationUnavailable);
+  Future<void> _returnToParentConversation(ChatProvider chatProvider) async {
+    final parentConversation = _resolveParentConversation(chatProvider);
+    if (parentConversation == null) {
+      _showSubConversationNotice(
+        context.l10n.chatParentConversationUnavailable,
+      );
       return;
     }
-    if (chatProvider.currentSession?.id == mainConversation.id) {
-      return;
-    }
-    await _handleSessionSwitch(mainConversation);
+    await _handleSessionSwitch(parentConversation);
   }
 
-  ChatSession? _resolveMainConversation(ChatProvider chatProvider) {
+  ChatSession? _resolveParentConversation(ChatProvider chatProvider) {
     final currentSession = chatProvider.currentSession;
     if (currentSession == null) {
       return null;
     }
-    final sessionById = <String, ChatSession>{
-      for (final session in chatProvider.sessions) session.id: session,
-    };
-    var cursor = currentSession;
-    final visited = <String>{};
-    while (true) {
-      if (!visited.add(cursor.id)) {
-        return null;
-      }
-      final parentId = cursor.parentId?.trim();
-      if (parentId == null || parentId.isEmpty) {
-        return cursor;
-      }
-      final parent = sessionById[parentId];
-      if (parent == null) {
-        return null;
-      }
-      cursor = parent;
+    final parentId = currentSession.parentId?.trim();
+    if (parentId == null || parentId.isEmpty || parentId == currentSession.id) {
+      return null;
     }
+    return chatProvider.knownSessionById(parentId);
   }
 
   Future<void> _openSubConversationFromSubtaskPart(
@@ -1019,9 +997,15 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
             error: error,
             stackTrace: stackTrace,
           );
+          if (!mounted || chatProvider.currentSession?.id != sessionId) {
+            return;
+          }
           _showSubConversationNotice(
             context.l10n.chatFailedToRefreshSubConversations,
           );
+          return;
+        }
+        if (!mounted || chatProvider.currentSession?.id != sessionId) {
           return;
         }
       }

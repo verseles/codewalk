@@ -1560,7 +1560,7 @@ class _ChatPageState extends State<ChatPage>
     }
     final chatProvider = _chatProvider ?? context.read<ChatProvider>();
     if (_isSubConversationSession(chatProvider.currentSession)) {
-      await _returnToMainConversation(chatProvider);
+      await _returnToParentConversation(chatProvider);
       return;
     }
     final scaffoldState = _scaffoldKey.currentState;

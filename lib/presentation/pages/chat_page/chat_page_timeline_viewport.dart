@@ -96,9 +96,6 @@ extension _ChatPageTimelineViewport on _ChatPageState {
   Widget _buildMessageList(ChatProvider chatProvider) {
     final settingsProvider = context.watch<SettingsProvider>();
     final appProvider = context.watch<AppProvider>();
-    final isSubConversation = _isSubConversationSession(
-      chatProvider.currentSession,
-    );
     if (chatProvider.state == ChatState.loading &&
         chatProvider.messages.isEmpty &&
         chatProvider.currentSession == null) {
@@ -390,7 +387,6 @@ extension _ChatPageTimelineViewport on _ChatPageState {
                         settingsProvider: settingsProvider,
                         latestReasoningPartKey: latestReasoningPartKey,
                         latestRevertibleMessageId: latestRevertibleMessageId,
-                        isSubConversation: isSubConversation,
                         finalAssistantRevealMessageId:
                             finalAssistantRevealMessageId,
                       );
@@ -414,7 +410,6 @@ extension _ChatPageTimelineViewport on _ChatPageState {
                               latestReasoningPartKey: latestReasoningPartKey,
                               latestRevertibleMessageId:
                                   latestRevertibleMessageId,
-                              isSubConversation: isSubConversation,
                               finalAssistantRevealMessageId:
                                   finalAssistantRevealMessageId,
                               wrapRevealAnchor: false,

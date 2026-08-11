@@ -802,6 +802,10 @@ class AppLocalizationsUr extends AppLocalizations {
       'مرکزی گفتگو ابھی دستیاب نہیں ہے۔';
 
   @override
+  String get chatParentConversationUnavailable =>
+      'والد گفتگو ابھی دستیاب نہیں ہے۔';
+
+  @override
   String get chatMentionAgentSubtitle => 'ایجنٹ';
 
   @override
@@ -1112,6 +1116,9 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get chatReturnToMainConversation => 'مرکزی گفتگو پر واپس جائیں۔';
+
+  @override
+  String get chatReturnToParentConversation => 'والد گفتگو پر واپس جائیں۔';
 
   @override
   String get chatReviewChanges => 'تبدیلیوں کا جائزہ لیں۔';
