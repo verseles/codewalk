@@ -1,5 +1,23 @@
 part of 'settings_provider.dart';
 
+String resolveDesktopRestartExecutable({
+  required TargetPlatform targetPlatform,
+  required String resolvedExecutable,
+  required Map<String, String> environment,
+  required bool Function(String path) fileExists,
+}) {
+  if (targetPlatform != TargetPlatform.linux ||
+      fileExists(resolvedExecutable)) {
+    return resolvedExecutable;
+  }
+  final home = environment['HOME']?.trim();
+  if (home == null || home.isEmpty) {
+    return resolvedExecutable;
+  }
+  final installerLink = '$home/.local/bin/codewalk';
+  return fileExists(installerLink) ? installerLink : resolvedExecutable;
+}
+
 extension SettingsProviderUpdateInstall on SettingsProvider {
   Future<void> checkForUpdate() async {
     _checkingForUpdate = true;
@@ -228,7 +246,12 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
         exit(0);
       }
 
-      final executable = Platform.resolvedExecutable;
+      final executable = resolveDesktopRestartExecutable(
+        targetPlatform: defaultTargetPlatform,
+        resolvedExecutable: Platform.resolvedExecutable,
+        environment: Platform.environment,
+        fileExists: (path) => File(path).existsSync(),
+      );
       final args = List<String>.from(Platform.executableArguments);
       await Process.start(executable, args, mode: ProcessStartMode.detached);
       exit(0);

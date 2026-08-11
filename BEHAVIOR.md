@@ -1822,6 +1822,8 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **When** the installer script is running
 - **Then** the app shows an indefinite loading snackbar (`Installing update...`) until the install state settles
 - **Then** on success, the app shows a completion warning snackbar with a `Restart` action so the user can relaunch into the new version
+- **Then** on Linux, release files are installed separately from the application-support directory, and update/reinstall preserves preferences, caches, and other user data from both legacy and current support paths
+- **Then** the Linux uninstaller removes application integration and bundle files without implicitly deleting user data
 - **Then** on Windows, the initial install step stages the downloaded update without modifying the running install directory
 - **Then** on Windows, the `Restart` action starts an updater helper, closes CodeWalk, applies the staged update after the old process exits, and relaunches CodeWalk from the updated install path
 

@@ -8,7 +8,8 @@ REPO="${CODEWALK_REPO:-verseles/codewalk}"
 APP_ID="com.verseles.codewalk"
 APP_NAME="CodeWalk"
 XDG_DATA_HOME_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
-INSTALL_DIR="${XDG_DATA_HOME_DIR}/codewalk"
+LEGACY_INSTALL_DIR="${XDG_DATA_HOME_DIR}/codewalk"
+INSTALL_DIR="$LEGACY_INSTALL_DIR"
 VERSION_FILE="$INSTALL_DIR/.installed-version"
 BIN_DIR="$HOME/.local/bin"
 LINUX_DESKTOP_DIR="${XDG_DATA_HOME_DIR}/applications"
@@ -65,6 +66,28 @@ detect_platform() {
   esac
 }
 
+configure_install_paths() {
+  if [ "$platform" = "linux" ]; then
+    INSTALL_DIR="${XDG_DATA_HOME_DIR}/codewalk-app"
+  else
+    INSTALL_DIR="$LEGACY_INSTALL_DIR"
+  fi
+  VERSION_FILE="$INSTALL_DIR/.installed-version"
+}
+
+cleanup_legacy_linux_bundle() {
+  [ "$platform" = "linux" ] || return 0
+  [ "$LEGACY_INSTALL_DIR" != "$INSTALL_DIR" ] || return 0
+  [ -d "$LEGACY_INSTALL_DIR" ] || return 0
+
+  # path_provider_linux intentionally reuses this executable-name directory
+  # for existing user data. Remove only files owned by old release bundles.
+  for entry in codewalk bin data lib codewalk.app .installed-version; do
+    rm -rf "$LEGACY_INSTALL_DIR/$entry"
+  done
+  info "Preserved Linux user data in $LEGACY_INSTALL_DIR"
+}
+
 latest_release() {
   json="$(fetch "https://api.github.com/repos/$REPO/releases/latest")"
   version="$(printf '%s' "$json" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)"
@@ -102,23 +125,43 @@ find_macos_bundle() {
   find "$INSTALL_DIR" -maxdepth 4 -type d -name '*.app' 2>/dev/null | head -1
 }
 
-find_cli_binary() {
+find_cli_binary_in() {
+  search_root="$1"
   for candidate in \
-    "$INSTALL_DIR/codewalk" \
-    "$INSTALL_DIR/bin/codewalk" \
-    "$INSTALL_DIR/codewalk.app/Contents/MacOS/codewalk"; do
+    "$search_root/codewalk" \
+    "$search_root/bin/codewalk" \
+    "$search_root/codewalk.app/Contents/MacOS/codewalk"; do
     if [ -x "$candidate" ]; then
       printf '%s' "$candidate"
       return 0
     fi
   done
 
-  candidate="$(find "$INSTALL_DIR" -maxdepth 3 -type f -name 'codewalk' 2>/dev/null | head -1 || true)"
+  candidate="$(find "$search_root" -maxdepth 3 -type f -name 'codewalk' 2>/dev/null | head -1 || true)"
   if [ -n "$candidate" ] && [ -x "$candidate" ]; then
     printf '%s' "$candidate"
     return 0
   fi
 
+  return 1
+}
+
+find_cli_binary() {
+  find_cli_binary_in "$INSTALL_DIR"
+}
+
+find_linux_icon_in() {
+  search_root="$1"
+  for candidate in \
+    "$search_root/data/$APP_ID.png" \
+    "$search_root/data/app_icon.png" \
+    "$search_root/$APP_ID.png" \
+    "$search_root/app_icon.png"; do
+    if [ -f "$candidate" ]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
   return 1
 }
 
@@ -150,18 +193,7 @@ integrate_linux_desktop() {
 
   mkdir -p "$LINUX_DESKTOP_DIR" "$LINUX_ICON_DIR"
 
-  icon_source=""
-  for candidate in \
-    "$INSTALL_DIR/data/$APP_ID.png" \
-    "$INSTALL_DIR/data/app_icon.png" \
-    "$INSTALL_DIR/$APP_ID.png" \
-    "$INSTALL_DIR/app_icon.png"; do
-    if [ -f "$candidate" ]; then
-      icon_source="$candidate"
-      break
-    fi
-  done
-
+  icon_source="$(find_linux_icon_in "$INSTALL_DIR" || true)"
   [ -n "$icon_source" ] || fail "Could not find Linux icon in extracted archive"
 
   linux_icon_path="$LINUX_ICON_DIR/$APP_ID.png"
@@ -194,21 +226,71 @@ EOF_DESKTOP
   fi
 }
 
+cleanup_install_attempt() {
+  status=$?
+  trap - EXIT HUP INT TERM
+  set +e
+  rm -rf "$tmp" "$staged_install_dir"
+  if [ -e "$backup_install_dir" ] || [ -L "$backup_install_dir" ]; then
+    if [ "${install_succeeded:-0}" = "1" ]; then
+      rm -rf "$backup_install_dir"
+    else
+      rm -rf "$INSTALL_DIR"
+      mv "$backup_install_dir" "$INSTALL_DIR"
+    fi
+  fi
+  exit "$status"
+}
+
 download_and_install() {
   tmp="${TMPDIR:-/tmp}/codewalk-install-$$"
-  extract_dir="$tmp/extract"
-  mkdir -p "$extract_dir"
-  trap 'rm -rf "$tmp"' EXIT
+  install_parent="${INSTALL_DIR%/*}"
+  staged_install_dir="${INSTALL_DIR}.staged-$$"
+  backup_install_dir="${INSTALL_DIR}.backup-$$"
+  mkdir -p "$tmp" "$install_parent"
+  rm -rf "$staged_install_dir" "$backup_install_dir"
+  mkdir -p "$staged_install_dir"
+  install_succeeded=0
+  trap cleanup_install_attempt EXIT
+  trap 'exit 129' HUP
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
 
   url="https://github.com/$REPO/releases/download/$version/$asset"
   info "Downloading $asset from $REPO ($version)"
   fetch "$url" > "$tmp/$asset" || fail "Failed to download $url"
 
-  rm -rf "$INSTALL_DIR"
-  mkdir -p "$INSTALL_DIR" "$BIN_DIR"
+  tar -xzf "$tmp/$asset" -C "$staged_install_dir" ||
+    fail "Failed to extract $asset"
+  staged_cli_binary="$(find_cli_binary_in "$staged_install_dir" || true)"
+  [ -n "$staged_cli_binary" ] ||
+    fail "Downloaded archive does not contain a codewalk executable"
+  if [ "$platform" = "linux" ]; then
+    staged_linux_icon="$(find_linux_icon_in "$staged_install_dir" || true)"
+    [ -n "$staged_linux_icon" ] ||
+      fail "Downloaded archive does not contain a Linux icon"
+    [ -f "$staged_install_dir/lib/libflutter_linux_gtk.so" ] ||
+      fail "Downloaded archive does not contain the Flutter Linux runtime"
+    [ -f "$staged_install_dir/lib/libapp.so" ] ||
+      fail "Downloaded archive does not contain the CodeWalk application library"
+    [ -f "$staged_install_dir/data/icudtl.dat" ] ||
+      fail "Downloaded archive does not contain ICU data"
+    [ -d "$staged_install_dir/data/flutter_assets" ] ||
+      fail "Downloaded archive does not contain Flutter assets"
+    [ -n "$(find "$staged_install_dir/data/flutter_assets" -mindepth 1 -print -quit)" ] ||
+      fail "Downloaded archive contains empty Flutter assets"
+  fi
 
-  tar -xzf "$tmp/$asset" -C "$extract_dir"
-  cp -R "$extract_dir"/. "$INSTALL_DIR"/
+  if [ -e "$INSTALL_DIR" ] || [ -L "$INSTALL_DIR" ]; then
+    mv "$INSTALL_DIR" "$backup_install_dir"
+  fi
+  if ! mv "$staged_install_dir" "$INSTALL_DIR"; then
+    if [ -e "$backup_install_dir" ] || [ -L "$backup_install_dir" ]; then
+      mv "$backup_install_dir" "$INSTALL_DIR"
+    fi
+    fail "Failed to activate the downloaded CodeWalk bundle"
+  fi
+  mkdir -p "$BIN_DIR"
 
   mac_app_bundle=""
   if [ "$platform" = "macos" ]; then
@@ -221,8 +303,12 @@ download_and_install() {
     ln -sf "$cli_binary" "$BIN_DIR/codewalk"
   fi
 
+  cleanup_legacy_linux_bundle
   integrate_linux_desktop
   printf '%s\n' "$version" > "$VERSION_FILE"
+  install_succeeded=1
+  rm -rf "$tmp" "$staged_install_dir" "$backup_install_dir"
+  trap - EXIT HUP INT TERM
 }
 
 print_done() {
@@ -251,8 +337,15 @@ print_done() {
   info "Run: codewalk"
 }
 
-detect_platform
-latest_release
-detect_install_mode
-download_and_install
-print_done
+main() {
+  detect_platform
+  configure_install_paths
+  latest_release
+  detect_install_mode
+  download_and_install
+  print_done
+}
+
+if [ "${CODEWALK_INSTALLER_SOURCE_ONLY:-0}" != "1" ]; then
+  main "$@"
+fi

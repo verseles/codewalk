@@ -56,6 +56,13 @@ Run the same command again any time to update/reinstall to the latest GitHub rel
 
 Installers automatically pick the right release for your platform.
 
+On Linux, release files are installed under
+`${XDG_DATA_HOME:-$HOME/.local/share}/codewalk-app`, separately from user data.
+Existing installations keep their preferences and caches in the legacy
+`codewalk` support directory; fresh installations use `com.verseles.codewalk`.
+Updates and uninstall remove application files without deleting either user-data
+directory.
+
 - Android
 
   Open this in your Android browser to download the APK:
