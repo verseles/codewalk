@@ -4077,10 +4077,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => '애플리케이션 닫기';
+  String get shortcutCloseApp => '탭/애플리케이션 닫기';
 
   @override
-  String get shortcutCloseAppDesc => '플랫폼 종료 동작을 사용하여 앱 닫기';
+  String get shortcutCloseAppDesc => '현재 세션 탭이 있으면 닫고, 그렇지 않으면 플랫폼 동작에 따라 앱 닫기';
 
   @override
   String get shortcutFocusCloseDrawer => '포커스/드로어 닫기';

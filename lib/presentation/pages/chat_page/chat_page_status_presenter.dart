@@ -42,6 +42,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
         key: const ValueKey<String>('appbar_context_usage_button'),
         tooltip: context.l10n.chatCompactContext,
         padding: EdgeInsets.zero,
+        borderRadius: AppShapes.borderFull,
         itemBuilder: (popupContext) => _buildContextUsageMenuItems(
           popupContext,
           usage: usage,
@@ -58,6 +59,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
           message: context.l10n.chatCompactContext,
           child: InkWell(
             key: const ValueKey<String>('appbar_context_usage_button'),
+            customBorder: const CircleBorder(),
             onTap: () => unawaited(
               _showContextUsageMenu(
                 anchorContext: anchorContext,
@@ -104,9 +106,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     required ChatProvider chatProvider,
     required bool canCompact,
   }) async {
-    if (!mounted ||
-        !navigatorContext.mounted ||
-        !_isChatScreenActive()) {
+    if (!mounted || !navigatorContext.mounted || !_isChatScreenActive()) {
       return;
     }
     final anchor = anchorContext.findRenderObject();

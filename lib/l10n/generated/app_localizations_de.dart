@@ -4283,11 +4283,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'Anwendung schließen';
+  String get shortcutCloseApp => 'Tab/Anwendung schließen';
 
   @override
   String get shortcutCloseAppDesc =>
-      'App mit dem Standard-Schließverhalten der Plattform schließen';
+      'Den aktuellen Sitzungstab schließen, wenn verfügbar; andernfalls die App mit dem Standardverhalten der Plattform schließen';
 
   @override
   String get shortcutFocusCloseDrawer => 'Seitenleiste fokussieren/schließen';

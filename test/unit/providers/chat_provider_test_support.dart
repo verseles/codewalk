@@ -219,6 +219,7 @@ ChatProvider buildChatProvider({
   sessionAttentionAggregatePublisher,
   Future<void> Function(bool isForeground)?
   sessionAttentionAppForegroundPublisher,
+  ProjectProvider? projectProvider,
 }) {
   return ChatProvider(
     sendChatMessage: SendChatMessage(chatRepository),
@@ -247,10 +248,12 @@ ChatProvider buildChatProvider({
     rejectQuestion: RejectQuestion(chatRepository),
     revertChatMessage: RevertChatMessage(chatRepository),
     unrevertChatMessages: UnrevertChatMessages(chatRepository),
-    projectProvider: ProjectProvider(
-      projectRepository: FakeProjectRepository(),
-      localDataSource: localDataSource,
-    ),
+    projectProvider:
+        projectProvider ??
+        ProjectProvider(
+          projectRepository: FakeProjectRepository(),
+          localDataSource: localDataSource,
+        ),
     localDataSource: localDataSource,
     settingsProvider: settingsProvider ?? defaultSettingsProvider,
     dioClient: dioClient,

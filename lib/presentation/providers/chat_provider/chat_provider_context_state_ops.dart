@@ -100,6 +100,9 @@ extension _ChatProviderContextStateOps on ChatProvider {
         .firstOrNull;
     if (provider == null ||
         !_isUserSelectableModelId(provider, override.modelId)) {
+      if (_providerCatalogAuthority != _CatalogAuthority.authoritative) {
+        return false;
+      }
       _removeSessionSelectionOverride(sessionId);
       // Override is stale — try the message fallback as a recovery path.
       return _restoreSelectionFromMessages(sessionId);
@@ -110,6 +113,9 @@ extension _ChatProviderContextStateOps on ChatProvider {
       override.agentName,
     );
     if (resolvedAgent == null) {
+      if (_agentCatalogAuthority != _CatalogAuthority.authoritative) {
+        return false;
+      }
       _removeSessionSelectionOverride(sessionId);
       return _restoreSelectionFromMessages(sessionId);
     }
@@ -117,7 +123,8 @@ extension _ChatProviderContextStateOps on ChatProvider {
     final model = provider.models[override.modelId];
     var nextVariantId = override.variantId;
     if (nextVariantId != null &&
-        (model == null || !model.variants.containsKey(nextVariantId))) {
+        (model == null || !model.variants.containsKey(nextVariantId)) &&
+        _providerCatalogAuthority == _CatalogAuthority.authoritative) {
       nextVariantId = null;
     }
 

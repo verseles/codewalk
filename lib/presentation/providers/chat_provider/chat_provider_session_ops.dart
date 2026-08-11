@@ -10,7 +10,7 @@ extension _ChatProviderSessionOps on ChatProvider {
         reason == 'project' && !waitForRevalidation;
     _storeCurrentContextSnapshot();
 
-    _providersFetchId += 1;
+    final contextSwitchFetchId = ++_providersFetchId;
     _sessionsFetchId += 1;
     _messagesFetchId += 1;
     _eventStreamGeneration += 1;
@@ -80,11 +80,17 @@ extension _ChatProviderSessionOps on ChatProvider {
       _setSyncState(ChatSyncState.reconnecting, reason: 'context-switch');
     }
 
-    final previousServerId = _activeServerId;
-    final serverId = await _resolveServerScopeId();
-    final serverChanged = previousServerId != serverId;
+    final storedServerId = await localDataSource.getActiveServerId();
+    if (contextSwitchFetchId != _providersFetchId) {
+      return;
+    }
+    final serverId = storedServerId == null || storedServerId.isEmpty
+        ? 'legacy'
+        : storedServerId;
+    _activeServerId = serverId;
     final nextScope = _resolveContextScopeId();
     final nextContextKey = _composeContextKey(serverId, nextScope);
+    final hadContextSnapshot = _contextSnapshots.containsKey(nextContextKey);
     _sessionTabBootstrapDirectory = reason == 'project'
         ? normalizeOptionalFilePath(newlyOpenedDirectory)
         : null;
@@ -94,25 +100,21 @@ extension _ChatProviderSessionOps on ChatProvider {
     _currentProjectId = projectProvider.currentProjectId;
     _restoreContextSnapshot(nextContextKey);
     await _ensureSessionTabsLoaded(serverId: serverId);
+    if (!_isProviderInitializationCurrent(
+      fetchId: contextSwitchFetchId,
+      contextKey: nextContextKey,
+    )) {
+      return;
+    }
     _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
 
     _errorMessage = null;
     _isLoadingSessionInsights = false;
     _sessionInsightsError = null;
     _isRespondingInteraction = false;
-    _agents = <Agent>[];
     _providersRefreshTask = null;
     _providersRefreshState = ChatProvidersRefreshState.idle;
     _providersRefreshErrorMessage = null;
-    _selectedAgentName = null;
-    _selectedProviderId = null;
-    _selectedModelId = null;
-    _selectedVariantId = null;
-    _recentModelKeys = <String>[];
-    _recentAgentNames = <String>[];
-    _recentVariantValuesByModel = <String, List<String>>{};
-    _modelUsageCounts = <String, int>{};
-    _selectedVariantByModel = <String, String>{};
     _shortcutCycleStateByDomain.clear();
     _lastSyncedRemoteModelKey = null;
     _lastSyncedRemoteAgentName = null;
@@ -122,21 +124,40 @@ extension _ChatProviderSessionOps on ChatProvider {
     _pendingRemoteSelectionSyncSince = null;
     _lastRemoteSelectionSyncAt = null;
     _remoteSelectionSyncInFlight = false;
+    _remoteSelectionSyncGeneration += 1;
     _selectionSyncTransactionPhase = _SelectionSyncTransactionPhase.idle;
     _autoTitleConsolidatedSessionIds.clear();
     _autoTitleLastSignatureBySessionId.clear();
     _autoTitleInFlightSessionIds.clear();
     _autoTitleQueuedSessionIds.clear();
-    if (serverChanged) {
-      _providers = <Provider>[];
-      _defaultModels = <String, String>{};
-      _connectedProviderIds = <String>[];
-      await _restoreProviderCatalogSnapshot(serverId: serverId, notify: false);
+    if (!hadContextSnapshot || (_providers.isEmpty && _agents.isEmpty)) {
+      await _restoreProviderCatalogSnapshot(
+        serverId: serverId,
+        scopeId: nextScope,
+        notify: false,
+        fetchId: contextSwitchFetchId,
+        contextKey: nextContextKey,
+      );
+      if (!_isProviderInitializationCurrent(
+        fetchId: contextSwitchFetchId,
+        contextKey: nextContextKey,
+      )) {
+        return;
+      }
     }
+    _applySelectionPriorityForCurrentSession();
     _state = _sessions.isEmpty ? ChatState.initial : ChatState.loaded;
     _notifyListeners();
     if (fastRealtimeCancellation != null) {
-      await fastRealtimeCancellation;
+      unawaited(
+        fastRealtimeCancellation.catchError((Object error, StackTrace stack) {
+          AppLogger.warn(
+            'Background realtime cancellation failed during context switch',
+            error: error,
+            stackTrace: stack,
+          );
+        }),
+      );
     }
 
     AppLogger.info(

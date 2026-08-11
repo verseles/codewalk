@@ -588,11 +588,18 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
-  Future<String?> getProviderCatalogCacheJson({String? serverId}) async {
-    if (serverId == null) {
+  Future<String?> getProviderCatalogCacheJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    if (serverId == null && scopeId == null) {
       return providerCatalogCacheJson;
     }
-    return scopedStrings[_key('provider_catalog_cache', serverId: serverId)];
+    return scopedStrings[_key(
+      'provider_catalog_cache',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
   }
 
   @override
@@ -1107,12 +1114,17 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   Future<void> saveProviderCatalogCacheJson(
     String providerCatalogJson, {
     String? serverId,
+    String? scopeId,
   }) async {
-    if (serverId == null) {
+    if (serverId == null && scopeId == null) {
       providerCatalogCacheJson = providerCatalogJson;
       return;
     }
-    scopedStrings[_key('provider_catalog_cache', serverId: serverId)] =
+    scopedStrings[_key(
+          'provider_catalog_cache',
+          serverId: serverId,
+          scopeId: scopeId,
+        )] =
         providerCatalogJson;
   }
 
@@ -2138,7 +2150,13 @@ class FakeAppRepository implements AppRepository {
   ]);
   int getProvidersCallCount = 0;
   Future<void> Function()? getProvidersDelay;
+  Future<Either<Failure, ProvidersResponse>> Function(String? directory)?
+  getProvidersHandler;
+  Future<void> Function()? getAgentsDelay;
+  Future<Either<Failure, List<Agent>>> Function(String? directory)?
+  getAgentsHandler;
   String? lastGetProvidersDirectory;
+  String? lastGetAgentsDirectory;
   String? updatedHost;
   int? updatedPort;
 
@@ -2159,11 +2177,17 @@ class FakeAppRepository implements AppRepository {
     getProvidersCallCount += 1;
     lastGetProvidersDirectory = directory;
     if (getProvidersDelay != null) await getProvidersDelay!();
+    final handler = getProvidersHandler;
+    if (handler != null) return handler(directory);
     return providersResult;
   }
 
   @override
   Future<Either<Failure, List<Agent>>> getAgents({String? directory}) async {
+    lastGetAgentsDirectory = directory;
+    if (getAgentsDelay != null) await getAgentsDelay!();
+    final handler = getAgentsHandler;
+    if (handler != null) return handler(directory);
     return agentsResult;
   }
 

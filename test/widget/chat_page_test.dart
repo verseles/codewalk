@@ -62,6 +62,7 @@ import 'package:codewalk/presentation/services/read_aloud_service.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/tts/tts_backend.dart';
 import 'package:codewalk/presentation/services/workspace_file_operations_service.dart';
+import 'package:codewalk/presentation/theme/app_shapes.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/presentation/utils/session_title_formatter.dart';
 import 'package:codewalk/presentation/widgets/chat_skeleton_shimmer.dart';
@@ -4826,7 +4827,7 @@ void main() {
     );
   });
 
-  testWidgets('project group transition delays overlay and preserves content', (
+  testWidgets('warm project transition does not wait for local persistence', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1000, 900));
@@ -4890,17 +4891,18 @@ void main() {
     await tester.tap(
       find.byKey(const ValueKey<String>('project_group_tile_proj_b')),
     );
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
 
     expect(
       find.byKey(const ValueKey<String>('project_scope_transition_blocker')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const ValueKey<String>('project_scope_loading_overlay')),
       findsNothing,
     );
-    await tester.pump(const Duration(milliseconds: 100));
+    expect(provider.projectProvider.currentProject?.id, 'proj_b');
+    await tester.pump(const Duration(milliseconds: 200));
     expect(
       find.byKey(const ValueKey<String>('project_scope_loading_overlay')),
       findsNothing,
@@ -4920,16 +4922,15 @@ void main() {
     await tester.tap(
       find.byKey(const ValueKey<String>('project_group_tile_proj_a')),
     );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 149));
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(
+      find.byKey(const ValueKey<String>('project_scope_transition_blocker')),
+      findsNothing,
+    );
+    await tester.pump(const Duration(milliseconds: 150));
     expect(
       find.byKey(const ValueKey<String>('project_scope_loading_overlay')),
       findsNothing,
-    );
-    await tester.pump(const Duration(milliseconds: 1));
-    expect(
-      find.byKey(const ValueKey<String>('project_scope_loading_overlay')),
-      findsOneWidget,
     );
     expect(
       identical(
@@ -5045,6 +5046,16 @@ void main() {
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
     await provider.loadSessions();
+
+    await provider.projectProvider.switchProject(projectB.id);
+    await provider.onProjectScopeChanged(waitForRevalidation: false);
+    await provider.initializeProviders();
+    await provider.loadSessions();
+    await provider.projectProvider.switchProject(projectA.id);
+    await provider.onProjectScopeChanged(waitForRevalidation: false);
+    await provider.initializeProviders();
+    await provider.projectProvider.closeProject(projectB.id);
+    await provider.loadSessions();
     await provider.selectSession(
       provider.sessions.singleWhere(
         (session) => session.id == otherSessionA.id,
@@ -5065,8 +5076,8 @@ void main() {
       provider.projectProvider.openProjectIds,
       isNot(contains(projectB.id)),
     );
-    repository.getSessionsDelay = () =>
-        Future<void>.delayed(const Duration(seconds: 1));
+    final warmRevalidationGate = Completer<void>();
+    repository.getSessionsDelay = () => warmRevalidationGate.future;
 
     await tester.tap(
       find.byKey(
@@ -5087,6 +5098,9 @@ void main() {
       isTrue,
     );
     expect(repository.lastGetSessionsDirectory, projectB.path);
+    expect(warmRevalidationGate.isCompleted, isFalse);
+    warmRevalidationGate.complete();
+    await tester.pumpAndSettle();
     repository.getSessionsDelay = null;
 
     final identityA = SessionTabIdentity(
@@ -5372,6 +5386,307 @@ void main() {
     await tester.pumpAndSettle();
     expect(dialog, findsNothing);
   });
+
+  testWidgets('Cmd+W closes the selected tab once in integrated chrome', (
+    WidgetTester tester,
+  ) async {
+    final previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = previousPlatform;
+    });
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final now = DateTime.now();
+    final project = Project(
+      id: 'proj_shortcut',
+      name: 'Shortcut Project',
+      path: '/repo/shortcut',
+      createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
+    final sessionA = ChatSession(
+      id: 'ses_shortcut_a',
+      workspaceId: 'default',
+      time: now,
+      title: 'Shortcut A',
+      directory: project.path,
+    );
+    final sessionB = ChatSession(
+      id: 'ses_shortcut_b',
+      workspaceId: 'default',
+      time: now,
+      title: 'Shortcut B',
+      directory: project.path,
+    );
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[sessionA, sessionB],
+    );
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    _disableAutomaticUpdateChecksForTest(localDataSource);
+    final settingsProvider = SettingsProvider(
+      localDataSource: localDataSource,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settingsProvider.initialize();
+    await settingsProvider.setShowSessionTabsOverride(true);
+    addTearDown(settingsProvider.dispose);
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      chatRepository: repository,
+      projectRepository: FakeProjectRepository(
+        currentProject: project,
+        projects: <Project>[project],
+      ),
+    );
+    addTearDown(provider.dispose);
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(
+      _testApp(
+        provider,
+        appProvider,
+        settingsProvider: settingsProvider,
+        integratedWindowChrome: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await provider.loadSessions();
+    await provider.selectSession(
+      provider.sessions.singleWhere((session) => session.id == sessionA.id),
+    );
+    await tester.pumpAndSettle();
+
+    expect(provider.sessionTabs, hasLength(2));
+    expect(settingsProvider.showSessionTabs, isTrue);
+    expect(provider.currentSession?.id, sessionA.id);
+    expect(
+      provider.sessionTabs
+          .singleWhere((tab) => tab.isSelected)
+          .identity
+          .sessionId,
+      sessionA.id,
+    );
+    expect(provider.projectProvider.currentProject?.path, project.path);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    expect(await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW), isTrue);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await _pumpSessionTabNavigation(tester);
+
+    expect(provider.currentSession?.id, sessionB.id);
+    expect(provider.sessionTabs.map((tab) => tab.identity.sessionId), <String>[
+      sessionB.id,
+    ]);
+    expect(
+      repository.sessions.map((session) => session.id),
+      containsAll(<String>[sessionA.id, sessionB.id]),
+    );
+    expect(find.text('Tab "Shortcut A" closed'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
+  testWidgets(
+    'close shortcut keeps app fallback dialog guard and custom binding',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final platformCalls = <MethodCall>[];
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        platformCalls.add(call);
+        return null;
+      });
+      addTearDown(() {
+        messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+      });
+
+      final projectA = Project(
+        id: 'proj_fallback_a',
+        name: 'Fallback Project A',
+        path: '/repo/fallback/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      );
+      final projectB = Project(
+        id: 'proj_fallback_b',
+        name: 'Fallback Project B',
+        path: '/repo/fallback/b',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      );
+      final now = DateTime.now();
+      final sessionA = ChatSession(
+        id: 'ses_fallback_a',
+        workspaceId: 'default',
+        time: now,
+        title: 'Fallback session A',
+        directory: projectA.path,
+      );
+      final sessionB = ChatSession(
+        id: 'ses_fallback_b',
+        workspaceId: 'default',
+        time: now,
+        title: 'Fallback session B',
+        directory: projectB.path,
+      );
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[sessionA, sessionB],
+      );
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      _disableAutomaticUpdateChecksForTest(localDataSource);
+      await localDataSource.saveSessionTabsStateJson(
+        PersistedSessionTabsState(
+          open: <PersistedSessionTab>[
+            PersistedSessionTab(
+              directory: projectA.path,
+              projectId: projectA.id,
+              sessionId: sessionA.id,
+              title: sessionA.title!,
+              lastOpenedAtMs: now.millisecondsSinceEpoch,
+              serverUpdatedAtMs: now.millisecondsSinceEpoch,
+            ),
+            PersistedSessionTab(
+              directory: projectB.path,
+              projectId: projectB.id,
+              sessionId: sessionB.id,
+              title: sessionB.title!,
+              lastOpenedAtMs: now.millisecondsSinceEpoch,
+              serverUpdatedAtMs: now.millisecondsSinceEpoch,
+            ),
+          ],
+        ).encode(),
+        serverId: 'srv_test',
+      );
+      final settingsProvider = SettingsProvider(
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        soundService: SoundService(),
+      );
+      await settingsProvider.initialize();
+      await settingsProvider.setShowSessionTabsOverride(false);
+      addTearDown(settingsProvider.dispose);
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        chatRepository: repository,
+        projectRepository: FakeProjectRepository(
+          currentProject: projectA,
+          projects: <Project>[projectA, projectB],
+        ),
+      );
+      addTearDown(provider.dispose);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(
+        _testApp(provider, appProvider, settingsProvider: settingsProvider),
+      );
+      await tester.pumpAndSettle();
+      await provider.loadSessions();
+      await provider.selectSession(
+        provider.sessions.singleWhere((session) => session.id == sessionA.id),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(
+        platformCalls.where((call) => call.method == 'SystemNavigator.pop'),
+        hasLength(1),
+      );
+      expect(provider.sessionTabs, hasLength(2));
+
+      await settingsProvider.setShowSessionTabsOverride(true);
+      expect(
+        await settingsProvider.updateShortcut(ShortcutAction.closeApp, 'alt+w'),
+        isNull,
+      );
+      platformCalls.clear();
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+      expect(provider.sessionTabs, hasLength(2));
+      expect(
+        platformCalls.where((call) => call.method == 'SystemNavigator.pop'),
+        isEmpty,
+      );
+
+      unawaited(
+        showDialog<void>(
+          context: tester.element(find.byType(ChatPage)),
+          builder: (_) => const AlertDialog(title: Text('Blocking dialog')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pump();
+      expect(provider.sessionTabs, hasLength(2));
+      expect(
+        platformCalls.where((call) => call.method == 'SystemNavigator.pop'),
+        isEmpty,
+      );
+      Navigator.of(tester.element(find.text('Blocking dialog'))).pop();
+      await tester.pumpAndSettle();
+
+      final activationGate = Completer<void>();
+      repository.getSessionsDelay = () => activationGate.future;
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pump();
+      expect(provider.sessionTabs, hasLength(1));
+      expect(
+        platformCalls.where((call) => call.method == 'SystemNavigator.pop'),
+        isEmpty,
+      );
+      activationGate.complete();
+      await _pumpSessionTabNavigation(tester);
+      repository.getSessionsDelay = null;
+      expect(provider.currentSession?.id, sessionB.id);
+      expect(provider.projectProvider.currentProject?.id, projectB.id);
+      expect(provider.sessionTabs.single.identity.sessionId, sessionB.id);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+      expect(provider.currentSession, isNull);
+      expect(provider.sessionTabs, isEmpty);
+      expect(
+        repository.sessions.map((session) => session.id),
+        containsAll(<String>[sessionA.id, sessionB.id]),
+      );
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.pumpAndSettle();
+      expect(
+        platformCalls.where((call) => call.method == 'SystemNavigator.pop'),
+        hasLength(1),
+      );
+    },
+  );
 
   testWidgets('active tab close selects right then enters local New Chat', (
     WidgetTester tester,
@@ -9579,17 +9894,20 @@ void main() {
     await provider.selectSession(provider.sessions.first);
     await tester.pumpAndSettle();
 
+    final contextUsageButton = find.byKey(
+      const ValueKey<String>('appbar_context_usage_button'),
+    );
+    final popupMenuButton = tester.widget<PopupMenuButton<void>>(
+      contextUsageButton,
+    );
+    expect(popupMenuButton.borderRadius, AppShapes.borderFull);
+    expect(tester.getSize(contextUsageButton), const Size.square(32));
     expect(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('appbar_context_usage_button')),
-        matching: find.text('30'),
-      ),
+      find.descendant(of: contextUsageButton, matching: find.text('30')),
       findsOneWidget,
     );
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('appbar_context_usage_button')),
-    );
+    await tester.tap(contextUsageButton);
     await tester.pumpAndSettle();
 
     expect(
@@ -9712,9 +10030,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DesktopWindowTitleBar), findsOneWidget);
-      await tester.tap(
-        find.byKey(const ValueKey<String>('appbar_context_usage_button')),
+      final contextUsageButton = find.byKey(
+        const ValueKey<String>('appbar_context_usage_button'),
       );
+      final inkWell = tester.widget<InkWell>(contextUsageButton);
+      expect(inkWell.customBorder, isA<CircleBorder>());
+      expect(tester.getSize(contextUsageButton), const Size.square(32));
+
+      await tester.tap(contextUsageButton);
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -9729,15 +10052,11 @@ void main() {
       expect(popoverRect.right, lessThanOrEqualTo(1000));
       expect(popoverRect.bottom, lessThanOrEqualTo(900));
 
-      await tester.tap(
-        find.byKey(const ValueKey<String>('appbar_context_usage_button')),
-      );
+      await tester.tap(contextUsageButton);
       await tester.pump();
       expect(popover, findsOneWidget);
 
-      await tester.tap(
-        find.text(L10nBridge.current!.chatPageStatusCompactNow),
-      );
+      await tester.tap(find.text(L10nBridge.current!.chatPageStatusCompactNow));
       await tester.pumpAndSettle();
       expect(popover, findsNothing);
       expect(tester.takeException(), isNull);

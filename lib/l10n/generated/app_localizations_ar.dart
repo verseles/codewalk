@@ -4187,11 +4187,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'إغلاق التطبيق';
+  String get shortcutCloseApp => 'إغلاق علامة التبويب/التطبيق';
 
   @override
   String get shortcutCloseAppDesc =>
-      'إغلاق التطبيق باستخدام سلوك الإغلاق الخاص بالمنصة';
+      'إغلاق علامة تبويب الجلسة الحالية عند توفرها، وإلا إغلاق التطبيق وفق سلوك المنصة';
 
   @override
   String get shortcutFocusCloseDrawer => 'تركيز/إغلاق الدرج';

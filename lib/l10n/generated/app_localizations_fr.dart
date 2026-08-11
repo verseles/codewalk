@@ -4339,11 +4339,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'Fermer lapplication';
+  String get shortcutCloseApp => 'Fermer l\'onglet/l\'application';
 
   @override
   String get shortcutCloseAppDesc =>
-      'Fermer l\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'application en utilisant le comportement de fermeture de la plateforme';
+      'Fermer l\'onglet de session actuel s\'il est disponible, sinon fermer l\'application selon le comportement de la plateforme';
 
   @override
   String get shortcutFocusCloseDrawer => 'Focus/fermer le tiroir';

@@ -246,8 +246,9 @@ const List<ShortcutDefinition> kShortcutDefinitions = <ShortcutDefinition>[
   ShortcutDefinition(
     action: ShortcutAction.closeApp,
     group: 'Application',
-    label: 'Close application',
-    description: 'Soft-close the app using platform close behavior',
+    label: 'Close tab/application',
+    description:
+        'Close the current session tab when available, otherwise soft-close the app',
     defaultBinding: 'mod+w',
   ),
   ShortcutDefinition(

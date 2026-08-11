@@ -315,6 +315,11 @@ class _ChatPageState extends State<ChatPage>
   bool _autoApprovePermissionDrainQueued = false;
   final Set<String> _autoApprovePermissionCooldownIds = <String>{};
   String? _backgroundPermissionAutoApproveContextSignature;
+  Future<void> _backgroundPermissionContextMutationQueue = Future<void>.value();
+  int _backgroundPermissionContextGeneration = 0;
+  int _backgroundPermissionContextMutationGeneration = 0;
+  int? _backgroundPermissionContextClearPendingGeneration;
+  bool _backgroundPermissionAutoApproveContextMayBeEnabled = true;
   String? _lastServerId;
   bool? _lastServerConnectionState;
   ServerHealthStatus _lastActiveServerHealthStatus = ServerHealthStatus.unknown;
@@ -688,6 +693,7 @@ class _ChatPageState extends State<ChatPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
       unawaited(_loadPinnedMobileActionsFromPrefs());
+      unawaited(_refreshBackgroundPermissionAutoApproveContextState());
     });
   }
 
@@ -892,6 +898,11 @@ class _ChatPageState extends State<ChatPage>
             state == AppLifecycleState.inactive,
       );
       _applyForegroundPolicy(reason: 'app-lifecycle-${state.name}');
+      unawaited(
+        _syncBackgroundPermissionAutoApproveContext(
+          reason: 'app-lifecycle-${state.name}',
+        ),
+      );
       if (_isAppInForeground) {
         _startForegroundWarningGrace();
         if (_isChatScreenActive()) {
@@ -2258,12 +2269,6 @@ class _ChatPageState extends State<ChatPage>
               return null;
             },
           ),
-          _CloseAppIntent: CallbackAction<_CloseAppIntent>(
-            onInvoke: (_) {
-              unawaited(_closeAppShortcut());
-              return null;
-            },
-          ),
           _QuitAppIntent: CallbackAction<_QuitAppIntent>(
             onInvoke: (_) {
               unawaited(_quitAppShortcut());
@@ -2312,7 +2317,8 @@ class _ChatPageState extends State<ChatPage>
               // behavior centralized with the other chat actions.
               break;
             case ShortcutAction.closeApp:
-              addShortcut(action, const _CloseAppIntent());
+              // Global-only because the action is contextual and one physical
+              // key event must never close both a tab and the app.
               break;
             case ShortcutAction.quitApp:
               addShortcut(action, const _QuitAppIntent());
@@ -2331,11 +2337,6 @@ class _ChatPageState extends State<ChatPage>
               actions: actionMap,
               child: Focus(
                 autofocus: true,
-                onKeyEvent: (_, event) {
-                  return _handleGlobalShortcutKeyEvent(event)
-                      ? KeyEventResult.handled
-                      : KeyEventResult.ignored;
-                },
                 child: PopScope<void>(
                   canPop: !_isMobileRuntime,
                   onPopInvokedWithResult: (didPop, _) {
@@ -2627,7 +2628,7 @@ class _ChatPageState extends State<ChatPage>
           ),
           ShortcutAction.closeApp => (
             action: action,
-            description: context.l10n.chatShortcutsCloseApp,
+            description: context.l10n.shortcutCloseAppDesc,
           ),
           ShortcutAction.quitApp => (
             action: action,

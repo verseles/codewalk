@@ -5211,11 +5211,11 @@
   "@setupDebugWsl": {
     "description": "CodeWalk UI string — setupDebugWsl"
   },
-  "shortcutCloseApp": "Close application",
+  "shortcutCloseApp": "Close tab/application",
   "@shortcutCloseApp": {
     "description": "CodeWalk UI string — shortcutCloseApp"
   },
-  "shortcutCloseAppDesc": "Close app using platform close behavior",
+  "shortcutCloseAppDesc": "Close the current session tab when available, otherwise close the app using platform behavior",
   "@shortcutCloseAppDesc": {
     "description": "CodeWalk UI string — shortcutCloseAppDesc"
   },

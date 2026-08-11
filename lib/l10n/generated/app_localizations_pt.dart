@@ -4272,11 +4272,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'Fechar aplicativo';
+  String get shortcutCloseApp => 'Fechar aba/aplicativo';
 
   @override
   String get shortcutCloseAppDesc =>
-      'Fechar o aplicativo usando o comportamento de fechamento da plataforma';
+      'Fechar a aba da sessão atual quando disponível; caso contrário, fechar o aplicativo usando o comportamento da plataforma';
 
   @override
   String get shortcutFocusCloseDrawer => 'Focar/fechar painel';

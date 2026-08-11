@@ -963,16 +963,6 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> refreshSessionAttentionHostCapability() async {
-    final persisted = await _localDataSource.getExperienceSettingsJson();
-    if (persisted != null && persisted.isNotEmpty) {
-      try {
-        _settings = ExperienceSettings.fromJson(
-          Map<String, dynamic>.from(jsonDecode(persisted) as Map),
-        );
-      } catch (_) {
-        // Keep the last valid in-memory settings snapshot.
-      }
-    }
     await _applySessionAttentionPresentationOverride();
     _sessionAttentionHostCapability = await _safeHostCapability();
     if ((_sessionAttentionHostCapability.stoppedByUser ||

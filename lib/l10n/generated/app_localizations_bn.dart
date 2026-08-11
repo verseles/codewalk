@@ -4250,11 +4250,11 @@ class AppLocalizationsBn extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'অ্যাপ্লিকেশন বন্ধ করুন';
+  String get shortcutCloseApp => 'ট্যাব/অ্যাপ্লিকেশন বন্ধ করুন';
 
   @override
   String get shortcutCloseAppDesc =>
-      'প্ল্যাটফর্ম বন্ধ করার আচরণ ব্যবহার করে অ্যাপ বন্ধ করুন';
+      'বর্তমান সেশন ট্যাব থাকলে সেটি বন্ধ করুন; অন্যথায় প্ল্যাটফর্মের নিয়মে অ্যাপ বন্ধ করুন';
 
   @override
   String get shortcutFocusCloseDrawer => 'ফোকাস/ড্রয়ার বন্ধ করুন';

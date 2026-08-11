@@ -119,26 +119,37 @@ extension _ChatPageLifecycle on _ChatPageState {
     }
 
     final clearSignature = 'clear:$normalizedServerId';
-    if (_backgroundPermissionAutoApproveContextSignature == clearSignature) {
+    if (_backgroundPermissionAutoApproveContextSignature == clearSignature &&
+        !_backgroundPermissionAutoApproveContextMayBeEnabled) {
       return;
     }
-    _backgroundPermissionAutoApproveContextSignature = clearSignature;
     AppLogger.debug(
       'background_permission_auto_approve_context reason=$reason action=clear server=$normalizedServerId',
     );
-    await AndroidBackgroundAlertWorker.clearPermissionAutoApproveContext(
-      serverId: normalizedServerId,
-    );
+    try {
+      await AndroidBackgroundAlertWorker.clearPermissionAutoApproveContext(
+        serverId: normalizedServerId,
+      );
+      _backgroundPermissionAutoApproveContextSignature = clearSignature;
+      _backgroundPermissionAutoApproveContextMayBeEnabled = false;
+    } catch (_) {
+      if (_backgroundPermissionAutoApproveContextSignature == clearSignature) {
+        _backgroundPermissionAutoApproveContextSignature = null;
+      }
+      rethrow;
+    }
   }
 
   void _clearBackgroundPermissionAutoApproveContextBestEffort({
     required String reason,
     String? serverId,
   }) {
+    final mutationGeneration = ++_backgroundPermissionContextMutationGeneration;
     unawaited(
-      _clearBackgroundPermissionAutoApproveContext(
+      _enqueueBackgroundPermissionContextClear(
         reason: reason,
         serverId: serverId,
+        expectedMutationGeneration: mutationGeneration,
       ).catchError((Object error, StackTrace stackTrace) {
         AppLogger.warn(
           'Failed to clear background permission auto-approve context',
@@ -147,6 +158,132 @@ extension _ChatPageLifecycle on _ChatPageState {
         );
       }),
     );
+  }
+
+  Future<void> _enqueueBackgroundPermissionContextClear({
+    required String reason,
+    String? serverId,
+    int? expectedGeneration,
+    int? expectedMutationGeneration,
+  }) {
+    return _enqueueBackgroundPermissionContextMutation(
+      reason: reason,
+      expectedGeneration: expectedGeneration,
+      expectedMutationGeneration: expectedMutationGeneration,
+      mutation: () => _clearBackgroundPermissionAutoApproveContext(
+        reason: reason,
+        serverId: serverId,
+      ),
+    );
+  }
+
+  Future<void> _enqueueBackgroundPermissionContextMutation({
+    required String reason,
+    required Future<void> Function() mutation,
+    int? expectedGeneration,
+    int? expectedMutationGeneration,
+  }) {
+    final previous = _backgroundPermissionContextMutationQueue;
+    final task = previous
+        .catchError((Object error, StackTrace stackTrace) {
+          AppLogger.warn(
+            'Previous background permission context mutation failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        })
+        .then((_) async {
+          if (expectedGeneration != null &&
+              expectedGeneration != _backgroundPermissionContextGeneration) {
+            return;
+          }
+          if (expectedMutationGeneration != null &&
+              expectedMutationGeneration !=
+                  _backgroundPermissionContextMutationGeneration) {
+            return;
+          }
+          await mutation();
+        });
+    _backgroundPermissionContextMutationQueue = task.catchError((
+      Object error,
+      StackTrace stackTrace,
+    ) {
+      AppLogger.warn(
+        'Failed background permission context mutation reason=$reason',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    });
+    return task;
+  }
+
+  Future<void> _disableBackgroundPermissionAutoApproveContext({
+    required String reason,
+    required int generation,
+    required int mutationGeneration,
+  }) async {
+    if (!_isMobileRuntime) {
+      return;
+    }
+    if (_isAppInForeground) {
+      return;
+    }
+    final settingsProvider = _settingsProvider;
+    if (settingsProvider != null &&
+        settingsProvider.initialized &&
+        (!settingsProvider.composerAutoApprovePermissions ||
+            !shouldRunAndroidBackgroundAlerts(settingsProvider.settings))) {
+      return;
+    }
+    final serverId =
+        (_chatProvider?.activeServerId ?? _appProvider?.activeServerId)
+            ?.trim() ??
+        '';
+    if (serverId.isEmpty) {
+      return;
+    }
+    if (!_backgroundPermissionAutoApproveContextMayBeEnabled) {
+      return;
+    }
+    await _enqueueBackgroundPermissionContextMutation(
+      reason: reason,
+      expectedGeneration: generation,
+      expectedMutationGeneration: mutationGeneration,
+      mutation: () =>
+          AndroidBackgroundAlertWorker.disablePermissionAutoApproveContext(
+            serverId: serverId,
+          ),
+    );
+    if (generation == _backgroundPermissionContextGeneration &&
+        mutationGeneration == _backgroundPermissionContextMutationGeneration) {
+      _backgroundPermissionAutoApproveContextMayBeEnabled = false;
+    }
+  }
+
+  Future<void> _refreshBackgroundPermissionAutoApproveContextState() async {
+    if (!_isMobileRuntime) {
+      _backgroundPermissionAutoApproveContextMayBeEnabled = false;
+      return;
+    }
+    final generation = _backgroundPermissionContextGeneration;
+    final mutationGeneration = _backgroundPermissionContextMutationGeneration;
+    final signature = _backgroundPermissionAutoApproveContextSignature;
+    final serverId =
+        (_chatProvider?.activeServerId ?? _appProvider?.activeServerId)
+            ?.trim() ??
+        '';
+    final enabled =
+        serverId.isNotEmpty &&
+        await AndroidBackgroundAlertWorker.hasEnabledPermissionAutoApproveContext(
+          serverId: serverId,
+        );
+    if (!mounted ||
+        generation != _backgroundPermissionContextGeneration ||
+        mutationGeneration != _backgroundPermissionContextMutationGeneration ||
+        signature != _backgroundPermissionAutoApproveContextSignature) {
+      return;
+    }
+    _backgroundPermissionAutoApproveContextMayBeEnabled = enabled;
   }
 
   String _autoApprovePermissionReply(ChatPermissionRequest request) {
@@ -159,14 +296,22 @@ extension _ChatPageLifecycle on _ChatPageState {
     if (!_isMobileRuntime) {
       return;
     }
+    if (_isProjectScopeTransitioning ||
+        _backgroundPermissionContextClearPendingGeneration != null) {
+      return;
+    }
+    final generation = _backgroundPermissionContextGeneration;
+    final mutationGeneration = ++_backgroundPermissionContextMutationGeneration;
 
     final chatProvider = _chatProvider;
     final settingsProvider = _settingsProvider;
     final serverId = chatProvider?.activeServerId.trim() ?? '';
     Future<void> clearContext() async {
-      await _clearBackgroundPermissionAutoApproveContext(
+      await _enqueueBackgroundPermissionContextClear(
         reason: reason,
         serverId: serverId,
+        expectedGeneration: generation,
+        expectedMutationGeneration: mutationGeneration,
       );
     }
 
@@ -175,6 +320,7 @@ extension _ChatPageLifecycle on _ChatPageState {
       return;
     }
     if (!settingsProvider.initialized) {
+      await clearContext();
       return;
     }
     if (!_isChatScreenActive()) {
@@ -186,6 +332,10 @@ extension _ChatPageLifecycle on _ChatPageState {
       return;
     }
     if (!shouldRunAndroidBackgroundAlerts(settingsProvider.settings)) {
+      await clearContext();
+      return;
+    }
+    if (_isAppInForeground) {
       await clearContext();
       return;
     }
@@ -218,13 +368,37 @@ extension _ChatPageLifecycle on _ChatPageState {
         contextData.signature) {
       return;
     }
-    _backgroundPermissionAutoApproveContextSignature = contextData.signature;
     AppLogger.debug(
       'background_permission_auto_approve_context reason=$reason action=prime server=$serverId session=$currentSessionId scope=$scopeId sessions=${threadSessionIds.length}',
     );
-    await AndroidBackgroundAlertWorker.primePermissionAutoApproveContext(
-      context: contextData,
-    );
+    try {
+      await _enqueueBackgroundPermissionContextMutation(
+        reason: reason,
+        expectedGeneration: generation,
+        expectedMutationGeneration: mutationGeneration,
+        mutation: () =>
+            AndroidBackgroundAlertWorker.primePermissionAutoApproveContext(
+              context: contextData,
+              isCurrent: () =>
+                  generation == _backgroundPermissionContextGeneration &&
+                  mutationGeneration ==
+                      _backgroundPermissionContextMutationGeneration,
+            ),
+      );
+      if (generation == _backgroundPermissionContextGeneration &&
+          mutationGeneration ==
+              _backgroundPermissionContextMutationGeneration) {
+        _backgroundPermissionAutoApproveContextSignature =
+            contextData.signature;
+        _backgroundPermissionAutoApproveContextMayBeEnabled = true;
+      }
+    } catch (_) {
+      if (_backgroundPermissionAutoApproveContextSignature ==
+          contextData.signature) {
+        _backgroundPermissionAutoApproveContextSignature = null;
+      }
+      rethrow;
+    }
   }
 
   void _scheduleAutoApprovePermissionDrain({required String reason}) {
@@ -503,9 +677,12 @@ extension _ChatPageLifecycle on _ChatPageState {
     }
     if (previousServerId != null && previousServerId.trim().isNotEmpty) {
       try {
-        await _clearBackgroundPermissionAutoApproveContext(
+        final mutationGeneration =
+            ++_backgroundPermissionContextMutationGeneration;
+        await _enqueueBackgroundPermissionContextClear(
           reason: 'server-changed',
           serverId: previousServerId,
+          expectedMutationGeneration: mutationGeneration,
         );
       } catch (error, stackTrace) {
         AppLogger.warn(

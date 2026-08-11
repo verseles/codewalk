@@ -4303,11 +4303,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'Chiudi applicazione';
+  String get shortcutCloseApp => 'Chiudi scheda/applicazione';
 
   @override
   String get shortcutCloseAppDesc =>
-      'Chiudi l\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'app usando il comportamento di chiusura della piattaforma';
+      'Chiudi la scheda della sessione corrente quando disponibile; altrimenti chiudi l\'app secondo il comportamento della piattaforma';
 
   @override
   String get shortcutFocusCloseDrawer => 'Focus/chiudi pannello';

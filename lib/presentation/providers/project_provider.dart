@@ -14,6 +14,22 @@ import '../../domain/repositories/project_repository.dart';
 
 enum ProjectStatus { initial, loading, loaded, error }
 
+class _ProjectStatePersistenceSnapshot {
+  const _ProjectStatePersistenceSnapshot({
+    required this.serverId,
+    required this.currentProjectId,
+    required this.openProjectIdsJson,
+    required this.archivedProjectIdsJson,
+    required this.hiddenProjectPathsJson,
+  });
+
+  final String serverId;
+  final String? currentProjectId;
+  final String openProjectIdsJson;
+  final String archivedProjectIdsJson;
+  final String hiddenProjectPathsJson;
+}
+
 class ProjectProvider extends ChangeNotifier {
   ProjectProvider({
     required ProjectRepository projectRepository,
@@ -36,6 +52,7 @@ class ProjectProvider extends ChangeNotifier {
   bool _worktreeSupported = false;
   String _activeServerId = 'legacy';
   String? _error;
+  Future<void> _projectStatePersistenceQueue = Future<void>.value();
 
   ProjectStatus get status => _status;
   List<Project> get projects => List<Project>.unmodifiable(_projects);
@@ -188,8 +205,8 @@ class ProjectProvider extends ChangeNotifier {
 
         _currentProject = target;
         _ensureOpenProject(projectId);
-        await _persistProjectState();
         notifyListeners();
+        unawaited(_enqueueProjectStatePersistence());
         _refreshWorktreesForCurrentContext();
         return true;
       },
@@ -284,8 +301,8 @@ class ProjectProvider extends ChangeNotifier {
 
         _currentProject = selectedProject;
         _ensureOpenProject(selectedProject.id);
-        await _persistProjectState();
         notifyListeners();
+        unawaited(_enqueueProjectStatePersistence());
         _refreshWorktreesForCurrentContext();
         return true;
       },
@@ -327,8 +344,8 @@ class ProjectProvider extends ChangeNotifier {
       }
     }
 
-    await _persistProjectState();
     notifyListeners();
+    unawaited(_enqueueProjectStatePersistence());
     return true;
   }
 
@@ -345,8 +362,8 @@ class ProjectProvider extends ChangeNotifier {
       _refreshWorktreesForCurrentContext();
     }
 
-    await _persistProjectState();
     notifyListeners();
+    unawaited(_enqueueProjectStatePersistence());
     return true;
   }
 
@@ -1028,27 +1045,73 @@ class ProjectProvider extends ChangeNotifier {
     _syncArchivedProjectIdsFromHiddenPaths();
   }
 
-  Future<void> _persistProjectState() async {
-    final current = _currentProject;
-    if (current != null) {
+  _ProjectStatePersistenceSnapshot _captureProjectStatePersistenceSnapshot() {
+    return _ProjectStatePersistenceSnapshot(
+      serverId: _activeServerId,
+      currentProjectId: _currentProject?.id,
+      openProjectIdsJson: jsonEncode(_openProjectIds),
+      archivedProjectIdsJson: jsonEncode(_archivedProjectIds),
+      hiddenProjectPathsJson: jsonEncode(_hiddenProjectPaths),
+    );
+  }
+
+  Future<void> _persistProjectStateSnapshot(
+    _ProjectStatePersistenceSnapshot snapshot,
+  ) async {
+    final currentProjectId = snapshot.currentProjectId;
+    if (currentProjectId != null) {
       await _localDataSource.saveCurrentProjectId(
-        current.id,
-        serverId: _activeServerId,
+        currentProjectId,
+        serverId: snapshot.serverId,
       );
     }
 
     await _localDataSource.saveOpenProjectIdsJson(
-      jsonEncode(_openProjectIds),
-      serverId: _activeServerId,
+      snapshot.openProjectIdsJson,
+      serverId: snapshot.serverId,
     );
     await _localDataSource.saveArchivedProjectIdsJson(
-      jsonEncode(_archivedProjectIds),
-      serverId: _activeServerId,
+      snapshot.archivedProjectIdsJson,
+      serverId: snapshot.serverId,
     );
     await _localDataSource.saveHiddenProjectPathsJson(
-      jsonEncode(_hiddenProjectPaths),
-      serverId: _activeServerId,
+      snapshot.hiddenProjectPathsJson,
+      serverId: snapshot.serverId,
     );
+  }
+
+  Future<void> _persistProjectState() {
+    return _enqueueProjectStatePersistence();
+  }
+
+  Future<void> _enqueueProjectStatePersistence() {
+    final snapshot = _captureProjectStatePersistenceSnapshot();
+    final previous = _projectStatePersistenceQueue;
+    final operation = previous
+        .catchError((Object error, StackTrace stackTrace) {
+          AppLogger.warn(
+            'Previous project state persistence failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        })
+        .then((_) => _persistProjectStateSnapshot(snapshot));
+    _projectStatePersistenceQueue = operation.catchError((
+      Object error,
+      StackTrace stackTrace,
+    ) {
+      AppLogger.warn(
+        'Failed to persist project state in background',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    });
+    return operation;
+  }
+
+  @visibleForTesting
+  Future<void> debugWaitForProjectStatePersistence() {
+    return _projectStatePersistenceQueue;
   }
 
   void _setStatus(ProjectStatus status) {

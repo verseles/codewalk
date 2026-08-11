@@ -661,6 +661,16 @@
 - **Then** the new context renders immediately from cached scope data without waiting for network revalidation
 - **Then** session list revalidation runs in background and refreshes to server state when the response arrives
 - **Then** if background revalidation fails, the cached visible state remains stable (no forced blank/loading fallback)
+- **Given** the target context has provider, model, agent, or variant choices, or composer catalogs
+- **When** that context is opened or restored
+- **Then** choices and catalogs are scoped by server plus project/directory and restored immediately from that context's own snapshot/cache
+- **Then** fresh server data revalidates catalogs in background, while stale or offline catalogs preserve the target context's selection instead of applying a fallback or another project's catalog
+- **Given** project selection or open-context state must be persisted
+- **When** the user changes context
+- **Then** persistence is write-behind and does not keep the visual transition blocker active
+- **Given** Android background permission auto-approval is eligible
+- **When** the project or lifecycle context changes
+- **Then** the auto-approve context follows the latest project/lifecycle context, remains disabled while the app is foreground, and rejects stale-context work
 - **Then** when returning to a recently visited project that was marked dirty by global events, the previously cached session list remains visible immediately and is revalidated in background
 - **Then** the fast project path detaches message, event, and global-event subscriptions with generation guards and cancels them in parallel with a 100 ms bound; the cached snapshot is restored and notified before that cancellation bound is awaited
 - **Then** slow/server-backed transitions keep the normal subscription teardown path
@@ -752,6 +762,11 @@
 - **Then** when chat render mode is `Block`, the OpenCode stream remains active but incomplete assistant text, reasoning, and tool cards for the current turn stay hidden behind a compact generation placeholder
 - **Then** block mode reveals the assistant turn after that turn settles, including the final text and any completed tool or reasoning entries
 - **Then** if a response is cancelled or finishes with an error, partial or error content is revealed instead of remaining hidden
+- **Given** the user is viewing `Settings > Behavior > Chat render mode`
+- **When** the user selects `Live` or `Block`
+- **Then** the `SegmentedButton` selection and matching description update immediately
+- **Then** the provider state and persisted value match the visible selection
+- **Then** leaving and returning, app resume or a session-attention capability refresh, and fresh provider/app hydration do not revert the selection
 
 ### First send from draft bootstraps a session automatically
 
@@ -1582,9 +1597,16 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 | `mod+t` | Cycle model variants | |
 | `alt+shift+j` / `option+shift+j` | Next agent | Avoids intercepting `Ctrl+J` line-feed input used by terminals and CLIs |
 | `alt+shift+k` / `option+shift+k` | Previous agent | Avoids intercepting `Ctrl+J` line-feed input used by terminals and CLIs |
-| `mod+w` | Close app | On desktop, follows close-to-tray/minimize/close settings; on Android and iOS it exits the app surface |
+| `mod+w` | Close tab/application | When session tabs are enabled and the selected tab matches the current session/context, closes that local tab; otherwise preserves the platform app-close behavior |
 | `Escape` | Restore full-screen terminal / close drawer / focus input | Double-press stops active response |
 | `mod+q` | Force-exit app | On desktop, bypasses close-to-tray/minimize; on Android and iOS it exits the app surface |
+
+- **Given** session tabs are enabled and the selected tab represents the current session in the active project context
+- **When** the user presses `mod+w`
+- **Then** exactly that local tab closes once, using the same right-neighbor, left-neighbor, `New Chat`, `Snackbar`, and `Undo` behavior as tab gestures, without mutating the OpenCode session
+- **Then** dialogs and other routes keep priority and block the chat shortcut
+- **When** tabs are disabled, no valid current tab exists, or the current context does not match the selected tab
+- **Then** `mod+w` keeps the existing platform close/minimize/tray behavior; custom bindings apply to both paths, while `mod+q` remains an independent force-exit action
 
 ### Enter confirms safe modal primary actions
 

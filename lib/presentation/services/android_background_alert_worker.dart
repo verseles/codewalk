@@ -329,16 +329,102 @@ class AndroidBackgroundAlertWorker {
 
   static Future<void> primePermissionAutoApproveContext({
     required PermissionAutoApproveBackgroundContext context,
+    bool Function()? isCurrent,
   }) async {
     if (!_isAndroidRuntime() || !context.isValid) {
       return;
     }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    final disabled = await prefs.setBool(
+      _backgroundPermissionAutoApproveDisabledStorageKey(context.serverId),
+      true,
+    );
+    if (!disabled) {
+      throw StateError('Failed to stage background permission context');
+    }
+    if (isCurrent != null && !isCurrent()) {
+      return;
+    }
+    final contextSaved = await prefs.setString(
       _backgroundPermissionAutoApproveContextStorageKey(context.serverId),
       jsonEncode(context.toJson()),
     );
+    if (!contextSaved) {
+      throw StateError('Failed to persist background permission context');
+    }
+    if (isCurrent != null && !isCurrent()) {
+      return;
+    }
+    final enabled = await prefs.setBool(
+      _backgroundPermissionAutoApproveDisabledStorageKey(context.serverId),
+      false,
+    );
+    if (!enabled) {
+      await prefs.setBool(
+        _backgroundPermissionAutoApproveDisabledStorageKey(context.serverId),
+        true,
+      );
+      throw StateError('Failed to enable background permission context');
+    }
+    if (isCurrent != null && !isCurrent()) {
+      final redisabled = await prefs.setBool(
+        _backgroundPermissionAutoApproveDisabledStorageKey(context.serverId),
+        true,
+      );
+      if (!redisabled) {
+        throw StateError(
+          'Failed to revoke stale background permission context',
+        );
+      }
+    }
+  }
+
+  static Future<void> disablePermissionAutoApproveContext({
+    required String serverId,
+  }) async {
+    if (!_isAndroidRuntime()) {
+      return;
+    }
+
+    final normalizedServerId = serverId.trim();
+    if (normalizedServerId.isEmpty) {
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final disabled = await prefs.setBool(
+      _backgroundPermissionAutoApproveDisabledStorageKey(normalizedServerId),
+      true,
+    );
+    if (!disabled) {
+      throw StateError('Failed to disable background permission context');
+    }
+  }
+
+  static Future<bool> hasEnabledPermissionAutoApproveContext({
+    required String serverId,
+  }) async {
+    if (!_isAndroidRuntime()) {
+      return false;
+    }
+    final normalizedServerId = serverId.trim();
+    if (normalizedServerId.isEmpty) {
+      return false;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(
+          _backgroundPermissionAutoApproveDisabledStorageKey(
+            normalizedServerId,
+          ),
+        ) ==
+        true) {
+      return false;
+    }
+    final raw = prefs.getString(
+      _backgroundPermissionAutoApproveContextStorageKey(normalizedServerId),
+    );
+    return raw != null && raw.trim().isNotEmpty;
   }
 
   static Future<void> clearPermissionAutoApproveContext({
@@ -354,9 +440,23 @@ class AndroidBackgroundAlertWorker {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(
-      _backgroundPermissionAutoApproveContextStorageKey(normalizedServerId),
+    final disabled = await prefs.setBool(
+      _backgroundPermissionAutoApproveDisabledStorageKey(normalizedServerId),
+      true,
     );
+    if (!disabled) {
+      throw StateError('Failed to disable background permission context');
+    }
+    final contextKey = _backgroundPermissionAutoApproveContextStorageKey(
+      normalizedServerId,
+    );
+    if (!prefs.containsKey(contextKey)) {
+      return;
+    }
+    final removed = await prefs.remove(contextKey);
+    if (!removed) {
+      throw StateError('Failed to clear background permission context');
+    }
   }
 
   @pragma('vm:entry-point')
@@ -638,6 +738,12 @@ class _AndroidBackgroundAlertRunner {
     SharedPreferences prefs,
     String serverId,
   ) {
+    if (prefs.getBool(
+          _backgroundPermissionAutoApproveDisabledStorageKey(serverId),
+        ) ==
+        true) {
+      return null;
+    }
     final raw = prefs.getString(
       _backgroundPermissionAutoApproveContextStorageKey(serverId),
     );
@@ -1386,6 +1492,11 @@ String _backgroundAlertSnapshotStorageKey(String serverId) {
 String _backgroundPermissionAutoApproveContextStorageKey(String serverId) {
   final normalized = serverId.trim().isEmpty ? 'legacy' : serverId.trim();
   return '$_backgroundPermissionAutoApproveContextKeyPrefix::$normalized';
+}
+
+String _backgroundPermissionAutoApproveDisabledStorageKey(String serverId) {
+  final normalized = serverId.trim().isEmpty ? 'legacy' : serverId.trim();
+  return '$_backgroundPermissionAutoApproveContextKeyPrefix-disabled::$normalized';
 }
 
 bool _shouldDisableBackgroundDataSaver(

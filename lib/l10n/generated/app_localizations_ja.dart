@@ -4076,10 +4076,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'アプリを閉じる';
+  String get shortcutCloseApp => 'タブ/アプリを閉じる';
 
   @override
-  String get shortcutCloseAppDesc => 'プラットフォームの終了動作を使用してアプリを閉じる';
+  String get shortcutCloseAppDesc =>
+      '現在のセッションタブがある場合は閉じ、それ以外はプラットフォームの動作でアプリを閉じる';
 
   @override
   String get shortcutFocusCloseDrawer => 'フォーカス/ドロワーを閉じる';

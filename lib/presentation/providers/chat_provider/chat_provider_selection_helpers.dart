@@ -61,12 +61,16 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
     return provider;
   }
 
-  Map<String, dynamic>? _configQueryParameters() {
-    final directory = projectProvider.currentDirectory?.trim();
-    if (directory == null || directory.isEmpty) {
+  Map<String, dynamic>? _configQueryParameters({String? directory}) {
+    final resolvedDirectory = (directory ?? projectProvider.currentDirectory)
+        ?.trim();
+    if (resolvedDirectory == null || resolvedDirectory.isEmpty) {
       return null;
     }
-    return <String, dynamic>{'directory': directory, 'workspace': directory};
+    return <String, dynamic>{
+      'directory': resolvedDirectory,
+      'workspace': resolvedDirectory,
+    };
   }
 
   Map<String, dynamic>? _codewalkSyncConfig(Map<String, dynamic> config) {
@@ -320,7 +324,11 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
     _notifyListeners();
   }
 
-  Future<bool> _syncSelectionToRemoteConfig() async {
+  Future<bool> _syncSelectionToRemoteConfig({
+    required String contextKey,
+    required String? directory,
+    required int generation,
+  }) async {
     final client = dioClient;
     if (client == null) {
       return true;
@@ -377,8 +385,12 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
             },
           },
         },
-        queryParameters: _configQueryParameters(),
+        queryParameters: _configQueryParameters(directory: directory),
       );
+      if (contextKey != _activeContextKey ||
+          generation != _remoteSelectionSyncGeneration) {
+        return true;
+      }
       _lastSyncedRemoteModelKey = modelKey;
       _lastSyncedRemoteAgentName = agentName;
       _lastSyncedRemoteVariantKey = variantSyncKey;
@@ -588,6 +600,8 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
         ..write(override.variantId ?? ChatProvider._remoteAutoVariantValue)
         ..write('|')
         ..write(override.updatedAtEpochMs)
+        ..write('|')
+        ..write(override.isExplicit)
         ..write(';');
     }
     return buffer.toString();
@@ -600,6 +614,7 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
       'agentName': value.agentName,
       'variantId': value.variantId ?? ChatProvider._remoteAutoVariantValue,
       'updatedAt': value.updatedAtEpochMs,
+      'isExplicit': value.isExplicit,
     };
   }
 
@@ -642,53 +657,47 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
       agentName: agentName.trim(),
       variantId: variantId,
       updatedAtEpochMs: updatedAtEpochMs,
+      isExplicit: json['isExplicit'] == true,
     );
   }
 
   Future<void> _loadSessionSelectionOverridesState({
     required String serverId,
     required String scopeId,
+    required int fetchId,
+    required String contextKey,
   }) async {
     final raw = await localDataSource.getSessionSelectionOverridesJson(
       serverId: serverId,
       scopeId: scopeId,
     );
-    if (raw == null || raw.trim().isEmpty) {
-      _replaceSessionOverridesForContext(
-        _activeContextKey,
-        const <String, _SessionSelectionOverride>{},
-      );
+    var parsed = <String, _SessionSelectionOverride>{};
+    try {
+      if (raw != null && raw.trim().isNotEmpty) {
+        final decoded = json.decode(raw);
+        if (decoded is Map) {
+          for (final entry in decoded.entries) {
+            final sessionId = entry.key.toString().trim();
+            if (sessionId.isEmpty) {
+              continue;
+            }
+            final override = _sessionOverrideFromJson(entry.value);
+            if (override != null) {
+              parsed[sessionId] = override;
+            }
+          }
+        }
+      }
+    } catch (_) {
+      parsed = <String, _SessionSelectionOverride>{};
+    }
+    if (!_isProviderInitializationCurrent(
+      fetchId: fetchId,
+      contextKey: contextKey,
+    )) {
       return;
     }
-
-    try {
-      final decoded = json.decode(raw);
-      if (decoded is! Map) {
-        _replaceSessionOverridesForContext(
-          _activeContextKey,
-          const <String, _SessionSelectionOverride>{},
-        );
-        return;
-      }
-
-      final parsed = <String, _SessionSelectionOverride>{};
-      for (final entry in decoded.entries) {
-        final sessionId = entry.key.toString().trim();
-        if (sessionId.isEmpty) {
-          continue;
-        }
-        final override = _sessionOverrideFromJson(entry.value);
-        if (override != null) {
-          parsed[sessionId] = override;
-        }
-      }
-      _replaceSessionOverridesForContext(_activeContextKey, parsed);
-    } catch (_) {
-      _replaceSessionOverridesForContext(
-        _activeContextKey,
-        const <String, _SessionSelectionOverride>{},
-      );
-    }
+    _replaceSessionOverridesForContext(contextKey, parsed);
   }
 
   bool _mergeRemoteSessionSelectionOverrides(
@@ -712,7 +721,8 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
             local.modelId != remote.modelId ||
             local.agentName != remote.agentName ||
             local.variantId != remote.variantId ||
-            local.updatedAtEpochMs != remote.updatedAtEpochMs;
+            local.updatedAtEpochMs != remote.updatedAtEpochMs ||
+            local.isExplicit != remote.isExplicit;
         if (shouldReplace) {
           merged[sessionId] = remote;
           changed = true;
@@ -906,21 +916,36 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
   Future<void> _refreshAgents({
     required String serverId,
     required String scopeId,
+    required String? directory,
+    required int fetchId,
+    required String contextKey,
   }) async {
-    final result = await getAgents(directory: projectProvider.currentDirectory);
+    final result = await getAgents(directory: directory);
+    if (!_isProviderInitializationCurrent(
+      fetchId: fetchId,
+      contextKey: contextKey,
+    )) {
+      return;
+    }
     if (result.isLeft()) {
       final failure = result.fold((value) => value, (_) => null);
       AppLogger.warn('Failed to load agents: ${failure.toString()}');
-      _agents = <Agent>[];
-      _selectedAgentName = null;
       return;
     }
     final agents = result.fold((_) => const <Agent>[], (value) => value);
-    _agents = List<Agent>.from(agents);
     final persisted = await localDataSource.getSelectedAgent(
       serverId: serverId,
       scopeId: scopeId,
     );
+    if (!_isProviderInitializationCurrent(
+      fetchId: fetchId,
+      contextKey: contextKey,
+    )) {
+      return;
+    }
+    _agents = List<Agent>.from(agents);
+    _agentCatalogAuthority = _CatalogAuthority.authoritative;
+    _agentCatalogFetchedAtEpochMs = DateTime.now().millisecondsSinceEpoch;
     _selectedAgentName = _resolvePreferredAgentName(_agents, persisted);
   }
 

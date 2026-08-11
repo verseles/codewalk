@@ -1405,8 +1405,9 @@ const englishTemplate = <String, String>{
   'setupDebugTitle': 'Focused on OpenCode setup',
   'setupDebugWSL': 'WSL',
   'setupDebugWsl': 'WSL',
-  'shortcutCloseApp': 'Close application',
-  'shortcutCloseAppDesc': 'Close app using platform close behavior',
+  'shortcutCloseApp': 'Close tab/application',
+  'shortcutCloseAppDesc':
+      'Close the current session tab when available, otherwise close the app using platform behavior',
   'shortcutFocusCloseDrawer': 'Focus/close drawer',
   'shortcutFocusCloseDrawerDesc':
       'Focus composer by default, or close drawer when open',
@@ -2995,8 +2996,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'مُركّز على إعداد OpenCode',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'إغلاق التطبيق',
-    'shortcutCloseAppDesc': 'إغلاق التطبيق باستخدام سلوك الإغلاق الخاص بالمنصة',
+    'shortcutCloseApp': 'إغلاق علامة التبويب/التطبيق',
+    'shortcutCloseAppDesc':
+        'إغلاق علامة تبويب الجلسة الحالية عند توفرها، وإلا إغلاق التطبيق وفق سلوك المنصة',
     'shortcutFocusCloseDrawer': 'تركيز/إغلاق الدرج',
     'shortcutFocusCloseDrawerDesc':
         'التركيز على المدخلات افتراضياً، أو إغلاق الدرج عندما يكون مفتوحاً',
@@ -4633,9 +4635,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'OpenCode সেটআপে ফোকাস করা হয়েছে',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'অ্যাপ্লিকেশন বন্ধ করুন',
+    'shortcutCloseApp': 'ট্যাব/অ্যাপ্লিকেশন বন্ধ করুন',
     'shortcutCloseAppDesc':
-        'প্ল্যাটফর্ম বন্ধ করার আচরণ ব্যবহার করে অ্যাপ বন্ধ করুন',
+        'বর্তমান সেশন ট্যাব থাকলে সেটি বন্ধ করুন; অন্যথায় প্ল্যাটফর্মের নিয়মে অ্যাপ বন্ধ করুন',
     'shortcutFocusCloseDrawer': 'ফোকাস/ড্রয়ার বন্ধ করুন',
     'shortcutFocusCloseDrawerDesc':
         'ডিফল্টভাবে ইনপুটে ফোকাস করুন, অথবা খোলা থাকলে ড্রয়ার বন্ধ করুন',
@@ -6317,9 +6319,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'Fokus auf OpenCode-Einrichtung',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'Anwendung schließen',
+    'shortcutCloseApp': 'Tab/Anwendung schließen',
     'shortcutCloseAppDesc':
-        'App mit dem Standard-Schließverhalten der Plattform schließen',
+        'Den aktuellen Sitzungstab schließen, wenn verfügbar; andernfalls die App mit dem Standardverhalten der Plattform schließen',
     'shortcutFocusCloseDrawer': 'Seitenleiste fokussieren/schließen',
     'shortcutFocusCloseDrawerDesc':
         'Eingabe standardmäßig fokussieren oder Seitenleiste schließen, falls offen',
@@ -7999,9 +8001,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'Enfocado en la configuración de OpenCode',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'Cerrar aplicación',
+    'shortcutCloseApp': 'Cerrar pestaña/aplicación',
     'shortcutCloseAppDesc':
-        'Cerrar la aplicación usando el comportamiento de cierre de la plataforma',
+        'Cerrar la pestaña de sesión actual cuando esté disponible; de lo contrario, cerrar la aplicación usando el comportamiento de la plataforma',
     'shortcutFocusCloseDrawer': 'Enfocar/cerrar panel',
     'shortcutFocusCloseDrawerDesc':
         'Enfocar entrada por defecto, o cerrar panel cuando está abierto',
@@ -9733,9 +9735,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'Axé sur la configuration d\'OpenCode',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'Fermer lapplication',
+    'shortcutCloseApp': 'Fermer l\'onglet/l\'application',
     'shortcutCloseAppDesc':
-        'Fermer l\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'application en utilisant le comportement de fermeture de la plateforme',
+        'Fermer l\'onglet de session actuel s\'il est disponible, sinon fermer l\'application selon le comportement de la plateforme',
     'shortcutFocusCloseDrawer': 'Focus/fermer le tiroir',
     'shortcutFocusCloseDrawerDesc':
         'Focus sur l\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'entrée par défaut, ou fermer le tiroir s\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'il est ouvert',
@@ -11392,9 +11394,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'OpenCode सेटअप पर ध्यान केंद्रित',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'एप्लिकेशन बंद करें',
+    'shortcutCloseApp': 'टैब/ऐप्लिकेशन बंद करें',
     'shortcutCloseAppDesc':
-        'प्लेटफ़ॉर्म बंद करने के व्यवहार का उपयोग करके ऐप बंद करें',
+        'वर्तमान सत्र टैब उपलब्ध हो तो उसे बंद करें; अन्यथा प्लेटफ़ॉर्म व्यवहार के अनुसार ऐप बंद करें',
     'shortcutFocusCloseDrawer': 'दराज पर ध्यान केंद्रित करें/बंद करें',
     'shortcutFocusCloseDrawerDesc':
         'डिफ़ॉल्ट रूप से इनपुट पर ध्यान केंद्रित करें, या खुला होने पर दराज बंद करें',
@@ -13098,9 +13100,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'Configurazione mirata di OpenCode',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'Chiudi applicazione',
+    'shortcutCloseApp': 'Chiudi scheda/applicazione',
     'shortcutCloseAppDesc':
-        'Chiudi l\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'app usando il comportamento di chiusura della piattaforma',
+        'Chiudi la scheda della sessione corrente quando disponibile; altrimenti chiudi l\'app secondo il comportamento della piattaforma',
     'shortcutFocusCloseDrawer': 'Focus/chiudi pannello',
     'shortcutFocusCloseDrawerDesc':
         'Focus sull\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'input per impostazione predefinita, o chiudi il pannello se aperto',
@@ -14605,8 +14607,8 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'OpenCodeセットアップにフォーカス',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'アプリを閉じる',
-    'shortcutCloseAppDesc': 'プラットフォームの終了動作を使用してアプリを閉じる',
+    'shortcutCloseApp': 'タブ/アプリを閉じる',
+    'shortcutCloseAppDesc': '現在のセッションタブがある場合は閉じ、それ以外はプラットフォームの動作でアプリを閉じる',
     'shortcutFocusCloseDrawer': 'フォーカス/ドロワーを閉じる',
     'shortcutFocusCloseDrawerDesc': 'デフォルトで入力にフォーカス、または開いている場合はドロワーを閉じる',
     'shortcutFocusInput': '入力にフォーカス',
@@ -16082,8 +16084,8 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'OpenCode 설정',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': '애플리케이션 닫기',
-    'shortcutCloseAppDesc': '플랫폼 종료 동작을 사용하여 앱 닫기',
+    'shortcutCloseApp': '탭/애플리케이션 닫기',
+    'shortcutCloseAppDesc': '현재 세션 탭이 있으면 닫고, 그렇지 않으면 플랫폼 동작에 따라 앱 닫기',
     'shortcutFocusCloseDrawer': '포커스/드로어 닫기',
     'shortcutFocusCloseDrawerDesc': '기본적으로 입력 창에 포커스, 또는 열려 있을 때 드로어 닫기',
     'shortcutFocusInput': '입력 창 포커스',
@@ -17722,9 +17724,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'Focado na configuração do OpenCode',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'Fechar aplicativo',
+    'shortcutCloseApp': 'Fechar aba/aplicativo',
     'shortcutCloseAppDesc':
-        'Fechar o aplicativo usando o comportamento de fechamento da plataforma',
+        'Fechar a aba da sessão atual quando disponível; caso contrário, fechar o aplicativo usando o comportamento da plataforma',
     'shortcutFocusCloseDrawer': 'Focar/fechar painel',
     'shortcutFocusCloseDrawerDesc':
         'Focar entrada por padrão, ou fechar painel quando aberto',
@@ -19401,9 +19403,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'Настройка OpenCode',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': 'Закрыть приложение',
+    'shortcutCloseApp': 'Закрыть вкладку/приложение',
     'shortcutCloseAppDesc':
-        'Закрыть приложение в соответствии с системным поведением закрытия',
+        'Закрыть текущую вкладку сеанса, если она доступна; иначе закрыть приложение согласно поведению платформы',
     'shortcutFocusCloseDrawer': 'Фокусировать/закрыть панель',
     'shortcutFocusCloseDrawerDesc':
         'Фокусировать редактор по умолчанию или закрыть панель, если она открыта',
@@ -21039,9 +21041,9 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': 'اوپن کوڈ سیٹ اپ پر فوکس کیا گیا۔',
     'setupDebugWSL': 'ڈبلیو ایس ایل',
     'setupDebugWsl': 'ڈبلیو ایس ایل',
-    'shortcutCloseApp': 'ایپلیکیشن بند کریں',
+    'shortcutCloseApp': 'ٹیب/ایپلیکیشن بند کریں',
     'shortcutCloseAppDesc':
-        'پلیٹ فارم کے بند کرنے کے رویے کا استعمال کرتے ہوئے ایپ بند کریں',
+        'موجودہ سیشن ٹیب دستیاب ہو تو اسے بند کریں؛ ورنہ پلیٹ فارم کے رویے کے مطابق ایپ بند کریں',
     'shortcutFocusCloseDrawer': 'دراز پر توجہ مرکوز کریں/بند کریں',
     'shortcutFocusCloseDrawerDesc':
         'ڈیفالٹ کے طور پر ان پٹ پر توجہ مرکوز کریں، یا دراز کھلا ہونے پر بند کریں',
@@ -22466,8 +22468,8 @@ const translations = <String, Map<String, String>>{
     'setupDebugTitle': '聚焦于 OpenCode 设置',
     'setupDebugWSL': 'WSL',
     'setupDebugWsl': 'WSL',
-    'shortcutCloseApp': '关闭应用',
-    'shortcutCloseAppDesc': '使用平台关闭行为关闭应用',
+    'shortcutCloseApp': '关闭标签页/应用',
+    'shortcutCloseAppDesc': '如果当前会话标签页可用则将其关闭，否则按平台行为关闭应用',
     'shortcutFocusCloseDrawer': '聚焦/关闭侧边栏',
     'shortcutFocusCloseDrawerDesc': '默认聚焦输入框，或在打开时关闭侧边栏',
     'shortcutFocusInput': '聚焦输入框',

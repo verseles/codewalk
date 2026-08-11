@@ -170,13 +170,17 @@ abstract class AppLocalDataSource {
     String? scopeId,
   });
 
-  /// Retrieve the last successful provider catalog snapshot for a server.
-  Future<String?> getProviderCatalogCacheJson({String? serverId});
+  /// Retrieve the last successful composer catalog snapshot for a context.
+  Future<String?> getProviderCatalogCacheJson({
+    String? serverId,
+    String? scopeId,
+  });
 
-  /// Save the last successful provider catalog snapshot for a server.
+  /// Save the last successful composer catalog snapshot for a context.
   Future<void> saveProviderCatalogCacheJson(
     String providerCatalogJson, {
     String? serverId,
+    String? scopeId,
   });
 
   /// Retrieve locally-persisted pinned session IDs (scoped).
@@ -1040,9 +1044,16 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }
 
   @override
-  Future<String?> getProviderCatalogCacheJson({String? serverId}) async {
+  Future<String?> getProviderCatalogCacheJson({
+    String? serverId,
+    String? scopeId,
+  }) async {
     return sharedPreferences.getString(
-      _scopedKey(AppConstants.providerCatalogCacheKey, serverId: serverId),
+      _scopedKey(
+        AppConstants.providerCatalogCacheKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
     );
   }
 
@@ -1050,9 +1061,14 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   Future<void> saveProviderCatalogCacheJson(
     String providerCatalogJson, {
     String? serverId,
+    String? scopeId,
   }) async {
     await sharedPreferences.setString(
-      _scopedKey(AppConstants.providerCatalogCacheKey, serverId: serverId),
+      _scopedKey(
+        AppConstants.providerCatalogCacheKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
       providerCatalogJson,
     );
   }

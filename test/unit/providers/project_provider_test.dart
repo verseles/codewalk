@@ -91,6 +91,39 @@ class _QueuedProjectListRepository extends FakeProjectRepository {
   }
 }
 
+class _GatedProjectPersistenceDataSource extends InMemoryAppLocalDataSource {
+  Completer<void>? saveOpenProjectsStarted;
+  Completer<void>? saveOpenProjectsGate;
+
+  @override
+  Future<void> saveOpenProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  }) async {
+    final started = saveOpenProjectsStarted;
+    if (started != null && !started.isCompleted) {
+      started.complete();
+    }
+    await saveOpenProjectsGate?.future;
+    await super.saveOpenProjectIdsJson(projectIdsJson, serverId: serverId);
+  }
+}
+
+class _FailingProjectPersistenceDataSource extends InMemoryAppLocalDataSource {
+  bool failArchivedProjectsSave = false;
+
+  @override
+  Future<void> saveArchivedProjectIdsJson(
+    String projectIdsJson, {
+    String? serverId,
+  }) async {
+    if (failArchivedProjectsSave) {
+      throw StateError('project persistence failed');
+    }
+    await super.saveArchivedProjectIdsJson(projectIdsJson, serverId: serverId);
+  }
+}
+
 void main() {
   group('ProjectProvider', () {
     late InMemoryAppLocalDataSource localDataSource;
@@ -167,6 +200,7 @@ void main() {
         await provider.initializeProject();
 
         final changed = await provider.switchProject('proj_b');
+        await provider.debugWaitForProjectStatePersistence();
 
         expect(changed, isTrue);
         expect(provider.currentProject?.id, 'proj_b');
@@ -177,6 +211,54 @@ void main() {
         expect(
           localDataSource.scopedStrings['current_project_id::srv_test'],
           'proj_b',
+        );
+      },
+    );
+
+    test(
+      'project switches publish before serialized persistence completes',
+      () async {
+        final gatedLocal = _GatedProjectPersistenceDataSource()
+          ..activeServerId = 'srv_test';
+        provider = ProjectProvider(
+          projectRepository: projectRepository,
+          localDataSource: gatedLocal,
+        );
+        await provider.initializeProject();
+
+        final started = Completer<void>();
+        final gate = Completer<void>();
+        gatedLocal
+          ..saveOpenProjectsStarted = started
+          ..saveOpenProjectsGate = gate;
+        var notifications = 0;
+        provider.addListener(() => notifications += 1);
+
+        final switchedToB = await provider
+            .switchProject('proj_b')
+            .timeout(const Duration(milliseconds: 80));
+        await started.future;
+
+        expect(switchedToB, isTrue);
+        expect(provider.currentProject?.id, 'proj_b');
+        expect(notifications, greaterThan(0));
+
+        final switchedBackToA = await provider
+            .switchProject('proj_a')
+            .timeout(const Duration(milliseconds: 80));
+        expect(switchedBackToA, isTrue);
+        expect(provider.currentProject?.id, 'proj_a');
+
+        gate.complete();
+        await provider.debugWaitForProjectStatePersistence();
+
+        expect(
+          gatedLocal.scopedStrings['current_project_id::srv_test'],
+          'proj_a',
+        );
+        expect(
+          jsonDecode(gatedLocal.scopedStrings['open_project_ids::srv_test']!),
+          containsAll(<String>['proj_a', 'proj_b']),
         );
       },
     );
@@ -297,6 +379,26 @@ void main() {
         expect(restoredProvider.hiddenProjectPaths, contains('/repo/a'));
       },
     );
+
+    test('awaited project persistence reports storage failures', () async {
+      final failingLocal = _FailingProjectPersistenceDataSource()
+        ..activeServerId = 'srv_test';
+      provider = ProjectProvider(
+        projectRepository: projectRepository,
+        localDataSource: failingLocal,
+      );
+      await provider.initializeProject();
+      await provider.switchProject('proj_b');
+      await provider.closeProject('proj_a');
+      await provider.debugWaitForProjectStatePersistence();
+      failingLocal.failArchivedProjectsSave = true;
+
+      await expectLater(
+        provider.archiveClosedProject('proj_a'),
+        throwsA(isA<StateError>()),
+      );
+      await provider.debugWaitForProjectStatePersistence();
+    });
 
     test('switchToDirectoryContext unhides a removed project path', () async {
       await provider.initializeProject();

@@ -4298,11 +4298,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'Cerrar aplicación';
+  String get shortcutCloseApp => 'Cerrar pestaña/aplicación';
 
   @override
   String get shortcutCloseAppDesc =>
-      'Cerrar la aplicación usando el comportamiento de cierre de la plataforma';
+      'Cerrar la pestaña de sesión actual cuando esté disponible; de lo contrario, cerrar la aplicación usando el comportamiento de la plataforma';
 
   @override
   String get shortcutFocusCloseDrawer => 'Enfocar/cerrar panel';

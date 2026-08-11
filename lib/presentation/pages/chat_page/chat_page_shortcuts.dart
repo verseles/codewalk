@@ -204,6 +204,25 @@ extension _ChatPageShortcuts on _ChatPageState {
   Future<void> _closeAppShortcut() async {
     final settingsProvider =
         _settingsProvider ?? context.read<SettingsProvider>();
+    if (settingsProvider.showSessionTabs && _isChatScreenActive()) {
+      final chatProvider = _chatProvider ?? context.read<ChatProvider>();
+      final currentSessionId = chatProvider.currentSession?.id;
+      final currentTab = chatProvider.sessionTabs
+          .where(
+            (tab) =>
+                tab.isSelected &&
+                tab.identity.sessionId == currentSessionId &&
+                _isSessionTabContextActive(tab),
+          )
+          .firstOrNull;
+      if (currentTab != null) {
+        await _closeSessionTab(currentTab);
+        return;
+      }
+      if (_sessionTabActivationTask != null) {
+        return;
+      }
+    }
     await settingsProvider.persistDesktopPaneWidths();
     if (_isDesktopRuntime) {
       await windowManager.close();

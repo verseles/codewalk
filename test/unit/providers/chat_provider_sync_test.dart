@@ -14,10 +14,51 @@ import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
 import 'chat_provider_test_support.dart';
+
+class _GatedPatchRecordingDioClient extends RecordingDioClient {
+  _GatedPatchRecordingDioClient({required super.configResponse});
+
+  final Completer<void> firstPatchStarted = Completer<void>();
+  final Completer<void> releaseFirstPatch = Completer<void>();
+  int startedPatchCount = 0;
+  int activePatchCount = 0;
+  int maxActivePatchCount = 0;
+  bool gateNextPatch = false;
+
+  @override
+  Future<Response<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    startedPatchCount += 1;
+    activePatchCount += 1;
+    if (activePatchCount > maxActivePatchCount) {
+      maxActivePatchCount = activePatchCount;
+    }
+    try {
+      if (gateNextPatch) {
+        gateNextPatch = false;
+        firstPatchStarted.complete();
+        await releaseFirstPatch.future;
+      }
+      return await super.patch<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
+    } finally {
+      activePatchCount -= 1;
+    }
+  }
+}
 
 void main() {
   group('ChatProvider - sync', () {
@@ -170,6 +211,90 @@ void main() {
         expect(hasFlushedVariantPatchOnIdle, isTrue);
       },
     );
+
+    test('outgoing selection sync transactions do not overlap', () async {
+      appRepository.providersResult = Right(
+        ProvidersResponse(
+          providers: <Provider>[
+            Provider(
+              id: 'provider_a',
+              name: 'Provider A',
+              env: const <String>[],
+              models: <String, Model>{
+                'model_a': testModel('model_a'),
+                'model_b': testModel('model_b'),
+              },
+            ),
+          ],
+          defaultModels: const <String, String>{'provider_a': 'model_a'},
+          connected: const <String>['provider_a'],
+        ),
+      );
+      final dioClient = _GatedPatchRecordingDioClient(
+        configResponse: <String, dynamic>{'model': 'provider_a/model_a'},
+      );
+      provider = buildProvider(dioClient: dioClient);
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      dioClient
+        ..patchBodies.clear()
+        ..patchQueries.clear()
+        ..startedPatchCount = 0
+        ..maxActivePatchCount = 0
+        ..gateNextPatch = true;
+      chatRepository.emitEvent(
+        const ChatEvent(
+          type: 'session.status',
+          properties: <String, dynamic>{
+            'sessionID': 'ses_1',
+            'status': <String, dynamic>{'type': 'busy'},
+          },
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await provider.setSelectedModelByProvider(
+        providerId: 'provider_a',
+        modelId: 'model_b',
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(dioClient.startedPatchCount, 0);
+
+      chatRepository.emitEvent(
+        const ChatEvent(
+          type: 'session.status',
+          properties: <String, dynamic>{
+            'sessionID': 'ses_1',
+            'status': <String, dynamic>{'type': 'idle'},
+          },
+        ),
+      );
+      await dioClient.firstPatchStarted.future;
+      await provider.setSelectedModelByProvider(
+        providerId: 'provider_a',
+        modelId: 'model_a',
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+
+      expect(dioClient.startedPatchCount, 1);
+      expect(dioClient.maxActivePatchCount, 1);
+
+      dioClient.releaseFirstPatch.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+
+      expect(dioClient.startedPatchCount, 2);
+      expect(dioClient.maxActivePatchCount, 1);
+      expect(
+        selectionPayloadFromPatch(dioClient.patchBodies.first)?['modelId'],
+        'model_b',
+      );
+      expect(
+        selectionPayloadFromPatch(dioClient.patchBodies.last)?['modelId'],
+        'model_a',
+      );
+    });
 
     test('variant sync is not blocked after a completed send stream', () async {
       appRepository.providersResult = Right(
@@ -471,6 +596,20 @@ void main() {
           providerId: 'provider_b',
           modelId: 'model_b',
         );
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        final persistedOverrides =
+            jsonDecode(
+                  (await localDataSource.getSessionSelectionOverridesJson(
+                    serverId: provider.activeServerId,
+                    scopeId: provider.projectProvider.currentScopeId,
+                  ))!,
+                )
+                as Map<String, dynamic>;
+        final persistedSession = Map<String, dynamic>.from(
+          persistedOverrides['ses_1'] as Map,
+        );
+        expect(persistedSession['isExplicit'], isTrue);
 
         provider = buildProvider();
         await provider.initializeProviders();

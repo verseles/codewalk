@@ -7505,13 +7505,13 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — shortcutCloseApp
   ///
   /// In en, this message translates to:
-  /// **'Close application'**
+  /// **'Close tab/application'**
   String get shortcutCloseApp;
 
   /// CodeWalk UI string — shortcutCloseAppDesc
   ///
   /// In en, this message translates to:
-  /// **'Close app using platform close behavior'**
+  /// **'Close the current session tab when available, otherwise close the app using platform behavior'**
   String get shortcutCloseAppDesc;
 
   /// CodeWalk UI string — shortcutFocusCloseDrawer

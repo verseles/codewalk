@@ -36,10 +36,6 @@ class _EscapeIntent extends Intent {
   const _EscapeIntent();
 }
 
-class _CloseAppIntent extends Intent {
-  const _CloseAppIntent();
-}
-
 class _QuitAppIntent extends Intent {
   const _QuitAppIntent();
 }

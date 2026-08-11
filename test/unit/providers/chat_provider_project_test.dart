@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/core/network/dio_client.dart';
+import 'package:codewalk/domain/entities/agent.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
@@ -43,10 +44,64 @@ import 'package:codewalk/presentation/services/event_feedback_dispatcher.dart';
 import 'package:codewalk/presentation/services/notification_service.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
 import 'chat_provider_test_support.dart';
+
+class _ScopedGatedConfigDioClient extends DioClient {
+  _ScopedGatedConfigDioClient({required this.configByDirectory})
+    : super(baseUrl: 'http://localhost');
+
+  final Map<String, Map<String, dynamic>> configByDirectory;
+  String? gatedDirectory;
+  Completer<void>? gatedRequestStarted;
+  Completer<void>? gatedRequestRelease;
+
+  @override
+  Future<Response<T>> get<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    if (path != '/config') {
+      throw UnimplementedError('Unexpected GET path in test: $path');
+    }
+    final directory = queryParameters?['directory'] as String? ?? '';
+    if (directory == gatedDirectory) {
+      final started = gatedRequestStarted;
+      if (started != null && !started.isCompleted) {
+        started.complete();
+      }
+      await gatedRequestRelease?.future;
+      gatedDirectory = null;
+    }
+    return Response<T>(
+      requestOptions: RequestOptions(path: path),
+      statusCode: 200,
+      data: (configByDirectory[directory] ?? const <String, dynamic>{}) as T,
+    );
+  }
+
+  @override
+  Future<Response<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    if (path != '/config') {
+      throw UnimplementedError('Unexpected PATCH path in test: $path');
+    }
+    final directory = queryParameters?['directory'] as String? ?? '';
+    return Response<T>(
+      requestOptions: RequestOptions(path: path),
+      statusCode: 200,
+      data: (configByDirectory[directory] ?? const <String, dynamic>{}) as T,
+    );
+  }
+}
 
 void main() {
   group('ChatProvider - project', () {
@@ -63,6 +118,7 @@ void main() {
       SettingsProvider? settingsProvider,
       Future<void> Function(SessionAttentionAggregate aggregate)?
       sessionAttentionAggregatePublisher,
+      ProjectProvider? projectProvider,
     }) {
       return buildChatProvider(
         chatRepository: chatRepository,
@@ -74,6 +130,7 @@ void main() {
         abortSuppressionWindow: abortSuppressionWindow,
         settingsProvider: settingsProvider,
         sessionAttentionAggregatePublisher: sessionAttentionAggregatePublisher,
+        projectProvider: projectProvider,
       );
     }
 
@@ -2311,6 +2368,214 @@ void main() {
     );
 
     test(
+      'warm switch restores target composer selection before refresh completes',
+      () async {
+        final projectA = Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        final projectB = Project(
+          id: 'proj_b',
+          name: 'Project B',
+          path: '/repo/b',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+        );
+        final scopedLocal = InMemoryAppLocalDataSource()
+          ..activeServerId = 'srv_test';
+        await scopedLocal.saveSelectedProvider(
+          'prov_a',
+          serverId: 'srv_test',
+          scopeId: projectA.path,
+        );
+        await scopedLocal.saveSelectedModel(
+          'mod_a',
+          serverId: 'srv_test',
+          scopeId: projectA.path,
+        );
+        await scopedLocal.saveSelectedAgent(
+          'agent_a',
+          serverId: 'srv_test',
+          scopeId: projectA.path,
+        );
+        await scopedLocal.saveSelectedVariantMap(
+          jsonEncode(<String, String>{'prov_a/mod_a': 'high'}),
+          serverId: 'srv_test',
+          scopeId: projectA.path,
+        );
+        await scopedLocal.saveSelectedProvider(
+          'prov_b',
+          serverId: 'srv_test',
+          scopeId: projectB.path,
+        );
+        await scopedLocal.saveSelectedModel(
+          'mod_b',
+          serverId: 'srv_test',
+          scopeId: projectB.path,
+        );
+        await scopedLocal.saveSelectedAgent(
+          'agent_b',
+          serverId: 'srv_test',
+          scopeId: projectB.path,
+        );
+        await scopedLocal.saveSelectedVariantMap(
+          jsonEncode(<String, String>{'prov_b/mod_b': 'careful'}),
+          serverId: 'srv_test',
+          scopeId: projectB.path,
+        );
+
+        ProvidersResponse responseFor(String? directory) {
+          final suffix = directory == projectB.path ? 'b' : 'a';
+          final providerId = 'prov_$suffix';
+          final modelId = 'mod_$suffix';
+          final variantId = suffix == 'a' ? 'high' : 'careful';
+          return ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: providerId,
+                name: 'Provider $suffix',
+                env: const <String>[],
+                models: <String, Model>{
+                  modelId: testModel(
+                    modelId,
+                    variants: <String, ModelVariant>{
+                      variantId: ModelVariant(id: variantId, name: variantId),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: <String, String>{providerId: modelId},
+            connected: <String>[providerId],
+          );
+        }
+
+        Completer<void>? providerGateA;
+        Completer<void>? providerGateB;
+        Completer<void>? providerStartedA;
+        Completer<void>? providerStartedB;
+        final scopedAppRepository = FakeAppRepository()
+          ..getProvidersHandler = (directory) async {
+            if (directory == projectA.path) {
+              final started = providerStartedA;
+              if (started != null && !started.isCompleted) {
+                started.complete();
+              }
+              await providerGateA?.future;
+            } else if (directory == projectB.path) {
+              final started = providerStartedB;
+              if (started != null && !started.isCompleted) {
+                started.complete();
+              }
+              await providerGateB?.future;
+            }
+            return Right(responseFor(directory));
+          }
+          ..getAgentsHandler = (directory) async => Right(<Agent>[
+            Agent(
+              name: directory == projectB.path ? 'agent_b' : 'agent_a',
+              mode: 'primary',
+              hidden: false,
+              native: false,
+            ),
+          ]);
+        final scopedProjectProvider = ProjectProvider(
+          projectRepository: FakeProjectRepository(
+            currentProject: projectA,
+            projects: <Project>[projectA, projectB],
+          ),
+          localDataSource: scopedLocal,
+        );
+        final scopedRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_a',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              directory: projectA.path,
+            ),
+            ChatSession(
+              id: 'ses_b',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(2000),
+              directory: projectB.path,
+            ),
+          ],
+        );
+        final warmProvider = buildChatProvider(
+          chatRepository: scopedRepository,
+          appRepository: scopedAppRepository,
+          localDataSource: scopedLocal,
+          defaultSettingsProvider: defaultSettingsProvider,
+          projectProvider: scopedProjectProvider,
+        );
+        addTearDown(warmProvider.dispose);
+
+        await scopedProjectProvider.initializeProject();
+        await warmProvider.initializeProviders();
+        await warmProvider.loadSessions();
+        expect(warmProvider.selectedProviderId, 'prov_a');
+        expect(warmProvider.selectedModelId, 'mod_a');
+        expect(warmProvider.selectedAgentName, 'agent_a');
+        expect(warmProvider.selectedVariantId, 'high');
+
+        await scopedProjectProvider.switchProject(projectB.id);
+        await warmProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await warmProvider.initializeProviders();
+        expect(warmProvider.selectedProviderId, 'prov_b');
+        expect(warmProvider.selectedModelId, 'mod_b');
+        expect(warmProvider.selectedAgentName, 'agent_b');
+        expect(warmProvider.selectedVariantId, 'careful');
+        await Future<void>.delayed(Duration.zero);
+        expect(
+          scopedLocal
+              .scopedStrings['provider_catalog_cache::srv_test::/repo/a'],
+          isNotNull,
+        );
+        expect(
+          scopedLocal
+              .scopedStrings['provider_catalog_cache::srv_test::/repo/b'],
+          isNotNull,
+        );
+
+        await scopedProjectProvider.switchProject(projectA.id);
+        await warmProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await warmProvider.initializeProviders();
+
+        providerGateA = Completer<void>();
+        providerStartedA = Completer<void>();
+        final staleRefreshA = warmProvider.initializeProviders();
+        await providerStartedA.future;
+
+        providerGateB = Completer<void>();
+        providerStartedB = Completer<void>();
+        await scopedProjectProvider.switchProject(projectB.id);
+        await warmProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await providerStartedB.future;
+
+        expect(warmProvider.selectedProviderId, 'prov_b');
+        expect(warmProvider.selectedModelId, 'mod_b');
+        expect(warmProvider.selectedAgentName, 'agent_b');
+        expect(warmProvider.selectedVariantId, 'careful');
+        expect(
+          warmProvider.selectableAgents.map((agent) => agent.name),
+          <String>['agent_b'],
+        );
+
+        providerGateA.complete();
+        await staleRefreshA;
+        expect(warmProvider.selectedProviderId, 'prov_b');
+        expect(warmProvider.selectedAgentName, 'agent_b');
+
+        providerGateB.complete();
+        await warmProvider.initializeProviders();
+        expect(warmProvider.selectedProviderId, 'prov_b');
+        expect(warmProvider.selectedAgentName, 'agent_b');
+      },
+    );
+
+    test(
       'same-server project switch keeps cached providers visible during refresh',
       () async {
         final scopedLocal = InMemoryAppLocalDataSource()
@@ -2388,6 +2653,13 @@ void main() {
         await scopedProvider.initializeProviders();
         expect(scopedProvider.providers, isNotEmpty);
 
+        await scopedProjectProvider.switchProject('proj_b');
+        await scopedProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await scopedProvider.initializeProviders();
+        await scopedProjectProvider.switchProject('proj_a');
+        await scopedProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await scopedProvider.initializeProviders();
+
         appRepository.providersResult = const Left(
           NetworkFailure('refresh failed'),
         );
@@ -2404,6 +2676,314 @@ void main() {
         );
 
         await scopedProvider.initializeProviders();
+      },
+    );
+
+    test(
+      'remote selection response from the previous project is ignored',
+      () async {
+        final projectA = Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        final projectB = Project(
+          id: 'proj_b',
+          name: 'Project B',
+          path: '/repo/b',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+        );
+        localDataSource = InMemoryAppLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final scopedProjectProvider = ProjectProvider(
+          projectRepository: FakeProjectRepository(
+            currentProject: projectA,
+            projects: <Project>[projectA, projectB],
+          ),
+          localDataSource: localDataSource,
+        );
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': testModel('model_a')},
+              ),
+              Provider(
+                id: 'provider_b',
+                name: 'Provider B',
+                env: const <String>[],
+                models: <String, Model>{'model_b': testModel('model_b')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a', 'provider_b'],
+          ),
+        );
+        chatRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_a',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              directory: projectA.path,
+            ),
+            ChatSession(
+              id: 'ses_b',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(2000),
+              directory: projectB.path,
+            ),
+          ],
+        );
+        final dioClient = _ScopedGatedConfigDioClient(
+          configByDirectory: <String, Map<String, dynamic>>{
+            projectA.path: <String, dynamic>{'model': 'provider_a/model_a'},
+            projectB.path: <String, dynamic>{'model': 'provider_b/model_b'},
+          },
+        );
+        final scopedProvider = buildProvider(
+          dioClient: dioClient,
+          projectProvider: scopedProjectProvider,
+        );
+        addTearDown(scopedProvider.dispose);
+
+        await scopedProjectProvider.initializeProject();
+        await scopedProvider.initializeProviders();
+        await scopedProvider.loadSessions();
+        await scopedProvider.selectSession(
+          scopedProvider.sessions.firstWhere(
+            (session) => session.id == 'ses_a',
+          ),
+        );
+
+        dioClient
+          ..gatedDirectory = projectA.path
+          ..gatedRequestStarted = Completer<void>()
+          ..gatedRequestRelease = Completer<void>();
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_a',
+              'status': <String, dynamic>{'type': 'idle'},
+            },
+          ),
+        );
+        await dioClient.gatedRequestStarted!.future;
+
+        await scopedProjectProvider.switchProject(projectB.id);
+        await scopedProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await scopedProvider.initializeProviders();
+        expect(scopedProvider.selectedProviderId, 'provider_b');
+        expect(scopedProvider.selectedModelId, 'model_b');
+
+        dioClient.gatedRequestRelease!.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(scopedProvider.selectedProviderId, 'provider_b');
+        expect(scopedProvider.selectedModelId, 'model_b');
+      },
+    );
+
+    test(
+      'selection persistence from the previous project does not patch the next project',
+      () async {
+        final projectA = Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        final projectB = Project(
+          id: 'proj_b',
+          name: 'Project B',
+          path: '/repo/b',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+        );
+        localDataSource = DelayedSelectionPersistenceLocalDataSource(
+          delay: const Duration(milliseconds: 20),
+        )..activeServerId = 'srv_test';
+        final scopedProjectProvider = ProjectProvider(
+          projectRepository: FakeProjectRepository(
+            currentProject: projectA,
+            projects: <Project>[projectA, projectB],
+          ),
+          localDataSource: localDataSource,
+        );
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_a': testModel('model_a'),
+                  'model_b': testModel('model_b'),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+        final dioClient = RecordingDioClient(
+          configResponse: <String, dynamic>{'model': 'provider_a/model_a'},
+        );
+        final scopedProvider = buildProvider(
+          dioClient: dioClient,
+          projectProvider: scopedProjectProvider,
+        );
+        addTearDown(scopedProvider.dispose);
+
+        await scopedProjectProvider.initializeProject();
+        await scopedProvider.initializeProviders();
+        dioClient.patchQueries.clear();
+
+        await scopedProvider.setSelectedModelByProvider(
+          providerId: 'provider_a',
+          modelId: 'model_b',
+        );
+        await scopedProjectProvider.switchProject(projectB.id);
+        await scopedProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await scopedProvider.initializeProviders();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        expect(
+          dioClient.patchQueries.where(
+            (query) => query?['directory'] == projectB.path,
+          ),
+          isEmpty,
+        );
+      },
+    );
+
+    test(
+      'stale catalog failure preserves newer persisted composer selection',
+      () async {
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(
+            name: 'agent_old',
+            mode: 'primary',
+            hidden: false,
+            native: false,
+          ),
+        ]);
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_old',
+                name: 'Old Provider',
+                env: const <String>[],
+                models: <String, Model>{'model_old': testModel('model_old')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_old': 'model_old'},
+            connected: const <String>['provider_old'],
+          ),
+        );
+        await provider.initializeProviders();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        const scopeId = 'default';
+        await localDataSource.saveSelectedProvider(
+          'provider_new',
+          serverId: 'srv_test',
+          scopeId: scopeId,
+        );
+        await localDataSource.saveSelectedModel(
+          'model_new',
+          serverId: 'srv_test',
+          scopeId: scopeId,
+        );
+        await localDataSource.saveSelectedVariantMap(
+          jsonEncode(<String, String>{'provider_new/model_new': 'high'}),
+          serverId: 'srv_test',
+          scopeId: scopeId,
+        );
+        appRepository.providersResult = const Left(NetworkFailure('offline'));
+        appRepository.agentsResult = const Right(<Agent>[
+          Agent(
+            name: 'agent_new',
+            mode: 'primary',
+            hidden: false,
+            native: false,
+          ),
+        ]);
+
+        provider = buildProvider();
+        addTearDown(provider.dispose);
+        await provider.initializeProviders();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(provider.selectedProviderId, 'provider_new');
+        expect(provider.selectedModelId, 'model_new');
+        expect(provider.selectedVariantId, 'high');
+        expect(
+          await localDataSource.getSelectedProvider(
+            serverId: 'srv_test',
+            scopeId: scopeId,
+          ),
+          'provider_new',
+        );
+        expect(
+          await localDataSource.getSelectedModel(
+            serverId: 'srv_test',
+            scopeId: scopeId,
+          ),
+          'model_new',
+        );
+        final refreshedCache =
+            jsonDecode(
+                  (await localDataSource.getProviderCatalogCacheJson(
+                    serverId: 'srv_test',
+                    scopeId: scopeId,
+                  ))!,
+                )
+                as Map<String, dynamic>;
+        expect(
+          (refreshedCache['agents'] as List<dynamic>).whereType<Map>().map(
+            (agent) => agent['name'],
+          ),
+          contains('agent_new'),
+        );
+      },
+    );
+
+    test(
+      'provider success with agent failure preserves persisted agent',
+      () async {
+        await localDataSource.saveSelectedAgent(
+          'agent_saved',
+          serverId: 'srv_test',
+          scopeId: 'default',
+        );
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{'model_a': testModel('model_a')},
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+        appRepository.agentsResult = const Left(NetworkFailure('offline'));
+
+        provider = buildProvider();
+        addTearDown(provider.dispose);
+        await provider.initializeProviders();
+
+        expect(provider.selectedAgentName, 'agent_saved');
       },
     );
 

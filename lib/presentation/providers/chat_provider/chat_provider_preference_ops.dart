@@ -48,6 +48,26 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       questionSubmitFailedRequestIds: Set<String>.from(
         _questionSubmitFailedRequestIds,
       ),
+      providers: List<Provider>.from(_providers),
+      defaultModels: Map<String, String>.from(_defaultModels),
+      connectedProviderIds: List<String>.from(_connectedProviderIds),
+      agents: List<Agent>.from(_agents),
+      selectedProviderId: _selectedProviderId,
+      selectedModelId: _selectedModelId,
+      selectedAgentName: _selectedAgentName,
+      selectedVariantId: _selectedVariantId,
+      recentModelKeys: List<String>.from(_recentModelKeys),
+      recentAgentNames: List<String>.from(_recentAgentNames),
+      recentVariantValuesByModel: _recentVariantValuesByModel.map(
+        (key, value) => MapEntry(key, List<String>.from(value)),
+      ),
+      modelUsageCounts: Map<String, int>.from(_modelUsageCounts),
+      selectedVariantByModel: Map<String, String>.from(_selectedVariantByModel),
+      agentSelectionMemoryByAgent: Map<String, _AgentSelectionMemory>.from(
+        _agentSelectionMemoryByAgent,
+      ),
+      providerCatalogFetchedAtEpochMs: _providerCatalogFetchedAtEpochMs,
+      agentCatalogFetchedAtEpochMs: _agentCatalogFetchedAtEpochMs,
     );
   }
 
@@ -80,6 +100,24 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       _clearActiveSendDraft();
       _clearRejectedDraft();
       _questionSubmitFailedRequestIds.clear();
+      _providers = <Provider>[];
+      _defaultModels = <String, String>{};
+      _connectedProviderIds = <String>[];
+      _agents = <Agent>[];
+      _providerCatalogAuthority = _CatalogAuthority.unknown;
+      _agentCatalogAuthority = _CatalogAuthority.unknown;
+      _providerCatalogFetchedAtEpochMs = null;
+      _agentCatalogFetchedAtEpochMs = null;
+      _selectedProviderId = null;
+      _selectedModelId = null;
+      _selectedAgentName = null;
+      _selectedVariantId = null;
+      _recentModelKeys = <String>[];
+      _recentAgentNames = <String>[];
+      _recentVariantValuesByModel = <String, List<String>>{};
+      _modelUsageCounts = <String, int>{};
+      _selectedVariantByModel = <String, String>{};
+      _agentSelectionMemoryByAgent = <String, _AgentSelectionMemory>{};
       _threadPermissionsVersion++;
       return;
     }
@@ -127,6 +165,34 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     _questionSubmitFailedRequestIds
       ..clear()
       ..addAll(snapshot.questionSubmitFailedRequestIds);
+    _providers = List<Provider>.from(snapshot.providers);
+    _defaultModels = Map<String, String>.from(snapshot.defaultModels);
+    _connectedProviderIds = List<String>.from(snapshot.connectedProviderIds);
+    _agents = List<Agent>.from(snapshot.agents);
+    _providerCatalogFetchedAtEpochMs = snapshot.providerCatalogFetchedAtEpochMs;
+    _agentCatalogFetchedAtEpochMs = snapshot.agentCatalogFetchedAtEpochMs;
+    _providerCatalogAuthority = _providerCatalogFetchedAtEpochMs == null
+        ? _CatalogAuthority.unknown
+        : _CatalogAuthority.stale;
+    _agentCatalogAuthority = _agentCatalogFetchedAtEpochMs == null
+        ? _CatalogAuthority.unknown
+        : _CatalogAuthority.stale;
+    _selectedProviderId = snapshot.selectedProviderId;
+    _selectedModelId = snapshot.selectedModelId;
+    _selectedAgentName = snapshot.selectedAgentName;
+    _selectedVariantId = snapshot.selectedVariantId;
+    _recentModelKeys = List<String>.from(snapshot.recentModelKeys);
+    _recentAgentNames = List<String>.from(snapshot.recentAgentNames);
+    _recentVariantValuesByModel = snapshot.recentVariantValuesByModel.map(
+      (key, value) => MapEntry(key, List<String>.from(value)),
+    );
+    _modelUsageCounts = Map<String, int>.from(snapshot.modelUsageCounts);
+    _selectedVariantByModel = Map<String, String>.from(
+      snapshot.selectedVariantByModel,
+    );
+    _agentSelectionMemoryByAgent = Map<String, _AgentSelectionMemory>.from(
+      snapshot.agentSelectionMemoryByAgent,
+    );
     _pendingCurrentSessionHydrationId =
         !_isNewChatDraftActive && _currentSession != null && _messages.isEmpty
         ? _currentSession!.id
@@ -138,6 +204,8 @@ extension _ChatProviderPreferenceOps on ChatProvider {
   Future<void> _loadModelPreferenceState({
     required String serverId,
     required String scopeId,
+    required int fetchId,
+    required String contextKey,
   }) async {
     // Load every preference field into a local variable first, then swap
     // the instance fields atomically at the end. The previous clear-then-load
@@ -253,6 +321,13 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     final loadedAgentSelectionMemoryByAgent = _decodeAgentSelectionMemory(
       agentSelectionMemoryJson,
     );
+
+    if (!_isProviderInitializationCurrent(
+      fetchId: fetchId,
+      contextKey: contextKey,
+    )) {
+      return;
+    }
 
     // Atomic swap — no field is cleared until its replacement is ready.
     _recentModelKeys = loadedRecentModelKeys;

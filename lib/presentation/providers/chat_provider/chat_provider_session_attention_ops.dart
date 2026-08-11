@@ -799,6 +799,23 @@ extension ChatProviderSessionAttentionOps on ChatProvider {
         activeSendDraft: snapshot.activeSendDraft,
         rejectedDraft: snapshot.rejectedDraft,
         questionSubmitFailedRequestIds: snapshot.questionSubmitFailedRequestIds,
+        providers: snapshot.providers,
+        defaultModels: snapshot.defaultModels,
+        connectedProviderIds: snapshot.connectedProviderIds,
+        agents: snapshot.agents,
+        selectedProviderId: snapshot.selectedProviderId,
+        selectedModelId: snapshot.selectedModelId,
+        selectedAgentName: snapshot.selectedAgentName,
+        selectedVariantId: snapshot.selectedVariantId,
+        recentModelKeys: snapshot.recentModelKeys,
+        recentAgentNames: snapshot.recentAgentNames,
+        recentVariantValuesByModel: snapshot.recentVariantValuesByModel,
+        modelUsageCounts: snapshot.modelUsageCounts,
+        selectedVariantByModel: snapshot.selectedVariantByModel,
+        agentSelectionMemoryByAgent: snapshot.agentSelectionMemoryByAgent,
+        providerCatalogFetchedAtEpochMs:
+            snapshot.providerCatalogFetchedAtEpochMs,
+        agentCatalogFetchedAtEpochMs: snapshot.agentCatalogFetchedAtEpochMs,
       );
     }
     if (updatedSnapshots.isNotEmpty) {

@@ -1,6 +1,9 @@
 import 'package:codewalk/domain/entities/chat_realtime.dart';
+import 'package:codewalk/presentation/services/android_background_alert_worker.dart';
 import 'package:codewalk/presentation/services/permission_auto_approve_runtime.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('always returns always reply unconditionally', () {
@@ -104,6 +107,86 @@ void main() {
         nextServerId: 'srv_a',
         nextScopeId: '/repo-a',
         nextDirectory: '/repo-a',
+      ),
+      isFalse,
+    );
+  });
+
+  test('worker context stays disabled until a valid context is primed', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+    });
+    const context = PermissionAutoApproveBackgroundContext(
+      serverId: 'srv_test',
+      scopeId: '/repo/a',
+      currentSessionId: 'ses_a',
+      threadSessionIds: <String>['ses_a'],
+      updatedAtEpochMs: 123,
+    );
+    const contextKey =
+        'codewalk.android.background.permission_auto_approve.v1::srv_test';
+    const disabledKey =
+        'codewalk.android.background.permission_auto_approve.v1-disabled::srv_test';
+
+    await AndroidBackgroundAlertWorker.primePermissionAutoApproveContext(
+      context: context,
+    );
+    var prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(contextKey), isNotNull);
+    expect(prefs.getBool(disabledKey), isFalse);
+    expect(
+      await AndroidBackgroundAlertWorker.hasEnabledPermissionAutoApproveContext(
+        serverId: 'srv_test',
+      ),
+      isTrue,
+    );
+
+    var generationChecks = 0;
+    await AndroidBackgroundAlertWorker.primePermissionAutoApproveContext(
+      context: context,
+      isCurrent: () {
+        generationChecks += 1;
+        return generationChecks == 1;
+      },
+    );
+    prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(contextKey), isNotNull);
+    expect(prefs.getBool(disabledKey), isTrue);
+    expect(
+      await AndroidBackgroundAlertWorker.hasEnabledPermissionAutoApproveContext(
+        serverId: 'srv_test',
+      ),
+      isFalse,
+    );
+
+    await AndroidBackgroundAlertWorker.primePermissionAutoApproveContext(
+      context: context,
+    );
+
+    await AndroidBackgroundAlertWorker.disablePermissionAutoApproveContext(
+      serverId: 'srv_test',
+    );
+    prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(contextKey), isNotNull);
+    expect(prefs.getBool(disabledKey), isTrue);
+    expect(
+      await AndroidBackgroundAlertWorker.hasEnabledPermissionAutoApproveContext(
+        serverId: 'srv_test',
+      ),
+      isFalse,
+    );
+
+    await AndroidBackgroundAlertWorker.clearPermissionAutoApproveContext(
+      serverId: 'srv_test',
+    );
+    prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(contextKey), isNull);
+    expect(prefs.getBool(disabledKey), isTrue);
+    expect(
+      await AndroidBackgroundAlertWorker.hasEnabledPermissionAutoApproveContext(
+        serverId: 'srv_test',
       ),
       isFalse,
     );

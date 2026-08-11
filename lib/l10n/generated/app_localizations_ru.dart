@@ -4277,11 +4277,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => 'Закрыть приложение';
+  String get shortcutCloseApp => 'Закрыть вкладку/приложение';
 
   @override
   String get shortcutCloseAppDesc =>
-      'Закрыть приложение в соответствии с системным поведением закрытия';
+      'Закрыть текущую вкладку сеанса, если она доступна; иначе закрыть приложение согласно поведению платформы';
 
   @override
   String get shortcutFocusCloseDrawer => 'Фокусировать/закрыть панель';

@@ -87,7 +87,9 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
     );
   }
 
-  Future<_RemoteChatSelection?> _loadRemoteChatSelection() async {
+  Future<_RemoteChatSelection?> _loadRemoteChatSelection({
+    String? directory,
+  }) async {
     final client = dioClient;
     if (client == null) {
       return null;
@@ -95,7 +97,7 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
     try {
       final response = await client.get<Map<String, dynamic>>(
         '/config',
-        queryParameters: _configQueryParameters(),
+        queryParameters: _configQueryParameters(directory: directory),
       );
       return _parseRemoteChatSelection(response.data);
     } catch (_) {
@@ -120,6 +122,9 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
     if (_remoteSelectionSyncInFlight) {
       return;
     }
+    final contextKey = _activeContextKey;
+    final directory = projectProvider.currentDirectory;
+    final generation = _remoteSelectionSyncGeneration;
     final lastSyncAt = _lastRemoteSelectionSyncAt;
     if (!force &&
         lastSyncAt != null &&
@@ -130,7 +135,13 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
 
     _remoteSelectionSyncInFlight = true;
     try {
-      final remoteSelection = await _loadRemoteChatSelection();
+      final remoteSelection = await _loadRemoteChatSelection(
+        directory: directory,
+      );
+      if (contextKey != _activeContextKey ||
+          generation != _remoteSelectionSyncGeneration) {
+        return;
+      }
       _lastRemoteSelectionSyncAt = DateTime.now();
       if (remoteSelection == null) {
         return;
@@ -141,7 +152,10 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
         persistLocal: true,
       );
     } finally {
-      _remoteSelectionSyncInFlight = false;
+      if (contextKey == _activeContextKey &&
+          generation == _remoteSelectionSyncGeneration) {
+        _remoteSelectionSyncInFlight = false;
+      }
     }
   }
 
@@ -208,7 +222,62 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
   }
 
   Future<void> _runSelectionSyncTransaction({required String reason}) async {
-    final success = await _syncSelectionToRemoteConfig();
+    final contextKey = _activeContextKey;
+    final generation = _remoteSelectionSyncGeneration;
+    final directory = projectProvider.currentDirectory;
+    final previous = _selectionSyncTransactionQueue;
+    final task = previous
+        .catchError((Object error, StackTrace stackTrace) {
+          AppLogger.warn(
+            'Previous selection sync transaction failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        })
+        .then(
+          (_) => _runSelectionSyncTransactionBody(
+            reason: reason,
+            contextKey: contextKey,
+            directory: directory,
+            generation: generation,
+          ),
+        );
+    _selectionSyncTransactionQueue = task.catchError((
+      Object error,
+      StackTrace stackTrace,
+    ) {
+      AppLogger.warn(
+        'Selection sync transaction failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    });
+    await task;
+  }
+
+  Future<void> _runSelectionSyncTransactionBody({
+    required String reason,
+    required String contextKey,
+    required String? directory,
+    required int generation,
+  }) async {
+    if (contextKey != _activeContextKey ||
+        generation != _remoteSelectionSyncGeneration) {
+      return;
+    }
+    _setSelectionSyncTransactionPhase(
+      _SelectionSyncTransactionPhase.pendingRemote,
+      reason: '$reason-start',
+    );
+    final success = await _syncSelectionToRemoteConfig(
+      contextKey: contextKey,
+      directory: directory,
+      generation: generation,
+    );
+    if (contextKey != _activeContextKey ||
+        generation != _remoteSelectionSyncGeneration) {
+      return;
+    }
     if (success) {
       _setSelectionSyncTransactionPhase(
         _SelectionSyncTransactionPhase.appliedRemote,

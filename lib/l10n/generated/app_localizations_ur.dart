@@ -4237,11 +4237,11 @@ class AppLocalizationsUr extends AppLocalizations {
   String get setupDebugWsl => 'ڈبلیو ایس ایل';
 
   @override
-  String get shortcutCloseApp => 'ایپلیکیشن بند کریں';
+  String get shortcutCloseApp => 'ٹیب/ایپلیکیشن بند کریں';
 
   @override
   String get shortcutCloseAppDesc =>
-      'پلیٹ فارم کے بند کرنے کے رویے کا استعمال کرتے ہوئے ایپ بند کریں';
+      'موجودہ سیشن ٹیب دستیاب ہو تو اسے بند کریں؛ ورنہ پلیٹ فارم کے رویے کے مطابق ایپ بند کریں';
 
   @override
   String get shortcutFocusCloseDrawer => 'دراز پر توجہ مرکوز کریں/بند کریں';

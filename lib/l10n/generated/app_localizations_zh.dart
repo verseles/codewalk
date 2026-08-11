@@ -3990,10 +3990,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setupDebugWsl => 'WSL';
 
   @override
-  String get shortcutCloseApp => '关闭应用';
+  String get shortcutCloseApp => '关闭标签页/应用';
 
   @override
-  String get shortcutCloseAppDesc => '使用平台关闭行为关闭应用';
+  String get shortcutCloseAppDesc => '如果当前会话标签页可用则将其关闭，否则按平台行为关闭应用';
 
   @override
   String get shortcutFocusCloseDrawer => '聚焦/关闭侧边栏';

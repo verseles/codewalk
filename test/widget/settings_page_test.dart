@@ -373,6 +373,134 @@ void main() {
     );
   });
 
+  testWidgets(
+    'Behavior render mode stays selected across navigation and hydration',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final local = _StaleReadExperienceSettingsDataSource()
+        ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+      final firstProvider = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: SoundService(),
+      );
+      await firstProvider.initialize();
+      addTearDown(firstProvider.dispose);
+      final staleLiveSettingsJson = local.experienceSettingsJson!;
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SettingsProvider>.value(
+          value: firstProvider,
+          child: _localizedMaterialApp(
+            home: const SettingsPage(initialSectionId: 'behavior'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final renderModeFinder = find.byKey(
+        const ValueKey<String>('settings_chat_render_mode'),
+      );
+      await tester.scrollUntilVisible(
+        renderModeFinder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      Set<ChatRenderMode> selectedMode() => tester
+          .widget<SegmentedButton<ChatRenderMode>>(renderModeFinder)
+          .selected;
+
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.live});
+      expect(
+        find.text(
+          'Show assistant text, reasoning, and tool activity as OpenCode streams events.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.descendant(of: renderModeFinder, matching: find.text('Block')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(firstProvider.chatRenderMode, ChatRenderMode.block);
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.block});
+      expect(
+        find.text(
+          'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Behavior').first);
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        renderModeFinder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.block});
+
+      await tester.tap(
+        find.descendant(of: renderModeFinder, matching: find.text('Live')),
+      );
+      await tester.pumpAndSettle();
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.live});
+
+      await tester.tap(
+        find.descendant(of: renderModeFinder, matching: find.text('Block')),
+      );
+      await tester.pumpAndSettle();
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.block});
+      expect(
+        jsonDecode(local.experienceSettingsJson!)['chatRenderMode'],
+        'block',
+      );
+
+      local.readOverride = staleLiveSettingsJson;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(firstProvider.chatRenderMode, ChatRenderMode.block);
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.block});
+      local.readOverride = null;
+
+      final secondProvider = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: SoundService(),
+      );
+      await secondProvider.initialize();
+      addTearDown(secondProvider.dispose);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SettingsProvider>.value(
+          value: secondProvider,
+          child: _localizedMaterialApp(
+            home: const SettingsPage(initialSectionId: 'behavior'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        renderModeFinder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(secondProvider.chatRenderMode, ChatRenderMode.block);
+      expect(selectedMode(), <ChatRenderMode>{ChatRenderMode.block});
+    },
+  );
+
   testWidgets('settings landing shows update banner above normal actions', (
     WidgetTester tester,
   ) async {
@@ -842,6 +970,16 @@ class _MockResponse {
 
   final int statusCode;
   final dynamic data;
+}
+
+class _StaleReadExperienceSettingsDataSource
+    extends InMemoryAppLocalDataSource {
+  String? readOverride;
+
+  @override
+  Future<String?> getExperienceSettingsJson() async {
+    return readOverride ?? super.getExperienceSettingsJson();
+  }
 }
 
 class _WidgetSessionAttentionHostService

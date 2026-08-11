@@ -182,6 +182,38 @@ void main() {
       },
     );
 
+    test(
+      'session attention refresh preserves unrelated in-memory settings',
+      () async {
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = jsonEncode(
+            ExperienceSettings.defaults().toJson(),
+          );
+        final host = _FakeSessionAttentionHostService();
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          sessionAttentionHostService: host,
+          sessionAttentionPresentationOverrideReader: () async =>
+              SessionAttentionPresentation.bubble,
+        );
+        await provider.initialize();
+        await provider.setChatRenderMode(ChatRenderMode.block);
+
+        local.experienceSettingsJson = jsonEncode(
+          ExperienceSettings.defaults().toJson(),
+        );
+        await provider.refreshSessionAttentionHostCapability();
+
+        expect(provider.chatRenderMode, ChatRenderMode.block);
+        expect(
+          provider.sessionAttentionPresentation,
+          SessionAttentionPresentation.bubble,
+        );
+      },
+    );
+
     test('restore activation failure persists the override as off', () async {
       final local = InMemoryAppLocalDataSource()
         ..experienceSettingsJson = jsonEncode(

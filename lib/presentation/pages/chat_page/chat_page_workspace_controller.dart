@@ -15,9 +15,14 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       return;
     }
 
-    await _clearBackgroundPermissionAutoApproveContext(
-      reason: 'project-scope-transition',
-    );
+    final permissionContextGeneration =
+        ++_backgroundPermissionContextGeneration;
+    final permissionMutationGeneration =
+        ++_backgroundPermissionContextMutationGeneration;
+    _backgroundPermissionContextClearPendingGeneration =
+        permissionContextGeneration;
+    _backgroundPermissionAutoApproveContextSignature = null;
+    Future<void>? permissionContextClear;
 
     final completion = Completer<void>();
     _projectScopeTransitionTask = completion.future;
@@ -49,6 +54,16 @@ extension _ChatPageWorkspaceController on _ChatPageState {
     _projectScopeLoadingOverlayTimer = overlayTimer;
 
     try {
+      await _disableBackgroundPermissionAutoApproveContext(
+        reason: 'project-scope-transition',
+        generation: permissionContextGeneration,
+        mutationGeneration: permissionMutationGeneration,
+      );
+      permissionContextClear = _enqueueBackgroundPermissionContextClear(
+        reason: 'project-scope-transition',
+        expectedGeneration: permissionContextGeneration,
+        expectedMutationGeneration: permissionMutationGeneration,
+      );
       await operation();
     } catch (error, stackTrace) {
       pendingError = error;
@@ -75,9 +90,76 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       }
     }
 
+    if (permissionContextClear != null) {
+      _finishBackgroundPermissionContextTransition(
+        generation: permissionContextGeneration,
+        mutationGeneration: permissionMutationGeneration,
+        clear: permissionContextClear,
+        allowRetry: true,
+      );
+    } else if (permissionContextGeneration ==
+        _backgroundPermissionContextGeneration) {
+      _backgroundPermissionContextClearPendingGeneration = null;
+    }
+
     if (pendingError != null && pendingStackTrace != null) {
       Error.throwWithStackTrace(pendingError, pendingStackTrace);
     }
+  }
+
+  void _finishBackgroundPermissionContextTransition({
+    required int generation,
+    required int mutationGeneration,
+    required Future<void> clear,
+    required bool allowRetry,
+  }) {
+    final completion = clear.then((_) async {
+      if (!mounted || generation != _backgroundPermissionContextGeneration) {
+        return;
+      }
+      _backgroundPermissionContextClearPendingGeneration = null;
+      if (mutationGeneration !=
+          _backgroundPermissionContextMutationGeneration) {
+        return;
+      }
+      await _syncBackgroundPermissionAutoApproveContext(
+        reason: allowRetry
+            ? 'project-scope-transition-complete'
+            : 'project-scope-transition-retry-complete',
+      );
+    });
+    final queued = completion.catchError((Object error, StackTrace stackTrace) {
+      if (generation == _backgroundPermissionContextGeneration) {
+        if (mutationGeneration !=
+            _backgroundPermissionContextMutationGeneration) {
+          _backgroundPermissionContextClearPendingGeneration = null;
+        } else {
+          _backgroundPermissionAutoApproveContextSignature = null;
+          if (allowRetry && mounted) {
+            _finishBackgroundPermissionContextTransition(
+              generation: generation,
+              mutationGeneration: mutationGeneration,
+              clear: _enqueueBackgroundPermissionContextClear(
+                reason: 'project-scope-transition-retry',
+                expectedGeneration: generation,
+                expectedMutationGeneration: mutationGeneration,
+              ),
+              allowRetry: false,
+            );
+          } else if (!allowRetry) {
+            _backgroundPermissionContextClearPendingGeneration = null;
+          }
+        }
+      }
+      AppLogger.warn(
+        allowRetry
+            ? 'Retrying background auto-approve context transition'
+            : 'Project transition kept background auto-approve fail-closed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    });
+    unawaited(queued);
   }
 
   Future<void> _switchProjectContext(String projectId) async {

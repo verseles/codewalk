@@ -415,6 +415,22 @@ class _ChatContextSnapshot {
     required this.activeSendDraft,
     required this.rejectedDraft,
     required this.questionSubmitFailedRequestIds,
+    required this.providers,
+    required this.defaultModels,
+    required this.connectedProviderIds,
+    required this.agents,
+    required this.selectedProviderId,
+    required this.selectedModelId,
+    required this.selectedAgentName,
+    required this.selectedVariantId,
+    required this.recentModelKeys,
+    required this.recentAgentNames,
+    required this.recentVariantValuesByModel,
+    required this.modelUsageCounts,
+    required this.selectedVariantByModel,
+    required this.agentSelectionMemoryByAgent,
+    required this.providerCatalogFetchedAtEpochMs,
+    required this.agentCatalogFetchedAtEpochMs,
   });
 
   final List<ChatSession> sessions;
@@ -438,6 +454,22 @@ class _ChatContextSnapshot {
   final ChatComposerDraft? activeSendDraft;
   final _RejectedDraftEnvelope? rejectedDraft;
   final Set<String> questionSubmitFailedRequestIds;
+  final List<Provider> providers;
+  final Map<String, String> defaultModels;
+  final List<String> connectedProviderIds;
+  final List<Agent> agents;
+  final String? selectedProviderId;
+  final String? selectedModelId;
+  final String? selectedAgentName;
+  final String? selectedVariantId;
+  final List<String> recentModelKeys;
+  final List<String> recentAgentNames;
+  final Map<String, List<String>> recentVariantValuesByModel;
+  final Map<String, int> modelUsageCounts;
+  final Map<String, String> selectedVariantByModel;
+  final Map<String, _AgentSelectionMemory> agentSelectionMemoryByAgent;
+  final int? providerCatalogFetchedAtEpochMs;
+  final int? agentCatalogFetchedAtEpochMs;
 }
 
 class _AutoTitleCandidateMessage {
@@ -507,14 +539,22 @@ class _ProviderCatalogSnapshot {
     required this.providers,
     required this.defaultModels,
     required this.connected,
+    required this.agents,
+    this.providerFetchedAtEpochMs,
+    this.agentFetchedAtEpochMs,
   });
 
   final List<Provider> providers;
   final Map<String, String> defaultModels;
   final List<String> connected;
+  final List<Agent> agents;
+  final int? providerFetchedAtEpochMs;
+  final int? agentFetchedAtEpochMs;
 
-  bool get isEmpty => providers.isEmpty;
+  bool get isEmpty => providers.isEmpty && agents.isEmpty;
 }
+
+enum _CatalogAuthority { unknown, stale, authoritative }
 
 class _SessionSelectionOverride {
   const _SessionSelectionOverride({
@@ -573,6 +613,8 @@ class _SelectionPersistenceSnapshot {
   const _SelectionPersistenceSnapshot({
     required this.serverId,
     required this.scopeId,
+    required this.contextKey,
+    required this.remoteSyncGeneration,
     required this.selectedProviderId,
     required this.selectedModelId,
     required this.selectedAgentName,
@@ -586,6 +628,8 @@ class _SelectionPersistenceSnapshot {
 
   final String serverId;
   final String scopeId;
+  final String contextKey;
+  final int remoteSyncGeneration;
   final String? selectedProviderId;
   final String? selectedModelId;
   final String? selectedAgentName;
@@ -600,6 +644,8 @@ class _SelectionPersistenceSnapshot {
     return _SelectionPersistenceSnapshot(
       serverId: serverId,
       scopeId: scopeId,
+      contextKey: contextKey,
+      remoteSyncGeneration: remoteSyncGeneration,
       selectedProviderId: selectedProviderId,
       selectedModelId: selectedModelId,
       selectedAgentName: selectedAgentName,

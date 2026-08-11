@@ -419,6 +419,10 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> _defaultModels = {};
   List<String> _connectedProviderIds = <String>[];
   List<Agent> _agents = <Agent>[];
+  _CatalogAuthority _providerCatalogAuthority = _CatalogAuthority.unknown;
+  _CatalogAuthority _agentCatalogAuthority = _CatalogAuthority.unknown;
+  int? _providerCatalogFetchedAtEpochMs;
+  int? _agentCatalogFetchedAtEpochMs;
   ChatProvidersRefreshState _providersRefreshState =
       ChatProvidersRefreshState.idle;
   String? _providersRefreshErrorMessage;
@@ -450,8 +454,10 @@ class ChatProvider extends ChangeNotifier {
   DateTime? _pendingRemoteSelectionSyncSince;
   DateTime? _lastRemoteSelectionSyncAt;
   bool _remoteSelectionSyncInFlight = false;
+  int _remoteSelectionSyncGeneration = 0;
   _SelectionSyncTransactionPhase _selectionSyncTransactionPhase =
       _SelectionSyncTransactionPhase.idle;
+  Future<void> _selectionSyncTransactionQueue = Future<void>.value();
   Future<void>? _selectionPersistenceTask;
   bool _selectionPersistenceDirty = false;
   bool _selectionPersistenceSyncRemote = false;
@@ -2511,6 +2517,8 @@ class ChatProvider extends ChangeNotifier {
     return _SelectionPersistenceSnapshot(
       serverId: serverId,
       scopeId: scopeId,
+      contextKey: _activeContextKey,
+      remoteSyncGeneration: _remoteSelectionSyncGeneration,
       selectedProviderId: _selectedProviderId,
       selectedModelId: _selectedModelId,
       selectedAgentName: _selectedAgentName,
@@ -2624,6 +2632,10 @@ class ChatProvider extends ChangeNotifier {
       sizeBytes: snapshot.sessionSelectionOverridesJson.length,
     );
     if (syncRemote) {
+      if (snapshot.contextKey != _activeContextKey ||
+          snapshot.remoteSyncGeneration != _remoteSelectionSyncGeneration) {
+        return;
+      }
       if (!_isExperimentalMultiDeviceSyncEnabled) {
         _pendingRemoteSelectionSync = false;
         _pendingRemoteSelectionSyncSince = null;
