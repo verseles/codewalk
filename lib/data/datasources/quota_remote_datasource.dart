@@ -9,23 +9,8 @@ import '../../presentation/services/chat_title_generator.dart';
 
 part 'quota_remote_datasource.part.js.dart';
 
-class OpenCodeGoDashboardCredentials {
-  const OpenCodeGoDashboardCredentials({
-    required this.workspaceId,
-    required this.authCookie,
-  });
-
-  final String workspaceId;
-  final String authCookie;
-
-  bool get isComplete =>
-      workspaceId.trim().isNotEmpty && authCookie.trim().isNotEmpty;
-}
-
 abstract class QuotaRemoteDataSource {
-  Future<List<QuotaProviderResult>> fetchQuotaResults({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  });
+  Future<List<QuotaProviderResult>> fetchQuotaResults();
 }
 
 class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
@@ -81,16 +66,14 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
   };
 
   @override
-  Future<List<QuotaProviderResult>> fetchQuotaResults({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  }) async {
+  Future<List<QuotaProviderResult>> fetchQuotaResults() async {
     final viaRest = await _fetchViaOpenChamberRest();
     if (viaRest != null) {
       AppLogger.info('[Quota] REST path returned ${viaRest.length} results');
       return viaRest;
     }
     AppLogger.info('[Quota] REST path unavailable, trying shell fallback');
-    return _fetchViaShellFallback(openCodeGoCredentials: openCodeGoCredentials);
+    return _fetchViaShellFallback();
   }
 
   Future<List<QuotaProviderResult>?> _fetchViaOpenChamberRest() async {
@@ -160,9 +143,7 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
     }
   }
 
-  Future<List<QuotaProviderResult>> _fetchViaShellFallback({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  }) async {
+  Future<List<QuotaProviderResult>> _fetchViaShellFallback() async {
     String? sessionId;
     try {
       sessionId = await _createEphemeralSession();
@@ -175,9 +156,7 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
         '/session/$sessionId/shell',
         data: <String, dynamic>{
           'agent': 'build',
-          'command': _buildQuotaShellCommand(
-            openCodeGoCredentials: openCodeGoCredentials,
-          ),
+          'command': _buildQuotaShellCommand(),
         },
       );
       if (response.statusCode != 200 || response.data is! Map) {
@@ -355,16 +334,7 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
     return null;
   }
 
-  String _buildQuotaShellCommand({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  }) {
-    final wsB64 = openCodeGoCredentials?.isComplete == true
-        ? base64Encode(utf8.encode(openCodeGoCredentials!.workspaceId.trim()))
-        : '';
-    final ckB64 = openCodeGoCredentials?.isComplete == true
-        ? base64Encode(utf8.encode(openCodeGoCredentials!.authCookie.trim()))
-        : '';
-
+  String _buildQuotaShellCommand() {
     final supportedKeysLiteral = jsonEncode(_supportedAuthKeys.toList());
 
     final payload = StringBuffer()
@@ -375,9 +345,7 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
       ..write(_jsCodexProvider())
       ..write(_jsGoogleProvider())
       ..write(_jsGitHubCopilotProvider())
-      ..write(
-        _jsOpenCodeGoProvider(openCodeGoWsB64: wsB64, openCodeGoCkB64: ckB64),
-      )
+      ..write(_jsOpenCodeGoProvider())
       ..write(_jsNanoGptProvider())
       ..write(_jsWaferProvider())
       ..write(_jsGitHubCopilotAddonProvider())

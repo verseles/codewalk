@@ -1,11 +1,10 @@
-import '../../../core/i18n/l10n_context.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/i18n/l10n_context.dart';
 import '../../../core/logging/app_logger.dart';
-import '../../services/file_part_action_service_shared.dart';
-import '../../theme/app_animations.dart';
 import '../../providers/quota_provider.dart';
+import '../../theme/app_animations.dart';
 import 'quota_provider_group_row.dart';
 
 class QuotaPopupSection extends StatefulWidget {
@@ -50,10 +49,10 @@ class _QuotaPopupSectionState extends State<QuotaPopupSection> {
     return Consumer<QuotaProvider>(
       builder: (context, quotaProvider, _) {
         final groups = quotaProvider.groups;
-        final showOpenCodeGoSetup = quotaProvider.openCodeGoSetupRequired;
+        final showOpenCodeGoFailure = quotaProvider.hasOpenCodeGoFailure;
         final isInitialLoading =
             quotaProvider.isLoading && quotaProvider.lastFetchedAt == null;
-        if (groups.isEmpty && !isInitialLoading && !showOpenCodeGoSetup) {
+        if (groups.isEmpty && !isInitialLoading && !showOpenCodeGoFailure) {
           AppLogger.info(
             '[QuotaUI] popup section hidden '
             '(loading=${quotaProvider.isLoading}, serverId=${widget.serverId})',
@@ -132,11 +131,9 @@ class _QuotaPopupSectionState extends State<QuotaPopupSection> {
               const _QuotaInitialLoadingState(),
             ] else ...[
               for (final group in groups) QuotaProviderGroupRow(group: group),
-              if (showOpenCodeGoSetup)
-                _OpenCodeGoSetupCard(
-                  serverId: widget.serverId,
-                  hasSavedCredentials:
-                      quotaProvider.hasOpenCodeGoDashboardCredentials,
+              if (showOpenCodeGoFailure)
+                _OpenCodeGoFailureCard(
+                  errorCode: quotaProvider.openCodeGoErrorCode,
                   error: quotaProvider.openCodeGoError,
                 ),
             ],
@@ -147,29 +144,28 @@ class _QuotaPopupSectionState extends State<QuotaPopupSection> {
   }
 }
 
-class _OpenCodeGoSetupCard extends StatelessWidget {
-  const _OpenCodeGoSetupCard({
-    required this.serverId,
-    required this.hasSavedCredentials,
-    required this.error,
-  });
+class _OpenCodeGoFailureCard extends StatelessWidget {
+  const _OpenCodeGoFailureCard({required this.errorCode, required this.error});
 
-  final String? serverId;
-  final bool hasSavedCredentials;
+  final String? errorCode;
   final String? error;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final title = hasSavedCredentials
-        ? context.l10n.quotaOpenCodeGoNeedsReconnect
-        : context.l10n.quotaOpenCodeGoDetected;
-    final description = hasSavedCredentials
-        ? context.l10n.quotaOpenCodeGoReconnectDescription
-        : context.l10n.quotaOpenCodeGoConnectDescription;
+    final title = switch (errorCode) {
+      'authentication' => context.l10n.errorAuthRequired,
+      'request_failed' => context.l10n.errorProviderUnavailable,
+      _ => context.l10n.errorAnErrorOccurred,
+    };
+    final description = switch (errorCode) {
+      'authentication' => context.l10n.errorAuthRequiredDesc,
+      'request_failed' => context.l10n.errorProviderUnavailableDesc,
+      _ => context.l10n.errorServerErrorDesc,
+    };
     return Container(
-      key: const ValueKey('opencode-go-quota-setup-card'),
+      key: const ValueKey('opencode-go-quota-failure-card'),
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -203,151 +199,9 @@ class _OpenCodeGoSetupCard extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              FilledButton.tonal(
-                key: const ValueKey('opencode-go-connect-usage-dashboard'),
-                onPressed: () => _showOpenCodeGoDashboardDialog(context),
-                child: Text(
-                  hasSavedCredentials
-                      ? context.l10n.quotaReconnect
-                      : context.l10n.quotaConnect,
-                ),
-              ),
-              if (hasSavedCredentials)
-                TextButton(
-                  key: const ValueKey('opencode-go-forget-credentials'),
-                  onPressed: () {
-                    context
-                        .read<QuotaProvider>()
-                        .forgetOpenCodeGoDashboardCredentials(
-                          serverId: serverId,
-                        );
-                  },
-                  child: Text(context.l10n.quotaForget),
-                ),
-            ],
-          ),
         ],
       ),
     );
-  }
-
-  Future<void> _showOpenCodeGoDashboardDialog(BuildContext context) async {
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return _OpenCodeGoDashboardDialog(serverId: serverId);
-      },
-    );
-  }
-}
-
-class _OpenCodeGoDashboardDialog extends StatefulWidget {
-  const _OpenCodeGoDashboardDialog({required this.serverId});
-
-  final String? serverId;
-
-  @override
-  State<_OpenCodeGoDashboardDialog> createState() =>
-      _OpenCodeGoDashboardDialogState();
-}
-
-class _OpenCodeGoDashboardDialogState
-    extends State<_OpenCodeGoDashboardDialog> {
-  final _workspaceController = TextEditingController();
-  final _cookieController = TextEditingController();
-  bool _saving = false;
-
-  @override
-  void dispose() {
-    _workspaceController.dispose();
-    _cookieController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(context.l10n.quotaOpenCodeGoUsage),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: const ValueKey('opencode-go-open-dashboard'),
-                onPressed: _openDashboard,
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: Text(context.l10n.quotaOpenDashboard),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              key: const ValueKey('opencode-go-workspace-field'),
-              controller: _workspaceController,
-              decoration: InputDecoration(
-                labelText: context.l10n.quotaWorkspaceId,
-                hintText: context.l10n.quotaWorkspaceId,
-                border: const OutlineInputBorder(),
-              ),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const ValueKey('opencode-go-cookie-field'),
-              controller: _cookieController,
-              decoration: InputDecoration(
-                labelText: context.l10n.quotaAuthCookie,
-                hintText: context.l10n.quotaAuthCookie,
-                border: const OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.of(context).pop(),
-          child: Text(context.l10n.commonCancel),
-        ),
-        FilledButton(
-          key: const ValueKey('opencode-go-save-dashboard-credentials'),
-          onPressed: _saving ? null : _save,
-          child: _saving
-              ? Text(context.l10n.quotaSaving)
-              : Text(context.l10n.commonSave),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _openDashboard() async {
-    await safeLaunch(Uri.parse('https://opencode.ai/auth'));
-  }
-
-  Future<void> _save() async {
-    final workspaceId = _workspaceController.text.trim();
-    final authCookie = _cookieController.text.trim();
-    if (workspaceId.isEmpty || authCookie.isEmpty) {
-      return;
-    }
-    setState(() => _saving = true);
-    await context.read<QuotaProvider>().saveOpenCodeGoDashboardCredentials(
-      serverId: widget.serverId,
-      workspaceId: workspaceId,
-      authCookie: authCookie,
-    );
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
   }
 }
 

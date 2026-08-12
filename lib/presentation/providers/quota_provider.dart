@@ -28,16 +28,13 @@ class QuotaProvider extends ChangeNotifier {
   List<QuotaProviderResult> get results =>
       List<QuotaProviderResult>.unmodifiable(_results);
 
-  bool get openCodeGoSetupRequired {
+  bool get hasOpenCodeGoFailure {
     final result = _openCodeGoResult;
     return result != null && result.configured && !result.hasVisibleData;
   }
 
-  bool get hasOpenCodeGoDashboardCredentials =>
-      (_openCodeGoWorkspaceId?.trim().isNotEmpty ?? false) &&
-      (_openCodeGoAuthCookie?.trim().isNotEmpty ?? false);
-
   String? get openCodeGoError => _openCodeGoResult?.error;
+  String? get openCodeGoErrorCode => _openCodeGoResult?.errorCode;
 
   QuotaProviderResult? get _openCodeGoResult {
     for (final result in _results) {
@@ -48,8 +45,7 @@ class QuotaProvider extends ChangeNotifier {
     return null;
   }
 
-  String? _openCodeGoWorkspaceId;
-  String? _openCodeGoAuthCookie;
+  bool _legacyCredentialsCleared = false;
 
   bool get hasAnyQuotaData => groups.isNotEmpty;
 
@@ -115,15 +111,8 @@ class QuotaProvider extends ChangeNotifier {
     notifyListeners();
     try {
       AppLogger.info('[Quota] ensureLoaded: starting fetch...');
-      await _loadOpenCodeGoDashboardCredentials(normalizedServerId);
-      _results = await _remoteDataSource.fetchQuotaResults(
-        openCodeGoCredentials: hasOpenCodeGoDashboardCredentials
-            ? OpenCodeGoDashboardCredentials(
-                workspaceId: _openCodeGoWorkspaceId!,
-                authCookie: _openCodeGoAuthCookie!,
-              )
-            : null,
-      );
+      await _clearLegacyOpenCodeGoCredentials();
+      _results = await _remoteDataSource.fetchQuotaResults();
       _lastFetchedAt = DateTime.now();
       final groupSummaries = groups
           .map(
@@ -143,60 +132,13 @@ class QuotaProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveOpenCodeGoDashboardCredentials({
-    required String? serverId,
-    required String workspaceId,
-    required String authCookie,
-  }) async {
+  Future<void> _clearLegacyOpenCodeGoCredentials() async {
     final localDataSource = _localDataSource;
-    final normalizedServerId = serverId?.trim();
-    if (localDataSource == null ||
-        normalizedServerId == null ||
-        normalizedServerId.isEmpty) {
+    if (localDataSource == null || _legacyCredentialsCleared) {
       return;
     }
-    await localDataSource.saveOpenCodeGoWorkspaceId(
-      workspaceId,
-      serverId: normalizedServerId,
-    );
-    await localDataSource.saveOpenCodeGoAuthCookie(
-      authCookie,
-      serverId: normalizedServerId,
-    );
-    await ensureLoaded(serverId: normalizedServerId, force: true);
-  }
-
-  Future<void> forgetOpenCodeGoDashboardCredentials({
-    required String? serverId,
-  }) async {
-    final localDataSource = _localDataSource;
-    final normalizedServerId = serverId?.trim();
-    if (localDataSource == null ||
-        normalizedServerId == null ||
-        normalizedServerId.isEmpty) {
-      return;
-    }
-    await localDataSource.clearOpenCodeGoDashboardCredentials(
-      serverId: normalizedServerId,
-    );
-    _openCodeGoWorkspaceId = null;
-    _openCodeGoAuthCookie = null;
-    await ensureLoaded(serverId: normalizedServerId, force: true);
-  }
-
-  Future<void> _loadOpenCodeGoDashboardCredentials(String serverId) async {
-    final localDataSource = _localDataSource;
-    if (localDataSource == null) {
-      _openCodeGoWorkspaceId = null;
-      _openCodeGoAuthCookie = null;
-      return;
-    }
-    _openCodeGoWorkspaceId = await localDataSource.getOpenCodeGoWorkspaceId(
-      serverId: serverId,
-    );
-    _openCodeGoAuthCookie = await localDataSource.getOpenCodeGoAuthCookie(
-      serverId: serverId,
-    );
+    await localDataSource.clearOpenCodeGoDashboardCredentials();
+    _legacyCredentialsCleared = true;
   }
 
   QuotaProviderGroup _buildGroup(QuotaProviderResult result) {

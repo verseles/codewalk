@@ -30,7 +30,7 @@
 
 - **Given** the user has selected a non-English locale in `Settings > Behavior`
 - **When** the user opens the quota details from the `Context usage` status
-- **Then** static UI copy in the popover is rendered in the active locale, including the `Rate limits` section title, loading state, the `OpenCode Go detected` setup card and its `Connect`/`Reconnect` actions, the `Pace` chip and its desktop tooltip / mobile snackbar, and the reset/refresh action labels
+- **Then** static UI copy in the popover is rendered in the active locale, including the `Rate limits` section title, loading state, the OpenCode Go quota failure card (authentication, request, and parsing titles and descriptions), the `Pace` chip and its desktop tooltip / mobile snackbar, and the reset/refresh action labels
 - **Then** provider names (e.g. `opencode-go`, `minimax-coding-plan`, `minimax-cn-coding-plan`, `cursor`, `ollama-cloud`, `Snowflake Cortex`, `Grok/xAI`, `Cohere North`) stay untranslated as server-defined identifiers
 - **Then** window labels (rolling, weekly, monthly) and all server-originated quota values, units, and percentage figures stay untranslated (ADR-023 compliance)
 
@@ -1361,15 +1361,15 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Given** the host does not expose OpenChamber endpoints
 - **When** quota data is requested
 - **Then** CodeWalk falls back to a hidden ephemeral shell session that probes `CW_QUOTA_JSON` without appearing in the user's conversation list
-- **Given** the host's OpenCode `auth.json` has an `opencode-go` key and dashboard credentials are available from either the host environment or CodeWalk's secure server-scoped storage
+- **Given** the host's OpenCode `auth.json` has an `opencode-go` entry
 - **When** the `Provider Quotas` popup is opened
-- **Then** CodeWalk shows rolling, weekly, and monthly usage bars for the `OpenCode Go` provider
-- **Given** OpenCode Go is configured but dashboard credentials are missing or expired
-- **When** the `Provider Quotas` popup is opened
-- **Then** CodeWalk shows an `OpenCode Go detected` setup card with a `Connect` or `Reconnect` action
-- **Then** the setup dialog can open `https://opencode.ai/auth`, save the workspace ID and auth cookie in secure storage, refresh the quota probe, and forget saved credentials later
-- **Then** if neither path returns data, the `Provider Quotas` section is silently omitted from the popup
-- **Then** outside the explicit OpenCode Go dashboard opt-in, the client never stores, manages, or forwards provider credentials; quota ownership stays on the server host by default
+- **Then** the shell fallback requests `https://opencode.ai/zen/go/v1/usage` using the host-owned `opencode-go` key from `auth.json` as a `Bearer` token
+- **Then** CodeWalk shows rolling, weekly, and monthly usage bars for the `OpenCode Go` provider, and any window with a valid percentage displays even when the response carries no reset metadata
+- **When** the OpenCode Go request fails
+- **Then** CodeWalk distinguishes authentication (`401`/`403`), request, and response-parsing failures and shows the matching failure card in the popup without claiming stale dashboard credentials or prompting for new ones
+- **Then** legacy client-stored workspace ID and auth cookie values are purged best-effort from secure storage on quota load, and the client never collects or stores a new dashboard credential
+- **Then** if no provider returns visible data and no failure card applies, the `Provider Quotas` section is omitted from the popup
+- **Then** the client never stores, manages, or forwards provider credentials; quota ownership stays on the server host
 - **Given** the host has configured credentials for `NanoGPT`, `Wafer.ai`, `GitHub Copilot Add-on`, `Kimi for Coding`, `Zhipu AI Coding Plan`, `MiniMax Coding Plan`, `z.ai`, `Cursor`, or `Ollama Cloud`
 - **When** the `Provider Quotas` popup is opened
 - **Then** CodeWalk displays their respective usage windows, rate limits, and remaining credits

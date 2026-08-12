@@ -17,15 +17,9 @@ class _FakeQuotaRemoteDataSource implements QuotaRemoteDataSource {
   _FakeQuotaRemoteDataSource(this.results);
 
   final List<QuotaProviderResult> results;
-  OpenCodeGoDashboardCredentials? lastOpenCodeGoCredentials;
 
   @override
-  Future<List<QuotaProviderResult>> fetchQuotaResults({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  }) async {
-    lastOpenCodeGoCredentials = openCodeGoCredentials;
-    return results;
-  }
+  Future<List<QuotaProviderResult>> fetchQuotaResults() async => results;
 }
 
 class _QueuedQuotaRemoteDataSource implements QuotaRemoteDataSource {
@@ -35,9 +29,7 @@ class _QueuedQuotaRemoteDataSource implements QuotaRemoteDataSource {
   int callCount = 0;
 
   @override
-  Future<List<QuotaProviderResult>> fetchQuotaResults({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  }) {
+  Future<List<QuotaProviderResult>> fetchQuotaResults() {
     if (callCount >= responses.length) {
       return Future<List<QuotaProviderResult>>.value(
         const <QuotaProviderResult>[],
@@ -75,34 +67,30 @@ QuotaProviderResult _buildOpenRouterResult() {
 
 void main() {
   test(
-    'QuotaProvider passes stored OpenCode Go dashboard credentials',
+    'QuotaProvider clears obsolete OpenCode Go dashboard credentials',
     () async {
-      final remoteDataSource = _FakeQuotaRemoteDataSource(const []);
       final localDataSource = support.InMemoryAppLocalDataSource();
-      await localDataSource.saveOpenCodeGoWorkspaceId(
-        'wrk_test',
-        serverId: 'srv_test',
-      );
-      await localDataSource.saveOpenCodeGoAuthCookie(
-        'auth=secret',
-        serverId: 'srv_test',
-      );
+      localDataSource.scopedStrings['opencode_go_workspace_id::srv_test'] =
+          'wrk_test';
+      localDataSource.scopedStrings['opencode_go_auth_cookie::srv_test'] =
+          'auth=secret';
+      localDataSource.scopedStrings['opencode_go_workspace_id::srv_other'] =
+          'wrk_other';
+      localDataSource.scopedStrings['opencode_go_auth_cookie::srv_other'] =
+          'auth=other';
+      localDataSource.scopedStrings['opencode_go_auth_cookie'] =
+          'auth=unscoped';
+      localDataSource.scopedStrings['unrelated'] = 'preserved';
       final provider = QuotaProvider(
-        remoteDataSource: remoteDataSource,
+        remoteDataSource: _FakeQuotaRemoteDataSource(const []),
         localDataSource: localDataSource,
       );
 
       await provider.ensureLoaded(serverId: 'srv_test');
 
-      expect(remoteDataSource.lastOpenCodeGoCredentials, isNotNull);
-      expect(
-        remoteDataSource.lastOpenCodeGoCredentials!.workspaceId,
-        'wrk_test',
-      );
-      expect(
-        remoteDataSource.lastOpenCodeGoCredentials!.authCookie,
-        'auth=secret',
-      );
+      expect(localDataSource.scopedStrings, <String, String>{
+        'unrelated': 'preserved',
+      });
     },
   );
 
@@ -453,7 +441,7 @@ void main() {
   );
 
   testWidgets(
-    'QuotaPopupSection shows OpenCode Go setup when dashboard credentials are missing',
+    'QuotaPopupSection distinguishes OpenCode Go authentication failures',
     (tester) async {
       final provider = QuotaProvider(
         remoteDataSource: _FakeQuotaRemoteDataSource(const [
@@ -463,9 +451,9 @@ void main() {
             ok: false,
             configured: true,
             usage: null,
-            error:
-                'OpenCode Go is configured, but subscription usage requires setup.',
+            error: 'OpenCode Go authentication failed',
             fetchedAt: 1,
+            errorCode: 'authentication',
           ),
         ]),
       );
@@ -482,14 +470,52 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(L10nBridge.current!.quotaRateLimits), findsOneWidget);
+      expect(find.text(L10nBridge.current!.errorAuthRequired), findsOneWidget);
       expect(
-        find.text(L10nBridge.current!.quotaOpenCodeGoDetected),
+        find.byKey(const ValueKey('opencode-go-quota-failure-card')),
+        findsOneWidget,
+      );
+      expect(find.text('OpenCode Go authentication failed'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'QuotaPopupSection does not call a parsing failure stale credentials',
+    (tester) async {
+      final provider = QuotaProvider(
+        remoteDataSource: _FakeQuotaRemoteDataSource(const [
+          QuotaProviderResult(
+            providerId: 'opencode-go',
+            providerName: 'OpenCode Go',
+            ok: false,
+            configured: true,
+            usage: null,
+            error: 'OpenCode Go usage data could not be parsed',
+            fetchedAt: 1,
+            errorCode: 'invalid_response',
+          ),
+        ]),
+      );
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<QuotaProvider>.value(
+          value: provider,
+          child: _buildApp(
+            home: const Scaffold(body: QuotaPopupSection(serverId: 'srv_test')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(L10nBridge.current!.errorAnErrorOccurred),
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey('opencode-go-connect-usage-dashboard')),
-        findsOneWidget,
+        find.text(L10nBridge.current!.quotaOpenCodeGoNeedsReconnect),
+        findsNothing,
       );
+      expect(find.byType(TextField), findsNothing);
     },
   );
 

@@ -143,18 +143,14 @@ class FakeQuotaRemoteDataSource implements QuotaRemoteDataSource {
 
   List<QuotaProviderResult> _results;
   int fetchCallCount = 0;
-  OpenCodeGoDashboardCredentials? lastOpenCodeGoCredentials;
 
   set results(List<QuotaProviderResult> value) {
     _results = value;
   }
 
   @override
-  Future<List<QuotaProviderResult>> fetchQuotaResults({
-    OpenCodeGoDashboardCredentials? openCodeGoCredentials,
-  }) async {
+  Future<List<QuotaProviderResult>> fetchQuotaResults() async {
     fetchCallCount += 1;
-    lastOpenCodeGoCredentials = openCodeGoCredentials;
     return _results;
   }
 }
@@ -278,16 +274,6 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   Future<String?> getApiKey({String? serverId}) async {
     if (serverId == null) return apiKey;
     return scopedStrings[_key('api_key', serverId: serverId)];
-  }
-
-  @override
-  Future<String?> getOpenCodeGoWorkspaceId({String? serverId}) async {
-    return scopedStrings[_key('opencode_go_workspace_id', serverId: serverId)];
-  }
-
-  @override
-  Future<String?> getOpenCodeGoAuthCookie({String? serverId}) async {
-    return scopedStrings[_key('opencode_go_auth_cookie', serverId: serverId)];
   }
 
   @override
@@ -725,35 +711,14 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
-  Future<void> saveOpenCodeGoWorkspaceId(
-    String workspaceId, {
-    String? serverId,
-  }) async {
-    final key = _key('opencode_go_workspace_id', serverId: serverId);
-    if (workspaceId.trim().isEmpty) {
-      scopedStrings.remove(key);
-      return;
-    }
-    scopedStrings[key] = workspaceId.trim();
-  }
-
-  @override
-  Future<void> saveOpenCodeGoAuthCookie(
-    String authCookie, {
-    String? serverId,
-  }) async {
-    final key = _key('opencode_go_auth_cookie', serverId: serverId);
-    if (authCookie.trim().isEmpty) {
-      scopedStrings.remove(key);
-      return;
-    }
-    scopedStrings[key] = authCookie.trim();
-  }
-
-  @override
-  Future<void> clearOpenCodeGoDashboardCredentials({String? serverId}) async {
-    scopedStrings.remove(_key('opencode_go_workspace_id', serverId: serverId));
-    scopedStrings.remove(_key('opencode_go_auth_cookie', serverId: serverId));
+  Future<void> clearOpenCodeGoDashboardCredentials() async {
+    scopedStrings.removeWhere(
+      (key, _) =>
+          key == 'opencode_go_workspace_id' ||
+          key.startsWith('opencode_go_workspace_id::') ||
+          key == 'opencode_go_auth_cookie' ||
+          key.startsWith('opencode_go_auth_cookie::'),
+    );
   }
 
   @override

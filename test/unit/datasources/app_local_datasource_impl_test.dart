@@ -193,6 +193,37 @@ void main() {
   );
 
   test(
+    'clears all legacy OpenCode Go secrets and preserves other values',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(sharedPreferences: prefs);
+      const workspacePrefix =
+          '${AppConstants.secureStorageNamespace}::${AppConstants.opencodeGoWorkspaceIdKey}';
+      const cookiePrefix =
+          '${AppConstants.secureStorageNamespace}::${AppConstants.opencodeGoAuthCookieKey}';
+      secureValues.addAll(<String, String>{
+        workspacePrefix: 'workspace-unscoped',
+        '$workspacePrefix::active': 'workspace-active',
+        '$workspacePrefix::removed': 'workspace-orphaned',
+        cookiePrefix: 'cookie-unscoped',
+        '$cookiePrefix::active': 'cookie-active',
+        '$cookiePrefix::removed': 'cookie-orphaned',
+        '${AppConstants.secureStorageNamespace}::api_key::active':
+            'keep-api-key',
+        'other::$cookiePrefix': 'keep-suffix-match',
+      });
+
+      await dataSource.clearOpenCodeGoDashboardCredentials();
+
+      expect(secureValues, <String, String>{
+        '${AppConstants.secureStorageNamespace}::api_key::active':
+            'keep-api-key',
+        'other::$cookiePrefix': 'keep-suffix-match',
+      });
+    },
+  );
+
+  test(
     'stores large chat cache payload in cache store instead of preferences',
     () async {
       final prefs = await SharedPreferences.getInstance();

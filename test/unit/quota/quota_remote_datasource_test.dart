@@ -159,16 +159,19 @@ void main() {
     expect(script, contains('function rGAccess(src)'));
     expect(script, contains('function fOCG(a)'));
     expect(script, contains("getE(a, ['opencode-go'])"));
-    expect(script, contains('https://opencode.ai/zen/go/v1/models'));
-    expect(script, contains('process.env.OPENCODE_GO_WORKSPACE_ID'));
-    expect(script, contains('process.env.OPENCODE_GO_AUTH_COOKIE'));
-    expect(script, contains('process.env.OPENCODE_GO_SESSION_COOKIE'));
-    expect(script, contains("t.indexOf('auth=') === 0"));
-    expect(script, contains("label === 'rolling usage'"));
-    expect(
-      script,
-      contains('w.rolling = tUW({ uP: sub.rolling.usedPercent, wS: null'),
+    expect(script, contains('https://opencode.ai/zen/go/v1/usage'));
+    expect(script, contains("Authorization: 'Bearer ' + k"));
+    final openCodeGoProbe = script.substring(
+      script.indexOf('async function fOCG(a)'),
+      script.indexOf('async function fNanoGpt(a)'),
     );
+    expect(openCodeGoProbe, isNot(contains('Cookie:')));
+    expect(script, isNot(contains('OPENCODE_GO_WORKSPACE_ID')));
+    expect(script, isNot(contains('OPENCODE_GO_AUTH_COOKIE')));
+    expect(script, contains("['rolling', 'rolling']"));
+    expect(script, contains("errCode: 'authentication'"));
+    expect(script, contains("errCode: 'invalid_response'"));
+    expect(script, contains('AbortSignal.timeout(15000)'));
     // The unsupported-keys filter is a minified string literal in the JS
     // shell-fallback; assert on a robust anchor (the trailing "].includes(k)"
     // pattern) plus the order-stable quota auth key set so the assertion
@@ -285,6 +288,128 @@ void main() {
       return;
     }
     expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+  });
+
+  test('OpenCode Go probe parses partial usage from the bearer API', () async {
+    final dio = Dio();
+    String? shellCommand;
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (options.path == '/api/quota/providers') {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                response: Response<dynamic>(
+                  requestOptions: options,
+                  statusCode: 404,
+                ),
+              ),
+            );
+            return;
+          }
+          if (options.path == '/session' && options.method == 'POST') {
+            handler.resolve(
+              Response<dynamic>(
+                requestOptions: options,
+                statusCode: 200,
+                data: <String, dynamic>{'id': 'ses_opencode_go_probe'},
+              ),
+            );
+            return;
+          }
+          if (options.path == '/session/ses_opencode_go_probe/shell') {
+            shellCommand =
+                (options.data as Map<String, dynamic>)['command'] as String?;
+            handler.resolve(
+              Response<dynamic>(
+                requestOptions: options,
+                statusCode: 200,
+                data: <String, dynamic>{
+                  'parts': <Map<String, dynamic>>[
+                    <String, dynamic>{
+                      'type': 'text',
+                      'text': 'CW_QUOTA_JSON:{"results":[]}',
+                    },
+                  ],
+                },
+              ),
+            );
+            return;
+          }
+          if (options.path == '/session/ses_opencode_go_probe' &&
+              options.method == 'DELETE') {
+            handler.resolve(
+              Response<dynamic>(requestOptions: options, statusCode: 200),
+            );
+            return;
+          }
+          handler.reject(
+            DioException(
+              requestOptions: options,
+              error: 'Unexpected ${options.path}',
+            ),
+          );
+        },
+      ),
+    );
+    await QuotaRemoteDataSourceImpl(dio: dio).fetchQuotaResults();
+    final script = _decodeShellScript(shellCommand!);
+    final probe = script.substring(
+      script.indexOf('async function fOCG(a)'),
+      script.indexOf('async function fNanoGpt(a)'),
+    );
+    const mockFetch = '''
+const fetch = async (url, options) => {
+  if (url !== 'https://opencode.ai/zen/go/v1/usage') throw new Error(url);
+  if (options.headers.Authorization !== 'Bearer test-key') throw new Error('auth');
+  if (Object.hasOwn(options.headers, 'Cookie')) throw new Error('cookie');
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      usage: {
+        rolling: { percent: 25, resetsAt: '2026-08-12T12:00:00.000Z' },
+        weekly: { percent: 40, resetsAt: '2026-08-19T12:00:00.000Z' },
+        monthly: { percent: 55 },
+      },
+    }),
+  };
+};
+''';
+    final executable = [
+      "const P = 'CW_QUOTA_JSON:';",
+      'function getE(a, al) { for (const x of al) if (a[x]) return a[x]; return null; }',
+      "function nE(e) { if (!e) return null; if (typeof e === 'string') return { token: e }; return typeof e === 'object' ? e : null; }",
+      script.substring(
+        script.indexOf('function bR('),
+        script.indexOf('function tUW('),
+      ),
+      script.substring(
+        script.indexOf('function tUW('),
+        script.indexOf('function gWin('),
+      ),
+      mockFetch,
+      probe,
+      "fOCG({'opencode-go': {key: 'test-key'}}).then((value) => console.log(P + JSON.stringify(value)));",
+    ].join('\n');
+    late final ProcessResult result;
+    try {
+      result = await Process.run('node', <String>['-e', executable]);
+    } on ProcessException {
+      markTestSkipped('Node.js is not available; skipping JS behavior check.');
+      return;
+    }
+    expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+    final output = (result.stdout as String).trim();
+    expect(output, startsWith('CW_QUOTA_JSON:'));
+    final payload = jsonDecode(output.substring('CW_QUOTA_JSON:'.length));
+    expect(payload['ok'], isTrue);
+    expect(payload['errorCode'], isNull);
+    expect(payload['usage']['windows']['rolling']['usedPercent'], 25);
+    expect(payload['usage']['windows']['weekly']['usedPercent'], 40);
+    expect(payload['usage']['windows']['monthly']['usedPercent'], 55);
+    expect(payload['usage']['windows']['monthly']['resetAt'], isNull);
   });
 
   test(

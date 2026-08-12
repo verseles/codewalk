@@ -1497,13 +1497,15 @@ The chat timeline experienced recurrent scroll jumping across three trigger scen
 
 ---
 
-## ADR-029: Host-Discovered Quota and Rate-Limit Monitoring for OpenChamber Parity (2026-04-09)
+## ADR-029: Host-Discovered Quota and Rate-Limit Monitoring for OpenChamber Parity (2026-04-09, updated 2026-08-12)
 
 **Status**: Accepted
 
+**Related**: ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-001 (Multi-Server Orchestration, Scoped Persistence, and Secure Credential Storage). Ref: issue #96.
+
 ### Context
 
-CodeWalk requires visibility into model quotas and rate-limits to prevent silent task failures due to exhausted provider balances. While official OpenCode (ADR-023) provides the core agent contract, it does not currently expose a unified real-time quota/rate-limit API for all backend providers. OpenChamber, as a community-driven server implementation, provides extended REST endpoints for this purpose. CodeWalk aims for functional parity with OpenChamber's monitoring capabilities while maintaining strict adherence to official OpenCode contracts as the primary source of truth.
+CodeWalk requires visibility into model quotas and rate-limits to prevent silent task failures due to exhausted provider balances. Official OpenCode (ADR-023) still does not expose a unified real-time quota/rate-limit API for all backend providers; OpenChamber, as a community-driven server implementation, provides extended REST endpoints for this purpose. CodeWalk aims for functional parity with OpenChamber's monitoring capabilities while maintaining strict adherence to official OpenCode contracts as the primary source of truth. Since issue #96, OpenCode Go quota is read using the host's own `auth.json` API key against the OpenCode Go usage API (`GET https://opencode.ai/zen/go/v1/usage`, Bearer auth) — not client workspace IDs, auth cookies, or HTML scraping. That endpoint is not part of the official OpenCode API contract; it is consumed as an OpenChamber-parity surface and recorded here for historical clarity without being presented as official.
 
 ### Decision
 
@@ -1515,6 +1517,8 @@ CodeWalk requires visibility into model quotas and rate-limits to prevent silent
 4. **Grouped Providers with Pace/Progress Semantics** — UI displays providers grouped by parent organization (OpenAI, Anthropic, etc.) using progress bars that reflect both absolute remaining quota and "Pace" (usage rate over time) to warn of imminent rate-limiting.
 5. **Auth Key Register** — `_supportedAuthKeys` is the single Dart-side register for shell fallback provider aliases and the `unsupportedConfigured` diagnostic filter. Adding a new shell probe requires updating both the dispatcher and this register.
 6. **Explicit Feature-by-Feature Parity Opt-in** — Future OpenChamber features will not be auto-adopted. Each parity addition must be explicitly evaluated, documented via ADR, and gated behind feature-specific capability checks.
+7. **Host-Owned OpenCode Go Usage Probe** — OpenCode Go quota is fetched inside the host-side shell probe using the host's `auth.json` `opencode-go` entry (accepting `key`, `access`, or `token` fields) against `GET https://opencode.ai/zen/go/v1/usage` with an `Authorization: Bearer` header, `Accept: application/json`, and a 15-second timeout. The probe parses the `usage` object's `rolling`, `weekly`, and `monthly` windows (`percent` used, optional `resetsAt`). No client workspace ID, no dashboard auth cookie, and no HTML scraping. Failures are classified as `authentication` (HTTP 401/403), `request_failed` (other non-OK HTTP status or transport errors), or `invalid_response` (unparseable payload or zero usable windows). Partial windows are tolerated: unparseable window entries are skipped, `resetsAt` is applied only when parseable, and only a payload with no usable windows is classified `invalid_response`. The Context usage popup shows a failure card keyed by this classification.
+8. **One-Time Best-Effort Legacy Credential Purge** — At the start of quota loading, purge all legacy OpenCode Go dashboard credential keys (`opencode_go_workspace_id`, `opencode_go_auth_cookie`) from secure storage once per `QuotaProvider` instance. Matching covers exact keys and prefix matches (`<namespace>::<key>` and `<namespace>::<key>::...`), so serverId-scoped and orphaned profile keys are removed as well. The purge is best-effort (secure-storage errors are swallowed), gated by an in-memory instance flag, and never blocks quota fetching.
 
 ### Rationale
 
@@ -1522,23 +1526,30 @@ CodeWalk requires visibility into model quotas and rate-limits to prevent silent
 - **Security** — By enforcing server-host ownership, the client avoids the risk of credential leakage and maintains the security boundaries established in ADR-001.
 - **Resilience** — The strategy-chain ensures monitoring works across both official servers (via hidden shell fallback) and OpenChamber-enhanced servers (via REST).
 - **UX** — Grouping and Pace semantics provide actionable insights rather than just raw numbers, helping users manage long-running agent tasks.
+- **Host-owned OpenCode Go key (issue #96)** — The host's `auth.json` already carries the OpenCode Go API key that authorizes the usage API; probing with it keeps the client at zero provider credentials instead of reintroducing a dashboard cookie/workspace-ID opt-in.
+- **Legacy purge** — The previous dashboard credential set is no longer used anywhere; a one-time best-effort purge removes it (including orphaned profile variants via prefix matching) without blocking quota loading.
+- **Historical clarity** — `https://opencode.ai/zen/go/v1/usage` is consumed directly by the probe but is not part of the official OpenCode API contract; it is documented as an OpenChamber-parity surface so future readers do not mistake it for an official endpoint.
 
 ### Consequences
 
 - ✅ Real-time visibility into provider limits prevents unexpected agent stalls.
-- ✅ Near-zero-credential client simplifies onboarding and improves security (narrow opt-in exception for `opencode-go` dashboard cookie only).
+- ✅ Near-zero-credential client: no provider credentials are stored; the `opencode-go` dashboard cookie/workspace-ID opt-in was removed (issue #96).
+- ✅ OpenCode Go monitoring works on any host whose `auth.json` carries an `opencode-go` API key — no client workspace ID, auth cookie, or HTML scraping.
+- ✅ One-time best-effort purge removes all legacy `opencode_go_workspace_id` / `opencode_go_auth_cookie` secure-storage keys via exact and prefix matching, including orphaned profile keys.
+- ✅ Failure classification (`authentication` / `request_failed` / `invalid_response`) plus tolerated partial windows keeps OpenCode Go failures diagnosable without over-reporting.
 - ✅ Graceful degradation between OpenChamber REST and official shell-only hosts.
 - ⚠️ Potential performance impact when using shell fallback (process spawn overhead on server).
 - ⚠️ UI density in the Context popup increases; requires careful MD3/Material You spacing.
+- ⚠️ The OpenCode Go usage endpoint is not part of the official OpenCode API contract and may change or disappear without notice; it is an OpenChamber-parity surface only.
 - ❌ No offline quota visibility; requires active server connection.
-- ⚠️ `opencode-go` dashboard credential opt-in stores an auth cookie client-side; mitigated by opt-in gate, `serverId` scoping, quota-probe-only use, and UI removability.
 
 ### Key Files
 
 - `lib/data/datasources/quota_remote_datasource.dart` — Strategy-chain implementation (OpenChamber REST → shell fallback)
-- `lib/data/datasources/quota_remote_datasource.part.js.dart` — Base64-encoded Node.js one-liner payload for shell-fallback quota probing (minified multi-provider JS encoded at compile time, decoded at runtime via `node -e "eval(Buffer.from('BASE64_PAYLOAD','base64').toString())"`)
+- `lib/data/datasources/quota_remote_datasource.part.js.dart` — Base64-encoded Node.js one-liner payload for shell-fallback quota probing (minified multi-provider JS encoded at compile time, decoded at runtime via `node -e "eval(Buffer.from('BASE64_PAYLOAD','base64').toString())"`); includes the host-owned OpenCode Go probe against `GET https://opencode.ai/zen/go/v1/usage`
+- `lib/data/datasources/app_local_datasource.dart` — `clearOpenCodeGoDashboardCredentials()` legacy credential purge (exact + prefix matching)
 - `lib/domain/entities/quota.dart` — Domain entities: `QuotaSnapshot`, `UsageWindow`, `PaceInfo`, `QuotaEntry`, `QuotaProviderGroup`
-- `lib/presentation/providers/quota_provider.dart` — Polling, TTL cache, server-scoped state, provider grouping, and Codex `providerId` guard that prevents single-window label collapse for Codex entries by preserving per-window granularity in grouped display
+- `lib/presentation/providers/quota_provider.dart` — Polling, TTL cache, server-scoped state, provider grouping, Codex `providerId` guard that prevents single-window label collapse for Codex entries by preserving per-window granularity in grouped display, and the one-time legacy purge gate (`_clearLegacyOpenCodeGoCredentials`)
 - `lib/presentation/utils/quota_pace_utils.dart` — Pure Dart pace calculation, window label inference, and formatting
 - `lib/presentation/widgets/quota/quota_popup_section.dart` — Root quota widget embedded in the Context usage popup
 - `lib/presentation/widgets/quota/quota_provider_group_row.dart` — Grouped provider expand/collapse row
@@ -1559,7 +1570,7 @@ The following shell fallback probes are implemented by the strategy-chain. REST 
 | 4 | `google` / `google.oauth` | Gemini and Antigravity quota windows | Google |
 | 5 | `github-copilot` / `copilot` | GitHub Copilot quota | GitHub |
 | 6 | `github-copilot-addon` | GitHub Copilot add-on quota | GitHub |
-| 7 | `opencode-go` | OpenCode Go rolling, weekly, and monthly dashboard usage | OpenCode |
+| 7 | `opencode-go` | OpenCode Go rolling, weekly, and monthly usage via host `auth.json` API key against the OpenCode Go usage API (no client dashboard credentials) | OpenCode |
 | 8 | `nano-gpt` | NanoGPT API usage and rate-limits | NanoGPT |
 | 9 | `wafer` | Wafer API usage and rate-limits | Wafer |
 | 10 | `kimi-for-coding` | Kimi for Coding API usage | Moonshot |
@@ -1572,24 +1583,25 @@ The following shell fallback probes are implemented by the strategy-chain. REST 
 
 `_supportedAuthKeys` also recognizes aliases for recent OpenCode provider additions (`snowflake-cortex`, `grok`/`xai`, and `cohere-north`) so they are not misreported as unknown configuration. Dedicated shell probes for those providers are not yet implemented; they become visible through REST only when the connected host supplies them.
 
-### Exception: OpenCode Go Dashboard Credential Opt-In
+### OpenCode Go Usage Probe (issue #96) — Host-Owned, Not Client Dashboard Credentials
 
-OpenCode Go does not expose a quota API usable via the standard OpenCode Go API key. When `opencode-go` is detected as the server type, the strategy-chain (Decision §2) has no REST or shell endpoint to probe for dashboard quota data. To preserve the user's ability to monitor quotas on OpenCode Go hosts, a narrow explicit exception is added:
+Earlier revisions of this ADR carried a narrow opt-in exception that stored an OpenCode Go dashboard workspace ID and auth cookie client-side for quota probing. That exception is **removed**: since issue #96, the probe uses the host's own `auth.json` `opencode-go` API key (`key`, `access`, or `token` fields) against `GET https://opencode.ai/zen/go/v1/usage` with `Authorization: Bearer`. No client workspace ID, no auth cookie, and no HTML scraping of the dashboard.
 
-1. **Opt-In Only** — When `opencode-go` is detected, the app presents a one-time opt-in prompt explaining that the OpenCode Go dashboard workspace ID and auth cookie are required for quota probing. The user must explicitly consent; nothing is stored without consent.
-2. **Minimal Credential Set** — Only two values are stored: the OpenCode Go dashboard workspace ID and the dashboard auth cookie. No passwords, tokens, or other secrets.
-3. **Existing Secure Storage** — Credentials are stored in CodeWalk's existing secure credential storage (ADR-001), scoped by `serverId` to prevent cross-server leakage. No new storage mechanism is introduced.
-4. **Quota-Probe Only** — The stored workspace ID and auth cookie are used exclusively for quota probing against the OpenCode Go dashboard. They are never transmitted to any other endpoint, never logged, and never included in error reports or analytics.
-5. **UI Removability** — The user can clear the stored credentials at any time via the existing server settings UI. Removal immediately disables quota probing for that server.
-6. **No Logging** — The auth cookie and workspace ID are treated as secrets at the same level as server API keys. They are excluded from all log output, crash reports, and debug surfaces.
+**One-Time Best-Effort Legacy Purge** — To retire the previous design safely, quota loading performs a one-time, best-effort purge of all legacy secure-storage keys for the dashboard credential set:
 
-**Rationale**: The OpenCode Go API key does not grant access to dashboard quota data. Without this exception, `opencode-go` users would have zero quota visibility — a functional regression vs. OpenChamber and shell-fallback hosts. The opt-in gate, minimal scope, existing secure storage, and removability ensure this exception does not erode the security posture established by ADR-001 and ADR-023.
+- Key families removed: `opencode_go_workspace_id` and `opencode_go_auth_cookie` under the secure-storage namespace.
+- Matching is exact plus prefix-based (`<namespace>::<key>` and `<namespace>::<key>::...`), which also covers serverId-scoped variants and orphaned profile keys left behind by deleted server profiles.
+- Best-effort by design: secure-storage read/write failures are swallowed so quota loading stays functional; an in-memory flag ensures the purge runs at most once per `QuotaProvider` instance and never blocks fetching.
+
+**Failure Classification** — The probe reports failures as `authentication` (HTTP 401/403), `request_failed` (other non-OK HTTP status or transport errors), or `invalid_response` (unparseable payload or zero usable windows). Partial windows are optional: entries that cannot be parsed are skipped, `resetsAt` is used only when parseable, and only a payload with no usable windows is classified `invalid_response`. The Context usage popup renders a failure card keyed by this classification.
+
+**Unofficial Endpoint** — `https://opencode.ai/zen/go/v1/usage` is not part of the official OpenCode API contract (ADR-023). It is consumed directly by the host-side probe purely as an OpenChamber-parity surface; it may change or disappear without notice and must not be treated as a supported OpenCode endpoint.
 
 ### ADR-023 Compatibility
 
 This feature is compliant with ADR-023. Official OpenCode remains the primary source for all agent contracts and core app behavior. OpenChamber is used exclusively as an optional parity source for the quota/rate-limit feature. In the absence of OpenChamber REST endpoints, the app falls back to a hidden ephemeral shell probe without PTY process lifecycle changes, ensuring no divergence from official server capabilities.
 
-**Exception for `opencode-go`**: The OpenCode Go Dashboard Credential Opt-In (above) stores a dashboard auth cookie and workspace ID in existing secure credential storage, scoped by `serverId`, used exclusively for quota probing. This is a narrow, opt-in exception to the server-host-only credential ownership rule (Decision §1). It does not alter any OpenCode agent contract, lifecycle, or API semantic. The cookie is never forwarded to any OpenCode endpoint beyond the dashboard's quota probe path, preserving ADR-023's non-regression guarantee.
+**OpenCode Go (issue #96)**: Official OpenCode still lacks a unified quota API. The OpenCode Go probe consumes the unofficial `https://opencode.ai/zen/go/v1/usage` endpoint from the host side using the host's own `auth.json` key — no client credential storage, no cookie exception, and no change to any official agent contract, lifecycle, or API semantic. This remains an isolated OpenChamber-parity surface under ADR-023, not an endorsed official endpoint.
 
 ### Post-Mortem: Shell Transport Truncation & API Proxying
 

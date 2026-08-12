@@ -6,8 +6,6 @@ const os = require('os');
 const p = require('path');
 
 const P = 'CW_QUOTA_JSON:';
-const OCG_WS_B64 = '__OCG_WS_B64__';
-const OCG_CK_B64 = '__OCG_CK_B64__';
 const CFG = p.join(os.homedir(), '.config', 'opencode');
 const DATA = p.join(
   process.env.XDG_DATA_HOME || p.join(os.homedir(), '.local', 'share'),
@@ -88,16 +86,6 @@ function pickS(...values) {
   return null;
 }
 
-function fromB64(v) {
-  const s = asS(v);
-  if (!s) return null;
-  try {
-    return Buffer.from(s, 'base64').toString('utf8').trim() || null;
-  } catch {
-    return null;
-  }
-}
-
 function toN(v) {
   if (typeof v === 'number' && Number.isFinite(v)) return v;
   if (typeof v === 'string') {
@@ -172,7 +160,7 @@ function gDiag(src) {
   ].join(', ');
 }
 
-function bR({ pId, pName, ok, use, err }) {
+function bR({ pId, pName, ok, use, err, errCode }) {
   return {
     providerId: pId,
     providerName: pName,
@@ -180,74 +168,9 @@ function bR({ pId, pName, ok, use, err }) {
     configured: true,
     usage: use ?? null,
     error: err ?? null,
+    errorCode: errCode ?? null,
     fetchedAt: Date.now(),
   };
-}
-
-// OpenCode Go specific helpers
-function nOC(v) {
-  if (typeof v !== 'string') return null;
-  const t = v.trim();
-  if (!t) return null;
-  // Normalize browser-copied values without treating base64 padding as a cookie name.
-  if (t.indexOf('auth=') === 0) return t;
-  return 'auth=' + t;
-}
-
-function sHC(h) {
-  if (typeof h !== 'string') return h;
-  return h.replace(/<!--[^]*?-->/g, '');
-}
-
-function nTx(v) {
-  if (typeof v !== 'string') return v;
-  return v.replace(/\s+/g, ' ').trim();
-}
-
-function pRD(v) {
-  if (typeof v !== 'string') return null;
-  const t = v.trim().toLowerCase();
-  if (!t) return null;
-  if (t.indexOf('few seconds') !== -1) return 15;
-  const ms = Array.from(t.matchAll(/(\d+)\s+(day|days|hour|hours|minute|minutes)/g));
-  if (!ms.length) return null;
-  let total = 0;
-  for (const m of ms) {
-    const amt = Number(m[1]);
-    if (!Number.isFinite(amt)) continue;
-    const u = m[2];
-    if (u.indexOf('day') === 0) total += amt * 86400;
-    else if (u.indexOf('hour') === 0) total += amt * 3600;
-    else if (u.indexOf('minute') === 0) total += amt * 60;
-  }
-  return total > 0 ? total : null;
-}
-
-function pDH(h) {
-  if (typeof h !== 'string' || h.indexOf('You are subscribed to OpenCode Go.') === -1) return null;
-  const sh = sHC(h);
-  const sm = sh.match(/<div data-slot="usage">([\s\S]*?)<\/div><form action=/);
-  if (!sm) return null;
-  const u = {};
-  const ims = Array.from(sm[1].matchAll(
-    /<div data-slot="usage-item">[\s\S]*?<span data-slot="usage-label">([^<]+)<\/span><span data-slot="usage-value">(\d+)%<\/span>[\s\S]*?<span data-slot="reset-time">\s*Resets in\s*([^<]+)<\/span>[\s\S]*?<\/div>/g,
-  ));
-  for (const im of ims) {
-    const label = nTx(im[1] || '').toLowerCase();
-    let key = null;
-    if (label === 'rolling usage') key = 'rolling';
-    if (label === 'weekly usage') key = 'weekly';
-    if (label === 'monthly usage') key = 'monthly';
-    if (!key) continue;
-    const used = toN(im[2]);
-    const resetAfter = pRD(nTx(im[3] || ''));
-    u[key] = {
-      usedPercent: used,
-      resetAt: resetAfter !== null ? Date.now() + resetAfter * 1000 : null,
-    };
-  }
-  if (!u.rolling || !u.weekly || !u.monthly) return null;
-  return u;
 }
 
 function tUW({ uP, wS, rA, vL }) {
@@ -720,61 +643,50 @@ async function fGH(a) {
 }
 ''';
 
-String _jsOpenCodeGoProvider({required String openCodeGoWsB64, required String openCodeGoCkB64}) {
+String _jsOpenCodeGoProvider() {
   return r'''
 async function fOCG(a) {
   const e = nE(getE(a, ['opencode-go']));
   const k = e && (e.key || e.access || e.token);
   if (!k) return null;
   try {
-    const vRes = await fetch('https://opencode.ai/zen/go/v1/models', {
-      method: 'GET',
-      headers: { Authorization: 'Bearer ' + k, Accept: 'application/json' },
+    const res = await fetch('https://opencode.ai/zen/go/v1/usage', {
+      headers: {
+        Authorization: 'Bearer ' + k,
+        Accept: 'application/json',
+        'User-Agent': 'CodeWalk quota provider',
+      },
+      signal: AbortSignal.timeout(15000),
     });
-    if (!vRes.ok) {
-      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: 'API error: ' + vRes.status });
+    if (res.status === 401 || res.status === 403) {
+      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: 'OpenCode Go authentication failed', errCode: 'authentication' });
     }
-    const wsId = fromB64('__OCG_WS_B64__') || asS(process.env.OPENCODE_GO_WORKSPACE_ID);
-    const rawCk = fromB64('__OCG_CK_B64__') || asS(process.env.OPENCODE_GO_AUTH_COOKIE) || asS(process.env.OPENCODE_GO_SESSION_COOKIE);
-    if (!wsId || !rawCk) {
-      return bR({
-        pId: 'opencode-go',
-        pName: 'OpenCode Go',
-        ok: false,
-        err: 'OpenCode Go is configured, but subscription usage requires OPENCODE_GO_WORKSPACE_ID and OPENCODE_GO_AUTH_COOKIE env vars on the host.',
-      });
+    if (!res.ok) {
+      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: 'OpenCode Go usage API returned HTTP ' + res.status, errCode: 'request_failed' });
     }
-    const ck = nOC(rawCk);
-    if (!ck) {
-      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: 'Invalid session cookie.' });
-    }
-    const dRes = await fetch('https://opencode.ai/workspace/' + encodeURIComponent(wsId) + '/go', {
-      method: 'GET',
-      headers: { Accept: 'text/html,application/xhtml+xml', Cookie: ck },
-    });
-    const payload = await dRes.text().catch(function() { return null; });
-    if (!dRes.ok) {
-      const msg = typeof payload === 'string' && payload.indexOf('/auth/authorize') !== -1
-        ? 'Dashboard session is not authorized for this workspace'
-        : 'Dashboard API error: ' + dRes.status;
-      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: msg });
-    }
-    const sub = pDH(payload);
-    if (!sub) {
-      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: 'Failed to parse OpenCode Go subscription usage from dashboard page.' });
-    }
+    const payload = await res.json().catch(function() { return null; });
+    const usage = payload && typeof payload === 'object' && payload.usage && typeof payload.usage === 'object'
+      ? payload.usage
+      : null;
     const w = {};
-    w.rolling = tUW({ uP: sub.rolling.usedPercent, wS: null, rA: sub.rolling.resetAt });
-    w.weekly = tUW({ uP: sub.weekly.usedPercent, wS: 7 * 86400, rA: sub.weekly.resetAt });
-    w.monthly = tUW({ uP: sub.monthly.usedPercent, wS: 30 * 86400, rA: sub.monthly.resetAt });
+    const mappings = [['rolling', 'rolling'], ['weekly', 'weekly'], ['monthly', 'monthly']];
+    for (const mapping of mappings) {
+      const entry = usage && usage[mapping[0]];
+      if (!entry || typeof entry !== 'object') continue;
+      const used = entry.percent;
+      const resetAt = typeof entry.resetsAt === 'string' ? Date.parse(entry.resetsAt) : NaN;
+      if (typeof used !== 'number' || !Number.isFinite(used)) continue;
+      w[mapping[1]] = tUW({ uP: used, wS: null, rA: Number.isFinite(resetAt) ? resetAt : null });
+    }
+    if (!Object.keys(w).length) {
+      return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: 'OpenCode Go usage data could not be parsed', errCode: 'invalid_response' });
+    }
     return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: true, use: { windows: w } });
   } catch (err) {
-    return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: err.message });
+    return bR({ pId: 'opencode-go', pName: 'OpenCode Go', ok: false, err: err.message, errCode: 'request_failed' });
   }
 }
-'''
-  .replaceAll('__OCG_WS_B64__', openCodeGoWsB64)
-  .replaceAll('__OCG_CK_B64__', openCodeGoCkB64);
+''';
 }
 
 String _jsNanoGptProvider() => r'''
@@ -1398,5 +1310,6 @@ String _jsDispatcher({required String supportedKeysLiteral}) {
 })().catch((err) => {
   console.log(P + JSON.stringify({ results: [], meta: { error: String(err) } }));
 });
-'''.replaceAll('__SUPPORTED_KEYS_LITERAL__', supportedKeysLiteral);
+'''
+      .replaceAll('__SUPPORTED_KEYS_LITERAL__', supportedKeysLiteral);
 }

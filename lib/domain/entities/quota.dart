@@ -123,6 +123,7 @@ class QuotaProviderResult {
     required this.usage,
     required this.error,
     required this.fetchedAt,
+    this.errorCode,
   });
 
   final String providerId;
@@ -132,6 +133,7 @@ class QuotaProviderResult {
   final QuotaProviderUsage? usage;
   final String? error;
   final int fetchedAt;
+  final String? errorCode;
 
   factory QuotaProviderResult.fromJson(Map<String, dynamic> json) {
     final usageRaw = json['usage'];
@@ -148,6 +150,7 @@ class QuotaProviderResult {
       error: _readString(json['error']),
       fetchedAt:
           _readInt(json['fetchedAt']) ?? DateTime.now().millisecondsSinceEpoch,
+      errorCode: _readString(json['errorCode']),
     );
   }
 
