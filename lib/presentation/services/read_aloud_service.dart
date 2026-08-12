@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../core/auth/tts_api_key_storage.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/experience_settings.dart';
 import 'tts/generated_tts_audio_player.dart';
@@ -179,7 +180,11 @@ class ReadAloudService extends ChangeNotifier {
         if (error is TtsBackendException) {
           _setError(_mapBackendError(error.kind), error.message);
         } else {
-          _setError(ReadAloudErrorKind.unknown, 'Text-to-speech failed.');
+          _setError(
+            ReadAloudErrorKind.unknown,
+            L10nBridge.current?.speechReadAloudFailed ??
+                'Text-to-speech failed.',
+          );
         }
       }
     }

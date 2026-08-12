@@ -765,10 +765,10 @@ class _LogTile extends StatelessWidget {
       subtitle.write('\n${context.l10n.logsEntryContext}: $contextMetrics');
     }
     if (entry.error != null && entry.error!.isNotEmpty) {
-      subtitle.write('\nError: ${entry.error}');
+      subtitle.write('\n${context.l10n.logsEntryError}: ${entry.error}');
     }
     if (entry.stackTrace != null && entry.stackTrace!.isNotEmpty) {
-      subtitle.write('\nStack: ${entry.stackTrace}');
+      subtitle.write('\n${context.l10n.logsEntryStack}: ${entry.stackTrace}');
     }
 
     return Container(

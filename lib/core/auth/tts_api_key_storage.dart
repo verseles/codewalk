@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../domain/entities/experience_settings.dart';
 
 class TtsApiKeyStorageException implements Exception {
@@ -51,6 +52,10 @@ class TtsApiKeyStorage {
 
   final TtsApiKeyStorageBackend _backend;
 
+  String get _storageUnavailableMessage =>
+      L10nBridge.current?.speechApiKeyStorageUnavailable ??
+      'Secure TTS API key storage is unavailable.';
+
   String _key(ReadAloudProvider provider) {
     return '${AppConstants.secureStorageNamespace}::tts_api_key::'
         '${readAloudProviderKey(provider)}';
@@ -62,10 +67,7 @@ class TtsApiKeyStorage {
       final trimmed = raw?.trim();
       return trimmed != null && trimmed.isNotEmpty ? trimmed : null;
     } catch (error) {
-      throw TtsApiKeyStorageException(
-        'Secure TTS API key storage is unavailable.',
-        error,
-      );
+      throw TtsApiKeyStorageException(_storageUnavailableMessage, error);
     }
   }
 
@@ -78,10 +80,7 @@ class TtsApiKeyStorage {
     try {
       await _backend.write(key: _key(provider), value: trimmed);
     } catch (error) {
-      throw TtsApiKeyStorageException(
-        'Secure TTS API key storage is unavailable.',
-        error,
-      );
+      throw TtsApiKeyStorageException(_storageUnavailableMessage, error);
     }
   }
 
@@ -89,10 +88,7 @@ class TtsApiKeyStorage {
     try {
       await _backend.delete(key: _key(provider));
     } catch (error) {
-      throw TtsApiKeyStorageException(
-        'Secure TTS API key storage is unavailable.',
-        error,
-      );
+      throw TtsApiKeyStorageException(_storageUnavailableMessage, error);
     }
   }
 }

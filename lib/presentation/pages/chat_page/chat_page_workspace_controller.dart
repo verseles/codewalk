@@ -281,7 +281,8 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       return;
     }
     _showChatPageMessageSnackBar(
-      'Project removed from history',
+      L10nBridge.current?.workspaceProjectRemovedFromHistory ??
+          'Project removed from history',
       hideCurrent: false,
     );
   }
@@ -560,14 +561,20 @@ extension _ChatPageWorkspaceController on _ChatPageState {
     final openedDirectory = projectProvider.currentDirectory;
     if (openedDirectory == requestedDirectory) {
       _showChatPageMessageSnackBar(
-        'Project context opened: $requestedDirectory',
+        L10nBridge.current?.workspaceProjectContextOpened(
+              requestedDirectory,
+            ) ??
+            'Project context opened: $requestedDirectory',
         hideCurrent: false,
       );
       return;
     }
     _showChatPageMessageSnackBar(
       projectProvider.error ??
-          'Failed to open project context: $requestedDirectory',
+          (L10nBridge.current?.workspaceFailedToOpenProjectContext(
+                requestedDirectory,
+              ) ??
+              'Failed to open project context: $requestedDirectory'),
       hideCurrent: false,
     );
   }

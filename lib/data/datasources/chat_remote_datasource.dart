@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/config/feature_flags.dart';
 import '../../core/errors/exceptions.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_realtime_model.dart';
@@ -1563,7 +1564,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               );
               _invalidateKnownAssistantIdsCache(sessionId);
               emitPromptAsyncFailure(
-                message: 'No response from server. Please try again.',
+                message:
+                    L10nBridge.current?.chatNoResponseFromServer ??
+                    'No response from server. Please try again.',
                 reason: 'no_message_id',
               );
               messageCompleted = true;
@@ -1608,7 +1611,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             );
             _invalidateKnownAssistantIdsCache(sessionId);
             emitPromptAsyncFailure(
-              message: 'No response from model. Please try again.',
+              message:
+                  L10nBridge.current?.chatNoResponseFromModel ??
+                  'No response from model. Please try again.',
               reason: 'no_message',
             );
           }
@@ -1642,7 +1647,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           'prompt-async-unexpected-status',
           details: 'status=${response.statusCode}',
         );
-        throw const ServerException('Failed to send message');
+        throw ServerException(
+          L10nBridge.current?.chatProviderErrorSendMessage ??
+              'Failed to send message',
+        );
       }
 
       final responseData = response.data;
@@ -1717,12 +1725,17 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
         'CW_TRACE_FINAL datasource event=dio-exception session=$sessionId status=${e.response?.statusCode ?? -1} messageId=${input.messageId ?? "-"}',
       );
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('Session not found');
+        throw NotFoundException(
+          L10nBridge.current?.chatProviderErrorSessionNotFound ??
+              'Session not found',
+        );
       }
       if (e.response?.statusCode == 400 || e.response?.statusCode == 422) {
         throw _validationExceptionFromDio(
           e,
-          fallbackMessage: 'Invalid message format',
+          fallbackMessage:
+              L10nBridge.current?.chatProviderErrorInvalidMessageFormat ??
+              'Invalid message format',
         );
       }
       if (e.response?.statusCode == 409) {
@@ -1731,7 +1744,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           message.isEmpty
               ? _fallbackServerMessageForStatus(
                   statusCode: 409,
-                  fallbackMessage: 'Failed to send message',
+                  fallbackMessage:
+                      L10nBridge.current?.chatProviderErrorSendMessage ??
+                      'Failed to send message',
                 )
               : message,
           409,
@@ -1739,7 +1754,9 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       }
       throw _serverExceptionFromDio(
         e,
-        fallbackMessage: 'Failed to send message',
+        fallbackMessage:
+            L10nBridge.current?.chatProviderErrorSendMessage ??
+            'Failed to send message',
       );
     } catch (e) {
       AppLogger.error('Message send exception', error: e);
@@ -1752,7 +1769,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           e is ValidationException) {
         rethrow;
       }
-      throw const ServerException('Failed to send message');
+      throw ServerException(
+        L10nBridge.current?.chatProviderErrorSendMessage ??
+            'Failed to send message',
+      );
     } finally {
       AppLogger.info('Chat send flow finalized for session=$sessionId');
       AppLogger.info(
@@ -2389,18 +2409,28 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       );
 
       if (response.statusCode != 200) {
-        throw const ServerException('Failed to summarize session');
+        throw ServerException(
+          L10nBridge.current?.chatProviderErrorCompactSessionContext ??
+              'Failed to compact session context',
+        );
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('Resource not found');
+        throw NotFoundException(
+          L10nBridge.current?.chatProviderErrorNotFound ?? 'Resource not found',
+        );
       }
       throw _serverExceptionFromDio(
         e,
-        fallbackMessage: 'Failed to summarize session',
+        fallbackMessage:
+            L10nBridge.current?.chatProviderErrorCompactSessionContext ??
+            'Failed to compact session context',
       );
     } catch (e) {
-      throw const ServerException('Failed to summarize session');
+      throw ServerException(
+        L10nBridge.current?.chatProviderErrorCompactSessionContext ??
+            'Failed to compact session context',
+      );
     }
   }
 

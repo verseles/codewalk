@@ -32,5 +32,5 @@ class MoonshineSpeechInputService implements SpeechInputService {
       'Moonshine speech is unavailable on this platform.';
 
   @override
-  String? get unavailableReasonKey => null;
+  String? get unavailableReasonKey => 'platformUnavailable';
 }

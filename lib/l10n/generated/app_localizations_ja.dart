@@ -331,24 +331,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get behaviorDataSaverActive => 'モバイルデータ通信で現在有効です。';
 
   @override
-  String get behaviorDataSaverAggressive => 'Aggressive';
+  String get behaviorDataSaverAggressive => '積極的';
 
   @override
   String get behaviorDataSaverAggressiveDescription =>
-      'Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.';
+      '低帯域モード: 表示中のワークスペースのストリームのみがライブのままとなり、グローバル更新は一時停止され、自動更新の間隔が延長されます。';
 
   @override
   String get behaviorDataSaverCellularOnly => '接続がモバイルデータ通信の場合にのみ適用されます。';
 
   @override
-  String get behaviorDataSaverOff => 'Off';
+  String get behaviorDataSaverOff => 'オフ';
 
   @override
-  String get behaviorDataSaverOffHint =>
-      'Full realtime and automatic refreshes are enabled.';
+  String get behaviorDataSaverOffHint => '完全なリアルタイム更新と自動更新が有効です。';
 
   @override
-  String get behaviorDataSaverStandard => 'Standard';
+  String get behaviorDataSaverStandard => '標準';
 
   @override
   String get behaviorDataSaverWaiting => '次のモバイルデータ同期ウィンドウを待機しています。';
@@ -493,10 +492,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get chatBlockResponsePendingDescription =>
-      'The answer will appear as a single block when this turn finishes.';
+      'このターンが終了すると、回答が1つのブロックとして表示されます。';
 
   @override
-  String get chatBlockResponsePendingTitle => 'Generating response';
+  String get chatBlockResponsePendingTitle => '応答を生成中';
 
   @override
   String get chatCachedConversationsYet => 'キャッシュされた会話はまだありません';
@@ -1445,7 +1444,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get composerSelectImages => '画像を選択';
 
   @override
-  String get composerSelectPdf => 'Select PDF';
+  String get composerSelectPdf => 'PDF を選択';
 
   @override
   String get composerSend => '送信';
@@ -1641,57 +1640,56 @@ class AppLocalizationsJa extends AppLocalizations {
   String get filesFileEmpty => 'ファイルは空です。';
 
   @override
-  String get filesAlreadyExists =>
-      'A file or folder with that name already exists.';
+  String get filesAlreadyExists => 'その名前のファイルまたはフォルダーは既に存在します。';
 
   @override
-  String get filesCopyPath => 'Copy path';
+  String get filesCopyPath => 'パスをコピー';
 
   @override
-  String get filesCreateFileTitle => 'Create file';
+  String get filesCreateFileTitle => 'ファイルを作成';
 
   @override
-  String get filesCreateFolderTitle => 'Create folder';
+  String get filesCreateFolderTitle => 'フォルダーを作成';
 
   @override
-  String get filesDelete => 'Delete';
+  String get filesDelete => '削除';
 
   @override
   String filesDeleteConfirm(String name) {
-    return 'Delete $name? This cannot be undone. Folders and their contents will be deleted.';
+    return '「$name」を削除しますか？この操作は元に戻せません。フォルダーは中身ごと削除されます。';
   }
 
   @override
   String filesDeleteTitle(String name) {
-    return 'Delete $name';
+    return '「$name」を削除';
   }
 
   @override
   String get filesFilesFound => 'ファイルが見つかりません';
 
   @override
-  String get filesFileCreated => 'File created.';
+  String get filesFileCreated => 'ファイルを作成しました。';
 
   @override
-  String get filesFolderCreated => 'Folder created.';
+  String get filesFolderCreated => 'フォルダーを作成しました。';
 
   @override
   String get filesHideSidebar => 'ファイルサイドバーを非表示';
 
   @override
-  String get filesInvalidName => 'Enter a valid name without path separators.';
+  String get filesInvalidName => 'パス区切り文字を含まない有効な名前を入力してください。';
 
   @override
-  String get filesNameHint => 'Name';
+  String get filesNameHint => '名前';
 
   @override
-  String get filesNew => 'New';
+  String get filesNew => '新規';
 
   @override
-  String get filesNewFile => 'New file';
+  String get filesNewFile => '新しいファイル';
 
   @override
-  String get filesNewFolder => 'New folder';
+  String get filesNewFolder => '新しいフォルダー';
 
   @override
   String get filesNames => '名前';
@@ -1708,118 +1706,116 @@ class AppLocalizationsJa extends AppLocalizations {
   String get filesQuickOpenFile => 'ファイルをクイックオープン';
 
   @override
-  String get filesOperationFailed => 'File operation failed.';
+  String get filesOperationFailed => 'ファイル操作に失敗しました。';
 
   @override
-  String get filesOperationUnavailable =>
-      'File operations are not available for this server.';
+  String get filesOperationUnavailable => 'このサーバーではファイル操作を利用できません。';
 
   @override
-  String get filesOutsideRoot => 'The path is outside the project root.';
+  String get filesOutsideRoot => 'パスがプロジェクトルートの外にあります。';
 
   @override
-  String get filesPathCopied => 'Path copied.';
+  String get filesPathCopied => 'パスをコピーしました。';
 
   @override
-  String get filesPathMissing => 'Path does not exist.';
+  String get filesPathMissing => 'パスが存在しません。';
 
   @override
-  String get filesPermissionDenied => 'Permission denied.';
+  String get filesPermissionDenied => '権限がありません。';
 
   @override
   String get filesRefresh => 'ファイルを更新';
 
   @override
-  String get filesRename => 'Rename';
+  String get filesRename => '名前を変更';
 
   @override
   String filesRenameTitle(String name) {
-    return 'Rename $name';
+    return '「$name」の名前を変更';
   }
 
   @override
-  String get filesRenamed => 'Renamed.';
+  String get filesRenamed => '名前を変更しました。';
 
   @override
-  String get filesRootDeleteBlocked => 'The project root cannot be deleted.';
+  String get filesRootDeleteBlocked => 'プロジェクトのルートは削除できません。';
 
   @override
   String get filesSearchHint => '名前またはパスでファイルを検索';
 
   @override
-  String get filesDeleted => 'Deleted.';
+  String get filesDeleted => '削除しました。';
 
   @override
   String get filesTitle => 'ファイル';
 
   @override
-  String get forwardAction => 'Forward';
+  String get forwardAction => '転送';
 
   @override
-  String get forwardAllFailed => 'Could not forward to any session';
+  String get forwardAllFailed => 'どのセッションにも転送できませんでした';
 
   @override
-  String get forwardCancel => 'Cancel';
+  String get forwardCancel => 'キャンセル';
 
   @override
-  String get forwardDialogSubtitle => 'Select one or more conversations';
+  String get forwardDialogSubtitle => '1つ以上の会話を選択';
 
   @override
-  String get forwardDialogTitle => 'Forward to…';
+  String get forwardDialogTitle => '転送先…';
 
   @override
-  String get forwardLoading => 'Loading sessions…';
+  String get forwardLoading => 'セッションを読み込み中…';
 
   @override
-  String get forwardNoOpenProjects => 'No open projects with sessions';
+  String get forwardNoOpenProjects => 'セッションのある開いているプロジェクトがありません';
 
   @override
-  String get forwardNoProviderModel =>
-      'Select a provider and model before forwarding';
+  String get forwardNoProviderModel => '転送する前にプロバイダーとモデルを選択してください';
 
   @override
-  String get forwardNoSessions => 'No recent sessions';
+  String get forwardNoSessions => '最近のセッションがありません';
 
   @override
   String forwardPartial(int success, int total) {
-    return 'Forwarded to $success of $total';
+    return '$total件中$success件に転送しました';
   }
 
   @override
   String forwardProvenanceLabel(String origin) {
-    return 'Forwarded from: $origin';
+    return '転送元: $origin';
   }
 
   @override
-  String get forwardRetry => 'Retry';
+  String get forwardRetry => '再試行';
 
   @override
-  String get forwardSearchHint => 'Search';
+  String get forwardSearchHint => '検索';
 
   @override
   String forwardSelectedCount(int count) {
-    return '$count selected';
+    return '$count件選択中';
   }
 
   @override
-  String get forwardSend => 'Forward';
+  String get forwardSend => '転送';
 
   @override
-  String get forwardServerOffline => 'Server offline';
+  String get forwardServerOffline => 'サーバーがオフラインです';
 
   @override
   String get forwardShortcutHint => 'Ctrl+Shift+F';
 
   @override
   String forwardSuccess(int count) {
-    return 'Forwarded to $count sessions';
+    return '$count件のセッションに転送しました';
   }
 
   @override
-  String get forwardUndo => 'Undo';
+  String get forwardUndo => '元に戻す';
 
   @override
-  String get forwardUndoFailed => 'Could not undo the forward';
+  String get forwardUndoFailed => '転送を元に戻せませんでした';
 
   @override
   String get logsAppLogs => 'アプリログ';
@@ -2025,8 +2021,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get msgInfoCompaction => '圧縮';
 
   @override
-  String msgInfoCost(double cost) {
-    return 'コスト: \\\$$cost';
+  String msgInfoCost(String cost) {
+    return 'コスト: \$$cost';
   }
 
   @override
@@ -2869,7 +2865,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get sessionDiffLoading => 'Loading changed files…';
+  String get sessionDiffLoading => '変更されたファイルを読み込み中…';
 
   @override
   String get sessionDiffReview => '変更を確認';
@@ -3152,11 +3148,11 @@ class AppLocalizationsJa extends AppLocalizations {
       'ブランドカラーを選択するには、CodeWalk クラシックに切り替えてください。';
 
   @override
-  String get settingsAppearanceChatFontScale => 'Conversation text size';
+  String get settingsAppearanceChatFontScale => '会話の文字サイズ';
 
   @override
   String get settingsAppearanceChatFontScaleDescription =>
-      'Scale the chat message and composer text on top of the system text size.';
+      'システムの文字サイズに加えて、チャットメッセージとコンポーザーのテキストを拡大縮小します。';
 
   @override
   String get settingsAppearanceCodeWalkClassic => 'CodeWalkクラシック';
@@ -3217,11 +3213,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsAppearanceDescription => 'テーマ、配色、文字サイズ、チャット表示を選択';
 
   @override
-  String get settingsAppearanceFontSize => 'Text size';
+  String get settingsAppearanceFontSize => '文字サイズ';
 
   @override
   String get settingsAppearanceFontSizeDescription =>
-      'Adjust the size of system text, conversation text, and terminal text.';
+      'システムテキスト、会話テキスト、ターミナルの文字サイズを調整します。';
 
   @override
   String get settingsAppearanceLight => 'ライト';
@@ -3264,11 +3260,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsAppearanceSystem => 'システム';
 
   @override
-  String get settingsAppearanceSystemFontScale => 'System text size';
+  String get settingsAppearanceSystemFontScale => 'システムの文字サイズ';
 
   @override
   String get settingsAppearanceSystemFontScaleDescription =>
-      'Scale all text in the app shell, including menus, dialogs, and sidebars.';
+      'メニュー、ダイアログ、サイドバーを含むアプリシェル全体の文字を拡大縮小します。';
 
   @override
   String get settingsAppearanceTaskList => 'タスク一覧';
@@ -3278,11 +3274,11 @@ class AppLocalizationsJa extends AppLocalizations {
       'セッションタスク一覧ウィジェットの表示/非表示を切り替えます。';
 
   @override
-  String get settingsAppearanceTerminalFontSize => 'Terminal text size';
+  String get settingsAppearanceTerminalFontSize => 'ターミナルの文字サイズ';
 
   @override
   String get settingsAppearanceTerminalFontSizeDescription =>
-      'Resize the embedded terminal font. Applies immediately to running sessions.';
+      '組み込みターミナルのフォントサイズを変更します。実行中のセッションにすぐに適用されます。';
 
   @override
   String get settingsAppearanceTheme => 'テーマ';
@@ -3367,32 +3363,32 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsBehaviorCellularDataSaver => 'モバイルデータセーバー';
 
   @override
-  String get settingsBehaviorChatRenderMode => 'Chat render mode';
+  String get settingsBehaviorChatRenderMode => 'チャット表示モード';
 
   @override
-  String get settingsBehaviorChatRenderModeBlock => 'Block';
+  String get settingsBehaviorChatRenderModeBlock => 'ブロック';
 
   @override
   String get settingsBehaviorChatRenderModeBlockDescription =>
-      'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.';
+      '現在のターンを1つのブロックとして表示できるまで、ライブのアシスタントテキスト、推論、ツールカードを非表示にします。';
 
   @override
   String get settingsBehaviorChatRenderModeDescription =>
-      'Choose whether assistant responses appear as they stream or reveal after the current turn settles.';
+      'アシスタントの応答をストリーム中に表示するか、現在のターンが完了した後に表示するかを選択します。';
 
   @override
-  String get settingsBehaviorChatRenderModeLive => 'Live';
+  String get settingsBehaviorChatRenderModeLive => 'ライブ';
 
   @override
   String get settingsBehaviorChatRenderModeLiveDescription =>
-      'Show assistant text, reasoning, and tool activity as OpenCode streams events.';
+      'OpenCode がイベントをストリームする際に、アシスタントのテキスト、推論、ツールのアクティビティを表示します。';
 
   @override
-  String get settingsBehaviorComposerSpellCheck => 'Composer spell check';
+  String get settingsBehaviorComposerSpellCheck => 'コンポーザーのスペルチェック';
 
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
-      'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
+      'チャットコンポーザーでプラットフォーム標準のスペルチェック、候補、自動修正を使用します。';
 
   @override
   String get settingsBehaviorConfigDeferred =>
@@ -4336,20 +4332,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get speechNativeSTTWorks =>
-      'On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.';
+      'Windows では、CodeWalk は WASAPI マイクバックエンドを通じてローカルのオンデバイス音声認識を使用します。安定性のため、Windows ネイティブの音声認識は無効になっています。';
 
   @override
   String get speechNativeStartsFaster =>
       'ネイティブの方が起動が早いです。Sherpa はより重いセットアップとより深いモデル制御を伴い、完全にデバイス上で動作します。';
 
   @override
-  String get speechOpenMicrophoneSettings => 'Open microphone settings';
+  String get speechOpenMicrophoneSettings => 'マイク設定を開く';
 
   @override
-  String get speechOpenSpeechPrivacy => 'Open speech privacy';
+  String get speechOpenSpeechPrivacy => '音声のプライバシー設定を開く';
 
   @override
-  String get speechOpenSpeechSettings => 'Open speech settings';
+  String get speechOpenSpeechSettings => '音声設定を開く';
 
   @override
   String get speechParakeet => 'Parakeet';
@@ -4407,7 +4403,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get speechWindowsSetupHint =>
-      'Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.';
+      'Windows の音声入力は、オンデバイスモデルとともに CodeWalk WASAPI キャプチャを使用します。デスクトップアプリのマイクアクセスを有効にしたままにしてください。下のボタンでトラブルシューティング用の Windows 設定が開きます。';
 
   @override
   String get statusConnected => '接続済み';
@@ -4454,7 +4450,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tailscalePeerOffline => 'オフライン';
 
   @override
-  String get tailscaleSelectPeer => 'Select a Tailscale peer';
+  String get tailscaleSelectPeer => 'Tailscale ピアを選択';
 
   @override
   String get tailscaleWaitingAdminApproval => 'この Tailscale ノードは管理者の承認待ちです。';
@@ -4781,80 +4777,1561 @@ class AppLocalizationsJa extends AppLocalizations {
   String get workspaceSuggestions => '提案';
 
   @override
-  String get sessionTabsGestureHintTitle => 'Session tabs have new controls';
+  String get sessionTabsGestureHintTitle => 'セッションタブに新しい操作が追加されました';
 
   @override
   String get sessionTabsGestureHintBody =>
-      'Double-click or double-tap a tab to close it. Right-click or touch and hold to open session actions. You can disable tabs in Display Toggles.';
+      'ダブルクリックまたはダブルタップでタブを閉じます。右クリックまたは長押しでセッション操作を開きます。タブは表示トグルで無効にできます。';
 
   @override
-  String get sessionTabsGestureHintAcknowledge => 'Got it';
+  String get sessionTabsGestureHintAcknowledge => 'OK';
 
   @override
-  String get sessionTabsGestureHintDisableTabs => 'Disable tabs';
+  String get sessionTabsGestureHintDisableTabs => 'タブを無効化';
 
   @override
-  String get sessionTabRenameAction => 'Rename session';
+  String get sessionTabRenameAction => 'セッション名を変更';
 
   @override
   String sessionTabClosedMessage(String title) {
-    return 'Tab \"$title\" closed';
+    return 'タブ「$title」を閉じました';
   }
 
   @override
-  String get sessionTabUndo => 'Undo';
+  String get sessionTabUndo => '元に戻す';
 
   @override
-  String get sessionTabRestoreFailed => 'Tab could not be restored.';
+  String get sessionTabRestoreFailed => 'タブを復元できませんでした。';
 
   @override
-  String get sessionTabChangeIconAction => 'Change icon';
+  String get sessionTabChangeIconAction => 'アイコンを変更';
 
   @override
-  String get sessionTabIconPickerTitle => 'Choose tab icon';
+  String get sessionTabIconPickerTitle => 'タブのアイコンを選択';
 
   @override
-  String get sessionTabIconUseProjectIcon => 'Use project icon';
+  String get sessionTabIconUseProjectIcon => 'プロジェクトのアイコンを使用';
 
   @override
-  String get sessionTabIconApplied => 'Tab icon updated.';
+  String get sessionTabIconApplied => 'タブのアイコンを更新しました。';
 
   @override
-  String get sessionTabIconSaveFailed => 'Tab icon could not be saved.';
+  String get sessionTabIconSaveFailed => 'タブのアイコンを保存できませんでした。';
 
   @override
-  String get sessionTabIconPresetCode => 'Code';
+  String get sessionTabIconPresetCode => 'コード';
 
   @override
-  String get sessionTabIconPresetTerminal => 'Terminal';
+  String get sessionTabIconPresetTerminal => 'ターミナル';
 
   @override
-  String get sessionTabIconPresetBug => 'Bug';
+  String get sessionTabIconPresetBug => 'バグ';
 
   @override
-  String get sessionTabIconPresetTasks => 'Tasks';
+  String get sessionTabIconPresetTasks => 'タスク';
 
   @override
-  String get sessionTabIconPresetLaunch => 'Launch';
+  String get sessionTabIconPresetLaunch => '起動';
 
   @override
-  String get sessionTabIconPresetIdea => 'Idea';
+  String get sessionTabIconPresetIdea => 'アイデア';
 
   @override
-  String get sessionTabIconPresetResearch => 'Research';
+  String get sessionTabIconPresetResearch => '調査';
 
   @override
-  String get sessionTabIconPresetDesign => 'Design';
+  String get sessionTabIconPresetDesign => 'デザイン';
 
   @override
-  String get sessionTabIconPresetData => 'Data';
+  String get sessionTabIconPresetData => 'データ';
 
   @override
-  String get sessionTabIconPresetCloud => 'Cloud';
+  String get sessionTabIconPresetCloud => 'クラウド';
 
   @override
-  String get sessionTabIconPresetSecurity => 'Security';
+  String get sessionTabIconPresetSecurity => 'セキュリティ';
 
   @override
-  String get sessionTabIconPresetTools => 'Tools';
+  String get sessionTabIconPresetTools => 'ツール';
+
+  @override
+  String get workspaceNoActiveContext => 'アクティブなコンテキストがありません';
+
+  @override
+  String get settingsAppearanceContrastLow => '低';
+
+  @override
+  String get settingsAppearanceContrastStandard => '標準';
+
+  @override
+  String get settingsAppearanceContrastMedium => '中';
+
+  @override
+  String get settingsAppearanceContrastMediumHigh => '中高';
+
+  @override
+  String get settingsNotificationsSystemSoundsWebUnavailable =>
+      'Web では利用できません。';
+
+  @override
+  String get settingsNotificationsSystemSoundsAndroid => 'システムの Android 通知音。';
+
+  @override
+  String get settingsNotificationsSystemSoundsFreedesktop =>
+      '/usr/share/sounds/freedesktop/stereo の Freedesktop サウンド。';
+
+  @override
+  String get settingsNotificationsSystemSoundsPlatform =>
+      'OS がシステムサウンドを公開しているプラットフォームで利用できます。';
+
+  @override
+  String get serversQuickGuideTitle => 'クイックセットアップ';
+
+  @override
+  String get serversQuickGuideIntro =>
+      'CodeWalk はアプリ、OpenCode はエンジンです。この接続を利用するには OpenCode の起動が必要です。';
+
+  @override
+  String get serversQuickGuideStepInstallCli => '1. OpenCode CLI をインストール。';
+
+  @override
+  String get serversQuickGuideRunPowerShell => '2. PowerShell で実行:';
+
+  @override
+  String get serversQuickGuideRunTerminal => '2. ターミナルで実行:';
+
+  @override
+  String get serversQuickGuideProtectPassword => 'パスワードでアクセスを保護';
+
+  @override
+  String get serversQuickGuideServerPassword => 'サーバーパスワード';
+
+  @override
+  String get serversQuickGuideInstallOptions =>
+      'その他の公式インストール方法: インストールスクリプト、npm、bun、pnpm、Homebrew、または GitHub Releases のバイナリ。';
+
+  @override
+  String get serversQuickGuideVerifyHint =>
+      'サーバー起動後、URL を CodeWalk に貼り付ける前に /global/health または /doc が応答することを確認してください。';
+
+  @override
+  String get shortcutsPressKeyCombination => 'キーの組み合わせを押してください';
+
+  @override
+  String get settingsProvenanceOpenCodeBacked => 'OpenCode ベース';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk ローカル';
+
+  @override
+  String get settingsProvenanceCodeWalkException => 'CodeWalk 例外';
+
+  @override
+  String get shortcutsErrorInvalid => '無効なショートカット';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'サポートされていないショートカットキー';
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '「$conflict」と競合';
+  }
+
+  @override
+  String get settingsSessionAttentionStopSaveFailed =>
+      'セッション通知は停止しましたが、設定を保存できませんでした。';
+
+  @override
+  String get settingsSessionAttentionEnableFailed => 'セッション通知を有効にできませんでした。';
+
+  @override
+  String get settingsSessionAttentionSaveFailedStopped =>
+      'セッション通知を保存できず、停止しました。';
+
+  @override
+  String get settingsSessionAttentionStillRunning =>
+      'セッション通知はまだ実行中です。もう一度停止してください。';
+
+  @override
+  String get settingsSessionAttentionStopFailed =>
+      'セッション通知を停止できませんでした。もう一度お試しください。';
+
+  @override
+  String get settingsSessionAttentionCapabilityUnavailable =>
+      'セッション通知ホストの機能を利用できません。';
+
+  @override
+  String get settingsServerFallbackProviderName => 'サーバーで設定';
+
+  @override
+  String get composerStopResponse => '応答を停止';
+
+  @override
+  String get composerSendMessageWhileResponding => '応答中にメッセージを送信';
+
+  @override
+  String get composerSendMessage => 'メッセージを送信';
+
+  @override
+  String get chatTourComposerDescription => 'ここにリクエストを入力します。';
+
+  @override
+  String get chatTourSendDescription => 'ここからメッセージを送信します。';
+
+  @override
+  String get composerAttachmentFallbackName => '添付ファイル';
+
+  @override
+  String get composerContextFallbackName => 'コンテキスト';
+
+  @override
+  String get searchableDropdownSearchHint => '検索';
+
+  @override
+  String get searchableDropdownEmptyText => '一致する項目はありません';
+
+  @override
+  String get speechApiKeyStorageUnavailable => 'セキュアな TTS APIキー保存を利用できません。';
+
+  @override
+  String get speechApiKeyRemoved => 'APIキーを削除しました。';
+
+  @override
+  String get speechApiKeySaved => 'APIキーをこのデバイスに安全に保存しました。';
+
+  @override
+  String get speechReadAloudTestText => 'これは CodeWalk の音声合成テストです。';
+
+  @override
+  String get speechNativeDisabledWindows =>
+      '安定性のため Windows では無効です。CodeWalk WASAPI キャプチャ経由で Parakeet または他のオンデバイスエンジンを使用してください。';
+
+  @override
+  String get speechNativeUnavailableLinux =>
+      'Linux では利用できません。音声入力には Parakeet を使用してください。';
+
+  @override
+  String get speechNotAvailableOnPlatform => 'このプラットフォームでは利用できません。';
+
+  @override
+  String get speechSherpaUnavailableAndroid =>
+      'APK サイズを最適化した Android ビルドでは利用できません。';
+
+  @override
+  String get speechMoonshineDesktopOnlyHint =>
+      'デスクトップのみで利用可能です。Android はネイティブのみです。';
+
+  @override
+  String get speechParakeetDesktopOnlyHint =>
+      'デスクトップのみで利用可能です。オフラインの多言語認識を使用します。';
+
+  @override
+  String get speechSenseVoiceDesktopOnlyHint =>
+      'デスクトップのみで利用可能です。中国語、広東語、日本語、韓国語、英語に最も強力です。';
+
+  @override
+  String get speechNativeSubtitle => 'よりシンプルで起動が速い。';
+
+  @override
+  String get speechSherpaSubtitle =>
+      'より重く、実験的でバグが出やすい。ダウンロードしたモデルではより正確なことが多い。';
+
+  @override
+  String get speechMoonshineSubtitle =>
+      'sherpa_onnx のオフライン認識とダウンロード可能なモデルを使う、デスクトップ限定の実験パス。';
+
+  @override
+  String get speechParakeetSubtitle =>
+      '1つの多言語ダウンロード可能モデルを持つ、デスクトップ限定のオフライン NeMo transducer パス。';
+
+  @override
+  String get speechSenseVoiceSubtitle =>
+      '中国語、広東語、日本語、韓国語、英語向けに調整されたデスクトップ限定のオフラインパス。';
+
+  @override
+  String get speechMoonshineModel => 'Moonshine モデル';
+
+  @override
+  String get speechSherpaLanguage => 'Sherpa 言語';
+
+  @override
+  String get speechSearchSherpaLanguage => 'Sherpa 言語を検索';
+
+  @override
+  String get speechNoLanguagePacksFound => '言語パックが見つかりません';
+
+  @override
+  String get speechTextToSpeechProvider => '音声合成プロバイダー';
+
+  @override
+  String get speechProviderSystemNative => 'システム / ネイティブ';
+
+  @override
+  String get speechProviderEdgeExperimental => 'Microsoft Edge Speech（実験的）';
+
+  @override
+  String get speechProviderOpenAiCompatible => 'OpenAI 互換';
+
+  @override
+  String get speechEdgeExperimentalTitle => 'Microsoft Edge Speech は実験的な機能です';
+
+  @override
+  String get speechEdgeExperimentalDescription =>
+      'このデバイスから非公式の Edge 読み上げサービスを直接使用します。読み上げを利用するとメッセージテキストが Microsoft に送信され、Microsoft が非公開プロトコルを変更した場合はサービスが使えなくなる可能性があります。';
+
+  @override
+  String get speechEdgeVoice => 'Edge の音声';
+
+  @override
+  String get speechEdgeVoiceListUnavailable =>
+      'デフォルトの Edge 音声を使用します。現在、音声リストを読み込めませんでした。';
+
+  @override
+  String get speechEdgeVoicesLoaded => 'Microsoft Edge Speech の音声から読み込みました。';
+
+  @override
+  String get speechCloudTtsPrivacy => 'クラウドTTSのプライバシー';
+
+  @override
+  String get speechCloudTtsPrivacyDescription =>
+      'クラウドTTSは、選択したアシスタントメッセージのテキストを設定済みプロバイダーに送信します。APIキーはこのデバイスのセキュアストレージに保存されます。';
+
+  @override
+  String get speechBaseUrl => 'ベースURL';
+
+  @override
+  String get speechApiKey => 'APIキー';
+
+  @override
+  String get speechApiKeySavedHelper =>
+      'キーは保存されています。新しい値を入力して置き換えるか、空の値を保存して削除します。';
+
+  @override
+  String get speechNoApiKeySaved => 'APIキーは保存されていません。';
+
+  @override
+  String get speechSaveApiKey => 'APIキーを保存';
+
+  @override
+  String get speechModel => 'モデル';
+
+  @override
+  String get speechPitchNotSupported =>
+      'OpenAI 互換 TTS ではピッチをサポートしていないため、このプロバイダーでは非表示です。';
+
+  @override
+  String get speechTestVoice => '音声をテスト';
+
+  @override
+  String get dialogMoonshineVoiceSetupDescription =>
+      'Moonshine は sherpa_onnx 経由でデバイス上で動作します。モデルを1つ選び、このデスクトップデバイスにのみダウンロードしてください。';
+
+  @override
+  String get dialogParakeetVoiceSetupDescription =>
+      'Parakeet は sherpa_onnx のオフライン認識でデバイス上で動作します。多言語STTを有効にするには、このデスクトップデバイスに1回ダウンロードしてください。';
+
+  @override
+  String get dialogSenseVoiceSetupDescription =>
+      'SenseVoice は sherpa_onnx のオフライン認識でデバイス上で動作します。中国語、広東語、日本語、韓国語、英語に最も強力です。';
+
+  @override
+  String get dialogSherpaVoiceSetupDescription =>
+      'Sherpa 音声入力にはオンデバイスの音声モデルが必要です。言語を選択し、1回だけダウンロードしてください（約147 MB）。';
+
+  @override
+  String speechSilenceSeconds(String value) {
+    return '$value 秒';
+  }
+
+  @override
+  String speechModelInstalled(String modelId) {
+    return 'モデルをインストール済み ($modelId)';
+  }
+
+  @override
+  String speechModelMissing(String modelId) {
+    return 'モデルがありません ($modelId)';
+  }
+
+  @override
+  String speechModelSizeMb(String sizeMb) {
+    return '~$sizeMb MB';
+  }
+
+  @override
+  String speechSystemDefaultLanguage(String language) {
+    return 'システムデフォルト（$language）';
+  }
+
+  @override
+  String speechModelListLoadFailed(String error, String service) {
+    return '$service のモデルリストの読み込みに失敗しました: $error';
+  }
+
+  @override
+  String speechDownloadFailed(String error) {
+    return 'ダウンロードに失敗しました: $error';
+  }
+
+  @override
+  String speechFailedToRemoveModel(String error) {
+    return 'モデルの削除に失敗しました: $error';
+  }
+
+  @override
+  String speechBaseUrlExample(String url) {
+    return '例: $url';
+  }
+
+  @override
+  String speechModelDefaultHelper(String model) {
+    return 'デフォルト: $model';
+  }
+
+  @override
+  String get notificationPermissionOrQuestionNeedsInput =>
+      'ツールの権限または質問への回答が必要です。';
+
+  @override
+  String get notificationPermissionNeedsInput => 'ツールの権限承認が必要です。';
+
+  @override
+  String get notificationQuestionNeedsInput => 'ツールの質問への回答が必要です。';
+
+  @override
+  String get notificationSessionError => 'セッションでエラーが報告されました。';
+
+  @override
+  String get notificationChannelErrors => 'CodeWalk エラー';
+
+  @override
+  String get notificationChannelErrorsDescription => 'CodeWalk エラーアラート';
+
+  @override
+  String get notificationChannelPermissions => 'CodeWalk 権限';
+
+  @override
+  String get notificationChannelPermissionsDescription => 'CodeWalk 操作要求アラート';
+
+  @override
+  String get notificationChannelAgent => 'CodeWalk エージェント';
+
+  @override
+  String get notificationChannelAgentDescription => 'CodeWalk エージェント完了アラート';
+
+  @override
+  String get notificationActionOpen => '開く';
+
+  @override
+  String get foregroundMonitorNotificationBody => 'バックグラウンドアラートが有効です';
+
+  @override
+  String get foregroundMonitorNotificationTitle => 'バックグラウンド監視が有効です';
+
+  @override
+  String get foregroundMonitorNotificationOneSession => '1つのセッションを監視中';
+
+  @override
+  String foregroundMonitorNotificationSessionCount(int count) {
+    return '$count件のセッションを監視中';
+  }
+
+  @override
+  String sessionAttentionSemanticLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のセッションが注意を要します',
+      one: '1件のセッションが注意を要します',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionAttentionOverlayPermissionRequired =>
+      '「他のアプリの上に表示」権限が必要です。';
+
+  @override
+  String get sessionAttentionIosInAppOnly => 'セッション通知は CodeWalk 内でのみ利用できます。';
+
+  @override
+  String get sessionAttentionOverlayPermissionGrantPrompt =>
+      '「他のアプリの上に表示」権限を許可してから、もう一度お試しください。';
+
+  @override
+  String get sessionAttentionAndroidStartFailed =>
+      'Android セッション通知サービスを開始できませんでした。';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count文字を切り詰め] $reason';
+  }
+
+  @override
+  String get chatMessageJustNow => 'たった今';
+
+  @override
+  String chatMessageMinutesAgo(int count) {
+    return '$count分前';
+  }
+
+  @override
+  String chatMessageHoursAgo(int count) {
+    return '$count時間前';
+  }
+
+  @override
+  String chatMessageDaysAgo(int count) {
+    return '$count日前';
+  }
+
+  @override
+  String chatMessageDateTime(int day, int hour, int minute, int month) {
+    return '$month/$day $hour:$minute';
+  }
+
+  @override
+  String get chatMessageYourMessage => 'あなたのメッセージ';
+
+  @override
+  String get chatMessageAssistantMessage => 'アシスタントメッセージ';
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'ステップ #$step 開始';
+  }
+
+  @override
+  String chatMessageStepStartedWithSnapshot(String snapshot, int step) {
+    return 'ステップ #$step 開始: $snapshot';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'ステップ #$step 終了: $reason • トークン $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessagePatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countパッチ',
+      one: '1パッチ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolRun => 'ツールの実行';
+
+  @override
+  String get chatMessageToolExecution => 'ツール実行';
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count件',
+      one: '+1件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainExtraTypes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count種類',
+      one: '+1種類',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件が注意を要します',
+      one: '1件が注意を要します',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件完了',
+      one: '1件完了',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => 'ツール呼び出し';
+
+  @override
+  String get chatMessageDiffPreviewTruncated => 'アプリ安定性のため差分プレビューを切り詰めました。';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'アプリ安定性のため大きなメッセージのプレビューを切り詰めました。';
+
+  @override
+  String get chatMessageInvalidLinkFormat => '無効なリンク形式です';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'リンクを開けません';
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total) {
+    return '$current/$total 進行中';
+  }
+
+  @override
+  String sessionTodoTaskProgress(String content, int index, int total) {
+    return 'タスク $index/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total 完了';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return 'タスク $count/$total 完了';
+  }
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return 'タスク ($count)';
+  }
+
+  @override
+  String questionStepOfReview(int current, int total) {
+    return 'ステップ $current/$total - 確認';
+  }
+
+  @override
+  String questionStepOfQuestion(int current, int total) {
+    return 'ステップ $current/$total - 質問';
+  }
+
+  @override
+  String get questionCustomAnswer => 'カスタム回答';
+
+  @override
+  String get questionSubmitAnswers => '回答を送信';
+
+  @override
+  String get questionReviewAnswers => '回答を確認';
+
+  @override
+  String permissionRequestTitle(String permission) {
+    return '権限リクエスト: $permission';
+  }
+
+  @override
+  String get sessionTitleCannotBeEmpty => 'タイトルは空にできません';
+
+  @override
+  String get filesFailedToLoad => 'ファイルの読み込みに失敗しました';
+
+  @override
+  String get filesFailedToSearch => 'ファイルの検索に失敗しました';
+
+  @override
+  String get filesNoOpenFilesHint => '開いているファイルはまだありません。入力して検索してください。';
+
+  @override
+  String get filesNoContentMatches => '一致するコンテンツが見つかりません';
+
+  @override
+  String filesOpenFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の開いているファイル',
+      one: '1件の開いているファイル',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesLinesSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count行が選択されました',
+      one: '1行が選択されました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filesDraftTooLargeToSave => '下書きが大きすぎるため、エディターから保存できません。';
+
+  @override
+  String get filesSaveChangesBeforeClose => 'このファイルを閉じる前に変更を保存してください。';
+
+  @override
+  String get filesSaveChangesBeforePathChange => 'このパスを変更する前に変更を保存してください。';
+
+  @override
+  String get filesWaitForSaveBeforePathChange =>
+      'このパスを変更する前に、ファイルの保存が終了するまでお待ちください。';
+
+  @override
+  String get filesWaitForFileOperation => 'ファイル操作が終了するまでお待ちください。';
+
+  @override
+  String get filesLargeFileReadOnly => '大きなファイルは編集の応答性を保つため読み取り専用で開きます。';
+
+  @override
+  String get filesCheckingWriteSupport => 'ファイル書き込みのサポートを確認中...';
+
+  @override
+  String get filesActiveProjectRequired => 'ファイル操作にはアクティブなプロジェクトディレクトリが必要です。';
+
+  @override
+  String get filesReloadSkippedUnsavedChanges => '未保存の変更があるため、再読み込みをスキップしました。';
+
+  @override
+  String get filesFailedToLoadContent => 'ファイルの内容の読み込みに失敗しました';
+
+  @override
+  String get filesFileSaved => 'ファイルを保存しました。';
+
+  @override
+  String get filesParentNotDirectory => '親要素がディレクトリではありません。';
+
+  @override
+  String get filesMalformedResponse => 'ファイル操作が無効な応答を返しました。';
+
+  @override
+  String get filesShellCommandDidNotComplete => 'ファイル操作のシェルコマンドが完了しませんでした。';
+
+  @override
+  String get filesShellCommandNoResult => 'ファイル操作のシェルコマンドが結果を返しませんでした。';
+
+  @override
+  String get filesShellCommandTruncated => 'ファイル操作のシェルコマンドがサーバーによって切り詰められました。';
+
+  @override
+  String get filesShellCommandSyntaxError => 'ファイル操作のシェルコマンドが構文エラーで失敗しました。';
+
+  @override
+  String get filesShellUtilityNotFound => '必要なシェルユーティリティが見つかりませんでした。';
+
+  @override
+  String get filesShellCommandFailed => 'ファイル操作のシェルコマンドが結果を返す前に失敗しました。';
+
+  @override
+  String get attachmentSaveTitle => '添付ファイルを保存';
+
+  @override
+  String get attachmentBrowserSandboxLocalFile =>
+      'ブラウザのサンドボックスにより、file:// の添付ファイルを直接開けません。';
+
+  @override
+  String get attachmentLocalPathBrowserBlocked =>
+      'この添付ファイルはブラウザから開けないローカルパスを指しています。';
+
+  @override
+  String terminalConnectedTo(String directory, String serverName) {
+    return '$serverName の $directory に接続しました';
+  }
+
+  @override
+  String get terminalTransportUnavailable => 'ターミナルのトランスポートを利用できません。';
+
+  @override
+  String get chatSlashCommandNew => '新しいチャットセッションを作成';
+
+  @override
+  String get chatSlashCommandModels => 'モデル選択を開く';
+
+  @override
+  String get chatSlashCommandSessions => '会話一覧を開く';
+
+  @override
+  String get chatSlashCommandAgent => 'エージェント選択を開く';
+
+  @override
+  String get chatSlashCommandOpen => 'ファイルをクイックオープン';
+
+  @override
+  String get chatSlashCommandHelp => 'コマンドのヘルプを表示';
+
+  @override
+  String get chatSlashCommandCompact => '現在のセッションのコンテキストを圧縮';
+
+  @override
+  String get chatSlashCommandThinking => '思考プロセスバブルの表示を切り替え';
+
+  @override
+  String get chatSlashCommandUndo => '最後に表示されたユーザーターンを元に戻す';
+
+  @override
+  String get chatSlashCommandRedo => '元に戻した最後のターンをやり直す';
+
+  @override
+  String chatSessionSubConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件のサブ会話',
+      one: '1つのサブ会話',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageWeeksAgo(int count) {
+    return '$count週前';
+  }
+
+  @override
+  String chatMessageShortDate(int day, int month) {
+    return '$month/$day';
+  }
+
+  @override
+  String get chatProviderErrorLoadSessionStatus => 'セッションの状態の読み込みに失敗しました';
+
+  @override
+  String get chatProviderErrorLoadSessionDetails => '一部のセッション詳細を読み込めませんでした';
+
+  @override
+  String chatProviderErrorLoadSessionList(String error) {
+    return 'セッション一覧の読み込みに失敗しました: $error';
+  }
+
+  @override
+  String get chatProviderErrorCreateSession => 'セッションの作成に失敗しました';
+
+  @override
+  String get chatProviderErrorSelectProviderModelBeforeSend =>
+      '送信する前に、接続済みのプロバイダーまたは無料の OpenCode モデルを選択してください';
+
+  @override
+  String get chatProviderErrorStartMessageSend => 'メッセージ送信を開始できませんでした';
+
+  @override
+  String get chatProviderErrorStopUnavailable => '現在のセッションでは停止を利用できません';
+
+  @override
+  String get chatProviderErrorWaitForResponseFinish =>
+      '圧縮する前に、現在の応答が終了するのを待ってください';
+
+  @override
+  String get chatProviderErrorCompactUnavailable =>
+      '現在のセッションではコンテキストの圧縮を利用できません';
+
+  @override
+  String get chatProviderErrorSelectModelBeforeCompact =>
+      'コンテキストを圧縮する前にモデルを選択してください';
+
+  @override
+  String get chatProviderErrorCompactSessionContext => 'セッションコンテキストの圧縮に失敗しました';
+
+  @override
+  String get chatProviderErrorNetwork => 'ネットワーク接続に失敗しました。ネットワーク設定を確認してください';
+
+  @override
+  String get chatProviderErrorServer => 'サーバーエラーです。後でもう一度お試しください';
+
+  @override
+  String get chatProviderErrorNotFound => 'リソースが見つかりません';
+
+  @override
+  String get chatProviderErrorInvalidInput => '入力パラメータが無効です';
+
+  @override
+  String get chatProviderErrorUnknown => '不明なエラーです。後でもう一度お試しください';
+
+  @override
+  String get chatProviderErrorSessionFallback => 'セッションエラー';
+
+  @override
+  String get projectProviderErrorNoProjectContext => 'サーバーからプロジェクトコンテキストがありません';
+
+  @override
+  String projectProviderErrorInitializeFailed(String error) {
+    return 'プロジェクトコンテキストの初期化に失敗しました: $error';
+  }
+
+  @override
+  String get projectProviderErrorSwitchProjectNotFound =>
+      'プロジェクトの切り替えに失敗しました: プロジェクトが見つかりません';
+
+  @override
+  String get projectProviderErrorSwitchDirectoryEmpty =>
+      'プロジェクトの切り替えに失敗しました: ディレクトリが空です';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      '少なくとも1つのコンテキストを開いたままにする必要があります';
+
+  @override
+  String get projectProviderErrorReopenProjectNotFound =>
+      'プロジェクトの再オープンに失敗しました: プロジェクトが見つかりません';
+
+  @override
+  String get projectProviderErrorOnlyClosedArchivable =>
+      'アーカイブできるのは閉じているプロジェクトのみです';
+
+  @override
+  String get projectProviderErrorArchiveProjectNotFound =>
+      'プロジェクトのアーカイブに失敗しました: プロジェクトが見つかりません';
+
+  @override
+  String get projectProviderErrorArchiveProjectPathInvalid =>
+      'プロジェクトのアーカイブに失敗しました: プロジェクトのパスが無効です';
+
+  @override
+  String projectProviderErrorLoadWorkspaces(String error) {
+    return 'ワークスペース一覧の読み込みに失敗しました: $error';
+  }
+
+  @override
+  String get projectProviderErrorWorkspaceNameEmpty => 'ワークスペース名は空にできません';
+
+  @override
+  String projectProviderErrorCreateWorkspace(String error) {
+    return 'ワークスペースの作成に失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorResetWorkspace(String error) {
+    return 'ワークスペースのリセットに失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorDeleteWorkspace(String error) {
+    return 'ワークスペースの削除に失敗しました: $error';
+  }
+
+  @override
+  String get projectProviderErrorDirectoryEmpty => 'ディレクトリは空にできません';
+
+  @override
+  String projectProviderErrorListDirectories(String error) {
+    return 'ディレクトリ一覧の取得に失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorValidateDirectory(String error) {
+    return 'ディレクトリの検証に失敗しました: $error';
+  }
+
+  @override
+  String get projectProviderErrorPathEmpty => 'パスは空にできません';
+
+  @override
+  String projectProviderErrorListFiles(String error) {
+    return 'ファイル一覧の取得に失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorSearchFiles(String error) {
+    return 'ファイルの検索に失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorContentSearchUnavailable(String error) {
+    return 'コンテンツ検索を利用できません: $error';
+  }
+
+  @override
+  String projectProviderErrorSearchSymbols(String error) {
+    return 'シンボルの検索に失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorReadFile(String error) {
+    return 'ファイルの読み込みに失敗しました: $error';
+  }
+
+  @override
+  String projectProviderErrorLoadProjectList(String error) {
+    return 'プロジェクト一覧の読み込みに失敗しました: $error';
+  }
+
+  @override
+  String get workspaceProjectRemovedFromHistory => '履歴からプロジェクトを削除しました';
+
+  @override
+  String workspaceProjectContextOpened(String directory) {
+    return 'プロジェクトコンテキストを開きました: $directory';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'プロジェクトコンテキストを開けませんでした: $directory';
+  }
+
+  @override
+  String get chatAbortNotice => 'どう変更しますか？';
+
+  @override
+  String sessionTitleToday(String date, String time) {
+    return '今日 $time（$date）';
+  }
+
+  @override
+  String sessionTitleYesterday(String date, String time) {
+    return '昨日 $time（$date）';
+  }
+
+  @override
+  String sessionTitleWeekday(String date, String time, String weekday) {
+    return '$weekday $time（$date）';
+  }
+
+  @override
+  String sessionTitleDateAndTime(String date, String time) {
+    return '$date $time';
+  }
+
+  @override
+  String get sessionWeekdayMon => '月';
+
+  @override
+  String get sessionWeekdayTue => '火';
+
+  @override
+  String get sessionWeekdayWed => '水';
+
+  @override
+  String get sessionWeekdayThu => '木';
+
+  @override
+  String get sessionWeekdayFri => '金';
+
+  @override
+  String get sessionWeekdaySat => '土';
+
+  @override
+  String get sessionWeekdaySun => '日';
+
+  @override
+  String get forwardTimeNow => 'たった今';
+
+  @override
+  String forwardTimeMinutes(int count) {
+    return '$count分';
+  }
+
+  @override
+  String forwardTimeHours(int count) {
+    return '$count時間';
+  }
+
+  @override
+  String forwardTimeDays(int count) {
+    return '$count日';
+  }
+
+  @override
+  String forwardTimeWeeks(int count) {
+    return '$count週';
+  }
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultModel => 'デフォルトモデル';
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultAgent => 'デフォルトエージェント';
+
+  @override
+  String get settingsBehaviorConfigFieldSmallModel => 'スモールモデル';
+
+  @override
+  String get settingsBehaviorConfigFieldAutoUpdateMode => '自動更新モード';
+
+  @override
+  String get settingsBehaviorConfigFieldSnapshotSetting => 'スナップショット設定';
+
+  @override
+  String get settingsBehaviorConfigFieldConversationUsername => '会話用ユーザー名';
+
+  @override
+  String get settingsBehaviorConfigFieldSharingDefault => '共有デフォルト';
+
+  @override
+  String get speechMicNoInputDevice => 'マイク入力デバイスがありません。';
+
+  @override
+  String get speechMicDeviceBusy => 'デフォルトのマイクは別のアプリで使用中です。';
+
+  @override
+  String get speechMicUnsupportedFormat => 'デフォルトのマイク形式がサポートされていません。';
+
+  @override
+  String get speechMicSpeechPrivacy =>
+      'Windows の音声サービスが無効になっている可能性があります（音声プライバシー、オンライン音声認識、または言語パック）。';
+
+  @override
+  String get speechMicBackendUnavailable =>
+      'このビルドでは Windows マイクバックエンドを利用できません。';
+
+  @override
+  String speechEngineFallbackNotice(String fallback, String reason) {
+    return '選択した STT エンジンを利用できません（$reason）。代わりに $fallback を使用します。';
+  }
+
+  @override
+  String get oauthFlowSecureStorageUnavailable =>
+      'OAuth 用のセキュアな認証情報ストレージを利用できません。';
+
+  @override
+  String get oauthFlowUnexpectedError => 'OAuth フローが予期せず失敗しました。もう一度お試しください。';
+
+  @override
+  String get oauthFlowNoEndpointsDiscovered =>
+      'OAuth エンドポイントが見つかりませんでした。Cloudflare Dashboard → Access → Applications → [このアプリ] で Managed OAuth を有効にしてください。';
+
+  @override
+  String get oauthFlowTokenResponseMissingAccessToken =>
+      'OAuth トークン応答にアクセストークンが含まれていませんでした。';
+
+  @override
+  String get oauthFlowProfileChanged => 'OAuth が完了する前にサーバープロファイルが変更されました。';
+
+  @override
+  String get oauthFlowMetadataMissingEndpoints =>
+      'OAuth メタデータに認証/トークンエンドポイントがありません。';
+
+  @override
+  String get oauthFlowCallbackNotCompleted => '認証コールバックが完了しませんでした';
+
+  @override
+  String get oauthFlowProviderDeclined =>
+      '認証サーバーが OAuth リクエストを拒否しました。もう一度お試しください。';
+
+  @override
+  String get oauthFlowCallbackValidationFailed =>
+      'OAuth コールバックの検証に失敗しました。もう一度お試しください。';
+
+  @override
+  String get oauthFlowCallbackServerStartFailed =>
+      'ローカルの OAuth コールバックサーバーを起動できませんでした。';
+
+  @override
+  String get oauthFlowSignInCanceled => 'OAuth サインインがキャンセルされました。';
+
+  @override
+  String get oauthFlowBrowserOpenFailed => 'OAuth サインイン用にシステムブラウザを開けませんでした。';
+
+  @override
+  String get oauthFlowCallbackTimeout =>
+      '5分以内に認証コールバックがアプリに届きませんでした。ブラウザは同意後にローカルのコールバックアドレスへリダイレクトされるはずです。代わりにブラウザに接続エラーが表示された場合は、このデバイスまたはネットワークがループバックリダイレクトをブロックしています。';
+
+  @override
+  String oauthFlowTokenExchangeTransientFailure(int maxAttempts) {
+    return '一時的なネットワーク問題のため、$maxAttempts回試行しましたがトークン交換に失敗しました。もう一度お試しください。';
+  }
+
+  @override
+  String oauthFlowTokenExchangeHttpFailure(int statusCode) {
+    return 'トークン交換に失敗しました（HTTP $statusCode）。もう一度お試しください。';
+  }
+
+  @override
+  String get oauthFlowTokenExchangeUnexpectedFailure =>
+      'トークン交換が予期せず失敗しました。もう一度お試しください。';
+
+  @override
+  String get oauthFlowTokenExchangeIncomplete =>
+      '認証コード送信後、トークン交換が完了しませんでした。OAuth サインインを再度開始してください。';
+
+  @override
+  String get speechReadAloudFailed => '音声合成に失敗しました。';
+
+  @override
+  String get speechReadAloudNoText => '読み上げるテキストがありません。';
+
+  @override
+  String get speechEdgeTextTooLong =>
+      'Microsoft Edge Speech は一度に最大4096バイトまで読み上げられます。';
+
+  @override
+  String get speechEdgeMalformedAudio =>
+      'Microsoft Edge Speech が不正な音声データを返しました。';
+
+  @override
+  String get speechEdgeUnsupportedAudio =>
+      'Microsoft Edge Speech がサポートされていない音声データを返しました。';
+
+  @override
+  String get speechEdgeUnsupportedFrame =>
+      'Microsoft Edge Speech がサポートされていない WebSocket フレームを返しました。';
+
+  @override
+  String get speechEdgeSynthesisInterrupted =>
+      'Microsoft Edge Speech は合成が完了する前に終了しました。';
+
+  @override
+  String get speechEdgeEmptyAudio => 'Microsoft Edge Speech が空の音声応答を返しました。';
+
+  @override
+  String get speechEdgeTimedOut => 'Microsoft Edge Speech がタイムアウトしました。';
+
+  @override
+  String get speechEdgeUnreachable => 'Microsoft Edge Speech に接続できませんでした。';
+
+  @override
+  String get speechApiKeyMissing =>
+      'この TTS プロバイダーを使用するには、[設定] > [音声] で APIキーを追加してください。';
+
+  @override
+  String get speechProviderEmptyAudio => 'TTS プロバイダーが空の音声応答を返しました。';
+
+  @override
+  String get speechProviderRequestRejected => 'TTS プロバイダーが音声リクエストを拒否しました。';
+
+  @override
+  String get speechApiKeyRejected => 'TTS の APIキーがプロバイダーに拒否されました。';
+
+  @override
+  String get speechProviderQuotaRateLimit => 'TTS プロバイダーがクォータまたはレート制限を報告しました。';
+
+  @override
+  String get speechProviderTemporarilyUnavailable => 'TTS プロバイダーが一時的に利用できません。';
+
+  @override
+  String get speechProviderUnreachable => 'TTS プロバイダーに接続できませんでした。';
+
+  @override
+  String appProviderErrorFailedToStartProcess(String tool) {
+    return '$tool プロセスの起動に失敗しました。';
+  }
+
+  @override
+  String appProviderErrorToolNotAvailable(String runtime, String tool) {
+    return '$tool が利用できません。先に $runtime をインストールしてください。';
+  }
+
+  @override
+  String appProviderErrorToolInstallFailed(int exitCode, String tool) {
+    return '$tool のインストールが終了コード $exitCode で失敗しました。';
+  }
+
+  @override
+  String appProviderErrorBunBootstrapFailed(int exitCode) {
+    return 'Bun のブートストラップが終了コード $exitCode で失敗しました。';
+  }
+
+  @override
+  String get appProviderErrorInstalledButNotFoundInPath =>
+      'OpenCode のインストールは完了しましたが、コマンドが PATH に見つかりませんでした。';
+
+  @override
+  String get appProviderErrorInstalledButPathNotResolved =>
+      'OpenCode のインストールは完了しましたが、コマンドパスを解決できませんでした。';
+
+  @override
+  String appProviderErrorConfiguredCommandNotFound(String tool) {
+    return '構成されたコマンドが見つからず、$tool が PATH にありません。';
+  }
+
+  @override
+  String get appProviderErrorConfiguredCommandPathMissing =>
+      '構成されたコマンドのパスが存在しません。';
+
+  @override
+  String get appProviderErrorConfiguredCommandVersionCheckFailed =>
+      '構成されたコマンドは存在しますが、バージョン確認に失敗しました。';
+
+  @override
+  String get appProviderErrorConfiguredCommandExecutionFailed =>
+      '構成されたコマンドを実行できませんでした。';
+
+  @override
+  String get appProviderWslCheckWindowsOnly => 'WSL チェックは Windows にのみ適用されます。';
+
+  @override
+  String get appProviderDesktopBuildRequired =>
+      '管理対象ローカルサーバーを構成するには、デスクトップビルドを使用してください。';
+
+  @override
+  String get appProviderKnownInstallationDirectoryDetected =>
+      '既知のインストールディレクトリから検出されました。';
+
+  @override
+  String appProviderKnownInstallationPathRefreshHint(String appName) {
+    return '既知のインストールディレクトリから検出されました。PATH の更新が必要になる場合があります。最近のインストールがまだ検出されない場合は、$appName を開き直してください。';
+  }
+
+  @override
+  String get appProviderErrorReleaseMetadataFetchFailed =>
+      'GitHub から最新リリースのメタデータを取得できませんでした。';
+
+  @override
+  String get appProviderErrorReleaseAssetListMissing =>
+      '最新リリースのメタデータにアセットリストが含まれていませんでした。';
+
+  @override
+  String get appProviderErrorNoCompatibleAsset =>
+      '互換性のある OpenCode バイナリアセットが見つかりませんでした。';
+
+  @override
+  String get appProviderErrorDownloadAssetFailed =>
+      '選択した OpenCode アセットのダウンロードに失敗しました。';
+
+  @override
+  String get appProviderErrorChecksumVerificationFailed =>
+      'ダウンロードしたアセットのチェックサム検証に失敗しました。';
+
+  @override
+  String get appProviderErrorExtractArchiveFailed =>
+      'OpenCode バイナリアーカイブの解凍に失敗しました。';
+
+  @override
+  String appProviderErrorExecutableNotFound(String tool) {
+    return '解凍されたファイル内に $tool 実行ファイルが見つかりませんでした。';
+  }
+
+  @override
+  String get chatNoResponseFromServer => 'サーバーからの応答がありません。もう一度お試しください。';
+
+  @override
+  String get chatNoResponseFromModel => 'モデルからの応答がありません。もう一度お試しください。';
+
+  @override
+  String get speechJobCancelled => '音声ジョブがキャンセルされました。';
+
+  @override
+  String get speechEdgeCancelled => 'Microsoft Edge Speech がキャンセルされました。';
+
+  @override
+  String get sessionAttentionKindActive => 'アクティブ';
+
+  @override
+  String get sessionAttentionKindReceiving => '受信中';
+
+  @override
+  String get sessionAttentionKindDelayed => '遅延';
+
+  @override
+  String get sessionAttentionKindCompleted => '完了';
+
+  @override
+  String get sessionAttentionKindPendingInteraction => '操作待ち';
+
+  @override
+  String get sessionAttentionKindError => 'エラー';
+
+  @override
+  String get sessionAttentionPauseCellularDataSaver => 'データ節約モードが有効です。';
+
+  @override
+  String get sessionAttentionPauseOauthReopenRequired => 'OAuth サインインが必要です';
+
+  @override
+  String get sessionAttentionPauseTailscaleReopenRequired =>
+      'Tailscale 接続が必要です';
+
+  @override
+  String get sessionAttentionPauseOffline => 'オフライン';
+
+  @override
+  String get sessionAttentionPausePermissionRevoked => '権限が取り消されました';
+
+  @override
+  String get sessionAttentionPauseServiceStopped => 'サービスが停止しました';
+
+  @override
+  String get sessionAttentionPauseHostUnavailable => 'ホストが利用できません';
+
+  @override
+  String get errorRequestCancelled => 'リクエストがキャンセルされました';
+
+  @override
+  String errorUnknownNetworkError(String error) {
+    return '不明なネットワークエラー: $error';
+  }
+
+  @override
+  String get errorCertificateError => '証明書エラー';
+
+  @override
+  String get errorSessionBusy => 'セッションは別のリクエストを処理中です。';
+
+  @override
+  String get errorRunShellCommandFailed => 'シェルコマンドの実行に失敗しました';
+
+  @override
+  String get errorRunSlashCommandFailed => 'スラッシュコマンドの実行に失敗しました';
+
+  @override
+  String get settingsBehaviorOpenCodeDefaultsLoadError =>
+      'アクティブなサーバーから OpenCode ベースのデフォルトを読み込めませんでした。';
+
+  @override
+  String get sessionTabIconRemoveFailed => 'ローカルセッションのタブアイコンデータの削除に失敗しました';
+
+  @override
+  String get forwardUntitled => '無題';
+
+  @override
+  String setupDebugLinuxLogsPath(String path) {
+    return 'Linux ログ: $path';
+  }
+
+  @override
+  String setupDebugRunOpenCodeCommand(String command) {
+    return 'OpenCode を起動: $command';
+  }
+
+  @override
+  String setupDebugServerHealthEndpoint(String endpoint) {
+    return 'サーバーのヘルスチェック: $endpoint';
+  }
+
+  @override
+  String setupDebugServerDocsEndpoint(String endpoint) {
+    return 'サーバードキュメント: $endpoint';
+  }
+
+  @override
+  String get logsEntryError => 'エラー';
+
+  @override
+  String get logsEntryStack => 'スタック';
+
+  @override
+  String get setupDebugSourceDiagnostics => '診断';
+
+  @override
+  String get setupDebugSourceUseExisting => '既存のものを使用';
+
+  @override
+  String get setupDebugSourceLocalServer => 'ローカルサーバー';
+
+  @override
+  String get setupDebugSourceOnboarding => 'オンボーディング';
+
+  @override
+  String get setupDebugSourceManualConnection => '手動接続';
+
+  @override
+  String setupDebugMessageDiagnosticsResult(
+    String availability,
+    String platform,
+    String recommendation,
+  ) {
+    return '$platform で $availability。$recommendation';
+  }
+
+  @override
+  String get setupDebugMessageDetectAttempt =>
+      '現在の環境から既存の OpenCode コマンドを検出しようとしています。';
+
+  @override
+  String get setupDebugMessageInstallStarted =>
+      'CodeWalk から OpenCode のインストールを開始しました。';
+
+  @override
+  String setupDebugMessageStartLocalServer(String url) {
+    return '管理対象の OpenCode サーバーを $url で起動しています。';
+  }
+
+  @override
+  String setupDebugMessageHealthyRunning(String url) {
+    return '管理対象の OpenCode サーバーは正常で、$url で実行中です。';
+  }
+
+  @override
+  String get setupDebugMessageStoppingLocalServer =>
+      '管理対象の OpenCode サーバーを停止しています。';
+
+  @override
+  String get setupDebugMessageStoppedCleanly =>
+      '管理対象の OpenCode サーバーは正常に停止しました。';
+
+  @override
+  String get setupDebugMessageExitedAfterRequestedStop =>
+      '停止要求後、管理対象の OpenCode サーバーが終了しました。';
+
+  @override
+  String get setupDebugMessageOnboardingConnectExisting =>
+      'ユーザーは既存の OpenCode サーバーへの接続を選択しました。';
+
+  @override
+  String get setupDebugMessageOnboardingGuidedPath =>
+      'ユーザーはガイド付きの OpenCode セットアップフローを開きました。';
+
+  @override
+  String get setupDebugMessageOnboardingManagedLocal =>
+      'ユーザーは管理対象のローカル OpenCode セットアップを開きました。';
+
+  @override
+  String get setupDebugMessageOnboardingOpenedServerSettings =>
+      'ヘルスチェック失敗後、ユーザーはサーバー設定を開きました。';
+
+  @override
+  String get setupDebugMessageOnboardingAddAnotherServer =>
+      'ヘルスチェック失敗後、ユーザーは別のサーバーを追加することを選択しました。';
+
+  @override
+  String setupDebugMessageTestingServerUrl(String url) {
+    return 'オンボーディングから OpenCode サーバー URL $url をテストしています。';
+  }
+
+  @override
+  String get chatProviderErrorSessionNotFound => 'セッションが見つかりません';
+
+  @override
+  String get chatProviderErrorInvalidMessageFormat => '無効なメッセージ形式です';
+
+  @override
+  String get chatProviderErrorNetworkShort => 'ネットワーク接続に失敗しました';
+
+  @override
+  String get chatProviderErrorUnknownShort => '不明なエラー';
+
+  @override
+  String get terminalCreateFailed => 'ターミナルセッションを作成できませんでした';
+
+  @override
+  String get terminalEndpointUnavailable => 'ターミナルエンドポイントが利用できません';
+
+  @override
+  String get terminalInvalidDirectory => '無効なターミナルディレクトリです';
+
+  @override
+  String get terminalWebsocketUnavailable => 'ターミナル WebSocket はここでは利用できません。';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count回',
+      one: '1回',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get errorConnectionTimeout => '接続タイムアウト';
+
+  @override
+  String get errorClientError => 'クライアントエラー';
+
+  @override
+  String get chatProviderErrorSendMessage => 'メッセージの送信に失敗しました';
 }

@@ -1,6 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web/web.dart' as web;
 
+import '../../core/i18n/l10n_bridge.dart';
 import 'file_part_action_service_shared.dart';
 import 'file_part_action_types.dart';
 
@@ -30,15 +31,18 @@ Future<FilePartActionResult> handleFilePartAction({
       if (launched) {
         return const FilePartActionResult(success: true);
       }
-      return const FilePartActionResult(
+      return FilePartActionResult(
         success: false,
-        message: 'Unable to open the attachment link.',
+        message:
+            L10nBridge.current?.attachmentUnableToOpenLink ??
+            'Unable to open the attachment link.',
       );
     }
     if (scheme == 'file') {
-      return const FilePartActionResult(
+      return FilePartActionResult(
         success: false,
         message:
+            L10nBridge.current?.attachmentBrowserSandboxLocalFile ??
             'Browser sandbox prevents opening local file:// attachments directly.',
       );
     }
@@ -52,16 +56,19 @@ Future<FilePartActionResult> handleFilePartAction({
   }
 
   if (sourcePath != null && sourcePath.trim().isNotEmpty) {
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
       message:
+          L10nBridge.current?.attachmentLocalPathBrowserBlocked ??
           'This attachment points to a local path that cannot be opened from the browser.',
     );
   }
 
-  return const FilePartActionResult(
+  return FilePartActionResult(
     success: false,
-    message: 'Attachment does not provide a valid location.',
+    message:
+        L10nBridge.current?.attachmentNoValidLocation ??
+        'Attachment does not provide a valid location.',
   );
 }
 
@@ -83,14 +90,18 @@ FilePartActionResult _downloadInlineAttachment({
     web.document.body?.appendChild(anchor);
     anchor.click();
     anchor.remove();
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: true,
-      message: 'Attachment download started.',
+      message:
+          L10nBridge.current?.attachmentDownloadStarted ??
+          'Attachment download started.',
     );
   } catch (_) {
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
-      message: 'Attachment could not be downloaded.',
+      message:
+          L10nBridge.current?.attachmentCouldNotDownload ??
+          'Attachment could not be downloaded.',
     );
   }
 }

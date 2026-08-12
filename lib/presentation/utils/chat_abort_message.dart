@@ -1,3 +1,8 @@
+import '../../core/i18n/l10n_bridge.dart';
+
+/// Protocol-level abort notice value echoed by the server. Kept as a raw
+/// English constant because it is matched against server payloads
+/// (`chat_provider_abort_policy_ops.dart`), not displayed directly.
 const String kChatAbortNoticeMessage = 'What you want to do different?';
 
 bool isAbortLikeError({String? name, required String message}) {
@@ -18,7 +23,7 @@ bool isAbortLikeError({String? name, required String message}) {
 
 String normalizeAbortMessageForDisplay(String message, {String? name}) {
   if (isAbortLikeError(name: name, message: message)) {
-    return kChatAbortNoticeMessage;
+    return L10nBridge.current?.chatAbortNotice ?? kChatAbortNoticeMessage;
   }
   return message;
 }

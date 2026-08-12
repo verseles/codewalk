@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
-import '../../core/i18n/l10n_bridge.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import 'local_opencode_server_runtime_types.dart';
 
 LocalOpencodeServerRuntime createLocalOpencodeServerRuntime() {
@@ -103,9 +103,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     String? commandPath,
   }) async {
     if (!isSupported) {
-      return const LocalOpencodeServerStartResult(
+      return LocalOpencodeServerStartResult(
         ok: false,
-        errorMessage: 'Managed local server is available only on desktop.',
+        errorMessage:
+            L10nBridge.current?.appProviderDesktopOnly ??
+            'Managed local server is available only on desktop.',
       );
     }
     if (_process != null) {
@@ -153,9 +155,13 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       if (details.isNotEmpty) {
         return LocalOpencodeServerStartResult(ok: false, errorMessage: details);
       }
-      return const LocalOpencodeServerStartResult(
+      return LocalOpencodeServerStartResult(
         ok: false,
-        errorMessage: 'Failed to start opencode process.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorFailedToStartProcess(
+              'opencode',
+            ) ??
+            'Failed to start opencode process.',
       );
     } catch (error) {
       return LocalOpencodeServerStartResult(
@@ -168,20 +174,23 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
   @override
   Future<LocalOpencodeEnvironmentReport> diagnose({String? commandPath}) async {
     if (!isSupported) {
-      return const LocalOpencodeEnvironmentReport(
+      return LocalOpencodeEnvironmentReport(
         supported: false,
         platform: 'unsupported',
         opencode: LocalToolStatus(
           available: false,
-          note: 'Managed local server is available only on desktop.',
+          note:
+              L10nBridge.current?.appProviderDesktopOnly ??
+              'Managed local server is available only on desktop.',
         ),
-        node: LocalToolStatus(available: false),
-        npm: LocalToolStatus(available: false),
-        bun: LocalToolStatus(available: false),
-        wsl: LocalToolStatus(available: false),
+        node: const LocalToolStatus(available: false),
+        npm: const LocalToolStatus(available: false),
+        bun: const LocalToolStatus(available: false),
+        wsl: const LocalToolStatus(available: false),
         hasNetworkAccess: false,
         installDirectoryWritable: false,
         recommendation:
+            L10nBridge.current?.appProviderDesktopBuildRequired ??
             'Use a desktop build to configure a managed local server.',
       );
     }
@@ -194,9 +203,13 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
         final fallback = await _probeOpencodeFromPathOrKnownLocations();
         opencodeStatus = fallback.available
             ? fallback
-            : const LocalToolStatus(
+            : LocalToolStatus(
                 available: false,
                 note:
+                    L10nBridge.current
+                        ?.appProviderErrorConfiguredCommandNotFound(
+                          'opencode',
+                        ) ??
                     'Configured command was not found and opencode is not in PATH.',
               );
       }
@@ -212,9 +225,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     if (defaultTargetPlatform == TargetPlatform.windows) {
       wslStatus = await _probeCommand('wsl');
     } else {
-      wslStatus = const LocalToolStatus(
+      wslStatus = LocalToolStatus(
         available: false,
-        note: 'WSL check only applies to Windows.',
+        note:
+            L10nBridge.current?.appProviderWslCheckWindowsOnly ??
+            'WSL check only applies to Windows.',
       );
     }
 
@@ -252,9 +267,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
   }) async {
     if (!isSupported) {
       onLog?.call('Managed local server is available only on desktop.');
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Managed local server is available only on desktop.',
+        errorMessage:
+            L10nBridge.current?.appProviderDesktopOnly ??
+            'Managed local server is available only on desktop.',
       );
     }
 
@@ -309,9 +326,14 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
   }) async {
     final npm = await _probeCommand('npm');
     if (!npm.available) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'npm is not available. Install Node.js first.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorToolNotAvailable(
+              'Node.js',
+              'npm',
+            ) ??
+            'npm is not available. Install Node.js first.',
       );
     }
 
@@ -325,15 +347,21 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     if (exitCode != 0) {
       return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'npm install failed with exit code $exitCode.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorToolInstallFailed(
+              exitCode,
+              'npm',
+            ) ??
+            'npm install failed with exit code $exitCode.',
       );
     }
 
     final resolved = await _resolveInstalledOpencodePath();
     if (resolved == null) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
         errorMessage:
+            L10nBridge.current?.appProviderErrorInstalledButNotFoundInPath ??
             'OpenCode installation finished but command was not found in PATH.',
       );
     }
@@ -347,9 +375,14 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     final bun = await _probeCommand('bun');
     final bunPath = bun.path.isNotEmpty ? bun.path : _defaultBunBinaryPath();
     if (!bun.available && (bunPath == null || !File(bunPath).existsSync())) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Bun is not available. Install Bun first.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorToolNotAvailable(
+              'Bun',
+              'Bun',
+            ) ??
+            'Bun is not available. Install Bun first.',
       );
     }
 
@@ -364,7 +397,12 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     if (exitCode != 0) {
       return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'bun install failed with exit code $exitCode.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorToolInstallFailed(
+              exitCode,
+              'bun',
+            ) ??
+            'bun install failed with exit code $exitCode.',
       );
     }
 
@@ -372,9 +410,10 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       preferredBun: executable,
     );
     if (resolved == null) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
         errorMessage:
+            L10nBridge.current?.appProviderErrorInstalledButPathNotResolved ??
             'OpenCode installation finished but command path could not be resolved.',
       );
     }
@@ -418,7 +457,9 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     if (exitCode != 0) {
       return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Bun bootstrap failed with exit code $exitCode.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorBunBootstrapFailed(exitCode) ??
+            'Bun bootstrap failed with exit code $exitCode.',
       );
     }
 
@@ -431,26 +472,32 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     onLog?.call('Fetching OpenCode latest release metadata...');
     final release = await _fetchLatestRelease();
     if (release == null) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Failed to fetch latest release metadata from GitHub.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorReleaseMetadataFetchFailed ??
+            'Failed to fetch latest release metadata from GitHub.',
       );
     }
 
     final versionTag = (release['tag_name'] as String? ?? '').trim();
     final assetsDynamic = release['assets'];
     if (assetsDynamic is! List) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Latest release metadata did not include asset list.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorReleaseAssetListMissing ??
+            'Latest release metadata did not include asset list.',
       );
     }
 
     final asset = _selectAssetForCurrentPlatform(assetsDynamic);
     if (asset == null) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'No compatible OpenCode binary asset was found.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorNoCompatibleAsset ??
+            'No compatible OpenCode binary asset was found.',
       );
     }
 
@@ -469,9 +516,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       onLog: onLog,
     );
     if (!downloadOk) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Failed to download selected OpenCode asset.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorDownloadAssetFailed ??
+            'Failed to download selected OpenCode asset.',
       );
     }
 
@@ -479,9 +528,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       onLog?.call('Verifying SHA256 checksum...');
       final actualDigest = await _computeSha256(File(archivePath));
       if (actualDigest.toLowerCase() != asset.sha256Digest.toLowerCase()) {
-        return const LocalOpencodeInstallResult(
+        return LocalOpencodeInstallResult(
           ok: false,
-          errorMessage: 'Checksum verification failed for downloaded asset.',
+          errorMessage:
+              L10nBridge.current?.appProviderErrorChecksumVerificationFailed ??
+              'Checksum verification failed for downloaded asset.',
         );
       }
       onLog?.call('Checksum verified.');
@@ -501,9 +552,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       onLog: onLog,
     );
     if (!extracted) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Failed to extract OpenCode binary archive.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorExtractArchiveFailed ??
+            'Failed to extract OpenCode binary archive.',
       );
     }
 
@@ -523,9 +576,13 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
     }
 
     if (discoveredPath == null) {
-      return const LocalOpencodeInstallResult(
+      return LocalOpencodeInstallResult(
         ok: false,
-        errorMessage: 'Could not find opencode executable in extracted files.',
+        errorMessage:
+            L10nBridge.current?.appProviderErrorExecutableNotFound(
+              'opencode',
+            ) ??
+            'Could not find opencode executable in extracted files.',
       );
     }
 
@@ -648,7 +705,9 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
   }
 
   String _knownLocationNote(String commandPath) {
-    const base = 'Detected from a known installation directory.';
+    final base =
+        L10nBridge.current?.appProviderKnownInstallationDirectoryDetected ??
+        'Detected from a known installation directory.';
     if (defaultTargetPlatform != TargetPlatform.windows) {
       return base;
     }
@@ -660,7 +719,10 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       return base;
     }
 
-    return '$base PATH may need refresh; reopen CodeWalk if a recent install is not detected yet.';
+    return L10nBridge.current?.appProviderKnownInstallationPathRefreshHint(
+          'CodeWalk',
+        ) ??
+        '$base PATH may need refresh; reopen CodeWalk if a recent install is not detected yet.';
   }
 
   bool _pathContainsDirectory(String pathToFind) {
@@ -708,9 +770,11 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
   Future<LocalToolStatus> _probeExplicitCommand(String commandPath) async {
     final file = File(commandPath);
     if (!file.existsSync()) {
-      return const LocalToolStatus(
+      return LocalToolStatus(
         available: false,
-        note: 'Configured command path does not exist.',
+        note:
+            L10nBridge.current?.appProviderErrorConfiguredCommandPathMissing ??
+            'Configured command path does not exist.',
       );
     }
 
@@ -719,9 +783,13 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
         '--version',
       ], runInShell: _shouldRunInShell(commandPath));
       if (result.exitCode != 0) {
-        return const LocalToolStatus(
+        return LocalToolStatus(
           available: false,
-          note: 'Configured command exists but version check failed.',
+          note:
+              L10nBridge
+                  .current
+                  ?.appProviderErrorConfiguredCommandVersionCheckFailed ??
+              'Configured command exists but version check failed.',
         );
       }
       final version =
@@ -732,9 +800,13 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
         version: version,
       );
     } catch (_) {
-      return const LocalToolStatus(
+      return LocalToolStatus(
         available: false,
-        note: 'Configured command could not be executed.',
+        note:
+            L10nBridge
+                .current
+                ?.appProviderErrorConfiguredCommandExecutionFailed ??
+            'Configured command could not be executed.',
       );
     }
   }
@@ -797,7 +869,7 @@ class _IoLocalOpencodeServerRuntime implements LocalOpencodeServerRuntime {
       return L10nBridge
               .current
               ?.onboardingPreconditionWindowsWslRecommendation ??
-          'Windows build detected. Prefer the native opencode.cmd / opencode.exe path; WSL is the power-user fallback — run opencode serve inside WSL with OPENCODE_SERVER_PASSWORD and --hostname 0.0.0.0, then connect to the WSL IP. npm install can still be used as a fallback.';
+          'Windows build detected. WSL is recommended by OpenCode docs, but npm install can be used as fallback.';
     }
     if (bun.available) {
       return L10nBridge

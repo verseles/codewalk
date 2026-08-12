@@ -94,7 +94,7 @@ class _SessionTitleInlineEditorState extends State<SessionTitleInlineEditor> {
     final nextTitle = _controller.text.trim();
     if (nextTitle.isEmpty) {
       setState(() {
-        _errorText = 'Title cannot be empty';
+        _errorText = context.l10n.sessionTitleCannotBeEmpty;
       });
       return;
     }

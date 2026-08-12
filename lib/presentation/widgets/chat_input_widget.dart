@@ -925,7 +925,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       return blockReason;
     }
     if (_mode == ChatComposerMode.shell) {
-      return 'Shell command (Esc to exit)';
+      return context.l10n.chatComposerHintShell;
     }
     return context.l10n.chatComposerPlaceholder;
   }
@@ -949,10 +949,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     final canSend = hasSendPayload && widget.enabled && !_isSending;
     final showStopAction = widget.isResponding && !hasSendPayload;
     final sendSemanticsLabel = showStopAction
-        ? 'Stop response'
+        ? context.l10n.composerStopResponse
         : (widget.isResponding
-              ? 'Send message while response is running'
-              : 'Send message');
+              ? context.l10n.composerSendMessageWhileResponding
+              : context.l10n.composerSendMessage);
     final showPopover = _popoverType != ChatComposerPopoverType.none;
     final blockReason = widget.blockReason?.trim();
     final hasBlockReason = blockReason != null && blockReason.isNotEmpty;
@@ -1008,7 +1008,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         showcaseKey: showcaseKey,
         targetKey: widget.composerShowcaseTargetKey!,
         title: context.l10n.composerChatInput,
-        description: 'Type your request here.',
+        description: context.l10n.chatTourComposerDescription,
         tooltipPosition: TooltipPosition.top,
         onSkipAction: widget.onTourSkip,
         targetBorderRadius: inputBubbleBorderRadius,
@@ -1025,10 +1025,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         showcaseKey: showcaseKey,
         targetKey: widget.sendButtonShowcaseTargetKey!,
         title: context.l10n.composerSend,
-        description: 'Send your message here.',
+        description: context.l10n.chatTourSendDescription,
         tooltipPosition: TooltipPosition.top,
         includePrevious: true,
-        primaryActionLabel: 'Done',
+        primaryActionLabel: context.l10n.onboardingDone,
         onSkipAction: widget.onTourSkip,
         targetBorderRadius: BorderRadius.circular(_composerActionButtonSize),
         child: child,
@@ -1133,7 +1133,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                             : Symbols.picture_as_pdf,
                         size: 18,
                       ),
-                      label: Text(attachment.filename ?? 'attachment'),
+                      label: Text(
+                        attachment.filename ??
+                            context.l10n.composerAttachmentFallbackName,
+                      ),
                       onDeleted: widget.enabled
                           ? () {
                               setState(() {
@@ -1162,7 +1165,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     final source = item.source;
                     final label = source != null
                         ? '${item.filename}:${source.text.start}-${source.text.end}'
-                        : (item.filename ?? 'context');
+                        : (item.filename ??
+                              context.l10n.composerContextFallbackName);
                     return InputChip(
                       avatar: const Icon(Symbols.code_rounded, size: 16),
                       label: Text(label),
@@ -1650,11 +1654,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   String _speechEngineLabel(SpeechToTextEngine engine) {
     return switch (engine) {
-      SpeechToTextEngine.native => 'Native',
-      SpeechToTextEngine.sherpa => 'Sherpa',
-      SpeechToTextEngine.moonshine => 'Moonshine',
-      SpeechToTextEngine.parakeet => 'Parakeet',
-      SpeechToTextEngine.sensevoice => 'SenseVoice',
+      SpeechToTextEngine.native => context.l10n.speechNative,
+      SpeechToTextEngine.sherpa => context.l10n.speechSherpa,
+      SpeechToTextEngine.moonshine => context.l10n.speechMoonshine,
+      SpeechToTextEngine.parakeet => context.l10n.speechParakeet,
+      SpeechToTextEngine.sensevoice => context.l10n.speechSenseVoice,
     };
   }
 

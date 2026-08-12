@@ -66,16 +66,19 @@
   "appShellUpdateAvailableResult": "اپ ڈیٹ دستیاب: v{latestVersion}",
   "appShellUpdateInstalledRestartApp": "اپ ڈیٹ انسٹال ہو گئی۔ لاگو کرنے کے لیے ایپ دوبارہ شروع کریں۔",
   "appShellUpdateInstalledRestartRequired": "اپ ڈیٹ انسٹال ہو گئی۔ نیا ورژن لاگو کرنے کے لیے دوبارہ شروع کرنا ضروری ہے۔",
+  "attachmentBrowserSandboxLocalFile": "براؤزر سینڈ باکس file:// منسلکات کو براہ راست کھولنے سے روکتا ہے۔",
   "attachmentCouldNotDecode": "منسلک ڈیٹا کو ڈی کوڈ نہیں کیا جا سکا۔",
   "attachmentCouldNotDownload": "منسلکہ ڈاؤن لوڈ نہیں کیا جا سکا۔",
   "attachmentCouldNotSave": "اس ڈیوائس پر منسلک فائل محفوظ نہیں کی جا سکی۔",
   "attachmentDownloadStarted": "منسلکہ ڈاؤن لوڈ شروع ہو گیا۔",
   "attachmentLocalNotFound": "اس ڈیوائس پر مقامی منسلک فائل نہیں ملی۔",
+  "attachmentLocalPathBrowserBlocked": "یہ منسلکہ ایک مقامی راستے کی طرف اشارہ کرتا ہے جو براؤزر سے نہیں کھولا جا سکتا۔",
   "attachmentNoValidLocation": "منسلکہ کوئی درست مقام فراہم نہیں کرتا۔",
   "attachmentNotAvailableOnPlatform": "اس پلیٹ فارم پر منسلک فائل کے اقدامات دستیاب نہیں ہیں۔",
   "attachmentPathEmpty": "منسلکہ کا راستہ خالی ہے۔",
   "attachmentPayloadEmpty": "منسلکہ کا پے لوڈ خالی ہے۔",
   "attachmentSaveCanceled": "محفوظ کرنا منسوخ کر دیا گیا۔",
+  "attachmentSaveTitle": "منسلکہ محفوظ کریں",
   "attachmentSavedAndOpened": "منسلکہ {path} میں محفوظ اور کھول دیا گیا۔",
   "attachmentSavedPath": "منسلکہ {path} میں محفوظ کر دیا گیا۔",
   "attachmentSavedTo": "منسلکہ {path} میں محفوظ کر دیا گیا۔",
@@ -93,12 +96,12 @@
   "behaviorCustomDisplayName": "حسب ضرورت ڈسپلے نام",
   "behaviorCutsAutomaticMobile": "بیک گراؤنڈ ڈاؤن لوڈز روک کر اور پیش منظر کے خودکار تازہ کاریوں کو ہر {inSeconds} سیکنڈ پر ایک رسے تک محدود کر کے خودکار موبائل ڈیٹا استعمال کو کم کرتا ہے۔",
   "behaviorDataSaverActive": "اب موبائل ڈیٹا پر فعال ہے۔",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "جارحانہ",
+  "behaviorDataSaverAggressiveDescription": "کم بینڈوڈتھ موڈ: صرف نظر آنے والا ورک اسپیس اسٹریم فعال رہتا ہے، عالمی اپ ڈیٹس روک دی جاتی ہیں، اور خودکار تازہ کاری کے وقفے بڑھا دیے جاتے ہیں۔",
   "behaviorDataSaverCellularOnly": "صرف اس وقت لاگو ہوتا ہے جب کنکشن سیلولر/موبائل ہو۔",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "بند",
+  "behaviorDataSaverOffHint": "مکمل ریئل ٹائم اور خودکار تازہ کاری فعال ہے۔",
+  "behaviorDataSaverStandard": "معیاری",
   "behaviorDataSaverWaiting": "اگلی موبائل ڈیٹا سنک ونڈو کا انتظار ہے۔",
   "behaviorDisabled": "غیر فعال",
   "behaviorLightweightTasksLike": "ہلکے کام جیسے",
@@ -127,6 +130,7 @@
   "cannedSendAutomaticallySubtitle": "فوری جواب ڈالنے کے فوراً بعد بھیجیں",
   "cannedSendImmediatelyInserting": "یہ فوری جواب داخل کرنے کے فوراً بعد بھیجیں۔",
   "cannedTextLabel": "متن",
+  "chatAbortNotice": "آپ کیا مختلف کرنا چاہتے ہیں؟",
   "chatActionNext": "اگلا",
   "chatActiveServerUnhealthy": "فعال سرور غیر صحت بخش ہے۔ بھیجیں ایک بار کوشش کریں گے اور بازیابی تک تیزی سے ناکام ہوجائیں گے۔",
   "chatActiveServerUnhealthyLabel": "فعال سرور غیر صحت مند ہے",
@@ -142,8 +146,8 @@
   "chatBadgeDataSaverActive": "سیلولر ڈیٹا سیور فعال ہے۔",
   "chatBadgeServerNeedsAttention": "سرور کنکشن پر توجہ کی ضرورت ہے۔",
   "chatBadgeSyncing": "گفتگو کی مطابقت پذیری ہو رہی ہے...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "یہ ٹرن مکمل ہونے پر جواب ایک ہی بلاک کے طور پر ظاہر ہوگا۔",
+  "chatBlockResponsePendingTitle": "جواب تیار ہو رہا ہے",
   "chatCachedConversationsYet": "ابھی تک کوئی کیش شدہ گفتگو نہیں ہے۔",
   "chatChangedFilesAvailable": "اس سیشن کے لیے کوئی تبدیل شدہ فائل دستیاب نہیں ہے۔",
   "chatChildrenChatProviderCurrentSessionChildren": "بچے: {length}",
@@ -225,44 +229,68 @@
   "chatLoadMore": "مزید لوڈ کریں۔",
   "chatLoadingProjectContext": "پروجیکٹ کا سیاق و سباق لوڈ ہو رہا ہے...",
   "chatMainConversationUnavailable": "مرکزی گفتگو ابھی دستیاب نہیں ہے۔",
-  "chatParentConversationUnavailable": "والد گفتگو ابھی دستیاب نہیں ہے۔",
   "chatMentionAgentSubtitle": "ایجنٹ",
   "chatMentionFileSubtitle": "فائل",
   "chatMentionSymbolSubtitle": "علامت",
+  "chatMessageAssistantMessage": "معاون پیغام",
   "chatMessageAttachedFile": "منسلک فائل",
+  "chatMessageDateTime": "{day}/{month} {hour}:{minute}",
+  "chatMessageDaysAgo": "{count} دن پہلے",
   "chatMessageDetails": "تفصیلات",
+  "chatMessageDiffPreviewTruncated": "Diff پیش نظارہ ایپ کے استحکام کے لیے مختصر کیا گیا۔",
   "chatMessageHide": "چھپائیں",
+  "chatMessageHoursAgo": "{count} گھنٹے پہلے",
+  "chatMessageInvalidLinkFormat": "غلط لنک فارمیٹ",
+  "chatMessageJustNow": "ابھی ابھی",
+  "chatMessageLargeMessageTruncated": "بڑے پیغام کا پیش نظارہ ایپ کے استحکام کے لیے مختصر کیا گیا۔",
   "chatMessageLess": "کم",
   "chatMessageMessagePartUnavailable": "پیغام کا حصہ دستیاب نہیں ہے۔",
   "chatMessageMetadataAvailable": "کوئی میٹا ڈیٹا دستیاب نہیں ہے۔",
+  "chatMessageMinutesAgo": "{count} منٹ پہلے",
   "chatMessageModelMessageModelId": "ماڈل: {modelId}",
   "chatMessageMore": "مزید",
   "chatMessageOpenFile": "فائل کھولیں۔",
+  "chatMessagePatchCount": "{count, plural, =1{1 پیوند} other{{count} پیوند}}",
   "chatMessageProviderMessageProviderId": "فراہم کنندہ: {providerId}",
   "chatMessageRewindEdit": "ریوائنڈ اور یہاں سے ترمیم کریں۔",
   "chatMessageRunningTask": "رننگ ٹاسک",
   "chatMessageSaveFile": "فائل محفوظ کریں۔",
+  "chatMessageShortDate": "{month}/{day}",
   "chatMessageShow": "دکھائیں",
   "chatMessageShowLess": "کم دکھائیں",
   "chatMessageShowLessCompact": "کم",
   "chatMessageShowMore": "مزید دکھائیں",
   "chatMessageShowMoreCompact": "مزید",
+  "chatMessageStepFinished": "مرحلہ #{step} مکمل ہوا: {reason} • ٹوکنز {tokens} • ${cost}",
+  "chatMessageStepStarted": "مرحلہ #{step} شروع ہوا",
+  "chatMessageStepStartedWithSnapshot": "مرحلہ #{step} شروع ہوا: {snapshot}",
   "chatMessageThinking": "سوچ رہا ہے",
   "chatMessageThinkingProcess": "سوچنے کا عمل",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 کو توجہ درکار ہے} other{{count} کو توجہ درکار ہے}}",
   "chatMessageToolCall": "1 ٹول کال",
   "chatMessageToolCalls": "{count} ٹول کالز",
+  "chatMessageToolCallsTitle": "ٹول کالز",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+1 قسم} other{+{count} اقسام}}",
+  "chatMessageToolChainMore": "{count, plural, =1{+1 مزید} other{+{count} مزید}}",
   "chatMessageToolCommand": "کمانڈ",
   "chatMessageToolCommandTruncated": "کمانڈ کا پیش نظارہ استحکام کے لیے مختصر کیا گیا۔",
   "chatMessageToolDiffOmitted": "Diff پیش نظارہ خارج کر دیا گیا: ترمیم کا پے لوڈ موبائل پر محفوظ طریقے سے دکھانے کے لیے بہت بڑا ہے۔",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 مکمل} other{{count} مکمل}}",
+  "chatMessageToolExecution": "ٹول پر عمل درآمد",
   "chatMessageToolInput": "ان پٹ",
   "chatMessageToolInputTruncated": "ان پٹ کا پیش نظارہ استحکام کے لیے مختصر کیا گیا۔",
   "chatMessageToolOutputTruncated": "بڑے آؤٹ پٹ کا پیش نظارہ استحکام کے لیے مختصر کیا گیا۔",
   "chatMessageToolQueuedCount": "{count} قطار میں ہیں",
+  "chatMessageToolRun": "ٹول رن",
   "chatMessageToolRunningCount": "{count} چل رہے ہیں",
   "chatMessageToolStatusInProgress": "جاری ہے۔",
   "chatMessageToolStatusNeedsAttention": "توجہ کی ضرورت ہے۔",
   "chatMessageToolStatusQueued": "قطار میں لگ گیا۔",
+  "chatMessageTruncatedChars": "[{count} حروف مختصر] {reason}",
+  "chatMessageUnableToOpenLink": "لنک کھولنے سے قاصر",
+  "chatMessageWeeksAgo": "{count} ہفتے پہلے",
   "chatMessageYou": "آپ",
+  "chatMessageYourMessage": "آپ کا پیغام",
   "chatModelLockedSubConversation": "ذیلی گفتگو میں ماڈل مقفل ہے",
   "chatNewChat": "نئی چیٹ",
   "chatNewChatTourDescription": "یہاں ایک نئی گفتگو شروع کریں۔",
@@ -292,10 +320,28 @@
   "chatPageStatusTokens": "ٹوکنز",
   "chatPageStatusUsage": "استعمال",
   "chatPageStatusUsagePercent": "{usagePercent}",
+  "chatParentConversationUnavailable": "والد گفتگو ابھی دستیاب نہیں ہے۔",
   "chatPermissionAutoApproveOff": "اجازت خودکار منظوری آف ہے",
   "chatPermissionAutoApproveOn": "اجازت خودکار منظوری آن ہے",
   "chatProjectContext": "پروجیکٹ کا سیاق و سباق",
   "chatProjectContext2": "پروجیکٹ سیاق",
+  "chatProviderErrorCompactSessionContext": "سیشن کا سیاق و سباق کمپیکٹ نہیں ہو سکا",
+  "chatProviderErrorCompactUnavailable": "موجودہ سیشن کے لیے سیاق و سباق کمپیکٹ دستیاب نہیں ہے",
+  "chatProviderErrorCreateSession": "سیشن بنانے میں ناکامی",
+  "chatProviderErrorInvalidInput": "غلط ان پٹ پیرامیٹرز",
+  "chatProviderErrorLoadSessionDetails": "سیشن کی کچھ تفصیلات لوڈ نہیں ہو سکیں",
+  "chatProviderErrorLoadSessionList": "سیشن کی فہرست لوڈ نہیں ہو سکی: {error}",
+  "chatProviderErrorLoadSessionStatus": "سیشن کی حیثیت لوڈ نہیں ہو سکی",
+  "chatProviderErrorNetwork": "نیٹ ورک کنکشن ناکام ہوا۔ براہ کرم نیٹ ورک کی ترتیبات چیک کریں",
+  "chatProviderErrorNotFound": "وسیلہ نہیں ملا",
+  "chatProviderErrorSelectModelBeforeCompact": "سیاق و سباق کمپیکٹ کرنے سے پہلے ایک ماڈل منتخب کریں",
+  "chatProviderErrorSelectProviderModelBeforeSend": "بھیجنے سے پہلے کوئی منسلک فراہم کنندہ یا مفت OpenCode ماڈل منتخب کریں",
+  "chatProviderErrorServer": "سرور کی غلطی۔ براہ کرم بعد میں دوبارہ کوشش کریں",
+  "chatProviderErrorSessionFallback": "سیشن کی غلطی",
+  "chatProviderErrorStartMessageSend": "پیغام بھیجنا شروع نہیں ہو سکا",
+  "chatProviderErrorStopUnavailable": "موجودہ سیشن کے لیے روکنا دستیاب نہیں ہے",
+  "chatProviderErrorUnknown": "نامعلوم غلطی۔ براہ کرم بعد میں دوبارہ کوشش کریں",
+  "chatProviderErrorWaitForResponseFinish": "کمپیکٹ کرنے سے پہلے موجودہ جواب مکمل ہونے کا انتظار کریں",
   "chatRealtimeGlobalEvent": "عالمی واقعہ",
   "chatRealtimeGlobalEventReason": "عالمی واقعہ ({reason})",
   "chatRealtimeGlobalEventStale": "عالمی واقعہ (پرانی نسل)",
@@ -336,6 +382,7 @@
   "chatSessionConversationNextAction": "گفتگو {nextAction}",
   "chatSessionConversations": "کوئی بات چیت نہیں۔",
   "chatSessionCreateConversationStart": "چیٹنگ شروع کرنے کے لیے ایک نئی گفتگو بنائیں",
+  "chatSessionSubConversationCount": "{count, plural, =1{1 ذیلی گفتگو} other{{count} ذیلی گفتگوئیں}}",
   "chatSessionTabsToggle": "سیشن ٹیبز",
   "chatSessionsLength": "{length}",
   "chatSetUpServer": "سرور مرتب کریں۔",
@@ -355,6 +402,16 @@
   "chatShortcutsStartStopVoice": "وائس ان پٹ شروع یا بند کریں",
   "chatShortcutsStopResponse": "فعال جواب روکیں (جواب دیتے وقت)",
   "chatSidebarAccess": "سائیڈ بار رسائی",
+  "chatSlashCommandAgent": "ایجنٹ سلیکٹر کھولیں",
+  "chatSlashCommandCompact": "موجودہ سیشن کا سیاق و سباق کمپیکٹ کریں",
+  "chatSlashCommandHelp": "کمانڈ مدد دکھائیں",
+  "chatSlashCommandModels": "ماڈل سلیکٹر کھولیں",
+  "chatSlashCommandNew": "نئی چیٹ سیشن بنائیں",
+  "chatSlashCommandOpen": "فائل کھولنے کا فوری عمل",
+  "chatSlashCommandRedo": "آخری واپس شدہ ٹرن دوبارہ کریں",
+  "chatSlashCommandSessions": "گفتگو کی فہرست کھولیں",
+  "chatSlashCommandThinking": "سوچنے کے بلبلے ٹوگل کریں",
+  "chatSlashCommandUndo": "آخری نظر آنے والی صارف ٹرن واپس کریں",
   "chatSortMostRecent": "تازہ ترین",
   "chatSortOldest": "قدیم ترین",
   "chatSortRecent": "حالیہ",
@@ -396,7 +453,9 @@
   "chatTipUseFocusedAgents": "مشورہ: پلان، ریویو یا بلڈ کے لیے مرکوز ایجنٹ چنیں",
   "chatToggleSidebars": "سائڈبارز کو ٹوگل کریں۔",
   "chatTokensLabel": "ٹوکنز: {total}",
+  "chatTourComposerDescription": "اپنی درخواست یہاں ٹائپ کریں۔",
   "chatTourProjectsConversations": "اپنے پروجیکٹس اور گفتگو کو کھولنے کے لیے اس بٹن کا استعمال کریں۔",
+  "chatTourSendDescription": "اپنا پیغام یہاں بھیجیں۔",
   "chatTourSidebarProjectTools": "گفتگو کا سائڈبار اور پروجیکٹ ٹولز دکھانے کے لیے اس مینو کا استعمال کریں۔",
   "chatTourSwitchFolders": "پروجیکٹ فولڈرز اور سیاق و سباق کو تبدیل کرنے کے لیے اس بٹن کا استعمال کریں۔",
   "chatUndoLastTurn": "آخری موڑ کو کالعدم کریں۔",
@@ -421,6 +480,7 @@
   "compactionManual": "دستی",
   "composerAddAttachment": "منسلکہ شامل کریں۔",
   "composerAttachFiles": "فائلیں منسلک کریں۔",
+  "composerAttachmentFallbackName": "منسلکہ",
   "composerCannedAppendAtCursor": "کرسر پر شامل کریں۔",
   "composerCannedLabel": "لیبل (اختیاری)",
   "composerCannedNoReplies": "ابھی تک کوئی فوری جواب نہیں ہے۔",
@@ -431,17 +491,21 @@
   "composerCannedSendAutomatically": "خود بخود بھیجیں۔",
   "composerCannedText": "متن",
   "composerChatInput": "چیٹ ان پٹ",
+  "composerContextFallbackName": "سیاق و سباق",
   "composerDeleteAction": "حذف کریں۔",
   "composerDropHint": "منسلک کرنے کے لیے تصاویر یا PDF چھوڑیں",
-  "composerPastedImageName": "چسپاں کردہ تصویر",
   "composerEdit": "ترمیم کریں۔",
   "composerExtras": "اضافی",
   "composerExtrasHide": "اضافی چھپائیں",
   "composerNewQuickReply": "نیا فوری جواب",
+  "composerPastedImageName": "چسپاں کردہ تصویر",
   "composerSelectImages": "امیجز کو منتخب کریں۔",
   "composerSelectPdf": "پی ڈی ایف منتخب کریں۔",
   "composerSend": "بھیجیں۔",
+  "composerSendMessage": "پیغام بھیجیں",
+  "composerSendMessageWhileResponding": "جواب جاری ہونے کے دوران پیغام بھیجیں",
   "composerShellMode": "شیل موڈ",
+  "composerStopResponse": "جواب روکیں",
   "desktopWindowClose": "بند کریں",
   "desktopWindowMaximize": "بڑا کریں",
   "desktopWindowMinimize": "چھوٹا کریں",
@@ -450,10 +514,14 @@
   "dialogLanguage": "زبان",
   "dialogMoonshineModelSize": "ماڈل کا سائز",
   "dialogMoonshineVoiceSetup": "مونشائن وائس سیٹ اپ",
+  "dialogMoonshineVoiceSetupDescription": "Moonshine sherpa_onnx کے ذریعے ڈیوائس پر ہی چلتا ہے۔ ایک بار ماڈل منتخب کریں اور اسے صرف اس ڈیسک ٹاپ ڈیوائس کے لیے ڈاؤن لوڈ کریں۔",
   "dialogParakeetModel": "پیراکیٹ ماڈل",
   "dialogParakeetVoiceSetup": "پیراکیٹ وائس سیٹ اپ",
+  "dialogParakeetVoiceSetupDescription": "Parakeet sherpa_onnx آف لائن ریکگنیشن کے ذریعے ڈیوائس پر ہی چلتا ہے۔ کثیر لسانی STT فعال کرنے کے لیے اس ڈیسک ٹاپ ڈیوائس پر ایک بار ڈاؤن لوڈ کریں۔",
   "dialogSenseVoiceModel": "SenseVoice ماڈل",
   "dialogSenseVoiceSetup": "SenseVoice سیٹ اپ",
+  "dialogSenseVoiceSetupDescription": "SenseVoice sherpa_onnx آف لائن ریکگنیشن کے ذریعے ڈیوائس پر ہی چلتا ہے۔ یہ چینی، کینٹونیز، جاپانی، کورین اور انگریزی کے لیے سب سے زیادہ موثر ہے۔",
+  "dialogSherpaVoiceSetupDescription": "Sherpa صوتی ان پٹ کے لیے ڈیوائس پر اسپیچ ماڈل درکار ہے۔ اپنی زبان منتخب کریں اور اسے ایک بار ڈاؤن لوڈ کریں (~147 MB)۔",
   "dialogVoiceInputSetup": "وائس ان پٹ سیٹ اپ",
   "errorAnErrorOccurred": "ایک خرابی پیش آگئی",
   "errorAuthRequired": "تصدیق درکار ہے",
@@ -488,47 +556,106 @@
   "fileActionLocalAttachmentFound": "اس آلہ پر مقامی منسلکہ نہیں ملا۔",
   "fileActionSaveCanceled": "محفوظ کرنا منسوخ ہو گیا۔",
   "fileActionUnableOpenLocal": "مقامی منسلکہ کھولنے سے قاصر۔",
+  "filesActiveProjectRequired": "فائل آپریشنز کے لیے ایک فعال پراجیکٹ ڈائریکٹری درکار ہے۔",
   "filesAddChat": "چیٹ میں شامل کریں۔",
+  "filesAlreadyExists": "اس نام والی فائل یا فولڈر پہلے سے موجود ہے۔",
   "filesAutosave": "خودکار محفوظ",
-  "filesAutosaveOn": "خودکار محفوظ فعال",
   "filesAutosaveOff": "خودکار محفوظ غیر فعال",
-  "filesRedo": "دوبارہ کریں",
-  "filesUndo": "واپس کریں",
+  "filesAutosaveOn": "خودکار محفوظ فعال",
   "filesBinaryFilePreview": "بائنری فائل کا پیش نظارہ دستیاب نہیں ہے۔",
+  "filesCheckingWriteSupport": "فائل لکھنے کی سہولت کی جانچ ہو رہی ہے...",
   "filesClear": "صاف",
   "filesContents": "مشمولات",
+  "filesCopyPath": "راستہ کاپی کریں",
+  "filesCreateFileTitle": "فائل بنائیں",
+  "filesCreateFolderTitle": "فولڈر بنائیں",
+  "filesDelete": "حذف کریں",
+  "filesDeleteConfirm": "{name} حذف کریں؟ یہ واپس نہیں ہو سکتا۔ فولڈرز اور ان کا مواد حذف کر دیا جائے گا۔",
+  "filesDeleteTitle": "{name} حذف کریں",
+  "filesDeleted": "حذف ہو گیا۔",
+  "filesDraftTooLargeToSave": "مسودہ ایڈیٹر سے محفوظ کرنے کے لیے بہت بڑا ہے۔",
   "filesDuplicate": "نقل بنائیں",
   "filesDuplicated": "فائل کی نقل بن گئی",
+  "filesFailedToLoad": "فائلیں لوڈ نہیں ہو سکیں",
+  "filesFailedToLoadContent": "فائل کا مواد لوڈ نہیں ہو سکا",
+  "filesFailedToSearch": "فائلوں کی تلاش ناکام ہوئی",
+  "filesFileCreated": "فائل بن گئی۔",
   "filesFileEmpty": "فائل خالی ہے۔",
+  "filesFileSaved": "فائل محفوظ ہو گئی۔",
   "filesFilesFound": "کوئی فائل نہیں ملی",
+  "filesFolderCreated": "فولڈر بن گیا۔",
   "filesHideSidebar": "فائلوں کی سائڈبار کو چھپائیں۔",
+  "filesInvalidName": "بغیر راستے کے الگ کرنے والے نشان کے درست نام درج کریں۔",
+  "filesLargeFileReadOnly": "بڑی فائلیں ایڈیٹنگ کو تیز رکھنے کے لیے صرف پڑھنے کے لیے کھلتی ہیں۔",
+  "filesLinesSelectedCount": "{count, plural, =1{1 منتخب سطر} other{{count} منتخب سطریں}}",
+  "filesMalformedResponse": "فائل آپریشن نے ایک غلط جواب واپس کیا۔",
+  "filesNameHint": "نام",
   "filesNames": "نام",
+  "filesNew": "نیا",
+  "filesNewFile": "نئی فائل",
+  "filesNewFolder": "نیا فولڈر",
+  "filesNoContentMatches": "کوئی مماثل مواد نہیں ملا",
+  "filesNoOpenFilesHint": "ابھی کوئی فائل کھلی نہیں ہے۔ تلاش کرنے کے لیے ٹائپ کریں۔",
+  "filesOpenFilesCount": "{count, plural, =1{1 کھلی فائل} other{{count} کھلی فائلیں}}",
   "filesOpenFilesFileState": "کھلی فائلیں ({length})",
+  "filesOperationFailed": "فائل کا عمل ناکام ہو گیا۔",
+  "filesOperationUnavailable": "اس سرور کے لیے فائل کے اعمال دستیاب نہیں ہیں۔",
+  "filesOutsideRoot": "راستہ پروجیکٹ کی جڑ سے باہر ہے۔",
+  "filesParentNotDirectory": "والد ڈائریکٹری نہیں ہے۔",
+  "filesPathCopied": "راستہ کاپی ہو گیا۔",
+  "filesPathMissing": "راستہ موجود نہیں ہے۔",
+  "filesPermissionDenied": "اجازت سے انکار کر دیا گیا۔",
   "filesQuickOpen": "فوری کھولیں۔",
   "filesQuickOpenFile": "فوری کھولیں فائل",
+  "filesRedo": "دوبارہ کریں",
   "filesRefresh": "فائلوں کو ریفریش کریں۔",
+  "filesReloadSkippedUnsavedChanges": "غیر محفوظ تبدیلیاں؛ دوبارہ لوڈ چھوڑ دیا گیا۔",
+  "filesRename": "نام تبدیل کریں",
+  "filesRenameTitle": "{name} کا نام تبدیل کریں",
+  "filesRenamed": "نام تبدیل ہو گیا۔",
+  "filesRootDeleteBlocked": "پروجیکٹ کی جڑ حذف نہیں کی جا سکتی۔",
+  "filesSaveChangesBeforeClose": "اس فائل کو بند کرنے سے پہلے تبدیلیاں محفوظ کریں۔",
+  "filesSaveChangesBeforePathChange": "یہ راستہ تبدیل کرنے سے پہلے تبدیلیاں محفوظ کریں۔",
   "filesSearchHint": "نام یا راستے سے فائلیں تلاش کریں۔",
+  "filesShellCommandDidNotComplete": "فائل آپریشن شیل کمانڈ مکمل نہیں ہوئی۔",
+  "filesShellCommandFailed": "فائل آپریشن شیل کمانڈ نتیجہ واپس کرنے سے پہلے ناکام ہوئی۔",
+  "filesShellCommandNoResult": "فائل آپریشن شیل کمانڈ نے کوئی نتیجہ واپس نہیں کیا۔",
+  "filesShellCommandSyntaxError": "فائل آپریشن شیل کمانڈ نحو کی غلطی کی وجہ سے ناکام ہوئی۔",
+  "filesShellCommandTruncated": "فائل آپریشن شیل کمانڈ سرور کی طرف سے مختصر کر دی گئی۔",
+  "filesShellUtilityNotFound": "ایک مطلوبہ شیل افادیت نہیں ملی۔",
   "filesTitle": "فائلیں",
-  "forwardAction": "Forward",
-  "forwardAllFailed": "Could not forward to any session",
-  "forwardCancel": "Cancel",
-  "forwardDialogSubtitle": "Select one or more conversations",
-  "forwardDialogTitle": "Forward to…",
-  "forwardLoading": "Loading sessions…",
-  "forwardNoOpenProjects": "No open projects with sessions",
-  "forwardNoProviderModel": "Select a provider and model before forwarding",
-  "forwardNoSessions": "No recent sessions",
-  "forwardPartial": "Forwarded to {success} of {total}",
-  "forwardProvenanceLabel": "Forwarded from: {origin}",
-  "forwardRetry": "Retry",
-  "forwardSearchHint": "Search",
-  "forwardSelectedCount": "{count} selected",
-  "forwardSend": "Forward",
-  "forwardServerOffline": "Server offline",
+  "filesUndo": "واپس کریں",
+  "filesWaitForFileOperation": "فائل آپریشن مکمل ہونے کا انتظار کریں۔",
+  "filesWaitForSaveBeforePathChange": "یہ راستہ تبدیل کرنے سے پہلے فائل کی محفوظ کاری مکمل ہونے کا انتظار کریں۔",
+  "foregroundMonitorNotificationBody": "قابل اعتماد بیک گراؤنڈ الرٹس فعال ہیں",
+  "foregroundMonitorNotificationOneSession": "ایک سیشن کی نگرانی جاری ہے",
+  "foregroundMonitorNotificationSessionCount": "{count} سیشنز کی نگرانی جاری ہے",
+  "foregroundMonitorNotificationTitle": "بیک گراؤنڈ مانیٹرنگ فعال",
+  "forwardAction": "فارورڈ",
+  "forwardAllFailed": "کسی سیشن میں فارورڈ نہیں کیا جا سکا",
+  "forwardCancel": "منسوخ کریں",
+  "forwardDialogSubtitle": "ایک یا ایک سے زیادہ گفتگو منتخب کریں",
+  "forwardDialogTitle": "فارورڈ کریں…",
+  "forwardLoading": "سیشنز لوڈ ہو رہے ہیں…",
+  "forwardNoOpenProjects": "سیشنز والے کوئی کھلے پروجیکٹ نہیں ہیں",
+  "forwardNoProviderModel": "فارورڈ کرنے سے پہلے پرووائیڈر اور ماڈل منتخب کریں",
+  "forwardNoSessions": "کوئی حالیہ سیشن نہیں",
+  "forwardPartial": "{total} میں سے {success} کو فارورڈ کیا گیا",
+  "forwardProvenanceLabel": "فارورڈ کیا گیا: {origin} سے",
+  "forwardRetry": "دوبارہ کوشش کریں",
+  "forwardSearchHint": "تلاش",
+  "forwardSelectedCount": "{count} منتخب",
+  "forwardSend": "فارورڈ",
+  "forwardServerOffline": "سرور آف لائن",
   "forwardShortcutHint": "Ctrl+Shift+F",
-  "forwardSuccess": "Forwarded to {count} sessions",
-  "forwardUndo": "Undo",
-  "forwardUndoFailed": "Could not undo the forward",
+  "forwardSuccess": "{count} سیشنز میں فارورڈ کیا گیا",
+  "forwardTimeDays": "{count} دن",
+  "forwardTimeHours": "{count} گھنٹے",
+  "forwardTimeMinutes": "{count} منٹ",
+  "forwardTimeNow": "ابھی",
+  "forwardTimeWeeks": "{count} ہفتے",
+  "forwardUndo": "واپس کریں",
+  "forwardUndoFailed": "فارورڈ واپس نہیں کیا جا سکا",
   "logsAppLogs": "ایپ لاگز",
   "logsClear": "نوشتہ جات صاف کریں۔",
   "logsCloseSearch": "تلاش بند کریں۔",
@@ -590,7 +717,7 @@
   "msgFilteredLogsCopied": "فلٹر شدہ لاگز کو کلپ بورڈ پر کاپی کیا گیا۔",
   "msgInfoAgent": "ایجنٹ",
   "msgInfoCompaction": "کومپیکشن",
-  "msgInfoCost": "لاگت: \\$ {cost}",
+  "msgInfoCost": "لاگت: ${cost}",
   "msgInfoMessageInfo": "پیغام کی معلومات",
   "msgInfoModel": "ماڈل: {modelId}",
   "msgInfoNoMetadata": "کوئی میٹا ڈیٹا دستیاب نہیں ہے۔",
@@ -605,7 +732,6 @@
   "msgInfoView": "دیکھیں",
   "msgNoSystemSoundsFound": "اس ڈیوائس پر کوئی سسٹم ساؤنڈ نہیں ملا۔",
   "msgNoValidFilesSelected": "کوئی درست فائلیں منتخب نہیں کی گئیں۔",
-  "msgSomeSelectedFilesNotAttached": "کچھ منتخب فائلیں منسلک نہیں کی جا سکیں۔",
   "msgReadAloud": "بلند آواز سے پڑھیں",
   "msgReadAloudNotAvailable": "اس ڈیوائس پر ٹیکسٹ ٹو اسپیچ دستیاب نہیں ہے۔",
   "msgSetupDebugCopied": "اوپن کوڈ سیٹ اپ ڈیبگ کلپ بورڈ پر کاپی ہو گیا۔",
@@ -613,6 +739,7 @@
   "msgShareAsImageFailed": "تصویر کے بطور پیغام کا اشتراک نہیں کیا جا سکا۔",
   "msgShareAsImageSubject": "کوڈ واک پیغام",
   "msgShareAsImageTooTall": "پیغام تصویر کے بطور اشتراک کرنے کے لیے بہت لمبا ہے۔",
+  "msgSomeSelectedFilesNotAttached": "کچھ منتخب فائلیں منسلک نہیں کی جا سکیں۔",
   "msgStopReadAloud": "پڑھنا بند کرو",
   "msgSystemSoundPickerUnavailable": "سسٹم ساؤنڈ چننے والا اس پلیٹ فارم پر دستیاب نہیں ہے۔",
   "msgUpdatedButRefreshFailed": "سرور کی ترتیب کو اپ ڈیٹ کیا، لیکن چیٹ فراہم کرنے والوں کو ریفریش نہیں کیا جا سکا۔",
@@ -622,11 +749,39 @@
   "notifNotificationsArriveReopening": "اگر اطلاعات صرف ایپ کو دوبارہ کھولنے پر پہنچتی ہیں، تو CodeWalk کو اس ڈیوائس پر آپٹیمائزیشن کے بغیر چلنے دیں۔",
   "notifResponseRunningKeep": "جب کوئی جواب چل رہا ہو، ایپ چھوڑنے کے بعد مختصر وقت کے لیے ریئل ٹائم کو فعال رکھیں۔",
   "notifSelectedSoundLabel": "منتخب: {soundLabel}",
+  "notificationActionOpen": "کھولیں",
   "notificationAgentFinished": "ایجنٹ نے موجودہ جواب مکمل کر لیا ہے۔",
+  "notificationChannelAgent": "CodeWalk ایجنٹ",
+  "notificationChannelAgentDescription": "CodeWalk ایجنٹ مکمل ہونے کے الرٹس",
+  "notificationChannelErrors": "CodeWalk خرابیاں",
+  "notificationChannelErrorsDescription": "CodeWalk خرابی کے الرٹس",
+  "notificationChannelPermissions": "CodeWalk اجازتیں",
+  "notificationChannelPermissionsDescription": "CodeWalk کارروائی درکار الرٹس",
   "notificationConversationUpdates": "گفتگو کی اپ ڈیٹس",
   "notificationOpenToClear": "متعلقہ اطلاعات کو صاف کرنے کے لیے یہ گفتگو کھولیں۔",
+  "notificationPermissionNeedsInput": "ٹول کی اجازت کے لیے آپ کے ان پٹ کی ضرورت ہے۔",
+  "notificationPermissionOrQuestionNeedsInput": "ٹول کی اجازت یا سوال کے لیے آپ کے ان پٹ کی ضرورت ہے۔",
+  "notificationQuestionNeedsInput": "ٹول کے سوال کے لیے آپ کے ان پٹ کی ضرورت ہے۔",
   "notificationSession": "سیشن",
+  "notificationSessionError": "ایک سیشن نے خرابی کی اطلاع دی۔",
   "notificationSoundLoadFailed": "اینڈرائیڈ سسٹم کی آوازیں لوڈ کرنے میں ناکام",
+  "oauthFlowBrowserOpenFailed": "OAuth سائن ان کے لیے سسٹم براؤزر نہیں کھل سکا۔",
+  "oauthFlowCallbackNotCompleted": "اتھارٹی کال بیک مکمل نہیں ہوئی",
+  "oauthFlowCallbackServerStartFailed": "مقامی OAuth کال بیک سرور شروع نہیں ہو سکا۔",
+  "oauthFlowCallbackTimeout": "5 منٹ کے اندر کوئی اتھارٹی کال بیک ایپ تک نہیں پہنچا۔ توقع تھی کہ رضامندی کے بعد براؤزر مقامی کال بیک ایڈریس پر ری ڈائریکٹ ہوگا۔ اگر براؤزر نے اس کے بجائے کنکشن کی غلطی دکھائی تو یہ ڈیوائس یا نیٹ ورک لوپ بیک ری ڈائریکٹس کو روکتا ہے۔",
+  "oauthFlowCallbackValidationFailed": "OAuth کال بیک کی تصدیق ناکام ہوئی۔ براہ کرم دوبارہ کوشش کریں۔",
+  "oauthFlowMetadataMissingEndpoints": "OAuth میٹا ڈیٹا میں اتھارٹی/ٹوکن اینڈ پوائنٹس موجود نہیں ہیں۔",
+  "oauthFlowNoEndpointsDiscovered": "کوئی OAuth اینڈ پوائنٹس دریافت نہیں ہوئے۔ Cloudflare ڈیش بورڈ میں منظم OAuth فعال کریں → Access → Applications → [اس ایپ]۔",
+  "oauthFlowProfileChanged": "OAuth مکمل ہونے سے پہلے سرور پروفائل تبدیل ہو گیا۔",
+  "oauthFlowProviderDeclined": "اتھارٹی سرور نے OAuth درخواست مسترد کر دی۔ براہ کرم دوبارہ کوشش کریں۔",
+  "oauthFlowSecureStorageUnavailable": "OAuth کے لیے محفوظ اسناد ذخیرہ دستیاب نہیں ہے۔",
+  "oauthFlowSignInCanceled": "OAuth سائن ان منسوخ کر دیا گیا۔",
+  "oauthFlowTokenExchangeHttpFailure": "ٹوکن کا تبادلہ ناکام ہوا (HTTP {statusCode})۔ براہ کرم دوبارہ کوشش کریں۔",
+  "oauthFlowTokenExchangeIncomplete": "اتھارٹی کوڈ بھیجنے کے بعد ٹوکن کا تبادلہ مکمل نہیں ہوا۔ براہ کرم OAuth سائن ان دوبارہ شروع کریں۔",
+  "oauthFlowTokenExchangeTransientFailure": "عارضی نیٹ ورک مسئلے کی وجہ سے {maxAttempts} کوششوں کے بعد ٹوکن کا تبادلہ ناکام ہوا۔ براہ کرم دوبارہ کوشش کریں۔",
+  "oauthFlowTokenExchangeUnexpectedFailure": "ٹوکن کا تبادلہ غیر متوقع طور پر ناکام ہوا۔ براہ کرم دوبارہ کوشش کریں۔",
+  "oauthFlowTokenResponseMissingAccessToken": "OAuth ٹوکن جواب میں ایکسیس ٹوکن شامل نہیں تھا۔",
+  "oauthFlowUnexpectedError": "OAuth فلو غیر متوقع طور پر ناکام ہوا۔ براہ کرم دوبارہ کوشش کریں۔",
   "onboardingAIGeneratedTitles": "AI نے عنوانات بنائے",
   "onboardingAddServerLater": "آپ بعد میں ترتیبات > سرورز میں سرور شامل کر سکتے ہیں۔",
   "onboardingAddedButHealthCheckFailed": "سرور شامل کر دیا گیا لیکن ہیلتھ چیک ناکام رہا۔ یہ ابھی شروع ہو رہا ہو سکتا ہے۔",
@@ -748,12 +903,42 @@
   "permissionConfirmReject": "مسترد کرنے کی تصدیق کریں۔",
   "permissionReject": "رد کرنا",
   "permissionReopen": "دوبارہ کھولیں۔",
+  "permissionRequestTitle": "اجازت کی درخواست: {permission}",
+  "projectProviderErrorArchiveProjectNotFound": "پراجیکٹ محفوظ نہیں ہو سکا: پراجیکٹ نہیں ملا",
+  "projectProviderErrorArchiveProjectPathInvalid": "پراجیکٹ محفوظ نہیں ہو سکا: پراجیکٹ کا راستہ غلط ہے",
+  "projectProviderErrorAtLeastOneContext": "کم از کم ایک سیاق و سباق کھلا رہنا چاہیے",
+  "projectProviderErrorContentSearchUnavailable": "مواد کی تلاش دستیاب نہیں: {error}",
+  "projectProviderErrorCreateWorkspace": "ورک اسپیس بنانے میں ناکامی: {error}",
+  "projectProviderErrorDeleteWorkspace": "ورک اسپیس حذف نہیں ہو سکی: {error}",
+  "projectProviderErrorDirectoryEmpty": "ڈائریکٹری خالی نہیں ہو سکتی",
+  "projectProviderErrorInitializeFailed": "پراجیکٹ کا سیاق و سباق شروع نہیں ہو سکا: {error}",
+  "projectProviderErrorListDirectories": "ڈائریکٹریز کی فہرست نہیں مل سکی: {error}",
+  "projectProviderErrorListFiles": "فائلوں کی فہرست نہیں مل سکی: {error}",
+  "projectProviderErrorLoadProjectList": "پراجیکٹ کی فہرست لوڈ نہیں ہو سکی: {error}",
+  "projectProviderErrorLoadWorkspaces": "ورک اسپیسز لوڈ نہیں ہو سکیں: {error}",
+  "projectProviderErrorNoProjectContext": "سرور سے کوئی پراجیکٹ سیاق و سباق دستیاب نہیں",
+  "projectProviderErrorOnlyClosedArchivable": "صرف بند پراجیکٹس کو محفوظ شدہ کیا جا سکتا ہے",
+  "projectProviderErrorPathEmpty": "راستہ خالی نہیں ہو سکتا",
+  "projectProviderErrorReadFile": "فائل پڑھی نہیں جا سکی: {error}",
+  "projectProviderErrorReopenProjectNotFound": "پراجیکٹ دوبارہ نہیں کھل سکا: پراجیکٹ نہیں ملا",
+  "projectProviderErrorResetWorkspace": "ورک اسپیس ری سیٹ نہیں ہو سکی: {error}",
+  "projectProviderErrorSearchFiles": "فائلوں کی تلاش ناکام ہوئی: {error}",
+  "projectProviderErrorSearchSymbols": "علامتوں کی تلاش ناکام ہوئی: {error}",
+  "projectProviderErrorSwitchDirectoryEmpty": "پراجیکٹ تبدیل نہیں ہو سکا: ڈائریکٹری خالی ہے",
+  "projectProviderErrorSwitchProjectNotFound": "پراجیکٹ تبدیل نہیں ہو سکا: پراجیکٹ نہیں ملا",
+  "projectProviderErrorValidateDirectory": "ڈائریکٹری کی تصدیق نہیں ہو سکی: {error}",
+  "projectProviderErrorWorkspaceNameEmpty": "ورک اسپیس کا نام خالی نہیں ہو سکتا",
   "questionAnswerSelected": "کوئی جواب منتخب نہیں کیا گیا۔",
   "questionCommaSeparatedValues": "کوما سے الگ کردہ اقدار",
+  "questionCustomAnswer": "حسب ضرورت جواب",
   "questionQuestionGroupMarked": "سوالیہ گروپ کو مسترد شدہ کے بطور نشان زد کیا گیا۔ تصدیق کرنے سے پہلے آپ کسی بھی وقت چیٹنگ جاری رکھ سکتے ہیں اور اس گروپ کو دوبارہ کھول سکتے ہیں۔",
   "questionQuestionRequest": "سوال کی درخواست",
   "questionQuestionsProvidedSubmit": "کوئی سوالات فراہم نہیں کیے گئے۔ آپ خالی جواب جمع کرا سکتے ہیں۔",
+  "questionReviewAnswers": "جوابات کا جائزہ لیں",
   "questionReviewAnswersSubmitting": "جمع کرانے سے پہلے اپنے جوابات کا جائزہ لیں۔",
+  "questionStepOfQuestion": "مرحلہ {current} از {total} - سوال",
+  "questionStepOfReview": "مرحلہ {current} از {total} - جائزہ",
+  "questionSubmitAnswers": "جوابات جمع کریں",
   "quotaAuthCookie": "اوتھ کوکی",
   "quotaConnect": "کنیکٹ کریں",
   "quotaForget": "بھول جاؤ",
@@ -771,6 +956,8 @@
   "quotaResetsIn": "{time} میں ری سیٹ ہوگا",
   "quotaSaving": "محفوظ کر رہا ہے...",
   "quotaWorkspaceId": "ورک اسپیس ID",
+  "searchableDropdownEmptyText": "کوئی مماثلت نہیں ملی",
+  "searchableDropdownSearchHint": "تلاش کریں",
   "serverClearOAuth": "OAuth کو صاف کریں۔",
   "serverConnectionAttention": "سرور کنکشن پر توجہ درکار ہے۔",
   "serverHealthHealthy": "صحت مند",
@@ -799,6 +986,15 @@
   "serversLocalOpenCodeServer": "مقامی اوپن کوڈ سرور",
   "serversManagedModeAvailable": "یہ نظم شدہ وضع صرف ڈیسک ٹاپ بلڈز (Linux/macOS/Windows) پر دستیاب ہے۔",
   "serversNoServersFound": "کوئی سرور نہیں ملا",
+  "serversQuickGuideInstallOptions": "دیگر آفیشل انسٹال آپشنز: install script، npm، bun، pnpm، Homebrew، یا GitHub Releases سے بائنری۔",
+  "serversQuickGuideIntro": "CodeWalk ایپ ہے۔ OpenCode وہ انجن ہے جو اس کنکشن کے کام کرنے سے پہلے چل رہا ہونا چاہیے۔",
+  "serversQuickGuideProtectPassword": "پاس ورڈ کے ساتھ رسائی محفوظ کریں",
+  "serversQuickGuideRunPowerShell": "2. PowerShell میں چلائیں:",
+  "serversQuickGuideRunTerminal": "2. اپنے ٹرمینل میں چلائیں:",
+  "serversQuickGuideServerPassword": "سرور پاس ورڈ",
+  "serversQuickGuideStepInstallCli": "1. OpenCode CLI انسٹال کریں۔",
+  "serversQuickGuideTitle": "فوری سیٹ اپ",
+  "serversQuickGuideVerifyHint": "سرور شروع کرنے کے بعد، CodeWalk میں URL چسپاں کرنے سے پہلے تصدیق کریں کہ /global/health یا /doc جواب دیتا ہے۔",
   "serversRefreshHealth": "صحت کو تازہ کریں۔",
   "serversRemoveProfileDisplayName": "\"{displayName}\" ہٹائیں؟",
   "serversSearchActiveHint": "فعال سرور تلاش کریں",
@@ -825,6 +1021,11 @@
   "sessionActionUnarchived": "غیر محفوظ شدہ",
   "sessionActionUnpinned": "پن سے ہٹایا گیا",
   "sessionArchive": "آرکائیو کریں",
+  "sessionAttentionAndroidStartFailed": "اینڈرائیڈ سیشن اٹینشن سروس شروع نہیں ہو سکی۔",
+  "sessionAttentionIosInAppOnly": "سیشن اٹینشن صرف CodeWalk کے اندر دستیاب ہے۔",
+  "sessionAttentionOverlayPermissionGrantPrompt": "دوسری ایپس پر ڈسپلے کی اجازت دیں، پھر دوبارہ کوشش کریں۔",
+  "sessionAttentionOverlayPermissionRequired": "دوسری ایپس پر ڈسپلے کی اجازت درکار ہے۔",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{1 سیشن کو توجہ درکار ہے} other{{count} سیشنز کو توجہ درکار ہے}}",
   "sessionCancelRename": "نام تبدیل کرنا منسوخ کریں۔",
   "sessionChildrenCount": "ذیلی گفتگو: {count}",
   "sessionCompactContext": "سیاق و سباق کمپیکٹ کریں",
@@ -838,7 +1039,7 @@
   "sessionDiffFilesCount": "Diff فائلیں: {count}",
   "sessionDiffLinesAddedRemoved": "+ {added} لائنیں شامل کی گئیں - {removed} لائنیں ہٹا دی گئیں۔",
   "sessionDiffLinesCollapsed": "{count} لائنیں سمٹ گئیں — پھیلانے کے لیے تھپتھپائیں۔",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "تبدیل شدہ فائلیں لوڈ ہو رہی ہیں…",
   "sessionDiffReview": "تبدیلیوں کا جائزہ لیں۔",
   "sessionDiffSplit": "تقسیم",
   "sessionDiffSummary": "خلاصہ",
@@ -883,13 +1084,55 @@
   "sessionShareLinkUnavailable": "اس سیشن کے لیے لنک دستیاب نہیں",
   "sessionShared": "گفتگو مشترکہ ہو گئی",
   "sessionSyncing": "گفتگو ہم آہنگ ہو رہی ہے...",
+  "sessionTabChangeIconAction": "آئیکن تبدیل کریں",
+  "sessionTabClosedMessage": "ٹیب \"{title}\" بند ہو گیا",
+  "sessionTabIconApplied": "ٹیب آئیکن اپ ڈیٹ ہو گیا۔",
+  "sessionTabIconPickerTitle": "ٹیب آئیکن منتخب کریں",
+  "sessionTabIconPresetBug": "بگ",
+  "sessionTabIconPresetCloud": "کلاؤڈ",
+  "sessionTabIconPresetCode": "کوڈ",
+  "sessionTabIconPresetData": "ڈیٹا",
+  "sessionTabIconPresetDesign": "ڈیزائن",
+  "sessionTabIconPresetIdea": "خیال",
+  "sessionTabIconPresetLaunch": "لانچ",
+  "sessionTabIconPresetResearch": "تحقیق",
+  "sessionTabIconPresetSecurity": "سیکورٹی",
+  "sessionTabIconPresetTasks": "کام",
+  "sessionTabIconPresetTerminal": "ٹرمینل",
+  "sessionTabIconPresetTools": "ٹولز",
+  "sessionTabIconSaveFailed": "ٹیب آئیکن محفوظ نہیں ہو سکا۔",
+  "sessionTabIconUseProjectIcon": "پروجیکٹ آئیکن استعمال کریں",
+  "sessionTabRenameAction": "سیشن کا نام تبدیل کریں",
+  "sessionTabRestoreFailed": "ٹیب بحال نہیں ہو سکا۔",
+  "sessionTabUndo": "واپس کریں",
+  "sessionTabsGestureHintAcknowledge": "سمجھ گیا",
+  "sessionTabsGestureHintBody": "ٹیب بند کرنے کے لیے اس پر ڈبل کلک یا ڈبل ٹیپ کریں۔ سیشن کے اعمال کھولنے کے لیے دائیں کلک یا دیر تک دبائیں۔ آپ ڈسپلے ٹوگلز میں ٹیبز کو غیر فعال کر سکتے ہیں۔",
+  "sessionTabsGestureHintDisableTabs": "ٹیبز غیر فعال کریں",
+  "sessionTabsGestureHintTitle": "سیشن ٹیبز میں نئے کنٹرولز ہیں",
+  "sessionTitleCannotBeEmpty": "عنوان خالی نہیں ہو سکتا",
+  "sessionTitleDateAndTime": "{date} {time}",
   "sessionTitleHint": "گفتگو کا عنوان",
+  "sessionTitleToday": "آج {time} ({date})",
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "sessionTitleYesterday": "کل {time} ({date})",
+  "sessionTodoCompletedCount": "{count}/{total} کام مکمل",
+  "sessionTodoDoneCompact": "{count}/{total} مکمل",
+  "sessionTodoInProgressCompact": "{current}/{total} جاری ہیں",
+  "sessionTodoTaskProgress": "کام {index}/{total} {content}",
+  "sessionTodoTasksCount": "کام ({count})",
   "sessionUnarchive": "آرکائیو سے نکالیں",
   "sessionUnpin": "ان پن کریں",
   "sessionUnshare": "شیئرنگ ختم کریں",
   "sessionUnshareAction": "شیئرنگ بند کریں",
   "sessionUnshared": "گفتگو غیر مشترکہ ہو گئی",
   "sessionViewTasks": "کام دیکھیں",
+  "sessionWeekdayFri": "جمعہ",
+  "sessionWeekdayMon": "پیر",
+  "sessionWeekdaySat": "ہفتہ",
+  "sessionWeekdaySun": "اتوار",
+  "sessionWeekdayThu": "جمعرات",
+  "sessionWeekdayTue": "منگل",
+  "sessionWeekdayWed": "بدھ",
   "settingsAboutCheckForUpdates": "اپ ڈیٹس کے لیے چیک کریں۔",
   "settingsAboutCheckOnOpen": "اوپن پر اپ ڈیٹس کی جانچ کریں۔",
   "settingsAboutCheckOnOpenDescription": "ایپ کب شروع ہوتی ہے خود بخود چیک کریں۔",
@@ -923,17 +1166,21 @@
   "settingsAppearanceBrandColorDynamicBlocked": "برانڈ کا رنگ منتخب کرنے کے لیے وال پیپر کے رنگوں کو غیر فعال کریں۔",
   "settingsAppearanceBrandColorNormal": "ایپ پیلیٹ کے لیے بیج کا رنگ چنیں۔",
   "settingsAppearanceBrandColorPresetBlocked": "برانڈ کا رنگ منتخب کرنے کے لیے CodeWalk Classic پر جائیں۔",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "گفتگو کے متن کا سائز",
+  "settingsAppearanceChatFontScaleDescription": "سسٹم متن کے سائز کے علاوہ چیٹ پیغام اور کمپوزر متن کا سائز بڑھائیں یا گھٹائیں۔",
   "settingsAppearanceCodeWalkClassic": "کوڈ واک کلاسک",
   "settingsAppearanceComposerTips": "کمپوزر ٹپس",
   "settingsAppearanceComposerTipsDescription": "اسسٹنٹ کے استدلال کے دوران گھومنے والی تجاویز دکھائیں یا چھپائیں۔",
   "settingsAppearanceContrast": "کنٹراسٹ",
   "settingsAppearanceContrastDynamicBlocked": "کنٹراسٹ کو ایڈجسٹ کرنے کے لیے وال پیپر کے رنگوں کو غیر فعال کریں۔",
   "settingsAppearanceContrastHigh": "اعلی",
+  "settingsAppearanceContrastLow": "کم",
+  "settingsAppearanceContrastMedium": "درمیانہ",
+  "settingsAppearanceContrastMediumHigh": "درمیانہ اعلی",
   "settingsAppearanceContrastNormal": "رنگ سکیم کے کنٹراسٹ لیول کو ایڈجسٹ کریں۔",
   "settingsAppearanceContrastPresetBlocked": "کنٹراسٹ ایڈجسٹ کرنے کے لیے CodeWalk Classic پر جائیں۔",
   "settingsAppearanceContrastReduced": "کم کر دیا",
+  "settingsAppearanceContrastStandard": "معیاری",
   "settingsAppearanceDark": "اندھیرا",
   "settingsAppearanceDensity": "کثافت",
   "settingsAppearanceDensityDense": "گھنا",
@@ -943,8 +1190,8 @@
   "settingsAppearanceDensityNormal": "نارمل",
   "settingsAppearanceDensitySpacious": "کشادہ",
   "settingsAppearanceDescription": "تھیمز، رنگ، متن کا سائز اور چیٹ ڈسپلے منتخب کریں",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "متن کا سائز",
+  "settingsAppearanceFontSizeDescription": "سسٹم متن، گفتگو کے متن اور ٹرمینل متن کا سائز ایڈجسٹ کریں۔",
   "settingsAppearanceLight": "روشنی",
   "settingsAppearanceMathRendering": "ریاضی رینڈرنگ",
   "settingsAppearanceMathRenderingDescription": "چیٹ پیغامات میں LaTeX ریاضی اظہار کو ٹائپ سیٹ مساوات کے طور پر رینڈر کریں۔",
@@ -957,23 +1204,23 @@
   "settingsAppearanceSectionDescription": "اپنے ورک فلو کے لیے بصری کثافت اور پیغام کی سطحوں کو ٹیون کریں۔",
   "settingsAppearanceSectionTitle": "ظاہری شکل",
   "settingsAppearanceSystem": "سسٹم",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "سسٹم متن کا سائز",
+  "settingsAppearanceSystemFontScaleDescription": "ایپ شیل کے تمام متن کا سائز بڑھائیں یا گھٹائیں، بشمول مینیوز، ڈائیلاگز اور سائیڈ بارز۔",
   "settingsAppearanceTaskList": "ٹاسک لسٹ",
   "settingsAppearanceTaskListDescription": "سیشن ٹاسک لسٹ ویجیٹ دکھائیں یا چھپائیں۔",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "ٹرمینل متن کا سائز",
+  "settingsAppearanceTerminalFontSizeDescription": "ایمبیڈڈ ٹرمینل فونٹ کا سائز تبدیل کریں۔ یہ چل رہے سیشنز پر فوری اثر کرتا ہے۔",
   "settingsAppearanceTheme": "تھیم",
   "settingsAppearanceThemeDescription": "لائٹ، ڈارک، یا سسٹم موڈ کا انتخاب کریں، پھر CodeWalk کلاسک پیلیٹ رکھیں یا اوپن کوڈ پری سیٹ پر سوئچ کریں۔",
-  "settingsAppearanceVisualStyle": "بصری انداز",
-  "settingsAppearanceVisualStyleDescription": "کلاسک شکل یا زیادہ نرم بہتر سطحوں کا انتخاب کریں۔",
-  "settingsAppearanceVisualStyleClassic": "کلاسک",
-  "settingsAppearanceVisualStyleRefined": "بہتر",
   "settingsAppearanceThinkingBubbles": "سوچنے والے بلبلے۔",
   "settingsAppearanceThinkingBubblesDescription": "اسسٹنٹ پیغامات میں ریجننگ بلاکس دکھائیں یا چھپائیں۔",
   "settingsAppearanceTitle": "ظاہری شکل",
   "settingsAppearanceToolCallBubbles": "ٹول کال بلبلے۔",
   "settingsAppearanceToolCallBubblesDescription": "معاون پیغامات میں ٹول ایگزیکیوشن کارڈز دکھائیں یا چھپائیں۔",
+  "settingsAppearanceVisualStyle": "بصری انداز",
+  "settingsAppearanceVisualStyleClassic": "کلاسک",
+  "settingsAppearanceVisualStyleDescription": "کلاسک شکل یا زیادہ نرم بہتر سطحوں کا انتخاب کریں۔",
+  "settingsAppearanceVisualStyleRefined": "بہتر",
   "settingsAppearanceWallpaperColors": "وال پیپر کے رنگ استعمال کریں۔",
   "settingsAppearanceWallpaperNormal": "اپنے آلے کے وال پیپر سے رنگ سکیم نکالیں۔",
   "settingsAppearanceWallpaperPresetBlocked": "وال پیپر کے رنگ استعمال کرنے کے لیے CodeWalk Classic پر جائیں۔",
@@ -987,15 +1234,22 @@
   "settingsBehaviorAutoupdateCaveat": "CodeWalk ریلیز چیک کے لیے About استعمال کریں۔ یہ ترتیب صرف آفیشل اوپن کوڈ `آٹو اپ ڈیٹ` کنفیگریشن کی آئینہ دار ہے۔",
   "settingsBehaviorAutoupdateHelp": "اپ اسٹریم اوپن کوڈ رن ٹائم اپ ڈیٹس کو کنٹرول کرتا ہے، کوڈ واک ایپ اپ ڈیٹ چیک کو نہیں۔",
   "settingsBehaviorCellularDataSaver": "سیلولر ڈیٹا سیور",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
-  "settingsBehaviorComposerSpellCheck": "Composer spell check",
-  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorChatRenderMode": "چیٹ رینڈر موڈ",
+  "settingsBehaviorChatRenderModeBlock": "بلاک",
+  "settingsBehaviorChatRenderModeBlockDescription": "لائیو اسسٹنٹ متن، استدلال اور ٹول کارڈز اس وقت تک چھپائیں جب تک موجودہ ٹرن ایک بلاک کے طور پر نہ دکھایا جا سکے۔",
+  "settingsBehaviorChatRenderModeDescription": "انتخاب کریں کہ اسسٹنٹ کے جوابات سٹریم ہوتے وقت ظاہر ہوں یا موجودہ ٹرن مکمل ہونے کے بعد۔",
+  "settingsBehaviorChatRenderModeLive": "لائیو",
+  "settingsBehaviorChatRenderModeLiveDescription": "اسسٹنٹ کا متن، استدلال اور ٹول کی سرگرمی دکھائیں جب OpenCode ایونٹس سٹریم کرتا ہے۔",
+  "settingsBehaviorComposerSpellCheck": "کمپوزر ہجے کی جانچ",
+  "settingsBehaviorComposerSpellCheckDescription": "چیٹ کمپوزر میں پلیٹ فارم کی نیٹیو ہجے کی جانچ، تجاویز اور خودکار تصحیح استعمال کریں۔",
   "settingsBehaviorConfigDeferred": "CodeWalk موجودہ جواب کے ختم ہونے کے بعد اس OpenCode ترتیب کو لاگو کرے گا۔",
+  "settingsBehaviorConfigFieldAutoUpdateMode": "خودکار اپ ڈیٹ موڈ",
+  "settingsBehaviorConfigFieldConversationUsername": "گفتگو صارف نام",
+  "settingsBehaviorConfigFieldDefaultAgent": "ڈیفالٹ ایجنٹ",
+  "settingsBehaviorConfigFieldDefaultModel": "ڈیفالٹ ماڈل",
+  "settingsBehaviorConfigFieldSharingDefault": "شیئرنگ ڈیفالٹ",
+  "settingsBehaviorConfigFieldSmallModel": "چھوٹا ماڈل",
+  "settingsBehaviorConfigFieldSnapshotSetting": "سنیپ شاٹ ترتیب",
   "settingsBehaviorConfigUpdateFailed": "اوپن کوڈ {field} کو اپ ڈیٹ نہیں کیا جا سکا۔",
   "settingsBehaviorConversationUsername": "گفتگو کا صارف نام",
   "settingsBehaviorConversationUsernameHelp": "سسٹم کے صارف نام کے بجائے گفتگو میں دکھایا گیا حسب ضرورت ڈسپلے نام۔",
@@ -1046,6 +1300,24 @@
   "settingsConversationUsername": "گفتگو کا صارف نام",
   "settingsDefaultAgent": "ڈیفالٹ ایجنٹ",
   "settingsDefaultModel": "ڈیفالٹ ماڈل",
+  "settingsGroupAlertTypes": "الرٹ کی اقسام",
+  "settingsGroupBackgroundBehavior": "بیک گراؤنڈ رویہ",
+  "settingsGroupChatDisplay": "چیٹ ڈسپلے",
+  "settingsGroupCurrentConnection": "موجودہ کنکشن",
+  "settingsGroupDataAndSync": "ڈیٹا اور سنک",
+  "settingsGroupDataReset": "ڈیٹا اور ری سیٹ",
+  "settingsGroupDelivery": "ڈیلیوری",
+  "settingsGroupHelp": "مدد",
+  "settingsGroupLanguageAndChat": "زبان اور چیٹ",
+  "settingsGroupLayoutAndText": "لے آؤٹ اور متن",
+  "settingsGroupOfflineModels": "آف لائن ماڈلز",
+  "settingsGroupOpenCodeDefaults": "OpenCode ڈیفالٹس",
+  "settingsGroupReadAloud": "پڑھ کر سنانا",
+  "settingsGroupSavedServers": "محفوظ شدہ سرورز",
+  "settingsGroupThemeAndColor": "تھیم اور رنگ",
+  "settingsGroupThisDevice": "یہ ڈیوائس",
+  "settingsGroupVersionUpdates": "ورژن اور اپ ڈیٹس",
+  "settingsGroupVoiceInput": "وائس ان پٹ",
   "settingsLanguageDescription": "CodeWalk کے ذریعے استعمال ہونے والی زبان کا انتخاب کریں۔ سسٹم ڈیفالٹ آپ کے آلے کی زبان کی پیروی کرتا ہے۔",
   "settingsLanguageEmptyText": "کوئی زبانیں نہیں ملی",
   "settingsLanguageFieldHelper": "فوری طور پر لاگو ہوتا ہے اور دوبارہ شروع ہونے پر برقرار رہتا ہے۔",
@@ -1055,6 +1327,12 @@
   "settingsLanguageTitle": "زبان",
   "settingsLogsDescription": "ایپ کی تشخیصات اور خرابیوں کے حل کی تفصیلات دیکھیں",
   "settingsLogsTitle": "Registros",
+  "settingsNavigationGroupExperience": "تجربہ",
+  "settingsNavigationGroupInput": "ان پٹ",
+  "settingsNavigationGroupSetup": "سیٹ اپ",
+  "settingsNavigationGroupSupport": "مدد اور تشخیص",
+  "settingsNavigationNoResults": "کوئی سیٹنگز نہیں ملیں",
+  "settingsNavigationSearchHint": "سیٹنگز تلاش کریں",
   "settingsNoAgentsFound": "کوئی ایجنٹ نہیں ملا",
   "settingsNotificationsAgentSubtitle": "جب جواب ختم ہوتا ہے۔",
   "settingsNotificationsAgentUpdates": "ایجنٹ کی تازہ کاری",
@@ -1111,10 +1389,17 @@
   "settingsNotificationsSyncInfo": "کچھ زمرہ آن/آف ٹوگلز کو فعال سرور پر /config سے ہم آہنگ کیا جاتا ہے۔",
   "settingsNotificationsSyncInfoLocal": "موجودہ سرور /config میں نوٹیفکیشن ٹوگلز کو ظاہر نہیں کرتا ہے۔ مقامی اقدار فعال ہیں۔",
   "settingsNotificationsSystemSoundPickerTitle": "سسٹم ساؤنڈ کا انتخاب کریں۔",
+  "settingsNotificationsSystemSoundsAndroid": "سسٹم سے اینڈرائیڈ نوٹیفکیشن آوازیں۔",
+  "settingsNotificationsSystemSoundsFreedesktop": "/usr/share/sounds/freedesktop/stereo سے Freedesktop آوازیں۔",
+  "settingsNotificationsSystemSoundsPlatform": "جہاں آپریٹنگ سسٹم سسٹم آوازیں فراہم کرتا ہے وہاں تعاون یافتہ۔",
+  "settingsNotificationsSystemSoundsWebUnavailable": "ویب پر دستیاب نہیں۔",
   "settingsNotificationsTitle": "اطلاعات",
   "settingsNotificationsWhenClosing": "کھڑکی بند کرتے وقت",
   "settingsOpenCodeAutoUpdate": "OpenCode خودکار اپ ڈیٹ",
   "settingsOpenCodeSharingDefault": "OpenCode شیئرنگ ڈیفالٹ",
+  "settingsProvenanceCodeWalkException": "CodeWalk استثناء",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk مقامی",
+  "settingsProvenanceOpenCodeBacked": "OpenCode حمایت یافتہ",
   "settingsReadAloudEnabled": "بلند آواز سے پڑھیں",
   "settingsReadAloudEnabledDescription": "معاون پیغامات پر بلند آواز میں پڑھنے کا بٹن دکھائیں۔",
   "settingsReadAloudPitch": "پچ",
@@ -1130,17 +1415,34 @@
   "settingsSearchDefaultModel": "ڈیفالٹ ماڈل تلاش کریں",
   "settingsSearchSharingMode": "شیئرنگ موڈ تلاش کریں",
   "settingsSearchSmallModel": "چھوٹا ماڈل تلاش کریں",
+  "settingsServerFallbackProviderName": "سرور پر کنفیگر شدہ",
   "settingsServersActive": "فعال",
   "settingsServersChooseActive": "فعال سرور کا انتخاب کریں۔",
   "settingsServersDefault": "طے شدہ",
   "settingsServersDescription": "OpenCode سے جڑیں اور اپنے سرورز کا نظم کریں",
   "settingsServersTitle": "سرورز",
+  "settingsSessionAttentionBubble": "ببل",
+  "settingsSessionAttentionCapabilityUnavailable": "سیشن اٹینشن ہوسٹ کی اہلیت دستیاب نہیں۔",
+  "settingsSessionAttentionDescription": "روٹ سیشن کی حالت اختیاری ببل یا پینل میں دکھاتا ہے۔",
+  "settingsSessionAttentionEnableFailed": "سیشن اٹینشن فعال نہیں کی جا سکی۔",
+  "settingsSessionAttentionOff": "بند",
+  "settingsSessionAttentionOpenSettings": "ڈسپلے سیٹنگز کھولیں",
+  "settingsSessionAttentionPanel": "پینل",
+  "settingsSessionAttentionPrivacy": "Android پر اسے فعال کرنے سے مستقل فورگراؤنڈ سروس شروع ہوتی ہے۔ جواب کا متن خفیہ کر کے محفوظ ہوتا ہے؛ کلاؤڈ TTS صرف پڑھیں دبانے کے بعد متن بھیجتا ہے۔",
+  "settingsSessionAttentionSaveFailedStopped": "سیشن اٹینشن محفوظ نہیں ہو سکی اور روک دی گئی۔",
   "settingsSessionAttentionSize": "ببل کا سائز",
   "settingsSessionAttentionSizeExtraLarge": "بہت بڑا",
   "settingsSessionAttentionSizeExtraSmall": "بہت چھوٹا",
   "settingsSessionAttentionSizeLarge": "بڑا",
   "settingsSessionAttentionSizeSmall": "چھوٹا",
   "settingsSessionAttentionSizeStandard": "معیاری",
+  "settingsSessionAttentionStillRunning": "سیشن اٹینشن اب بھی چل رہی ہے۔ اسے دوبارہ روکنے کی کوشش کریں۔",
+  "settingsSessionAttentionStop": "سیشن توجہ روکیں",
+  "settingsSessionAttentionStopFailed": "سیشن اٹینشن روکی نہیں جا سکی۔ دوبارہ کوشش کریں۔",
+  "settingsSessionAttentionStopSaveFailed": "سیشن اٹینشن روک دی گئی لیکن ترتیب محفوظ نہیں ہو سکی۔",
+  "settingsSessionAttentionThirdPartyTtsWarning": "پڑھیں دبانے پر جواب کا متن ترتیب دیے گئے فریق ثالث TTS فراہم کنندہ کو بھیجا جا سکتا ہے۔",
+  "settingsSessionAttentionTitle": "سیشن توجہ",
+  "settingsSessionAttentionUnavailable": "اس پلیٹ فارم پر سیشن توجہ دستیاب نہیں ہے۔",
   "settingsSetupWizard": "سیٹ اپ وزرڈ",
   "settingsShortcutsDescription": "کی بورڈ شارٹ کٹس تلاش کریں اور اپنی مرضی کے مطابق بنائیں",
   "settingsShortcutsEdit": "شارٹ کٹ میں ترمیم کریں۔",
@@ -1241,46 +1543,122 @@
   "shortcutToggleVoiceInputDesc": "ایڈیٹر میں صوتی ڈکٹیشن شروع کریں یا روکیں",
   "shortcutsApply": "لگائیں",
   "shortcutsConflictConflict": "{conflict} کے ساتھ تصادم",
+  "shortcutsErrorConflict": "\"{conflict}\" سے ٹکراؤ",
+  "shortcutsErrorInvalid": "غلط شارٹ کٹ",
+  "shortcutsErrorUnsupportedKey": "غیر تعاون یافتہ شارٹ کٹ کلید",
   "shortcutsKeyboardShortcuts": "کی بورڈ شارٹ کٹس",
+  "shortcutsPressKeyCombination": "اب کلیدوں کا مجموعہ دبائیں",
   "shortcutsReset": "سب کو ری سیٹ کریں۔",
   "shortcutsSearchEditBindings": "تلاش کریں، بائنڈنگز میں ترمیم کریں، اور محفوظ کرنے سے پہلے تنازعات کو حل کریں۔",
   "shortcutsSetShortcutWidget": "شارٹ کٹ سیٹ کریں: {label}",
   "shortcutsTheseBindingsStored": "یہ بائنڈنگز موجودہ ایپ رن ٹائم کے لیے CodeWalk میں محفوظ ہیں اور OpenCode `tui.json` کی بائنڈز میں ترمیم نہیں کرتی ہیں۔",
+  "speechApiKey": "API کلید",
+  "speechApiKeyMissing": "اس TTS فراہم کنندہ کو استعمال کرنے کے لیے ترتیبات > اسپیچ میں ایک API کلید شامل کریں۔",
+  "speechApiKeyRejected": "TTS API کلید فراہم کنندہ نے مسترد کر دی۔",
+  "speechApiKeyRemoved": "API کلید ہٹا دی گئی۔",
+  "speechApiKeySaved": "API کلید اس ڈیوائس پر محفوظ طریقے سے محفوظ ہو گئی۔",
+  "speechApiKeySavedHelper": "ایک کلید محفوظ ہے۔ اسے تبدیل کرنے کے لیے نئی قدر درج کریں، یا ہٹانے کے لیے خالی قدر محفوظ کریں۔",
+  "speechApiKeyStorageUnavailable": "TTS API کلید کی محفوظ اسٹوریج دستیاب نہیں ہے۔",
   "speechAutoStopSilence": "خود بخود خاموشی کا ٹائم آؤٹ",
+  "speechBaseUrl": "بیس URL",
+  "speechBaseUrlExample": "مثال: {url}",
   "speechChooseRecognitionEngine": "شناختی انجن، خاموشی کا ٹائم آؤٹ، اور ماڈل کے اختیارات کا انتخاب کریں۔",
+  "speechCloudTtsPrivacy": "کلاؤڈ TTS پرائیویسی",
+  "speechCloudTtsPrivacyDescription": "کلاؤڈ TTS منتخب معاون پیغام کا متن کنفیگر شدہ فراہم کنندہ کو بھیجتا ہے۔ API کلیدیں اس ڈیوائس پر محفوظ اسٹوریج میں رکھی جاتی ہیں۔",
   "speechDesktopOnly": "{service} صرف ڈیسک ٹاپ پر دستیاب ہے۔",
   "speechDownload": "ڈاؤن لوڈ کریں۔",
+  "speechDownloadFailed": "ڈاؤن لوڈ ناکام: {error}",
+  "speechEdgeEmptyAudio": "مائیکروسافٹ ایج اسپیچ نے خالی آڈیو جواب واپس کیا۔",
+  "speechEdgeExperimentalDescription": "اس ڈیوائس سے براہ راست غیر سرکاری Edge Read Aloud سروس استعمال کرتا ہے۔ بلند آواز سے پڑھنے پر پیغام کا متن Microsoft کو بھیجا جاتا ہے، اور اگر Microsoft پرائیویٹ پروٹوکول تبدیل کرے تو سروس بند ہو سکتی ہے۔",
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech تجرباتی ہے",
+  "speechEdgeMalformedAudio": "مائیکروسافٹ ایج اسپیچ نے خراب آڈیو ڈیٹا واپس کیا۔",
+  "speechEdgeSynthesisInterrupted": "مائیکروسافٹ ایج اسپیچ سنتھیسز مکمل ہونے سے پہلے ختم ہو گیا۔",
+  "speechEdgeTextTooLong": "مائیکروسافٹ ایج اسپیچ ایک وقت میں 4096 بائٹس تک پڑھ سکتا ہے۔",
+  "speechEdgeTimedOut": "مائیکروسافٹ ایج اسپیچ کا وقت ختم ہو گیا۔",
+  "speechEdgeUnreachable": "مائیکروسافٹ ایج اسپیچ تک رسائی نہیں ہو سکی۔",
+  "speechEdgeUnsupportedAudio": "مائیکروسافٹ ایج اسپیچ نے غیر تعاون یافتہ آڈیو ڈیٹا واپس کیا۔",
+  "speechEdgeUnsupportedFrame": "مائیکروسافٹ ایج اسپیچ نے ایک غیر تعاون یافتہ ویب ساکٹ فریم واپس کیا۔",
+  "speechEdgeVoice": "Edge آواز",
+  "speechEdgeVoiceListUnavailable": "ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔ آوازوں کی فہرست ابھی لوڈ نہیں ہو سکی۔",
+  "speechEdgeVoicesLoaded": "Microsoft Edge Speech آوازوں سے لوڈ کیا گیا۔",
   "speechEngine": "انجن",
+  "speechEngineFallbackNotice": "منتخب STT انجن دستیاب نہیں ({reason})۔ اس کے بجائے {fallback} استعمال ہو رہا ہے۔",
+  "speechFailedToRemoveModel": "ماڈل ہٹانے میں ناکام: {error}",
   "speechInstalledLanguages": "انسٹال شدہ زبانیں۔",
   "speechListeningStopsAutomatically": "اس کئی سیکنڈ کی خاموشی کے بعد سننا خود بخود رک جاتا ہے۔",
+  "speechMicBackendUnavailable": "ونڈوز مائیکروفون بیک اینڈ اس بلڈ میں دستیاب نہیں ہے۔",
+  "speechMicDeviceBusy": "ڈیفالٹ مائیکروفون فی الحال کسی دوسری ایپ استعمال میں ہے۔",
+  "speechMicNoInputDevice": "کوئی مائیکروفون ان پٹ ڈیوائس دستیاب نہیں ہے۔",
   "speechMicPermissionDisabled": "مائیکروفون کی اجازت غیر فعال ہے۔",
+  "speechMicSpeechPrivacy": "ونڈوز اسپیچ سروسز غیر فعال ہو سکتی ہیں (اسپیچ پرائیویسی، آن لائن اسپیچ ریکگنیشن، یا لینگویج پیک)۔",
+  "speechMicUnsupportedFormat": "ڈیفالٹ مائیکروفون فارمیٹ تعاون یافتہ نہیں ہے۔",
+  "speechModel": "ماڈل",
+  "speechModelDefaultHelper": "ڈیفالٹ: {model}",
   "speechModelFilesIncomplete": "{service} ماڈل فائلیں نامکمل ہیں۔",
+  "speechModelInstalled": "ماڈل انسٹال ہو گیا ({modelId})",
+  "speechModelListLoadFailed": "{service} ماڈل کی فہرست لوڈ کرنے میں ناکام: {error}",
+  "speechModelMissing": "ماڈل غائب ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} MB",
   "speechMoonshine": "چاندنی",
+  "speechMoonshineDesktopOnlyHint": "صرف ڈیسک ٹاپ پر دستیاب ہے۔ اینڈرائیڈ صرف نئیٹو رہتا ہے۔",
+  "speechMoonshineModel": "Moonshine ماڈل",
   "speechMoonshineModelsDesktop": "مونشائن ماڈلز (ڈیسک ٹاپ)",
   "speechMoonshineStaysDownloadable": "Moonshine ڈاؤن لوڈ کے قابل اور ایپ بنڈل سے باہر رہتی ہے۔ اس ڈیسک ٹاپ ڈیوائس کے لیے ایک ماڈل منتخب کریں اور اگر آپ جگہ واپس چاہتے ہیں تو اسے بعد میں ہٹا دیں۔",
+  "speechMoonshineSubtitle": "ڈیسک ٹاپ صرف تجرباتی راستہ جو sherpa_onnx آف لائن ریکگنیشن اور ڈاؤن لوڈ قابل ماڈلز استعمال کرتا ہے۔",
   "speechNative": "مقامی",
+  "speechNativeDisabledWindows": "استحکام کے لیے Windows پر غیر فعال۔ CodeWalk WASAPI کیپچر کے ذریعے Parakeet یا کوئی اور آن ڈیوائس انجن استعمال کریں۔",
   "speechNativeSTTDisabled": "اس ایپ میں لینکس پر مقامی STT غیر فعال ہے۔ پیراکیٹ نئے انسٹالز کے لیے ڈیفالٹ انجن ہے۔",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "Windows پر، CodeWalk اپنے WASAPI مائیکروفون بیک اینڈ کے ذریعے مقامی آن ڈیوائس اسپیچ ریکگنیشن استعمال کرتا ہے۔ استحکام کے لیے Windows کی نیٹیو اسپیچ ریکگنیشن غیر فعال ہے۔",
   "speechNativeStartsFaster": "مقامی تیزی سے شروع ہوتا ہے۔ شیرپا بھاری سیٹ اپ اور گہرے ماڈل کنٹرول کے ساتھ مکمل طور پر آن ڈیوائس چلاتا ہے۔",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechNativeSubtitle": "آسان اور تیز تر آغاز۔",
+  "speechNativeUnavailableLinux": "Linux پر دستیاب نہیں۔ اسپیچ ان پٹ کے لیے Parakeet استعمال کریں۔",
+  "speechNoApiKeySaved": "کوئی API کلید محفوظ نہیں۔",
+  "speechNoLanguagePacksFound": "کوئی لینگویج پیک نہیں ملا",
+  "speechNotAvailableOnPlatform": "اس پلیٹ فارم پر دستیاب نہیں۔",
+  "speechOpenMicrophoneSettings": "مائیکروفون سیٹنگز کھولیں",
+  "speechOpenSpeechPrivacy": "اسپیچ پرائیویسی کھولیں",
+  "speechOpenSpeechSettings": "اسپیچ سیٹنگز کھولیں",
   "speechParakeet": "طوطا",
+  "speechParakeetDesktopOnlyHint": "صرف ڈیسک ٹاپ پر دستیاب ہے۔ آف لائن کثیر لسانی ریکگنیشن استعمال کرتا ہے۔",
   "speechParakeetModelsDesktop": "پیراکیٹ ماڈل (ڈیسک ٹاپ)",
   "speechParakeetStaysDownloadable": "پیراکیٹ ڈاؤن لوڈ کے قابل اور ایپ بنڈل سے باہر رہتا ہے۔ یہ فی الحال 25 یورپی زبانوں کے لیے موزوں ایک کثیر لسانی ماڈل کو بے نقاب کرتا ہے۔",
+  "speechParakeetSubtitle": "ڈیسک ٹاپ صرف آف لائن NeMo ٹرانسڈیوسر راستہ جس میں ایک کثیر لسانی ڈاؤن لوڈ قابل ماڈل ہے۔",
   "speechPickLanguagePacks": "زبان کے پیک کو منتخب کریں اور ڈیوائس پر شناخت کے لیے ماڈلز ڈاؤن لوڈ/ہٹائیں۔",
+  "speechPitchNotSupported": "Pitch OpenAI-مطابق TTS کی حمایت یافتہ نہیں ہے اور اس فراہم کنندہ کے لیے چھپا دیا گیا ہے۔",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (تجرباتی)",
+  "speechProviderEmptyAudio": "TTS فراہم کنندہ نے خالی آڈیو جواب واپس کیا۔",
+  "speechProviderOpenAiCompatible": "OpenAI-مطابق",
+  "speechProviderQuotaRateLimit": "TTS فراہم کنندہ نے کوٹہ یا شرح کی حد رپورٹ کی۔",
+  "speechProviderRequestRejected": "TTS فراہم کنندہ نے اسپیچ درخواست مسترد کر دی۔",
+  "speechProviderSystemNative": "سسٹم / نئیٹو",
+  "speechProviderTemporarilyUnavailable": "TTS فراہم کنندہ عارضی طور پر دستیاب نہیں ہے۔",
+  "speechProviderUnreachable": "TTS فراہم کنندہ تک رسائی نہیں ہو سکی۔",
+  "speechReadAloudFailed": "متن سے تقریر ناکام ہوئی۔",
+  "speechReadAloudNoText": "بلند آواز میں پڑھنے کے لیے کوئی متن نہیں ہے۔",
+  "speechReadAloudTestText": "یہ CodeWalk ٹیکسٹ ٹو اسپیچ ٹیسٹ ہے۔",
   "speechRemove": "ہٹا دیں۔",
   "speechRuntimeFailed": "{service} رن ٹائم شروع ہونے میں ناکام رہا۔",
+  "speechSaveApiKey": "API کلید محفوظ کریں",
+  "speechSearchSherpaLanguage": "Sherpa زبان تلاش کریں",
   "speechSelectSherpaAbove": "لینگویج پیک کا نظم کرنے اور ماڈل ڈاؤن لوڈ کرنے کے لیے اوپر شیرپا کو منتخب کریں۔",
   "speechSenseVoice": "سینس وائس",
+  "speechSenseVoiceDesktopOnlyHint": "صرف ڈیسک ٹاپ پر دستیاب ہے۔ چینی، کینٹونیز، جاپانی، کورین اور انگریزی کے لیے سب سے موثر۔",
   "speechSenseVoiceModelsDesktop": "SenseVoice ماڈلز (ڈیسک ٹاپ)",
   "speechSenseVoiceStaysDownloadable": "SenseVoice ڈاؤن لوڈ کے قابل اور ایپ بنڈل سے باہر رہتا ہے۔ یہ چینی، کینٹونیز، جاپانی، کورین اور انگریزی کے لیے یہاں کا سب سے مضبوط ڈیسک ٹاپ آپشن ہے۔",
+  "speechSenseVoiceSubtitle": "ڈیسک ٹاپ صرف آف لائن راستہ جو چینی، کینٹونیز، جاپانی، کورین اور انگریزی کے لیے تیار کیا گیا ہے۔",
   "speechSherpa": "شیرپا",
   "speechSherpaExperimentalFail": "شیرپا تجرباتی ہے اور کچھ آلات پر ناکام ہو سکتا ہے۔ اگر آپ سب سے زیادہ مستحکم سلوک چاہتے ہیں تو مقامی کو ترجیح دیں۔",
+  "speechSherpaLanguage": "Sherpa زبان",
   "speechSherpaModelsLinux": "شیرپا ماڈلز (لینکس)",
+  "speechSherpaSubtitle": "بھاری، تجرباتی اور بگز کا شکار۔ ڈاؤن لوڈ شدہ ماڈلز کے ساتھ اکثر زیادہ درست۔",
+  "speechSherpaUnavailableAndroid": "چھوٹے APK سائز کے لیے بہتر کردہ اینڈرائیڈ بلڈز پر دستیاب نہیں۔",
+  "speechSilenceSeconds": "{value} سیکنڈ",
   "speechSpeechText": "متن سے تقریر",
+  "speechSystemDefaultLanguage": "سسٹم ڈیفالٹ ({language})",
+  "speechTestVoice": "آواز ٹیسٹ کریں",
+  "speechTextToSpeechProvider": "ٹیکسٹ ٹو اسپیچ فراہم کنندہ",
   "speechUnavailableOnPlatform": "اس پلیٹ فارم پر {service} اسپیچ دستیاب نہیں ہے۔",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "Windows وائس ان پٹ آن ڈیوائس ماڈلز کے ساتھ CodeWalk WASAPI کیپچر استعمال کرتا ہے۔ ڈیسک ٹاپ ایپس کے لیے مائیکروفون تک رسائی فعال رکھیں؛ نیچے دئے گئے بٹن مسئلہ حل کرنے کے لیے Windows سیٹنگز کھولتے ہیں۔",
   "statusConnected": "منسلک",
   "statusDelayed": "تاخیر شدہ",
   "statusFailed": "ناکام",
@@ -1298,6 +1676,7 @@
   "tailscaleSelectPeer": "ٹیل اسکیل پیئر کو منتخب کریں۔",
   "tailscaleWaitingAdminApproval": "یہ Tailscale نوڈ ایڈمن کی منظوری کا منتظر ہے۔",
   "terminalClose": "ٹرمینل بند کریں۔",
+  "terminalConnectedTo": "{directory} میں {serverName} سے منسلک",
   "terminalConnectingTo": "{serverName} ٹرمینل سے منسلک ہو رہا ہے...",
   "terminalConnectionFailed": "ٹرمینل کنکشن ناکام رہا: {error}",
   "terminalDisconnected": "ٹرمینل منقطع ہو گیا۔",
@@ -1325,6 +1704,7 @@
   "terminalSessionClosed": "ٹرمینل سیشن بند کر دیا گیا۔",
   "terminalTerminal": "ٹرمینل",
   "terminalTitle": "ٹرمینل",
+  "terminalTransportUnavailable": "ٹرمینل ٹرانسپورٹ دستیاب نہیں ہے۔",
   "terminalTryAgain": "دوبارہ کوشش کریں۔",
   "toolAwaitingInput": "ان پٹ کا انتظار ہے۔",
   "toolEditing": "ایڈیٹنگ",
@@ -1379,46 +1759,449 @@
   "workspaceCloseProject": "بند کریں {project}",
   "workspaceClosedProjects": "بند منصوبے",
   "workspaceCurrentDirectory": "موجودہ ڈائریکٹری: {path}",
+  "workspaceFailedToOpenProjectContext": "پراجیکٹ کا سیاق و سباق نہیں کھل سکا: {directory}",
   "workspaceFilterDirs": "ڈائریکٹریز کو فلٹر کریں۔",
+  "workspaceNoActiveContext": "کوئی فعال سیاق و سباق نہیں",
   "workspaceOpenFolder": "فولڈر کھولیں۔",
   "workspaceOpenProjectFolder": "پروجیکٹ فولڈر کھولیں۔",
   "workspaceOpenProjects": "کھلے منصوبے",
+  "workspaceProjectContextOpened": "پراجیکٹ کا سیاق و سباق کھل گیا: {directory}",
   "workspaceProjectDirectory": "پروجیکٹ ڈائرکٹری",
   "workspaceProjectHint": "/repo/my-project",
+  "workspaceProjectRemovedFromHistory": "پراجیکٹ تاریخ سے ہٹا دیا گیا",
   "workspaceRemoveFromHistory": "تاریخ سے {name} کو ہٹا دیں۔",
   "workspaceSuggestions": "تجاویز",
-  "settingsSessionAttentionTitle": "سیشن توجہ",
-  "settingsSessionAttentionDescription": "روٹ سیشن کی حالت اختیاری ببل یا پینل میں دکھاتا ہے۔",
-  "settingsSessionAttentionOff": "بند",
-  "settingsSessionAttentionBubble": "ببل",
-  "settingsSessionAttentionPanel": "پینل",
-  "settingsSessionAttentionPrivacy": "Android پر اسے فعال کرنے سے مستقل فورگراؤنڈ سروس شروع ہوتی ہے۔ جواب کا متن خفیہ کر کے محفوظ ہوتا ہے؛ کلاؤڈ TTS صرف پڑھیں دبانے کے بعد متن بھیجتا ہے۔",
-  "settingsSessionAttentionUnavailable": "اس پلیٹ فارم پر سیشن توجہ دستیاب نہیں ہے۔",
-  "settingsSessionAttentionOpenSettings": "ڈسپلے سیٹنگز کھولیں",
-  "settingsSessionAttentionStop": "سیشن توجہ روکیں",
-  "settingsSessionAttentionThirdPartyTtsWarning": "پڑھیں دبانے پر جواب کا متن ترتیب دیے گئے فریق ثالث TTS فراہم کنندہ کو بھیجا جا سکتا ہے۔",
-  "settingsGroupAlertTypes": "الرٹ کی اقسام",
-  "settingsGroupBackgroundBehavior": "بیک گراؤنڈ رویہ",
-  "settingsGroupChatDisplay": "چیٹ ڈسپلے",
-  "settingsGroupCurrentConnection": "موجودہ کنکشن",
-  "settingsGroupDataAndSync": "ڈیٹا اور سنک",
-  "settingsGroupDataReset": "ڈیٹا اور ری سیٹ",
-  "settingsGroupDelivery": "ڈیلیوری",
-  "settingsGroupHelp": "مدد",
-  "settingsGroupLanguageAndChat": "زبان اور چیٹ",
-  "settingsGroupLayoutAndText": "لے آؤٹ اور متن",
-  "settingsGroupOfflineModels": "آف لائن ماڈلز",
-  "settingsGroupOpenCodeDefaults": "OpenCode ڈیفالٹس",
-  "settingsGroupReadAloud": "پڑھ کر سنانا",
-  "settingsGroupSavedServers": "محفوظ شدہ سرورز",
-  "settingsGroupThemeAndColor": "تھیم اور رنگ",
-  "settingsGroupThisDevice": "یہ ڈیوائس",
-  "settingsGroupVersionUpdates": "ورژن اور اپ ڈیٹس",
-  "settingsGroupVoiceInput": "وائس ان پٹ",
-  "settingsNavigationGroupExperience": "تجربہ",
-  "settingsNavigationGroupInput": "ان پٹ",
-  "settingsNavigationGroupSetup": "سیٹ اپ",
-  "settingsNavigationGroupSupport": "مدد اور تشخیص",
-  "settingsNavigationNoResults": "کوئی سیٹنگز نہیں ملیں",
-  "settingsNavigationSearchHint": "سیٹنگز تلاش کریں"
+  "appProviderErrorFailedToStartProcess": "{tool} پروسیس شروع کرنے میں ناکامی ہوئی۔",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} دستیاب نہیں ہے۔ پہلے {runtime} انسٹال کریں۔",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "{tool} کی انسٹالیشن ایکزٹ کوڈ {exitCode} کے ساتھ ناکام ہوئی۔",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "Bun بوٹسٹریپ ایکزٹ کوڈ {exitCode} کے ساتھ ناکام ہوا۔",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "OpenCode کی انسٹالیشن مکمل ہوئی لیکن کمانڈ PATH میں نہیں ملی۔",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "OpenCode کی انسٹالیشن مکمل ہوئی لیکن کمانڈ کا راستہ معلوم نہیں ہو سکا۔",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "کنفیگر کردہ کمانڈ نہیں ملی اور {tool} PATH میں نہیں ہے۔",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "کنفیگر کردہ کمانڈ کا راستہ موجود نہیں ہے۔",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "کنفیگر کردہ کمانڈ موجود ہے لیکن ورژن چیک ناکام ہوا۔",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "کنفیگر کردہ کمانڈ پر عمل نہیں ہو سکا۔",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "WSL چیک صرف Windows پر لاگو ہوتا ہے۔",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "منظم مقامی سرور کنفیگر کرنے کے لیے ڈیسک ٹاپ بلڈ استعمال کریں۔",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "معروف انسٹالیشن ڈائرکٹری سے پتہ چلا۔",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "معروف انسٹالیشن ڈائرکٹری سے پتہ چلا۔ PATH کو ریفریش کی ضرورت ہو سکتی ہے؛ اگر حالیہ انسٹال ابھی تک نہیں ملا تو {appName} دوبارہ کھولیں۔",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "GitHub سے تازہ ترین ریلیز میٹا ڈیٹا حاصل کرنے میں ناکامی۔",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "تازہ ترین ریلیز میٹا ڈیٹا میں اثاثوں کی فہرست شامل نہیں تھی۔",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "کوئی ہم آہنگ OpenCode بائنری اثاثہ نہیں ملا۔",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "منتخب کردہ OpenCode اثاثہ ڈاؤن لوڈ کرنے میں ناکامی۔",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "ڈاؤن لوڈ کردہ اثاثہ کے چیک سم کی تصدیق ناکام ہوئی۔",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "OpenCode بائنری آرکائیو نکالنے میں ناکامی۔",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "نکالے گئے فائلوں میں {tool} ایگزیکیوٹیبل نہیں ملا۔",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "سرور سے کوئی جواب نہیں۔ براہ کرم دوبارہ کوشش کریں۔",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "ماڈل سے کوئی جواب نہیں۔ براہ کرم دوبارہ کوشش کریں۔",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "اسپیچ کام منسوخ کر دیا گیا۔",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "Microsoft Edge Speech منسوخ کر دیا گیا۔",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "فعال",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "موصول ہو رہا ہے",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "تاخیر شدہ",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "مکمل",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "تعامل کا انتظار",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "خرابی",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "سیلولر ڈیٹا سیور فعال ہے",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "OAuth سائن ان درکار ہے",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "Tailscale کنکشن درکار ہے",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "آف لائن",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "اجازت منسوخ کر دی گئی",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "سروس رک گئی",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "ہوسٹ دستیاب نہیں",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "errorCertificateError": "سرٹیفکیٹ کی خرابی",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorRequestCancelled": "درخواست منسوخ کر دی گئی",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorRunShellCommandFailed": "شیل کمانڈ چلانے میں ناکامی ہوئی",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "سلیش کمانڈ چلانے میں ناکامی ہوئی",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "errorSessionBusy": "سیشن ایک اور درخواست پر کارروائی کرنے میں مصروف ہے۔",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorUnknownNetworkError": "نامعلوم نیٹ ورک کی خرابی: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "forwardUntitled": "بلا عنوان",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "logsEntryError": "خرابی",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "اسٹیک",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "sessionTabIconRemoveFailed": "مقامی سیشن کے ٹیب آئیکن کا ڈیٹا ہٹانے میں ناکامی ہوئی",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "فعال سرور سے OpenCode کے تعاون سے چلنے والی ڈیفالٹس لوڈ نہیں ہو سکیں۔",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "setupDebugLinuxLogsPath": "Linux لاگز: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "موجودہ ماحول سے ایک موجودہ OpenCode کمانڈ کا پتہ لگانے کی کوشش کی جا رہی ہے۔",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageDiagnosticsResult": "{platform} پر {availability}۔ {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "درخواست کردہ بندش کے بعد منظم OpenCode سرور بند ہو گیا۔",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageHealthyRunning": "منظم OpenCode سرور صحیح حالت میں ہے اور {url} پر چل رہا ہے۔",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageInstallStarted": "CodeWalk سے OpenCode کی انسٹالیشن شروع ہو گئی۔",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "ناکام ہیلتھ چیک کے بعد صارف نے ایک اور سرور شامل کرنے کا انتخاب کیا۔",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "صارف نے ایک موجودہ OpenCode سرور سے منسلک ہونے کا انتخاب کیا۔",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "صارف نے گائیڈڈ OpenCode سیٹ اپ کا راستہ کھولا۔",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "صارف نے منظم مقامی OpenCode سیٹ اپ کھولا۔",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "ناکام ہیلتھ چیک کے بعد صارف نے سرور کی ترتیبات کھولیں۔",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageStartLocalServer": "{url} پر منظم OpenCode سرور شروع کیا جا رہا ہے۔",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppedCleanly": "منظم OpenCode سرور صفائی کے ساتھ بند ہو گیا۔",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageStoppingLocalServer": "منظم OpenCode سرور بند کیا جا رہا ہے۔",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageTestingServerUrl": "آن بورڈنگ سے OpenCode سرور کے URL {url} کی جانچ کی جا رہی ہے۔",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "OpenCode چلائیں: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "سرور کی دستاویزات: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "سرور ہیلتھ: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugSourceDiagnostics": "تشخیص",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceLocalServer": "مقامی سرور",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceManualConnection": "دستی کنکشن",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugSourceOnboarding": "آن بورڈنگ",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceUseExisting": "موجودہ استعمال کریں۔",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "chatProviderErrorSessionNotFound": "سیشن نہیں ملا",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "غلط میسج فارمیٹ",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "نیٹ ورک کنکشن ناکام ہوا",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "نامعلوم غلطی",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "ٹرمینل سیشن بنانے میں ناکامی",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "ٹرمینل اینڈ پوائنٹ دستیاب نہیں ہے",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "غلط ٹرمینل ڈائریکٹری",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "ٹرمینل ویب ساکٹ یہاں دستیاب نہیں ہے۔",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 کال} other{{count} کالز}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "کنکشن کا وقت ختم ہو گیا",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "کلائنٹ کی خرابی",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "پیغام بھیجنے میں ناکامی ہوئی",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

@@ -271,7 +271,7 @@ class _ShortcutCaptureDialogState extends State<_ShortcutCaptureDialog> {
             ),
             child: Text(
               _captured == null
-                  ? 'Press the key combination now'
+                  ? context.l10n.shortcutsPressKeyCombination
                   : ShortcutBindingCodec.formatForDisplay(_captured!),
               textAlign: TextAlign.center,
             ),

@@ -7,7 +7,6 @@ import '../../core/i18n/l10n_context.dart';
 import '../providers/app_provider.dart';
 import '../services/local_opencode_server_runtime_types.dart';
 
-
 class OpenCodeSetupDebugPage extends StatelessWidget {
   const OpenCodeSetupDebugPage({super.key});
 
@@ -147,9 +146,7 @@ class OpenCodeSetupDebugPage extends StatelessWidget {
                         _SetupDebugCard(
                           title: context.l10n.setupDebugCapturedSetupDetails,
                           icon: Symbols.inbox_rounded,
-                          child: Text(
-                            context.l10n.setupDebugRunDiagnosticsTry,
-                          ),
+                          child: Text(context.l10n.setupDebugRunDiagnosticsTry),
                         ),
                       ],
                       const SizedBox(height: 12),
@@ -159,16 +156,20 @@ class OpenCodeSetupDebugPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              context.l10n.setupDebugCodeWalkCaptureEnough,
-                            ),
+                            Text(context.l10n.setupDebugCodeWalkCaptureEnough),
                             const SizedBox(height: 8),
-                            const Text('• Linux logs: ~/.local/share/opencode/log/'),
-                            const Text(
-                              '• Run OpenCode with: opencode --log-level DEBUG',
+                            Text(
+                              '• ${context.l10n.setupDebugLinuxLogsPath('~/.local/share/opencode/log/')}',
                             ),
-                            const Text('• Server health: GET /global/health'),
-                            const Text('• Server docs: GET /doc'),
+                            Text(
+                              '• ${context.l10n.setupDebugRunOpenCodeCommand('opencode --log-level DEBUG')}',
+                            ),
+                            Text(
+                              '• ${context.l10n.setupDebugServerHealthEndpoint('GET /global/health')}',
+                            ),
+                            Text(
+                              '• ${context.l10n.setupDebugServerDocsEndpoint('GET /doc')}',
+                            ),
                           ],
                         ),
                       ),
@@ -240,21 +241,37 @@ class _EnvironmentDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _InfoRow(label: context.l10n.setupDebugPlatform2, value: report!.platform),
+        _InfoRow(
+          label: context.l10n.setupDebugPlatform2,
+          value: report!.platform,
+        ),
         if (commandPath.trim().isNotEmpty)
-          _InfoRow(label: context.l10n.setupDebugCommandPath2, value: commandPath.trim()),
-        _ToolStatusRow(label: context.l10n.setupDebugOpenCode2, status: report!.opencode),
-        _ToolStatusRow(label: context.l10n.setupDebugNode, status: report!.node),
+          _InfoRow(
+            label: context.l10n.setupDebugCommandPath2,
+            value: commandPath.trim(),
+          ),
+        _ToolStatusRow(
+          label: context.l10n.setupDebugOpenCode2,
+          status: report!.opencode,
+        ),
+        _ToolStatusRow(
+          label: context.l10n.setupDebugNode,
+          status: report!.node,
+        ),
         _ToolStatusRow(label: context.l10n.setupDebugNpm2, status: report!.npm),
         _ToolStatusRow(label: context.l10n.setupDebugBun2, status: report!.bun),
         _ToolStatusRow(label: context.l10n.setupDebugWSL, status: report!.wsl),
         _InfoRow(
           label: context.l10n.setupDebugNetwork2,
-          value: report!.hasNetworkAccess ? 'reachable' : 'unreachable',
+          value: report!.hasNetworkAccess
+              ? context.l10n.onboardingReachable
+              : context.l10n.onboardingUnreachable,
         ),
         _InfoRow(
           label: context.l10n.setupDebugInstallDirectory,
-          value: report!.installDirectoryWritable ? 'writable' : 'not writable',
+          value: report!.installDirectoryWritable
+              ? context.l10n.onboardingWritable
+              : context.l10n.onboardingNotWritable,
         ),
         const SizedBox(height: 8),
         Text(
@@ -309,7 +326,9 @@ class _ToolStatusRow extends StatelessWidget {
     return _InfoRow(
       label: label,
       value: details.isEmpty
-          ? (status.available ? 'available' : 'not available')
+          ? (status.available
+                ? context.l10n.onboardingAvailable
+                : context.l10n.onboardingNotAvailable)
           : details.join(' | '),
     );
   }
@@ -338,7 +357,7 @@ class _SetupDebugEntryTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.setupDebugTimeEntrySource(time, entry.source),
+                context.l10n.setupDebugTimeEntrySource(entry.source, time),
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(height: 4),

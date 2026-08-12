@@ -1,5 +1,4 @@
 {
-  "@@locale": "ar",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "لا يمكن تنشيط خادم غير سليم",
   "appProviderDesktopOnly": "الخادم المحلي المدار متاح فقط على سطح المكتب.",
@@ -93,12 +92,12 @@
   "behaviorCustomDisplayName": "اسم العرض المخصص",
   "behaviorCutsAutomaticMobile": "يقلل استخدام البيانات المتنقلة التلقائي عن طريق إيقاف التنزيلات في الخلفية والحد من التحديثات التلقائية في المقدمة إلى دفعة واحدة كل {inSeconds} ثانية.",
   "behaviorDataSaverActive": "نشط الآن على بيانات المحمول.",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "صارم",
+  "behaviorDataSaverAggressiveDescription": "وضع النطاق الترددي المنخفض: يبقى تدفق مساحة العمل المرئية فقط نشطًا، مع إيقاف التحديثات العالمية مؤقتًا وإطالة الفترات الزمنية للتحديث التلقائي.",
   "behaviorDataSaverCellularOnly": "ينطبق فقط عندما يكون الاتصال عبر شبكة المحمول/البيانات.",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "إيقاف",
+  "behaviorDataSaverOffHint": "التحديث الفوري والتلقائي مفعّل بالكامل.",
+  "behaviorDataSaverStandard": "قياسي",
   "behaviorDataSaverWaiting": "بانتظار نافذة مزامنة بيانات المحمول التالية.",
   "behaviorDisabled": "معطل",
   "behaviorLightweightTasksLike": "مهام خفيفة مثل",
@@ -142,8 +141,8 @@
   "chatBadgeDataSaverActive": "توفير بيانات الهاتف نشط.",
   "chatBadgeServerNeedsAttention": "اتصال الخادم يحتاج إلى انتباه.",
   "chatBadgeSyncing": "جاري مزامنة المحادثات...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "سيظهر الرد في كتلة واحدة عند اكتمال هذه الجولة.",
+  "chatBlockResponsePendingTitle": "جارٍ إنشاء الرد",
   "chatCachedConversationsYet": "لا توجد محادثات مخزنة مؤقتاً بعد",
   "chatChangedFilesAvailable": "لا تتوفر ملفات مغيرة لهذه الجلسة.",
   "chatChildrenChatProviderCurrentSessionChildren": "أبناء: {length}",
@@ -509,26 +508,26 @@
   "filesRefresh": "تحديث الملفات",
   "filesSearchHint": "البحث في الملفات بالاسم أو المسار",
   "filesTitle": "الملفات",
-  "forwardAction": "Forward",
-  "forwardAllFailed": "Could not forward to any session",
-  "forwardCancel": "Cancel",
-  "forwardDialogSubtitle": "Select one or more conversations",
-  "forwardDialogTitle": "Forward to…",
-  "forwardLoading": "Loading sessions…",
-  "forwardNoOpenProjects": "No open projects with sessions",
-  "forwardNoProviderModel": "Select a provider and model before forwarding",
-  "forwardNoSessions": "No recent sessions",
-  "forwardPartial": "Forwarded to {success} of {total}",
-  "forwardProvenanceLabel": "Forwarded from: {origin}",
-  "forwardRetry": "Retry",
-  "forwardSearchHint": "Search",
-  "forwardSelectedCount": "{count} selected",
-  "forwardSend": "Forward",
-  "forwardServerOffline": "Server offline",
+  "forwardAction": "إعادة توجيه",
+  "forwardAllFailed": "تعذّر إعادة التوجيه إلى أي جلسة",
+  "forwardCancel": "إلغاء",
+  "forwardDialogSubtitle": "حدّد محادثة واحدة أو أكثر",
+  "forwardDialogTitle": "إعادة توجيه إلى…",
+  "forwardLoading": "جارٍ تحميل الجلسات…",
+  "forwardNoOpenProjects": "لا توجد مشاريع مفتوحة فيها جلسات",
+  "forwardNoProviderModel": "حدّد مزودًا ونموذجًا قبل إعادة التوجيه",
+  "forwardNoSessions": "لا توجد جلسات حديثة",
+  "forwardPartial": "تمت إعادة التوجيه إلى {success} من {total}",
+  "forwardProvenanceLabel": "أُعيدت التوجيه من: {origin}",
+  "forwardRetry": "إعادة المحاولة",
+  "forwardSearchHint": "بحث",
+  "forwardSelectedCount": "تم تحديد {count}",
+  "forwardSend": "إرسال",
+  "forwardServerOffline": "الخادم غير متصل",
   "forwardShortcutHint": "Ctrl+Shift+F",
-  "forwardSuccess": "Forwarded to {count} sessions",
-  "forwardUndo": "Undo",
-  "forwardUndoFailed": "Could not undo the forward",
+  "forwardSuccess": "تمت إعادة التوجيه إلى {count} جلسات",
+  "forwardUndo": "تراجع",
+  "forwardUndoFailed": "تعذّر التراجع عن إعادة التوجيه",
   "logsAppLogs": "سجلات التطبيق",
   "logsClear": "مسح السجلات",
   "logsCloseSearch": "إغلاق البحث",
@@ -590,7 +589,7 @@
   "msgFilteredLogsCopied": "تم نسخ السجلات المصفاة إلى الحافظة",
   "msgInfoAgent": "الوكيل",
   "msgInfoCompaction": "ضغط",
-  "msgInfoCost": "التكلفة: \\${cost}",
+  "msgInfoCost": "التكلفة: ${cost}",
   "msgInfoMessageInfo": "معلومات الرسالة",
   "msgInfoModel": "النموذج: {modelId}",
   "msgInfoNoMetadata": "لا تتوفر بيانات تعريفية",
@@ -838,7 +837,7 @@
   "sessionDiffFilesCount": "ملفات الفرق: {count}",
   "sessionDiffLinesAddedRemoved": "+{added} أسطر تم إضافتها -{removed} أسطر تم إزالتها",
   "sessionDiffLinesCollapsed": "{count} أسطر مطوية — اضغط للتوسيع",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "جارٍ تحميل الملفات المعدّلة…",
   "sessionDiffReview": "مراجعة التغييرات",
   "sessionDiffSplit": "تقسيم",
   "sessionDiffSummary": "ملخص",
@@ -923,8 +922,8 @@
   "settingsAppearanceBrandColorDynamicBlocked": "قم بتعطيل ألوان الخلفية لاختيار لون العلامة التجارية.",
   "settingsAppearanceBrandColorNormal": "اختر لوناً أساسياً للوحة ألوان التطبيق.",
   "settingsAppearanceBrandColorPresetBlocked": "قم بالتحويل إلى CodeWalk Classic لاختيار لون العلامة التجارية.",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "حجم نص المحادثة",
+  "settingsAppearanceChatFontScaleDescription": "غيّر حجم نص الرسائل والمحرر في الدردشة بالإضافة إلى حجم نص النظام.",
   "settingsAppearanceCodeWalkClassic": "كود ووك الكلاسيكي (CodeWalk Classic)",
   "settingsAppearanceComposerTips": "نصائح الملحِّن",
   "settingsAppearanceComposerTipsDescription": "إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.",
@@ -943,8 +942,8 @@
   "settingsAppearanceDensityNormal": "عادي",
   "settingsAppearanceDensitySpacious": "متسع",
   "settingsAppearanceDescription": "اختر المظاهر والألوان وحجم النص وعرض الدردشة",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "حجم النص",
+  "settingsAppearanceFontSizeDescription": "اضبط حجم نص النظام ونص المحادثة ونص الطرفية.",
   "settingsAppearanceLight": "فاتح",
   "settingsAppearanceMathRendering": "عرض الرياضيات",
   "settingsAppearanceMathRenderingDescription": "عرض تعبيرات LaTeX الرياضية كمعادلات منسقة في رسائل الدردشة.",
@@ -957,12 +956,12 @@
   "settingsAppearanceSectionDescription": "ضبط الكثافة البصرية وأسطح الرسائل لسير عملك.",
   "settingsAppearanceSectionTitle": "المظهر",
   "settingsAppearanceSystem": "النظام",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "حجم نص النظام",
+  "settingsAppearanceSystemFontScaleDescription": "غيّر حجم جميع النصوص في واجهة التطبيق، بما في ذلك القوائم والحوارات والأشرطة الجانبية.",
   "settingsAppearanceTaskList": "قائمة المهام",
   "settingsAppearanceTaskListDescription": "إظهار أو إخفاء عنصر واجهة مستخدم قائمة المهام للجلسة.",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "حجم نص الطرفية",
+  "settingsAppearanceTerminalFontSizeDescription": "غيّر حجم خط الطرفية المدمجة. يُطبَّق فورًا على الجلسات قيد التشغيل.",
   "settingsAppearanceTheme": "السمة",
   "settingsAppearanceThemeDescription": "اختر الوضع الفاتح، أو الداكن، أو وضع النظام، ثم احتفظ بلوحة ألوان CodeWalk الكلاسيكية أو انتقل إلى إعداد مسبق لـ OpenCode.",
   "settingsAppearanceVisualStyle": "النمط المرئي",
@@ -987,14 +986,14 @@
   "settingsBehaviorAutoupdateCaveat": "استخدم ''حول'' لفحص إصدارات CodeWalk. يعكس هذا الإعداد فقط تكوين `autoupdate` الرسمي لـ OpenCode.",
   "settingsBehaviorAutoupdateHelp": "يتحكم في تحديثات وقت تشغيل OpenCode في المنبع، وليس في فحوصات تحديث تطبيق CodeWalk.",
   "settingsBehaviorCellularDataSaver": "موفر بيانات المحمول",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
-  "settingsBehaviorComposerSpellCheck": "Composer spell check",
-  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorChatRenderMode": "وضع عرض الدردشة",
+  "settingsBehaviorChatRenderModeBlock": "كتلة",
+  "settingsBehaviorChatRenderModeBlockDescription": "أخفِ النص المباشر للمساعد والاستدلال وبطاقات الأدوات حتى يمكن عرض الجولة الحالية ككتلة واحدة.",
+  "settingsBehaviorChatRenderModeDescription": "اختر ما إذا كانت ردود المساعد تظهر أثناء البث أو تُعرض بعد اكتمال الجولة الحالية.",
+  "settingsBehaviorChatRenderModeLive": "مباشر",
+  "settingsBehaviorChatRenderModeLiveDescription": "اعرض نص المساعد واستدلالاته ونشاط الأدوات أثناء بث الأحداث من OpenCode.",
+  "settingsBehaviorComposerSpellCheck": "التدقيق الإملائي في المحرر",
+  "settingsBehaviorComposerSpellCheckDescription": "استخدم التدقيق الإملائي والاقتراحات والتصحيح التلقائي من المنصة في محرر الدردشة.",
   "settingsBehaviorConfigDeferred": "سيقوم CodeWalk بتطبيق إعداد OpenCode هذا بعد انتهاء الاستجابة الحالية.",
   "settingsBehaviorConfigUpdateFailed": "تعذر تحديث {field} لـ OpenCode.",
   "settingsBehaviorConversationUsername": "اسم مستخدم المحادثة",
@@ -1260,11 +1259,11 @@
   "speechMoonshineStaysDownloadable": "تظل نماذج Moonshine قابلة للتنزيل وخارج حزمة التطبيق. اختر نموذجاً واحداً لجهاز سطح المكتب هذا وقم بإزالته لاحقاً إذا كنت تريد استعادة المساحة.",
   "speechNative": "أصلي (Native)",
   "speechNativeSTTDisabled": "ميزة تحويل الكلام إلى نص الأصلية (Native STT) معطلة على Linux في هذا التطبيق. محرك Parakeet هو المحرك الافتراضي للتثبيتات الجديدة.",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "على نظام Windows، يستخدم CodeWalk التعرف على الكلام محليًا على الجهاز عبر واجهة الميكروفون WASAPI. التعرف الأصلي على الكلام في Windows معطّل لضمان الاستقرار.",
   "speechNativeStartsFaster": "الخيار الأصلي يبدأ بشكل أسرع. يعمل Sherpa بالكامل على الجهاز بإعداد أثقل وتحكم أعمق في النموذج.",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechOpenMicrophoneSettings": "فتح إعدادات الميكروفون",
+  "speechOpenSpeechPrivacy": "فتح إعدادات خصوصية الكلام",
+  "speechOpenSpeechSettings": "فتح إعدادات الكلام",
   "speechParakeet": "Parakeet",
   "speechParakeetModelsDesktop": "نماذج Parakeet (سطح المكتب)",
   "speechParakeetStaysDownloadable": "يظل Parakeet قابلاً للتنزيل وخارج حزمة التطبيق. يعرض حالياً نموذجاً واحداً متعدد اللغات محسناً لـ 25 لغة أوروبية.",
@@ -1280,7 +1279,7 @@
   "speechSherpaModelsLinux": "نماذج Sherpa (Linux)",
   "speechSpeechText": "تحويل الكلام إلى نص",
   "speechUnavailableOnPlatform": "كلام {service} غير متاح على هذه المنصة.",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "يستخدم الإدخال الصوتي في Windows التقاط WASAPI من CodeWalk مع نماذج على الجهاز. أبقِ وصول الميكروفون لتطبيقات سطح المكتب مفعّلًا؛ تفتح الأزرار أدناه إعدادات Windows لاستكشاف الأخطاء وإصلاحها.",
   "statusConnected": "متصل",
   "statusDelayed": "متأخر",
   "statusFailed": "فشل",
@@ -1420,5 +1419,788 @@
   "settingsNavigationGroupSetup": "الإعداد",
   "settingsNavigationGroupSupport": "المساعدة والتشخيص",
   "settingsNavigationNoResults": "لا توجد إعدادات",
-  "settingsNavigationSearchHint": "ابحث في الإعدادات"
+  "settingsNavigationSearchHint": "ابحث في الإعدادات",
+  "filesAlreadyExists": "يوجد ملف أو مجلد بهذا الاسم بالفعل.",
+  "filesCopyPath": "نسخ المسار",
+  "filesCreateFileTitle": "إنشاء ملف",
+  "filesCreateFolderTitle": "إنشاء مجلد",
+  "filesDelete": "حذف",
+  "filesDeleteConfirm": "حذف {name}؟ لا يمكن التراجع عن هذا. سيتم حذف المجلدات ومحتوياتها.",
+  "filesDeleteTitle": "حذف {name}",
+  "filesDeleted": "تم الحذف.",
+  "filesFileCreated": "تم إنشاء الملف.",
+  "filesFolderCreated": "تم إنشاء المجلد.",
+  "filesInvalidName": "أدخل اسمًا صالحًا دون فواصل مسار.",
+  "filesNameHint": "الاسم",
+  "filesNew": "جديد",
+  "filesNewFile": "ملف جديد",
+  "filesNewFolder": "مجلد جديد",
+  "filesOperationFailed": "فشلت عملية الملفات.",
+  "filesOperationUnavailable": "عمليات الملفات غير متاحة لهذا الخادم.",
+  "filesOutsideRoot": "المسار خارج جذر المشروع.",
+  "filesPathCopied": "تم نسخ المسار.",
+  "filesPathMissing": "المسار غير موجود.",
+  "filesPermissionDenied": "تم رفض الإذن.",
+  "filesRename": "إعادة تسمية",
+  "filesRenameTitle": "إعادة تسمية {name}",
+  "filesRenamed": "تمت إعادة التسمية.",
+  "filesRootDeleteBlocked": "لا يمكن حذف جذر المشروع.",
+  "sessionTabChangeIconAction": "تغيير الأيقونة",
+  "sessionTabClosedMessage": "تم إغلاق التبويب \"{title}\"",
+  "sessionTabIconApplied": "تم تحديث أيقونة التبويب.",
+  "sessionTabIconPickerTitle": "اختر أيقونة التبويب",
+  "sessionTabIconPresetBug": "خلل",
+  "sessionTabIconPresetCloud": "سحابة",
+  "sessionTabIconPresetCode": "الكود",
+  "sessionTabIconPresetData": "البيانات",
+  "sessionTabIconPresetDesign": "التصميم",
+  "sessionTabIconPresetIdea": "فكرة",
+  "sessionTabIconPresetLaunch": "إطلاق",
+  "sessionTabIconPresetResearch": "بحث",
+  "sessionTabIconPresetSecurity": "الأمان",
+  "sessionTabIconPresetTasks": "المهام",
+  "sessionTabIconPresetTerminal": "الطرفية",
+  "sessionTabIconPresetTools": "الأدوات",
+  "sessionTabIconSaveFailed": "تعذر حفظ أيقونة التبويب.",
+  "sessionTabIconUseProjectIcon": "استخدام أيقونة المشروع",
+  "sessionTabRenameAction": "إعادة تسمية الجلسة",
+  "sessionTabRestoreFailed": "تعذر استعادة التبويب.",
+  "sessionTabUndo": "تراجع",
+  "sessionTabsGestureHintAcknowledge": "فهمت",
+  "sessionTabsGestureHintBody": "انقر نقرًا مزدوجًا أو اضغط بلمسة مزدوجة على تبويب لإغلاقه. انقر بزر الماوس الأيمن أو اضغط مطولاً لفتح إجراءات الجلسة. يمكنك تعطيل التبويبات من مفاتيح تبديل العرض.",
+  "sessionTabsGestureHintDisableTabs": "تعطيل التبويبات",
+  "sessionTabsGestureHintTitle": "تبويبات الجلسات تحوي عناصر تحكم جديدة",
+  "workspaceNoActiveContext": "لا يوجد سياق نشط",
+  "settingsAppearanceContrastLow": "منخفض",
+  "settingsAppearanceContrastStandard": "قياسي",
+  "settingsAppearanceContrastMedium": "متوسط",
+  "settingsAppearanceContrastMediumHigh": "متوسط مرتفع",
+  "settingsNotificationsSystemSoundsWebUnavailable": "غير متاح على الويب.",
+  "settingsNotificationsSystemSoundsAndroid": "أصوات إشعارات Android من النظام.",
+  "settingsNotificationsSystemSoundsFreedesktop": "أصوات Freedesktop من /usr/share/sounds/freedesktop/stereo.",
+  "settingsNotificationsSystemSoundsPlatform": "مدعوم حيثما يكشف نظام التشغيل عن أصوات النظام.",
+  "serversQuickGuideTitle": "إعداد سريع",
+  "serversQuickGuideIntro": "CodeWalk هو التطبيق، وOpenCode هو المحرك الذي يجب أن يكون قيد التشغيل قبل أن يعمل هذا الاتصال.",
+  "serversQuickGuideStepInstallCli": "1. ثبّت OpenCode CLI.",
+  "serversQuickGuideRunPowerShell": "2. شغّل في PowerShell:",
+  "serversQuickGuideRunTerminal": "2. شغّل في الطرفية:",
+  "serversQuickGuideProtectPassword": "احمِ الوصول بكلمة مرور",
+  "serversQuickGuideServerPassword": "كلمة مرور الخادم",
+  "serversQuickGuideInstallOptions": "خيارات التثبيت الرسمية الأخرى: سكربت التثبيت، npm، bun، pnpm، Homebrew، أو ملف ثنائي من GitHub Releases.",
+  "serversQuickGuideVerifyHint": "بعد بدء الخادم، تأكد من استجابة /global/health أو /doc قبل لصق العنوان في CodeWalk.",
+  "shortcutsPressKeyCombination": "اضغط مجموعة المفاتيح الآن",
+  "settingsProvenanceOpenCodeBacked": "مدعوم من OpenCode",
+  "settingsProvenanceCodeWalkLocal": "محلي في CodeWalk",
+  "settingsProvenanceCodeWalkException": "استثناء CodeWalk",
+  "shortcutsErrorInvalid": "اختصار غير صالح",
+  "shortcutsErrorUnsupportedKey": "مفتاح اختصار غير مدعوم",
+  "shortcutsErrorConflict": "يتعارض مع \"{conflict}\"",
+  "settingsSessionAttentionStopSaveFailed": "تم إيقاف تنبيه الجلسة ولكن تعذّر حفظ الإعداد.",
+  "settingsSessionAttentionEnableFailed": "تعذّر تمكين تنبيه الجلسة.",
+  "settingsSessionAttentionSaveFailedStopped": "تعذّر حفظ إعداد تنبيه الجلسة وتم إيقافه.",
+  "settingsSessionAttentionStillRunning": "تنبيه الجلسة ما زال قيد التشغيل. حاول إيقافه مرة أخرى.",
+  "settingsSessionAttentionStopFailed": "تعذّر إيقاف تنبيه الجلسة. حاول مرة أخرى.",
+  "settingsSessionAttentionCapabilityUnavailable": "إمكانية استضافة تنبيه الجلسة غير متاحة.",
+  "settingsServerFallbackProviderName": "مُهيأ على الخادم",
+  "composerStopResponse": "إيقاف الرد",
+  "composerSendMessageWhileResponding": "إرسال رسالة أثناء تشغيل الرد",
+  "composerSendMessage": "إرسال الرسالة",
+  "chatTourComposerDescription": "اكتب طلبك هنا.",
+  "chatTourSendDescription": "أرسل رسالتك من هنا.",
+  "composerAttachmentFallbackName": "مرفق",
+  "composerContextFallbackName": "سياق",
+  "searchableDropdownSearchHint": "بحث",
+  "searchableDropdownEmptyText": "لا توجد نتائج مطابقة",
+  "speechApiKeyStorageUnavailable": "التخزين الآمن لمفتاح TTS API غير متاح.",
+  "speechApiKeyRemoved": "تمت إزالة مفتاح API.",
+  "speechApiKeySaved": "تم حفظ مفتاح API بأمان على هذا الجهاز.",
+  "speechReadAloudTestText": "هذا اختبار تحويل النص إلى كلام من CodeWalk.",
+  "speechNativeDisabledWindows": "معطّل على Windows من أجل الاستقرار. استخدم Parakeet أو محركًا آخر محليًا عبر التقاط WASAPI في CodeWalk.",
+  "speechNativeUnavailableLinux": "غير متاح على Linux. استخدم Parakeet لإدخال الصوت.",
+  "speechNotAvailableOnPlatform": "غير متاح على هذه المنصة.",
+  "speechSherpaUnavailableAndroid": "غير متاح على إصدارات Android المحسّنة لحجم APK صغير.",
+  "speechMoonshineDesktopOnlyHint": "متاح على سطح المكتب فقط. يبقى Android بالإصدار الأصلي فقط.",
+  "speechParakeetDesktopOnlyHint": "متاح على سطح المكتب فقط. يستخدم تعرّفًا متعدد اللغات دون اتصال.",
+  "speechSenseVoiceDesktopOnlyHint": "متاح على سطح المكتب فقط. أقوى ما يكون للصينية والكانتونية واليابانية والكورية والإنجليزية.",
+  "speechNativeSubtitle": "بدء تشغيل أبسط وأسرع.",
+  "speechSherpaSubtitle": "أثقل وتجريبي وعرضة للأخطاء، وغالبًا أكثر دقة مع النماذج التي يتم تنزيلها.",
+  "speechMoonshineSubtitle": "مسار تجريبي لسطح المكتب فقط يستخدم تعرّف sherpa_onnx دون اتصال ونماذج قابلة للتنزيل.",
+  "speechParakeetSubtitle": "مسار NeMo transducer دون اتصال لسطح المكتب فقط مع نموذج واحد متعدد اللغات قابل للتنزيل.",
+  "speechSenseVoiceSubtitle": "مسار دون اتصال لسطح المكتب فقط مضبوط للصينية والكانتونية واليابانية والكورية والإنجليزية.",
+  "speechMoonshineModel": "نموذج Moonshine",
+  "speechSherpaLanguage": "لغة Sherpa",
+  "speechSearchSherpaLanguage": "ابحث عن لغة Sherpa",
+  "speechNoLanguagePacksFound": "لم يتم العثور على حزم لغات",
+  "speechTextToSpeechProvider": "مزوّد تحويل النص إلى كلام",
+  "speechProviderSystemNative": "النظام / الأصلي",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (تجريبي)",
+  "speechProviderOpenAiCompatible": "متوافق مع OpenAI",
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech تجريبي",
+  "speechEdgeExperimentalDescription": "يستخدم خدمة القراءة بصوت عالٍ غير الرسمية من Edge مباشرة من هذا الجهاز. يُرسل نص الرسالة إلى Microsoft عند استخدام القراءة بصوت عالٍ، وقد تتعطل الخدمة إذا غيّرت Microsoft البروتوكول الخاص.",
+  "speechEdgeVoice": "صوت Edge",
+  "speechEdgeVoiceListUnavailable": "يتم استخدام صوت Edge الافتراضي. تعذّر تحميل قائمة الأصوات الآن.",
+  "speechEdgeVoicesLoaded": "تم التحميل من أصوات Microsoft Edge Speech.",
+  "speechCloudTtsPrivacy": "خصوصية TTS السحابي",
+  "speechCloudTtsPrivacyDescription": "يرسل TTS السحابي نص رسالة المساعد المحددة إلى المزوّد المُهيأ. تُخزَّن مفاتيح API في تخزين آمن على هذا الجهاز.",
+  "speechBaseUrl": "العنوان الأساسي",
+  "speechApiKey": "مفتاح API",
+  "speechApiKeySavedHelper": "يوجد مفتاح محفوظ. أدخل قيمة جديدة لاستبداله، أو احفظ قيمة فارغة لإزالته.",
+  "speechNoApiKeySaved": "لا يوجد مفتاح API محفوظ.",
+  "speechSaveApiKey": "حفظ مفتاح API",
+  "speechModel": "النموذج",
+  "speechPitchNotSupported": "نبرة الصوت غير مدعومة في TTS المتوافق مع OpenAI وتكون مخفية لهذا المزوّد.",
+  "speechTestVoice": "اختبار الصوت",
+  "dialogMoonshineVoiceSetupDescription": "يعمل Moonshine محليًا عبر sherpa_onnx. اختر نموذجًا مرة واحدة ونزّله لهذا الجهاز المكتبي فقط.",
+  "dialogParakeetVoiceSetupDescription": "يعمل Parakeet محليًا عبر تعرّف sherpa_onnx دون اتصال. نزّله مرة واحدة لهذا الجهاز المكتبي لتفعيل التعرف على الكلام متعدد اللغات.",
+  "dialogSenseVoiceSetupDescription": "يعمل SenseVoice محليًا عبر تعرّف sherpa_onnx دون اتصال. وهو أقوى ما يكون للصينية والكانتونية واليابانية والكورية والإنجليزية.",
+  "dialogSherpaVoiceSetupDescription": "يتطلب إدخال الصوت عبر Sherpa نموذج كلام محليًا على الجهاز. اختر لغتك ونزّله مرة واحدة (~147 MB).",
+  "speechSilenceSeconds": "{value} ثانية",
+  "speechModelInstalled": "تم تثبيت النموذج ({modelId})",
+  "speechModelMissing": "النموذج مفقود ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} MB",
+  "speechSystemDefaultLanguage": "الافتراضي في النظام ({language})",
+  "speechModelListLoadFailed": "فشل تحميل قائمة نماذج {service}: {error}",
+  "speechDownloadFailed": "فشل التنزيل: {error}",
+  "speechFailedToRemoveModel": "فشل إزالة النموذج: {error}",
+  "speechBaseUrlExample": "مثال: {url}",
+  "speechModelDefaultHelper": "الافتراضي: {model}",
+  "notificationPermissionOrQuestionNeedsInput": "إذن أداة أو سؤال يحتاج إلى إدخال منك.",
+  "notificationPermissionNeedsInput": "إذن أداة يحتاج إلى إدخال منك.",
+  "notificationQuestionNeedsInput": "سؤال أداة يحتاج إلى إدخال منك.",
+  "notificationSessionError": "أبلغت إحدى الجلسات عن خطأ.",
+  "notificationChannelErrors": "أخطاء CodeWalk",
+  "notificationChannelErrorsDescription": "تنبيهات أخطاء CodeWalk",
+  "notificationChannelPermissions": "أذونات CodeWalk",
+  "notificationChannelPermissionsDescription": "تنبيهات CodeWalk التي تتطلب إجراءً",
+  "notificationChannelAgent": "وكيل CodeWalk",
+  "notificationChannelAgentDescription": "تنبيهات اكتمال وكيل CodeWalk",
+  "notificationActionOpen": "فتح",
+  "foregroundMonitorNotificationBody": "التنبيهات الخلفية الموثوقة نشطة",
+  "foregroundMonitorNotificationTitle": "المراقبة الخلفية نشطة",
+  "foregroundMonitorNotificationOneSession": "مراقبة جلسة واحدة",
+  "foregroundMonitorNotificationSessionCount": "مراقبة {count} جلسات",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{جلسة واحدة تحتاج إلى انتباه} other{{count} جلسات تحتاج إلى انتباه}}",
+  "sessionAttentionOverlayPermissionRequired": "مطلوب إذن العرض فوق التطبيقات الأخرى.",
+  "sessionAttentionIosInAppOnly": "تنبيه الجلسة متاح داخل CodeWalk فقط.",
+  "sessionAttentionOverlayPermissionGrantPrompt": "امنح إذن العرض فوق التطبيقات الأخرى، ثم حاول مرة أخرى.",
+  "sessionAttentionAndroidStartFailed": "تعذّر بدء خدمة تنبيه الجلسة على Android.",
+  "chatMessageTruncatedChars": "[تم اقتطاع {count} حرفًا] {reason}",
+  "chatMessageJustNow": "الآن",
+  "chatMessageMinutesAgo": "قبل {count} د",
+  "chatMessageHoursAgo": "قبل {count} س",
+  "chatMessageDaysAgo": "قبل {count} يوم",
+  "chatMessageDateTime": "{month}/{day} {hour}:{minute}",
+  "chatMessageYourMessage": "رسالتك",
+  "chatMessageAssistantMessage": "رسالة المساعد",
+  "chatMessageStepStarted": "بدأت الخطوة #{step}",
+  "chatMessageStepStartedWithSnapshot": "بدأت الخطوة #{step}: {snapshot}",
+  "chatMessageStepFinished": "انتهت الخطوة #{step}: {reason} • رموز {tokens} • ${cost}",
+  "chatMessagePatchCount": "{count, plural, =1{تصحيح واحد} other{{count} تصحيحات}}",
+  "chatMessageToolRun": "تشغيل الأداة",
+  "chatMessageToolExecution": "تنفيذ الأداة",
+  "chatMessageToolChainMore": "{count, plural, =1{+1 إضافي} other{+{count} إضافي}}",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+1 نوع} other{+{count} أنواع}}",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 بحاجة إلى انتباه} other{{count} بحاجة إلى انتباه}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 مكتمل} other{{count} مكتملة}}",
+  "chatMessageToolCallsTitle": "استدعاءات الأدوات",
+  "chatMessageDiffPreviewTruncated": "تم اقتطاع معاينة الفرق من أجل استقرار التطبيق.",
+  "chatMessageLargeMessageTruncated": "تم اقتطاع معاينة الرسالة الكبيرة من أجل استقرار التطبيق.",
+  "chatMessageInvalidLinkFormat": "تنسيق رابط غير صالح",
+  "chatMessageUnableToOpenLink": "تعذّر فتح الرابط",
+  "sessionTodoInProgressCompact": "{current}/{total} قيد التنفيذ",
+  "sessionTodoTaskProgress": "المهمة {index}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} منجز",
+  "sessionTodoCompletedCount": "المهام {count}/{total} مكتملة",
+  "sessionTodoTasksCount": "المهام ({count})",
+  "questionStepOfReview": "الخطوة {current} من {total} - مراجعة",
+  "questionStepOfQuestion": "الخطوة {current} من {total} - سؤال",
+  "questionCustomAnswer": "إجابة مخصصة",
+  "questionSubmitAnswers": "إرسال الإجابات",
+  "questionReviewAnswers": "مراجعة الإجابات",
+  "permissionRequestTitle": "طلب إذن: {permission}",
+  "sessionTitleCannotBeEmpty": "لا يمكن أن يكون العنوان فارغًا",
+  "filesFailedToLoad": "فشل تحميل الملفات",
+  "filesFailedToSearch": "فشل البحث في الملفات",
+  "filesNoOpenFilesHint": "لا توجد ملفات مفتوحة بعد. اكتب للبحث.",
+  "filesNoContentMatches": "لم يتم العثور على تطابقات في المحتوى",
+  "filesOpenFilesCount": "{count, plural, =1{ملف واحد مفتوح} other{{count} ملفات مفتوحة}}",
+  "filesLinesSelectedCount": "{count, plural, =1{سطر واحد محدد} other{{count} أسطر محددة}}",
+  "filesDraftTooLargeToSave": "المسودة كبيرة جداً بحيث لا يمكن حفظها من المحرر.",
+  "filesSaveChangesBeforeClose": "احفظ التغييرات قبل إغلاق هذا الملف.",
+  "filesSaveChangesBeforePathChange": "احفظ التغييرات قبل تغيير هذا المسار.",
+  "filesWaitForSaveBeforePathChange": "انتظر انتهاء حفظ الملف قبل تغيير هذا المسار.",
+  "filesWaitForFileOperation": "انتظر انتهاء عملية الملف.",
+  "filesLargeFileReadOnly": "تُفتح الملفات الكبيرة للقراءة فقط للحفاظ على استجابة التحرير.",
+  "filesCheckingWriteSupport": "جاري التحقق من دعم الكتابة للملفات...",
+  "filesActiveProjectRequired": "تتطلب عمليات الملفات مجلد مشروع نشطاً.",
+  "filesReloadSkippedUnsavedChanges": "توجد تغييرات غير محفوظة؛ تم تخطي إعادة التحميل.",
+  "filesFailedToLoadContent": "فشل تحميل محتوى الملف",
+  "filesFileSaved": "تم حفظ الملف.",
+  "filesParentNotDirectory": "المجلد الأصلي ليس دليلاً.",
+  "filesMalformedResponse": "أعادت عملية الملفات استجابة غير صالحة.",
+  "filesShellCommandDidNotComplete": "لم يكتمل أمر الشل الخاص بعملية الملفات.",
+  "filesShellCommandNoResult": "لم يُرجع أمر الشل الخاص بعملية الملفات أي نتيجة.",
+  "filesShellCommandTruncated": "تم اقتطاع أمر الشل الخاص بعملية الملفات بواسطة الخادم.",
+  "filesShellCommandSyntaxError": "فشل أمر الشل الخاص بعملية الملفات بسبب خطأ في بناء الجملة.",
+  "filesShellUtilityNotFound": "لم يتم العثور على أداة شل مطلوبة.",
+  "filesShellCommandFailed": "فشل أمر الشل الخاص بعملية الملفات قبل إرجاع نتيجة.",
+  "attachmentSaveTitle": "حفظ المرفق",
+  "attachmentBrowserSandboxLocalFile": "يمنع صندوق حماية المتصفح فتح المرفقات المحلية file:// مباشرة.",
+  "attachmentLocalPathBrowserBlocked": "يشير هذا المرفق إلى مسار محلي لا يمكن فتحه من المتصفح.",
+  "terminalConnectedTo": "متصل بـ {serverName} في {directory}",
+  "terminalTransportUnavailable": "ناقل الطرفية غير متاح.",
+  "chatSlashCommandNew": "إنشاء جلسة دردشة جديدة",
+  "chatSlashCommandModels": "فتح محدد النماذج",
+  "chatSlashCommandSessions": "فتح قائمة المحادثات",
+  "chatSlashCommandAgent": "فتح محدد الوكلاء",
+  "chatSlashCommandOpen": "إجراء سريع لفتح ملف",
+  "chatSlashCommandHelp": "إظهار تعليمات الأمر",
+  "chatSlashCommandCompact": "ضغط سياق الجلسة الحالية",
+  "chatSlashCommandThinking": "تبديل فقاعات التفكير",
+  "chatSlashCommandUndo": "التراجع عن آخر دور ظاهر للمستخدم",
+  "chatSlashCommandRedo": "إعادة إجراء آخر دور تم التراجع عنه",
+  "chatSessionSubConversationCount": "{count, plural, =1{محادثة فرعية واحدة} other{{count} محادثات فرعية}}",
+  "chatMessageWeeksAgo": "قبل {count} أ",
+  "chatMessageShortDate": "{month}/{day}",
+  "chatProviderErrorLoadSessionStatus": "فشل تحميل حالة الجلسة",
+  "chatProviderErrorLoadSessionDetails": "تعذر تحميل بعض تفاصيل الجلسة",
+  "chatProviderErrorLoadSessionList": "فشل تحميل قائمة الجلسات: {error}",
+  "chatProviderErrorCreateSession": "فشل إنشاء الجلسة",
+  "chatProviderErrorSelectProviderModelBeforeSend": "حدد مزوداً متصلاً أو نموذج OpenCode مجاني قبل الإرسال",
+  "chatProviderErrorStartMessageSend": "فشل بدء إرسال الرسالة",
+  "chatProviderErrorStopUnavailable": "الإيقاف غير متاح للجلسة الحالية",
+  "chatProviderErrorWaitForResponseFinish": "انتظر انتهاء الاستجابة الحالية قبل الضغط",
+  "chatProviderErrorCompactUnavailable": "ضغط السياق غير متاح للجلسة الحالية",
+  "chatProviderErrorSelectModelBeforeCompact": "حدد نموذجاً قبل ضغط السياق",
+  "chatProviderErrorCompactSessionContext": "فشل ضغط سياق الجلسة",
+  "chatProviderErrorNetwork": "فشل الاتصال بالشبكة. يرجى التحقق من إعدادات الشبكة",
+  "chatProviderErrorServer": "خطأ في الخادم. يرجى المحاولة لاحقاً",
+  "chatProviderErrorNotFound": "المورد غير موجود",
+  "chatProviderErrorInvalidInput": "معلمات إدخال غير صالحة",
+  "chatProviderErrorUnknown": "خطأ غير معروف. يرجى المحاولة لاحقاً",
+  "chatProviderErrorSessionFallback": "خطأ في الجلسة",
+  "projectProviderErrorNoProjectContext": "لا يتوفر سياق مشروع من الخادم",
+  "projectProviderErrorInitializeFailed": "فشل تهيئة سياق المشروع: {error}",
+  "projectProviderErrorSwitchProjectNotFound": "فشل تبديل المشروع: المشروع غير موجود",
+  "projectProviderErrorSwitchDirectoryEmpty": "فشل تبديل المشروع: الدليل فارغ",
+  "projectProviderErrorAtLeastOneContext": "يجب أن يبقى سياق واحد على الأقل مفتوحاً",
+  "projectProviderErrorReopenProjectNotFound": "فشل إعادة فتح المشروع: المشروع غير موجود",
+  "projectProviderErrorOnlyClosedArchivable": "يمكن أرشفة المشاريع المغلقة فقط",
+  "projectProviderErrorArchiveProjectNotFound": "فشل أرشفة المشروع: المشروع غير موجود",
+  "projectProviderErrorArchiveProjectPathInvalid": "فشل أرشفة المشروع: مسار المشروع غير صالح",
+  "projectProviderErrorLoadWorkspaces": "فشل تحميل مساحات العمل: {error}",
+  "projectProviderErrorWorkspaceNameEmpty": "لا يمكن أن يكون اسم مساحة العمل فارغاً",
+  "projectProviderErrorCreateWorkspace": "فشل إنشاء مساحة العمل: {error}",
+  "projectProviderErrorResetWorkspace": "فشل إعادة تعيين مساحة العمل: {error}",
+  "projectProviderErrorDeleteWorkspace": "فشل حذف مساحة العمل: {error}",
+  "projectProviderErrorDirectoryEmpty": "لا يمكن أن يكون الدليل فارغاً",
+  "projectProviderErrorListDirectories": "فشل سرد الأدلة: {error}",
+  "projectProviderErrorValidateDirectory": "فشل التحقق من الدليل: {error}",
+  "projectProviderErrorPathEmpty": "لا يمكن أن يكون المسار فارغاً",
+  "projectProviderErrorListFiles": "فشل سرد الملفات: {error}",
+  "projectProviderErrorSearchFiles": "فشل البحث في الملفات: {error}",
+  "projectProviderErrorContentSearchUnavailable": "البحث في المحتوى غير متاح: {error}",
+  "projectProviderErrorSearchSymbols": "فشل البحث عن الرموز: {error}",
+  "projectProviderErrorReadFile": "فشل قراءة الملف: {error}",
+  "projectProviderErrorLoadProjectList": "فشل تحميل قائمة المشاريع: {error}",
+  "workspaceProjectRemovedFromHistory": "تمت إزالة المشروع من السجل",
+  "workspaceProjectContextOpened": "تم فتح سياق المشروع: {directory}",
+  "workspaceFailedToOpenProjectContext": "فشل فتح سياق المشروع: {directory}",
+  "chatAbortNotice": "ما الذي تريد فعله بشكل مختلف؟",
+  "sessionTitleToday": "اليوم {time} ({date})",
+  "sessionTitleYesterday": "أمس {time} ({date})",
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "sessionTitleDateAndTime": "{date} {time}",
+  "sessionWeekdayMon": "الاثنين",
+  "sessionWeekdayTue": "الثلاثاء",
+  "sessionWeekdayWed": "الأربعاء",
+  "sessionWeekdayThu": "الخميس",
+  "sessionWeekdayFri": "الجمعة",
+  "sessionWeekdaySat": "السبت",
+  "sessionWeekdaySun": "الأحد",
+  "forwardTimeNow": "الآن",
+  "forwardTimeMinutes": "{count} د",
+  "forwardTimeHours": "{count} س",
+  "forwardTimeDays": "{count} يوم",
+  "forwardTimeWeeks": "{count} أ",
+  "settingsBehaviorConfigFieldDefaultModel": "النموذج الافتراضي",
+  "settingsBehaviorConfigFieldDefaultAgent": "الوكيل الافتراضي",
+  "settingsBehaviorConfigFieldSmallModel": "النموذج الصغير",
+  "settingsBehaviorConfigFieldAutoUpdateMode": "وضع التحديث التلقائي",
+  "settingsBehaviorConfigFieldSnapshotSetting": "إعداد اللقطة",
+  "settingsBehaviorConfigFieldConversationUsername": "اسم مستخدم المحادثة",
+  "settingsBehaviorConfigFieldSharingDefault": "الافتراضي للمشاركة",
+  "speechMicNoInputDevice": "لا يتوفر جهاز إدخال ميكروفون.",
+  "speechMicDeviceBusy": "الميكروفون الافتراضي قيد الاستخدام حالياً بواسطة تطبيق آخر.",
+  "speechMicUnsupportedFormat": "تنسيق الميكروفون الافتراضي غير مدعوم.",
+  "speechMicSpeechPrivacy": "قد تكون خدمات الكلام في Windows معطلة (خصوصية الكلام، أو التعرف على الكلام عبر الإنترنت، أو حزم اللغات).",
+  "speechMicBackendUnavailable": "الواجهة الخلفية لميكروفون Windows غير متاحة في هذا الإصدار.",
+  "speechEngineFallbackNotice": "محرك تحويل الكلام إلى نص المحدد غير متاح ({reason}). سيتم استخدام {fallback} بدلاً منه.",
+  "oauthFlowSecureStorageUnavailable": "التخزين الآمن لبيانات الاعتماد غير متاح لـ OAuth.",
+  "oauthFlowUnexpectedError": "فشل تدفق OAuth بشكل غير متوقع. يرجى المحاولة مرة أخرى.",
+  "oauthFlowNoEndpointsDiscovered": "لم يتم اكتشاف نقاط نهاية OAuth. فعّل Managed OAuth في لوحة تحكم Cloudflare → Access → Applications → [هذا التطبيق].",
+  "oauthFlowTokenResponseMissingAccessToken": "لم تتضمن استجابة رمز OAuth رمز وصول.",
+  "oauthFlowProfileChanged": "تغير ملف تعريف الخادم قبل اكتمال OAuth.",
+  "oauthFlowMetadataMissingEndpoints": "تفتقر بيانات OAuth الوصفية إلى نقاط نهاية التفويض/الرموز.",
+  "oauthFlowCallbackNotCompleted": "لم يكتمل رد الاتصال الخاص بالتفويض",
+  "oauthFlowProviderDeclined": "رفض خادم التفويض طلب OAuth. يرجى المحاولة مرة أخرى.",
+  "oauthFlowCallbackValidationFailed": "فشل التحقق من رد اتصال OAuth. يرجى المحاولة مرة أخرى.",
+  "oauthFlowCallbackServerStartFailed": "فشل بدء خادم رد الاتصال المحلي لـ OAuth.",
+  "oauthFlowSignInCanceled": "تم إلغاء تسجيل الدخول عبر OAuth.",
+  "oauthFlowBrowserOpenFailed": "تعذر فتح متصفح النظام لتسجيل الدخول عبر OAuth.",
+  "oauthFlowCallbackTimeout": "لم يصل أي رد تفويض إلى التطبيق خلال 5 دقائق. كان من المتوقع أن يعيد المتصفح التوجيه إلى عنوان رد الاتصال المحلي بعد الموافقة. إذا أظهر المتصفح خطأ اتصال بدلاً من ذلك، فإن هذا الجهاز أو الشبكة تحظر عمليات إعادة التوجيه إلى الحلقة المحلية.",
+  "oauthFlowTokenExchangeTransientFailure": "فشل تبادل الرمز بعد {maxAttempts} محاولات بسبب مشكلة شبكة مؤقتة. يرجى المحاولة مرة أخرى.",
+  "oauthFlowTokenExchangeHttpFailure": "فشل تبادل الرمز (HTTP {statusCode}). يرجى المحاولة مرة أخرى.",
+  "oauthFlowTokenExchangeUnexpectedFailure": "فشل تبادل الرمز بشكل غير متوقع. يرجى المحاولة مرة أخرى.",
+  "oauthFlowTokenExchangeIncomplete": "لم يكتمل تبادل الرمز بعد إرسال رمز التفويض. يرجى بدء تسجيل الدخول عبر OAuth مرة أخرى.",
+  "speechReadAloudFailed": "فشل تحويل النص إلى كلام.",
+  "speechReadAloudNoText": "لا يوجد نص للقراءة بصوت عالٍ.",
+  "speechEdgeTextTooLong": "يمكن لـ Microsoft Edge Speech قراءة ما يصل إلى 4096 بايت في المرة الواحدة.",
+  "speechEdgeMalformedAudio": "أعاد Microsoft Edge Speech بيانات صوتية تالفة.",
+  "speechEdgeUnsupportedAudio": "أعاد Microsoft Edge Speech بيانات صوتية غير مدعومة.",
+  "speechEdgeUnsupportedFrame": "أعاد Microsoft Edge Speech إطار websocket غير مدعوم.",
+  "speechEdgeSynthesisInterrupted": "انتهى Microsoft Edge Speech قبل اكتمال التوليف الصوتي.",
+  "speechEdgeEmptyAudio": "أعاد Microsoft Edge Speech استجابة صوتية فارغة.",
+  "speechEdgeTimedOut": "انتهت مهلة Microsoft Edge Speech.",
+  "speechEdgeUnreachable": "تعذر الوصول إلى Microsoft Edge Speech.",
+  "speechApiKeyMissing": "أضف مفتاح API في الإعدادات > الكلام لاستخدام مزود TTS هذا.",
+  "speechProviderEmptyAudio": "أعاد مزود TTS استجابة صوتية فارغة.",
+  "speechProviderRequestRejected": "رفض مزود TTS طلب الكلام.",
+  "speechApiKeyRejected": "رفض المزود مفتاح API الخاص بـ TTS.",
+  "speechProviderQuotaRateLimit": "أبلغ مزود TTS عن حصة أو حد معدل.",
+  "speechProviderTemporarilyUnavailable": "مزود TTS غير متاح مؤقتاً.",
+  "speechProviderUnreachable": "تعذر الوصول إلى مزود TTS.",
+  "appProviderErrorFailedToStartProcess": "فشل بدء عملية {tool}.",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} غير متوفر. ثبّت {runtime} أولاً.",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "فشل تثبيت {tool} برمز الخروج {exitCode}.",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "فشل إقلاع Bun برمز الخروج {exitCode}.",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "اكتمل تثبيت OpenCode لكن الأمر لم يُعثر عليه في PATH.",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "اكتمل تثبيت OpenCode لكن تعذر تحديد مسار الأمر.",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "لم يُعثر على الأمر المُهيأ و{tool} غير موجود في PATH.",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "مسار الأمر المُهيأ غير موجود.",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "الأمر المُهيأ موجود لكن فشل فحص الإصدار.",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "تعذر تنفيذ الأمر المُهيأ.",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "فحص WSL ينطبق على نظام Windows فقط.",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "استخدم نسخة سطح المكتب لتهيئة خادم محلي مُدار.",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "تم الاكتشاف من دليل تثبيت معروف.",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "تم الاكتشاف من دليل تثبيت معروف. قد تحتاج PATH إلى التحديث؛ أعد فتح {appName} إذا لم يُكتشف تثبيت حديث بعد.",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "فشل جلب بيانات أحدث إصدار من GitHub.",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "لم تتضمن بيانات أحدث إصدار قائمة الأصول.",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "لم يُعثر على أصل ثنائي متوافق لـ OpenCode.",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "فشل تنزيل أصل OpenCode المحدد.",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "فشل التحقق من المجموع الاختباري للأصل الذي تم تنزيله.",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "فشل استخراج أرشيف OpenCode الثنائي.",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "تعذر العثور على الملف التنفيذي لـ {tool} في الملفات المستخرجة.",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "لا توجد استجابة من الخادم. يرجى المحاولة مرة أخرى.",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "لا توجد استجابة من النموذج. يرجى المحاولة مرة أخرى.",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "تم إلغاء مهمة الكلام.",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "تم إلغاء Microsoft Edge Speech.",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "نشط",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "استقبال",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "متأخر",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "مكتمل",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "بانتظار التفاعل",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "خطأ",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "موفر البيانات الخلوية نشط",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "مطلوب تسجيل دخول OAuth",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "مطلوب اتصال Tailscale",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "غير متصل",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "تم سحب الإذن",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "توقفت الخدمة",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "المضيف غير متاح",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "errorCertificateError": "خطأ في الشهادة",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorRequestCancelled": "تم إلغاء الطلب",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorRunShellCommandFailed": "فشل تشغيل أمر شل",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "فشل تشغيل أمر الشرطة المائلة",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "errorSessionBusy": "الجلسة مشغولة بمعالجة طلب آخر.",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorUnknownNetworkError": "خطأ شبكة غير معروف: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "forwardUntitled": "بدون عنوان",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "logsEntryError": "خطأ",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "المكدس",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "sessionTabIconRemoveFailed": "فشل إزالة بيانات أيقونة تبويب الجلسة المحلية",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "تعذر تحميل الإعدادات الافتراضية المدعومة من OpenCode من الخادم النشط.",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "setupDebugLinuxLogsPath": "سجلات Linux: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "محاولة اكتشاف أمر OpenCode موجود من البيئة الحالية.",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageDiagnosticsResult": "{availability} على {platform}. {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "خرج خادم OpenCode المُدار بعد إيقاف مطلوب.",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageHealthyRunning": "خادم OpenCode المُدار سليم ويعمل على {url}.",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageInstallStarted": "بدأ تثبيت OpenCode من CodeWalk.",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "اختار المستخدم إضافة خادم آخر بعد فشل فحص الحالة.",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "اختار المستخدم الاتصال بخادم OpenCode موجود.",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "فتح المستخدم مسار إعداد OpenCode الموجّه.",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "فتح المستخدم إعداد OpenCode المحلي المُدار.",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "فتح المستخدم إعدادات الخادم بعد فشل فحص الحالة.",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageStartLocalServer": "جارٍ تشغيل خادم OpenCode المُدار على {url}.",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppedCleanly": "توقف خادم OpenCode المُدار بشكل سليم.",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageStoppingLocalServer": "جارٍ إيقاف خادم OpenCode المُدار.",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageTestingServerUrl": "اختبار عنوان URL لخادم OpenCode {url} من الإعداد الأولي.",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "شغّل OpenCode باستخدام: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "وثائق الخادم: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "صحة الخادم: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugSourceDiagnostics": "التشخيصات",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceLocalServer": "خادم محلي",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceManualConnection": "اتصال يدوي",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugSourceOnboarding": "الإعداد الأولي",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceUseExisting": "استخدام الحالي",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "chatProviderErrorSessionNotFound": "الجلسة غير موجودة",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "تنسيق رسالة غير صالح",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "فشل الاتصال بالشبكة",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "خطأ غير معروف",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "فشل إنشاء جلسة الطرفية",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "نقطة نهاية الطرفية غير متاحة",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "دليل الطرفية غير صالح",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "WebSocket الطرفية غير متاح هنا.",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{استدعاء واحد} other{{count} استدعاءات}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "انتهت مهلة الاتصال",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "خطأ من العميل",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "فشل إرسال الرسالة",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

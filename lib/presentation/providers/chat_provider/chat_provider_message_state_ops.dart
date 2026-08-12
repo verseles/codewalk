@@ -1169,15 +1169,30 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     );
     switch (failure) {
       case NetworkFailure _:
-        _setError('Network connection failed. Please check network settings');
+        _setError(
+          L10nBridge.current?.chatProviderErrorNetwork ??
+              'Network connection failed. Please check network settings',
+        );
       case ServerFailure _:
-        _setError('Server error. Please try again later');
+        _setError(
+          L10nBridge.current?.chatProviderErrorServer ??
+              'Server error. Please try again later',
+        );
       case NotFoundFailure _:
-        _setError('Resource not found');
+        _setError(
+          L10nBridge.current?.chatProviderErrorNotFound ??
+              'Resource not found',
+        );
       case ValidationFailure _:
-        _setError('Invalid input parameters');
+        _setError(
+          L10nBridge.current?.chatProviderErrorInvalidInput ??
+              'Invalid input parameters',
+        );
       default:
-        _setError('Unknown error. Please try again later');
+        _setError(
+          L10nBridge.current?.chatProviderErrorUnknown ??
+              'Unknown error. Please try again later',
+        );
     }
   }
 

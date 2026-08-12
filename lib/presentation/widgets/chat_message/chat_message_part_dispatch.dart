@@ -130,7 +130,7 @@ extension _ChatMessagePartDispatch on _ChatMessageWidgetState {
         context,
         icon: Symbols.warning_amber_rounded,
         title: context.l10n.chatMessageMessagePartUnavailable,
-        subtitle: 'Large or malformed content was skipped for stability.',
+        subtitle: context.l10n.chatLargeContentSkipped,
       );
     }
   }
@@ -344,25 +344,28 @@ class _CollapsibleToolChain extends StatelessWidget {
     onExpandedChanged(!expanded);
   }
 
-  String _buildCollapsedPrimaryLabel({required bool compact}) {
+  String _buildCollapsedPrimaryLabel(
+    BuildContext context, {
+    required bool compact,
+  }) {
     final toolParts = parts.whereType<ToolPart>().toList(growable: false);
     final patchCount = parts.whereType<PatchPart>().length;
 
     if (compact) {
       if (toolParts.isEmpty) {
         if (patchCount > 0) {
-          return patchCount == 1 ? '1 patch' : '$patchCount patches';
+          return context.l10n.chatMessagePatchCount(patchCount);
         }
-        return 'Tool run';
+        return context.l10n.chatMessageToolRun;
       }
 
-      final callLabel = toolParts.length == 1
-          ? '1 call'
-          : '${toolParts.length} calls';
+      final callLabel = context.l10n.chatMessageToolChainCallsCompact(
+        toolParts.length,
+      );
       if (patchCount <= 0) {
         return callLabel;
       }
-      final patchLabel = patchCount == 1 ? '1 patch' : '$patchCount patches';
+      final patchLabel = context.l10n.chatMessagePatchCount(patchCount);
       return '$callLabel • $patchLabel';
     }
 
@@ -374,9 +377,9 @@ class _CollapsibleToolChain extends StatelessWidget {
 
     if (toolDescriptions.isEmpty) {
       if (patchCount > 0) {
-        return patchCount == 1 ? '1 patch' : '$patchCount patches';
+        return context.l10n.chatMessagePatchCount(patchCount);
       }
-      return 'Tool execution';
+      return context.l10n.chatMessageToolExecution;
     }
 
     if (toolDescriptions.length == 1) {
@@ -384,21 +387,23 @@ class _CollapsibleToolChain extends StatelessWidget {
       if (patchCount <= 0) {
         return primary;
       }
-      final patchLabel = patchCount == 1 ? '1 patch' : '$patchCount patches';
+      final patchLabel = context.l10n.chatMessagePatchCount(patchCount);
       return '$primary • $patchLabel';
     }
 
     const maxVisible = 2;
     final visible = toolDescriptions.take(maxVisible).join(' • ');
     final remaining = toolDescriptions.length - maxVisible;
-    final extraLabel = remaining > 0 ? ' • +$remaining more' : '';
+    final extraLabel = remaining > 0
+        ? ' • ${context.l10n.chatMessageToolChainMore(remaining)}'
+        : '';
     final patchLabel = patchCount > 0
-        ? ' • ${patchCount == 1 ? '1 patch' : '$patchCount patches'}'
+        ? ' • ${context.l10n.chatMessagePatchCount(patchCount)}'
         : '';
     return '$visible$extraLabel$patchLabel';
   }
 
-  String? _buildCollapsedSecondaryLabel() {
+  String? _buildCollapsedSecondaryLabel(BuildContext context) {
     final toolTypes = parts
         .whereType<ToolPart>()
         .map(toolTypeLabelBuilder)
@@ -422,10 +427,10 @@ class _CollapsibleToolChain extends StatelessWidget {
       return unique.join(' • ');
     }
 
-    return '${unique.take(2).join(' • ')} • +${unique.length - 2} types';
+    return '${unique.take(2).join(' • ')} • ${context.l10n.chatMessageToolChainExtraTypes(unique.length - 2)}';
   }
 
-  String? _buildCollapsedProgressLabel() {
+  String? _buildCollapsedProgressLabel(BuildContext context) {
     final toolParts = parts.whereType<ToolPart>().toList(growable: false);
     if (toolParts.isEmpty) {
       return null;
@@ -446,18 +451,18 @@ class _CollapsibleToolChain extends StatelessWidget {
     }
 
     final summaryParts = <String>[
-      if (running > 0) '$running running',
-      if (pending > 0) '$pending queued',
-      if (failed > 0) '$failed needs attention',
+      if (running > 0) context.l10n.chatMessageToolRunningCount(running),
+      if (pending > 0) context.l10n.chatMessageToolQueuedCount(pending),
+      if (failed > 0) context.l10n.chatMessageToolAttentionCount(failed),
     ];
     return summaryParts.join(' • ');
   }
 
-  String _buildExpandedSummaryLabel() {
+  String _buildExpandedSummaryLabel(BuildContext context) {
     final toolParts = parts.whereType<ToolPart>().toList(growable: false);
     final patchCount = parts.whereType<PatchPart>().length;
     if (toolParts.isEmpty) {
-      return patchCount == 1 ? '1 patch' : '$patchCount patches';
+      return context.l10n.chatMessagePatchCount(patchCount);
     }
 
     final pending = toolParts
@@ -474,12 +479,12 @@ class _CollapsibleToolChain extends StatelessWidget {
         .length;
 
     final summaryParts = <String>[
-      toolParts.length == 1 ? '1 call' : '${toolParts.length} calls',
-      if (completed > 0) '$completed done',
-      if (running > 0) '$running running',
-      if (pending > 0) '$pending queued',
-      if (failed > 0) '$failed needs attention',
-      if (patchCount > 0) patchCount == 1 ? '1 patch' : '$patchCount patches',
+      context.l10n.chatMessageToolChainCallsCompact(toolParts.length),
+      if (completed > 0) context.l10n.chatMessageToolDoneCount(completed),
+      if (running > 0) context.l10n.chatMessageToolRunningCount(running),
+      if (pending > 0) context.l10n.chatMessageToolQueuedCount(pending),
+      if (failed > 0) context.l10n.chatMessageToolAttentionCount(failed),
+      if (patchCount > 0) context.l10n.chatMessagePatchCount(patchCount),
     ];
     return summaryParts.join(' • ');
   }
@@ -492,10 +497,11 @@ class _CollapsibleToolChain extends StatelessWidget {
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final compactLayout = _isCompactLayout(context);
     final collapsedPrimaryLabel = _buildCollapsedPrimaryLabel(
+      context,
       compact: compactLayout,
     );
-    final collapsedProgressLabel = _buildCollapsedProgressLabel();
-    final collapsedSecondaryLabelRaw = _buildCollapsedSecondaryLabel();
+    final collapsedProgressLabel = _buildCollapsedProgressLabel(context);
+    final collapsedSecondaryLabelRaw = _buildCollapsedSecondaryLabel(context);
     final collapsedSecondaryLabel =
         collapsedSecondaryLabelRaw != null &&
             collapsedSecondaryLabelRaw.trim().toLowerCase() !=
@@ -571,7 +577,9 @@ class _CollapsibleToolChain extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _expanded ? 'Tool calls' : collapsedPrimaryLabel,
+                      _expanded
+                          ? context.l10n.chatMessageToolCallsTitle
+                          : collapsedPrimaryLabel,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -585,7 +593,7 @@ class _CollapsibleToolChain extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         _expanded
-                            ? _buildExpandedSummaryLabel()
+                            ? _buildExpandedSummaryLabel(context)
                             : collapsedProgressLabel ??
                                   collapsedSecondaryLabel!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -610,7 +618,11 @@ class _CollapsibleToolChain extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  _expanded ? context.l10n.chatMessageHide : (compactLayout ? context.l10n.chatMessageShow : context.l10n.chatMessageDetails),
+                  _expanded
+                      ? context.l10n.chatMessageHide
+                      : (compactLayout
+                            ? context.l10n.chatMessageShow
+                            : context.l10n.chatMessageDetails),
                 ),
               ),
             ],

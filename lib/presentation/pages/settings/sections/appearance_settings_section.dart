@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/i18n/l10n_context.dart';
 import '../../../../domain/entities/experience_settings.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/desktop_window_chrome_service.dart';
 import '../../../theme/brand_colors.dart';
@@ -23,13 +24,13 @@ bool get _isDesktopPlatform =>
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows);
 
-String _contrastLabel(double level) {
-  if (level <= -0.83) return 'Reduced';
-  if (level <= -0.17) return 'Low';
-  if (level <= 0.17) return 'Standard';
-  if (level <= 0.58) return 'Medium';
-  if (level <= 0.83) return 'Medium High';
-  return 'High';
+String _contrastLabel(AppLocalizations l10n, double level) {
+  if (level <= -0.83) return l10n.settingsAppearanceContrastReduced;
+  if (level <= -0.17) return l10n.settingsAppearanceContrastLow;
+  if (level <= 0.17) return l10n.settingsAppearanceContrastStandard;
+  if (level <= 0.58) return l10n.settingsAppearanceContrastMedium;
+  if (level <= 0.83) return l10n.settingsAppearanceContrastMediumHigh;
+  return l10n.settingsAppearanceContrastHigh;
 }
 
 class AppearanceSettingsSection extends StatelessWidget {
@@ -488,6 +489,7 @@ class AppearanceSettingsSection extends StatelessWidget {
                                 max: 1.0,
                                 divisions: 6,
                                 label: _contrastLabel(
+                                  context.l10n,
                                   settingsProvider.contrastLevel,
                                 ),
                                 onChanged: isDynamicActive

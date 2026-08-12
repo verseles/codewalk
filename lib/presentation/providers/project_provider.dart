@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/failures.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/utils/path_utils.dart';
 import '../../data/datasources/app_local_datasource.dart';
@@ -155,7 +156,10 @@ class ProjectProvider extends ChangeNotifier {
 
       _currentProject ??= _firstVisibleProject ?? _projects.firstOrNull;
       if (_currentProject == null) {
-        _setError('No project context available from server');
+        _setError(
+          L10nBridge.current?.projectProviderErrorNoProjectContext ??
+              'No project context available from server',
+        );
         return;
       }
 
@@ -171,7 +175,12 @@ class ProjectProvider extends ChangeNotifier {
         error: e,
         stackTrace: stackTrace,
       );
-      _setError('Failed to initialize project context: $e');
+      _setError(
+        L10nBridge.current?.projectProviderErrorInitializeFailed(
+              '$e',
+            ) ??
+            'Failed to initialize project context: $e',
+      );
     }
   }
 
@@ -196,7 +205,10 @@ class ProjectProvider extends ChangeNotifier {
             .where((item) => item.id == projectId)
             .firstOrNull;
         if (target == null) {
-          _setError('Failed to switch project: project not found');
+          _setError(
+            L10nBridge.current?.projectProviderErrorSwitchProjectNotFound ??
+                'Failed to switch project: project not found',
+          );
           return false;
         }
         if (_currentProject?.id == projectId) {
@@ -225,7 +237,10 @@ class ProjectProvider extends ChangeNotifier {
       () async {
         final normalized = normalizeOptionalFilePath(directory);
         if (normalized == null) {
-          _setError('Failed to switch project: directory is empty');
+          _setError(
+            L10nBridge.current?.projectProviderErrorSwitchDirectoryEmpty ??
+                'Failed to switch project: directory is empty',
+          );
           return false;
         }
         if (areEquivalentFilePaths(_currentProject?.path, normalized)) {
@@ -320,7 +335,10 @@ class ProjectProvider extends ChangeNotifier {
     }
 
     if (_openProjectIds.length <= 1 && _currentProject?.id == projectId) {
-      _setError('At least one context must remain open');
+      _setError(
+        L10nBridge.current?.projectProviderErrorAtLeastOneContext ??
+            'At least one context must remain open',
+      );
       return false;
     }
 
@@ -352,7 +370,10 @@ class ProjectProvider extends ChangeNotifier {
   Future<bool> reopenProject(String projectId, {bool makeActive = true}) async {
     final project = _projects.where((item) => item.id == projectId).firstOrNull;
     if (project == null) {
-      _setError('Failed to reopen project: project not found');
+      _setError(
+        L10nBridge.current?.projectProviderErrorReopenProjectNotFound ??
+            'Failed to reopen project: project not found',
+      );
       return false;
     }
 
@@ -382,12 +403,18 @@ class ProjectProvider extends ChangeNotifier {
 
   Future<bool> archiveClosedProject(String projectId) async {
     if (_openProjectIds.contains(projectId)) {
-      _setError('Only closed projects can be archived');
+      _setError(
+        L10nBridge.current?.projectProviderErrorOnlyClosedArchivable ??
+            'Only closed projects can be archived',
+      );
       return false;
     }
     final project = _projects.where((item) => item.id == projectId).firstOrNull;
     if (project == null) {
-      _setError('Failed to archive project: project not found');
+      _setError(
+        L10nBridge.current?.projectProviderErrorArchiveProjectNotFound ??
+            'Failed to archive project: project not found',
+      );
       return false;
     }
     if (_isProjectHidden(project)) {
@@ -395,7 +422,10 @@ class ProjectProvider extends ChangeNotifier {
     }
     final hiddenPath = normalizeOptionalFilePath(project.path);
     if (hiddenPath == null) {
-      _setError('Failed to archive project: project path is invalid');
+      _setError(
+        L10nBridge.current?.projectProviderErrorArchiveProjectPathInvalid ??
+            'Failed to archive project: project path is invalid',
+      );
       return false;
     }
     _hiddenProjectPaths = _appendUniqueSortedPath(
@@ -439,7 +469,12 @@ class ProjectProvider extends ChangeNotifier {
         }
         AppLogger.warn('Failed to load worktrees', error: failure);
         if (!silent) {
-          _setError('Failed to load workspaces: ${failure.message}');
+          _setError(
+            L10nBridge.current?.projectProviderErrorLoadWorkspaces(
+                  failure.message,
+                ) ??
+                'Failed to load workspaces: ${failure.message}',
+          );
         }
       },
       (worktrees) {
@@ -459,7 +494,10 @@ class ProjectProvider extends ChangeNotifier {
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
-      _setError('Workspace name cannot be empty');
+      _setError(
+        L10nBridge.current?.projectProviderErrorWorkspaceNameEmpty ??
+            'Workspace name cannot be empty',
+      );
       return null;
     }
 
@@ -492,7 +530,12 @@ class ProjectProvider extends ChangeNotifier {
           'Workspace create failed name=$trimmed directory=${requestDirectory ?? "-"}',
           error: failure,
         );
-        _setError('Failed to create workspace: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorCreateWorkspace(
+                failure.message,
+              ) ??
+              'Failed to create workspace: ${failure.message}',
+        );
         return null;
       },
       (worktree) async {
@@ -538,7 +581,12 @@ class ProjectProvider extends ChangeNotifier {
           return false;
         }
         AppLogger.warn('Workspace reset failed id=$worktreeId', error: failure);
-        _setError('Failed to reset workspace: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorResetWorkspace(
+                failure.message,
+              ) ??
+              'Failed to reset workspace: ${failure.message}',
+        );
         return false;
       },
       (_) {
@@ -576,7 +624,12 @@ class ProjectProvider extends ChangeNotifier {
           'Workspace delete failed id=$worktreeId',
           error: failure,
         );
-        _setError('Failed to delete workspace: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorDeleteWorkspace(
+                failure.message,
+              ) ??
+              'Failed to delete workspace: ${failure.message}',
+        );
         return false;
       },
       (_) async {
@@ -628,7 +681,10 @@ class ProjectProvider extends ChangeNotifier {
   Future<List<String>?> listDirectories(String directory) async {
     final normalized = directory.trim();
     if (normalized.isEmpty) {
-      _setError('Directory cannot be empty');
+      _setError(
+        L10nBridge.current?.projectProviderErrorDirectoryEmpty ??
+            'Directory cannot be empty',
+      );
       return null;
     }
     AppLogger.info('Directory list start directory=$normalized');
@@ -639,7 +695,12 @@ class ProjectProvider extends ChangeNotifier {
           'Directory list failed directory=$normalized',
           error: failure,
         );
-        _setError('Failed to list directories: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorListDirectories(
+                failure.message,
+              ) ??
+              'Failed to list directories: ${failure.message}',
+        );
         return null;
       },
       (directories) {
@@ -661,7 +722,10 @@ class ProjectProvider extends ChangeNotifier {
   Future<bool?> isGitDirectory(String directory) async {
     final normalized = directory.trim();
     if (normalized.isEmpty) {
-      _setError('Directory cannot be empty');
+      _setError(
+        L10nBridge.current?.projectProviderErrorDirectoryEmpty ??
+            'Directory cannot be empty',
+      );
       return null;
     }
     AppLogger.info('Directory git check start directory=$normalized');
@@ -672,7 +736,12 @@ class ProjectProvider extends ChangeNotifier {
           'Directory git check failed directory=$normalized',
           error: failure,
         );
-        _setError('Failed to validate directory: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorValidateDirectory(
+                failure.message,
+              ) ??
+              'Failed to validate directory: ${failure.message}',
+        );
         return null;
       },
       (isGit) {
@@ -690,7 +759,10 @@ class ProjectProvider extends ChangeNotifier {
   }) async {
     final normalizedPath = path.trim();
     if (normalizedPath.isEmpty) {
-      _setError('Path cannot be empty');
+      _setError(
+        L10nBridge.current?.projectProviderErrorPathEmpty ??
+            'Path cannot be empty',
+      );
       return null;
     }
     final requestDirectory = directory?.trim();
@@ -707,7 +779,10 @@ class ProjectProvider extends ChangeNotifier {
           'File list failed path=$normalizedPath directory=${targetDirectory ?? "-"}',
           error: failure,
         );
-        _setError('Failed to list files: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorListFiles(failure.message) ??
+              'Failed to list files: ${failure.message}',
+        );
         return null;
       },
       (nodes) {
@@ -750,7 +825,12 @@ class ProjectProvider extends ChangeNotifier {
         error: failure,
       );
       if (updateProviderError) {
-        _setError('Failed to search files: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorSearchFiles(
+                failure.message,
+              ) ??
+              'Failed to search files: ${failure.message}',
+        );
       }
       return null;
     }, (nodes) => nodes);
@@ -781,7 +861,12 @@ class ProjectProvider extends ChangeNotifier {
         error: failure,
       );
       if (updateProviderError) {
-        _setError('Content search not available: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorContentSearchUnavailable(
+                failure.message,
+              ) ??
+              'Content search not available: ${failure.message}',
+        );
       }
       return null;
     }, (matches) => matches);
@@ -812,7 +897,12 @@ class ProjectProvider extends ChangeNotifier {
         error: failure,
       );
       if (updateProviderError) {
-        _setError('Failed to search symbols: ${failure.message}');
+        _setError(
+          L10nBridge.current?.projectProviderErrorSearchSymbols(
+                failure.message,
+              ) ??
+              'Failed to search symbols: ${failure.message}',
+        );
       }
       return null;
     }, (symbols) => symbols);
@@ -824,7 +914,10 @@ class ProjectProvider extends ChangeNotifier {
   }) async {
     final normalizedPath = path.trim();
     if (normalizedPath.isEmpty) {
-      _setError('Path cannot be empty');
+      _setError(
+        L10nBridge.current?.projectProviderErrorPathEmpty ??
+            'Path cannot be empty',
+      );
       return null;
     }
     final requestDirectory = directory?.trim();
@@ -840,7 +933,10 @@ class ProjectProvider extends ChangeNotifier {
         'File read failed path=$normalizedPath directory=${targetDirectory ?? "-"}',
         error: failure,
       );
-      _setError('Failed to read file: ${failure.message}');
+      _setError(
+        L10nBridge.current?.projectProviderErrorReadFile(failure.message) ??
+            'Failed to read file: ${failure.message}',
+      );
       return null;
     }, (content) => content);
   }
@@ -896,7 +992,12 @@ class ProjectProvider extends ChangeNotifier {
     result.fold(
       (failure) {
         if (!silent) {
-          _setError('Failed to load project list: ${failure.message}');
+          _setError(
+            L10nBridge.current?.projectProviderErrorLoadProjectList(
+                  failure.message,
+                ) ??
+                'Failed to load project list: ${failure.message}',
+          );
         }
       },
       (projects) {

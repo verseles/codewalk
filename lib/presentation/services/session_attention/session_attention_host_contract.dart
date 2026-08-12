@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../domain/entities/experience_settings.dart';
 
 enum SessionAttentionHostKind {
@@ -64,14 +65,17 @@ class UnsupportedSessionAttentionHostService
     implements SessionAttentionHostService {
   const UnsupportedSessionAttentionHostService();
 
-  static const capabilityValue = SessionAttentionHostCapability(
-    kind: SessionAttentionHostKind.unsupported,
-    supported: false,
-    permissionGranted: false,
-    running: false,
-    topmostSupported: false,
-    explanation: 'Session attention surfaces are unavailable on this platform.',
-  );
+  static SessionAttentionHostCapability get capabilityValue =>
+      SessionAttentionHostCapability(
+        kind: SessionAttentionHostKind.unsupported,
+        supported: false,
+        permissionGranted: false,
+        running: false,
+        topmostSupported: false,
+        explanation:
+            L10nBridge.current?.settingsSessionAttentionUnavailable ??
+            'Session attention is unavailable on this platform.',
+      );
 
   @override
   Future<SessionAttentionHostCapability> capability() async => capabilityValue;
@@ -79,9 +83,9 @@ class UnsupportedSessionAttentionHostService
   @override
   Future<SessionAttentionHostActivationResult> activate(
     SessionAttentionPresentation presentation,
-  ) async => const SessionAttentionHostActivationResult.failure(
+  ) async => SessionAttentionHostActivationResult.failure(
     capabilityValue,
-    'Session attention surfaces are unavailable on this platform.',
+    capabilityValue.explanation ?? '',
   );
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../domain/entities/session_attention_overlay/session_attention_models.dart';
 
 class SessionAttentionOverlay extends StatelessWidget {
@@ -9,7 +10,6 @@ class SessionAttentionOverlay extends StatelessWidget {
     required this.items,
     required this.expanded,
     required this.semanticLabel,
-    required this.stateLabelBuilder,
     required this.openLabel,
     required this.expandLabel,
     required this.collapseLabel,
@@ -28,7 +28,6 @@ class SessionAttentionOverlay extends StatelessWidget {
   final List<SessionAttentionItem> items;
   final bool expanded;
   final String semanticLabel;
-  final String Function(RootSessionAttentionKind kind) stateLabelBuilder;
   final String openLabel;
   final String expandLabel;
   final String collapseLabel;
@@ -73,7 +72,7 @@ class SessionAttentionOverlay extends StatelessWidget {
   ) {
     final colors = _colorsFor(context, primary.kind);
     return Semantics(
-      label: '${stateLabelBuilder(primary.kind)}, $count, $semanticLabel',
+      label: '${_localizedKindLabel(primary.kind)}, $count, $semanticLabel',
       button: true,
       child: Material(
         key: const ValueKey<String>('session_attention_bubble'),
@@ -173,7 +172,8 @@ class SessionAttentionOverlay extends StatelessWidget {
             SessionAttentionTransportCapability.reopenRequired;
     return Semantics(
       container: true,
-      label: '${item.projectLabel}, ${item.title}, ${item.kind.name}',
+      label:
+          '${item.projectLabel}, ${item.title}, ${_localizedKindLabel(item.kind)}',
       child: Padding(
         key: ValueKey<String>('session_attention_item_${item.snapshotId}'),
         padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
@@ -196,7 +196,7 @@ class SessionAttentionOverlay extends StatelessWidget {
                   ),
                   if (item.pauseReason != null)
                     Text(
-                      item.pauseReason!.name,
+                      _localizedPauseReasonLabel(item.pauseReason!),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.tertiary,
                       ),
@@ -269,4 +269,44 @@ class SessionAttentionOverlay extends StatelessWidget {
       ),
     };
   }
+
+  String _localizedKindLabel(RootSessionAttentionKind kind) => switch (kind) {
+    RootSessionAttentionKind.error =>
+      L10nBridge.current?.sessionAttentionKindError ?? 'Error',
+    RootSessionAttentionKind.pendingInteraction =>
+      L10nBridge.current?.sessionAttentionKindPendingInteraction ??
+          'Pending interaction',
+    RootSessionAttentionKind.completed =>
+      L10nBridge.current?.sessionAttentionKindCompleted ?? 'Completed',
+    RootSessionAttentionKind.delayed =>
+      L10nBridge.current?.sessionAttentionKindDelayed ?? 'Delayed',
+    RootSessionAttentionKind.receiving =>
+      L10nBridge.current?.sessionAttentionKindReceiving ?? 'Receiving',
+    RootSessionAttentionKind.active =>
+      L10nBridge.current?.sessionAttentionKindActive ?? 'Active',
+  };
+
+  String _localizedPauseReasonLabel(SessionAttentionPauseReason reason) =>
+      switch (reason) {
+        SessionAttentionPauseReason.cellularDataSaver =>
+          L10nBridge.current?.sessionAttentionPauseCellularDataSaver ??
+              'Cellular data saver is active',
+        SessionAttentionPauseReason.oauthReopenRequired =>
+          L10nBridge.current?.sessionAttentionPauseOauthReopenRequired ??
+              'OAuth sign-in required',
+        SessionAttentionPauseReason.tailscaleReopenRequired =>
+          L10nBridge.current?.sessionAttentionPauseTailscaleReopenRequired ??
+              'Tailscale connection required',
+        SessionAttentionPauseReason.offline =>
+          L10nBridge.current?.sessionAttentionPauseOffline ?? 'Offline',
+        SessionAttentionPauseReason.permissionRevoked =>
+          L10nBridge.current?.sessionAttentionPausePermissionRevoked ??
+              'Permission revoked',
+        SessionAttentionPauseReason.serviceStopped =>
+          L10nBridge.current?.sessionAttentionPauseServiceStopped ??
+              'Service stopped',
+        SessionAttentionPauseReason.hostUnavailable =>
+          L10nBridge.current?.sessionAttentionPauseHostUnavailable ??
+              'Host unavailable',
+      };
 }

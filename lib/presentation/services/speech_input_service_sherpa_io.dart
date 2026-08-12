@@ -55,7 +55,7 @@ class SherpaSpeechInputService implements SpeechInputService {
     if (!SpeechEnginePlatformSupport.isSherpaSupported) {
       _isAvailable = false;
       _unavailableReason = 'Sherpa is unavailable on this platform.';
-      _unavailableReasonKey = 'generic';
+      _unavailableReasonKey = 'platformUnavailable';
       return false;
     }
 
@@ -68,6 +68,8 @@ class SherpaSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _isAvailable = false;
+      _unavailableReason = 'Sherpa runtime failed to initialize.';
+      _unavailableReasonKey = 'runtimeFailed';
       return false;
     }
 
@@ -151,6 +153,8 @@ class SherpaSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _isAvailable = false;
+      _unavailableReason = 'Sherpa model files are incomplete.';
+      _unavailableReasonKey = 'modelIncomplete';
       onError();
       return;
     }
@@ -328,9 +332,10 @@ class SherpaSpeechInputService implements SpeechInputService {
   void _applyCaptureFailure(
     SpeechAudioCaptureFailureInfo info, {
     String fallback = 'Microphone permission is disabled.',
+    String fallbackKey = 'microphoneDenied',
   }) {
     _unavailableReason = info.reason ?? fallback;
-    _unavailableReasonKey = info.reasonKey ?? 'generic';
+    _unavailableReasonKey = info.reasonKey ?? fallbackKey;
   }
 
   Future<void> _recreateRecognizer({

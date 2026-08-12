@@ -166,8 +166,14 @@ SpeechAudioCaptureFailureInfo speechAudioCaptureFailureInfoForStatus(
         reasonKey: 'generic',
       );
     case WindowsMicrophoneAccessStatus.allowed:
-    case null:
       return const SpeechAudioCaptureFailureInfo();
+    case null:
+      // Non-Windows permission denial has no Windows status; keep the typed
+      // code consistent so the UI maps it to the localized mic-permission copy.
+      return const SpeechAudioCaptureFailureInfo(
+        reason: 'Microphone permission is disabled.',
+        reasonKey: 'microphoneDenied',
+      );
   }
 }
 

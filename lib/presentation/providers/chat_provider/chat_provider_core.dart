@@ -255,7 +255,8 @@ extension _ChatProviderCorePart on ChatProvider {
             _setProvidersRefreshState(
               ChatProvidersRefreshState.failed,
               errorMessage: message.isEmpty
-                  ? 'Failed to refresh providers and models'
+                  ? (L10nBridge.current?.chatFailedToRefreshProviders ??
+                        'Failed to refresh providers and models')
                   : message,
             );
           }
@@ -681,7 +682,9 @@ extension _ChatProviderCorePart on ChatProvider {
       );
       _setProvidersRefreshState(
         ChatProvidersRefreshState.failed,
-        errorMessage: 'Failed to refresh providers and models',
+        errorMessage:
+            L10nBridge.current?.chatFailedToRefreshProviders ??
+            'Failed to refresh providers and models',
       );
     }
     if (_isProviderInitializationCurrent(

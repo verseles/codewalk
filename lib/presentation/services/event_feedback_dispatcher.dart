@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/experience_settings.dart';
@@ -157,6 +158,7 @@ class EventFeedbackDispatcher {
       properties,
       sessionTitleHint: sessionTitleHint,
     );
+    final l10n = L10nBridge.current;
     switch (event.type) {
       case 'permission.asked':
       case 'permission.updated':
@@ -170,8 +172,10 @@ class EventFeedbackDispatcher {
           notificationCategory: NotificationCategory.permissions,
           soundCategory: SoundCategory.permissions,
           categoryKey: 'permissions',
-          title: sessionTitle ?? 'Session',
-          body: 'A tool permission or question needs your input.',
+          title: sessionTitle ?? (l10n?.notificationSession ?? 'Session'),
+          body:
+              l10n?.notificationPermissionOrQuestionNeedsInput ??
+              'A tool permission or question needs your input.',
           sessionId: sessionId,
           directory: directory,
         );
@@ -180,8 +184,9 @@ class EventFeedbackDispatcher {
           notificationCategory: NotificationCategory.errors,
           soundCategory: SoundCategory.errors,
           categoryKey: 'errors',
-          title: sessionTitle ?? 'Session',
-          body: 'A session reported an error.',
+          title: sessionTitle ?? (l10n?.notificationSession ?? 'Session'),
+          body:
+              l10n?.notificationSessionError ?? 'A session reported an error.',
           sessionId: sessionId,
           directory: directory,
         );
@@ -193,8 +198,10 @@ class EventFeedbackDispatcher {
           notificationCategory: NotificationCategory.agent,
           soundCategory: SoundCategory.agent,
           categoryKey: 'agent',
-          title: sessionTitle ?? 'Session',
-          body: 'Agent finished the current response.',
+          title: sessionTitle ?? (l10n?.notificationSession ?? 'Session'),
+          body:
+              l10n?.notificationAgentFinished ??
+              'Agent finished the current response.',
           sessionId: sessionId,
           directory: directory,
         );

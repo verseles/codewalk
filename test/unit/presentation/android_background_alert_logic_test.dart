@@ -1,9 +1,98 @@
+import 'dart:ui';
+
+import 'package:codewalk/core/i18n/l10n_bridge.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
+import 'package:codewalk/l10n/generated/app_localizations_en.dart';
+import 'package:codewalk/l10n/generated/app_localizations_pt.dart';
 import 'package:codewalk/presentation/services/android_background_alert_logic.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const planner = BackgroundAlertPlanner();
+
+  group('background locale resolution', () {
+    tearDown(() => L10nBridge.update(null));
+
+    test('resolves a persisted locale code to its localizations', () {
+      final pt = resolveBackgroundAlertLocalizations('pt');
+      expect(pt, isA<AppLocalizationsPt>());
+      expect(pt.localeName, 'pt');
+      expect(pt.notificationSession, AppLocalizationsPt().notificationSession);
+      expect(
+        pt.notificationChannelErrors,
+        AppLocalizationsPt().notificationChannelErrors,
+      );
+    });
+
+    test('accepts a region-qualified locale code', () {
+      expect(
+        resolveBackgroundAlertLocalizations('pt-BR'),
+        isA<AppLocalizationsPt>(),
+      );
+    });
+
+    test('falls back to English for unsupported locale codes', () {
+      final en = resolveBackgroundAlertLocalizations('xx');
+      expect(en, isA<AppLocalizationsEn>());
+      expect(en.localeName, 'en');
+    });
+
+    test('falls back to English when no locale is persisted', () {
+      expect(
+        resolveBackgroundAlertLocalizations(
+          null,
+          systemLocale: const Locale('en'),
+        ),
+        isA<AppLocalizationsEn>(),
+      );
+    });
+
+    test('uses the supported system locale when none is persisted', () {
+      expect(
+        resolveBackgroundAlertLocalizations(
+          null,
+          systemLocale: const Locale('pt'),
+        ),
+        isA<AppLocalizationsPt>(),
+      );
+    });
+
+    test('resolves an RTL system locale when none is persisted', () {
+      expect(
+        resolveBackgroundAlertLocale(null, systemLocale: const Locale('ar')),
+        const Locale('ar'),
+      );
+    });
+
+    test('planner emits translated strings when the locale bridge is set', () {
+      L10nBridge.update(resolveBackgroundAlertLocalizations('pt'));
+
+      const current = BackgroundPollingState(
+        sessionStatusById: <String, String>{'ses_1': 'busy'},
+        sessionUpdatedAtById: <String, int>{'ses_1': 100},
+        sessionTitleById: <String, String>{},
+        permissionRequests: <BackgroundInteractionRequest>[
+          BackgroundInteractionRequest(id: 'perm_1', sessionId: 'ses_1'),
+        ],
+        questionRequests: <BackgroundInteractionRequest>[],
+      );
+
+      final plan = planner.plan(
+        previous: BackgroundAlertSnapshot.empty(),
+        current: current,
+        settings: ExperienceSettings.defaults(),
+        nowEpochMs: 200,
+      );
+
+      final signal = plan.signals.single;
+      expect(signal.kind, BackgroundAlertKind.permission);
+      expect(signal.title, AppLocalizationsPt().notificationSession);
+      expect(
+        signal.body,
+        AppLocalizationsPt().notificationPermissionNeedsInput,
+      );
+    });
+  });
 
   test('detects active sessions for busy and retry statuses', () {
     expect(
@@ -29,7 +118,7 @@ void main() {
     );
   });
 
-  test('uses two-minute fast probe cadence', () {
+  test('uses three-minute fast probe cadence', () {
     expect(kBackgroundFastProbeInterval, const Duration(minutes: 3));
   });
 

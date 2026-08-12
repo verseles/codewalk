@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../domain/entities/experience_settings.dart';
 import 'tts_backend.dart';
 
@@ -52,9 +53,10 @@ class OpenAiCompatibleTtsBackend implements TtsBackend {
   ) async {
     final apiKey = request.apiKey?.trim();
     if (apiKey == null || apiKey.isEmpty) {
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.missingApiKey,
-        'Add an API key in Settings > Speech to use this TTS provider.',
+        L10nBridge.current?.speechApiKeyMissing ??
+            'Add an API key in Settings > Speech to use this TTS provider.',
       );
     }
 
@@ -83,9 +85,10 @@ class OpenAiCompatibleTtsBackend implements TtsBackend {
       );
       final data = response.data;
       if (data == null || data.isEmpty) {
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'The TTS provider returned an empty audio response.',
+          L10nBridge.current?.speechProviderEmptyAudio ??
+              'The TTS provider returned an empty audio response.',
         );
       }
       return GeneratedTtsAudio(
@@ -136,34 +139,39 @@ TtsBackendException mapOpenAiCompatibleDioException(DioException error) {
   if (statusCode == 400) {
     return TtsBackendException(
       TtsBackendErrorKind.invalidRequest,
-      'The TTS provider rejected the speech request.',
+      L10nBridge.current?.speechProviderRequestRejected ??
+          'The TTS provider rejected the speech request.',
       statusCode: statusCode,
     );
   }
   if (statusCode == 401 || statusCode == 403) {
     return TtsBackendException(
       TtsBackendErrorKind.invalidApiKey,
-      'The TTS API key was rejected by the provider.',
+      L10nBridge.current?.speechApiKeyRejected ??
+          'The TTS API key was rejected by the provider.',
       statusCode: statusCode,
     );
   }
   if (statusCode == 429) {
     return TtsBackendException(
       TtsBackendErrorKind.rateLimitedOrQuota,
-      'The TTS provider reported a quota or rate limit.',
+      L10nBridge.current?.speechProviderQuotaRateLimit ??
+          'The TTS provider reported a quota or rate limit.',
       statusCode: statusCode,
     );
   }
   if (statusCode != null && statusCode >= 500) {
     return TtsBackendException(
       TtsBackendErrorKind.providerUnavailable,
-      'The TTS provider is temporarily unavailable.',
+      L10nBridge.current?.speechProviderTemporarilyUnavailable ??
+          'The TTS provider is temporarily unavailable.',
       statusCode: statusCode,
     );
   }
   return TtsBackendException(
     TtsBackendErrorKind.network,
-    'The TTS provider could not be reached.',
+    L10nBridge.current?.speechProviderUnreachable ??
+        'The TTS provider could not be reached.',
     statusCode: statusCode,
   );
 }

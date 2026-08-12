@@ -3,16 +3,20 @@ part of '../chat_page.dart';
 extension _ChatPageFileViewer on _ChatPageState {
   static const int _maxHighlightedFileLength = 160000;
   static const int _maxEditableFileLength = 64 * 1024;
-  static const String _draftTooLargeSaveMessage =
-      'Draft is too large to save from the editor.';
-  static const String _dirtyCloseBlockedMessage =
-      'Save changes before closing this file.';
-  static const String _dirtyPathMutationBlockedMessage =
-      'Save changes before changing this path.';
-  static const String _savingPathMutationBlockedMessage =
-      'Wait for the file save to finish before changing this path.';
-  static const String _pathMutationInProgressMessage =
-      'Wait for the file operation to finish.';
+
+  String get _draftTooLargeSaveMessage => context.l10n.filesDraftTooLargeToSave;
+
+  String get _dirtyCloseBlockedMessage =>
+      context.l10n.filesSaveChangesBeforeClose;
+
+  String get _dirtyPathMutationBlockedMessage =>
+      context.l10n.filesSaveChangesBeforePathChange;
+
+  String get _savingPathMutationBlockedMessage =>
+      context.l10n.filesWaitForSaveBeforePathChange;
+
+  String get _pathMutationInProgressMessage =>
+      context.l10n.filesWaitForFileOperation;
 
   Widget _buildFileViewerPanel({
     required _FileExplorerContextState fileState,
@@ -275,7 +279,7 @@ extension _ChatPageFileViewer on _ChatPageState {
           Icon(Symbols.check_box, size: 16, color: colorScheme.primary),
           const SizedBox(width: 6),
           Text(
-            '$selectedCount line${selectedCount > 1 ? 's' : ''} selected',
+            context.l10n.filesLinesSelectedCount(selectedCount),
             style: Theme.of(
               context,
             ).textTheme.labelSmall?.copyWith(color: colorScheme.primary),
@@ -710,10 +714,10 @@ extension _ChatPageFileViewer on _ChatPageState {
       return _pathMutationInProgressMessage;
     }
     if (_isEditorContentTooLarge(content)) {
-      return 'Large files open read-only to keep editing responsive.';
+      return context.l10n.filesLargeFileReadOnly;
     }
     if (fileState.fileOperationCapabilitiesLoading) {
-      return 'Checking file write support...';
+      return context.l10n.filesCheckingWriteSupport;
     }
     final capabilities = fileState.fileOperationCapabilities;
     if (capabilities?.shellFileOpsSupported != true) {

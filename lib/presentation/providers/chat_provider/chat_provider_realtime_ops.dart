@@ -37,7 +37,9 @@ extension _ChatProviderRealtimeOps on ChatProvider {
     if (!shouldBlock) {
       return true;
     }
-    const message = 'Reconnecting to the server. Try again in a moment.';
+    final message =
+        L10nBridge.current?.chatRealtimeReconnectingServerTry ??
+        'Reconnecting to the server. Try again in a moment.';
     AppLogger.warn('Blocked $actionLabel while realtime transport reconnects');
     _enqueueUiNotice(type: ChatUiNoticeType.serverError, message: message);
     _notifyListeners();

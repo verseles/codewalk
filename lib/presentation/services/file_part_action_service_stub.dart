@@ -1,3 +1,4 @@
+import '../../core/i18n/l10n_bridge.dart';
 import 'file_part_action_types.dart';
 
 Future<FilePartActionResult> handleFilePartAction({
@@ -6,8 +7,10 @@ Future<FilePartActionResult> handleFilePartAction({
   required String mimeType,
   required String? filename,
 }) async {
-  return const FilePartActionResult(
+  return FilePartActionResult(
     success: false,
-    message: 'Attachment actions are not available on this platform.',
+    message:
+        L10nBridge.current?.attachmentNotAvailableOnPlatform ??
+        'Attachment actions are not available on this platform.',
   );
 }

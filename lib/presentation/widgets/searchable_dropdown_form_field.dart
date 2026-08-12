@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_shapes.dart';
 
 typedef SearchableDropdownSearchTermsBuilder<T> =
@@ -16,8 +17,8 @@ class SearchableDropdownFormField<T> extends FormField<T> {
     this.decoration = const InputDecoration(),
     this.hint,
     this.isExpanded = false,
-    this.searchHintText = 'Search',
-    this.emptyText = 'No matches found',
+    this.searchHintText,
+    this.emptyText,
     this.searchTermsBuilder,
   }) : fieldInitialValue = initialValue,
        super(
@@ -36,8 +37,8 @@ class SearchableDropdownFormField<T> extends FormField<T> {
   final InputDecoration decoration;
   final Widget? hint;
   final bool isExpanded;
-  final String searchHintText;
-  final String emptyText;
+  final String? searchHintText;
+  final String? emptyText;
   final SearchableDropdownSearchTermsBuilder<T>? searchTermsBuilder;
 
   T? get _effectiveInitialValue => value ?? fieldInitialValue;
@@ -128,6 +129,15 @@ class _SearchableDropdownFormFieldState<T> extends FormFieldState<T> {
   }
 
   Future<void> _openPicker(BuildContext context) async {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final searchHintText =
+        _widget.searchHintText ??
+        l10n?.searchableDropdownSearchHint ??
+        'Search';
+    final emptyText =
+        _widget.emptyText ??
+        l10n?.searchableDropdownEmptyText ??
+        'No matches found';
     final selectedValue = await showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
@@ -136,8 +146,8 @@ class _SearchableDropdownFormFieldState<T> extends FormFieldState<T> {
         return _SearchableDropdownSheet<T>(
           items: _widget.items,
           selectedValue: value,
-          searchHintText: _widget.searchHintText,
-          emptyText: _widget.emptyText,
+          searchHintText: searchHintText,
+          emptyText: emptyText,
           searchTermsBuilder: _widget.searchTermsBuilder,
         );
       },

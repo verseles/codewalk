@@ -44,10 +44,10 @@ codewalk/
 │   │   ├── entities/persisted_session_tabs_state.dart # Versioned open/closed session-tab payload models
 │   │   ├── entities/session_tab_icon_overrides.dart # Versioned per-session session-tab icon override entities (issue #138)
 │   │   └── entities/session_attention_overlay/ # Session-attention identity, item, aggregate, and transport models
-│   ├── l10n/                           # Flutter gen_l10n ARB files (14 locales) and generated delegates
-│   │   ├── app_en.arb                  # English source ARB (1394 UI keys with metadata)
-│   │   ├── app_*.arb                   # Translation ARBs (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, ur, zh)
-│   │   └── generated/                  # Auto-generated AppLocalizations classes via flutter gen-l10n
+│   ├── l10n/                           # Canonical Flutter gen_l10n ARB files (14 locales) and generated delegates
+│   │   ├── app_en.arb                  # English template ARB (1855 UI keys with metadata) — canonical source of truth
+│   │   ├── app_*.arb                   # Translation ARBs (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, ur, zh) — canonical
+│   │   └── generated/                  # Auto-generated AppLocalizations classes via flutter gen-l10n (do not edit)
 │   └── presentation/                   # UI, state providers, runtime services
 │       ├── pages/                      # App pages and page-level orchestration
 │       │   ├── app_shell_page.dart
@@ -86,7 +86,7 @@ codewalk/
 │       └── theme/                      # Material You theme: AppTheme, AppShapes, BrandColor seeds, AppSemanticColors, AppVisualStyleTokens (issue #86)
 ├── test/                               # Unit, widget, integration, presentation, support tests
 ├── tool/ci/                            # Analyzer budget, coverage gate, and session-overlay Android instrumentation scripts
-├── tool/i18n/                          # ARB generation and code migration tooling
+├── tool/i18n/                          # ARB catalog sync/validation and code migration tooling (arb_strings.dart is generated from the ARBs)
 ├── .github/workflows/                  # CI and release workflows
 ├── .opencode/agents/                  # Repo-local OpenCode agents
 ├── android/ linux/ macos/ web/ windows/ # Platform runners/build configs
@@ -468,7 +468,9 @@ make analyze
 make test
 make coverage
 make check
-dart tool/i18n/generate_arb.dart && flutter gen-l10n  # Regenerate all 14 locale ARBs and localization delegates
+dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.dart from canonical lib/l10n/app_*.arb
+dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs match the arb_strings.dart catalog (non-destructive)
+flutter gen-l10n                                # Regenerate AppLocalizations delegates into lib/l10n/generated/
 make web
 make android
 make desktop
@@ -486,6 +488,7 @@ flutter run -d chrome
 
 ```text
 test/unit/                             # Unit tests
+test/unit/i18n/arb_catalog_sync_test.dart # ARB ⇄ arb_strings.dart catalog parity: exact keys/values, placeholders, plurals, and ICU apostrophe safety (issue #103)
 test/unit/domain/session_attention_models_test.dart # Session-attention identity, priority, aggregate, and payload models
 test/unit/data/session_attention_snapshot_store_test.dart # Encrypted snapshot round trips, nonce rotation, corruption recovery, atomic-write failures, and tombstones
 test/unit/presentation/session_attention_coordinator_test.dart # Attention timing and monitoring-availability coverage
@@ -550,14 +553,17 @@ tool/release/changelog.py              # Changelog update/extract helper used by
 ## Internationalization (i18n)
 
 - Comprehensive localization with 14 supported languages: English (template), Arabic, Bengali, German, Spanish, French, Hindi, Italian, Japanese, Korean, Portuguese (Brazil), Russian, Urdu, and Chinese (Simplified).
-- ARB source files live in `lib/l10n/` (14 locales), with English as the template (`app_en.arb`, 1394 UI keys).
+- `lib/l10n/app_*.arb` (14 locales) are the canonical i18n source of truth, with English as the template (`app_en.arb`, 1855 UI keys).
 - Generated `AppLocalizations` classes in `lib/l10n/generated/` provide type-safe translation accessors.
 - UI code uses `context.l10n.keyName` via the `L10nContext` extension (`lib/core/i18n/l10n_context.dart`).
 - Context-free services (tray, background tasks, notification planning) use the stabilized `L10nBridge.current` pattern (`lib/core/i18n/l10n_bridge.dart`) for context-free access to translations.
 - The locale registry (`lib/core/i18n/app_locales.dart`) defines the 14 supported locales, RTL metadata, resolution callback, and PT_BR normalization.
 - `L10nBridge.current` is set at app boot and on locale change via `LocaleProvider` in `lib/main.dart`, ensuring consistent translation availability across the entire application lifecycle.
 - Non-translatable invariants: OpenCode wire event types, permission keys, tool state discriminators, REST paths, config key names, and `prompt_async` contract fields.
-- To add new strings: edit `tool/i18n/arb_strings.dart` (+ per-locale translation maps), run `dart tool/i18n/generate_arb.dart && flutter gen-l10n`.
+- To add new strings: edit the ARB files in `lib/l10n/` (add the key to `app_en.arb` and translations to the locale ARBs), run `dart tool/i18n/sync_arb_strings_from_arbs.dart` to rebuild `tool/i18n/arb_strings.dart`, then run `flutter gen-l10n` to regenerate the localization delegates.
+- `dart tool/i18n/generate_arb.dart` is validation-only and non-destructive: it verifies every ARB matches the `arb_strings.dart` catalog (keys and values) and fails on mismatch instead of rewriting files.
+- `test/unit/i18n/arb_catalog_sync_test.dart` enforces the catalog contract in CI: exact key/value parity between `arb_strings.dart` and the ARBs, placeholder and plural parity across all locales, and no over-escaped ICU apostrophes.
+- Android background/overlay surfaces bootstrap their own locale outside the widget tree: the session-overlay engine resolves its locale via `resolveBackgroundAlertLocale` (`android_background_alert_logic.dart`) and the background alert worker calls `initializeBackgroundLocale()` (`android_background_alert_worker.dart`) before localizing notifications.
 - To migrate remaining hardcoded strings: follow the `context.l10n` pattern; use `tool/i18n/migrate_code_v2.dart` as reference.
 
 ## Notes

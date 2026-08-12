@@ -1,8 +1,36 @@
+import 'dart:ui' as ui;
+
 import '../../core/config/feature_flags.dart';
+import '../../core/i18n/app_locales.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../domain/entities/experience_settings.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 const Duration kBackgroundFastProbeInterval = Duration(minutes: 3);
 const Duration kBackgroundTailProbeInterval = Duration(minutes: 5);
+
+/// Resolves [AppLocalizations] for a persisted locale code using the same
+/// [AppLocales] conventions as the foreground app. When the app follows the
+/// system locale, resolves the platform locale with the same callback.
+AppLocalizations resolveBackgroundAlertLocalizations(
+  String? localeCode, {
+  ui.Locale? systemLocale,
+}) {
+  return lookupAppLocalizations(
+    resolveBackgroundAlertLocale(localeCode, systemLocale: systemLocale),
+  );
+}
+
+ui.Locale resolveBackgroundAlertLocale(
+  String? localeCode, {
+  ui.Locale? systemLocale,
+}) {
+  return AppLocales.localeForCode(localeCode) ??
+      AppLocales.resolutionCallback(
+        systemLocale ?? ui.PlatformDispatcher.instance.locale,
+        AppLocales.supported,
+      );
+}
 
 bool shouldRunAndroidBackgroundAlerts(ExperienceSettings settings) {
   if (!settings.androidBackgroundAlertsEnabled) {
@@ -284,6 +312,7 @@ class BackgroundAlertPlanner {
       lastPolledAtEpochMs: nowEpochMs,
     );
 
+    final l10n = L10nBridge.current;
     final agentEnabled =
         settings.notifications[NotificationCategory.agent] ?? true;
     final permissionEnabled =
@@ -304,7 +333,9 @@ class BackgroundAlertPlanner {
               kind: BackgroundAlertKind.error,
               categoryKey: 'errors',
               title: _sessionTitleFor(current.sessionTitleById[entry.key]),
-              body: 'A session reported an error.',
+              body:
+                  l10n?.notificationSessionError ??
+                  'A session reported an error.',
               sessionId: entry.key,
             ),
           );
@@ -324,7 +355,9 @@ class BackgroundAlertPlanner {
               title: _sessionTitleFor(
                 current.sessionTitleById[request.sessionId],
               ),
-              body: 'A tool permission needs your input.',
+              body:
+                  l10n?.notificationPermissionNeedsInput ??
+                  'A tool permission needs your input.',
               sessionId: request.sessionId,
             ),
           );
@@ -342,7 +375,9 @@ class BackgroundAlertPlanner {
               title: _sessionTitleFor(
                 current.sessionTitleById[request.sessionId],
               ),
-              body: 'A tool question needs your input.',
+              body:
+                  l10n?.notificationQuestionNeedsInput ??
+                  'A tool question needs your input.',
               sessionId: request.sessionId,
             ),
           );
@@ -380,7 +415,9 @@ class BackgroundAlertPlanner {
               kind: BackgroundAlertKind.completion,
               categoryKey: 'agent',
               title: title,
-              body: 'Agent finished the current response.',
+              body:
+                  l10n?.notificationAgentFinished ??
+                  'Agent finished the current response.',
               sessionId: sessionId,
             ),
           );
@@ -394,7 +431,9 @@ class BackgroundAlertPlanner {
               kind: BackgroundAlertKind.error,
               categoryKey: 'errors',
               title: title,
-              body: 'A session reported an error.',
+              body:
+                  l10n?.notificationSessionError ??
+                  'A session reported an error.',
               sessionId: sessionId,
             ),
           );
@@ -418,7 +457,9 @@ class BackgroundAlertPlanner {
             title: _sessionTitleFor(
               current.sessionTitleById[request.sessionId],
             ),
-            body: 'A tool permission needs your input.',
+            body:
+                l10n?.notificationPermissionNeedsInput ??
+                'A tool permission needs your input.',
             sessionId: request.sessionId,
           ),
         );
@@ -436,7 +477,9 @@ class BackgroundAlertPlanner {
             title: _sessionTitleFor(
               current.sessionTitleById[request.sessionId],
             ),
-            body: 'A tool question needs your input.',
+            body:
+                l10n?.notificationQuestionNeedsInput ??
+                'A tool question needs your input.',
             sessionId: request.sessionId,
           ),
         );
@@ -475,7 +518,7 @@ class BackgroundAlertPlanner {
   String _sessionTitleFor(String? raw) {
     final title = raw?.trim();
     if (title == null || title.isEmpty) {
-      return 'Session';
+      return L10nBridge.current?.notificationSession ?? 'Session';
     }
     return title;
   }

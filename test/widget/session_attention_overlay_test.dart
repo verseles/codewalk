@@ -53,7 +53,6 @@ Widget _app({
     items: items,
     expanded: expanded,
     semanticLabel: '${items.length} sessions need attention',
-    stateLabelBuilder: (kind) => kind.name,
     openLabel: 'Open',
     expandLabel: 'Expand',
     collapseLabel: 'Collapse',
@@ -240,7 +239,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Semantics &&
-            widget.properties.label == 'error, 2, 2 sessions need attention',
+            widget.properties.label == 'Error, 2, 2 sessions need attention',
       ),
       findsOneWidget,
     );

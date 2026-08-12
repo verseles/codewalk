@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import 'oauth_credential.dart';
 import 'oauth_service_result.dart';
@@ -319,7 +320,8 @@ class OAuthService {
   }
 
   static String tokenExchangeHttpFailure(int statusCode) {
-    return 'Token exchange failed (HTTP $statusCode). Please try again.';
+    return L10nBridge.current?.oauthFlowTokenExchangeHttpFailure(statusCode) ??
+        'Token exchange failed (HTTP $statusCode). Please try again.';
   }
 
   static Uri? _absoluteCallbackUri({
@@ -366,7 +368,9 @@ class OAuthService {
       _log('OAuth flow aborted because secure storage is unavailable');
       return OAuthFlowResult(
         log: [],
-        error: 'Secure credential storage is unavailable for OAuth.',
+        error:
+            L10nBridge.current?.oauthFlowSecureStorageUnavailable ??
+            'Secure credential storage is unavailable for OAuth.',
         token: null,
       );
     } catch (e) {
@@ -377,7 +381,9 @@ class OAuthService {
       _log('OAuth flow aborted with an unexpected ${e.runtimeType}');
       return OAuthFlowResult(
         log: [],
-        error: 'OAuth flow failed unexpectedly. Please try again.',
+        error:
+            L10nBridge.current?.oauthFlowUnexpectedError ??
+            'OAuth flow failed unexpectedly. Please try again.',
         token: null,
       );
     }
@@ -414,9 +420,10 @@ class OAuthService {
       return OAuthFlowResult(
         log: [],
         error:
+            L10nBridge.current?.oauthFlowNoEndpointsDiscovered ??
             'No OAuth endpoints discovered. '
-            'Enable Managed OAuth in Cloudflare Dashboard '
-            '→ Access → Applications → [this app].',
+                'Enable Managed OAuth in Cloudflare Dashboard '
+                '→ Access → Applications → [this app].',
         token: null,
       );
     }
@@ -436,7 +443,9 @@ class OAuthService {
     if (accessToken == null || accessToken.isEmpty) {
       return OAuthFlowResult(
         log: [],
-        error: 'OAuth token response did not include an access token.',
+        error:
+            L10nBridge.current?.oauthFlowTokenResponseMissingAccessToken ??
+            'OAuth token response did not include an access token.',
         token: null,
       );
     }
@@ -458,7 +467,9 @@ class OAuthService {
       if (!persisted) {
         return OAuthFlowResult(
           log: [],
-          error: 'The server profile changed before OAuth could finish.',
+          error:
+              L10nBridge.current?.oauthFlowProfileChanged ??
+              'The server profile changed before OAuth could finish.',
           token: null,
         );
       }
@@ -467,7 +478,9 @@ class OAuthService {
       _log('Credential save failed: secure storage unavailable');
       return OAuthFlowResult(
         log: [],
-        error: 'Secure credential storage is unavailable for OAuth.',
+        error:
+            L10nBridge.current?.oauthFlowSecureStorageUnavailable ??
+            'Secure credential storage is unavailable for OAuth.',
         token: null,
       );
     }
@@ -541,7 +554,9 @@ class OAuthService {
         if (!persisted) {
           return OAuthFlowResult(
             log: [],
-            error: 'The server profile changed before OAuth could finish.',
+            error:
+                L10nBridge.current?.oauthFlowProfileChanged ??
+                'The server profile changed before OAuth could finish.',
             token: null,
           );
         }
@@ -554,7 +569,9 @@ class OAuthService {
       _log('Credential refresh failed: secure storage unavailable');
       return OAuthFlowResult(
         log: [],
-        error: 'Secure credential storage is unavailable for OAuth.',
+        error:
+            L10nBridge.current?.oauthFlowSecureStorageUnavailable ??
+            'Secure credential storage is unavailable for OAuth.',
         token: null,
       );
     } catch (e) {
@@ -707,7 +724,8 @@ class OAuthService {
     final tokenEp = meta['token_endpoint'] as String?;
     if (authEp == null || tokenEp == null) {
       return _PkceResult.failure(
-        'OAuth metadata is missing authorization/token endpoints.',
+        L10nBridge.current?.oauthFlowMetadataMissingEndpoints ??
+            'OAuth metadata is missing authorization/token endpoints.',
       );
     }
 
@@ -741,7 +759,9 @@ class OAuthService {
       );
       if (callback.code == null) {
         return _PkceResult.failure(
-          callback.failureReason ?? 'Authorization callback was not completed',
+          callback.failureReason ??
+              L10nBridge.current?.oauthFlowCallbackNotCompleted ??
+              'Authorization callback was not completed',
         );
       }
       _log('Authorization code received');
@@ -811,9 +831,11 @@ class OAuthService {
         final providerRejected =
             validation.decision == OAuthCallbackDecision.rejectProviderError;
         final rejection = providerRejected
-            ? 'The authorization server declined the OAuth request. '
-                  'Please try again.'
-            : 'OAuth callback validation failed. Please try again.';
+            ? (L10nBridge.current?.oauthFlowProviderDeclined ??
+                  'The authorization server declined the OAuth request. '
+                      'Please try again.')
+            : (L10nBridge.current?.oauthFlowCallbackValidationFailed ??
+                  'OAuth callback validation failed. Please try again.');
         _log(
           accepted
               ? 'Authorization code received (callback validated)'
@@ -846,7 +868,10 @@ class OAuthService {
     } catch (e) {
       _log('Callback server failed with ${e.runtimeType}');
       completeOnce(
-        _CallbackResult.failure('Local OAuth callback server failed to start.'),
+        _CallbackResult.failure(
+          L10nBridge.current?.oauthFlowCallbackServerStartFailed ??
+              'Local OAuth callback server failed to start.',
+        ),
       );
       return completer.future;
     }
@@ -854,7 +879,12 @@ class OAuthService {
     final flowId = _generateVerifier();
     if (Platform.isAndroid) {
       _registerAndroidCloseListener(flowId, () {
-        completeOnce(_CallbackResult.failure('OAuth sign-in was canceled.'));
+        completeOnce(
+          _CallbackResult.failure(
+            L10nBridge.current?.oauthFlowSignInCanceled ??
+                'OAuth sign-in was canceled.',
+          ),
+        );
       });
     }
     try {
@@ -863,7 +893,8 @@ class OAuthService {
         _log('Browser failed to open');
         completeOnce(
           _CallbackResult.failure(
-            'Could not open the system browser for OAuth sign-in.',
+            L10nBridge.current?.oauthFlowBrowserOpenFailed ??
+                'Could not open the system browser for OAuth sign-in.',
           ),
         );
         return completer.future;
@@ -876,11 +907,12 @@ class OAuthService {
           completionGuard.tryMarkTerminal();
           _log('Login timed out after 5 minutes');
           return _CallbackResult.failure(
-            'No authorization callback reached the app within 5 minutes. '
-            'The browser was expected to redirect to the local callback '
-            'address after consent. '
-            'If the browser showed a connection error instead, this device '
-            'or network blocks loopback redirects.',
+            L10nBridge.current?.oauthFlowCallbackTimeout ??
+                'No authorization callback reached the app within 5 minutes. '
+                    'The browser was expected to redirect to the local callback '
+                    'address after consent. If the browser showed a connection '
+                    'error instead, this device or network blocks loopback '
+                    'redirects.',
           );
         },
       );
@@ -964,8 +996,9 @@ class OAuthService {
     }
     _log('Token exchange failed after $maxAttempts transient attempts');
     return _ExchangeResult.failure(
-      'Token exchange failed after $maxAttempts attempts because of a '
-      'temporary network problem. Please try again.',
+      L10nBridge.current?.oauthFlowTokenExchangeTransientFailure(maxAttempts) ??
+          'Token exchange failed after $maxAttempts attempts because of a '
+              'temporary network problem. Please try again.',
     );
   }
 
@@ -1024,7 +1057,8 @@ class OAuthService {
     } catch (e) {
       _log('Token exchange failed with ${e.runtimeType}');
       return _ExchangeResult.failure(
-        'Token exchange failed unexpectedly. Please try again.',
+        L10nBridge.current?.oauthFlowTokenExchangeUnexpectedFailure ??
+            'Token exchange failed unexpectedly. Please try again.',
       );
     } finally {
       client?.close(force: true);
@@ -1044,8 +1078,9 @@ class OAuthService {
     }
     _log('Token exchange failed after possible request send; not retrying');
     return _ExchangeResult.failure(
-      'Token exchange did not complete after the authorization code was sent. '
-      'Please start OAuth sign-in again.',
+      L10nBridge.current?.oauthFlowTokenExchangeIncomplete ??
+          'Token exchange did not complete after the authorization code was '
+              'sent. Please start OAuth sign-in again.',
     );
   }
 

@@ -356,10 +356,9 @@ class _NotificationsSettingsSectionState
       null => Symbols.help,
     };
     final statusText = switch (status) {
-      true => 'Battery optimization is disabled for CodeWalk.',
-      false =>
-        'Battery optimization is enabled. Some devices may delay background alerts.',
-      null => 'Could not read battery optimization status yet.',
+      true => context.l10n.settingsNotificationsBatteryDisabled,
+      false => context.l10n.settingsNotificationsBatteryEnabled,
+      null => context.l10n.settingsNotificationsBatteryUnknown,
     };
 
     return Column(
@@ -408,8 +407,8 @@ class _NotificationsSettingsSectionState
                   : const Icon(Symbols.settings),
               label: Text(
                 status == true
-                    ? 'Open battery settings'
-                    : 'Disable optimization',
+                    ? context.l10n.settingsNotificationsOpenBatterySettings
+                    : context.l10n.settingsNotificationsDisableOptimization,
               ),
             ),
             OutlinedButton.icon(
@@ -470,8 +469,8 @@ class _NotificationsSettingsSectionState
     if (mounted) {
       _showSnackBar(
         opened
-            ? 'Android battery settings opened. Allow unrestricted battery for CodeWalk.'
-            : 'Could not open Android battery optimization settings.',
+            ? context.l10n.msgBatterySettingsOpened
+            : context.l10n.msgBatterySettingsFailed,
       );
     }
 
@@ -728,7 +727,7 @@ class _NotificationsSettingsSectionState
   }) {
     return SearchableDropdownFormField<SoundOption>(
       initialValue: selected,
-      searchHintText: 'Search sound type',
+      searchHintText: context.l10n.settingsNotificationsSearchSoundType,
       searchTermsBuilder: (value) => <String>[_soundLabel(value)],
       items: _soundOptions
           .map(
@@ -751,9 +750,9 @@ class _NotificationsSettingsSectionState
           ),
         );
       },
-      decoration: const InputDecoration(
-        labelText: 'Sound type',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: context.l10n.settingsNotificationsSoundType,
+        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -833,7 +832,7 @@ class _NotificationsSettingsSectionState
 
   Future<SystemSoundChoice?> _showSystemSoundPicker() async {
     if (!_soundSourceService.supportsSystemSoundPicker) {
-      _showSnackBar('System sound picker is not available on this platform.');
+      _showSnackBar(context.l10n.msgSystemSoundPickerUnavailable);
       return null;
     }
 
@@ -842,7 +841,7 @@ class _NotificationsSettingsSectionState
       return null;
     }
     if (sounds.isEmpty) {
-      _showSnackBar('No system sound was found on this device.');
+      _showSnackBar(context.l10n.msgNoSystemSoundsFound);
       return null;
     }
 
@@ -895,13 +894,14 @@ class _NotificationsSettingsSectionState
 
   String _systemPickerHint() {
     if (kIsWeb) {
-      return 'Not available on web.';
+      return context.l10n.settingsNotificationsSystemSoundsWebUnavailable;
     }
     return switch (defaultTargetPlatform) {
-      TargetPlatform.android => 'Android notification sounds from the system.',
+      TargetPlatform.android =>
+        context.l10n.settingsNotificationsSystemSoundsAndroid,
       TargetPlatform.linux =>
-        'Freedesktop sounds from /usr/share/sounds/freedesktop/stereo.',
-      _ => 'Supported where the operating system exposes system sounds.',
+        context.l10n.settingsNotificationsSystemSoundsFreedesktop,
+      _ => context.l10n.settingsNotificationsSystemSoundsPlatform,
     };
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:xterm/xterm.dart';
 
 import '../../core/errors/exceptions.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../data/datasources/terminal_remote_datasource.dart';
 import '../../data/models/pty_session_model.dart';
 import '../../domain/entities/server_profile.dart';
@@ -20,17 +21,18 @@ enum CodewalkTerminalState {
   failed,
 }
 
-typedef CodewalkTerminalSocketOpener = Future<CodewalkTerminalSocketConnection> Function({
-  required Uri url,
-  Map<String, String>? headers,
-});
+typedef CodewalkTerminalSocketOpener =
+    Future<CodewalkTerminalSocketConnection> Function({
+      required Uri url,
+      Map<String, String>? headers,
+    });
 
 class CodewalkTerminalController extends ChangeNotifier {
   CodewalkTerminalController({
     TerminalRemoteDataSource? remoteDataSource,
     CodewalkTerminalSocketOpener? socketOpener,
   }) : _remoteDataSource =
-            remoteDataSource ?? _UnavailableTerminalRemoteDataSource(),
+           remoteDataSource ?? _UnavailableTerminalRemoteDataSource(),
        _socketOpener = socketOpener ?? openCodewalkTerminalSocket {
     _terminal = _createTerminal();
   }
@@ -43,8 +45,7 @@ class CodewalkTerminalController extends ChangeNotifier {
   StreamSubscription<List<int>>? _outputSubscription;
   Future<void>? _socketDone;
   CodewalkTerminalState _state = CodewalkTerminalState.idle;
-  String _statusMessage =
-      'Open Terminal to connect to the server project terminal.';
+  String? _statusMessage;
   String? _targetKey;
   String? _ptyId;
   String? _directory;
@@ -61,7 +62,10 @@ class CodewalkTerminalController extends ChangeNotifier {
   bool get isDeadState =>
       _state == CodewalkTerminalState.failed ||
       _state == CodewalkTerminalState.exited;
-  String get statusMessage => _statusMessage;
+  String get statusMessage =>
+      _statusMessage ??
+      L10nBridge.current?.terminalOpenToConnect ??
+      'Open Terminal to connect to the server project terminal.';
 
   bool get supportsRemoteTerminal => !kIsWeb;
 
@@ -72,14 +76,16 @@ class CodewalkTerminalController extends ChangeNotifier {
   }) async {
     if (!supportsRemoteTerminal) {
       await _resetToUnavailable(
-        'Embedded terminal is not available on this runtime yet.',
+        L10nBridge.current?.terminalNotAvailableYet ??
+            'Embedded terminal is not available on this runtime yet.',
       );
       return;
     }
 
     if (serverProfile == null) {
       await _resetToUnavailable(
-        'Select an active server before opening Terminal.',
+        L10nBridge.current?.terminalSelectServer ??
+            'Select an active server before opening Terminal.',
       );
       return;
     }
@@ -87,16 +93,15 @@ class CodewalkTerminalController extends ChangeNotifier {
     final normalizedDirectory = workingDirectory?.trim();
     if (normalizedDirectory == null || normalizedDirectory.isEmpty) {
       await _resetToUnavailable(
-        'Open a project folder before starting the server terminal.',
+        L10nBridge.current?.terminalOpenProjectFirst ??
+            'Open a project folder before starting the server terminal.',
       );
       return;
     }
 
     final targetKey = '${serverProfile.id}\u0000$normalizedDirectory';
-    final canReuseSession = !force &&
-        _ptyId != null &&
-        _targetKey == targetKey &&
-        !isDeadState;
+    final canReuseSession =
+        !force && _ptyId != null && _targetKey == targetKey && !isDeadState;
 
     if (!force && canReuseSession && _socket != null) {
       return;
@@ -112,7 +117,9 @@ class CodewalkTerminalController extends ChangeNotifier {
     _terminal = _createTerminal();
     _terminalGeneration += 1;
     _state = CodewalkTerminalState.starting;
-    _statusMessage = 'Connecting to ${serverProfile.displayName} terminal...';
+    _statusMessage =
+        L10nBridge.current?.terminalConnectingTo(serverProfile.displayName) ??
+        'Connecting to ${serverProfile.displayName} terminal...';
     _targetKey = targetKey;
     _directory = normalizedDirectory;
     _notify();
@@ -140,20 +147,25 @@ class CodewalkTerminalController extends ChangeNotifier {
       _socket = socket;
 
       _utf8DecoderSink?.close();
-      _utf8DecoderSink = const Utf8Decoder(allowMalformed: true).startChunkedConversion(
-        _TerminalStringSink((decoded) {
-          if (_processToken != processToken || decoded.isEmpty) {
-            return;
-          }
-          _terminal.write(decoded);
-          if (_state == CodewalkTerminalState.starting) {
-            _state = CodewalkTerminalState.running;
-            _statusMessage =
-                'Connected to ${serverProfile.displayName} in $normalizedDirectory';
-            _notify();
-          }
-        }),
-      );
+      _utf8DecoderSink = const Utf8Decoder(allowMalformed: true)
+          .startChunkedConversion(
+            _TerminalStringSink((decoded) {
+              if (_processToken != processToken || decoded.isEmpty) {
+                return;
+              }
+              _terminal.write(decoded);
+              if (_state == CodewalkTerminalState.starting) {
+                _state = CodewalkTerminalState.running;
+                _statusMessage =
+                    L10nBridge.current?.terminalConnectedTo(
+                      normalizedDirectory,
+                      serverProfile.displayName,
+                    ) ??
+                    'Connected to ${serverProfile.displayName} in $normalizedDirectory';
+                _notify();
+              }
+            }),
+          );
       late final StreamSubscription<List<int>> outputSubscription;
       var outputClosed = false;
 
@@ -187,7 +199,9 @@ class CodewalkTerminalController extends ChangeNotifier {
           _socket = null;
           _socketDone = null;
           _state = CodewalkTerminalState.failed;
-          _statusMessage = 'Terminal connection failed: $error';
+          _statusMessage =
+              L10nBridge.current?.terminalConnectionFailed('$error') ??
+              'Terminal connection failed: $error';
           _notify();
         },
       );
@@ -200,7 +214,9 @@ class CodewalkTerminalController extends ChangeNotifier {
         _socketDone = null;
         await closeOutput();
         _state = CodewalkTerminalState.exited;
-        _statusMessage = 'Terminal disconnected.';
+        _statusMessage =
+            L10nBridge.current?.terminalDisconnected ??
+            'Terminal disconnected.';
         _notify();
       });
     } catch (error) {
@@ -215,7 +231,9 @@ class CodewalkTerminalController extends ChangeNotifier {
         _cursor = -1;
       }
       _state = CodewalkTerminalState.failed;
-      _statusMessage = 'Terminal connection failed: $error';
+      _statusMessage =
+          L10nBridge.current?.terminalConnectionFailed('$error') ??
+          'Terminal connection failed: $error';
       _notify();
     }
   }
@@ -223,7 +241,8 @@ class CodewalkTerminalController extends ChangeNotifier {
   Future<void> stop() async {
     await _terminateSession();
     _state = CodewalkTerminalState.idle;
-    _statusMessage = 'Terminal session closed.';
+    _statusMessage =
+        L10nBridge.current?.terminalSessionClosed ?? 'Terminal session closed.';
     _notify();
   }
 
@@ -375,7 +394,10 @@ class _TerminalStringSink implements Sink<String> {
 class _UnavailableTerminalRemoteDataSource implements TerminalRemoteDataSource {
   @override
   Future<PtySessionModel> createPty({required String directory}) async {
-    throw const ServerException('Terminal transport is unavailable.');
+    throw ServerException(
+      L10nBridge.current?.terminalTransportUnavailable ??
+          'Terminal transport is unavailable.',
+    );
   }
 
   @override

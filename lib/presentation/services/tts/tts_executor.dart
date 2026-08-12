@@ -1,4 +1,5 @@
 import '../../../core/auth/tts_api_key_storage.dart';
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../domain/entities/experience_settings.dart';
 import '../../../domain/entities/session_attention_overlay/session_attention_models.dart';
 import 'tts_backend.dart';
@@ -149,9 +150,9 @@ class TtsExecutor {
 
   void _ensureCurrent(int generation, SpeechJob job) {
     if (_generation != generation || !identical(_activeJob, job)) {
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.invalidRequest,
-        'Speech job was cancelled.',
+        L10nBridge.current?.speechJobCancelled ?? 'Speech job was cancelled.',
       );
     }
   }

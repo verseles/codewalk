@@ -596,6 +596,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   // -- Shared utilities used by 3+ part clusters --
 
   String _truncatePreview(
+    BuildContext context,
     String text, {
     required int maxChars,
     required String reason,
@@ -605,7 +606,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     }
     final head = text.substring(0, maxChars);
     final remaining = text.length - maxChars;
-    return '$head\n\n[truncated $remaining chars] $reason';
+    return '$head\n\n${context.l10n.chatMessageTruncatedChars(remaining, reason)}';
   }
 
   Widget _buildInfoContainer(
@@ -654,20 +655,25 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     );
   }
 
-  String _formatTime(DateTime time) {
+  String _formatTime(BuildContext context, DateTime time) {
     final now = DateTime.now();
     final difference = now.difference(time);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return context.l10n.chatMessageJustNow;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
+      return context.l10n.chatMessageMinutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
+      return context.l10n.chatMessageHoursAgo(difference.inHours);
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return context.l10n.chatMessageDaysAgo(difference.inDays);
     } else {
-      return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      return context.l10n.chatMessageDateTime(
+        time.day,
+        time.hour,
+        time.minute,
+        time.month,
+      );
     }
   }
 

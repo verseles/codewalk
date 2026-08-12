@@ -132,7 +132,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
     _setState(() {
       state.loadingDirectories.remove(cacheKey);
       if (listed == null) {
-        final message = projectProvider.error ?? 'Failed to load files';
+        final message = projectProvider.error ?? context.l10n.filesFailedToLoad;
         if (cacheKey == _ChatPageState._rootTreeCacheKey) {
           state.treeError = message;
         } else {
@@ -286,7 +286,8 @@ extension _ChatPageFileExplorerController on _ChatPageState {
         setModalState(() {
           loading = false;
           resultNodes = <_QuickOpenResult>[];
-          errorMessage = projectProvider.error ?? 'Failed to search files';
+          errorMessage =
+              projectProvider.error ?? context.l10n.filesFailedToSearch;
         });
         return;
       }
@@ -355,7 +356,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                     unawaited(openFirstQuickOpenResult(dialogContext)),
               },
               child: AlertDialog(
-                title: const Text('Quick Open File'),
+                title: Text(context.l10n.filesQuickOpenFile),
                 content: SizedBox(
                   width: 520,
                   height: 420,
@@ -378,16 +379,16 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                       ),
                       const SizedBox(height: 8),
                       SegmentedButton<_QuickOpenSearchMode>(
-                        segments: const <ButtonSegment<_QuickOpenSearchMode>>[
+                        segments: <ButtonSegment<_QuickOpenSearchMode>>[
                           ButtonSegment<_QuickOpenSearchMode>(
                             value: _QuickOpenSearchMode.names,
-                            label: Text('Names'),
-                            icon: Icon(Symbols.description),
+                            label: Text(context.l10n.filesNames),
+                            icon: const Icon(Symbols.description),
                           ),
                           ButtonSegment<_QuickOpenSearchMode>(
                             value: _QuickOpenSearchMode.contents,
-                            label: Text('Contents'),
-                            icon: Icon(Symbols.manage_search),
+                            label: Text(context.l10n.filesContents),
+                            icon: const Icon(Symbols.manage_search),
                           ),
                         ],
                         selected: <_QuickOpenSearchMode>{searchMode},
@@ -415,10 +416,10 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                             ? Center(
                                 child: Text(
                                   queryController.text.trim().isEmpty
-                                      ? 'No open files yet. Type to search.'
+                                      ? context.l10n.filesNoOpenFilesHint
                                       : searchMode == _QuickOpenSearchMode.names
-                                      ? 'No files found'
-                                      : 'No content matches found',
+                                      ? context.l10n.filesFilesFound
+                                      : context.l10n.filesNoContentMatches,
                                 ),
                               )
                             : ListView.builder(
@@ -586,7 +587,9 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                         );
                       },
                       child: Text(
-                        '${fileState.tabSelection.openPaths.length} open file${fileState.tabSelection.openPaths.length == 1 ? '' : 's'}',
+                        context.l10n.filesOpenFilesCount(
+                          fileState.tabSelection.openPaths.length,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -742,7 +745,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                   );
                 }
                 if (rootNodes == null || rootNodes.isEmpty) {
-                  return const Center(child: Text('No files found'));
+                  return Center(child: Text(context.l10n.filesFilesFound));
                 }
                 return ListView(
                   key: const ValueKey<String>('file_tree_list'),

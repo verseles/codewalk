@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../domain/entities/experience_settings.dart';
 import 'session_attention_host_contract.dart';
 import 'session_attention_host_protocol.dart';
@@ -42,7 +43,8 @@ class _IoSessionAttentionHostService
         permissionRevoked: stopState['permissionRevoked'] == true,
         explanation: permissionGranted
             ? null
-            : 'Display-over-other-apps permission is required.',
+            : L10nBridge.current?.sessionAttentionOverlayPermissionRequired ??
+                  'Display-over-other-apps permission is required.',
       );
     }
     if (defaultTargetPlatform == TargetPlatform.iOS) {
@@ -52,17 +54,20 @@ class _IoSessionAttentionHostService
         permissionGranted: true,
         running: _iosHostActive,
         topmostSupported: false,
-        explanation: 'Session attention is available only inside CodeWalk.',
+        explanation:
+            L10nBridge.current?.sessionAttentionIosInAppOnly ??
+            'Session attention is available only inside CodeWalk.',
       );
     }
-    return const SessionAttentionHostCapability(
+    return SessionAttentionHostCapability(
       kind: SessionAttentionHostKind.unsupported,
       supported: false,
       permissionGranted: false,
       running: false,
       topmostSupported: false,
       explanation:
-          'Session attention surfaces are unavailable on this platform.',
+          L10nBridge.current?.settingsSessionAttentionUnavailable ??
+          'Session attention is unavailable on this platform.',
     );
   }
 
@@ -80,7 +85,8 @@ class _IoSessionAttentionHostService
         await openSystemSettings();
         return SessionAttentionHostActivationResult.failure(
           current,
-          'Grant display-over-other-apps permission, then try again.',
+          L10nBridge.current?.sessionAttentionOverlayPermissionGrantPrompt ??
+              'Grant display-over-other-apps permission, then try again.',
         );
       }
       final started =
@@ -100,7 +106,8 @@ class _IoSessionAttentionHostService
             )
           : SessionAttentionHostActivationResult.failure(
               next,
-              'The Android session attention service could not start.',
+              L10nBridge.current?.sessionAttentionAndroidStartFailed ??
+                  'The Android session attention service could not start.',
             );
     }
     if (defaultTargetPlatform == TargetPlatform.iOS) {

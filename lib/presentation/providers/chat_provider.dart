@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/config/feature_flags.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../core/errors/failures.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/utils/path_utils.dart';
@@ -987,8 +988,9 @@ class ChatProvider extends ChangeNotifier {
   List<Agent> get selectableAgents =>
       List<Agent>.unmodifiable(_sortedSelectableAgents(_agents));
   String? get selectedAgentName => _selectedAgentName;
-  String get selectedAgentLabel =>
-      _selectedAgentName == null ? 'Select agent' : _selectedAgentName!;
+  String get selectedAgentLabel => _selectedAgentName == null
+      ? (L10nBridge.current?.chatChooseAgent ?? 'Select agent')
+      : _selectedAgentName!;
   String? get selectedProviderId => _selectedProviderId;
   String? get selectedModelId => _selectedModelId;
   String? get selectedVariantId => _selectedVariantId;
@@ -1810,7 +1812,7 @@ class ChatProvider extends ChangeNotifier {
   String get selectedVariantLabel {
     final selected = _selectedVariantId;
     if (selected == null) {
-      return 'Auto';
+      return L10nBridge.current?.modelAuto ?? 'Auto';
     }
     final variant = selectedModel?.variants[selected];
     return variant?.name ?? selected;
@@ -1946,7 +1948,9 @@ class ChatProvider extends ChangeNotifier {
     result.fold(
       (failure) {
         if (!silent) {
-          _sessionInsightsError = 'Failed to load session status';
+          _sessionInsightsError =
+              L10nBridge.current?.chatProviderErrorLoadSessionStatus ??
+              'Failed to load session status';
           notifyListeners();
         }
         AppLogger.warn('Failed to load session status snapshot: $failure');
@@ -2358,7 +2362,9 @@ class ChatProvider extends ChangeNotifier {
         (failure) {
           AppLogger.warn('Failed to refresh status for $sessionId: $failure');
           if (!silent) {
-            _sessionInsightsError = 'Some session details could not be loaded';
+            _sessionInsightsError =
+                L10nBridge.current?.chatProviderErrorLoadSessionDetails ??
+                'Some session details could not be loaded';
           }
         },
         (statusMap) {
@@ -3399,7 +3405,10 @@ class ChatProvider extends ChangeNotifier {
             error: e,
             stackTrace: stackTrace,
           );
-          _setError('Failed to load session list: ${e.toString()}');
+          _setError(
+            L10nBridge.current?.chatProviderErrorLoadSessionList('$e') ??
+                'Failed to load session list: $e',
+          );
         }
       },
       tags: const <String>{'chat:sessions'},
@@ -3651,7 +3660,10 @@ class ChatProvider extends ChangeNotifier {
 
     final session = result.fold((_) => null, (value) => value);
     if (session == null) {
-      _setError('Failed to create session');
+      _setError(
+        L10nBridge.current?.chatProviderErrorCreateSession ??
+            'Failed to create session',
+      );
       return;
     }
 
@@ -4353,7 +4365,8 @@ class ChatProvider extends ChangeNotifier {
       if (providerIdForSend == null || modelIdForSend == null) {
         _stashRejectedDraftForRetry(sessionId: sendSessionId);
         _setError(
-          'Select a connected provider or free OpenCode model before sending',
+          L10nBridge.current?.chatProviderErrorSelectProviderModelBeforeSend ??
+              'Select a connected provider or free OpenCode model before sending',
           sessionId: sendSessionId,
         );
         return false;
@@ -4686,7 +4699,11 @@ class ChatProvider extends ChangeNotifier {
         _setState(ChatState.loaded);
         return false;
       }
-      _setError('Failed to start message send', sessionId: streamSessionId);
+      _setError(
+        L10nBridge.current?.chatProviderErrorStartMessageSend ??
+            'Failed to start message send',
+        sessionId: streamSessionId,
+      );
       return false;
     }
   }
@@ -4699,7 +4716,10 @@ class ChatProvider extends ChangeNotifier {
     final usecase = abortChatSession;
     if (session == null || usecase == null) {
       if (!suppressFailureUi) {
-        _setError('Stop is unavailable for the current session');
+        _setError(
+          L10nBridge.current?.chatProviderErrorStopUnavailable ??
+              'Stop is unavailable for the current session',
+        );
       }
       return false;
     }
@@ -4761,7 +4781,10 @@ class ChatProvider extends ChangeNotifier {
 
     _isAbortingResponse = false;
     if (!success && !suppressFailureUi && _errorMessage == null) {
-      _errorMessage = previousError ?? 'Failed to stop current response';
+      _errorMessage =
+          previousError ??
+          (L10nBridge.current?.chatFailedToStopResponse ??
+              'Failed to stop current response');
     }
     notifyListeners();
     if (success) {
@@ -4779,6 +4802,7 @@ class ChatProvider extends ChangeNotifier {
     }
     if (canAbortActiveResponse) {
       _errorMessage =
+          L10nBridge.current?.chatProviderErrorWaitForResponseFinish ??
           'Wait for the current response to finish before compacting';
       notifyListeners();
       return false;
@@ -4787,7 +4811,9 @@ class ChatProvider extends ChangeNotifier {
     final session = _currentSession;
     final usecase = summarizeChatSession;
     if (session == null || usecase == null) {
-      _errorMessage = 'Compact context is unavailable for the current session';
+      _errorMessage =
+          L10nBridge.current?.chatProviderErrorCompactUnavailable ??
+          'Compact context is unavailable for the current session';
       notifyListeners();
       return false;
     }
@@ -4799,7 +4825,9 @@ class ChatProvider extends ChangeNotifier {
     final providerId = _selectedProviderId;
     final modelId = _selectedModelId;
     if (providerId == null || modelId == null) {
-      _errorMessage = 'Select a model before compacting context';
+      _errorMessage =
+          L10nBridge.current?.chatProviderErrorSelectModelBeforeCompact ??
+          'Select a model before compacting context';
       notifyListeners();
       return false;
     }
@@ -4823,7 +4851,8 @@ class ChatProvider extends ChangeNotifier {
     result.fold(
       (failure) {
         _errorMessage = failure.message.isEmpty
-            ? 'Failed to compact session context'
+            ? (L10nBridge.current?.chatProviderErrorCompactSessionContext ??
+                  'Failed to compact session context')
             : failure.message;
       },
       (_) {
@@ -4843,7 +4872,10 @@ class ChatProvider extends ChangeNotifier {
       unawaited(loadSessionInsights(session.id, silent: true));
       unawaited(_persistLastSessionSnapshotBestEffort());
     } else {
-      _errorMessage ??= previousError ?? 'Failed to compact session context';
+      _errorMessage ??=
+          previousError ??
+          (L10nBridge.current?.chatProviderErrorCompactSessionContext ??
+              'Failed to compact session context');
     }
     notifyListeners();
     return success;

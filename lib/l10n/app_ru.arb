@@ -66,16 +66,19 @@
   "appShellUpdateAvailableResult": "Доступно обновление: v{latestVersion}",
   "appShellUpdateInstalledRestartApp": "Обновление установлено. Перезапустите приложение для применения.",
   "appShellUpdateInstalledRestartRequired": "Обновление установлено. Требуется перезапуск для применения новой версии.",
+  "attachmentBrowserSandboxLocalFile": "Песочница браузера не позволяет открывать локальные вложения file:// напрямую.",
   "attachmentCouldNotDecode": "Данные вложения не могут быть декодированы.",
   "attachmentCouldNotDownload": "Не удалось скачать вложение.",
   "attachmentCouldNotSave": "Вложение не удалось сохранить на этом устройстве.",
   "attachmentDownloadStarted": "Загрузка вложения началась.",
   "attachmentLocalNotFound": "Локальное вложение не найдено на этом устройстве.",
+  "attachmentLocalPathBrowserBlocked": "Это вложение указывает на локальный путь, который нельзя открыть из браузера.",
   "attachmentNoValidLocation": "Вложение не указывает корректный путь.",
   "attachmentNotAvailableOnPlatform": "Действия с вложениями недоступны на этой платформе.",
   "attachmentPathEmpty": "Путь к вложению пуст.",
   "attachmentPayloadEmpty": "Полезная нагрузка вложения пуста.",
   "attachmentSaveCanceled": "Сохранение отменено.",
+  "attachmentSaveTitle": "Сохранить вложение",
   "attachmentSavedAndOpened": "Вложение сохранено по пути {path} и открыто.",
   "attachmentSavedPath": "Вложение сохранено в {path}.",
   "attachmentSavedTo": "Вложение сохранено по пути {path}.",
@@ -93,12 +96,12 @@
   "behaviorCustomDisplayName": "Пользовательское имя, отображаемое в беседах вместо системного имени пользователя.",
   "behaviorCutsAutomaticMobile": "Сокращает автоматическое использование мобильных данных, останавливая фоновые загрузки и ограничивая автоматические обновления в фоновом режиме до одной серии каждые {inSeconds} секунд.",
   "behaviorDataSaverActive": "Активно сейчас при использовании мобильного интернета.",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "Агрессивный",
+  "behaviorDataSaverAggressiveDescription": "Режим низкой пропускной способности: активным остается только поток видимого рабочего пространства, глобальные обновления приостановлены, а автоматические обновления растянуты во времени.",
   "behaviorDataSaverCellularOnly": "Применяется только при мобильном подключении.",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "Выкл.",
+  "behaviorDataSaverOffHint": "Полный режим реального времени и автоматические обновления включены.",
+  "behaviorDataSaverStandard": "Стандартный",
   "behaviorDataSaverWaiting": "Ожидание следующего окна синхронизации мобильных данных.",
   "behaviorDisabled": "Отключено",
   "behaviorLightweightTasksLike": "Используется для легких задач, таких как генерация заголовков.",
@@ -127,6 +130,7 @@
   "cannedSendAutomaticallySubtitle": "Отправлять немедленно после вставки этого быстрого ответа",
   "cannedSendImmediatelyInserting": "Отправлять немедленно после вставки этого быстрого ответа",
   "cannedTextLabel": "Текст",
+  "chatAbortNotice": "Что вы хотите сделать иначе?",
   "chatActionNext": "Далее",
   "chatActiveServerUnhealthy": "Активный сервер неисправен. Попытки отправки будут однократными и будут завершаться ошибкой до восстановления работоспособности.",
   "chatActiveServerUnhealthyLabel": "Активный сервер неисправен",
@@ -142,8 +146,8 @@
   "chatBadgeDataSaverActive": "Экономия мобильного трафика активна.",
   "chatBadgeServerNeedsAttention": "Подключение к серверу требует внимания.",
   "chatBadgeSyncing": "Синхронизация бесед...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "Ответ появится единым блоком, когда этот ход завершится.",
+  "chatBlockResponsePendingTitle": "Генерация ответа",
   "chatCachedConversationsYet": "Кэшированных бесед пока нет",
   "chatChangedFilesAvailable": "Для этой сессии нет доступных измененных файлов.",
   "chatChildrenChatProviderCurrentSessionChildren": "Дочерние элементы: {length}",
@@ -225,6 +229,8 @@
   "chatLoadMore": "Загрузить еще",
   "chatLoadingProjectContext": "Загрузка контекста проекта...",
   "chatMainConversationUnavailable": "Основная беседа пока недоступна.",
+  "chatMessageShortDate": "{day}.{month}",
+  "chatMessageWeeksAgo": "{count} нед. назад",
   "chatParentConversationUnavailable": "Родительская беседа пока недоступна.",
   "chatMentionAgentSubtitle": "агент",
   "chatMentionFileSubtitle": "файл",
@@ -296,6 +302,23 @@
   "chatPermissionAutoApproveOn": "Автоматическое одобрение разрешений включено",
   "chatProjectContext": "Контекст проекта",
   "chatProjectContext2": "Контекст проекта",
+  "chatProviderErrorCompactSessionContext": "Не удалось сжать контекст сессии",
+  "chatProviderErrorCompactUnavailable": "Сжатие контекста недоступно для текущей сессии",
+  "chatProviderErrorCreateSession": "Не удалось создать сессию",
+  "chatProviderErrorInvalidInput": "Некорректные входные параметры",
+  "chatProviderErrorLoadSessionDetails": "Не удалось загрузить часть данных сессии",
+  "chatProviderErrorLoadSessionList": "Не удалось загрузить список сессий: {error}",
+  "chatProviderErrorLoadSessionStatus": "Не удалось загрузить статус сессии",
+  "chatProviderErrorNetwork": "Ошибка сетевого подключения. Проверьте настройки сети",
+  "chatProviderErrorNotFound": "Ресурс не найден",
+  "chatProviderErrorSelectModelBeforeCompact": "Выберите модель перед сжатием контекста",
+  "chatProviderErrorSelectProviderModelBeforeSend": "Перед отправкой выберите подключенного провайдера или бесплатную модель OpenCode",
+  "chatProviderErrorServer": "Ошибка сервера. Повторите попытку позже",
+  "chatProviderErrorSessionFallback": "Ошибка сессии",
+  "chatProviderErrorStartMessageSend": "Не удалось начать отправку сообщения",
+  "chatProviderErrorStopUnavailable": "Остановка недоступна для текущей сессии",
+  "chatProviderErrorUnknown": "Неизвестная ошибка. Повторите попытку позже",
+  "chatProviderErrorWaitForResponseFinish": "Дождитесь завершения текущего ответа перед сжатием",
   "chatRealtimeGlobalEvent": "глобальное событие",
   "chatRealtimeGlobalEventReason": "глобальное событие ({reason})",
   "chatRealtimeGlobalEventStale": "глобальное событие (устаревшая генерация)",
@@ -336,6 +359,7 @@
   "chatSessionConversationNextAction": "Беседа {nextAction}",
   "chatSessionConversations": "Бесед нет",
   "chatSessionCreateConversationStart": "Создайте новую беседу, чтобы начать общение",
+  "chatSessionSubConversationCount": "{count, plural, =1{1 поддиалог} few{{count} поддиалога} many{{count} поддиалогов} other{{count} поддиалогов}}",
   "chatSessionTabsToggle": "Вкладки сессий",
   "chatSessionsLength": "{length}",
   "chatSetUpServer": "Настроить сервер",
@@ -355,6 +379,16 @@
   "chatShortcutsStartStopVoice": "Запуск или остановка голосового ввода",
   "chatShortcutsStopResponse": "Остановить активный ответ (во время генерации)",
   "chatSidebarAccess": "Доступ к боковой панели",
+  "chatSlashCommandAgent": "Открыть выбор агента",
+  "chatSlashCommandCompact": "Сжать контекст текущей сессии",
+  "chatSlashCommandHelp": "Показать справку по командам",
+  "chatSlashCommandModels": "Открыть выбор модели",
+  "chatSlashCommandNew": "Создать новую сессию чата",
+  "chatSlashCommandOpen": "Быстрое открытие файла",
+  "chatSlashCommandRedo": "Повторить последний отмененный ход",
+  "chatSlashCommandSessions": "Открыть список диалогов",
+  "chatSlashCommandThinking": "Показать или скрыть пузырьки размышлений",
+  "chatSlashCommandUndo": "Отменить последний видимый ход пользователя",
   "chatSortMostRecent": "Сначала новые",
   "chatSortOldest": "Сначала старые",
   "chatSortRecent": "Недавние",
@@ -488,11 +522,34 @@
   "fileActionLocalAttachmentFound": "Локальное вложение не найдено на этом устройстве.",
   "fileActionSaveCanceled": "Сохранение отменено.",
   "fileActionUnableOpenLocal": "Не удалось открыть локальное вложение.",
+  "filesActiveProjectRequired": "Для операций с файлами нужна активная директория проекта.",
   "filesAddChat": "Добавить в чат",
   "filesAutosave": "Автосохранение",
   "filesAutosaveOn": "Автосохранение включено",
   "filesAutosaveOff": "Автосохранение выключено",
+  "filesCheckingWriteSupport": "Проверка поддержки записи файлов...",
+  "filesDraftTooLargeToSave": "Черновик слишком велик, чтобы сохранить его из редактора.",
+  "filesFailedToLoad": "Не удалось загрузить файлы",
+  "filesFailedToLoadContent": "Не удалось загрузить содержимое файла",
+  "filesFailedToSearch": "Не удалось выполнить поиск файлов",
+  "filesFileSaved": "Файл сохранен.",
+  "filesLargeFileReadOnly": "Большие файлы открываются только для чтения, чтобы редактирование оставалось отзывчивым.",
+  "filesLinesSelectedCount": "{count, plural, =1{Выбрана 1 строка} few{Выбрано {count} строки} many{Выбрано {count} строк} other{Выбрано {count} строк}}",
+  "filesMalformedResponse": "Операция с файлом вернула некорректный ответ.",
+  "filesNoContentMatches": "Совпадений по содержимому не найдено",
+  "filesNoOpenFilesHint": "Открытых файлов пока нет. Начните вводить текст для поиска.",
+  "filesOpenFilesCount": "{count, plural, =1{1 открытый файл} few{{count} открытых файла} many{{count} открытых файлов} other{{count} открытых файлов}}",
+  "filesParentNotDirectory": "Родительский элемент не является директорией.",
   "filesRedo": "Повторить",
+  "filesReloadSkippedUnsavedChanges": "Есть несохраненные изменения; перезагрузка пропущена.",
+  "filesSaveChangesBeforeClose": "Сохраните изменения перед закрытием файла.",
+  "filesSaveChangesBeforePathChange": "Сохраните изменения перед сменой пути.",
+  "filesShellCommandDidNotComplete": "Команда оболочки для операции с файлом не завершилась.",
+  "filesShellCommandFailed": "Команда оболочки для операции с файлом завершилась ошибкой до выдачи результата.",
+  "filesShellCommandNoResult": "Команда оболочки для операции с файлом не вернула результат.",
+  "filesShellCommandSyntaxError": "Команда оболочки для операции с файлом завершилась ошибкой синтаксиса.",
+  "filesShellCommandTruncated": "Команда оболочки для операции с файлом была обрезана сервером.",
+  "filesShellUtilityNotFound": "Не найдена необходимая утилита командной оболочки.",
   "filesUndo": "Отменить",
   "filesBinaryFilePreview": "Предпросмотр бинарного файла недоступен.",
   "filesClear": "Очистить",
@@ -500,35 +557,67 @@
   "filesDuplicate": "Дублировать",
   "filesDuplicated": "Файл продублирован",
   "filesFileEmpty": "Файл пуст.",
+  "filesAlreadyExists": "Файл или папка с таким именем уже существуют.",
+  "filesCopyPath": "Копировать путь",
+  "filesCreateFileTitle": "Создать файл",
+  "filesCreateFolderTitle": "Создать папку",
+  "filesDelete": "Удалить",
+  "filesDeleteConfirm": "Удалить {name}? Это действие необратимо. Папки и их содержимое будут удалены.",
+  "filesDeleteTitle": "Удалить {name}",
   "filesFilesFound": "Файлы не найдены",
+  "filesFileCreated": "Файл создан.",
+  "filesFolderCreated": "Папка создана.",
   "filesHideSidebar": "Скрыть боковую панель файлов",
+  "filesInvalidName": "Введите допустимое имя без разделителей пути.",
+  "filesNameHint": "Имя",
+  "filesNew": "Создать",
+  "filesNewFile": "Новый файл",
+  "filesNewFolder": "Новая папка",
   "filesNames": "Имена",
   "filesOpenFilesFileState": "Открытые файлы ({length})",
   "filesQuickOpen": "Быстрое открытие",
   "filesQuickOpenFile": "Быстрое открытие файла",
+  "filesOperationFailed": "Не удалось выполнить операцию с файлом.",
+  "filesOperationUnavailable": "Операции с файлами недоступны для этого сервера.",
+  "filesOutsideRoot": "Путь находится за пределами корня проекта.",
+  "filesPathCopied": "Путь скопирован.",
+  "filesPathMissing": "Путь не существует.",
+  "filesPermissionDenied": "Отказано в доступе.",
   "filesRefresh": "Обновить файлы",
+  "filesRename": "Переименовать",
+  "filesRenameTitle": "Переименовать {name}",
+  "filesRenamed": "Переименовано.",
+  "filesRootDeleteBlocked": "Корень проекта не может быть удален.",
   "filesSearchHint": "Поиск файлов по имени или пути",
+  "filesDeleted": "Удалено.",
   "filesTitle": "Файлы",
-  "forwardAction": "Forward",
-  "forwardAllFailed": "Could not forward to any session",
-  "forwardCancel": "Cancel",
-  "forwardDialogSubtitle": "Select one or more conversations",
-  "forwardDialogTitle": "Forward to…",
-  "forwardLoading": "Loading sessions…",
-  "forwardNoOpenProjects": "No open projects with sessions",
-  "forwardNoProviderModel": "Select a provider and model before forwarding",
-  "forwardNoSessions": "No recent sessions",
-  "forwardPartial": "Forwarded to {success} of {total}",
-  "forwardProvenanceLabel": "Forwarded from: {origin}",
-  "forwardRetry": "Retry",
-  "forwardSearchHint": "Search",
-  "forwardSelectedCount": "{count} selected",
-  "forwardSend": "Forward",
-  "forwardServerOffline": "Server offline",
+  "filesWaitForFileOperation": "Дождитесь завершения операции с файлом.",
+  "filesWaitForSaveBeforePathChange": "Дождитесь завершения сохранения файла перед сменой пути.",
+  "forwardAction": "Переслать",
+  "forwardAllFailed": "Не удалось переслать ни в одну сессию",
+  "forwardCancel": "Отмена",
+  "forwardDialogSubtitle": "Выберите одну или несколько бесед",
+  "forwardDialogTitle": "Переслать в…",
+  "forwardLoading": "Загрузка сессий…",
+  "forwardNoOpenProjects": "Нет открытых проектов с сессиями",
+  "forwardNoProviderModel": "Выберите провайдера и модель перед пересылкой",
+  "forwardNoSessions": "Нет недавних сессий",
+  "forwardPartial": "Переслано в {success} из {total}",
+  "forwardProvenanceLabel": "Переслано из: {origin}",
+  "forwardRetry": "Повторить",
+  "forwardSearchHint": "Поиск",
+  "forwardSelectedCount": "Выбрано: {count}",
+  "forwardSend": "Переслать",
+  "forwardServerOffline": "Сервер недоступен",
   "forwardShortcutHint": "Ctrl+Shift+F",
-  "forwardSuccess": "Forwarded to {count} sessions",
-  "forwardUndo": "Undo",
-  "forwardUndoFailed": "Could not undo the forward",
+  "forwardSuccess": "Переслано в {count} сессий",
+  "forwardTimeDays": "{count} дн",
+  "forwardTimeHours": "{count} ч",
+  "forwardTimeMinutes": "{count} мин",
+  "forwardTimeNow": "сейчас",
+  "forwardTimeWeeks": "{count} нед",
+  "forwardUndo": "Отменить",
+  "forwardUndoFailed": "Не удалось отменить пересылку",
   "logsAppLogs": "Логи приложения",
   "logsClear": "Очистить логи",
   "logsCloseSearch": "Закрыть поиск",
@@ -556,8 +645,8 @@
   "logsShowingOrderedLength": "Показано {length} из {length2} записей",
   "logsSlowestPerformance": "Самые медленные журналы производительности",
   "logsSlowestTasks": "Самые медленные задачи",
-  "logsTagCustomAction": "Своя...",
   "logsTagCustomHint": "Имя тега (например: task:select_session)",
+  "logsTagCustomAction": "Своя...",
   "logsTaskDuration": "{operation} — {elapsedMs} мс",
   "logsTaskStatusCanceled": "отменено",
   "logsTaskStatusError": "ошибка",
@@ -590,7 +679,7 @@
   "msgFilteredLogsCopied": "Отфильтрованные журналы скопированы в буфер обмена",
   "msgInfoAgent": "Агент",
   "msgInfoCompaction": "Сжатие",
-  "msgInfoCost": "Стоимость: \\${cost}",
+  "msgInfoCost": "Стоимость: ${cost}",
   "msgInfoMessageInfo": "Информация о сообщении",
   "msgInfoModel": "Модель: {modelId}",
   "msgInfoNoMetadata": "Метаданные недоступны",
@@ -627,6 +716,23 @@
   "notificationOpenToClear": "Откройте эту беседу, чтобы очистить связанные уведомления.",
   "notificationSession": "Сессия",
   "notificationSoundLoadFailed": "Не удалось загрузить системные звуки Android",
+  "oauthFlowBrowserOpenFailed": "Не удалось открыть системный браузер для входа через OAuth.",
+  "oauthFlowCallbackNotCompleted": "Обратный вызов авторизации не был завершен",
+  "oauthFlowCallbackServerStartFailed": "Не удалось запустить локальный сервер обратного вызова OAuth.",
+  "oauthFlowCallbackTimeout": "Ни один обратный вызов авторизации не достиг приложения в течение 5 минут. Браузер должен был перенаправить на локальный адрес обратного вызова после согласия. Если вместо этого браузер показал ошибку подключения, это устройство или сеть блокирует переадресацию через loopback.",
+  "oauthFlowCallbackValidationFailed": "Не удалось проверить обратный вызов OAuth. Попробуйте еще раз.",
+  "oauthFlowMetadataMissingEndpoints": "В метаданных OAuth отсутствуют точки авторизации и получения токена.",
+  "oauthFlowNoEndpointsDiscovered": "Точки OAuth не обнаружены. Включите Managed OAuth в Cloudflare Dashboard → Access → Applications → [это приложение].",
+  "oauthFlowProfileChanged": "Профиль сервера изменился до завершения OAuth.",
+  "oauthFlowProviderDeclined": "Сервер авторизации отклонил запрос OAuth. Попробуйте еще раз.",
+  "oauthFlowSecureStorageUnavailable": "Защищенное хранилище учетных данных недоступно для OAuth.",
+  "oauthFlowSignInCanceled": "Вход через OAuth отменен.",
+  "oauthFlowTokenExchangeHttpFailure": "Обмен токена не удался (HTTP {statusCode}). Попробуйте еще раз.",
+  "oauthFlowTokenExchangeIncomplete": "Обмен токена не завершился после отправки кода авторизации. Начните вход через OAuth заново.",
+  "oauthFlowTokenExchangeTransientFailure": "Обмен токена не удался после {maxAttempts} попыток из-за временной проблемы с сетью. Попробуйте еще раз.",
+  "oauthFlowTokenExchangeUnexpectedFailure": "Обмен токена неожиданно завершился ошибкой. Попробуйте еще раз.",
+  "oauthFlowTokenResponseMissingAccessToken": "Ответ с токеном OAuth не содержал токен доступа.",
+  "oauthFlowUnexpectedError": "Поток OAuth неожиданно завершился ошибкой. Попробуйте еще раз.",
   "onboardingAIGeneratedTitles": "Заголовки, созданные ИИ",
   "onboardingAddServerLater": "Вы можете добавить сервер позже в Настройки > Серверы.",
   "onboardingAddedButHealthCheckFailed": "Сервер добавлен, но проверка состояния не удалась. Возможно, он еще запускается.",
@@ -748,6 +854,30 @@
   "permissionConfirmReject": "Подтвердить отклонение",
   "permissionReject": "Отклонить",
   "permissionReopen": "Открыть заново",
+  "projectProviderErrorArchiveProjectNotFound": "Не удалось заархивировать проект: проект не найден",
+  "projectProviderErrorArchiveProjectPathInvalid": "Не удалось заархивировать проект: путь проекта некорректен",
+  "projectProviderErrorAtLeastOneContext": "Должен оставаться открытым хотя бы один контекст",
+  "projectProviderErrorContentSearchUnavailable": "Поиск по содержимому недоступен: {error}",
+  "projectProviderErrorCreateWorkspace": "Не удалось создать рабочее пространство: {error}",
+  "projectProviderErrorDeleteWorkspace": "Не удалось удалить рабочее пространство: {error}",
+  "projectProviderErrorDirectoryEmpty": "Директория не может быть пустой",
+  "projectProviderErrorInitializeFailed": "Не удалось инициализировать контекст проекта: {error}",
+  "projectProviderErrorListDirectories": "Не удалось получить список директорий: {error}",
+  "projectProviderErrorListFiles": "Не удалось получить список файлов: {error}",
+  "projectProviderErrorLoadProjectList": "Не удалось загрузить список проектов: {error}",
+  "projectProviderErrorLoadWorkspaces": "Не удалось загрузить рабочие пространства: {error}",
+  "projectProviderErrorNoProjectContext": "Контекст проекта недоступен на сервере",
+  "projectProviderErrorOnlyClosedArchivable": "Архивировать можно только закрытые проекты",
+  "projectProviderErrorPathEmpty": "Путь не может быть пустым",
+  "projectProviderErrorReadFile": "Не удалось прочитать файл: {error}",
+  "projectProviderErrorReopenProjectNotFound": "Не удалось заново открыть проект: проект не найден",
+  "projectProviderErrorResetWorkspace": "Не удалось сбросить рабочее пространство: {error}",
+  "projectProviderErrorSearchFiles": "Не удалось выполнить поиск файлов: {error}",
+  "projectProviderErrorSearchSymbols": "Не удалось выполнить поиск символов: {error}",
+  "projectProviderErrorSwitchDirectoryEmpty": "Не удалось переключить проект: директория пуста",
+  "projectProviderErrorSwitchProjectNotFound": "Не удалось переключить проект: проект не найден",
+  "projectProviderErrorValidateDirectory": "Не удалось проверить директорию: {error}",
+  "projectProviderErrorWorkspaceNameEmpty": "Название рабочего пространства не может быть пустым",
   "questionAnswerSelected": "Ответ не выбран.",
   "questionCommaSeparatedValues": "Значения через запятую",
   "questionQuestionGroupMarked": "Группа вопросов отклонена. Вы можете продолжить общение и повторно открыть эту группу в любое время перед подтверждением.",
@@ -838,7 +968,7 @@
   "sessionDiffFilesCount": "Измененные файлы: {count}",
   "sessionDiffLinesAddedRemoved": "+{added} строк добавлено -{removed} строк удалено",
   "sessionDiffLinesCollapsed": "{count} строк свернуто — нажмите, чтобы развернуть",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "Загрузка измененных файлов…",
   "sessionDiffReview": "Просмотр изменений",
   "sessionDiffSplit": "Разделенный",
   "sessionDiffSummary": "Сводка",
@@ -883,13 +1013,24 @@
   "sessionShareLinkUnavailable": "Ссылка общего доступа недоступна для этой сессии",
   "sessionShared": "Общий доступ к беседе предоставлен",
   "sessionSyncing": "Синхронизация бесед...",
+  "sessionTitleDateAndTime": "{date} {time}",
   "sessionTitleHint": "Название беседы",
+  "sessionTitleToday": "Сегодня {time} ({date})",
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "sessionTitleYesterday": "Вчера {time} ({date})",
   "sessionUnarchive": "Из архива",
   "sessionUnpin": "Открепить",
   "sessionUnshare": "Отменить общий доступ к сессии",
   "sessionUnshareAction": "Закрыть доступ",
   "sessionUnshared": "Общий доступ к беседе отменен",
   "sessionViewTasks": "Посмотреть задачи",
+  "sessionWeekdayFri": "Пт",
+  "sessionWeekdayMon": "Пн",
+  "sessionWeekdaySat": "Сб",
+  "sessionWeekdaySun": "Вс",
+  "sessionWeekdayThu": "Чт",
+  "sessionWeekdayTue": "Вт",
+  "sessionWeekdayWed": "Ср",
   "settingsAboutCheckForUpdates": "Проверить обновления",
   "settingsAboutCheckOnOpen": "Проверять обновления при запуске",
   "settingsAboutCheckOnOpenDescription": "Автоматически проверять обновления при запуске приложения",
@@ -923,8 +1064,8 @@
   "settingsAppearanceBrandColorDynamicBlocked": "Отключите цвета обоев, чтобы выбрать фирменный цвет.",
   "settingsAppearanceBrandColorNormal": "Выберите базовый цвет для палитры приложения.",
   "settingsAppearanceBrandColorPresetBlocked": "Переключитесь на CodeWalk Classic, чтобы выбрать фирменный цвет.",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "Размер текста беседы",
+  "settingsAppearanceChatFontScaleDescription": "Масштабирует текст сообщений чата и редактора поверх системного размера текста.",
   "settingsAppearanceCodeWalkClassic": "CodeWalk Classic",
   "settingsAppearanceComposerTips": "Подсказки в редакторе",
   "settingsAppearanceComposerTipsDescription": "Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает.",
@@ -943,8 +1084,8 @@
   "settingsAppearanceDensityNormal": "Обычная",
   "settingsAppearanceDensitySpacious": "Просторная",
   "settingsAppearanceDescription": "Выбор темы, цветов, размера текста и отображения чата",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "Размер текста",
+  "settingsAppearanceFontSizeDescription": "Настраивает размер системного текста, текста бесед и текста терминала.",
   "settingsAppearanceLight": "Светлая",
   "settingsAppearanceMathRendering": "Отображение формул",
   "settingsAppearanceMathRenderingDescription": "Отображать математические выражения LaTeX (\\$…\\$ и \\$\\$…\\$\\$) в виде отформатированных формул в сообщениях чата.",
@@ -957,12 +1098,12 @@
   "settingsAppearanceSectionDescription": "Настройте плотность элементов интерфейса и экраны сообщений под свой рабочий процесс.",
   "settingsAppearanceSectionTitle": "Внешний вид",
   "settingsAppearanceSystem": "Системная",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "Системный размер текста",
+  "settingsAppearanceSystemFontScaleDescription": "Масштабирует весь текст оболочки приложения, включая меню, диалоги и боковые панели.",
   "settingsAppearanceTaskList": "Список задач",
   "settingsAppearanceTaskListDescription": "Показывать или скрывать виджет списка задач сессии.",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "Размер текста терминала",
+  "settingsAppearanceTerminalFontSizeDescription": "Изменяет размер шрифта встроенного терминала. Применяется немедленно к запущенным сессиям.",
   "settingsAppearanceTheme": "Тема",
   "settingsAppearanceThemeDescription": "Выберите светлый, темный или системный режим, а затем сохраните классическую палитру CodeWalk или переключитесь на предустановку OpenCode.",
   "settingsAppearanceVisualStyle": "Визуальный стиль",
@@ -987,15 +1128,22 @@
   "settingsBehaviorAutoupdateCaveat": "Используйте раздел «О программе» для проверки релизов CodeWalk. Эта настройка лишь дублирует официальную конфигурацию `autoupdate` OpenCode.",
   "settingsBehaviorAutoupdateHelp": "Управляет обновлениями среды выполнения OpenCode, а не проверками обновлений приложения CodeWalk.",
   "settingsBehaviorCellularDataSaver": "Экономия мобильного трафика",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
-  "settingsBehaviorComposerSpellCheck": "Composer spell check",
-  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorChatRenderMode": "Режим отображения чата",
+  "settingsBehaviorChatRenderModeBlock": "Блок",
+  "settingsBehaviorChatRenderModeBlockDescription": "Скрывает живой текст ассистента, рассуждения и карточки инструментов, пока текущий ход не будет показан единым блоком.",
+  "settingsBehaviorChatRenderModeDescription": "Выберите, появляются ли ответы ассистента по мере передачи или раскрываются после завершения текущего хода.",
+  "settingsBehaviorChatRenderModeLive": "В реальном времени",
+  "settingsBehaviorChatRenderModeLiveDescription": "Показывает текст ассистента, рассуждения и активность инструментов по мере передачи событий OpenCode.",
+  "settingsBehaviorComposerSpellCheck": "Проверка орфографии в редакторе",
+  "settingsBehaviorComposerSpellCheckDescription": "Использовать встроенную проверку орфографии платформы, подсказки и автозамену в редакторе чата.",
   "settingsBehaviorConfigDeferred": "CodeWalk применит эту настройку OpenCode после завершения текущего ответа.",
+  "settingsBehaviorConfigFieldAutoUpdateMode": "режим автообновления",
+  "settingsBehaviorConfigFieldConversationUsername": "имя пользователя в диалоге",
+  "settingsBehaviorConfigFieldDefaultAgent": "агент по умолчанию",
+  "settingsBehaviorConfigFieldDefaultModel": "модель по умолчанию",
+  "settingsBehaviorConfigFieldSharingDefault": "настройка общего доступа по умолчанию",
+  "settingsBehaviorConfigFieldSmallModel": "малая модель",
+  "settingsBehaviorConfigFieldSnapshotSetting": "настройка снапшотов",
   "settingsBehaviorConfigUpdateFailed": "Не удалось обновить OpenCode {field}.",
   "settingsBehaviorConversationUsername": "Имя пользователя для бесед",
   "settingsBehaviorConversationUsernameHelp": "Пользовательское имя, отображаемое в беседах вместо системного имени пользователя.",
@@ -1157,6 +1305,30 @@
   "settingsSpeechSilenceTimeout": "Таймаут тишины: {value} с",
   "settingsSpeechTitle": "Преобразование речи в текст",
   "settingsTitle": "Настройки",
+  "settingsGroupAlertTypes": "Типы уведомлений",
+  "settingsGroupBackgroundBehavior": "Работа в фоне",
+  "settingsGroupChatDisplay": "Отображение чата",
+  "settingsGroupCurrentConnection": "Текущее подключение",
+  "settingsGroupDataAndSync": "Данные и синхронизация",
+  "settingsGroupDataReset": "Данные и сброс",
+  "settingsGroupDelivery": "Доставка",
+  "settingsGroupHelp": "Справка",
+  "settingsGroupLanguageAndChat": "Язык и чат",
+  "settingsGroupLayoutAndText": "Макет и текст",
+  "settingsGroupOfflineModels": "Офлайн-модели",
+  "settingsGroupOpenCodeDefaults": "Параметры OpenCode по умолчанию",
+  "settingsGroupReadAloud": "Чтение вслух",
+  "settingsGroupSavedServers": "Сохраненные серверы",
+  "settingsGroupThemeAndColor": "Тема и цвет",
+  "settingsGroupThisDevice": "Это устройство",
+  "settingsGroupVersionUpdates": "Версия и обновления",
+  "settingsGroupVoiceInput": "Голосовой ввод",
+  "settingsNavigationGroupExperience": "Опыт",
+  "settingsNavigationGroupInput": "Ввод",
+  "settingsNavigationGroupSetup": "Настройка",
+  "settingsNavigationGroupSupport": "Справка и диагностика",
+  "settingsNavigationNoResults": "Настройки не найдены",
+  "settingsNavigationSearchHint": "Поиск настроек",
   "settingsUsernameClearHint": "Очистка имени пользователя беседы OpenCode по-прежнему требует изменения конфигурации вне приложения.",
   "settingsUsernameEnterHint": "Введите имя пользователя, чтобы сохранить собственное название беседы OpenCode.",
   "settingsUsernameResetExplanation": "Сброс `username` к системному значению по умолчанию по-прежнему требует редактирования конфигурации вне приложения, поскольку обновления патчей `/config` не могут удалять ключи.",
@@ -1167,7 +1339,7 @@
   "setupDebugCapturedSetupLogs": "Захваченные журналы настройки",
   "setupDebugClear": "Очистить отладочную информацию",
   "setupDebugClearSetupDebug": "Очистить отладочную информацию",
-  "setupDebugCodeWalkCaptureEnough": "If CodeWalk did not capture enough context, check the official OpenCode logs and health endpoints directly:",
+  "setupDebugCodeWalkCaptureEnough": "Если CodeWalk не захватил достаточно контекста, проверьте официальные логи OpenCode и конечные точки состояния напрямую:",
   "setupDebugCommandPath": "Путь к команде",
   "setupDebugCommandPath2": "Путь к команде",
   "setupDebugCopy": "Копировать отладочную информацию",
@@ -1246,29 +1418,52 @@
   "shortcutsSearchEditBindings": "Ищите, редактируйте привязки клавиш и устраняйте конфликты перед сохранением.",
   "shortcutsSetShortcutWidget": "Задать ярлык: {label}",
   "shortcutsTheseBindingsStored": "Эти привязки хранятся в CodeWalk для текущего времени выполнения приложения и не изменяют горячие клавиши в `tui.json` OpenCode.",
+  "speechApiKeyMissing": "Добавьте API-ключ в Настройки > Речь, чтобы использовать этого TTS-провайдера.",
+  "speechApiKeyRejected": "Провайдер отклонил API-ключ TTS.",
   "speechAutoStopSilence": "Автоостановка при тишине",
   "speechChooseRecognitionEngine": "Выберите движок распознавания, таймаут тишины и параметры модели.",
   "speechDesktopOnly": "{service} доступна только на десктопе.",
   "speechDownload": "Скачать",
+  "speechEdgeEmptyAudio": "Microsoft Edge Speech вернул пустой аудиоответ.",
+  "speechEdgeMalformedAudio": "Microsoft Edge Speech вернул поврежденные аудиоданные.",
+  "speechEdgeSynthesisInterrupted": "Microsoft Edge Speech завершился до окончания синтеза речи.",
+  "speechEdgeTextTooLong": "Microsoft Edge Speech может озвучить за раз не более 4096 байт.",
+  "speechEdgeTimedOut": "Истекло время ожидания Microsoft Edge Speech.",
+  "speechEdgeUnreachable": "Не удалось связаться с Microsoft Edge Speech.",
+  "speechEdgeUnsupportedAudio": "Microsoft Edge Speech вернул неподдерживаемые аудиоданные.",
+  "speechEdgeUnsupportedFrame": "Microsoft Edge Speech вернул неподдерживаемый websocket-кадр.",
   "speechEngine": "Движок",
+  "speechEngineFallbackNotice": "Выбранный STT-движок недоступен ({reason}). Вместо него используется {fallback}.",
   "speechInstalledLanguages": "Установленные языки",
   "speechListeningStopsAutomatically": "Распознавание останавливается автоматически после указанного количества секунд тишины.",
+  "speechMicBackendUnavailable": "Бэкенд микрофона Windows недоступен в этой сборке.",
+  "speechMicDeviceBusy": "Микрофон по умолчанию сейчас используется другим приложением.",
+  "speechMicNoInputDevice": "Устройство ввода микрофона недоступно.",
   "speechMicPermissionDisabled": "Разрешение на использование микрофона отключено.",
+  "speechMicSpeechPrivacy": "Возможно, отключены службы речи Windows (конфиденциальность речи, онлайн-распознавание речи или языковые пакеты).",
+  "speechMicUnsupportedFormat": "Формат микрофона по умолчанию не поддерживается.",
   "speechModelFilesIncomplete": "Файлы моделей {service} неполные.",
   "speechMoonshine": "Moonshine",
   "speechMoonshineModelsDesktop": "Модели Moonshine (десктоп)",
   "speechMoonshineStaysDownloadable": "Модели Moonshine загружаются отдельно и не входят в стандартный пакет приложения. Выберите одну модель для этого десктопного устройства и удалите ее позже, если потребуется освободить место.",
   "speechNative": "Встроенный",
   "speechNativeSTTDisabled": "Встроенный STT отключен на Linux в этом приложении. Parakeet используется в качестве движка по умолчанию для новых установок.",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "В Windows CodeWalk использует локальное распознавание речи на устройстве через WASAPI-бэкенд микрофона. Встроенное распознавание речи Windows отключено ради стабильности.",
   "speechNativeStartsFaster": "Встроенный запускается быстрее. Sherpa работает полностью на устройстве с более сложной настройкой и глубоким контролем над моделью.",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechOpenMicrophoneSettings": "Открыть настройки микрофона",
+  "speechOpenSpeechPrivacy": "Открыть конфиденциальность речи",
+  "speechOpenSpeechSettings": "Открыть настройки речи",
   "speechParakeet": "Parakeet",
   "speechParakeetModelsDesktop": "Модели Parakeet (десктоп)",
   "speechParakeetStaysDownloadable": "Модели Parakeet загружаются отдельно и не входят в стандартный пакет приложения. В настоящее время доступна одна многоязычная модель, оптимизированная для 25 европейских языков.",
   "speechPickLanguagePacks": "Выберите языковые пакеты и скачайте/удалите модели для локального распознавания речи.",
+  "speechProviderEmptyAudio": "TTS-провайдер вернул пустой аудиоответ.",
+  "speechProviderQuotaRateLimit": "TTS-провайдер сообщил о превышении квоты или лимита запросов.",
+  "speechProviderRequestRejected": "TTS-провайдер отклонил запрос на озвучивание.",
+  "speechProviderTemporarilyUnavailable": "TTS-провайдер временно недоступен.",
+  "speechProviderUnreachable": "Не удалось связаться с TTS-провайдером.",
+  "speechReadAloudFailed": "Не удалось озвучить текст.",
+  "speechReadAloudNoText": "Нет текста для озвучивания.",
   "speechRemove": "Удалить",
   "speechRuntimeFailed": "Не удалось инициализировать среду выполнения {service}.",
   "speechSelectSherpaAbove": "Выберите Sherpa выше, чтобы управлять языковыми пакетами и загружать модели.",
@@ -1280,7 +1475,7 @@
   "speechSherpaModelsLinux": "Модели Sherpa (Linux)",
   "speechSpeechText": "Преобразование речи в текст",
   "speechUnavailableOnPlatform": "Распознавание речи {service} недоступно на этой платформе.",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "Голосовой ввод в Windows использует захват WASAPI CodeWalk с моделями на устройстве. Держите доступ к микрофону для настольных приложений включенным; кнопки ниже открывают настройки Windows для устранения неполадок.",
   "statusConnected": "Подключено",
   "statusDelayed": "Задержка",
   "statusFailed": "Сбой",
@@ -1298,6 +1493,7 @@
   "tailscaleSelectPeer": "Выберите узел Tailscale",
   "tailscaleWaitingAdminApproval": "Этот узел Tailscale ожидает одобрения администратора.",
   "terminalClose": "Закрыть терминал",
+  "terminalConnectedTo": "Подключено к {serverName} в {directory}",
   "terminalConnectingTo": "Подключение к терминалу {serverName}...",
   "terminalConnectionFailed": "Сбой подключения к терминалу: {error}",
   "terminalDisconnected": "Терминал отключен.",
@@ -1325,6 +1521,7 @@
   "terminalSessionClosed": "Сессия терминала закрыта.",
   "terminalTerminal": "Терминал",
   "terminalTitle": "Терминал",
+  "terminalTransportUnavailable": "Транспорт терминала недоступен.",
   "terminalTryAgain": "Попробовать снова",
   "toolAwaitingInput": "Ожидание ввода",
   "toolEditing": "Редактирование",
@@ -1379,14 +1576,16 @@
   "workspaceCloseProject": "Закрыть {project}",
   "workspaceClosedProjects": "Закрытые проекты",
   "workspaceCurrentDirectory": "Текущий каталог: {path}",
+  "workspaceFailedToOpenProjectContext": "Не удалось открыть контекст проекта: {directory}",
   "workspaceFilterDirs": "Фильтровать каталоги",
   "workspaceOpenFolder": "Открыть папку",
   "workspaceOpenProjectFolder": "Открыть папку проекта",
   "workspaceOpenProjects": "Открытые проекты",
+  "workspaceProjectContextOpened": "Контекст проекта открыт: {directory}",
   "workspaceProjectDirectory": "Каталог проекта",
   "workspaceProjectHint": "/repo/my-project",
+  "workspaceProjectRemovedFromHistory": "Проект удален из истории",
   "workspaceRemoveFromHistory": "Удалить {name} из истории",
-  "workspaceSuggestions": "Предложения",
   "settingsSessionAttentionTitle": "Внимание к сеансам",
   "settingsSessionAttentionDescription": "Показывает состояние корневых сеансов в дополнительном пузыре или панели.",
   "settingsSessionAttentionOff": "Выключено",
@@ -1397,28 +1596,612 @@
   "settingsSessionAttentionOpenSettings": "Открыть настройки отображения",
   "settingsSessionAttentionStop": "Остановить внимание к сеансам",
   "settingsSessionAttentionThirdPartyTtsWarning": "После нажатия «Читать» текст ответа может быть отправлен настроенному стороннему поставщику TTS.",
-  "settingsGroupAlertTypes": "Типы уведомлений",
-  "settingsGroupBackgroundBehavior": "Работа в фоне",
-  "settingsGroupChatDisplay": "Отображение чата",
-  "settingsGroupCurrentConnection": "Текущее подключение",
-  "settingsGroupDataAndSync": "Данные и синхронизация",
-  "settingsGroupDataReset": "Данные и сброс",
-  "settingsGroupDelivery": "Доставка",
-  "settingsGroupHelp": "Справка",
-  "settingsGroupLanguageAndChat": "Язык и чат",
-  "settingsGroupLayoutAndText": "Макет и текст",
-  "settingsGroupOfflineModels": "Офлайн-модели",
-  "settingsGroupOpenCodeDefaults": "Параметры OpenCode по умолчанию",
-  "settingsGroupReadAloud": "Чтение вслух",
-  "settingsGroupSavedServers": "Сохраненные серверы",
-  "settingsGroupThemeAndColor": "Тема и цвет",
-  "settingsGroupThisDevice": "Это устройство",
-  "settingsGroupVersionUpdates": "Версия и обновления",
-  "settingsGroupVoiceInput": "Голосовой ввод",
-  "settingsNavigationGroupExperience": "Опыт",
-  "settingsNavigationGroupInput": "Ввод",
-  "settingsNavigationGroupSetup": "Настройка",
-  "settingsNavigationGroupSupport": "Справка и диагностика",
-  "settingsNavigationNoResults": "Настройки не найдены",
-  "settingsNavigationSearchHint": "Поиск настроек"
+  "workspaceSuggestions": "Предложения",
+  "sessionTabsGestureHintTitle": "У вкладок сессий новые элементы управления",
+  "sessionTabsGestureHintBody": "Двойной щелчок или двойное касание по вкладке закрывает ее. Щелкните правой кнопкой или коснитесь и удерживайте, чтобы открыть действия сессии. Вкладки можно отключить в переключателях отображения.",
+  "sessionTabsGestureHintAcknowledge": "Понятно",
+  "sessionTabsGestureHintDisableTabs": "Отключить вкладки",
+  "sessionTabRenameAction": "Переименовать сессию",
+  "sessionTabClosedMessage": "Вкладка \"{title}\" закрыта",
+  "sessionTabUndo": "Отменить",
+  "sessionTabRestoreFailed": "Не удалось восстановить вкладку.",
+  "sessionTabChangeIconAction": "Сменить значок",
+  "sessionTabIconPickerTitle": "Выбрать значок вкладки",
+  "sessionTabIconUseProjectIcon": "Использовать значок проекта",
+  "sessionTabIconApplied": "Значок вкладки обновлен.",
+  "sessionTabIconSaveFailed": "Не удалось сохранить значок вкладки.",
+  "sessionTabIconPresetCode": "Код",
+  "sessionTabIconPresetTerminal": "Терминал",
+  "sessionTabIconPresetBug": "Ошибка",
+  "sessionTabIconPresetTasks": "Задачи",
+  "sessionTabIconPresetLaunch": "Запуск",
+  "sessionTabIconPresetIdea": "Идея",
+  "sessionTabIconPresetResearch": "Исследование",
+  "sessionTabIconPresetDesign": "Дизайн",
+  "sessionTabIconPresetData": "Данные",
+  "sessionTabIconPresetCloud": "Облако",
+  "sessionTabIconPresetSecurity": "Безопасность",
+  "sessionTabIconPresetTools": "Инструменты",
+  "workspaceNoActiveContext": "Нет активного контекста",
+  "settingsAppearanceContrastLow": "Низкий",
+  "settingsAppearanceContrastStandard": "Стандартный",
+  "settingsAppearanceContrastMedium": "Средний",
+  "settingsAppearanceContrastMediumHigh": "Средне-высокий",
+  "settingsNotificationsSystemSoundsWebUnavailable": "Недоступно в веб-версии.",
+  "settingsNotificationsSystemSoundsAndroid": "Системные звуки уведомлений Android.",
+  "settingsNotificationsSystemSoundsFreedesktop": "Звуки Freedesktop из /usr/share/sounds/freedesktop/stereo.",
+  "settingsNotificationsSystemSoundsPlatform": "Поддерживается там, где операционная система предоставляет системные звуки.",
+  "serversQuickGuideTitle": "Быстрая настройка",
+  "serversQuickGuideIntro": "CodeWalk — это приложение. OpenCode — это движок, который должен быть запущен, чтобы это подключение работало.",
+  "serversQuickGuideStepInstallCli": "1. Установите CLI OpenCode.",
+  "serversQuickGuideRunPowerShell": "2. Выполните в PowerShell:",
+  "serversQuickGuideRunTerminal": "2. Выполните в терминале:",
+  "serversQuickGuideProtectPassword": "Защитите доступ паролем",
+  "serversQuickGuideServerPassword": "Пароль сервера",
+  "serversQuickGuideInstallOptions": "Другие официальные способы установки: установочный скрипт, npm, bun, pnpm, Homebrew или бинарный файл из GitHub Releases.",
+  "serversQuickGuideVerifyHint": "После запуска сервера убедитесь, что /global/health или /doc отвечают, прежде чем вставлять URL в CodeWalk.",
+  "shortcutsPressKeyCombination": "Нажмите комбинацию клавиш сейчас",
+  "settingsProvenanceOpenCodeBacked": "На базе OpenCode",
+  "settingsProvenanceCodeWalkLocal": "Локально для CodeWalk",
+  "settingsProvenanceCodeWalkException": "Исключение CodeWalk",
+  "shortcutsErrorInvalid": "Недопустимое сочетание клавиш",
+  "shortcutsErrorUnsupportedKey": "Неподдерживаемая клавиша",
+  "shortcutsErrorConflict": "Конфликт с \"{conflict}\"",
+  "settingsSessionAttentionStopSaveFailed": "Отслеживание сессий остановлено, но настройку не удалось сохранить.",
+  "settingsSessionAttentionEnableFailed": "Не удалось включить отслеживание сессий.",
+  "settingsSessionAttentionSaveFailedStopped": "Не удалось сохранить отслеживание сессий, поэтому оно остановлено.",
+  "settingsSessionAttentionStillRunning": "Отслеживание сессий все еще работает. Попробуйте остановить его снова.",
+  "settingsSessionAttentionStopFailed": "Не удалось остановить отслеживание сессий. Попробуйте еще раз.",
+  "settingsSessionAttentionCapabilityUnavailable": "Возможность отслеживания сессий недоступна на хосте.",
+  "settingsServerFallbackProviderName": "Настроено на сервере",
+  "composerStopResponse": "Остановить ответ",
+  "composerSendMessageWhileResponding": "Отправить сообщение во время ответа",
+  "composerSendMessage": "Отправить сообщение",
+  "chatTourComposerDescription": "Введите ваш запрос здесь.",
+  "chatTourSendDescription": "Отправьте сообщение здесь.",
+  "composerAttachmentFallbackName": "Вложение",
+  "composerContextFallbackName": "Контекст",
+  "searchableDropdownSearchHint": "Поиск",
+  "searchableDropdownEmptyText": "Совпадений не найдено",
+  "speechApiKeyStorageUnavailable": "Безопасное хранение ключа API TTS недоступно.",
+  "speechApiKeyRemoved": "API-ключ удален.",
+  "speechApiKeySaved": "API-ключ сохранен в защищенном хранилище на этом устройстве.",
+  "speechReadAloudTestText": "Это тест синтеза речи CodeWalk.",
+  "speechNativeDisabledWindows": "Отключено в Windows для стабильности. Используйте Parakeet или другой встроенный движок через захват WASAPI в CodeWalk.",
+  "speechNativeUnavailableLinux": "Недоступно в Linux. Используйте Parakeet для голосового ввода.",
+  "speechNotAvailableOnPlatform": "Недоступно на этой платформе.",
+  "speechSherpaUnavailableAndroid": "Недоступно в сборках Android, оптимизированных под малый размер APK.",
+  "speechMoonshineDesktopOnlyHint": "Доступно только на компьютере. На Android остаются только встроенные движки.",
+  "speechParakeetDesktopOnlyHint": "Доступно только на компьютере. Использует офлайн-распознавание на нескольких языках.",
+  "speechSenseVoiceDesktopOnlyHint": "Доступно только на компьютере. Лучше всего подходит для китайского, кантонского, японского, корейского и английского языков.",
+  "speechNativeSubtitle": "Проще и быстрее запускается.",
+  "speechSherpaSubtitle": "Тяжелее, экспериментальный, склонен к ошибкам. Часто точнее с загруженными моделями.",
+  "speechMoonshineSubtitle": "Экспериментальный путь только для компьютера: офлайн-распознавание sherpa_onnx и загружаемые модели.",
+  "speechParakeetSubtitle": "Офлайн-путь NeMo transducer только для компьютера с одной многоязычной загружаемой моделью.",
+  "speechSenseVoiceSubtitle": "Офлайн-путь только для компьютера, оптимизированный для китайского, кантонского, японского, корейского и английского языков.",
+  "speechMoonshineModel": "Модель Moonshine",
+  "speechSherpaLanguage": "Язык Sherpa",
+  "speechSearchSherpaLanguage": "Поиск языка Sherpa",
+  "speechNoLanguagePacksFound": "Языковые пакеты не найдены",
+  "speechTextToSpeechProvider": "Провайдер синтеза речи",
+  "speechProviderSystemNative": "Системный / встроенный",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (экспериментально)",
+  "speechProviderOpenAiCompatible": "Совместимый с OpenAI",
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech — экспериментально",
+  "speechEdgeExperimentalDescription": "Использует неофициальный сервис Edge Read Aloud напрямую с этого устройства. Текст сообщения отправляется в Microsoft при использовании озвучивания, и сервис может перестать работать, если Microsoft изменит закрытый протокол.",
+  "speechEdgeVoice": "Голос Edge",
+  "speechEdgeVoiceListUnavailable": "Используется голос Edge по умолчанию. Список голосов не удалось загрузить.",
+  "speechEdgeVoicesLoaded": "Загружено из голосов Microsoft Edge Speech.",
+  "speechCloudTtsPrivacy": "Конфиденциальность облачного TTS",
+  "speechCloudTtsPrivacyDescription": "Облачный TTS отправляет текст выбранного сообщения ассистента настроенному провайдеру. API-ключи хранятся в защищенном хранилище на этом устройстве.",
+  "speechBaseUrl": "Базовый URL",
+  "speechApiKey": "API-ключ",
+  "speechApiKeySavedHelper": "Ключ сохранен. Введите новое значение, чтобы заменить его, или оставьте пустым, чтобы удалить.",
+  "speechNoApiKeySaved": "API-ключ не сохранен.",
+  "speechSaveApiKey": "Сохранить API-ключ",
+  "speechModel": "Модель",
+  "speechPitchNotSupported": "Высота тона не поддерживается TTS, совместимым с OpenAI, и скрыта для этого провайдера.",
+  "speechTestVoice": "Проверить голос",
+  "dialogMoonshineVoiceSetupDescription": "Moonshine работает на устройстве через sherpa_onnx. Выберите модель один раз — она загрузится только на это настольное устройство.",
+  "dialogParakeetVoiceSetupDescription": "Parakeet работает на устройстве через офлайн-распознавание sherpa_onnx. Загрузите модель один раз на это настольное устройство, чтобы включить многоязычное распознавание речи (STT).",
+  "dialogSenseVoiceSetupDescription": "SenseVoice работает на устройстве через офлайн-распознавание sherpa_onnx. Он сильнее всего в китайском, кантонском, японском, корейском и английском языках.",
+  "dialogSherpaVoiceSetupDescription": "Голосовой ввод Sherpa требует модель распознавания речи на устройстве. Выберите язык и загрузите модель один раз (~147 МБ).",
+  "speechSilenceSeconds": "{value} сек.",
+  "speechModelInstalled": "Модель установлена ({modelId})",
+  "speechModelMissing": "Модель отсутствует ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} МБ",
+  "speechSystemDefaultLanguage": "Системный ({language})",
+  "speechModelListLoadFailed": "Не удалось загрузить список моделей {service}: {error}",
+  "speechDownloadFailed": "Ошибка загрузки: {error}",
+  "speechFailedToRemoveModel": "Не удалось удалить модель: {error}",
+  "speechBaseUrlExample": "Пример: {url}",
+  "speechModelDefaultHelper": "По умолчанию: {model}",
+  "notificationPermissionOrQuestionNeedsInput": "Для разрешения инструмента или вопроса требуется ваш ввод.",
+  "notificationPermissionNeedsInput": "Для разрешения инструмента требуется ваш ввод.",
+  "notificationQuestionNeedsInput": "Для вопроса инструмента требуется ваш ввод.",
+  "notificationSessionError": "Сессия сообщила об ошибке.",
+  "notificationChannelErrors": "Ошибки CodeWalk",
+  "notificationChannelErrorsDescription": "Уведомления об ошибках CodeWalk",
+  "notificationChannelPermissions": "Разрешения CodeWalk",
+  "notificationChannelPermissionsDescription": "Уведомления о действиях, требующих вашего участия",
+  "notificationChannelAgent": "Агент CodeWalk",
+  "notificationChannelAgentDescription": "Уведомления о завершении работы агента CodeWalk",
+  "notificationActionOpen": "Открыть",
+  "foregroundMonitorNotificationBody": "Надежные фоновые уведомления активны",
+  "foregroundMonitorNotificationTitle": "Фоновое отслеживание активно",
+  "foregroundMonitorNotificationOneSession": "Отслеживается одна сессия",
+  "foregroundMonitorNotificationSessionCount": "Отслеживается сессий: {count}",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{1 сессия требует внимания} few{{count} сессии требуют внимания} many{{count} сессий требуют внимания} other{{count} сессий требуют внимания}}",
+  "sessionAttentionOverlayPermissionRequired": "Требуется разрешение на отображение поверх других приложений.",
+  "sessionAttentionIosInAppOnly": "Отслеживание сессий доступно только внутри CodeWalk.",
+  "sessionAttentionOverlayPermissionGrantPrompt": "Предоставьте разрешение на отображение поверх других приложений, затем попробуйте снова.",
+  "sessionAttentionAndroidStartFailed": "Службе отслеживания сессий Android не удалось запуститься.",
+  "chatMessageTruncatedChars": "[обрезано {count} символов] {reason}",
+  "chatMessageJustNow": "Только что",
+  "chatMessageMinutesAgo": "{count} мин назад",
+  "chatMessageHoursAgo": "{count} ч назад",
+  "chatMessageDaysAgo": "{count} дн. назад",
+  "chatMessageDateTime": "{day}.{month} {hour}:{minute}",
+  "chatMessageYourMessage": "Ваше сообщение",
+  "chatMessageAssistantMessage": "Сообщение ассистента",
+  "chatMessageStepStarted": "Шаг #{step} начат",
+  "chatMessageStepStartedWithSnapshot": "Шаг #{step} начат: {snapshot}",
+  "chatMessageStepFinished": "Шаг #{step} завершен: {reason} • токены {tokens} • ${cost}",
+  "chatMessagePatchCount": "{count, plural, =1{1 патч} few{{count} патча} many{{count} патчей} other{{count} патчей}}",
+  "chatMessageToolRun": "Запуск инструмента",
+  "chatMessageToolExecution": "Выполнение инструмента",
+  "chatMessageToolChainMore": "{count, plural, =1{+1 еще} other{+{count} еще}}",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+1 тип} few{+{count} типа} many{+{count} типов} other{+{count} типов}}",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 требует внимания} other{{count} требуют внимания}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 готово} other{{count} готово}}",
+  "chatMessageToolCallsTitle": "Вызовы инструментов",
+  "chatMessageDiffPreviewTruncated": "Предпросмотр изменений обрезан для стабильности приложения.",
+  "chatMessageLargeMessageTruncated": "Предпросмотр большого сообщения обрезан для стабильности приложения.",
+  "chatMessageInvalidLinkFormat": "Недопустимый формат ссылки",
+  "chatMessageUnableToOpenLink": "Не удалось открыть ссылку",
+  "sessionTodoInProgressCompact": "{current}/{total} в работе",
+  "sessionTodoTaskProgress": "Задача {index}/{total}: {content}",
+  "sessionTodoDoneCompact": "{count}/{total} готово",
+  "sessionTodoCompletedCount": "Задач выполнено: {count}/{total}",
+  "sessionTodoTasksCount": "Задачи ({count})",
+  "questionStepOfReview": "Шаг {current} из {total} — Просмотр",
+  "questionStepOfQuestion": "Шаг {current} из {total} — Вопрос",
+  "questionCustomAnswer": "Свой ответ",
+  "questionSubmitAnswers": "Отправить ответы",
+  "questionReviewAnswers": "Просмотр ответов",
+  "permissionRequestTitle": "Запрос разрешения: {permission}",
+  "appProviderErrorFailedToStartProcess": "Не удалось запустить процесс {tool}.",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} недоступен. Сначала установите {runtime}.",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "Установка {tool} не удалась: код выхода {exitCode}.",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "Сбой загрузки Bun: код выхода {exitCode}.",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "Установка OpenCode завершилась, но команда не найдена в PATH.",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "Установка OpenCode завершилась, но не удалось определить путь к команде.",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "Настроенная команда не найдена, и {tool} нет в PATH.",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "Путь к настроенной команде не существует.",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "Настроенная команда существует, но проверка версии не удалась.",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "Не удалось выполнить настроенную команду.",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "Проверка WSL применяется только к Windows.",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "Используйте настольную версию, чтобы настроить управляемый локальный сервер.",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "Обнаружено в известном каталоге установки.",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "Обнаружено в известном каталоге установки. Возможно, потребуется обновить PATH: перезапустите {appName}, если недавняя установка еще не обнаружена.",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "Не удалось получить метаданные последнего релиза из GitHub.",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "В метаданных последнего релиза не было списка файлов.",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "Совместимый бинарный файл OpenCode не найден.",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "Не удалось загрузить выбранный файл OpenCode.",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "Не удалось проверить контрольную сумму загруженного файла.",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "Не удалось извлечь бинарный архив OpenCode.",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "Не удалось найти исполняемый файл {tool} в извлеченных файлах.",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "Сервер не ответил. Попробуйте еще раз.",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "Модель не ответила. Попробуйте еще раз.",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "Задача озвучивания была отменена.",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "Microsoft Edge Speech был отменен.",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "Активно",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "Получение",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "Задержано",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "Завершено",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "Ожидает взаимодействия",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "Ошибка",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "Активен режим экономии мобильных данных",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "Требуется вход через OAuth",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "Требуется подключение Tailscale",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "Офлайн",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "Разрешение отозвано",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "Служба остановлена",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "Хост недоступен",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "sessionTitleCannotBeEmpty": "Название не может быть пустым",
+  "errorCertificateError": "Ошибка сертификата",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorRequestCancelled": "Запрос отменён",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorRunShellCommandFailed": "Не удалось выполнить команду оболочки",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "Не удалось выполнить слеш-команду",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "errorSessionBusy": "Сеанс занят обработкой другого запроса.",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorUnknownNetworkError": "Неизвестная сетевая ошибка: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "forwardUntitled": "Без названия",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "logsEntryError": "Ошибка",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "Стек",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "sessionTabIconRemoveFailed": "Не удалось удалить данные значка локальной вкладки сеанса",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "Не удалось загрузить значения по умолчанию на основе OpenCode с активного сервера.",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "setupDebugLinuxLogsPath": "Журналы Linux: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "Попытка обнаружить существующую команду OpenCode в текущем окружении.",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageDiagnosticsResult": "{availability} на {platform}. {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "Управляемый сервер OpenCode завершил работу после запрошенной остановки.",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageHealthyRunning": "Управляемый сервер OpenCode работает корректно по адресу {url}.",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageInstallStarted": "Установка OpenCode запущена из CodeWalk.",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "Пользователь выбрал добавление другого сервера после неудачной проверки работоспособности.",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "Пользователь выбрал подключение к существующему серверу OpenCode.",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "Пользователь открыл путь управляемой настройки OpenCode.",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "Пользователь открыл управляемую локальную настройку OpenCode.",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "Пользователь открыл настройки сервера после неудачной проверки работоспособности.",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageStartLocalServer": "Запуск управляемого сервера OpenCode по адресу {url}.",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppedCleanly": "Управляемый сервер OpenCode остановлен корректно.",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageStoppingLocalServer": "Остановка управляемого сервера OpenCode.",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageTestingServerUrl": "Проверка URL сервера OpenCode {url} из процесса настройки.",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "Запустите OpenCode с помощью: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "Документация сервера: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "Работоспособность сервера: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugSourceDiagnostics": "Диагностика",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceLocalServer": "Локальный сервер",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceManualConnection": "Ручное подключение",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugSourceOnboarding": "Онбординг",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceUseExisting": "Использовать существующий",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "chatProviderErrorSessionNotFound": "Сессия не найдена",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "Некорректный формат сообщения",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "Ошибка сетевого подключения",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "Неизвестная ошибка",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "Не удалось создать сессию терминала",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "Конечная точка терминала недоступна",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "Недопустимый каталог терминала",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "Вебсокет терминала здесь недоступен.",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 вызов} few{{count} вызова} many{{count} вызовов} other{{count} вызовов}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "Время ожидания соединения истекло",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "Ошибка клиента",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "Не удалось отправить сообщение",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

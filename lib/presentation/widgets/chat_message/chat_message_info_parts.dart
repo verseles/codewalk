@@ -104,7 +104,7 @@ extension _ChatMessageInfoPartsBuilder on _ChatMessageWidgetState {
   Widget _buildPatchPart(BuildContext context, PatchPart part) {
     final files = part.files.take(4).join(', ');
     final suffix = part.files.length > 4
-        ? ' (+${part.files.length - 4} more)'
+        ? ' (${context.l10n.chatMessageToolChainMore(part.files.length - 4)})'
         : '';
     return _buildInfoContainer(
       context,

@@ -155,7 +155,7 @@ extension _ChatPageSelectorFlow on _ChatPageState {
               children: [
                 Text(
                   currentProject == null
-                      ? 'No active context'
+                      ? context.l10n.workspaceNoActiveContext
                       : context.l10n.workspaceCurrentDirectory(
                           currentDirectoryFull,
                         ),

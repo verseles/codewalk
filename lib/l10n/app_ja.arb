@@ -93,12 +93,12 @@
   "behaviorCustomDisplayName": "カスタム表示名",
   "behaviorCutsAutomaticMobile": "バックグラウンドダウンロードを停止し、フォアグラウンドの自動更新を{inSeconds}秒ごとに1回のバーストに制限することで、自動モバイルデータ使用量を削減します。",
   "behaviorDataSaverActive": "モバイルデータ通信で現在有効です。",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "積極的",
+  "behaviorDataSaverAggressiveDescription": "低帯域モード: 表示中のワークスペースのストリームのみがライブのままとなり、グローバル更新は一時停止され、自動更新の間隔が延長されます。",
   "behaviorDataSaverCellularOnly": "接続がモバイルデータ通信の場合にのみ適用されます。",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "オフ",
+  "behaviorDataSaverOffHint": "完全なリアルタイム更新と自動更新が有効です。",
+  "behaviorDataSaverStandard": "標準",
   "behaviorDataSaverWaiting": "次のモバイルデータ同期ウィンドウを待機しています。",
   "behaviorDisabled": "無効",
   "behaviorLightweightTasksLike": "次のような軽量タスク",
@@ -142,8 +142,8 @@
   "chatBadgeDataSaverActive": "データ節約モードが有効です。",
   "chatBadgeServerNeedsAttention": "サーバー接続に注意が必要です。",
   "chatBadgeSyncing": "会話を同期中...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "このターンが終了すると、回答が1つのブロックとして表示されます。",
+  "chatBlockResponsePendingTitle": "応答を生成中",
   "chatCachedConversationsYet": "キャッシュされた会話はまだありません",
   "chatChangedFilesAvailable": "このセッションで利用可能な変更されたファイルはありません。",
   "chatChildrenChatProviderCurrentSessionChildren": "子: {length}",
@@ -439,7 +439,7 @@
   "composerExtrasHide": "その他を隠す",
   "composerNewQuickReply": "新規クイック返信",
   "composerSelectImages": "画像を選択",
-  "composerSelectPdf": "Select PDF",
+  "composerSelectPdf": "PDF を選択",
   "composerSend": "送信",
   "composerShellMode": "シェルモード",
   "desktopWindowClose": "閉じる",
@@ -500,35 +500,60 @@
   "filesDuplicate": "複製",
   "filesDuplicated": "ファイルを複製しました",
   "filesFileEmpty": "ファイルは空です。",
+  "filesAlreadyExists": "その名前のファイルまたはフォルダーは既に存在します。",
+  "filesCopyPath": "パスをコピー",
+  "filesCreateFileTitle": "ファイルを作成",
+  "filesCreateFolderTitle": "フォルダーを作成",
+  "filesDelete": "削除",
+  "filesDeleteConfirm": "「{name}」を削除しますか？この操作は元に戻せません。フォルダーは中身ごと削除されます。",
+  "filesDeleteTitle": "「{name}」を削除",
   "filesFilesFound": "ファイルが見つかりません",
+  "filesFileCreated": "ファイルを作成しました。",
+  "filesFolderCreated": "フォルダーを作成しました。",
   "filesHideSidebar": "ファイルサイドバーを非表示",
+  "filesInvalidName": "パス区切り文字を含まない有効な名前を入力してください。",
+  "filesNameHint": "名前",
+  "filesNew": "新規",
+  "filesNewFile": "新しいファイル",
+  "filesNewFolder": "新しいフォルダー",
   "filesNames": "名前",
   "filesOpenFilesFileState": "開いているファイル ({length})",
   "filesQuickOpen": "クイックオープン",
   "filesQuickOpenFile": "ファイルをクイックオープン",
+  "filesOperationFailed": "ファイル操作に失敗しました。",
+  "filesOperationUnavailable": "このサーバーではファイル操作を利用できません。",
+  "filesOutsideRoot": "パスがプロジェクトルートの外にあります。",
+  "filesPathCopied": "パスをコピーしました。",
+  "filesPathMissing": "パスが存在しません。",
+  "filesPermissionDenied": "権限がありません。",
   "filesRefresh": "ファイルを更新",
+  "filesRename": "名前を変更",
+  "filesRenameTitle": "「{name}」の名前を変更",
+  "filesRenamed": "名前を変更しました。",
+  "filesRootDeleteBlocked": "プロジェクトのルートは削除できません。",
   "filesSearchHint": "名前またはパスでファイルを検索",
+  "filesDeleted": "削除しました。",
   "filesTitle": "ファイル",
-  "forwardAction": "Forward",
-  "forwardAllFailed": "Could not forward to any session",
-  "forwardCancel": "Cancel",
-  "forwardDialogSubtitle": "Select one or more conversations",
-  "forwardDialogTitle": "Forward to…",
-  "forwardLoading": "Loading sessions…",
-  "forwardNoOpenProjects": "No open projects with sessions",
-  "forwardNoProviderModel": "Select a provider and model before forwarding",
-  "forwardNoSessions": "No recent sessions",
-  "forwardPartial": "Forwarded to {success} of {total}",
-  "forwardProvenanceLabel": "Forwarded from: {origin}",
-  "forwardRetry": "Retry",
-  "forwardSearchHint": "Search",
-  "forwardSelectedCount": "{count} selected",
-  "forwardSend": "Forward",
-  "forwardServerOffline": "Server offline",
+  "forwardAction": "転送",
+  "forwardAllFailed": "どのセッションにも転送できませんでした",
+  "forwardCancel": "キャンセル",
+  "forwardDialogSubtitle": "1つ以上の会話を選択",
+  "forwardDialogTitle": "転送先…",
+  "forwardLoading": "セッションを読み込み中…",
+  "forwardNoOpenProjects": "セッションのある開いているプロジェクトがありません",
+  "forwardNoProviderModel": "転送する前にプロバイダーとモデルを選択してください",
+  "forwardNoSessions": "最近のセッションがありません",
+  "forwardPartial": "{total}件中{success}件に転送しました",
+  "forwardProvenanceLabel": "転送元: {origin}",
+  "forwardRetry": "再試行",
+  "forwardSearchHint": "検索",
+  "forwardSelectedCount": "{count}件選択中",
+  "forwardSend": "転送",
+  "forwardServerOffline": "サーバーがオフラインです",
   "forwardShortcutHint": "Ctrl+Shift+F",
-  "forwardSuccess": "Forwarded to {count} sessions",
-  "forwardUndo": "Undo",
-  "forwardUndoFailed": "Could not undo the forward",
+  "forwardSuccess": "{count}件のセッションに転送しました",
+  "forwardUndo": "元に戻す",
+  "forwardUndoFailed": "転送を元に戻せませんでした",
   "logsAppLogs": "アプリログ",
   "logsClear": "ログをクリア",
   "logsCloseSearch": "検索を閉じる",
@@ -556,8 +581,8 @@
   "logsShowingOrderedLength": "{length2}件中{length}件のエントリを表示",
   "logsSlowestPerformance": "最も遅いパフォーマンスログ",
   "logsSlowestTasks": "最も遅いタスク",
-  "logsTagCustomAction": "カスタム...",
   "logsTagCustomHint": "タグ名（例: task:select_session）",
+  "logsTagCustomAction": "カスタム...",
   "logsTaskDuration": "{operation} — {elapsedMs} ms",
   "logsTaskStatusCanceled": "キャンセル済み",
   "logsTaskStatusError": "エラー",
@@ -590,7 +615,7 @@
   "msgFilteredLogsCopied": "フィルター済みログがクリップボードにコピーされました",
   "msgInfoAgent": "エージェント",
   "msgInfoCompaction": "圧縮",
-  "msgInfoCost": "コスト: \\${cost}",
+  "msgInfoCost": "コスト: ${cost}",
   "msgInfoMessageInfo": "メッセージ情報",
   "msgInfoModel": "モデル: {modelId}",
   "msgInfoNoMetadata": "メタデータはありません",
@@ -838,7 +863,7 @@
   "sessionDiffFilesCount": "差分ファイル: {count}",
   "sessionDiffLinesAddedRemoved": "+{added} 行追加 -{removed} 行削除",
   "sessionDiffLinesCollapsed": "{count} 行が折りたたまれています — タップして展開",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "変更されたファイルを読み込み中…",
   "sessionDiffReview": "変更を確認",
   "sessionDiffSplit": "分割",
   "sessionDiffSummary": "概要",
@@ -923,8 +948,8 @@
   "settingsAppearanceBrandColorDynamicBlocked": "ブランドカラーを選択するには、壁紙の色を無効にしてください。",
   "settingsAppearanceBrandColorNormal": "アプリパレットのシードカラーを選択します。",
   "settingsAppearanceBrandColorPresetBlocked": "ブランドカラーを選択するには、CodeWalk クラシックに切り替えてください。",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "会話の文字サイズ",
+  "settingsAppearanceChatFontScaleDescription": "システムの文字サイズに加えて、チャットメッセージとコンポーザーのテキストを拡大縮小します。",
   "settingsAppearanceCodeWalkClassic": "CodeWalkクラシック",
   "settingsAppearanceComposerTips": "コンポーザーヒント",
   "settingsAppearanceComposerTipsDescription": "アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。",
@@ -943,8 +968,8 @@
   "settingsAppearanceDensityNormal": "標準",
   "settingsAppearanceDensitySpacious": "低密度",
   "settingsAppearanceDescription": "テーマ、配色、文字サイズ、チャット表示を選択",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "文字サイズ",
+  "settingsAppearanceFontSizeDescription": "システムテキスト、会話テキスト、ターミナルの文字サイズを調整します。",
   "settingsAppearanceLight": "ライト",
   "settingsAppearanceMathRendering": "数式レンダリング",
   "settingsAppearanceMathRenderingDescription": "チャットメッセージでLaTeX数式を組版済み方程式としてレンダリングします。",
@@ -957,12 +982,12 @@
   "settingsAppearanceSectionDescription": "ワークフローに合わせて、表示密度やメッセージの表面を調整します。",
   "settingsAppearanceSectionTitle": "外観",
   "settingsAppearanceSystem": "システム",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "システムの文字サイズ",
+  "settingsAppearanceSystemFontScaleDescription": "メニュー、ダイアログ、サイドバーを含むアプリシェル全体の文字を拡大縮小します。",
   "settingsAppearanceTaskList": "タスク一覧",
   "settingsAppearanceTaskListDescription": "セッションタスク一覧ウィジェットの表示/非表示を切り替えます。",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "ターミナルの文字サイズ",
+  "settingsAppearanceTerminalFontSizeDescription": "組み込みターミナルのフォントサイズを変更します。実行中のセッションにすぐに適用されます。",
   "settingsAppearanceTheme": "テーマ",
   "settingsAppearanceThemeDescription": "ライト、ダーク、またはシステムモードを選択し、CodeWalk クラシックパレットを維持するか、OpenCode プリセットに切り替えます。",
   "settingsAppearanceVisualStyle": "ビジュアルスタイル",
@@ -987,14 +1012,14 @@
   "settingsBehaviorAutoupdateCaveat": "CodeWalk のリリース確認には「情報」を使用してください。この設定は公式の OpenCode `autoupdate` 設定をミラーリングしているだけです。",
   "settingsBehaviorAutoupdateHelp": "上流の OpenCode ランタイムのアップデートを制御します。CodeWalk アプリのアップデート確認ではありません。",
   "settingsBehaviorCellularDataSaver": "モバイルデータセーバー",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
-  "settingsBehaviorComposerSpellCheck": "Composer spell check",
-  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorChatRenderMode": "チャット表示モード",
+  "settingsBehaviorChatRenderModeBlock": "ブロック",
+  "settingsBehaviorChatRenderModeBlockDescription": "現在のターンを1つのブロックとして表示できるまで、ライブのアシスタントテキスト、推論、ツールカードを非表示にします。",
+  "settingsBehaviorChatRenderModeDescription": "アシスタントの応答をストリーム中に表示するか、現在のターンが完了した後に表示するかを選択します。",
+  "settingsBehaviorChatRenderModeLive": "ライブ",
+  "settingsBehaviorChatRenderModeLiveDescription": "OpenCode がイベントをストリームする際に、アシスタントのテキスト、推論、ツールのアクティビティを表示します。",
+  "settingsBehaviorComposerSpellCheck": "コンポーザーのスペルチェック",
+  "settingsBehaviorComposerSpellCheckDescription": "チャットコンポーザーでプラットフォーム標準のスペルチェック、候補、自動修正を使用します。",
   "settingsBehaviorConfigDeferred": "CodeWalk は、現在のレスポンスが終了した後にこの OpenCode 設定を適用します。",
   "settingsBehaviorConfigUpdateFailed": "OpenCode の {field} を更新できませんでした。",
   "settingsBehaviorConversationUsername": "会話用ユーザー名",
@@ -1157,6 +1182,30 @@
   "settingsSpeechSilenceTimeout": "無音タイムアウト: {value}秒",
   "settingsSpeechTitle": "音声文字変換",
   "settingsTitle": "設定",
+  "settingsGroupAlertTypes": "アラートの種類",
+  "settingsGroupBackgroundBehavior": "バックグラウンド時の動作",
+  "settingsGroupChatDisplay": "チャット表示",
+  "settingsGroupCurrentConnection": "現在の接続",
+  "settingsGroupDataAndSync": "データと同期",
+  "settingsGroupDataReset": "データとリセット",
+  "settingsGroupDelivery": "配信",
+  "settingsGroupHelp": "ヘルプ",
+  "settingsGroupLanguageAndChat": "言語とチャット",
+  "settingsGroupLayoutAndText": "レイアウトと文字",
+  "settingsGroupOfflineModels": "オフラインモデル",
+  "settingsGroupOpenCodeDefaults": "OpenCode のデフォルト",
+  "settingsGroupReadAloud": "読み上げ",
+  "settingsGroupSavedServers": "保存済みサーバー",
+  "settingsGroupThemeAndColor": "テーマと配色",
+  "settingsGroupThisDevice": "このデバイス",
+  "settingsGroupVersionUpdates": "バージョンと更新",
+  "settingsGroupVoiceInput": "音声入力",
+  "settingsNavigationGroupExperience": "操作感",
+  "settingsNavigationGroupInput": "入力",
+  "settingsNavigationGroupSetup": "セットアップ",
+  "settingsNavigationGroupSupport": "ヘルプと診断",
+  "settingsNavigationNoResults": "設定が見つかりません",
+  "settingsNavigationSearchHint": "設定を検索",
   "settingsUsernameClearHint": "OpenCode 会話ユーザー名をクリアするには、依然としてアプリ外で設定を編集する必要があります。",
   "settingsUsernameEnterHint": "カスタムの OpenCode 会話名を保存するにはユーザー名を入力してください。",
   "settingsUsernameResetExplanation": "`/config` パッチ更新ではキーを削除できないため、`username` をシステムデフォルトに戻すにはアプリ外で設定を編集する必要があります。",
@@ -1260,11 +1309,11 @@
   "speechMoonshineStaysDownloadable": "Moonshine はアプリバンドルの外に置かれ、ダウンロード可能な状態になります。このデスクトップデバイス用にモデルを1つ選択し、後で容量を戻したい場合は削除してください。",
   "speechNative": "ネイティブ",
   "speechNativeSTTDisabled": "このアプリでは Linux 上のネイティブ STT が無効になっています。新規インストールでは Parakeet がデフォルトのエンジンになります。",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "Windows では、CodeWalk は WASAPI マイクバックエンドを通じてローカルのオンデバイス音声認識を使用します。安定性のため、Windows ネイティブの音声認識は無効になっています。",
   "speechNativeStartsFaster": "ネイティブの方が起動が早いです。Sherpa はより重いセットアップとより深いモデル制御を伴い、完全にデバイス上で動作します。",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechOpenMicrophoneSettings": "マイク設定を開く",
+  "speechOpenSpeechPrivacy": "音声のプライバシー設定を開く",
+  "speechOpenSpeechSettings": "音声設定を開く",
   "speechParakeet": "Parakeet",
   "speechParakeetModelsDesktop": "Parakeetモデル（デスクトップ）",
   "speechParakeetStaysDownloadable": "Parakeet はアプリバンドルの外に置かれ、ダウンロード可能な状態になります。現在は、ヨーロッパの25言語向けに最適化された1つの多言語モデルが公開されています。",
@@ -1280,7 +1329,7 @@
   "speechSherpaModelsLinux": "Sherpaモデル（Linux）",
   "speechSpeechText": "音声文字変換",
   "speechUnavailableOnPlatform": "{service} 音声はこのプラットフォームでは利用できません。",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "Windows の音声入力は、オンデバイスモデルとともに CodeWalk WASAPI キャプチャを使用します。デスクトップアプリのマイクアクセスを有効にしたままにしてください。下のボタンでトラブルシューティング用の Windows 設定が開きます。",
   "statusConnected": "接続済み",
   "statusDelayed": "遅延",
   "statusFailed": "失敗",
@@ -1295,7 +1344,7 @@
   "tailscaleNotSupportedOnPlatform": "Tailscale はこのプラットフォームではサポートされていません。",
   "tailscaleNotSupportedOnWindows": "Tailscale は Windows ではサポートされていません。",
   "tailscalePeerOffline": "オフライン",
-  "tailscaleSelectPeer": "Select a Tailscale peer",
+  "tailscaleSelectPeer": "Tailscale ピアを選択",
   "tailscaleWaitingAdminApproval": "この Tailscale ノードは管理者の承認待ちです。",
   "terminalClose": "ターミナルを閉じる",
   "terminalConnectingTo": "{serverName} ターミナルに接続中...",
@@ -1386,7 +1435,6 @@
   "workspaceProjectDirectory": "プロジェクトディレクトリ",
   "workspaceProjectHint": "/repo/my-project",
   "workspaceRemoveFromHistory": "履歴から {name} を削除",
-  "workspaceSuggestions": "提案",
   "settingsSessionAttentionTitle": "セッション通知",
   "settingsSessionAttentionDescription": "ルートセッションの状態を任意のバブルまたはパネルに表示します。",
   "settingsSessionAttentionOff": "オフ",
@@ -1397,28 +1445,763 @@
   "settingsSessionAttentionOpenSettings": "表示設定を開く",
   "settingsSessionAttentionStop": "セッション通知を停止",
   "settingsSessionAttentionThirdPartyTtsWarning": "「読み上げ」を押すと、応答テキストが設定済みの外部 TTS プロバイダーに送信される場合があります。",
-  "settingsGroupAlertTypes": "アラートの種類",
-  "settingsGroupBackgroundBehavior": "バックグラウンド時の動作",
-  "settingsGroupChatDisplay": "チャット表示",
-  "settingsGroupCurrentConnection": "現在の接続",
-  "settingsGroupDataAndSync": "データと同期",
-  "settingsGroupDataReset": "データとリセット",
-  "settingsGroupDelivery": "配信",
-  "settingsGroupHelp": "ヘルプ",
-  "settingsGroupLanguageAndChat": "言語とチャット",
-  "settingsGroupLayoutAndText": "レイアウトと文字",
-  "settingsGroupOfflineModels": "オフラインモデル",
-  "settingsGroupOpenCodeDefaults": "OpenCode のデフォルト",
-  "settingsGroupReadAloud": "読み上げ",
-  "settingsGroupSavedServers": "保存済みサーバー",
-  "settingsGroupThemeAndColor": "テーマと配色",
-  "settingsGroupThisDevice": "このデバイス",
-  "settingsGroupVersionUpdates": "バージョンと更新",
-  "settingsGroupVoiceInput": "音声入力",
-  "settingsNavigationGroupExperience": "操作感",
-  "settingsNavigationGroupInput": "入力",
-  "settingsNavigationGroupSetup": "セットアップ",
-  "settingsNavigationGroupSupport": "ヘルプと診断",
-  "settingsNavigationNoResults": "設定が見つかりません",
-  "settingsNavigationSearchHint": "設定を検索"
+  "workspaceSuggestions": "提案",
+  "sessionTabsGestureHintTitle": "セッションタブに新しい操作が追加されました",
+  "sessionTabsGestureHintBody": "ダブルクリックまたはダブルタップでタブを閉じます。右クリックまたは長押しでセッション操作を開きます。タブは表示トグルで無効にできます。",
+  "sessionTabsGestureHintAcknowledge": "OK",
+  "sessionTabsGestureHintDisableTabs": "タブを無効化",
+  "sessionTabRenameAction": "セッション名を変更",
+  "sessionTabClosedMessage": "タブ「{title}」を閉じました",
+  "sessionTabUndo": "元に戻す",
+  "sessionTabRestoreFailed": "タブを復元できませんでした。",
+  "sessionTabChangeIconAction": "アイコンを変更",
+  "sessionTabIconPickerTitle": "タブのアイコンを選択",
+  "sessionTabIconUseProjectIcon": "プロジェクトのアイコンを使用",
+  "sessionTabIconApplied": "タブのアイコンを更新しました。",
+  "sessionTabIconSaveFailed": "タブのアイコンを保存できませんでした。",
+  "sessionTabIconPresetCode": "コード",
+  "sessionTabIconPresetTerminal": "ターミナル",
+  "sessionTabIconPresetBug": "バグ",
+  "sessionTabIconPresetTasks": "タスク",
+  "sessionTabIconPresetLaunch": "起動",
+  "sessionTabIconPresetIdea": "アイデア",
+  "sessionTabIconPresetResearch": "調査",
+  "sessionTabIconPresetDesign": "デザイン",
+  "sessionTabIconPresetData": "データ",
+  "sessionTabIconPresetCloud": "クラウド",
+  "sessionTabIconPresetSecurity": "セキュリティ",
+  "sessionTabIconPresetTools": "ツール",
+  "workspaceNoActiveContext": "アクティブなコンテキストがありません",
+  "settingsAppearanceContrastLow": "低",
+  "settingsAppearanceContrastStandard": "標準",
+  "settingsAppearanceContrastMedium": "中",
+  "settingsAppearanceContrastMediumHigh": "中高",
+  "settingsNotificationsSystemSoundsWebUnavailable": "Web では利用できません。",
+  "settingsNotificationsSystemSoundsAndroid": "システムの Android 通知音。",
+  "settingsNotificationsSystemSoundsFreedesktop": "/usr/share/sounds/freedesktop/stereo の Freedesktop サウンド。",
+  "settingsNotificationsSystemSoundsPlatform": "OS がシステムサウンドを公開しているプラットフォームで利用できます。",
+  "serversQuickGuideTitle": "クイックセットアップ",
+  "serversQuickGuideIntro": "CodeWalk はアプリ、OpenCode はエンジンです。この接続を利用するには OpenCode の起動が必要です。",
+  "serversQuickGuideStepInstallCli": "1. OpenCode CLI をインストール。",
+  "serversQuickGuideRunPowerShell": "2. PowerShell で実行:",
+  "serversQuickGuideRunTerminal": "2. ターミナルで実行:",
+  "serversQuickGuideProtectPassword": "パスワードでアクセスを保護",
+  "serversQuickGuideServerPassword": "サーバーパスワード",
+  "serversQuickGuideInstallOptions": "その他の公式インストール方法: インストールスクリプト、npm、bun、pnpm、Homebrew、または GitHub Releases のバイナリ。",
+  "serversQuickGuideVerifyHint": "サーバー起動後、URL を CodeWalk に貼り付ける前に /global/health または /doc が応答することを確認してください。",
+  "shortcutsPressKeyCombination": "キーの組み合わせを押してください",
+  "settingsProvenanceOpenCodeBacked": "OpenCode ベース",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk ローカル",
+  "settingsProvenanceCodeWalkException": "CodeWalk 例外",
+  "shortcutsErrorInvalid": "無効なショートカット",
+  "shortcutsErrorUnsupportedKey": "サポートされていないショートカットキー",
+  "shortcutsErrorConflict": "「{conflict}」と競合",
+  "settingsSessionAttentionStopSaveFailed": "セッション通知は停止しましたが、設定を保存できませんでした。",
+  "settingsSessionAttentionEnableFailed": "セッション通知を有効にできませんでした。",
+  "settingsSessionAttentionSaveFailedStopped": "セッション通知を保存できず、停止しました。",
+  "settingsSessionAttentionStillRunning": "セッション通知はまだ実行中です。もう一度停止してください。",
+  "settingsSessionAttentionStopFailed": "セッション通知を停止できませんでした。もう一度お試しください。",
+  "settingsSessionAttentionCapabilityUnavailable": "セッション通知ホストの機能を利用できません。",
+  "settingsServerFallbackProviderName": "サーバーで設定",
+  "composerStopResponse": "応答を停止",
+  "composerSendMessageWhileResponding": "応答中にメッセージを送信",
+  "composerSendMessage": "メッセージを送信",
+  "chatTourComposerDescription": "ここにリクエストを入力します。",
+  "chatTourSendDescription": "ここからメッセージを送信します。",
+  "composerAttachmentFallbackName": "添付ファイル",
+  "composerContextFallbackName": "コンテキスト",
+  "searchableDropdownSearchHint": "検索",
+  "searchableDropdownEmptyText": "一致する項目はありません",
+  "speechApiKeyStorageUnavailable": "セキュアな TTS APIキー保存を利用できません。",
+  "speechApiKeyRemoved": "APIキーを削除しました。",
+  "speechApiKeySaved": "APIキーをこのデバイスに安全に保存しました。",
+  "speechReadAloudTestText": "これは CodeWalk の音声合成テストです。",
+  "speechNativeDisabledWindows": "安定性のため Windows では無効です。CodeWalk WASAPI キャプチャ経由で Parakeet または他のオンデバイスエンジンを使用してください。",
+  "speechNativeUnavailableLinux": "Linux では利用できません。音声入力には Parakeet を使用してください。",
+  "speechNotAvailableOnPlatform": "このプラットフォームでは利用できません。",
+  "speechSherpaUnavailableAndroid": "APK サイズを最適化した Android ビルドでは利用できません。",
+  "speechMoonshineDesktopOnlyHint": "デスクトップのみで利用可能です。Android はネイティブのみです。",
+  "speechParakeetDesktopOnlyHint": "デスクトップのみで利用可能です。オフラインの多言語認識を使用します。",
+  "speechSenseVoiceDesktopOnlyHint": "デスクトップのみで利用可能です。中国語、広東語、日本語、韓国語、英語に最も強力です。",
+  "speechNativeSubtitle": "よりシンプルで起動が速い。",
+  "speechSherpaSubtitle": "より重く、実験的でバグが出やすい。ダウンロードしたモデルではより正確なことが多い。",
+  "speechMoonshineSubtitle": "sherpa_onnx のオフライン認識とダウンロード可能なモデルを使う、デスクトップ限定の実験パス。",
+  "speechParakeetSubtitle": "1つの多言語ダウンロード可能モデルを持つ、デスクトップ限定のオフライン NeMo transducer パス。",
+  "speechSenseVoiceSubtitle": "中国語、広東語、日本語、韓国語、英語向けに調整されたデスクトップ限定のオフラインパス。",
+  "speechMoonshineModel": "Moonshine モデル",
+  "speechSherpaLanguage": "Sherpa 言語",
+  "speechSearchSherpaLanguage": "Sherpa 言語を検索",
+  "speechNoLanguagePacksFound": "言語パックが見つかりません",
+  "speechTextToSpeechProvider": "音声合成プロバイダー",
+  "speechProviderSystemNative": "システム / ネイティブ",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech（実験的）",
+  "speechProviderOpenAiCompatible": "OpenAI 互換",
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech は実験的な機能です",
+  "speechEdgeExperimentalDescription": "このデバイスから非公式の Edge 読み上げサービスを直接使用します。読み上げを利用するとメッセージテキストが Microsoft に送信され、Microsoft が非公開プロトコルを変更した場合はサービスが使えなくなる可能性があります。",
+  "speechEdgeVoice": "Edge の音声",
+  "speechEdgeVoiceListUnavailable": "デフォルトの Edge 音声を使用します。現在、音声リストを読み込めませんでした。",
+  "speechEdgeVoicesLoaded": "Microsoft Edge Speech の音声から読み込みました。",
+  "speechCloudTtsPrivacy": "クラウドTTSのプライバシー",
+  "speechCloudTtsPrivacyDescription": "クラウドTTSは、選択したアシスタントメッセージのテキストを設定済みプロバイダーに送信します。APIキーはこのデバイスのセキュアストレージに保存されます。",
+  "speechBaseUrl": "ベースURL",
+  "speechApiKey": "APIキー",
+  "speechApiKeySavedHelper": "キーは保存されています。新しい値を入力して置き換えるか、空の値を保存して削除します。",
+  "speechNoApiKeySaved": "APIキーは保存されていません。",
+  "speechSaveApiKey": "APIキーを保存",
+  "speechModel": "モデル",
+  "speechPitchNotSupported": "OpenAI 互換 TTS ではピッチをサポートしていないため、このプロバイダーでは非表示です。",
+  "speechTestVoice": "音声をテスト",
+  "dialogMoonshineVoiceSetupDescription": "Moonshine は sherpa_onnx 経由でデバイス上で動作します。モデルを1つ選び、このデスクトップデバイスにのみダウンロードしてください。",
+  "dialogParakeetVoiceSetupDescription": "Parakeet は sherpa_onnx のオフライン認識でデバイス上で動作します。多言語STTを有効にするには、このデスクトップデバイスに1回ダウンロードしてください。",
+  "dialogSenseVoiceSetupDescription": "SenseVoice は sherpa_onnx のオフライン認識でデバイス上で動作します。中国語、広東語、日本語、韓国語、英語に最も強力です。",
+  "dialogSherpaVoiceSetupDescription": "Sherpa 音声入力にはオンデバイスの音声モデルが必要です。言語を選択し、1回だけダウンロードしてください（約147 MB）。",
+  "speechSilenceSeconds": "{value} 秒",
+  "speechModelInstalled": "モデルをインストール済み ({modelId})",
+  "speechModelMissing": "モデルがありません ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} MB",
+  "speechSystemDefaultLanguage": "システムデフォルト（{language}）",
+  "speechModelListLoadFailed": "{service} のモデルリストの読み込みに失敗しました: {error}",
+  "speechDownloadFailed": "ダウンロードに失敗しました: {error}",
+  "speechFailedToRemoveModel": "モデルの削除に失敗しました: {error}",
+  "speechBaseUrlExample": "例: {url}",
+  "speechModelDefaultHelper": "デフォルト: {model}",
+  "notificationPermissionOrQuestionNeedsInput": "ツールの権限または質問への回答が必要です。",
+  "notificationPermissionNeedsInput": "ツールの権限承認が必要です。",
+  "notificationQuestionNeedsInput": "ツールの質問への回答が必要です。",
+  "notificationSessionError": "セッションでエラーが報告されました。",
+  "notificationChannelErrors": "CodeWalk エラー",
+  "notificationChannelErrorsDescription": "CodeWalk エラーアラート",
+  "notificationChannelPermissions": "CodeWalk 権限",
+  "notificationChannelPermissionsDescription": "CodeWalk 操作要求アラート",
+  "notificationChannelAgent": "CodeWalk エージェント",
+  "notificationChannelAgentDescription": "CodeWalk エージェント完了アラート",
+  "notificationActionOpen": "開く",
+  "foregroundMonitorNotificationBody": "バックグラウンドアラートが有効です",
+  "foregroundMonitorNotificationTitle": "バックグラウンド監視が有効です",
+  "foregroundMonitorNotificationOneSession": "1つのセッションを監視中",
+  "foregroundMonitorNotificationSessionCount": "{count}件のセッションを監視中",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{1件のセッションが注意を要します} other{{count}件のセッションが注意を要します}}",
+  "sessionAttentionOverlayPermissionRequired": "「他のアプリの上に表示」権限が必要です。",
+  "sessionAttentionIosInAppOnly": "セッション通知は CodeWalk 内でのみ利用できます。",
+  "sessionAttentionOverlayPermissionGrantPrompt": "「他のアプリの上に表示」権限を許可してから、もう一度お試しください。",
+  "sessionAttentionAndroidStartFailed": "Android セッション通知サービスを開始できませんでした。",
+  "chatMessageTruncatedChars": "[{count}文字を切り詰め] {reason}",
+  "chatMessageJustNow": "たった今",
+  "chatMessageMinutesAgo": "{count}分前",
+  "chatMessageHoursAgo": "{count}時間前",
+  "chatMessageDaysAgo": "{count}日前",
+  "chatMessageDateTime": "{month}/{day} {hour}:{minute}",
+  "chatMessageYourMessage": "あなたのメッセージ",
+  "chatMessageAssistantMessage": "アシスタントメッセージ",
+  "chatMessageStepStarted": "ステップ #{step} 開始",
+  "chatMessageStepStartedWithSnapshot": "ステップ #{step} 開始: {snapshot}",
+  "chatMessageStepFinished": "ステップ #{step} 終了: {reason} • トークン {tokens} • ${cost}",
+  "chatMessagePatchCount": "{count, plural, =1{1パッチ} other{{count}パッチ}}",
+  "chatMessageToolRun": "ツールの実行",
+  "chatMessageToolExecution": "ツール実行",
+  "chatMessageToolChainMore": "{count, plural, =1{+1件} other{+{count}件}}",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+1種類} other{+{count}種類}}",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1件が注意を要します} other{{count}件が注意を要します}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1件完了} other{{count}件完了}}",
+  "chatMessageToolCallsTitle": "ツール呼び出し",
+  "chatMessageDiffPreviewTruncated": "アプリ安定性のため差分プレビューを切り詰めました。",
+  "chatMessageLargeMessageTruncated": "アプリ安定性のため大きなメッセージのプレビューを切り詰めました。",
+  "chatMessageInvalidLinkFormat": "無効なリンク形式です",
+  "chatMessageUnableToOpenLink": "リンクを開けません",
+  "sessionTodoInProgressCompact": "{current}/{total} 進行中",
+  "sessionTodoTaskProgress": "タスク {index}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} 完了",
+  "sessionTodoCompletedCount": "タスク {count}/{total} 完了",
+  "sessionTodoTasksCount": "タスク ({count})",
+  "questionStepOfReview": "ステップ {current}/{total} - 確認",
+  "questionStepOfQuestion": "ステップ {current}/{total} - 質問",
+  "questionCustomAnswer": "カスタム回答",
+  "questionSubmitAnswers": "回答を送信",
+  "questionReviewAnswers": "回答を確認",
+  "permissionRequestTitle": "権限リクエスト: {permission}",
+  "sessionTitleCannotBeEmpty": "タイトルは空にできません",
+  "filesFailedToLoad": "ファイルの読み込みに失敗しました",
+  "filesFailedToSearch": "ファイルの検索に失敗しました",
+  "filesNoOpenFilesHint": "開いているファイルはまだありません。入力して検索してください。",
+  "filesNoContentMatches": "一致するコンテンツが見つかりません",
+  "filesOpenFilesCount": "{count, plural, =1{1件の開いているファイル} other{{count}件の開いているファイル}}",
+  "filesLinesSelectedCount": "{count, plural, =1{1行が選択されました} other{{count}行が選択されました}}",
+  "filesDraftTooLargeToSave": "下書きが大きすぎるため、エディターから保存できません。",
+  "filesSaveChangesBeforeClose": "このファイルを閉じる前に変更を保存してください。",
+  "filesSaveChangesBeforePathChange": "このパスを変更する前に変更を保存してください。",
+  "filesWaitForSaveBeforePathChange": "このパスを変更する前に、ファイルの保存が終了するまでお待ちください。",
+  "filesWaitForFileOperation": "ファイル操作が終了するまでお待ちください。",
+  "filesLargeFileReadOnly": "大きなファイルは編集の応答性を保つため読み取り専用で開きます。",
+  "filesCheckingWriteSupport": "ファイル書き込みのサポートを確認中...",
+  "filesActiveProjectRequired": "ファイル操作にはアクティブなプロジェクトディレクトリが必要です。",
+  "filesReloadSkippedUnsavedChanges": "未保存の変更があるため、再読み込みをスキップしました。",
+  "filesFailedToLoadContent": "ファイルの内容の読み込みに失敗しました",
+  "filesFileSaved": "ファイルを保存しました。",
+  "filesParentNotDirectory": "親要素がディレクトリではありません。",
+  "filesMalformedResponse": "ファイル操作が無効な応答を返しました。",
+  "filesShellCommandDidNotComplete": "ファイル操作のシェルコマンドが完了しませんでした。",
+  "filesShellCommandNoResult": "ファイル操作のシェルコマンドが結果を返しませんでした。",
+  "filesShellCommandTruncated": "ファイル操作のシェルコマンドがサーバーによって切り詰められました。",
+  "filesShellCommandSyntaxError": "ファイル操作のシェルコマンドが構文エラーで失敗しました。",
+  "filesShellUtilityNotFound": "必要なシェルユーティリティが見つかりませんでした。",
+  "filesShellCommandFailed": "ファイル操作のシェルコマンドが結果を返す前に失敗しました。",
+  "attachmentSaveTitle": "添付ファイルを保存",
+  "attachmentBrowserSandboxLocalFile": "ブラウザのサンドボックスにより、file:// の添付ファイルを直接開けません。",
+  "attachmentLocalPathBrowserBlocked": "この添付ファイルはブラウザから開けないローカルパスを指しています。",
+  "terminalConnectedTo": "{serverName} の {directory} に接続しました",
+  "terminalTransportUnavailable": "ターミナルのトランスポートを利用できません。",
+  "chatSlashCommandNew": "新しいチャットセッションを作成",
+  "chatSlashCommandModels": "モデル選択を開く",
+  "chatSlashCommandSessions": "会話一覧を開く",
+  "chatSlashCommandAgent": "エージェント選択を開く",
+  "chatSlashCommandOpen": "ファイルをクイックオープン",
+  "chatSlashCommandHelp": "コマンドのヘルプを表示",
+  "chatSlashCommandCompact": "現在のセッションのコンテキストを圧縮",
+  "chatSlashCommandThinking": "思考プロセスバブルの表示を切り替え",
+  "chatSlashCommandUndo": "最後に表示されたユーザーターンを元に戻す",
+  "chatSlashCommandRedo": "元に戻した最後のターンをやり直す",
+  "chatSessionSubConversationCount": "{count, plural, =1{1つのサブ会話} other{{count}件のサブ会話}}",
+  "chatMessageWeeksAgo": "{count}週前",
+  "chatMessageShortDate": "{month}/{day}",
+  "chatProviderErrorLoadSessionStatus": "セッションの状態の読み込みに失敗しました",
+  "chatProviderErrorLoadSessionDetails": "一部のセッション詳細を読み込めませんでした",
+  "chatProviderErrorLoadSessionList": "セッション一覧の読み込みに失敗しました: {error}",
+  "chatProviderErrorCreateSession": "セッションの作成に失敗しました",
+  "chatProviderErrorSelectProviderModelBeforeSend": "送信する前に、接続済みのプロバイダーまたは無料の OpenCode モデルを選択してください",
+  "chatProviderErrorStartMessageSend": "メッセージ送信を開始できませんでした",
+  "chatProviderErrorStopUnavailable": "現在のセッションでは停止を利用できません",
+  "chatProviderErrorWaitForResponseFinish": "圧縮する前に、現在の応答が終了するのを待ってください",
+  "chatProviderErrorCompactUnavailable": "現在のセッションではコンテキストの圧縮を利用できません",
+  "chatProviderErrorSelectModelBeforeCompact": "コンテキストを圧縮する前にモデルを選択してください",
+  "chatProviderErrorCompactSessionContext": "セッションコンテキストの圧縮に失敗しました",
+  "chatProviderErrorNetwork": "ネットワーク接続に失敗しました。ネットワーク設定を確認してください",
+  "chatProviderErrorServer": "サーバーエラーです。後でもう一度お試しください",
+  "chatProviderErrorNotFound": "リソースが見つかりません",
+  "chatProviderErrorInvalidInput": "入力パラメータが無効です",
+  "chatProviderErrorUnknown": "不明なエラーです。後でもう一度お試しください",
+  "chatProviderErrorSessionFallback": "セッションエラー",
+  "projectProviderErrorNoProjectContext": "サーバーからプロジェクトコンテキストがありません",
+  "projectProviderErrorInitializeFailed": "プロジェクトコンテキストの初期化に失敗しました: {error}",
+  "projectProviderErrorSwitchProjectNotFound": "プロジェクトの切り替えに失敗しました: プロジェクトが見つかりません",
+  "projectProviderErrorSwitchDirectoryEmpty": "プロジェクトの切り替えに失敗しました: ディレクトリが空です",
+  "projectProviderErrorAtLeastOneContext": "少なくとも1つのコンテキストを開いたままにする必要があります",
+  "projectProviderErrorReopenProjectNotFound": "プロジェクトの再オープンに失敗しました: プロジェクトが見つかりません",
+  "projectProviderErrorOnlyClosedArchivable": "アーカイブできるのは閉じているプロジェクトのみです",
+  "projectProviderErrorArchiveProjectNotFound": "プロジェクトのアーカイブに失敗しました: プロジェクトが見つかりません",
+  "projectProviderErrorArchiveProjectPathInvalid": "プロジェクトのアーカイブに失敗しました: プロジェクトのパスが無効です",
+  "projectProviderErrorLoadWorkspaces": "ワークスペース一覧の読み込みに失敗しました: {error}",
+  "projectProviderErrorWorkspaceNameEmpty": "ワークスペース名は空にできません",
+  "projectProviderErrorCreateWorkspace": "ワークスペースの作成に失敗しました: {error}",
+  "projectProviderErrorResetWorkspace": "ワークスペースのリセットに失敗しました: {error}",
+  "projectProviderErrorDeleteWorkspace": "ワークスペースの削除に失敗しました: {error}",
+  "projectProviderErrorDirectoryEmpty": "ディレクトリは空にできません",
+  "projectProviderErrorListDirectories": "ディレクトリ一覧の取得に失敗しました: {error}",
+  "projectProviderErrorValidateDirectory": "ディレクトリの検証に失敗しました: {error}",
+  "projectProviderErrorPathEmpty": "パスは空にできません",
+  "projectProviderErrorListFiles": "ファイル一覧の取得に失敗しました: {error}",
+  "projectProviderErrorSearchFiles": "ファイルの検索に失敗しました: {error}",
+  "projectProviderErrorContentSearchUnavailable": "コンテンツ検索を利用できません: {error}",
+  "projectProviderErrorSearchSymbols": "シンボルの検索に失敗しました: {error}",
+  "projectProviderErrorReadFile": "ファイルの読み込みに失敗しました: {error}",
+  "projectProviderErrorLoadProjectList": "プロジェクト一覧の読み込みに失敗しました: {error}",
+  "workspaceProjectRemovedFromHistory": "履歴からプロジェクトを削除しました",
+  "workspaceProjectContextOpened": "プロジェクトコンテキストを開きました: {directory}",
+  "workspaceFailedToOpenProjectContext": "プロジェクトコンテキストを開けませんでした: {directory}",
+  "chatAbortNotice": "どう変更しますか？",
+  "sessionTitleToday": "今日 {time}（{date}）",
+  "sessionTitleYesterday": "昨日 {time}（{date}）",
+  "sessionTitleWeekday": "{weekday} {time}（{date}）",
+  "sessionTitleDateAndTime": "{date} {time}",
+  "sessionWeekdayMon": "月",
+  "sessionWeekdayTue": "火",
+  "sessionWeekdayWed": "水",
+  "sessionWeekdayThu": "木",
+  "sessionWeekdayFri": "金",
+  "sessionWeekdaySat": "土",
+  "sessionWeekdaySun": "日",
+  "forwardTimeNow": "たった今",
+  "forwardTimeMinutes": "{count}分",
+  "forwardTimeHours": "{count}時間",
+  "forwardTimeDays": "{count}日",
+  "forwardTimeWeeks": "{count}週",
+  "settingsBehaviorConfigFieldDefaultModel": "デフォルトモデル",
+  "settingsBehaviorConfigFieldDefaultAgent": "デフォルトエージェント",
+  "settingsBehaviorConfigFieldSmallModel": "スモールモデル",
+  "settingsBehaviorConfigFieldAutoUpdateMode": "自動更新モード",
+  "settingsBehaviorConfigFieldSnapshotSetting": "スナップショット設定",
+  "settingsBehaviorConfigFieldConversationUsername": "会話用ユーザー名",
+  "settingsBehaviorConfigFieldSharingDefault": "共有デフォルト",
+  "speechMicNoInputDevice": "マイク入力デバイスがありません。",
+  "speechMicDeviceBusy": "デフォルトのマイクは別のアプリで使用中です。",
+  "speechMicUnsupportedFormat": "デフォルトのマイク形式がサポートされていません。",
+  "speechMicSpeechPrivacy": "Windows の音声サービスが無効になっている可能性があります（音声プライバシー、オンライン音声認識、または言語パック）。",
+  "speechMicBackendUnavailable": "このビルドでは Windows マイクバックエンドを利用できません。",
+  "speechEngineFallbackNotice": "選択した STT エンジンを利用できません（{reason}）。代わりに {fallback} を使用します。",
+  "oauthFlowSecureStorageUnavailable": "OAuth 用のセキュアな認証情報ストレージを利用できません。",
+  "oauthFlowUnexpectedError": "OAuth フローが予期せず失敗しました。もう一度お試しください。",
+  "oauthFlowNoEndpointsDiscovered": "OAuth エンドポイントが見つかりませんでした。Cloudflare Dashboard → Access → Applications → [このアプリ] で Managed OAuth を有効にしてください。",
+  "oauthFlowTokenResponseMissingAccessToken": "OAuth トークン応答にアクセストークンが含まれていませんでした。",
+  "oauthFlowProfileChanged": "OAuth が完了する前にサーバープロファイルが変更されました。",
+  "oauthFlowMetadataMissingEndpoints": "OAuth メタデータに認証/トークンエンドポイントがありません。",
+  "oauthFlowCallbackNotCompleted": "認証コールバックが完了しませんでした",
+  "oauthFlowProviderDeclined": "認証サーバーが OAuth リクエストを拒否しました。もう一度お試しください。",
+  "oauthFlowCallbackValidationFailed": "OAuth コールバックの検証に失敗しました。もう一度お試しください。",
+  "oauthFlowCallbackServerStartFailed": "ローカルの OAuth コールバックサーバーを起動できませんでした。",
+  "oauthFlowSignInCanceled": "OAuth サインインがキャンセルされました。",
+  "oauthFlowBrowserOpenFailed": "OAuth サインイン用にシステムブラウザを開けませんでした。",
+  "oauthFlowCallbackTimeout": "5分以内に認証コールバックがアプリに届きませんでした。ブラウザは同意後にローカルのコールバックアドレスへリダイレクトされるはずです。代わりにブラウザに接続エラーが表示された場合は、このデバイスまたはネットワークがループバックリダイレクトをブロックしています。",
+  "oauthFlowTokenExchangeTransientFailure": "一時的なネットワーク問題のため、{maxAttempts}回試行しましたがトークン交換に失敗しました。もう一度お試しください。",
+  "oauthFlowTokenExchangeHttpFailure": "トークン交換に失敗しました（HTTP {statusCode}）。もう一度お試しください。",
+  "oauthFlowTokenExchangeUnexpectedFailure": "トークン交換が予期せず失敗しました。もう一度お試しください。",
+  "oauthFlowTokenExchangeIncomplete": "認証コード送信後、トークン交換が完了しませんでした。OAuth サインインを再度開始してください。",
+  "speechReadAloudFailed": "音声合成に失敗しました。",
+  "speechReadAloudNoText": "読み上げるテキストがありません。",
+  "speechEdgeTextTooLong": "Microsoft Edge Speech は一度に最大4096バイトまで読み上げられます。",
+  "speechEdgeMalformedAudio": "Microsoft Edge Speech が不正な音声データを返しました。",
+  "speechEdgeUnsupportedAudio": "Microsoft Edge Speech がサポートされていない音声データを返しました。",
+  "speechEdgeUnsupportedFrame": "Microsoft Edge Speech がサポートされていない WebSocket フレームを返しました。",
+  "speechEdgeSynthesisInterrupted": "Microsoft Edge Speech は合成が完了する前に終了しました。",
+  "speechEdgeEmptyAudio": "Microsoft Edge Speech が空の音声応答を返しました。",
+  "speechEdgeTimedOut": "Microsoft Edge Speech がタイムアウトしました。",
+  "speechEdgeUnreachable": "Microsoft Edge Speech に接続できませんでした。",
+  "speechApiKeyMissing": "この TTS プロバイダーを使用するには、[設定] > [音声] で APIキーを追加してください。",
+  "speechProviderEmptyAudio": "TTS プロバイダーが空の音声応答を返しました。",
+  "speechProviderRequestRejected": "TTS プロバイダーが音声リクエストを拒否しました。",
+  "speechApiKeyRejected": "TTS の APIキーがプロバイダーに拒否されました。",
+  "speechProviderQuotaRateLimit": "TTS プロバイダーがクォータまたはレート制限を報告しました。",
+  "speechProviderTemporarilyUnavailable": "TTS プロバイダーが一時的に利用できません。",
+  "speechProviderUnreachable": "TTS プロバイダーに接続できませんでした。",
+  "appProviderErrorFailedToStartProcess": "{tool} プロセスの起動に失敗しました。",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} が利用できません。先に {runtime} をインストールしてください。",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "{tool} のインストールが終了コード {exitCode} で失敗しました。",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "Bun のブートストラップが終了コード {exitCode} で失敗しました。",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "OpenCode のインストールは完了しましたが、コマンドが PATH に見つかりませんでした。",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "OpenCode のインストールは完了しましたが、コマンドパスを解決できませんでした。",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "構成されたコマンドが見つからず、{tool} が PATH にありません。",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "構成されたコマンドのパスが存在しません。",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "構成されたコマンドは存在しますが、バージョン確認に失敗しました。",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "構成されたコマンドを実行できませんでした。",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "WSL チェックは Windows にのみ適用されます。",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "管理対象ローカルサーバーを構成するには、デスクトップビルドを使用してください。",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "既知のインストールディレクトリから検出されました。",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "既知のインストールディレクトリから検出されました。PATH の更新が必要になる場合があります。最近のインストールがまだ検出されない場合は、{appName} を開き直してください。",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "GitHub から最新リリースのメタデータを取得できませんでした。",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "最新リリースのメタデータにアセットリストが含まれていませんでした。",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "互換性のある OpenCode バイナリアセットが見つかりませんでした。",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "選択した OpenCode アセットのダウンロードに失敗しました。",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "ダウンロードしたアセットのチェックサム検証に失敗しました。",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "OpenCode バイナリアーカイブの解凍に失敗しました。",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "解凍されたファイル内に {tool} 実行ファイルが見つかりませんでした。",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "サーバーからの応答がありません。もう一度お試しください。",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "モデルからの応答がありません。もう一度お試しください。",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "音声ジョブがキャンセルされました。",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "Microsoft Edge Speech がキャンセルされました。",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "アクティブ",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "受信中",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "遅延",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "完了",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "操作待ち",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "エラー",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "データ節約モードが有効です。",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "OAuth サインインが必要です",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "Tailscale 接続が必要です",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "オフライン",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "権限が取り消されました",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "サービスが停止しました",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "ホストが利用できません",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "errorRequestCancelled": "リクエストがキャンセルされました",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorUnknownNetworkError": "不明なネットワークエラー: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCertificateError": "証明書エラー",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorSessionBusy": "セッションは別のリクエストを処理中です。",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorRunShellCommandFailed": "シェルコマンドの実行に失敗しました",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "スラッシュコマンドの実行に失敗しました",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "アクティブなサーバーから OpenCode ベースのデフォルトを読み込めませんでした。",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "sessionTabIconRemoveFailed": "ローカルセッションのタブアイコンデータの削除に失敗しました",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "forwardUntitled": "無題",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "setupDebugLinuxLogsPath": "Linux ログ: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "OpenCode を起動: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "サーバーのヘルスチェック: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "サーバードキュメント: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "logsEntryError": "エラー",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "スタック",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "setupDebugSourceDiagnostics": "診断",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceUseExisting": "既存のものを使用",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "setupDebugSourceLocalServer": "ローカルサーバー",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceOnboarding": "オンボーディング",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceManualConnection": "手動接続",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugMessageDiagnosticsResult": "{platform} で {availability}。{recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "現在の環境から既存の OpenCode コマンドを検出しようとしています。",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageInstallStarted": "CodeWalk から OpenCode のインストールを開始しました。",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageStartLocalServer": "管理対象の OpenCode サーバーを {url} で起動しています。",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageHealthyRunning": "管理対象の OpenCode サーバーは正常で、{url} で実行中です。",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppingLocalServer": "管理対象の OpenCode サーバーを停止しています。",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageStoppedCleanly": "管理対象の OpenCode サーバーは正常に停止しました。",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "停止要求後、管理対象の OpenCode サーバーが終了しました。",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "ユーザーは既存の OpenCode サーバーへの接続を選択しました。",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "ユーザーはガイド付きの OpenCode セットアップフローを開きました。",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "ユーザーは管理対象のローカル OpenCode セットアップを開きました。",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "ヘルスチェック失敗後、ユーザーはサーバー設定を開きました。",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "ヘルスチェック失敗後、ユーザーは別のサーバーを追加することを選択しました。",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageTestingServerUrl": "オンボーディングから OpenCode サーバー URL {url} をテストしています。",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "chatProviderErrorSessionNotFound": "セッションが見つかりません",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "無効なメッセージ形式です",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "ネットワーク接続に失敗しました",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "不明なエラー",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "ターミナルセッションを作成できませんでした",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "ターミナルエンドポイントが利用できません",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "無効なターミナルディレクトリです",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "ターミナル WebSocket はここでは利用できません。",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1回} other{{count}回}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "接続タイムアウト",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "クライアントエラー",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "メッセージの送信に失敗しました",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

@@ -130,10 +130,10 @@ extension _ChatPageMobileOverflow on _ChatPageState {
         id: 'terminal',
         icon: Symbols.terminal_rounded,
         tooltip: settingsProvider.terminalPanelVisible
-            ? 'Hide terminal'
+            ? context.l10n.terminalHide
             : (_terminalController.supportsRemoteTerminal
-                  ? 'Open terminal'
-                  : 'Open terminal info'),
+                  ? context.l10n.terminalOpen
+                  : context.l10n.terminalOpenInfo),
         onTap: () =>
             () => unawaited(_toggleTerminalPanel()),
       ),

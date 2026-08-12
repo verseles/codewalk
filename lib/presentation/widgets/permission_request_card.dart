@@ -45,7 +45,7 @@ class PermissionRequestCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Permission request: ${request.permission}',
+                  context.l10n.permissionRequestTitle(request.permission),
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),

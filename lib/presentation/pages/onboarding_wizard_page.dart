@@ -296,8 +296,8 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
   void _goToConnectServer() {
     context.read<AppProvider>().recordSetupDebugEvent(
-      source: 'Onboarding',
-      message: 'User chose to connect to an existing OpenCode server.',
+      source: context.l10n.setupDebugSourceOnboarding,
+      message: context.l10n.setupDebugMessageOnboardingConnectExisting,
     );
     setState(() {
       _readyFromManagedLocal = false;
@@ -308,8 +308,8 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
   void _goToNeedHelp() {
     context.read<AppProvider>().recordSetupDebugEvent(
-      source: 'Onboarding',
-      message: 'User opened the guided OpenCode setup path.',
+      source: context.l10n.setupDebugSourceOnboarding,
+      message: context.l10n.setupDebugMessageOnboardingGuidedPath,
     );
     setState(() {
       _readyFromManagedLocal = false;
@@ -320,8 +320,8 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
   void _goToLocalManagedSetup() {
     context.read<AppProvider>().recordSetupDebugEvent(
-      source: 'Onboarding',
-      message: 'User opened managed local OpenCode setup.',
+      source: context.l10n.setupDebugSourceOnboarding,
+      message: context.l10n.setupDebugMessageOnboardingManagedLocal,
     );
     setState(() {
       _readyFromManagedLocal = false;
@@ -395,8 +395,8 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
   Future<void> _openServerSettings() async {
     context.read<AppProvider>().recordSetupDebugEvent(
-      source: 'Onboarding',
-      message: 'User opened server settings after a failed health check.',
+      source: context.l10n.setupDebugSourceOnboarding,
+      message: context.l10n.setupDebugMessageOnboardingOpenedServerSettings,
     );
     await Navigator.of(
       context,
@@ -457,8 +457,8 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
   void _addAnotherServerAfterFailure() {
     context.read<AppProvider>().recordSetupDebugEvent(
-      source: 'Onboarding',
-      message: 'User chose to add another server after a failed health check.',
+      source: context.l10n.setupDebugSourceOnboarding,
+      message: context.l10n.setupDebugMessageOnboardingAddAnotherServer,
     );
     setState(() {
       _addedServerId = null;
@@ -491,8 +491,8 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
     final adjustedUrl = _mapAndroidLoopback(_urlController.text.trim());
     final label = _labelController.text.trim();
     appProvider.recordSetupDebugEvent(
-      source: 'Manual connection',
-      message: 'Testing OpenCode server URL $adjustedUrl from onboarding.',
+      source: context.l10n.setupDebugSourceManualConnection,
+      message: context.l10n.setupDebugMessageTestingServerUrl(adjustedUrl),
     );
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
@@ -523,7 +523,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
       if (!mounted) return;
       if (!updated) {
         appProvider.recordSetupDebugEvent(
-          source: 'Manual connection',
+          source: context.l10n.setupDebugSourceManualConnection,
           message: appProvider.errorMessage,
           severity: SetupDebugSeverity.error,
         );
@@ -556,7 +556,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
           ? context.l10n.onboardingHealthCheckFailedMayBeStarting
           : context.l10n.onboardingConnectionUpdated;
       appProvider.recordSetupDebugEvent(
-        source: 'Manual connection',
+        source: context.l10n.setupDebugSourceManualConnection,
         message: healthMessage,
         severity: health == ServerHealthStatus.unhealthy
             ? SetupDebugSeverity.error
@@ -632,7 +632,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
           ? context.l10n.onboardingAddedButHealthCheckFailed
           : context.l10n.onboardingConnectionSaved;
       appProvider.recordSetupDebugEvent(
-        source: 'Manual connection',
+        source: context.l10n.setupDebugSourceManualConnection,
         message: healthMessage,
         severity: health == ServerHealthStatus.unhealthy
             ? SetupDebugSeverity.error
@@ -649,7 +649,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
       });
     } else {
       appProvider.recordSetupDebugEvent(
-        source: 'Manual connection',
+        source: context.l10n.setupDebugSourceManualConnection,
         message: appProvider.errorMessage,
         severity: SetupDebugSeverity.error,
       );

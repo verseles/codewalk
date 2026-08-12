@@ -23,6 +23,7 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
 
   Future<_SpeechServiceResolution?> _resolveSpeechServiceForStart(
     SettingsProvider settingsProvider,
+    AppLocalizations l10n,
   ) async {
     final primaryEngine = settingsProvider.speechToTextEngine;
     final candidates = <SpeechToTextEngine>[primaryEngine];
@@ -98,7 +99,11 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
           unavailableReason: unavailableReason,
         );
       }
-      unavailableReason ??= service.unavailableReason;
+      unavailableReason ??= _localizedUnavailableReason(
+        l10n,
+        engine,
+        service.unavailableReasonKey,
+      );
     }
 
     if (lastAttempted == null) {
@@ -110,6 +115,32 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       usedFallback: true,
       unavailableReason: unavailableReason,
     );
+  }
+
+  // Maps a typed [SpeechInputService.unavailableReasonKey] to a localized
+  // user-facing message at the UI boundary. Speech services must not resolve
+  // the locale themselves; they emit stable, locale-independent codes and the
+  // widget maps them here where AppLocalizations is always available.
+  String _localizedUnavailableReason(
+    AppLocalizations l10n,
+    SpeechToTextEngine engine,
+    String? reasonKey,
+  ) {
+    final label = _speechEngineLabel(engine);
+    return switch (reasonKey) {
+      'nativeDisabled' => l10n.speechNativeDisabledWindows,
+      'microphoneDenied' => l10n.speechMicPermissionDisabled,
+      'desktopOnly' => l10n.speechDesktopOnly(label),
+      'runtimeFailed' => l10n.speechRuntimeFailed(label),
+      'modelIncomplete' => l10n.speechModelFilesIncomplete(label),
+      'platformUnavailable' => l10n.speechUnavailableOnPlatform(label),
+      'noInputDevice' => l10n.speechMicNoInputDevice,
+      'deviceBusy' => l10n.speechMicDeviceBusy,
+      'unsupportedFormat' => l10n.speechMicUnsupportedFormat,
+      'speechPrivacy' => l10n.speechMicSpeechPrivacy,
+      'backendUnavailable' => l10n.speechMicBackendUnavailable,
+      _ => l10n.msgVoiceInputUnavailable,
+    };
   }
 
   Future<void> _startListening() async {
@@ -127,7 +158,11 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     }
 
     final settingsProvider = context.read<SettingsProvider>();
-    final resolution = await _resolveSpeechServiceForStart(settingsProvider);
+    final l10n = context.l10n;
+    final resolution = await _resolveSpeechServiceForStart(
+      settingsProvider,
+      l10n,
+    );
     if (resolution == null) {
       _finishListeningLoading();
       if (!mounted) return;
@@ -140,13 +175,15 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     if (resolution.usedFallback && mounted) {
       final label = _speechEngineLabel(resolution.engine);
       final reason = resolution.unavailableReason?.trim();
-      final reasonSuffix = reason != null && reason.isNotEmpty
-          ? ' ($reason)'
-          : '';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Selected STT engine unavailable$reasonSuffix. Using $label.',
+            l10n.speechEngineFallbackNotice(
+              label,
+              reason != null && reason.isNotEmpty
+                  ? reason
+                  : l10n.msgVoiceInputUnavailable,
+            ),
           ),
         ),
       );

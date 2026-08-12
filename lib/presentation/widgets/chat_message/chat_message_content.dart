@@ -95,7 +95,9 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                         )
                       : null,
                   child: Semantics(
-                    label: isUser ? 'Your message' : 'Assistant message',
+                    label: isUser
+                        ? context.l10n.chatMessageYourMessage
+                        : context.l10n.chatMessageAssistantMessage,
                     child: Container(
                       padding: bubblePadding,
                       decoration: BoxDecoration(
@@ -144,7 +146,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                                     ],
                                     Flexible(
                                       child: Text(
-                                        _formatTime(message.time),
+                                        _formatTime(context, message.time),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         softWrap: false,
@@ -563,12 +565,14 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
           if (message.tokens != null)
             PopupMenuItem(
               enabled: false,
-              child: Text('Tokens: ${message.tokens!.total}'),
+              child: Text(context.l10n.msgInfoTokens(message.tokens!.total)),
             ),
           if (message.cost != null)
             PopupMenuItem(
               enabled: false,
-              child: Text('Cost: \$${message.cost!.toStringAsFixed(6)}'),
+              child: Text(
+                context.l10n.msgInfoCost(message.cost!.toStringAsFixed(6)),
+              ),
             ),
         ];
 
@@ -582,15 +586,22 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
           final stepStart = stepStarts[index];
           final snapshot = stepStart.snapshot?.trim();
           final details = snapshot == null || snapshot.isEmpty
-              ? 'Step started #${index + 1}'
-              : 'Step started #${index + 1}: $snapshot';
+              ? context.l10n.chatMessageStepStarted(index + 1)
+              : context.l10n.chatMessageStepStartedWithSnapshot(
+                  snapshot,
+                  index + 1,
+                );
           items.add(PopupMenuItem(enabled: false, child: Text(details)));
         }
 
         for (var index = 0; index < stepFinishes.length; index += 1) {
           final stepFinish = stepFinishes[index];
-          final details =
-              'Step finished #${index + 1}: ${stepFinish.reason} • tokens ${stepFinish.tokens.total} • \$${stepFinish.cost.toStringAsFixed(6)}';
+          final details = context.l10n.chatMessageStepFinished(
+            stepFinish.cost.toStringAsFixed(6),
+            stepFinish.reason,
+            index + 1,
+            stepFinish.tokens.total,
+          );
           items.add(PopupMenuItem(enabled: false, child: Text(details)));
         }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 
 class AndroidForegroundMonitorService {
@@ -45,10 +46,13 @@ class AndroidForegroundMonitorService {
       // Always invoke the channel call instead of deduplicating by count.
       // The native side is idempotent and this ensures the service is
       // restarted if Android killed it while the Dart statics were stale.
-      await _channel.invokeMethod<void>(
-        'updateForegroundNotification',
-        <String, String>{'title': title, 'body': _notificationBody},
-      );
+      await _channel
+          .invokeMethod<void>('updateForegroundNotification', <String, String>{
+            'title': title,
+            'body':
+                L10nBridge.current?.foregroundMonitorNotificationBody ??
+                _notificationBody,
+          });
 
       _running = true;
     } catch (error, stackTrace) {
@@ -68,12 +72,18 @@ class AndroidForegroundMonitorService {
   }
 
   static String _titleForActiveSessionCount(int activeSessionCount) {
+    final l10n = L10nBridge.current;
     if (activeSessionCount <= 0) {
-      return 'Background monitoring active';
+      return l10n?.foregroundMonitorNotificationTitle ??
+          'Background monitoring active';
     }
     if (activeSessionCount == 1) {
-      return 'Monitoring one session';
+      return l10n?.foregroundMonitorNotificationOneSession ??
+          'Monitoring one session';
     }
-    return 'Monitoring $activeSessionCount sessions';
+    return l10n?.foregroundMonitorNotificationSessionCount(
+          activeSessionCount,
+        ) ??
+        'Monitoring $activeSessionCount sessions';
   }
 }

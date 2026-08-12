@@ -66,14 +66,19 @@ class _SenseVoiceModelDownloadDialogState
           ? kSenseVoiceModelDefault
           : entries.first.id;
       _manager.setPreferredModelId(preselect);
+      if (!mounted) return;
       setState(() {
         _models = entries;
         _selectedId = preselect;
         _isLoading = false;
       });
     } catch (error) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load SenseVoice model list: $error';
+        _errorMessage = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'SenseVoice',
+        );
         _isLoading = false;
       });
     }
@@ -108,7 +113,7 @@ class _SenseVoiceModelDownloadDialogState
       if (mounted) {
         setState(() {
           _isDownloading = false;
-          _errorMessage = 'Download failed: $error';
+          _errorMessage = context.l10n.speechDownloadFailed(error.toString());
         });
       }
     }
@@ -163,16 +168,13 @@ class _SenseVoiceModelDownloadDialogState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'SenseVoice runs on-device through sherpa_onnx offline recognition. '
-          'It is strongest for Chinese, Cantonese, Japanese, Korean, and English.',
-        ),
+        Text(context.l10n.dialogSenseVoiceSetupDescription),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: _selectedId,
           isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'SenseVoice model',
+          decoration: InputDecoration(
+            labelText: context.l10n.dialogSenseVoiceModel,
             border: const OutlineInputBorder(),
           ),
           items: _models
@@ -198,7 +200,7 @@ class _SenseVoiceModelDownloadDialogState
         if (selected != null) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            '~${selected.sizeMb} MB',
+            context.l10n.speechModelSizeMb(selected.sizeMb.toString()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

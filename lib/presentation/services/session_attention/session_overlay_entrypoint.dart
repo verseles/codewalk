@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/auth/tts_api_key_storage.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../data/datasources/chat_remote_datasource.dart';
 import '../../../data/models/chat_session_model.dart';
 import '../../../data/repositories/chat_repository_impl.dart';
@@ -16,6 +17,7 @@ import '../../../data/session_attention/session_attention_snapshot_store.dart';
 import '../../../domain/entities/experience_settings.dart';
 import '../../../domain/entities/session_attention_overlay/session_attention_models.dart';
 import '../../../domain/usecases/get_chat_messages.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../widgets/session_attention_overlay/session_attention_overlay.dart';
 import '../../widgets/session_attention_overlay/session_attention_overlay_controller.dart';
 import '../android_background_alert_logic.dart';
@@ -66,6 +68,7 @@ class _SessionAttentionHostAppState extends State<SessionAttentionHostApp> {
   final Map<String, DateTime> _androidBusyStarted = <String, DateTime>{};
   final Set<String> _androidErrorSessions = <String>{};
   ExperienceSettings _androidSettings = ExperienceSettings.defaults();
+  Locale _androidLocale = const Locale('en');
   @override
   void initState() {
     super.initState();
@@ -102,6 +105,7 @@ class _SessionAttentionHostAppState extends State<SessionAttentionHostApp> {
         }
       }
       _androidSettings = settings;
+      _updateAndroidLocale();
       final store = SessionAttentionSnapshotStore();
       final readAloud = ReadAloudService(
         apiKeyStorage: TtsApiKeyStorage(),
@@ -768,6 +772,13 @@ class _SessionAttentionHostAppState extends State<SessionAttentionHostApp> {
         }
       }
     }
+    _updateAndroidLocale();
+  }
+
+  void _updateAndroidLocale() {
+    _androidLocale = resolveBackgroundAlertLocale(_androidSettings.localeCode);
+    L10nBridge.update(lookupAppLocalizations(_androidLocale));
+    if (mounted) setState(() {});
   }
 
   Map<String, dynamic>? _activeAndroidProfile(SharedPreferences preferences) {
@@ -912,8 +923,12 @@ class _SessionAttentionHostAppState extends State<SessionAttentionHostApp> {
     final expanded = snapshot?.presentation.name == 'panel';
     final items = snapshot?.items ?? const <SessionAttentionItem>[];
     final activeSpeechSnapshotId = _androidController?.activeSpeechSnapshotId;
+    final l10n = L10nBridge.current;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: _androidLocale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       home: Scaffold(
         backgroundColor: Colors.transparent,
@@ -926,15 +941,18 @@ class _SessionAttentionHostAppState extends State<SessionAttentionHostApp> {
             child: SessionAttentionOverlay(
               items: items,
               expanded: expanded,
-              semanticLabel: '${items.length} sessions need attention',
-              stateLabelBuilder: (kind) => kind.name,
-              openLabel: 'Open',
-              expandLabel: 'Expand',
-              collapseLabel: 'Collapse',
-              readLabel: 'Read',
-              stopReadingLabel: 'Stop reading',
-              dismissLabel: 'Dismiss',
-              stopOverlayLabel: 'Stop overlay',
+              semanticLabel:
+                  l10n?.sessionAttentionSemanticLabel(items.length) ??
+                  '${items.length} sessions need attention',
+              openLabel: l10n?.notificationActionOpen ?? 'Open',
+              expandLabel: l10n?.chatExpandGroup ?? 'Expand group',
+              collapseLabel: l10n?.chatCollapseGroup ?? 'Collapse group',
+              readLabel: l10n?.msgReadAloud ?? 'Read aloud',
+              stopReadingLabel: l10n?.msgStopReadAloud ?? 'Stop reading',
+              dismissLabel: l10n?.settingsAboutDismiss ?? 'Dismiss',
+              stopOverlayLabel:
+                  l10n?.settingsSessionAttentionStop ??
+                  'Stop session attention',
               activeSpeechSnapshotId: activeSpeechSnapshotId,
               onOpen: (item) => _command('open', item),
               onRead: (item) => _command('read', item),

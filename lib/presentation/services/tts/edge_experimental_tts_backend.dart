@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../core/i18n/l10n_bridge.dart';
 import '../../../domain/entities/experience_settings.dart';
 import 'edge_tts_protocol.dart';
 import 'edge_tts_websocket.dart';
@@ -80,15 +81,17 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
   ) async {
     final text = stripEdgeTtsControlChars(request.text).trim();
     if (text.isEmpty) {
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.invalidRequest,
-        'There is no text to read aloud.',
+        L10nBridge.current?.speechReadAloudNoText ??
+            'There is no text to read aloud.',
       );
     }
     if (isEdgeTtsInputTooLong(text)) {
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.invalidRequest,
-        'Microsoft Edge Speech can read up to 4096 bytes at a time.',
+        L10nBridge.current?.speechEdgeTextTooLong ??
+            'Microsoft Edge Speech can read up to 4096 bytes at a time.',
       );
     }
 
@@ -106,9 +109,10 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
     try {
       await connection.ready.timeout(kEdgeTtsConnectTimeout);
       if (_cancelled) {
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'Microsoft Edge Speech was cancelled.',
+          L10nBridge.current?.speechEdgeCancelled ??
+              'Microsoft Edge Speech was cancelled.',
         );
       }
       final voice = _effectiveVoice(request.voiceId);
@@ -136,9 +140,10 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         kEdgeTtsSynthesisTimeout,
       )) {
         if (_cancelled) {
-          throw const TtsBackendException(
+          throw TtsBackendException(
             TtsBackendErrorKind.providerUnavailable,
-            'Microsoft Edge Speech was cancelled.',
+            L10nBridge.current?.speechEdgeCancelled ??
+                'Microsoft Edge Speech was cancelled.',
           );
         }
         if (event is String) {
@@ -158,15 +163,17 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
             if (frame.audioBytes.isEmpty) {
               continue;
             }
-            throw const TtsBackendException(
+            throw TtsBackendException(
               TtsBackendErrorKind.providerUnavailable,
-              'Microsoft Edge Speech returned malformed audio data.',
+              L10nBridge.current?.speechEdgeMalformedAudio ??
+                  'Microsoft Edge Speech returned malformed audio data.',
             );
           }
           if (frame.contentType != kEdgeTtsAudioMimeType) {
-            throw const TtsBackendException(
+            throw TtsBackendException(
               TtsBackendErrorKind.providerUnavailable,
-              'Microsoft Edge Speech returned unsupported audio data.',
+              L10nBridge.current?.speechEdgeUnsupportedAudio ??
+                  'Microsoft Edge Speech returned unsupported audio data.',
             );
           }
           if (frame.audioBytes.isNotEmpty) {
@@ -174,29 +181,33 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
           }
           continue;
         }
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'Microsoft Edge Speech returned an unsupported websocket frame.',
+          L10nBridge.current?.speechEdgeUnsupportedFrame ??
+              'Microsoft Edge Speech returned an unsupported websocket frame.',
         );
       }
 
       if (_cancelled) {
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'Microsoft Edge Speech was cancelled.',
+          L10nBridge.current?.speechEdgeCancelled ??
+              'Microsoft Edge Speech was cancelled.',
         );
       }
       if (!receivedTurnEnd) {
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'Microsoft Edge Speech ended before synthesis completed.',
+          L10nBridge.current?.speechEdgeSynthesisInterrupted ??
+              'Microsoft Edge Speech ended before synthesis completed.',
         );
       }
       final bytes = audio.takeBytes();
       if (bytes.isEmpty) {
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'Microsoft Edge Speech returned an empty audio response.',
+          L10nBridge.current?.speechEdgeEmptyAudio ??
+              'Microsoft Edge Speech returned an empty audio response.',
         );
       }
       return GeneratedTtsAudio(
@@ -204,27 +215,31 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         mimeType: kEdgeTtsAudioMimeType,
       );
     } on TimeoutException catch (_) {
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.network,
-        'Microsoft Edge Speech timed out.',
+        L10nBridge.current?.speechEdgeTimedOut ??
+            'Microsoft Edge Speech timed out.',
       );
     } on FormatException catch (_) {
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.providerUnavailable,
-        'Microsoft Edge Speech returned malformed audio data.',
+        L10nBridge.current?.speechEdgeMalformedAudio ??
+            'Microsoft Edge Speech returned malformed audio data.',
       );
     } on TtsBackendException {
       rethrow;
     } catch (_) {
       if (_cancelled) {
-        throw const TtsBackendException(
+        throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
-          'Microsoft Edge Speech was cancelled.',
+          L10nBridge.current?.speechEdgeCancelled ??
+              'Microsoft Edge Speech was cancelled.',
         );
       }
-      throw const TtsBackendException(
+      throw TtsBackendException(
         TtsBackendErrorKind.network,
-        'Microsoft Edge Speech could not be reached.',
+        L10nBridge.current?.speechEdgeUnreachable ??
+            'Microsoft Edge Speech could not be reached.',
       );
     } finally {
       if (identical(_activeConnection, connection)) {

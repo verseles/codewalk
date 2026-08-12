@@ -58,11 +58,13 @@
   },
   "appProviderExitedWithCode": "Local server exited with code {code}.",
   "@appProviderExitedWithCode": {
-    "description": "CodeWalk UI string — appProviderExitedWithCode"
-,
+    "description": "CodeWalk UI string — appProviderExitedWithCode",
     "placeholders": {
-      "code": { "type": "int" }
-    }  },
+      "code": {
+        "type": "int"
+      }
+    }
+  },
   "appProviderFailedToStart": "Failed to start local OpenCode server.",
   "@appProviderFailedToStart": {
     "description": "CodeWalk UI string — appProviderFailedToStart"
@@ -81,11 +83,13 @@
   },
   "appProviderInstallSucceededWithPath": "Installation succeeded. OpenCode command available at {path}.",
   "@appProviderInstallSucceededWithPath": {
-    "description": "CodeWalk UI string — appProviderInstallSucceededWithPath"
-,
+    "description": "CodeWalk UI string — appProviderInstallSucceededWithPath",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "appProviderInstallViaBun": "Install via Bun",
   "@appProviderInstallViaBun": {
     "description": "CodeWalk UI string — appProviderInstallViaBun"
@@ -132,11 +136,13 @@
   },
   "appProviderNotDetectedRefresh": "OpenCode command was not detected. If you installed it moments ago, refresh checks or reopen {appName} to reload PATH.",
   "@appProviderNotDetectedRefresh": {
-    "description": "CodeWalk UI string — appProviderNotDetectedRefresh"
-,
+    "description": "CodeWalk UI string — appProviderNotDetectedRefresh",
     "placeholders": {
-      "appName": { "type": "String" }
-    }  },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "appProviderOAuthNotSupported": "Cloudflare Access OAuth is not supported on this platform",
   "@appProviderOAuthNotSupported": {
     "description": "CodeWalk UI string — appProviderOAuthNotSupported"
@@ -163,11 +169,13 @@
   },
   "appProviderRunningAt": "Running at {url}",
   "@appProviderRunningAt": {
-    "description": "CodeWalk UI string — appProviderRunningAt"
-,
+    "description": "CodeWalk UI string — appProviderRunningAt",
     "placeholders": {
-      "url": { "type": "String" }
-    }  },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "appProviderSetupDetectingOpenCode": "Detecting OpenCode command...",
   "@appProviderSetupDetectingOpenCode": {
     "description": "CodeWalk UI string — appProviderSetupDetectingOpenCode"
@@ -178,11 +186,13 @@
   },
   "appProviderSetupInstallationSucceededWithPath": "Installation succeeded. OpenCode command available at {path}.",
   "@appProviderSetupInstallationSucceededWithPath": {
-    "description": "CodeWalk UI string — appProviderSetupInstallationSucceededWithPath"
-,
+    "description": "CodeWalk UI string — appProviderSetupInstallationSucceededWithPath",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "appProviderSetupInstallingRequirements": "Installing OpenCode requirements...",
   "@appProviderSetupInstallingRequirements": {
     "description": "CodeWalk UI string — appProviderSetupInstallingRequirements"
@@ -209,33 +219,39 @@
   },
   "appProviderSetupUsingOpenCodeAt": "Using OpenCode command at {path}",
   "@appProviderSetupUsingOpenCodeAt": {
-    "description": "CodeWalk UI string — appProviderSetupUsingOpenCodeAt"
-,
+    "description": "CodeWalk UI string — appProviderSetupUsingOpenCodeAt",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "appProviderStartingLocalServer": "Starting local server...",
   "@appProviderStartingLocalServer": {
     "description": "CodeWalk UI string — appProviderStartingLocalServer"
   },
   "appProviderStatusLocalServerExitedWithCode": "Local server exited with code {code}.",
   "@appProviderStatusLocalServerExitedWithCode": {
-    "description": "CodeWalk UI string — appProviderStatusLocalServerExitedWithCode"
-,
+    "description": "CodeWalk UI string — appProviderStatusLocalServerExitedWithCode",
     "placeholders": {
-      "code": { "type": "int" }
-    }  },
+      "code": {
+        "type": "int"
+      }
+    }
+  },
   "appProviderStatusLocalServerStopped": "Local server is stopped.",
   "@appProviderStatusLocalServerStopped": {
     "description": "CodeWalk UI string — appProviderStatusLocalServerStopped"
   },
   "appProviderStatusRunningAt": "Running at {url}",
   "@appProviderStatusRunningAt": {
-    "description": "CodeWalk UI string — appProviderStatusRunningAt"
-,
+    "description": "CodeWalk UI string — appProviderStatusRunningAt",
     "placeholders": {
-      "url": { "type": "String" }
-    }  },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "appProviderStatusStartingLocalServer": "Starting local server...",
   "@appProviderStatusStartingLocalServer": {
     "description": "CodeWalk UI string — appProviderStatusStartingLocalServer"
@@ -254,11 +270,13 @@
   },
   "appProviderUsingCommandAt": "Using OpenCode command at {path}",
   "@appProviderUsingCommandAt": {
-    "description": "CodeWalk UI string — appProviderUsingCommandAt"
-,
+    "description": "CodeWalk UI string — appProviderUsingCommandAt",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "appShellDownloadingUpdate": "Downloading update…",
   "@appShellDownloadingUpdate": {
     "description": "CodeWalk UI string — appShellDownloadingUpdate"
@@ -281,11 +299,13 @@
   },
   "appShellUpdateAvailableResult": "Update available: v{latestVersion}",
   "@appShellUpdateAvailableResult": {
-    "description": "CodeWalk UI string — appShellUpdateAvailableResult"
-,
+    "description": "CodeWalk UI string — appShellUpdateAvailableResult",
     "placeholders": {
-      "latestVersion": { "type": "String" }
-    }  },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
   "appShellUpdateInstalledRestartApp": "Update installed. Restart the app to apply.",
   "@appShellUpdateInstalledRestartApp": {
     "description": "CodeWalk UI string — appShellUpdateInstalledRestartApp"
@@ -336,25 +356,31 @@
   },
   "attachmentSavedAndOpened": "Attachment saved to {path} and opened.",
   "@attachmentSavedAndOpened": {
-    "description": "CodeWalk UI string — attachmentSavedAndOpened"
-,
+    "description": "CodeWalk UI string — attachmentSavedAndOpened",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "attachmentSavedPath": "Attachment saved to {path}.",
   "@attachmentSavedPath": {
-    "description": "CodeWalk UI string — attachmentSavedPath"
-,
+    "description": "CodeWalk UI string — attachmentSavedPath",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "attachmentSavedTo": "Attachment saved to {path}.",
   "@attachmentSavedTo": {
-    "description": "CodeWalk UI string — attachmentSavedTo"
-,
+    "description": "CodeWalk UI string — attachmentSavedTo",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "attachmentUnableToOpenLink": "Unable to open the attachment link.",
   "@attachmentUnableToOpenLink": {
     "description": "CodeWalk UI string — attachmentUnableToOpenLink"
@@ -405,11 +431,13 @@
   },
   "behaviorCutsAutomaticMobile": "Cuts automatic mobile-data usage by stopping background downloads and throttling automatic foreground refreshes to one burst every {inSeconds} seconds.",
   "@behaviorCutsAutomaticMobile": {
-    "description": "CodeWalk UI string — behaviorCutsAutomaticMobile"
-,
+    "description": "CodeWalk UI string — behaviorCutsAutomaticMobile",
     "placeholders": {
-      "inSeconds": { "type": "int" }
-    }  },
+      "inSeconds": {
+        "type": "int"
+      }
+    }
+  },
   "behaviorDataSaverActive": "Active now on mobile data.",
   "@behaviorDataSaverActive": {
     "description": "CodeWalk UI string — behaviorDataSaverActive"
@@ -588,25 +616,31 @@
   },
   "chatBadgeConversationError": "\"{title}\" has an error.",
   "@chatBadgeConversationError": {
-    "description": "CodeWalk UI string — chatBadgeConversationError"
-,
+    "description": "CodeWalk UI string — chatBadgeConversationError",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "chatBadgeConversationNeedsInput": "\"{title}\" needs your input.",
   "@chatBadgeConversationNeedsInput": {
-    "description": "CodeWalk UI string — chatBadgeConversationNeedsInput"
-,
+    "description": "CodeWalk UI string — chatBadgeConversationNeedsInput",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "chatBadgeConversationNewReply": "\"{title}\" has a new reply.",
   "@chatBadgeConversationNewReply": {
-    "description": "CodeWalk UI string — chatBadgeConversationNewReply"
-,
+    "description": "CodeWalk UI string — chatBadgeConversationNewReply",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "chatBadgeDataSaverActive": "Cellular data saver is active.",
   "@chatBadgeDataSaverActive": {
     "description": "CodeWalk UI string — chatBadgeDataSaverActive"
@@ -637,11 +671,13 @@
   },
   "chatChildrenChatProviderCurrentSessionChildren": "Children: {length}",
   "@chatChildrenChatProviderCurrentSessionChildren": {
-    "description": "CodeWalk UI string — chatChildrenChatProviderCurrentSessionChildren"
-,
+    "description": "CodeWalk UI string — chatChildrenChatProviderCurrentSessionChildren",
     "placeholders": {
-      "length": { "type": "int" }
-    }  },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
   "chatChooseAgent": "Select agent",
   "@chatChooseAgent": {
     "description": "CodeWalk UI string — chatChooseAgent"
@@ -668,11 +704,13 @@
   },
   "chatCloseProject": "Close {project}",
   "@chatCloseProject": {
-    "description": "CodeWalk UI string — chatCloseProject"
-,
+    "description": "CodeWalk UI string — chatCloseProject",
     "placeholders": {
-      "project": { "type": "String" }
-    }  },
+      "project": {
+        "type": "String"
+      }
+    }
+  },
   "chatCollapseGroup": "Collapse group",
   "@chatCollapseGroup": {
     "description": "CodeWalk UI string — chatCollapseGroup"
@@ -715,11 +753,13 @@
   },
   "chatCostLabel": "Cost: ${cost}",
   "@chatCostLabel": {
-    "description": "CodeWalk UI string — chatCostLabel"
-,
+    "description": "CodeWalk UI string — chatCostLabel",
     "placeholders": {
-      "cost": { "type": "double" }
-    }  },
+      "cost": {
+        "type": "double"
+      }
+    }
+  },
   "chatCouldNotRefreshSession": "Could not refresh this conversation",
   "@chatCouldNotRefreshSession": {
     "description": "CodeWalk UI string — chatCouldNotRefreshSession"
@@ -730,11 +770,13 @@
   },
   "chatDescriptionChildren": "Children: {count}",
   "@chatDescriptionChildren": {
-    "description": "CodeWalk UI string — chatDescriptionChildren"
-,
+    "description": "CodeWalk UI string — chatDescriptionChildren",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatDescriptionCloseApp": "Close app using platform close behavior",
   "@chatDescriptionCloseApp": {
     "description": "CodeWalk UI string — chatDescriptionCloseApp"
@@ -901,12 +943,16 @@
   },
   "chatGroupMessageCountMessages": "{messageCount} messages hidden before {compactionLabel} compaction",
   "@chatGroupMessageCountMessages": {
-    "description": "CodeWalk UI string — chatGroupMessageCountMessages"
-,
+    "description": "CodeWalk UI string — chatGroupMessageCountMessages",
     "placeholders": {
-      "compactionLabel": { "type": "String" },
-      "messageCount": { "type": "String" }
-    }  },
+      "compactionLabel": {
+        "type": "String"
+      },
+      "messageCount": {
+        "type": "String"
+      }
+    }
+  },
   "chatHelloAssistant": "Hello! I am your AI assistant",
   "@chatHelloAssistant": {
     "description": "CodeWalk UI string — chatHelloAssistant"
@@ -937,12 +983,16 @@
   },
   "chatHistoryMessagesHidden": "{count} messages hidden before {label} compaction",
   "@chatHistoryMessagesHidden": {
-    "description": "CodeWalk UI string — chatHistoryMessagesHidden"
-,
+    "description": "CodeWalk UI string — chatHistoryMessagesHidden",
     "placeholders": {
-      "count": { "type": "int" },
-      "label": { "type": "String" }
-    }  },
+      "count": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "chatHistoryShowEarlier": "Show earlier messages",
   "@chatHistoryShowEarlier": {
     "description": "CodeWalk UI string — chatHistoryShowEarlier"
@@ -1013,11 +1063,13 @@
   },
   "chatMessageModelMessageModelId": "Model: {modelId}",
   "@chatMessageModelMessageModelId": {
-    "description": "CodeWalk UI string — chatMessageModelMessageModelId"
-,
+    "description": "CodeWalk UI string — chatMessageModelMessageModelId",
     "placeholders": {
-      "modelId": { "type": "String" }
-    }  },
+      "modelId": {
+        "type": "String"
+      }
+    }
+  },
   "chatMessageMore": "More",
   "@chatMessageMore": {
     "description": "CodeWalk UI string — chatMessageMore"
@@ -1028,11 +1080,13 @@
   },
   "chatMessageProviderMessageProviderId": "Provider: {providerId}",
   "@chatMessageProviderMessageProviderId": {
-    "description": "CodeWalk UI string — chatMessageProviderMessageProviderId"
-,
+    "description": "CodeWalk UI string — chatMessageProviderMessageProviderId",
     "placeholders": {
-      "providerId": { "type": "String" }
-    }  },
+      "providerId": {
+        "type": "String"
+      }
+    }
+  },
   "chatMessageRewindEdit": "Rewind and edit from here",
   "@chatMessageRewindEdit": {
     "description": "CodeWalk UI string — chatMessageRewindEdit"
@@ -1079,11 +1133,13 @@
   },
   "chatMessageToolCalls": "{count} tool calls",
   "@chatMessageToolCalls": {
-    "description": "CodeWalk UI string — chatMessageToolCalls"
-,
+    "description": "CodeWalk UI string — chatMessageToolCalls",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatMessageToolCommand": "Command",
   "@chatMessageToolCommand": {
     "description": "CodeWalk UI string — chatMessageToolCommand"
@@ -1110,18 +1166,22 @@
   },
   "chatMessageToolQueuedCount": "{count} queued",
   "@chatMessageToolQueuedCount": {
-    "description": "CodeWalk UI string — chatMessageToolQueuedCount"
-,
+    "description": "CodeWalk UI string — chatMessageToolQueuedCount",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatMessageToolRunningCount": "{count} running",
   "@chatMessageToolRunningCount": {
-    "description": "CodeWalk UI string — chatMessageToolRunningCount"
-,
+    "description": "CodeWalk UI string — chatMessageToolRunningCount",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatMessageToolStatusInProgress": "In progress",
   "@chatMessageToolStatusInProgress": {
     "description": "CodeWalk UI string — chatMessageToolStatusInProgress"
@@ -1252,11 +1312,13 @@
   },
   "chatPageStatusUsagePercent": "{usagePercent}",
   "@chatPageStatusUsagePercent": {
-    "description": "CodeWalk UI string — chatPageStatusUsagePercent"
-,
+    "description": "CodeWalk UI string — chatPageStatusUsagePercent",
     "placeholders": {
-      "usagePercent": { "type": "int" }
-    }  },
+      "usagePercent": {
+        "type": "int"
+      }
+    }
+  },
   "chatPermissionAutoApproveOff": "Permission auto-approve is off",
   "@chatPermissionAutoApproveOff": {
     "description": "CodeWalk UI string — chatPermissionAutoApproveOff"
@@ -1279,33 +1341,39 @@
   },
   "chatRealtimeGlobalEventReason": "global event ({reason})",
   "@chatRealtimeGlobalEventReason": {
-    "description": "CodeWalk UI string — chatRealtimeGlobalEventReason"
-,
+    "description": "CodeWalk UI string — chatRealtimeGlobalEventReason",
     "placeholders": {
-      "reason": { "type": "String" }
-    }  },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "chatRealtimeGlobalEventStale": "global event (stale generation)",
   "@chatRealtimeGlobalEventStale": {
     "description": "CodeWalk UI string — chatRealtimeGlobalEventStale"
   },
   "chatRealtimeMessageStreamReason": "message stream ({reason})",
   "@chatRealtimeMessageStreamReason": {
-    "description": "CodeWalk UI string — chatRealtimeMessageStreamReason"
-,
+    "description": "CodeWalk UI string — chatRealtimeMessageStreamReason",
     "placeholders": {
-      "reason": { "type": "String" }
-    }  },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "chatRealtimeRealtimeEvent": "realtime event",
   "@chatRealtimeRealtimeEvent": {
     "description": "CodeWalk UI string — chatRealtimeRealtimeEvent"
   },
   "chatRealtimeRealtimeEventReason": "realtime event ({reason})",
   "@chatRealtimeRealtimeEventReason": {
-    "description": "CodeWalk UI string — chatRealtimeRealtimeEventReason"
-,
+    "description": "CodeWalk UI string — chatRealtimeRealtimeEventReason",
     "placeholders": {
-      "reason": { "type": "String" }
-    }  },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "chatRealtimeRealtimeEventStale": "realtime event (stale generation)",
   "@chatRealtimeRealtimeEventStale": {
     "description": "CodeWalk UI string — chatRealtimeRealtimeEventStale"
@@ -1352,11 +1420,13 @@
   },
   "chatRemoveDisplayNameHistory": "Remove {displayName} from history",
   "@chatRemoveDisplayNameHistory": {
-    "description": "CodeWalk UI string — chatRemoveDisplayNameHistory"
-,
+    "description": "CodeWalk UI string — chatRemoveDisplayNameHistory",
     "placeholders": {
-      "displayName": { "type": "String" }
-    }  },
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
   "chatRetry": "Retry",
   "@chatRetry": {
     "description": "CodeWalk UI string — chatRetry"
@@ -1403,12 +1473,16 @@
   },
   "chatSearchResultCount": "Message {current} of {total}",
   "@chatSearchResultCount": {
-    "description": "CodeWalk UI string — chatSearchResultCount"
-,
+    "description": "CodeWalk UI string — chatSearchResultCount",
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
-    }  },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "chatSearchTimeline": "Search timeline",
   "@chatSearchTimeline": {
     "description": "CodeWalk UI string — chatSearchTimeline"
@@ -1435,18 +1509,22 @@
   },
   "chatSessionChatSessionSession": "Chat session: {title}",
   "@chatSessionChatSessionSession": {
-    "description": "CodeWalk UI string — chatSessionChatSessionSession"
-,
+    "description": "CodeWalk UI string — chatSessionChatSessionSession",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "chatSessionConversationNextAction": "Conversation {nextAction}",
   "@chatSessionConversationNextAction": {
-    "description": "CodeWalk UI string — chatSessionConversationNextAction"
-,
+    "description": "CodeWalk UI string — chatSessionConversationNextAction",
     "placeholders": {
-      "nextAction": { "type": "String" }
-    }  },
+      "nextAction": {
+        "type": "String"
+      }
+    }
+  },
   "chatSessionConversations": "No conversations",
   "@chatSessionConversations": {
     "description": "CodeWalk UI string — chatSessionConversations"
@@ -1461,11 +1539,13 @@
   },
   "chatSessionsLength": "{length}",
   "@chatSessionsLength": {
-    "description": "CodeWalk UI string — chatSessionsLength"
-,
+    "description": "CodeWalk UI string — chatSessionsLength",
     "placeholders": {
-      "length": { "type": "int" }
-    }  },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
   "chatSetUpServer": "Set up server",
   "@chatSetUpServer": {
     "description": "CodeWalk UI string — chatSetUpServer"
@@ -1572,11 +1652,13 @@
   },
   "chatStatusPatchingMultipleFiles": "Patching {count} files",
   "@chatStatusPatchingMultipleFiles": {
-    "description": "CodeWalk UI string — chatStatusPatchingMultipleFiles"
-,
+    "description": "CodeWalk UI string — chatStatusPatchingMultipleFiles",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatStatusPatchingOneFile": "Patching 1 file",
   "@chatStatusPatchingOneFile": {
     "description": "CodeWalk UI string — chatStatusPatchingOneFile"
@@ -1587,11 +1669,13 @@
   },
   "chatStatusRetryCount": "Status: Retry #{count}",
   "@chatStatusRetryCount": {
-    "description": "CodeWalk UI string — chatStatusRetryCount"
-,
+    "description": "CodeWalk UI string — chatStatusRetryCount",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatStatusSubsession": "Subsession",
   "@chatStatusSubsession": {
     "description": "CodeWalk UI string — chatStatusSubsession"
@@ -1606,11 +1690,13 @@
   },
   "chatSyncLabel": "Sync: {label}",
   "@chatSyncLabel": {
-    "description": "CodeWalk UI string — chatSyncLabel"
-,
+    "description": "CodeWalk UI string — chatSyncLabel",
     "placeholders": {
-      "label": { "type": "String" }
-    }  },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "chatTasks": "Tasks",
   "@chatTasks": {
     "description": "CodeWalk UI string — chatTasks"
@@ -1705,11 +1791,13 @@
   },
   "chatTokensLabel": "Tokens: {total}",
   "@chatTokensLabel": {
-    "description": "CodeWalk UI string — chatTokensLabel"
-,
+    "description": "CodeWalk UI string — chatTokensLabel",
     "placeholders": {
-      "total": { "type": "int" }
-    }  },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "chatTourProjectsConversations": "Use this button to open your projects and conversations.",
   "@chatTourProjectsConversations": {
     "description": "CodeWalk UI string — chatTourProjectsConversations"
@@ -1764,11 +1852,13 @@
   },
   "chatWorkMessagesMultiple": "{count} work messages",
   "@chatWorkMessagesMultiple": {
-    "description": "CodeWalk UI string — chatWorkMessagesMultiple"
-,
+    "description": "CodeWalk UI string — chatWorkMessagesMultiple",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chatWorkShow": "Show",
   "@chatWorkShow": {
     "description": "CodeWalk UI string — chatWorkShow"
@@ -2059,25 +2149,31 @@
   },
   "fileActionAttachmentSavedOutputFile": "Attachment saved to {path} and opened.",
   "@fileActionAttachmentSavedOutputFile": {
-    "description": "CodeWalk UI string — fileActionAttachmentSavedOutputFile"
-,
+    "description": "CodeWalk UI string — fileActionAttachmentSavedOutputFile",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "fileActionAttachmentSavedOutputFile2": "Attachment saved to {path}.",
   "@fileActionAttachmentSavedOutputFile2": {
-    "description": "CodeWalk UI string — fileActionAttachmentSavedOutputFile2"
-,
+    "description": "CodeWalk UI string — fileActionAttachmentSavedOutputFile2",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "fileActionAttachmentSavedSavedPath": "Attachment saved to {savedPath}.",
   "@fileActionAttachmentSavedSavedPath": {
-    "description": "CodeWalk UI string — fileActionAttachmentSavedSavedPath"
-,
+    "description": "CodeWalk UI string — fileActionAttachmentSavedSavedPath",
     "placeholders": {
-      "savedPath": { "type": "String" }
-    }  },
+      "savedPath": {
+        "type": "String"
+      }
+    }
+  },
   "fileActionLocalAttachmentFound": "Local attachment was not found on this device.",
   "@fileActionLocalAttachmentFound": {
     "description": "CodeWalk UI string — fileActionLocalAttachmentFound"
@@ -2162,14 +2258,18 @@
   "@filesDeleteConfirm": {
     "description": "CodeWalk UI string — filesDeleteConfirm",
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "filesDeleteTitle": "Delete {name}",
   "@filesDeleteTitle": {
     "description": "CodeWalk UI string — filesDeleteTitle",
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "filesFilesFound": "No files found",
@@ -2214,11 +2314,13 @@
   },
   "filesOpenFilesFileState": "Open files ({length})",
   "@filesOpenFilesFileState": {
-    "description": "CodeWalk UI string — filesOpenFilesFileState"
-,
+    "description": "CodeWalk UI string — filesOpenFilesFileState",
     "placeholders": {
-      "length": { "type": "int" }
-    }  },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
   "filesQuickOpen": "Quick Open",
   "@filesQuickOpen": {
     "description": "CodeWalk UI string — filesQuickOpen"
@@ -2263,7 +2365,9 @@
   "@filesRenameTitle": {
     "description": "CodeWalk UI string — filesRenameTitle",
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "filesRenamed": "Renamed.",
@@ -2324,19 +2428,25 @@
   },
   "forwardPartial": "Forwarded to {success} of {total}",
   "@forwardPartial": {
-    "description": "CodeWalk UI string — forwardPartial"
-,
+    "description": "CodeWalk UI string — forwardPartial",
     "placeholders": {
-      "success": { "type": "int" },
-      "total": { "type": "int" }
-    }  },
+      "success": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "forwardProvenanceLabel": "Forwarded from: {origin}",
   "@forwardProvenanceLabel": {
-    "description": "CodeWalk UI string — forwardProvenanceLabel"
-,
+    "description": "CodeWalk UI string — forwardProvenanceLabel",
     "placeholders": {
-      "origin": { "type": "String" }
-    }  },
+      "origin": {
+        "type": "String"
+      }
+    }
+  },
   "forwardRetry": "Retry",
   "@forwardRetry": {
     "description": "CodeWalk UI string — forwardRetry"
@@ -2347,11 +2457,13 @@
   },
   "forwardSelectedCount": "{count} selected",
   "@forwardSelectedCount": {
-    "description": "CodeWalk UI string — forwardSelectedCount"
-,
+    "description": "CodeWalk UI string — forwardSelectedCount",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "forwardSend": "Forward",
   "@forwardSend": {
     "description": "CodeWalk UI string — forwardSend"
@@ -2366,11 +2478,13 @@
   },
   "forwardSuccess": "Forwarded to {count} sessions",
   "@forwardSuccess": {
-    "description": "CodeWalk UI string — forwardSuccess"
-,
+    "description": "CodeWalk UI string — forwardSuccess",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "forwardUndo": "Undo",
   "@forwardUndo": {
     "description": "CodeWalk UI string — forwardUndo"
@@ -2461,36 +2575,48 @@
   },
   "logsPerformanceDuration": "{elapsedMs} ms",
   "@logsPerformanceDuration": {
-    "description": "CodeWalk UI string — logsPerformanceDuration"
-,
+    "description": "CodeWalk UI string — logsPerformanceDuration",
     "placeholders": {
-      "elapsedMs": { "type": "int" }
-    }  },
+      "elapsedMs": {
+        "type": "int"
+      }
+    }
+  },
   "logsPerformanceFilter": "Performance",
   "@logsPerformanceFilter": {
     "description": "CodeWalk UI string — logsPerformanceFilter"
   },
   "logsPerformanceTileTitle": "PERFORMANCE {operation} | {elapsedMs} ms | {status}",
   "@logsPerformanceTileTitle": {
-    "description": "CodeWalk UI string — logsPerformanceTileTitle"
-,
+    "description": "CodeWalk UI string — logsPerformanceTileTitle",
     "placeholders": {
-      "elapsedMs": { "type": "int" },
-      "operation": { "type": "String" },
-      "status": { "type": "String" }
-    }  },
+      "elapsedMs": {
+        "type": "int"
+      },
+      "operation": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "logsSearch": "Search logs",
   "@logsSearch": {
     "description": "CodeWalk UI string — logsSearch"
   },
   "logsShowingOrderedLength": "Showing {length} of {length2} entries",
   "@logsShowingOrderedLength": {
-    "description": "CodeWalk UI string — logsShowingOrderedLength"
-,
+    "description": "CodeWalk UI string — logsShowingOrderedLength",
     "placeholders": {
-      "length": { "type": "int" },
-      "length2": { "type": "int" }
-    }  },
+      "length": {
+        "type": "int"
+      },
+      "length2": {
+        "type": "int"
+      }
+    }
+  },
   "logsSlowestPerformance": "Slowest performance logs",
   "@logsSlowestPerformance": {
     "description": "CodeWalk UI string — logsSlowestPerformance"
@@ -2509,12 +2635,16 @@
   },
   "logsTaskDuration": "{operation} — {elapsedMs} ms",
   "@logsTaskDuration": {
-    "description": "CodeWalk UI string — logsTaskDuration"
-,
+    "description": "CodeWalk UI string — logsTaskDuration",
     "placeholders": {
-      "elapsedMs": { "type": "int" },
-      "operation": { "type": "String" }
-    }  },
+      "elapsedMs": {
+        "type": "int"
+      },
+      "operation": {
+        "type": "String"
+      }
+    }
+  },
   "logsTaskStatusCanceled": "canceled",
   "@logsTaskStatusCanceled": {
     "description": "CodeWalk UI string — logsTaskStatusCanceled"
@@ -2625,11 +2755,13 @@
   },
   "msgFilePathNotFound": "File not found: {path}",
   "@msgFilePathNotFound": {
-    "description": "CodeWalk UI string — msgFilePathNotFound"
-,
+    "description": "CodeWalk UI string — msgFilePathNotFound",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "msgFilteredLogsCopied": "Filtered logs copied to clipboard",
   "@msgFilteredLogsCopied": {
     "description": "CodeWalk UI string — msgFilteredLogsCopied"
@@ -2644,45 +2776,55 @@
   },
   "msgInfoCost": "Cost: ${cost}",
   "@msgInfoCost": {
-    "description": "CodeWalk UI string — msgInfoCost"
-,
+    "description": "CodeWalk UI string — msgInfoCost",
     "placeholders": {
-      "cost": { "type": "double" }
-    }  },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
   "msgInfoMessageInfo": "Message Info",
   "@msgInfoMessageInfo": {
     "description": "CodeWalk UI string — msgInfoMessageInfo"
   },
   "msgInfoModel": "Model: {modelId}",
   "@msgInfoModel": {
-    "description": "CodeWalk UI string — msgInfoModel"
-,
+    "description": "CodeWalk UI string — msgInfoModel",
     "placeholders": {
-      "modelId": { "type": "String" }
-    }  },
+      "modelId": {
+        "type": "String"
+      }
+    }
+  },
   "msgInfoNoMetadata": "No metadata available",
   "@msgInfoNoMetadata": {
     "description": "CodeWalk UI string — msgInfoNoMetadata"
   },
   "msgInfoPartDescriptionModel": "{description}{model}",
   "@msgInfoPartDescriptionModel": {
-    "description": "CodeWalk UI string — msgInfoPartDescriptionModel"
-,
+    "description": "CodeWalk UI string — msgInfoPartDescriptionModel",
     "placeholders": {
-      "description": { "type": "String" },
-      "model": { "type": "String" }
-    }  },
+      "description": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
   "msgInfoPatch": "Patch",
   "@msgInfoPatch": {
     "description": "CodeWalk UI string — msgInfoPatch"
   },
   "msgInfoProvider": "Provider: {providerId}",
   "@msgInfoProvider": {
-    "description": "CodeWalk UI string — msgInfoProvider"
-,
+    "description": "CodeWalk UI string — msgInfoProvider",
     "placeholders": {
-      "providerId": { "type": "String" }
-    }  },
+      "providerId": {
+        "type": "String"
+      }
+    }
+  },
   "msgInfoRetry": "Retry",
   "@msgInfoRetry": {
     "description": "CodeWalk UI string — msgInfoRetry"
@@ -2693,18 +2835,22 @@
   },
   "msgInfoSubtaskPartAgent": "Subtask ({agent})",
   "@msgInfoSubtaskPartAgent": {
-    "description": "CodeWalk UI string — msgInfoSubtaskPartAgent"
-,
+    "description": "CodeWalk UI string — msgInfoSubtaskPartAgent",
     "placeholders": {
-      "agent": { "type": "String" }
-    }  },
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
   "msgInfoTokens": "Tokens: {total}",
   "@msgInfoTokens": {
-    "description": "CodeWalk UI string — msgInfoTokens"
-,
+    "description": "CodeWalk UI string — msgInfoTokens",
     "placeholders": {
-      "total": { "type": "int" }
-    }  },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "msgInfoUndoThisTurn": "Undo this turn",
   "@msgInfoUndoThisTurn": {
     "description": "CodeWalk UI string — msgInfoUndoThisTurn"
@@ -2787,11 +2933,13 @@
   },
   "notifSelectedSoundLabel": "Selected: {soundLabel}",
   "@notifSelectedSoundLabel": {
-    "description": "CodeWalk UI string — notifSelectedSoundLabel"
-,
+    "description": "CodeWalk UI string — notifSelectedSoundLabel",
     "placeholders": {
-      "soundLabel": { "type": "String" }
-    }  },
+      "soundLabel": {
+        "type": "String"
+      }
+    }
+  },
   "notificationAgentFinished": "Agent finished the current response.",
   "@notificationAgentFinished": {
     "description": "CodeWalk UI string — notificationAgentFinished"
@@ -2830,12 +2978,16 @@
   },
   "onboardingAppProviderLocalSetupLogsLength": "{length} setup log lines and {length2} setup events are available in the separate setup debug screen.",
   "@onboardingAppProviderLocalSetupLogsLength": {
-    "description": "CodeWalk UI string — onboardingAppProviderLocalSetupLogsLength"
-,
+    "description": "CodeWalk UI string — onboardingAppProviderLocalSetupLogsLength",
     "placeholders": {
-      "length": { "type": "int" },
-      "length2": { "type": "int" }
-    }  },
+      "length": {
+        "type": "int"
+      },
+      "length2": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingAuthenticate": "Authenticate",
   "@onboardingAuthenticate": {
     "description": "CodeWalk UI string — onboardingAuthenticate"
@@ -2914,11 +3066,13 @@
   },
   "onboardingDesktopOnlyDiagnose": "Desktop only: {appName} can diagnose, install, and run OpenCode for you.",
   "@onboardingDesktopOnlyDiagnose": {
-    "description": "CodeWalk UI string — onboardingDesktopOnlyDiagnose"
-,
+    "description": "CodeWalk UI string — onboardingDesktopOnlyDiagnose",
     "placeholders": {
-      "appName": { "type": "String" }
-    }  },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingDetailedSetupEvents": "Detailed setup events were captured for troubleshooting.",
   "@onboardingDetailedSetupEvents": {
     "description": "CodeWalk UI string — onboardingDetailedSetupEvents"
@@ -3001,11 +3155,13 @@
   },
   "onboardingLatestOutputAppProvider": "Latest output: {localServerLastOutput}",
   "@onboardingLatestOutputAppProvider": {
-    "description": "CodeWalk UI string — onboardingLatestOutputAppProvider"
-,
+    "description": "CodeWalk UI string — onboardingLatestOutputAppProvider",
     "placeholders": {
-      "localServerLastOutput": { "type": "String" }
-    }  },
+      "localServerLastOutput": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingLetCodeWalkSet": "Let CodeWalk set it up locally",
   "@onboardingLetCodeWalkSet": {
     "description": "CodeWalk UI string — onboardingLetCodeWalkSet"
@@ -3024,11 +3180,13 @@
   },
   "onboardingNeedsOpenCodeServer": "{appName} needs an OpenCode server before it can help with your code.",
   "@onboardingNeedsOpenCodeServer": {
-    "description": "CodeWalk UI string — onboardingNeedsOpenCodeServer"
-,
+    "description": "CodeWalk UI string — onboardingNeedsOpenCodeServer",
     "placeholders": {
-      "appName": { "type": "String" }
-    }  },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingNotAvailable": "not available",
   "@onboardingNotAvailable": {
     "description": "CodeWalk UI string — onboardingNotAvailable"
@@ -3175,11 +3333,13 @@
   },
   "onboardingStartUsing": "Start using {appName}",
   "@onboardingStartUsing": {
-    "description": "CodeWalk UI string — onboardingStartUsing"
-,
+    "description": "CodeWalk UI string — onboardingStartUsing",
     "placeholders": {
-      "appName": { "type": "String" }
-    }  },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingStarting": "Starting",
   "@onboardingStarting": {
     "description": "CodeWalk UI string — onboardingStarting"
@@ -3198,11 +3358,13 @@
   },
   "onboardingSuggestedUrl": "Suggested local OpenCode server URL: {url}",
   "@onboardingSuggestedUrl": {
-    "description": "CodeWalk UI string — onboardingSuggestedUrl"
-,
+    "description": "CodeWalk UI string — onboardingSuggestedUrl",
     "placeholders": {
-      "url": { "type": "String" }
-    }  },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingTailscaleAdminApproval": "Tailscale admin approval required",
   "@onboardingTailscaleAdminApproval": {
     "description": "CodeWalk UI string — onboardingTailscaleAdminApproval"
@@ -3213,11 +3375,13 @@
   },
   "onboardingTailscaleAuthAfterSaveTest": "After you save and test this server, {appName} will open Tailscale login if this device is not authenticated yet.",
   "@onboardingTailscaleAuthAfterSaveTest": {
-    "description": "CodeWalk UI string — onboardingTailscaleAuthAfterSaveTest"
-,
+    "description": "CodeWalk UI string — onboardingTailscaleAuthAfterSaveTest",
     "placeholders": {
-      "appName": { "type": "String" }
-    }  },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingTailscaleConnected": "Tailscale connected",
   "@onboardingTailscaleConnected": {
     "description": "CodeWalk UI string — onboardingTailscaleConnected"
@@ -3280,11 +3444,13 @@
   },
   "onboardingWelcomeTo": "Welcome to {appName}",
   "@onboardingWelcomeTo": {
-    "description": "CodeWalk UI string — onboardingWelcomeTo"
-,
+    "description": "CodeWalk UI string — onboardingWelcomeTo",
     "placeholders": {
-      "appName": { "type": "String" }
-    }  },
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingWindowsTipInstalling": "Windows tip: after installing, click Refresh Checks. If detection still fails, reopen CodeWalk to reload PATH changes.",
   "@onboardingWindowsTipInstalling": {
     "description": "CodeWalk UI string — onboardingWindowsTipInstalling"
@@ -3387,11 +3553,13 @@
   },
   "quotaPacePercent": "Pace {percent}%",
   "@quotaPacePercent": {
-    "description": "CodeWalk UI string — quotaPacePercent"
-,
+    "description": "CodeWalk UI string — quotaPacePercent",
     "placeholders": {
-      "percent": { "type": "String" }
-    }  },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "quotaRateLimits": "Rate limits",
   "@quotaRateLimits": {
     "description": "CodeWalk UI string — quotaRateLimits"
@@ -3406,11 +3574,13 @@
   },
   "quotaResetsIn": "Resets in {time}",
   "@quotaResetsIn": {
-    "description": "CodeWalk UI string — quotaResetsIn"
-,
+    "description": "CodeWalk UI string — quotaResetsIn",
     "placeholders": {
-      "time": { "type": "String" }
-    }  },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "quotaSaving": "Saving...",
   "@quotaSaving": {
     "description": "CodeWalk UI string — quotaSaving"
@@ -3493,11 +3663,13 @@
   },
   "serversCommandAppProviderLocalServerCommandPath": "Command: {localServerCommandPath}",
   "@serversCommandAppProviderLocalServerCommandPath": {
-    "description": "CodeWalk UI string — serversCommandAppProviderLocalServerCommandPath"
-,
+    "description": "CodeWalk UI string — serversCommandAppProviderLocalServerCommandPath",
     "placeholders": {
-      "localServerCommandPath": { "type": "String" }
-    }  },
+      "localServerCommandPath": {
+        "type": "String"
+      }
+    }
+  },
   "serversCopy": "Copy",
   "@serversCopy": {
     "description": "CodeWalk UI string — serversCopy"
@@ -3540,11 +3712,13 @@
   },
   "serversRemoveProfileDisplayName": "Remove \"{displayName}\"?",
   "@serversRemoveProfileDisplayName": {
-    "description": "CodeWalk UI string — serversRemoveProfileDisplayName"
-,
+    "description": "CodeWalk UI string — serversRemoveProfileDisplayName",
     "placeholders": {
-      "displayName": { "type": "String" }
-    }  },
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
   "serversSearchActiveHint": "Search active server",
   "@serversSearchActiveHint": {
     "description": "CodeWalk UI string — serversSearchActiveHint"
@@ -3647,11 +3821,13 @@
   },
   "sessionChildrenCount": "Children: {count}",
   "@sessionChildrenCount": {
-    "description": "CodeWalk UI string — sessionChildrenCount"
-,
+    "description": "CodeWalk UI string — sessionChildrenCount",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "sessionCompactContext": "Compact context",
   "@sessionCompactContext": {
     "description": "CodeWalk UI string — sessionCompactContext"
@@ -3666,11 +3842,13 @@
   },
   "sessionDeleteConfirm": "Are you sure you want to delete the conversation \"{title}\"? This action cannot be undone.",
   "@sessionDeleteConfirm": {
-    "description": "CodeWalk UI string — sessionDeleteConfirm"
-,
+    "description": "CodeWalk UI string — sessionDeleteConfirm",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "sessionDeleteTitle": "Delete Conversation",
   "@sessionDeleteTitle": {
     "description": "CodeWalk UI string — sessionDeleteTitle"
@@ -3685,33 +3863,43 @@
   },
   "sessionDiffFilesChanged": "{count, plural, =1{1 file changed} other{{count} files changed}}",
   "@sessionDiffFilesChanged": {
-    "description": "CodeWalk UI string — sessionDiffFilesChanged"
-,
+    "description": "CodeWalk UI string — sessionDiffFilesChanged",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "sessionDiffFilesCount": "Diff files: {count}",
   "@sessionDiffFilesCount": {
-    "description": "CodeWalk UI string — sessionDiffFilesCount"
-,
+    "description": "CodeWalk UI string — sessionDiffFilesCount",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "sessionDiffLinesAddedRemoved": "+{added} lines added -{removed} lines removed",
   "@sessionDiffLinesAddedRemoved": {
-    "description": "CodeWalk UI string — sessionDiffLinesAddedRemoved"
-,
+    "description": "CodeWalk UI string — sessionDiffLinesAddedRemoved",
     "placeholders": {
-      "added": { "type": "int" },
-      "removed": { "type": "int" }
-    }  },
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
   "sessionDiffLinesCollapsed": "{count} lines collapsed — tap to expand",
   "@sessionDiffLinesCollapsed": {
-    "description": "CodeWalk UI string — sessionDiffLinesCollapsed"
-,
+    "description": "CodeWalk UI string — sessionDiffLinesCollapsed",
     "placeholders": {
-      "count": { "type": "int" }
-    }  },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "sessionDiffLoading": "Loading changed files…",
   "@sessionDiffLoading": {
     "description": "CodeWalk UI string — sessionDiffLoading"
@@ -3818,29 +4006,35 @@
   },
   "sessionHasError": "\"{title}\" has an error.",
   "@sessionHasError": {
-    "description": "CodeWalk UI string — sessionHasError"
-,
+    "description": "CodeWalk UI string — sessionHasError",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "sessionHasNewReply": "\"{title}\" has a new reply.",
   "@sessionHasNewReply": {
-    "description": "CodeWalk UI string — sessionHasNewReply"
-,
+    "description": "CodeWalk UI string — sessionHasNewReply",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "sessionKeyboardShortcuts": "Keyboard shortcuts",
   "@sessionKeyboardShortcuts": {
     "description": "CodeWalk UI string — sessionKeyboardShortcuts"
   },
   "sessionNeedsInput": "\"{title}\" needs your input.",
   "@sessionNeedsInput": {
-    "description": "CodeWalk UI string — sessionNeedsInput"
-,
+    "description": "CodeWalk UI string — sessionNeedsInput",
     "placeholders": {
-      "title": { "type": "String" }
-    }  },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "sessionNoCachedConversations": "No cached conversations yet",
   "@sessionNoCachedConversations": {
     "description": "CodeWalk UI string — sessionNoCachedConversations"
@@ -3955,11 +4149,13 @@
   },
   "settingsAboutDownloading": "Downloading... {percent}%",
   "@settingsAboutDownloading": {
-    "description": "CodeWalk UI string — settingsAboutDownloading"
-,
+    "description": "CodeWalk UI string — settingsAboutDownloading",
     "placeholders": {
-      "percent": { "type": "String" }
-    }  },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAboutEraseAllData": "Erase all data and restart",
   "@settingsAboutEraseAllData": {
     "description": "CodeWalk UI string — settingsAboutEraseAllData"
@@ -3974,11 +4170,13 @@
   },
   "settingsAboutLatestVersion": "v{version} is the latest version",
   "@settingsAboutLatestVersion": {
-    "description": "CodeWalk UI string — settingsAboutLatestVersion"
-,
+    "description": "CodeWalk UI string — settingsAboutLatestVersion",
     "placeholders": {
-      "version": { "type": "String" }
-    }  },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAboutLoading": "Loading...",
   "@settingsAboutLoading": {
     "description": "CodeWalk UI string — settingsAboutLoading"
@@ -4021,35 +4219,45 @@
   },
   "settingsAboutUpdateAvailable": "Update available: v{version}",
   "@settingsAboutUpdateAvailable": {
-    "description": "CodeWalk UI string — settingsAboutUpdateAvailable"
-,
+    "description": "CodeWalk UI string — settingsAboutUpdateAvailable",
     "placeholders": {
-      "version": { "type": "String" }
-    }  },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAboutUpdateInstalled": "Update installed. Restart the app to apply.",
   "@settingsAboutUpdateInstalled": {
     "description": "CodeWalk UI string — settingsAboutUpdateInstalled"
   },
   "settingsAboutUpdateVersionSummary": "Current: {installedVersion}; available: v{latestVersion}",
   "@settingsAboutUpdateVersionSummary": {
-    "description": "CodeWalk UI string — settingsAboutUpdateVersionSummary"
-,
+    "description": "CodeWalk UI string — settingsAboutUpdateVersionSummary",
     "placeholders": {
-      "installedVersion": { "type": "String" },
-      "latestVersion": { "type": "String" }
-    }  },
+      "installedVersion": {
+        "type": "String"
+      },
+      "latestVersion": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAboutVersion": "Version",
   "@settingsAboutVersion": {
     "description": "CodeWalk UI string — settingsAboutVersion"
   },
   "settingsAboutVersionBuild": "{version} (build {buildNumber})",
   "@settingsAboutVersionBuild": {
-    "description": "CodeWalk UI string — settingsAboutVersionBuild"
-,
+    "description": "CodeWalk UI string — settingsAboutVersionBuild",
     "placeholders": {
-      "buildNumber": { "type": "String" },
-      "version": { "type": "String" }
-    }  },
+      "buildNumber": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAppearanceAmoledDark": "AMOLED dark mode",
   "@settingsAppearanceAmoledDark": {
     "description": "CodeWalk UI string — settingsAppearanceAmoledDark"
@@ -4372,11 +4580,13 @@
   },
   "settingsBehaviorConfigUpdateFailed": "Could not update the OpenCode {field}.",
   "@settingsBehaviorConfigUpdateFailed": {
-    "description": "CodeWalk UI string — settingsBehaviorConfigUpdateFailed"
-,
+    "description": "CodeWalk UI string — settingsBehaviorConfigUpdateFailed",
     "placeholders": {
-      "field": { "type": "String" }
-    }  },
+      "field": {
+        "type": "String"
+      }
+    }
+  },
   "settingsBehaviorConversationUsername": "Conversation username",
   "@settingsBehaviorConversationUsername": {
     "description": "CodeWalk UI string — settingsBehaviorConversationUsername"
@@ -4779,11 +4989,13 @@
   },
   "settingsNotificationsSelectedSound": "Selected: {label}",
   "@settingsNotificationsSelectedSound": {
-    "description": "CodeWalk UI string — settingsNotificationsSelectedSound"
-,
+    "description": "CodeWalk UI string — settingsNotificationsSelectedSound",
     "placeholders": {
-      "label": { "type": "String" }
-    }  },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "settingsNotificationsServer": "Server",
   "@settingsNotificationsServer": {
     "description": "CodeWalk UI string — settingsNotificationsServer"
@@ -5010,11 +5222,13 @@
   },
   "settingsSpeechSilenceTimeout": "Silence timeout: {value}s",
   "@settingsSpeechSilenceTimeout": {
-    "description": "CodeWalk UI string — settingsSpeechSilenceTimeout"
-,
+    "description": "CodeWalk UI string — settingsSpeechSilenceTimeout",
     "placeholders": {
-      "value": { "type": "String" }
-    }  },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSpeechTitle": "Speech to text",
   "@settingsSpeechTitle": {
     "description": "CodeWalk UI string — settingsSpeechTitle"
@@ -5289,12 +5503,16 @@
   },
   "setupDebugTimeEntrySource": "{time} - {source}",
   "@setupDebugTimeEntrySource": {
-    "description": "CodeWalk UI string — setupDebugTimeEntrySource"
-,
+    "description": "CodeWalk UI string — setupDebugTimeEntrySource",
     "placeholders": {
-      "source": { "type": "String" },
-      "time": { "type": "String" }
-    }  },
+      "source": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "setupDebugTimeline": "Timeline",
   "@setupDebugTimeline": {
     "description": "CodeWalk UI string — setupDebugTimeline"
@@ -5457,11 +5675,13 @@
   },
   "shortcutsConflictConflict": "Conflict with {conflict}",
   "@shortcutsConflictConflict": {
-    "description": "CodeWalk UI string — shortcutsConflictConflict"
-,
+    "description": "CodeWalk UI string — shortcutsConflictConflict",
     "placeholders": {
-      "conflict": { "type": "String" }
-    }  },
+      "conflict": {
+        "type": "String"
+      }
+    }
+  },
   "shortcutsKeyboardShortcuts": "Keyboard shortcuts",
   "@shortcutsKeyboardShortcuts": {
     "description": "CodeWalk UI string — shortcutsKeyboardShortcuts"
@@ -5476,11 +5696,13 @@
   },
   "shortcutsSetShortcutWidget": "Set shortcut: {label}",
   "@shortcutsSetShortcutWidget": {
-    "description": "CodeWalk UI string — shortcutsSetShortcutWidget"
-,
+    "description": "CodeWalk UI string — shortcutsSetShortcutWidget",
     "placeholders": {
-      "label": { "type": "String" }
-    }  },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "shortcutsTheseBindingsStored": "These bindings are stored in CodeWalk for the current app runtime and do not edit OpenCode `tui.json` keybinds.",
   "@shortcutsTheseBindingsStored": {
     "description": "CodeWalk UI string — shortcutsTheseBindingsStored"
@@ -5495,11 +5717,13 @@
   },
   "speechDesktopOnly": "{service} is available on desktop only.",
   "@speechDesktopOnly": {
-    "description": "CodeWalk UI string — speechDesktopOnly"
-,
+    "description": "CodeWalk UI string — speechDesktopOnly",
     "placeholders": {
-      "service": { "type": "String" }
-    }  },
+      "service": {
+        "type": "String"
+      }
+    }
+  },
   "speechDownload": "Download",
   "@speechDownload": {
     "description": "CodeWalk UI string — speechDownload"
@@ -5522,11 +5746,13 @@
   },
   "speechModelFilesIncomplete": "{service} model files are incomplete.",
   "@speechModelFilesIncomplete": {
-    "description": "CodeWalk UI string — speechModelFilesIncomplete"
-,
+    "description": "CodeWalk UI string — speechModelFilesIncomplete",
     "placeholders": {
-      "service": { "type": "String" }
-    }  },
+      "service": {
+        "type": "String"
+      }
+    }
+  },
   "speechMoonshine": "Moonshine",
   "@speechMoonshine": {
     "description": "CodeWalk UI string — speechMoonshine"
@@ -5589,11 +5815,13 @@
   },
   "speechRuntimeFailed": "{service} runtime failed to initialize.",
   "@speechRuntimeFailed": {
-    "description": "CodeWalk UI string — speechRuntimeFailed"
-,
+    "description": "CodeWalk UI string — speechRuntimeFailed",
     "placeholders": {
-      "service": { "type": "String" }
-    }  },
+      "service": {
+        "type": "String"
+      }
+    }
+  },
   "speechSelectSherpaAbove": "Select Sherpa above to manage language packs and download models.",
   "@speechSelectSherpaAbove": {
     "description": "CodeWalk UI string — speechSelectSherpaAbove"
@@ -5628,11 +5856,13 @@
   },
   "speechUnavailableOnPlatform": "{service} speech is unavailable on this platform.",
   "@speechUnavailableOnPlatform": {
-    "description": "CodeWalk UI string — speechUnavailableOnPlatform"
-,
+    "description": "CodeWalk UI string — speechUnavailableOnPlatform",
     "placeholders": {
-      "service": { "type": "String" }
-    }  },
+      "service": {
+        "type": "String"
+      }
+    }
+  },
   "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
   "@speechWindowsSetupHint": {
     "description": "CodeWalk UI string — speechWindowsSetupHint"
@@ -5707,29 +5937,35 @@
   },
   "terminalConnectingTo": "Connecting to {serverName} terminal...",
   "@terminalConnectingTo": {
-    "description": "CodeWalk UI string — terminalConnectingTo"
-,
+    "description": "CodeWalk UI string — terminalConnectingTo",
     "placeholders": {
-      "serverName": { "type": "String" }
-    }  },
+      "serverName": {
+        "type": "String"
+      }
+    }
+  },
   "terminalConnectionFailed": "Terminal connection failed: {error}",
   "@terminalConnectionFailed": {
-    "description": "CodeWalk UI string — terminalConnectionFailed"
-,
+    "description": "CodeWalk UI string — terminalConnectionFailed",
     "placeholders": {
-      "error": { "type": "String" }
-    }  },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "terminalDisconnected": "Terminal disconnected.",
   "@terminalDisconnected": {
     "description": "CodeWalk UI string — terminalDisconnected"
   },
   "terminalEmbeddedUnavailable": "Embedded terminal is not available on this runtime yet. Keep using composer shell mode for one-shot commands or open the terminal from a supported CodeWalk app runtime for {serverName}.",
   "@terminalEmbeddedUnavailable": {
-    "description": "CodeWalk UI string — terminalEmbeddedUnavailable"
-,
+    "description": "CodeWalk UI string — terminalEmbeddedUnavailable",
     "placeholders": {
-      "serverName": { "type": "String" }
-    }  },
+      "serverName": {
+        "type": "String"
+      }
+    }
+  },
   "terminalExtraKeyAlt": "Alt key",
   "@terminalExtraKeyAlt": {
     "description": "CodeWalk UI string — terminalExtraKeyAlt"
@@ -5884,11 +6120,13 @@
   },
   "toolPresentationRunningTool": "Running {toolName}",
   "@toolPresentationRunningTool": {
-    "description": "CodeWalk UI string — toolPresentationRunningTool"
-,
+    "description": "CodeWalk UI string — toolPresentationRunningTool",
     "placeholders": {
-      "toolName": { "type": "String" }
-    }  },
+      "toolName": {
+        "type": "String"
+      }
+    }
+  },
   "toolPresentationSearching": "Searching",
   "@toolPresentationSearching": {
     "description": "CodeWalk UI string — toolPresentationSearching"
@@ -6031,22 +6269,26 @@
   },
   "workspaceCloseProject": "Close {project}",
   "@workspaceCloseProject": {
-    "description": "CodeWalk UI string — workspaceCloseProject"
-,
+    "description": "CodeWalk UI string — workspaceCloseProject",
     "placeholders": {
-      "project": { "type": "String" }
-    }  },
+      "project": {
+        "type": "String"
+      }
+    }
+  },
   "workspaceClosedProjects": "Closed projects",
   "@workspaceClosedProjects": {
     "description": "CodeWalk UI string — workspaceClosedProjects"
   },
   "workspaceCurrentDirectory": "Current directory: {path}",
   "@workspaceCurrentDirectory": {
-    "description": "CodeWalk UI string — workspaceCurrentDirectory"
-,
+    "description": "CodeWalk UI string — workspaceCurrentDirectory",
     "placeholders": {
-      "path": { "type": "String" }
-    }  },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "workspaceFilterDirs": "Filter directories",
   "@workspaceFilterDirs": {
     "description": "CodeWalk UI string — workspaceFilterDirs"
@@ -6073,83 +6315,2200 @@
   },
   "workspaceRemoveFromHistory": "Remove {name} from history",
   "@workspaceRemoveFromHistory": {
-    "description": "CodeWalk UI string — workspaceRemoveFromHistory"
-,
+    "description": "CodeWalk UI string — workspaceRemoveFromHistory",
     "placeholders": {
-      "name": { "type": "String" }
-    }  },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSessionAttentionTitle": "Session attention",
-  "@settingsSessionAttentionTitle": {"description": "Title for the opt-in floating session attention setting"},
+  "@settingsSessionAttentionTitle": {
+    "description": "Title for the opt-in floating session attention setting"
+  },
   "settingsSessionAttentionDescription": "Show root-session status in an opt-in bubble or panel.",
-  "@settingsSessionAttentionDescription": {"description": "Description for floating session attention modes"},
+  "@settingsSessionAttentionDescription": {
+    "description": "Description for floating session attention modes"
+  },
   "settingsSessionAttentionOff": "Off",
-  "@settingsSessionAttentionOff": {"description": "Disabled session attention mode"},
+  "@settingsSessionAttentionOff": {
+    "description": "Disabled session attention mode"
+  },
   "settingsSessionAttentionBubble": "Bubble",
-  "@settingsSessionAttentionBubble": {"description": "Compact session attention mode"},
+  "@settingsSessionAttentionBubble": {
+    "description": "Compact session attention mode"
+  },
   "settingsSessionAttentionPanel": "Panel",
-  "@settingsSessionAttentionPanel": {"description": "Expanded session attention mode"},
+  "@settingsSessionAttentionPanel": {
+    "description": "Expanded session attention mode"
+  },
   "settingsSessionAttentionPrivacy": "On Android, enabling this starts a persistent foreground service. Response text is stored encrypted; cloud TTS sends text only after you press Read.",
-  "@settingsSessionAttentionPrivacy": {"description": "Privacy, foreground-service, and cloud TTS disclosure"},
+  "@settingsSessionAttentionPrivacy": {
+    "description": "Privacy, foreground-service, and cloud TTS disclosure"
+  },
   "settingsSessionAttentionUnavailable": "Session attention is unavailable on this platform.",
-  "@settingsSessionAttentionUnavailable": {"description": "Unsupported platform explanation"},
+  "@settingsSessionAttentionUnavailable": {
+    "description": "Unsupported platform explanation"
+  },
   "settingsSessionAttentionOpenSettings": "Open display settings",
-  "@settingsSessionAttentionOpenSettings": {"description": "Open Android overlay permission settings"},
+  "@settingsSessionAttentionOpenSettings": {
+    "description": "Open Android overlay permission settings"
+  },
   "settingsSessionAttentionStop": "Stop session attention",
-  "@settingsSessionAttentionStop": {"description": "Stop the active session attention host"},
+  "@settingsSessionAttentionStop": {
+    "description": "Stop the active session attention host"
+  },
   "settingsSessionAttentionThirdPartyTtsWarning": "When you press Read, response text may be sent to the configured third-party TTS provider.",
-  "@settingsSessionAttentionThirdPartyTtsWarning": {"description": "Third-party text-to-speech data use warning"},
+  "@settingsSessionAttentionThirdPartyTtsWarning": {
+    "description": "Third-party text-to-speech data use warning"
+  },
   "workspaceSuggestions": "Suggestions",
   "@workspaceSuggestions": {
     "description": "CodeWalk UI string — workspaceSuggestions"
   },
   "sessionTabsGestureHintTitle": "Session tabs have new controls",
-  "@sessionTabsGestureHintTitle": {"description": "Title for the session tab gesture onboarding dialog"},
+  "@sessionTabsGestureHintTitle": {
+    "description": "Title for the session tab gesture onboarding dialog"
+  },
   "sessionTabsGestureHintBody": "Double-click or double-tap a tab to close it. Right-click or touch and hold to open session actions. You can disable tabs in Display Toggles.",
-  "@sessionTabsGestureHintBody": {"description": "Instructions for closing tabs, opening their menu, and disabling tabs"},
+  "@sessionTabsGestureHintBody": {
+    "description": "Instructions for closing tabs, opening their menu, and disabling tabs"
+  },
   "sessionTabsGestureHintAcknowledge": "Got it",
-  "@sessionTabsGestureHintAcknowledge": {"description": "Acknowledgement button for the session tab gesture dialog"},
+  "@sessionTabsGestureHintAcknowledge": {
+    "description": "Acknowledgement button for the session tab gesture dialog"
+  },
   "sessionTabsGestureHintDisableTabs": "Disable tabs",
-  "@sessionTabsGestureHintDisableTabs": {"description": "Button that disables session tabs from the gesture dialog"},
+  "@sessionTabsGestureHintDisableTabs": {
+    "description": "Button that disables session tabs from the gesture dialog"
+  },
   "sessionTabRenameAction": "Rename session",
-  "@sessionTabRenameAction": {"description": "Rename action in the active session tab menu"},
+  "@sessionTabRenameAction": {
+    "description": "Rename action in the active session tab menu"
+  },
   "sessionTabClosedMessage": "Tab \"{title}\" closed",
-  "@sessionTabClosedMessage": {"description": "Snackbar shown after closing a session tab", "placeholders": {"title": {"type": "String"}}},
+  "@sessionTabClosedMessage": {
+    "description": "Snackbar shown after closing a session tab",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "sessionTabUndo": "Undo",
-  "@sessionTabUndo": {"description": "Snackbar action that restores a closed session tab"},
+  "@sessionTabUndo": {
+    "description": "Snackbar action that restores a closed session tab"
+  },
   "sessionTabRestoreFailed": "Tab could not be restored.",
-  "@sessionTabRestoreFailed": {"description": "Snackbar shown when undo cannot restore a closed session tab"},
+  "@sessionTabRestoreFailed": {
+    "description": "Snackbar shown when undo cannot restore a closed session tab"
+  },
   "sessionTabChangeIconAction": "Change icon",
-  "@sessionTabChangeIconAction": {"description": "Action that opens the icon picker for a session tab"},
+  "@sessionTabChangeIconAction": {
+    "description": "Action that opens the icon picker for a session tab"
+  },
   "sessionTabIconPickerTitle": "Choose tab icon",
-  "@sessionTabIconPickerTitle": {"description": "Title for the session tab icon picker"},
+  "@sessionTabIconPickerTitle": {
+    "description": "Title for the session tab icon picker"
+  },
   "sessionTabIconUseProjectIcon": "Use project icon",
-  "@sessionTabIconUseProjectIcon": {"description": "Option that removes a session tab icon override"},
+  "@sessionTabIconUseProjectIcon": {
+    "description": "Option that removes a session tab icon override"
+  },
   "sessionTabIconApplied": "Tab icon updated.",
-  "@sessionTabIconApplied": {"description": "Snackbar shown after a tab icon is saved"},
+  "@sessionTabIconApplied": {
+    "description": "Snackbar shown after a tab icon is saved"
+  },
   "sessionTabIconSaveFailed": "Tab icon could not be saved.",
-  "@sessionTabIconSaveFailed": {"description": "Snackbar shown when a tab icon cannot be saved"},
+  "@sessionTabIconSaveFailed": {
+    "description": "Snackbar shown when a tab icon cannot be saved"
+  },
   "sessionTabIconPresetCode": "Code",
-  "@sessionTabIconPresetCode": {"description": "Label for the Code tab icon preset"},
+  "@sessionTabIconPresetCode": {
+    "description": "Label for the Code tab icon preset"
+  },
   "sessionTabIconPresetTerminal": "Terminal",
-  "@sessionTabIconPresetTerminal": {"description": "Label for the Terminal tab icon preset"},
+  "@sessionTabIconPresetTerminal": {
+    "description": "Label for the Terminal tab icon preset"
+  },
   "sessionTabIconPresetBug": "Bug",
-  "@sessionTabIconPresetBug": {"description": "Label for the Bug tab icon preset"},
+  "@sessionTabIconPresetBug": {
+    "description": "Label for the Bug tab icon preset"
+  },
   "sessionTabIconPresetTasks": "Tasks",
-  "@sessionTabIconPresetTasks": {"description": "Label for the Tasks tab icon preset"},
+  "@sessionTabIconPresetTasks": {
+    "description": "Label for the Tasks tab icon preset"
+  },
   "sessionTabIconPresetLaunch": "Launch",
-  "@sessionTabIconPresetLaunch": {"description": "Label for the Launch tab icon preset"},
+  "@sessionTabIconPresetLaunch": {
+    "description": "Label for the Launch tab icon preset"
+  },
   "sessionTabIconPresetIdea": "Idea",
-  "@sessionTabIconPresetIdea": {"description": "Label for the Idea tab icon preset"},
+  "@sessionTabIconPresetIdea": {
+    "description": "Label for the Idea tab icon preset"
+  },
   "sessionTabIconPresetResearch": "Research",
-  "@sessionTabIconPresetResearch": {"description": "Label for the Research tab icon preset"},
+  "@sessionTabIconPresetResearch": {
+    "description": "Label for the Research tab icon preset"
+  },
   "sessionTabIconPresetDesign": "Design",
-  "@sessionTabIconPresetDesign": {"description": "Label for the Design tab icon preset"},
+  "@sessionTabIconPresetDesign": {
+    "description": "Label for the Design tab icon preset"
+  },
   "sessionTabIconPresetData": "Data",
-  "@sessionTabIconPresetData": {"description": "Label for the Data tab icon preset"},
+  "@sessionTabIconPresetData": {
+    "description": "Label for the Data tab icon preset"
+  },
   "sessionTabIconPresetCloud": "Cloud",
-  "@sessionTabIconPresetCloud": {"description": "Label for the Cloud tab icon preset"},
+  "@sessionTabIconPresetCloud": {
+    "description": "Label for the Cloud tab icon preset"
+  },
   "sessionTabIconPresetSecurity": "Security",
-  "@sessionTabIconPresetSecurity": {"description": "Label for the Security tab icon preset"},
+  "@sessionTabIconPresetSecurity": {
+    "description": "Label for the Security tab icon preset"
+  },
   "sessionTabIconPresetTools": "Tools",
-  "@sessionTabIconPresetTools": {"description": "Label for the Tools tab icon preset"}
+  "@sessionTabIconPresetTools": {
+    "description": "Label for the Tools tab icon preset"
+  },
+  "workspaceNoActiveContext": "No active context",
+  "@workspaceNoActiveContext": {
+    "description": "CodeWalk UI string — workspaceNoActiveContext"
+  },
+  "settingsAppearanceContrastLow": "Low",
+  "@settingsAppearanceContrastLow": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastLow"
+  },
+  "settingsAppearanceContrastStandard": "Standard",
+  "@settingsAppearanceContrastStandard": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastStandard"
+  },
+  "settingsAppearanceContrastMedium": "Medium",
+  "@settingsAppearanceContrastMedium": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastMedium"
+  },
+  "settingsAppearanceContrastMediumHigh": "Medium High",
+  "@settingsAppearanceContrastMediumHigh": {
+    "description": "CodeWalk UI string — settingsAppearanceContrastMediumHigh"
+  },
+  "settingsNotificationsSystemSoundsWebUnavailable": "Not available on web.",
+  "@settingsNotificationsSystemSoundsWebUnavailable": {
+    "description": "CodeWalk UI string — settingsNotificationsSystemSoundsWebUnavailable"
+  },
+  "settingsNotificationsSystemSoundsAndroid": "Android notification sounds from the system.",
+  "@settingsNotificationsSystemSoundsAndroid": {
+    "description": "CodeWalk UI string — settingsNotificationsSystemSoundsAndroid"
+  },
+  "settingsNotificationsSystemSoundsFreedesktop": "Freedesktop sounds from /usr/share/sounds/freedesktop/stereo.",
+  "@settingsNotificationsSystemSoundsFreedesktop": {
+    "description": "CodeWalk UI string — settingsNotificationsSystemSoundsFreedesktop"
+  },
+  "settingsNotificationsSystemSoundsPlatform": "Supported where the operating system exposes system sounds.",
+  "@settingsNotificationsSystemSoundsPlatform": {
+    "description": "CodeWalk UI string — settingsNotificationsSystemSoundsPlatform"
+  },
+  "serversQuickGuideTitle": "Quick setup",
+  "@serversQuickGuideTitle": {
+    "description": "CodeWalk UI string — serversQuickGuideTitle"
+  },
+  "serversQuickGuideIntro": "CodeWalk is the app. OpenCode is the engine that needs to be running before this connection can work.",
+  "@serversQuickGuideIntro": {
+    "description": "CodeWalk UI string — serversQuickGuideIntro"
+  },
+  "serversQuickGuideStepInstallCli": "1. Install OpenCode CLI.",
+  "@serversQuickGuideStepInstallCli": {
+    "description": "CodeWalk UI string — serversQuickGuideStepInstallCli"
+  },
+  "serversQuickGuideRunPowerShell": "2. Run in PowerShell:",
+  "@serversQuickGuideRunPowerShell": {
+    "description": "CodeWalk UI string — serversQuickGuideRunPowerShell"
+  },
+  "serversQuickGuideRunTerminal": "2. Run in your terminal:",
+  "@serversQuickGuideRunTerminal": {
+    "description": "CodeWalk UI string — serversQuickGuideRunTerminal"
+  },
+  "serversQuickGuideProtectPassword": "Protect access with password",
+  "@serversQuickGuideProtectPassword": {
+    "description": "CodeWalk UI string — serversQuickGuideProtectPassword"
+  },
+  "serversQuickGuideServerPassword": "Server password",
+  "@serversQuickGuideServerPassword": {
+    "description": "CodeWalk UI string — serversQuickGuideServerPassword"
+  },
+  "serversQuickGuideInstallOptions": "Other official install options: install script, npm, bun, pnpm, Homebrew, or a binary from GitHub Releases.",
+  "@serversQuickGuideInstallOptions": {
+    "description": "CodeWalk UI string — serversQuickGuideInstallOptions"
+  },
+  "serversQuickGuideVerifyHint": "After starting the server, confirm /global/health or /doc responds before pasting the URL into CodeWalk.",
+  "@serversQuickGuideVerifyHint": {
+    "description": "CodeWalk UI string — serversQuickGuideVerifyHint"
+  },
+  "shortcutsPressKeyCombination": "Press the key combination now",
+  "@shortcutsPressKeyCombination": {
+    "description": "CodeWalk UI string — shortcutsPressKeyCombination"
+  },
+  "settingsProvenanceOpenCodeBacked": "OpenCode-backed",
+  "@settingsProvenanceOpenCodeBacked": {
+    "description": "CodeWalk UI string — settingsProvenanceOpenCodeBacked"
+  },
+  "settingsProvenanceCodeWalkLocal": "CodeWalk-local",
+  "@settingsProvenanceCodeWalkLocal": {
+    "description": "CodeWalk UI string — settingsProvenanceCodeWalkLocal"
+  },
+  "settingsProvenanceCodeWalkException": "CodeWalk exception",
+  "@settingsProvenanceCodeWalkException": {
+    "description": "CodeWalk UI string — settingsProvenanceCodeWalkException"
+  },
+  "shortcutsErrorInvalid": "Invalid shortcut",
+  "@shortcutsErrorInvalid": {
+    "description": "CodeWalk UI string — shortcutsErrorInvalid"
+  },
+  "shortcutsErrorUnsupportedKey": "Unsupported shortcut key",
+  "@shortcutsErrorUnsupportedKey": {
+    "description": "CodeWalk UI string — shortcutsErrorUnsupportedKey"
+  },
+  "shortcutsErrorConflict": "Conflicts with \"{conflict}\"",
+  "@shortcutsErrorConflict": {
+    "description": "CodeWalk UI string — shortcutsErrorConflict",
+    "placeholders": {
+      "conflict": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSessionAttentionStopSaveFailed": "Session attention was stopped but the setting could not be saved.",
+  "@settingsSessionAttentionStopSaveFailed": {
+    "description": "CodeWalk UI string — settingsSessionAttentionStopSaveFailed"
+  },
+  "settingsSessionAttentionEnableFailed": "Session attention could not be enabled.",
+  "@settingsSessionAttentionEnableFailed": {
+    "description": "CodeWalk UI string — settingsSessionAttentionEnableFailed"
+  },
+  "settingsSessionAttentionSaveFailedStopped": "Session attention could not be saved and was stopped.",
+  "@settingsSessionAttentionSaveFailedStopped": {
+    "description": "CodeWalk UI string — settingsSessionAttentionSaveFailedStopped"
+  },
+  "settingsSessionAttentionStillRunning": "Session attention is still running. Try stopping it again.",
+  "@settingsSessionAttentionStillRunning": {
+    "description": "CodeWalk UI string — settingsSessionAttentionStillRunning"
+  },
+  "settingsSessionAttentionStopFailed": "Session attention could not be stopped. Try again.",
+  "@settingsSessionAttentionStopFailed": {
+    "description": "CodeWalk UI string — settingsSessionAttentionStopFailed"
+  },
+  "settingsSessionAttentionCapabilityUnavailable": "Session attention host capability is unavailable.",
+  "@settingsSessionAttentionCapabilityUnavailable": {
+    "description": "CodeWalk UI string — settingsSessionAttentionCapabilityUnavailable"
+  },
+  "settingsServerFallbackProviderName": "Configured on server",
+  "@settingsServerFallbackProviderName": {
+    "description": "CodeWalk UI string — settingsServerFallbackProviderName"
+  },
+  "composerStopResponse": "Stop response",
+  "@composerStopResponse": {
+    "description": "CodeWalk UI string — composerStopResponse"
+  },
+  "composerSendMessageWhileResponding": "Send message while response is running",
+  "@composerSendMessageWhileResponding": {
+    "description": "CodeWalk UI string — composerSendMessageWhileResponding"
+  },
+  "composerSendMessage": "Send message",
+  "@composerSendMessage": {
+    "description": "CodeWalk UI string — composerSendMessage"
+  },
+  "chatTourComposerDescription": "Type your request here.",
+  "@chatTourComposerDescription": {
+    "description": "CodeWalk UI string — chatTourComposerDescription"
+  },
+  "chatTourSendDescription": "Send your message here.",
+  "@chatTourSendDescription": {
+    "description": "CodeWalk UI string — chatTourSendDescription"
+  },
+  "composerAttachmentFallbackName": "Attachment",
+  "@composerAttachmentFallbackName": {
+    "description": "CodeWalk UI string — composerAttachmentFallbackName"
+  },
+  "composerContextFallbackName": "Context",
+  "@composerContextFallbackName": {
+    "description": "CodeWalk UI string — composerContextFallbackName"
+  },
+  "searchableDropdownSearchHint": "Search",
+  "@searchableDropdownSearchHint": {
+    "description": "CodeWalk UI string — searchableDropdownSearchHint"
+  },
+  "searchableDropdownEmptyText": "No matches found",
+  "@searchableDropdownEmptyText": {
+    "description": "CodeWalk UI string — searchableDropdownEmptyText"
+  },
+  "speechApiKeyStorageUnavailable": "Secure TTS API key storage is unavailable.",
+  "@speechApiKeyStorageUnavailable": {
+    "description": "CodeWalk UI string — speechApiKeyStorageUnavailable"
+  },
+  "speechApiKeyRemoved": "API key removed.",
+  "@speechApiKeyRemoved": {
+    "description": "CodeWalk UI string — speechApiKeyRemoved"
+  },
+  "speechApiKeySaved": "API key saved securely on this device.",
+  "@speechApiKeySaved": {
+    "description": "CodeWalk UI string — speechApiKeySaved"
+  },
+  "speechReadAloudTestText": "This is a CodeWalk text-to-speech test.",
+  "@speechReadAloudTestText": {
+    "description": "CodeWalk UI string — speechReadAloudTestText"
+  },
+  "speechNativeDisabledWindows": "Disabled on Windows for stability. Use Parakeet or another on-device engine through CodeWalk WASAPI capture.",
+  "@speechNativeDisabledWindows": {
+    "description": "CodeWalk UI string — speechNativeDisabledWindows"
+  },
+  "speechNativeUnavailableLinux": "Unavailable on Linux. Use Parakeet for speech input.",
+  "@speechNativeUnavailableLinux": {
+    "description": "CodeWalk UI string — speechNativeUnavailableLinux"
+  },
+  "speechNotAvailableOnPlatform": "Not available on this platform.",
+  "@speechNotAvailableOnPlatform": {
+    "description": "CodeWalk UI string — speechNotAvailableOnPlatform"
+  },
+  "speechSherpaUnavailableAndroid": "Unavailable on Android builds optimized for small APK size.",
+  "@speechSherpaUnavailableAndroid": {
+    "description": "CodeWalk UI string — speechSherpaUnavailableAndroid"
+  },
+  "speechMoonshineDesktopOnlyHint": "Available on desktop only. Android stays native-only.",
+  "@speechMoonshineDesktopOnlyHint": {
+    "description": "CodeWalk UI string — speechMoonshineDesktopOnlyHint"
+  },
+  "speechParakeetDesktopOnlyHint": "Available on desktop only. Uses offline multilingual recognition.",
+  "@speechParakeetDesktopOnlyHint": {
+    "description": "CodeWalk UI string — speechParakeetDesktopOnlyHint"
+  },
+  "speechSenseVoiceDesktopOnlyHint": "Available on desktop only. Strongest for Chinese, Cantonese, Japanese, Korean, and English.",
+  "@speechSenseVoiceDesktopOnlyHint": {
+    "description": "CodeWalk UI string — speechSenseVoiceDesktopOnlyHint"
+  },
+  "speechNativeSubtitle": "Simpler and faster startup.",
+  "@speechNativeSubtitle": {
+    "description": "CodeWalk UI string — speechNativeSubtitle"
+  },
+  "speechSherpaSubtitle": "Heavier, experimental, and bug-prone. Often more precise with downloaded models.",
+  "@speechSherpaSubtitle": {
+    "description": "CodeWalk UI string — speechSherpaSubtitle"
+  },
+  "speechMoonshineSubtitle": "Desktop-only experimental path using sherpa_onnx offline recognition and downloadable models.",
+  "@speechMoonshineSubtitle": {
+    "description": "CodeWalk UI string — speechMoonshineSubtitle"
+  },
+  "speechParakeetSubtitle": "Desktop-only offline NeMo transducer path with one multilingual downloadable model.",
+  "@speechParakeetSubtitle": {
+    "description": "CodeWalk UI string — speechParakeetSubtitle"
+  },
+  "speechSenseVoiceSubtitle": "Desktop-only offline path tuned for Chinese, Cantonese, Japanese, Korean, and English.",
+  "@speechSenseVoiceSubtitle": {
+    "description": "CodeWalk UI string — speechSenseVoiceSubtitle"
+  },
+  "speechMoonshineModel": "Moonshine model",
+  "@speechMoonshineModel": {
+    "description": "CodeWalk UI string — speechMoonshineModel"
+  },
+  "speechSherpaLanguage": "Sherpa language",
+  "@speechSherpaLanguage": {
+    "description": "CodeWalk UI string — speechSherpaLanguage"
+  },
+  "speechSearchSherpaLanguage": "Search Sherpa language",
+  "@speechSearchSherpaLanguage": {
+    "description": "CodeWalk UI string — speechSearchSherpaLanguage"
+  },
+  "speechNoLanguagePacksFound": "No language packs found",
+  "@speechNoLanguagePacksFound": {
+    "description": "CodeWalk UI string — speechNoLanguagePacksFound"
+  },
+  "speechTextToSpeechProvider": "Text-to-speech provider",
+  "@speechTextToSpeechProvider": {
+    "description": "CodeWalk UI string — speechTextToSpeechProvider"
+  },
+  "speechProviderSystemNative": "System / Native",
+  "@speechProviderSystemNative": {
+    "description": "CodeWalk UI string — speechProviderSystemNative"
+  },
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (experimental)",
+  "@speechProviderEdgeExperimental": {
+    "description": "CodeWalk UI string — speechProviderEdgeExperimental"
+  },
+  "speechProviderOpenAiCompatible": "OpenAI-compatible",
+  "@speechProviderOpenAiCompatible": {
+    "description": "CodeWalk UI string — speechProviderOpenAiCompatible"
+  },
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech is experimental",
+  "@speechEdgeExperimentalTitle": {
+    "description": "CodeWalk UI string — speechEdgeExperimentalTitle"
+  },
+  "speechEdgeExperimentalDescription": "Uses the unofficial Edge Read Aloud service directly from this device. Message text is sent to Microsoft when you use read aloud, and the service may break if Microsoft changes the private protocol.",
+  "@speechEdgeExperimentalDescription": {
+    "description": "CodeWalk UI string — speechEdgeExperimentalDescription"
+  },
+  "speechEdgeVoice": "Edge voice",
+  "@speechEdgeVoice": {
+    "description": "CodeWalk UI string — speechEdgeVoice"
+  },
+  "speechEdgeVoiceListUnavailable": "Using the default Edge voice. Voice list could not be loaded right now.",
+  "@speechEdgeVoiceListUnavailable": {
+    "description": "CodeWalk UI string — speechEdgeVoiceListUnavailable"
+  },
+  "speechEdgeVoicesLoaded": "Loaded from Microsoft Edge Speech voices.",
+  "@speechEdgeVoicesLoaded": {
+    "description": "CodeWalk UI string — speechEdgeVoicesLoaded"
+  },
+  "speechCloudTtsPrivacy": "Cloud TTS privacy",
+  "@speechCloudTtsPrivacy": {
+    "description": "CodeWalk UI string — speechCloudTtsPrivacy"
+  },
+  "speechCloudTtsPrivacyDescription": "Cloud TTS sends the selected assistant message text to the configured provider. API keys are stored in secure storage on this device.",
+  "@speechCloudTtsPrivacyDescription": {
+    "description": "CodeWalk UI string — speechCloudTtsPrivacyDescription"
+  },
+  "speechBaseUrl": "Base URL",
+  "@speechBaseUrl": {
+    "description": "CodeWalk UI string — speechBaseUrl"
+  },
+  "speechApiKey": "API key",
+  "@speechApiKey": {
+    "description": "CodeWalk UI string — speechApiKey"
+  },
+  "speechApiKeySavedHelper": "A key is saved. Enter a new value to replace it, or save an empty value to remove it.",
+  "@speechApiKeySavedHelper": {
+    "description": "CodeWalk UI string — speechApiKeySavedHelper"
+  },
+  "speechNoApiKeySaved": "No API key saved.",
+  "@speechNoApiKeySaved": {
+    "description": "CodeWalk UI string — speechNoApiKeySaved"
+  },
+  "speechSaveApiKey": "Save API key",
+  "@speechSaveApiKey": {
+    "description": "CodeWalk UI string — speechSaveApiKey"
+  },
+  "speechModel": "Model",
+  "@speechModel": {
+    "description": "CodeWalk UI string — speechModel"
+  },
+  "speechPitchNotSupported": "Pitch is not supported by OpenAI-compatible TTS and is hidden for this provider.",
+  "@speechPitchNotSupported": {
+    "description": "CodeWalk UI string — speechPitchNotSupported"
+  },
+  "speechTestVoice": "Test voice",
+  "@speechTestVoice": {
+    "description": "CodeWalk UI string — speechTestVoice"
+  },
+  "dialogMoonshineVoiceSetupDescription": "Moonshine runs on-device through sherpa_onnx. Pick a model once and download it only for this desktop device.",
+  "@dialogMoonshineVoiceSetupDescription": {
+    "description": "CodeWalk UI string — dialogMoonshineVoiceSetupDescription"
+  },
+  "dialogParakeetVoiceSetupDescription": "Parakeet runs on-device through sherpa_onnx offline recognition. Download it once for this desktop device to enable multilingual STT.",
+  "@dialogParakeetVoiceSetupDescription": {
+    "description": "CodeWalk UI string — dialogParakeetVoiceSetupDescription"
+  },
+  "dialogSenseVoiceSetupDescription": "SenseVoice runs on-device through sherpa_onnx offline recognition. It is strongest for Chinese, Cantonese, Japanese, Korean, and English.",
+  "@dialogSenseVoiceSetupDescription": {
+    "description": "CodeWalk UI string — dialogSenseVoiceSetupDescription"
+  },
+  "dialogSherpaVoiceSetupDescription": "Sherpa voice input requires an on-device speech model. Select your language and download it once (~147 MB).",
+  "@dialogSherpaVoiceSetupDescription": {
+    "description": "CodeWalk UI string — dialogSherpaVoiceSetupDescription"
+  },
+  "speechSilenceSeconds": "{value} seconds",
+  "@speechSilenceSeconds": {
+    "description": "CodeWalk UI string — speechSilenceSeconds",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "speechModelInstalled": "Model installed ({modelId})",
+  "@speechModelInstalled": {
+    "description": "CodeWalk UI string — speechModelInstalled",
+    "placeholders": {
+      "modelId": {
+        "type": "String"
+      }
+    }
+  },
+  "speechModelMissing": "Model missing ({modelId})",
+  "@speechModelMissing": {
+    "description": "CodeWalk UI string — speechModelMissing",
+    "placeholders": {
+      "modelId": {
+        "type": "String"
+      }
+    }
+  },
+  "speechModelSizeMb": "~{sizeMb} MB",
+  "@speechModelSizeMb": {
+    "description": "CodeWalk UI string — speechModelSizeMb",
+    "placeholders": {
+      "sizeMb": {
+        "type": "String"
+      }
+    }
+  },
+  "speechSystemDefaultLanguage": "System default ({language})",
+  "@speechSystemDefaultLanguage": {
+    "description": "CodeWalk UI string — speechSystemDefaultLanguage",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "speechModelListLoadFailed": "Failed to load {service} model list: {error}",
+  "@speechModelListLoadFailed": {
+    "description": "CodeWalk UI string — speechModelListLoadFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      },
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "speechDownloadFailed": "Download failed: {error}",
+  "@speechDownloadFailed": {
+    "description": "CodeWalk UI string — speechDownloadFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "speechFailedToRemoveModel": "Failed to remove model: {error}",
+  "@speechFailedToRemoveModel": {
+    "description": "CodeWalk UI string — speechFailedToRemoveModel",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "speechBaseUrlExample": "Example: {url}",
+  "@speechBaseUrlExample": {
+    "description": "CodeWalk UI string — speechBaseUrlExample",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "speechModelDefaultHelper": "Default: {model}",
+  "@speechModelDefaultHelper": {
+    "description": "CodeWalk UI string — speechModelDefaultHelper",
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPermissionOrQuestionNeedsInput": "A tool permission or question needs your input.",
+  "@notificationPermissionOrQuestionNeedsInput": {
+    "description": "CodeWalk UI string — notificationPermissionOrQuestionNeedsInput"
+  },
+  "notificationPermissionNeedsInput": "A tool permission needs your input.",
+  "@notificationPermissionNeedsInput": {
+    "description": "CodeWalk UI string — notificationPermissionNeedsInput"
+  },
+  "notificationQuestionNeedsInput": "A tool question needs your input.",
+  "@notificationQuestionNeedsInput": {
+    "description": "CodeWalk UI string — notificationQuestionNeedsInput"
+  },
+  "notificationSessionError": "A session reported an error.",
+  "@notificationSessionError": {
+    "description": "CodeWalk UI string — notificationSessionError"
+  },
+  "notificationChannelErrors": "CodeWalk errors",
+  "@notificationChannelErrors": {
+    "description": "CodeWalk UI string — notificationChannelErrors"
+  },
+  "notificationChannelErrorsDescription": "CodeWalk error alerts",
+  "@notificationChannelErrorsDescription": {
+    "description": "CodeWalk UI string — notificationChannelErrorsDescription"
+  },
+  "notificationChannelPermissions": "CodeWalk permissions",
+  "@notificationChannelPermissions": {
+    "description": "CodeWalk UI string — notificationChannelPermissions"
+  },
+  "notificationChannelPermissionsDescription": "CodeWalk action required alerts",
+  "@notificationChannelPermissionsDescription": {
+    "description": "CodeWalk UI string — notificationChannelPermissionsDescription"
+  },
+  "notificationChannelAgent": "CodeWalk agent",
+  "@notificationChannelAgent": {
+    "description": "CodeWalk UI string — notificationChannelAgent"
+  },
+  "notificationChannelAgentDescription": "CodeWalk agent completion alerts",
+  "@notificationChannelAgentDescription": {
+    "description": "CodeWalk UI string — notificationChannelAgentDescription"
+  },
+  "notificationActionOpen": "Open",
+  "@notificationActionOpen": {
+    "description": "CodeWalk UI string — notificationActionOpen"
+  },
+  "foregroundMonitorNotificationBody": "Reliable background alerts are active",
+  "@foregroundMonitorNotificationBody": {
+    "description": "CodeWalk UI string — foregroundMonitorNotificationBody"
+  },
+  "foregroundMonitorNotificationTitle": "Background monitoring active",
+  "@foregroundMonitorNotificationTitle": {
+    "description": "CodeWalk UI string — foregroundMonitorNotificationTitle"
+  },
+  "foregroundMonitorNotificationOneSession": "Monitoring one session",
+  "@foregroundMonitorNotificationOneSession": {
+    "description": "CodeWalk UI string — foregroundMonitorNotificationOneSession"
+  },
+  "foregroundMonitorNotificationSessionCount": "Monitoring {count} sessions",
+  "@foregroundMonitorNotificationSessionCount": {
+    "description": "CodeWalk UI string — foregroundMonitorNotificationSessionCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionAttentionSemanticLabel": "{count, plural, =1{1 session needs attention} other{{count} sessions need attention}}",
+  "@sessionAttentionSemanticLabel": {
+    "description": "CodeWalk UI string — sessionAttentionSemanticLabel",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionAttentionOverlayPermissionRequired": "Display-over-other-apps permission is required.",
+  "@sessionAttentionOverlayPermissionRequired": {
+    "description": "CodeWalk UI string — sessionAttentionOverlayPermissionRequired"
+  },
+  "sessionAttentionIosInAppOnly": "Session attention is available only inside CodeWalk.",
+  "@sessionAttentionIosInAppOnly": {
+    "description": "CodeWalk UI string — sessionAttentionIosInAppOnly"
+  },
+  "sessionAttentionOverlayPermissionGrantPrompt": "Grant display-over-other-apps permission, then try again.",
+  "@sessionAttentionOverlayPermissionGrantPrompt": {
+    "description": "CodeWalk UI string — sessionAttentionOverlayPermissionGrantPrompt"
+  },
+  "sessionAttentionAndroidStartFailed": "The Android session attention service could not start.",
+  "@sessionAttentionAndroidStartFailed": {
+    "description": "CodeWalk UI string — sessionAttentionAndroidStartFailed"
+  },
+  "chatMessageTruncatedChars": "[truncated {count} chars] {reason}",
+  "@chatMessageTruncatedChars": {
+    "description": "CodeWalk UI string — chatMessageTruncatedChars",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "chatMessageJustNow": "Just now",
+  "@chatMessageJustNow": {
+    "description": "CodeWalk UI string — chatMessageJustNow"
+  },
+  "chatMessageMinutesAgo": "{count}m ago",
+  "@chatMessageMinutesAgo": {
+    "description": "CodeWalk UI string — chatMessageMinutesAgo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageHoursAgo": "{count}h ago",
+  "@chatMessageHoursAgo": {
+    "description": "CodeWalk UI string — chatMessageHoursAgo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageDaysAgo": "{count}d ago",
+  "@chatMessageDaysAgo": {
+    "description": "CodeWalk UI string — chatMessageDaysAgo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageDateTime": "{month}/{day} {hour}:{minute}",
+  "@chatMessageDateTime": {
+    "description": "CodeWalk UI string — chatMessageDateTime",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "hour": {
+        "type": "int"
+      },
+      "minute": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageYourMessage": "Your message",
+  "@chatMessageYourMessage": {
+    "description": "CodeWalk UI string — chatMessageYourMessage"
+  },
+  "chatMessageAssistantMessage": "Assistant message",
+  "@chatMessageAssistantMessage": {
+    "description": "CodeWalk UI string — chatMessageAssistantMessage"
+  },
+  "chatMessageStepStarted": "Step started #{step}",
+  "@chatMessageStepStarted": {
+    "description": "CodeWalk UI string — chatMessageStepStarted",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageStepStartedWithSnapshot": "Step started #{step}: {snapshot}",
+  "@chatMessageStepStartedWithSnapshot": {
+    "description": "CodeWalk UI string — chatMessageStepStartedWithSnapshot",
+    "placeholders": {
+      "snapshot": {
+        "type": "String"
+      },
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageStepFinished": "Step finished #{step}: {reason} • tokens {tokens} • ${cost}",
+  "@chatMessageStepFinished": {
+    "description": "CodeWalk UI string — chatMessageStepFinished",
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      },
+      "step": {
+        "type": "int"
+      },
+      "tokens": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessagePatchCount": "{count, plural, =1{1 patch} other{{count} patches}}",
+  "@chatMessagePatchCount": {
+    "description": "CodeWalk UI string — chatMessagePatchCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolRun": "Tool run",
+  "@chatMessageToolRun": {
+    "description": "CodeWalk UI string — chatMessageToolRun"
+  },
+  "chatMessageToolExecution": "Tool execution",
+  "@chatMessageToolExecution": {
+    "description": "CodeWalk UI string — chatMessageToolExecution"
+  },
+  "chatMessageToolChainMore": "{count, plural, =1{+1 more} other{+{count} more}}",
+  "@chatMessageToolChainMore": {
+    "description": "CodeWalk UI string — chatMessageToolChainMore",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+1 type} other{+{count} types}}",
+  "@chatMessageToolChainExtraTypes": {
+    "description": "CodeWalk UI string — chatMessageToolChainExtraTypes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 needs attention} other{{count} need attention}}",
+  "@chatMessageToolAttentionCount": {
+    "description": "CodeWalk UI string — chatMessageToolAttentionCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolDoneCount": "{count, plural, =1{1 done} other{{count} done}}",
+  "@chatMessageToolDoneCount": {
+    "description": "CodeWalk UI string — chatMessageToolDoneCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageToolCallsTitle": "Tool calls",
+  "@chatMessageToolCallsTitle": {
+    "description": "CodeWalk UI string — chatMessageToolCallsTitle"
+  },
+  "chatMessageDiffPreviewTruncated": "Diff preview truncated for app stability.",
+  "@chatMessageDiffPreviewTruncated": {
+    "description": "CodeWalk UI string — chatMessageDiffPreviewTruncated"
+  },
+  "chatMessageLargeMessageTruncated": "Large message preview truncated for app stability.",
+  "@chatMessageLargeMessageTruncated": {
+    "description": "CodeWalk UI string — chatMessageLargeMessageTruncated"
+  },
+  "chatMessageInvalidLinkFormat": "Invalid link format",
+  "@chatMessageInvalidLinkFormat": {
+    "description": "CodeWalk UI string — chatMessageInvalidLinkFormat"
+  },
+  "chatMessageUnableToOpenLink": "Unable to open link",
+  "@chatMessageUnableToOpenLink": {
+    "description": "CodeWalk UI string — chatMessageUnableToOpenLink"
+  },
+  "sessionTodoInProgressCompact": "{current}/{total} in progress",
+  "@sessionTodoInProgressCompact": {
+    "description": "CodeWalk UI string — sessionTodoInProgressCompact",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoTaskProgress": "Task {index}/{total} {content}",
+  "@sessionTodoTaskProgress": {
+    "description": "CodeWalk UI string — sessionTodoTaskProgress",
+    "placeholders": {
+      "content": {
+        "type": "String"
+      },
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoDoneCompact": "{count}/{total} done",
+  "@sessionTodoDoneCompact": {
+    "description": "CodeWalk UI string — sessionTodoDoneCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoCompletedCount": "Tasks {count}/{total} completed",
+  "@sessionTodoCompletedCount": {
+    "description": "CodeWalk UI string — sessionTodoCompletedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoTasksCount": "Tasks ({count})",
+  "@sessionTodoTasksCount": {
+    "description": "CodeWalk UI string — sessionTodoTasksCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "questionStepOfReview": "Step {current} of {total} - Review",
+  "@questionStepOfReview": {
+    "description": "CodeWalk UI string — questionStepOfReview",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "questionStepOfQuestion": "Step {current} of {total} - Question",
+  "@questionStepOfQuestion": {
+    "description": "CodeWalk UI string — questionStepOfQuestion",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "questionCustomAnswer": "Custom answer",
+  "@questionCustomAnswer": {
+    "description": "CodeWalk UI string — questionCustomAnswer"
+  },
+  "questionSubmitAnswers": "Submit Answers",
+  "@questionSubmitAnswers": {
+    "description": "CodeWalk UI string — questionSubmitAnswers"
+  },
+  "questionReviewAnswers": "Review Answers",
+  "@questionReviewAnswers": {
+    "description": "CodeWalk UI string — questionReviewAnswers"
+  },
+  "permissionRequestTitle": "Permission request: {permission}",
+  "@permissionRequestTitle": {
+    "description": "CodeWalk UI string — permissionRequestTitle",
+    "placeholders": {
+      "permission": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleCannotBeEmpty": "Title cannot be empty",
+  "@sessionTitleCannotBeEmpty": {
+    "description": "CodeWalk UI string — sessionTitleCannotBeEmpty"
+  },
+  "filesFailedToLoad": "Failed to load files",
+  "@filesFailedToLoad": {
+    "description": "CodeWalk UI string — filesFailedToLoad"
+  },
+  "filesFailedToSearch": "Failed to search files",
+  "@filesFailedToSearch": {
+    "description": "CodeWalk UI string — filesFailedToSearch"
+  },
+  "filesNoOpenFilesHint": "No open files yet. Type to search.",
+  "@filesNoOpenFilesHint": {
+    "description": "CodeWalk UI string — filesNoOpenFilesHint"
+  },
+  "filesNoContentMatches": "No content matches found",
+  "@filesNoContentMatches": {
+    "description": "CodeWalk UI string — filesNoContentMatches"
+  },
+  "filesOpenFilesCount": "{count, plural, =1{1 open file} other{{count} open files}}",
+  "@filesOpenFilesCount": {
+    "description": "CodeWalk UI string — filesOpenFilesCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filesLinesSelectedCount": "{count, plural, =1{1 line selected} other{{count} lines selected}}",
+  "@filesLinesSelectedCount": {
+    "description": "CodeWalk UI string — filesLinesSelectedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filesDraftTooLargeToSave": "Draft is too large to save from the editor.",
+  "@filesDraftTooLargeToSave": {
+    "description": "CodeWalk UI string — filesDraftTooLargeToSave"
+  },
+  "filesSaveChangesBeforeClose": "Save changes before closing this file.",
+  "@filesSaveChangesBeforeClose": {
+    "description": "CodeWalk UI string — filesSaveChangesBeforeClose"
+  },
+  "filesSaveChangesBeforePathChange": "Save changes before changing this path.",
+  "@filesSaveChangesBeforePathChange": {
+    "description": "CodeWalk UI string — filesSaveChangesBeforePathChange"
+  },
+  "filesWaitForSaveBeforePathChange": "Wait for the file save to finish before changing this path.",
+  "@filesWaitForSaveBeforePathChange": {
+    "description": "CodeWalk UI string — filesWaitForSaveBeforePathChange"
+  },
+  "filesWaitForFileOperation": "Wait for the file operation to finish.",
+  "@filesWaitForFileOperation": {
+    "description": "CodeWalk UI string — filesWaitForFileOperation"
+  },
+  "filesLargeFileReadOnly": "Large files open read-only to keep editing responsive.",
+  "@filesLargeFileReadOnly": {
+    "description": "CodeWalk UI string — filesLargeFileReadOnly"
+  },
+  "filesCheckingWriteSupport": "Checking file write support...",
+  "@filesCheckingWriteSupport": {
+    "description": "CodeWalk UI string — filesCheckingWriteSupport"
+  },
+  "filesActiveProjectRequired": "File operations require an active project directory.",
+  "@filesActiveProjectRequired": {
+    "description": "CodeWalk UI string — filesActiveProjectRequired"
+  },
+  "filesReloadSkippedUnsavedChanges": "Unsaved changes; reload skipped.",
+  "@filesReloadSkippedUnsavedChanges": {
+    "description": "CodeWalk UI string — filesReloadSkippedUnsavedChanges"
+  },
+  "filesFailedToLoadContent": "Failed to load file content",
+  "@filesFailedToLoadContent": {
+    "description": "CodeWalk UI string — filesFailedToLoadContent"
+  },
+  "filesFileSaved": "File saved.",
+  "@filesFileSaved": {
+    "description": "CodeWalk UI string — filesFileSaved"
+  },
+  "filesParentNotDirectory": "Parent is not a directory.",
+  "@filesParentNotDirectory": {
+    "description": "CodeWalk UI string — filesParentNotDirectory"
+  },
+  "filesMalformedResponse": "File operation returned an invalid response.",
+  "@filesMalformedResponse": {
+    "description": "CodeWalk UI string — filesMalformedResponse"
+  },
+  "filesShellCommandDidNotComplete": "File operation shell command did not complete.",
+  "@filesShellCommandDidNotComplete": {
+    "description": "CodeWalk UI string — filesShellCommandDidNotComplete"
+  },
+  "filesShellCommandNoResult": "File operation shell command returned no result.",
+  "@filesShellCommandNoResult": {
+    "description": "CodeWalk UI string — filesShellCommandNoResult"
+  },
+  "filesShellCommandTruncated": "File operation shell command was truncated by the server.",
+  "@filesShellCommandTruncated": {
+    "description": "CodeWalk UI string — filesShellCommandTruncated"
+  },
+  "filesShellCommandSyntaxError": "File operation shell command failed with a syntax error.",
+  "@filesShellCommandSyntaxError": {
+    "description": "CodeWalk UI string — filesShellCommandSyntaxError"
+  },
+  "filesShellUtilityNotFound": "A required shell utility was not found.",
+  "@filesShellUtilityNotFound": {
+    "description": "CodeWalk UI string — filesShellUtilityNotFound"
+  },
+  "filesShellCommandFailed": "File operation shell command failed before returning a result.",
+  "@filesShellCommandFailed": {
+    "description": "CodeWalk UI string — filesShellCommandFailed"
+  },
+  "attachmentSaveTitle": "Save attachment",
+  "@attachmentSaveTitle": {
+    "description": "CodeWalk UI string — attachmentSaveTitle"
+  },
+  "attachmentBrowserSandboxLocalFile": "Browser sandbox prevents opening local file:// attachments directly.",
+  "@attachmentBrowserSandboxLocalFile": {
+    "description": "CodeWalk UI string — attachmentBrowserSandboxLocalFile"
+  },
+  "attachmentLocalPathBrowserBlocked": "This attachment points to a local path that cannot be opened from the browser.",
+  "@attachmentLocalPathBrowserBlocked": {
+    "description": "CodeWalk UI string — attachmentLocalPathBrowserBlocked"
+  },
+  "terminalConnectedTo": "Connected to {serverName} in {directory}",
+  "@terminalConnectedTo": {
+    "description": "CodeWalk UI string — terminalConnectedTo",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      },
+      "serverName": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalTransportUnavailable": "Terminal transport is unavailable.",
+  "@terminalTransportUnavailable": {
+    "description": "CodeWalk UI string — terminalTransportUnavailable"
+  },
+  "chatSlashCommandNew": "Create a new chat session",
+  "@chatSlashCommandNew": {
+    "description": "CodeWalk UI string — chatSlashCommandNew"
+  },
+  "chatSlashCommandModels": "Open model selector",
+  "@chatSlashCommandModels": {
+    "description": "CodeWalk UI string — chatSlashCommandModels"
+  },
+  "chatSlashCommandSessions": "Open conversations list",
+  "@chatSlashCommandSessions": {
+    "description": "CodeWalk UI string — chatSlashCommandSessions"
+  },
+  "chatSlashCommandAgent": "Open agent selector",
+  "@chatSlashCommandAgent": {
+    "description": "CodeWalk UI string — chatSlashCommandAgent"
+  },
+  "chatSlashCommandOpen": "File open quick action",
+  "@chatSlashCommandOpen": {
+    "description": "CodeWalk UI string — chatSlashCommandOpen"
+  },
+  "chatSlashCommandHelp": "Show command help",
+  "@chatSlashCommandHelp": {
+    "description": "CodeWalk UI string — chatSlashCommandHelp"
+  },
+  "chatSlashCommandCompact": "Compact current session context",
+  "@chatSlashCommandCompact": {
+    "description": "CodeWalk UI string — chatSlashCommandCompact"
+  },
+  "chatSlashCommandThinking": "Toggle thinking bubbles",
+  "@chatSlashCommandThinking": {
+    "description": "CodeWalk UI string — chatSlashCommandThinking"
+  },
+  "chatSlashCommandUndo": "Undo the last visible user turn",
+  "@chatSlashCommandUndo": {
+    "description": "CodeWalk UI string — chatSlashCommandUndo"
+  },
+  "chatSlashCommandRedo": "Redo the last undone turn",
+  "@chatSlashCommandRedo": {
+    "description": "CodeWalk UI string — chatSlashCommandRedo"
+  },
+  "chatSessionSubConversationCount": "{count, plural, =1{1 sub-conversation} other{{count} sub-conversations}}",
+  "@chatSessionSubConversationCount": {
+    "description": "CodeWalk UI string — chatSessionSubConversationCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageWeeksAgo": "{count}w ago",
+  "@chatMessageWeeksAgo": {
+    "description": "CodeWalk UI string — chatMessageWeeksAgo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageShortDate": "{month}/{day}",
+  "@chatMessageShortDate": {
+    "description": "CodeWalk UI string — chatMessageShortDate",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "chatProviderErrorLoadSessionStatus": "Failed to load session status",
+  "@chatProviderErrorLoadSessionStatus": {
+    "description": "CodeWalk UI string — chatProviderErrorLoadSessionStatus"
+  },
+  "chatProviderErrorLoadSessionDetails": "Some session details could not be loaded",
+  "@chatProviderErrorLoadSessionDetails": {
+    "description": "CodeWalk UI string — chatProviderErrorLoadSessionDetails"
+  },
+  "chatProviderErrorLoadSessionList": "Failed to load session list: {error}",
+  "@chatProviderErrorLoadSessionList": {
+    "description": "CodeWalk UI string — chatProviderErrorLoadSessionList",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "chatProviderErrorCreateSession": "Failed to create session",
+  "@chatProviderErrorCreateSession": {
+    "description": "CodeWalk UI string — chatProviderErrorCreateSession"
+  },
+  "chatProviderErrorSelectProviderModelBeforeSend": "Select a connected provider or free OpenCode model before sending",
+  "@chatProviderErrorSelectProviderModelBeforeSend": {
+    "description": "CodeWalk UI string — chatProviderErrorSelectProviderModelBeforeSend"
+  },
+  "chatProviderErrorStartMessageSend": "Failed to start message send",
+  "@chatProviderErrorStartMessageSend": {
+    "description": "CodeWalk UI string — chatProviderErrorStartMessageSend"
+  },
+  "chatProviderErrorStopUnavailable": "Stop is unavailable for the current session",
+  "@chatProviderErrorStopUnavailable": {
+    "description": "CodeWalk UI string — chatProviderErrorStopUnavailable"
+  },
+  "chatProviderErrorWaitForResponseFinish": "Wait for the current response to finish before compacting",
+  "@chatProviderErrorWaitForResponseFinish": {
+    "description": "CodeWalk UI string — chatProviderErrorWaitForResponseFinish"
+  },
+  "chatProviderErrorCompactUnavailable": "Compact context is unavailable for the current session",
+  "@chatProviderErrorCompactUnavailable": {
+    "description": "CodeWalk UI string — chatProviderErrorCompactUnavailable"
+  },
+  "chatProviderErrorSelectModelBeforeCompact": "Select a model before compacting context",
+  "@chatProviderErrorSelectModelBeforeCompact": {
+    "description": "CodeWalk UI string — chatProviderErrorSelectModelBeforeCompact"
+  },
+  "chatProviderErrorCompactSessionContext": "Failed to compact session context",
+  "@chatProviderErrorCompactSessionContext": {
+    "description": "CodeWalk UI string — chatProviderErrorCompactSessionContext"
+  },
+  "chatProviderErrorNetwork": "Network connection failed. Please check network settings",
+  "@chatProviderErrorNetwork": {
+    "description": "CodeWalk UI string — chatProviderErrorNetwork"
+  },
+  "chatProviderErrorServer": "Server error. Please try again later",
+  "@chatProviderErrorServer": {
+    "description": "CodeWalk UI string — chatProviderErrorServer"
+  },
+  "chatProviderErrorNotFound": "Resource not found",
+  "@chatProviderErrorNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorNotFound"
+  },
+  "chatProviderErrorInvalidInput": "Invalid input parameters",
+  "@chatProviderErrorInvalidInput": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidInput"
+  },
+  "chatProviderErrorUnknown": "Unknown error. Please try again later",
+  "@chatProviderErrorUnknown": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknown"
+  },
+  "chatProviderErrorSessionFallback": "Session error",
+  "@chatProviderErrorSessionFallback": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionFallback"
+  },
+  "projectProviderErrorNoProjectContext": "No project context available from server",
+  "@projectProviderErrorNoProjectContext": {
+    "description": "CodeWalk UI string — projectProviderErrorNoProjectContext"
+  },
+  "projectProviderErrorInitializeFailed": "Failed to initialize project context: {error}",
+  "@projectProviderErrorInitializeFailed": {
+    "description": "CodeWalk UI string — projectProviderErrorInitializeFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorSwitchProjectNotFound": "Failed to switch project: project not found",
+  "@projectProviderErrorSwitchProjectNotFound": {
+    "description": "CodeWalk UI string — projectProviderErrorSwitchProjectNotFound"
+  },
+  "projectProviderErrorSwitchDirectoryEmpty": "Failed to switch project: directory is empty",
+  "@projectProviderErrorSwitchDirectoryEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorSwitchDirectoryEmpty"
+  },
+  "projectProviderErrorAtLeastOneContext": "At least one context must remain open",
+  "@projectProviderErrorAtLeastOneContext": {
+    "description": "CodeWalk UI string — projectProviderErrorAtLeastOneContext"
+  },
+  "projectProviderErrorReopenProjectNotFound": "Failed to reopen project: project not found",
+  "@projectProviderErrorReopenProjectNotFound": {
+    "description": "CodeWalk UI string — projectProviderErrorReopenProjectNotFound"
+  },
+  "projectProviderErrorOnlyClosedArchivable": "Only closed projects can be archived",
+  "@projectProviderErrorOnlyClosedArchivable": {
+    "description": "CodeWalk UI string — projectProviderErrorOnlyClosedArchivable"
+  },
+  "projectProviderErrorArchiveProjectNotFound": "Failed to archive project: project not found",
+  "@projectProviderErrorArchiveProjectNotFound": {
+    "description": "CodeWalk UI string — projectProviderErrorArchiveProjectNotFound"
+  },
+  "projectProviderErrorArchiveProjectPathInvalid": "Failed to archive project: project path is invalid",
+  "@projectProviderErrorArchiveProjectPathInvalid": {
+    "description": "CodeWalk UI string — projectProviderErrorArchiveProjectPathInvalid"
+  },
+  "projectProviderErrorLoadWorkspaces": "Failed to load workspaces: {error}",
+  "@projectProviderErrorLoadWorkspaces": {
+    "description": "CodeWalk UI string — projectProviderErrorLoadWorkspaces",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorWorkspaceNameEmpty": "Workspace name cannot be empty",
+  "@projectProviderErrorWorkspaceNameEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorWorkspaceNameEmpty"
+  },
+  "projectProviderErrorCreateWorkspace": "Failed to create workspace: {error}",
+  "@projectProviderErrorCreateWorkspace": {
+    "description": "CodeWalk UI string — projectProviderErrorCreateWorkspace",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorResetWorkspace": "Failed to reset workspace: {error}",
+  "@projectProviderErrorResetWorkspace": {
+    "description": "CodeWalk UI string — projectProviderErrorResetWorkspace",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorDeleteWorkspace": "Failed to delete workspace: {error}",
+  "@projectProviderErrorDeleteWorkspace": {
+    "description": "CodeWalk UI string — projectProviderErrorDeleteWorkspace",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorDirectoryEmpty": "Directory cannot be empty",
+  "@projectProviderErrorDirectoryEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorDirectoryEmpty"
+  },
+  "projectProviderErrorListDirectories": "Failed to list directories: {error}",
+  "@projectProviderErrorListDirectories": {
+    "description": "CodeWalk UI string — projectProviderErrorListDirectories",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorValidateDirectory": "Failed to validate directory: {error}",
+  "@projectProviderErrorValidateDirectory": {
+    "description": "CodeWalk UI string — projectProviderErrorValidateDirectory",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorPathEmpty": "Path cannot be empty",
+  "@projectProviderErrorPathEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorPathEmpty"
+  },
+  "projectProviderErrorListFiles": "Failed to list files: {error}",
+  "@projectProviderErrorListFiles": {
+    "description": "CodeWalk UI string — projectProviderErrorListFiles",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorSearchFiles": "Failed to search files: {error}",
+  "@projectProviderErrorSearchFiles": {
+    "description": "CodeWalk UI string — projectProviderErrorSearchFiles",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorContentSearchUnavailable": "Content search not available: {error}",
+  "@projectProviderErrorContentSearchUnavailable": {
+    "description": "CodeWalk UI string — projectProviderErrorContentSearchUnavailable",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorSearchSymbols": "Failed to search symbols: {error}",
+  "@projectProviderErrorSearchSymbols": {
+    "description": "CodeWalk UI string — projectProviderErrorSearchSymbols",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorReadFile": "Failed to read file: {error}",
+  "@projectProviderErrorReadFile": {
+    "description": "CodeWalk UI string — projectProviderErrorReadFile",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorLoadProjectList": "Failed to load project list: {error}",
+  "@projectProviderErrorLoadProjectList": {
+    "description": "CodeWalk UI string — projectProviderErrorLoadProjectList",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceProjectRemovedFromHistory": "Project removed from history",
+  "@workspaceProjectRemovedFromHistory": {
+    "description": "CodeWalk UI string — workspaceProjectRemovedFromHistory"
+  },
+  "workspaceProjectContextOpened": "Project context opened: {directory}",
+  "@workspaceProjectContextOpened": {
+    "description": "CodeWalk UI string — workspaceProjectContextOpened",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceFailedToOpenProjectContext": "Failed to open project context: {directory}",
+  "@workspaceFailedToOpenProjectContext": {
+    "description": "CodeWalk UI string — workspaceFailedToOpenProjectContext",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAbortNotice": "What you want to do different?",
+  "@chatAbortNotice": {
+    "description": "CodeWalk UI string — chatAbortNotice"
+  },
+  "sessionTitleToday": "Today {time} ({date})",
+  "@sessionTitleToday": {
+    "description": "CodeWalk UI string — sessionTitleToday",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleYesterday": "Yesterday {time} ({date})",
+  "@sessionTitleYesterday": {
+    "description": "CodeWalk UI string — sessionTitleYesterday",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "@sessionTitleWeekday": {
+    "description": "CodeWalk UI string — sessionTitleWeekday",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleDateAndTime": "{date} {time}",
+  "@sessionTitleDateAndTime": {
+    "description": "CodeWalk UI string — sessionTitleDateAndTime",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionWeekdayMon": "Mon",
+  "@sessionWeekdayMon": {
+    "description": "CodeWalk UI string — sessionWeekdayMon"
+  },
+  "sessionWeekdayTue": "Tue",
+  "@sessionWeekdayTue": {
+    "description": "CodeWalk UI string — sessionWeekdayTue"
+  },
+  "sessionWeekdayWed": "Wed",
+  "@sessionWeekdayWed": {
+    "description": "CodeWalk UI string — sessionWeekdayWed"
+  },
+  "sessionWeekdayThu": "Thu",
+  "@sessionWeekdayThu": {
+    "description": "CodeWalk UI string — sessionWeekdayThu"
+  },
+  "sessionWeekdayFri": "Fri",
+  "@sessionWeekdayFri": {
+    "description": "CodeWalk UI string — sessionWeekdayFri"
+  },
+  "sessionWeekdaySat": "Sat",
+  "@sessionWeekdaySat": {
+    "description": "CodeWalk UI string — sessionWeekdaySat"
+  },
+  "sessionWeekdaySun": "Sun",
+  "@sessionWeekdaySun": {
+    "description": "CodeWalk UI string — sessionWeekdaySun"
+  },
+  "forwardTimeNow": "now",
+  "@forwardTimeNow": {
+    "description": "CodeWalk UI string — forwardTimeNow"
+  },
+  "forwardTimeMinutes": "{count}m",
+  "@forwardTimeMinutes": {
+    "description": "CodeWalk UI string — forwardTimeMinutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardTimeHours": "{count}h",
+  "@forwardTimeHours": {
+    "description": "CodeWalk UI string — forwardTimeHours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardTimeDays": "{count}d",
+  "@forwardTimeDays": {
+    "description": "CodeWalk UI string — forwardTimeDays",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardTimeWeeks": "{count}w",
+  "@forwardTimeWeeks": {
+    "description": "CodeWalk UI string — forwardTimeWeeks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsBehaviorConfigFieldDefaultModel": "default model",
+  "@settingsBehaviorConfigFieldDefaultModel": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldDefaultModel"
+  },
+  "settingsBehaviorConfigFieldDefaultAgent": "default agent",
+  "@settingsBehaviorConfigFieldDefaultAgent": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldDefaultAgent"
+  },
+  "settingsBehaviorConfigFieldSmallModel": "small model",
+  "@settingsBehaviorConfigFieldSmallModel": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldSmallModel"
+  },
+  "settingsBehaviorConfigFieldAutoUpdateMode": "auto-update mode",
+  "@settingsBehaviorConfigFieldAutoUpdateMode": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldAutoUpdateMode"
+  },
+  "settingsBehaviorConfigFieldSnapshotSetting": "snapshot setting",
+  "@settingsBehaviorConfigFieldSnapshotSetting": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldSnapshotSetting"
+  },
+  "settingsBehaviorConfigFieldConversationUsername": "conversation username",
+  "@settingsBehaviorConfigFieldConversationUsername": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldConversationUsername"
+  },
+  "settingsBehaviorConfigFieldSharingDefault": "sharing default",
+  "@settingsBehaviorConfigFieldSharingDefault": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldSharingDefault"
+  },
+  "speechMicNoInputDevice": "No microphone input device is available.",
+  "@speechMicNoInputDevice": {
+    "description": "CodeWalk UI string — speechMicNoInputDevice"
+  },
+  "speechMicDeviceBusy": "The default microphone is currently in use by another app.",
+  "@speechMicDeviceBusy": {
+    "description": "CodeWalk UI string — speechMicDeviceBusy"
+  },
+  "speechMicUnsupportedFormat": "The default microphone format is not supported.",
+  "@speechMicUnsupportedFormat": {
+    "description": "CodeWalk UI string — speechMicUnsupportedFormat"
+  },
+  "speechMicSpeechPrivacy": "Windows speech services may be disabled (speech privacy, online speech recognition, or language packs).",
+  "@speechMicSpeechPrivacy": {
+    "description": "CodeWalk UI string — speechMicSpeechPrivacy"
+  },
+  "speechMicBackendUnavailable": "The Windows microphone backend is not available in this build.",
+  "@speechMicBackendUnavailable": {
+    "description": "CodeWalk UI string — speechMicBackendUnavailable"
+  },
+  "speechEngineFallbackNotice": "Selected STT engine unavailable ({reason}). Using {fallback} instead.",
+  "@speechEngineFallbackNotice": {
+    "description": "CodeWalk UI string — speechEngineFallbackNotice",
+    "placeholders": {
+      "fallback": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "oauthFlowSecureStorageUnavailable": "Secure credential storage is unavailable for OAuth.",
+  "@oauthFlowSecureStorageUnavailable": {
+    "description": "CodeWalk UI string — oauthFlowSecureStorageUnavailable"
+  },
+  "oauthFlowUnexpectedError": "OAuth flow failed unexpectedly. Please try again.",
+  "@oauthFlowUnexpectedError": {
+    "description": "CodeWalk UI string — oauthFlowUnexpectedError"
+  },
+  "oauthFlowNoEndpointsDiscovered": "No OAuth endpoints discovered. Enable Managed OAuth in Cloudflare Dashboard → Access → Applications → [this app].",
+  "@oauthFlowNoEndpointsDiscovered": {
+    "description": "CodeWalk UI string — oauthFlowNoEndpointsDiscovered"
+  },
+  "oauthFlowTokenResponseMissingAccessToken": "OAuth token response did not include an access token.",
+  "@oauthFlowTokenResponseMissingAccessToken": {
+    "description": "CodeWalk UI string — oauthFlowTokenResponseMissingAccessToken"
+  },
+  "oauthFlowProfileChanged": "The server profile changed before OAuth could finish.",
+  "@oauthFlowProfileChanged": {
+    "description": "CodeWalk UI string — oauthFlowProfileChanged"
+  },
+  "oauthFlowMetadataMissingEndpoints": "OAuth metadata is missing authorization/token endpoints.",
+  "@oauthFlowMetadataMissingEndpoints": {
+    "description": "CodeWalk UI string — oauthFlowMetadataMissingEndpoints"
+  },
+  "oauthFlowCallbackNotCompleted": "Authorization callback was not completed",
+  "@oauthFlowCallbackNotCompleted": {
+    "description": "CodeWalk UI string — oauthFlowCallbackNotCompleted"
+  },
+  "oauthFlowProviderDeclined": "The authorization server declined the OAuth request. Please try again.",
+  "@oauthFlowProviderDeclined": {
+    "description": "CodeWalk UI string — oauthFlowProviderDeclined"
+  },
+  "oauthFlowCallbackValidationFailed": "OAuth callback validation failed. Please try again.",
+  "@oauthFlowCallbackValidationFailed": {
+    "description": "CodeWalk UI string — oauthFlowCallbackValidationFailed"
+  },
+  "oauthFlowCallbackServerStartFailed": "Local OAuth callback server failed to start.",
+  "@oauthFlowCallbackServerStartFailed": {
+    "description": "CodeWalk UI string — oauthFlowCallbackServerStartFailed"
+  },
+  "oauthFlowSignInCanceled": "OAuth sign-in was canceled.",
+  "@oauthFlowSignInCanceled": {
+    "description": "CodeWalk UI string — oauthFlowSignInCanceled"
+  },
+  "oauthFlowBrowserOpenFailed": "Could not open the system browser for OAuth sign-in.",
+  "@oauthFlowBrowserOpenFailed": {
+    "description": "CodeWalk UI string — oauthFlowBrowserOpenFailed"
+  },
+  "oauthFlowCallbackTimeout": "No authorization callback reached the app within 5 minutes. The browser was expected to redirect to the local callback address after consent. If the browser showed a connection error instead, this device or network blocks loopback redirects.",
+  "@oauthFlowCallbackTimeout": {
+    "description": "CodeWalk UI string — oauthFlowCallbackTimeout"
+  },
+  "oauthFlowTokenExchangeTransientFailure": "Token exchange failed after {maxAttempts} attempts because of a temporary network problem. Please try again.",
+  "@oauthFlowTokenExchangeTransientFailure": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeTransientFailure",
+    "placeholders": {
+      "maxAttempts": {
+        "type": "int"
+      }
+    }
+  },
+  "oauthFlowTokenExchangeHttpFailure": "Token exchange failed (HTTP {statusCode}). Please try again.",
+  "@oauthFlowTokenExchangeHttpFailure": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeHttpFailure",
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "oauthFlowTokenExchangeUnexpectedFailure": "Token exchange failed unexpectedly. Please try again.",
+  "@oauthFlowTokenExchangeUnexpectedFailure": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeUnexpectedFailure"
+  },
+  "oauthFlowTokenExchangeIncomplete": "Token exchange did not complete after the authorization code was sent. Please start OAuth sign-in again.",
+  "@oauthFlowTokenExchangeIncomplete": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeIncomplete"
+  },
+  "speechReadAloudFailed": "Text-to-speech failed.",
+  "@speechReadAloudFailed": {
+    "description": "CodeWalk UI string — speechReadAloudFailed"
+  },
+  "speechReadAloudNoText": "There is no text to read aloud.",
+  "@speechReadAloudNoText": {
+    "description": "CodeWalk UI string — speechReadAloudNoText"
+  },
+  "speechEdgeTextTooLong": "Microsoft Edge Speech can read up to 4096 bytes at a time.",
+  "@speechEdgeTextTooLong": {
+    "description": "CodeWalk UI string — speechEdgeTextTooLong"
+  },
+  "speechEdgeMalformedAudio": "Microsoft Edge Speech returned malformed audio data.",
+  "@speechEdgeMalformedAudio": {
+    "description": "CodeWalk UI string — speechEdgeMalformedAudio"
+  },
+  "speechEdgeUnsupportedAudio": "Microsoft Edge Speech returned unsupported audio data.",
+  "@speechEdgeUnsupportedAudio": {
+    "description": "CodeWalk UI string — speechEdgeUnsupportedAudio"
+  },
+  "speechEdgeUnsupportedFrame": "Microsoft Edge Speech returned an unsupported websocket frame.",
+  "@speechEdgeUnsupportedFrame": {
+    "description": "CodeWalk UI string — speechEdgeUnsupportedFrame"
+  },
+  "speechEdgeSynthesisInterrupted": "Microsoft Edge Speech ended before synthesis completed.",
+  "@speechEdgeSynthesisInterrupted": {
+    "description": "CodeWalk UI string — speechEdgeSynthesisInterrupted"
+  },
+  "speechEdgeEmptyAudio": "Microsoft Edge Speech returned an empty audio response.",
+  "@speechEdgeEmptyAudio": {
+    "description": "CodeWalk UI string — speechEdgeEmptyAudio"
+  },
+  "speechEdgeTimedOut": "Microsoft Edge Speech timed out.",
+  "@speechEdgeTimedOut": {
+    "description": "CodeWalk UI string — speechEdgeTimedOut"
+  },
+  "speechEdgeUnreachable": "Microsoft Edge Speech could not be reached.",
+  "@speechEdgeUnreachable": {
+    "description": "CodeWalk UI string — speechEdgeUnreachable"
+  },
+  "speechApiKeyMissing": "Add an API key in Settings > Speech to use this TTS provider.",
+  "@speechApiKeyMissing": {
+    "description": "CodeWalk UI string — speechApiKeyMissing"
+  },
+  "speechProviderEmptyAudio": "The TTS provider returned an empty audio response.",
+  "@speechProviderEmptyAudio": {
+    "description": "CodeWalk UI string — speechProviderEmptyAudio"
+  },
+  "speechProviderRequestRejected": "The TTS provider rejected the speech request.",
+  "@speechProviderRequestRejected": {
+    "description": "CodeWalk UI string — speechProviderRequestRejected"
+  },
+  "speechApiKeyRejected": "The TTS API key was rejected by the provider.",
+  "@speechApiKeyRejected": {
+    "description": "CodeWalk UI string — speechApiKeyRejected"
+  },
+  "speechProviderQuotaRateLimit": "The TTS provider reported a quota or rate limit.",
+  "@speechProviderQuotaRateLimit": {
+    "description": "CodeWalk UI string — speechProviderQuotaRateLimit"
+  },
+  "speechProviderTemporarilyUnavailable": "The TTS provider is temporarily unavailable.",
+  "@speechProviderTemporarilyUnavailable": {
+    "description": "CodeWalk UI string — speechProviderTemporarilyUnavailable"
+  },
+  "speechProviderUnreachable": "The TTS provider could not be reached.",
+  "@speechProviderUnreachable": {
+    "description": "CodeWalk UI string — speechProviderUnreachable"
+  },
+  "appProviderErrorFailedToStartProcess": "Failed to start {tool} process.",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} is not available. Install {runtime} first.",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "{tool} install failed with exit code {exitCode}.",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "Bun bootstrap failed with exit code {exitCode}.",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "OpenCode installation finished but command was not found in PATH.",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "OpenCode installation finished but command path could not be resolved.",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "Configured command was not found and {tool} is not in PATH.",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "Configured command path does not exist.",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "Configured command exists but version check failed.",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "Configured command could not be executed.",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "WSL check only applies to Windows.",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "Use a desktop build to configure a managed local server.",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "Detected from a known installation directory.",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "Detected from a known installation directory. PATH may need refresh; reopen {appName} if a recent install is not detected yet.",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "Failed to fetch latest release metadata from GitHub.",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "Latest release metadata did not include asset list.",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "No compatible OpenCode binary asset was found.",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "Failed to download selected OpenCode asset.",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "Checksum verification failed for downloaded asset.",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "Failed to extract OpenCode binary archive.",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "Could not find {tool} executable in extracted files.",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "No response from server. Please try again.",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "No response from model. Please try again.",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "Speech job was cancelled.",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "Microsoft Edge Speech was cancelled.",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "Active",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "Receiving",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "Delayed",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "Completed",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "Pending interaction",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "Error",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "Cellular data saver is active",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "OAuth sign-in required",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "Tailscale connection required",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "Offline",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "Permission revoked",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "Service stopped",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "Host unavailable",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "errorRequestCancelled": "Request cancelled",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorUnknownNetworkError": "Unknown network error: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCertificateError": "Certificate error",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorSessionBusy": "Session is busy processing another request.",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorRunShellCommandFailed": "Failed to run shell command",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "Failed to run slash command",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "Could not load OpenCode-backed defaults from the active server.",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "sessionTabIconRemoveFailed": "Failed to remove local session tab icon data",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "forwardUntitled": "Untitled",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "setupDebugLinuxLogsPath": "Linux logs: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "Run OpenCode with: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "Server health: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "Server docs: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "logsEntryError": "Error",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "Stack",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "setupDebugSourceDiagnostics": "Diagnostics",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceUseExisting": "Use Existing",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "setupDebugSourceLocalServer": "Local Server",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceOnboarding": "Onboarding",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceManualConnection": "Manual connection",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugMessageDiagnosticsResult": "{availability} on {platform}. {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "Trying to detect an existing OpenCode command from the current environment.",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageInstallStarted": "Started OpenCode installation from CodeWalk.",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageStartLocalServer": "Starting managed OpenCode server at {url}.",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageHealthyRunning": "Managed OpenCode server is healthy and running at {url}.",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppingLocalServer": "Stopping managed OpenCode server.",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageStoppedCleanly": "Managed OpenCode server stopped cleanly.",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "Managed OpenCode server exited after a requested stop.",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "User chose to connect to an existing OpenCode server.",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "User opened the guided OpenCode setup path.",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "User opened managed local OpenCode setup.",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "User opened server settings after a failed health check.",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "User chose to add another server after a failed health check.",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageTestingServerUrl": "Testing OpenCode server URL {url} from onboarding.",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "chatProviderErrorSessionNotFound": "Session not found",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "Invalid message format",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "Network connection failed",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "Unknown error",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "Failed to create terminal session",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "Terminal endpoint is not available",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "Invalid terminal directory",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "Terminal websocket is not available here.",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 call} other{{count} calls}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "Connection timeout",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "Client error",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "Failed to send message",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

@@ -667,6 +667,7 @@ void main() {
               time: DateTime.fromMillisecondsSinceEpoch(1000),
               providerId: 'openai',
               modelId: 'gpt-4.1',
+              cost: 0.0012,
               parts: const <MessagePart>[
                 StepStartPart(
                   id: 'part_step_start_2',
@@ -700,6 +701,7 @@ void main() {
 
     expect(find.text('Model: gpt-4.1'), findsOneWidget);
     expect(find.text('Provider: openai'), findsOneWidget);
+    expect(find.text(r'Cost: $0.001200'), findsOneWidget);
     expect(find.text('Step started #1: snap-abc'), findsOneWidget);
     expect(
       find.text('Step finished #1: stop • tokens 7 • \$0.001200'),

@@ -28,7 +28,10 @@ extension _ChatRemoteDataSourceCommandAndErrorHelpers
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
       if (response.statusCode != 200) {
-        throw const ServerException('Failed to run shell command');
+        throw ServerException(
+          L10nBridge.current?.errorRunShellCommandFailed ??
+              'Failed to run shell command',
+        );
       }
 
       final map = response.data as Map<String, dynamic>;
@@ -37,20 +40,30 @@ extension _ChatRemoteDataSourceCommandAndErrorHelpers
       return ChatMessageModel.fromJson({...info, 'parts': parts});
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('Resource not found');
+        throw NotFoundException(
+          L10nBridge.current?.chatProviderErrorNotFound ?? 'Resource not found',
+        );
       }
       if (e.response?.statusCode == 400) {
-        throw const ValidationException('Invalid input parameters');
+        throw ValidationException(
+          L10nBridge.current?.chatProviderErrorInvalidInput ??
+              'Invalid input parameters',
+        );
       }
       throw _serverExceptionFromDio(
         e,
-        fallbackMessage: 'Failed to run shell command',
+        fallbackMessage:
+            L10nBridge.current?.errorRunShellCommandFailed ??
+            'Failed to run shell command',
       );
     } catch (e) {
       if (e is ValidationException) {
         rethrow;
       }
-      throw const ServerException('Failed to run shell command');
+      throw ServerException(
+        L10nBridge.current?.errorRunShellCommandFailed ??
+            'Failed to run shell command',
+      );
     }
   }
 
@@ -108,7 +121,10 @@ extension _ChatRemoteDataSourceCommandAndErrorHelpers
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
       if (response.statusCode != 200) {
-        throw const ServerException('Failed to run slash command');
+        throw ServerException(
+          L10nBridge.current?.errorRunSlashCommandFailed ??
+              'Failed to run slash command',
+        );
       }
 
       final map = response.data as Map<String, dynamic>;
@@ -117,20 +133,30 @@ extension _ChatRemoteDataSourceCommandAndErrorHelpers
       return ChatMessageModel.fromJson({...info, 'parts': parts});
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        throw const NotFoundException('Resource not found');
+        throw NotFoundException(
+          L10nBridge.current?.chatProviderErrorNotFound ?? 'Resource not found',
+        );
       }
       if (e.response?.statusCode == 400) {
-        throw const ValidationException('Invalid input parameters');
+        throw ValidationException(
+          L10nBridge.current?.chatProviderErrorInvalidInput ??
+              'Invalid input parameters',
+        );
       }
       throw _serverExceptionFromDio(
         e,
-        fallbackMessage: 'Failed to run slash command',
+        fallbackMessage:
+            L10nBridge.current?.errorRunSlashCommandFailed ??
+            'Failed to run slash command',
       );
     } catch (e) {
       if (e is ValidationException) {
         rethrow;
       }
-      throw const ServerException('Failed to run slash command');
+      throw ServerException(
+        L10nBridge.current?.errorRunSlashCommandFailed ??
+            'Failed to run slash command',
+      );
     }
   }
 
@@ -154,15 +180,22 @@ extension _ChatRemoteDataSourceCommandAndErrorHelpers
     required String fallbackMessage,
   }) {
     return switch (statusCode) {
-      401 ||
-      403 => 'Authentication failed. Reconnect the provider and try again.',
-      409 => 'Session is busy processing another request.',
-      429 => 'Rate limit exceeded. Wait a moment and try again.',
+      401 || 403 =>
+        L10nBridge.current?.errorFormatAuthenticationFailedReconnect ??
+            'Authentication failed. Reconnect the provider and try again.',
+      409 =>
+        L10nBridge.current?.errorSessionBusy ??
+            'Session is busy processing another request.',
+      429 =>
+        L10nBridge.current?.errorFormatRateLimitExceeded ??
+            'Rate limit exceeded. Wait a moment and try again.',
       // V2: explicit 503 — server explicitly unavailable (retryable)
       503 =>
-        'Service temporarily unavailable. The server may be starting up — please try again shortly.',
+        L10nBridge.current?.errorFormatServiceTemporarilyUnavailable ??
+            'Service temporarily unavailable. The server may be starting up — please try again shortly.',
       _ when statusCode != null && statusCode >= 500 =>
-        'Provider temporarily unavailable. Try again shortly.',
+        L10nBridge.current?.errorFormatProviderTemporarilyUnavailable ??
+            'Provider temporarily unavailable. Try again shortly.',
       _ => fallbackMessage,
     };
   }

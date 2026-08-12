@@ -1627,65 +1627,65 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
   }
 
   List<ChatComposerSlashCommandSuggestion> _builtinSlashCommands() {
-    return const <ChatComposerSlashCommandSuggestion>[
+    return <ChatComposerSlashCommandSuggestion>[
       ChatComposerSlashCommandSuggestion(
         name: 'new',
         source: 'builtin',
-        description: 'Create a new chat session',
+        description: context.l10n.chatSlashCommandNew,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'models',
         source: 'builtin',
-        description: 'Open model selector',
+        description: context.l10n.chatSlashCommandModels,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'sessions',
         source: 'builtin',
-        description: 'Open conversations list',
+        description: context.l10n.chatSlashCommandSessions,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'agent',
         source: 'builtin',
-        description: 'Open agent selector',
+        description: context.l10n.chatSlashCommandAgent,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'open',
         source: 'builtin',
-        description: 'File open quick action',
+        description: context.l10n.chatSlashCommandOpen,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'help',
         source: 'builtin',
-        description: 'Show command help',
+        description: context.l10n.chatSlashCommandHelp,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'compact',
         source: 'builtin',
-        description: 'Compact current session context',
+        description: context.l10n.chatSlashCommandCompact,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'thinking',
         source: 'builtin',
-        description: 'Toggle thinking bubbles',
+        description: context.l10n.chatSlashCommandThinking,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'undo',
         source: 'builtin',
-        description: 'Undo the last visible user turn',
+        description: context.l10n.chatSlashCommandUndo,
         isBuiltin: true,
       ),
       ChatComposerSlashCommandSuggestion(
         name: 'redo',
         source: 'builtin',
-        description: 'Redo the last undone turn',
+        description: context.l10n.chatSlashCommandRedo,
         isBuiltin: true,
       ),
     ];

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/experience_settings.dart';
 import 'app_activation_service.dart';
@@ -222,13 +223,15 @@ class NotificationService {
 
       const android = AndroidInitializationSettings('@mipmap/launcher_icon');
       const macos = DarwinInitializationSettings();
-      const linux = LinuxInitializationSettings(defaultActionName: 'Open');
+      final linux = LinuxInitializationSettings(
+        defaultActionName: L10nBridge.current?.notificationActionOpen ?? 'Open',
+      );
       const windows = WindowsInitializationSettings(
         appName: 'CodeWalk',
         appUserModelId: 'com.codewalk.app',
         guid: '1f111f3e-6f5e-4fca-9ba2-2c9f8f9ddc7a',
       );
-      const settings = InitializationSettings(
+      final settings = InitializationSettings(
         android: android,
         macOS: macos,
         linux: linux,
@@ -477,8 +480,8 @@ class NotificationService {
     return NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
-        'CodeWalk $category',
-        channelDescription: 'CodeWalk $category notifications',
+        _androidChannelName(category),
+        channelDescription: _androidChannelDescription(category),
         importance: _androidImportanceForCategory(category),
         priority: _androidPriorityForCategory(category),
         icon: _androidSmallIcon,
@@ -535,8 +538,8 @@ class NotificationService {
           soundOption: SoundOption.off,
           soundSource: null,
         ),
-        'CodeWalk $category',
-        channelDescription: 'CodeWalk $category notifications',
+        _androidChannelName(category),
+        channelDescription: _androidChannelDescription(category),
         importance: _androidImportanceForCategory(category),
         priority: _androidPriorityForCategory(category),
         icon: _androidSmallIcon,
@@ -550,8 +553,12 @@ class NotificationService {
 
     await _plugin.show(
       id: _summaryNotificationId(sessionId),
-      title: 'Conversation updates',
-      body: 'Open this conversation to clear related notifications.',
+      title:
+          L10nBridge.current?.notificationConversationUpdates ??
+          'Conversation updates',
+      body:
+          L10nBridge.current?.notificationOpenToClear ??
+          'Open this conversation to clear related notifications.',
       notificationDetails: summaryDetails,
       payload: payload,
     );
@@ -614,6 +621,32 @@ class NotificationService {
       return null;
     }
     return ThemeLinuxSound(themeName);
+  }
+
+  String _androidChannelName(String category) {
+    final l10n = L10nBridge.current;
+    return switch (category) {
+      'errors' => l10n?.notificationChannelErrors ?? 'CodeWalk errors',
+      'permissions' =>
+        l10n?.notificationChannelPermissions ?? 'CodeWalk permissions',
+      'agent' => l10n?.notificationChannelAgent ?? 'CodeWalk agent',
+      _ => 'CodeWalk $category',
+    };
+  }
+
+  String _androidChannelDescription(String category) {
+    final l10n = L10nBridge.current;
+    return switch (category) {
+      'errors' =>
+        l10n?.notificationChannelErrorsDescription ?? 'CodeWalk error alerts',
+      'permissions' =>
+        l10n?.notificationChannelPermissionsDescription ??
+            'CodeWalk action required alerts',
+      'agent' =>
+        l10n?.notificationChannelAgentDescription ??
+            'CodeWalk agent completion alerts',
+      _ => 'CodeWalk $category notifications',
+    };
   }
 
   String _androidChannelId({

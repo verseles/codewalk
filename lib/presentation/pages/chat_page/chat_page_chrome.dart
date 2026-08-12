@@ -1706,7 +1706,9 @@ extension _ChatPageChrome on _ChatPageState {
             ),
           IconButton(
             icon: const Icon(Symbols.close_rounded),
-            tooltip: 'Close ${_projectDisplayLabel(project)}',
+            tooltip: context.l10n.chatCloseProject(
+              _projectDisplayLabel(project),
+            ),
             onPressed: closeEnabled ? onClose : null,
           ),
         ],

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -78,7 +77,7 @@ class MoonshineSpeechInputService implements SpeechInputService {
   Future<bool> initialize() async {
     if (!_isDesktopSupported) {
       _unavailableReason = 'Moonshine is available on desktop only.';
-      _unavailableReasonKey = 'generic';
+      _unavailableReasonKey = 'desktopOnly';
       _isAvailable = false;
       return false;
     }
@@ -92,7 +91,7 @@ class MoonshineSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _unavailableReason = 'Moonshine runtime failed to initialize.';
-      _unavailableReasonKey = 'generic';
+      _unavailableReasonKey = 'runtimeFailed';
       _isAvailable = false;
       return false;
     }
@@ -141,7 +140,7 @@ class MoonshineSpeechInputService implements SpeechInputService {
       );
       _isAvailable = false;
       _unavailableReason = 'Moonshine model files are incomplete.';
-      _unavailableReasonKey = 'generic';
+      _unavailableReasonKey = 'modelIncomplete';
       onError();
       return;
     }
@@ -292,9 +291,10 @@ class MoonshineSpeechInputService implements SpeechInputService {
   void _applyCaptureFailure(
     SpeechAudioCaptureFailureInfo info, {
     String fallback = 'Microphone permission is disabled.',
+    String fallbackKey = 'microphoneDenied',
   }) {
     _unavailableReason = info.reason ?? fallback;
-    _unavailableReasonKey = info.reasonKey ?? 'generic';
+    _unavailableReasonKey = info.reasonKey ?? fallbackKey;
   }
 
   void _recreateRecognizer(String modelDir) {

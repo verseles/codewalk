@@ -5,7 +5,6 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../domain/entities/chat_realtime.dart';
 
-
 class _QuestionPrimaryIntent extends Intent {
   const _QuestionPrimaryIntent();
 }
@@ -266,8 +265,8 @@ class _QuestionRequestCardState extends State<QuestionRequestCard> {
     final currentStep = (_stepIndex + 1).clamp(1, _totalSteps);
     final progress = currentStep / _totalSteps;
     final label = _isReviewStep
-        ? 'Step $currentStep of $_totalSteps - Review'
-        : 'Step $currentStep of $_totalSteps - Question';
+        ? context.l10n.questionStepOfReview(currentStep, _totalSteps)
+        : context.l10n.questionStepOfQuestion(currentStep, _totalSteps);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +346,7 @@ class _QuestionRequestCardState extends State<QuestionRequestCard> {
             controller: _controllerFor(questionIndex),
             decoration: InputDecoration(
               isDense: true,
-              labelText: 'Custom answer',
+              labelText: context.l10n.questionCustomAnswer,
               hintText: context.l10n.questionCommaSeparatedValues,
             ),
           ),
@@ -463,10 +462,10 @@ class _QuestionRequestCardState extends State<QuestionRequestCard> {
     }
 
     final primaryLabel = _isReviewStep
-        ? 'Submit Answers'
+        ? context.l10n.questionSubmitAnswers
         : _stepIndex + 1 >= _questionCount
-        ? 'Review Answers'
-        : 'Next';
+        ? context.l10n.questionReviewAnswers
+        : context.l10n.chatActionNext;
 
     return Wrap(
       spacing: 8,

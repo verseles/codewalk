@@ -67,14 +67,19 @@ class _MoonshineModelDownloadDialogState
           ? kMoonshineModelTiny
           : entries.first.id;
       _manager.setPreferredModelId(preselect);
+      if (!mounted) return;
       setState(() {
         _models = entries;
         _selectedId = preselect;
         _isLoading = false;
       });
     } catch (error) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load Moonshine model list: $error';
+        _errorMessage = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'Moonshine',
+        );
         _isLoading = false;
       });
     }
@@ -109,7 +114,7 @@ class _MoonshineModelDownloadDialogState
       if (mounted) {
         setState(() {
           _isDownloading = false;
-          _errorMessage = 'Download failed: $error';
+          _errorMessage = context.l10n.speechDownloadFailed(error.toString());
         });
       }
     }
@@ -164,16 +169,13 @@ class _MoonshineModelDownloadDialogState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Moonshine runs on-device through sherpa_onnx. Pick a model once and '
-          'download it only for this desktop device.',
-        ),
+        Text(context.l10n.dialogMoonshineVoiceSetupDescription),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: _selectedId,
           isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Model size',
+          decoration: InputDecoration(
+            labelText: context.l10n.dialogMoonshineModelSize,
             border: const OutlineInputBorder(),
           ),
           items: _models
@@ -199,7 +201,7 @@ class _MoonshineModelDownloadDialogState
         if (selected != null) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            '~${selected.sizeMb} MB',
+            context.l10n.speechModelSizeMb(selected.sizeMb.toString()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

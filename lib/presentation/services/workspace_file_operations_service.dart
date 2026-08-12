@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/utils/path_utils.dart';
 import 'chat_title_generator.dart';
@@ -151,9 +152,11 @@ class WorkspaceFileOperationsServiceImpl
     required String baseUrl,
   }) async {
     if (_isUnsafeRoot(directory)) {
-      return const WorkspaceFileOperationsCapabilities(
+      return WorkspaceFileOperationsCapabilities(
         shellFileOpsSupported: false,
-        message: 'File operations require an active project directory.',
+        message:
+            L10nBridge.current?.filesActiveProjectRequired ??
+            'File operations require an active project directory.',
       );
     }
     final key = _capabilityKey(serverScopeKey, directory);
@@ -820,7 +823,8 @@ class WorkspaceFileOperationsServiceImpl
           return _safeShellFailureMessage(state['error']);
         }
         if (status == 'pending' || status == 'running') {
-          return 'File operation shell command did not complete.';
+          return L10nBridge.current?.filesShellCommandDidNotComplete ??
+              'File operation shell command did not complete.';
         }
       }
     }
@@ -836,22 +840,27 @@ class WorkspaceFileOperationsServiceImpl
       }
     }
 
-    return 'File operation shell command returned no result.';
+    return L10nBridge.current?.filesShellCommandNoResult ??
+        'File operation shell command returned no result.';
   }
 
   static String _safeShellFailureMessage(dynamic raw) {
     final normalized = raw is String ? raw.trim().toLowerCase() : '';
     if (normalized.contains('unexpected end of file') ||
         normalized.contains('unexpected eof')) {
-      return 'File operation shell command was truncated by the server.';
+      return L10nBridge.current?.filesShellCommandTruncated ??
+          'File operation shell command was truncated by the server.';
     }
     if (normalized.contains('syntax error')) {
-      return 'File operation shell command failed with a syntax error.';
+      return L10nBridge.current?.filesShellCommandSyntaxError ??
+          'File operation shell command failed with a syntax error.';
     }
     if (normalized.contains('not found')) {
-      return 'A required shell utility was not found.';
+      return L10nBridge.current?.filesShellUtilityNotFound ??
+          'A required shell utility was not found.';
     }
-    return 'File operation shell command failed before returning a result.';
+    return L10nBridge.current?.filesShellCommandFailed ??
+        'File operation shell command failed before returning a result.';
   }
 
   static String? _lastValidSentinelPayload(Iterable<String> values) {
@@ -978,29 +987,36 @@ class WorkspaceFileOperationsServiceImpl
   }
 
   static String _defaultMessage(WorkspaceFileOperationCode code) {
+    final l10n = L10nBridge.current;
     switch (code) {
       case WorkspaceFileOperationCode.ok:
         return 'ok';
       case WorkspaceFileOperationCode.unavailable:
-        return 'File operations are not available for this server.';
+        return l10n?.filesOperationUnavailable ??
+            'File operations are not available for this server.';
       case WorkspaceFileOperationCode.invalidName:
-        return 'Invalid name.';
+        return l10n?.filesInvalidName ??
+            'Enter a valid name without path separators.';
       case WorkspaceFileOperationCode.outsideRoot:
-        return 'Path is outside the project root.';
+        return l10n?.filesOutsideRoot ??
+            'The path is outside the project root.';
       case WorkspaceFileOperationCode.rootDeleteBlocked:
-        return 'The project root cannot be deleted.';
+        return l10n?.filesRootDeleteBlocked ??
+            'The project root cannot be deleted.';
       case WorkspaceFileOperationCode.missing:
-        return 'Path does not exist.';
+        return l10n?.filesPathMissing ?? 'Path does not exist.';
       case WorkspaceFileOperationCode.alreadyExists:
-        return 'A file or folder with that name already exists.';
+        return l10n?.filesAlreadyExists ??
+            'A file or folder with that name already exists.';
       case WorkspaceFileOperationCode.permissionDenied:
-        return 'Permission denied.';
+        return l10n?.filesPermissionDenied ?? 'Permission denied.';
       case WorkspaceFileOperationCode.notDirectory:
-        return 'Parent is not a directory.';
+        return l10n?.filesParentNotDirectory ?? 'Parent is not a directory.';
       case WorkspaceFileOperationCode.failed:
-        return 'File operation failed.';
+        return l10n?.filesOperationFailed ?? 'File operation failed.';
       case WorkspaceFileOperationCode.malformedResponse:
-        return 'File operation returned an invalid response.';
+        return l10n?.filesMalformedResponse ??
+            'File operation returned an invalid response.';
     }
   }
 

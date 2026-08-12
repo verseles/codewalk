@@ -27,7 +27,7 @@ class SessionDiffViewer extends StatefulWidget {
     required this.diffs,
     this.compact = false,
     this.initiallyExpanded = true,
-    this.title = 'Review changes',
+    this.title,
     this.onFileTap,
     this.initialMode,
   });
@@ -35,7 +35,7 @@ class SessionDiffViewer extends StatefulWidget {
   final List<SessionDiff> diffs;
   final bool compact;
   final bool initiallyExpanded;
-  final String title;
+  final String? title;
 
   /// Called when the user taps a file path to navigate to the file viewer.
   /// Receives the file path (e.g. 'lib/main.dart') and optional line number.
@@ -110,7 +110,7 @@ class _SessionDiffViewerState extends State<SessionDiffViewer> {
       initiallyExpanded: _expanded,
       onExpansionChanged: (value) => setState(() => _expanded = value),
       leading: const Icon(Symbols.preview),
-      title: Text(widget.title),
+      title: Text(widget.title ?? context.l10n.sessionDiffReview),
       subtitle: Text(context.l10n.sessionDiffFilesChanged(widget.diffs.length)),
       childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       children: [
@@ -140,7 +140,7 @@ class _SessionDiffViewerState extends State<SessionDiffViewer> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    widget.title,
+                    widget.title ?? context.l10n.sessionDiffReview,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),

@@ -32,5 +32,5 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
       'SenseVoice speech is unavailable on this platform.';
 
   @override
-  String? get unavailableReasonKey => null;
+  String? get unavailableReasonKey => 'platformUnavailable';
 }

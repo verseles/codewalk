@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import 'file_part_action_service_shared.dart';
 import 'file_part_action_types.dart';
@@ -32,7 +33,9 @@ Future<FilePartActionResult> handleFilePartAction({
       return _launchUri(
         parsedUrl,
         mode: LaunchMode.externalApplication,
-        fallbackMessage: 'Unable to open the attachment link.',
+        fallbackMessage:
+            L10nBridge.current?.attachmentUnableToOpenLink ??
+            'Unable to open the attachment link.',
       );
     }
     if (scheme == 'file') {
@@ -54,9 +57,11 @@ Future<FilePartActionResult> handleFilePartAction({
     return _openLocalPath(inferredPath);
   }
 
-  return const FilePartActionResult(
+  return FilePartActionResult(
     success: false,
-    message: 'Attachment does not provide a valid location.',
+    message:
+        L10nBridge.current?.attachmentNoValidLocation ??
+        'Attachment does not provide a valid location.',
   );
 }
 
@@ -69,9 +74,11 @@ Future<FilePartActionResult> _saveInlineAttachment({
   try {
     bytes = _decodeInlineData(dataUrl);
   } on FormatException {
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
-      message: 'Attachment data could not be decoded.',
+      message:
+          L10nBridge.current?.attachmentCouldNotDecode ??
+          'Attachment data could not be decoded.',
     );
   } catch (error, stackTrace) {
     AppLogger.warn(
@@ -79,16 +86,20 @@ Future<FilePartActionResult> _saveInlineAttachment({
       error: error,
       stackTrace: stackTrace,
     );
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
-      message: 'Attachment data could not be decoded.',
+      message:
+          L10nBridge.current?.attachmentCouldNotDecode ??
+          'Attachment data could not be decoded.',
     );
   }
 
   if (bytes.isEmpty) {
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
-      message: 'Attachment payload is empty.',
+      message:
+          L10nBridge.current?.attachmentPayloadEmpty ??
+          'Attachment payload is empty.',
     );
   }
 
@@ -123,12 +134,16 @@ Future<FilePartActionResult> _saveInlineAttachment({
       if (opened) {
         return FilePartActionResult(
           success: true,
-          message: 'Attachment saved to ${outputFile.path} and opened.',
+          message:
+              L10nBridge.current?.attachmentSavedAndOpened(outputFile.path) ??
+              'Attachment saved to ${outputFile.path} and opened.',
         );
       }
       return FilePartActionResult(
         success: true,
-        message: 'Attachment saved to ${outputFile.path}.',
+        message:
+            L10nBridge.current?.attachmentSavedPath(outputFile.path) ??
+            'Attachment saved to ${outputFile.path}.',
       );
     } catch (error, stackTrace) {
       lastError = error;
@@ -142,9 +157,11 @@ Future<FilePartActionResult> _saveInlineAttachment({
     stackTrace: lastStackTrace,
   );
 
-  return const FilePartActionResult(
+  return FilePartActionResult(
     success: false,
-    message: 'Attachment could not be saved on this device.',
+    message:
+        L10nBridge.current?.attachmentCouldNotSave ??
+        'Attachment could not be saved on this device.',
   );
 }
 
@@ -154,19 +171,21 @@ Future<FilePartActionResult?> _saveWithSystemDialog({
 }) async {
   try {
     final savedPath = await FilePicker.saveFile(
-      dialogTitle: 'Save attachment',
+      dialogTitle: L10nBridge.current?.attachmentSaveTitle ?? 'Save attachment',
       fileName: fileName,
       bytes: Uint8List.fromList(bytes),
     );
     if (savedPath == null) {
-      return const FilePartActionResult(
+      return FilePartActionResult(
         success: false,
-        message: 'Save canceled.',
+        message: L10nBridge.current?.attachmentSaveCanceled ?? 'Save canceled.',
       );
     }
     return FilePartActionResult(
       success: true,
-      message: 'Attachment saved to $savedPath.',
+      message:
+          L10nBridge.current?.attachmentSavedPath(savedPath) ??
+          'Attachment saved to $savedPath.',
     );
   } catch (error, stackTrace) {
     AppLogger.info(
@@ -235,17 +254,21 @@ Future<List<Directory>> _resolveAttachmentDirectories() async {
 Future<FilePartActionResult> _openLocalPath(String rawPath) async {
   final trimmedPath = rawPath.trim();
   if (trimmedPath.isEmpty) {
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
-      message: 'Attachment path is empty.',
+      message:
+          L10nBridge.current?.attachmentPathEmpty ??
+          'Attachment path is empty.',
     );
   }
 
   final entityType = FileSystemEntity.typeSync(trimmedPath, followLinks: true);
   if (entityType == FileSystemEntityType.notFound) {
-    return const FilePartActionResult(
+    return FilePartActionResult(
       success: false,
-      message: 'Local attachment was not found on this device.',
+      message:
+          L10nBridge.current?.attachmentLocalNotFound ??
+          'Local attachment was not found on this device.',
     );
   }
 
@@ -253,9 +276,11 @@ Future<FilePartActionResult> _openLocalPath(String rawPath) async {
   if (launched) {
     return const FilePartActionResult(success: true);
   }
-  return const FilePartActionResult(
+  return FilePartActionResult(
     success: false,
-    message: 'Unable to open the local attachment.',
+    message:
+        L10nBridge.current?.attachmentUnableToOpenLocal ??
+        'Unable to open the local attachment.',
   );
 }
 

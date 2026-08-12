@@ -862,34 +862,17 @@ class _ServerSetupQuickGuideState extends State<ServerSetupQuickGuide> {
   Widget build(BuildContext context) {
     final isWindows =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
-    final locale = Localizations.maybeLocaleOf(context);
-    final isPortuguese =
-        locale?.languageCode.toLowerCase().startsWith('pt') ?? false;
 
-    final title = isPortuguese ? 'Configuracao rapida' : 'Quick setup';
-    final intro = isPortuguese
-        ? 'CodeWalk e o app. OpenCode e o motor que precisa estar rodando para a conexao funcionar.'
-        : 'CodeWalk is the app. OpenCode is the engine that needs to be running before this connection can work.';
-    final firstStep = isPortuguese
-        ? '1. Instale o OpenCode CLI.'
-        : '1. Install OpenCode CLI.';
-    final commandLabel = isPortuguese
-        ? isWindows
-              ? '2. Execute no PowerShell:'
-              : '2. Execute no terminal:'
-        : isWindows
-        ? '2. Run in PowerShell:'
-        : '2. Run in your terminal:';
-    final passwordToggleLabel = isPortuguese
-        ? 'Proteger acesso com senha'
-        : 'Protect access with password';
-    final passwordHint = isPortuguese ? 'Senha do servidor' : 'Server password';
-    final installOptions = isPortuguese
-        ? 'Outras opcoes oficiais: script de instalacao, npm, bun, pnpm, Homebrew ou binario do GitHub Releases.'
-        : 'Other official install options: install script, npm, bun, pnpm, Homebrew, or a binary from GitHub Releases.';
-    final verifyHint = isPortuguese
-        ? 'Depois de iniciar o servidor, confirme /global/health ou /doc antes de colar a URL no CodeWalk.'
-        : 'After starting the server, confirm /global/health or /doc responds before pasting the URL into CodeWalk.';
+    final title = context.l10n.serversQuickGuideTitle;
+    final intro = context.l10n.serversQuickGuideIntro;
+    final firstStep = context.l10n.serversQuickGuideStepInstallCli;
+    final commandLabel = isWindows
+        ? context.l10n.serversQuickGuideRunPowerShell
+        : context.l10n.serversQuickGuideRunTerminal;
+    final passwordToggleLabel = context.l10n.serversQuickGuideProtectPassword;
+    final passwordHint = context.l10n.serversQuickGuideServerPassword;
+    final installOptions = context.l10n.serversQuickGuideInstallOptions;
+    final verifyHint = context.l10n.serversQuickGuideVerifyHint;
     final command = _buildCommand();
 
     return Padding(

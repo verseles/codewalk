@@ -20,7 +20,7 @@ class ChatTourShowcase extends StatelessWidget {
     required this.tooltipPosition,
     this.includePrevious = false,
     this.showSkip = true,
-    this.primaryActionLabel = 'Next',
+    this.primaryActionLabel,
     this.onPrimaryAction,
     this.onPreviousAction,
     this.onSkipAction,
@@ -37,7 +37,7 @@ class ChatTourShowcase extends StatelessWidget {
   final TooltipPosition tooltipPosition;
   final bool includePrevious;
   final bool showSkip;
-  final String primaryActionLabel;
+  final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
   final VoidCallback? onPreviousAction;
   final VoidCallback? onSkipAction;
@@ -123,7 +123,9 @@ class ChatTourShowcase extends StatelessWidget {
                       onPressed:
                           onPrimaryAction ??
                           () => ShowcaseView.get().next(force: true),
-                      child: Text(primaryActionLabel),
+                      child: Text(
+                        primaryActionLabel ?? context.l10n.chatActionNext,
+                      ),
                     ),
                   ],
                 ),

@@ -967,7 +967,10 @@ class AppProvider extends ChangeNotifier {
           error: error,
           stackTrace: stackTrace,
         );
-        _setError('Failed to remove local session tab icon data');
+        _setError(
+          L10nBridge.current?.sessionTabIconRemoveFailed ??
+              'Failed to remove local session tab icon data',
+        );
         return false;
       }
       if (removed.oauthEnabled) {
@@ -1098,9 +1101,16 @@ class AppProvider extends ChangeNotifier {
               'OpenCode detected')
         : (L10nBridge.current?.appProviderSetupOpenCodeNotDetected ??
               'OpenCode not detected');
+    final diagnosticsMessage =
+        L10nBridge.current?.setupDebugMessageDiagnosticsResult(
+          availability,
+          report.platform,
+          report.recommendation,
+        ) ??
+        '$availability on ${report.platform}. ${report.recommendation}';
     _recordSetupDebugEvent(
-      source: 'Diagnostics',
-      message: '$availability on ${report.platform}. ${report.recommendation}',
+      source: _setupDebugSourceDiagnostics,
+      message: diagnosticsMessage,
       notify: false,
     );
     if (notify) {
@@ -1118,8 +1128,9 @@ class AppProvider extends ChangeNotifier {
         'Detecting OpenCode command...';
     _errorMessage = '';
     _recordSetupDebugEvent(
-      source: 'Use Existing',
+      source: _setupDebugSourceUseExisting,
       message:
+          L10nBridge.current?.setupDebugMessageDetectAttempt ??
           'Trying to detect an existing OpenCode command from the current environment.',
       notify: false,
     );
@@ -1143,7 +1154,7 @@ class AppProvider extends ChangeNotifier {
       _localSetupInProgress = false;
       _localSetupMessage = message;
       _recordSetupDebugEvent(
-        source: 'Use Existing',
+        source: _setupDebugSourceUseExisting,
         message: message,
         severity: SetupDebugSeverity.error,
         notify: false,
@@ -1161,7 +1172,7 @@ class AppProvider extends ChangeNotifier {
         'Using OpenCode command at ${report.opencode.path}';
     _errorMessage = '';
     _recordSetupDebugEvent(
-      source: 'Use Existing',
+      source: _setupDebugSourceUseExisting,
       message: _localSetupMessage,
       notify: false,
     );
@@ -1190,7 +1201,9 @@ class AppProvider extends ChangeNotifier {
     final methodLabel = _installMethodLabel(method);
     _recordSetupDebugEvent(
       source: methodLabel,
-      message: 'Started OpenCode installation from CodeWalk.',
+      message:
+          L10nBridge.current?.setupDebugMessageInstallStarted ??
+          'Started OpenCode installation from CodeWalk.',
       notify: false,
     );
     notifyListeners();
@@ -1378,8 +1391,12 @@ class AppProvider extends ChangeNotifier {
     _localServerLastOutput = '';
     _errorMessage = '';
     _recordSetupDebugEvent(
-      source: 'Local Server',
-      message: 'Starting managed OpenCode server at $localServerUrl.',
+      source: _setupDebugSourceLocalServer,
+      message:
+          L10nBridge.current?.setupDebugMessageStartLocalServer(
+            localServerUrl,
+          ) ??
+          'Starting managed OpenCode server at $localServerUrl.',
       notify: false,
     );
     notifyListeners();
@@ -1399,11 +1416,12 @@ class AppProvider extends ChangeNotifier {
       final details = startResult.errorMessage?.trim();
       final message = details != null && details.isNotEmpty
           ? details
-          : 'Failed to start local OpenCode server.';
+          : L10nBridge.current?.appProviderFailedToStart ??
+                'Failed to start local OpenCode server.';
       _localServerStatus = LocalServerRuntimeStatus.failed;
       _localServerStatusMessage = message;
       _recordSetupDebugEvent(
-        source: 'Local Server',
+        source: _setupDebugSourceLocalServer,
         message: message,
         severity: SetupDebugSeverity.error,
         notify: false,
@@ -1421,7 +1439,7 @@ class AppProvider extends ChangeNotifier {
       _localServerStatusMessage = message;
       await _localServerRuntime.stop();
       _recordSetupDebugEvent(
-        source: 'Local Server',
+        source: _setupDebugSourceLocalServer,
         message: message,
         severity: SetupDebugSeverity.error,
         notify: false,
@@ -1438,8 +1456,9 @@ class AppProvider extends ChangeNotifier {
         'Running at $localServerUrl';
     _errorMessage = '';
     _recordSetupDebugEvent(
-      source: 'Local Server',
+      source: _setupDebugSourceLocalServer,
       message:
+          L10nBridge.current?.setupDebugMessageHealthyRunning(localServerUrl) ??
           'Managed OpenCode server is healthy and running at $localServerUrl.',
       notify: false,
     );
@@ -1460,8 +1479,10 @@ class AppProvider extends ChangeNotifier {
         'Stopping local server...';
     _errorMessage = '';
     _recordSetupDebugEvent(
-      source: 'Local Server',
-      message: 'Stopping managed OpenCode server.',
+      source: _setupDebugSourceLocalServer,
+      message:
+          L10nBridge.current?.setupDebugMessageStoppingLocalServer ??
+          'Stopping managed OpenCode server.',
       notify: false,
     );
     notifyListeners();
@@ -1474,8 +1495,10 @@ class AppProvider extends ChangeNotifier {
           'Local server is stopped.';
       _localServerStoppingByRequest = false;
       _recordSetupDebugEvent(
-        source: 'Local Server',
-        message: 'Managed OpenCode server stopped cleanly.',
+        source: _setupDebugSourceLocalServer,
+        message:
+            L10nBridge.current?.setupDebugMessageStoppedCleanly ??
+            'Managed OpenCode server stopped cleanly.',
         notify: false,
       );
       notifyListeners();
@@ -1518,8 +1541,10 @@ class AppProvider extends ChangeNotifier {
           L10nBridge.current?.appProviderStatusLocalServerStopped ??
           'Local server is stopped.';
       _recordSetupDebugEvent(
-        source: 'Local Server',
-        message: 'Managed OpenCode server exited after a requested stop.',
+        source: _setupDebugSourceLocalServer,
+        message:
+            L10nBridge.current?.setupDebugMessageExitedAfterRequestedStop ??
+            'Managed OpenCode server exited after a requested stop.',
         notify: false,
       );
       notifyListeners();
@@ -1535,7 +1560,7 @@ class AppProvider extends ChangeNotifier {
         L10nBridge.current?.appProviderStatusLocalServerExitedWithCode(code) ??
         'Local server exited with code $code.';
     _recordSetupDebugEvent(
-      source: 'Local Server',
+      source: _setupDebugSourceLocalServer,
       message: _localServerStatusMessage,
       severity: SetupDebugSeverity.error,
       notify: false,
@@ -1993,6 +2018,15 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  String get _setupDebugSourceDiagnostics =>
+      L10nBridge.current?.setupDebugSourceDiagnostics ?? 'Diagnostics';
+
+  String get _setupDebugSourceUseExisting =>
+      L10nBridge.current?.setupDebugSourceUseExisting ?? 'Use Existing';
+
+  String get _setupDebugSourceLocalServer =>
+      L10nBridge.current?.setupDebugSourceLocalServer ?? 'Local Server';
 
   String _installMethodLabel(LocalOpencodeInstallMethod method) {
     final l10n = L10nBridge.current;

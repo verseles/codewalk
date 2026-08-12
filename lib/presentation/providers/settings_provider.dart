@@ -902,7 +902,8 @@ class SettingsProvider extends ChangeNotifier {
         notifyListeners();
       }
       if (!await _persistSessionAttentionSettings()) {
-        return 'Session attention was stopped but the setting could not be saved.';
+        return L10nBridge.current?.settingsSessionAttentionStopSaveFailed ??
+            'Session attention was stopped but the setting could not be saved.';
       }
       await _persistSessionAttentionPresentationOverride(presentation);
       await _sessionAttentionRepublish?.call();
@@ -928,6 +929,7 @@ class SettingsProvider extends ChangeNotifier {
       await _persistSessionAttentionPresentationOverride(fallbackPresentation);
       return stopError ??
           result.error ??
+          L10nBridge.current?.settingsSessionAttentionEnableFailed ??
           'Session attention could not be enabled.';
     }
 
@@ -950,7 +952,8 @@ class SettingsProvider extends ChangeNotifier {
       await _persistSessionAttentionPresentationOverride(
         SessionAttentionPresentation.off,
       );
-      return 'Session attention could not be saved and was stopped.';
+      return L10nBridge.current?.settingsSessionAttentionSaveFailedStopped ??
+          'Session attention could not be saved and was stopped.';
     }
     await _persistSessionAttentionPresentationOverride(presentation);
     await _sessionAttentionRepublish?.call();
@@ -1029,13 +1032,15 @@ class SettingsProvider extends ChangeNotifier {
         error: error,
         stackTrace: stackTrace,
       );
-      return const SessionAttentionHostCapability(
+      return SessionAttentionHostCapability(
         kind: SessionAttentionHostKind.unsupported,
         supported: false,
         permissionGranted: false,
         running: false,
         topmostSupported: false,
-        explanation: 'Session attention host capability is unavailable.',
+        explanation:
+            L10nBridge.current?.settingsSessionAttentionCapabilityUnavailable ??
+            'Session attention host capability is unavailable.',
       );
     }
   }
@@ -1053,7 +1058,8 @@ class SettingsProvider extends ChangeNotifier {
       );
       return SessionAttentionHostActivationResult.failure(
         await _safeHostCapability(),
-        'Session attention could not be enabled.',
+        L10nBridge.current?.settingsSessionAttentionEnableFailed ??
+            'Session attention could not be enabled.',
       );
     }
   }
@@ -1063,7 +1069,8 @@ class SettingsProvider extends ChangeNotifier {
       await _sessionAttentionHostService.stop();
       _sessionAttentionHostCapability = await _safeHostCapability();
       if (_sessionAttentionHostCapability.running) {
-        return 'Session attention is still running. Try stopping it again.';
+        return L10nBridge.current?.settingsSessionAttentionStillRunning ??
+            'Session attention is still running. Try stopping it again.';
       }
       return null;
     } catch (error, stackTrace) {
@@ -1073,7 +1080,8 @@ class SettingsProvider extends ChangeNotifier {
         stackTrace: stackTrace,
       );
       _sessionAttentionHostCapability = await _safeHostCapability();
-      return 'Session attention could not be stopped. Try again.';
+      return L10nBridge.current?.settingsSessionAttentionStopFailed ??
+          'Session attention could not be stopped. Try again.';
     }
   }
 
@@ -1687,17 +1695,21 @@ class SettingsProvider extends ChangeNotifier {
   Future<String?> updateShortcut(ShortcutAction action, String binding) async {
     final normalized = ShortcutBindingCodec.normalize(binding);
     if (normalized.isEmpty) {
-      return 'Invalid shortcut';
+      return L10nBridge.current?.shortcutsErrorInvalid ?? 'Invalid shortcut';
     }
 
     final parsed = ShortcutBindingCodec.parse(normalized);
     if (parsed == null) {
-      return 'Unsupported shortcut key';
+      return L10nBridge.current?.shortcutsErrorUnsupportedKey ??
+          'Unsupported shortcut key';
     }
 
     final conflict = findShortcutConflict(action, normalized);
     if (conflict != null) {
-      return 'Conflicts with "$conflict"';
+      final l10n = L10nBridge.current;
+      return l10n != null
+          ? l10n.shortcutsErrorConflict(conflict)
+          : 'Conflicts with "$conflict"';
     }
 
     final next = Map<ShortcutAction, String>.from(_settings.shortcuts);
@@ -2099,7 +2111,9 @@ class SettingsProvider extends ChangeNotifier {
       return OpenCodeDefaultModelOption(
         key: configuredModelKey,
         providerId: configuredModelKey,
-        providerName: 'Configured on server',
+        providerName:
+            L10nBridge.current?.settingsServerFallbackProviderName ??
+            'Configured on server',
         modelId: configuredModelKey,
         modelName: configuredModelKey,
         connected: false,

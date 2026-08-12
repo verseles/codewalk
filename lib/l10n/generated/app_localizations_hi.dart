@@ -353,25 +353,25 @@ class AppLocalizationsHi extends AppLocalizations {
   String get behaviorDataSaverActive => 'मोबाइल डेटा पर अभी सक्रिय है।';
 
   @override
-  String get behaviorDataSaverAggressive => 'Aggressive';
+  String get behaviorDataSaverAggressive => 'आक्रामक';
 
   @override
   String get behaviorDataSaverAggressiveDescription =>
-      'Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.';
+      'कम-बैंडविड्थ मोड: केवल दृश्य कार्यक्षेत्र स्ट्रीम सक्रिय रहती है, वैश्विक अपडेट रोक दिए जाते हैं, और स्वचालित रीफ़्रेश के बीच अंतराल बढ़ा दिया जाता है।';
 
   @override
   String get behaviorDataSaverCellularOnly =>
       'केवल तब लागू होता है जब कनेक्शन सेलुलर/मोबाइल हो।';
 
   @override
-  String get behaviorDataSaverOff => 'Off';
+  String get behaviorDataSaverOff => 'बंद';
 
   @override
   String get behaviorDataSaverOffHint =>
-      'Full realtime and automatic refreshes are enabled.';
+      'पूर्ण रीयलटाइम और स्वचालित रीफ़्रेश सक्षम हैं।';
 
   @override
-  String get behaviorDataSaverStandard => 'Standard';
+  String get behaviorDataSaverStandard => 'मानक';
 
   @override
   String get behaviorDataSaverWaiting =>
@@ -525,10 +525,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get chatBlockResponsePendingDescription =>
-      'The answer will appear as a single block when this turn finishes.';
+      'जब यह टर्न समाप्त होगा, तो उत्तर एक ही ब्लॉक के रूप में दिखाई देगा।';
 
   @override
-  String get chatBlockResponsePendingTitle => 'Generating response';
+  String get chatBlockResponsePendingTitle => 'प्रतिक्रिया बनाई जा रही है';
 
   @override
   String get chatCachedConversationsYet => 'अभी तक कोई कैश्ड बातचीत नहीं है';
@@ -589,7 +589,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get chatComposerPlaceholder => 'अपनी ज़रूरतें लिखें...';
 
   @override
-  String get chatConversation => 'Conversation';
+  String get chatConversation => 'बातचीत';
 
   @override
   String get chatConversations => 'बातचीत';
@@ -1150,7 +1150,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get chatSearchTimeline => 'समयरेखा खोजें';
 
   @override
-  String get chatSelectDirectory => 'Select directory';
+  String get chatSelectDirectory => 'निर्देशिका चुनें';
 
   @override
   String get chatSelectOrCreate =>
@@ -1738,56 +1738,56 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get filesAlreadyExists =>
-      'A file or folder with that name already exists.';
+      'इस नाम वाली फ़ाइल या फ़ोल्डर पहले से मौजूद है।';
 
   @override
-  String get filesCopyPath => 'Copy path';
+  String get filesCopyPath => 'पथ कॉपी करें';
 
   @override
-  String get filesCreateFileTitle => 'Create file';
+  String get filesCreateFileTitle => 'फ़ाइल बनाएं';
 
   @override
-  String get filesCreateFolderTitle => 'Create folder';
+  String get filesCreateFolderTitle => 'फ़ोल्डर बनाएं';
 
   @override
-  String get filesDelete => 'Delete';
+  String get filesDelete => 'हटाएं';
 
   @override
   String filesDeleteConfirm(String name) {
-    return 'Delete $name? This cannot be undone. Folders and their contents will be deleted.';
+    return '$name हटाएं? इसे पूर्ववत नहीं किया जा सकता। फ़ोल्डर और उनकी सामग्री हटा दी जाएगी।';
   }
 
   @override
   String filesDeleteTitle(String name) {
-    return 'Delete $name';
+    return '$name हटाएं';
   }
 
   @override
   String get filesFilesFound => 'कोई फ़ाइल नहीं मिली';
 
   @override
-  String get filesFileCreated => 'File created.';
+  String get filesFileCreated => 'फ़ाइल बन गई।';
 
   @override
-  String get filesFolderCreated => 'Folder created.';
+  String get filesFolderCreated => 'फ़ोल्डर बन गया।';
 
   @override
   String get filesHideSidebar => 'फ़ाइलें साइडबार छुपाएं';
 
   @override
-  String get filesInvalidName => 'Enter a valid name without path separators.';
+  String get filesInvalidName => 'बिना पथ विभाजक के मान्य नाम दर्ज करें।';
 
   @override
-  String get filesNameHint => 'Name';
+  String get filesNameHint => 'नाम';
 
   @override
-  String get filesNew => 'New';
+  String get filesNew => 'नया';
 
   @override
-  String get filesNewFile => 'New file';
+  String get filesNewFile => 'नई फ़ाइल';
 
   @override
-  String get filesNewFolder => 'New folder';
+  String get filesNewFolder => 'नया फ़ोल्डर';
 
   @override
   String get filesNames => 'नाम';
@@ -1804,118 +1804,118 @@ class AppLocalizationsHi extends AppLocalizations {
   String get filesQuickOpenFile => 'त्वरित रूप से फ़ाइल खोलें';
 
   @override
-  String get filesOperationFailed => 'File operation failed.';
+  String get filesOperationFailed => 'फ़ाइल ऑपरेशन विफल रहा।';
 
   @override
   String get filesOperationUnavailable =>
-      'File operations are not available for this server.';
+      'इस सर्वर के लिए फ़ाइल ऑपरेशन उपलब्ध नहीं हैं।';
 
   @override
-  String get filesOutsideRoot => 'The path is outside the project root.';
+  String get filesOutsideRoot => 'पथ प्रोजेक्ट रूट के बाहर है।';
 
   @override
-  String get filesPathCopied => 'Path copied.';
+  String get filesPathCopied => 'पथ कॉपी किया गया।';
 
   @override
-  String get filesPathMissing => 'Path does not exist.';
+  String get filesPathMissing => 'पथ मौजूद नहीं है।';
 
   @override
-  String get filesPermissionDenied => 'Permission denied.';
+  String get filesPermissionDenied => 'अनुमति अस्वीकृत।';
 
   @override
   String get filesRefresh => 'फ़ाइलें रीफ़्रेश करें';
 
   @override
-  String get filesRename => 'Rename';
+  String get filesRename => 'नाम बदलें';
 
   @override
   String filesRenameTitle(String name) {
-    return 'Rename $name';
+    return '$name का नाम बदलें';
   }
 
   @override
-  String get filesRenamed => 'Renamed.';
+  String get filesRenamed => 'नाम बदल दिया गया।';
 
   @override
-  String get filesRootDeleteBlocked => 'The project root cannot be deleted.';
+  String get filesRootDeleteBlocked => 'प्रोजेक्ट रूट को हटाया नहीं जा सकता।';
 
   @override
   String get filesSearchHint => 'नाम या पथ द्वारा फ़ाइलें खोजें';
 
   @override
-  String get filesDeleted => 'Deleted.';
+  String get filesDeleted => 'हटा दिया गया।';
 
   @override
   String get filesTitle => 'फ़ाइलें';
 
   @override
-  String get forwardAction => 'Forward';
+  String get forwardAction => 'आगे भेजें';
 
   @override
-  String get forwardAllFailed => 'Could not forward to any session';
+  String get forwardAllFailed => 'किसी भी सत्र में आगे नहीं भेजा जा सका';
 
   @override
-  String get forwardCancel => 'Cancel';
+  String get forwardCancel => 'रद्द करें';
 
   @override
-  String get forwardDialogSubtitle => 'Select one or more conversations';
+  String get forwardDialogSubtitle => 'एक या अधिक बातचीत चुनें';
 
   @override
-  String get forwardDialogTitle => 'Forward to…';
+  String get forwardDialogTitle => 'आगे भेजें…';
 
   @override
-  String get forwardLoading => 'Loading sessions…';
+  String get forwardLoading => 'सत्र लोड हो रहे हैं…';
 
   @override
-  String get forwardNoOpenProjects => 'No open projects with sessions';
+  String get forwardNoOpenProjects => 'सत्र वाली कोई खुली परियोजना नहीं';
 
   @override
   String get forwardNoProviderModel =>
-      'Select a provider and model before forwarding';
+      'आगे भेजने से पहले प्रदाता और मॉडल चुनें';
 
   @override
-  String get forwardNoSessions => 'No recent sessions';
+  String get forwardNoSessions => 'कोई हालिया सत्र नहीं';
 
   @override
   String forwardPartial(int success, int total) {
-    return 'Forwarded to $success of $total';
+    return '$total में से $success सत्रों में आगे भेजा गया';
   }
 
   @override
   String forwardProvenanceLabel(String origin) {
-    return 'Forwarded from: $origin';
+    return 'आगे भेजा गया: $origin से';
   }
 
   @override
-  String get forwardRetry => 'Retry';
+  String get forwardRetry => 'पुनः प्रयास करें';
 
   @override
-  String get forwardSearchHint => 'Search';
+  String get forwardSearchHint => 'खोजें';
 
   @override
   String forwardSelectedCount(int count) {
-    return '$count selected';
+    return '$count चयनित';
   }
 
   @override
-  String get forwardSend => 'Forward';
+  String get forwardSend => 'आगे भेजें';
 
   @override
-  String get forwardServerOffline => 'Server offline';
+  String get forwardServerOffline => 'सर्वर ऑफ़लाइन है';
 
   @override
   String get forwardShortcutHint => 'Ctrl+Shift+F';
 
   @override
   String forwardSuccess(int count) {
-    return 'Forwarded to $count sessions';
+    return '$count सत्रों में आगे भेजा गया';
   }
 
   @override
-  String get forwardUndo => 'Undo';
+  String get forwardUndo => 'पूर्ववत करें';
 
   @override
-  String get forwardUndoFailed => 'Could not undo the forward';
+  String get forwardUndoFailed => 'आगे भेजना पूर्ववत नहीं किया जा सका';
 
   @override
   String get logsAppLogs => 'ऐप लॉग';
@@ -1927,7 +1927,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get logsCloseSearch => 'खोज बंद करें';
 
   @override
-  String get logsCopyFiltered => 'copy filtered logs';
+  String get logsCopyFiltered => 'फ़िल्टर किए गए लॉग कॉपी करें';
 
   @override
   String get logsEnableLogging => 'ऐप लॉगिंग चालू करें';
@@ -2126,8 +2126,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get msgInfoCompaction => 'संकुचन (Compaction)';
 
   @override
-  String msgInfoCost(double cost) {
-    return 'लागत: \\\$$cost';
+  String msgInfoCost(String cost) {
+    return 'लागत: \$$cost';
   }
 
   @override
@@ -2450,7 +2450,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboardingNotWritable => 'लिखने योग्य नहीं';
 
   @override
-  String get onboardingOpenCode => 'What is OpenCode?';
+  String get onboardingOpenCode => 'OpenCode क्या है?';
 
   @override
   String get onboardingOpenCodeRunningDevice =>
@@ -2514,7 +2514,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get onboardingRecommendedOrderTry =>
-      'अनुशंसित क्रम: यदि आप चाहते हैं कि CodeWalk सब कुछ बूटस्ट्रैप करे, तो \'Bun + OpenCode इंस्टॉल करें\' का प्रयास करें। यदि OpenCode पहले से इंस्टॉल है, तो \'मौजूदा का उपयोग करें\' चुनें।';
+      'अनुशंसित क्रम: यदि आप चाहते हैं कि CodeWalk सब कुछ बूटस्ट्रैप करे, तो Bun + OpenCode इंस्टॉल करें का प्रयास करें। यदि OpenCode पहले से इंस्टॉल है, तो मौजूदा का उपयोग करें चुनें।';
 
   @override
   String get onboardingRefreshChecks => 'चेक रीफ़्रेश करें';
@@ -3003,7 +3003,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get sessionDiffLoading => 'Loading changed files…';
+  String get sessionDiffLoading => 'बदली गई फ़ाइलें लोड हो रही हैं…';
 
   @override
   String get sessionDiffReview => 'परिवर्तनों की समीक्षा करें';
@@ -3296,11 +3296,11 @@ class AppLocalizationsHi extends AppLocalizations {
       'ब्रांड रंग चुनने के लिए CodeWalk क्लासिक पर स्विच करें।';
 
   @override
-  String get settingsAppearanceChatFontScale => 'Conversation text size';
+  String get settingsAppearanceChatFontScale => 'बातचीत टेक्स्ट आकार';
 
   @override
   String get settingsAppearanceChatFontScaleDescription =>
-      'Scale the chat message and composer text on top of the system text size.';
+      'सिस्टम टेक्स्ट आकार के ऊपर चैट संदेश और कंपोज़र टेक्स्ट को स्केल करें।';
 
   @override
   String get settingsAppearanceCodeWalkClassic => 'CodeWalk क्लासिक';
@@ -3363,11 +3363,11 @@ class AppLocalizationsHi extends AppLocalizations {
       'थीम, रंग, टेक्स्ट आकार और चैट प्रदर्शन चुनें';
 
   @override
-  String get settingsAppearanceFontSize => 'Text size';
+  String get settingsAppearanceFontSize => 'टेक्स्ट आकार';
 
   @override
   String get settingsAppearanceFontSizeDescription =>
-      'Adjust the size of system text, conversation text, and terminal text.';
+      'सिस्टम टेक्स्ट, बातचीत टेक्स्ट और टर्मिनल टेक्स्ट का आकार समायोजित करें।';
 
   @override
   String get settingsAppearanceLight => 'लाइट';
@@ -3410,11 +3410,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsAppearanceSystem => 'सिस्टम';
 
   @override
-  String get settingsAppearanceSystemFontScale => 'System text size';
+  String get settingsAppearanceSystemFontScale => 'सिस्टम टेक्स्ट आकार';
 
   @override
   String get settingsAppearanceSystemFontScaleDescription =>
-      'Scale all text in the app shell, including menus, dialogs, and sidebars.';
+      'मेनू, डायलॉग और साइडबार सहित ऐप शेल के सभी टेक्स्ट को स्केल करें।';
 
   @override
   String get settingsAppearanceTaskList => 'कार्य सूची';
@@ -3424,11 +3424,11 @@ class AppLocalizationsHi extends AppLocalizations {
       'सत्र कार्य सूची विजेट दिखाएं या छिपाएं।';
 
   @override
-  String get settingsAppearanceTerminalFontSize => 'Terminal text size';
+  String get settingsAppearanceTerminalFontSize => 'टर्मिनल टेक्स्ट आकार';
 
   @override
   String get settingsAppearanceTerminalFontSizeDescription =>
-      'Resize the embedded terminal font. Applies immediately to running sessions.';
+      'एम्बेडेड टर्मिनल फ़ॉन्ट का आकार बदलें। चल रहे सत्रों पर तुरंत लागू होता है।';
 
   @override
   String get settingsAppearanceTheme => 'थीम';
@@ -3505,7 +3505,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get settingsBehaviorAutoupdateCaveat =>
-      'CodeWalk रिलीज़ जांच के लिए \'के बारे में\' (About) का उपयोग करें। यह सेटिंग केवल आधिकारिक OpenCode `autoupdate` कॉन्फ़िगरेशन को दर्शाता है।';
+      'CodeWalk रिलीज़ जांच के लिए के बारे में (About) का उपयोग करें। यह सेटिंग केवल आधिकारिक OpenCode `autoupdate` कॉन्फ़िगरेशन को दर्शाता है।';
 
   @override
   String get settingsBehaviorAutoupdateHelp =>
@@ -3515,32 +3515,32 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settingsBehaviorCellularDataSaver => 'सेलुलर डेटा सेवर';
 
   @override
-  String get settingsBehaviorChatRenderMode => 'Chat render mode';
+  String get settingsBehaviorChatRenderMode => 'चैट रेंडर मोड';
 
   @override
-  String get settingsBehaviorChatRenderModeBlock => 'Block';
+  String get settingsBehaviorChatRenderModeBlock => 'ब्लॉक';
 
   @override
   String get settingsBehaviorChatRenderModeBlockDescription =>
-      'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.';
+      'जब तक वर्तमान टर्न को एक ब्लॉक के रूप में नहीं दिखाया जा सकता, तब तक लाइव असिस्टेंट टेक्स्ट, तर्क और टूल कार्ड छिपाएं।';
 
   @override
   String get settingsBehaviorChatRenderModeDescription =>
-      'Choose whether assistant responses appear as they stream or reveal after the current turn settles.';
+      'चुनें कि असिस्टेंट प्रतिक्रियाएं स्ट्रीम होते ही दिखें या वर्तमान टर्न पूरा होने के बाद प्रकट हों।';
 
   @override
-  String get settingsBehaviorChatRenderModeLive => 'Live';
+  String get settingsBehaviorChatRenderModeLive => 'लाइव';
 
   @override
   String get settingsBehaviorChatRenderModeLiveDescription =>
-      'Show assistant text, reasoning, and tool activity as OpenCode streams events.';
+      'OpenCode इवेंट स्ट्रीम करते समय असिस्टेंट टेक्स्ट, तर्क और टूल गतिविधि दिखाएं।';
 
   @override
-  String get settingsBehaviorComposerSpellCheck => 'Composer spell check';
+  String get settingsBehaviorComposerSpellCheck => 'कंपोज़र वर्तनी जांच';
 
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
-      'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
+      'चैट कंपोज़र में नेटिव प्लेटफ़ॉर्म वर्तनी जांच, सुझाव और ऑटोकरेक्ट का उपयोग करें।';
 
   @override
   String get settingsBehaviorConfigDeferred =>
@@ -4516,20 +4516,20 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get speechNativeSTTWorks =>
-      'On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.';
+      'Windows पर, CodeWalk अपने WASAPI माइक्रोफ़ोन बैकएंड के माध्यम से स्थानीय ऑन-डिवाइस भाषण पहचान का उपयोग करता है। स्थिरता के लिए नेटिव Windows भाषण पहचान अक्षम है।';
 
   @override
   String get speechNativeStartsFaster =>
       'नेटिव तेज़ी से शुरू होता है। Sherpa भारी सेटअप और गहरे मॉडल नियंत्रण के साथ पूरी तरह से डिवाइस पर चलता है।';
 
   @override
-  String get speechOpenMicrophoneSettings => 'Open microphone settings';
+  String get speechOpenMicrophoneSettings => 'माइक्रोफ़ोन सेटिंग्स खोलें';
 
   @override
-  String get speechOpenSpeechPrivacy => 'Open speech privacy';
+  String get speechOpenSpeechPrivacy => 'भाषण गोपनीयता सेटिंग्स खोलें';
 
   @override
-  String get speechOpenSpeechSettings => 'Open speech settings';
+  String get speechOpenSpeechSettings => 'भाषण सेटिंग्स खोलें';
 
   @override
   String get speechParakeet => 'Parakeet';
@@ -4587,7 +4587,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get speechWindowsSetupHint =>
-      'Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.';
+      'Windows आवाज़ इनपुट ऑन-डिवाइस मॉडल के साथ CodeWalk WASAPI कैप्चर का उपयोग करता है। डेस्कटॉप ऐप्स के लिए माइक्रोफ़ोन एक्सेस सक्षम रखें; नीचे दिए गए बटन समस्या निवारण के लिए Windows सेटिंग्स खोलते हैं।';
 
   @override
   String get statusConnected => 'कनेक्टेड';
@@ -4972,80 +4972,1630 @@ class AppLocalizationsHi extends AppLocalizations {
   String get workspaceSuggestions => 'सुझाव';
 
   @override
-  String get sessionTabsGestureHintTitle => 'Session tabs have new controls';
+  String get sessionTabsGestureHintTitle => 'सत्र टैब में नए नियंत्रण हैं';
 
   @override
   String get sessionTabsGestureHintBody =>
-      'Double-click or double-tap a tab to close it. Right-click or touch and hold to open session actions. You can disable tabs in Display Toggles.';
+      'किसी टैब को बंद करने के लिए उस पर डबल-क्लिक या डबल-टैप करें। सत्र क्रियाएं खोलने के लिए राइट-क्लिक करें या टच और होल्ड करें। आप डिस्प्ले टॉगल (Display Toggles) में टैब अक्षम कर सकते हैं।';
 
   @override
-  String get sessionTabsGestureHintAcknowledge => 'Got it';
+  String get sessionTabsGestureHintAcknowledge => 'ठीक है';
 
   @override
-  String get sessionTabsGestureHintDisableTabs => 'Disable tabs';
+  String get sessionTabsGestureHintDisableTabs => 'टैब अक्षम करें';
 
   @override
-  String get sessionTabRenameAction => 'Rename session';
+  String get sessionTabRenameAction => 'सत्र का नाम बदलें';
 
   @override
   String sessionTabClosedMessage(String title) {
-    return 'Tab \"$title\" closed';
+    return 'टैब \"$title\" बंद हुआ';
   }
 
   @override
-  String get sessionTabUndo => 'Undo';
+  String get sessionTabUndo => 'पूर्ववत करें';
 
   @override
-  String get sessionTabRestoreFailed => 'Tab could not be restored.';
+  String get sessionTabRestoreFailed => 'टैब पुनर्स्थापित नहीं किया जा सका।';
 
   @override
-  String get sessionTabChangeIconAction => 'Change icon';
+  String get sessionTabChangeIconAction => 'आइकन बदलें';
 
   @override
-  String get sessionTabIconPickerTitle => 'Choose tab icon';
+  String get sessionTabIconPickerTitle => 'टैब आइकन चुनें';
 
   @override
-  String get sessionTabIconUseProjectIcon => 'Use project icon';
+  String get sessionTabIconUseProjectIcon => 'प्रोजेक्ट आइकन का उपयोग करें';
 
   @override
-  String get sessionTabIconApplied => 'Tab icon updated.';
+  String get sessionTabIconApplied => 'टैब आइकन अपडेट हो गया।';
 
   @override
-  String get sessionTabIconSaveFailed => 'Tab icon could not be saved.';
+  String get sessionTabIconSaveFailed => 'टैब आइकन सहेजा नहीं जा सका।';
 
   @override
-  String get sessionTabIconPresetCode => 'Code';
+  String get sessionTabIconPresetCode => 'कोड';
 
   @override
-  String get sessionTabIconPresetTerminal => 'Terminal';
+  String get sessionTabIconPresetTerminal => 'टर्मिनल';
 
   @override
-  String get sessionTabIconPresetBug => 'Bug';
+  String get sessionTabIconPresetBug => 'बग';
 
   @override
-  String get sessionTabIconPresetTasks => 'Tasks';
+  String get sessionTabIconPresetTasks => 'कार्य';
 
   @override
-  String get sessionTabIconPresetLaunch => 'Launch';
+  String get sessionTabIconPresetLaunch => 'लॉन्च';
 
   @override
-  String get sessionTabIconPresetIdea => 'Idea';
+  String get sessionTabIconPresetIdea => 'विचार';
 
   @override
-  String get sessionTabIconPresetResearch => 'Research';
+  String get sessionTabIconPresetResearch => 'शोध';
 
   @override
-  String get sessionTabIconPresetDesign => 'Design';
+  String get sessionTabIconPresetDesign => 'डिज़ाइन';
 
   @override
-  String get sessionTabIconPresetData => 'Data';
+  String get sessionTabIconPresetData => 'डेटा';
 
   @override
-  String get sessionTabIconPresetCloud => 'Cloud';
+  String get sessionTabIconPresetCloud => 'क्लाउड';
 
   @override
-  String get sessionTabIconPresetSecurity => 'Security';
+  String get sessionTabIconPresetSecurity => 'सुरक्षा';
 
   @override
-  String get sessionTabIconPresetTools => 'Tools';
+  String get sessionTabIconPresetTools => 'टूल्स';
+
+  @override
+  String get workspaceNoActiveContext => 'कोई सक्रिय संदर्भ नहीं';
+
+  @override
+  String get settingsAppearanceContrastLow => 'कम';
+
+  @override
+  String get settingsAppearanceContrastStandard => 'मानक';
+
+  @override
+  String get settingsAppearanceContrastMedium => 'मध्यम';
+
+  @override
+  String get settingsAppearanceContrastMediumHigh => 'मध्यम उच्च';
+
+  @override
+  String get settingsNotificationsSystemSoundsWebUnavailable =>
+      'वेब पर उपलब्ध नहीं।';
+
+  @override
+  String get settingsNotificationsSystemSoundsAndroid =>
+      'सिस्टम से Android सूचना ध्वनियाँ।';
+
+  @override
+  String get settingsNotificationsSystemSoundsFreedesktop =>
+      'Freedesktop ध्वनियाँ /usr/share/sounds/freedesktop/stereo से।';
+
+  @override
+  String get settingsNotificationsSystemSoundsPlatform =>
+      'जहाँ ऑपरेटिंग सिस्टम सिस्टम ध्वनियाँ उपलब्ध कराता है, वहाँ समर्थित।';
+
+  @override
+  String get serversQuickGuideTitle => 'त्वरित सेटअप';
+
+  @override
+  String get serversQuickGuideIntro =>
+      'CodeWalk ऐप है। OpenCode इंजन है, जिसे इस कनेक्शन के काम करने से पहले चालू होना आवश्यक है।';
+
+  @override
+  String get serversQuickGuideStepInstallCli => '1. OpenCode CLI स्थापित करें।';
+
+  @override
+  String get serversQuickGuideRunPowerShell => '2. PowerShell में चलाएँ:';
+
+  @override
+  String get serversQuickGuideRunTerminal => '2. अपने टर्मिनल में चलाएँ:';
+
+  @override
+  String get serversQuickGuideProtectPassword =>
+      'पासवर्ड से एक्सेस सुरक्षित करें';
+
+  @override
+  String get serversQuickGuideServerPassword => 'सर्वर पासवर्ड';
+
+  @override
+  String get serversQuickGuideInstallOptions =>
+      'अन्य आधिकारिक स्थापना विकल्प: इंस्टॉल स्क्रिप्ट, npm, bun, pnpm, Homebrew, या GitHub Releases से बाइनरी।';
+
+  @override
+  String get serversQuickGuideVerifyHint =>
+      'सर्वर शुरू करने के बाद, CodeWalk में URL पेस्ट करने से पहले /global/health या /doc के प्रतिक्रिया देने की पुष्टि करें।';
+
+  @override
+  String get shortcutsPressKeyCombination => 'अब की-कॉम्बिनेशन दबाएँ';
+
+  @override
+  String get settingsProvenanceOpenCodeBacked => 'OpenCode-समर्थित';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk-स्थानीय';
+
+  @override
+  String get settingsProvenanceCodeWalkException => 'CodeWalk अपवाद';
+
+  @override
+  String get shortcutsErrorInvalid => 'अमान्य शॉर्टकट';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'असमर्थित शॉर्टकट कुंजी';
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '\"$conflict\" से टकराता है';
+  }
+
+  @override
+  String get settingsSessionAttentionStopSaveFailed =>
+      'सत्र ध्यान रोका गया लेकिन सेटिंग सहेजी नहीं जा सकी।';
+
+  @override
+  String get settingsSessionAttentionEnableFailed =>
+      'सत्र ध्यान सक्षम नहीं किया जा सका।';
+
+  @override
+  String get settingsSessionAttentionSaveFailedStopped =>
+      'सत्र ध्यान सहेजा नहीं जा सका और इसे रोक दिया गया।';
+
+  @override
+  String get settingsSessionAttentionStillRunning =>
+      'सत्र ध्यान अभी भी चल रहा है। इसे फिर से रोकने का प्रयास करें।';
+
+  @override
+  String get settingsSessionAttentionStopFailed =>
+      'सत्र ध्यान रोका नहीं जा सका। फिर से प्रयास करें।';
+
+  @override
+  String get settingsSessionAttentionCapabilityUnavailable =>
+      'सत्र ध्यान की होस्ट क्षमता उपलब्ध नहीं है।';
+
+  @override
+  String get settingsServerFallbackProviderName =>
+      'सर्वर पर कॉन्फ़िगर किया गया';
+
+  @override
+  String get composerStopResponse => 'प्रतिक्रिया रोकें';
+
+  @override
+  String get composerSendMessageWhileResponding =>
+      'प्रतिक्रिया चलने के दौरान संदेश भेजें';
+
+  @override
+  String get composerSendMessage => 'संदेश भेजें';
+
+  @override
+  String get chatTourComposerDescription => 'अपना अनुरोध यहाँ लिखें।';
+
+  @override
+  String get chatTourSendDescription => 'अपना संदेश यहाँ भेजें।';
+
+  @override
+  String get composerAttachmentFallbackName => 'अनुलग्नक';
+
+  @override
+  String get composerContextFallbackName => 'संदर्भ';
+
+  @override
+  String get searchableDropdownSearchHint => 'खोजें';
+
+  @override
+  String get searchableDropdownEmptyText => 'कोई मेल नहीं मिला';
+
+  @override
+  String get speechApiKeyStorageUnavailable =>
+      'सुरक्षित TTS API कुंजी संग्रहण उपलब्ध नहीं है।';
+
+  @override
+  String get speechApiKeyRemoved => 'API कुंजी हटाई गई।';
+
+  @override
+  String get speechApiKeySaved =>
+      'API कुंजी इस डिवाइस पर सुरक्षित रूप से सहेजी गई।';
+
+  @override
+  String get speechReadAloudTestText =>
+      'यह एक CodeWalk टेक्स्ट-टू-स्पीच परीक्षण है।';
+
+  @override
+  String get speechNativeDisabledWindows =>
+      'स्थिरता के लिए Windows पर अक्षम। CodeWalk WASAPI कैप्चर के माध्यम से Parakeet या कोई अन्य ऑन-डिवाइस इंजन उपयोग करें।';
+
+  @override
+  String get speechNativeUnavailableLinux =>
+      'Linux पर अनुपलब्ध। भाषण इनपुट के लिए Parakeet का उपयोग करें।';
+
+  @override
+  String get speechNotAvailableOnPlatform => 'इस प्लेटफॉर्म पर उपलब्ध नहीं।';
+
+  @override
+  String get speechSherpaUnavailableAndroid =>
+      'छोटे APK आकार के लिए अनुकूलित Android बिल्ड पर अनुपलब्ध।';
+
+  @override
+  String get speechMoonshineDesktopOnlyHint =>
+      'केवल डेस्कटॉप पर उपलब्ध। Android केवल नेटिव रहता है।';
+
+  @override
+  String get speechParakeetDesktopOnlyHint =>
+      'केवल डेस्कटॉप पर उपलब्ध। ऑफ़लाइन बहुभाषी पहचान का उपयोग करता है।';
+
+  @override
+  String get speechSenseVoiceDesktopOnlyHint =>
+      'केवल डेस्कटॉप पर उपलब्ध। चीनी, कैंटोनीज़, जापानी, कोरियाई और अंग्रेज़ी के लिए सबसे मजबूत।';
+
+  @override
+  String get speechNativeSubtitle => 'सरल और तेज़ स्टार्टअप।';
+
+  @override
+  String get speechSherpaSubtitle =>
+      'भारी, प्रायोगिक और बग-प्रवण। डाउनलोड किए गए मॉडल के साथ अक्सर अधिक सटीक।';
+
+  @override
+  String get speechMoonshineSubtitle =>
+      'sherpa_onnx ऑफ़लाइन पहचान और डाउनलोड करने योग्य मॉडल का उपयोग करने वाला केवल-डेस्कटॉप प्रायोगिक पथ।';
+
+  @override
+  String get speechParakeetSubtitle =>
+      'एक बहुभाषी डाउनलोड करने योग्य मॉडल के साथ केवल-डेस्कटॉप ऑफ़लाइन NeMo ट्रांसड्यूसर पथ।';
+
+  @override
+  String get speechSenseVoiceSubtitle =>
+      'चीनी, कैंटोनीज़, जापानी, कोरियाई और अंग्रेज़ी के लिए अनुकूलित केवल-डेस्कटॉप ऑफ़लाइन पथ।';
+
+  @override
+  String get speechMoonshineModel => 'Moonshine मॉडल';
+
+  @override
+  String get speechSherpaLanguage => 'Sherpa भाषा';
+
+  @override
+  String get speechSearchSherpaLanguage => 'Sherpa भाषा खोजें';
+
+  @override
+  String get speechNoLanguagePacksFound => 'कोई भाषा पैक नहीं मिला';
+
+  @override
+  String get speechTextToSpeechProvider => 'टेक्स्ट-टू-स्पीच प्रदाता';
+
+  @override
+  String get speechProviderSystemNative => 'सिस्टम / नेटिव';
+
+  @override
+  String get speechProviderEdgeExperimental =>
+      'Microsoft Edge Speech (प्रायोगिक)';
+
+  @override
+  String get speechProviderOpenAiCompatible => 'OpenAI-संगत';
+
+  @override
+  String get speechEdgeExperimentalTitle =>
+      'Microsoft Edge Speech प्रायोगिक है';
+
+  @override
+  String get speechEdgeExperimentalDescription =>
+      'इस डिवाइस से सीधे अनाधिकारिक Edge Read Aloud सेवा का उपयोग करता है। जब आप रीड अलाउड का उपयोग करते हैं तो संदेश टेक्स्ट Microsoft को भेजा जाता है, और यदि Microsoft निजी प्रोटोकॉल बदलता है तो सेवा टूट सकती है।';
+
+  @override
+  String get speechEdgeVoice => 'Edge आवाज़';
+
+  @override
+  String get speechEdgeVoiceListUnavailable =>
+      'डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है। आवाज़ सूची अभी लोड नहीं की जा सकी।';
+
+  @override
+  String get speechEdgeVoicesLoaded =>
+      'Microsoft Edge Speech आवाज़ों से लोड किया गया।';
+
+  @override
+  String get speechCloudTtsPrivacy => 'क्लाउड TTS गोपनीयता';
+
+  @override
+  String get speechCloudTtsPrivacyDescription =>
+      'क्लाउड TTS चयनित असिस्टेंट संदेश टेक्स्ट कॉन्फ़िगर किए गए प्रदाता को भेजता है। API कुंजियाँ इस डिवाइस पर सुरक्षित संग्रहण में रखी जाती हैं।';
+
+  @override
+  String get speechBaseUrl => 'बेस URL';
+
+  @override
+  String get speechApiKey => 'API कुंजी';
+
+  @override
+  String get speechApiKeySavedHelper =>
+      'एक कुंजी सहेजी गई है। बदलने के लिए नया मान दर्ज करें, या हटाने के लिए खाली मान सहेजें।';
+
+  @override
+  String get speechNoApiKeySaved => 'कोई API कुंजी सहेजी नहीं गई।';
+
+  @override
+  String get speechSaveApiKey => 'API कुंजी सहेजें';
+
+  @override
+  String get speechModel => 'मॉडल';
+
+  @override
+  String get speechPitchNotSupported =>
+      'पिच OpenAI-संगत TTS द्वारा समर्थित नहीं है और इस प्रदाता के लिए छिपाई गई है।';
+
+  @override
+  String get speechTestVoice => 'आवाज़ का परीक्षण करें';
+
+  @override
+  String get dialogMoonshineVoiceSetupDescription =>
+      'Moonshine sherpa_onnx के माध्यम से डिवाइस पर चलता है। एक बार मॉडल चुनें और इसे केवल इस डेस्कटॉप डिवाइस के लिए डाउनलोड करें।';
+
+  @override
+  String get dialogParakeetVoiceSetupDescription =>
+      'Parakeet sherpa_onnx ऑफ़लाइन पहचान के माध्यम से डिवाइस पर चलता है। बहुभाषी STT सक्षम करने के लिए इसे इस डेस्कटॉप डिवाइस के लिए एक बार डाउनलोड करें।';
+
+  @override
+  String get dialogSenseVoiceSetupDescription =>
+      'SenseVoice sherpa_onnx ऑफ़लाइन पहचान के माध्यम से डिवाइस पर चलता है। यह चीनी, कैंटोनीज़, जापानी, कोरियाई और अंग्रेज़ी के लिए सबसे मजबूत है।';
+
+  @override
+  String get dialogSherpaVoiceSetupDescription =>
+      'Sherpa आवाज़ इनपुट के लिए ऑन-डिवाइस भाषण मॉडल आवश्यक है। अपनी भाषा चुनें और इसे एक बार डाउनलोड करें (~147 MB)।';
+
+  @override
+  String speechSilenceSeconds(String value) {
+    return '$value सेकंड';
+  }
+
+  @override
+  String speechModelInstalled(String modelId) {
+    return 'मॉडल स्थापित ($modelId)';
+  }
+
+  @override
+  String speechModelMissing(String modelId) {
+    return 'मॉडल अनुपलब्ध ($modelId)';
+  }
+
+  @override
+  String speechModelSizeMb(String sizeMb) {
+    return '~$sizeMb MB';
+  }
+
+  @override
+  String speechSystemDefaultLanguage(String language) {
+    return 'सिस्टम डिफ़ॉल्ट ($language)';
+  }
+
+  @override
+  String speechModelListLoadFailed(String error, String service) {
+    return '$service मॉडल सूची लोड करने में विफल: $error';
+  }
+
+  @override
+  String speechDownloadFailed(String error) {
+    return 'डाउनलोड विफल: $error';
+  }
+
+  @override
+  String speechFailedToRemoveModel(String error) {
+    return 'मॉडल हटाने में विफल: $error';
+  }
+
+  @override
+  String speechBaseUrlExample(String url) {
+    return 'उदाहरण: $url';
+  }
+
+  @override
+  String speechModelDefaultHelper(String model) {
+    return 'डिफ़ॉल्ट: $model';
+  }
+
+  @override
+  String get notificationPermissionOrQuestionNeedsInput =>
+      'किसी टूल अनुमति या प्रश्न के लिए आपके इनपुट की आवश्यकता है।';
+
+  @override
+  String get notificationPermissionNeedsInput =>
+      'किसी टूल अनुमति के लिए आपके इनपुट की आवश्यकता है।';
+
+  @override
+  String get notificationQuestionNeedsInput =>
+      'किसी टूल प्रश्न के लिए आपके इनपुट की आवश्यकता है।';
+
+  @override
+  String get notificationSessionError => 'एक सत्र ने त्रुटि की सूचना दी।';
+
+  @override
+  String get notificationChannelErrors => 'CodeWalk त्रुटियाँ';
+
+  @override
+  String get notificationChannelErrorsDescription => 'CodeWalk त्रुटि अलर्ट';
+
+  @override
+  String get notificationChannelPermissions => 'CodeWalk अनुमतियाँ';
+
+  @override
+  String get notificationChannelPermissionsDescription =>
+      'CodeWalk कार्रवाई आवश्यक अलर्ट';
+
+  @override
+  String get notificationChannelAgent => 'CodeWalk एजेंट';
+
+  @override
+  String get notificationChannelAgentDescription =>
+      'CodeWalk एजेंट पूर्णता अलर्ट';
+
+  @override
+  String get notificationActionOpen => 'खोलें';
+
+  @override
+  String get foregroundMonitorNotificationBody =>
+      'विश्वसनीय बैकग्राउंड अलर्ट सक्रिय हैं';
+
+  @override
+  String get foregroundMonitorNotificationTitle => 'बैकग्राउंड निगरानी सक्रिय';
+
+  @override
+  String get foregroundMonitorNotificationOneSession => 'एक सत्र की निगरानी';
+
+  @override
+  String foregroundMonitorNotificationSessionCount(int count) {
+    return '$count सत्रों की निगरानी';
+  }
+
+  @override
+  String sessionAttentionSemanticLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count सत्रों को ध्यान देने की आवश्यकता है',
+      one: '1 सत्र को ध्यान देने की आवश्यकता है',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionAttentionOverlayPermissionRequired =>
+      'अन्य ऐप्स के ऊपर प्रदर्शित करने की अनुमति आवश्यक है।';
+
+  @override
+  String get sessionAttentionIosInAppOnly =>
+      'सत्र ध्यान केवल CodeWalk के भीतर उपलब्ध है।';
+
+  @override
+  String get sessionAttentionOverlayPermissionGrantPrompt =>
+      'अन्य ऐप्स के ऊपर प्रदर्शित करने की अनुमति दें, फिर पुनः प्रयास करें।';
+
+  @override
+  String get sessionAttentionAndroidStartFailed =>
+      'Android सत्र ध्यान सेवा शुरू नहीं हो सकी।';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[$count वर्ण छोटे किए गए] $reason';
+  }
+
+  @override
+  String get chatMessageJustNow => 'अभी-अभी';
+
+  @override
+  String chatMessageMinutesAgo(int count) {
+    return '$count मिनट पहले';
+  }
+
+  @override
+  String chatMessageHoursAgo(int count) {
+    return '$count घंटे पहले';
+  }
+
+  @override
+  String chatMessageDaysAgo(int count) {
+    return '$count दिन पहले';
+  }
+
+  @override
+  String chatMessageDateTime(int day, int hour, int minute, int month) {
+    return '$month/$day $hour:$minute';
+  }
+
+  @override
+  String get chatMessageYourMessage => 'आपका संदेश';
+
+  @override
+  String get chatMessageAssistantMessage => 'असिस्टेंट संदेश';
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'चरण शुरू #$step';
+  }
+
+  @override
+  String chatMessageStepStartedWithSnapshot(String snapshot, int step) {
+    return 'चरण शुरू #$step: $snapshot';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'चरण समाप्त #$step: $reason • टोकन $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessagePatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count पैच',
+      one: '1 पैच',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolRun => 'टूल रन';
+
+  @override
+  String get chatMessageToolExecution => 'टूल निष्पादन';
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count और',
+      one: '+1 और',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainExtraTypes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count प्रकार',
+      one: '+1 प्रकार',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count को ध्यान देने की आवश्यकता है',
+      one: '1 को ध्यान देने की आवश्यकता है',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count पूर्ण',
+      one: '1 पूर्ण',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => 'टूल कॉल';
+
+  @override
+  String get chatMessageDiffPreviewTruncated =>
+      'ऐप स्थिरता के लिए Diff पूर्वावलोकन छोटा किया गया।';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'ऐप स्थिरता के लिए बड़े संदेश का पूर्वावलोकन छोटा किया गया।';
+
+  @override
+  String get chatMessageInvalidLinkFormat => 'अमान्य लिंक प्रारूप';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'लिंक खोलने में असमर्थ';
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total) {
+    return '$current/$total प्रगति पर';
+  }
+
+  @override
+  String sessionTodoTaskProgress(String content, int index, int total) {
+    return 'कार्य $index/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total पूर्ण';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return 'कार्य $count/$total पूर्ण हुए';
+  }
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return 'कार्य ($count)';
+  }
+
+  @override
+  String questionStepOfReview(int current, int total) {
+    return 'चरण $current/$total - समीक्षा';
+  }
+
+  @override
+  String questionStepOfQuestion(int current, int total) {
+    return 'चरण $current/$total - प्रश्न';
+  }
+
+  @override
+  String get questionCustomAnswer => 'कस्टम उत्तर';
+
+  @override
+  String get questionSubmitAnswers => 'उत्तर जमा करें';
+
+  @override
+  String get questionReviewAnswers => 'उत्तरों की समीक्षा करें';
+
+  @override
+  String permissionRequestTitle(String permission) {
+    return 'अनुमति अनुरोध: $permission';
+  }
+
+  @override
+  String get sessionTitleCannotBeEmpty => 'शीर्षक खाली नहीं हो सकता';
+
+  @override
+  String get filesFailedToLoad => 'फ़ाइलें लोड करने में विफल';
+
+  @override
+  String get filesFailedToSearch => 'फ़ाइलें खोजने में विफल';
+
+  @override
+  String get filesNoOpenFilesHint =>
+      'अभी तक कोई फ़ाइल खुली नहीं है। खोजने के लिए टाइप करें।';
+
+  @override
+  String get filesNoContentMatches => 'कोई सामग्री मेल नहीं मिली';
+
+  @override
+  String filesOpenFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count खुली फ़ाइलें',
+      one: '1 खुली फ़ाइल',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesLinesSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count पंक्तियाँ चयनित',
+      one: '1 पंक्ति चयनित',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filesDraftTooLargeToSave =>
+      'ड्राफ़्ट एडिटर से सेव करने के लिए बहुत बड़ा है।';
+
+  @override
+  String get filesSaveChangesBeforeClose =>
+      'इस फ़ाइल को बंद करने से पहले परिवर्तन सेव करें।';
+
+  @override
+  String get filesSaveChangesBeforePathChange =>
+      'यह पथ बदलने से पहले परिवर्तन सेव करें।';
+
+  @override
+  String get filesWaitForSaveBeforePathChange =>
+      'यह पथ बदलने से पहले फ़ाइल सेव होने तक प्रतीक्षा करें।';
+
+  @override
+  String get filesWaitForFileOperation =>
+      'फ़ाइल ऑपरेशन पूरा होने तक प्रतीक्षा करें।';
+
+  @override
+  String get filesLargeFileReadOnly =>
+      'बड़ी फ़ाइलें एडिटिंग को सुचारू रखने के लिए केवल-पढ़ने के मोड में खुलती हैं।';
+
+  @override
+  String get filesCheckingWriteSupport =>
+      'फ़ाइल लिखने की सुविधा की जाँच की जा रही है...';
+
+  @override
+  String get filesActiveProjectRequired =>
+      'फ़ाइल ऑपरेशन के लिए एक सक्रिय प्रोजेक्ट निर्देशिका आवश्यक है।';
+
+  @override
+  String get filesReloadSkippedUnsavedChanges =>
+      'अनसेव किए गए परिवर्तन हैं; रीलोड छोड़ दिया गया।';
+
+  @override
+  String get filesFailedToLoadContent => 'फ़ाइल सामग्री लोड करने में विफल';
+
+  @override
+  String get filesFileSaved => 'फ़ाइल सेव हो गई।';
+
+  @override
+  String get filesParentNotDirectory => 'पैरेंट एक निर्देशिका नहीं है।';
+
+  @override
+  String get filesMalformedResponse =>
+      'फ़ाइल ऑपरेशन ने अमान्य प्रतिक्रिया लौटाई।';
+
+  @override
+  String get filesShellCommandDidNotComplete =>
+      'फ़ाइल ऑपरेशन शेल कमांड पूरा नहीं हुआ।';
+
+  @override
+  String get filesShellCommandNoResult =>
+      'फ़ाइल ऑपरेशन शेल कमांड ने कोई परिणाम नहीं लौटाया।';
+
+  @override
+  String get filesShellCommandTruncated =>
+      'फ़ाइल ऑपरेशन शेल कमांड को सर्वर ने काट दिया।';
+
+  @override
+  String get filesShellCommandSyntaxError =>
+      'फ़ाइल ऑपरेशन शेल कमांड सिंटैक्स त्रुटि के साथ विफल रहा।';
+
+  @override
+  String get filesShellUtilityNotFound => 'एक आवश्यक शेल उपयोगिता नहीं मिली।';
+
+  @override
+  String get filesShellCommandFailed =>
+      'फ़ाइल ऑपरेशन शेल कमांड परिणाम लौटाने से पहले विफल रहा।';
+
+  @override
+  String get attachmentSaveTitle => 'अटैचमेंट सेव करें';
+
+  @override
+  String get attachmentBrowserSandboxLocalFile =>
+      'ब्राउज़र सैंडबॉक्स स्थानीय file:// अटैचमेंट को सीधे खोलने से रोकता है।';
+
+  @override
+  String get attachmentLocalPathBrowserBlocked =>
+      'यह अटैचमेंट एक स्थानीय पथ की ओर इंगित करता है जिसे ब्राउज़र से नहीं खोला जा सकता।';
+
+  @override
+  String terminalConnectedTo(String directory, String serverName) {
+    return 'निर्देशिका $directory में $serverName से कनेक्ट हुआ';
+  }
+
+  @override
+  String get terminalTransportUnavailable => 'टर्मिनल ट्रांसपोर्ट अनुपलब्ध है।';
+
+  @override
+  String get chatSlashCommandNew => 'नया चैट सत्र बनाएँ';
+
+  @override
+  String get chatSlashCommandModels => 'मॉडल चयनकर्ता खोलें';
+
+  @override
+  String get chatSlashCommandSessions => 'बातचीत सूची खोलें';
+
+  @override
+  String get chatSlashCommandAgent => 'एजेंट चयनकर्ता खोलें';
+
+  @override
+  String get chatSlashCommandOpen => 'फ़ाइल खोलने का त्वरित कार्य';
+
+  @override
+  String get chatSlashCommandHelp => 'कमांड सहायता दिखाएँ';
+
+  @override
+  String get chatSlashCommandCompact => 'वर्तमान सत्र संदर्भ संक्षिप्त करें';
+
+  @override
+  String get chatSlashCommandThinking => 'थिंकिंग बबल्स टॉगल करें';
+
+  @override
+  String get chatSlashCommandUndo => 'अंतिम दृश्यमान उपयोगकर्ता टर्न अनडू करें';
+
+  @override
+  String get chatSlashCommandRedo => 'अंतिम अनडू किया गया टर्न रीडू करें';
+
+  @override
+  String chatSessionSubConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count उप-बातचीतें',
+      one: '1 उप-बातचीत',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageWeeksAgo(int count) {
+    return '$count सप्ताह पहले';
+  }
+
+  @override
+  String chatMessageShortDate(int day, int month) {
+    return '$month/$day';
+  }
+
+  @override
+  String get chatProviderErrorLoadSessionStatus =>
+      'सत्र स्थिति लोड करने में विफल';
+
+  @override
+  String get chatProviderErrorLoadSessionDetails =>
+      'कुछ सत्र विवरण लोड नहीं हो सके';
+
+  @override
+  String chatProviderErrorLoadSessionList(String error) {
+    return 'सत्र सूची लोड करने में विफल: $error';
+  }
+
+  @override
+  String get chatProviderErrorCreateSession => 'सत्र बनाने में विफल';
+
+  @override
+  String get chatProviderErrorSelectProviderModelBeforeSend =>
+      'भेजने से पहले एक कनेक्टेड प्रोवाइडर या निःशुल्क OpenCode मॉडल चुनें';
+
+  @override
+  String get chatProviderErrorStartMessageSend =>
+      'संदेश भेजना शुरू करने में विफल';
+
+  @override
+  String get chatProviderErrorStopUnavailable =>
+      'वर्तमान सत्र के लिए रोकना उपलब्ध नहीं है';
+
+  @override
+  String get chatProviderErrorWaitForResponseFinish =>
+      'संदर्भ संक्षिप्त करने से पहले वर्तमान प्रतिक्रिया समाप्त होने तक प्रतीक्षा करें';
+
+  @override
+  String get chatProviderErrorCompactUnavailable =>
+      'वर्तमान सत्र के लिए संक्षिप्त संदर्भ अनुपलब्ध है';
+
+  @override
+  String get chatProviderErrorSelectModelBeforeCompact =>
+      'संदर्भ संक्षिप्त करने से पहले एक मॉडल चुनें';
+
+  @override
+  String get chatProviderErrorCompactSessionContext =>
+      'सत्र संदर्भ संक्षिप्त करने में विफल';
+
+  @override
+  String get chatProviderErrorNetwork =>
+      'नेटवर्क कनेक्शन विफल। कृपया नेटवर्क सेटिंग्स जाँचें';
+
+  @override
+  String get chatProviderErrorServer =>
+      'सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें';
+
+  @override
+  String get chatProviderErrorNotFound => 'संसाधन नहीं मिला';
+
+  @override
+  String get chatProviderErrorInvalidInput => 'अमान्य इनपुट पैरामीटर';
+
+  @override
+  String get chatProviderErrorUnknown =>
+      'अज्ञात त्रुटि। कृपया बाद में पुनः प्रयास करें';
+
+  @override
+  String get chatProviderErrorSessionFallback => 'सत्र त्रुटि';
+
+  @override
+  String get projectProviderErrorNoProjectContext =>
+      'सर्वर से कोई प्रोजेक्ट संदर्भ उपलब्ध नहीं है';
+
+  @override
+  String projectProviderErrorInitializeFailed(String error) {
+    return 'प्रोजेक्ट संदर्भ आरंभ करने में विफल: $error';
+  }
+
+  @override
+  String get projectProviderErrorSwitchProjectNotFound =>
+      'प्रोजेक्ट बदलने में विफल: प्रोजेक्ट नहीं मिला';
+
+  @override
+  String get projectProviderErrorSwitchDirectoryEmpty =>
+      'प्रोजेक्ट बदलने में विफल: निर्देशिका खाली है';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'कम से कम एक संदर्भ खुला रहना चाहिए';
+
+  @override
+  String get projectProviderErrorReopenProjectNotFound =>
+      'प्रोजेक्ट फिर से खोलने में विफल: प्रोजेक्ट नहीं मिला';
+
+  @override
+  String get projectProviderErrorOnlyClosedArchivable =>
+      'केवल बंद प्रोजेक्ट संग्रहीत किए जा सकते हैं';
+
+  @override
+  String get projectProviderErrorArchiveProjectNotFound =>
+      'प्रोजेक्ट संग्रहीत करने में विफल: प्रोजेक्ट नहीं मिला';
+
+  @override
+  String get projectProviderErrorArchiveProjectPathInvalid =>
+      'प्रोजेक्ट संग्रहीत करने में विफल: प्रोजेक्ट पथ अमान्य है';
+
+  @override
+  String projectProviderErrorLoadWorkspaces(String error) {
+    return 'कार्यक्षेत्र लोड करने में विफल: $error';
+  }
+
+  @override
+  String get projectProviderErrorWorkspaceNameEmpty =>
+      'कार्यक्षेत्र नाम खाली नहीं हो सकता';
+
+  @override
+  String projectProviderErrorCreateWorkspace(String error) {
+    return 'कार्यक्षेत्र बनाने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorResetWorkspace(String error) {
+    return 'कार्यक्षेत्र रीसेट करने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorDeleteWorkspace(String error) {
+    return 'कार्यक्षेत्र हटाने में विफल: $error';
+  }
+
+  @override
+  String get projectProviderErrorDirectoryEmpty =>
+      'निर्देशिका खाली नहीं हो सकती';
+
+  @override
+  String projectProviderErrorListDirectories(String error) {
+    return 'निर्देशिकाएँ सूचीबद्ध करने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorValidateDirectory(String error) {
+    return 'निर्देशिका सत्यापित करने में विफल: $error';
+  }
+
+  @override
+  String get projectProviderErrorPathEmpty => 'पथ खाली नहीं हो सकता';
+
+  @override
+  String projectProviderErrorListFiles(String error) {
+    return 'फ़ाइलें सूचीबद्ध करने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorSearchFiles(String error) {
+    return 'फ़ाइलें खोजने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorContentSearchUnavailable(String error) {
+    return 'सामग्री खोज उपलब्ध नहीं: $error';
+  }
+
+  @override
+  String projectProviderErrorSearchSymbols(String error) {
+    return 'प्रतीक खोजने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorReadFile(String error) {
+    return 'फ़ाइल पढ़ने में विफल: $error';
+  }
+
+  @override
+  String projectProviderErrorLoadProjectList(String error) {
+    return 'प्रोजेक्ट सूची लोड करने में विफल: $error';
+  }
+
+  @override
+  String get workspaceProjectRemovedFromHistory =>
+      'प्रोजेक्ट इतिहास से हटा दिया गया';
+
+  @override
+  String workspaceProjectContextOpened(String directory) {
+    return 'प्रोजेक्ट संदर्भ खोला गया: $directory';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'प्रोजेक्ट संदर्भ खोलने में विफल: $directory';
+  }
+
+  @override
+  String get chatAbortNotice => 'आप क्या अलग करना चाहते हैं?';
+
+  @override
+  String sessionTitleToday(String date, String time) {
+    return 'आज $time ($date)';
+  }
+
+  @override
+  String sessionTitleYesterday(String date, String time) {
+    return 'कल $time ($date)';
+  }
+
+  @override
+  String sessionTitleWeekday(String date, String time, String weekday) {
+    return '$weekday $time ($date)';
+  }
+
+  @override
+  String sessionTitleDateAndTime(String date, String time) {
+    return '$date $time';
+  }
+
+  @override
+  String get sessionWeekdayMon => 'सोम';
+
+  @override
+  String get sessionWeekdayTue => 'मंगल';
+
+  @override
+  String get sessionWeekdayWed => 'बुध';
+
+  @override
+  String get sessionWeekdayThu => 'गुरु';
+
+  @override
+  String get sessionWeekdayFri => 'शुक्र';
+
+  @override
+  String get sessionWeekdaySat => 'शनि';
+
+  @override
+  String get sessionWeekdaySun => 'रवि';
+
+  @override
+  String get forwardTimeNow => 'अभी';
+
+  @override
+  String forwardTimeMinutes(int count) {
+    return '$count मिनट';
+  }
+
+  @override
+  String forwardTimeHours(int count) {
+    return '$count घंटे';
+  }
+
+  @override
+  String forwardTimeDays(int count) {
+    return '$count दिन';
+  }
+
+  @override
+  String forwardTimeWeeks(int count) {
+    return '$count सप्ताह';
+  }
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultModel => 'डिफ़ॉल्ट मॉडल';
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultAgent => 'डिफ़ॉल्ट एजेंट';
+
+  @override
+  String get settingsBehaviorConfigFieldSmallModel => 'छोटा मॉडल';
+
+  @override
+  String get settingsBehaviorConfigFieldAutoUpdateMode => 'ऑटो-अपडेट मोड';
+
+  @override
+  String get settingsBehaviorConfigFieldSnapshotSetting => 'स्नैपशॉट सेटिंग';
+
+  @override
+  String get settingsBehaviorConfigFieldConversationUsername =>
+      'बातचीत उपयोगकर्ता नाम';
+
+  @override
+  String get settingsBehaviorConfigFieldSharingDefault => 'साझाकरण डिफ़ॉल्ट';
+
+  @override
+  String get speechMicNoInputDevice =>
+      'कोई माइक्रोफ़ोन इनपुट डिवाइस उपलब्ध नहीं है।';
+
+  @override
+  String get speechMicDeviceBusy =>
+      'डिफ़ॉल्ट माइक्रोफ़ोन वर्तमान में किसी अन्य ऐप द्वारा उपयोग में है।';
+
+  @override
+  String get speechMicUnsupportedFormat =>
+      'डिफ़ॉल्ट माइक्रोफ़ोन प्रारूप समर्थित नहीं है।';
+
+  @override
+  String get speechMicSpeechPrivacy =>
+      'Windows स्पीच सेवाएँ अक्षम हो सकती हैं (स्पीच प्राइवेसी, ऑनलाइन स्पीच रिकग्निशन, या भाषा पैक)।';
+
+  @override
+  String get speechMicBackendUnavailable =>
+      'Windows माइक्रोफ़ोन बैकएंड इस बिल्ड में उपलब्ध नहीं है।';
+
+  @override
+  String speechEngineFallbackNotice(String fallback, String reason) {
+    return 'चयनित STT इंजन अनुपलब्ध है ($reason)। इसके बजाय $fallback का उपयोग किया जा रहा है।';
+  }
+
+  @override
+  String get oauthFlowSecureStorageUnavailable =>
+      'OAuth के लिए सुरक्षित क्रेडेंशियल स्टोरेज अनुपलब्ध है।';
+
+  @override
+  String get oauthFlowUnexpectedError =>
+      'OAuth प्रवाह अप्रत्याशित रूप से विफल रहा। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get oauthFlowNoEndpointsDiscovered =>
+      'कोई OAuth एंडपॉइंट खोजा नहीं गया। Cloudflare Dashboard में Managed OAuth सक्षम करें → Access → Applications → [यह ऐप]।';
+
+  @override
+  String get oauthFlowTokenResponseMissingAccessToken =>
+      'OAuth टोकन प्रतिक्रिया में एक्सेस टोकन शामिल नहीं था।';
+
+  @override
+  String get oauthFlowProfileChanged =>
+      'OAuth समाप्त होने से पहले सर्वर प्रोफाइल बदल गया।';
+
+  @override
+  String get oauthFlowMetadataMissingEndpoints =>
+      'OAuth मेटाडेटा में ऑथराइज़ेशन/टोकन एंडपॉइंट अनुपलब्ध हैं।';
+
+  @override
+  String get oauthFlowCallbackNotCompleted => 'ऑथराइज़ेशन कॉलबैक पूरा नहीं हुआ';
+
+  @override
+  String get oauthFlowProviderDeclined =>
+      'ऑथराइज़ेशन सर्वर ने OAuth अनुरोध अस्वीकार कर दिया। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get oauthFlowCallbackValidationFailed =>
+      'OAuth कॉलबैक सत्यापन विफल। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get oauthFlowCallbackServerStartFailed =>
+      'स्थानीय OAuth कॉलबैक सर्वर शुरू करने में विफल।';
+
+  @override
+  String get oauthFlowSignInCanceled => 'OAuth साइन-इन रद्द कर दिया गया।';
+
+  @override
+  String get oauthFlowBrowserOpenFailed =>
+      'OAuth साइन-इन के लिए सिस्टम ब्राउज़र नहीं खोला जा सका।';
+
+  @override
+  String get oauthFlowCallbackTimeout =>
+      '5 मिनट के भीतर ऐप तक कोई ऑथराइज़ेशन कॉलबैक नहीं पहुँचा। सहमति के बाद ब्राउज़र को स्थानीय कॉलबैक पते पर रीडायरेक्ट होना था। यदि ब्राउज़र ने इसके बजाय कनेक्शन त्रुटि दिखाई, तो यह डिवाइस या नेटवर्क लूपबैक रीडायरेक्ट को ब्लॉक करता है।';
+
+  @override
+  String oauthFlowTokenExchangeTransientFailure(int maxAttempts) {
+    return '$maxAttempts प्रयासों के बाद अस्थायी नेटवर्क समस्या के कारण टोकन एक्सचेंज विफल रहा। कृपया पुनः प्रयास करें।';
+  }
+
+  @override
+  String oauthFlowTokenExchangeHttpFailure(int statusCode) {
+    return 'टोकन एक्सचेंज विफल (HTTP $statusCode)। कृपया पुनः प्रयास करें।';
+  }
+
+  @override
+  String get oauthFlowTokenExchangeUnexpectedFailure =>
+      'टोकन एक्सचेंज अप्रत्याशित रूप से विफल रहा। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get oauthFlowTokenExchangeIncomplete =>
+      'ऑथराइज़ेशन कोड भेजे जाने के बाद टोकन एक्सचेंज पूरा नहीं हुआ। कृपया OAuth साइन-इन फिर से शुरू करें।';
+
+  @override
+  String get speechReadAloudFailed => 'टेक्स्ट-टू-स्पीच विफल रहा।';
+
+  @override
+  String get speechReadAloudNoText =>
+      'पढ़कर सुनाने के लिए कोई टेक्स्ट नहीं है।';
+
+  @override
+  String get speechEdgeTextTooLong =>
+      'Microsoft Edge Speech एक बार में 4096 बाइट्स तक पढ़ सकता है।';
+
+  @override
+  String get speechEdgeMalformedAudio =>
+      'Microsoft Edge Speech ने दोषपूर्ण ऑडियो डेटा लौटाया।';
+
+  @override
+  String get speechEdgeUnsupportedAudio =>
+      'Microsoft Edge Speech ने अनसमर्थित ऑडियो डेटा लौटाया।';
+
+  @override
+  String get speechEdgeUnsupportedFrame =>
+      'Microsoft Edge Speech ने एक अनसमर्थित वेबसॉकेट फ्रेम लौटाया।';
+
+  @override
+  String get speechEdgeSynthesisInterrupted =>
+      'Microsoft Edge Speech संश्लेषण पूरा होने से पहले समाप्त हो गया।';
+
+  @override
+  String get speechEdgeEmptyAudio =>
+      'Microsoft Edge Speech ने खाली ऑडियो प्रतिक्रिया लौटाई।';
+
+  @override
+  String get speechEdgeTimedOut =>
+      'Microsoft Edge Speech का समय समाप्त हो गया।';
+
+  @override
+  String get speechEdgeUnreachable =>
+      'Microsoft Edge Speech तक नहीं पहुँचा जा सका।';
+
+  @override
+  String get speechApiKeyMissing =>
+      'इस TTS प्रदाता का उपयोग करने के लिए सेटिंग्स > भाषण से पाठ में API कुंजी जोड़ें।';
+
+  @override
+  String get speechProviderEmptyAudio =>
+      'TTS प्रदाता ने खाली ऑडियो प्रतिक्रिया लौटाई।';
+
+  @override
+  String get speechProviderRequestRejected =>
+      'TTS प्रदाता ने स्पीच अनुरोध अस्वीकार कर दिया।';
+
+  @override
+  String get speechApiKeyRejected =>
+      'TTS API कुंजी प्रदाता द्वारा अस्वीकार कर दी गई।';
+
+  @override
+  String get speechProviderQuotaRateLimit =>
+      'TTS प्रदाता ने कोटा या दर सीमा की सूचना दी।';
+
+  @override
+  String get speechProviderTemporarilyUnavailable =>
+      'TTS प्रदाता अस्थायी रूप से अनुपलब्ध है।';
+
+  @override
+  String get speechProviderUnreachable => 'TTS प्रदाता तक नहीं पहुँचा जा सका।';
+
+  @override
+  String appProviderErrorFailedToStartProcess(String tool) {
+    return '$tool प्रक्रिया शुरू करने में विफल।';
+  }
+
+  @override
+  String appProviderErrorToolNotAvailable(String runtime, String tool) {
+    return '$tool उपलब्ध नहीं है। पहले $runtime स्थापित करें।';
+  }
+
+  @override
+  String appProviderErrorToolInstallFailed(int exitCode, String tool) {
+    return '$tool स्थापना निकास कोड $exitCode के साथ विफल रही।';
+  }
+
+  @override
+  String appProviderErrorBunBootstrapFailed(int exitCode) {
+    return 'Bun बूटस्ट्रैप निकास कोड $exitCode के साथ विफल रहा।';
+  }
+
+  @override
+  String get appProviderErrorInstalledButNotFoundInPath =>
+      'OpenCode स्थापना पूरी हुई लेकिन कमांड PATH में नहीं मिला।';
+
+  @override
+  String get appProviderErrorInstalledButPathNotResolved =>
+      'OpenCode स्थापना पूरी हुई लेकिन कमांड पथ हल नहीं किया जा सका।';
+
+  @override
+  String appProviderErrorConfiguredCommandNotFound(String tool) {
+    return 'कॉन्फ़िगर किया गया कमांड नहीं मिला और $tool PATH में नहीं है।';
+  }
+
+  @override
+  String get appProviderErrorConfiguredCommandPathMissing =>
+      'कॉन्फ़िगर किए गए कमांड का पथ मौजूद नहीं है।';
+
+  @override
+  String get appProviderErrorConfiguredCommandVersionCheckFailed =>
+      'कॉन्फ़िगर किया गया कमांड मौजूद है लेकिन संस्करण जांच विफल रही।';
+
+  @override
+  String get appProviderErrorConfiguredCommandExecutionFailed =>
+      'कॉन्फ़िगर किया गया कमांड निष्पादित नहीं किया जा सका।';
+
+  @override
+  String get appProviderWslCheckWindowsOnly =>
+      'WSL जांच केवल Windows पर लागू होती है।';
+
+  @override
+  String get appProviderDesktopBuildRequired =>
+      'प्रबंधित स्थानीय सर्वर कॉन्फ़िगर करने के लिए डेस्कटॉप बिल्ड का उपयोग करें।';
+
+  @override
+  String get appProviderKnownInstallationDirectoryDetected =>
+      'किसी ज्ञात स्थापना निर्देशिका से पता लगाया गया।';
+
+  @override
+  String appProviderKnownInstallationPathRefreshHint(String appName) {
+    return 'किसी ज्ञात स्थापना निर्देशिका से पता लगाया गया। PATH को रीफ़्रेश करने की आवश्यकता हो सकती है; यदि हाल की स्थापना अभी तक पता नहीं चली है, तो $appName को फिर से खोलें।';
+  }
+
+  @override
+  String get appProviderErrorReleaseMetadataFetchFailed =>
+      'GitHub से नवीनतम रिलीज़ मेटाडेटा प्राप्त करने में विफल।';
+
+  @override
+  String get appProviderErrorReleaseAssetListMissing =>
+      'नवीनतम रिलीज़ मेटाडेटा में संपत्ति सूची शामिल नहीं थी।';
+
+  @override
+  String get appProviderErrorNoCompatibleAsset =>
+      'कोई संगत OpenCode बाइनरी संपत्ति नहीं मिली।';
+
+  @override
+  String get appProviderErrorDownloadAssetFailed =>
+      'चयनित OpenCode संपत्ति डाउनलोड करने में विफल।';
+
+  @override
+  String get appProviderErrorChecksumVerificationFailed =>
+      'डाउनलोड की गई संपत्ति के लिए चेकसम सत्यापन विफल रहा।';
+
+  @override
+  String get appProviderErrorExtractArchiveFailed =>
+      'OpenCode बाइनरी संग्रह निकालने में विफल।';
+
+  @override
+  String appProviderErrorExecutableNotFound(String tool) {
+    return 'निकाले गए फ़ाइलों में $tool निष्पादन योग्य नहीं मिला।';
+  }
+
+  @override
+  String get chatNoResponseFromServer =>
+      'सर्वर से कोई प्रतिक्रिया नहीं मिली। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get chatNoResponseFromModel =>
+      'मॉडल से कोई प्रतिक्रिया नहीं मिली। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get speechJobCancelled => 'स्पीच कार्य रद्द कर दिया गया।';
+
+  @override
+  String get speechEdgeCancelled => 'Microsoft Edge Speech रद्द कर दिया गया।';
+
+  @override
+  String get sessionAttentionKindActive => 'सक्रिय';
+
+  @override
+  String get sessionAttentionKindReceiving => 'प्राप्त हो रहा है';
+
+  @override
+  String get sessionAttentionKindDelayed => 'विलंबित';
+
+  @override
+  String get sessionAttentionKindCompleted => 'पूर्ण';
+
+  @override
+  String get sessionAttentionKindPendingInteraction =>
+      'इंटरैक्शन की प्रतीक्षा है';
+
+  @override
+  String get sessionAttentionKindError => 'त्रुटि';
+
+  @override
+  String get sessionAttentionPauseCellularDataSaver =>
+      'सेलुलर डेटा सेवर सक्रिय है।';
+
+  @override
+  String get sessionAttentionPauseOauthReopenRequired => 'OAuth साइन-इन आवश्यक';
+
+  @override
+  String get sessionAttentionPauseTailscaleReopenRequired =>
+      'Tailscale कनेक्शन आवश्यक';
+
+  @override
+  String get sessionAttentionPauseOffline => 'ऑफ़लाइन';
+
+  @override
+  String get sessionAttentionPausePermissionRevoked => 'अनुमति रद्द कर दी गई';
+
+  @override
+  String get sessionAttentionPauseServiceStopped => 'सेवा रुक गई';
+
+  @override
+  String get sessionAttentionPauseHostUnavailable => 'होस्ट अनुपलब्ध';
+
+  @override
+  String get errorRequestCancelled => 'अनुरोध रद्द कर दिया गया';
+
+  @override
+  String errorUnknownNetworkError(String error) {
+    return 'अज्ञात नेटवर्क त्रुटि: $error';
+  }
+
+  @override
+  String get errorCertificateError => 'प्रमाणपत्र त्रुटि';
+
+  @override
+  String get errorSessionBusy =>
+      'सत्र किसी अन्य अनुरोध को संसाधित करने में व्यस्त है।';
+
+  @override
+  String get errorRunShellCommandFailed => 'शेल कमांड चलाने में विफल';
+
+  @override
+  String get errorRunSlashCommandFailed => 'स्लैश कमांड चलाने में विफल';
+
+  @override
+  String get settingsBehaviorOpenCodeDefaultsLoadError =>
+      'सक्रिय सर्वर से OpenCode-आधारित डिफ़ॉल्ट लोड नहीं किए जा सके।';
+
+  @override
+  String get sessionTabIconRemoveFailed =>
+      'स्थानीय सत्र टैब आइकन डेटा हटाने में विफल';
+
+  @override
+  String get forwardUntitled => 'बिना शीर्षक';
+
+  @override
+  String setupDebugLinuxLogsPath(String path) {
+    return 'Linux लॉग: $path';
+  }
+
+  @override
+  String setupDebugRunOpenCodeCommand(String command) {
+    return 'OpenCode चलाने के लिए: $command';
+  }
+
+  @override
+  String setupDebugServerHealthEndpoint(String endpoint) {
+    return 'सर्वर स्वास्थ्य जांच: $endpoint';
+  }
+
+  @override
+  String setupDebugServerDocsEndpoint(String endpoint) {
+    return 'सर्वर दस्तावेज़: $endpoint';
+  }
+
+  @override
+  String get logsEntryError => 'त्रुटि';
+
+  @override
+  String get logsEntryStack => 'स्टैक';
+
+  @override
+  String get setupDebugSourceDiagnostics => 'निदान';
+
+  @override
+  String get setupDebugSourceUseExisting => 'मौजूदा का उपयोग करें';
+
+  @override
+  String get setupDebugSourceLocalServer => 'स्थानीय सर्वर';
+
+  @override
+  String get setupDebugSourceOnboarding => 'ऑनबोर्डिंग';
+
+  @override
+  String get setupDebugSourceManualConnection => 'मैन्युअल कनेक्शन';
+
+  @override
+  String setupDebugMessageDiagnosticsResult(
+    String availability,
+    String platform,
+    String recommendation,
+  ) {
+    return '$platform पर $availability। $recommendation';
+  }
+
+  @override
+  String get setupDebugMessageDetectAttempt =>
+      'वर्तमान वातावरण से मौजूदा OpenCode कमांड का पता लगाने का प्रयास किया जा रहा है।';
+
+  @override
+  String get setupDebugMessageInstallStarted =>
+      'CodeWalk से OpenCode इंस्टॉलेशन शुरू किया गया।';
+
+  @override
+  String setupDebugMessageStartLocalServer(String url) {
+    return '$url पर प्रबंधित OpenCode सर्वर शुरू हो रहा है।';
+  }
+
+  @override
+  String setupDebugMessageHealthyRunning(String url) {
+    return 'प्रबंधित OpenCode सर्वर स्वस्थ है और $url पर चल रहा है।';
+  }
+
+  @override
+  String get setupDebugMessageStoppingLocalServer =>
+      'प्रबंधित OpenCode सर्वर रोका जा रहा है।';
+
+  @override
+  String get setupDebugMessageStoppedCleanly =>
+      'प्रबंधित OpenCode सर्वर साफ़ रूप से रुक गया।';
+
+  @override
+  String get setupDebugMessageExitedAfterRequestedStop =>
+      'अनुरोधित रोक के बाद प्रबंधित OpenCode सर्वर बंद हो गया।';
+
+  @override
+  String get setupDebugMessageOnboardingConnectExisting =>
+      'उपयोगकर्ता ने मौजूदा OpenCode सर्वर से कनेक्ट करना चुना।';
+
+  @override
+  String get setupDebugMessageOnboardingGuidedPath =>
+      'उपयोगकर्ता ने निर्देशित OpenCode सेटअप पथ खोला।';
+
+  @override
+  String get setupDebugMessageOnboardingManagedLocal =>
+      'उपयोगकर्ता ने प्रबंधित स्थानीय OpenCode सेटअप खोला।';
+
+  @override
+  String get setupDebugMessageOnboardingOpenedServerSettings =>
+      'स्वास्थ्य जांच विफल होने के बाद उपयोगकर्ता ने सर्वर सेटिंग्स खोली।';
+
+  @override
+  String get setupDebugMessageOnboardingAddAnotherServer =>
+      'स्वास्थ्य जांच विफल होने के बाद उपयोगकर्ता ने दूसरा सर्वर जोड़ना चुना।';
+
+  @override
+  String setupDebugMessageTestingServerUrl(String url) {
+    return 'ऑनबोर्डिंग से OpenCode सर्वर URL $url का परीक्षण किया जा रहा है।';
+  }
+
+  @override
+  String get chatProviderErrorSessionNotFound => 'सत्र नहीं मिला';
+
+  @override
+  String get chatProviderErrorInvalidMessageFormat => 'अमान्य संदेश प्रारूप';
+
+  @override
+  String get chatProviderErrorNetworkShort => 'नेटवर्क कनेक्शन विफल';
+
+  @override
+  String get chatProviderErrorUnknownShort => 'अज्ञात त्रुटि';
+
+  @override
+  String get terminalCreateFailed => 'टर्मिनल सत्र बनाना विफल';
+
+  @override
+  String get terminalEndpointUnavailable => 'टर्मिनल एंडपॉइंट उपलब्ध नहीं है';
+
+  @override
+  String get terminalInvalidDirectory => 'अमान्य टर्मिनल निर्देशिका';
+
+  @override
+  String get terminalWebsocketUnavailable =>
+      'टर्मिनल वेबसॉकेट यहाँ उपलब्ध नहीं है।';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count कॉल',
+      one: '1 कॉल',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get errorConnectionTimeout => 'कनेक्शन टाइमआउट';
+
+  @override
+  String get errorClientError => 'क्लाइंट त्रुटि';
+
+  @override
+  String get chatProviderErrorSendMessage => 'संदेश भेजने में विफल';
 }

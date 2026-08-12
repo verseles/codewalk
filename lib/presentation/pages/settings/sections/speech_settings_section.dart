@@ -157,7 +157,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
         _loadingReadAloudApiKey = false;
-        _readAloudApiKeyStatus = 'Secure API key storage is unavailable.';
+        _readAloudApiKeyStatus = context.l10n.speechApiKeyStorageUnavailable;
       });
     }
   }
@@ -165,7 +165,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   Future<void> _saveOpenAiCompatibleApiKey() async {
     if (!di.sl.isRegistered<TtsApiKeyStorage>()) {
       setState(() {
-        _readAloudApiKeyStatus = 'Secure API key storage is unavailable.';
+        _readAloudApiKeyStatus = context.l10n.speechApiKeyStorageUnavailable;
       });
       return;
     }
@@ -186,14 +186,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         _hasOpenAiCompatibleApiKey = value.trim().isNotEmpty;
         _loadingReadAloudApiKey = false;
         _readAloudApiKeyStatus = value.trim().isEmpty
-            ? 'API key removed.'
-            : 'API key saved securely on this device.';
+            ? context.l10n.speechApiKeyRemoved
+            : context.l10n.speechApiKeySaved;
       });
     } catch (_) {
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
         _loadingReadAloudApiKey = false;
-        _readAloudApiKeyStatus = 'Secure API key storage is unavailable.';
+        _readAloudApiKeyStatus = context.l10n.speechApiKeyStorageUnavailable;
       });
     }
   }
@@ -205,7 +205,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final service = di.sl<ReadAloudService>();
     await service.speak(
       messageId: 'settings_read_aloud_test',
-      text: 'This is a CodeWalk text-to-speech test.',
+      text: context.l10n.speechReadAloudTestText,
       provider: settingsProvider.readAloudProvider,
       rate: settingsProvider.readAloudRate,
       pitch: settingsProvider.readAloudPitch,
@@ -307,26 +307,22 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final senseVoiceEnabled = _supportsSenseVoice;
     final nativeEnabled = SpeechEnginePlatformSupport.isNativeSupported;
     final nativeUnavailableHint = switch (defaultTargetPlatform) {
-      TargetPlatform.windows =>
-        'Disabled on Windows for stability. Use Parakeet or another on-device engine through CodeWalk WASAPI capture.',
-      TargetPlatform.linux =>
-        'Unavailable on Linux. Use Parakeet for speech input.',
-      _ => 'Not available on this platform.',
+      TargetPlatform.windows => context.l10n.speechNativeDisabledWindows,
+      TargetPlatform.linux => context.l10n.speechNativeUnavailableLinux,
+      _ => context.l10n.speechNotAvailableOnPlatform,
     };
     final sherpaUnavailableHint = switch (defaultTargetPlatform) {
-      TargetPlatform.android =>
-        'Unavailable on Android builds optimized for small APK size.',
-      _ => 'Not available on this platform.',
+      TargetPlatform.android => context.l10n.speechSherpaUnavailableAndroid,
+      _ => context.l10n.speechNotAvailableOnPlatform,
     };
     final moonshineUnavailableHint = switch (defaultTargetPlatform) {
-      _ => 'Available on desktop only. Android stays native-only.',
+      _ => context.l10n.speechMoonshineDesktopOnlyHint,
     };
     final parakeetUnavailableHint = switch (defaultTargetPlatform) {
-      _ => 'Available on desktop only. Uses offline multilingual recognition.',
+      _ => context.l10n.speechParakeetDesktopOnlyHint,
     };
     final senseVoiceUnavailableHint = switch (defaultTargetPlatform) {
-      _ =>
-        'Available on desktop only. Strongest for Chinese, Cantonese, Japanese, Korean, and English.',
+      _ => context.l10n.speechSenseVoiceDesktopOnlyHint,
     };
 
     return Card(
@@ -360,7 +356,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     title: Text(context.l10n.speechNative),
                     subtitle: Text(
                       nativeEnabled
-                          ? 'Simpler and faster startup.'
+                          ? context.l10n.speechNativeSubtitle
                           : nativeUnavailableHint,
                     ),
                   ),
@@ -469,7 +465,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     title: Text(context.l10n.speechSherpa),
                     subtitle: Text(
                       sherpaEnabled
-                          ? 'Heavier, experimental, and bug-prone. Often more precise with downloaded models.'
+                          ? context.l10n.speechSherpaSubtitle
                           : sherpaUnavailableHint,
                     ),
                   ),
@@ -501,7 +497,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     title: Text(context.l10n.speechMoonshine),
                     subtitle: Text(
                       moonshineEnabled
-                          ? 'Desktop-only experimental path using sherpa_onnx offline recognition and downloadable models.'
+                          ? context.l10n.speechMoonshineSubtitle
                           : moonshineUnavailableHint,
                     ),
                   ),
@@ -513,7 +509,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     title: Text(context.l10n.speechParakeet),
                     subtitle: Text(
                       parakeetEnabled
-                          ? 'Desktop-only offline NeMo transducer path with one multilingual downloadable model.'
+                          ? context.l10n.speechParakeetSubtitle
                           : parakeetUnavailableHint,
                     ),
                   ),
@@ -525,7 +521,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     title: Text(context.l10n.speechSenseVoice),
                     subtitle: Text(
                       senseVoiceEnabled
-                          ? 'Desktop-only offline path tuned for Chinese, Cantonese, Japanese, Korean, and English.'
+                          ? context.l10n.speechSenseVoiceSubtitle
                           : senseVoiceUnavailableHint,
                     ),
                   ),
@@ -601,7 +597,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               },
             ),
             Text(
-              '${silenceValue.round()} seconds',
+              context.l10n.speechSilenceSeconds(
+                silenceValue.round().toString(),
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -644,9 +642,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             else ...[
               DropdownButtonFormField<String>(
                 initialValue: selectedId,
-                decoration: const InputDecoration(
-                  labelText: 'Moonshine model',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.speechMoonshineModel,
+                  border: const OutlineInputBorder(),
                 ),
                 items: _moonshineModels
                     .map(
@@ -679,14 +677,20 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     ),
                     label: Text(
                       installed
-                          ? 'Model installed (${selectedId.toUpperCase()})'
-                          : 'Model missing (${selectedId.toUpperCase()})',
+                          ? context.l10n.speechModelInstalled(
+                              selectedId.toUpperCase(),
+                            )
+                          : context.l10n.speechModelMissing(
+                              selectedId.toUpperCase(),
+                            ),
                     ),
                   ),
                   const Spacer(),
                   if (selectedModel != null)
                     Text(
-                      '~${selectedModel.sizeMb} MB',
+                      context.l10n.speechModelSizeMb(
+                        selectedModel.sizeMb.toString(),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
@@ -775,9 +779,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             else ...[
               DropdownButtonFormField<String>(
                 initialValue: selectedId,
-                decoration: const InputDecoration(
-                  labelText: 'Parakeet model',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.dialogParakeetModel,
+                  border: const OutlineInputBorder(),
                 ),
                 items: _parakeetModels
                     .map(
@@ -810,14 +814,20 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     ),
                     label: Text(
                       installed
-                          ? 'Model installed (${selectedId.toUpperCase()})'
-                          : 'Model missing (${selectedId.toUpperCase()})',
+                          ? context.l10n.speechModelInstalled(
+                              selectedId.toUpperCase(),
+                            )
+                          : context.l10n.speechModelMissing(
+                              selectedId.toUpperCase(),
+                            ),
                     ),
                   ),
                   const Spacer(),
                   if (selectedModel != null)
                     Text(
-                      '~${selectedModel.sizeMb} MB',
+                      context.l10n.speechModelSizeMb(
+                        selectedModel.sizeMb.toString(),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
@@ -906,9 +916,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             else ...[
               DropdownButtonFormField<String>(
                 initialValue: selectedId,
-                decoration: const InputDecoration(
-                  labelText: 'SenseVoice model',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.dialogSenseVoiceModel,
+                  border: const OutlineInputBorder(),
                 ),
                 items: _senseVoiceModels
                     .map(
@@ -941,14 +951,20 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     ),
                     label: Text(
                       installed
-                          ? 'Model installed (${selectedId.toUpperCase()})'
-                          : 'Model missing (${selectedId.toUpperCase()})',
+                          ? context.l10n.speechModelInstalled(
+                              selectedId.toUpperCase(),
+                            )
+                          : context.l10n.speechModelMissing(
+                              selectedId.toUpperCase(),
+                            ),
                     ),
                   ),
                   const Spacer(),
                   if (selectedModel != null)
                     Text(
-                      '~${selectedModel.sizeMb} MB',
+                      context.l10n.speechModelSizeMb(
+                        selectedModel.sizeMb.toString(),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
@@ -1042,13 +1058,13 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             else ...[
               SearchableDropdownFormField<String>(
                 value: selectedCode,
-                decoration: const InputDecoration(
-                  labelText: 'Sherpa language',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.speechSherpaLanguage,
+                  border: const OutlineInputBorder(),
                 ),
                 isExpanded: true,
-                searchHintText: 'Search Sherpa language',
-                emptyText: 'No language packs found',
+                searchHintText: context.l10n.speechSearchSherpaLanguage,
+                emptyText: context.l10n.speechNoLanguagePacksFound,
                 searchTermsBuilder: (value) {
                   if (value == kSherpaLanguageSystem) {
                     return <String>[
@@ -1067,7 +1083,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   DropdownMenuItem<String>(
                     value: kSherpaLanguageSystem,
                     child: Text(
-                      'System default (${_modelManager.detectSystemLanguage().toUpperCase()})',
+                      context.l10n.speechSystemDefaultLanguage(
+                        _modelManager.detectSystemLanguage().toUpperCase(),
+                      ),
                     ),
                   ),
                   ..._models.map(
@@ -1101,14 +1119,20 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     ),
                     label: Text(
                       installed
-                          ? 'Model installed (${effectiveCode.toUpperCase()})'
-                          : 'Model missing (${effectiveCode.toUpperCase()})',
+                          ? context.l10n.speechModelInstalled(
+                              effectiveCode.toUpperCase(),
+                            )
+                          : context.l10n.speechModelMissing(
+                              effectiveCode.toUpperCase(),
+                            ),
                     ),
                   ),
                   const Spacer(),
                   if (selectedModel != null)
                     Text(
-                      '~${selectedModel.sizeMb} MB',
+                      context.l10n.speechModelSizeMb(
+                        selectedModel.sizeMb.toString(),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
@@ -1201,7 +1225,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _modelError = 'Failed to load Sherpa model catalog: $error';
+        _modelError = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'Sherpa',
+        );
         _loadingModels = false;
       });
     }
@@ -1232,7 +1259,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _moonshineModelError = 'Failed to load Moonshine model catalog: $error';
+        _moonshineModelError = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'Moonshine',
+        );
         _loadingMoonshineModels = false;
       });
     }
@@ -1263,7 +1293,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _parakeetModelError = 'Failed to load Parakeet model catalog: $error';
+        _parakeetModelError = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'Parakeet',
+        );
         _loadingParakeetModels = false;
       });
     }
@@ -1294,8 +1327,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _senseVoiceModelError =
-            'Failed to load SenseVoice model catalog: $error';
+        _senseVoiceModelError = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'SenseVoice',
+        );
         _loadingSenseVoiceModels = false;
       });
     }
@@ -1355,7 +1390,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _modelError = 'Download failed: $error';
+        _modelError = context.l10n.speechDownloadFailed(error.toString());
       });
     } finally {
       if (mounted) {
@@ -1452,7 +1487,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _modelError = 'Failed to remove model: $error';
+        _modelError = context.l10n.speechFailedToRemoveModel(error.toString());
       });
     } finally {
       if (mounted) {
@@ -1493,7 +1528,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _moonshineModelError = 'Download failed: $error';
+        _moonshineModelError = context.l10n.speechDownloadFailed(
+          error.toString(),
+        );
       });
     } finally {
       if (mounted) {
@@ -1518,7 +1555,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _moonshineModelError = 'Failed to remove model: $error';
+        _moonshineModelError = context.l10n.speechFailedToRemoveModel(
+          error.toString(),
+        );
       });
     } finally {
       if (mounted) {
@@ -1559,7 +1598,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _parakeetModelError = 'Download failed: $error';
+        _parakeetModelError = context.l10n.speechDownloadFailed(
+          error.toString(),
+        );
       });
     } finally {
       if (mounted) {
@@ -1584,7 +1625,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _parakeetModelError = 'Failed to remove model: $error';
+        _parakeetModelError = context.l10n.speechFailedToRemoveModel(
+          error.toString(),
+        );
       });
     } finally {
       if (mounted) {
@@ -1625,7 +1668,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _senseVoiceModelError = 'Download failed: $error';
+        _senseVoiceModelError = context.l10n.speechDownloadFailed(
+          error.toString(),
+        );
       });
     } finally {
       if (mounted) {
@@ -1650,7 +1695,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return;
       }
       setState(() {
-        _senseVoiceModelError = 'Failed to remove model: $error';
+        _senseVoiceModelError = context.l10n.speechFailedToRemoveModel(
+          error.toString(),
+        );
       });
     } finally {
       if (mounted) {
@@ -1703,22 +1750,22 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   Widget _buildReadAloudProviderSelector(SettingsProvider settingsProvider) {
     return DropdownButtonFormField<ReadAloudProvider>(
       initialValue: settingsProvider.readAloudProvider,
-      decoration: const InputDecoration(
-        labelText: 'Text-to-speech provider',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: context.l10n.speechTextToSpeechProvider,
+        border: const OutlineInputBorder(),
       ),
-      items: const <DropdownMenuItem<ReadAloudProvider>>[
+      items: <DropdownMenuItem<ReadAloudProvider>>[
         DropdownMenuItem(
           value: ReadAloudProvider.native,
-          child: Text('System / Native'),
+          child: Text(context.l10n.speechProviderSystemNative),
         ),
         DropdownMenuItem(
           value: ReadAloudProvider.edgeExperimental,
-          child: Text('Microsoft Edge Speech (experimental)'),
+          child: Text(context.l10n.speechProviderEdgeExperimental),
         ),
         DropdownMenuItem(
           value: ReadAloudProvider.openAiCompatible,
-          child: Text('OpenAI-compatible'),
+          child: Text(context.l10n.speechProviderOpenAiCompatible),
         ),
       ],
       onChanged: (value) {
@@ -1785,13 +1832,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   }
 
   Widget _buildEdgeReadAloudNotice() {
-    return const ListTile(
+    return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(Symbols.experiment),
-      title: Text('Microsoft Edge Speech is experimental'),
-      subtitle: Text(
-        'Uses the unofficial Edge Read Aloud service directly from this device. Message text is sent to Microsoft when you use read aloud, and the service may break if Microsoft changes the private protocol.',
-      ),
+      leading: const Icon(Symbols.experiment),
+      title: Text(context.l10n.speechEdgeExperimentalTitle),
+      subtitle: Text(context.l10n.speechEdgeExperimentalDescription),
     );
   }
 
@@ -1806,12 +1851,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       builder: (context, snapshot) {
         final voices = snapshot.data ?? const <Map<String, String>>[];
         if (voices.isEmpty) {
-          return const ListTile(
+          return ListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text('Edge voice'),
-            subtitle: Text(
-              'Using the default Edge voice. Voice list could not be loaded right now.',
-            ),
+            title: Text(context.l10n.speechEdgeVoice),
+            subtitle: Text(context.l10n.speechEdgeVoiceListUnavailable),
           );
         }
         final selected =
@@ -1822,9 +1865,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             : null;
         return DropdownButtonFormField<String>(
           initialValue: selected,
-          decoration: const InputDecoration(
-            labelText: 'Edge voice',
-            helperText: 'Loaded from Microsoft Edge Speech voices.',
+          decoration: InputDecoration(
+            labelText: context.l10n.speechEdgeVoice,
+            helperText: context.l10n.speechEdgeVoicesLoaded,
           ),
           items: voices.map((voice) {
             final id = voice['name'] ?? '';
@@ -1863,18 +1906,18 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ListTile(
+        ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text('Cloud TTS privacy'),
-          subtitle: Text(
-            'Cloud TTS sends the selected assistant message text to the configured provider. API keys are stored in secure storage on this device.',
-          ),
+          title: Text(context.l10n.speechCloudTtsPrivacy),
+          subtitle: Text(context.l10n.speechCloudTtsPrivacyDescription),
         ),
         TextFormField(
           initialValue: settingsProvider.readAloudBaseUrl,
-          decoration: const InputDecoration(
-            labelText: 'Base URL',
-            helperText: 'Example: https://api.openai.com/v1',
+          decoration: InputDecoration(
+            labelText: context.l10n.speechBaseUrl,
+            helperText: context.l10n.speechBaseUrlExample(
+              'https://api.openai.com/v1',
+            ),
           ),
           keyboardType: TextInputType.url,
           onChanged: (value) =>
@@ -1884,10 +1927,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         TextFormField(
           controller: _readAloudApiKeyController,
           decoration: InputDecoration(
-            labelText: 'API key',
+            labelText: context.l10n.speechApiKey,
             helperText: _hasOpenAiCompatibleApiKey
-                ? 'A key is saved. Enter a new value to replace it, or save an empty value to remove it.'
-                : 'No API key saved.',
+                ? context.l10n.speechApiKeySavedHelper
+                : context.l10n.speechNoApiKeySaved,
             suffixIcon: _loadingReadAloudApiKey
                 ? const Padding(
                     padding: EdgeInsets.all(12),
@@ -1898,7 +1941,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     ),
                   )
                 : IconButton(
-                    tooltip: 'Save API key',
+                    tooltip: context.l10n.speechSaveApiKey,
                     icon: const Icon(Symbols.save),
                     onPressed: () => unawaited(_saveOpenAiCompatibleApiKey()),
                   ),
@@ -1918,9 +1961,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         const SizedBox(height: 12),
         TextFormField(
           initialValue: settingsProvider.readAloudModel,
-          decoration: const InputDecoration(
-            labelText: 'Model',
-            helperText: 'Default: gpt-4o-mini-tts',
+          decoration: InputDecoration(
+            labelText: context.l10n.speechModel,
+            helperText: context.l10n.speechModelDefaultHelper(
+              kDefaultOpenAiCompatibleTtsModel,
+            ),
           ),
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudModel(value)),
@@ -1928,7 +1973,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: selectedVoice,
-          decoration: const InputDecoration(labelText: 'Voice'),
+          decoration: InputDecoration(
+            labelText: context.l10n.settingsReadAloudVoice,
+          ),
           items: kOpenAiCompatibleVoiceIds
               .map(
                 (voice) =>
@@ -1946,7 +1993,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Pitch is not supported by OpenAI-compatible TTS and is hidden for this provider.',
+          context.l10n.speechPitchNotSupported,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -2006,7 +2053,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               alignment: Alignment.centerLeft,
               child: OutlinedButton.icon(
                 icon: const Icon(Symbols.play_arrow),
-                label: const Text('Test voice'),
+                label: Text(context.l10n.speechTestVoice),
                 onPressed: () =>
                     unawaited(_testReadAloudVoice(settingsProvider)),
               ),

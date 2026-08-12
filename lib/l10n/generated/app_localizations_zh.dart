@@ -320,24 +320,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get behaviorDataSaverActive => '当前已在移动数据网络上激活。';
 
   @override
-  String get behaviorDataSaverAggressive => 'Aggressive';
+  String get behaviorDataSaverAggressive => '激进';
 
   @override
   String get behaviorDataSaverAggressiveDescription =>
-      'Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.';
+      '低带宽模式：仅可见工作区流保持实时，全局更新暂停，自动刷新间隔延长。';
 
   @override
   String get behaviorDataSaverCellularOnly => '仅在蜂窝/移动网络连接时适用。';
 
   @override
-  String get behaviorDataSaverOff => 'Off';
+  String get behaviorDataSaverOff => '关闭';
 
   @override
-  String get behaviorDataSaverOffHint =>
-      'Full realtime and automatic refreshes are enabled.';
+  String get behaviorDataSaverOffHint => '已启用完整的实时更新和自动刷新。';
 
   @override
-  String get behaviorDataSaverStandard => 'Standard';
+  String get behaviorDataSaverStandard => '标准';
 
   @override
   String get behaviorDataSaverWaiting => '正在等待下一个移动数据同步窗口。';
@@ -478,11 +477,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatBadgeSyncing => '正在同步会话...';
 
   @override
-  String get chatBlockResponsePendingDescription =>
-      'The answer will appear as a single block when this turn finishes.';
+  String get chatBlockResponsePendingDescription => '本轮结束后，答案将以单个块的形式显示。';
 
   @override
-  String get chatBlockResponsePendingTitle => 'Generating response';
+  String get chatBlockResponsePendingTitle => '正在生成回复';
 
   @override
   String get chatCachedConversationsYet => '暂无缓存的对话';
@@ -1614,57 +1612,56 @@ class AppLocalizationsZh extends AppLocalizations {
   String get filesFileEmpty => '文件为空。';
 
   @override
-  String get filesAlreadyExists =>
-      'A file or folder with that name already exists.';
+  String get filesAlreadyExists => '已存在同名的文件或文件夹。';
 
   @override
-  String get filesCopyPath => 'Copy path';
+  String get filesCopyPath => '复制路径';
 
   @override
-  String get filesCreateFileTitle => 'Create file';
+  String get filesCreateFileTitle => '新建文件';
 
   @override
-  String get filesCreateFolderTitle => 'Create folder';
+  String get filesCreateFolderTitle => '新建文件夹';
 
   @override
-  String get filesDelete => 'Delete';
+  String get filesDelete => '删除';
 
   @override
   String filesDeleteConfirm(String name) {
-    return 'Delete $name? This cannot be undone. Folders and their contents will be deleted.';
+    return '确定删除 $name 吗？此操作无法撤消。文件夹及其内容将一并删除。';
   }
 
   @override
   String filesDeleteTitle(String name) {
-    return 'Delete $name';
+    return '删除 $name';
   }
 
   @override
   String get filesFilesFound => '未找到文件';
 
   @override
-  String get filesFileCreated => 'File created.';
+  String get filesFileCreated => '文件已创建。';
 
   @override
-  String get filesFolderCreated => 'Folder created.';
+  String get filesFolderCreated => '文件夹已创建。';
 
   @override
   String get filesHideSidebar => '隐藏文件侧边栏';
 
   @override
-  String get filesInvalidName => 'Enter a valid name without path separators.';
+  String get filesInvalidName => '请输入不含路径分隔符的有效名称。';
 
   @override
-  String get filesNameHint => 'Name';
+  String get filesNameHint => '名称';
 
   @override
-  String get filesNew => 'New';
+  String get filesNew => '新建';
 
   @override
-  String get filesNewFile => 'New file';
+  String get filesNewFile => '新建文件';
 
   @override
-  String get filesNewFolder => 'New folder';
+  String get filesNewFolder => '新建文件夹';
 
   @override
   String get filesNames => '名称';
@@ -1681,118 +1678,116 @@ class AppLocalizationsZh extends AppLocalizations {
   String get filesQuickOpenFile => '快速打开文件';
 
   @override
-  String get filesOperationFailed => 'File operation failed.';
+  String get filesOperationFailed => '文件操作失败。';
 
   @override
-  String get filesOperationUnavailable =>
-      'File operations are not available for this server.';
+  String get filesOperationUnavailable => '此服务器不支持文件操作。';
 
   @override
-  String get filesOutsideRoot => 'The path is outside the project root.';
+  String get filesOutsideRoot => '该路径位于项目根目录之外。';
 
   @override
-  String get filesPathCopied => 'Path copied.';
+  String get filesPathCopied => '路径已复制。';
 
   @override
-  String get filesPathMissing => 'Path does not exist.';
+  String get filesPathMissing => '路径不存在。';
 
   @override
-  String get filesPermissionDenied => 'Permission denied.';
+  String get filesPermissionDenied => '权限被拒绝。';
 
   @override
   String get filesRefresh => '刷新文件';
 
   @override
-  String get filesRename => 'Rename';
+  String get filesRename => '重命名';
 
   @override
   String filesRenameTitle(String name) {
-    return 'Rename $name';
+    return '重命名 $name';
   }
 
   @override
-  String get filesRenamed => 'Renamed.';
+  String get filesRenamed => '已重命名。';
 
   @override
-  String get filesRootDeleteBlocked => 'The project root cannot be deleted.';
+  String get filesRootDeleteBlocked => '无法删除项目根目录。';
 
   @override
   String get filesSearchHint => '按名称或路径搜索文件';
 
   @override
-  String get filesDeleted => 'Deleted.';
+  String get filesDeleted => '已删除。';
 
   @override
   String get filesTitle => '文件';
 
   @override
-  String get forwardAction => 'Forward';
+  String get forwardAction => '转发';
 
   @override
-  String get forwardAllFailed => 'Could not forward to any session';
+  String get forwardAllFailed => '无法转发到任何会话';
 
   @override
-  String get forwardCancel => 'Cancel';
+  String get forwardCancel => '取消';
 
   @override
-  String get forwardDialogSubtitle => 'Select one or more conversations';
+  String get forwardDialogSubtitle => '选择一个或多个对话';
 
   @override
-  String get forwardDialogTitle => 'Forward to…';
+  String get forwardDialogTitle => '转发到…';
 
   @override
-  String get forwardLoading => 'Loading sessions…';
+  String get forwardLoading => '正在加载会话…';
 
   @override
-  String get forwardNoOpenProjects => 'No open projects with sessions';
+  String get forwardNoOpenProjects => '没有包含会话的打开项目';
 
   @override
-  String get forwardNoProviderModel =>
-      'Select a provider and model before forwarding';
+  String get forwardNoProviderModel => '转发前请先选择提供商和模型';
 
   @override
-  String get forwardNoSessions => 'No recent sessions';
+  String get forwardNoSessions => '没有最近的会话';
 
   @override
   String forwardPartial(int success, int total) {
-    return 'Forwarded to $success of $total';
+    return '已转发到 $total 个会话中的 $success 个';
   }
 
   @override
   String forwardProvenanceLabel(String origin) {
-    return 'Forwarded from: $origin';
+    return '转发自：$origin';
   }
 
   @override
-  String get forwardRetry => 'Retry';
+  String get forwardRetry => '重试';
 
   @override
-  String get forwardSearchHint => 'Search';
+  String get forwardSearchHint => '搜索';
 
   @override
   String forwardSelectedCount(int count) {
-    return '$count selected';
+    return '已选择 $count 项';
   }
 
   @override
-  String get forwardSend => 'Forward';
+  String get forwardSend => '转发';
 
   @override
-  String get forwardServerOffline => 'Server offline';
+  String get forwardServerOffline => '服务器离线';
 
   @override
   String get forwardShortcutHint => 'Ctrl+Shift+F';
 
   @override
   String forwardSuccess(int count) {
-    return 'Forwarded to $count sessions';
+    return '已转发到 $count 个会话';
   }
 
   @override
-  String get forwardUndo => 'Undo';
+  String get forwardUndo => '撤销';
 
   @override
-  String get forwardUndoFailed => 'Could not undo the forward';
+  String get forwardUndoFailed => '无法撤销转发';
 
   @override
   String get logsAppLogs => '应用日志';
@@ -1994,8 +1989,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get msgInfoCompaction => '压缩';
 
   @override
-  String msgInfoCost(double cost) {
-    return '费用: \\\$$cost';
+  String msgInfoCost(String cost) {
+    return '费用: \$$cost';
   }
 
   @override
@@ -2817,7 +2812,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get sessionDiffLoading => 'Loading changed files…';
+  String get sessionDiffLoading => '正在加载更改的文件…';
 
   @override
   String get sessionDiffReview => '审查更改';
@@ -3092,11 +3087,11 @@ class AppLocalizationsZh extends AppLocalizations {
       '切换到 CodeWalk 经典以选择品牌颜色。';
 
   @override
-  String get settingsAppearanceChatFontScale => 'Conversation text size';
+  String get settingsAppearanceChatFontScale => '对话文字大小';
 
   @override
   String get settingsAppearanceChatFontScaleDescription =>
-      'Scale the chat message and composer text on top of the system text size.';
+      '在系统文字大小之上缩放聊天消息和输入框文字。';
 
   @override
   String get settingsAppearanceCodeWalkClassic => 'CodeWalk 经典';
@@ -3154,11 +3149,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAppearanceDescription => '选择主题、颜色、文字大小和聊天显示方式';
 
   @override
-  String get settingsAppearanceFontSize => 'Text size';
+  String get settingsAppearanceFontSize => '文字大小';
 
   @override
-  String get settingsAppearanceFontSizeDescription =>
-      'Adjust the size of system text, conversation text, and terminal text.';
+  String get settingsAppearanceFontSizeDescription => '调整系统文字、对话文字和终端文字的大小。';
 
   @override
   String get settingsAppearanceLight => '浅色';
@@ -3199,11 +3193,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAppearanceSystem => '系统';
 
   @override
-  String get settingsAppearanceSystemFontScale => 'System text size';
+  String get settingsAppearanceSystemFontScale => '系统文字大小';
 
   @override
   String get settingsAppearanceSystemFontScaleDescription =>
-      'Scale all text in the app shell, including menus, dialogs, and sidebars.';
+      '缩放应用外壳中的所有文字，包括菜单、对话框和侧边栏。';
 
   @override
   String get settingsAppearanceTaskList => '任务列表';
@@ -3212,11 +3206,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAppearanceTaskListDescription => '显示或隐藏会话任务列表小部件。';
 
   @override
-  String get settingsAppearanceTerminalFontSize => 'Terminal text size';
+  String get settingsAppearanceTerminalFontSize => '终端文字大小';
 
   @override
   String get settingsAppearanceTerminalFontSizeDescription =>
-      'Resize the embedded terminal font. Applies immediately to running sessions.';
+      '调整嵌入式终端字体大小。立即应用于正在运行的会话。';
 
   @override
   String get settingsAppearanceTheme => '主题';
@@ -3299,32 +3293,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsBehaviorCellularDataSaver => '蜂窝数据节省程序';
 
   @override
-  String get settingsBehaviorChatRenderMode => 'Chat render mode';
+  String get settingsBehaviorChatRenderMode => '聊天渲染模式';
 
   @override
-  String get settingsBehaviorChatRenderModeBlock => 'Block';
+  String get settingsBehaviorChatRenderModeBlock => '块模式';
 
   @override
   String get settingsBehaviorChatRenderModeBlockDescription =>
-      'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.';
+      '在当前回合能以单个块显示之前，隐藏实时助手文本、推理内容和工具卡片。';
 
   @override
   String get settingsBehaviorChatRenderModeDescription =>
-      'Choose whether assistant responses appear as they stream or reveal after the current turn settles.';
+      '选择助手回复是流式显示，还是在当前回合结束后显示。';
 
   @override
-  String get settingsBehaviorChatRenderModeLive => 'Live';
+  String get settingsBehaviorChatRenderModeLive => '实时';
 
   @override
   String get settingsBehaviorChatRenderModeLiveDescription =>
-      'Show assistant text, reasoning, and tool activity as OpenCode streams events.';
+      '在 OpenCode 流式传输事件时显示助手文本、推理和工具活动。';
 
   @override
-  String get settingsBehaviorComposerSpellCheck => 'Composer spell check';
+  String get settingsBehaviorComposerSpellCheck => '输入框拼写检查';
 
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
-      'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
+      '在聊天输入框中使用平台原生拼写检查、建议和自动更正。';
 
   @override
   String get settingsBehaviorConfigDeferred =>
@@ -4245,20 +4239,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get speechNativeSTTWorks =>
-      'On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.';
+      '在 Windows 上，CodeWalk 通过其 WASAPI 麦克风后端使用本地设备端语音识别。为保持稳定性，Windows 原生语音识别已禁用。';
 
   @override
   String get speechNativeStartsFaster =>
       '原生引擎启动更快。Sherpa 完全在设备上运行，具有更繁重的设置和更深度的模型控制。';
 
   @override
-  String get speechOpenMicrophoneSettings => 'Open microphone settings';
+  String get speechOpenMicrophoneSettings => '打开麦克风设置';
 
   @override
-  String get speechOpenSpeechPrivacy => 'Open speech privacy';
+  String get speechOpenSpeechPrivacy => '打开语音隐私设置';
 
   @override
-  String get speechOpenSpeechSettings => 'Open speech settings';
+  String get speechOpenSpeechSettings => '打开语音设置';
 
   @override
   String get speechParakeet => 'Parakeet';
@@ -4314,7 +4308,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get speechWindowsSetupHint =>
-      'Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.';
+      'Windows 语音输入使用 CodeWalk WASAPI 采集和设备端模型。请保持桌面应用可访问麦克风；下方按钮会打开 Windows 设置以进行故障排查。';
 
   @override
   String get statusConnected => '已连接';
@@ -4683,80 +4677,1498 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workspaceSuggestions => '建议';
 
   @override
-  String get sessionTabsGestureHintTitle => 'Session tabs have new controls';
+  String get sessionTabsGestureHintTitle => '会话标签页新增了控制功能';
 
   @override
   String get sessionTabsGestureHintBody =>
-      'Double-click or double-tap a tab to close it. Right-click or touch and hold to open session actions. You can disable tabs in Display Toggles.';
+      '双击标签页可将其关闭。右键单击或长按可打开会话操作。您可以在“显示开关”中禁用标签页。';
 
   @override
-  String get sessionTabsGestureHintAcknowledge => 'Got it';
+  String get sessionTabsGestureHintAcknowledge => '知道了';
 
   @override
-  String get sessionTabsGestureHintDisableTabs => 'Disable tabs';
+  String get sessionTabsGestureHintDisableTabs => '禁用标签页';
 
   @override
-  String get sessionTabRenameAction => 'Rename session';
+  String get sessionTabRenameAction => '重命名会话';
 
   @override
   String sessionTabClosedMessage(String title) {
-    return 'Tab \"$title\" closed';
+    return '标签页“$title”已关闭';
   }
 
   @override
-  String get sessionTabUndo => 'Undo';
+  String get sessionTabUndo => '撤销';
 
   @override
-  String get sessionTabRestoreFailed => 'Tab could not be restored.';
+  String get sessionTabRestoreFailed => '无法恢复标签页。';
 
   @override
-  String get sessionTabChangeIconAction => 'Change icon';
+  String get sessionTabChangeIconAction => '更改图标';
 
   @override
-  String get sessionTabIconPickerTitle => 'Choose tab icon';
+  String get sessionTabIconPickerTitle => '选择标签页图标';
 
   @override
-  String get sessionTabIconUseProjectIcon => 'Use project icon';
+  String get sessionTabIconUseProjectIcon => '使用项目图标';
 
   @override
-  String get sessionTabIconApplied => 'Tab icon updated.';
+  String get sessionTabIconApplied => '标签页图标已更新。';
 
   @override
-  String get sessionTabIconSaveFailed => 'Tab icon could not be saved.';
+  String get sessionTabIconSaveFailed => '无法保存标签页图标。';
 
   @override
-  String get sessionTabIconPresetCode => 'Code';
+  String get sessionTabIconPresetCode => '代码';
 
   @override
-  String get sessionTabIconPresetTerminal => 'Terminal';
+  String get sessionTabIconPresetTerminal => '终端';
 
   @override
-  String get sessionTabIconPresetBug => 'Bug';
+  String get sessionTabIconPresetBug => '缺陷';
 
   @override
-  String get sessionTabIconPresetTasks => 'Tasks';
+  String get sessionTabIconPresetTasks => '任务';
 
   @override
-  String get sessionTabIconPresetLaunch => 'Launch';
+  String get sessionTabIconPresetLaunch => '启动';
 
   @override
-  String get sessionTabIconPresetIdea => 'Idea';
+  String get sessionTabIconPresetIdea => '灵感';
 
   @override
-  String get sessionTabIconPresetResearch => 'Research';
+  String get sessionTabIconPresetResearch => '研究';
 
   @override
-  String get sessionTabIconPresetDesign => 'Design';
+  String get sessionTabIconPresetDesign => '设计';
 
   @override
-  String get sessionTabIconPresetData => 'Data';
+  String get sessionTabIconPresetData => '数据';
 
   @override
-  String get sessionTabIconPresetCloud => 'Cloud';
+  String get sessionTabIconPresetCloud => '云端';
 
   @override
-  String get sessionTabIconPresetSecurity => 'Security';
+  String get sessionTabIconPresetSecurity => '安全';
 
   @override
-  String get sessionTabIconPresetTools => 'Tools';
+  String get sessionTabIconPresetTools => '工具';
+
+  @override
+  String get workspaceNoActiveContext => '无活动上下文';
+
+  @override
+  String get settingsAppearanceContrastLow => '低';
+
+  @override
+  String get settingsAppearanceContrastStandard => '标准';
+
+  @override
+  String get settingsAppearanceContrastMedium => '中';
+
+  @override
+  String get settingsAppearanceContrastMediumHigh => '中高';
+
+  @override
+  String get settingsNotificationsSystemSoundsWebUnavailable => 'Web 端不可用。';
+
+  @override
+  String get settingsNotificationsSystemSoundsAndroid => '使用 Android 系统通知声音。';
+
+  @override
+  String get settingsNotificationsSystemSoundsFreedesktop =>
+      '使用 /usr/share/sounds/freedesktop/stereo 中的 Freedesktop 声音。';
+
+  @override
+  String get settingsNotificationsSystemSoundsPlatform => '在操作系统提供系统声音的平台上受支持。';
+
+  @override
+  String get serversQuickGuideTitle => '快速设置';
+
+  @override
+  String get serversQuickGuideIntro =>
+      'CodeWalk 是应用，OpenCode 是需要先运行、此连接才能工作的引擎。';
+
+  @override
+  String get serversQuickGuideStepInstallCli => '1. 安装 OpenCode CLI。';
+
+  @override
+  String get serversQuickGuideRunPowerShell => '2. 在 PowerShell 中运行：';
+
+  @override
+  String get serversQuickGuideRunTerminal => '2. 在您的终端中运行：';
+
+  @override
+  String get serversQuickGuideProtectPassword => '使用密码保护访问';
+
+  @override
+  String get serversQuickGuideServerPassword => '服务器密码';
+
+  @override
+  String get serversQuickGuideInstallOptions =>
+      '其他官方安装方式：安装脚本、npm、bun、pnpm、Homebrew，或 GitHub Releases 中的二进制文件。';
+
+  @override
+  String get serversQuickGuideVerifyHint =>
+      '启动服务器后，请先确认 /global/health 或 /doc 有响应，再将 URL 粘贴到 CodeWalk 中。';
+
+  @override
+  String get shortcutsPressKeyCombination => '现在请按下组合键';
+
+  @override
+  String get settingsProvenanceOpenCodeBacked => 'OpenCode 后端';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'CodeWalk 本地';
+
+  @override
+  String get settingsProvenanceCodeWalkException => 'CodeWalk 异常';
+
+  @override
+  String get shortcutsErrorInvalid => '无效的快捷键';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => '不支持的快捷键';
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return '与“$conflict”冲突';
+  }
+
+  @override
+  String get settingsSessionAttentionStopSaveFailed => '会话关注已停止，但设置无法保存。';
+
+  @override
+  String get settingsSessionAttentionEnableFailed => '无法启用会话关注。';
+
+  @override
+  String get settingsSessionAttentionSaveFailedStopped => '会话关注设置无法保存，已停止。';
+
+  @override
+  String get settingsSessionAttentionStillRunning => '会话关注仍在运行。请再次尝试停止。';
+
+  @override
+  String get settingsSessionAttentionStopFailed => '无法停止会话关注。请重试。';
+
+  @override
+  String get settingsSessionAttentionCapabilityUnavailable => '会话关注的主机能力不可用。';
+
+  @override
+  String get settingsServerFallbackProviderName => '在服务器上配置';
+
+  @override
+  String get composerStopResponse => '停止响应';
+
+  @override
+  String get composerSendMessageWhileResponding => '响应运行中发送消息';
+
+  @override
+  String get composerSendMessage => '发送消息';
+
+  @override
+  String get chatTourComposerDescription => '在此输入您的请求。';
+
+  @override
+  String get chatTourSendDescription => '在此发送您的消息。';
+
+  @override
+  String get composerAttachmentFallbackName => '附件';
+
+  @override
+  String get composerContextFallbackName => '上下文';
+
+  @override
+  String get searchableDropdownSearchHint => '搜索';
+
+  @override
+  String get searchableDropdownEmptyText => '未找到匹配项';
+
+  @override
+  String get speechApiKeyStorageUnavailable => '安全存储 TTS API 密钥的功能不可用。';
+
+  @override
+  String get speechApiKeyRemoved => 'API 密钥已移除。';
+
+  @override
+  String get speechApiKeySaved => 'API 密钥已安全保存到此设备。';
+
+  @override
+  String get speechReadAloudTestText => '这是 CodeWalk 的文字转语音测试。';
+
+  @override
+  String get speechNativeDisabledWindows =>
+      '出于稳定性考虑，Windows 上已禁用。请通过 CodeWalk WASAPI 采集使用 Parakeet 或其他设备端引擎。';
+
+  @override
+  String get speechNativeUnavailableLinux => 'Linux 上不可用。请使用 Parakeet 进行语音输入。';
+
+  @override
+  String get speechNotAvailableOnPlatform => '此平台不可用。';
+
+  @override
+  String get speechSherpaUnavailableAndroid => '在针对小 APK 体积优化的 Android 构建中不可用。';
+
+  @override
+  String get speechMoonshineDesktopOnlyHint => '仅桌面端可用。Android 端保持仅限原生。';
+
+  @override
+  String get speechParakeetDesktopOnlyHint => '仅桌面端可用。使用离线多语言识别。';
+
+  @override
+  String get speechSenseVoiceDesktopOnlyHint => '仅桌面端可用。对中文、粤语、日语、韩语和英语支持最佳。';
+
+  @override
+  String get speechNativeSubtitle => '启动更简单、更快速。';
+
+  @override
+  String get speechSherpaSubtitle => '较笨重、实验性且容易出问题。使用下载的模型通常更准确。';
+
+  @override
+  String get speechMoonshineSubtitle =>
+      '仅限桌面端的实验性路径，使用 sherpa_onnx 离线识别和可下载模型。';
+
+  @override
+  String get speechParakeetSubtitle =>
+      '仅限桌面端的离线 NeMo transducer 路径，配有一个可下载的多语言模型。';
+
+  @override
+  String get speechSenseVoiceSubtitle => '仅限桌面端的离线路径，针对中文、粤语、日语、韩语和英语优化。';
+
+  @override
+  String get speechMoonshineModel => 'Moonshine 模型';
+
+  @override
+  String get speechSherpaLanguage => 'Sherpa 语言';
+
+  @override
+  String get speechSearchSherpaLanguage => '搜索 Sherpa 语言';
+
+  @override
+  String get speechNoLanguagePacksFound => '未找到语言包';
+
+  @override
+  String get speechTextToSpeechProvider => '文字转语音提供商';
+
+  @override
+  String get speechProviderSystemNative => '系统 / 原生';
+
+  @override
+  String get speechProviderEdgeExperimental => 'Microsoft Edge 语音（实验）';
+
+  @override
+  String get speechProviderOpenAiCompatible => 'OpenAI 兼容';
+
+  @override
+  String get speechEdgeExperimentalTitle => 'Microsoft Edge 语音为实验功能';
+
+  @override
+  String get speechEdgeExperimentalDescription =>
+      '直接从此设备使用非官方的 Edge 朗读服务。使用朗读时，消息文本会发送给 Microsoft；如果 Microsoft 更改私有协议，该服务可能会失效。';
+
+  @override
+  String get speechEdgeVoice => 'Edge 语音';
+
+  @override
+  String get speechEdgeVoiceListUnavailable => '正在使用默认 Edge 语音。目前无法加载语音列表。';
+
+  @override
+  String get speechEdgeVoicesLoaded => '已从 Microsoft Edge 语音加载。';
+
+  @override
+  String get speechCloudTtsPrivacy => '云端 TTS 隐私';
+
+  @override
+  String get speechCloudTtsPrivacyDescription =>
+      '云端 TTS 会将选定的助手消息文本发送到配置的提供商。API 密钥存储在此设备的安全存储中。';
+
+  @override
+  String get speechBaseUrl => '基础 URL';
+
+  @override
+  String get speechApiKey => 'API 密钥';
+
+  @override
+  String get speechApiKeySavedHelper => '已保存密钥。输入新值以替换，或保存空值以移除。';
+
+  @override
+  String get speechNoApiKeySaved => '未保存 API 密钥。';
+
+  @override
+  String get speechSaveApiKey => '保存 API 密钥';
+
+  @override
+  String get speechModel => '模型';
+
+  @override
+  String get speechPitchNotSupported => 'OpenAI 兼容 TTS 不支持音高，因此该提供商已隐藏此选项。';
+
+  @override
+  String get speechTestVoice => '测试语音';
+
+  @override
+  String get dialogMoonshineVoiceSetupDescription =>
+      'Moonshine 通过 sherpa_onnx 在设备端运行。只需选择一次模型，并仅为此桌面设备下载。';
+
+  @override
+  String get dialogParakeetVoiceSetupDescription =>
+      'Parakeet 通过 sherpa_onnx 离线识别在设备端运行。为此桌面设备下载一次，即可启用多语言语音转文字（STT）。';
+
+  @override
+  String get dialogSenseVoiceSetupDescription =>
+      'SenseVoice 通过 sherpa_onnx 离线识别在设备端运行。对中文、粤语、日语、韩语和英语支持最佳。';
+
+  @override
+  String get dialogSherpaVoiceSetupDescription =>
+      'Sherpa 语音输入需要设备端语音模型。请选择您的语言并下载一次（约 147 MB）。';
+
+  @override
+  String speechSilenceSeconds(String value) {
+    return '$value 秒';
+  }
+
+  @override
+  String speechModelInstalled(String modelId) {
+    return '模型已安装（$modelId）';
+  }
+
+  @override
+  String speechModelMissing(String modelId) {
+    return '模型缺失（$modelId）';
+  }
+
+  @override
+  String speechModelSizeMb(String sizeMb) {
+    return '约 $sizeMb MB';
+  }
+
+  @override
+  String speechSystemDefaultLanguage(String language) {
+    return '系统默认（$language）';
+  }
+
+  @override
+  String speechModelListLoadFailed(String error, String service) {
+    return '无法加载 $service 模型列表：$error';
+  }
+
+  @override
+  String speechDownloadFailed(String error) {
+    return '下载失败：$error';
+  }
+
+  @override
+  String speechFailedToRemoveModel(String error) {
+    return '移除模型失败：$error';
+  }
+
+  @override
+  String speechBaseUrlExample(String url) {
+    return '示例：$url';
+  }
+
+  @override
+  String speechModelDefaultHelper(String model) {
+    return '默认：$model';
+  }
+
+  @override
+  String get notificationPermissionOrQuestionNeedsInput => '工具权限或问题需要您的输入。';
+
+  @override
+  String get notificationPermissionNeedsInput => '工具权限需要您的输入。';
+
+  @override
+  String get notificationQuestionNeedsInput => '工具问题需要您的输入。';
+
+  @override
+  String get notificationSessionError => '某个会话报告了错误。';
+
+  @override
+  String get notificationChannelErrors => 'CodeWalk 错误';
+
+  @override
+  String get notificationChannelErrorsDescription => 'CodeWalk 错误提醒';
+
+  @override
+  String get notificationChannelPermissions => 'CodeWalk 权限';
+
+  @override
+  String get notificationChannelPermissionsDescription => 'CodeWalk 操作待处理提醒';
+
+  @override
+  String get notificationChannelAgent => 'CodeWalk 代理';
+
+  @override
+  String get notificationChannelAgentDescription => 'CodeWalk 代理完成提醒';
+
+  @override
+  String get notificationActionOpen => '打开';
+
+  @override
+  String get foregroundMonitorNotificationBody => '可靠的后台提醒已启用';
+
+  @override
+  String get foregroundMonitorNotificationTitle => '后台监控已启用';
+
+  @override
+  String get foregroundMonitorNotificationOneSession => '正在监控 1 个会话';
+
+  @override
+  String foregroundMonitorNotificationSessionCount(int count) {
+    return '正在监控 $count 个会话';
+  }
+
+  @override
+  String sessionAttentionSemanticLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个会话需要关注',
+      one: '1 个会话需要关注',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionAttentionOverlayPermissionRequired => '需要“在其他应用上层显示”权限。';
+
+  @override
+  String get sessionAttentionIosInAppOnly => '会话关注仅在 CodeWalk 应用内可用。';
+
+  @override
+  String get sessionAttentionOverlayPermissionGrantPrompt =>
+      '请授予在其他应用上层显示的权限，然后重试。';
+
+  @override
+  String get sessionAttentionAndroidStartFailed => 'Android 会话关注服务无法启动。';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[已截断 $count 个字符] $reason';
+  }
+
+  @override
+  String get chatMessageJustNow => '刚刚';
+
+  @override
+  String chatMessageMinutesAgo(int count) {
+    return '$count 分钟前';
+  }
+
+  @override
+  String chatMessageHoursAgo(int count) {
+    return '$count 小时前';
+  }
+
+  @override
+  String chatMessageDaysAgo(int count) {
+    return '$count 天前';
+  }
+
+  @override
+  String chatMessageDateTime(int day, int hour, int minute, int month) {
+    return '$month月$day日 $hour:$minute';
+  }
+
+  @override
+  String get chatMessageYourMessage => '您的消息';
+
+  @override
+  String get chatMessageAssistantMessage => '助手消息';
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return '步骤 #$step 已开始';
+  }
+
+  @override
+  String chatMessageStepStartedWithSnapshot(String snapshot, int step) {
+    return '步骤 #$step 已开始：$snapshot';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return '步骤 #$step 已完成：$reason • tokens $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessagePatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个补丁',
+      one: '1 个补丁',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolRun => '工具运行';
+
+  @override
+  String get chatMessageToolExecution => '工具执行';
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count 更多',
+      one: '+1 更多',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainExtraTypes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count 种类型',
+      one: '+1 种类型',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项需要关注',
+      one: '1 项需要关注',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项完成',
+      one: '1 项完成',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => '工具调用';
+
+  @override
+  String get chatMessageDiffPreviewTruncated => '为保证应用稳定性，Diff 预览已被截断。';
+
+  @override
+  String get chatMessageLargeMessageTruncated => '为保证应用稳定性，大消息预览已被截断。';
+
+  @override
+  String get chatMessageInvalidLinkFormat => '无效的链接格式';
+
+  @override
+  String get chatMessageUnableToOpenLink => '无法打开链接';
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total) {
+    return '进行中 $current/$total';
+  }
+
+  @override
+  String sessionTodoTaskProgress(String content, int index, int total) {
+    return '任务 $index/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '已完成 $count/$total';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return '已完成 $count/$total 个任务';
+  }
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return '任务（$count）';
+  }
+
+  @override
+  String questionStepOfReview(int current, int total) {
+    return '第 $current 步，共 $total 步 - 查看';
+  }
+
+  @override
+  String questionStepOfQuestion(int current, int total) {
+    return '第 $current 步，共 $total 步 - 问题';
+  }
+
+  @override
+  String get questionCustomAnswer => '自定义答案';
+
+  @override
+  String get questionSubmitAnswers => '提交答案';
+
+  @override
+  String get questionReviewAnswers => '查看答案';
+
+  @override
+  String permissionRequestTitle(String permission) {
+    return '权限请求：$permission';
+  }
+
+  @override
+  String get sessionTitleCannotBeEmpty => '标题不能为空';
+
+  @override
+  String get filesFailedToLoad => '加载文件失败';
+
+  @override
+  String get filesFailedToSearch => '搜索文件失败';
+
+  @override
+  String get filesNoOpenFilesHint => '还没有打开的文件。输入以搜索。';
+
+  @override
+  String get filesNoContentMatches => '未找到匹配的内容';
+
+  @override
+  String filesOpenFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个打开的文件',
+      one: '1 个打开的文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesLinesSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已选择 $count 行',
+      one: '已选择 1 行',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filesDraftTooLargeToSave => '草稿过大，无法从编辑器保存。';
+
+  @override
+  String get filesSaveChangesBeforeClose => '关闭此文件前请保存更改。';
+
+  @override
+  String get filesSaveChangesBeforePathChange => '更改此路径前请保存更改。';
+
+  @override
+  String get filesWaitForSaveBeforePathChange => '更改此路径前请等待文件保存完成。';
+
+  @override
+  String get filesWaitForFileOperation => '请等待文件操作完成。';
+
+  @override
+  String get filesLargeFileReadOnly => '大文件以只读方式打开，以保持编辑响应流畅。';
+
+  @override
+  String get filesCheckingWriteSupport => '正在检查文件写入支持...';
+
+  @override
+  String get filesActiveProjectRequired => '文件操作需要活动项目目录。';
+
+  @override
+  String get filesReloadSkippedUnsavedChanges => '存在未保存的更改；已跳过重新加载。';
+
+  @override
+  String get filesFailedToLoadContent => '加载文件内容失败';
+
+  @override
+  String get filesFileSaved => '文件已保存。';
+
+  @override
+  String get filesParentNotDirectory => '父级不是目录。';
+
+  @override
+  String get filesMalformedResponse => '文件操作返回了无效响应。';
+
+  @override
+  String get filesShellCommandDidNotComplete => '文件操作的 shell 命令未执行完成。';
+
+  @override
+  String get filesShellCommandNoResult => '文件操作的 shell 命令未返回结果。';
+
+  @override
+  String get filesShellCommandTruncated => '文件操作的 shell 命令被服务器截断。';
+
+  @override
+  String get filesShellCommandSyntaxError => '文件操作的 shell 命令因语法错误而失败。';
+
+  @override
+  String get filesShellUtilityNotFound => '找不到所需的 shell 实用工具。';
+
+  @override
+  String get filesShellCommandFailed => '文件操作的 shell 命令在返回结果前失败。';
+
+  @override
+  String get attachmentSaveTitle => '保存附件';
+
+  @override
+  String get attachmentBrowserSandboxLocalFile => '浏览器沙盒阻止直接打开本地 file:// 附件。';
+
+  @override
+  String get attachmentLocalPathBrowserBlocked => '此附件指向一个本地路径，无法从浏览器中打开。';
+
+  @override
+  String terminalConnectedTo(String directory, String serverName) {
+    return '已连接到 $directory 中的 $serverName';
+  }
+
+  @override
+  String get terminalTransportUnavailable => '终端传输不可用。';
+
+  @override
+  String get chatSlashCommandNew => '创建新的聊天会话';
+
+  @override
+  String get chatSlashCommandModels => '打开模型选择器';
+
+  @override
+  String get chatSlashCommandSessions => '打开会话列表';
+
+  @override
+  String get chatSlashCommandAgent => '打开智能体选择器';
+
+  @override
+  String get chatSlashCommandOpen => '打开文件快速操作';
+
+  @override
+  String get chatSlashCommandHelp => '显示命令帮助';
+
+  @override
+  String get chatSlashCommandCompact => '压缩当前会话上下文';
+
+  @override
+  String get chatSlashCommandThinking => '切换思考气泡';
+
+  @override
+  String get chatSlashCommandUndo => '撤销上一条可见的用户消息';
+
+  @override
+  String get chatSlashCommandRedo => '重做上一个已撤销的操作';
+
+  @override
+  String chatSessionSubConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个子对话',
+      one: '1 个子对话',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageWeeksAgo(int count) {
+    return '$count 周前';
+  }
+
+  @override
+  String chatMessageShortDate(int day, int month) {
+    return '$month/$day';
+  }
+
+  @override
+  String get chatProviderErrorLoadSessionStatus => '加载会话状态失败';
+
+  @override
+  String get chatProviderErrorLoadSessionDetails => '部分会话详情无法加载';
+
+  @override
+  String chatProviderErrorLoadSessionList(String error) {
+    return '加载会话列表失败：$error';
+  }
+
+  @override
+  String get chatProviderErrorCreateSession => '创建会话失败';
+
+  @override
+  String get chatProviderErrorSelectProviderModelBeforeSend =>
+      '发送前请先选择已连接的提供商或免费的 OpenCode 模型';
+
+  @override
+  String get chatProviderErrorStartMessageSend => '开始发送消息失败';
+
+  @override
+  String get chatProviderErrorStopUnavailable => '当前会话无法停止';
+
+  @override
+  String get chatProviderErrorWaitForResponseFinish => '请等待当前响应完成后再进行压缩';
+
+  @override
+  String get chatProviderErrorCompactUnavailable => '当前会话无法压缩上下文';
+
+  @override
+  String get chatProviderErrorSelectModelBeforeCompact => '压缩上下文前请先选择模型';
+
+  @override
+  String get chatProviderErrorCompactSessionContext => '压缩会话上下文失败';
+
+  @override
+  String get chatProviderErrorNetwork => '网络连接失败。请检查网络设置';
+
+  @override
+  String get chatProviderErrorServer => '服务器错误。请稍后重试';
+
+  @override
+  String get chatProviderErrorNotFound => '找不到资源';
+
+  @override
+  String get chatProviderErrorInvalidInput => '输入参数无效';
+
+  @override
+  String get chatProviderErrorUnknown => '未知错误。请稍后重试';
+
+  @override
+  String get chatProviderErrorSessionFallback => '会话错误';
+
+  @override
+  String get projectProviderErrorNoProjectContext => '服务器上没有可用的项目上下文';
+
+  @override
+  String projectProviderErrorInitializeFailed(String error) {
+    return '初始化项目上下文失败：$error';
+  }
+
+  @override
+  String get projectProviderErrorSwitchProjectNotFound => '切换项目失败：找不到项目';
+
+  @override
+  String get projectProviderErrorSwitchDirectoryEmpty => '切换项目失败：目录为空';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext => '至少必须保留一个打开的上下文';
+
+  @override
+  String get projectProviderErrorReopenProjectNotFound => '重新打开项目失败：找不到项目';
+
+  @override
+  String get projectProviderErrorOnlyClosedArchivable => '只有已关闭的项目才能归档';
+
+  @override
+  String get projectProviderErrorArchiveProjectNotFound => '归档项目失败：找不到项目';
+
+  @override
+  String get projectProviderErrorArchiveProjectPathInvalid => '归档项目失败：项目路径无效';
+
+  @override
+  String projectProviderErrorLoadWorkspaces(String error) {
+    return '加载工作区失败：$error';
+  }
+
+  @override
+  String get projectProviderErrorWorkspaceNameEmpty => '工作区名称不能为空';
+
+  @override
+  String projectProviderErrorCreateWorkspace(String error) {
+    return '创建工作区失败：$error';
+  }
+
+  @override
+  String projectProviderErrorResetWorkspace(String error) {
+    return '重置工作区失败：$error';
+  }
+
+  @override
+  String projectProviderErrorDeleteWorkspace(String error) {
+    return '删除工作区失败：$error';
+  }
+
+  @override
+  String get projectProviderErrorDirectoryEmpty => '目录不能为空';
+
+  @override
+  String projectProviderErrorListDirectories(String error) {
+    return '列出目录失败：$error';
+  }
+
+  @override
+  String projectProviderErrorValidateDirectory(String error) {
+    return '验证目录失败：$error';
+  }
+
+  @override
+  String get projectProviderErrorPathEmpty => '路径不能为空';
+
+  @override
+  String projectProviderErrorListFiles(String error) {
+    return '列出文件失败：$error';
+  }
+
+  @override
+  String projectProviderErrorSearchFiles(String error) {
+    return '搜索文件失败：$error';
+  }
+
+  @override
+  String projectProviderErrorContentSearchUnavailable(String error) {
+    return '内容搜索不可用：$error';
+  }
+
+  @override
+  String projectProviderErrorSearchSymbols(String error) {
+    return '搜索符号失败：$error';
+  }
+
+  @override
+  String projectProviderErrorReadFile(String error) {
+    return '读取文件失败：$error';
+  }
+
+  @override
+  String projectProviderErrorLoadProjectList(String error) {
+    return '加载项目列表失败：$error';
+  }
+
+  @override
+  String get workspaceProjectRemovedFromHistory => '项目已从历史记录中移除';
+
+  @override
+  String workspaceProjectContextOpened(String directory) {
+    return '项目上下文已打开：$directory';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return '打开项目上下文失败：$directory';
+  }
+
+  @override
+  String get chatAbortNotice => '您想做出哪些不同的操作？';
+
+  @override
+  String sessionTitleToday(String date, String time) {
+    return '今天 $time（$date）';
+  }
+
+  @override
+  String sessionTitleYesterday(String date, String time) {
+    return '昨天 $time（$date）';
+  }
+
+  @override
+  String sessionTitleWeekday(String date, String time, String weekday) {
+    return '$weekday $time（$date）';
+  }
+
+  @override
+  String sessionTitleDateAndTime(String date, String time) {
+    return '$date $time';
+  }
+
+  @override
+  String get sessionWeekdayMon => '周一';
+
+  @override
+  String get sessionWeekdayTue => '周二';
+
+  @override
+  String get sessionWeekdayWed => '周三';
+
+  @override
+  String get sessionWeekdayThu => '周四';
+
+  @override
+  String get sessionWeekdayFri => '周五';
+
+  @override
+  String get sessionWeekdaySat => '周六';
+
+  @override
+  String get sessionWeekdaySun => '周日';
+
+  @override
+  String get forwardTimeNow => '刚刚';
+
+  @override
+  String forwardTimeMinutes(int count) {
+    return '$count 分钟';
+  }
+
+  @override
+  String forwardTimeHours(int count) {
+    return '$count 小时';
+  }
+
+  @override
+  String forwardTimeDays(int count) {
+    return '$count 天';
+  }
+
+  @override
+  String forwardTimeWeeks(int count) {
+    return '$count 周';
+  }
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultModel => '默认模型';
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultAgent => '默认智能体';
+
+  @override
+  String get settingsBehaviorConfigFieldSmallModel => '小型模型';
+
+  @override
+  String get settingsBehaviorConfigFieldAutoUpdateMode => '自动更新模式';
+
+  @override
+  String get settingsBehaviorConfigFieldSnapshotSetting => '快照设置';
+
+  @override
+  String get settingsBehaviorConfigFieldConversationUsername => '会话用户名';
+
+  @override
+  String get settingsBehaviorConfigFieldSharingDefault => '默认共享方式';
+
+  @override
+  String get speechMicNoInputDevice => '没有可用的麦克风输入设备。';
+
+  @override
+  String get speechMicDeviceBusy => '默认麦克风正被其他应用占用。';
+
+  @override
+  String get speechMicUnsupportedFormat => '不支持默认麦克风格式。';
+
+  @override
+  String get speechMicSpeechPrivacy => 'Windows 语音服务可能已被禁用（语音隐私、在线语音识别或语言包）。';
+
+  @override
+  String get speechMicBackendUnavailable => '此构建中不可用 Windows 麦克风后端。';
+
+  @override
+  String speechEngineFallbackNotice(String fallback, String reason) {
+    return '所选 STT 引擎不可用（$reason）。将改用 $fallback。';
+  }
+
+  @override
+  String get oauthFlowSecureStorageUnavailable => 'OAuth 的安全凭据存储不可用。';
+
+  @override
+  String get oauthFlowUnexpectedError => 'OAuth 流程意外失败。请重试。';
+
+  @override
+  String get oauthFlowNoEndpointsDiscovered =>
+      '未发现 OAuth 端点。请在 Cloudflare Dashboard → Access → Applications → [此应用] 中启用托管 OAuth。';
+
+  @override
+  String get oauthFlowTokenResponseMissingAccessToken => 'OAuth 令牌响应不包含访问令牌。';
+
+  @override
+  String get oauthFlowProfileChanged => 'OAuth 完成前服务器配置文件已更改。';
+
+  @override
+  String get oauthFlowMetadataMissingEndpoints => 'OAuth 元数据缺少授权/令牌端点。';
+
+  @override
+  String get oauthFlowCallbackNotCompleted => '授权回调未完成';
+
+  @override
+  String get oauthFlowProviderDeclined => '授权服务器拒绝了 OAuth 请求。请重试。';
+
+  @override
+  String get oauthFlowCallbackValidationFailed => 'OAuth 回调验证失败。请重试。';
+
+  @override
+  String get oauthFlowCallbackServerStartFailed => '本地 OAuth 回调服务器启动失败。';
+
+  @override
+  String get oauthFlowSignInCanceled => 'OAuth 登录已取消。';
+
+  @override
+  String get oauthFlowBrowserOpenFailed => '无法为 OAuth 登录打开系统浏览器。';
+
+  @override
+  String get oauthFlowCallbackTimeout =>
+      '5 分钟内未收到授权回调。浏览器应在授权同意后重定向到本地回调地址。如果浏览器反而显示连接错误，则说明此设备或网络阻止了回环重定向。';
+
+  @override
+  String oauthFlowTokenExchangeTransientFailure(int maxAttempts) {
+    return '由于临时网络问题，令牌交换在 $maxAttempts 次尝试后失败。请重试。';
+  }
+
+  @override
+  String oauthFlowTokenExchangeHttpFailure(int statusCode) {
+    return '令牌交换失败（HTTP $statusCode）。请重试。';
+  }
+
+  @override
+  String get oauthFlowTokenExchangeUnexpectedFailure => '令牌交换意外失败。请重试。';
+
+  @override
+  String get oauthFlowTokenExchangeIncomplete =>
+      '授权代码发送后令牌交换未完成。请重新开始 OAuth 登录。';
+
+  @override
+  String get speechReadAloudFailed => '文字转语音失败。';
+
+  @override
+  String get speechReadAloudNoText => '没有可朗读的文本。';
+
+  @override
+  String get speechEdgeTextTooLong => 'Microsoft Edge 语音一次最多可读取 4096 字节。';
+
+  @override
+  String get speechEdgeMalformedAudio => 'Microsoft Edge 语音返回了格式错误的音频数据。';
+
+  @override
+  String get speechEdgeUnsupportedAudio => 'Microsoft Edge 语音返回了不支持的音频数据。';
+
+  @override
+  String get speechEdgeUnsupportedFrame =>
+      'Microsoft Edge 语音返回了不支持的 websocket 帧。';
+
+  @override
+  String get speechEdgeSynthesisInterrupted => 'Microsoft Edge 语音在合成完成前结束。';
+
+  @override
+  String get speechEdgeEmptyAudio => 'Microsoft Edge 语音返回了空音频响应。';
+
+  @override
+  String get speechEdgeTimedOut => 'Microsoft Edge 语音超时。';
+
+  @override
+  String get speechEdgeUnreachable => '无法访问 Microsoft Edge 语音。';
+
+  @override
+  String get speechApiKeyMissing => '请在 设置 > 语音 中添加 API 密钥以使用此 TTS 提供商。';
+
+  @override
+  String get speechProviderEmptyAudio => 'TTS 提供商返回了空音频响应。';
+
+  @override
+  String get speechProviderRequestRejected => 'TTS 提供商拒绝了语音请求。';
+
+  @override
+  String get speechApiKeyRejected => 'TTS API 密钥被提供商拒绝。';
+
+  @override
+  String get speechProviderQuotaRateLimit => 'TTS 提供商报告了配额或速率限制。';
+
+  @override
+  String get speechProviderTemporarilyUnavailable => 'TTS 提供商暂时不可用。';
+
+  @override
+  String get speechProviderUnreachable => '无法访问 TTS 提供商。';
+
+  @override
+  String appProviderErrorFailedToStartProcess(String tool) {
+    return '无法启动 $tool 进程。';
+  }
+
+  @override
+  String appProviderErrorToolNotAvailable(String runtime, String tool) {
+    return '$tool 不可用。请先安装 $runtime。';
+  }
+
+  @override
+  String appProviderErrorToolInstallFailed(int exitCode, String tool) {
+    return '$tool 安装失败，退出代码为 $exitCode。';
+  }
+
+  @override
+  String appProviderErrorBunBootstrapFailed(int exitCode) {
+    return 'Bun 引导失败，退出代码为 $exitCode。';
+  }
+
+  @override
+  String get appProviderErrorInstalledButNotFoundInPath =>
+      'OpenCode 安装已完成，但在 PATH 中未找到命令。';
+
+  @override
+  String get appProviderErrorInstalledButPathNotResolved =>
+      'OpenCode 安装已完成，但无法解析命令路径。';
+
+  @override
+  String appProviderErrorConfiguredCommandNotFound(String tool) {
+    return '未找到配置的命令，且 $tool 不在 PATH 中。';
+  }
+
+  @override
+  String get appProviderErrorConfiguredCommandPathMissing => '配置的命令路径不存在。';
+
+  @override
+  String get appProviderErrorConfiguredCommandVersionCheckFailed =>
+      '配置的命令存在，但版本检查失败。';
+
+  @override
+  String get appProviderErrorConfiguredCommandExecutionFailed => '无法执行配置的命令。';
+
+  @override
+  String get appProviderWslCheckWindowsOnly => 'WSL 检查仅适用于 Windows。';
+
+  @override
+  String get appProviderDesktopBuildRequired => '请使用桌面版配置托管本地服务器。';
+
+  @override
+  String get appProviderKnownInstallationDirectoryDetected => '已从已知的安装目录中检测到。';
+
+  @override
+  String appProviderKnownInstallationPathRefreshHint(String appName) {
+    return '已从已知的安装目录中检测到。PATH 可能需要刷新；如果尚未检测到最近的安装，请重新打开 $appName。';
+  }
+
+  @override
+  String get appProviderErrorReleaseMetadataFetchFailed =>
+      '从 GitHub 获取最新版本元数据失败。';
+
+  @override
+  String get appProviderErrorReleaseAssetListMissing => '最新版本元数据中未包含资产列表。';
+
+  @override
+  String get appProviderErrorNoCompatibleAsset => '未找到兼容的 OpenCode 二进制资产。';
+
+  @override
+  String get appProviderErrorDownloadAssetFailed => '下载所选 OpenCode 资产失败。';
+
+  @override
+  String get appProviderErrorChecksumVerificationFailed => '已下载资产的校验和验证失败。';
+
+  @override
+  String get appProviderErrorExtractArchiveFailed => '解压 OpenCode 二进制压缩包失败。';
+
+  @override
+  String appProviderErrorExecutableNotFound(String tool) {
+    return '在解压的文件中找不到 $tool 可执行文件。';
+  }
+
+  @override
+  String get chatNoResponseFromServer => '服务器无响应，请重试。';
+
+  @override
+  String get chatNoResponseFromModel => '模型无响应，请重试。';
+
+  @override
+  String get speechJobCancelled => '语音任务已取消。';
+
+  @override
+  String get speechEdgeCancelled => 'Microsoft Edge 语音已取消。';
+
+  @override
+  String get sessionAttentionKindActive => '活动';
+
+  @override
+  String get sessionAttentionKindReceiving => '接收中';
+
+  @override
+  String get sessionAttentionKindDelayed => '延迟';
+
+  @override
+  String get sessionAttentionKindCompleted => '已完成';
+
+  @override
+  String get sessionAttentionKindPendingInteraction => '等待交互';
+
+  @override
+  String get sessionAttentionKindError => '错误';
+
+  @override
+  String get sessionAttentionPauseCellularDataSaver => '移动数据节省模式已开启。';
+
+  @override
+  String get sessionAttentionPauseOauthReopenRequired => '需要 OAuth 登录';
+
+  @override
+  String get sessionAttentionPauseTailscaleReopenRequired => '需要 Tailscale 连接';
+
+  @override
+  String get sessionAttentionPauseOffline => '离线';
+
+  @override
+  String get sessionAttentionPausePermissionRevoked => '权限已被撤销';
+
+  @override
+  String get sessionAttentionPauseServiceStopped => '服务已停止';
+
+  @override
+  String get sessionAttentionPauseHostUnavailable => '主机不可用';
+
+  @override
+  String get errorRequestCancelled => '请求已取消';
+
+  @override
+  String errorUnknownNetworkError(String error) {
+    return '未知网络错误: $error';
+  }
+
+  @override
+  String get errorCertificateError => '证书错误';
+
+  @override
+  String get errorSessionBusy => '会话正忙于处理另一个请求。';
+
+  @override
+  String get errorRunShellCommandFailed => '运行 shell 命令失败';
+
+  @override
+  String get errorRunSlashCommandFailed => '运行斜杠命令失败';
+
+  @override
+  String get settingsBehaviorOpenCodeDefaultsLoadError =>
+      '无法从活动服务器加载 OpenCode 支持的默认设置。';
+
+  @override
+  String get sessionTabIconRemoveFailed => '删除本地会话标签图标数据失败';
+
+  @override
+  String get forwardUntitled => '无标题';
+
+  @override
+  String setupDebugLinuxLogsPath(String path) {
+    return 'Linux 日志: $path';
+  }
+
+  @override
+  String setupDebugRunOpenCodeCommand(String command) {
+    return '使用以下命令运行 OpenCode: $command';
+  }
+
+  @override
+  String setupDebugServerHealthEndpoint(String endpoint) {
+    return '服务器健康检查: $endpoint';
+  }
+
+  @override
+  String setupDebugServerDocsEndpoint(String endpoint) {
+    return '服务器文档: $endpoint';
+  }
+
+  @override
+  String get logsEntryError => '错误';
+
+  @override
+  String get logsEntryStack => '堆栈';
+
+  @override
+  String get setupDebugSourceDiagnostics => '诊断';
+
+  @override
+  String get setupDebugSourceUseExisting => '使用现有';
+
+  @override
+  String get setupDebugSourceLocalServer => '本地服务器';
+
+  @override
+  String get setupDebugSourceOnboarding => '引导设置';
+
+  @override
+  String get setupDebugSourceManualConnection => '手动连接';
+
+  @override
+  String setupDebugMessageDiagnosticsResult(
+    String availability,
+    String platform,
+    String recommendation,
+  ) {
+    return '在 $platform 上 $availability。$recommendation';
+  }
+
+  @override
+  String get setupDebugMessageDetectAttempt => '正在尝试从当前环境检测现有的 OpenCode 命令。';
+
+  @override
+  String get setupDebugMessageInstallStarted => '已从 CodeWalk 开始安装 OpenCode。';
+
+  @override
+  String setupDebugMessageStartLocalServer(String url) {
+    return '正在 $url 启动受管的 OpenCode 服务器。';
+  }
+
+  @override
+  String setupDebugMessageHealthyRunning(String url) {
+    return '受管的 OpenCode 服务器状态正常，正在 $url 运行。';
+  }
+
+  @override
+  String get setupDebugMessageStoppingLocalServer => '正在停止受管的 OpenCode 服务器。';
+
+  @override
+  String get setupDebugMessageStoppedCleanly => '受管的 OpenCode 服务器已正常停止。';
+
+  @override
+  String get setupDebugMessageExitedAfterRequestedStop =>
+      '收到停止请求后，受管的 OpenCode 服务器已退出。';
+
+  @override
+  String get setupDebugMessageOnboardingConnectExisting =>
+      '用户选择了连接到现有的 OpenCode 服务器。';
+
+  @override
+  String get setupDebugMessageOnboardingGuidedPath => '用户打开了 OpenCode 引导式设置流程。';
+
+  @override
+  String get setupDebugMessageOnboardingManagedLocal =>
+      '用户打开了受管的本地 OpenCode 设置。';
+
+  @override
+  String get setupDebugMessageOnboardingOpenedServerSettings =>
+      '健康检查失败后，用户打开了服务器设置。';
+
+  @override
+  String get setupDebugMessageOnboardingAddAnotherServer =>
+      '健康检查失败后，用户选择了添加另一台服务器。';
+
+  @override
+  String setupDebugMessageTestingServerUrl(String url) {
+    return '正在测试来自引导流程的 OpenCode 服务器 URL $url。';
+  }
+
+  @override
+  String get chatProviderErrorSessionNotFound => '未找到会话';
+
+  @override
+  String get chatProviderErrorInvalidMessageFormat => '消息格式无效';
+
+  @override
+  String get chatProviderErrorNetworkShort => '网络连接失败';
+
+  @override
+  String get chatProviderErrorUnknownShort => '未知错误';
+
+  @override
+  String get terminalCreateFailed => '创建终端会话失败';
+
+  @override
+  String get terminalEndpointUnavailable => '终端端点不可用';
+
+  @override
+  String get terminalInvalidDirectory => '终端目录无效';
+
+  @override
+  String get terminalWebsocketUnavailable => '此处无法使用终端 WebSocket。';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次',
+      one: '1 次',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get errorConnectionTimeout => '连接超时';
+
+  @override
+  String get errorClientError => '客户端错误';
+
+  @override
+  String get chatProviderErrorSendMessage => '发送消息失败';
 }

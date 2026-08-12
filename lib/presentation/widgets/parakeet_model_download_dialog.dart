@@ -66,14 +66,19 @@ class _ParakeetModelDownloadDialogState
           ? kParakeetModelDefault
           : entries.first.id;
       _manager.setPreferredModelId(preselect);
+      if (!mounted) return;
       setState(() {
         _models = entries;
         _selectedId = preselect;
         _isLoading = false;
       });
     } catch (error) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load Parakeet model list: $error';
+        _errorMessage = context.l10n.speechModelListLoadFailed(
+          error.toString(),
+          'Parakeet',
+        );
         _isLoading = false;
       });
     }
@@ -108,7 +113,7 @@ class _ParakeetModelDownloadDialogState
       if (mounted) {
         setState(() {
           _isDownloading = false;
-          _errorMessage = 'Download failed: $error';
+          _errorMessage = context.l10n.speechDownloadFailed(error.toString());
         });
       }
     }
@@ -163,16 +168,13 @@ class _ParakeetModelDownloadDialogState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Parakeet runs on-device through sherpa_onnx offline recognition. '
-          'Download it once for this desktop device to enable multilingual STT.',
-        ),
+        Text(context.l10n.dialogParakeetVoiceSetupDescription),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: _selectedId,
           isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Parakeet model',
+          decoration: InputDecoration(
+            labelText: context.l10n.dialogParakeetModel,
             border: const OutlineInputBorder(),
           ),
           items: _models
@@ -198,7 +200,7 @@ class _ParakeetModelDownloadDialogState
         if (selected != null) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            '~${selected.sizeMb} MB',
+            context.l10n.speechModelSizeMb(selected.sizeMb.toString()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

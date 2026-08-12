@@ -1023,7 +1023,9 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     if (!updated) {
       _showFailureSnackBar(
         context,
-        context.l10n.settingsBehaviorConfigUpdateFailed('default model'),
+        context.l10n.settingsBehaviorConfigUpdateFailed(
+          context.l10n.settingsBehaviorConfigFieldDefaultModel,
+        ),
       );
       return;
     }
@@ -1046,7 +1048,9 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     if (!updated) {
       _showFailureSnackBar(
         context,
-        context.l10n.settingsBehaviorConfigUpdateFailed('default agent'),
+        context.l10n.settingsBehaviorConfigUpdateFailed(
+          context.l10n.settingsBehaviorConfigFieldDefaultAgent,
+        ),
       );
       return;
     }
@@ -1066,7 +1070,9 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     if (!updated) {
       _showFailureSnackBar(
         context,
-        context.l10n.settingsBehaviorConfigUpdateFailed('small model'),
+        context.l10n.settingsBehaviorConfigUpdateFailed(
+          context.l10n.settingsBehaviorConfigFieldSmallModel,
+        ),
       );
       return;
     }
@@ -1089,7 +1095,9 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     if (!updated) {
       _showFailureSnackBar(
         context,
-        context.l10n.settingsBehaviorConfigUpdateFailed('auto-update mode'),
+        context.l10n.settingsBehaviorConfigUpdateFailed(
+          context.l10n.settingsBehaviorConfigFieldAutoUpdateMode,
+        ),
       );
     }
   }
@@ -1107,7 +1115,9 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     if (!updated) {
       _showFailureSnackBar(
         context,
-        context.l10n.settingsBehaviorConfigUpdateFailed('snapshot setting'),
+        context.l10n.settingsBehaviorConfigUpdateFailed(
+          context.l10n.settingsBehaviorConfigFieldSnapshotSetting,
+        ),
       );
     }
   }
@@ -1140,7 +1150,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
       _showFailureSnackBar(
         context,
         context.l10n.settingsBehaviorConfigUpdateFailed(
-          'conversation username',
+          context.l10n.settingsBehaviorConfigFieldConversationUsername,
         ),
       );
     }
@@ -1161,7 +1171,9 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     if (!updated) {
       _showFailureSnackBar(
         context,
-        context.l10n.settingsBehaviorConfigUpdateFailed('sharing default'),
+        context.l10n.settingsBehaviorConfigUpdateFailed(
+          context.l10n.settingsBehaviorConfigFieldSharingDefault,
+        ),
       );
     }
   }

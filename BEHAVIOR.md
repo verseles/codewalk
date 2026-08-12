@@ -34,6 +34,38 @@
 - **Then** provider names (e.g. `opencode-go`, `minimax-coding-plan`, `minimax-cn-coding-plan`, `cursor`, `ollama-cloud`, `Snowflake Cortex`, `Grok/xAI`, `Cohere North`) stay untranslated as server-defined identifiers
 - **Then** window labels (rolling, weekly, monthly) and all server-originated quota values, units, and percentage figures stay untranslated (ADR-023 compliance)
 
+### CodeWalk UI copy is localized across 13 non-English locales
+
+- **Given** the user selects any of the 13 non-English supported locales
+- **When** CodeWalk renders user-visible UI copy
+- **Then** the copy is rendered in the active locale wherever a localization key exists for it
+
+### Non-widget paths localize through L10nBridge
+
+- **Given** a path outside the normal widget tree (services, background work, data-layer messages, errors surfaced outside widgets)
+- **When** that path needs user-visible copy
+- **Then** it reads the localized string through `L10nBridge`
+- **Then** when the bridge holds no current localization or the key is missing, the path falls back to the English string instead of failing
+
+### Background and overlay surfaces resolve the active locale
+
+- **Given** a Workmanager background task or the Android session overlay runs outside the main app UI
+- **When** the surface needs localized copy
+- **Then** it resolves the locale from the persisted language preference, falling back to the system locale
+- **Then** the Android overlay renders in the resolved locale and respects right-to-left layout (RTL) when the resolved locale is an RTL language
+
+### Server-provided, log, protocol, and export content stays as source content
+
+- **Given** content originates from the server, app logs, the OpenCode wire protocol, or exported data
+- **When** that content is displayed or shared
+- **Then** it remains exactly as provided by its source and is never translated, localized, or rewritten (ADR-023 compliance)
+
+### Reusable widgets fall back without a localization delegate
+
+- **Given** a reusable widget is rendered without a localization delegate in scope (for example, in tests or embeddable surfaces)
+- **When** the widget needs user-visible copy
+- **Then** it falls back safely instead of throwing, so the widget remains usable outside the localized app tree
+
 ### Non-translatable invariants
 
 - OpenCode wire event types, permission key names, tool state values, `prompt_async` contract fields, REST paths, config key names, model/provider/agent identifiers, and server-originated content remain untranslated (ADR-023 compliance)

@@ -9,9 +9,10 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
     }
 
     final textForRender = _truncatePreview(
+      context,
       part.text,
       maxChars: _ChatMessageWidgetState._maxMarkdownCharsForRichRender,
-      reason: 'Large message preview truncated for app stability.',
+      reason: context.l10n.chatMessageLargeMessageTruncated,
     );
     final usePlainText = textForRender != part.text;
     final themeTokens = _resolveThemeTokens(context);
@@ -161,14 +162,14 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
   Future<void> _openMarkdownLink(BuildContext context, String href) async {
     var uri = Uri.tryParse(href);
     if (uri == null) {
-      _showLinkOpenFeedback(context, 'Invalid link format');
+      _showLinkOpenFeedback(context, context.l10n.chatMessageInvalidLinkFormat);
       return;
     }
     if (!uri.hasScheme) {
       uri = Uri.tryParse('https://$href');
     }
     if (uri == null || uri.host.trim().isEmpty) {
-      _showLinkOpenFeedback(context, 'Invalid link format');
+      _showLinkOpenFeedback(context, context.l10n.chatMessageInvalidLinkFormat);
       return;
     }
 
@@ -179,7 +180,10 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
       );
       if (!launched) {
         if (!context.mounted) return;
-        _showLinkOpenFeedback(context, 'Unable to open link');
+        _showLinkOpenFeedback(
+          context,
+          context.l10n.chatMessageUnableToOpenLink,
+        );
       }
     } catch (error, stackTrace) {
       AppLogger.warn(
@@ -188,7 +192,7 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
         stackTrace: stackTrace,
       );
       if (!context.mounted) return;
-      _showLinkOpenFeedback(context, 'Unable to open link');
+      _showLinkOpenFeedback(context, context.l10n.chatMessageUnableToOpenLink);
     }
   }
 

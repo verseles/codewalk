@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../domain/entities/chat_session.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_animations.dart';
 
 class SessionTodoListWidget extends StatefulWidget {
@@ -104,21 +105,32 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
     return MediaQuery.sizeOf(context).width < 600;
   }
 
-  String _collapsedSummary({required bool compact}) {
+  String _collapsedSummary(AppLocalizations? l10n, {required bool compact}) {
     final todos = widget.todos;
     final inProgressIndex = todos.indexWhere((t) => t.status == 'in_progress');
     if (inProgressIndex >= 0) {
       final task = todos[inProgressIndex];
       if (compact) {
-        return '${inProgressIndex + 1}/${todos.length} in progress';
+        return l10n?.sessionTodoInProgressCompact(
+              inProgressIndex + 1,
+              todos.length,
+            ) ??
+            '${inProgressIndex + 1}/${todos.length} in progress';
       }
-      return 'Task ${inProgressIndex + 1}/${todos.length} ${task.content}';
+      return l10n?.sessionTodoTaskProgress(
+            task.content,
+            inProgressIndex + 1,
+            todos.length,
+          ) ??
+          'Task ${inProgressIndex + 1}/${todos.length} ${task.content}';
     }
     final completedCount = todos.where((t) => t.status == 'completed').length;
     if (compact) {
-      return '$completedCount/${todos.length} done';
+      return l10n?.sessionTodoDoneCompact(completedCount, todos.length) ??
+          '$completedCount/${todos.length} done';
     }
-    return 'Tasks $completedCount/${todos.length} completed';
+    return l10n?.sessionTodoCompletedCount(completedCount, todos.length) ??
+        'Tasks $completedCount/${todos.length} completed';
   }
 
   int get _completedCount {
@@ -143,6 +155,7 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
     final textTheme = Theme.of(context).textTheme;
     final needsScroll = widget.todos.length > widget.maxVisibleItems;
     final compactLayout = _isCompactLayout(context);
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -171,8 +184,11 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
                     Flexible(
                       child: Text(
                         widget.collapsed
-                            ? _collapsedSummary(compact: compactLayout)
-                            : 'Tasks (${widget.todos.length})',
+                            ? _collapsedSummary(l10n, compact: compactLayout)
+                            : l10n?.sessionTodoTasksCount(
+                                    widget.todos.length,
+                                  ) ??
+                                  'Tasks (${widget.todos.length})',
                         style: textTheme.labelMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,

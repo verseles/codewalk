@@ -67,19 +67,17 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (projectProvider.currentDirectory == null ||
         state.rootDirectory == '/' ||
         state.rootDirectory.trim().isEmpty) {
-      state.fileOperationCapabilities =
-          const WorkspaceFileOperationsCapabilities(
-            shellFileOpsSupported: false,
-            message: 'File operations require an active project directory.',
-          );
+      state.fileOperationCapabilities = WorkspaceFileOperationsCapabilities(
+        shellFileOpsSupported: false,
+        message: context.l10n.filesActiveProjectRequired,
+      );
       return Future<void>.value();
     }
     if (!di.sl.isRegistered<WorkspaceFileOperationsService>()) {
-      state.fileOperationCapabilities =
-          const WorkspaceFileOperationsCapabilities(
-            shellFileOpsSupported: false,
-            message: 'File operations are not available.',
-          );
+      state.fileOperationCapabilities = WorkspaceFileOperationsCapabilities(
+        shellFileOpsSupported: false,
+        message: context.l10n.filesOperationUnavailable,
+      );
       return Future<void>.value();
     }
     final rootDirectory = state.rootDirectory;
@@ -106,9 +104,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
           }
           _setState(() {
             state.fileOperationCapabilities =
-                const WorkspaceFileOperationsCapabilities(
+                WorkspaceFileOperationsCapabilities(
                   shellFileOpsSupported: false,
-                  message: 'File operations are not available.',
+                  message: context.l10n.filesOperationUnavailable,
                 );
             state.fileOperationCapabilitiesLoading = false;
           });
@@ -541,10 +539,10 @@ extension _ChatPageFileRuntime on _ChatPageState {
     }
     if (draft != null && draft.isDirty) {
       _setState(() {
-        draft.saveErrorMessage = _ChatPageFileViewer._dirtyCloseBlockedMessage;
+        draft.saveErrorMessage = _dirtyCloseBlockedMessage;
       });
       onUpdated?.call();
-      _showFileOperationSnackBar(_ChatPageFileViewer._dirtyCloseBlockedMessage);
+      _showFileOperationSnackBar(_dirtyCloseBlockedMessage);
       return;
     }
     _setState(() {
@@ -576,7 +574,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
       if (background) {
         return;
       }
-      const message = 'Unsaved changes; reload skipped.';
+      final message = context.l10n.filesReloadSkippedUnsavedChanges;
       _setState(() {
         dirtyDraft.saveErrorMessage = message;
       });
@@ -619,7 +617,8 @@ extension _ChatPageFileRuntime on _ChatPageState {
         fileState.tabsByPath[normalizedPath] = _FileTabViewState(
           status: _FileTabLoadStatus.error,
           content: '',
-          errorMessage: projectProvider.error ?? 'Failed to load file content',
+          errorMessage:
+              projectProvider.error ?? context.l10n.filesFailedToLoadContent,
         );
         return;
       }
@@ -706,7 +705,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
                 child: Scaffold(
                   appBar: AppBar(
                     title: Text(
-                      'Open files (${fileState.tabSelection.openPaths.length})',
+                      context.l10n.filesOpenFilesFileState(
+                        fileState.tabSelection.openPaths.length,
+                      ),
                     ),
                     leading: IconButton(
                       icon: const Icon(Symbols.close),
@@ -760,7 +761,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
                           children: [
                             Expanded(
                               child: Text(
-                                'Open files (${fileState.tabSelection.openPaths.length})',
+                                context.l10n.filesOpenFilesFileState(
+                                  fileState.tabSelection.openPaths.length,
+                                ),
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ),
@@ -998,9 +1001,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
       fileState,
       _fileTreePathAliases(fileState, parentDirectory),
     )) {
-      _showFileOperationSnackBar(
-        _ChatPageFileViewer._pathMutationInProgressMessage,
-      );
+      _showFileOperationSnackBar(_pathMutationInProgressMessage);
       return;
     }
     final name = await _showFileNameDialog(
@@ -1019,9 +1020,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
       fileState,
       _fileTreePathAliases(fileState, targetPath),
     )) {
-      _showFileOperationSnackBar(
-        _ChatPageFileViewer._pathMutationInProgressMessage,
-      );
+      _showFileOperationSnackBar(_pathMutationInProgressMessage);
       return;
     }
     final service = di.sl<WorkspaceFileOperationsService>();
@@ -1264,9 +1263,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
       }
     }
     if (_hasPendingFileTreeMutation(fileState, normalizedPaths)) {
-      _showFileOperationSnackBar(
-        _ChatPageFileViewer._pathMutationInProgressMessage,
-      );
+      _showFileOperationSnackBar(_pathMutationInProgressMessage);
       return true;
     }
     final blockedDrafts = fileState.editorDraftsByPath.entries
@@ -1283,8 +1280,8 @@ extension _ChatPageFileRuntime on _ChatPageState {
       return false;
     }
     final message = blockedDrafts.any((draft) => draft.isSaving)
-        ? _ChatPageFileViewer._savingPathMutationBlockedMessage
-        : _ChatPageFileViewer._dirtyPathMutationBlockedMessage;
+        ? _savingPathMutationBlockedMessage
+        : _dirtyPathMutationBlockedMessage;
     _setState(() {
       for (final draft in blockedDrafts) {
         draft.saveErrorMessage = message;
@@ -1459,7 +1456,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
       fileState,
       _fileTreePathAliases(fileState, normalizedPath),
     )) {
-      const message = _ChatPageFileViewer._pathMutationInProgressMessage;
+      final message = _pathMutationInProgressMessage;
       _setState(() {
         draft.saveErrorMessage = message;
       });
@@ -1486,13 +1483,11 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (utf8.encode(contentToSave).length >
         _ChatPageFileViewer._maxEditableFileLength) {
       _setState(() {
-        draft.saveErrorMessage = _ChatPageFileViewer._draftTooLargeSaveMessage;
+        draft.saveErrorMessage = _draftTooLargeSaveMessage;
       });
       onUpdated?.call();
       if (!silent) {
-        _showFileOperationSnackBar(
-          _ChatPageFileViewer._draftTooLargeSaveMessage,
-        );
+        _showFileOperationSnackBar(_draftTooLargeSaveMessage);
       }
       return;
     }
@@ -1563,7 +1558,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (!silent &&
         !allowInactiveContext &&
         projectProvider.contextKey == fileState.contextKey) {
-      _showFileOperationSnackBar('File saved.');
+      _showFileOperationSnackBar(context.l10n.filesFileSaved);
     }
   }
 

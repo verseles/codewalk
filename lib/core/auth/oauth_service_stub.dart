@@ -1,3 +1,4 @@
+import '../../core/i18n/l10n_bridge.dart';
 import 'oauth_credential.dart';
 import 'oauth_service_result.dart';
 import 'oauth_token_storage.dart';
@@ -30,14 +31,18 @@ class OAuthService {
 
   Future<OAuthFlowResult> authenticate({bool skipCache = false}) async {
     return OAuthFlowResult(
-      error: 'Cloudflare Access OAuth is not supported on this platform.',
+      error:
+          L10nBridge.current?.serverOAuthNotSupported ??
+          'Cloudflare Access OAuth is not supported on this platform',
       token: null,
     );
   }
 
   Future<OAuthFlowResult> refreshCredential(OAuthCredential credential) async {
     return OAuthFlowResult(
-      error: 'Cloudflare Access OAuth is not supported on this platform.',
+      error:
+          L10nBridge.current?.serverOAuthNotSupported ??
+          'Cloudflare Access OAuth is not supported on this platform',
       token: null,
     );
   }

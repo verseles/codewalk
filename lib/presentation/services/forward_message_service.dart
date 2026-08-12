@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_session.dart';
@@ -224,7 +225,12 @@ class ForwardMessageService {
 
     for (final project in openProjects) {
       if (!serverReachable) {
-        groups.add(ForwardProjectGroup(project: project, sessions: const <ForwardSession>[]));
+        groups.add(
+          ForwardProjectGroup(
+            project: project,
+            sessions: const <ForwardSession>[],
+          ),
+        );
         continue;
       }
       final sessionsResult = await _getChatSessions(
@@ -259,7 +265,7 @@ class ForwardMessageService {
             id: session.id,
             title: session.title?.trim().isNotEmpty == true
                 ? session.title!.trim()
-                : 'Untitled',
+                : L10nBridge.current?.forwardUntitled ?? 'Untitled',
             updatedAt: session.time,
             directory: project.path,
             providerId: null,
@@ -400,10 +406,7 @@ class ForwardMessageService {
     // records it as a `send` failure rather than silently treating it as
     // a successful send followed by an undo-resolve miss.
     await for (final result in stream) {
-      result.fold(
-        (failure) => throw failure,
-        (_) => null,
-      );
+      result.fold((failure) => throw failure, (_) => null);
     }
     final undoEntry = await _resolveForwardedUserMessageId(
       sessionId: target.sessionId,
@@ -431,10 +434,7 @@ class ForwardMessageService {
         limit: 3,
       ),
     );
-    final messages = result.fold(
-      (_) => <ChatMessage>[],
-      (value) => value,
-    );
+    final messages = result.fold((_) => <ChatMessage>[], (value) => value);
     // The REST endpoint returns messages chronologically (oldest first).
     // We need the *most recent* user message — the one we just created —
     // so iterate from the tail of the list. The previous forward order
@@ -465,9 +465,7 @@ class ForwardMessageService {
         limit: 1,
       ),
     );
-    return result.fold<String?>(
-      (_) => null,
-      (messages) {
+    return result.fold<String?>((_) => null, (messages) {
       if (messages.isEmpty) return null;
       final last = messages.last;
       for (final part in last.parts) {
@@ -476,8 +474,7 @@ class ForwardMessageService {
         }
       }
       return null;
-      },
-    );
+    });
   }
 
   bool _serverReachable() {
@@ -487,7 +484,10 @@ class ForwardMessageService {
     return status == ServerHealthStatus.healthy;
   }
 
-  String _composeForwardedText({required String text, required String provenanceLine}) {
+  String _composeForwardedText({
+    required String text,
+    required String provenanceLine,
+  }) {
     final buffer = StringBuffer();
     if (provenanceLine.trim().isNotEmpty) {
       buffer.writeln(provenanceLine.trim());

@@ -80,6 +80,7 @@ extension SettingsProviderOpenCodeDefaults on SettingsProvider {
       _openCodeDefaultsLoaded = true;
     } catch (error, stackTrace) {
       _openCodeDefaultsError =
+          L10nBridge.current?.settingsBehaviorOpenCodeDefaultsLoadError ??
           'Could not load OpenCode-backed defaults from the active server.';
       AppLogger.warn(
         'Failed to load OpenCode-backed defaults',

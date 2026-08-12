@@ -1,7 +1,11 @@
+import 'package:codewalk/core/i18n/l10n_bridge.dart';
+import 'package:codewalk/l10n/generated/app_localizations_en.dart';
 import 'package:codewalk/presentation/utils/session_title_formatter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  tearDown(() => L10nBridge.update(null));
+
   group('SessionTitleFormatter', () {
     test('returns explicit non-empty title when provided', () {
       final title = SessionTitleFormatter.displayTitle(
@@ -23,6 +27,18 @@ void main() {
       expect(title, 'Today 10:30 (2/11/2026)');
     });
 
+    test('formats today with generated localization', () {
+      L10nBridge.update(AppLocalizationsEn());
+
+      final title = SessionTitleFormatter.displayTitle(
+        time: DateTime(2026, 2, 11, 10, 30),
+        title: null,
+        now: DateTime(2026, 2, 11, 12, 0),
+      );
+
+      expect(title, 'Today 10:30 (2/11/2026)');
+    });
+
     test('formats yesterday fallback with absolute date', () {
       final title = SessionTitleFormatter.fallbackTitle(
         time: DateTime(2026, 2, 10, 9, 5),
@@ -32,7 +48,29 @@ void main() {
       expect(title, 'Yesterday 09:05 (2/10/2026)');
     });
 
+    test('formats yesterday with generated localization', () {
+      L10nBridge.update(AppLocalizationsEn());
+
+      final title = SessionTitleFormatter.fallbackTitle(
+        time: DateTime(2026, 2, 10, 9, 5),
+        now: DateTime(2026, 2, 11, 12, 0),
+      );
+
+      expect(title, 'Yesterday 09:05 (2/10/2026)');
+    });
+
     test('formats recent weekday fallback', () {
+      final title = SessionTitleFormatter.fallbackTitle(
+        time: DateTime(2026, 2, 9, 14, 15),
+        now: DateTime(2026, 2, 11, 12, 0),
+      );
+
+      expect(title, 'Mon 14:15 (2/9/2026)');
+    });
+
+    test('formats recent weekday with generated localization', () {
+      L10nBridge.update(AppLocalizationsEn());
+
       final title = SessionTitleFormatter.fallbackTitle(
         time: DateTime(2026, 2, 9, 14, 15),
         now: DateTime(2026, 2, 11, 12, 0),

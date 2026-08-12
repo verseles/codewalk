@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_realtime.dart';
@@ -26,6 +27,15 @@ class ChatRepositoryImpl implements ChatRepository {
     return ServerFailure(message, exception.code);
   }
 
+  NetworkFailure _networkFailure() => NetworkFailure(
+    L10nBridge.current?.chatProviderErrorNetworkShort ??
+        'Network connection failed',
+  );
+
+  UnknownFailure _unknownFailure() => UnknownFailure(
+    L10nBridge.current?.chatProviderErrorUnknownShort ?? 'Unknown error',
+  );
+
   @override
   Future<Either<Failure, List<ChatSession>>> getSessions({
     String? directory,
@@ -46,9 +56,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load sessions'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -70,9 +80,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -95,9 +105,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to create session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -124,9 +134,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to update session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -148,9 +158,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to delete session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -172,9 +182,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to share session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -196,9 +206,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to unshare session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -224,9 +234,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to fork session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -242,9 +252,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load session status'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -266,9 +276,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load session children'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -290,9 +300,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load session todo'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -316,9 +326,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load session diff'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -342,9 +352,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load message list'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -368,9 +378,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to load message'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -399,31 +409,39 @@ class ChatRepositoryImpl implements ChatRepository {
       AppLogger.info('Repository send stream completed session=$sessionId');
     } on NotFoundException {
       AppLogger.warn('Repository send failed: session not found $sessionId');
-      yield const Left(NotFoundFailure('Session not found'));
+      yield Left(
+        NotFoundFailure(
+          L10nBridge.current?.chatProviderErrorSessionNotFound ??
+              'Session not found',
+        ),
+      );
     } on ValidationException catch (e) {
       AppLogger.warn('Repository send failed: validation error');
       final message = e.message.trim().isEmpty
-          ? 'Invalid input parameters'
+          ? L10nBridge.current?.chatProviderErrorInvalidInput ??
+                'Invalid input parameters'
           : e.message.trim();
       yield Left(ValidationFailure(message));
     } on ConflictException catch (e) {
       AppLogger.warn('Repository send failed: session conflict');
       final message = e.message.trim().isEmpty
-          ? 'Session is busy processing another request.'
+          ? L10nBridge.current?.errorSessionBusy ??
+                'Session is busy processing another request.'
           : e.message.trim();
       yield Left(ServerFailure(message, e.code));
     } on ServerException catch (e) {
       AppLogger.warn('Repository send failed: server error');
       final message = e.message.trim().isEmpty
-          ? 'Failed to send message'
+          ? L10nBridge.current?.chatProviderErrorSendMessage ??
+                'Failed to send message'
           : e.message.trim();
       yield Left(ServerFailure(message, e.code));
     } on NetworkException {
       AppLogger.warn('Repository send failed: network error');
-      yield const Left(NetworkFailure('Network connection failed'));
+      yield Left(_networkFailure());
     } catch (e) {
       AppLogger.error('Repository send failed: unexpected exception', error: e);
-      yield const Left(UnknownFailure('Unknown error'));
+      yield Left(_unknownFailure());
     }
   }
 
@@ -441,9 +459,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       yield Left(_serverFailure(e, 'Failed to subscribe to realtime events'));
     } on NetworkException {
-      yield const Left(NetworkFailure('Network connection failed'));
+      yield Left(_networkFailure());
     } catch (_) {
-      yield const Left(UnknownFailure('Unknown error'));
+      yield Left(_unknownFailure());
     }
   }
 
@@ -457,9 +475,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       yield Left(_serverFailure(e, 'Failed to subscribe to global events'));
     } on NetworkException {
-      yield const Left(NetworkFailure('Network connection failed'));
+      yield Left(_networkFailure());
     } catch (_) {
-      yield const Left(UnknownFailure('Unknown error'));
+      yield Left(_unknownFailure());
     }
   }
 
@@ -482,9 +500,9 @@ class ChatRepositoryImpl implements ChatRepository {
           : e.message.trim();
       return Left(ServerFailure(message, e.code));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -518,9 +536,9 @@ class ChatRepositoryImpl implements ChatRepository {
           : e.message.trim();
       return Left(ServerFailure(message, e.code));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -541,9 +559,9 @@ class ChatRepositoryImpl implements ChatRepository {
           : e.message.trim();
       return Left(ServerFailure(message, e.code));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -573,9 +591,9 @@ class ChatRepositoryImpl implements ChatRepository {
           : e.message.trim();
       return Left(ServerFailure(message, e.code));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -598,9 +616,9 @@ class ChatRepositoryImpl implements ChatRepository {
           : e.message.trim();
       return Left(ServerFailure(message, e.code));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (_) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -622,9 +640,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to abort session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -648,9 +666,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to revert message'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -672,9 +690,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to restore messages'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -704,9 +722,9 @@ class ChatRepositoryImpl implements ChatRepository {
     } on ServerException catch (e) {
       return Left(_serverFailure(e, 'Failed to initialize session'));
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(_networkFailure());
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(_unknownFailure());
     }
   }
 
@@ -728,13 +746,33 @@ class ChatRepositoryImpl implements ChatRepository {
       );
       return const Right(null);
     } on NotFoundException {
-      return const Left(NotFoundFailure('Session not found'));
+      return Left(
+        NotFoundFailure(
+          L10nBridge.current?.chatProviderErrorSessionNotFound ??
+              'Session not found',
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(_serverFailure(e, 'Failed to summarize session'));
+      return Left(
+        _serverFailure(
+          e,
+          L10nBridge.current?.chatProviderErrorCompactSessionContext ??
+              'Failed to compact session context',
+        ),
+      );
     } on NetworkException {
-      return const Left(NetworkFailure('Network connection failed'));
+      return Left(
+        NetworkFailure(
+          L10nBridge.current?.chatProviderErrorNetworkShort ??
+              'Network connection failed',
+        ),
+      );
     } catch (e) {
-      return const Left(UnknownFailure('Unknown error'));
+      return Left(
+        UnknownFailure(
+          L10nBridge.current?.chatProviderErrorUnknownShort ?? 'Unknown error',
+        ),
+      );
     }
   }
 }

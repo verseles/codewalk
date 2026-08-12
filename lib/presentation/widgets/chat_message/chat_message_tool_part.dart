@@ -29,7 +29,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     final toolIdentityToken = _toolPartIdentityToken(part);
     final latestTaskCommand =
         isTaskTool && part.state.status == ToolStatus.running
-        ? _extractToolCommand(part.state)
+        ? _extractToolCommand(context, part.state)
         : null;
     final taskSecondaryLabel = isTaskTool
         ? _buildTaskToolSecondaryLabel(
@@ -283,7 +283,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     ToolState state,
     String toolName,
   ) {
-    final command = _extractToolCommand(state);
+    final command = _extractToolCommand(context, state);
     switch (state.status) {
       case ToolStatus.running:
         final runningState = state as ToolStateRunning;
@@ -386,6 +386,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     Color? toggleColor,
   }) {
     final textForRender = _truncatePreview(
+      context,
       text,
       maxChars: _ChatMessageWidgetState._maxToolOutputPreviewChars,
       reason: context.l10n.chatMessageToolOutputTruncated,
@@ -423,12 +424,13 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     final backgroundColor = inErrorContainer
         ? colorScheme.onErrorContainer.withValues(alpha: 0.08)
         : colorScheme.surface;
-    final prefix = toolName.trim().toLowerCase() == 'bash'
+    final isCommandTool = toolName.trim().toLowerCase() == 'bash';
+    final prefix = isCommandTool
         ? context.l10n.chatMessageToolCommand
         : context.l10n.chatMessageToolInput;
 
     final shouldColorizeInput =
-        prefix == 'Input' && _isDiffLikeToolInput(toolName, command);
+        !isCommandTool && _isDiffLikeToolInput(toolName, command);
 
     if (shouldColorizeInput) {
       final normalizedInput = _normalizeToolInputDiff(command);
@@ -527,23 +529,26 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     return command;
   }
 
-  String? _extractToolCommand(ToolState state) {
+  String? _extractToolCommand(BuildContext context, ToolState state) {
     switch (state.status) {
       case ToolStatus.pending:
         return null;
       case ToolStatus.running:
         final runningState = state as ToolStateRunning;
-        return _extractCommandFromInputMap(runningState.input);
+        return _extractCommandFromInputMap(context, runningState.input);
       case ToolStatus.completed:
         final completedState = state as ToolStateCompleted;
-        return _extractCommandFromInputMap(completedState.input);
+        return _extractCommandFromInputMap(context, completedState.input);
       case ToolStatus.error:
         final errorState = state as ToolStateError;
-        return _extractCommandFromInputMap(errorState.input);
+        return _extractCommandFromInputMap(context, errorState.input);
     }
   }
 
-  String? _extractCommandFromInputMap(Map<String, dynamic> input) {
+  String? _extractCommandFromInputMap(
+    BuildContext context,
+    Map<String, dynamic> input,
+  ) {
     if (input.isEmpty) {
       return null;
     }
@@ -569,6 +574,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     final command = readString(input['command']) ?? readString(input['cmd']);
     if (command != null) {
       return _truncatePreview(
+        context,
         command,
         maxChars: _ChatMessageWidgetState._maxToolCommandPreviewChars,
         reason: context.l10n.chatMessageToolCommandTruncated,
@@ -577,7 +583,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
 
     final nestedInput = readMap(input['input']);
     if (nestedInput != null) {
-      final nestedCommand = _extractCommandFromInputMap(nestedInput);
+      final nestedCommand = _extractCommandFromInputMap(context, nestedInput);
       if (nestedCommand != null) {
         return nestedCommand;
       }
@@ -592,6 +598,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
       return null;
     }
     return _truncatePreview(
+      context,
       fallback,
       maxChars: _ChatMessageWidgetState._maxToolCommandPreviewChars,
       reason: context.l10n.chatMessageToolInputTruncated,
@@ -605,9 +612,10 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     final output = state.output.trim();
     if (output.isNotEmpty) {
       return _truncatePreview(
+        context,
         state.output,
         maxChars: _ChatMessageWidgetState._maxToolOutputPreviewChars,
-        reason: 'Tool output preview truncated for app stability.',
+        reason: context.l10n.chatMessageToolOutputTruncated,
       );
     }
 
@@ -623,9 +631,10 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     ]);
     if (directDiff != null && directDiff.trim().isNotEmpty) {
       return _truncatePreview(
+        context,
         directDiff,
         maxChars: _ChatMessageWidgetState._maxToolOutputPreviewChars,
-        reason: 'Diff preview truncated for app stability.',
+        reason: context.l10n.chatMessageDiffPreviewTruncated,
       );
     }
 

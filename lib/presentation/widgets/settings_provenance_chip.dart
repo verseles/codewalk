@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/i18n/l10n_context.dart';
+
 enum SettingsProvenance { opencodeBacked, codewalkLocal, codewalkException }
 
 class SettingsProvenanceChip extends StatelessWidget {
@@ -12,17 +14,17 @@ class SettingsProvenanceChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final (label, backgroundColor, foregroundColor) = switch (provenance) {
       SettingsProvenance.opencodeBacked => (
-        'OpenCode-backed',
+        context.l10n.settingsProvenanceOpenCodeBacked,
         colorScheme.primaryContainer,
         colorScheme.onPrimaryContainer,
       ),
       SettingsProvenance.codewalkLocal => (
-        'CodeWalk-local',
+        context.l10n.settingsProvenanceCodeWalkLocal,
         colorScheme.secondaryContainer,
         colorScheme.onSecondaryContainer,
       ),
       SettingsProvenance.codewalkException => (
-        'CodeWalk exception',
+        context.l10n.settingsProvenanceCodeWalkException,
         colorScheme.tertiaryContainer,
         colorScheme.onTertiaryContainer,
       ),

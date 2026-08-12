@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../../domain/entities/chat_session.dart';
 import '../providers/chat_provider.dart';
@@ -408,9 +409,11 @@ class _ChatSessionListState extends State<ChatSessionList> {
         ? visualTokens.controlRadius
         : BorderRadius.circular(10);
     final isPinned = widget.pinnedSessionIds.contains(session.id);
-    final childLabel = childCount == 1
-        ? '1 sub-conversation'
-        : '$childCount sub-conversations';
+    final childLabel =
+        L10nBridge.current?.chatSessionSubConversationCount(childCount) ??
+        (childCount == 1
+            ? '1 sub-conversation'
+            : '$childCount sub-conversations');
     final hasRecentUnreadHighlight =
         sessionAttention.hasRecentUnreadCompletion && isRootSession;
     final subtitleText = _sidebarSummary(session.summary);
@@ -662,17 +665,24 @@ class _ChatSessionListState extends State<ChatSessionList> {
     final difference = now.difference(time);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return L10nBridge.current?.chatMessageJustNow ?? 'Just now';
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
+      return L10nBridge.current?.chatMessageMinutesAgo(difference.inMinutes) ??
+          '${difference.inMinutes}m ago';
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
+      return L10nBridge.current?.chatMessageHoursAgo(difference.inHours) ??
+          '${difference.inHours}h ago';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return L10nBridge.current?.chatMessageDaysAgo(difference.inDays) ??
+          '${difference.inDays}d ago';
     } else if (difference.inDays < 30) {
-      return '${(difference.inDays / 7).floor()}w ago';
+      return L10nBridge.current?.chatMessageWeeksAgo(
+            (difference.inDays / 7).floor(),
+          ) ??
+          '${(difference.inDays / 7).floor()}w ago';
     } else {
-      return '${time.month}/${time.day}';
+      return L10nBridge.current?.chatMessageShortDate(time.day, time.month) ??
+          '${time.month}/${time.day}';
     }
   }
 }

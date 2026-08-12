@@ -194,7 +194,7 @@ extension _ChatPageShortcuts on _ChatPageState {
       return;
     }
     final rawMessage =
-        chatProvider.errorMessage ?? 'Failed to stop current response';
+        chatProvider.errorMessage ?? context.l10n.chatFailedToStopResponse;
     _showChatPageMessageSnackBar(
       normalizeAbortMessageForDisplay(rawMessage),
       showCloseIcon: true,

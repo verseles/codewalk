@@ -93,12 +93,12 @@
   "behaviorCustomDisplayName": "কাস্টম প্রদর্শন নাম",
   "behaviorCutsAutomaticMobile": "ব্যাকগ্রাউন্ড ডাউনলোড বন্ধ করে এবং ফোরগ্রাউন্ড স্বয়ংক্রিয় রিফ্রেশ প্রতি {inSeconds} সেকেন্ডে একটি বার্স্টে সীমাবদ্ধ করে স্বয়ংক্রিয় মোবাইল ডেটা ব্যবহার কমায়।",
   "behaviorDataSaverActive": "মোবাইল ডেটাতে এখন সক্রিয়।",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "আক্রমনাত্মক",
+  "behaviorDataSaverAggressiveDescription": "কম-ব্যান্ডউইথ মোড: শুধুমাত্র দৃশ্যমান ওয়ার্কস্পেস স্ট্রিম সক্রিয় থাকে, বৈশ্বিক আপডেট বিরতিতে রাখা হয় এবং স্বয়ংক্রিয় রিফ্রেশ দীর্ঘ বিরতিতে হয়।",
   "behaviorDataSaverCellularOnly": "সংযোগটি সেলুলার/মোবাইল হলেই প্রযোজ্য।",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "বন্ধ",
+  "behaviorDataSaverOffHint": "সম্পূর্ণ রিয়েলটাইম এবং স্বয়ংক্রিয় রিফ্রেশ সক্রিয় রয়েছে।",
+  "behaviorDataSaverStandard": "মানক",
   "behaviorDataSaverWaiting": "পরবর্তী মোবাইল-ডেটা সিঙ্ক উইন্ডোর জন্য অপেক্ষা করা হচ্ছে।",
   "behaviorDisabled": "নিষ্ক্রিয়",
   "behaviorLightweightTasksLike": "হালকা কাজ যেমন",
@@ -142,8 +142,8 @@
   "chatBadgeDataSaverActive": "সেলুলার ডেটা সেভার সক্রিয়।",
   "chatBadgeServerNeedsAttention": "সার্ভার সংযোগে মনোযোগ প্রয়োজন।",
   "chatBadgeSyncing": "কথোপকথন সিঙ্ক হচ্ছে...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "এই টার্ন শেষ হলে উত্তরটি একটি একক ব্লক হিসেবে প্রদর্শিত হবে।",
+  "chatBlockResponsePendingTitle": "উত্তর তৈরি হচ্ছে",
   "chatCachedConversationsYet": "এখনও কোনো ক্যাশ করা কথোপকথন নেই৷",
   "chatChangedFilesAvailable": "এই অধিবেশনের জন্য কোন পরিবর্তিত ফাইল উপলব্ধ নেই.",
   "chatChildrenChatProviderCurrentSessionChildren": "চাইল্ড: {length}",
@@ -509,26 +509,26 @@
   "filesRefresh": "ফাইল রিফ্রেশ করুন",
   "filesSearchHint": "নাম বা পথ দ্বারা ফাইল অনুসন্ধান করুন",
   "filesTitle": "ফাইল",
-  "forwardAction": "Forward",
-  "forwardAllFailed": "Could not forward to any session",
-  "forwardCancel": "Cancel",
-  "forwardDialogSubtitle": "Select one or more conversations",
-  "forwardDialogTitle": "Forward to…",
-  "forwardLoading": "Loading sessions…",
-  "forwardNoOpenProjects": "No open projects with sessions",
-  "forwardNoProviderModel": "Select a provider and model before forwarding",
-  "forwardNoSessions": "No recent sessions",
-  "forwardPartial": "Forwarded to {success} of {total}",
-  "forwardProvenanceLabel": "Forwarded from: {origin}",
-  "forwardRetry": "Retry",
-  "forwardSearchHint": "Search",
-  "forwardSelectedCount": "{count} selected",
-  "forwardSend": "Forward",
-  "forwardServerOffline": "Server offline",
+  "forwardAction": "ফরোয়ার্ড",
+  "forwardAllFailed": "কোনো সেশনে ফরোয়ার্ড করা যায়নি",
+  "forwardCancel": "বাতিল",
+  "forwardDialogSubtitle": "এক বা একাধিক কথোপকথন নির্বাচন করুন",
+  "forwardDialogTitle": "ফরোয়ার্ড করুন…",
+  "forwardLoading": "সেশন লোড হচ্ছে…",
+  "forwardNoOpenProjects": "সেশনসহ কোনো খোলা প্রজেক্ট নেই",
+  "forwardNoProviderModel": "ফরোয়ার্ড করার আগে একটি প্রোভাইডার এবং মডেল নির্বাচন করুন",
+  "forwardNoSessions": "কোনো সাম্প্রতিক সেশন নেই",
+  "forwardPartial": "{total} এর মধ্যে {success}টিতে ফরোয়ার্ড করা হয়েছে",
+  "forwardProvenanceLabel": "{origin} থেকে ফরোয়ার্ড করা হয়েছে",
+  "forwardRetry": "আবার চেষ্টা করুন",
+  "forwardSearchHint": "অনুসন্ধান",
+  "forwardSelectedCount": "{count}টি নির্বাচিত",
+  "forwardSend": "ফরোয়ার্ড",
+  "forwardServerOffline": "সার্ভার অফলাইন",
   "forwardShortcutHint": "Ctrl+Shift+F",
-  "forwardSuccess": "Forwarded to {count} sessions",
-  "forwardUndo": "Undo",
-  "forwardUndoFailed": "Could not undo the forward",
+  "forwardSuccess": "{count}টি সেশনে ফরোয়ার্ড করা হয়েছে",
+  "forwardUndo": "পূর্বাবস্থায় ফিরুন",
+  "forwardUndoFailed": "ফরোয়ার্ড পূর্বাবস্থায় ফেরানো যায়নি",
   "logsAppLogs": "অ্যাপ লগ",
   "logsClear": "সাফ লগ",
   "logsCloseSearch": "অনুসন্ধান বন্ধ করুন",
@@ -590,7 +590,7 @@
   "msgFilteredLogsCopied": "ফিল্টার করা লগ ক্লিপবোর্ডে কপি করা হয়েছে",
   "msgInfoAgent": "এজেন্ট",
   "msgInfoCompaction": "কম্প্যাকশন",
-  "msgInfoCost": "খরচ: \\${cost}",
+  "msgInfoCost": "খরচ: ${cost}",
   "msgInfoMessageInfo": "বার্তা তথ্য",
   "msgInfoModel": "মডেল: {modelId}",
   "msgInfoNoMetadata": "কোন মেটাডেটা উপলব্ধ নেই",
@@ -838,7 +838,7 @@
   "sessionDiffFilesCount": "ডিফ ফাইল: {count}",
   "sessionDiffLinesAddedRemoved": "+{added} লাইন যোগ করা হয়েছে -{removed} লাইন সরানো হয়েছে",
   "sessionDiffLinesCollapsed": "{count} লাইনগুলি ভেঙে গেছে — প্রসারিত করতে আলতো চাপুন৷",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "পরিবর্তিত ফাইল লোড হচ্ছে…",
   "sessionDiffReview": "পরিবর্তনগুলি পর্যালোচনা করুন",
   "sessionDiffSplit": "বিভক্ত",
   "sessionDiffSummary": "সারাংশ",
@@ -923,8 +923,8 @@
   "settingsAppearanceBrandColorDynamicBlocked": "একটি ব্র্যান্ডের রঙ বাছাই করতে ওয়ালপেপারের রঙগুলি অক্ষম করুন৷",
   "settingsAppearanceBrandColorNormal": "অ্যাপ প্যালেটের জন্য একটি বীজের রঙ বেছে নিন।",
   "settingsAppearanceBrandColorPresetBlocked": "একটি ব্র্যান্ডের রঙ বাছাই করতে CodeWalk Classic-এ স্যুইচ করুন।",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "কথোপকথনের টেক্সটের আকার",
+  "settingsAppearanceChatFontScaleDescription": "সিস্টেম টেক্সটের আকারের উপর চ্যাট বার্তা এবং কম্পোজার টেক্সটের আকার বাড়ান বা কমান।",
   "settingsAppearanceCodeWalkClassic": "কোডওয়াক ক্লাসিক",
   "settingsAppearanceComposerTips": "সুরকার টিপস",
   "settingsAppearanceComposerTipsDescription": "সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷",
@@ -943,8 +943,8 @@
   "settingsAppearanceDensityNormal": "স্বাভাবিক",
   "settingsAppearanceDensitySpacious": "প্রশস্ত",
   "settingsAppearanceDescription": "থিম, রঙ, টেক্সট সাইজ এবং চ্যাট প্রদর্শন চয়ন করুন",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "টেক্সটের আকার",
+  "settingsAppearanceFontSizeDescription": "সিস্টেম টেক্সট, কথোপকথনের টেক্সট এবং টার্মিনাল টেক্সটের আকার সামঞ্জস্য করুন।",
   "settingsAppearanceLight": "আলো",
   "settingsAppearanceMathRendering": "গণিত রেন্ডারিং",
   "settingsAppearanceMathRenderingDescription": "চ্যাট বার্তায় LaTeX গণিত রাশিগুলিকে টাইপসেট সমীকরণ হিসেবে রেন্ডার করুন।",
@@ -957,12 +957,12 @@
   "settingsAppearanceSectionDescription": "আপনার কর্মপ্রবাহের জন্য ভিজ্যুয়াল ঘনত্ব এবং বার্তা সারফেস টিউন করুন।",
   "settingsAppearanceSectionTitle": "চেহারা",
   "settingsAppearanceSystem": "সিস্টেম",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "সিস্টেম টেক্সটের আকার",
+  "settingsAppearanceSystemFontScaleDescription": "অ্যাপ শেলের সব টেক্সটের আকার বাড়ান বা কমান, মেনু, ডায়ালগ এবং সাইডবারসহ।",
   "settingsAppearanceTaskList": "টাস্ক তালিকা",
   "settingsAppearanceTaskListDescription": "সেশন টাস্ক লিস্ট উইজেট দেখান বা লুকান।",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "টার্মিনাল টেক্সটের আকার",
+  "settingsAppearanceTerminalFontSizeDescription": "এমবেডেড টার্মিনালের ফন্টের আকার পরিবর্তন করুন। চলমান সেশনে তাৎক্ষণিক প্রযোজ্য।",
   "settingsAppearanceTheme": "থিম",
   "settingsAppearanceThemeDescription": "হালকা, অন্ধকার বা সিস্টেম মোড চয়ন করুন, তারপর CodeWalk ক্লাসিক প্যালেট রাখুন বা একটি OpenCode প্রিসেট এ স্যুইচ করুন।",
   "settingsAppearanceVisualStyle": "ভিজ্যুয়াল স্টাইল",
@@ -987,14 +987,14 @@
   "settingsBehaviorAutoupdateCaveat": "CodeWalk রিলিজ চেকের জন্য সম্পর্কে ব্যবহার করুন। এই সেটিংটি শুধুমাত্র অফিসিয়াল OpenCode `autoupdate` কনফিগারেশনকে মিরর করে।",
   "settingsBehaviorAutoupdateHelp": "আপস্ট্রিম OpenCode রানটাইম আপডেট নিয়ন্ত্রণ করে, CodeWalk অ্যাপ আপডেট চেক নয়।",
   "settingsBehaviorCellularDataSaver": "সেলুলার ডেটা সেভার",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
-  "settingsBehaviorComposerSpellCheck": "Composer spell check",
-  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorChatRenderMode": "চ্যাট রেন্ডার মোড",
+  "settingsBehaviorChatRenderModeBlock": "ব্লক",
+  "settingsBehaviorChatRenderModeBlockDescription": "বর্তমান টার্ন একক ব্লক হিসেবে দেখানোর আগ পর্যন্ত লাইভ সহায়ক টেক্সট, যুক্তি এবং টুল কার্ড লুকিয়ে রাখুন।",
+  "settingsBehaviorChatRenderModeDescription": "সহায়কের উত্তর স্ট্রিম করার সময় দেখাবেন নাকি বর্তমান টার্ন শেষ হওয়ার পরে দেখাবেন তা চয়ন করুন।",
+  "settingsBehaviorChatRenderModeLive": "লাইভ",
+  "settingsBehaviorChatRenderModeLiveDescription": "OpenCode ইভেন্ট স্ট্রিম করার সময় সহায়কের টেক্সট, যুক্তি ও টুলের কার্যকলাপ দেখান।",
+  "settingsBehaviorComposerSpellCheck": "কম্পোজার বানান পরীক্ষা",
+  "settingsBehaviorComposerSpellCheckDescription": "চ্যাট কম্পোজারে প্ল্যাটফর্মের নেটিভ বানান পরীক্ষা, পরামর্শ এবং স্বয়ংক্রিয় সংশোধন ব্যবহার করুন।",
   "settingsBehaviorConfigDeferred": "CodeWalk বর্তমান প্রতিক্রিয়া শেষ হওয়ার পরে এই OpenCode সেটিং প্রয়োগ করবে।",
   "settingsBehaviorConfigUpdateFailed": "OpenCode {field} আপডেট করা যায়নি।",
   "settingsBehaviorConversationUsername": "কথোপকথনের ব্যবহারকারীর নাম",
@@ -1260,11 +1260,11 @@
   "speechMoonshineStaysDownloadable": "Moonshine ডাউনলোডযোগ্য এবং অ্যাপ বান্ডেলের বাইরে থাকে। এই ডেস্কটপ ডিভাইসের জন্য একটি মডেল বাছুন এবং যদি আপনি স্থান ফিরে চান তাহলে পরে এটি সরান।",
   "speechNative": "নেটিভ",
   "speechNativeSTTDisabled": "এই অ্যাপে Linux-এ নেটিভ STT অক্ষম করা আছে। প্যারাকিট নতুন ইনস্টলের জন্য ডিফল্ট ইঞ্জিন।",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "Windows-এ CodeWalk তার WASAPI মাইক্রোফোন ব্যাকএন্ডের মাধ্যমে স্থানীয় অন-ডিভাইস স্পিচ রিকগনিশন ব্যবহার করে। স্থিতিশীলতার জন্য Windows-এর নেটিভ স্পিচ রিকগনিশন নিষ্ক্রিয় করা আছে।",
   "speechNativeStartsFaster": "নেটিভ দ্রুত শুরু হয়. শেরপা ভারী সেটআপ এবং গভীর মডেল নিয়ন্ত্রণ সহ সম্পূর্ণরূপে অন-ডিভাইস চালান।",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechOpenMicrophoneSettings": "মাইক্রোফোন সেটিংস খুলুন",
+  "speechOpenSpeechPrivacy": "স্পিচ গোপনীয়তা খুলুন",
+  "speechOpenSpeechSettings": "স্পিচ সেটিংস খুলুন",
   "speechParakeet": "প্যারাকিট",
   "speechParakeetModelsDesktop": "প্যারাকিট মডেল (ডেস্কটপ)",
   "speechParakeetStaysDownloadable": "প্যারাকিট ডাউনলোডযোগ্য এবং অ্যাপ বান্ডিলের বাইরে থাকে। এটি বর্তমানে 25টি ইউরোপীয় ভাষার জন্য অপ্টিমাইজ করা একটি বহুভাষিক মডেল প্রকাশ করে।",
@@ -1280,7 +1280,7 @@
   "speechSherpaModelsLinux": "শেরপা মডেল (লিনাক্স)",
   "speechSpeechText": "টেক্সট থেকে বক্তৃতা",
   "speechUnavailableOnPlatform": "এই প্ল্যাটফর্মে {service} স্পিচ উপলব্ধ নয়।",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "Windows ভয়েস ইনপুট অন-ডিভাইস মডেলসহ CodeWalk WASAPI ক্যাপচার ব্যবহার করে। ডেস্কটপ অ্যাপগুলোর জন্য মাইক্রোফোন অ্যাক্সেস চালু রাখুন; নিচের বাটনগুলো সমস্যা সমাধানের জন্য Windows সেটিংস খোলে।",
   "statusConnected": "সংযুক্ত",
   "statusDelayed": "বিলম্বিত",
   "statusFailed": "ব্যর্থ",
@@ -1420,5 +1420,788 @@
   "settingsNavigationGroupSetup": "সেটআপ",
   "settingsNavigationGroupSupport": "সহায়তা এবং ডায়াগনস্টিকস",
   "settingsNavigationNoResults": "কোনো সেটিংস পাওয়া যায়নি",
-  "settingsNavigationSearchHint": "সেটিংস অনুসন্ধান করুন"
+  "settingsNavigationSearchHint": "সেটিংস অনুসন্ধান করুন",
+  "filesAlreadyExists": "একই নামে একটি ফাইল বা ফোল্ডার ইতিমধ্যে বিদ্যমান।",
+  "filesCopyPath": "পাথ কপি করুন",
+  "filesCreateFileTitle": "ফাইল তৈরি করুন",
+  "filesCreateFolderTitle": "ফোল্ডার তৈরি করুন",
+  "filesDelete": "মুছুন",
+  "filesDeleteConfirm": "{name} মুছবেন? এটি আর ফিরিয়ে আনা যাবে না। ফোল্ডার এবং এর ভেতরের বিষয়বস্তু মুছে যাবে।",
+  "filesDeleteTitle": "{name} মুছুন",
+  "filesFileCreated": "ফাইল তৈরি হয়েছে।",
+  "filesFolderCreated": "ফোল্ডার তৈরি হয়েছে।",
+  "filesInvalidName": "পাথ বিভাজক ছাড়া একটি বৈধ নাম লিখুন।",
+  "filesNameHint": "নাম",
+  "filesNew": "নতুন",
+  "filesNewFile": "নতুন ফাইল",
+  "filesNewFolder": "নতুন ফোল্ডার",
+  "filesOperationFailed": "ফাইল অপারেশন ব্যর্থ হয়েছে।",
+  "filesOperationUnavailable": "এই সার্ভারের জন্য ফাইল অপারেশন উপলব্ধ নয়।",
+  "filesOutsideRoot": "পাথটি প্রজেক্ট রুটের বাইরে।",
+  "filesPathCopied": "পাথ কপি হয়েছে।",
+  "filesPathMissing": "পাথটি বিদ্যমান নেই।",
+  "filesPermissionDenied": "অনুমতি অস্বীকার করা হয়েছে।",
+  "filesRename": "নাম পরিবর্তন করুন",
+  "filesRenameTitle": "{name} এর নাম পরিবর্তন করুন",
+  "filesRenamed": "নাম পরিবর্তন হয়েছে।",
+  "filesRootDeleteBlocked": "প্রজেক্ট রুট মুছে ফেলা যাবে না।",
+  "filesDeleted": "মুছে ফেলা হয়েছে।",
+  "sessionTabsGestureHintTitle": "সেশন ট্যাবে নতুন নিয়ন্ত্রণ আছে",
+  "sessionTabsGestureHintBody": "একটি ট্যাব বন্ধ করতে ডাবল-ক্লিক করুন বা ডাবল-ট্যাপ করুন। সেশন অ্যাকশন খুলতে ডান-ক্লিক করুন বা চেপে ধরে রাখুন। প্রদর্শন টগল থেকে ট্যাব নিষ্ক্রিয় করা যায়।",
+  "sessionTabsGestureHintAcknowledge": "বুঝেছি",
+  "sessionTabsGestureHintDisableTabs": "ট্যাব নিষ্ক্রিয় করুন",
+  "sessionTabRenameAction": "সেশনের নাম পরিবর্তন করুন",
+  "sessionTabClosedMessage": "ট্যাব \"{title}\" বন্ধ হয়েছে",
+  "sessionTabUndo": "পূর্বাবস্থায় ফেরান",
+  "sessionTabRestoreFailed": "ট্যাব পুনরুদ্ধার করা যায়নি।",
+  "sessionTabChangeIconAction": "আইকন পরিবর্তন করুন",
+  "sessionTabIconPickerTitle": "ট্যাব আইকন চয়ন করুন",
+  "sessionTabIconUseProjectIcon": "প্রজেক্ট আইকন ব্যবহার করুন",
+  "sessionTabIconApplied": "ট্যাব আইকন আপডেট হয়েছে।",
+  "sessionTabIconSaveFailed": "ট্যাব আইকন সংরক্ষণ করা যায়নি।",
+  "sessionTabIconPresetCode": "কোড",
+  "sessionTabIconPresetTerminal": "টার্মিনাল",
+  "sessionTabIconPresetBug": "বাগ",
+  "sessionTabIconPresetTasks": "কাজ",
+  "sessionTabIconPresetLaunch": "চালু করুন",
+  "sessionTabIconPresetIdea": "আইডিয়া",
+  "sessionTabIconPresetResearch": "গবেষণা",
+  "sessionTabIconPresetDesign": "ডিজাইন",
+  "sessionTabIconPresetData": "ডেটা",
+  "sessionTabIconPresetCloud": "ক্লাউড",
+  "sessionTabIconPresetSecurity": "নিরাপত্তা",
+  "sessionTabIconPresetTools": "টুলস",
+  "workspaceNoActiveContext": "কোনো সক্রিয় কনটেক্সট নেই",
+  "settingsAppearanceContrastLow": "নিম্ন",
+  "settingsAppearanceContrastStandard": "মানক",
+  "settingsAppearanceContrastMedium": "মাঝারি",
+  "settingsAppearanceContrastMediumHigh": "মাঝারি-উচ্চ",
+  "settingsNotificationsSystemSoundsWebUnavailable": "ওয়েবে উপলব্ধ নয়।",
+  "settingsNotificationsSystemSoundsAndroid": "সিস্টেম থেকে Android নোটিফিকেশন শব্দ।",
+  "settingsNotificationsSystemSoundsFreedesktop": "/usr/share/sounds/freedesktop/stereo থেকে Freedesktop শব্দ।",
+  "settingsNotificationsSystemSoundsPlatform": "অপারেটিং সিস্টেম যেখানে সিস্টেম শব্দ প্রদান করে সেখানে সমর্থিত।",
+  "serversQuickGuideTitle": "দ্রুত সেটআপ",
+  "serversQuickGuideIntro": "CodeWalk হলো অ্যাপটি। OpenCode হলো ইঞ্জিন — এই সংযোগ কাজ করার আগে এটি চালু থাকতে হবে।",
+  "serversQuickGuideStepInstallCli": "১. OpenCode CLI ইনস্টল করুন।",
+  "serversQuickGuideRunPowerShell": "২. PowerShell-এ চালান:",
+  "serversQuickGuideRunTerminal": "২. আপনার টার্মিনালে চালান:",
+  "serversQuickGuideProtectPassword": "পাসওয়ার্ড দিয়ে অ্যাক্সেস সুরক্ষিত করুন",
+  "serversQuickGuideServerPassword": "সার্ভার পাসওয়ার্ড",
+  "serversQuickGuideInstallOptions": "অন্যান্য অফিসিয়াল ইনস্টল বিকল্প: ইনস্টল স্ক্রিপ্ট, npm, bun, pnpm, Homebrew, অথবা GitHub Releases থেকে একটি বাইনারি।",
+  "serversQuickGuideVerifyHint": "সার্ভার চালু করার পর, URLটি CodeWalk-এ পেস্ট করার আগে /global/health বা /doc সাড়া দেয় কিনা নিশ্চিত করুন।",
+  "shortcutsPressKeyCombination": "এখন কী কম্বিনেশন টিপুন",
+  "settingsProvenanceOpenCodeBacked": "OpenCode-সমর্থিত",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk-স্থানীয়",
+  "settingsProvenanceCodeWalkException": "CodeWalk ব্যতিক্রম",
+  "shortcutsErrorInvalid": "অবৈধ শর্টকাট",
+  "shortcutsErrorUnsupportedKey": "অসমর্থিত শর্টকাট কী",
+  "shortcutsErrorConflict": "\"{conflict}\"-এর সাথে সংঘর্ষ",
+  "settingsSessionAttentionStopSaveFailed": "সেশন অ্যাটেনশন বন্ধ করা হয়েছে কিন্তু সেটিংটি সংরক্ষণ করা যায়নি।",
+  "settingsSessionAttentionEnableFailed": "সেশন অ্যাটেনশন চালু করা যায়নি।",
+  "settingsSessionAttentionSaveFailedStopped": "সেশন অ্যাটেনশন সংরক্ষণ করা যায়নি এবং এটি বন্ধ করা হয়েছে।",
+  "settingsSessionAttentionStillRunning": "সেশন অ্যাটেনশন এখনও চলছে। এটি আবার বন্ধ করার চেষ্টা করুন।",
+  "settingsSessionAttentionStopFailed": "সেশন অ্যাটেনশন বন্ধ করা যায়নি। আবার চেষ্টা করুন।",
+  "settingsSessionAttentionCapabilityUnavailable": "সেশন অ্যাটেনশন হোস্ট ক্ষমতা উপলব্ধ নেই।",
+  "settingsServerFallbackProviderName": "সার্ভারে কনফিগার করা হয়েছে",
+  "composerStopResponse": "উত্তর বন্ধ করুন",
+  "composerSendMessageWhileResponding": "উত্তর চলাকালীন বার্তা পাঠান",
+  "composerSendMessage": "বার্তা পাঠান",
+  "chatTourComposerDescription": "এখানে আপনার অনুরোধ টাইপ করুন।",
+  "chatTourSendDescription": "এখানে আপনার বার্তা পাঠান।",
+  "composerAttachmentFallbackName": "সংযুক্তি",
+  "composerContextFallbackName": "কনটেক্সট",
+  "searchableDropdownSearchHint": "অনুসন্ধান",
+  "searchableDropdownEmptyText": "কোনো মিল পাওয়া যায়নি",
+  "speechApiKeyStorageUnavailable": "নিরাপদ TTS API কী স্টোরেজ উপলব্ধ নেই।",
+  "speechApiKeyRemoved": "API কী মুছে ফেলা হয়েছে।",
+  "speechApiKeySaved": "API কী এই ডিভাইসে নিরাপদে সংরক্ষণ করা হয়েছে।",
+  "speechReadAloudTestText": "এটি একটি CodeWalk টেক্সট-টু-স্পিচ পরীক্ষা।",
+  "speechNativeDisabledWindows": "স্থিতিশীলতার জন্য Windows-এ অক্ষম। CodeWalk WASAPI ক্যাপচারের মাধ্যমে Parakeet বা অন্য কোনো অন-ডিভাইস ইঞ্জিন ব্যবহার করুন।",
+  "speechNativeUnavailableLinux": "Linux-এ উপলব্ধ নয়। স্পিচ ইনপুটের জন্য Parakeet ব্যবহার করুন।",
+  "speechNotAvailableOnPlatform": "এই প্ল্যাটফর্মে উপলব্ধ নয়।",
+  "speechSherpaUnavailableAndroid": "ছোট APK আকারের জন্য অপ্টিমাইজ করা Android বিল্ডে উপলব্ধ নয়।",
+  "speechMoonshineDesktopOnlyHint": "শুধুমাত্র ডেস্কটপে উপলব্ধ। Android শুধুমাত্র নেটিভ থাকবে।",
+  "speechParakeetDesktopOnlyHint": "শুধুমাত্র ডেস্কটপে উপলব্ধ। অফলাইন বহুভাষিক শনাক্তকরণ ব্যবহার করে।",
+  "speechSenseVoiceDesktopOnlyHint": "শুধুমাত্র ডেস্কটপে উপলব্ধ। চাইনিজ, ক্যান্টোনিজ, জাপানিজ, কোরিয়ান এবং ইংরেজির জন্য সবচেয়ে শক্তিশালী।",
+  "speechNativeSubtitle": "সহজ এবং দ্রুত স্টার্টআপ।",
+  "speechSherpaSubtitle": "ভারী, পরীক্ষামূলক এবং বাগ-প্রবণ। ডাউনলোড করা মডেলের সাথে প্রায়শই বেশি নির্ভুল।",
+  "speechMoonshineSubtitle": "sherpa_onnx অফলাইন শনাক্তকরণ এবং ডাউনলোডযোগ্য মডেল ব্যবহার করে শুধুমাত্র ডেস্কটপের পরীক্ষামূলক পথ।",
+  "speechParakeetSubtitle": "একটি বহুভাষিক ডাউনলোডযোগ্য মডেলসহ শুধুমাত্র ডেস্কটপের অফলাইন NeMo ট্রান্সডিউসার পথ।",
+  "speechSenseVoiceSubtitle": "চাইনিজ, ক্যান্টোনিজ, জাপানিজ, কোরিয়ান এবং ইংরেজির জন্য টিউন করা শুধুমাত্র ডেস্কটপের অফলাইন পথ।",
+  "speechMoonshineModel": "Moonshine মডেল",
+  "speechSherpaLanguage": "Sherpa ভাষা",
+  "speechSearchSherpaLanguage": "Sherpa ভাষা অনুসন্ধান করুন",
+  "speechNoLanguagePacksFound": "কোনো ভাষা প্যাক পাওয়া যায়নি",
+  "speechTextToSpeechProvider": "টেক্সট-টু-স্পিচ প্রদানকারী",
+  "speechProviderSystemNative": "সিস্টেম / নেটিভ",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (পরীক্ষামূলক)",
+  "speechProviderOpenAiCompatible": "OpenAI-সামঞ্জস্যপূর্ণ",
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech পরীক্ষামূলক",
+  "speechEdgeExperimentalDescription": "এই ডিভাইস থেকে সরাসরি অননুমোদিত Edge Read Aloud পরিষেবা ব্যবহার করে। আপনি read aloud ব্যবহার করলে বার্তার টেক্সট Microsoft-এ পাঠানো হয় এবং Microsoft প্রাইভেট প্রোটোকল পরিবর্তন করলে পরিষেবাটি ভেঙে যেতে পারে।",
+  "speechEdgeVoice": "Edge ভয়েস",
+  "speechEdgeVoiceListUnavailable": "ডিফল্ট Edge ভয়েস ব্যবহার করা হচ্ছে। এই মুহূর্তে ভয়েস তালিকা লোড করা যায়নি।",
+  "speechEdgeVoicesLoaded": "Microsoft Edge Speech ভয়েস থেকে লোড করা হয়েছে।",
+  "speechCloudTtsPrivacy": "ক্লাউড TTS গোপনীয়তা",
+  "speechCloudTtsPrivacyDescription": "ক্লাউড TTS নির্বাচিত সহকারী বার্তার টেক্সট কনফিগার করা প্রদানকারীর কাছে পাঠায়। API কী এই ডিভাইসের নিরাপদ স্টোরেজে সংরক্ষিত থাকে।",
+  "speechBaseUrl": "বেস URL",
+  "speechApiKey": "API কী",
+  "speechApiKeySavedHelper": "একটি কী সংরক্ষিত আছে। এটি প্রতিস্থাপন করতে একটি নতুন মান লিখুন, অথবা মুছে ফেলতে একটি খালি মান সংরক্ষণ করুন।",
+  "speechNoApiKeySaved": "কোনো API কী সংরক্ষিত নেই।",
+  "speechSaveApiKey": "API কী সংরক্ষণ করুন",
+  "speechModel": "মডেল",
+  "speechPitchNotSupported": "OpenAI-সামঞ্জস্যপূর্ণ TTS পিচ সমর্থন করে না, তাই এই প্রদানকারীর জন্য এটি লুকানো আছে।",
+  "speechTestVoice": "ভয়েস পরীক্ষা করুন",
+  "dialogMoonshineVoiceSetupDescription": "Moonshine sherpa_onnx-এর মাধ্যমে অন-ডিভাইসে চলে। একবার একটি মডেল বেছে নিন এবং এটি শুধুমাত্র এই ডেস্কটপ ডিভাইসের জন্য ডাউনলোড করুন।",
+  "dialogParakeetVoiceSetupDescription": "Parakeet sherpa_onnx অফলাইন শনাক্তকরণের মাধ্যমে অন-ডিভাইসে চলে। বহুভাষিক STT সক্ষম করতে এই ডেস্কটপ ডিভাইসের জন্য এটি একবার ডাউনলোড করুন।",
+  "dialogSenseVoiceSetupDescription": "SenseVoice sherpa_onnx অফলাইন শনাক্তকরণের মাধ্যমে অন-ডিভাইসে চলে। এটি চাইনিজ, ক্যান্টোনিজ, জাপানিজ, কোরিয়ান এবং ইংরেজির জন্য সবচেয়ে শক্তিশালী।",
+  "dialogSherpaVoiceSetupDescription": "Sherpa ভয়েস ইনপুটের জন্য একটি অন-ডিভাইস স্পিচ মডেল প্রয়োজন। আপনার ভাষা নির্বাচন করুন এবং এটি একবার ডাউনলোড করুন (~147 MB)।",
+  "speechSilenceSeconds": "{value} সেকেন্ড",
+  "speechModelInstalled": "মডেল ইনস্টল করা হয়েছে ({modelId})",
+  "speechModelMissing": "মডেল নেই ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} MB",
+  "speechSystemDefaultLanguage": "সিস্টেম ডিফল্ট ({language})",
+  "speechModelListLoadFailed": "{service} মডেল তালিকা লোড করা ব্যর্থ হয়েছে: {error}",
+  "speechDownloadFailed": "ডাউনলোড ব্যর্থ হয়েছে: {error}",
+  "speechFailedToRemoveModel": "মডেল সরানো ব্যর্থ হয়েছে: {error}",
+  "speechBaseUrlExample": "উদাহরণ: {url}",
+  "speechModelDefaultHelper": "ডিফল্ট: {model}",
+  "notificationPermissionOrQuestionNeedsInput": "একটি টুল অনুমতি বা প্রশ্নে আপনার ইনপুট প্রয়োজন।",
+  "notificationPermissionNeedsInput": "একটি টুল অনুমতিতে আপনার ইনপুট প্রয়োজন।",
+  "notificationQuestionNeedsInput": "একটি টুল প্রশ্নে আপনার ইনপুট প্রয়োজন।",
+  "notificationSessionError": "একটি সেশন একটি ত্রুটি রিপোর্ট করেছে।",
+  "notificationChannelErrors": "CodeWalk ত্রুটি",
+  "notificationChannelErrorsDescription": "CodeWalk ত্রুটি সতর্কতা",
+  "notificationChannelPermissions": "CodeWalk অনুমতি",
+  "notificationChannelPermissionsDescription": "CodeWalk অ্যাকশন প্রয়োজনীয় সতর্কতা",
+  "notificationChannelAgent": "CodeWalk এজেন্ট",
+  "notificationChannelAgentDescription": "CodeWalk এজেন্ট সম্পন্ন হওয়ার সতর্কতা",
+  "notificationActionOpen": "খুলুন",
+  "foregroundMonitorNotificationBody": "নির্ভরযোগ্য ব্যাকগ্রাউন্ড সতর্কতা সক্রিয়",
+  "foregroundMonitorNotificationTitle": "ব্যাকগ্রাউন্ড মনিটরিং সক্রিয়",
+  "foregroundMonitorNotificationOneSession": "একটি সেশন মনিটর করা হচ্ছে",
+  "foregroundMonitorNotificationSessionCount": "{count}টি সেশন মনিটর করা হচ্ছে",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{১টি সেশনে মনোযোগ প্রয়োজন} other{{count}টি সেশনে মনোযোগ প্রয়োজন}}",
+  "sessionAttentionOverlayPermissionRequired": "অন্যান্য অ্যাপের উপরে প্রদর্শনের অনুমতি প্রয়োজন।",
+  "sessionAttentionIosInAppOnly": "সেশন অ্যাটেনশন শুধুমাত্র CodeWalk-এর ভিতরে উপলব্ধ।",
+  "sessionAttentionOverlayPermissionGrantPrompt": "অন্যান্য অ্যাপের উপরে প্রদর্শনের অনুমতি দিন, তারপর আবার চেষ্টা করুন।",
+  "sessionAttentionAndroidStartFailed": "Android সেশন অ্যাটেনশন পরিষেবা শুরু করা যায়নি।",
+  "chatMessageTruncatedChars": "[{count} অক্ষর ছাঁটা হয়েছে] {reason}",
+  "chatMessageJustNow": "এইমাত্র",
+  "chatMessageMinutesAgo": "{count} মি. আগে",
+  "chatMessageHoursAgo": "{count} ঘণ্টা আগে",
+  "chatMessageDaysAgo": "{count} দিন আগে",
+  "chatMessageDateTime": "{month}/{day} {hour}:{minute}",
+  "chatMessageYourMessage": "আপনার বার্তা",
+  "chatMessageAssistantMessage": "সহকারীর বার্তা",
+  "chatMessageStepStarted": "ধাপ #{step} শুরু হয়েছে",
+  "chatMessageStepStartedWithSnapshot": "ধাপ #{step} শুরু হয়েছে: {snapshot}",
+  "chatMessageStepFinished": "ধাপ #{step} শেষ হয়েছে: {reason} • টোকেন {tokens} • ${cost}",
+  "chatMessagePatchCount": "{count, plural, =1{১টি প্যাচ} other{{count}টি প্যাচ}}",
+  "chatMessageToolRun": "টুল রান",
+  "chatMessageToolExecution": "টুল এক্সিকিউশন",
+  "chatMessageToolChainMore": "{count, plural, =1{+১টি আরও} other{+{count}টি আরও}}",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+১টি ধরন} other{+{count}টি ধরন}}",
+  "chatMessageToolAttentionCount": "{count, plural, =1{১টিতে মনোযোগ প্রয়োজন} other{{count}টিতে মনোযোগ প্রয়োজন}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{১টি সম্পন্ন} other{{count}টি সম্পন্ন}}",
+  "chatMessageToolCallsTitle": "টুল কল",
+  "chatMessageDiffPreviewTruncated": "অ্যাপ স্থিতিশীলতার জন্য ডিফ প্রিভিউ ছাঁটা হয়েছে।",
+  "chatMessageLargeMessageTruncated": "অ্যাপ স্থিতিশীলতার জন্য বড় বার্তার প্রিভিউ ছাঁটা হয়েছে।",
+  "chatMessageInvalidLinkFormat": "অবৈধ লিংক ফরম্যাট",
+  "chatMessageUnableToOpenLink": "লিংক খোলা যাচ্ছে না",
+  "sessionTodoInProgressCompact": "{current}/{total} চলছে",
+  "sessionTodoTaskProgress": "কাজ {index}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} সম্পন্ন",
+  "sessionTodoCompletedCount": "কাজ {count}/{total} সম্পন্ন হয়েছে",
+  "sessionTodoTasksCount": "কাজ ({count})",
+  "questionStepOfReview": "ধাপ {current}/{total} - পর্যালোচনা",
+  "questionStepOfQuestion": "ধাপ {current}/{total} - প্রশ্ন",
+  "questionCustomAnswer": "কাস্টম উত্তর",
+  "questionSubmitAnswers": "উত্তর জমা দিন",
+  "questionReviewAnswers": "উত্তর পর্যালোচনা করুন",
+  "permissionRequestTitle": "অনুমতির অনুরোধ: {permission}",
+  "sessionTitleCannotBeEmpty": "শিরোনাম খালি হতে পারে না",
+  "speechProviderUnreachable": "TTS প্রদানকারীতে পৌঁছানো যায়নি।",
+  "speechProviderTemporarilyUnavailable": "TTS প্রদানকারী সাময়িকভাবে অনুপলব্ধ।",
+  "speechProviderQuotaRateLimit": "TTS প্রদানকারী একটি কোটা বা রেট সীমা জানিয়েছে।",
+  "speechApiKeyRejected": "TTS API কী প্রদানকারী দ্বারা প্রত্যাখ্যাত হয়েছে।",
+  "speechProviderRequestRejected": "TTS প্রদানকারী স্পিচ অনুরোধটি প্রত্যাখ্যান করেছে।",
+  "speechProviderEmptyAudio": "TTS প্রদানকারী একটি খালি অডিও প্রতিক্রিয়া ফিরিয়েছে।",
+  "speechApiKeyMissing": "এই TTS প্রদানকারী ব্যবহার করতে Settings > Speech-এ একটি API কী যোগ করুন।",
+  "speechEdgeUnreachable": "Microsoft Edge Speech-এ পৌঁছানো যায়নি।",
+  "speechEdgeTimedOut": "Microsoft Edge Speech-এর সময়সীমা শেষ হয়েছে।",
+  "speechEdgeEmptyAudio": "Microsoft Edge Speech একটি খালি অডিও প্রতিক্রিয়া ফিরিয়েছে।",
+  "speechEdgeSynthesisInterrupted": "সংশ্লেষণ সম্পূর্ণ হওয়ার আগেই Microsoft Edge Speech শেষ হয়ে গেছে।",
+  "speechEdgeUnsupportedFrame": "Microsoft Edge Speech একটি অসমর্থিত websocket ফ্রেম ফিরিয়েছে।",
+  "speechEdgeUnsupportedAudio": "Microsoft Edge Speech অসমর্থিত অডিও ডেটা ফিরিয়েছে।",
+  "speechEdgeMalformedAudio": "Microsoft Edge Speech ত্রুটিপূর্ণ অডিও ডেটা ফিরিয়েছে।",
+  "speechEdgeTextTooLong": "Microsoft Edge Speech একবারে সর্বোচ্চ 4096 বাইট পড়তে পারে।",
+  "speechReadAloudNoText": "জোরে পড়ার জন্য কোনো টেক্সট নেই।",
+  "speechReadAloudFailed": "টেক্সট-টু-স্পিচ ব্যর্থ হয়েছে।",
+  "oauthFlowTokenExchangeIncomplete": "অনুমোদন কোড পাঠানোর পরেও টোকেন বিনিময় সম্পূর্ণ হয়নি। অনুগ্রহ করে আবার OAuth সাইন-ইন শুরু করুন।",
+  "oauthFlowTokenExchangeUnexpectedFailure": "টোকেন বিনিময় অপ্রত্যাশিতভাবে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "oauthFlowTokenExchangeHttpFailure": "টোকেন বিনিময় ব্যর্থ হয়েছে (HTTP {statusCode})। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "oauthFlowTokenExchangeTransientFailure": "অস্থায়ী নেটওয়ার্ক সমস্যার কারণে {maxAttempts} বার চেষ্টার পরেও টোকেন বিনিময় ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "oauthFlowCallbackTimeout": "৫ মিনিটের মধ্যে অ্যাপে কোনো অনুমোদন কলব্যাক পৌঁছায়নি। সম্মতির পর ব্রাউজারটি স্থানীয় কলব্যাক ঠিকানায় পুনঃনির্দেশিত হওয়ার কথা ছিল। যদি ব্রাউজারটি পরিবর্তে একটি সংযোগ ত্রুটি দেখায়, তাহলে এই ডিভাইস বা নেটওয়ার্ক লুপব্যাক রিডাইরেক্ট ব্লক করে।",
+  "oauthFlowBrowserOpenFailed": "OAuth সাইন-ইনের জন্য সিস্টেম ব্রাউজার খোলা যায়নি।",
+  "oauthFlowSignInCanceled": "OAuth সাইন-ইন বাতিল করা হয়েছে।",
+  "oauthFlowCallbackServerStartFailed": "স্থানীয় OAuth কলব্যাক সার্ভার শুরু করতে ব্যর্থ হয়েছে।",
+  "oauthFlowCallbackValidationFailed": "OAuth কলব্যাক যাচাই ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "oauthFlowProviderDeclined": "অনুমোদন সার্ভার OAuth অনুরোধটি প্রত্যাখ্যান করেছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "oauthFlowCallbackNotCompleted": "অনুমোদন কলব্যাক সম্পূর্ণ হয়নি",
+  "oauthFlowMetadataMissingEndpoints": "OAuth মেটাডেটায় অনুমোদন/টোকেন এন্ডপয়েন্ট অনুপস্থিত।",
+  "oauthFlowProfileChanged": "OAuth শেষ হওয়ার আগেই সার্ভার প্রোফাইল পরিবর্তিত হয়েছে।",
+  "oauthFlowTokenResponseMissingAccessToken": "OAuth টোকেন প্রতিক্রিয়ায় একটি অ্যাক্সেস টোকেন অন্তর্ভুক্ত ছিল না।",
+  "oauthFlowNoEndpointsDiscovered": "কোনো OAuth এন্ডপয়েন্ট আবিষ্কৃত হয়নি। Cloudflare Dashboard → Access → Applications → [এই অ্যাপ]-এ Managed OAuth সক্ষম করুন।",
+  "oauthFlowUnexpectedError": "OAuth ফ্লো অপ্রত্যাশিতভাবে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "oauthFlowSecureStorageUnavailable": "OAuth-এর জন্য নিরাপদ পরিচয়পত্র স্টোরেজ অনুপলব্ধ।",
+  "speechEngineFallbackNotice": "নির্বাচিত STT ইঞ্জিন অনুপলব্ধ ({reason})। পরিবর্তে {fallback} ব্যবহার করা হচ্ছে।",
+  "speechMicBackendUnavailable": "এই বিল্ডে Windows মাইক্রোফোন ব্যাকএন্ড উপলব্ধ নয়।",
+  "speechMicSpeechPrivacy": "Windows স্পিচ পরিষেবাগুলি নিষ্ক্রিয় থাকতে পারে (স্পিচ গোপনীয়তা, অনলাইন স্পিচ রিকগনিশন, বা ভাষা প্যাক)।",
+  "speechMicUnsupportedFormat": "ডিফল্ট মাইক্রোফোন ফরম্যাট সমর্থিত নয়।",
+  "speechMicDeviceBusy": "ডিফল্ট মাইক্রোফোনটি বর্তমানে অন্য একটি অ্যাপ ব্যবহার করছে।",
+  "speechMicNoInputDevice": "কোনো মাইক্রোফোন ইনপুট ডিভাইস উপলব্ধ নেই।",
+  "settingsBehaviorConfigFieldSharingDefault": "শেয়ারিং ডিফল্ট",
+  "settingsBehaviorConfigFieldConversationUsername": "কথোপকথন ব্যবহারকারীর নাম",
+  "settingsBehaviorConfigFieldSnapshotSetting": "স্ন্যাপশট সেটিং",
+  "settingsBehaviorConfigFieldAutoUpdateMode": "অটো-আপডেট মোড",
+  "settingsBehaviorConfigFieldSmallModel": "ছোট মডেল",
+  "settingsBehaviorConfigFieldDefaultAgent": "ডিফল্ট এজেন্ট",
+  "settingsBehaviorConfigFieldDefaultModel": "ডিফল্ট মডেল",
+  "forwardTimeWeeks": "{count} সপ্তাহ",
+  "forwardTimeDays": "{count} দিন",
+  "forwardTimeHours": "{count} ঘণ্টা",
+  "forwardTimeMinutes": "{count} মিনিট",
+  "forwardTimeNow": "এখন",
+  "sessionWeekdaySun": "রবি",
+  "sessionWeekdaySat": "শনি",
+  "sessionWeekdayFri": "শুক্র",
+  "sessionWeekdayThu": "বৃহস্পতি",
+  "sessionWeekdayWed": "বুধ",
+  "sessionWeekdayTue": "মঙ্গল",
+  "sessionWeekdayMon": "সোম",
+  "sessionTitleDateAndTime": "{date} {time}",
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "sessionTitleYesterday": "গতকাল {time} ({date})",
+  "sessionTitleToday": "আজ {time} ({date})",
+  "chatAbortNotice": "আপনি কী ভিন্নভাবে করতে চান?",
+  "workspaceFailedToOpenProjectContext": "প্রজেক্ট প্রসঙ্গ খুলতে ব্যর্থ: {directory}",
+  "workspaceProjectContextOpened": "প্রজেক্ট প্রসঙ্গ খোলা হয়েছে: {directory}",
+  "workspaceProjectRemovedFromHistory": "প্রজেক্ট ইতিহাস থেকে সরানো হয়েছে",
+  "projectProviderErrorLoadProjectList": "প্রজেক্টের তালিকা লোড করতে ব্যর্থ: {error}",
+  "projectProviderErrorReadFile": "ফাইল পড়তে ব্যর্থ: {error}",
+  "projectProviderErrorSearchSymbols": "প্রতীক অনুসন্ধান করতে ব্যর্থ: {error}",
+  "projectProviderErrorContentSearchUnavailable": "বিষয়বস্তু অনুসন্ধান উপলব্ধ নয়: {error}",
+  "projectProviderErrorSearchFiles": "ফাইল অনুসন্ধান করতে ব্যর্থ: {error}",
+  "projectProviderErrorListFiles": "ফাইল তালিকাভুক্ত করতে ব্যর্থ: {error}",
+  "projectProviderErrorPathEmpty": "পাথ খালি হতে পারে না",
+  "projectProviderErrorValidateDirectory": "ডিরেক্টরি যাচাই করতে ব্যর্থ: {error}",
+  "projectProviderErrorListDirectories": "ডিরেক্টরি তালিকাভুক্ত করতে ব্যর্থ: {error}",
+  "projectProviderErrorDirectoryEmpty": "ডিরেক্টরি খালি হতে পারে না",
+  "projectProviderErrorDeleteWorkspace": "ওয়ার্কস্পেস মুছতে ব্যর্থ: {error}",
+  "projectProviderErrorResetWorkspace": "ওয়ার্কস্পেস রিসেট করতে ব্যর্থ: {error}",
+  "projectProviderErrorCreateWorkspace": "ওয়ার্কস্পেস তৈরি করতে ব্যর্থ: {error}",
+  "projectProviderErrorWorkspaceNameEmpty": "ওয়ার্কস্পেসের নাম খালি হতে পারে না",
+  "projectProviderErrorLoadWorkspaces": "ওয়ার্কস্পেস লোড করতে ব্যর্থ: {error}",
+  "projectProviderErrorArchiveProjectPathInvalid": "প্রজেক্ট সংরক্ষণাগারভুক্ত করতে ব্যর্থ: প্রজেক্ট পাথ অবৈধ",
+  "projectProviderErrorArchiveProjectNotFound": "প্রজেক্ট সংরক্ষণাগারভুক্ত করতে ব্যর্থ: প্রজেক্ট পাওয়া যায়নি",
+  "projectProviderErrorOnlyClosedArchivable": "শুধুমাত্র বন্ধ প্রজেক্ট সংরক্ষণাগারভুক্ত করা যাবে",
+  "projectProviderErrorReopenProjectNotFound": "প্রজেক্ট পুনরায় খুলতে ব্যর্থ: প্রজেক্ট পাওয়া যায়নি",
+  "projectProviderErrorAtLeastOneContext": "অন্তত একটি প্রসঙ্গ খোলা থাকতে হবে",
+  "projectProviderErrorSwitchDirectoryEmpty": "প্রজেক্ট পরিবর্তন করতে ব্যর্থ: ডিরেক্টরি খালি",
+  "projectProviderErrorSwitchProjectNotFound": "প্রজেক্ট পরিবর্তন করতে ব্যর্থ: প্রজেক্ট পাওয়া যায়নি",
+  "projectProviderErrorInitializeFailed": "প্রজেক্ট প্রসঙ্গ শুরু করতে ব্যর্থ: {error}",
+  "projectProviderErrorNoProjectContext": "সার্ভার থেকে কোনো প্রজেক্ট প্রসঙ্গ উপলব্ধ নেই",
+  "chatProviderErrorSessionFallback": "সেশন ত্রুটি",
+  "chatProviderErrorUnknown": "অজানা ত্রুটি। অনুগ্রহ করে পরে আবার চেষ্টা করুন",
+  "chatProviderErrorInvalidInput": "অবৈধ ইনপুট প্যারামিটার",
+  "chatProviderErrorNotFound": "রিসোর্স পাওয়া যায়নি",
+  "chatProviderErrorServer": "সার্ভার ত্রুটি। অনুগ্রহ করে পরে আবার চেষ্টা করুন",
+  "chatProviderErrorNetwork": "নেটওয়ার্ক সংযোগ ব্যর্থ হয়েছে। অনুগ্রহ করে নেটওয়ার্ক সেটিংস পরীক্ষা করুন",
+  "chatProviderErrorCompactSessionContext": "সেশনের প্রসঙ্গ কম্প্যাক্ট করতে ব্যর্থ",
+  "chatProviderErrorSelectModelBeforeCompact": "প্রসঙ্গ কম্প্যাক্ট করার আগে একটি মডেল নির্বাচন করুন",
+  "chatProviderErrorCompactUnavailable": "বর্তমান সেশনের জন্য কমপ্যাক্ট প্রসঙ্গ অনুপলব্ধ",
+  "chatProviderErrorWaitForResponseFinish": "কম্প্যাক্ট করার আগে বর্তমান প্রতিক্রিয়া শেষ হওয়ার জন্য অপেক্ষা করুন",
+  "chatProviderErrorStopUnavailable": "বর্তমান সেশনের জন্য থামানো অনুপলব্ধ",
+  "chatProviderErrorStartMessageSend": "বার্তা পাঠানো শুরু করতে ব্যর্থ",
+  "chatProviderErrorSelectProviderModelBeforeSend": "পাঠানোর আগে একটি সংযুক্ত প্রদানকারী বা বিনামূল্যের OpenCode মডেল নির্বাচন করুন",
+  "chatProviderErrorCreateSession": "সেশন তৈরি করতে ব্যর্থ",
+  "chatProviderErrorLoadSessionList": "সেশনের তালিকা লোড করতে ব্যর্থ: {error}",
+  "chatProviderErrorLoadSessionDetails": "কিছু সেশন বিবরণ লোড করা যায়নি",
+  "chatProviderErrorLoadSessionStatus": "সেশনের স্থিতি লোড করতে ব্যর্থ",
+  "chatMessageShortDate": "{month}/{day}",
+  "chatMessageWeeksAgo": "{count} সপ্তাহ আগে",
+  "chatSessionSubConversationCount": "{count, plural, =1{১টি উপ-কথোপকথন} other{{count} টি উপ-কথোপকথন}}",
+  "chatSlashCommandRedo": "শেষ পূর্বাবস্থায় ফেরানো পালা পুনরায় করুন",
+  "chatSlashCommandUndo": "শেষ দৃশ্যমান ব্যবহারকারীর পালা পূর্বাবস্থায় ফেরান",
+  "chatSlashCommandThinking": "চিন্তার বুদবুদ টগল করুন",
+  "chatSlashCommandCompact": "বর্তমান সেশনের প্রসঙ্গ কম্প্যাক্ট করুন",
+  "chatSlashCommandHelp": "কমান্ড সাহায্য দেখান",
+  "chatSlashCommandOpen": "ফাইল খোলার দ্রুত অ্যাকশন",
+  "chatSlashCommandAgent": "এজেন্ট নির্বাচক খুলুন",
+  "chatSlashCommandSessions": "কথোপকথনের তালিকা খুলুন",
+  "chatSlashCommandModels": "মডেল নির্বাচক খুলুন",
+  "chatSlashCommandNew": "নতুন চ্যাট সেশন তৈরি করুন",
+  "terminalTransportUnavailable": "টার্মিনাল ট্রান্সপোর্ট অনুপলব্ধ।",
+  "terminalConnectedTo": "{directory}-এ {serverName}-এর সাথে সংযুক্ত",
+  "attachmentLocalPathBrowserBlocked": "এই সংযুক্তিটি এমন একটি স্থানীয় পাথের দিকে নির্দেশ করে যা ব্রাউজার থেকে খোলা যায় না।",
+  "attachmentBrowserSandboxLocalFile": "ব্রাউজার স্যান্ডবক্স সরাসরি স্থানীয় file:// সংযুক্তি খুলতে বাধা দেয়।",
+  "attachmentSaveTitle": "সংযুক্তি সংরক্ষণ করুন",
+  "filesShellCommandFailed": "ফাইল অপারেশনের শেল কমান্ড ফলাফল ফেরত দেওয়ার আগেই ব্যর্থ হয়েছে।",
+  "filesShellUtilityNotFound": "একটি প্রয়োজনীয় শেল ইউটিলিটি পাওয়া যায়নি।",
+  "filesShellCommandSyntaxError": "ফাইল অপারেশনের শেল কমান্ড সিনট্যাক্স ত্রুটির কারণে ব্যর্থ হয়েছে।",
+  "filesShellCommandTruncated": "ফাইল অপারেশনের শেল কমান্ড সার্ভার দ্বারা ছাঁটাই করা হয়েছে।",
+  "filesShellCommandNoResult": "ফাইল অপারেশনের শেল কমান্ড কোনো ফলাফল ফেরত দেয়নি।",
+  "filesShellCommandDidNotComplete": "ফাইল অপারেশনের শেল কমান্ড সম্পূর্ণ হয়নি।",
+  "filesMalformedResponse": "ফাইল অপারেশন একটি অবৈধ প্রতিক্রিয়া ফিরিয়েছে।",
+  "filesParentNotDirectory": "প্যারেন্ট একটি ডিরেক্টরি নয়।",
+  "filesFileSaved": "ফাইল সংরক্ষিত হয়েছে।",
+  "filesFailedToLoadContent": "ফাইলের বিষয়বস্তু লোড করতে ব্যর্থ",
+  "filesReloadSkippedUnsavedChanges": "অসংরক্ষিত পরিবর্তন আছে; রিলোড এড়িয়ে যাওয়া হয়েছে।",
+  "filesActiveProjectRequired": "ফাইল অপারেশনের জন্য একটি সক্রিয় প্রজেক্ট ডিরেক্টরি প্রয়োজন।",
+  "filesCheckingWriteSupport": "ফাইলে লেখার সমর্থন পরীক্ষা করা হচ্ছে...",
+  "filesLargeFileReadOnly": "সম্পাদনা সচল রাখতে বড় ফাইলগুলো শুধুমাত্র পড়ার জন্য খোলে।",
+  "filesWaitForFileOperation": "ফাইল অপারেশন শেষ হওয়ার জন্য অপেক্ষা করুন।",
+  "filesWaitForSaveBeforePathChange": "এই পাথ পরিবর্তন করার আগে ফাইল সংরক্ষণ শেষ হওয়ার জন্য অপেক্ষা করুন।",
+  "filesSaveChangesBeforePathChange": "এই পাথ পরিবর্তন করার আগে পরিবর্তনগুলি সংরক্ষণ করুন।",
+  "filesSaveChangesBeforeClose": "এই ফাইলটি বন্ধ করার আগে পরিবর্তনগুলি সংরক্ষণ করুন।",
+  "filesDraftTooLargeToSave": "খসড়াটি সম্পাদক থেকে সংরক্ষণ করার মতো খুব বড়।",
+  "filesLinesSelectedCount": "{count, plural, =1{১টি লাইন নির্বাচিত} other{{count} টি লাইন নির্বাচিত}}",
+  "filesOpenFilesCount": "{count, plural, =1{১টি খোলা ফাইল} other{{count} টি খোলা ফাইল}}",
+  "filesNoContentMatches": "কোনো বিষয়বস্তু মিল পাওয়া যায়নি",
+  "filesNoOpenFilesHint": "এখনও কোনো খোলা ফাইল নেই। অনুসন্ধান করতে টাইপ করুন।",
+  "filesFailedToSearch": "ফাইল অনুসন্ধান করতে ব্যর্থ",
+  "filesFailedToLoad": "ফাইল লোড করতে ব্যর্থ",
+  "appProviderErrorFailedToStartProcess": "{tool} প্রক্রিয়া শুরু করতে ব্যর্থ হয়েছে।",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} উপলব্ধ নেই। প্রথমে {runtime} ইনস্টল করুন।",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "{tool} ইনস্টল ব্যর্থ হয়েছে এক্সিট কোড {exitCode} সহ।",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "Bun বুটস্ট্র্যাপ ব্যর্থ হয়েছে এক্সিট কোড {exitCode} সহ।",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "OpenCode ইনস্টলেশন শেষ হয়েছে কিন্তু কমান্ডটি PATH-এ পাওয়া যায়নি।",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "OpenCode ইনস্টলেশন শেষ হয়েছে কিন্তু কমান্ডের পথ নির্ধারণ করা যায়নি।",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "কনফিগার করা কমান্ড পাওয়া যায়নি এবং {tool} PATH-এ নেই।",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "কনফিগার করা কমান্ডের পথ বিদ্যমান নেই।",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "কনফিগার করা কমান্ড বিদ্যমান কিন্তু সংস্করণ যাচাই ব্যর্থ হয়েছে।",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "কনফিগার করা কমান্ডটি কার্যকর করা যায়নি।",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "WSL চেক শুধুমাত্র Windows-এ প্রযোজ্য।",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "পরিচালিত স্থানীয় সার্ভার কনফিগার করতে একটি ডেস্কটপ বিল্ড ব্যবহার করুন।",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "একটি পরিচিত ইনস্টলেশন ডিরেক্টরি থেকে সনাক্ত করা হয়েছে।",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "একটি পরিচিত ইনস্টলেশন ডিরেক্টরি থেকে সনাক্ত করা হয়েছে। PATH রিফ্রেশের প্রয়োজন হতে পারে; সাম্প্রতিক ইনস্টল এখনও সনাক্ত না হলে {appName} পুনরায় খুলুন।",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "GitHub থেকে সর্বশেষ রিলিজ মেটাডেটা আনতে ব্যর্থ হয়েছে।",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "সর্বশেষ রিলিজ মেটাডেটায় অ্যাসেট তালিকা অন্তর্ভুক্ত ছিল না।",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "কোনো সামঞ্জস্যপূর্ণ OpenCode বাইনারি অ্যাসেট পাওয়া যায়নি।",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "নির্বাচিত OpenCode অ্যাসেট ডাউনলোড করতে ব্যর্থ হয়েছে।",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "ডাউনলোড করা অ্যাসেটের চেকসাম যাচাই ব্যর্থ হয়েছে।",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "OpenCode বাইনারি আর্কাইভ নিষ্কাশন করতে ব্যর্থ হয়েছে।",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "নিষ্কাশিত ফাইলগুলিতে {tool} এক্সিকিউটেবল পাওয়া যায়নি।",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "সার্ভার থেকে কোনো সাড়া নেই। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "মডেল থেকে কোনো সাড়া নেই। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "স্পিচ কাজটি বাতিল করা হয়েছে।",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "Microsoft Edge Speech বাতিল করা হয়েছে।",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "সক্রিয়",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "গ্রহণ করা হচ্ছে",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "বিলম্বিত",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "সম্পন্ন",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "মিথস্ক্রিয়ার অপেক্ষায়",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "ত্রুটি",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "সেলুলার ডেটা সেভার সক্রিয়",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "OAuth সাইন-ইন প্রয়োজন",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "Tailscale সংযোগ প্রয়োজন",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "অফলাইন",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "অনুমতি প্রত্যাহার করা হয়েছে",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "পরিষেবা বন্ধ",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "হোস্ট অনুপলব্ধ",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "errorCertificateError": "সার্টিফিকেট ত্রুটি",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorRequestCancelled": "অনুরোধ বাতিল হয়েছে",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorRunShellCommandFailed": "শেল কমান্ড চালানো ব্যর্থ হয়েছে",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "স্ল্যাশ কমান্ড চালানো ব্যর্থ হয়েছে",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "errorSessionBusy": "সেশন অন্য একটি অনুরোধ প্রক্রিয়াকরণে ব্যস্ত।",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorUnknownNetworkError": "অজানা নেটওয়ার্ক ত্রুটি: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "forwardUntitled": "শিরোনামহীন",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "logsEntryError": "ত্রুটি",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "স্ট্যাক",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "sessionTabIconRemoveFailed": "স্থানীয় সেশনের ট্যাব আইকন ডেটা সরাতে ব্যর্থ হয়েছে",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "সক্রিয় সার্ভার থেকে OpenCode-সমর্থিত ডিফল্ট লোড করা যায়নি।",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "setupDebugLinuxLogsPath": "Linux লগ: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "বর্তমান পরিবেশ থেকে একটি বিদ্যমান OpenCode কমান্ড সনাক্ত করার চেষ্টা করা হচ্ছে।",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageDiagnosticsResult": "{platform}-এ {availability}। {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "অনুরোধকৃত বন্ধের পরে পরিচালিত OpenCode সার্ভার বন্ধ হয়ে গেছে।",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageHealthyRunning": "পরিচালিত OpenCode সার্ভার সুস্থ আছে এবং {url}-এ চলছে।",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageInstallStarted": "CodeWalk থেকে OpenCode ইনস্টলেশন শুরু হয়েছে।",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "ব্যর্থ হেলথ চেকের পরে ব্যবহারকারী আরেকটি সার্ভার যোগ করতে বেছে নিয়েছেন।",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "ব্যবহারকারী একটি বিদ্যমান OpenCode সার্ভারে সংযোগ করতে বেছে নিয়েছেন।",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "ব্যবহারকারী নির্দেশিত OpenCode সেটআপ পথ খুলেছেন।",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "ব্যবহারকারী পরিচালিত স্থানীয় OpenCode সেটআপ খুলেছেন।",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "ব্যর্থ হেলথ চেকের পরে ব্যবহারকারী সার্ভার সেটিংস খুলেছেন।",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageStartLocalServer": "{url}-এ পরিচালিত OpenCode সার্ভার চালু করা হচ্ছে।",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppedCleanly": "পরিচালিত OpenCode সার্ভার সঠিকভাবে বন্ধ হয়েছে।",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageStoppingLocalServer": "পরিচালিত OpenCode সার্ভার বন্ধ করা হচ্ছে।",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageTestingServerUrl": "অনবোর্ডিং থেকে OpenCode সার্ভারের URL {url} পরীক্ষা করা হচ্ছে।",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "OpenCode চালান: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "সার্ভার ডকস: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "সার্ভার হেলথ: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugSourceDiagnostics": "ডায়াগনস্টিকস",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceLocalServer": "স্থানীয় সার্ভার",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceManualConnection": "ম্যানুয়াল সংযোগ",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugSourceOnboarding": "অনবোর্ডিং",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceUseExisting": "বিদ্যমান ব্যবহার করুন",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "chatProviderErrorSessionNotFound": "সেশন পাওয়া যায়নি",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "অবৈধ মেসেজ ফরম্যাট",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "নেটওয়ার্ক সংযোগ ব্যর্থ হয়েছে",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "অজানা ত্রুটি",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "টার্মিনাল সেশন তৈরি করতে ব্যর্থ",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "টার্মিনাল এন্ডপয়েন্ট উপলব্ধ নয়",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "অবৈধ টার্মিনাল ডিরেক্টরি",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "টার্মিনাল websocket এখানে উপলব্ধ নয়।",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{১টি কল} other{{count}টি কল}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "সংযোগের সময়সীমা শেষ হয়েছে",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "ক্লায়েন্ট ত্রুটি",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "বার্তা পাঠানো ব্যর্থ হয়েছে",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

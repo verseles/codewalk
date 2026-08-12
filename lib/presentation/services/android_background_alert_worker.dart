@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../data/models/chat_realtime_model.dart';
 import '../../data/models/chat_session_model.dart';
@@ -467,11 +468,39 @@ class AndroidBackgroundAlertWorker {
 
     _initialized = true;
 
+    // The Workmanager isolate never builds a widget tree, so L10nBridge stays
+    // null unless initialized here. Load it from the persisted locale before
+    // any notification or channel string is resolved.
+    await initializeBackgroundLocale();
+
     final runner = _AndroidBackgroundAlertRunner(
       planner: const BackgroundAlertPlanner(),
       notificationDispatcher: _BackgroundNotificationDispatcher(),
     );
     return runner.run(taskName: taskName);
+  }
+
+  /// Initializes [L10nBridge] from the persisted locale so translated
+  /// notification and channel strings are used in the background isolate,
+  /// where no widget tree exists to update the bridge. Falls back to English
+  /// on any failure. This refreshes on every task because Workmanager may
+  /// reuse an isolate after the user changes the app language.
+  static Future<void> initializeBackgroundLocale() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      final settings = _readExperienceSettingsFromPrefs(prefs);
+      L10nBridge.update(
+        resolveBackgroundAlertLocalizations(settings.localeCode),
+      );
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to initialize background alert locale',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      L10nBridge.update(null);
+    }
   }
 }
 
@@ -1308,8 +1337,12 @@ class _BackgroundNotificationDispatcher {
       if (hasSessionId) {
         await _plugin.show(
           id: _summaryNotificationId(normalizedSessionId),
-          title: 'Conversation updates',
-          body: 'Open this conversation to clear related notifications.',
+          title:
+              L10nBridge.current?.notificationConversationUpdates ??
+              'Conversation updates',
+          body:
+              L10nBridge.current?.notificationOpenToClear ??
+              'Open this conversation to clear related notifications.',
           notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
               channel.id,
@@ -1382,23 +1415,30 @@ class _BackgroundNotificationDispatcher {
   String _sessionSummaryTag(String sessionId) => 'session-summary:$sessionId';
 
   _NotificationChannelConfig _channelFor(String categoryKey) {
+    final l10n = L10nBridge.current;
     return switch (categoryKey) {
-      'errors' => const _NotificationChannelConfig(
+      'errors' => _NotificationChannelConfig(
         id: 'codewalk_errors',
-        name: 'CodeWalk errors',
-        description: 'CodeWalk error alerts',
+        name: l10n?.notificationChannelErrors ?? 'CodeWalk errors',
+        description:
+            l10n?.notificationChannelErrorsDescription ??
+            'CodeWalk error alerts',
         highImportance: true,
       ),
-      'permissions' => const _NotificationChannelConfig(
+      'permissions' => _NotificationChannelConfig(
         id: 'codewalk_permissions',
-        name: 'CodeWalk permissions',
-        description: 'CodeWalk action required alerts',
+        name: l10n?.notificationChannelPermissions ?? 'CodeWalk permissions',
+        description:
+            l10n?.notificationChannelPermissionsDescription ??
+            'CodeWalk action required alerts',
         highImportance: true,
       ),
-      _ => const _NotificationChannelConfig(
+      _ => _NotificationChannelConfig(
         id: 'codewalk_agent',
-        name: 'CodeWalk agent',
-        description: 'CodeWalk agent completion alerts',
+        name: l10n?.notificationChannelAgent ?? 'CodeWalk agent',
+        description:
+            l10n?.notificationChannelAgentDescription ??
+            'CodeWalk agent completion alerts',
         highImportance: false,
       ),
     };

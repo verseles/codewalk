@@ -69,14 +69,19 @@ class _SherpaModelDownloadDialogState extends State<SherpaModelDownloadDialog> {
           : entries.first.code;
       _manager.setPreferredLanguage(preselect);
 
+      if (!mounted) return;
       setState(() {
         _models = entries;
         _selectedCode = preselect;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load model list: $e';
+        _errorMessage = context.l10n.speechModelListLoadFailed(
+          e.toString(),
+          'Sherpa',
+        );
         _isLoading = false;
       });
     }
@@ -105,7 +110,7 @@ class _SherpaModelDownloadDialogState extends State<SherpaModelDownloadDialog> {
       if (mounted) {
         setState(() {
           _isDownloading = false;
-          _errorMessage = 'Download failed: $e';
+          _errorMessage = context.l10n.speechDownloadFailed(e.toString());
         });
       }
     }
@@ -166,16 +171,13 @@ class _SherpaModelDownloadDialogState extends State<SherpaModelDownloadDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Sherpa voice input requires an on-device speech model. '
-          'Select your language and download it once (~147 MB).',
-        ),
+        Text(context.l10n.dialogSherpaVoiceSetupDescription),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: _selectedCode,
           isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Language',
+          decoration: InputDecoration(
+            labelText: context.l10n.dialogLanguage,
             border: const OutlineInputBorder(),
           ),
           items: _models
@@ -192,7 +194,7 @@ class _SherpaModelDownloadDialogState extends State<SherpaModelDownloadDialog> {
         if (selected != null) ...[
           const SizedBox(height: 8),
           Text(
-            '~${selected.sizeMb} MB',
+            context.l10n.speechModelSizeMb(selected.sizeMb.toString()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

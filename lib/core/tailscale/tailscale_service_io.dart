@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:tailscale/tailscale.dart' as ts;
 
+import '../i18n/l10n_bridge.dart';
 import '../logging/app_logger.dart';
 import 'tailscale_peer.dart';
 import 'tailscale_state.dart';
@@ -47,9 +48,11 @@ class TailscaleService {
   }) async {
     if (Platform.isWindows) {
       return _publish(
-        const TailscaleState(
+        TailscaleState(
           nodeState: TailscaleNodeState.unsupported,
-          message: 'Tailscale is not supported on Windows.',
+          message:
+              L10nBridge.current?.tailscaleNotSupportedOnWindows ??
+              'Tailscale is not supported on Windows.',
         ),
       );
     }
@@ -243,7 +246,9 @@ class TailscaleService {
       ts.NodeState.needsMachineAuth => TailscaleState(
         nodeState: TailscaleNodeState.needsMachineAuth,
         authUrl: status.authUrl,
-        message: 'This Tailscale node is waiting for admin approval.',
+        message:
+            L10nBridge.current?.tailscaleWaitingAdminApproval ??
+            'This Tailscale node is waiting for admin approval.',
       ),
       ts.NodeState.starting => const TailscaleState(
         nodeState: TailscaleNodeState.connecting,
@@ -265,7 +270,9 @@ class TailscaleService {
       ts.NodeState.needsMachineAuth => TailscaleState(
         nodeState: TailscaleNodeState.needsMachineAuth,
         authUrl: _state.authUrl,
-        message: 'This Tailscale node is waiting for admin approval.',
+        message:
+            L10nBridge.current?.tailscaleWaitingAdminApproval ??
+            'This Tailscale node is waiting for admin approval.',
       ),
       ts.NodeState.starting => const TailscaleState(
         nodeState: TailscaleNodeState.connecting,

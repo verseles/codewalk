@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../core/errors/exceptions.dart';
 import '../../core/constants/api_constants.dart';
+import '../../core/errors/exceptions.dart';
+import '../../core/i18n/l10n_bridge.dart';
 import '../models/pty_session_model.dart';
 
 abstract class TerminalRemoteDataSource {
@@ -31,17 +32,29 @@ class TerminalRemoteDataSourceImpl implements TerminalRemoteDataSource {
         queryParameters: <String, String>{'directory': directory},
       );
       if (response.statusCode != 200) {
-        throw const ServerException('Failed to create terminal session');
+        throw ServerException(
+          L10nBridge.current?.terminalCreateFailed ??
+              'Failed to create terminal session',
+        );
       }
       return PtySessionModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (error) {
       if (error.response?.statusCode == 404) {
-        throw const NotFoundException('Terminal endpoint is not available');
+        throw NotFoundException(
+          L10nBridge.current?.terminalEndpointUnavailable ??
+              'Terminal endpoint is not available',
+        );
       }
       if (error.response?.statusCode == 400) {
-        throw const ValidationException('Invalid terminal directory');
+        throw ValidationException(
+          L10nBridge.current?.terminalInvalidDirectory ??
+              'Invalid terminal directory',
+        );
       }
-      throw const ServerException('Failed to create terminal session');
+      throw ServerException(
+        L10nBridge.current?.terminalCreateFailed ??
+            'Failed to create terminal session',
+      );
     }
   }
 

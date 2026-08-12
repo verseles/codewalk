@@ -1,3 +1,4 @@
+import '../../core/i18n/l10n_bridge.dart';
 import 'local_opencode_server_runtime_types.dart';
 
 LocalOpencodeServerRuntime createLocalOpencodeServerRuntime() {
@@ -27,28 +28,33 @@ class _UnsupportedLocalOpencodeServerRuntime
     required int port,
     String? commandPath,
   }) async {
-    return const LocalOpencodeServerStartResult(
+    return LocalOpencodeServerStartResult(
       ok: false,
-      errorMessage: 'Managed local server is available only on desktop.',
+      errorMessage:
+          L10nBridge.current?.appProviderDesktopOnly ??
+          'Managed local server is available only on desktop.',
     );
   }
 
   @override
   Future<LocalOpencodeEnvironmentReport> diagnose({String? commandPath}) async {
-    return const LocalOpencodeEnvironmentReport(
+    return LocalOpencodeEnvironmentReport(
       supported: false,
       platform: 'unsupported',
       opencode: LocalToolStatus(
         available: false,
-        note: 'Managed local server is available only on desktop.',
+        note:
+            L10nBridge.current?.appProviderDesktopOnly ??
+            'Managed local server is available only on desktop.',
       ),
-      node: LocalToolStatus(available: false),
-      npm: LocalToolStatus(available: false),
-      bun: LocalToolStatus(available: false),
-      wsl: LocalToolStatus(available: false),
+      node: const LocalToolStatus(available: false),
+      npm: const LocalToolStatus(available: false),
+      bun: const LocalToolStatus(available: false),
+      wsl: const LocalToolStatus(available: false),
       hasNetworkAccess: false,
       installDirectoryWritable: false,
       recommendation:
+          L10nBridge.current?.appProviderDesktopBuildRequired ??
           'Use a desktop build to configure a managed local server.',
     );
   }
@@ -59,9 +65,11 @@ class _UnsupportedLocalOpencodeServerRuntime
     void Function(String line)? onLog,
   }) async {
     onLog?.call('Managed local server is available only on desktop.');
-    return const LocalOpencodeInstallResult(
+    return LocalOpencodeInstallResult(
       ok: false,
-      errorMessage: 'Managed local server is available only on desktop.',
+      errorMessage:
+          L10nBridge.current?.appProviderDesktopOnly ??
+          'Managed local server is available only on desktop.',
     );
   }
 

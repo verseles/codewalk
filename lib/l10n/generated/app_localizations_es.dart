@@ -361,25 +361,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get behaviorDataSaverActive => 'Activo ahora con datos móviles.';
 
   @override
-  String get behaviorDataSaverAggressive => 'Aggressive';
+  String get behaviorDataSaverAggressive => 'Agresivo';
 
   @override
   String get behaviorDataSaverAggressiveDescription =>
-      'Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.';
+      'Modo de bajo ancho de banda: solo el flujo del espacio de trabajo visible permanece en vivo, las actualizaciones globales se pausan y las actualizaciones automáticas se espacian.';
 
   @override
   String get behaviorDataSaverCellularOnly =>
       'Solo se aplica cuando la conexión es celular/móvil.';
 
   @override
-  String get behaviorDataSaverOff => 'Off';
+  String get behaviorDataSaverOff => 'Desactivado';
 
   @override
   String get behaviorDataSaverOffHint =>
-      'Full realtime and automatic refreshes are enabled.';
+      'El tiempo real completo y las actualizaciones automáticas están habilitados.';
 
   @override
-  String get behaviorDataSaverStandard => 'Standard';
+  String get behaviorDataSaverStandard => 'Estándar';
 
   @override
   String get behaviorDataSaverWaiting =>
@@ -539,10 +539,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chatBlockResponsePendingDescription =>
-      'The answer will appear as a single block when this turn finishes.';
+      'La respuesta aparecerá como un solo bloque cuando termine este turno.';
 
   @override
-  String get chatBlockResponsePendingTitle => 'Generating response';
+  String get chatBlockResponsePendingTitle => 'Generando respuesta';
 
   @override
   String get chatCachedConversationsYet =>
@@ -1759,56 +1759,57 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get filesAlreadyExists =>
-      'A file or folder with that name already exists.';
+      'Ya existe un archivo o carpeta con ese nombre.';
 
   @override
-  String get filesCopyPath => 'Copy path';
+  String get filesCopyPath => 'Copiar ruta';
 
   @override
-  String get filesCreateFileTitle => 'Create file';
+  String get filesCreateFileTitle => 'Crear archivo';
 
   @override
-  String get filesCreateFolderTitle => 'Create folder';
+  String get filesCreateFolderTitle => 'Crear carpeta';
 
   @override
-  String get filesDelete => 'Delete';
+  String get filesDelete => 'Eliminar';
 
   @override
   String filesDeleteConfirm(String name) {
-    return 'Delete $name? This cannot be undone. Folders and their contents will be deleted.';
+    return '¿Eliminar $name? Esta acción no se puede deshacer. Las carpetas se eliminarán con su contenido.';
   }
 
   @override
   String filesDeleteTitle(String name) {
-    return 'Delete $name';
+    return 'Eliminar $name';
   }
 
   @override
   String get filesFilesFound => 'No se encontraron archivos';
 
   @override
-  String get filesFileCreated => 'File created.';
+  String get filesFileCreated => 'Archivo creado.';
 
   @override
-  String get filesFolderCreated => 'Folder created.';
+  String get filesFolderCreated => 'Carpeta creada.';
 
   @override
   String get filesHideSidebar => 'Ocultar barra de Archivos';
 
   @override
-  String get filesInvalidName => 'Enter a valid name without path separators.';
+  String get filesInvalidName =>
+      'Introduzca un nombre válido sin separadores de ruta.';
 
   @override
-  String get filesNameHint => 'Name';
+  String get filesNameHint => 'Nombre';
 
   @override
-  String get filesNew => 'New';
+  String get filesNew => 'Nuevo';
 
   @override
-  String get filesNewFile => 'New file';
+  String get filesNewFile => 'Nuevo archivo';
 
   @override
-  String get filesNewFolder => 'New folder';
+  String get filesNewFolder => 'Nueva carpeta';
 
   @override
   String get filesNames => 'Nombres';
@@ -1825,118 +1826,119 @@ class AppLocalizationsEs extends AppLocalizations {
   String get filesQuickOpenFile => 'Apertura rápida de archivo';
 
   @override
-  String get filesOperationFailed => 'File operation failed.';
+  String get filesOperationFailed => 'La operación de archivo falló.';
 
   @override
   String get filesOperationUnavailable =>
-      'File operations are not available for this server.';
+      'Las operaciones de archivo no están disponibles para este servidor.';
 
   @override
-  String get filesOutsideRoot => 'The path is outside the project root.';
+  String get filesOutsideRoot => 'La ruta está fuera de la raíz del proyecto.';
 
   @override
-  String get filesPathCopied => 'Path copied.';
+  String get filesPathCopied => 'Ruta copiada.';
 
   @override
-  String get filesPathMissing => 'Path does not exist.';
+  String get filesPathMissing => 'La ruta no existe.';
 
   @override
-  String get filesPermissionDenied => 'Permission denied.';
+  String get filesPermissionDenied => 'Permiso denegado.';
 
   @override
   String get filesRefresh => 'Actualizar archivos';
 
   @override
-  String get filesRename => 'Rename';
+  String get filesRename => 'Renombrar';
 
   @override
   String filesRenameTitle(String name) {
-    return 'Rename $name';
+    return 'Renombrar $name';
   }
 
   @override
-  String get filesRenamed => 'Renamed.';
+  String get filesRenamed => 'Renombrado.';
 
   @override
-  String get filesRootDeleteBlocked => 'The project root cannot be deleted.';
+  String get filesRootDeleteBlocked =>
+      'La raíz del proyecto no se puede eliminar.';
 
   @override
   String get filesSearchHint => 'Buscar archivos por nombre o ruta';
 
   @override
-  String get filesDeleted => 'Deleted.';
+  String get filesDeleted => 'Eliminado.';
 
   @override
   String get filesTitle => 'Archivos';
 
   @override
-  String get forwardAction => 'Forward';
+  String get forwardAction => 'Reenviar';
 
   @override
-  String get forwardAllFailed => 'Could not forward to any session';
+  String get forwardAllFailed => 'No se pudo reenviar a ninguna sesión';
 
   @override
-  String get forwardCancel => 'Cancel';
+  String get forwardCancel => 'Cancelar';
 
   @override
-  String get forwardDialogSubtitle => 'Select one or more conversations';
+  String get forwardDialogSubtitle => 'Seleccione una o más conversaciones';
 
   @override
-  String get forwardDialogTitle => 'Forward to…';
+  String get forwardDialogTitle => 'Reenviar a…';
 
   @override
-  String get forwardLoading => 'Loading sessions…';
+  String get forwardLoading => 'Cargando sesiones…';
 
   @override
-  String get forwardNoOpenProjects => 'No open projects with sessions';
+  String get forwardNoOpenProjects => 'No hay proyectos abiertos con sesiones';
 
   @override
   String get forwardNoProviderModel =>
-      'Select a provider and model before forwarding';
+      'Seleccione un proveedor y un modelo antes de reenviar';
 
   @override
-  String get forwardNoSessions => 'No recent sessions';
+  String get forwardNoSessions => 'No hay sesiones recientes';
 
   @override
   String forwardPartial(int success, int total) {
-    return 'Forwarded to $success of $total';
+    return 'Reenviado a $success de $total';
   }
 
   @override
   String forwardProvenanceLabel(String origin) {
-    return 'Forwarded from: $origin';
+    return 'Reenviado desde: $origin';
   }
 
   @override
-  String get forwardRetry => 'Retry';
+  String get forwardRetry => 'Reintentar';
 
   @override
-  String get forwardSearchHint => 'Search';
+  String get forwardSearchHint => 'Buscar';
 
   @override
   String forwardSelectedCount(int count) {
-    return '$count selected';
+    return '$count seleccionadas';
   }
 
   @override
-  String get forwardSend => 'Forward';
+  String get forwardSend => 'Reenviar';
 
   @override
-  String get forwardServerOffline => 'Server offline';
+  String get forwardServerOffline => 'Servidor sin conexión';
 
   @override
   String get forwardShortcutHint => 'Ctrl+Shift+F';
 
   @override
   String forwardSuccess(int count) {
-    return 'Forwarded to $count sessions';
+    return 'Reenviado a $count sesiones';
   }
 
   @override
-  String get forwardUndo => 'Undo';
+  String get forwardUndo => 'Deshacer';
 
   @override
-  String get forwardUndoFailed => 'Could not undo the forward';
+  String get forwardUndoFailed => 'No se pudo deshacer el reenvío';
 
   @override
   String get logsAppLogs => 'Registros de la App';
@@ -2149,7 +2151,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msgInfoCompaction => 'Compactación';
 
   @override
-  String msgInfoCost(double cost) {
+  String msgInfoCost(String cost) {
     return 'Costo: \$$cost';
   }
 
@@ -3031,7 +3033,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get sessionDiffLoading => 'Loading changed files…';
+  String get sessionDiffLoading => 'Cargando archivos modificados…';
 
   @override
   String get sessionDiffReview => 'Revisar cambios';
@@ -3325,11 +3327,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cambie a CodeWalk Clásico para elegir un color de marca.';
 
   @override
-  String get settingsAppearanceChatFontScale => 'Conversation text size';
+  String get settingsAppearanceChatFontScale =>
+      'Tamaño del texto de la conversación';
 
   @override
   String get settingsAppearanceChatFontScaleDescription =>
-      'Scale the chat message and composer text on top of the system text size.';
+      'Escala el texto de los mensajes del chat y del compositor además del tamaño de texto del sistema.';
 
   @override
   String get settingsAppearanceCodeWalkClassic => 'CodeWalk Clásico';
@@ -3392,11 +3395,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Elige temas, colores, tamaño de texto y visualización del chat';
 
   @override
-  String get settingsAppearanceFontSize => 'Text size';
+  String get settingsAppearanceFontSize => 'Tamaño del texto';
 
   @override
   String get settingsAppearanceFontSizeDescription =>
-      'Adjust the size of system text, conversation text, and terminal text.';
+      'Ajusta el tamaño del texto del sistema, de la conversación y del terminal.';
 
   @override
   String get settingsAppearanceLight => 'Claro';
@@ -3439,11 +3442,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsAppearanceSystem => 'Sistema';
 
   @override
-  String get settingsAppearanceSystemFontScale => 'System text size';
+  String get settingsAppearanceSystemFontScale =>
+      'Tamaño del texto del sistema';
 
   @override
   String get settingsAppearanceSystemFontScaleDescription =>
-      'Scale all text in the app shell, including menus, dialogs, and sidebars.';
+      'Escala todo el texto del shell de la aplicación, incluidos menús, diálogos y barras laterales.';
 
   @override
   String get settingsAppearanceTaskList => 'Lista de tareas';
@@ -3453,11 +3457,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mostrar u ocultar el widget de lista de tareas de la sesión.';
 
   @override
-  String get settingsAppearanceTerminalFontSize => 'Terminal text size';
+  String get settingsAppearanceTerminalFontSize =>
+      'Tamaño del texto del terminal';
 
   @override
   String get settingsAppearanceTerminalFontSizeDescription =>
-      'Resize the embedded terminal font. Applies immediately to running sessions.';
+      'Cambia el tamaño de la fuente del terminal integrado. Se aplica de inmediato a las sesiones en ejecución.';
 
   @override
   String get settingsAppearanceTheme => 'Tema';
@@ -3545,32 +3550,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsBehaviorCellularDataSaver => 'Ahorro de datos móviles';
 
   @override
-  String get settingsBehaviorChatRenderMode => 'Chat render mode';
+  String get settingsBehaviorChatRenderMode => 'Modo de renderizado del chat';
 
   @override
-  String get settingsBehaviorChatRenderModeBlock => 'Block';
+  String get settingsBehaviorChatRenderModeBlock => 'Bloque';
 
   @override
   String get settingsBehaviorChatRenderModeBlockDescription =>
-      'Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.';
+      'Oculta el texto en vivo del asistente, el razonamiento y las tarjetas de herramientas hasta que el turno actual pueda mostrarse como un solo bloque.';
 
   @override
   String get settingsBehaviorChatRenderModeDescription =>
-      'Choose whether assistant responses appear as they stream or reveal after the current turn settles.';
+      'Elija si las respuestas del asistente aparecen a medida que se transmiten o se revelan después de que el turno actual se estabilice.';
 
   @override
-  String get settingsBehaviorChatRenderModeLive => 'Live';
+  String get settingsBehaviorChatRenderModeLive => 'En vivo';
 
   @override
   String get settingsBehaviorChatRenderModeLiveDescription =>
-      'Show assistant text, reasoning, and tool activity as OpenCode streams events.';
+      'Muestra el texto del asistente, el razonamiento y la actividad de las herramientas mientras OpenCode transmite eventos.';
 
   @override
-  String get settingsBehaviorComposerSpellCheck => 'Composer spell check';
+  String get settingsBehaviorComposerSpellCheck =>
+      'Corrección ortográfica del compositor';
 
   @override
   String get settingsBehaviorComposerSpellCheckDescription =>
-      'Use native platform spell check, suggestions, and autocorrect in the chat composer.';
+      'Usa la corrección ortográfica, las sugerencias y la autocorrección nativas de la plataforma en el compositor del chat.';
 
   @override
   String get settingsBehaviorConfigDeferred =>
@@ -4571,20 +4577,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get speechNativeSTTWorks =>
-      'On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.';
+      'En Windows, CodeWalk usa el reconocimiento de voz local en el dispositivo mediante su backend de micrófono WASAPI. El reconocimiento de voz nativo de Windows está deshabilitado por estabilidad.';
 
   @override
   String get speechNativeStartsFaster =>
       'El nativo se inicia más rápido. Sherpa se ejecuta completamente en el dispositivo con una configuración más pesada y un control de modelo más profundo.';
 
   @override
-  String get speechOpenMicrophoneSettings => 'Open microphone settings';
+  String get speechOpenMicrophoneSettings =>
+      'Abrir configuración del micrófono';
 
   @override
-  String get speechOpenSpeechPrivacy => 'Open speech privacy';
+  String get speechOpenSpeechPrivacy => 'Abrir privacidad de voz';
 
   @override
-  String get speechOpenSpeechSettings => 'Open speech settings';
+  String get speechOpenSpeechSettings => 'Abrir configuración de voz';
 
   @override
   String get speechParakeet => 'Parakeet';
@@ -4643,7 +4650,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get speechWindowsSetupHint =>
-      'Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.';
+      'La entrada de voz en Windows usa la captura WASAPI de CodeWalk con modelos en el dispositivo. Mantenga habilitado el acceso al micrófono para las aplicaciones de escritorio; los botones de abajo abren la configuración de Windows para solucionar problemas.';
 
   @override
   String get statusConnected => 'Conectado';
@@ -5025,49 +5032,51 @@ class AppLocalizationsEs extends AppLocalizations {
   String get workspaceSuggestions => 'Sugerencias';
 
   @override
-  String get sessionTabsGestureHintTitle => 'Session tabs have new controls';
+  String get sessionTabsGestureHintTitle =>
+      'Las pestañas de sesión tienen nuevos controles';
 
   @override
   String get sessionTabsGestureHintBody =>
-      'Double-click or double-tap a tab to close it. Right-click or touch and hold to open session actions. You can disable tabs in Display Toggles.';
+      'Haga doble clic o doble toque en una pestaña para cerrarla. Haga clic con el botón derecho o mantenga pulsada una pestaña para abrir las acciones de sesión. Puede desactivar las pestañas en Opciones de visualización.';
 
   @override
-  String get sessionTabsGestureHintAcknowledge => 'Got it';
+  String get sessionTabsGestureHintAcknowledge => 'Entendido';
 
   @override
-  String get sessionTabsGestureHintDisableTabs => 'Disable tabs';
+  String get sessionTabsGestureHintDisableTabs => 'Desactivar pestañas';
 
   @override
-  String get sessionTabRenameAction => 'Rename session';
+  String get sessionTabRenameAction => 'Renombrar sesión';
 
   @override
   String sessionTabClosedMessage(String title) {
-    return 'Tab \"$title\" closed';
+    return 'Pestaña \"$title\" cerrada';
   }
 
   @override
-  String get sessionTabUndo => 'Undo';
+  String get sessionTabUndo => 'Deshacer';
 
   @override
-  String get sessionTabRestoreFailed => 'Tab could not be restored.';
+  String get sessionTabRestoreFailed => 'No se pudo restaurar la pestaña.';
 
   @override
-  String get sessionTabChangeIconAction => 'Change icon';
+  String get sessionTabChangeIconAction => 'Cambiar icono';
 
   @override
-  String get sessionTabIconPickerTitle => 'Choose tab icon';
+  String get sessionTabIconPickerTitle => 'Elegir icono de pestaña';
 
   @override
-  String get sessionTabIconUseProjectIcon => 'Use project icon';
+  String get sessionTabIconUseProjectIcon => 'Usar icono del proyecto';
 
   @override
-  String get sessionTabIconApplied => 'Tab icon updated.';
+  String get sessionTabIconApplied => 'Icono de pestaña actualizado.';
 
   @override
-  String get sessionTabIconSaveFailed => 'Tab icon could not be saved.';
+  String get sessionTabIconSaveFailed =>
+      'No se pudo guardar el icono de la pestaña.';
 
   @override
-  String get sessionTabIconPresetCode => 'Code';
+  String get sessionTabIconPresetCode => 'Código';
 
   @override
   String get sessionTabIconPresetTerminal => 'Terminal';
@@ -5076,29 +5085,1601 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sessionTabIconPresetBug => 'Bug';
 
   @override
-  String get sessionTabIconPresetTasks => 'Tasks';
+  String get sessionTabIconPresetTasks => 'Tareas';
 
   @override
-  String get sessionTabIconPresetLaunch => 'Launch';
+  String get sessionTabIconPresetLaunch => 'Inicio';
 
   @override
   String get sessionTabIconPresetIdea => 'Idea';
 
   @override
-  String get sessionTabIconPresetResearch => 'Research';
+  String get sessionTabIconPresetResearch => 'Investigación';
 
   @override
-  String get sessionTabIconPresetDesign => 'Design';
+  String get sessionTabIconPresetDesign => 'Diseño';
 
   @override
-  String get sessionTabIconPresetData => 'Data';
+  String get sessionTabIconPresetData => 'Datos';
 
   @override
-  String get sessionTabIconPresetCloud => 'Cloud';
+  String get sessionTabIconPresetCloud => 'Nube';
 
   @override
-  String get sessionTabIconPresetSecurity => 'Security';
+  String get sessionTabIconPresetSecurity => 'Seguridad';
 
   @override
-  String get sessionTabIconPresetTools => 'Tools';
+  String get sessionTabIconPresetTools => 'Herramientas';
+
+  @override
+  String get workspaceNoActiveContext => 'Sin contexto activo';
+
+  @override
+  String get settingsAppearanceContrastLow => 'Bajo';
+
+  @override
+  String get settingsAppearanceContrastStandard => 'Estándar';
+
+  @override
+  String get settingsAppearanceContrastMedium => 'Medio';
+
+  @override
+  String get settingsAppearanceContrastMediumHigh => 'Medio alto';
+
+  @override
+  String get settingsNotificationsSystemSoundsWebUnavailable =>
+      'No disponible en la web.';
+
+  @override
+  String get settingsNotificationsSystemSoundsAndroid =>
+      'Sonidos de notificación de Android del sistema.';
+
+  @override
+  String get settingsNotificationsSystemSoundsFreedesktop =>
+      'Sonidos de Freedesktop desde /usr/share/sounds/freedesktop/stereo.';
+
+  @override
+  String get settingsNotificationsSystemSoundsPlatform =>
+      'Compatible donde el sistema operativo expone sonidos del sistema.';
+
+  @override
+  String get serversQuickGuideTitle => 'Configuración rápida';
+
+  @override
+  String get serversQuickGuideIntro =>
+      'CodeWalk es la aplicación. OpenCode es el motor que debe estar en ejecución para que esta conexión funcione.';
+
+  @override
+  String get serversQuickGuideStepInstallCli => '1. Instale OpenCode CLI.';
+
+  @override
+  String get serversQuickGuideRunPowerShell => '2. Ejecute en PowerShell:';
+
+  @override
+  String get serversQuickGuideRunTerminal => '2. Ejecute en su terminal:';
+
+  @override
+  String get serversQuickGuideProtectPassword =>
+      'Proteger el acceso con contraseña';
+
+  @override
+  String get serversQuickGuideServerPassword => 'Contraseña del servidor';
+
+  @override
+  String get serversQuickGuideInstallOptions =>
+      'Otras opciones oficiales de instalación: script de instalación, npm, bun, pnpm, Homebrew o un binario de GitHub Releases.';
+
+  @override
+  String get serversQuickGuideVerifyHint =>
+      'Después de iniciar el servidor, confirme que /global/health o /doc responden antes de pegar la URL en CodeWalk.';
+
+  @override
+  String get shortcutsPressKeyCombination =>
+      'Presione la combinación de teclas ahora';
+
+  @override
+  String get settingsProvenanceOpenCodeBacked => 'Respaldado por OpenCode';
+
+  @override
+  String get settingsProvenanceCodeWalkLocal => 'Local de CodeWalk';
+
+  @override
+  String get settingsProvenanceCodeWalkException => 'Excepción de CodeWalk';
+
+  @override
+  String get shortcutsErrorInvalid => 'Atajo inválido';
+
+  @override
+  String get shortcutsErrorUnsupportedKey => 'Tecla de atajo no compatible';
+
+  @override
+  String shortcutsErrorConflict(String conflict) {
+    return 'Entra en conflicto con \"$conflict\"';
+  }
+
+  @override
+  String get settingsSessionAttentionStopSaveFailed =>
+      'La atención de sesión se detuvo, pero el ajuste no se pudo guardar.';
+
+  @override
+  String get settingsSessionAttentionEnableFailed =>
+      'La atención de sesión no se pudo activar.';
+
+  @override
+  String get settingsSessionAttentionSaveFailedStopped =>
+      'La atención de sesión no se pudo guardar y se detuvo.';
+
+  @override
+  String get settingsSessionAttentionStillRunning =>
+      'La atención de sesión sigue en ejecución. Intente detenerla nuevamente.';
+
+  @override
+  String get settingsSessionAttentionStopFailed =>
+      'La atención de sesión no se pudo detener. Intente de nuevo.';
+
+  @override
+  String get settingsSessionAttentionCapabilityUnavailable =>
+      'La capacidad de atención de sesión del host no está disponible.';
+
+  @override
+  String get settingsServerFallbackProviderName => 'Configurado en el servidor';
+
+  @override
+  String get composerStopResponse => 'Detener respuesta';
+
+  @override
+  String get composerSendMessageWhileResponding =>
+      'Enviar mensaje mientras la respuesta está en ejecución';
+
+  @override
+  String get composerSendMessage => 'Enviar mensaje';
+
+  @override
+  String get chatTourComposerDescription => 'Escriba su solicitud aquí.';
+
+  @override
+  String get chatTourSendDescription => 'Envíe su mensaje aquí.';
+
+  @override
+  String get composerAttachmentFallbackName => 'Adjunto';
+
+  @override
+  String get composerContextFallbackName => 'Contexto';
+
+  @override
+  String get searchableDropdownSearchHint => 'Buscar';
+
+  @override
+  String get searchableDropdownEmptyText => 'No se encontraron coincidencias';
+
+  @override
+  String get speechApiKeyStorageUnavailable =>
+      'El almacenamiento seguro de la clave de API de TTS no está disponible.';
+
+  @override
+  String get speechApiKeyRemoved => 'Clave API eliminada.';
+
+  @override
+  String get speechApiKeySaved =>
+      'Clave API guardada de forma segura en este dispositivo.';
+
+  @override
+  String get speechReadAloudTestText =>
+      'Esta es una prueba de texto a voz de CodeWalk.';
+
+  @override
+  String get speechNativeDisabledWindows =>
+      'Deshabilitado en Windows por estabilidad. Use Parakeet u otro motor en el dispositivo mediante la captura WASAPI de CodeWalk.';
+
+  @override
+  String get speechNativeUnavailableLinux =>
+      'No disponible en Linux. Use Parakeet para la entrada de voz.';
+
+  @override
+  String get speechNotAvailableOnPlatform =>
+      'No disponible en esta plataforma.';
+
+  @override
+  String get speechSherpaUnavailableAndroid =>
+      'No disponible en compilaciones de Android optimizadas para un tamaño de APK reducido.';
+
+  @override
+  String get speechMoonshineDesktopOnlyHint =>
+      'Disponible solo en escritorio. Android se mantiene solo con el nativo.';
+
+  @override
+  String get speechParakeetDesktopOnlyHint =>
+      'Disponible solo en escritorio. Usa reconocimiento multilingüe sin conexión.';
+
+  @override
+  String get speechSenseVoiceDesktopOnlyHint =>
+      'Disponible solo en escritorio. Más fuerte para chino, cantonés, japonés, coreano e inglés.';
+
+  @override
+  String get speechNativeSubtitle => 'Inicio más simple y rápido.';
+
+  @override
+  String get speechSherpaSubtitle =>
+      'Más pesado, experimental y propenso a errores. A menudo más preciso con modelos descargados.';
+
+  @override
+  String get speechMoonshineSubtitle =>
+      'Ruta experimental solo de escritorio que usa reconocimiento sin conexión de sherpa_onnx y modelos descargables.';
+
+  @override
+  String get speechParakeetSubtitle =>
+      'Ruta sin conexión solo de escritorio del transducer NeMo con un modelo multilingüe descargable.';
+
+  @override
+  String get speechSenseVoiceSubtitle =>
+      'Ruta sin conexión solo de escritorio afinada para chino, cantonés, japonés, coreano e inglés.';
+
+  @override
+  String get speechMoonshineModel => 'Modelo Moonshine';
+
+  @override
+  String get speechSherpaLanguage => 'Idioma de Sherpa';
+
+  @override
+  String get speechSearchSherpaLanguage => 'Buscar idioma de Sherpa';
+
+  @override
+  String get speechNoLanguagePacksFound =>
+      'No se encontraron paquetes de idioma';
+
+  @override
+  String get speechTextToSpeechProvider => 'Proveedor de texto a voz';
+
+  @override
+  String get speechProviderSystemNative => 'Sistema / Nativo';
+
+  @override
+  String get speechProviderEdgeExperimental =>
+      'Microsoft Edge Speech (experimental)';
+
+  @override
+  String get speechProviderOpenAiCompatible => 'Compatible con OpenAI';
+
+  @override
+  String get speechEdgeExperimentalTitle =>
+      'Microsoft Edge Speech es experimental';
+
+  @override
+  String get speechEdgeExperimentalDescription =>
+      'Usa el servicio no oficial Edge Read Aloud directamente desde este dispositivo. El texto de los mensajes se envía a Microsoft cuando usa la lectura en voz alta, y el servicio puede dejar de funcionar si Microsoft cambia el protocolo privado.';
+
+  @override
+  String get speechEdgeVoice => 'Voz de Edge';
+
+  @override
+  String get speechEdgeVoiceListUnavailable =>
+      'Usando la voz predeterminada de Edge. La lista de voces no se pudo cargar en este momento.';
+
+  @override
+  String get speechEdgeVoicesLoaded =>
+      'Cargadas desde las voces de Microsoft Edge Speech.';
+
+  @override
+  String get speechCloudTtsPrivacy => 'Privacidad de TTS en la nube';
+
+  @override
+  String get speechCloudTtsPrivacyDescription =>
+      'El TTS en la nube envía el texto del mensaje del asistente seleccionado al proveedor configurado. Las claves API se almacenan en el almacenamiento seguro de este dispositivo.';
+
+  @override
+  String get speechBaseUrl => 'URL base';
+
+  @override
+  String get speechApiKey => 'Clave API';
+
+  @override
+  String get speechApiKeySavedHelper =>
+      'Hay una clave guardada. Ingrese un valor nuevo para reemplazarla, o guarde un valor vacío para eliminarla.';
+
+  @override
+  String get speechNoApiKeySaved => 'No hay clave API guardada.';
+
+  @override
+  String get speechSaveApiKey => 'Guardar clave API';
+
+  @override
+  String get speechModel => 'Modelo';
+
+  @override
+  String get speechPitchNotSupported =>
+      'El tono no es compatible con el TTS compatible con OpenAI y está oculto para este proveedor.';
+
+  @override
+  String get speechTestVoice => 'Probar voz';
+
+  @override
+  String get dialogMoonshineVoiceSetupDescription =>
+      'Moonshine se ejecuta en el dispositivo mediante sherpa_onnx. Elija un modelo una vez y descárguelo solo para este dispositivo de escritorio.';
+
+  @override
+  String get dialogParakeetVoiceSetupDescription =>
+      'Parakeet se ejecuta en el dispositivo mediante el reconocimiento sin conexión de sherpa_onnx. Descárguelo una vez para este dispositivo de escritorio para habilitar el STT multilingüe.';
+
+  @override
+  String get dialogSenseVoiceSetupDescription =>
+      'SenseVoice se ejecuta en el dispositivo mediante el reconocimiento sin conexión de sherpa_onnx. Es más fuerte para chino, cantonés, japonés, coreano e inglés.';
+
+  @override
+  String get dialogSherpaVoiceSetupDescription =>
+      'La entrada de voz de Sherpa requiere un modelo de voz en el dispositivo. Seleccione su idioma y descárguelo una vez (~147 MB).';
+
+  @override
+  String speechSilenceSeconds(String value) {
+    return '$value segundos';
+  }
+
+  @override
+  String speechModelInstalled(String modelId) {
+    return 'Modelo instalado ($modelId)';
+  }
+
+  @override
+  String speechModelMissing(String modelId) {
+    return 'Modelo faltante ($modelId)';
+  }
+
+  @override
+  String speechModelSizeMb(String sizeMb) {
+    return '~$sizeMb MB';
+  }
+
+  @override
+  String speechSystemDefaultLanguage(String language) {
+    return 'Predeterminado del sistema ($language)';
+  }
+
+  @override
+  String speechModelListLoadFailed(String error, String service) {
+    return 'Error al cargar la lista de modelos de $service: $error';
+  }
+
+  @override
+  String speechDownloadFailed(String error) {
+    return 'Error en la descarga: $error';
+  }
+
+  @override
+  String speechFailedToRemoveModel(String error) {
+    return 'Error al eliminar el modelo: $error';
+  }
+
+  @override
+  String speechBaseUrlExample(String url) {
+    return 'Ejemplo: $url';
+  }
+
+  @override
+  String speechModelDefaultHelper(String model) {
+    return 'Predeterminado: $model';
+  }
+
+  @override
+  String get notificationPermissionOrQuestionNeedsInput =>
+      'Un permiso o una pregunta de herramienta necesita su intervención.';
+
+  @override
+  String get notificationPermissionNeedsInput =>
+      'Un permiso de herramienta necesita su intervención.';
+
+  @override
+  String get notificationQuestionNeedsInput =>
+      'Una pregunta de herramienta necesita su intervención.';
+
+  @override
+  String get notificationSessionError => 'Una sesión reportó un error.';
+
+  @override
+  String get notificationChannelErrors => 'Errores de CodeWalk';
+
+  @override
+  String get notificationChannelErrorsDescription =>
+      'Alertas de error de CodeWalk';
+
+  @override
+  String get notificationChannelPermissions => 'Permisos de CodeWalk';
+
+  @override
+  String get notificationChannelPermissionsDescription =>
+      'Alertas de acción requerida de CodeWalk';
+
+  @override
+  String get notificationChannelAgent => 'Agente de CodeWalk';
+
+  @override
+  String get notificationChannelAgentDescription =>
+      'Alertas de finalización de agente de CodeWalk';
+
+  @override
+  String get notificationActionOpen => 'Abrir';
+
+  @override
+  String get foregroundMonitorNotificationBody =>
+      'Las alertas confiables en segundo plano están activas';
+
+  @override
+  String get foregroundMonitorNotificationTitle =>
+      'Monitoreo en segundo plano activo';
+
+  @override
+  String get foregroundMonitorNotificationOneSession =>
+      'Monitoreando una sesión';
+
+  @override
+  String foregroundMonitorNotificationSessionCount(int count) {
+    return 'Monitoreando $count sesiones';
+  }
+
+  @override
+  String sessionAttentionSemanticLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sesiones necesitan atención',
+      one: '1 sesión necesita atención',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sessionAttentionOverlayPermissionRequired =>
+      'Se requiere el permiso de mostrar sobre otras aplicaciones.';
+
+  @override
+  String get sessionAttentionIosInAppOnly =>
+      'La atención de sesión solo está disponible dentro de CodeWalk.';
+
+  @override
+  String get sessionAttentionOverlayPermissionGrantPrompt =>
+      'Otorgue el permiso de mostrar sobre otras aplicaciones y vuelva a intentarlo.';
+
+  @override
+  String get sessionAttentionAndroidStartFailed =>
+      'El servicio de atención de sesión de Android no se pudo iniciar.';
+
+  @override
+  String chatMessageTruncatedChars(int count, String reason) {
+    return '[truncado $count caracteres] $reason';
+  }
+
+  @override
+  String get chatMessageJustNow => 'Justo ahora';
+
+  @override
+  String chatMessageMinutesAgo(int count) {
+    return 'Hace ${count}m';
+  }
+
+  @override
+  String chatMessageHoursAgo(int count) {
+    return 'Hace ${count}h';
+  }
+
+  @override
+  String chatMessageDaysAgo(int count) {
+    return 'Hace ${count}d';
+  }
+
+  @override
+  String chatMessageDateTime(int day, int hour, int minute, int month) {
+    return '$month/$day $hour:$minute';
+  }
+
+  @override
+  String get chatMessageYourMessage => 'Su mensaje';
+
+  @override
+  String get chatMessageAssistantMessage => 'Mensaje del asistente';
+
+  @override
+  String chatMessageStepStarted(int step) {
+    return 'Paso iniciado #$step';
+  }
+
+  @override
+  String chatMessageStepStartedWithSnapshot(String snapshot, int step) {
+    return 'Paso iniciado #$step: $snapshot';
+  }
+
+  @override
+  String chatMessageStepFinished(
+    String cost,
+    String reason,
+    int step,
+    int tokens,
+  ) {
+    return 'Paso finalizado #$step: $reason • tokens $tokens • \$$cost';
+  }
+
+  @override
+  String chatMessagePatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parches',
+      one: '1 parche',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolRun => 'Ejecución de herramienta';
+
+  @override
+  String get chatMessageToolExecution => 'Ejecución de herramienta';
+
+  @override
+  String chatMessageToolChainMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count más',
+      one: '+1 más',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolChainExtraTypes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count tipos',
+      one: '+1 tipo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolAttentionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count necesitan atención',
+      one: '1 necesita atención',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageToolDoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count completados',
+      one: '1 completado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatMessageToolCallsTitle => 'Llamadas a herramientas';
+
+  @override
+  String get chatMessageDiffPreviewTruncated =>
+      'Vista previa del diff truncada por estabilidad de la aplicación.';
+
+  @override
+  String get chatMessageLargeMessageTruncated =>
+      'Vista previa de mensaje grande truncada por estabilidad de la aplicación.';
+
+  @override
+  String get chatMessageInvalidLinkFormat => 'Formato de enlace inválido';
+
+  @override
+  String get chatMessageUnableToOpenLink => 'No se puede abrir el enlace';
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total) {
+    return '$current/$total en progreso';
+  }
+
+  @override
+  String sessionTodoTaskProgress(String content, int index, int total) {
+    return 'Tarea $index/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total completados';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return 'Tareas $count/$total completadas';
+  }
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return 'Tareas ($count)';
+  }
+
+  @override
+  String questionStepOfReview(int current, int total) {
+    return 'Paso $current de $total - Revisión';
+  }
+
+  @override
+  String questionStepOfQuestion(int current, int total) {
+    return 'Paso $current de $total - Pregunta';
+  }
+
+  @override
+  String get questionCustomAnswer => 'Respuesta personalizada';
+
+  @override
+  String get questionSubmitAnswers => 'Enviar respuestas';
+
+  @override
+  String get questionReviewAnswers => 'Revisar respuestas';
+
+  @override
+  String permissionRequestTitle(String permission) {
+    return 'Solicitud de permiso: $permission';
+  }
+
+  @override
+  String get sessionTitleCannotBeEmpty => 'El título no puede estar vacío';
+
+  @override
+  String get filesFailedToLoad => 'No se pudieron cargar los archivos';
+
+  @override
+  String get filesFailedToSearch => 'No se pudo buscar en los archivos';
+
+  @override
+  String get filesNoOpenFilesHint =>
+      'Aún no hay archivos abiertos. Escriba para buscar.';
+
+  @override
+  String get filesNoContentMatches =>
+      'No se encontraron coincidencias de contenido';
+
+  @override
+  String filesOpenFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archivos abiertos',
+      one: '1 archivo abierto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filesLinesSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count líneas seleccionadas',
+      one: '1 línea seleccionada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filesDraftTooLargeToSave =>
+      'El borrador es demasiado grande para guardarlo desde el editor.';
+
+  @override
+  String get filesSaveChangesBeforeClose =>
+      'Guarde los cambios antes de cerrar este archivo.';
+
+  @override
+  String get filesSaveChangesBeforePathChange =>
+      'Guarde los cambios antes de cambiar esta ruta.';
+
+  @override
+  String get filesWaitForSaveBeforePathChange =>
+      'Espere a que termine el guardado del archivo antes de cambiar esta ruta.';
+
+  @override
+  String get filesWaitForFileOperation =>
+      'Espere a que termine la operación de archivos.';
+
+  @override
+  String get filesLargeFileReadOnly =>
+      'Los archivos grandes se abren en modo de solo lectura para mantener la edición fluida.';
+
+  @override
+  String get filesCheckingWriteSupport =>
+      'Comprobando soporte de escritura de archivos...';
+
+  @override
+  String get filesActiveProjectRequired =>
+      'Las operaciones de archivos requieren un directorio de proyecto activo.';
+
+  @override
+  String get filesReloadSkippedUnsavedChanges =>
+      'Hay cambios sin guardar; se omitió la recarga.';
+
+  @override
+  String get filesFailedToLoadContent =>
+      'No se pudo cargar el contenido del archivo';
+
+  @override
+  String get filesFileSaved => 'Archivo guardado.';
+
+  @override
+  String get filesParentNotDirectory =>
+      'El directorio principal no es un directorio.';
+
+  @override
+  String get filesMalformedResponse =>
+      'La operación de archivos devolvió una respuesta no válida.';
+
+  @override
+  String get filesShellCommandDidNotComplete =>
+      'El comando de shell de la operación de archivos no se completó.';
+
+  @override
+  String get filesShellCommandNoResult =>
+      'El comando de shell de la operación de archivos no devolvió ningún resultado.';
+
+  @override
+  String get filesShellCommandTruncated =>
+      'El comando de shell de la operación de archivos fue truncado por el servidor.';
+
+  @override
+  String get filesShellCommandSyntaxError =>
+      'El comando de shell de la operación de archivos falló con un error de sintaxis.';
+
+  @override
+  String get filesShellUtilityNotFound =>
+      'No se encontró una utilidad de shell requerida.';
+
+  @override
+  String get filesShellCommandFailed =>
+      'El comando de shell de la operación de archivos falló antes de devolver un resultado.';
+
+  @override
+  String get attachmentSaveTitle => 'Guardar archivo adjunto';
+
+  @override
+  String get attachmentBrowserSandboxLocalFile =>
+      'El sandbox del navegador impide abrir archivos adjuntos locales file:// directamente.';
+
+  @override
+  String get attachmentLocalPathBrowserBlocked =>
+      'Este archivo adjunto apunta a una ruta local que no se puede abrir desde el navegador.';
+
+  @override
+  String terminalConnectedTo(String directory, String serverName) {
+    return 'Conectado a $serverName en $directory';
+  }
+
+  @override
+  String get terminalTransportUnavailable =>
+      'El transporte de terminal no está disponible.';
+
+  @override
+  String get chatSlashCommandNew => 'Crear una nueva sesión de chat';
+
+  @override
+  String get chatSlashCommandModels => 'Abrir selector de modelos';
+
+  @override
+  String get chatSlashCommandSessions => 'Abrir lista de conversaciones';
+
+  @override
+  String get chatSlashCommandAgent => 'Abrir selector de agente';
+
+  @override
+  String get chatSlashCommandOpen => 'Acción rápida para abrir archivos';
+
+  @override
+  String get chatSlashCommandHelp => 'Mostrar ayuda de comandos';
+
+  @override
+  String get chatSlashCommandCompact =>
+      'Compactar el contexto de la sesión actual';
+
+  @override
+  String get chatSlashCommandThinking => 'Alternar burbujas de pensamiento';
+
+  @override
+  String get chatSlashCommandUndo =>
+      'Deshacer el último turno visible del usuario';
+
+  @override
+  String get chatSlashCommandRedo => 'Rehacer el último turno deshecho';
+
+  @override
+  String chatSessionSubConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count subconversaciones',
+      one: '1 subconversación',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatMessageWeeksAgo(int count) {
+    return 'Hace ${count}w';
+  }
+
+  @override
+  String chatMessageShortDate(int day, int month) {
+    return '$month/$day';
+  }
+
+  @override
+  String get chatProviderErrorLoadSessionStatus =>
+      'No se pudo cargar el estado de la sesión';
+
+  @override
+  String get chatProviderErrorLoadSessionDetails =>
+      'No se pudieron cargar algunos detalles de la sesión';
+
+  @override
+  String chatProviderErrorLoadSessionList(String error) {
+    return 'No se pudo cargar la lista de sesiones: $error';
+  }
+
+  @override
+  String get chatProviderErrorCreateSession => 'No se pudo crear la sesión';
+
+  @override
+  String get chatProviderErrorSelectProviderModelBeforeSend =>
+      'Seleccione un proveedor conectado o un modelo gratuito de OpenCode antes de enviar';
+
+  @override
+  String get chatProviderErrorStartMessageSend =>
+      'No se pudo iniciar el envío del mensaje';
+
+  @override
+  String get chatProviderErrorStopUnavailable =>
+      'Detener no está disponible para la sesión actual';
+
+  @override
+  String get chatProviderErrorWaitForResponseFinish =>
+      'Espere a que termine la respuesta actual antes de compactar';
+
+  @override
+  String get chatProviderErrorCompactUnavailable =>
+      'La compactación de contexto no está disponible para la sesión actual';
+
+  @override
+  String get chatProviderErrorSelectModelBeforeCompact =>
+      'Seleccione un modelo antes de compactar el contexto';
+
+  @override
+  String get chatProviderErrorCompactSessionContext =>
+      'No se pudo compactar el contexto de la sesión';
+
+  @override
+  String get chatProviderErrorNetwork =>
+      'Falló la conexión de red. Verifique la configuración de red';
+
+  @override
+  String get chatProviderErrorServer =>
+      'Error del servidor. Inténtelo de nuevo más tarde';
+
+  @override
+  String get chatProviderErrorNotFound => 'Recurso no encontrado';
+
+  @override
+  String get chatProviderErrorInvalidInput =>
+      'Parámetros de entrada no válidos';
+
+  @override
+  String get chatProviderErrorUnknown =>
+      'Error desconocido. Inténtelo de nuevo más tarde';
+
+  @override
+  String get chatProviderErrorSessionFallback => 'Error de sesión';
+
+  @override
+  String get projectProviderErrorNoProjectContext =>
+      'No hay contexto de proyecto disponible desde el servidor';
+
+  @override
+  String projectProviderErrorInitializeFailed(String error) {
+    return 'No se pudo inicializar el contexto del proyecto: $error';
+  }
+
+  @override
+  String get projectProviderErrorSwitchProjectNotFound =>
+      'No se pudo cambiar de proyecto: proyecto no encontrado';
+
+  @override
+  String get projectProviderErrorSwitchDirectoryEmpty =>
+      'No se pudo cambiar de proyecto: el directorio está vacío';
+
+  @override
+  String get projectProviderErrorAtLeastOneContext =>
+      'Al menos un contexto debe permanecer abierto';
+
+  @override
+  String get projectProviderErrorReopenProjectNotFound =>
+      'No se pudo reabrir el proyecto: proyecto no encontrado';
+
+  @override
+  String get projectProviderErrorOnlyClosedArchivable =>
+      'Solo los proyectos cerrados se pueden archivar';
+
+  @override
+  String get projectProviderErrorArchiveProjectNotFound =>
+      'No se pudo archivar el proyecto: proyecto no encontrado';
+
+  @override
+  String get projectProviderErrorArchiveProjectPathInvalid =>
+      'No se pudo archivar el proyecto: la ruta del proyecto no es válida';
+
+  @override
+  String projectProviderErrorLoadWorkspaces(String error) {
+    return 'No se pudieron cargar los espacios de trabajo: $error';
+  }
+
+  @override
+  String get projectProviderErrorWorkspaceNameEmpty =>
+      'El nombre del espacio de trabajo no puede estar vacío';
+
+  @override
+  String projectProviderErrorCreateWorkspace(String error) {
+    return 'No se pudo crear el espacio de trabajo: $error';
+  }
+
+  @override
+  String projectProviderErrorResetWorkspace(String error) {
+    return 'No se pudo restablecer el espacio de trabajo: $error';
+  }
+
+  @override
+  String projectProviderErrorDeleteWorkspace(String error) {
+    return 'No se pudo eliminar el espacio de trabajo: $error';
+  }
+
+  @override
+  String get projectProviderErrorDirectoryEmpty =>
+      'El directorio no puede estar vacío';
+
+  @override
+  String projectProviderErrorListDirectories(String error) {
+    return 'No se pudieron listar los directorios: $error';
+  }
+
+  @override
+  String projectProviderErrorValidateDirectory(String error) {
+    return 'No se pudo validar el directorio: $error';
+  }
+
+  @override
+  String get projectProviderErrorPathEmpty => 'La ruta no puede estar vacía';
+
+  @override
+  String projectProviderErrorListFiles(String error) {
+    return 'No se pudieron listar los archivos: $error';
+  }
+
+  @override
+  String projectProviderErrorSearchFiles(String error) {
+    return 'No se pudo buscar en los archivos: $error';
+  }
+
+  @override
+  String projectProviderErrorContentSearchUnavailable(String error) {
+    return 'Búsqueda de contenido no disponible: $error';
+  }
+
+  @override
+  String projectProviderErrorSearchSymbols(String error) {
+    return 'No se pudieron buscar los símbolos: $error';
+  }
+
+  @override
+  String projectProviderErrorReadFile(String error) {
+    return 'No se pudo leer el archivo: $error';
+  }
+
+  @override
+  String projectProviderErrorLoadProjectList(String error) {
+    return 'No se pudo cargar la lista de proyectos: $error';
+  }
+
+  @override
+  String get workspaceProjectRemovedFromHistory =>
+      'Proyecto eliminado del historial';
+
+  @override
+  String workspaceProjectContextOpened(String directory) {
+    return 'Contexto del proyecto abierto: $directory';
+  }
+
+  @override
+  String workspaceFailedToOpenProjectContext(String directory) {
+    return 'No se pudo abrir el contexto del proyecto: $directory';
+  }
+
+  @override
+  String get chatAbortNotice => '¿Qué desea hacer de manera diferente?';
+
+  @override
+  String sessionTitleToday(String date, String time) {
+    return 'Hoy $time ($date)';
+  }
+
+  @override
+  String sessionTitleYesterday(String date, String time) {
+    return 'Ayer $time ($date)';
+  }
+
+  @override
+  String sessionTitleWeekday(String date, String time, String weekday) {
+    return '$weekday $time ($date)';
+  }
+
+  @override
+  String sessionTitleDateAndTime(String date, String time) {
+    return '$date $time';
+  }
+
+  @override
+  String get sessionWeekdayMon => 'lun';
+
+  @override
+  String get sessionWeekdayTue => 'mar';
+
+  @override
+  String get sessionWeekdayWed => 'mié';
+
+  @override
+  String get sessionWeekdayThu => 'jue';
+
+  @override
+  String get sessionWeekdayFri => 'vie';
+
+  @override
+  String get sessionWeekdaySat => 'sáb';
+
+  @override
+  String get sessionWeekdaySun => 'dom';
+
+  @override
+  String get forwardTimeNow => 'ahora';
+
+  @override
+  String forwardTimeMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String forwardTimeHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String forwardTimeDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String forwardTimeWeeks(int count) {
+    return '${count}w';
+  }
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultModel => 'modelo predeterminado';
+
+  @override
+  String get settingsBehaviorConfigFieldDefaultAgent => 'agente predeterminado';
+
+  @override
+  String get settingsBehaviorConfigFieldSmallModel => 'modelo pequeño';
+
+  @override
+  String get settingsBehaviorConfigFieldAutoUpdateMode =>
+      'modo de actualización automática';
+
+  @override
+  String get settingsBehaviorConfigFieldSnapshotSetting =>
+      'configuración de instantáneas';
+
+  @override
+  String get settingsBehaviorConfigFieldConversationUsername =>
+      'nombre de usuario de conversación';
+
+  @override
+  String get settingsBehaviorConfigFieldSharingDefault =>
+      'configuración predeterminada de uso compartido';
+
+  @override
+  String get speechMicNoInputDevice =>
+      'No hay ningún dispositivo de entrada de micrófono disponible.';
+
+  @override
+  String get speechMicDeviceBusy =>
+      'Otra aplicación está usando actualmente el micrófono predeterminado.';
+
+  @override
+  String get speechMicUnsupportedFormat =>
+      'El formato predeterminado del micrófono no es compatible.';
+
+  @override
+  String get speechMicSpeechPrivacy =>
+      'Es posible que los servicios de voz de Windows estén deshabilitados (privacidad de voz, reconocimiento de voz en línea o paquetes de idioma).';
+
+  @override
+  String get speechMicBackendUnavailable =>
+      'El backend de micrófono de Windows no está disponible en esta compilación.';
+
+  @override
+  String speechEngineFallbackNotice(String fallback, String reason) {
+    return 'El motor de STT seleccionado no está disponible ($reason). Se usará $fallback en su lugar.';
+  }
+
+  @override
+  String get oauthFlowSecureStorageUnavailable =>
+      'El almacenamiento seguro de credenciales no está disponible para OAuth.';
+
+  @override
+  String get oauthFlowUnexpectedError =>
+      'El flujo de OAuth falló inesperadamente. Inténtelo de nuevo.';
+
+  @override
+  String get oauthFlowNoEndpointsDiscovered =>
+      'No se descubrieron puntos finales de OAuth. Habilite Managed OAuth en Cloudflare Dashboard → Access → Applications → [esta aplicación].';
+
+  @override
+  String get oauthFlowTokenResponseMissingAccessToken =>
+      'La respuesta de token de OAuth no incluyó un token de acceso.';
+
+  @override
+  String get oauthFlowProfileChanged =>
+      'El perfil del servidor cambió antes de que OAuth pudiera completarse.';
+
+  @override
+  String get oauthFlowMetadataMissingEndpoints =>
+      'Los metadatos de OAuth no incluyen los puntos finales de autorización/token.';
+
+  @override
+  String get oauthFlowCallbackNotCompleted =>
+      'La devolución de llamada de autorización no se completó';
+
+  @override
+  String get oauthFlowProviderDeclined =>
+      'El servidor de autorización rechazó la solicitud de OAuth. Inténtelo de nuevo.';
+
+  @override
+  String get oauthFlowCallbackValidationFailed =>
+      'La validación de la devolución de llamada de OAuth falló. Inténtelo de nuevo.';
+
+  @override
+  String get oauthFlowCallbackServerStartFailed =>
+      'No se pudo iniciar el servidor local de devolución de llamada de OAuth.';
+
+  @override
+  String get oauthFlowSignInCanceled =>
+      'El inicio de sesión con OAuth se canceló.';
+
+  @override
+  String get oauthFlowBrowserOpenFailed =>
+      'No se pudo abrir el navegador del sistema para iniciar sesión con OAuth.';
+
+  @override
+  String get oauthFlowCallbackTimeout =>
+      'Ninguna devolución de llamada de autorización llegó a la aplicación dentro de los 5 minutos. Se esperaba que el navegador redirigiera a la dirección de devolución de llamada local después del consentimiento. Si el navegador mostró un error de conexión en su lugar, este dispositivo o red bloquea las redirecciones de bucle local (loopback).';
+
+  @override
+  String oauthFlowTokenExchangeTransientFailure(int maxAttempts) {
+    return 'El intercambio de tokens falló después de $maxAttempts intentos debido a un problema temporal de red. Inténtelo de nuevo.';
+  }
+
+  @override
+  String oauthFlowTokenExchangeHttpFailure(int statusCode) {
+    return 'El intercambio de tokens falló (HTTP $statusCode). Inténtelo de nuevo.';
+  }
+
+  @override
+  String get oauthFlowTokenExchangeUnexpectedFailure =>
+      'El intercambio de tokens falló inesperadamente. Inténtelo de nuevo.';
+
+  @override
+  String get oauthFlowTokenExchangeIncomplete =>
+      'El intercambio de tokens no se completó después de enviar el código de autorización. Inicie sesión con OAuth nuevamente.';
+
+  @override
+  String get speechReadAloudFailed => 'La conversión de texto a voz falló.';
+
+  @override
+  String get speechReadAloudNoText => 'No hay texto para leer en voz alta.';
+
+  @override
+  String get speechEdgeTextTooLong =>
+      'Microsoft Edge Speech puede leer hasta 4096 bytes a la vez.';
+
+  @override
+  String get speechEdgeMalformedAudio =>
+      'Microsoft Edge Speech devolvió datos de audio no válidos.';
+
+  @override
+  String get speechEdgeUnsupportedAudio =>
+      'Microsoft Edge Speech devolvió datos de audio no compatibles.';
+
+  @override
+  String get speechEdgeUnsupportedFrame =>
+      'Microsoft Edge Speech devolvió un marco websocket no compatible.';
+
+  @override
+  String get speechEdgeSynthesisInterrupted =>
+      'Microsoft Edge Speech terminó antes de completar la síntesis.';
+
+  @override
+  String get speechEdgeEmptyAudio =>
+      'Microsoft Edge Speech devolvió una respuesta de audio vacía.';
+
+  @override
+  String get speechEdgeTimedOut =>
+      'Microsoft Edge Speech agotó el tiempo de espera.';
+
+  @override
+  String get speechEdgeUnreachable =>
+      'No se pudo acceder a Microsoft Edge Speech.';
+
+  @override
+  String get speechApiKeyMissing =>
+      'Agregue una clave de API en Configuración > Speech para usar este proveedor de TTS.';
+
+  @override
+  String get speechProviderEmptyAudio =>
+      'El proveedor de TTS devolvió una respuesta de audio vacía.';
+
+  @override
+  String get speechProviderRequestRejected =>
+      'El proveedor de TTS rechazó la solicitud de voz.';
+
+  @override
+  String get speechApiKeyRejected =>
+      'El proveedor rechazó la clave de API de TTS.';
+
+  @override
+  String get speechProviderQuotaRateLimit =>
+      'El proveedor de TTS informó un límite de cuota o de frecuencia.';
+
+  @override
+  String get speechProviderTemporarilyUnavailable =>
+      'El proveedor de TTS no está disponible temporalmente.';
+
+  @override
+  String get speechProviderUnreachable =>
+      'No se pudo acceder al proveedor de TTS.';
+
+  @override
+  String appProviderErrorFailedToStartProcess(String tool) {
+    return 'No se pudo iniciar el proceso de $tool.';
+  }
+
+  @override
+  String appProviderErrorToolNotAvailable(String runtime, String tool) {
+    return '$tool no está disponible. Instale $runtime primero.';
+  }
+
+  @override
+  String appProviderErrorToolInstallFailed(int exitCode, String tool) {
+    return 'La instalación de $tool falló con el código de salida $exitCode.';
+  }
+
+  @override
+  String appProviderErrorBunBootstrapFailed(int exitCode) {
+    return 'El arranque de Bun falló con el código de salida $exitCode.';
+  }
+
+  @override
+  String get appProviderErrorInstalledButNotFoundInPath =>
+      'La instalación de OpenCode finalizó, pero no se encontró el comando en el PATH.';
+
+  @override
+  String get appProviderErrorInstalledButPathNotResolved =>
+      'La instalación de OpenCode finalizó, pero no se pudo resolver la ruta del comando.';
+
+  @override
+  String appProviderErrorConfiguredCommandNotFound(String tool) {
+    return 'No se encontró el comando configurado y $tool no está en el PATH.';
+  }
+
+  @override
+  String get appProviderErrorConfiguredCommandPathMissing =>
+      'La ruta del comando configurado no existe.';
+
+  @override
+  String get appProviderErrorConfiguredCommandVersionCheckFailed =>
+      'El comando configurado existe, pero falló la comprobación de versión.';
+
+  @override
+  String get appProviderErrorConfiguredCommandExecutionFailed =>
+      'No se pudo ejecutar el comando configurado.';
+
+  @override
+  String get appProviderWslCheckWindowsOnly =>
+      'La comprobación de WSL solo aplica a Windows.';
+
+  @override
+  String get appProviderDesktopBuildRequired =>
+      'Use una compilación de escritorio para configurar un servidor local gestionado.';
+
+  @override
+  String get appProviderKnownInstallationDirectoryDetected =>
+      'Detectado desde un directorio de instalación conocido.';
+
+  @override
+  String appProviderKnownInstallationPathRefreshHint(String appName) {
+    return 'Detectado desde un directorio de instalación conocido. Es posible que el PATH deba actualizarse; reabra $appName si una instalación reciente aún no se detecta.';
+  }
+
+  @override
+  String get appProviderErrorReleaseMetadataFetchFailed =>
+      'No se pudieron obtener los metadatos de la última versión desde GitHub.';
+
+  @override
+  String get appProviderErrorReleaseAssetListMissing =>
+      'Los metadatos de la última versión no incluían la lista de recursos.';
+
+  @override
+  String get appProviderErrorNoCompatibleAsset =>
+      'No se encontró ningún recurso binario compatible de OpenCode.';
+
+  @override
+  String get appProviderErrorDownloadAssetFailed =>
+      'No se pudo descargar el recurso de OpenCode seleccionado.';
+
+  @override
+  String get appProviderErrorChecksumVerificationFailed =>
+      'Falló la verificación de la suma de comprobación del recurso descargado.';
+
+  @override
+  String get appProviderErrorExtractArchiveFailed =>
+      'No se pudo extraer el archivo binario de OpenCode.';
+
+  @override
+  String appProviderErrorExecutableNotFound(String tool) {
+    return 'No se encontró el ejecutable de $tool en los archivos extraídos.';
+  }
+
+  @override
+  String get chatNoResponseFromServer =>
+      'No hubo respuesta del servidor. Vuelva a intentarlo.';
+
+  @override
+  String get chatNoResponseFromModel =>
+      'No hubo respuesta del modelo. Vuelva a intentarlo.';
+
+  @override
+  String get speechJobCancelled => 'El trabajo de voz se canceló.';
+
+  @override
+  String get speechEdgeCancelled => 'Microsoft Edge Speech se canceló.';
+
+  @override
+  String get sessionAttentionKindActive => 'Activo';
+
+  @override
+  String get sessionAttentionKindReceiving => 'Recibiendo';
+
+  @override
+  String get sessionAttentionKindDelayed => 'Retrasado';
+
+  @override
+  String get sessionAttentionKindCompleted => 'Completado';
+
+  @override
+  String get sessionAttentionKindPendingInteraction => 'Interacción pendiente';
+
+  @override
+  String get sessionAttentionKindError => 'Error';
+
+  @override
+  String get sessionAttentionPauseCellularDataSaver =>
+      'El ahorro de datos móviles está activo';
+
+  @override
+  String get sessionAttentionPauseOauthReopenRequired =>
+      'Se requiere iniciar sesión con OAuth';
+
+  @override
+  String get sessionAttentionPauseTailscaleReopenRequired =>
+      'Se requiere conexión con Tailscale';
+
+  @override
+  String get sessionAttentionPauseOffline => 'Desconectado';
+
+  @override
+  String get sessionAttentionPausePermissionRevoked => 'Permiso revocado';
+
+  @override
+  String get sessionAttentionPauseServiceStopped => 'Servicio detenido';
+
+  @override
+  String get sessionAttentionPauseHostUnavailable => 'Host no disponible';
+
+  @override
+  String get errorRequestCancelled => 'Solicitud cancelada';
+
+  @override
+  String errorUnknownNetworkError(String error) {
+    return 'Error de red desconocido: $error';
+  }
+
+  @override
+  String get errorCertificateError => 'Error de certificado';
+
+  @override
+  String get errorSessionBusy =>
+      'La sesión está ocupada procesando otra solicitud.';
+
+  @override
+  String get errorRunShellCommandFailed =>
+      'No se pudo ejecutar el comando de shell';
+
+  @override
+  String get errorRunSlashCommandFailed =>
+      'No se pudo ejecutar el comando de barra';
+
+  @override
+  String get settingsBehaviorOpenCodeDefaultsLoadError =>
+      'No se pudieron cargar los valores predeterminados basados en OpenCode del servidor activo.';
+
+  @override
+  String get sessionTabIconRemoveFailed =>
+      'No se pudieron eliminar los datos del icono de la pestaña de sesión local';
+
+  @override
+  String get forwardUntitled => 'Sin título';
+
+  @override
+  String setupDebugLinuxLogsPath(String path) {
+    return 'Registros de Linux: $path';
+  }
+
+  @override
+  String setupDebugRunOpenCodeCommand(String command) {
+    return 'Ejecute OpenCode con: $command';
+  }
+
+  @override
+  String setupDebugServerHealthEndpoint(String endpoint) {
+    return 'Estado del servidor: $endpoint';
+  }
+
+  @override
+  String setupDebugServerDocsEndpoint(String endpoint) {
+    return 'Documentación del servidor: $endpoint';
+  }
+
+  @override
+  String get logsEntryError => 'Error';
+
+  @override
+  String get logsEntryStack => 'Pila';
+
+  @override
+  String get setupDebugSourceDiagnostics => 'Diagnóstico';
+
+  @override
+  String get setupDebugSourceUseExisting => 'Usar existente';
+
+  @override
+  String get setupDebugSourceLocalServer => 'Servidor local';
+
+  @override
+  String get setupDebugSourceOnboarding => 'Incorporación';
+
+  @override
+  String get setupDebugSourceManualConnection => 'Conexión manual';
+
+  @override
+  String setupDebugMessageDiagnosticsResult(
+    String availability,
+    String platform,
+    String recommendation,
+  ) {
+    return '$availability en $platform. $recommendation';
+  }
+
+  @override
+  String get setupDebugMessageDetectAttempt =>
+      'Se intenta detectar un comando OpenCode existente en el entorno actual.';
+
+  @override
+  String get setupDebugMessageInstallStarted =>
+      'Instalación de OpenCode iniciada desde CodeWalk.';
+
+  @override
+  String setupDebugMessageStartLocalServer(String url) {
+    return 'Iniciando el servidor OpenCode administrado en $url.';
+  }
+
+  @override
+  String setupDebugMessageHealthyRunning(String url) {
+    return 'El servidor OpenCode administrado está sano y en ejecución en $url.';
+  }
+
+  @override
+  String get setupDebugMessageStoppingLocalServer =>
+      'Deteniendo el servidor OpenCode administrado.';
+
+  @override
+  String get setupDebugMessageStoppedCleanly =>
+      'El servidor OpenCode administrado se detuvo correctamente.';
+
+  @override
+  String get setupDebugMessageExitedAfterRequestedStop =>
+      'El servidor OpenCode administrado se cerró tras una detención solicitada.';
+
+  @override
+  String get setupDebugMessageOnboardingConnectExisting =>
+      'El usuario eligió conectarse a un servidor OpenCode existente.';
+
+  @override
+  String get setupDebugMessageOnboardingGuidedPath =>
+      'El usuario abrió la ruta de configuración guiada de OpenCode.';
+
+  @override
+  String get setupDebugMessageOnboardingManagedLocal =>
+      'El usuario abrió la configuración local administrada de OpenCode.';
+
+  @override
+  String get setupDebugMessageOnboardingOpenedServerSettings =>
+      'El usuario abrió los ajustes del servidor después de una comprobación de estado fallida.';
+
+  @override
+  String get setupDebugMessageOnboardingAddAnotherServer =>
+      'El usuario eligió añadir otro servidor después de una comprobación de estado fallida.';
+
+  @override
+  String setupDebugMessageTestingServerUrl(String url) {
+    return 'Probando la URL del servidor OpenCode $url desde la incorporación.';
+  }
+
+  @override
+  String get chatProviderErrorSessionNotFound => 'Sesión no encontrada';
+
+  @override
+  String get chatProviderErrorInvalidMessageFormat =>
+      'Formato de mensaje no válido';
+
+  @override
+  String get chatProviderErrorNetworkShort => 'Falló la conexión de red';
+
+  @override
+  String get chatProviderErrorUnknownShort => 'Error desconocido';
+
+  @override
+  String get terminalCreateFailed => 'No se pudo crear la sesión de terminal';
+
+  @override
+  String get terminalEndpointUnavailable =>
+      'El endpoint del terminal no está disponible';
+
+  @override
+  String get terminalInvalidDirectory => 'Directorio de terminal no válido';
+
+  @override
+  String get terminalWebsocketUnavailable =>
+      'El websocket del terminal no está disponible aquí.';
+
+  @override
+  String chatMessageToolChainCallsCompact(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count llamadas',
+      one: '1 llamada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get errorConnectionTimeout => 'Se agotó el tiempo de conexión';
+
+  @override
+  String get errorClientError => 'Error del cliente';
+
+  @override
+  String get chatProviderErrorSendMessage => 'No se pudo enviar el mensaje';
 }

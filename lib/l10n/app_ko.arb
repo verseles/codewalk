@@ -93,12 +93,12 @@
   "behaviorCustomDisplayName": "사용자 지정 표시 이름",
   "behaviorCutsAutomaticMobile": "백그라운드 다운로드를 중지하고 포그라운드 자동 새로고침을 {inSeconds}초마다 한 번으로 제한하여 자동 모바일 데이터 사용량을 줄입니다.",
   "behaviorDataSaverActive": "현재 모바일 데이터에서 활성화되어 있습니다.",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "공격적",
+  "behaviorDataSaverAggressiveDescription": "저대역폭 모드: 표시 중인 작업 공간 스트림만 실시간으로 유지되고, 전역 업데이트는 일시 중지되며, 자동 새로고침 간격이 늘어납니다.",
   "behaviorDataSaverCellularOnly": "모바일/셀룰러 연결 시에만 적용됩니다.",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "끄기",
+  "behaviorDataSaverOffHint": "전체 실시간 업데이트와 자동 새로고침이 활성화됩니다.",
+  "behaviorDataSaverStandard": "표준",
   "behaviorDataSaverWaiting": "다음 모바일 데이터 동기화 주기를 대기 중입니다.",
   "behaviorDisabled": "비활성화됨",
   "behaviorLightweightTasksLike": "다음과 같은 가벼운 작업",
@@ -142,8 +142,8 @@
   "chatBadgeDataSaverActive": "데이터 절약 모드가 활성화되었습니다.",
   "chatBadgeServerNeedsAttention": "서버 연결에 주의가 필요합니다.",
   "chatBadgeSyncing": "대화 동기화 중...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "이 턴이 끝나면 답변이 단일 블록으로 표시됩니다.",
+  "chatBlockResponsePendingTitle": "응답 생성 중",
   "chatCachedConversationsYet": "캐시된 대화가 없습니다",
   "chatChangedFilesAvailable": "이 세션에서 변경된 파일을 사용할 수 없습니다.",
   "chatChildrenChatProviderCurrentSessionChildren": "하위: {length}",
@@ -500,35 +500,60 @@
   "filesDuplicate": "복제",
   "filesDuplicated": "파일이 복제되었습니다",
   "filesFileEmpty": "파일이 비어 있습니다.",
+  "filesAlreadyExists": "이미 같은 이름의 파일 또는 폴더가 있습니다.",
+  "filesCopyPath": "경로 복사",
+  "filesCreateFileTitle": "파일 만들기",
+  "filesCreateFolderTitle": "폴더 만들기",
+  "filesDelete": "삭제",
+  "filesDeleteConfirm": "{name}을(를) 삭제할까요? 되돌릴 수 없습니다. 폴더는 내용까지 삭제됩니다.",
+  "filesDeleteTitle": "{name} 삭제",
   "filesFilesFound": "파일을 찾을 수 없음",
+  "filesFileCreated": "파일이 생성되었습니다.",
+  "filesFolderCreated": "폴더가 생성되었습니다.",
   "filesHideSidebar": "파일 사이드바 숨기기",
+  "filesInvalidName": "경로 구분 기호 없이 유효한 이름을 입력하세요.",
+  "filesNameHint": "이름",
+  "filesNew": "새로 만들기",
+  "filesNewFile": "새 파일",
+  "filesNewFolder": "새 폴더",
   "filesNames": "이름",
   "filesOpenFilesFileState": "열린 파일 ({length})",
   "filesQuickOpen": "빠른 열기",
   "filesQuickOpenFile": "빠른 파일 열기",
+  "filesOperationFailed": "파일 작업에 실패했습니다.",
+  "filesOperationUnavailable": "이 서버에서는 파일 작업을 사용할 수 없습니다.",
+  "filesOutsideRoot": "경로가 프로젝트 루트를 벗어납니다.",
+  "filesPathCopied": "경로가 복사되었습니다.",
+  "filesPathMissing": "경로가 존재하지 않습니다.",
+  "filesPermissionDenied": "권한이 거부되었습니다.",
   "filesRefresh": "파일 새로고침",
+  "filesRename": "이름 변경",
+  "filesRenameTitle": "{name} 이름 변경",
+  "filesRenamed": "이름이 변경되었습니다.",
+  "filesRootDeleteBlocked": "프로젝트 루트는 삭제할 수 없습니다.",
   "filesSearchHint": "이름 또는 경로로 파일 검색",
+  "filesDeleted": "삭제되었습니다.",
   "filesTitle": "파일",
-  "forwardAction": "Forward",
-  "forwardAllFailed": "Could not forward to any session",
-  "forwardCancel": "Cancel",
-  "forwardDialogSubtitle": "Select one or more conversations",
-  "forwardDialogTitle": "Forward to…",
-  "forwardLoading": "Loading sessions…",
-  "forwardNoOpenProjects": "No open projects with sessions",
-  "forwardNoProviderModel": "Select a provider and model before forwarding",
-  "forwardNoSessions": "No recent sessions",
-  "forwardPartial": "Forwarded to {success} of {total}",
-  "forwardProvenanceLabel": "Forwarded from: {origin}",
-  "forwardRetry": "Retry",
-  "forwardSearchHint": "Search",
-  "forwardSelectedCount": "{count} selected",
-  "forwardSend": "Forward",
-  "forwardServerOffline": "Server offline",
+  "forwardAction": "전달",
+  "forwardAllFailed": "어떤 세션으로도 전달하지 못했습니다",
+  "forwardCancel": "취소",
+  "forwardDialogSubtitle": "대화를 하나 이상 선택하세요",
+  "forwardDialogTitle": "전달할 대상…",
+  "forwardLoading": "세션 로드 중…",
+  "forwardNoOpenProjects": "세션이 있는 열린 프로젝트가 없습니다",
+  "forwardNoProviderModel": "전달하기 전에 공급자와 모델을 선택하세요",
+  "forwardNoSessions": "최근 세션이 없습니다",
+  "forwardPartial": "{total}개 중 {success}개로 전달됨",
+  "forwardProvenanceLabel": "전달 출처: {origin}",
+  "forwardRetry": "재시도",
+  "forwardSearchHint": "검색",
+  "forwardSelectedCount": "{count}개 선택됨",
+  "forwardSend": "전달",
+  "forwardServerOffline": "서버가 오프라인입니다",
   "forwardShortcutHint": "Ctrl+Shift+F",
-  "forwardSuccess": "Forwarded to {count} sessions",
-  "forwardUndo": "Undo",
-  "forwardUndoFailed": "Could not undo the forward",
+  "forwardSuccess": "{count}개 세션으로 전달됨",
+  "forwardUndo": "실행 취소",
+  "forwardUndoFailed": "전달을 실행 취소할 수 없습니다",
   "logsAppLogs": "앱 로그",
   "logsClear": "로그 지우기",
   "logsCloseSearch": "검색 닫기",
@@ -556,8 +581,8 @@
   "logsShowingOrderedLength": "항목 {length2}개 중 {length}개 표시",
   "logsSlowestPerformance": "가장 느린 성능 로그",
   "logsSlowestTasks": "가장 느린 작업",
-  "logsTagCustomAction": "사용자 지정...",
   "logsTagCustomHint": "태그 이름(예: task:select_session)",
+  "logsTagCustomAction": "사용자 지정...",
   "logsTaskDuration": "{operation} — {elapsedMs} ms",
   "logsTaskStatusCanceled": "취소됨",
   "logsTaskStatusError": "오류",
@@ -590,7 +615,7 @@
   "msgFilteredLogsCopied": "필터링된 로그가 클립보드에 복사되었습니다",
   "msgInfoAgent": "에이전트",
   "msgInfoCompaction": "압축",
-  "msgInfoCost": "비용: \\${cost}",
+  "msgInfoCost": "비용: ${cost}",
   "msgInfoMessageInfo": "메시지 정보",
   "msgInfoModel": "모델: {modelId}",
   "msgInfoNoMetadata": "사용 가능한 메타데이터가 없습니다",
@@ -697,7 +722,7 @@
   "onboardingPreconditionWindowsWslRecommendation": "Windows 빌드가 감지되었습니다. OpenCode 문서에서는 WSL을 권장하지만, 대체 방안으로 npm install을 사용할 수 있습니다.",
   "onboardingReachable": "연결 가능",
   "onboardingReady": "준비됨",
-  "onboardingRecommendedOrderTry": "권장 순서: CodeWalk가 모든 환경을 자동으로 구축하게 하려면 ''Bun + OpenCode 설치''를 시도해 보세요. OpenCode가 이미 설치되어 있으면 ''기존 서버 사용''을 선택하세요.",
+  "onboardingRecommendedOrderTry": "권장 순서: CodeWalk가 모든 환경을 자동으로 구축하게 하려면 'Bun + OpenCode 설치'를 시도해 보세요. OpenCode가 이미 설치되어 있으면 '기존 서버 사용'을 선택하세요.",
   "onboardingRefreshChecks": "검사 새로고침",
   "onboardingRunDiagnosticsToVerify": "로컬 OpenCode 요구 사항을 확인하려면 진단을 실행하십시오.",
   "onboardingSaveAndTest": "저장 및 테스트",
@@ -739,7 +764,7 @@
   "onboardingUsingDetectedCommand": "감지된 OpenCode 명령을 사용합니다.",
   "onboardingViewSetupDebug": "설정 디버그 보기",
   "onboardingWelcomeTo": "{appName}에 오신 것을 환영합니다",
-  "onboardingWindowsTipInstalling": "Windows 팁: 설치 후 ''검사 새로고침''을 클릭하세요. 여전히 감지되지 않으면 CodeWalk를 다시 열어 PATH 변경 사항을 다시 로드하세요.",
+  "onboardingWindowsTipInstalling": "Windows 팁: 설치 후 '검사 새로고침'을 클릭하세요. 여전히 감지되지 않으면 CodeWalk를 다시 열어 PATH 변경 사항을 다시 로드하세요.",
   "onboardingWritable": "쓰기 가능",
   "onboardingYoureAllSet": "모든 준비가 완료되었습니다!",
   "permissionAllowOnce": "한 번만 허용",
@@ -838,7 +863,7 @@
   "sessionDiffFilesCount": "Diff 파일: {count}",
   "sessionDiffLinesAddedRemoved": "+{added}줄 추가됨 -{removed}줄 제거됨",
   "sessionDiffLinesCollapsed": "{count}줄이 접혀 있음 — 탭하여 펼치기",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "변경된 파일 로드 중…",
   "sessionDiffReview": "변경 사항 검토",
   "sessionDiffSplit": "분할 보기",
   "sessionDiffSummary": "요약",
@@ -923,8 +948,8 @@
   "settingsAppearanceBrandColorDynamicBlocked": "브랜드 색상을 선택하려면 배경화면 색상 사용을 비활성화하세요.",
   "settingsAppearanceBrandColorNormal": "앱 팔레트의 기준 색상을 선택합니다.",
   "settingsAppearanceBrandColorPresetBlocked": "브랜드 색상을 선택하려면 CodeWalk 클래식으로 전환하세요.",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "대화 텍스트 크기",
+  "settingsAppearanceChatFontScaleDescription": "시스템 텍스트 크기에 더해 채팅 메시지와 작성기 텍스트의 크기를 조정합니다.",
   "settingsAppearanceCodeWalkClassic": "CodeWalk 클래식",
   "settingsAppearanceComposerTips": "컴포저 팁",
   "settingsAppearanceComposerTipsDescription": "어시스턴트가 생각하는 동안 순환되는 팁의 표시 여부를 설정합니다.",
@@ -943,8 +968,8 @@
   "settingsAppearanceDensityNormal": "보통",
   "settingsAppearanceDensitySpacious": "넓음",
   "settingsAppearanceDescription": "테마, 색상, 텍스트 크기 및 채팅 표시 선택",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "텍스트 크기",
+  "settingsAppearanceFontSizeDescription": "시스템 텍스트, 대화 텍스트, 터미널 텍스트의 크기를 조정합니다.",
   "settingsAppearanceLight": "라이트",
   "settingsAppearanceMathRendering": "수식 렌더링",
   "settingsAppearanceMathRenderingDescription": "채팅 메시지에서 LaTeX 수학 표현식을 조판된 방정식으로 렌더링합니다.",
@@ -957,12 +982,12 @@
   "settingsAppearanceSectionDescription": "작업 흐름에 맞게 시각적 조밀도 및 메시지 영역을 조정합니다.",
   "settingsAppearanceSectionTitle": "화면 표시",
   "settingsAppearanceSystem": "시스템",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "시스템 텍스트 크기",
+  "settingsAppearanceSystemFontScaleDescription": "메뉴, 대화상자, 사이드바를 포함한 앱 셸의 모든 텍스트 크기를 조정합니다.",
   "settingsAppearanceTaskList": "작업 목록",
   "settingsAppearanceTaskListDescription": "세션 작업 목록 위젯의 표시 여부를 설정합니다.",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "터미널 텍스트 크기",
+  "settingsAppearanceTerminalFontSizeDescription": "내장 터미널 글꼴 크기를 조정합니다. 실행 중인 세션에 즉시 적용됩니다.",
   "settingsAppearanceTheme": "테마",
   "settingsAppearanceThemeDescription": "라이트, 다크 또는 시스템 모드를 선택한 다음 CodeWalk 클래식 팔레트를 유지하거나 OpenCode 프리셋으로 전환합니다.",
   "settingsAppearanceVisualStyle": "시각 스타일",
@@ -984,17 +1009,17 @@
   "settingsAppearanceWindowChromeSystem": "시스템 장식",
   "settingsAppearanceWindowChromeSystemDescription": "네이티브 제목 표시줄을 유지하고 탭을 앱 바 아래에 표시합니다.",
   "settingsBack": "뒤로",
-  "settingsBehaviorAutoupdateCaveat": "CodeWalk 릴리스 확인은 ''정보''를 사용하세요. 이 설정은 공식 OpenCode `autoupdate` 구성만 미러링합니다.",
+  "settingsBehaviorAutoupdateCaveat": "CodeWalk 릴리스 확인은 '정보'를 사용하세요. 이 설정은 공식 OpenCode `autoupdate` 구성만 미러링합니다.",
   "settingsBehaviorAutoupdateHelp": "CodeWalk 앱 업데이트 확인이 아닌 업스트림 OpenCode 런타임 업데이트를 제어합니다.",
   "settingsBehaviorCellularDataSaver": "데이터 절약 모드",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
-  "settingsBehaviorComposerSpellCheck": "Composer spell check",
-  "settingsBehaviorComposerSpellCheckDescription": "Use native platform spell check, suggestions, and autocorrect in the chat composer.",
+  "settingsBehaviorChatRenderMode": "채팅 렌더링 모드",
+  "settingsBehaviorChatRenderModeBlock": "블록",
+  "settingsBehaviorChatRenderModeBlockDescription": "현재 턴을 단일 블록으로 표시할 수 있을 때까지 실시간 어시스턴트 텍스트, 추론, 도구 카드를 숨깁니다.",
+  "settingsBehaviorChatRenderModeDescription": "어시스턴트 응답을 스트리밍 중 표시할지, 현재 턴이 끝난 후 표시할지 선택하세요.",
+  "settingsBehaviorChatRenderModeLive": "실시간",
+  "settingsBehaviorChatRenderModeLiveDescription": "OpenCode가 이벤트를 스트리밍할 때 어시스턴트 텍스트, 추론, 도구 활동을 표시합니다.",
+  "settingsBehaviorComposerSpellCheck": "작성기 맞춤법 검사",
+  "settingsBehaviorComposerSpellCheckDescription": "채팅 작성기에서 플랫폼 기본 맞춤법 검사, 제안, 자동 수정을 사용합니다.",
   "settingsBehaviorConfigDeferred": "CodeWalk는 현재 응답이 완료된 후 이 OpenCode 설정을 적용합니다.",
   "settingsBehaviorConfigUpdateFailed": "OpenCode {field}을(를) 업데이트할 수 없습니다.",
   "settingsBehaviorConversationUsername": "대화 사용자 이름",
@@ -1116,7 +1141,7 @@
   "settingsOpenCodeAutoUpdate": "OpenCode 자동 업데이트",
   "settingsOpenCodeSharingDefault": "OpenCode 공유 기본값",
   "settingsReadAloudEnabled": "음성으로 읽기",
-  "settingsReadAloudEnabledDescription": "어시스턴트 메시지에 ''음성으로 읽기'' 버튼을 표시합니다.",
+  "settingsReadAloudEnabledDescription": "어시스턴트 메시지에 '음성으로 읽기' 버튼을 표시합니다.",
   "settingsReadAloudPitch": "음높이",
   "settingsReadAloudPitchDescription": "목소리의 높낮이를 조정합니다.",
   "settingsReadAloudSectionDescription": "어시스턴트의 응답을 음성으로 읽습니다. 속도, 높낮이 및 목소리를 구성하세요.",
@@ -1157,6 +1182,30 @@
   "settingsSpeechSilenceTimeout": "무음 제한 시간: {value}초",
   "settingsSpeechTitle": "음성 인식 (STT)",
   "settingsTitle": "설정",
+  "settingsGroupAlertTypes": "알림 유형",
+  "settingsGroupBackgroundBehavior": "백그라운드 동작",
+  "settingsGroupChatDisplay": "채팅 표시",
+  "settingsGroupCurrentConnection": "현재 연결",
+  "settingsGroupDataAndSync": "데이터 및 동기화",
+  "settingsGroupDataReset": "데이터 및 초기화",
+  "settingsGroupDelivery": "전달 방식",
+  "settingsGroupHelp": "도움말",
+  "settingsGroupLanguageAndChat": "언어 및 채팅",
+  "settingsGroupLayoutAndText": "레이아웃 및 텍스트",
+  "settingsGroupOfflineModels": "오프라인 모델",
+  "settingsGroupOpenCodeDefaults": "OpenCode 기본값",
+  "settingsGroupReadAloud": "소리내어 읽기",
+  "settingsGroupSavedServers": "저장된 서버",
+  "settingsGroupThemeAndColor": "테마 및 색상",
+  "settingsGroupThisDevice": "이 기기",
+  "settingsGroupVersionUpdates": "버전 및 업데이트",
+  "settingsGroupVoiceInput": "음성 입력",
+  "settingsNavigationGroupExperience": "경험",
+  "settingsNavigationGroupInput": "입력",
+  "settingsNavigationGroupSetup": "설정",
+  "settingsNavigationGroupSupport": "도움말 및 진단",
+  "settingsNavigationNoResults": "설정 항목을 찾을 수 없음",
+  "settingsNavigationSearchHint": "설정 검색",
   "settingsUsernameClearHint": "OpenCode 대화 사용자 이름을 지우려면 여전히 앱 외부에서 구성을 수정해야 합니다.",
   "settingsUsernameEnterHint": "사용자 정의 OpenCode 대화 이름을 저장하려면 사용자 이름을 입력하세요.",
   "settingsUsernameResetExplanation": "`/config` 패치 업데이트는 키를 제거할 수 없으므로 `username`을 시스템 기본값으로 재설정하려면 앱 외부에서 구성을 편집해야 합니다.",
@@ -1260,11 +1309,11 @@
   "speechMoonshineStaysDownloadable": "Moonshine은 앱 번들에 포함되지 않고 다운로드 가능한 상태로 유지됩니다. 이 데스크톱 기기에 맞게 하나의 모델을 선택하고, 공간을 확보하고 싶다면 나중에 제거하세요.",
   "speechNative": "기본 제공 엔진",
   "speechNativeSTTDisabled": "이 앱의 Linux 환경에서는 네이티브 STT 기능이 비활성화되어 있습니다. 신규 설치의 경우 Parakeet가 기본 엔진입니다.",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "Windows에서는 CodeWalk가 WASAPI 마이크 백엔드를 통해 로컬 온디바이스 음성 인식을 사용합니다. 안정성을 위해 Windows 네이티브 음성 인식은 비활성화되어 있습니다.",
   "speechNativeStartsFaster": "네이티브 방식이 더 빠르게 시작됩니다. Sherpa는 비교적 무거운 구성과 심층적인 모델 제어 기능을 통해 기기 자체에서 완전히 작동합니다.",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechOpenMicrophoneSettings": "마이크 설정 열기",
+  "speechOpenSpeechPrivacy": "음성 개인 정보 보호 설정 열기",
+  "speechOpenSpeechSettings": "음성 설정 열기",
   "speechParakeet": "Parakeet",
   "speechParakeetModelsDesktop": "Parakeet 모델 (데스크톱)",
   "speechParakeetStaysDownloadable": "Parakeet는 앱 번들에 포함되지 않고 다운로드 가능한 상태로 유지됩니다. 현재 25개 유럽 언어에 최적화된 다국어 모델 하나를 제공하고 있습니다.",
@@ -1280,7 +1329,7 @@
   "speechSherpaModelsLinux": "Sherpa 모델 (Linux)",
   "speechSpeechText": "음성 인식 (STT)",
   "speechUnavailableOnPlatform": "{service} 음성을 이 플랫폼에서 사용할 수 없습니다.",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "Windows 음성 입력은 온디바이스 모델과 함께 CodeWalk WASAPI 캡처를 사용합니다. 데스크톱 앱의 마이크 액세스를 활성화된 상태로 유지하세요. 아래 버튼은 문제 해결을 위해 Windows 설정을 엽니다.",
   "statusConnected": "연결됨",
   "statusDelayed": "지연됨",
   "statusFailed": "실패",
@@ -1386,7 +1435,6 @@
   "workspaceProjectDirectory": "프로젝트 디렉토리",
   "workspaceProjectHint": "/repo/my-project",
   "workspaceRemoveFromHistory": "기록에서 {name} 제거",
-  "workspaceSuggestions": "추천 프로젝트",
   "settingsSessionAttentionTitle": "세션 알림",
   "settingsSessionAttentionDescription": "루트 세션 상태를 선택적 버블이나 패널에 표시합니다.",
   "settingsSessionAttentionOff": "끄기",
@@ -1397,28 +1445,1402 @@
   "settingsSessionAttentionOpenSettings": "표시 설정 열기",
   "settingsSessionAttentionStop": "세션 알림 중지",
   "settingsSessionAttentionThirdPartyTtsWarning": "읽기를 누르면 응답 텍스트가 설정된 타사 TTS 제공업체로 전송될 수 있습니다.",
-  "settingsGroupAlertTypes": "알림 유형",
-  "settingsGroupBackgroundBehavior": "백그라운드 동작",
-  "settingsGroupChatDisplay": "채팅 표시",
-  "settingsGroupCurrentConnection": "현재 연결",
-  "settingsGroupDataAndSync": "데이터 및 동기화",
-  "settingsGroupDataReset": "데이터 및 초기화",
-  "settingsGroupDelivery": "전달 방식",
-  "settingsGroupHelp": "도움말",
-  "settingsGroupLanguageAndChat": "언어 및 채팅",
-  "settingsGroupLayoutAndText": "레이아웃 및 텍스트",
-  "settingsGroupOfflineModels": "오프라인 모델",
-  "settingsGroupOpenCodeDefaults": "OpenCode 기본값",
-  "settingsGroupReadAloud": "소리내어 읽기",
-  "settingsGroupSavedServers": "저장된 서버",
-  "settingsGroupThemeAndColor": "테마 및 색상",
-  "settingsGroupThisDevice": "이 기기",
-  "settingsGroupVersionUpdates": "버전 및 업데이트",
-  "settingsGroupVoiceInput": "음성 입력",
-  "settingsNavigationGroupExperience": "경험",
-  "settingsNavigationGroupInput": "입력",
-  "settingsNavigationGroupSetup": "설정",
-  "settingsNavigationGroupSupport": "도움말 및 진단",
-  "settingsNavigationNoResults": "설정 항목을 찾을 수 없음",
-  "settingsNavigationSearchHint": "설정 검색"
+  "workspaceSuggestions": "추천 프로젝트",
+  "sessionTabsGestureHintTitle": "세션 탭에 새 제어 기능이 추가되었습니다",
+  "sessionTabsGestureHintBody": "탭을 두 번 클릭하거나 두 번 탭하면 닫힙니다. 오른쪽 클릭하거나 길게 누르면 세션 작업이 열립니다. 화면 표시 토글에서 탭을 비활성화할 수 있습니다.",
+  "sessionTabsGestureHintAcknowledge": "알겠습니다",
+  "sessionTabsGestureHintDisableTabs": "탭 사용 안 함",
+  "sessionTabRenameAction": "세션 이름 변경",
+  "sessionTabClosedMessage": "탭 \"{title}\"이(가) 닫혔습니다",
+  "sessionTabUndo": "실행 취소",
+  "sessionTabRestoreFailed": "탭을 복원할 수 없습니다.",
+  "sessionTabChangeIconAction": "아이콘 변경",
+  "sessionTabIconPickerTitle": "탭 아이콘 선택",
+  "sessionTabIconUseProjectIcon": "프로젝트 아이콘 사용",
+  "sessionTabIconApplied": "탭 아이콘이 업데이트되었습니다.",
+  "sessionTabIconSaveFailed": "탭 아이콘을 저장할 수 없습니다.",
+  "sessionTabIconPresetCode": "코드",
+  "sessionTabIconPresetTerminal": "터미널",
+  "sessionTabIconPresetBug": "버그",
+  "sessionTabIconPresetTasks": "작업",
+  "sessionTabIconPresetLaunch": "시작",
+  "sessionTabIconPresetIdea": "아이디어",
+  "sessionTabIconPresetResearch": "연구",
+  "sessionTabIconPresetDesign": "디자인",
+  "sessionTabIconPresetData": "데이터",
+  "sessionTabIconPresetCloud": "클라우드",
+  "sessionTabIconPresetSecurity": "보안",
+  "sessionTabIconPresetTools": "도구",
+  "workspaceNoActiveContext": "활성 컨텍스트 없음",
+  "settingsAppearanceContrastLow": "낮음",
+  "settingsAppearanceContrastStandard": "표준",
+  "settingsAppearanceContrastMedium": "중간",
+  "settingsAppearanceContrastMediumHigh": "중간 높음",
+  "settingsNotificationsSystemSoundsWebUnavailable": "웹에서는 사용할 수 없습니다.",
+  "settingsNotificationsSystemSoundsAndroid": "시스템의 Android 알림음입니다.",
+  "settingsNotificationsSystemSoundsFreedesktop": "/usr/share/sounds/freedesktop/stereo의 Freedesktop 소리입니다.",
+  "settingsNotificationsSystemSoundsPlatform": "운영 체제가 시스템 소리를 제공하는 플랫폼에서 지원됩니다.",
+  "serversQuickGuideTitle": "빠른 설정",
+  "serversQuickGuideIntro": "CodeWalk는 앱입니다. OpenCode는 이 연결이 작동하려면 실행 중이어야 하는 엔진입니다.",
+  "serversQuickGuideStepInstallCli": "1. OpenCode CLI 설치.",
+  "serversQuickGuideRunPowerShell": "2. PowerShell에서 실행:",
+  "serversQuickGuideRunTerminal": "2. 터미널에서 실행:",
+  "serversQuickGuideProtectPassword": "비밀번호로 액세스 보호",
+  "serversQuickGuideServerPassword": "서버 비밀번호",
+  "serversQuickGuideInstallOptions": "기타 공식 설치 옵션: 설치 스크립트, npm, bun, pnpm, Homebrew 또는 GitHub Releases의 바이너리.",
+  "serversQuickGuideVerifyHint": "서버를 시작한 후 /global/health 또는 /doc가 응답하는지 확인한 다음 URL을 CodeWalk에 붙여넣으세요.",
+  "shortcutsPressKeyCombination": "지금 키 조합을 누르세요",
+  "settingsProvenanceOpenCodeBacked": "OpenCode 기반",
+  "settingsProvenanceCodeWalkLocal": "CodeWalk 로컬",
+  "settingsProvenanceCodeWalkException": "CodeWalk 예외",
+  "shortcutsErrorInvalid": "잘못된 단축키",
+  "shortcutsErrorUnsupportedKey": "지원하지 않는 단축키",
+  "shortcutsErrorConflict": "\"{conflict}\"과(와) 충돌",
+  "settingsSessionAttentionStopSaveFailed": "세션 알림이 중지되었지만 설정을 저장하지 못했습니다.",
+  "settingsSessionAttentionEnableFailed": "세션 알림을 활성화할 수 없습니다.",
+  "settingsSessionAttentionSaveFailedStopped": "세션 알림 설정을 저장하지 못해 중지되었습니다.",
+  "settingsSessionAttentionStillRunning": "세션 알림이 아직 실행 중입니다. 다시 중지를 시도하세요.",
+  "settingsSessionAttentionStopFailed": "세션 알림을 중지할 수 없습니다. 다시 시도하세요.",
+  "settingsSessionAttentionCapabilityUnavailable": "세션 알림 호스트 기능을 사용할 수 없습니다.",
+  "settingsServerFallbackProviderName": "서버에서 구성됨",
+  "composerStopResponse": "응답 중지",
+  "composerSendMessageWhileResponding": "응답 실행 중 메시지 전송",
+  "composerSendMessage": "메시지 전송",
+  "chatTourComposerDescription": "요청을 여기에 입력하세요.",
+  "chatTourSendDescription": "메시지를 여기서 보내세요.",
+  "composerAttachmentFallbackName": "첨부 파일",
+  "composerContextFallbackName": "컨텍스트",
+  "searchableDropdownSearchHint": "검색",
+  "searchableDropdownEmptyText": "일치하는 항목 없음",
+  "speechApiKeyStorageUnavailable": "보안 TTS API 키 저장소를 사용할 수 없습니다.",
+  "speechApiKeyRemoved": "API 키가 제거되었습니다.",
+  "speechApiKeySaved": "API 키가 이 기기에 안전하게 저장되었습니다.",
+  "speechReadAloudTestText": "이것은 CodeWalk 텍스트 음성 변환 테스트입니다.",
+  "speechNativeDisabledWindows": "안정성을 위해 Windows에서는 비활성화됩니다. CodeWalk WASAPI 캡처를 통해 Parakeet 또는 다른 기기 내 엔진을 사용하세요.",
+  "speechNativeUnavailableLinux": "Linux에서는 사용할 수 없습니다. 음성 입력에는 Parakeet을 사용하세요.",
+  "speechNotAvailableOnPlatform": "이 플랫폼에서는 사용할 수 없습니다.",
+  "speechSherpaUnavailableAndroid": "작은 APK 크기에 최적화된 Android 빌드에서는 사용할 수 없습니다.",
+  "speechMoonshineDesktopOnlyHint": "데스크톱에서만 사용할 수 있습니다. Android는 기본 엔진만 지원합니다.",
+  "speechParakeetDesktopOnlyHint": "데스크톱에서만 사용할 수 있습니다. 오프라인 다국어 인식을 사용합니다.",
+  "speechSenseVoiceDesktopOnlyHint": "데스크톱에서만 사용할 수 있습니다. 중국어, 광둥어, 일본어, 한국어, 영어에 가장 적합합니다.",
+  "speechNativeSubtitle": "더 간단하고 빠르게 시작됩니다.",
+  "speechSherpaSubtitle": "더 무겁고 실험적이며 버그가 발생하기 쉽습니다. 다운로드한 모델에서는 종종 더 정확합니다.",
+  "speechMoonshineSubtitle": "sherpa_onnx 오프라인 인식과 다운로드 가능한 모델을 사용하는 데스크톱 전용 실험 경로입니다.",
+  "speechParakeetSubtitle": "하나의 다국어 다운로드 모델을 제공하는 데스크톱 전용 오프라인 NeMo 트랜스듀서 경로입니다.",
+  "speechSenseVoiceSubtitle": "중국어, 광둥어, 일본어, 한국어, 영어에 맞춘 데스크톱 전용 오프라인 경로입니다.",
+  "speechMoonshineModel": "Moonshine 모델",
+  "speechSherpaLanguage": "Sherpa 언어",
+  "speechSearchSherpaLanguage": "Sherpa 언어 검색",
+  "speechNoLanguagePacksFound": "언어 팩을 찾을 수 없음",
+  "speechTextToSpeechProvider": "텍스트 음성 변환 제공자",
+  "speechProviderSystemNative": "시스템 / 기본",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (실험적)",
+  "speechProviderOpenAiCompatible": "OpenAI 호환",
+  "speechEdgeExperimentalTitle": "Microsoft Edge Speech는 실험적입니다",
+  "speechEdgeExperimentalDescription": "비공식 Edge 읽어주기 서비스를 이 기기에서 직접 사용합니다. 읽어주기를 사용하면 메시지 텍스트가 Microsoft로 전송되며, Microsoft가 비공개 프로토콜을 변경하면 서비스가 중단될 수 있습니다.",
+  "speechEdgeVoice": "Edge 음성",
+  "speechEdgeVoiceListUnavailable": "기본 Edge 음성을 사용 중입니다. 지금은 음성 목록을 불러올 수 없습니다.",
+  "speechEdgeVoicesLoaded": "Microsoft Edge Speech 음성에서 로드되었습니다.",
+  "speechCloudTtsPrivacy": "클라우드 TTS 개인정보 보호",
+  "speechCloudTtsPrivacyDescription": "클라우드 TTS는 선택한 어시스턴트 메시지 텍스트를 설정된 제공자에게 전송합니다. API 키는 이 기기의 보안 저장소에 저장됩니다.",
+  "speechBaseUrl": "기본 URL",
+  "speechApiKey": "API 키",
+  "speechApiKeySavedHelper": "저장된 키가 있습니다. 새 값을 입력하여 교체하거나 빈 값을 저장하여 제거하세요.",
+  "speechNoApiKeySaved": "저장된 API 키가 없습니다.",
+  "speechSaveApiKey": "API 키 저장",
+  "speechModel": "모델",
+  "speechPitchNotSupported": "피치는 OpenAI 호환 TTS에서 지원되지 않으므로 이 제공자에서는 숨겨집니다.",
+  "speechTestVoice": "음성 테스트",
+  "dialogMoonshineVoiceSetupDescription": "Moonshine은 sherpa_onnx를 통해 기기에서 실행됩니다. 모델을 한 번 선택하고 이 데스크톱 기기에만 다운로드하세요.",
+  "dialogParakeetVoiceSetupDescription": "Parakeet은 sherpa_onnx 오프라인 인식을 통해 기기에서 실행됩니다. 다국어 STT를 사용하려면 이 데스크톱 기기에 한 번 다운로드하세요.",
+  "dialogSenseVoiceSetupDescription": "SenseVoice는 sherpa_onnx 오프라인 인식을 통해 기기에서 실행됩니다. 중국어, 광둥어, 일본어, 한국어, 영어에 가장 적합합니다.",
+  "dialogSherpaVoiceSetupDescription": "Sherpa 음성 입력에는 기기 내 음성 모델이 필요합니다. 언어를 선택하고 한 번 다운로드하세요 (~147 MB).",
+  "speechSilenceSeconds": "{value}초",
+  "speechModelInstalled": "모델 설치됨 ({modelId})",
+  "speechModelMissing": "모델 없음 ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} MB",
+  "speechSystemDefaultLanguage": "시스템 기본값 ({language})",
+  "speechModelListLoadFailed": "{service} 모델 목록을 불러오지 못했습니다: {error}",
+  "speechDownloadFailed": "다운로드 실패: {error}",
+  "speechFailedToRemoveModel": "모델 제거 실패: {error}",
+  "speechBaseUrlExample": "예: {url}",
+  "speechModelDefaultHelper": "기본값: {model}",
+  "notificationPermissionOrQuestionNeedsInput": "도구 권한 또는 질문에 대한 입력이 필요합니다.",
+  "notificationPermissionNeedsInput": "도구 권한에 대한 입력이 필요합니다.",
+  "notificationQuestionNeedsInput": "도구 질문에 대한 입력이 필요합니다.",
+  "notificationSessionError": "세션에서 오류가 보고되었습니다.",
+  "notificationChannelErrors": "CodeWalk 오류",
+  "notificationChannelErrorsDescription": "CodeWalk 오류 알림",
+  "notificationChannelPermissions": "CodeWalk 권한",
+  "notificationChannelPermissionsDescription": "CodeWalk 작업 필요 알림",
+  "notificationChannelAgent": "CodeWalk 에이전트",
+  "notificationChannelAgentDescription": "CodeWalk 에이전트 완료 알림",
+  "notificationActionOpen": "열기",
+  "foregroundMonitorNotificationBody": "안정적인 백그라운드 알림이 활성화되어 있습니다",
+  "foregroundMonitorNotificationTitle": "백그라운드 모니터링 활성화됨",
+  "foregroundMonitorNotificationOneSession": "세션 1개 모니터링 중",
+  "foregroundMonitorNotificationSessionCount": "{count}개 세션 모니터링 중",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{1개 세션에 주의가 필요합니다} other{{count}개 세션에 주의가 필요합니다}}",
+  "sessionAttentionOverlayPermissionRequired": "다른 앱 위에 표시 권한이 필요합니다.",
+  "sessionAttentionIosInAppOnly": "세션 알림은 CodeWalk 내에서만 사용할 수 있습니다.",
+  "sessionAttentionOverlayPermissionGrantPrompt": "다른 앱 위에 표시 권한을 허용한 후 다시 시도하세요.",
+  "sessionAttentionAndroidStartFailed": "Android 세션 알림 서비스를 시작할 수 없습니다.",
+  "chatMessageTruncatedChars": "[{count}자 잘림] {reason}",
+  "chatMessageJustNow": "방금",
+  "chatMessageMinutesAgo": "{count}분 전",
+  "chatMessageHoursAgo": "{count}시간 전",
+  "chatMessageDaysAgo": "{count}일 전",
+  "chatMessageDateTime": "{month}/{day} {hour}:{minute}",
+  "chatMessageYourMessage": "내 메시지",
+  "chatMessageAssistantMessage": "어시스턴트 메시지",
+  "chatMessageStepStarted": "#{step} 단계 시작됨",
+  "chatMessageStepStartedWithSnapshot": "#{step} 단계 시작됨: {snapshot}",
+  "chatMessageStepFinished": "#{step} 단계 완료: {reason} • 토큰 {tokens}개 • 비용 ${cost}",
+  "chatMessagePatchCount": "{count, plural, =1{패치 1개} other{패치 {count}개}}",
+  "chatMessageToolRun": "도구 실행",
+  "chatMessageToolExecution": "도구 실행",
+  "chatMessageToolChainMore": "{count, plural, =1{+1개 더} other{+{count}개 더}}",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{유형 +1개} other{유형 +{count}개}}",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1개에 주의 필요} other{{count}개에 주의 필요}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1개 완료} other{{count}개 완료}}",
+  "chatMessageToolCallsTitle": "도구 호출",
+  "chatMessageDiffPreviewTruncated": "앱 안정성을 위해 Diff 미리보기가 잘렸습니다.",
+  "chatMessageLargeMessageTruncated": "앱 안정성을 위해 큰 메시지 미리보기가 잘렸습니다.",
+  "chatMessageInvalidLinkFormat": "잘못된 링크 형식",
+  "chatMessageUnableToOpenLink": "링크를 열 수 없습니다",
+  "sessionTodoInProgressCompact": "{current}/{total} 진행 중",
+  "sessionTodoTaskProgress": "작업 {index}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} 완료",
+  "sessionTodoCompletedCount": "작업 {count}/{total}개 완료됨",
+  "sessionTodoTasksCount": "작업 ({count})",
+  "questionStepOfReview": "{total}단계 중 {current}단계 - 검토",
+  "questionStepOfQuestion": "{total}단계 중 {current}단계 - 질문",
+  "questionCustomAnswer": "사용자 지정 답변",
+  "questionSubmitAnswers": "답변 제출",
+  "questionReviewAnswers": "답변 검토",
+  "permissionRequestTitle": "권한 요청: {permission}",
+  "sessionTitleCannotBeEmpty": "제목은 비워둘 수 없습니다",
+  "filesFailedToLoad": "파일을 불러오지 못했습니다",
+  "@filesFailedToLoad": {
+    "description": "CodeWalk UI string — filesFailedToLoad"
+  },
+  "filesFailedToSearch": "파일 검색에 실패했습니다",
+  "@filesFailedToSearch": {
+    "description": "CodeWalk UI string — filesFailedToSearch"
+  },
+  "filesNoOpenFilesHint": "열린 파일이 없습니다. 검색하려면 입력하세요.",
+  "@filesNoOpenFilesHint": {
+    "description": "CodeWalk UI string — filesNoOpenFilesHint"
+  },
+  "filesNoContentMatches": "일치하는 내용이 없습니다",
+  "@filesNoContentMatches": {
+    "description": "CodeWalk UI string — filesNoContentMatches"
+  },
+  "filesOpenFilesCount": "{count, plural, =1{열린 파일 1개} other{열린 파일 {count}개}}",
+  "@filesOpenFilesCount": {
+    "description": "CodeWalk UI string — filesOpenFilesCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filesLinesSelectedCount": "{count, plural, =1{1줄 선택됨} other{{count}줄 선택됨}}",
+  "@filesLinesSelectedCount": {
+    "description": "CodeWalk UI string — filesLinesSelectedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filesDraftTooLargeToSave": "초안이 너무 커서 편집기에서 저장할 수 없습니다.",
+  "@filesDraftTooLargeToSave": {
+    "description": "CodeWalk UI string — filesDraftTooLargeToSave"
+  },
+  "filesSaveChangesBeforeClose": "이 파일을 닫기 전에 변경 사항을 저장하세요.",
+  "@filesSaveChangesBeforeClose": {
+    "description": "CodeWalk UI string — filesSaveChangesBeforeClose"
+  },
+  "filesSaveChangesBeforePathChange": "이 경로를 변경하기 전에 변경 사항을 저장하세요.",
+  "@filesSaveChangesBeforePathChange": {
+    "description": "CodeWalk UI string — filesSaveChangesBeforePathChange"
+  },
+  "filesWaitForSaveBeforePathChange": "이 경로를 변경하기 전에 파일 저장이 끝날 때까지 기다리세요.",
+  "@filesWaitForSaveBeforePathChange": {
+    "description": "CodeWalk UI string — filesWaitForSaveBeforePathChange"
+  },
+  "filesWaitForFileOperation": "파일 작업이 끝날 때까지 기다리세요.",
+  "@filesWaitForFileOperation": {
+    "description": "CodeWalk UI string — filesWaitForFileOperation"
+  },
+  "filesLargeFileReadOnly": "편집 응답성을 유지하기 위해 큰 파일은 읽기 전용으로 열립니다.",
+  "@filesLargeFileReadOnly": {
+    "description": "CodeWalk UI string — filesLargeFileReadOnly"
+  },
+  "filesCheckingWriteSupport": "파일 쓰기 지원 확인 중...",
+  "@filesCheckingWriteSupport": {
+    "description": "CodeWalk UI string — filesCheckingWriteSupport"
+  },
+  "filesActiveProjectRequired": "파일 작업에는 활성 프로젝트 디렉터리가 필요합니다.",
+  "@filesActiveProjectRequired": {
+    "description": "CodeWalk UI string — filesActiveProjectRequired"
+  },
+  "filesReloadSkippedUnsavedChanges": "저장하지 않은 변경 사항이 있어 다시 로드를 건너뜁니다.",
+  "@filesReloadSkippedUnsavedChanges": {
+    "description": "CodeWalk UI string — filesReloadSkippedUnsavedChanges"
+  },
+  "filesFailedToLoadContent": "파일 내용을 불러오지 못했습니다",
+  "@filesFailedToLoadContent": {
+    "description": "CodeWalk UI string — filesFailedToLoadContent"
+  },
+  "filesFileSaved": "파일이 저장되었습니다.",
+  "@filesFileSaved": {
+    "description": "CodeWalk UI string — filesFileSaved"
+  },
+  "filesParentNotDirectory": "상위 항목이 디렉터리가 아닙니다.",
+  "@filesParentNotDirectory": {
+    "description": "CodeWalk UI string — filesParentNotDirectory"
+  },
+  "filesMalformedResponse": "파일 작업에서 잘못된 응답이 반환되었습니다.",
+  "@filesMalformedResponse": {
+    "description": "CodeWalk UI string — filesMalformedResponse"
+  },
+  "filesShellCommandDidNotComplete": "파일 작업 셸 명령이 완료되지 않았습니다.",
+  "@filesShellCommandDidNotComplete": {
+    "description": "CodeWalk UI string — filesShellCommandDidNotComplete"
+  },
+  "filesShellCommandNoResult": "파일 작업 셸 명령이 결과를 반환하지 않았습니다.",
+  "@filesShellCommandNoResult": {
+    "description": "CodeWalk UI string — filesShellCommandNoResult"
+  },
+  "filesShellCommandTruncated": "파일 작업 셸 명령이 서버에 의해 잘렸습니다.",
+  "@filesShellCommandTruncated": {
+    "description": "CodeWalk UI string — filesShellCommandTruncated"
+  },
+  "filesShellCommandSyntaxError": "파일 작업 셸 명령이 구문 오류로 실패했습니다.",
+  "@filesShellCommandSyntaxError": {
+    "description": "CodeWalk UI string — filesShellCommandSyntaxError"
+  },
+  "filesShellUtilityNotFound": "필요한 셸 유틸리티를 찾을 수 없습니다.",
+  "@filesShellUtilityNotFound": {
+    "description": "CodeWalk UI string — filesShellUtilityNotFound"
+  },
+  "filesShellCommandFailed": "결과를 반환하기 전에 파일 작업 셸 명령이 실패했습니다.",
+  "@filesShellCommandFailed": {
+    "description": "CodeWalk UI string — filesShellCommandFailed"
+  },
+  "attachmentSaveTitle": "첨부 파일 저장",
+  "@attachmentSaveTitle": {
+    "description": "CodeWalk UI string — attachmentSaveTitle"
+  },
+  "attachmentBrowserSandboxLocalFile": "브라우저 샌드박스로 인해 file:// 첨부 파일을 직접 열 수 없습니다.",
+  "@attachmentBrowserSandboxLocalFile": {
+    "description": "CodeWalk UI string — attachmentBrowserSandboxLocalFile"
+  },
+  "attachmentLocalPathBrowserBlocked": "이 첨부 파일은 브라우저에서 열 수 없는 로컬 경로를 가리킵니다.",
+  "@attachmentLocalPathBrowserBlocked": {
+    "description": "CodeWalk UI string — attachmentLocalPathBrowserBlocked"
+  },
+  "terminalConnectedTo": "{directory}의 {serverName}에 연결됨",
+  "@terminalConnectedTo": {
+    "description": "CodeWalk UI string — terminalConnectedTo",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      },
+      "serverName": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalTransportUnavailable": "터미널 전송을 사용할 수 없습니다.",
+  "@terminalTransportUnavailable": {
+    "description": "CodeWalk UI string — terminalTransportUnavailable"
+  },
+  "chatSlashCommandNew": "새 채팅 세션 만들기",
+  "@chatSlashCommandNew": {
+    "description": "CodeWalk UI string — chatSlashCommandNew"
+  },
+  "chatSlashCommandModels": "모델 선택기 열기",
+  "@chatSlashCommandModels": {
+    "description": "CodeWalk UI string — chatSlashCommandModels"
+  },
+  "chatSlashCommandSessions": "대화 목록 열기",
+  "@chatSlashCommandSessions": {
+    "description": "CodeWalk UI string — chatSlashCommandSessions"
+  },
+  "chatSlashCommandAgent": "에이전트 선택기 열기",
+  "@chatSlashCommandAgent": {
+    "description": "CodeWalk UI string — chatSlashCommandAgent"
+  },
+  "chatSlashCommandOpen": "파일 열기 빠른 작업",
+  "@chatSlashCommandOpen": {
+    "description": "CodeWalk UI string — chatSlashCommandOpen"
+  },
+  "chatSlashCommandHelp": "명령 도움말 표시",
+  "@chatSlashCommandHelp": {
+    "description": "CodeWalk UI string — chatSlashCommandHelp"
+  },
+  "chatSlashCommandCompact": "현재 세션 컨텍스트 압축",
+  "@chatSlashCommandCompact": {
+    "description": "CodeWalk UI string — chatSlashCommandCompact"
+  },
+  "chatSlashCommandThinking": "생각 풍선 표시 전환",
+  "@chatSlashCommandThinking": {
+    "description": "CodeWalk UI string — chatSlashCommandThinking"
+  },
+  "chatSlashCommandUndo": "마지막으로 표시된 사용자 턴 실행 취소",
+  "@chatSlashCommandUndo": {
+    "description": "CodeWalk UI string — chatSlashCommandUndo"
+  },
+  "chatSlashCommandRedo": "실행 취소한 마지막 턴 다시 실행",
+  "@chatSlashCommandRedo": {
+    "description": "CodeWalk UI string — chatSlashCommandRedo"
+  },
+  "chatSessionSubConversationCount": "{count, plural, =1{하위 대화 1개} other{하위 대화 {count}개}}",
+  "@chatSessionSubConversationCount": {
+    "description": "CodeWalk UI string — chatSessionSubConversationCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageWeeksAgo": "{count}주 전",
+  "@chatMessageWeeksAgo": {
+    "description": "CodeWalk UI string — chatMessageWeeksAgo",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatMessageShortDate": "{month}/{day}",
+  "@chatMessageShortDate": {
+    "description": "CodeWalk UI string — chatMessageShortDate",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      }
+    }
+  },
+  "chatProviderErrorLoadSessionStatus": "세션 상태를 불러오지 못했습니다",
+  "@chatProviderErrorLoadSessionStatus": {
+    "description": "CodeWalk UI string — chatProviderErrorLoadSessionStatus"
+  },
+  "chatProviderErrorLoadSessionDetails": "일부 세션 세부 정보를 불러오지 못했습니다",
+  "@chatProviderErrorLoadSessionDetails": {
+    "description": "CodeWalk UI string — chatProviderErrorLoadSessionDetails"
+  },
+  "chatProviderErrorLoadSessionList": "세션 목록을 불러오지 못했습니다: {error}",
+  "@chatProviderErrorLoadSessionList": {
+    "description": "CodeWalk UI string — chatProviderErrorLoadSessionList",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "chatProviderErrorCreateSession": "세션을 만들지 못했습니다",
+  "@chatProviderErrorCreateSession": {
+    "description": "CodeWalk UI string — chatProviderErrorCreateSession"
+  },
+  "chatProviderErrorSelectProviderModelBeforeSend": "메시지를 보내기 전에 연결된 공급자 또는 무료 OpenCode 모델을 선택하세요",
+  "@chatProviderErrorSelectProviderModelBeforeSend": {
+    "description": "CodeWalk UI string — chatProviderErrorSelectProviderModelBeforeSend"
+  },
+  "chatProviderErrorStartMessageSend": "메시지 전송을 시작하지 못했습니다",
+  "@chatProviderErrorStartMessageSend": {
+    "description": "CodeWalk UI string — chatProviderErrorStartMessageSend"
+  },
+  "chatProviderErrorStopUnavailable": "현재 세션에서는 중지를 사용할 수 없습니다",
+  "@chatProviderErrorStopUnavailable": {
+    "description": "CodeWalk UI string — chatProviderErrorStopUnavailable"
+  },
+  "chatProviderErrorWaitForResponseFinish": "컨텍스트를 압축하기 전에 현재 응답이 끝날 때까지 기다리세요",
+  "@chatProviderErrorWaitForResponseFinish": {
+    "description": "CodeWalk UI string — chatProviderErrorWaitForResponseFinish"
+  },
+  "chatProviderErrorCompactUnavailable": "현재 세션에서는 컨텍스트 압축을 사용할 수 없습니다",
+  "@chatProviderErrorCompactUnavailable": {
+    "description": "CodeWalk UI string — chatProviderErrorCompactUnavailable"
+  },
+  "chatProviderErrorSelectModelBeforeCompact": "컨텍스트를 압축하기 전에 모델을 선택하세요",
+  "@chatProviderErrorSelectModelBeforeCompact": {
+    "description": "CodeWalk UI string — chatProviderErrorSelectModelBeforeCompact"
+  },
+  "chatProviderErrorCompactSessionContext": "세션 컨텍스트 압축에 실패했습니다",
+  "@chatProviderErrorCompactSessionContext": {
+    "description": "CodeWalk UI string — chatProviderErrorCompactSessionContext"
+  },
+  "chatProviderErrorNetwork": "네트워크 연결에 실패했습니다. 네트워크 설정을 확인해 주세요",
+  "@chatProviderErrorNetwork": {
+    "description": "CodeWalk UI string — chatProviderErrorNetwork"
+  },
+  "chatProviderErrorServer": "서버 오류가 발생했습니다. 나중에 다시 시도해 주세요",
+  "@chatProviderErrorServer": {
+    "description": "CodeWalk UI string — chatProviderErrorServer"
+  },
+  "chatProviderErrorNotFound": "리소스를 찾을 수 없습니다",
+  "@chatProviderErrorNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorNotFound"
+  },
+  "chatProviderErrorInvalidInput": "잘못된 입력 매개변수입니다",
+  "@chatProviderErrorInvalidInput": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidInput"
+  },
+  "chatProviderErrorUnknown": "알 수 없는 오류가 발생했습니다. 나중에 다시 시도해 주세요",
+  "@chatProviderErrorUnknown": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknown"
+  },
+  "chatProviderErrorSessionFallback": "세션 오류",
+  "@chatProviderErrorSessionFallback": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionFallback"
+  },
+  "projectProviderErrorNoProjectContext": "서버에서 프로젝트 컨텍스트를 사용할 수 없습니다",
+  "@projectProviderErrorNoProjectContext": {
+    "description": "CodeWalk UI string — projectProviderErrorNoProjectContext"
+  },
+  "projectProviderErrorInitializeFailed": "프로젝트 컨텍스트를 초기화하지 못했습니다: {error}",
+  "@projectProviderErrorInitializeFailed": {
+    "description": "CodeWalk UI string — projectProviderErrorInitializeFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorSwitchProjectNotFound": "프로젝트를 전환하지 못했습니다: 프로젝트를 찾을 수 없습니다",
+  "@projectProviderErrorSwitchProjectNotFound": {
+    "description": "CodeWalk UI string — projectProviderErrorSwitchProjectNotFound"
+  },
+  "projectProviderErrorSwitchDirectoryEmpty": "프로젝트를 전환하지 못했습니다: 디렉터리가 비어 있습니다",
+  "@projectProviderErrorSwitchDirectoryEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorSwitchDirectoryEmpty"
+  },
+  "projectProviderErrorAtLeastOneContext": "최소한 하나의 컨텍스트는 열려 있어야 합니다",
+  "@projectProviderErrorAtLeastOneContext": {
+    "description": "CodeWalk UI string — projectProviderErrorAtLeastOneContext"
+  },
+  "projectProviderErrorReopenProjectNotFound": "프로젝트를 다시 열지 못했습니다: 프로젝트를 찾을 수 없습니다",
+  "@projectProviderErrorReopenProjectNotFound": {
+    "description": "CodeWalk UI string — projectProviderErrorReopenProjectNotFound"
+  },
+  "projectProviderErrorOnlyClosedArchivable": "닫힌 프로젝트만 보관할 수 있습니다",
+  "@projectProviderErrorOnlyClosedArchivable": {
+    "description": "CodeWalk UI string — projectProviderErrorOnlyClosedArchivable"
+  },
+  "projectProviderErrorArchiveProjectNotFound": "프로젝트를 보관하지 못했습니다: 프로젝트를 찾을 수 없습니다",
+  "@projectProviderErrorArchiveProjectNotFound": {
+    "description": "CodeWalk UI string — projectProviderErrorArchiveProjectNotFound"
+  },
+  "projectProviderErrorArchiveProjectPathInvalid": "프로젝트를 보관하지 못했습니다: 프로젝트 경로가 올바르지 않습니다",
+  "@projectProviderErrorArchiveProjectPathInvalid": {
+    "description": "CodeWalk UI string — projectProviderErrorArchiveProjectPathInvalid"
+  },
+  "projectProviderErrorLoadWorkspaces": "작업 공간 목록을 불러오지 못했습니다: {error}",
+  "@projectProviderErrorLoadWorkspaces": {
+    "description": "CodeWalk UI string — projectProviderErrorLoadWorkspaces",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorWorkspaceNameEmpty": "작업 공간 이름은 비어 있을 수 없습니다",
+  "@projectProviderErrorWorkspaceNameEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorWorkspaceNameEmpty"
+  },
+  "projectProviderErrorCreateWorkspace": "작업 공간을 만들지 못했습니다: {error}",
+  "@projectProviderErrorCreateWorkspace": {
+    "description": "CodeWalk UI string — projectProviderErrorCreateWorkspace",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorResetWorkspace": "작업 공간을 초기화하지 못했습니다: {error}",
+  "@projectProviderErrorResetWorkspace": {
+    "description": "CodeWalk UI string — projectProviderErrorResetWorkspace",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorDeleteWorkspace": "작업 공간을 삭제하지 못했습니다: {error}",
+  "@projectProviderErrorDeleteWorkspace": {
+    "description": "CodeWalk UI string — projectProviderErrorDeleteWorkspace",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorDirectoryEmpty": "디렉터리는 비어 있을 수 없습니다",
+  "@projectProviderErrorDirectoryEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorDirectoryEmpty"
+  },
+  "projectProviderErrorListDirectories": "디렉터리 목록을 불러오지 못했습니다: {error}",
+  "@projectProviderErrorListDirectories": {
+    "description": "CodeWalk UI string — projectProviderErrorListDirectories",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorValidateDirectory": "디렉터리 검증에 실패했습니다: {error}",
+  "@projectProviderErrorValidateDirectory": {
+    "description": "CodeWalk UI string — projectProviderErrorValidateDirectory",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorPathEmpty": "경로는 비어 있을 수 없습니다",
+  "@projectProviderErrorPathEmpty": {
+    "description": "CodeWalk UI string — projectProviderErrorPathEmpty"
+  },
+  "projectProviderErrorListFiles": "파일 목록을 불러오지 못했습니다: {error}",
+  "@projectProviderErrorListFiles": {
+    "description": "CodeWalk UI string — projectProviderErrorListFiles",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorSearchFiles": "파일 검색에 실패했습니다: {error}",
+  "@projectProviderErrorSearchFiles": {
+    "description": "CodeWalk UI string — projectProviderErrorSearchFiles",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorContentSearchUnavailable": "콘텐츠 검색을 사용할 수 없습니다: {error}",
+  "@projectProviderErrorContentSearchUnavailable": {
+    "description": "CodeWalk UI string — projectProviderErrorContentSearchUnavailable",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorSearchSymbols": "기호 검색에 실패했습니다: {error}",
+  "@projectProviderErrorSearchSymbols": {
+    "description": "CodeWalk UI string — projectProviderErrorSearchSymbols",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorReadFile": "파일을 읽지 못했습니다: {error}",
+  "@projectProviderErrorReadFile": {
+    "description": "CodeWalk UI string — projectProviderErrorReadFile",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectProviderErrorLoadProjectList": "프로젝트 목록을 불러오지 못했습니다: {error}",
+  "@projectProviderErrorLoadProjectList": {
+    "description": "CodeWalk UI string — projectProviderErrorLoadProjectList",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceProjectRemovedFromHistory": "프로젝트가 기록에서 제거되었습니다",
+  "@workspaceProjectRemovedFromHistory": {
+    "description": "CodeWalk UI string — workspaceProjectRemovedFromHistory"
+  },
+  "workspaceProjectContextOpened": "프로젝트 컨텍스트가 열렸습니다: {directory}",
+  "@workspaceProjectContextOpened": {
+    "description": "CodeWalk UI string — workspaceProjectContextOpened",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceFailedToOpenProjectContext": "프로젝트 컨텍스트를 열지 못했습니다: {directory}",
+  "@workspaceFailedToOpenProjectContext": {
+    "description": "CodeWalk UI string — workspaceFailedToOpenProjectContext",
+    "placeholders": {
+      "directory": {
+        "type": "String"
+      }
+    }
+  },
+  "chatAbortNotice": "어떤 점을 다르게 하시겠어요?",
+  "@chatAbortNotice": {
+    "description": "CodeWalk UI string — chatAbortNotice"
+  },
+  "sessionTitleToday": "오늘 {time} ({date})",
+  "@sessionTitleToday": {
+    "description": "CodeWalk UI string — sessionTitleToday",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleYesterday": "어제 {time} ({date})",
+  "@sessionTitleYesterday": {
+    "description": "CodeWalk UI string — sessionTitleYesterday",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "@sessionTitleWeekday": {
+    "description": "CodeWalk UI string — sessionTitleWeekday",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTitleDateAndTime": "{date} {time}",
+  "@sessionTitleDateAndTime": {
+    "description": "CodeWalk UI string — sessionTitleDateAndTime",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionWeekdayMon": "월",
+  "@sessionWeekdayMon": {
+    "description": "CodeWalk UI string — sessionWeekdayMon"
+  },
+  "sessionWeekdayTue": "화",
+  "@sessionWeekdayTue": {
+    "description": "CodeWalk UI string — sessionWeekdayTue"
+  },
+  "sessionWeekdayWed": "수",
+  "@sessionWeekdayWed": {
+    "description": "CodeWalk UI string — sessionWeekdayWed"
+  },
+  "sessionWeekdayThu": "목",
+  "@sessionWeekdayThu": {
+    "description": "CodeWalk UI string — sessionWeekdayThu"
+  },
+  "sessionWeekdayFri": "금",
+  "@sessionWeekdayFri": {
+    "description": "CodeWalk UI string — sessionWeekdayFri"
+  },
+  "sessionWeekdaySat": "토",
+  "@sessionWeekdaySat": {
+    "description": "CodeWalk UI string — sessionWeekdaySat"
+  },
+  "sessionWeekdaySun": "일",
+  "@sessionWeekdaySun": {
+    "description": "CodeWalk UI string — sessionWeekdaySun"
+  },
+  "forwardTimeNow": "지금",
+  "@forwardTimeNow": {
+    "description": "CodeWalk UI string — forwardTimeNow"
+  },
+  "forwardTimeMinutes": "{count}분",
+  "@forwardTimeMinutes": {
+    "description": "CodeWalk UI string — forwardTimeMinutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardTimeHours": "{count}시간",
+  "@forwardTimeHours": {
+    "description": "CodeWalk UI string — forwardTimeHours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardTimeDays": "{count}일",
+  "@forwardTimeDays": {
+    "description": "CodeWalk UI string — forwardTimeDays",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forwardTimeWeeks": "{count}주",
+  "@forwardTimeWeeks": {
+    "description": "CodeWalk UI string — forwardTimeWeeks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsBehaviorConfigFieldDefaultModel": "기본 모델",
+  "@settingsBehaviorConfigFieldDefaultModel": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldDefaultModel"
+  },
+  "settingsBehaviorConfigFieldDefaultAgent": "기본 에이전트",
+  "@settingsBehaviorConfigFieldDefaultAgent": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldDefaultAgent"
+  },
+  "settingsBehaviorConfigFieldSmallModel": "소형 모델",
+  "@settingsBehaviorConfigFieldSmallModel": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldSmallModel"
+  },
+  "settingsBehaviorConfigFieldAutoUpdateMode": "자동 업데이트 모드",
+  "@settingsBehaviorConfigFieldAutoUpdateMode": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldAutoUpdateMode"
+  },
+  "settingsBehaviorConfigFieldSnapshotSetting": "스냅샷 설정",
+  "@settingsBehaviorConfigFieldSnapshotSetting": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldSnapshotSetting"
+  },
+  "settingsBehaviorConfigFieldConversationUsername": "대화 사용자 이름",
+  "@settingsBehaviorConfigFieldConversationUsername": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldConversationUsername"
+  },
+  "settingsBehaviorConfigFieldSharingDefault": "공유 기본값",
+  "@settingsBehaviorConfigFieldSharingDefault": {
+    "description": "CodeWalk UI string — settingsBehaviorConfigFieldSharingDefault"
+  },
+  "speechMicNoInputDevice": "사용 가능한 마이크 입력 장치가 없습니다.",
+  "@speechMicNoInputDevice": {
+    "description": "CodeWalk UI string — speechMicNoInputDevice"
+  },
+  "speechMicDeviceBusy": "기본 마이크가 현재 다른 앱에서 사용 중입니다.",
+  "@speechMicDeviceBusy": {
+    "description": "CodeWalk UI string — speechMicDeviceBusy"
+  },
+  "speechMicUnsupportedFormat": "기본 마이크 형식이 지원되지 않습니다.",
+  "@speechMicUnsupportedFormat": {
+    "description": "CodeWalk UI string — speechMicUnsupportedFormat"
+  },
+  "speechMicSpeechPrivacy": "Windows 음성 서비스가 비활성화되어 있을 수 있습니다(음성 개인 정보 보호, 온라인 음성 인식 또는 언어 팩).",
+  "@speechMicSpeechPrivacy": {
+    "description": "CodeWalk UI string — speechMicSpeechPrivacy"
+  },
+  "speechMicBackendUnavailable": "이 빌드에서는 Windows 마이크 백엔드를 사용할 수 없습니다.",
+  "@speechMicBackendUnavailable": {
+    "description": "CodeWalk UI string — speechMicBackendUnavailable"
+  },
+  "speechEngineFallbackNotice": "선택한 STT 엔진을 사용할 수 없습니다({reason}). 대신 {fallback}을 사용합니다.",
+  "@speechEngineFallbackNotice": {
+    "description": "CodeWalk UI string — speechEngineFallbackNotice",
+    "placeholders": {
+      "fallback": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "oauthFlowSecureStorageUnavailable": "OAuth에 사용할 안전한 자격 증명 저장소를 사용할 수 없습니다.",
+  "@oauthFlowSecureStorageUnavailable": {
+    "description": "CodeWalk UI string — oauthFlowSecureStorageUnavailable"
+  },
+  "oauthFlowUnexpectedError": "OAuth 흐름이 예기치 않게 실패했습니다. 다시 시도해 주세요.",
+  "@oauthFlowUnexpectedError": {
+    "description": "CodeWalk UI string — oauthFlowUnexpectedError"
+  },
+  "oauthFlowNoEndpointsDiscovered": "OAuth 엔드포인트를 찾을 수 없습니다. Cloudflare Dashboard → Access → Applications → [이 앱]에서 관리 OAuth를 사용하도록 설정하세요.",
+  "@oauthFlowNoEndpointsDiscovered": {
+    "description": "CodeWalk UI string — oauthFlowNoEndpointsDiscovered"
+  },
+  "oauthFlowTokenResponseMissingAccessToken": "OAuth 토큰 응답에 액세스 토큰이 포함되지 않았습니다.",
+  "oauthFlowProfileChanged": "OAuth가 완료되기 전에 서버 프로필이 변경되었습니다.",
+  "@oauthFlowProfileChanged": {
+    "description": "CodeWalk UI string — oauthFlowProfileChanged"
+  },
+  "oauthFlowMetadataMissingEndpoints": "OAuth 메타데이터에 인증/토큰 엔드포인트가 없습니다.",
+  "@oauthFlowMetadataMissingEndpoints": {
+    "description": "CodeWalk UI string — oauthFlowMetadataMissingEndpoints"
+  },
+  "oauthFlowCallbackNotCompleted": "인증 콜백이 완료되지 않았습니다",
+  "@oauthFlowCallbackNotCompleted": {
+    "description": "CodeWalk UI string — oauthFlowCallbackNotCompleted"
+  },
+  "oauthFlowProviderDeclined": "인증 서버가 OAuth 요청을 거부했습니다. 다시 시도해 주세요.",
+  "@oauthFlowProviderDeclined": {
+    "description": "CodeWalk UI string — oauthFlowProviderDeclined"
+  },
+  "oauthFlowCallbackValidationFailed": "OAuth 콜백 검증에 실패했습니다. 다시 시도해 주세요.",
+  "@oauthFlowCallbackValidationFailed": {
+    "description": "CodeWalk UI string — oauthFlowCallbackValidationFailed"
+  },
+  "oauthFlowCallbackServerStartFailed": "로컬 OAuth 콜백 서버를 시작하지 못했습니다.",
+  "@oauthFlowCallbackServerStartFailed": {
+    "description": "CodeWalk UI string — oauthFlowCallbackServerStartFailed"
+  },
+  "oauthFlowSignInCanceled": "OAuth 로그인이 취소되었습니다.",
+  "@oauthFlowSignInCanceled": {
+    "description": "CodeWalk UI string — oauthFlowSignInCanceled"
+  },
+  "oauthFlowBrowserOpenFailed": "OAuth 로그인을 위해 시스템 브라우저를 열 수 없습니다.",
+  "@oauthFlowBrowserOpenFailed": {
+    "description": "CodeWalk UI string — oauthFlowBrowserOpenFailed"
+  },
+  "oauthFlowCallbackTimeout": "5분 이내에 인증 콜백이 앱에 도달하지 못했습니다. 동의 후 브라우저가 로컬 콜백 주소로 리디렉션될 것으로 예상했습니다. 대신 브라우저에 연결 오류가 표시된 경우 이 기기 또는 네트워크에서 루프백 리디렉션을 차단하고 있는 것입니다.",
+  "@oauthFlowCallbackTimeout": {
+    "description": "CodeWalk UI string — oauthFlowCallbackTimeout"
+  },
+  "oauthFlowTokenExchangeTransientFailure": "일시적인 네트워크 문제로 {maxAttempts}회 시도 후 토큰 교환에 실패했습니다. 다시 시도해 주세요.",
+  "@oauthFlowTokenExchangeTransientFailure": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeTransientFailure",
+    "placeholders": {
+      "maxAttempts": {
+        "type": "int"
+      }
+    }
+  },
+  "oauthFlowTokenExchangeHttpFailure": "토큰 교환에 실패했습니다(HTTP {statusCode}). 다시 시도해 주세요.",
+  "@oauthFlowTokenExchangeHttpFailure": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeHttpFailure",
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "oauthFlowTokenExchangeUnexpectedFailure": "토큰 교환이 예기치 않게 실패했습니다. 다시 시도해 주세요.",
+  "@oauthFlowTokenExchangeUnexpectedFailure": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeUnexpectedFailure"
+  },
+  "oauthFlowTokenExchangeIncomplete": "인증 코드가 전송된 후 토큰 교환이 완료되지 않았습니다. OAuth 로그인을 다시 시작해 주세요.",
+  "@oauthFlowTokenExchangeIncomplete": {
+    "description": "CodeWalk UI string — oauthFlowTokenExchangeIncomplete"
+  },
+  "speechReadAloudFailed": "텍스트 음성 변환에 실패했습니다.",
+  "@speechReadAloudFailed": {
+    "description": "CodeWalk UI string — speechReadAloudFailed"
+  },
+  "speechReadAloudNoText": "소리 내어 읽을 텍스트가 없습니다.",
+  "@speechReadAloudNoText": {
+    "description": "CodeWalk UI string — speechReadAloudNoText"
+  },
+  "speechEdgeTextTooLong": "Microsoft Edge Speech는 한 번에 최대 4096바이트까지 읽을 수 있습니다.",
+  "@speechEdgeTextTooLong": {
+    "description": "CodeWalk UI string — speechEdgeTextTooLong"
+  },
+  "speechEdgeMalformedAudio": "Microsoft Edge Speech가 잘못된 형식의 오디오 데이터를 반환했습니다.",
+  "@speechEdgeMalformedAudio": {
+    "description": "CodeWalk UI string — speechEdgeMalformedAudio"
+  },
+  "speechEdgeUnsupportedAudio": "Microsoft Edge Speech가 지원되지 않는 오디오 데이터를 반환했습니다.",
+  "@speechEdgeUnsupportedAudio": {
+    "description": "CodeWalk UI string — speechEdgeUnsupportedAudio"
+  },
+  "speechEdgeUnsupportedFrame": "Microsoft Edge Speech가 지원되지 않는 websocket 프레임을 반환했습니다.",
+  "@speechEdgeUnsupportedFrame": {
+    "description": "CodeWalk UI string — speechEdgeUnsupportedFrame"
+  },
+  "speechEdgeSynthesisInterrupted": "Microsoft Edge Speech가 합성이 완료되기 전에 종료되었습니다.",
+  "@speechEdgeSynthesisInterrupted": {
+    "description": "CodeWalk UI string — speechEdgeSynthesisInterrupted"
+  },
+  "speechEdgeEmptyAudio": "Microsoft Edge Speech가 빈 오디오 응답을 반환했습니다.",
+  "@speechEdgeEmptyAudio": {
+    "description": "CodeWalk UI string — speechEdgeEmptyAudio"
+  },
+  "speechEdgeTimedOut": "Microsoft Edge Speech 요청 시간이 초과되었습니다.",
+  "@speechEdgeTimedOut": {
+    "description": "CodeWalk UI string — speechEdgeTimedOut"
+  },
+  "speechEdgeUnreachable": "Microsoft Edge Speech에 연결할 수 없습니다.",
+  "@speechEdgeUnreachable": {
+    "description": "CodeWalk UI string — speechEdgeUnreachable"
+  },
+  "speechApiKeyMissing": "이 TTS 공급자를 사용하려면 설정 > 음성에서 API 키를 추가하세요.",
+  "@speechApiKeyMissing": {
+    "description": "CodeWalk UI string — speechApiKeyMissing"
+  },
+  "speechProviderEmptyAudio": "TTS 공급자가 빈 오디오 응답을 반환했습니다.",
+  "@speechProviderEmptyAudio": {
+    "description": "CodeWalk UI string — speechProviderEmptyAudio"
+  },
+  "speechProviderRequestRejected": "TTS 공급자가 음성 요청을 거부했습니다.",
+  "@speechProviderRequestRejected": {
+    "description": "CodeWalk UI string — speechProviderRequestRejected"
+  },
+  "speechApiKeyRejected": "TTS API 키가 공급자에 의해 거부되었습니다.",
+  "@speechApiKeyRejected": {
+    "description": "CodeWalk UI string — speechApiKeyRejected"
+  },
+  "speechProviderQuotaRateLimit": "TTS 공급자가 할당량 또는 속도 제한에 도달했습니다.",
+  "@speechProviderQuotaRateLimit": {
+    "description": "CodeWalk UI string — speechProviderQuotaRateLimit"
+  },
+  "speechProviderTemporarilyUnavailable": "TTS 공급자를 일시적으로 사용할 수 없습니다.",
+  "@speechProviderTemporarilyUnavailable": {
+    "description": "CodeWalk UI string — speechProviderTemporarilyUnavailable"
+  },
+  "speechProviderUnreachable": "TTS 공급자에 연결할 수 없습니다.",
+  "@speechProviderUnreachable": {
+    "description": "CodeWalk UI string — speechProviderUnreachable"
+  },
+  "appProviderErrorFailedToStartProcess": "{tool} 프로세스를 시작하지 못했습니다.",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool}을(를) 사용할 수 없습니다. 먼저 {runtime}을(를) 설치하세요.",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "{tool} 설치가 종료 코드 {exitCode}로 실패했습니다.",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "Bun 부트스트랩이 종료 코드 {exitCode}로 실패했습니다.",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "OpenCode 설치가 완료되었지만 PATH에서 명령을 찾을 수 없습니다.",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "OpenCode 설치가 완료되었지만 명령 경로를 확인할 수 없습니다.",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "구성된 명령을 찾을 수 없고 {tool}이(가) PATH에 없습니다.",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "구성된 명령 경로가 존재하지 않습니다.",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "구성된 명령은 존재하지만 버전 확인에 실패했습니다.",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "구성된 명령을 실행할 수 없습니다.",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "WSL 확인은 Windows에만 적용됩니다.",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "관리형 로컬 서버를 구성하려면 데스크톱 빌드를 사용하세요.",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "알려진 설치 디렉터리에서 감지되었습니다.",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "알려진 설치 디렉터리에서 감지되었습니다. PATH를 새로 고쳐야 할 수 있습니다. 최근 설치가 아직 감지되지 않으면 {appName}을(를) 다시 여세요.",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "GitHub에서 최신 릴리스 메타데이터를 가져오지 못했습니다.",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "최신 릴리스 메타데이터에 자산 목록이 포함되지 않았습니다.",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "호환되는 OpenCode 바이너리 자산을 찾을 수 없습니다.",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "선택한 OpenCode 자산을 다운로드하지 못했습니다.",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "다운로드한 자산의 체크섬 검증에 실패했습니다.",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "OpenCode 바이너리 아카이브 압축 해제에 실패했습니다.",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "압축 해제된 파일에서 {tool} 실행 파일을 찾을 수 없습니다.",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "서버에서 응답이 없습니다. 다시 시도하세요.",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "모델에서 응답이 없습니다. 다시 시도하세요.",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "음성 작업이 취소되었습니다.",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "Microsoft Edge Speech가 취소되었습니다.",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "활성",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "수신 중",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "지연됨",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "완료",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "상호작용 대기 중",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "오류",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "데이터 절약 모드가 활성화되었습니다.",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "OAuth 로그인 필요",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "Tailscale 연결 필요",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "오프라인",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "권한이 취소되었습니다",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "서비스가 중지되었습니다",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "호스트를 사용할 수 없음",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "errorRequestCancelled": "요청이 취소되었습니다",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorUnknownNetworkError": "알 수 없는 네트워크 오류: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCertificateError": "인증서 오류",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorSessionBusy": "세션이 다른 요청을 처리하는 중입니다.",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorRunShellCommandFailed": "셸 명령 실행에 실패했습니다",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "슬래시 명령 실행에 실패했습니다",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "활성 서버에서 OpenCode 기반 기본값을 불러올 수 없습니다.",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "sessionTabIconRemoveFailed": "로컬 세션 탭 아이콘 데이터를 제거하지 못했습니다",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "forwardUntitled": "제목 없음",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "setupDebugLinuxLogsPath": "Linux 로그: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "다음 명령으로 OpenCode 실행: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "서버 상태 확인: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "서버 문서: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "logsEntryError": "오류",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "스택",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "setupDebugSourceDiagnostics": "진단",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceUseExisting": "기존 서버 사용",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "setupDebugSourceLocalServer": "로컬 서버",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceOnboarding": "온보딩",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceManualConnection": "수동 연결",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugMessageDiagnosticsResult": "{platform}에서 {availability}. {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "현재 환경에서 기존 OpenCode 명령을 감지하려고 시도합니다.",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageInstallStarted": "CodeWalk에서 OpenCode 설치를 시작했습니다.",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageStartLocalServer": "관리형 OpenCode 서버를 {url}에서 시작합니다.",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageHealthyRunning": "관리형 OpenCode 서버가 정상이며 {url}에서 실행 중입니다.",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppingLocalServer": "관리형 OpenCode 서버를 중지합니다.",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageStoppedCleanly": "관리형 OpenCode 서버가 정상적으로 중지되었습니다.",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "중지 요청 후 관리형 OpenCode 서버가 종료되었습니다.",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "사용자가 기존 OpenCode 서버에 연결하기로 선택했습니다.",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "사용자가 안내형 OpenCode 설정 경로를 열었습니다.",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "사용자가 관리형 로컬 OpenCode 설정을 열었습니다.",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "상태 확인 실패 후 사용자가 서버 설정을 열었습니다.",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "상태 확인 실패 후 사용자가 다른 서버를 추가하기로 선택했습니다.",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageTestingServerUrl": "온보딩에서 OpenCode 서버 URL {url}을 테스트합니다.",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "chatProviderErrorSessionNotFound": "세션을 찾을 수 없습니다",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "잘못된 메시지 형식입니다",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "네트워크 연결에 실패했습니다",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "알 수 없는 오류",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "터미널 세션을 만들지 못했습니다",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "터미널 엔드포인트를 사용할 수 없습니다",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "잘못된 터미널 디렉터리입니다",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "터미널 WebSocket을 여기서는 사용할 수 없습니다.",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1개} other{{count}개}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "연결 시간 초과",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "클라이언트 오류",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "메시지 전송에 실패했습니다",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

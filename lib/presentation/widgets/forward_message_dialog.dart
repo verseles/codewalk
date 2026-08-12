@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/project.dart';
@@ -517,11 +518,23 @@ class _SessionTile extends StatelessWidget {
   String _formatRelative(DateTime when) {
     final now = DateTime.now();
     final diff = now.difference(when);
-    if (diff.inSeconds < 60) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    if (diff.inDays < 7) return '${diff.inDays}d';
-    return '${(diff.inDays / 7).floor()}w';
+    if (diff.inSeconds < 60) {
+      return L10nBridge.current?.forwardTimeNow ?? 'now';
+    }
+    if (diff.inMinutes < 60) {
+      return L10nBridge.current?.forwardTimeMinutes(diff.inMinutes) ??
+          '${diff.inMinutes}m';
+    }
+    if (diff.inHours < 24) {
+      return L10nBridge.current?.forwardTimeHours(diff.inHours) ??
+          '${diff.inHours}h';
+    }
+    if (diff.inDays < 7) {
+      return L10nBridge.current?.forwardTimeDays(diff.inDays) ??
+          '${diff.inDays}d';
+    }
+    return L10nBridge.current?.forwardTimeWeeks((diff.inDays / 7).floor()) ??
+        '${(diff.inDays / 7).floor()}w';
   }
 }
 

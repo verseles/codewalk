@@ -22,6 +22,7 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../core/config/feature_flags.dart';
 import '../../core/di/injection_container.dart' as di;
+import '../../core/i18n/l10n_bridge.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
@@ -2518,8 +2519,7 @@ class _ChatPageState extends State<ChatPage>
                                 SessionAttentionPresentation.panel,
                             semanticLabel:
                                 context.l10n.settingsSessionAttentionTitle,
-                            stateLabelBuilder: (kind) => kind.name,
-                            openLabel: context.l10n.notificationOpenToClear,
+                            openLabel: context.l10n.notificationActionOpen,
                             expandLabel: context.l10n.chatExpandGroup,
                             collapseLabel: context.l10n.chatCollapseGroup,
                             readLabel: context.l10n.msgReadAloud,

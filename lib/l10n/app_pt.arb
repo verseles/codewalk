@@ -93,12 +93,12 @@
   "behaviorCustomDisplayName": "Nome de exibição personalizado",
   "behaviorCutsAutomaticMobile": "Reduz o uso automático de dados móveis parando downloads em segundo plano e limitando as atualizações automáticas em primeiro plano a uma rajada a cada {inSeconds} segundos.",
   "behaviorDataSaverActive": "Ativo agora em dados móveis.",
-  "behaviorDataSaverAggressive": "Aggressive",
-  "behaviorDataSaverAggressiveDescription": "Low-bandwidth mode: only the visible workspace stream stays live, global updates are paused, and automatic refreshes are stretched.",
+  "behaviorDataSaverAggressive": "Agressivo",
+  "behaviorDataSaverAggressiveDescription": "Modo de baixa largura de banda: apenas o fluxo do workspace visível permanece ao vivo, as atualizações globais são pausadas e as atualizações automáticas ficam espaçadas.",
   "behaviorDataSaverCellularOnly": "Aplica-se apenas quando a conexão é celular/móvel.",
-  "behaviorDataSaverOff": "Off",
-  "behaviorDataSaverOffHint": "Full realtime and automatic refreshes are enabled.",
-  "behaviorDataSaverStandard": "Standard",
+  "behaviorDataSaverOff": "Desligado",
+  "behaviorDataSaverOffHint": "Tempo real completo e atualizações automáticas estão habilitados.",
+  "behaviorDataSaverStandard": "Padrão",
   "behaviorDataSaverWaiting": "Aguardando a próxima janela de sincronização de dados móveis.",
   "behaviorDisabled": "Desativado",
   "behaviorLightweightTasksLike": "Tarefas leves como",
@@ -142,8 +142,8 @@
   "chatBadgeDataSaverActive": "A economia de dados móveis está ativa.",
   "chatBadgeServerNeedsAttention": "A conexão do servidor precisa de atenção.",
   "chatBadgeSyncing": "Sincronizando conversas...",
-  "chatBlockResponsePendingDescription": "The answer will appear as a single block when this turn finishes.",
-  "chatBlockResponsePendingTitle": "Generating response",
+  "chatBlockResponsePendingDescription": "A resposta aparecerá como um único bloco quando este turno terminar.",
+  "chatBlockResponsePendingTitle": "Gerando resposta",
   "chatCachedConversationsYet": "Nenhuma conversa em cache ainda",
   "chatChangedFilesAvailable": "Nenhum arquivo alterado está disponível para esta sessão.",
   "chatChildrenChatProviderCurrentSessionChildren": "Filhos: {length}",
@@ -590,7 +590,7 @@
   "msgFilteredLogsCopied": "Logs filtrados copiados para a área de transferência",
   "msgInfoAgent": "Agente",
   "msgInfoCompaction": "Compactação",
-  "msgInfoCost": "Custo: R${cost}",
+  "msgInfoCost": "Custo: ${cost}",
   "msgInfoMessageInfo": "Informações da Mensagem",
   "msgInfoModel": "Modelo: {modelId}",
   "msgInfoNoMetadata": "Nenhum metadado disponível",
@@ -838,7 +838,7 @@
   "sessionDiffFilesCount": "Arquivos diff: {count}",
   "sessionDiffLinesAddedRemoved": "+{added} linhas adicionadas -{removed} linhas removidas",
   "sessionDiffLinesCollapsed": "{count} linhas colapsadas — toque para expandir",
-  "sessionDiffLoading": "Loading changed files…",
+  "sessionDiffLoading": "Carregando arquivos alterados…",
   "sessionDiffReview": "Revisar alterações",
   "sessionDiffSplit": "Dividido",
   "sessionDiffSummary": "Resumo",
@@ -923,8 +923,8 @@
   "settingsAppearanceBrandColorDynamicBlocked": "Desative as cores do papel de parede para escolher uma cor da marca.",
   "settingsAppearanceBrandColorNormal": "Escolha uma cor semente para a paleta do app.",
   "settingsAppearanceBrandColorPresetBlocked": "Mude para CodeWalk Clássico para escolher uma cor da marca.",
-  "settingsAppearanceChatFontScale": "Conversation text size",
-  "settingsAppearanceChatFontScaleDescription": "Scale the chat message and composer text on top of the system text size.",
+  "settingsAppearanceChatFontScale": "Tamanho do texto da conversa",
+  "settingsAppearanceChatFontScaleDescription": "Ajusta o texto das mensagens do chat e do composer acima do tamanho do texto do sistema.",
   "settingsAppearanceCodeWalkClassic": "CodeWalk Clássico",
   "settingsAppearanceComposerTips": "Dicas do composer",
   "settingsAppearanceComposerTipsDescription": "Mostrar ou ocultar dicas rotativas enquanto o assistente está raciocinando.",
@@ -943,8 +943,8 @@
   "settingsAppearanceDensityNormal": "Normal",
   "settingsAppearanceDensitySpacious": "Espaçosa",
   "settingsAppearanceDescription": "Escolha temas, cores, tamanho do texto e exibição do chat",
-  "settingsAppearanceFontSize": "Text size",
-  "settingsAppearanceFontSizeDescription": "Adjust the size of system text, conversation text, and terminal text.",
+  "settingsAppearanceFontSize": "Tamanho do texto",
+  "settingsAppearanceFontSizeDescription": "Ajusta o tamanho do texto do sistema, da conversa e do terminal.",
   "settingsAppearanceLight": "Claro",
   "settingsAppearanceMathRendering": "Renderização de matemática",
   "settingsAppearanceMathRenderingDescription": "Renderizar expressões matemáticas LaTeX como equações tipografadas nas mensagens de chat.",
@@ -957,12 +957,12 @@
   "settingsAppearanceSectionDescription": "Ajuste a densidade visual e as superfícies de mensagem para o seu fluxo de trabalho.",
   "settingsAppearanceSectionTitle": "Aparência",
   "settingsAppearanceSystem": "Sistema",
-  "settingsAppearanceSystemFontScale": "System text size",
-  "settingsAppearanceSystemFontScaleDescription": "Scale all text in the app shell, including menus, dialogs, and sidebars.",
+  "settingsAppearanceSystemFontScale": "Tamanho do texto do sistema",
+  "settingsAppearanceSystemFontScaleDescription": "Ajusta todo o texto do app, incluindo menus, diálogos e barras laterais.",
   "settingsAppearanceTaskList": "Lista de tarefas",
   "settingsAppearanceTaskListDescription": "Mostrar ou ocultar o widget de lista de tarefas da sessão.",
-  "settingsAppearanceTerminalFontSize": "Terminal text size",
-  "settingsAppearanceTerminalFontSizeDescription": "Resize the embedded terminal font. Applies immediately to running sessions.",
+  "settingsAppearanceTerminalFontSize": "Tamanho do texto do terminal",
+  "settingsAppearanceTerminalFontSizeDescription": "Redimensiona a fonte do terminal embutido. Aplica-se imediatamente às sessões em execução.",
   "settingsAppearanceTheme": "Tema",
   "settingsAppearanceThemeDescription": "Escolha entre modo claro, escuro ou sistema, depois mantenha a paleta clássica do CodeWalk ou mude para um preset OpenCode.",
   "settingsAppearanceVisualStyle": "Estilo visual",
@@ -987,12 +987,12 @@
   "settingsBehaviorAutoupdateCaveat": "Use a seção Sobre para verificações de versão do CodeWalk. Esta configuração apenas espelha a config `autoupdate` oficial do OpenCode.",
   "settingsBehaviorAutoupdateHelp": "Controla as atualizações de runtime do OpenCode upstream, não as verificações de atualização do app CodeWalk.",
   "settingsBehaviorCellularDataSaver": "Economia de dados móveis",
-  "settingsBehaviorChatRenderMode": "Chat render mode",
-  "settingsBehaviorChatRenderModeBlock": "Block",
-  "settingsBehaviorChatRenderModeBlockDescription": "Hide live assistant text, reasoning, and tool cards until the current turn can be shown as one block.",
-  "settingsBehaviorChatRenderModeDescription": "Choose whether assistant responses appear as they stream or reveal after the current turn settles.",
-  "settingsBehaviorChatRenderModeLive": "Live",
-  "settingsBehaviorChatRenderModeLiveDescription": "Show assistant text, reasoning, and tool activity as OpenCode streams events.",
+  "settingsBehaviorChatRenderMode": "Modo de renderização do chat",
+  "settingsBehaviorChatRenderModeBlock": "Bloco",
+  "settingsBehaviorChatRenderModeBlockDescription": "Oculta o texto ao vivo do assistente, o raciocínio e os cards de ferramentas até que o turno atual possa ser mostrado como um único bloco.",
+  "settingsBehaviorChatRenderModeDescription": "Escolha se as respostas do assistente aparecem conforme transmitidas ou são reveladas após o término do turno atual.",
+  "settingsBehaviorChatRenderModeLive": "Ao vivo",
+  "settingsBehaviorChatRenderModeLiveDescription": "Mostra o texto do assistente, o raciocínio e a atividade de ferramentas conforme o OpenCode transmite os eventos.",
   "settingsBehaviorComposerSpellCheck": "Corretor do composer",
   "settingsBehaviorComposerSpellCheckDescription": "Usa o corretor ortográfico, sugestões e autocorreção nativos da plataforma no composer do chat.",
   "settingsBehaviorConfigDeferred": "O CodeWalk aplicará esta configuração do OpenCode após a resposta atual terminar.",
@@ -1260,11 +1260,11 @@
   "speechMoonshineStaysDownloadable": "O Moonshine permanece disponível para download fora do pacote do app. Escolha um modelo para este dispositivo desktop e remova-o mais tarde se quiser recuperar o espaço.",
   "speechNative": "Nativo",
   "speechNativeSTTDisabled": "O STT nativo está desabilitado no Linux neste app. O Parakeet é o mecanismo padrão para novas instalações.",
-  "speechNativeSTTWorks": "On Windows, CodeWalk uses local on-device speech recognition through its WASAPI microphone backend. Native Windows speech recognition is disabled for stability.",
+  "speechNativeSTTWorks": "No Windows, o CodeWalk usa reconhecimento de fala local no dispositivo por meio do backend de microfone WASAPI. O reconhecimento de fala nativo do Windows está desabilitado por estabilidade.",
   "speechNativeStartsFaster": "O Nativo inicia mais rápido. O Sherpa é executado totalmente no dispositivo, com uma configuração mais pesada e maior controle do modelo.",
-  "speechOpenMicrophoneSettings": "Open microphone settings",
-  "speechOpenSpeechPrivacy": "Open speech privacy",
-  "speechOpenSpeechSettings": "Open speech settings",
+  "speechOpenMicrophoneSettings": "Abrir configurações do microfone",
+  "speechOpenSpeechPrivacy": "Abrir privacidade de fala",
+  "speechOpenSpeechSettings": "Abrir configurações de fala",
   "speechParakeet": "Parakeet",
   "speechParakeetModelsDesktop": "Modelos Parakeet (desktop)",
   "speechParakeetStaysDownloadable": "O Parakeet permanece disponível para download fora do pacote do app. Atualmente, ele disponibiliza um modelo multilíngue otimizado para 25 idiomas europeus.",
@@ -1280,7 +1280,7 @@
   "speechSherpaModelsLinux": "Modelos Sherpa (Linux)",
   "speechSpeechText": "Fala para texto",
   "speechUnavailableOnPlatform": "A fala do {service} não está disponível nesta plataforma.",
-  "speechWindowsSetupHint": "Windows voice input uses CodeWalk WASAPI capture with on-device models. Keep microphone access for desktop apps enabled; the buttons below open Windows settings for troubleshooting.",
+  "speechWindowsSetupHint": "A entrada de voz no Windows usa a captura WASAPI do CodeWalk com modelos no dispositivo. Mantenha habilitado o acesso ao microfone para apps de desktop; os botões abaixo abrem as configurações do Windows para solução de problemas.",
   "statusConnected": "Conectado",
   "statusDelayed": "Atrasado",
   "statusFailed": "Falhou",
@@ -1428,5 +1428,780 @@
   "settingsNavigationGroupSetup": "Configuração",
   "settingsNavigationGroupSupport": "Ajuda e diagnóstico",
   "settingsNavigationNoResults": "Nenhuma configuração encontrada",
-  "settingsNavigationSearchHint": "Pesquisar configurações"
+  "settingsNavigationSearchHint": "Pesquisar configurações",
+  "filesAlreadyExists": "Já existe um arquivo ou pasta com esse nome.",
+  "filesCopyPath": "Copiar caminho",
+  "filesCreateFileTitle": "Criar arquivo",
+  "filesCreateFolderTitle": "Criar pasta",
+  "filesDelete": "Excluir",
+  "filesDeleteConfirm": "Excluir {name}? Esta ação não pode ser desfeita. As pastas e seus conteúdos serão excluídos.",
+  "filesDeleteTitle": "Excluir {name}",
+  "filesDeleted": "Excluído.",
+  "filesFileCreated": "Arquivo criado.",
+  "filesFolderCreated": "Pasta criada.",
+  "filesInvalidName": "Digite um nome válido sem separadores de caminho.",
+  "filesNameHint": "Nome",
+  "filesNew": "Novo",
+  "filesNewFile": "Novo arquivo",
+  "filesNewFolder": "Nova pasta",
+  "filesOperationFailed": "A operação de arquivo falhou.",
+  "filesOperationUnavailable": "As operações de arquivo não estão disponíveis para este servidor.",
+  "filesOutsideRoot": "O caminho está fora da raiz do projeto.",
+  "filesPathCopied": "Caminho copiado.",
+  "filesPathMissing": "O caminho não existe.",
+  "filesPermissionDenied": "Permissão negada.",
+  "filesRename": "Renomear",
+  "filesRenameTitle": "Renomear {name}",
+  "filesRenamed": "Renomeado.",
+  "filesRootDeleteBlocked": "A raiz do projeto não pode ser excluída.",
+  "sessionTabChangeIconAction": "Alterar ícone",
+  "sessionTabIconApplied": "Ícone da aba atualizado.",
+  "sessionTabIconPickerTitle": "Escolher ícone da aba",
+  "sessionTabIconPresetBug": "Bug",
+  "sessionTabIconPresetCloud": "Nuvem",
+  "sessionTabIconPresetCode": "Código",
+  "sessionTabIconPresetData": "Dados",
+  "sessionTabIconPresetDesign": "Design",
+  "sessionTabIconPresetIdea": "Ideia",
+  "sessionTabIconPresetLaunch": "Lançamento",
+  "sessionTabIconPresetResearch": "Pesquisa",
+  "sessionTabIconPresetSecurity": "Segurança",
+  "sessionTabIconPresetTasks": "Tarefas",
+  "sessionTabIconPresetTerminal": "Terminal",
+  "sessionTabIconPresetTools": "Ferramentas",
+  "sessionTabIconSaveFailed": "Não foi possível salvar o ícone da aba.",
+  "sessionTabIconUseProjectIcon": "Usar ícone do projeto",
+  "chatMessageAssistantMessage": "Mensagem do assistente",
+  "chatMessageDateTime": "{month}/{day} {hour}:{minute}",
+  "chatMessageDaysAgo": "{count} d atrás",
+  "chatMessageDiffPreviewTruncated": "Pré-visualização de diff truncada para a estabilidade do app.",
+  "chatMessageHoursAgo": "{count} h atrás",
+  "chatMessageInvalidLinkFormat": "Formato de link inválido",
+  "chatMessageJustNow": "Agora mesmo",
+  "chatMessageLargeMessageTruncated": "Pré-visualização de mensagem grande truncada para a estabilidade do app.",
+  "chatMessageMinutesAgo": "{count} min atrás",
+  "chatMessagePatchCount": "{count, plural, =1{1 patch} other{{count} patches}}",
+  "chatMessageStepFinished": "Etapa concluída #{step}: {reason} • tokens {tokens} • ${cost}",
+  "chatMessageStepStarted": "Etapa iniciada #{step}",
+  "chatMessageStepStartedWithSnapshot": "Etapa iniciada #{step}: {snapshot}",
+  "chatMessageToolAttentionCount": "{count, plural, =1{1 precisa de atenção} other{{count} precisam de atenção}}",
+  "chatMessageToolCallsTitle": "Chamadas de ferramentas",
+  "chatMessageToolChainExtraTypes": "{count, plural, =1{+1 tipo} other{+{count} tipos}}",
+  "chatMessageToolChainMore": "{count, plural, =1{+1 a mais} other{+{count} a mais}}",
+  "chatMessageToolDoneCount": "{count, plural, =1{1 concluída} other{{count} concluídas}}",
+  "chatMessageToolExecution": "Execução de ferramenta",
+  "chatMessageToolRun": "Execução de ferramenta",
+  "chatMessageTruncatedChars": "[truncado {count} caracteres] {reason}",
+  "chatMessageUnableToOpenLink": "Não foi possível abrir o link",
+  "chatMessageYourMessage": "Sua mensagem",
+  "chatTourComposerDescription": "Digite sua solicitação aqui.",
+  "chatTourSendDescription": "Envie sua mensagem aqui.",
+  "composerAttachmentFallbackName": "Anexo",
+  "composerContextFallbackName": "Contexto",
+  "composerSendMessage": "Enviar mensagem",
+  "composerSendMessageWhileResponding": "Enviar mensagem enquanto a resposta está em execução",
+  "composerStopResponse": "Parar resposta",
+  "dialogMoonshineVoiceSetupDescription": "O Moonshine roda no dispositivo por meio do sherpa_onnx. Escolha um modelo uma vez e baixe-o apenas para este dispositivo desktop.",
+  "dialogParakeetVoiceSetupDescription": "O Parakeet roda no dispositivo com reconhecimento offline do sherpa_onnx. Baixe-o uma vez para este dispositivo desktop para habilitar o STT multilíngue.",
+  "dialogSenseVoiceSetupDescription": "O SenseVoice roda no dispositivo com reconhecimento offline do sherpa_onnx. É mais eficaz para chinês, cantonês, japonês, coreano e inglês.",
+  "dialogSherpaVoiceSetupDescription": "A entrada de voz do Sherpa requer um modelo de fala no dispositivo. Selecione seu idioma e baixe-o uma vez (~147 MB).",
+  "foregroundMonitorNotificationBody": "Alertas confiáveis em segundo plano estão ativos",
+  "foregroundMonitorNotificationOneSession": "Monitorando uma sessão",
+  "foregroundMonitorNotificationSessionCount": "Monitorando {count} sessões",
+  "foregroundMonitorNotificationTitle": "Monitoramento em segundo plano ativo",
+  "notificationActionOpen": "Abrir",
+  "notificationChannelAgent": "Agente do CodeWalk",
+  "notificationChannelAgentDescription": "Alertas de conclusão do agente do CodeWalk",
+  "notificationChannelErrors": "Erros do CodeWalk",
+  "notificationChannelErrorsDescription": "Alertas de erros do CodeWalk",
+  "notificationChannelPermissions": "Permissões do CodeWalk",
+  "notificationChannelPermissionsDescription": "Alertas de ação necessária do CodeWalk",
+  "notificationPermissionNeedsInput": "Uma permissão de ferramenta precisa da sua intervenção.",
+  "notificationPermissionOrQuestionNeedsInput": "Uma permissão de ferramenta ou pergunta precisa da sua intervenção.",
+  "notificationQuestionNeedsInput": "Uma pergunta de ferramenta precisa da sua intervenção.",
+  "notificationSessionError": "Uma sessão relatou um erro.",
+  "permissionRequestTitle": "Solicitação de permissão: {permission}",
+  "questionCustomAnswer": "Resposta personalizada",
+  "questionReviewAnswers": "Revisar respostas",
+  "questionStepOfQuestion": "Etapa {current} de {total} - Pergunta",
+  "questionStepOfReview": "Etapa {current} de {total} - Revisão",
+  "questionSubmitAnswers": "Enviar respostas",
+  "searchableDropdownEmptyText": "Nenhuma correspondência encontrada",
+  "searchableDropdownSearchHint": "Buscar",
+  "serversQuickGuideInstallOptions": "Outras opções oficiais de instalação: script de instalação, npm, bun, pnpm, Homebrew ou um binário dos GitHub Releases.",
+  "serversQuickGuideIntro": "CodeWalk é o app. O OpenCode é o motor que precisa estar em execução antes que esta conexão funcione.",
+  "serversQuickGuideProtectPassword": "Proteja o acesso com senha",
+  "serversQuickGuideRunPowerShell": "2. Execute no PowerShell:",
+  "serversQuickGuideRunTerminal": "2. Execute no seu terminal:",
+  "serversQuickGuideServerPassword": "Senha do servidor",
+  "serversQuickGuideStepInstallCli": "1. Instale o CLI do OpenCode.",
+  "serversQuickGuideTitle": "Configuração rápida",
+  "serversQuickGuideVerifyHint": "Após iniciar o servidor, confirme se /global/health ou /doc responde antes de colar a URL no CodeWalk.",
+  "sessionAttentionAndroidStartFailed": "O serviço de atenção de sessões do Android não pôde ser iniciado.",
+  "sessionAttentionIosInAppOnly": "A atenção de sessões está disponível apenas dentro do CodeWalk.",
+  "sessionAttentionOverlayPermissionGrantPrompt": "Conceda a permissão de exibição sobre outros apps e tente novamente.",
+  "sessionAttentionOverlayPermissionRequired": "A permissão de exibição sobre outros apps é necessária.",
+  "sessionAttentionSemanticLabel": "{count, plural, =1{1 sessão precisa de atenção} other{{count} sessões precisam de atenção}}",
+  "sessionTitleCannotBeEmpty": "O título não pode ficar vazio",
+  "sessionTodoCompletedCount": "Tarefas {count}/{total} concluídas",
+  "sessionTodoDoneCompact": "{count}/{total} concluídas",
+  "sessionTodoInProgressCompact": "{current}/{total} em andamento",
+  "sessionTodoTaskProgress": "Tarefa {index}/{total} {content}",
+  "sessionTodoTasksCount": "Tarefas ({count})",
+  "settingsAppearanceContrastLow": "Baixo",
+  "settingsAppearanceContrastMedium": "Médio",
+  "settingsAppearanceContrastMediumHigh": "Médio alto",
+  "settingsAppearanceContrastStandard": "Padrão",
+  "settingsNotificationsSystemSoundsAndroid": "Sons de notificação do Android, fornecidos pelo sistema.",
+  "settingsNotificationsSystemSoundsFreedesktop": "Sons Freedesktop de /usr/share/sounds/freedesktop/stereo.",
+  "settingsNotificationsSystemSoundsPlatform": "Compatível onde o sistema operacional expõe sons do sistema.",
+  "settingsNotificationsSystemSoundsWebUnavailable": "Não disponível na web.",
+  "settingsProvenanceCodeWalkException": "Exceção do CodeWalk",
+  "settingsProvenanceCodeWalkLocal": "Local do CodeWalk",
+  "settingsProvenanceOpenCodeBacked": "Baseado no OpenCode",
+  "settingsServerFallbackProviderName": "Configurado no servidor",
+  "settingsSessionAttentionCapabilityUnavailable": "O recurso de host da atenção de sessões está indisponível.",
+  "settingsSessionAttentionEnableFailed": "Não foi possível ativar a atenção de sessões.",
+  "settingsSessionAttentionSaveFailedStopped": "Não foi possível salvar a atenção de sessões e ela foi interrompida.",
+  "settingsSessionAttentionStillRunning": "A atenção de sessões ainda está em execução. Tente interrompê-la novamente.",
+  "settingsSessionAttentionStopFailed": "Não foi possível interromper a atenção de sessões. Tente novamente.",
+  "settingsSessionAttentionStopSaveFailed": "A atenção de sessões foi interrompida, mas a configuração não pôde ser salva.",
+  "shortcutsErrorConflict": "Conflita com \"{conflict}\"",
+  "shortcutsErrorInvalid": "Atalho inválido",
+  "shortcutsErrorUnsupportedKey": "Tecla de atalho não suportada",
+  "shortcutsPressKeyCombination": "Pressione a combinação de teclas agora",
+  "speechApiKey": "Chave de API",
+  "speechApiKeyRemoved": "Chave de API removida.",
+  "speechApiKeySaved": "Chave de API salva com segurança neste dispositivo.",
+  "speechApiKeySavedHelper": "Uma chave está salva. Digite um novo valor para substituí-la ou salve um valor vazio para removê-la.",
+  "speechApiKeyStorageUnavailable": "O armazenamento seguro da chave de API TTS está indisponível.",
+  "speechBaseUrl": "URL base",
+  "speechBaseUrlExample": "Exemplo: {url}",
+  "speechCloudTtsPrivacy": "Privacidade do TTS em nuvem",
+  "speechCloudTtsPrivacyDescription": "O TTS em nuvem envia o texto da mensagem do assistente selecionada ao provedor configurado. As chaves de API são armazenadas em armazenamento seguro neste dispositivo.",
+  "speechDownloadFailed": "Falha no download: {error}",
+  "speechEdgeExperimentalDescription": "Usa o serviço não oficial Edge Read Aloud diretamente deste dispositivo. O texto das mensagens é enviado à Microsoft ao usar a leitura em voz alta, e o serviço pode parar de funcionar se a Microsoft alterar o protocolo privado.",
+  "speechEdgeExperimentalTitle": "O Microsoft Edge Speech é experimental",
+  "speechEdgeVoice": "Voz do Edge",
+  "speechEdgeVoiceListUnavailable": "Usando a voz padrão do Edge. A lista de vozes não pôde ser carregada no momento.",
+  "speechEdgeVoicesLoaded": "Carregado das vozes do Microsoft Edge Speech.",
+  "speechFailedToRemoveModel": "Falha ao remover o modelo: {error}",
+  "speechModel": "Modelo",
+  "speechModelDefaultHelper": "Padrão: {model}",
+  "speechModelInstalled": "Modelo instalado ({modelId})",
+  "speechModelListLoadFailed": "Falha ao carregar a lista de modelos do {service}: {error}",
+  "speechModelMissing": "Modelo ausente ({modelId})",
+  "speechModelSizeMb": "~{sizeMb} MB",
+  "speechMoonshineDesktopOnlyHint": "Disponível apenas no desktop. O Android permanece apenas com o mecanismo nativo.",
+  "speechMoonshineModel": "Modelo Moonshine",
+  "speechMoonshineSubtitle": "Caminho experimental apenas para desktop, usando reconhecimento offline do sherpa_onnx e modelos para download.",
+  "speechNativeDisabledWindows": "Desabilitado no Windows por estabilidade. Use o Parakeet ou outro mecanismo local por meio da captura WASAPI do CodeWalk.",
+  "speechNativeSubtitle": "Início mais simples e rápido.",
+  "speechNativeUnavailableLinux": "Indisponível no Linux. Use o Parakeet para entrada de fala.",
+  "speechNoApiKeySaved": "Nenhuma chave de API salva.",
+  "speechNoLanguagePacksFound": "Nenhum pacote de idiomas encontrado",
+  "speechNotAvailableOnPlatform": "Não disponível nesta plataforma.",
+  "speechParakeetDesktopOnlyHint": "Disponível apenas no desktop. Usa reconhecimento multilíngue offline.",
+  "speechParakeetSubtitle": "Caminho offline NeMo transducer apenas para desktop, com um modelo multilíngue para download.",
+  "speechPitchNotSupported": "O tom não é suportado pelo TTS compatível com OpenAI e fica oculto para este provedor.",
+  "speechProviderEdgeExperimental": "Microsoft Edge Speech (experimental)",
+  "speechProviderOpenAiCompatible": "Compatível com OpenAI",
+  "speechProviderSystemNative": "Sistema / Nativo",
+  "speechReadAloudTestText": "Este é um teste de conversão de texto em fala do CodeWalk.",
+  "speechSaveApiKey": "Salvar chave de API",
+  "speechSearchSherpaLanguage": "Buscar idioma do Sherpa",
+  "speechSenseVoiceDesktopOnlyHint": "Disponível apenas no desktop. Mais eficaz para chinês, cantonês, japonês, coreano e inglês.",
+  "speechSenseVoiceSubtitle": "Caminho offline apenas para desktop, ajustado para chinês, cantonês, japonês, coreano e inglês.",
+  "speechSherpaLanguage": "Idioma do Sherpa",
+  "speechSherpaSubtitle": "Mais pesado, experimental e propenso a bugs. Frequentemente mais preciso com modelos baixados.",
+  "speechSherpaUnavailableAndroid": "Indisponível em builds do Android otimizadas para APK pequeno.",
+  "speechSilenceSeconds": "{value} segundos",
+  "speechSystemDefaultLanguage": "Padrão do sistema ({language})",
+  "speechTestVoice": "Testar voz",
+  "speechTextToSpeechProvider": "Provedor de conversão de texto em fala",
+  "workspaceNoActiveContext": "Sem contexto ativo",
+  "filesFailedToLoad": "Falha ao carregar arquivos",
+  "filesFailedToSearch": "Falha ao buscar arquivos",
+  "filesNoOpenFilesHint": "Nenhum arquivo aberto ainda. Digite para buscar.",
+  "filesNoContentMatches": "Nenhuma correspondência de conteúdo encontrada",
+  "filesOpenFilesCount": "{count, plural, =1{1 arquivo aberto} other{{count} arquivos abertos}}",
+  "filesLinesSelectedCount": "{count, plural, =1{1 linha selecionada} other{{count} linhas selecionadas}}",
+  "filesDraftTooLargeToSave": "O rascunho é grande demais para ser salvo pelo editor.",
+  "filesSaveChangesBeforeClose": "Salve as alterações antes de fechar este arquivo.",
+  "filesSaveChangesBeforePathChange": "Salve as alterações antes de alterar este caminho.",
+  "filesWaitForSaveBeforePathChange": "Aguarde o salvamento do arquivo terminar antes de alterar este caminho.",
+  "filesWaitForFileOperation": "Aguarde a operação de arquivo terminar.",
+  "filesLargeFileReadOnly": "Arquivos grandes abrem somente leitura para manter a edição responsiva.",
+  "filesCheckingWriteSupport": "Verificando suporte de gravação do arquivo...",
+  "filesActiveProjectRequired": "As operações de arquivo exigem um diretório de projeto ativo.",
+  "filesReloadSkippedUnsavedChanges": "Alterações não salvas; recarga ignorada.",
+  "filesFailedToLoadContent": "Falha ao carregar o conteúdo do arquivo",
+  "filesFileSaved": "Arquivo salvo.",
+  "filesParentNotDirectory": "O pai não é um diretório.",
+  "filesMalformedResponse": "A operação de arquivo retornou uma resposta inválida.",
+  "filesShellCommandDidNotComplete": "O comando shell da operação de arquivo não foi concluído.",
+  "filesShellCommandNoResult": "O comando shell da operação de arquivo não retornou resultado.",
+  "filesShellCommandTruncated": "O comando shell da operação de arquivo foi truncado pelo servidor.",
+  "filesShellCommandSyntaxError": "O comando shell da operação de arquivo falhou com erro de sintaxe.",
+  "filesShellUtilityNotFound": "Um utilitário shell necessário não foi encontrado.",
+  "filesShellCommandFailed": "O comando shell da operação de arquivo falhou antes de retornar um resultado.",
+  "attachmentSaveTitle": "Salvar anexo",
+  "attachmentBrowserSandboxLocalFile": "O sandbox do navegador impede a abertura direta de anexos locais file://.",
+  "attachmentLocalPathBrowserBlocked": "Este anexo aponta para um caminho local que não pode ser aberto no navegador.",
+  "terminalConnectedTo": "Conectado a {serverName} em {directory}",
+  "terminalTransportUnavailable": "O transporte do terminal está indisponível.",
+  "chatSlashCommandNew": "Criar uma nova sessão de chat",
+  "chatSlashCommandModels": "Abrir seletor de modelos",
+  "chatSlashCommandSessions": "Abrir lista de conversas",
+  "chatSlashCommandAgent": "Abrir seletor de agentes",
+  "chatSlashCommandOpen": "Ação rápida de abertura de arquivo",
+  "chatSlashCommandHelp": "Mostrar ajuda de comandos",
+  "chatSlashCommandCompact": "Compactar o contexto da sessão atual",
+  "chatSlashCommandThinking": "Alternar balões de pensamento",
+  "chatSlashCommandUndo": "Desfazer o último turno visível do usuário",
+  "chatSlashCommandRedo": "Refazer o último turno desfeito",
+  "chatSessionSubConversationCount": "{count, plural, =1{1 subconversa} other{{count} subconversas}}",
+  "chatMessageWeeksAgo": "{count} sem atrás",
+  "chatMessageShortDate": "{month}/{day}",
+  "chatProviderErrorLoadSessionStatus": "Falha ao carregar o status da sessão",
+  "chatProviderErrorLoadSessionDetails": "Alguns detalhes da sessão não puderam ser carregados",
+  "chatProviderErrorLoadSessionList": "Falha ao carregar a lista de sessões: {error}",
+  "chatProviderErrorCreateSession": "Falha ao criar a sessão",
+  "chatProviderErrorSelectProviderModelBeforeSend": "Selecione um provedor conectado ou um modelo OpenCode gratuito antes de enviar",
+  "chatProviderErrorStartMessageSend": "Falha ao iniciar o envio da mensagem",
+  "chatProviderErrorStopUnavailable": "A parada está indisponível para a sessão atual",
+  "chatProviderErrorWaitForResponseFinish": "Aguarde a resposta atual terminar antes de compactar",
+  "chatProviderErrorCompactUnavailable": "A compactação de contexto está indisponível para a sessão atual",
+  "chatProviderErrorSelectModelBeforeCompact": "Selecione um modelo antes de compactar o contexto",
+  "chatProviderErrorCompactSessionContext": "Falha ao compactar o contexto da sessão",
+  "chatProviderErrorNetwork": "Falha na conexão de rede. Verifique as configurações de rede",
+  "chatProviderErrorServer": "Erro no servidor. Tente novamente mais tarde",
+  "chatProviderErrorNotFound": "Recurso não encontrado",
+  "chatProviderErrorInvalidInput": "Parâmetros de entrada inválidos",
+  "chatProviderErrorUnknown": "Erro desconhecido. Tente novamente mais tarde",
+  "chatProviderErrorSessionFallback": "Erro de sessão",
+  "projectProviderErrorNoProjectContext": "Nenhum contexto de projeto disponível no servidor",
+  "projectProviderErrorInitializeFailed": "Falha ao inicializar o contexto do projeto: {error}",
+  "projectProviderErrorSwitchProjectNotFound": "Falha ao alternar de projeto: projeto não encontrado",
+  "projectProviderErrorSwitchDirectoryEmpty": "Falha ao alternar de projeto: o diretório está vazio",
+  "projectProviderErrorAtLeastOneContext": "Pelo menos um contexto deve permanecer aberto",
+  "projectProviderErrorReopenProjectNotFound": "Falha ao reabrir o projeto: projeto não encontrado",
+  "projectProviderErrorOnlyClosedArchivable": "Somente projetos fechados podem ser arquivados",
+  "projectProviderErrorArchiveProjectNotFound": "Falha ao arquivar o projeto: projeto não encontrado",
+  "projectProviderErrorArchiveProjectPathInvalid": "Falha ao arquivar o projeto: o caminho do projeto é inválido",
+  "projectProviderErrorLoadWorkspaces": "Falha ao carregar workspaces: {error}",
+  "projectProviderErrorWorkspaceNameEmpty": "O nome do workspace não pode ficar vazio",
+  "projectProviderErrorCreateWorkspace": "Falha ao criar o workspace: {error}",
+  "projectProviderErrorResetWorkspace": "Falha ao redefinir o workspace: {error}",
+  "projectProviderErrorDeleteWorkspace": "Falha ao excluir o workspace: {error}",
+  "projectProviderErrorDirectoryEmpty": "O diretório não pode ficar vazio",
+  "projectProviderErrorListDirectories": "Falha ao listar diretórios: {error}",
+  "projectProviderErrorValidateDirectory": "Falha ao validar o diretório: {error}",
+  "projectProviderErrorPathEmpty": "O caminho não pode ficar vazio",
+  "projectProviderErrorListFiles": "Falha ao listar arquivos: {error}",
+  "projectProviderErrorSearchFiles": "Falha ao buscar arquivos: {error}",
+  "projectProviderErrorContentSearchUnavailable": "Busca de conteúdo indisponível: {error}",
+  "projectProviderErrorSearchSymbols": "Falha ao buscar símbolos: {error}",
+  "projectProviderErrorReadFile": "Falha ao ler o arquivo: {error}",
+  "projectProviderErrorLoadProjectList": "Falha ao carregar a lista de projetos: {error}",
+  "workspaceProjectRemovedFromHistory": "Projeto removido do histórico",
+  "workspaceProjectContextOpened": "Contexto do projeto aberto: {directory}",
+  "workspaceFailedToOpenProjectContext": "Falha ao abrir o contexto do projeto: {directory}",
+  "chatAbortNotice": "O que você quer fazer de diferente?",
+  "sessionTitleToday": "Hoje {time} ({date})",
+  "sessionTitleYesterday": "Ontem {time} ({date})",
+  "sessionTitleWeekday": "{weekday} {time} ({date})",
+  "sessionTitleDateAndTime": "{date} {time}",
+  "sessionWeekdayMon": "Seg",
+  "sessionWeekdayTue": "Ter",
+  "sessionWeekdayWed": "Qua",
+  "sessionWeekdayThu": "Qui",
+  "sessionWeekdayFri": "Sex",
+  "sessionWeekdaySat": "Sáb",
+  "sessionWeekdaySun": "Dom",
+  "forwardTimeNow": "agora",
+  "forwardTimeMinutes": "{count} min",
+  "forwardTimeHours": "{count} h",
+  "forwardTimeDays": "{count} d",
+  "forwardTimeWeeks": "{count} sem",
+  "settingsBehaviorConfigFieldDefaultModel": "modelo padrão",
+  "settingsBehaviorConfigFieldDefaultAgent": "agente padrão",
+  "settingsBehaviorConfigFieldSmallModel": "modelo pequeno",
+  "settingsBehaviorConfigFieldAutoUpdateMode": "modo de atualização automática",
+  "settingsBehaviorConfigFieldSnapshotSetting": "configuração de snapshot",
+  "settingsBehaviorConfigFieldConversationUsername": "nome de usuário da conversa",
+  "settingsBehaviorConfigFieldSharingDefault": "padrão de compartilhamento",
+  "speechMicNoInputDevice": "Nenhum dispositivo de entrada de microfone está disponível.",
+  "speechMicDeviceBusy": "O microfone padrão está em uso por outro aplicativo no momento.",
+  "speechMicUnsupportedFormat": "O formato do microfone padrão não é suportado.",
+  "speechMicSpeechPrivacy": "Os serviços de fala do Windows podem estar desativados (privacidade de fala, reconhecimento de fala online ou pacotes de idiomas).",
+  "speechMicBackendUnavailable": "O backend de microfone do Windows não está disponível nesta compilação.",
+  "speechEngineFallbackNotice": "Mecanismo de STT selecionado indisponível ({reason}). Usando {fallback} em seu lugar.",
+  "oauthFlowSecureStorageUnavailable": "O armazenamento seguro de credenciais está indisponível para OAuth.",
+  "oauthFlowUnexpectedError": "O fluxo de OAuth falhou inesperadamente. Tente novamente.",
+  "oauthFlowNoEndpointsDiscovered": "Nenhum endpoint de OAuth encontrado. Ative o OAuth Gerenciado em Cloudflare Dashboard → Access → Applications → [este app].",
+  "oauthFlowTokenResponseMissingAccessToken": "A resposta do token OAuth não incluiu um access token.",
+  "oauthFlowProfileChanged": "O perfil do servidor mudou antes de o OAuth ser concluído.",
+  "oauthFlowMetadataMissingEndpoints": "Os metadados do OAuth não incluem os endpoints de autorização/token.",
+  "oauthFlowCallbackNotCompleted": "O callback de autorização não foi concluído",
+  "oauthFlowProviderDeclined": "O servidor de autorização recusou a solicitação de OAuth. Tente novamente.",
+  "oauthFlowCallbackValidationFailed": "A validação do callback de OAuth falhou. Tente novamente.",
+  "oauthFlowCallbackServerStartFailed": "O servidor de callback de OAuth local falhou ao iniciar.",
+  "oauthFlowSignInCanceled": "O login do OAuth foi cancelado.",
+  "oauthFlowBrowserOpenFailed": "Não foi possível abrir o navegador do sistema para o login do OAuth.",
+  "oauthFlowCallbackTimeout": "Nenhum callback de autorização chegou ao app em 5 minutos. Esperava-se que o navegador redirecionasse para o endereço de callback local após o consentimento. Se o navegador mostrou um erro de conexão, este dispositivo ou rede bloqueia redirecionamentos de loopback.",
+  "oauthFlowTokenExchangeTransientFailure": "A troca de token falhou após {maxAttempts} tentativas devido a um problema temporário de rede. Tente novamente.",
+  "oauthFlowTokenExchangeHttpFailure": "A troca de token falhou (HTTP {statusCode}). Tente novamente.",
+  "oauthFlowTokenExchangeUnexpectedFailure": "A troca de token falhou inesperadamente. Tente novamente.",
+  "oauthFlowTokenExchangeIncomplete": "A troca de token não foi concluída após o envio do código de autorização. Inicie o login do OAuth novamente.",
+  "speechReadAloudFailed": "A conversão de texto em fala falhou.",
+  "speechReadAloudNoText": "Não há texto para ler em voz alta.",
+  "speechEdgeTextTooLong": "O Microsoft Edge Speech pode ler até 4096 bytes por vez.",
+  "speechEdgeMalformedAudio": "O Microsoft Edge Speech retornou dados de áudio malformados.",
+  "speechEdgeUnsupportedAudio": "O Microsoft Edge Speech retornou dados de áudio não suportados.",
+  "speechEdgeUnsupportedFrame": "O Microsoft Edge Speech retornou um quadro websocket não suportado.",
+  "speechEdgeSynthesisInterrupted": "O Microsoft Edge Speech terminou antes de a síntese ser concluída.",
+  "speechEdgeEmptyAudio": "O Microsoft Edge Speech retornou uma resposta de áudio vazia.",
+  "speechEdgeTimedOut": "O Microsoft Edge Speech expirou.",
+  "speechEdgeUnreachable": "Não foi possível alcançar o Microsoft Edge Speech.",
+  "speechApiKeyMissing": "Adicione uma chave de API em Configurações > Fala para usar este provedor de TTS.",
+  "speechProviderEmptyAudio": "O provedor de TTS retornou uma resposta de áudio vazia.",
+  "speechProviderRequestRejected": "O provedor de TTS rejeitou a solicitação de fala.",
+  "speechApiKeyRejected": "A chave de API de TTS foi rejeitada pelo provedor.",
+  "speechProviderQuotaRateLimit": "O provedor de TTS relatou um limite de cota ou taxa.",
+  "speechProviderTemporarilyUnavailable": "O provedor de TTS está temporariamente indisponível.",
+  "appProviderErrorFailedToStartProcess": "Falha ao iniciar o processo de {tool}.",
+  "@appProviderErrorFailedToStartProcess": {
+    "description": "CodeWalk UI string — appProviderErrorFailedToStartProcess",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolNotAvailable": "{tool} não está disponível. Instale o {runtime} primeiro.",
+  "@appProviderErrorToolNotAvailable": {
+    "description": "CodeWalk UI string — appProviderErrorToolNotAvailable",
+    "placeholders": {
+      "runtime": {
+        "type": "String"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorToolInstallFailed": "A instalação de {tool} falhou com o código de saída {exitCode}.",
+  "@appProviderErrorToolInstallFailed": {
+    "description": "CodeWalk UI string — appProviderErrorToolInstallFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      },
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorBunBootstrapFailed": "A inicialização do Bun falhou com o código de saída {exitCode}.",
+  "@appProviderErrorBunBootstrapFailed": {
+    "description": "CodeWalk UI string — appProviderErrorBunBootstrapFailed",
+    "placeholders": {
+      "exitCode": {
+        "type": "int"
+      }
+    }
+  },
+  "appProviderErrorInstalledButNotFoundInPath": "A instalação do OpenCode foi concluída, mas o comando não foi encontrado no PATH.",
+  "@appProviderErrorInstalledButNotFoundInPath": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButNotFoundInPath"
+  },
+  "appProviderErrorInstalledButPathNotResolved": "A instalação do OpenCode foi concluída, mas não foi possível resolver o caminho do comando.",
+  "@appProviderErrorInstalledButPathNotResolved": {
+    "description": "CodeWalk UI string — appProviderErrorInstalledButPathNotResolved"
+  },
+  "appProviderErrorConfiguredCommandNotFound": "O comando configurado não foi encontrado e {tool} não está no PATH.",
+  "@appProviderErrorConfiguredCommandNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorConfiguredCommandPathMissing": "O caminho do comando configurado não existe.",
+  "@appProviderErrorConfiguredCommandPathMissing": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandPathMissing"
+  },
+  "appProviderErrorConfiguredCommandVersionCheckFailed": "O comando configurado existe, mas a verificação de versão falhou.",
+  "@appProviderErrorConfiguredCommandVersionCheckFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandVersionCheckFailed"
+  },
+  "appProviderErrorConfiguredCommandExecutionFailed": "Não foi possível executar o comando configurado.",
+  "@appProviderErrorConfiguredCommandExecutionFailed": {
+    "description": "CodeWalk UI string — appProviderErrorConfiguredCommandExecutionFailed"
+  },
+  "appProviderWslCheckWindowsOnly": "A verificação de WSL se aplica apenas ao Windows.",
+  "@appProviderWslCheckWindowsOnly": {
+    "description": "CodeWalk UI string — appProviderWslCheckWindowsOnly"
+  },
+  "appProviderDesktopBuildRequired": "Use uma versão desktop para configurar um servidor local gerenciado.",
+  "@appProviderDesktopBuildRequired": {
+    "description": "CodeWalk UI string — appProviderDesktopBuildRequired"
+  },
+  "appProviderKnownInstallationDirectoryDetected": "Detectado a partir de um diretório de instalação conhecido.",
+  "@appProviderKnownInstallationDirectoryDetected": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationDirectoryDetected"
+  },
+  "appProviderKnownInstallationPathRefreshHint": "Detectado a partir de um diretório de instalação conhecido. O PATH pode precisar ser atualizado; reabra o {appName} se uma instalação recente ainda não foi detectada.",
+  "@appProviderKnownInstallationPathRefreshHint": {
+    "description": "CodeWalk UI string — appProviderKnownInstallationPathRefreshHint",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appProviderErrorReleaseMetadataFetchFailed": "Falha ao buscar os metadados da versão mais recente no GitHub.",
+  "@appProviderErrorReleaseMetadataFetchFailed": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseMetadataFetchFailed"
+  },
+  "appProviderErrorReleaseAssetListMissing": "Os metadados da versão mais recente não incluíam a lista de recursos.",
+  "@appProviderErrorReleaseAssetListMissing": {
+    "description": "CodeWalk UI string — appProviderErrorReleaseAssetListMissing"
+  },
+  "appProviderErrorNoCompatibleAsset": "Nenhum recurso binário compatível do OpenCode foi encontrado.",
+  "@appProviderErrorNoCompatibleAsset": {
+    "description": "CodeWalk UI string — appProviderErrorNoCompatibleAsset"
+  },
+  "appProviderErrorDownloadAssetFailed": "Falha ao baixar o recurso do OpenCode selecionado.",
+  "@appProviderErrorDownloadAssetFailed": {
+    "description": "CodeWalk UI string — appProviderErrorDownloadAssetFailed"
+  },
+  "appProviderErrorChecksumVerificationFailed": "A verificação de checksum do recurso baixado falhou.",
+  "@appProviderErrorChecksumVerificationFailed": {
+    "description": "CodeWalk UI string — appProviderErrorChecksumVerificationFailed"
+  },
+  "appProviderErrorExtractArchiveFailed": "Falha ao extrair o arquivo binário do OpenCode.",
+  "@appProviderErrorExtractArchiveFailed": {
+    "description": "CodeWalk UI string — appProviderErrorExtractArchiveFailed"
+  },
+  "appProviderErrorExecutableNotFound": "Não foi possível encontrar o executável de {tool} nos arquivos extraídos.",
+  "@appProviderErrorExecutableNotFound": {
+    "description": "CodeWalk UI string — appProviderErrorExecutableNotFound",
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "chatNoResponseFromServer": "Sem resposta do servidor. Tente novamente.",
+  "@chatNoResponseFromServer": {
+    "description": "CodeWalk UI string — chatNoResponseFromServer"
+  },
+  "chatNoResponseFromModel": "Sem resposta do modelo. Tente novamente.",
+  "@chatNoResponseFromModel": {
+    "description": "CodeWalk UI string — chatNoResponseFromModel"
+  },
+  "speechJobCancelled": "O trabalho de fala foi cancelado.",
+  "@speechJobCancelled": {
+    "description": "CodeWalk UI string — speechJobCancelled"
+  },
+  "speechEdgeCancelled": "O Microsoft Edge Speech foi cancelado.",
+  "@speechEdgeCancelled": {
+    "description": "CodeWalk UI string — speechEdgeCancelled"
+  },
+  "sessionAttentionKindActive": "Ativo",
+  "@sessionAttentionKindActive": {
+    "description": "CodeWalk UI string — sessionAttentionKindActive"
+  },
+  "sessionAttentionKindReceiving": "Recebendo",
+  "@sessionAttentionKindReceiving": {
+    "description": "CodeWalk UI string — sessionAttentionKindReceiving"
+  },
+  "sessionAttentionKindDelayed": "Atrasado",
+  "@sessionAttentionKindDelayed": {
+    "description": "CodeWalk UI string — sessionAttentionKindDelayed"
+  },
+  "sessionAttentionKindCompleted": "Concluído",
+  "@sessionAttentionKindCompleted": {
+    "description": "CodeWalk UI string — sessionAttentionKindCompleted"
+  },
+  "sessionAttentionKindPendingInteraction": "Interação pendente",
+  "@sessionAttentionKindPendingInteraction": {
+    "description": "CodeWalk UI string — sessionAttentionKindPendingInteraction"
+  },
+  "sessionAttentionKindError": "Erro",
+  "@sessionAttentionKindError": {
+    "description": "CodeWalk UI string — sessionAttentionKindError"
+  },
+  "sessionAttentionPauseCellularDataSaver": "O economizador de dados móveis está ativo",
+  "@sessionAttentionPauseCellularDataSaver": {
+    "description": "CodeWalk UI string — sessionAttentionPauseCellularDataSaver"
+  },
+  "sessionAttentionPauseOauthReopenRequired": "É necessário entrar com OAuth",
+  "@sessionAttentionPauseOauthReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOauthReopenRequired"
+  },
+  "sessionAttentionPauseTailscaleReopenRequired": "É necessária a conexão com o Tailscale",
+  "@sessionAttentionPauseTailscaleReopenRequired": {
+    "description": "CodeWalk UI string — sessionAttentionPauseTailscaleReopenRequired"
+  },
+  "sessionAttentionPauseOffline": "Offline",
+  "@sessionAttentionPauseOffline": {
+    "description": "CodeWalk UI string — sessionAttentionPauseOffline"
+  },
+  "sessionAttentionPausePermissionRevoked": "Permissão revogada",
+  "@sessionAttentionPausePermissionRevoked": {
+    "description": "CodeWalk UI string — sessionAttentionPausePermissionRevoked"
+  },
+  "sessionAttentionPauseServiceStopped": "Serviço interrompido",
+  "@sessionAttentionPauseServiceStopped": {
+    "description": "CodeWalk UI string — sessionAttentionPauseServiceStopped"
+  },
+  "sessionAttentionPauseHostUnavailable": "Host indisponível",
+  "@sessionAttentionPauseHostUnavailable": {
+    "description": "CodeWalk UI string — sessionAttentionPauseHostUnavailable"
+  },
+  "speechProviderUnreachable": "Não foi possível alcançar o provedor de TTS.",
+  "errorCertificateError": "Erro de certificado",
+  "@errorCertificateError": {
+    "description": "CodeWalk UI string — errorCertificateError"
+  },
+  "errorRequestCancelled": "Solicitação cancelada",
+  "@errorRequestCancelled": {
+    "description": "CodeWalk UI string — errorRequestCancelled"
+  },
+  "errorRunShellCommandFailed": "Falha ao executar o comando de shell",
+  "@errorRunShellCommandFailed": {
+    "description": "CodeWalk UI string — errorRunShellCommandFailed"
+  },
+  "errorRunSlashCommandFailed": "Falha ao executar o comando de barra",
+  "@errorRunSlashCommandFailed": {
+    "description": "CodeWalk UI string — errorRunSlashCommandFailed"
+  },
+  "errorSessionBusy": "A sessão está ocupada processando outra solicitação.",
+  "@errorSessionBusy": {
+    "description": "CodeWalk UI string — errorSessionBusy"
+  },
+  "errorUnknownNetworkError": "Erro de rede desconhecido: {error}",
+  "@errorUnknownNetworkError": {
+    "description": "CodeWalk UI string — errorUnknownNetworkError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "forwardUntitled": "Sem título",
+  "@forwardUntitled": {
+    "description": "CodeWalk UI string — forwardUntitled"
+  },
+  "logsEntryError": "Erro",
+  "@logsEntryError": {
+    "description": "CodeWalk UI string — logsEntryError"
+  },
+  "logsEntryStack": "Pilha",
+  "@logsEntryStack": {
+    "description": "CodeWalk UI string — logsEntryStack"
+  },
+  "sessionTabIconRemoveFailed": "Falha ao remover os dados do ícone da aba de sessão local",
+  "@sessionTabIconRemoveFailed": {
+    "description": "CodeWalk UI string — sessionTabIconRemoveFailed"
+  },
+  "settingsBehaviorOpenCodeDefaultsLoadError": "Não foi possível carregar os padrões baseados no OpenCode do servidor ativo.",
+  "@settingsBehaviorOpenCodeDefaultsLoadError": {
+    "description": "CodeWalk UI string — settingsBehaviorOpenCodeDefaultsLoadError"
+  },
+  "setupDebugLinuxLogsPath": "Registros do Linux: {path}",
+  "@setupDebugLinuxLogsPath": {
+    "description": "CodeWalk UI string — setupDebugLinuxLogsPath",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageDetectAttempt": "Tentando detectar um comando OpenCode existente no ambiente atual.",
+  "@setupDebugMessageDetectAttempt": {
+    "description": "CodeWalk UI string — setupDebugMessageDetectAttempt"
+  },
+  "setupDebugMessageDiagnosticsResult": "{availability} em {platform}. {recommendation}",
+  "@setupDebugMessageDiagnosticsResult": {
+    "description": "CodeWalk UI string — setupDebugMessageDiagnosticsResult",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      },
+      "recommendation": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageExitedAfterRequestedStop": "O servidor OpenCode gerenciado foi encerrado após uma parada solicitada.",
+  "@setupDebugMessageExitedAfterRequestedStop": {
+    "description": "CodeWalk UI string — setupDebugMessageExitedAfterRequestedStop"
+  },
+  "setupDebugMessageHealthyRunning": "O servidor OpenCode gerenciado está saudável e em execução em {url}.",
+  "@setupDebugMessageHealthyRunning": {
+    "description": "CodeWalk UI string — setupDebugMessageHealthyRunning",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageInstallStarted": "Instalação do OpenCode iniciada pelo CodeWalk.",
+  "@setupDebugMessageInstallStarted": {
+    "description": "CodeWalk UI string — setupDebugMessageInstallStarted"
+  },
+  "setupDebugMessageOnboardingAddAnotherServer": "O usuário escolheu adicionar outro servidor após uma verificação de saúde com falha.",
+  "@setupDebugMessageOnboardingAddAnotherServer": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingAddAnotherServer"
+  },
+  "setupDebugMessageOnboardingConnectExisting": "O usuário escolheu se conectar a um servidor OpenCode existente.",
+  "@setupDebugMessageOnboardingConnectExisting": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingConnectExisting"
+  },
+  "setupDebugMessageOnboardingGuidedPath": "O usuário abriu o caminho guiado de configuração do OpenCode.",
+  "@setupDebugMessageOnboardingGuidedPath": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingGuidedPath"
+  },
+  "setupDebugMessageOnboardingManagedLocal": "O usuário abriu a configuração local gerenciada do OpenCode.",
+  "@setupDebugMessageOnboardingManagedLocal": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingManagedLocal"
+  },
+  "setupDebugMessageOnboardingOpenedServerSettings": "O usuário abriu as configurações do servidor após uma verificação de saúde com falha.",
+  "@setupDebugMessageOnboardingOpenedServerSettings": {
+    "description": "CodeWalk UI string — setupDebugMessageOnboardingOpenedServerSettings"
+  },
+  "setupDebugMessageStartLocalServer": "Iniciando o servidor OpenCode gerenciado em {url}.",
+  "@setupDebugMessageStartLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStartLocalServer",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugMessageStoppedCleanly": "O servidor OpenCode gerenciado foi interrompido corretamente.",
+  "@setupDebugMessageStoppedCleanly": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppedCleanly"
+  },
+  "setupDebugMessageStoppingLocalServer": "Interrompendo o servidor OpenCode gerenciado.",
+  "@setupDebugMessageStoppingLocalServer": {
+    "description": "CodeWalk UI string — setupDebugMessageStoppingLocalServer"
+  },
+  "setupDebugMessageTestingServerUrl": "Testando a URL do servidor OpenCode {url} durante a configuração inicial.",
+  "@setupDebugMessageTestingServerUrl": {
+    "description": "CodeWalk UI string — setupDebugMessageTestingServerUrl",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugRunOpenCodeCommand": "Execute o OpenCode com: {command}",
+  "@setupDebugRunOpenCodeCommand": {
+    "description": "CodeWalk UI string — setupDebugRunOpenCodeCommand",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerDocsEndpoint": "Documentação do servidor: {endpoint}",
+  "@setupDebugServerDocsEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerDocsEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugServerHealthEndpoint": "Saúde do servidor: {endpoint}",
+  "@setupDebugServerHealthEndpoint": {
+    "description": "CodeWalk UI string — setupDebugServerHealthEndpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      }
+    }
+  },
+  "setupDebugSourceDiagnostics": "Diagnóstico",
+  "@setupDebugSourceDiagnostics": {
+    "description": "CodeWalk UI string — setupDebugSourceDiagnostics"
+  },
+  "setupDebugSourceLocalServer": "Servidor local",
+  "@setupDebugSourceLocalServer": {
+    "description": "CodeWalk UI string — setupDebugSourceLocalServer"
+  },
+  "setupDebugSourceManualConnection": "Conexão manual",
+  "@setupDebugSourceManualConnection": {
+    "description": "CodeWalk UI string — setupDebugSourceManualConnection"
+  },
+  "setupDebugSourceOnboarding": "Onboarding",
+  "@setupDebugSourceOnboarding": {
+    "description": "CodeWalk UI string — setupDebugSourceOnboarding"
+  },
+  "setupDebugSourceUseExisting": "Usar existente",
+  "@setupDebugSourceUseExisting": {
+    "description": "CodeWalk UI string — setupDebugSourceUseExisting"
+  },
+  "chatProviderErrorSessionNotFound": "Sessão não encontrada",
+  "@chatProviderErrorSessionNotFound": {
+    "description": "CodeWalk UI string — chatProviderErrorSessionNotFound"
+  },
+  "chatProviderErrorInvalidMessageFormat": "Formato de mensagem inválido",
+  "@chatProviderErrorInvalidMessageFormat": {
+    "description": "CodeWalk UI string — chatProviderErrorInvalidMessageFormat"
+  },
+  "chatProviderErrorNetworkShort": "Falha na conexão de rede",
+  "@chatProviderErrorNetworkShort": {
+    "description": "CodeWalk UI string — chatProviderErrorNetworkShort"
+  },
+  "chatProviderErrorUnknownShort": "Erro desconhecido",
+  "@chatProviderErrorUnknownShort": {
+    "description": "CodeWalk UI string — chatProviderErrorUnknownShort"
+  },
+  "terminalCreateFailed": "Falha ao criar a sessão do terminal",
+  "@terminalCreateFailed": {
+    "description": "CodeWalk UI string — terminalCreateFailed"
+  },
+  "terminalEndpointUnavailable": "O endpoint do terminal não está disponível",
+  "@terminalEndpointUnavailable": {
+    "description": "CodeWalk UI string — terminalEndpointUnavailable"
+  },
+  "terminalInvalidDirectory": "Diretório do terminal inválido",
+  "@terminalInvalidDirectory": {
+    "description": "CodeWalk UI string — terminalInvalidDirectory"
+  },
+  "terminalWebsocketUnavailable": "O websocket do terminal não está disponível aqui.",
+  "@terminalWebsocketUnavailable": {
+    "description": "CodeWalk UI string — terminalWebsocketUnavailable"
+  },
+  "chatMessageToolChainCallsCompact": "{count, plural, =1{1 chamada} other{{count} chamadas}}",
+  "@chatMessageToolChainCallsCompact": {
+    "description": "CodeWalk UI string — chatMessageToolChainCallsCompact",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorConnectionTimeout": "Tempo de conexão esgotado",
+  "@errorConnectionTimeout": {
+    "description": "CodeWalk UI string — errorConnectionTimeout"
+  },
+  "errorClientError": "Erro do cliente",
+  "@errorClientError": {
+    "description": "CodeWalk UI string — errorClientError"
+  },
+  "chatProviderErrorSendMessage": "Falha ao enviar mensagem",
+  "@chatProviderErrorSendMessage": {
+    "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  }
 }

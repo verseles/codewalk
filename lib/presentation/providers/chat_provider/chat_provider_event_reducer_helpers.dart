@@ -479,7 +479,8 @@ extension _ChatProviderEventReducerHelpers on ChatProvider {
         ? messageFromError
         : (messageFromRawError != null && messageFromRawError.isNotEmpty)
         ? messageFromRawError
-        : 'Session error';
+        : (L10nBridge.current?.chatProviderErrorSessionFallback ??
+              'Session error');
     final code = data['code']?.toString() ?? error?['code']?.toString();
     return (message: message, code: code);
   }
