@@ -6678,4 +6678,87 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'Invio del messaggio non riuscito';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq o un endpoint personalizzato compatibile con OpenAI.';
+
+  @override
+  String get speechApiProvider => 'Fornitore di trascrizione vocale';
+
+  @override
+  String get speechCloudSttPrivacy =>
+      'Privacy del riconoscimento vocale nel cloud';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'L’audio del microfono registrato viene inviato al fornitore configurato. Le chiavi API restano nella memoria protetta di questo dispositivo.';
+
+  @override
+  String get speechApiKeyOptional => 'Facoltativo per endpoint personalizzati.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider usa la trascrizione in batch. Tocca di nuovo il microfono per fermare e trascrivere.';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'Il riconoscimento vocale tramite API non è disponibile nella versione web.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'Controlla endpoint e modello dell’API vocale. Gli endpoint remoti devono usare HTTPS.';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'L’endpoint o il modello vocale è stato rifiutato.';
+
+  @override
+  String get speechApiRateLimited =>
+      'Il fornitore vocale ha segnalato una quota o un limite di frequenza.';
+
+  @override
+  String get speechApiUnavailable =>
+      'Il fornitore vocale è temporaneamente non disponibile.';
+
+  @override
+  String get speechApiNetwork => 'Impossibile raggiungere il fornitore vocale.';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'Il fornitore vocale ha restituito una risposta non valida.';
+
+  @override
+  String get speechApiEmptyAudio => 'Nessun audio del microfono catturato.';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'Il fornitore vocale non ha restituito alcuna trascrizione.';
+
+  @override
+  String get speechApiCustomProvider => 'Personalizzato compatibile con OpenAI';
+
+  @override
+  String get speechApiMaxDuration =>
+      'Le registrazioni API si fermano automaticamente dopo 2 minuti.';
+
+  @override
+  String get speechApiLanguageHint =>
+      'La lingua attiva dell’app viene inviata come suggerimento di trascrizione.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'La memoria protetta della chiave API vocale non è disponibile.';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'Aggiungi una chiave API vocale in Impostazioni > Voce.';
+
+  @override
+  String get speechSttApiKeyRejected =>
+      'La chiave API vocale è stata rifiutata.';
 }

@@ -8510,5 +8510,98 @@
   "chatProviderErrorSendMessage": "Failed to send message",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
+  },
+  "speechApiEngine": "API",
+  "@speechApiEngine": {
+    "description": "CodeWalk UI string — speechApiEngine"
+  },
+  "speechApiEngineSubtitle": "OpenAI, Groq, or a custom OpenAI-compatible endpoint.",
+  "@speechApiEngineSubtitle": {
+    "description": "CodeWalk UI string — speechApiEngineSubtitle"
+  },
+  "speechApiProvider": "Speech-to-text provider",
+  "@speechApiProvider": {
+    "description": "CodeWalk UI string — speechApiProvider"
+  },
+  "speechCloudSttPrivacy": "Cloud speech-to-text privacy",
+  "@speechCloudSttPrivacy": {
+    "description": "CodeWalk UI string — speechCloudSttPrivacy"
+  },
+  "speechCloudSttPrivacyDescription": "Recorded microphone audio is sent to the configured provider. API keys stay in secure storage on this device.",
+  "@speechCloudSttPrivacyDescription": {
+    "description": "CodeWalk UI string — speechCloudSttPrivacyDescription"
+  },
+  "speechApiKeyOptional": "Optional for custom endpoints.",
+  "@speechApiKeyOptional": {
+    "description": "CodeWalk UI string — speechApiKeyOptional"
+  },
+  "speechApiBatchHint": "{provider} uses batch transcription. Tap the microphone again to stop and transcribe.",
+  "@speechApiBatchHint": {
+    "description": "CodeWalk UI string — speechApiBatchHint",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "speechApiWebUnavailable": "API speech-to-text is unavailable on the web build.",
+  "@speechApiWebUnavailable": {
+    "description": "CodeWalk UI string — speechApiWebUnavailable"
+  },
+  "speechApiConfigInvalid": "Check the speech API endpoint and model. Remote endpoints must use HTTPS.",
+  "@speechApiConfigInvalid": {
+    "description": "CodeWalk UI string — speechApiConfigInvalid"
+  },
+  "speechApiRequestInvalid": "The speech endpoint or model was rejected.",
+  "@speechApiRequestInvalid": {
+    "description": "CodeWalk UI string — speechApiRequestInvalid"
+  },
+  "speechApiRateLimited": "The speech provider reported a quota or rate limit.",
+  "@speechApiRateLimited": {
+    "description": "CodeWalk UI string — speechApiRateLimited"
+  },
+  "speechApiUnavailable": "The speech provider is temporarily unavailable.",
+  "@speechApiUnavailable": {
+    "description": "CodeWalk UI string — speechApiUnavailable"
+  },
+  "speechApiNetwork": "The speech provider could not be reached.",
+  "@speechApiNetwork": {
+    "description": "CodeWalk UI string — speechApiNetwork"
+  },
+  "speechApiInvalidResponse": "The speech provider returned an invalid response.",
+  "@speechApiInvalidResponse": {
+    "description": "CodeWalk UI string — speechApiInvalidResponse"
+  },
+  "speechApiEmptyAudio": "No microphone audio was captured.",
+  "@speechApiEmptyAudio": {
+    "description": "CodeWalk UI string — speechApiEmptyAudio"
+  },
+  "speechApiEmptyTranscript": "The speech provider returned no transcription.",
+  "@speechApiEmptyTranscript": {
+    "description": "CodeWalk UI string — speechApiEmptyTranscript"
+  },
+  "speechApiCustomProvider": "Custom OpenAI-compatible",
+  "@speechApiCustomProvider": {
+    "description": "CodeWalk UI string — speechApiCustomProvider"
+  },
+  "speechApiMaxDuration": "API recordings stop automatically after 2 minutes.",
+  "@speechApiMaxDuration": {
+    "description": "CodeWalk UI string — speechApiMaxDuration"
+  },
+  "speechApiLanguageHint": "The active app language is sent as a transcription hint.",
+  "@speechApiLanguageHint": {
+    "description": "CodeWalk UI string — speechApiLanguageHint"
+  },
+  "speechSttApiKeyStorageUnavailable": "Secure speech API key storage is unavailable.",
+  "@speechSttApiKeyStorageUnavailable": {
+    "description": "CodeWalk UI string — speechSttApiKeyStorageUnavailable"
+  },
+  "speechSttApiKeyMissing": "Add a speech API key in Settings > Speech.",
+  "@speechSttApiKeyMissing": {
+    "description": "CodeWalk UI string — speechSttApiKeyMissing"
+  },
+  "speechSttApiKeyRejected": "The speech API key was rejected.",
+  "@speechSttApiKeyRejected": {
+    "description": "CodeWalk UI string — speechSttApiKeyRejected"
   }
 }

@@ -2203,5 +2203,27 @@
   "chatProviderErrorSendMessage": "メッセージの送信に失敗しました",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI、Groq、または OpenAI 互換のカスタムエンドポイント。",
+  "speechApiProvider": "音声文字起こしプロバイダー",
+  "speechCloudSttPrivacy": "クラウド音声文字起こしのプライバシー",
+  "speechCloudSttPrivacyDescription": "録音されたマイク音声は設定されたプロバイダーに送信されます。API キーはこのデバイスの安全なストレージに保管されます。",
+  "speechApiKeyOptional": "カスタムエンドポイントでは省略可能です。",
+  "speechApiBatchHint": "{provider} はバッチ文字起こしを使用します。もう一度マイクをタップすると停止して文字起こしします。",
+  "speechApiWebUnavailable": "API 音声文字起こしはウェブ版では利用できません。",
+  "speechApiConfigInvalid": "音声 API のエンドポイントとモデルを確認してください。リモートのエンドポイントは HTTPS を使用する必要があります。",
+  "speechApiRequestInvalid": "音声エンドポイントまたはモデルが拒否されました。",
+  "speechApiRateLimited": "音声プロバイダーがクォータまたはレート制限を報告しました。",
+  "speechApiUnavailable": "音声プロバイダーは一時的に利用できません。",
+  "speechApiNetwork": "音声プロバイダーに接続できませんでした。",
+  "speechApiInvalidResponse": "音声プロバイダーが無効な応答を返しました。",
+  "speechApiEmptyAudio": "マイク音声がキャプチャされませんでした。",
+  "speechApiEmptyTranscript": "音声プロバイダーが文字起こしを返しませんでした。",
+  "speechApiCustomProvider": "カスタム OpenAI 互換",
+  "speechApiMaxDuration": "API 録音は 2 分後に自動的に停止します。",
+  "speechApiLanguageHint": "アクティブなアプリの言語が文字起こしのヒントとして送信されます。",
+  "speechSttApiKeyStorageUnavailable": "音声 API キーの安全なストレージを利用できません。",
+  "speechSttApiKeyMissing": "設定 > 音声で音声 API キーを追加してください。",
+  "speechSttApiKeyRejected": "音声 API キーが拒否されました。"
 }

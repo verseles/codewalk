@@ -2203,5 +2203,27 @@
   "chatProviderErrorSendMessage": "发送消息失败",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI、Groq 或自定义 OpenAI 兼容端点。",
+  "speechApiProvider": "语音转文本提供商",
+  "speechCloudSttPrivacy": "云语音转文本隐私",
+  "speechCloudSttPrivacyDescription": "录制的麦克风音频会发送到已配置的提供商。API 密钥会安全存储在此设备上。",
+  "speechApiKeyOptional": "自定义端点可省略。",
+  "speechApiBatchHint": "{provider} 使用批量转录。再次点按麦克风以停止并转录。",
+  "speechApiWebUnavailable": "API 语音转文本在 Web 版本上不可用。",
+  "speechApiConfigInvalid": "请检查语音 API 端点和模型。远程端点必须使用 HTTPS。",
+  "speechApiRequestInvalid": "语音端点或模型被拒绝。",
+  "speechApiRateLimited": "语音提供商报告了配额或速率限制。",
+  "speechApiUnavailable": "语音提供商暂时不可用。",
+  "speechApiNetwork": "无法连接到语音提供商。",
+  "speechApiInvalidResponse": "语音提供商返回了无效响应。",
+  "speechApiEmptyAudio": "未捕获到麦克风音频。",
+  "speechApiEmptyTranscript": "语音提供商未返回转录内容。",
+  "speechApiCustomProvider": "自定义 OpenAI 兼容",
+  "speechApiMaxDuration": "API 录音将在 2 分钟后自动停止。",
+  "speechApiLanguageHint": "应用当前语言会作为转录提示发送。",
+  "speechSttApiKeyStorageUnavailable": "安全语音 API 密钥存储不可用。",
+  "speechSttApiKeyMissing": "请在设置 > 语音中添加语音 API 密钥。",
+  "speechSttApiKeyRejected": "语音 API 密钥被拒绝。"
 }

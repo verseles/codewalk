@@ -2007,9 +2007,22 @@ const englishTemplate = <String, String>{
   'shortcutsSetShortcutWidget': 'Set shortcut: {label}',
   'shortcutsTheseBindingsStored':
       'These bindings are stored in CodeWalk for the current app runtime and do not edit OpenCode `tui.json` keybinds.',
+  'speechApiBatchHint':
+      '{provider} uses batch transcription. Tap the microphone again to stop and transcribe.',
+  'speechApiConfigInvalid':
+      'Check the speech API endpoint and model. Remote endpoints must use HTTPS.',
+  'speechApiCustomProvider': 'Custom OpenAI-compatible',
+  'speechApiEmptyAudio': 'No microphone audio was captured.',
+  'speechApiEmptyTranscript': 'The speech provider returned no transcription.',
+  'speechApiEngine': 'API',
+  'speechApiEngineSubtitle':
+      'OpenAI, Groq, or a custom OpenAI-compatible endpoint.',
+  'speechApiInvalidResponse':
+      'The speech provider returned an invalid response.',
   'speechApiKey': 'API key',
   'speechApiKeyMissing':
       'Add an API key in Settings > Speech to use this TTS provider.',
+  'speechApiKeyOptional': 'Optional for custom endpoints.',
   'speechApiKeyRejected': 'The TTS API key was rejected by the provider.',
   'speechApiKeyRemoved': 'API key removed.',
   'speechApiKeySaved': 'API key saved securely on this device.',
@@ -2017,11 +2030,24 @@ const englishTemplate = <String, String>{
       'A key is saved. Enter a new value to replace it, or save an empty value to remove it.',
   'speechApiKeyStorageUnavailable':
       'Secure TTS API key storage is unavailable.',
+  'speechApiLanguageHint':
+      'The active app language is sent as a transcription hint.',
+  'speechApiMaxDuration': 'API recordings stop automatically after 2 minutes.',
+  'speechApiNetwork': 'The speech provider could not be reached.',
+  'speechApiProvider': 'Speech-to-text provider',
+  'speechApiRateLimited': 'The speech provider reported a quota or rate limit.',
+  'speechApiRequestInvalid': 'The speech endpoint or model was rejected.',
+  'speechApiUnavailable': 'The speech provider is temporarily unavailable.',
+  'speechApiWebUnavailable':
+      'API speech-to-text is unavailable on the web build.',
   'speechAutoStopSilence': 'Auto-stop silence timeout',
   'speechBaseUrl': 'Base URL',
   'speechBaseUrlExample': 'Example: {url}',
   'speechChooseRecognitionEngine':
       'Choose the recognition engine, silence timeout, and model options.',
+  'speechCloudSttPrivacy': 'Cloud speech-to-text privacy',
+  'speechCloudSttPrivacyDescription':
+      'Recorded microphone audio is sent to the configured provider. API keys stay in secure storage on this device.',
   'speechCloudTtsPrivacy': 'Cloud TTS privacy',
   'speechCloudTtsPrivacyDescription':
       'Cloud TTS sends the selected assistant message text to the configured provider. API keys are stored in secure storage on this device.',
@@ -2154,6 +2180,10 @@ const englishTemplate = <String, String>{
       'Unavailable on Android builds optimized for small APK size.',
   'speechSilenceSeconds': '{value} seconds',
   'speechSpeechText': 'Speech to text',
+  'speechSttApiKeyMissing': 'Add a speech API key in Settings > Speech.',
+  'speechSttApiKeyRejected': 'The speech API key was rejected.',
+  'speechSttApiKeyStorageUnavailable':
+      'Secure speech API key storage is unavailable.',
   'speechSystemDefaultLanguage': 'System default ({language})',
   'speechTestVoice': 'Test voice',
   'speechTextToSpeechProvider': 'Text-to-speech provider',
@@ -4256,20 +4286,44 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'تعيين اختصار: {label}',
     'shortcutsTheseBindingsStored':
         'يتم تخزين هذه الروابط في CodeWalk لوقت تشغيل التطبيق الحالي ولا تقوم بتعديل روابط مفاتيح `tui.json` لـ OpenCode.',
+    'speechApiBatchHint':
+        'يستخدم {provider} التحويل الدفعي. انقر على الميكروفون مرة أخرى للإيقاف والتحويل.',
+    'speechApiConfigInvalid':
+        'تحقق من نقطة النهاية والنموذج لـ API الكلام. يجب أن تستخدم نقاط النهاية البعيدة HTTPS.',
+    'speechApiCustomProvider': 'مخصص متوافق مع OpenAI',
+    'speechApiEmptyAudio': 'لم يتم التقاط أي صوت من الميكروفون.',
+    'speechApiEmptyTranscript': 'لم يُرجع موفر الكلام أي نص محول.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI أو Groq أو نقطة نهاية مخصصة متوافقة مع OpenAI.',
+    'speechApiInvalidResponse': 'أعاد موفر الكلام استجابة غير صالحة.',
     'speechApiKey': 'مفتاح API',
     'speechApiKeyMissing':
         'أضف مفتاح API في الإعدادات > الكلام لاستخدام مزود TTS هذا.',
+    'speechApiKeyOptional': 'اختياري لنقاط النهاية المخصصة.',
     'speechApiKeyRejected': 'رفض المزود مفتاح API الخاص بـ TTS.',
     'speechApiKeyRemoved': 'تمت إزالة مفتاح API.',
     'speechApiKeySaved': 'تم حفظ مفتاح API بأمان على هذا الجهاز.',
     'speechApiKeySavedHelper':
         'يوجد مفتاح محفوظ. أدخل قيمة جديدة لاستبداله، أو احفظ قيمة فارغة لإزالته.',
     'speechApiKeyStorageUnavailable': 'التخزين الآمن لمفتاح TTS API غير متاح.',
+    'speechApiLanguageHint': 'يُرسل لغة التطبيق النشطة كتلميح للتحويل.',
+    'speechApiMaxDuration': 'يتوقف التسجيل عبر API تلقائيًا بعد دقيقتين.',
+    'speechApiNetwork': 'تعذر الوصول إلى موفر الكلام.',
+    'speechApiProvider': 'موفر تحويل الكلام إلى نص',
+    'speechApiRateLimited': 'أبلغ موفر الكلام عن حصة أو حد معدل.',
+    'speechApiRequestInvalid': 'تم رفض نقطة نهاية الكلام أو النموذج.',
+    'speechApiUnavailable': 'موفر الكلام غير متاح مؤقتًا.',
+    'speechApiWebUnavailable':
+        'تحويل الكلام إلى نص عبر API غير متاح في إصدار الويب.',
     'speechAutoStopSilence': 'مهلة صمت الإيقاف التلقائي',
     'speechBaseUrl': 'العنوان الأساسي',
     'speechBaseUrlExample': 'مثال: {url}',
     'speechChooseRecognitionEngine':
         'اختر محرك التعرف، ومهلة الصمت، وخيارات النموذج.',
+    'speechCloudSttPrivacy': 'خصوصية تحويل الكلام إلى نص في السحابة',
+    'speechCloudSttPrivacyDescription':
+        'يُرسل الصوت المسجل من الميكروفون إلى الموفر المُعد. تبقى مفاتيح API في التخزين الآمن على هذا الجهاز.',
     'speechCloudTtsPrivacy': 'خصوصية TTS السحابي',
     'speechCloudTtsPrivacyDescription':
         'يرسل TTS السحابي نص رسالة المساعد المحددة إلى المزوّد المُهيأ. تُخزَّن مفاتيح API في تخزين آمن على هذا الجهاز.',
@@ -4396,6 +4450,10 @@ const translations = <String, Map<String, String>>{
         'غير متاح على إصدارات Android المحسّنة لحجم APK صغير.',
     'speechSilenceSeconds': '{value} ثانية',
     'speechSpeechText': 'تحويل الكلام إلى نص',
+    'speechSttApiKeyMissing': 'أضف مفتاح API للكلام في الإعدادات > الكلام.',
+    'speechSttApiKeyRejected': 'تم رفض مفتاح API الخاص بالكلام.',
+    'speechSttApiKeyStorageUnavailable':
+        'التخزين الآمن لمفتاح API الخاص بالكلام غير متاح.',
     'speechSystemDefaultLanguage': 'الافتراضي في النظام ({language})',
     'speechTestVoice': 'اختبار الصوت',
     'speechTextToSpeechProvider': 'مزوّد تحويل النص إلى كلام',
@@ -6596,20 +6654,49 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'শর্টকাট সেট করুন: {label}',
     'shortcutsTheseBindingsStored':
         'এই বাইন্ডিংগুলি বর্তমান অ্যাপ রানটাইমের জন্য CodeWalk-এ সংরক্ষিত থাকে এবং OpenCode `tui.json` কীবাইন্ড এডিট করে না।',
+    'speechApiBatchHint':
+        '{provider} ব্যাচ ট্রান্সক্রিপশন ব্যবহার করে। থামাতে ও ট্রান্সক্রিপ্ট করতে আবার মাইক্রোফোনে আলতো চাপুন।',
+    'speechApiConfigInvalid':
+        'স্পিচ API এন্ডপয়েন্ট এবং মডেল পরীক্ষা করুন। রিমোট এন্ডপয়েন্টে অবশ্যই HTTPS ব্যবহার করতে হবে।',
+    'speechApiCustomProvider': 'কাস্টম OpenAI-সামঞ্জস্যপূর্ণ',
+    'speechApiEmptyAudio': 'কোনো মাইক্রোফোন অডিও ধারণ করা হয়নি।',
+    'speechApiEmptyTranscript':
+        'স্পিচ প্রদানকারী কোনো ট্রান্সক্রিপশন ফিরিয়ে দেয়নি।',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq অথবা একটি কাস্টম OpenAI-সামঞ্জস্যপূর্ণ এন্ডপয়েন্ট।',
+    'speechApiInvalidResponse':
+        'স্পিচ প্রদানকারী একটি অবৈধ প্রতিক্রিয়া ফিরিয়েছে।',
     'speechApiKey': 'API কী',
     'speechApiKeyMissing':
         'এই TTS প্রদানকারী ব্যবহার করতে Settings > Speech-এ একটি API কী যোগ করুন।',
+    'speechApiKeyOptional': 'কাস্টম এন্ডপয়েন্টের জন্য ঐচ্ছিক।',
     'speechApiKeyRejected': 'TTS API কী প্রদানকারী দ্বারা প্রত্যাখ্যাত হয়েছে।',
     'speechApiKeyRemoved': 'API কী মুছে ফেলা হয়েছে।',
     'speechApiKeySaved': 'API কী এই ডিভাইসে নিরাপদে সংরক্ষণ করা হয়েছে।',
     'speechApiKeySavedHelper':
         'একটি কী সংরক্ষিত আছে। এটি প্রতিস্থাপন করতে একটি নতুন মান লিখুন, অথবা মুছে ফেলতে একটি খালি মান সংরক্ষণ করুন।',
     'speechApiKeyStorageUnavailable': 'নিরাপদ TTS API কী স্টোরেজ উপলব্ধ নেই।',
+    'speechApiLanguageHint':
+        'সক্রিয় অ্যাপ ভাষা ট্রান্সক্রিপশন ইঙ্গিত হিসেবে পাঠানো হয়।',
+    'speechApiMaxDuration':
+        'API রেকর্ডিং ২ মিনিট পরে স্বয়ংক্রিয়ভাবে বন্ধ হয়।',
+    'speechApiNetwork': 'স্পিচ প্রদানকারীর সাথে যোগাযোগ করা যায়নি।',
+    'speechApiProvider': 'স্পিচ-টু-টেক্সট প্রদানকারী',
+    'speechApiRateLimited':
+        'স্পিচ প্রদানকারী একটি কোটা বা রেট লিমিট জানিয়েছে।',
+    'speechApiRequestInvalid':
+        'স্পিচ এন্ডপয়েন্ট বা মডেল প্রত্যাখ্যান করা হয়েছে।',
+    'speechApiUnavailable': 'স্পিচ প্রদানকারী সাময়িকভাবে অনুপলব্ধ।',
+    'speechApiWebUnavailable': 'API স্পিচ-টু-টেক্সট ওয়েব বিল্ডে উপলব্ধ নয়।',
     'speechAutoStopSilence': 'অটো-স্টপ সাইলেন্স টাইমআউট',
     'speechBaseUrl': 'বেস URL',
     'speechBaseUrlExample': 'উদাহরণ: {url}',
     'speechChooseRecognitionEngine':
         'স্বীকৃতি ইঞ্জিন, নীরবতা টাইমআউট এবং মডেল বিকল্পগুলি চয়ন করুন৷',
+    'speechCloudSttPrivacy': 'ক্লাউড স্পিচ-টু-টেক্সট গোপনীয়তা',
+    'speechCloudSttPrivacyDescription':
+        'রেকর্ড করা মাইক্রোফোন অডিও কনফিগার করা প্রদানকারীর কাছে পাঠানো হয়। API কী এই ডিভাইসের নিরাপদ স্টোরেজে থাকে।',
     'speechCloudTtsPrivacy': 'ক্লাউড TTS গোপনীয়তা',
     'speechCloudTtsPrivacyDescription':
         'ক্লাউড TTS নির্বাচিত সহকারী বার্তার টেক্সট কনফিগার করা প্রদানকারীর কাছে পাঠায়। API কী এই ডিভাইসের নিরাপদ স্টোরেজে সংরক্ষিত থাকে।',
@@ -6743,6 +6830,10 @@ const translations = <String, Map<String, String>>{
         'ছোট APK আকারের জন্য অপ্টিমাইজ করা Android বিল্ডে উপলব্ধ নয়।',
     'speechSilenceSeconds': '{value} সেকেন্ড',
     'speechSpeechText': 'টেক্সট থেকে বক্তৃতা',
+    'speechSttApiKeyMissing': 'সেটিংস > স্পিচে একটি স্পিচ API কী যোগ করুন।',
+    'speechSttApiKeyRejected': 'স্পিচ API কী প্রত্যাখ্যান করা হয়েছে।',
+    'speechSttApiKeyStorageUnavailable':
+        'নিরাপদ স্পিচ API কী স্টোরেজ উপলব্ধ নয়।',
     'speechSystemDefaultLanguage': 'সিস্টেম ডিফল্ট ({language})',
     'speechTestVoice': 'ভয়েস পরীক্ষা করুন',
     'speechTextToSpeechProvider': 'টেক্সট-টু-স্পিচ প্রদানকারী',
@@ -9004,9 +9095,23 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'Tastenkombination festlegen: {label}',
     'shortcutsTheseBindingsStored':
         'Diese Tastenbelegungen sind in CodeWalk für die aktuelle App-Laufzeit gespeichert und bearbeiten keine OpenCode `tui.json`-Tastaturbelegungen.',
+    'speechApiBatchHint':
+        '{provider} verwendet Stapeltranskription. Tippen Sie erneut auf das Mikrofon, um zu stoppen und zu transkribieren.',
+    'speechApiConfigInvalid':
+        'Überprüfen Sie den Sprach-API-Endpunkt und das Modell. Remote-Endpunkte müssen HTTPS verwenden.',
+    'speechApiCustomProvider': 'Benutzerdefiniert, OpenAI-kompatibel',
+    'speechApiEmptyAudio': 'Es wurde kein Mikrofon-Audio erfasst.',
+    'speechApiEmptyTranscript':
+        'Der Sprachanbieter hat keine Transkription zurückgegeben.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq oder ein benutzerdefinierter, OpenAI-kompatibler Endpunkt.',
+    'speechApiInvalidResponse':
+        'Der Sprachanbieter hat eine ungültige Antwort zurückgegeben.',
     'speechApiKey': 'API-Schlüssel',
     'speechApiKeyMissing':
         'Fügen Sie unter Einstellungen > Sprache zu Text einen API-Schlüssel hinzu, um diesen TTS-Anbieter zu verwenden.',
+    'speechApiKeyOptional': 'Optional für benutzerdefinierte Endpunkte.',
     'speechApiKeyRejected':
         'Der TTS-API-Schlüssel wurde vom Anbieter abgelehnt.',
     'speechApiKeyRemoved': 'API-Schlüssel entfernt.',
@@ -9015,11 +9120,27 @@ const translations = <String, Map<String, String>>{
         'Ein Schlüssel ist gespeichert. Geben Sie einen neuen Wert ein, um ihn zu ersetzen, oder speichern Sie einen leeren Wert, um ihn zu entfernen.',
     'speechApiKeyStorageUnavailable':
         'Sichere TTS-API-Schlüssel-Speicherung ist nicht verfügbar.',
+    'speechApiLanguageHint':
+        'Die aktive App-Sprache wird als Transkriptionshinweis gesendet.',
+    'speechApiMaxDuration': 'API-Aufnahmen stoppen automatisch nach 2 Minuten.',
+    'speechApiNetwork': 'Der Sprachanbieter konnte nicht erreicht werden.',
+    'speechApiProvider': 'Sprach-zu-Text-Anbieter',
+    'speechApiRateLimited':
+        'Der Sprachanbieter hat ein Kontingent oder ein Ratenlimit gemeldet.',
+    'speechApiRequestInvalid':
+        'Der Sprach-Endpunkt oder das Modell wurde abgelehnt.',
+    'speechApiUnavailable':
+        'Der Sprachanbieter ist vorübergehend nicht verfügbar.',
+    'speechApiWebUnavailable':
+        'API-Spracherkennung ist in der Web-Version nicht verfügbar.',
     'speechAutoStopSilence': 'Automatischer Stopp bei Stille',
     'speechBaseUrl': 'Basis-URL',
     'speechBaseUrlExample': 'Beispiel: {url}',
     'speechChooseRecognitionEngine':
         'Wählen Sie die Erkennungs-Engine, das Stille-Timeout und die Modelloptionen.',
+    'speechCloudSttPrivacy': 'Datenschutz bei der Cloud-Spracherkennung',
+    'speechCloudSttPrivacyDescription':
+        'Aufgezeichnetes Mikrofon-Audio wird an den konfigurierten Anbieter gesendet. API-Schlüssel verbleiben im sicheren Speicher dieses Geräts.',
     'speechCloudTtsPrivacy': 'Cloud-TTS-Datenschutz',
     'speechCloudTtsPrivacyDescription':
         'Cloud-TTS sendet den Text der ausgewählten Assistentennachricht an den konfigurierten Anbieter. API-Schlüssel werden im sicheren Speicher dieses Geräts aufbewahrt.',
@@ -9158,6 +9279,11 @@ const translations = <String, Map<String, String>>{
         'Auf für kleine APK-Größe optimierten Android-Builds nicht verfügbar.',
     'speechSilenceSeconds': '{value} Sekunden',
     'speechSpeechText': 'Sprache zu Text',
+    'speechSttApiKeyMissing':
+        'Fügen Sie unter Einstellungen > Sprache einen Sprach-API-Schlüssel hinzu.',
+    'speechSttApiKeyRejected': 'Der Sprach-API-Schlüssel wurde abgelehnt.',
+    'speechSttApiKeyStorageUnavailable':
+        'Der sichere Speicher für den Sprach-API-Schlüssel ist nicht verfügbar.',
     'speechSystemDefaultLanguage': 'Systemstandard ({language})',
     'speechTestVoice': 'Stimme testen',
     'speechTextToSpeechProvider': 'Text-zu-Sprache-Anbieter',
@@ -11423,9 +11549,23 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'Establecer atajo: {label}',
     'shortcutsTheseBindingsStored':
         'Estas combinaciones de teclas se almacenan en CodeWalk para la ejecución actual de la aplicación y no editan los atajos de teclado `tui.json` de OpenCode.',
+    'speechApiBatchHint':
+        '{provider} usa transcripción por lotes. Toca el micrófono de nuevo para detener y transcribir.',
+    'speechApiConfigInvalid':
+        'Comprueba el endpoint y el modelo de la API de voz. Los endpoints remotos deben usar HTTPS.',
+    'speechApiCustomProvider': 'Personalizado compatible con OpenAI',
+    'speechApiEmptyAudio': 'No se capturó audio del micrófono.',
+    'speechApiEmptyTranscript':
+        'El proveedor de voz no devolvió ninguna transcripción.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq o un endpoint personalizado compatible con OpenAI.',
+    'speechApiInvalidResponse':
+        'El proveedor de voz devolvió una respuesta no válida.',
     'speechApiKey': 'Clave API',
     'speechApiKeyMissing':
         'Agregue una clave de API en Configuración > Speech para usar este proveedor de TTS.',
+    'speechApiKeyOptional': 'Opcional para endpoints personalizados.',
     'speechApiKeyRejected': 'El proveedor rechazó la clave de API de TTS.',
     'speechApiKeyRemoved': 'Clave API eliminada.',
     'speechApiKeySaved':
@@ -11434,12 +11574,28 @@ const translations = <String, Map<String, String>>{
         'Hay una clave guardada. Ingrese un valor nuevo para reemplazarla, o guarde un valor vacío para eliminarla.',
     'speechApiKeyStorageUnavailable':
         'El almacenamiento seguro de la clave de API de TTS no está disponible.',
+    'speechApiLanguageHint':
+        'El idioma activo de la aplicación se envía como sugerencia de transcripción.',
+    'speechApiMaxDuration':
+        'Las grabaciones de API se detienen automáticamente después de 2 minutos.',
+    'speechApiNetwork': 'No se pudo conectar con el proveedor de voz.',
+    'speechApiProvider': 'Proveedor de voz a texto',
+    'speechApiRateLimited':
+        'El proveedor de voz informó una cuota o un límite de tarifa.',
+    'speechApiRequestInvalid': 'El endpoint o el modelo de voz fue rechazado.',
+    'speechApiUnavailable':
+        'El proveedor de voz no está disponible temporalmente.',
+    'speechApiWebUnavailable':
+        'El reconocimiento de voz por API no está disponible en la versión web.',
     'speechAutoStopSilence':
         'Tiempo de espera de silencio para parada automática',
     'speechBaseUrl': 'URL base',
     'speechBaseUrlExample': 'Ejemplo: {url}',
     'speechChooseRecognitionEngine':
         'Elija el motor de reconocimiento, el tiempo de espera de silencio y las opciones de modelo.',
+    'speechCloudSttPrivacy': 'Privacidad del reconocimiento de voz en la nube',
+    'speechCloudSttPrivacyDescription':
+        'El audio del micrófono grabado se envía al proveedor configurado. Las claves de API se guardan en el almacenamiento seguro de este dispositivo.',
     'speechCloudTtsPrivacy': 'Privacidad de TTS en la nube',
     'speechCloudTtsPrivacyDescription':
         'El TTS en la nube envía el texto del mensaje del asistente seleccionado al proveedor configurado. Las claves API se almacenan en el almacenamiento seguro de este dispositivo.',
@@ -11577,6 +11733,10 @@ const translations = <String, Map<String, String>>{
         'No disponible en compilaciones de Android optimizadas para un tamaño de APK reducido.',
     'speechSilenceSeconds': '{value} segundos',
     'speechSpeechText': 'Voz a texto',
+    'speechSttApiKeyMissing': 'Añade una clave de API de voz en Ajustes > Voz.',
+    'speechSttApiKeyRejected': 'La clave de API de voz fue rechazada.',
+    'speechSttApiKeyStorageUnavailable':
+        'El almacenamiento seguro de la clave de API de voz no está disponible.',
     'speechSystemDefaultLanguage': 'Predeterminado del sistema ({language})',
     'speechTestVoice': 'Probar voz',
     'speechTextToSpeechProvider': 'Proveedor de texto a voz',
@@ -13868,9 +14028,23 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'Définir le raccourci : {label}',
     'shortcutsTheseBindingsStored':
         'Ces affectations sont stockées dans CodeWalk pour la durée d\'exécution actuelle de l\'application et ne modifient pas les raccourcis clavier `tui.json` d\'OpenCode.',
+    'speechApiBatchHint':
+        '{provider} utilise la transcription par lots. Touchez de nouveau le microphone pour arrêter et transcrire.',
+    'speechApiConfigInvalid':
+        'Vérifiez l’endpoint et le modèle de l’API vocale. Les endpoints distants doivent utiliser HTTPS.',
+    'speechApiCustomProvider': 'Personnalisé compatible OpenAI',
+    'speechApiEmptyAudio': 'Aucun audio du microphone n’a été capturé.',
+    'speechApiEmptyTranscript':
+        'Le fournisseur vocal n’a renvoyé aucune transcription.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq ou un endpoint personnalisé compatible avec OpenAI.',
+    'speechApiInvalidResponse':
+        'Le fournisseur vocal a renvoyé une réponse invalide.',
     'speechApiKey': 'Clé API',
     'speechApiKeyMissing':
         'Ajoutez une clé API dans Paramètres > Reconnaissance vocale pour utiliser ce fournisseur TTS.',
+    'speechApiKeyOptional': 'Facultatif pour les endpoints personnalisés.',
     'speechApiKeyRejected': 'La clé API TTS a été rejetée par le fournisseur.',
     'speechApiKeyRemoved': 'Clé API supprimée.',
     'speechApiKeySaved':
@@ -13879,12 +14053,29 @@ const translations = <String, Map<String, String>>{
         'Une clé est enregistrée. Saisissez une nouvelle valeur pour la remplacer, ou enregistrez une valeur vide pour la supprimer.',
     'speechApiKeyStorageUnavailable':
         'Le stockage sécurisé de la clé API TTS n\'est pas disponible.',
+    'speechApiLanguageHint':
+        'La langue active de l’application est envoyée comme indice de transcription.',
+    'speechApiMaxDuration':
+        'Les enregistrements API s’arrêtent automatiquement après 2 minutes.',
+    'speechApiNetwork': 'Impossible de joindre le fournisseur vocal.',
+    'speechApiProvider': 'Fournisseur de reconnaissance vocale',
+    'speechApiRateLimited':
+        'Le fournisseur vocal a signalé un quota ou une limite de débit.',
+    'speechApiRequestInvalid': 'L’endpoint ou le modèle vocal a été rejeté.',
+    'speechApiUnavailable':
+        'Le fournisseur vocal est temporairement indisponible.',
+    'speechApiWebUnavailable':
+        'La reconnaissance vocale par API est indisponible dans la version web.',
     'speechAutoStopSilence':
         'Délai d\'inactivité de silence pour arrêt automatique',
     'speechBaseUrl': 'URL de base',
     'speechBaseUrlExample': 'Exemple : {url}',
     'speechChooseRecognitionEngine':
         'Choisissez le moteur de reconnaissance, le délai d\'inactivité de silence et les options de modèle.',
+    'speechCloudSttPrivacy':
+        'Confidentialité de la reconnaissance vocale dans le cloud',
+    'speechCloudSttPrivacyDescription':
+        'L’audio enregistré par le microphone est envoyé au fournisseur configuré. Les clés API restent dans le stockage sécurisé de cet appareil.',
     'speechCloudTtsPrivacy': 'Confidentialité de la synthèse vocale cloud',
     'speechCloudTtsPrivacyDescription':
         'La synthèse vocale cloud envoie le texte du message de l\'assistant sélectionné au fournisseur configuré. Les clés API sont stockées dans le stockage sécurisé de cet appareil.',
@@ -14023,6 +14214,11 @@ const translations = <String, Map<String, String>>{
         'Indisponible sur les builds Android optimisés pour une taille d\'APK réduite.',
     'speechSilenceSeconds': '{value} secondes',
     'speechSpeechText': 'Reconnaissance vocale',
+    'speechSttApiKeyMissing':
+        'Ajoutez une clé API vocale dans Paramètres > Voix.',
+    'speechSttApiKeyRejected': 'La clé API vocale a été rejetée.',
+    'speechSttApiKeyStorageUnavailable':
+        'Le stockage sécurisé de la clé API vocale est indisponible.',
     'speechSystemDefaultLanguage': 'Par défaut du système ({language})',
     'speechTestVoice': 'Tester la voix',
     'speechTextToSpeechProvider': 'Fournisseur de synthèse vocale',
@@ -16226,9 +16422,21 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'शॉर्टकट सेट करें: {label}',
     'shortcutsTheseBindingsStored':
         'ये बाइंडिंग वर्तमान ऐप रनटाइम के लिए CodeWalk में संग्रहीत हैं और OpenCode `tui.json` की-बाइंड को संपादित नहीं करती हैं।',
+    'speechApiBatchHint':
+        '{provider} बैच ट्रांसक्रिप्शन का उपयोग करता है। रोकने और ट्रांसक्रिप्ट करने के लिए माइक्रोफ़ोन को फिर से टैप करें।',
+    'speechApiConfigInvalid':
+        'स्पीच API एंडपॉइंट और मॉडल जाँचें। रिमोट एंडपॉइंट को HTTPS का उपयोग करना चाहिए।',
+    'speechApiCustomProvider': 'कस्टम OpenAI-संगत',
+    'speechApiEmptyAudio': 'कोई माइक्रोफ़ोन ऑडियो कैप्चर नहीं हुआ।',
+    'speechApiEmptyTranscript':
+        'स्पीच प्रदाता ने कोई ट्रांसक्रिप्शन नहीं लौटाया।',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle': 'OpenAI, Groq या एक कस्टम OpenAI-संगत एंडपॉइंट।',
+    'speechApiInvalidResponse': 'स्पीच प्रदाता ने अमान्य प्रतिक्रिया लौटाई।',
     'speechApiKey': 'API कुंजी',
     'speechApiKeyMissing':
         'इस TTS प्रदाता का उपयोग करने के लिए सेटिंग्स > भाषण से पाठ में API कुंजी जोड़ें।',
+    'speechApiKeyOptional': 'कस्टम एंडपॉइंट के लिए वैकल्पिक।',
     'speechApiKeyRejected': 'TTS API कुंजी प्रदाता द्वारा अस्वीकार कर दी गई।',
     'speechApiKeyRemoved': 'API कुंजी हटाई गई।',
     'speechApiKeySaved': 'API कुंजी इस डिवाइस पर सुरक्षित रूप से सहेजी गई।',
@@ -16236,11 +16444,25 @@ const translations = <String, Map<String, String>>{
         'एक कुंजी सहेजी गई है। बदलने के लिए नया मान दर्ज करें, या हटाने के लिए खाली मान सहेजें।',
     'speechApiKeyStorageUnavailable':
         'सुरक्षित TTS API कुंजी संग्रहण उपलब्ध नहीं है।',
+    'speechApiLanguageHint':
+        'सक्रिय ऐप भाषा ट्रांसक्रिप्शन संकेत के रूप में भेजी जाती है।',
+    'speechApiMaxDuration':
+        'API रिकॉर्डिंग 2 मिनट के बाद स्वचालित रूप से रुक जाती है।',
+    'speechApiNetwork': 'स्पीच प्रदाता तक नहीं पहुंचा जा सका।',
+    'speechApiProvider': 'स्पीच-टू-टेक्स्ट प्रदाता',
+    'speechApiRateLimited': 'स्पीच प्रदाता ने कोटा या दर सीमा की सूचना दी।',
+    'speechApiRequestInvalid': 'स्पीच एंडपॉइंट या मॉडल अस्वीकृत कर दिया गया।',
+    'speechApiUnavailable': 'स्पीच प्रदाता अस्थायी रूप से अनुपलब्ध है।',
+    'speechApiWebUnavailable':
+        'API स्पीच-टू-टेक्स्ट वेब बिल्ड पर उपलब्ध नहीं है।',
     'speechAutoStopSilence': 'स्वचालित रूप से रोकने के लिए मौन टाइमआउट',
     'speechBaseUrl': 'बेस URL',
     'speechBaseUrlExample': 'उदाहरण: {url}',
     'speechChooseRecognitionEngine':
         'पहचान इंजन (recognition engine), मौन टाइमआउट और मॉडल विकल्प चुनें।',
+    'speechCloudSttPrivacy': 'क्लाउड स्पीच-टू-टेक्स्ट गोपनीयता',
+    'speechCloudSttPrivacyDescription':
+        'रिकॉर्ड किया गया माइक्रोफ़ोन ऑडियो कॉन्फ़िगर किए गए प्रदाता को भेजा जाता है। API कुंजियाँ इस डिवाइस की सुरक्षित स्टोरेज में रहती हैं।',
     'speechCloudTtsPrivacy': 'क्लाउड TTS गोपनीयता',
     'speechCloudTtsPrivacyDescription':
         'क्लाउड TTS चयनित असिस्टेंट संदेश टेक्स्ट कॉन्फ़िगर किए गए प्रदाता को भेजता है। API कुंजियाँ इस डिवाइस पर सुरक्षित संग्रहण में रखी जाती हैं।',
@@ -16373,6 +16595,10 @@ const translations = <String, Map<String, String>>{
         'छोटे APK आकार के लिए अनुकूलित Android बिल्ड पर अनुपलब्ध।',
     'speechSilenceSeconds': '{value} सेकंड',
     'speechSpeechText': 'भाषण से पाठ',
+    'speechSttApiKeyMissing': 'सेटिंग्स > स्पीच में स्पीच API कुंजी जोड़ें।',
+    'speechSttApiKeyRejected': 'स्पीच API कुंजी अस्वीकृत कर दी गई।',
+    'speechSttApiKeyStorageUnavailable':
+        'सुरक्षित स्पीच API कुंजी स्टोरेज उपलब्ध नहीं है।',
     'speechSystemDefaultLanguage': 'सिस्टम डिफ़ॉल्ट ({language})',
     'speechTestVoice': 'आवाज़ का परीक्षण करें',
     'speechTextToSpeechProvider': 'टेक्स्ट-टू-स्पीच प्रदाता',
@@ -18641,9 +18867,23 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'Imposta scorciatoia: {label}',
     'shortcutsTheseBindingsStored':
         'Queste associazioni sono memorizzate in CodeWalk per il runtime dell\'app corrente e non modificano le associazioni di tasti `tui.json` di OpenCode.',
+    'speechApiBatchHint':
+        '{provider} usa la trascrizione in batch. Tocca di nuovo il microfono per fermare e trascrivere.',
+    'speechApiConfigInvalid':
+        'Controlla endpoint e modello dell’API vocale. Gli endpoint remoti devono usare HTTPS.',
+    'speechApiCustomProvider': 'Personalizzato compatibile con OpenAI',
+    'speechApiEmptyAudio': 'Nessun audio del microfono catturato.',
+    'speechApiEmptyTranscript':
+        'Il fornitore vocale non ha restituito alcuna trascrizione.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq o un endpoint personalizzato compatibile con OpenAI.',
+    'speechApiInvalidResponse':
+        'Il fornitore vocale ha restituito una risposta non valida.',
     'speechApiKey': 'Chiave API',
     'speechApiKeyMissing':
         'Aggiungi una chiave API in Impostazioni > Trascrizione vocale per usare questo provider TTS.',
+    'speechApiKeyOptional': 'Facoltativo per endpoint personalizzati.',
     'speechApiKeyRejected': 'La chiave API TTS è stata rifiutata dal provider.',
     'speechApiKeyRemoved': 'Chiave API rimossa.',
     'speechApiKeySaved':
@@ -18652,11 +18892,28 @@ const translations = <String, Map<String, String>>{
         'Una chiave è salvata. Inserisci un nuovo valore per sostituirla oppure salva un valore vuoto per rimuoverla.',
     'speechApiKeyStorageUnavailable':
         'L\'archiviazione sicura della chiave API TTS non è disponibile.',
+    'speechApiLanguageHint':
+        'La lingua attiva dell’app viene inviata come suggerimento di trascrizione.',
+    'speechApiMaxDuration':
+        'Le registrazioni API si fermano automaticamente dopo 2 minuti.',
+    'speechApiNetwork': 'Impossibile raggiungere il fornitore vocale.',
+    'speechApiProvider': 'Fornitore di trascrizione vocale',
+    'speechApiRateLimited':
+        'Il fornitore vocale ha segnalato una quota o un limite di frequenza.',
+    'speechApiRequestInvalid':
+        'L’endpoint o il modello vocale è stato rifiutato.',
+    'speechApiUnavailable':
+        'Il fornitore vocale è temporaneamente non disponibile.',
+    'speechApiWebUnavailable':
+        'Il riconoscimento vocale tramite API non è disponibile nella versione web.',
     'speechAutoStopSilence': 'Timeout di silenzio con arresto automatico',
     'speechBaseUrl': 'URL di base',
     'speechBaseUrlExample': 'Esempio: {url}',
     'speechChooseRecognitionEngine':
         'Scegli il motore di riconoscimento vocale, il timeout di silenzio e le opzioni del modello.',
+    'speechCloudSttPrivacy': 'Privacy del riconoscimento vocale nel cloud',
+    'speechCloudSttPrivacyDescription':
+        'L’audio del microfono registrato viene inviato al fornitore configurato. Le chiavi API restano nella memoria protetta di questo dispositivo.',
     'speechCloudTtsPrivacy': 'Privacy del TTS cloud',
     'speechCloudTtsPrivacyDescription':
         'Il TTS cloud invia il testo del messaggio dell\'assistente selezionato al provider configurato. Le chiavi API sono archiviate nell\'archiviazione sicura di questo dispositivo.',
@@ -18794,6 +19051,11 @@ const translations = <String, Map<String, String>>{
         'Non disponibile sulle build Android ottimizzate per un APK di piccole dimensioni.',
     'speechSilenceSeconds': '{value} secondi',
     'speechSpeechText': 'Trascrizione vocale',
+    'speechSttApiKeyMissing':
+        'Aggiungi una chiave API vocale in Impostazioni > Voce.',
+    'speechSttApiKeyRejected': 'La chiave API vocale è stata rifiutata.',
+    'speechSttApiKeyStorageUnavailable':
+        'La memoria protetta della chiave API vocale non è disponibile.',
     'speechSystemDefaultLanguage': 'Predefinita di sistema ({language})',
     'speechTestVoice': 'Prova voce',
     'speechTextToSpeechProvider': 'Provider di sintesi vocale',
@@ -20761,17 +21023,39 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'ショートカットを設定: {label}',
     'shortcutsTheseBindingsStored':
         'これらのバインディングは現在のアプリ実行時のために CodeWalk に保存され、OpenCode の `tui.json` キーバインドは編集しません。',
+    'speechApiBatchHint':
+        '{provider} はバッチ文字起こしを使用します。もう一度マイクをタップすると停止して文字起こしします。',
+    'speechApiConfigInvalid':
+        '音声 API のエンドポイントとモデルを確認してください。リモートのエンドポイントは HTTPS を使用する必要があります。',
+    'speechApiCustomProvider': 'カスタム OpenAI 互換',
+    'speechApiEmptyAudio': 'マイク音声がキャプチャされませんでした。',
+    'speechApiEmptyTranscript': '音声プロバイダーが文字起こしを返しませんでした。',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle': 'OpenAI、Groq、または OpenAI 互換のカスタムエンドポイント。',
+    'speechApiInvalidResponse': '音声プロバイダーが無効な応答を返しました。',
     'speechApiKey': 'APIキー',
     'speechApiKeyMissing': 'この TTS プロバイダーを使用するには、[設定] > [音声] で APIキーを追加してください。',
+    'speechApiKeyOptional': 'カスタムエンドポイントでは省略可能です。',
     'speechApiKeyRejected': 'TTS の APIキーがプロバイダーに拒否されました。',
     'speechApiKeyRemoved': 'APIキーを削除しました。',
     'speechApiKeySaved': 'APIキーをこのデバイスに安全に保存しました。',
     'speechApiKeySavedHelper': 'キーは保存されています。新しい値を入力して置き換えるか、空の値を保存して削除します。',
     'speechApiKeyStorageUnavailable': 'セキュアな TTS APIキー保存を利用できません。',
+    'speechApiLanguageHint': 'アクティブなアプリの言語が文字起こしのヒントとして送信されます。',
+    'speechApiMaxDuration': 'API 録音は 2 分後に自動的に停止します。',
+    'speechApiNetwork': '音声プロバイダーに接続できませんでした。',
+    'speechApiProvider': '音声文字起こしプロバイダー',
+    'speechApiRateLimited': '音声プロバイダーがクォータまたはレート制限を報告しました。',
+    'speechApiRequestInvalid': '音声エンドポイントまたはモデルが拒否されました。',
+    'speechApiUnavailable': '音声プロバイダーは一時的に利用できません。',
+    'speechApiWebUnavailable': 'API 音声文字起こしはウェブ版では利用できません。',
     'speechAutoStopSilence': '自動停止の無音タイムアウト',
     'speechBaseUrl': 'ベースURL',
     'speechBaseUrlExample': '例: {url}',
     'speechChooseRecognitionEngine': '認識エンジン、無音タイムアウト、およびモデルのオプションを選択します。',
+    'speechCloudSttPrivacy': 'クラウド音声文字起こしのプライバシー',
+    'speechCloudSttPrivacyDescription':
+        '録音されたマイク音声は設定されたプロバイダーに送信されます。API キーはこのデバイスの安全なストレージに保管されます。',
     'speechCloudTtsPrivacy': 'クラウドTTSのプライバシー',
     'speechCloudTtsPrivacyDescription':
         'クラウドTTSは、選択したアシスタントメッセージのテキストを設定済みプロバイダーに送信します。APIキーはこのデバイスのセキュアストレージに保存されます。',
@@ -20885,6 +21169,9 @@ const translations = <String, Map<String, String>>{
     'speechSherpaUnavailableAndroid': 'APK サイズを最適化した Android ビルドでは利用できません。',
     'speechSilenceSeconds': '{value} 秒',
     'speechSpeechText': '音声文字変換',
+    'speechSttApiKeyMissing': '設定 > 音声で音声 API キーを追加してください。',
+    'speechSttApiKeyRejected': '音声 API キーが拒否されました。',
+    'speechSttApiKeyStorageUnavailable': '音声 API キーの安全なストレージを利用できません。',
     'speechSystemDefaultLanguage': 'システムデフォルト（{language}）',
     'speechTestVoice': '音声をテスト',
     'speechTextToSpeechProvider': '音声合成プロバイダー',
@@ -22830,17 +23117,38 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': '단축키 설정: {label}',
     'shortcutsTheseBindingsStored':
         '이 단축키 설정은 현재 앱 런타임의 CodeWalk에 저장되며, OpenCode `tui.json` 키 바인딩을 수정하지 않습니다.',
+    'speechApiBatchHint': '{provider}는 배치 변환을 사용합니다. 마이크를 다시 탭하여 중지하고 변환하세요.',
+    'speechApiConfigInvalid':
+        '음성 API 엔드포인트와 모델을 확인하세요. 원격 엔드포인트는 HTTPS를 사용해야 합니다.',
+    'speechApiCustomProvider': 'OpenAI 호환 사용자 지정',
+    'speechApiEmptyAudio': '마이크 오디오가 캡처되지 않았습니다.',
+    'speechApiEmptyTranscript': '음성 제공업체가 변환 결과를 반환하지 않았습니다.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle': 'OpenAI, Groq 또는 OpenAI 호환 사용자 지정 엔드포인트.',
+    'speechApiInvalidResponse': '음성 제공업체가 잘못된 응답을 반환했습니다.',
     'speechApiKey': 'API 키',
     'speechApiKeyMissing': '이 TTS 공급자를 사용하려면 설정 > 음성에서 API 키를 추가하세요.',
+    'speechApiKeyOptional': '사용자 지정 엔드포인트의 경우 선택사항입니다.',
     'speechApiKeyRejected': 'TTS API 키가 공급자에 의해 거부되었습니다.',
     'speechApiKeyRemoved': 'API 키가 제거되었습니다.',
     'speechApiKeySaved': 'API 키가 이 기기에 안전하게 저장되었습니다.',
     'speechApiKeySavedHelper': '저장된 키가 있습니다. 새 값을 입력하여 교체하거나 빈 값을 저장하여 제거하세요.',
     'speechApiKeyStorageUnavailable': '보안 TTS API 키 저장소를 사용할 수 없습니다.',
+    'speechApiLanguageHint': '활성 앱 언어가 변환 힌트로 전송됩니다.',
+    'speechApiMaxDuration': 'API 녹음은 2분 후 자동으로 중지됩니다.',
+    'speechApiNetwork': '음성 제공업체에 연결할 수 없습니다.',
+    'speechApiProvider': '음성 텍스트 변환 제공업체',
+    'speechApiRateLimited': '음성 제공업체가 할당량 또는 속도 제한을 보고했습니다.',
+    'speechApiRequestInvalid': '음성 엔드포인트 또는 모델이 거부되었습니다.',
+    'speechApiUnavailable': '음성 제공업체를 일시적으로 사용할 수 없습니다.',
+    'speechApiWebUnavailable': 'API 음성 텍스트 변환은 웹 빌드에서 사용할 수 없습니다.',
     'speechAutoStopSilence': '자동 정지 무음 시간 제한',
     'speechBaseUrl': '기본 URL',
     'speechBaseUrlExample': '예: {url}',
     'speechChooseRecognitionEngine': '음성 인식 엔진, 무음 시간 제한 및 모델 옵션을 선택하세요.',
+    'speechCloudSttPrivacy': '클라우드 음성 텍스트 변환 개인정보 보호',
+    'speechCloudSttPrivacyDescription':
+        '녹음된 마이크 오디오는 구성된 제공업체로 전송됩니다. API 키는 이 기기의 보안 저장소에 유지됩니다.',
     'speechCloudTtsPrivacy': '클라우드 TTS 개인정보 보호',
     'speechCloudTtsPrivacyDescription':
         '클라우드 TTS는 선택한 어시스턴트 메시지 텍스트를 설정된 제공자에게 전송합니다. API 키는 이 기기의 보안 저장소에 저장됩니다.',
@@ -22961,6 +23269,9 @@ const translations = <String, Map<String, String>>{
         '작은 APK 크기에 최적화된 Android 빌드에서는 사용할 수 없습니다.',
     'speechSilenceSeconds': '{value}초',
     'speechSpeechText': '음성 인식 (STT)',
+    'speechSttApiKeyMissing': '설정 > 음성에서 음성 API 키를 추가하세요.',
+    'speechSttApiKeyRejected': '음성 API 키가 거부되었습니다.',
+    'speechSttApiKeyStorageUnavailable': '보안 음성 API 키 저장소를 사용할 수 없습니다.',
     'speechSystemDefaultLanguage': '시스템 기본값 ({language})',
     'speechTestVoice': '음성 테스트',
     'speechTextToSpeechProvider': '텍스트 음성 변환 제공자',
@@ -25175,9 +25486,23 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'Definir atalho: {label}',
     'shortcutsTheseBindingsStored':
         'Esses atalhos são armazenados no CodeWalk para a execução atual do app e não editam os atalhos de teclado do `tui.json` do OpenCode.',
+    'speechApiBatchHint':
+        '{provider} usa transcrição em lote. Toque no microfone novamente para parar e transcrever.',
+    'speechApiConfigInvalid':
+        'Verifique o endpoint e o modelo da API de fala. Endpoints remotos devem usar HTTPS.',
+    'speechApiCustomProvider': 'Personalizado compatível com OpenAI',
+    'speechApiEmptyAudio': 'Nenhum áudio do microfone foi capturado.',
+    'speechApiEmptyTranscript':
+        'O provedor de fala não retornou nenhuma transcrição.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq ou um endpoint personalizado compatível com OpenAI.',
+    'speechApiInvalidResponse':
+        'O provedor de fala retornou uma resposta inválida.',
     'speechApiKey': 'Chave de API',
     'speechApiKeyMissing':
         'Adicione uma chave de API em Configurações > Fala para usar este provedor de TTS.',
+    'speechApiKeyOptional': 'Opcional para endpoints personalizados.',
     'speechApiKeyRejected':
         'A chave de API de TTS foi rejeitada pelo provedor.',
     'speechApiKeyRemoved': 'Chave de API removida.',
@@ -25186,11 +25511,27 @@ const translations = <String, Map<String, String>>{
         'Uma chave está salva. Digite um novo valor para substituí-la ou salve um valor vazio para removê-la.',
     'speechApiKeyStorageUnavailable':
         'O armazenamento seguro da chave de API TTS está indisponível.',
+    'speechApiLanguageHint':
+        'O idioma ativo do aplicativo é enviado como dica de transcrição.',
+    'speechApiMaxDuration':
+        'As gravações da API param automaticamente após 2 minutos.',
+    'speechApiNetwork': 'Não foi possível alcançar o provedor de fala.',
+    'speechApiProvider': 'Provedor de fala para texto',
+    'speechApiRateLimited':
+        'O provedor de fala informou uma cota ou limite de taxa.',
+    'speechApiRequestInvalid': 'O endpoint ou o modelo de fala foi rejeitado.',
+    'speechApiUnavailable':
+        'O provedor de fala está temporariamente indisponível.',
+    'speechApiWebUnavailable':
+        'O reconhecimento de fala por API não está disponível na versão web.',
     'speechAutoStopSilence': 'Tempo limite de silêncio para parada automática',
     'speechBaseUrl': 'URL base',
     'speechBaseUrlExample': 'Exemplo: {url}',
     'speechChooseRecognitionEngine':
         'Escolha o mecanismo de reconhecimento, o tempo limite de silêncio e as opções de modelo.',
+    'speechCloudSttPrivacy': 'Privacidade do reconhecimento de fala em nuvem',
+    'speechCloudSttPrivacyDescription':
+        'O áudio do microfone gravado é enviado ao provedor configurado. As chaves de API permanecem no armazenamento seguro deste dispositivo.',
     'speechCloudTtsPrivacy': 'Privacidade do TTS em nuvem',
     'speechCloudTtsPrivacyDescription':
         'O TTS em nuvem envia o texto da mensagem do assistente selecionada ao provedor configurado. As chaves de API são armazenadas em armazenamento seguro neste dispositivo.',
@@ -25329,6 +25670,11 @@ const translations = <String, Map<String, String>>{
         'Indisponível em builds do Android otimizadas para APK pequeno.',
     'speechSilenceSeconds': '{value} segundos',
     'speechSpeechText': 'Fala para texto',
+    'speechSttApiKeyMissing':
+        'Adicione uma chave de API de fala em Configurações > Fala.',
+    'speechSttApiKeyRejected': 'A chave de API de fala foi rejeitada.',
+    'speechSttApiKeyStorageUnavailable':
+        'O armazenamento seguro da chave de API de fala está indisponível.',
     'speechSystemDefaultLanguage': 'Padrão do sistema ({language})',
     'speechTestVoice': 'Testar voz',
     'speechTextToSpeechProvider': 'Provedor de conversão de texto em fala',
@@ -27571,9 +27917,22 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'Задать ярлык: {label}',
     'shortcutsTheseBindingsStored':
         'Эти привязки хранятся в CodeWalk для текущего времени выполнения приложения и не изменяют горячие клавиши в `tui.json` OpenCode.',
+    'speechApiBatchHint':
+        '{provider} использует пакетную транскрипцию. Нажмите на микрофон ещё раз, чтобы остановить и транскрибировать.',
+    'speechApiConfigInvalid':
+        'Проверьте конечную точку и модель API речи. Удалённые конечные точки должны использовать HTTPS.',
+    'speechApiCustomProvider': 'Пользовательская, совместимая с OpenAI',
+    'speechApiEmptyAudio': 'Звук с микрофона не записан.',
+    'speechApiEmptyTranscript': 'Поставщик речи не вернул транскрипцию.',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI, Groq или пользовательская конечная точка, совместимая с OpenAI.',
+    'speechApiInvalidResponse': 'Поставщик речи вернул недопустимый ответ.',
     'speechApiKey': 'API-ключ',
     'speechApiKeyMissing':
         'Добавьте API-ключ в Настройки > Речь, чтобы использовать этого TTS-провайдера.',
+    'speechApiKeyOptional':
+        'Необязательно для пользовательских конечных точек.',
     'speechApiKeyRejected': 'Провайдер отклонил API-ключ TTS.',
     'speechApiKeyRemoved': 'API-ключ удален.',
     'speechApiKeySaved':
@@ -27582,11 +27941,26 @@ const translations = <String, Map<String, String>>{
         'Ключ сохранен. Введите новое значение, чтобы заменить его, или оставьте пустым, чтобы удалить.',
     'speechApiKeyStorageUnavailable':
         'Безопасное хранение ключа API TTS недоступно.',
+    'speechApiLanguageHint':
+        'Активный язык приложения отправляется как подсказка для транскрипции.',
+    'speechApiMaxDuration':
+        'API-записи автоматически останавливаются через 2 минуты.',
+    'speechApiNetwork': 'Не удалось связаться с поставщиком речи.',
+    'speechApiProvider': 'Поставщик преобразования речи в текст',
+    'speechApiRateLimited':
+        'Поставщик речи сообщил о превышении квоты или лимита запросов.',
+    'speechApiRequestInvalid': 'Конечная точка или модель речи была отклонена.',
+    'speechApiUnavailable': 'Поставщик речи временно недоступен.',
+    'speechApiWebUnavailable':
+        'Распознавание речи через API недоступно в веб-версии.',
     'speechAutoStopSilence': 'Автоостановка при тишине',
     'speechBaseUrl': 'Базовый URL',
     'speechBaseUrlExample': 'Пример: {url}',
     'speechChooseRecognitionEngine':
         'Выберите движок распознавания, таймаут тишины и параметры модели.',
+    'speechCloudSttPrivacy': 'Конфиденциальность облачного распознавания речи',
+    'speechCloudSttPrivacyDescription':
+        'Записанный звук с микрофона отправляется настроенному поставщику. Ключи API хранятся в защищённом хранилище этого устройства.',
     'speechCloudTtsPrivacy': 'Конфиденциальность облачного TTS',
     'speechCloudTtsPrivacyDescription':
         'Облачный TTS отправляет текст выбранного сообщения ассистента настроенному провайдеру. API-ключи хранятся в защищенном хранилище на этом устройстве.',
@@ -27721,6 +28095,10 @@ const translations = <String, Map<String, String>>{
         'Недоступно в сборках Android, оптимизированных под малый размер APK.',
     'speechSilenceSeconds': '{value} сек.',
     'speechSpeechText': 'Преобразование речи в текст',
+    'speechSttApiKeyMissing': 'Добавьте ключ API речи в Настройки > Речь.',
+    'speechSttApiKeyRejected': 'Ключ API речи был отклонён.',
+    'speechSttApiKeyStorageUnavailable':
+        'Защищённое хранилище ключей API речи недоступно.',
     'speechSystemDefaultLanguage': 'Системный ({language})',
     'speechTestVoice': 'Проверить голос',
     'speechTextToSpeechProvider': 'Провайдер синтеза речи',
@@ -29911,9 +30289,22 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': 'شارٹ کٹ سیٹ کریں: {label}',
     'shortcutsTheseBindingsStored':
         'یہ بائنڈنگز موجودہ ایپ رن ٹائم کے لیے CodeWalk میں محفوظ ہیں اور OpenCode `tui.json` کی بائنڈز میں ترمیم نہیں کرتی ہیں۔',
+    'speechApiBatchHint':
+        '{provider} بیچ ٹرانسکرپشن استعمال کرتا ہے۔ روکنے اور ٹرانسکرائب کرنے کے لیے مائیکروفون کو دوبارہ تھپتھپائیں۔',
+    'speechApiConfigInvalid':
+        'اسپیچ API اینڈ پوائنٹ اور ماڈل چیک کریں۔ ریموٹ اینڈ پوائنٹس کو HTTPS استعمال کرنا ضروری ہے۔',
+    'speechApiCustomProvider': 'حسب ضرورت OpenAI-مطابق',
+    'speechApiEmptyAudio': 'کوئی مائیکروفون آڈیو حاصل نہیں ہوا۔',
+    'speechApiEmptyTranscript':
+        'اسپیچ فراہم کنندہ نے کوئی ٹرانسکرپشن واپس نہیں دی۔',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle':
+        'OpenAI، Groq یا ایک حسب ضرورت OpenAI-مطابق اینڈ پوائنٹ۔',
+    'speechApiInvalidResponse': 'اسپیچ فراہم کنندہ نے ایک غلط جواب واپس کیا۔',
     'speechApiKey': 'API کلید',
     'speechApiKeyMissing':
         'اس TTS فراہم کنندہ کو استعمال کرنے کے لیے ترتیبات > اسپیچ میں ایک API کلید شامل کریں۔',
+    'speechApiKeyOptional': 'حسب ضرورت اینڈ پوائنٹس کے لیے اختیاری۔',
     'speechApiKeyRejected': 'TTS API کلید فراہم کنندہ نے مسترد کر دی۔',
     'speechApiKeyRemoved': 'API کلید ہٹا دی گئی۔',
     'speechApiKeySaved': 'API کلید اس ڈیوائس پر محفوظ طریقے سے محفوظ ہو گئی۔',
@@ -29921,11 +30312,24 @@ const translations = <String, Map<String, String>>{
         'ایک کلید محفوظ ہے۔ اسے تبدیل کرنے کے لیے نئی قدر درج کریں، یا ہٹانے کے لیے خالی قدر محفوظ کریں۔',
     'speechApiKeyStorageUnavailable':
         'TTS API کلید کی محفوظ اسٹوریج دستیاب نہیں ہے۔',
+    'speechApiLanguageHint':
+        'فعال ایپ زبان ٹرانسکرپشن اشارے کے طور پر بھیجی جاتی ہے۔',
+    'speechApiMaxDuration': 'API ریکارڈنگ 2 منٹ کے بعد خود بخود رک جاتی ہے۔',
+    'speechApiNetwork': 'اسپیچ فراہم کنندہ سے رابطہ نہیں ہو سکا۔',
+    'speechApiProvider': 'اسپیچ ٹو ٹیکسٹ فراہم کنندہ',
+    'speechApiRateLimited':
+        'اسپیچ فراہم کنندہ نے کوٹہ یا شرح کی حد کی اطلاع دی۔',
+    'speechApiRequestInvalid': 'اسپیچ اینڈ پوائنٹ یا ماڈل مسترد کر دیا گیا۔',
+    'speechApiUnavailable': 'اسپیچ فراہم کنندہ عارضی طور پر دستیاب نہیں ہے۔',
+    'speechApiWebUnavailable': 'API اسپیچ ٹو ٹیکسٹ ویب بلڈ پر دستیاب نہیں ہے۔',
     'speechAutoStopSilence': 'خود بخود خاموشی کا ٹائم آؤٹ',
     'speechBaseUrl': 'بیس URL',
     'speechBaseUrlExample': 'مثال: {url}',
     'speechChooseRecognitionEngine':
         'شناختی انجن، خاموشی کا ٹائم آؤٹ، اور ماڈل کے اختیارات کا انتخاب کریں۔',
+    'speechCloudSttPrivacy': 'کلاؤڈ اسپیچ ٹو ٹیکسٹ رازداری',
+    'speechCloudSttPrivacyDescription':
+        'ریکارڈ شدہ مائیکروفون آڈیو کنفیگر شدہ فراہم کنندہ کو بھیجا جاتا ہے۔ API کیز اس ڈیوائس کے محفوظ اسٹوریج میں رہتی ہیں۔',
     'speechCloudTtsPrivacy': 'کلاؤڈ TTS پرائیویسی',
     'speechCloudTtsPrivacyDescription':
         'کلاؤڈ TTS منتخب معاون پیغام کا متن کنفیگر شدہ فراہم کنندہ کو بھیجتا ہے۔ API کلیدیں اس ڈیوائس پر محفوظ اسٹوریج میں رکھی جاتی ہیں۔',
@@ -30057,6 +30461,10 @@ const translations = <String, Map<String, String>>{
         'چھوٹے APK سائز کے لیے بہتر کردہ اینڈرائیڈ بلڈز پر دستیاب نہیں۔',
     'speechSilenceSeconds': '{value} سیکنڈ',
     'speechSpeechText': 'متن سے تقریر',
+    'speechSttApiKeyMissing': 'سیٹنگز > اسپیچ میں اسپیچ API کلید شامل کریں۔',
+    'speechSttApiKeyRejected': 'اسپیچ API کلید مسترد کر دی گئی۔',
+    'speechSttApiKeyStorageUnavailable':
+        'محفوظ اسپیچ API کلید اسٹوریج دستیاب نہیں ہے۔',
     'speechSystemDefaultLanguage': 'سسٹم ڈیفالٹ ({language})',
     'speechTestVoice': 'آواز ٹیسٹ کریں',
     'speechTextToSpeechProvider': 'ٹیکسٹ ٹو اسپیچ فراہم کنندہ',
@@ -31908,17 +32316,36 @@ const translations = <String, Map<String, String>>{
     'shortcutsSetShortcutWidget': '设置快捷键: {label}',
     'shortcutsTheseBindingsStored':
         '这些绑定存储在 CodeWalk 中用于当前应用运行时，不会修改 OpenCode `tui.json` 按键绑定。',
+    'speechApiBatchHint': '{provider} 使用批量转录。再次点按麦克风以停止并转录。',
+    'speechApiConfigInvalid': '请检查语音 API 端点和模型。远程端点必须使用 HTTPS。',
+    'speechApiCustomProvider': '自定义 OpenAI 兼容',
+    'speechApiEmptyAudio': '未捕获到麦克风音频。',
+    'speechApiEmptyTranscript': '语音提供商未返回转录内容。',
+    'speechApiEngine': 'API',
+    'speechApiEngineSubtitle': 'OpenAI、Groq 或自定义 OpenAI 兼容端点。',
+    'speechApiInvalidResponse': '语音提供商返回了无效响应。',
     'speechApiKey': 'API 密钥',
     'speechApiKeyMissing': '请在 设置 > 语音 中添加 API 密钥以使用此 TTS 提供商。',
+    'speechApiKeyOptional': '自定义端点可省略。',
     'speechApiKeyRejected': 'TTS API 密钥被提供商拒绝。',
     'speechApiKeyRemoved': 'API 密钥已移除。',
     'speechApiKeySaved': 'API 密钥已安全保存到此设备。',
     'speechApiKeySavedHelper': '已保存密钥。输入新值以替换，或保存空值以移除。',
     'speechApiKeyStorageUnavailable': '安全存储 TTS API 密钥的功能不可用。',
+    'speechApiLanguageHint': '应用当前语言会作为转录提示发送。',
+    'speechApiMaxDuration': 'API 录音将在 2 分钟后自动停止。',
+    'speechApiNetwork': '无法连接到语音提供商。',
+    'speechApiProvider': '语音转文本提供商',
+    'speechApiRateLimited': '语音提供商报告了配额或速率限制。',
+    'speechApiRequestInvalid': '语音端点或模型被拒绝。',
+    'speechApiUnavailable': '语音提供商暂时不可用。',
+    'speechApiWebUnavailable': 'API 语音转文本在 Web 版本上不可用。',
     'speechAutoStopSilence': '自动停止静音超时',
     'speechBaseUrl': '基础 URL',
     'speechBaseUrlExample': '示例：{url}',
     'speechChooseRecognitionEngine': '选择识别引擎、静音超时和模型选项。',
+    'speechCloudSttPrivacy': '云语音转文本隐私',
+    'speechCloudSttPrivacyDescription': '录制的麦克风音频会发送到已配置的提供商。API 密钥会安全存储在此设备上。',
     'speechCloudTtsPrivacy': '云端 TTS 隐私',
     'speechCloudTtsPrivacyDescription':
         '云端 TTS 会将选定的助手消息文本发送到配置的提供商。API 密钥存储在此设备的安全存储中。',
@@ -32020,6 +32447,9 @@ const translations = <String, Map<String, String>>{
     'speechSherpaUnavailableAndroid': '在针对小 APK 体积优化的 Android 构建中不可用。',
     'speechSilenceSeconds': '{value} 秒',
     'speechSpeechText': '语音转文本',
+    'speechSttApiKeyMissing': '请在设置 > 语音中添加语音 API 密钥。',
+    'speechSttApiKeyRejected': '语音 API 密钥被拒绝。',
+    'speechSttApiKeyStorageUnavailable': '安全语音 API 密钥存储不可用。',
     'speechSystemDefaultLanguage': '系统默认（{language}）',
     'speechTestVoice': '测试语音',
     'speechTextToSpeechProvider': '文字转语音提供商',

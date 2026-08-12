@@ -6171,4 +6171,73 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => '发送消息失败';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle => 'OpenAI、Groq 或自定义 OpenAI 兼容端点。';
+
+  @override
+  String get speechApiProvider => '语音转文本提供商';
+
+  @override
+  String get speechCloudSttPrivacy => '云语音转文本隐私';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      '录制的麦克风音频会发送到已配置的提供商。API 密钥会安全存储在此设备上。';
+
+  @override
+  String get speechApiKeyOptional => '自定义端点可省略。';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider 使用批量转录。再次点按麦克风以停止并转录。';
+  }
+
+  @override
+  String get speechApiWebUnavailable => 'API 语音转文本在 Web 版本上不可用。';
+
+  @override
+  String get speechApiConfigInvalid => '请检查语音 API 端点和模型。远程端点必须使用 HTTPS。';
+
+  @override
+  String get speechApiRequestInvalid => '语音端点或模型被拒绝。';
+
+  @override
+  String get speechApiRateLimited => '语音提供商报告了配额或速率限制。';
+
+  @override
+  String get speechApiUnavailable => '语音提供商暂时不可用。';
+
+  @override
+  String get speechApiNetwork => '无法连接到语音提供商。';
+
+  @override
+  String get speechApiInvalidResponse => '语音提供商返回了无效响应。';
+
+  @override
+  String get speechApiEmptyAudio => '未捕获到麦克风音频。';
+
+  @override
+  String get speechApiEmptyTranscript => '语音提供商未返回转录内容。';
+
+  @override
+  String get speechApiCustomProvider => '自定义 OpenAI 兼容';
+
+  @override
+  String get speechApiMaxDuration => 'API 录音将在 2 分钟后自动停止。';
+
+  @override
+  String get speechApiLanguageHint => '应用当前语言会作为转录提示发送。';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable => '安全语音 API 密钥存储不可用。';
+
+  @override
+  String get speechSttApiKeyMissing => '请在设置 > 语音中添加语音 API 密钥。';
+
+  @override
+  String get speechSttApiKeyRejected => '语音 API 密钥被拒绝。';
 }

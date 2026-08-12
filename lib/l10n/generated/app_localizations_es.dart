@@ -6682,4 +6682,86 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'No se pudo enviar el mensaje';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq o un endpoint personalizado compatible con OpenAI.';
+
+  @override
+  String get speechApiProvider => 'Proveedor de voz a texto';
+
+  @override
+  String get speechCloudSttPrivacy =>
+      'Privacidad del reconocimiento de voz en la nube';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'El audio del micrófono grabado se envía al proveedor configurado. Las claves de API se guardan en el almacenamiento seguro de este dispositivo.';
+
+  @override
+  String get speechApiKeyOptional => 'Opcional para endpoints personalizados.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider usa transcripción por lotes. Toca el micrófono de nuevo para detener y transcribir.';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'El reconocimiento de voz por API no está disponible en la versión web.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'Comprueba el endpoint y el modelo de la API de voz. Los endpoints remotos deben usar HTTPS.';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'El endpoint o el modelo de voz fue rechazado.';
+
+  @override
+  String get speechApiRateLimited =>
+      'El proveedor de voz informó una cuota o un límite de tarifa.';
+
+  @override
+  String get speechApiUnavailable =>
+      'El proveedor de voz no está disponible temporalmente.';
+
+  @override
+  String get speechApiNetwork => 'No se pudo conectar con el proveedor de voz.';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'El proveedor de voz devolvió una respuesta no válida.';
+
+  @override
+  String get speechApiEmptyAudio => 'No se capturó audio del micrófono.';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'El proveedor de voz no devolvió ninguna transcripción.';
+
+  @override
+  String get speechApiCustomProvider => 'Personalizado compatible con OpenAI';
+
+  @override
+  String get speechApiMaxDuration =>
+      'Las grabaciones de API se detienen automáticamente después de 2 minutos.';
+
+  @override
+  String get speechApiLanguageHint =>
+      'El idioma activo de la aplicación se envía como sugerencia de transcripción.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'El almacenamiento seguro de la clave de API de voz no está disponible.';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'Añade una clave de API de voz en Ajustes > Voz.';
+
+  @override
+  String get speechSttApiKeyRejected => 'La clave de API de voz fue rechazada.';
 }

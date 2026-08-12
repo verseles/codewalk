@@ -60,6 +60,10 @@ class SpeechEnginePlatformSupport {
         defaultTargetPlatform == TargetPlatform.windows;
   }
 
+  // Cloud API keys must not be exposed in browser builds. Native mobile and
+  // desktop apps can call a configured OpenAI-compatible endpoint directly.
+  static bool get isApiSupported => !kIsWeb;
+
   // True when at least one on-device engine (Sherpa/Moonshine/Parakeet/
   // SenseVoice) is supported. Used to decide whether to show the on-device
   // STT disabled info card on Windows.

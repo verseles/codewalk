@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/auth/stt_api_key_storage.dart';
 import '../../../../core/auth/tts_api_key_storage.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/injection_container.dart' as di;
@@ -83,6 +84,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   bool _hasOpenAiCompatibleApiKey = false;
   String? _readAloudApiKeyStatus;
   int _readAloudApiKeyGeneration = 0;
+  final TextEditingController _speechApiKeyController = TextEditingController();
+  bool _loadingSpeechApiKey = false;
+  bool _hasSpeechApiKey = false;
+  String? _speechApiKeyStatus;
+  int _speechApiKeyGeneration = 0;
   Future<List<Map<String, String>>>? _edgeReadAloudVoicesFuture;
 
   bool get _isLinux {
@@ -127,12 +133,67 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       unawaited(_loadSenseVoiceModelCatalog());
     }
     unawaited(_loadReadAloudApiKeyState());
+    unawaited(_loadSpeechApiKeyState());
   }
 
   @override
   void dispose() {
     _readAloudApiKeyController.dispose();
+    _speechApiKeyController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSpeechApiKeyState() async {
+    if (!di.sl.isRegistered<SttApiKeyStorage>()) return;
+    final provider = context.read<SettingsProvider>().speechApiProvider;
+    final generation = ++_speechApiKeyGeneration;
+    setState(() {
+      _loadingSpeechApiKey = true;
+      _speechApiKeyStatus = null;
+    });
+    try {
+      final key = await di.sl<SttApiKeyStorage>().read(provider);
+      if (!mounted || generation != _speechApiKeyGeneration) return;
+      setState(() {
+        _hasSpeechApiKey = key != null;
+        _loadingSpeechApiKey = false;
+      });
+    } catch (_) {
+      if (!mounted || generation != _speechApiKeyGeneration) return;
+      setState(() {
+        _loadingSpeechApiKey = false;
+        _speechApiKeyStatus = context.l10n.speechSttApiKeyStorageUnavailable;
+      });
+    }
+  }
+
+  Future<void> _saveSpeechApiKey() async {
+    if (!di.sl.isRegistered<SttApiKeyStorage>()) return;
+    final provider = context.read<SettingsProvider>().speechApiProvider;
+    final value = _speechApiKeyController.text;
+    final generation = ++_speechApiKeyGeneration;
+    setState(() {
+      _loadingSpeechApiKey = true;
+      _speechApiKeyStatus = null;
+    });
+    try {
+      await di.sl<SttApiKeyStorage>().write(provider, value);
+      _speechApiKeyController.clear();
+      if (!mounted || generation != _speechApiKeyGeneration) return;
+      setState(() {
+        _hasSpeechApiKey = value.trim().isNotEmpty;
+        _loadingSpeechApiKey = false;
+        _speechApiKeyStatus = value.trim().isEmpty
+            ? context.l10n.speechApiKeyRemoved
+            : context.l10n.speechApiKeySaved;
+      });
+    } catch (_) {
+      if (!mounted || generation != _speechApiKeyGeneration) return;
+      setState(() {
+        _loadingSpeechApiKey = false;
+        _speechApiKeyStatus = context.l10n.speechSttApiKeyStorageUnavailable;
+      });
+    }
   }
 
   Future<void> _loadReadAloudApiKeyState() async {
@@ -289,6 +350,12 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               const SizedBox(height: 8),
               _buildSenseVoiceModelCard(settingsProvider),
             ],
+            if (selectedEngine == SpeechToTextEngine.api) ...[
+              const SizedBox(height: 20),
+              SettingsGroupHeader(title: context.l10n.speechApiProvider),
+              const SizedBox(height: 8),
+              _buildSpeechApiCard(settingsProvider),
+            ],
             const SizedBox(height: 20),
             SettingsGroupHeader(title: context.l10n.settingsGroupReadAloud),
             const SizedBox(height: 8),
@@ -306,6 +373,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final parakeetEnabled = _supportsParakeet;
     final senseVoiceEnabled = _supportsSenseVoice;
     final nativeEnabled = SpeechEnginePlatformSupport.isNativeSupported;
+    final apiEnabled = SpeechEnginePlatformSupport.isApiSupported;
     final nativeUnavailableHint = switch (defaultTargetPlatform) {
       TargetPlatform.windows => context.l10n.speechNativeDisabledWindows,
       TargetPlatform.linux => context.l10n.speechNativeUnavailableLinux,
@@ -525,8 +593,158 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                           : senseVoiceUnavailableHint,
                     ),
                   ),
+                  const Divider(height: 1),
+                  RadioListTile<SpeechToTextEngine>(
+                    key: const ValueKey('speech-api-engine-tile'),
+                    contentPadding: EdgeInsets.zero,
+                    value: SpeechToTextEngine.api,
+                    enabled: apiEnabled,
+                    title: Text(context.l10n.speechApiEngine),
+                    subtitle: Text(
+                      apiEnabled
+                          ? context.l10n.speechApiEngineSubtitle
+                          : context.l10n.speechNotAvailableOnPlatform,
+                    ),
+                  ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpeechApiCard(SettingsProvider settingsProvider) {
+    final provider = settingsProvider.speechApiProvider;
+    final providerLabel = switch (provider) {
+      SpeechApiProvider.openAi => 'OpenAI',
+      SpeechApiProvider.groq => 'Groq',
+      SpeechApiProvider.custom => context.l10n.speechApiCustomProvider,
+    };
+    return Card(
+      key: const ValueKey('speech-api-settings-card'),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Symbols.cloud_upload),
+              title: Text(context.l10n.speechCloudSttPrivacy),
+              subtitle: Text(context.l10n.speechCloudSttPrivacyDescription),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<SpeechApiProvider>(
+              key: const ValueKey('speech-api-provider-field'),
+              initialValue: provider,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechApiProvider,
+              ),
+              items: <DropdownMenuItem<SpeechApiProvider>>[
+                const DropdownMenuItem(
+                  value: SpeechApiProvider.openAi,
+                  child: Text('OpenAI'),
+                ),
+                const DropdownMenuItem(
+                  value: SpeechApiProvider.groq,
+                  child: Text('Groq'),
+                ),
+                DropdownMenuItem(
+                  value: SpeechApiProvider.custom,
+                  child: Text(context.l10n.speechApiCustomProvider),
+                ),
+              ],
+              onChanged: (value) async {
+                if (value == null) return;
+                _speechApiKeyController.clear();
+                await settingsProvider.setSpeechApiProvider(value);
+                if (mounted) unawaited(_loadSpeechApiKeyState());
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: ValueKey(
+                'speech-api-base-url-${speechApiProviderKey(provider)}',
+              ),
+              initialValue: settingsProvider.speechApiBaseUrl,
+              enabled: provider == SpeechApiProvider.custom,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechBaseUrl,
+                helperText: context.l10n.speechBaseUrlExample(
+                  defaultSpeechApiBaseUrl(provider),
+                ),
+              ),
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              onChanged: (value) =>
+                  unawaited(settingsProvider.setSpeechApiBaseUrl(value)),
+              onFieldSubmitted: settingsProvider.setSpeechApiBaseUrl,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              key: ValueKey(
+                'speech-api-model-${speechApiProviderKey(provider)}',
+              ),
+              initialValue: settingsProvider.speechApiModel,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechModel,
+                helperText: context.l10n.speechModelDefaultHelper(
+                  defaultSpeechApiModel(provider),
+                ),
+              ),
+              autocorrect: false,
+              onChanged: (value) =>
+                  unawaited(settingsProvider.setSpeechApiModel(value)),
+              onFieldSubmitted: settingsProvider.setSpeechApiModel,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              key: ValueKey('speech-api-key-${speechApiProviderKey(provider)}'),
+              controller: _speechApiKeyController,
+              obscureText: true,
+              autocorrect: false,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechApiKey,
+                helperText: _hasSpeechApiKey
+                    ? context.l10n.speechApiKeySavedHelper
+                    : provider == SpeechApiProvider.custom
+                    ? context.l10n.speechApiKeyOptional
+                    : context.l10n.speechNoApiKeySaved,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                key: const ValueKey('speech-api-save-key'),
+                onPressed: _loadingSpeechApiKey ? null : _saveSpeechApiKey,
+                child: Text(context.l10n.speechSaveApiKey),
+              ),
+            ),
+            if (_speechApiKeyStatus != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _speechApiKeyStatus!,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              context.l10n.speechApiBatchHint(providerLabel),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              context.l10n.speechApiMaxDuration,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              context.l10n.speechApiLanguageHint,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),

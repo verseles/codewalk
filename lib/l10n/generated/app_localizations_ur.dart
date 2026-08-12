@@ -6581,4 +6581,85 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'پیغام بھیجنے میں ناکامی ہوئی';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI، Groq یا ایک حسب ضرورت OpenAI-مطابق اینڈ پوائنٹ۔';
+
+  @override
+  String get speechApiProvider => 'اسپیچ ٹو ٹیکسٹ فراہم کنندہ';
+
+  @override
+  String get speechCloudSttPrivacy => 'کلاؤڈ اسپیچ ٹو ٹیکسٹ رازداری';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'ریکارڈ شدہ مائیکروفون آڈیو کنفیگر شدہ فراہم کنندہ کو بھیجا جاتا ہے۔ API کیز اس ڈیوائس کے محفوظ اسٹوریج میں رہتی ہیں۔';
+
+  @override
+  String get speechApiKeyOptional => 'حسب ضرورت اینڈ پوائنٹس کے لیے اختیاری۔';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider بیچ ٹرانسکرپشن استعمال کرتا ہے۔ روکنے اور ٹرانسکرائب کرنے کے لیے مائیکروفون کو دوبارہ تھپتھپائیں۔';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'API اسپیچ ٹو ٹیکسٹ ویب بلڈ پر دستیاب نہیں ہے۔';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'اسپیچ API اینڈ پوائنٹ اور ماڈل چیک کریں۔ ریموٹ اینڈ پوائنٹس کو HTTPS استعمال کرنا ضروری ہے۔';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'اسپیچ اینڈ پوائنٹ یا ماڈل مسترد کر دیا گیا۔';
+
+  @override
+  String get speechApiRateLimited =>
+      'اسپیچ فراہم کنندہ نے کوٹہ یا شرح کی حد کی اطلاع دی۔';
+
+  @override
+  String get speechApiUnavailable =>
+      'اسپیچ فراہم کنندہ عارضی طور پر دستیاب نہیں ہے۔';
+
+  @override
+  String get speechApiNetwork => 'اسپیچ فراہم کنندہ سے رابطہ نہیں ہو سکا۔';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'اسپیچ فراہم کنندہ نے ایک غلط جواب واپس کیا۔';
+
+  @override
+  String get speechApiEmptyAudio => 'کوئی مائیکروفون آڈیو حاصل نہیں ہوا۔';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'اسپیچ فراہم کنندہ نے کوئی ٹرانسکرپشن واپس نہیں دی۔';
+
+  @override
+  String get speechApiCustomProvider => 'حسب ضرورت OpenAI-مطابق';
+
+  @override
+  String get speechApiMaxDuration =>
+      'API ریکارڈنگ 2 منٹ کے بعد خود بخود رک جاتی ہے۔';
+
+  @override
+  String get speechApiLanguageHint =>
+      'فعال ایپ زبان ٹرانسکرپشن اشارے کے طور پر بھیجی جاتی ہے۔';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'محفوظ اسپیچ API کلید اسٹوریج دستیاب نہیں ہے۔';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'سیٹنگز > اسپیچ میں اسپیچ API کلید شامل کریں۔';
+
+  @override
+  String get speechSttApiKeyRejected => 'اسپیچ API کلید مسترد کر دی گئی۔';
 }

@@ -6669,4 +6669,89 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get chatProviderErrorSendMessage =>
       'Senden der Nachricht fehlgeschlagen';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq oder ein benutzerdefinierter, OpenAI-kompatibler Endpunkt.';
+
+  @override
+  String get speechApiProvider => 'Sprach-zu-Text-Anbieter';
+
+  @override
+  String get speechCloudSttPrivacy =>
+      'Datenschutz bei der Cloud-Spracherkennung';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'Aufgezeichnetes Mikrofon-Audio wird an den konfigurierten Anbieter gesendet. API-Schlüssel verbleiben im sicheren Speicher dieses Geräts.';
+
+  @override
+  String get speechApiKeyOptional =>
+      'Optional für benutzerdefinierte Endpunkte.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider verwendet Stapeltranskription. Tippen Sie erneut auf das Mikrofon, um zu stoppen und zu transkribieren.';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'API-Spracherkennung ist in der Web-Version nicht verfügbar.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'Überprüfen Sie den Sprach-API-Endpunkt und das Modell. Remote-Endpunkte müssen HTTPS verwenden.';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'Der Sprach-Endpunkt oder das Modell wurde abgelehnt.';
+
+  @override
+  String get speechApiRateLimited =>
+      'Der Sprachanbieter hat ein Kontingent oder ein Ratenlimit gemeldet.';
+
+  @override
+  String get speechApiUnavailable =>
+      'Der Sprachanbieter ist vorübergehend nicht verfügbar.';
+
+  @override
+  String get speechApiNetwork =>
+      'Der Sprachanbieter konnte nicht erreicht werden.';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'Der Sprachanbieter hat eine ungültige Antwort zurückgegeben.';
+
+  @override
+  String get speechApiEmptyAudio => 'Es wurde kein Mikrofon-Audio erfasst.';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'Der Sprachanbieter hat keine Transkription zurückgegeben.';
+
+  @override
+  String get speechApiCustomProvider => 'Benutzerdefiniert, OpenAI-kompatibel';
+
+  @override
+  String get speechApiMaxDuration =>
+      'API-Aufnahmen stoppen automatisch nach 2 Minuten.';
+
+  @override
+  String get speechApiLanguageHint =>
+      'Die aktive App-Sprache wird als Transkriptionshinweis gesendet.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'Der sichere Speicher für den Sprach-API-Schlüssel ist nicht verfügbar.';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'Fügen Sie unter Einstellungen > Sprache einen Sprach-API-Schlüssel hinzu.';
+
+  @override
+  String get speechSttApiKeyRejected =>
+      'Der Sprach-API-Schlüssel wurde abgelehnt.';
 }

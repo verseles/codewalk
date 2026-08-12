@@ -6334,4 +6334,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'メッセージの送信に失敗しました';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI、Groq、または OpenAI 互換のカスタムエンドポイント。';
+
+  @override
+  String get speechApiProvider => '音声文字起こしプロバイダー';
+
+  @override
+  String get speechCloudSttPrivacy => 'クラウド音声文字起こしのプライバシー';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      '録音されたマイク音声は設定されたプロバイダーに送信されます。API キーはこのデバイスの安全なストレージに保管されます。';
+
+  @override
+  String get speechApiKeyOptional => 'カスタムエンドポイントでは省略可能です。';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider はバッチ文字起こしを使用します。もう一度マイクをタップすると停止して文字起こしします。';
+  }
+
+  @override
+  String get speechApiWebUnavailable => 'API 音声文字起こしはウェブ版では利用できません。';
+
+  @override
+  String get speechApiConfigInvalid =>
+      '音声 API のエンドポイントとモデルを確認してください。リモートのエンドポイントは HTTPS を使用する必要があります。';
+
+  @override
+  String get speechApiRequestInvalid => '音声エンドポイントまたはモデルが拒否されました。';
+
+  @override
+  String get speechApiRateLimited => '音声プロバイダーがクォータまたはレート制限を報告しました。';
+
+  @override
+  String get speechApiUnavailable => '音声プロバイダーは一時的に利用できません。';
+
+  @override
+  String get speechApiNetwork => '音声プロバイダーに接続できませんでした。';
+
+  @override
+  String get speechApiInvalidResponse => '音声プロバイダーが無効な応答を返しました。';
+
+  @override
+  String get speechApiEmptyAudio => 'マイク音声がキャプチャされませんでした。';
+
+  @override
+  String get speechApiEmptyTranscript => '音声プロバイダーが文字起こしを返しませんでした。';
+
+  @override
+  String get speechApiCustomProvider => 'カスタム OpenAI 互換';
+
+  @override
+  String get speechApiMaxDuration => 'API 録音は 2 分後に自動的に停止します。';
+
+  @override
+  String get speechApiLanguageHint => 'アクティブなアプリの言語が文字起こしのヒントとして送信されます。';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable => '音声 API キーの安全なストレージを利用できません。';
+
+  @override
+  String get speechSttApiKeyMissing => '設定 > 音声で音声 API キーを追加してください。';
+
+  @override
+  String get speechSttApiKeyRejected => '音声 API キーが拒否されました。';
 }

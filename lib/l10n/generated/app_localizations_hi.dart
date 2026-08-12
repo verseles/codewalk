@@ -6598,4 +6598,85 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'संदेश भेजने में विफल';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq या एक कस्टम OpenAI-संगत एंडपॉइंट।';
+
+  @override
+  String get speechApiProvider => 'स्पीच-टू-टेक्स्ट प्रदाता';
+
+  @override
+  String get speechCloudSttPrivacy => 'क्लाउड स्पीच-टू-टेक्स्ट गोपनीयता';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'रिकॉर्ड किया गया माइक्रोफ़ोन ऑडियो कॉन्फ़िगर किए गए प्रदाता को भेजा जाता है। API कुंजियाँ इस डिवाइस की सुरक्षित स्टोरेज में रहती हैं।';
+
+  @override
+  String get speechApiKeyOptional => 'कस्टम एंडपॉइंट के लिए वैकल्पिक।';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider बैच ट्रांसक्रिप्शन का उपयोग करता है। रोकने और ट्रांसक्रिप्ट करने के लिए माइक्रोफ़ोन को फिर से टैप करें।';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'API स्पीच-टू-टेक्स्ट वेब बिल्ड पर उपलब्ध नहीं है।';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'स्पीच API एंडपॉइंट और मॉडल जाँचें। रिमोट एंडपॉइंट को HTTPS का उपयोग करना चाहिए।';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'स्पीच एंडपॉइंट या मॉडल अस्वीकृत कर दिया गया।';
+
+  @override
+  String get speechApiRateLimited =>
+      'स्पीच प्रदाता ने कोटा या दर सीमा की सूचना दी।';
+
+  @override
+  String get speechApiUnavailable =>
+      'स्पीच प्रदाता अस्थायी रूप से अनुपलब्ध है।';
+
+  @override
+  String get speechApiNetwork => 'स्पीच प्रदाता तक नहीं पहुंचा जा सका।';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'स्पीच प्रदाता ने अमान्य प्रतिक्रिया लौटाई।';
+
+  @override
+  String get speechApiEmptyAudio => 'कोई माइक्रोफ़ोन ऑडियो कैप्चर नहीं हुआ।';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'स्पीच प्रदाता ने कोई ट्रांसक्रिप्शन नहीं लौटाया।';
+
+  @override
+  String get speechApiCustomProvider => 'कस्टम OpenAI-संगत';
+
+  @override
+  String get speechApiMaxDuration =>
+      'API रिकॉर्डिंग 2 मिनट के बाद स्वचालित रूप से रुक जाती है।';
+
+  @override
+  String get speechApiLanguageHint =>
+      'सक्रिय ऐप भाषा ट्रांसक्रिप्शन संकेत के रूप में भेजी जाती है।';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'सुरक्षित स्पीच API कुंजी स्टोरेज उपलब्ध नहीं है।';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'सेटिंग्स > स्पीच में स्पीच API कुंजी जोड़ें।';
+
+  @override
+  String get speechSttApiKeyRejected => 'स्पीच API कुंजी अस्वीकृत कर दी गई।';
 }

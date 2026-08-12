@@ -6599,4 +6599,84 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'বার্তা পাঠানো ব্যর্থ হয়েছে';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq অথবা একটি কাস্টম OpenAI-সামঞ্জস্যপূর্ণ এন্ডপয়েন্ট।';
+
+  @override
+  String get speechApiProvider => 'স্পিচ-টু-টেক্সট প্রদানকারী';
+
+  @override
+  String get speechCloudSttPrivacy => 'ক্লাউড স্পিচ-টু-টেক্সট গোপনীয়তা';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'রেকর্ড করা মাইক্রোফোন অডিও কনফিগার করা প্রদানকারীর কাছে পাঠানো হয়। API কী এই ডিভাইসের নিরাপদ স্টোরেজে থাকে।';
+
+  @override
+  String get speechApiKeyOptional => 'কাস্টম এন্ডপয়েন্টের জন্য ঐচ্ছিক।';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider ব্যাচ ট্রান্সক্রিপশন ব্যবহার করে। থামাতে ও ট্রান্সক্রিপ্ট করতে আবার মাইক্রোফোনে আলতো চাপুন।';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'API স্পিচ-টু-টেক্সট ওয়েব বিল্ডে উপলব্ধ নয়।';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'স্পিচ API এন্ডপয়েন্ট এবং মডেল পরীক্ষা করুন। রিমোট এন্ডপয়েন্টে অবশ্যই HTTPS ব্যবহার করতে হবে।';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'স্পিচ এন্ডপয়েন্ট বা মডেল প্রত্যাখ্যান করা হয়েছে।';
+
+  @override
+  String get speechApiRateLimited =>
+      'স্পিচ প্রদানকারী একটি কোটা বা রেট লিমিট জানিয়েছে।';
+
+  @override
+  String get speechApiUnavailable => 'স্পিচ প্রদানকারী সাময়িকভাবে অনুপলব্ধ।';
+
+  @override
+  String get speechApiNetwork => 'স্পিচ প্রদানকারীর সাথে যোগাযোগ করা যায়নি।';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'স্পিচ প্রদানকারী একটি অবৈধ প্রতিক্রিয়া ফিরিয়েছে।';
+
+  @override
+  String get speechApiEmptyAudio => 'কোনো মাইক্রোফোন অডিও ধারণ করা হয়নি।';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'স্পিচ প্রদানকারী কোনো ট্রান্সক্রিপশন ফিরিয়ে দেয়নি।';
+
+  @override
+  String get speechApiCustomProvider => 'কাস্টম OpenAI-সামঞ্জস্যপূর্ণ';
+
+  @override
+  String get speechApiMaxDuration =>
+      'API রেকর্ডিং ২ মিনিট পরে স্বয়ংক্রিয়ভাবে বন্ধ হয়।';
+
+  @override
+  String get speechApiLanguageHint =>
+      'সক্রিয় অ্যাপ ভাষা ট্রান্সক্রিপশন ইঙ্গিত হিসেবে পাঠানো হয়।';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'নিরাপদ স্পিচ API কী স্টোরেজ উপলব্ধ নয়।';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'সেটিংস > স্পিচে একটি স্পিচ API কী যোগ করুন।';
+
+  @override
+  String get speechSttApiKeyRejected => 'স্পিচ API কী প্রত্যাখ্যান করা হয়েছে।';
 }

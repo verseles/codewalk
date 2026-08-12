@@ -2085,5 +2085,27 @@
         "type": "int"
       }
     }
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq o un endpoint personalizzato compatibile con OpenAI.",
+  "speechApiProvider": "Fornitore di trascrizione vocale",
+  "speechCloudSttPrivacy": "Privacy del riconoscimento vocale nel cloud",
+  "speechCloudSttPrivacyDescription": "L’audio del microfono registrato viene inviato al fornitore configurato. Le chiavi API restano nella memoria protetta di questo dispositivo.",
+  "speechApiKeyOptional": "Facoltativo per endpoint personalizzati.",
+  "speechApiBatchHint": "{provider} usa la trascrizione in batch. Tocca di nuovo il microfono per fermare e trascrivere.",
+  "speechApiWebUnavailable": "Il riconoscimento vocale tramite API non è disponibile nella versione web.",
+  "speechApiConfigInvalid": "Controlla endpoint e modello dell’API vocale. Gli endpoint remoti devono usare HTTPS.",
+  "speechApiRequestInvalid": "L’endpoint o il modello vocale è stato rifiutato.",
+  "speechApiRateLimited": "Il fornitore vocale ha segnalato una quota o un limite di frequenza.",
+  "speechApiUnavailable": "Il fornitore vocale è temporaneamente non disponibile.",
+  "speechApiNetwork": "Impossibile raggiungere il fornitore vocale.",
+  "speechApiInvalidResponse": "Il fornitore vocale ha restituito una risposta non valida.",
+  "speechApiEmptyAudio": "Nessun audio del microfono catturato.",
+  "speechApiEmptyTranscript": "Il fornitore vocale non ha restituito alcuna trascrizione.",
+  "speechApiCustomProvider": "Personalizzato compatibile con OpenAI",
+  "speechApiMaxDuration": "Le registrazioni API si fermano automaticamente dopo 2 minuti.",
+  "speechApiLanguageHint": "La lingua attiva dell’app viene inviata come suggerimento di trascrizione.",
+  "speechSttApiKeyStorageUnavailable": "La memoria protetta della chiave API vocale non è disponibile.",
+  "speechSttApiKeyMissing": "Aggiungi una chiave API vocale in Impostazioni > Voce.",
+  "speechSttApiKeyRejected": "La chiave API vocale è stata rifiutata."
 }

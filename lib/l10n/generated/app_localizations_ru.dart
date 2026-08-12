@@ -6651,4 +6651,87 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'Не удалось отправить сообщение';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq или пользовательская конечная точка, совместимая с OpenAI.';
+
+  @override
+  String get speechApiProvider => 'Поставщик преобразования речи в текст';
+
+  @override
+  String get speechCloudSttPrivacy =>
+      'Конфиденциальность облачного распознавания речи';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'Записанный звук с микрофона отправляется настроенному поставщику. Ключи API хранятся в защищённом хранилище этого устройства.';
+
+  @override
+  String get speechApiKeyOptional =>
+      'Необязательно для пользовательских конечных точек.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider использует пакетную транскрипцию. Нажмите на микрофон ещё раз, чтобы остановить и транскрибировать.';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'Распознавание речи через API недоступно в веб-версии.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'Проверьте конечную точку и модель API речи. Удалённые конечные точки должны использовать HTTPS.';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'Конечная точка или модель речи была отклонена.';
+
+  @override
+  String get speechApiRateLimited =>
+      'Поставщик речи сообщил о превышении квоты или лимита запросов.';
+
+  @override
+  String get speechApiUnavailable => 'Поставщик речи временно недоступен.';
+
+  @override
+  String get speechApiNetwork => 'Не удалось связаться с поставщиком речи.';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'Поставщик речи вернул недопустимый ответ.';
+
+  @override
+  String get speechApiEmptyAudio => 'Звук с микрофона не записан.';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'Поставщик речи не вернул транскрипцию.';
+
+  @override
+  String get speechApiCustomProvider =>
+      'Пользовательская, совместимая с OpenAI';
+
+  @override
+  String get speechApiMaxDuration =>
+      'API-записи автоматически останавливаются через 2 минуты.';
+
+  @override
+  String get speechApiLanguageHint =>
+      'Активный язык приложения отправляется как подсказка для транскрипции.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'Защищённое хранилище ключей API речи недоступно.';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'Добавьте ключ API речи в Настройки > Речь.';
+
+  @override
+  String get speechSttApiKeyRejected => 'Ключ API речи был отклонён.';
 }

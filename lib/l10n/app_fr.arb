@@ -2050,5 +2050,27 @@
   "chatProviderErrorSendMessage": "Échec de l''envoi du message",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq ou un endpoint personnalisé compatible avec OpenAI.",
+  "speechApiProvider": "Fournisseur de reconnaissance vocale",
+  "speechCloudSttPrivacy": "Confidentialité de la reconnaissance vocale dans le cloud",
+  "speechCloudSttPrivacyDescription": "L’audio enregistré par le microphone est envoyé au fournisseur configuré. Les clés API restent dans le stockage sécurisé de cet appareil.",
+  "speechApiKeyOptional": "Facultatif pour les endpoints personnalisés.",
+  "speechApiBatchHint": "{provider} utilise la transcription par lots. Touchez de nouveau le microphone pour arrêter et transcrire.",
+  "speechApiWebUnavailable": "La reconnaissance vocale par API est indisponible dans la version web.",
+  "speechApiConfigInvalid": "Vérifiez l’endpoint et le modèle de l’API vocale. Les endpoints distants doivent utiliser HTTPS.",
+  "speechApiRequestInvalid": "L’endpoint ou le modèle vocal a été rejeté.",
+  "speechApiRateLimited": "Le fournisseur vocal a signalé un quota ou une limite de débit.",
+  "speechApiUnavailable": "Le fournisseur vocal est temporairement indisponible.",
+  "speechApiNetwork": "Impossible de joindre le fournisseur vocal.",
+  "speechApiInvalidResponse": "Le fournisseur vocal a renvoyé une réponse invalide.",
+  "speechApiEmptyAudio": "Aucun audio du microphone n’a été capturé.",
+  "speechApiEmptyTranscript": "Le fournisseur vocal n’a renvoyé aucune transcription.",
+  "speechApiCustomProvider": "Personnalisé compatible OpenAI",
+  "speechApiMaxDuration": "Les enregistrements API s’arrêtent automatiquement après 2 minutes.",
+  "speechApiLanguageHint": "La langue active de l’application est envoyée comme indice de transcription.",
+  "speechSttApiKeyStorageUnavailable": "Le stockage sécurisé de la clé API vocale est indisponible.",
+  "speechSttApiKeyMissing": "Ajoutez une clé API vocale dans Paramètres > Voix.",
+  "speechSttApiKeyRejected": "La clé API vocale a été rejetée."
 }

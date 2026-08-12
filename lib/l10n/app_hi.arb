@@ -2203,5 +2203,27 @@
   "chatProviderErrorSendMessage": "संदेश भेजने में विफल",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq या एक कस्टम OpenAI-संगत एंडपॉइंट।",
+  "speechApiProvider": "स्पीच-टू-टेक्स्ट प्रदाता",
+  "speechCloudSttPrivacy": "क्लाउड स्पीच-टू-टेक्स्ट गोपनीयता",
+  "speechCloudSttPrivacyDescription": "रिकॉर्ड किया गया माइक्रोफ़ोन ऑडियो कॉन्फ़िगर किए गए प्रदाता को भेजा जाता है। API कुंजियाँ इस डिवाइस की सुरक्षित स्टोरेज में रहती हैं।",
+  "speechApiKeyOptional": "कस्टम एंडपॉइंट के लिए वैकल्पिक।",
+  "speechApiBatchHint": "{provider} बैच ट्रांसक्रिप्शन का उपयोग करता है। रोकने और ट्रांसक्रिप्ट करने के लिए माइक्रोफ़ोन को फिर से टैप करें।",
+  "speechApiWebUnavailable": "API स्पीच-टू-टेक्स्ट वेब बिल्ड पर उपलब्ध नहीं है।",
+  "speechApiConfigInvalid": "स्पीच API एंडपॉइंट और मॉडल जाँचें। रिमोट एंडपॉइंट को HTTPS का उपयोग करना चाहिए।",
+  "speechApiRequestInvalid": "स्पीच एंडपॉइंट या मॉडल अस्वीकृत कर दिया गया।",
+  "speechApiRateLimited": "स्पीच प्रदाता ने कोटा या दर सीमा की सूचना दी।",
+  "speechApiUnavailable": "स्पीच प्रदाता अस्थायी रूप से अनुपलब्ध है।",
+  "speechApiNetwork": "स्पीच प्रदाता तक नहीं पहुंचा जा सका।",
+  "speechApiInvalidResponse": "स्पीच प्रदाता ने अमान्य प्रतिक्रिया लौटाई।",
+  "speechApiEmptyAudio": "कोई माइक्रोफ़ोन ऑडियो कैप्चर नहीं हुआ।",
+  "speechApiEmptyTranscript": "स्पीच प्रदाता ने कोई ट्रांसक्रिप्शन नहीं लौटाया।",
+  "speechApiCustomProvider": "कस्टम OpenAI-संगत",
+  "speechApiMaxDuration": "API रिकॉर्डिंग 2 मिनट के बाद स्वचालित रूप से रुक जाती है।",
+  "speechApiLanguageHint": "सक्रिय ऐप भाषा ट्रांसक्रिप्शन संकेत के रूप में भेजी जाती है।",
+  "speechSttApiKeyStorageUnavailable": "सुरक्षित स्पीच API कुंजी स्टोरेज उपलब्ध नहीं है।",
+  "speechSttApiKeyMissing": "सेटिंग्स > स्पीच में स्पीच API कुंजी जोड़ें।",
+  "speechSttApiKeyRejected": "स्पीच API कुंजी अस्वीकृत कर दी गई।"
 }

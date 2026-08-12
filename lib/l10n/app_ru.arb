@@ -2203,5 +2203,27 @@
   "chatProviderErrorSendMessage": "Не удалось отправить сообщение",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq или пользовательская конечная точка, совместимая с OpenAI.",
+  "speechApiProvider": "Поставщик преобразования речи в текст",
+  "speechCloudSttPrivacy": "Конфиденциальность облачного распознавания речи",
+  "speechCloudSttPrivacyDescription": "Записанный звук с микрофона отправляется настроенному поставщику. Ключи API хранятся в защищённом хранилище этого устройства.",
+  "speechApiKeyOptional": "Необязательно для пользовательских конечных точек.",
+  "speechApiBatchHint": "{provider} использует пакетную транскрипцию. Нажмите на микрофон ещё раз, чтобы остановить и транскрибировать.",
+  "speechApiWebUnavailable": "Распознавание речи через API недоступно в веб-версии.",
+  "speechApiConfigInvalid": "Проверьте конечную точку и модель API речи. Удалённые конечные точки должны использовать HTTPS.",
+  "speechApiRequestInvalid": "Конечная точка или модель речи была отклонена.",
+  "speechApiRateLimited": "Поставщик речи сообщил о превышении квоты или лимита запросов.",
+  "speechApiUnavailable": "Поставщик речи временно недоступен.",
+  "speechApiNetwork": "Не удалось связаться с поставщиком речи.",
+  "speechApiInvalidResponse": "Поставщик речи вернул недопустимый ответ.",
+  "speechApiEmptyAudio": "Звук с микрофона не записан.",
+  "speechApiEmptyTranscript": "Поставщик речи не вернул транскрипцию.",
+  "speechApiCustomProvider": "Пользовательская, совместимая с OpenAI",
+  "speechApiMaxDuration": "API-записи автоматически останавливаются через 2 минуты.",
+  "speechApiLanguageHint": "Активный язык приложения отправляется как подсказка для транскрипции.",
+  "speechSttApiKeyStorageUnavailable": "Защищённое хранилище ключей API речи недоступно.",
+  "speechSttApiKeyMissing": "Добавьте ключ API речи в Настройки > Речь.",
+  "speechSttApiKeyRejected": "Ключ API речи был отклонён."
 }

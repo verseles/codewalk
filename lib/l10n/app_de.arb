@@ -2050,5 +2050,27 @@
   "chatProviderErrorSendMessage": "Senden der Nachricht fehlgeschlagen",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq oder ein benutzerdefinierter, OpenAI-kompatibler Endpunkt.",
+  "speechApiProvider": "Sprach-zu-Text-Anbieter",
+  "speechCloudSttPrivacy": "Datenschutz bei der Cloud-Spracherkennung",
+  "speechCloudSttPrivacyDescription": "Aufgezeichnetes Mikrofon-Audio wird an den konfigurierten Anbieter gesendet. API-Schlüssel verbleiben im sicheren Speicher dieses Geräts.",
+  "speechApiKeyOptional": "Optional für benutzerdefinierte Endpunkte.",
+  "speechApiBatchHint": "{provider} verwendet Stapeltranskription. Tippen Sie erneut auf das Mikrofon, um zu stoppen und zu transkribieren.",
+  "speechApiWebUnavailable": "API-Spracherkennung ist in der Web-Version nicht verfügbar.",
+  "speechApiConfigInvalid": "Überprüfen Sie den Sprach-API-Endpunkt und das Modell. Remote-Endpunkte müssen HTTPS verwenden.",
+  "speechApiRequestInvalid": "Der Sprach-Endpunkt oder das Modell wurde abgelehnt.",
+  "speechApiRateLimited": "Der Sprachanbieter hat ein Kontingent oder ein Ratenlimit gemeldet.",
+  "speechApiUnavailable": "Der Sprachanbieter ist vorübergehend nicht verfügbar.",
+  "speechApiNetwork": "Der Sprachanbieter konnte nicht erreicht werden.",
+  "speechApiInvalidResponse": "Der Sprachanbieter hat eine ungültige Antwort zurückgegeben.",
+  "speechApiEmptyAudio": "Es wurde kein Mikrofon-Audio erfasst.",
+  "speechApiEmptyTranscript": "Der Sprachanbieter hat keine Transkription zurückgegeben.",
+  "speechApiCustomProvider": "Benutzerdefiniert, OpenAI-kompatibel",
+  "speechApiMaxDuration": "API-Aufnahmen stoppen automatisch nach 2 Minuten.",
+  "speechApiLanguageHint": "Die aktive App-Sprache wird als Transkriptionshinweis gesendet.",
+  "speechSttApiKeyStorageUnavailable": "Der sichere Speicher für den Sprach-API-Schlüssel ist nicht verfügbar.",
+  "speechSttApiKeyMissing": "Fügen Sie unter Einstellungen > Sprache einen Sprach-API-Schlüssel hinzu.",
+  "speechSttApiKeyRejected": "Der Sprach-API-Schlüssel wurde abgelehnt."
 }

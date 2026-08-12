@@ -436,6 +436,46 @@ void main() {
     });
   });
 
+  group('speech API serialization', () {
+    test('defaults to OpenAI without serializing API keys', () {
+      final defaults = ExperienceSettings.defaults();
+
+      expect(defaults.speechApiProvider, SpeechApiProvider.openAi);
+      expect(defaults.speechApiBaseUrl, kDefaultOpenAiSttBaseUrl);
+      expect(defaults.speechApiModel, kDefaultOpenAiSttModel);
+      expect(defaults.toJson().containsKey('speechApiKey'), isFalse);
+    });
+
+    test('round trips API engine and custom non-secret configuration', () {
+      final settings = ExperienceSettings.defaults().copyWith(
+        speechToTextEngine: SpeechToTextEngine.api,
+        speechApiProvider: SpeechApiProvider.custom,
+        speechApiBaseUrl: 'http://localhost:8080/v1',
+        speechApiModel: 'whisper-large-v3',
+      );
+
+      final restored = ExperienceSettings.fromJson(settings.toJson());
+
+      expect(restored.speechToTextEngine, SpeechToTextEngine.api);
+      expect(restored.speechApiProvider, SpeechApiProvider.custom);
+      expect(restored.speechApiBaseUrl, 'http://localhost:8080/v1');
+      expect(restored.speechApiModel, 'whisper-large-v3');
+      expect(settings.toJson().containsKey('apiKey'), isFalse);
+    });
+
+    test('maps provider aliases and trims trailing base URL slashes', () {
+      final restored = ExperienceSettings.fromJson(<String, dynamic>{
+        'speechToTextEngine': 'openai_compatible',
+        'speechApiProvider': 'openai-compatible',
+        'speechApiBaseUrl': 'https://stt.example/v1///',
+      });
+
+      expect(restored.speechToTextEngine, SpeechToTextEngine.api);
+      expect(restored.speechApiProvider, SpeechApiProvider.custom);
+      expect(restored.speechApiBaseUrl, 'https://stt.example/v1');
+    });
+  });
+
   group('font size fields', () {
     test('default values match safe scale center and terminal default', () {
       final defaults = ExperienceSettings.defaults();

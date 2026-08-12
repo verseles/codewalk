@@ -6563,4 +6563,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'Failed to send message';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq, or a custom OpenAI-compatible endpoint.';
+
+  @override
+  String get speechApiProvider => 'Speech-to-text provider';
+
+  @override
+  String get speechCloudSttPrivacy => 'Cloud speech-to-text privacy';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'Recorded microphone audio is sent to the configured provider. API keys stay in secure storage on this device.';
+
+  @override
+  String get speechApiKeyOptional => 'Optional for custom endpoints.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider uses batch transcription. Tap the microphone again to stop and transcribe.';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'API speech-to-text is unavailable on the web build.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'Check the speech API endpoint and model. Remote endpoints must use HTTPS.';
+
+  @override
+  String get speechApiRequestInvalid =>
+      'The speech endpoint or model was rejected.';
+
+  @override
+  String get speechApiRateLimited =>
+      'The speech provider reported a quota or rate limit.';
+
+  @override
+  String get speechApiUnavailable =>
+      'The speech provider is temporarily unavailable.';
+
+  @override
+  String get speechApiNetwork => 'The speech provider could not be reached.';
+
+  @override
+  String get speechApiInvalidResponse =>
+      'The speech provider returned an invalid response.';
+
+  @override
+  String get speechApiEmptyAudio => 'No microphone audio was captured.';
+
+  @override
+  String get speechApiEmptyTranscript =>
+      'The speech provider returned no transcription.';
+
+  @override
+  String get speechApiCustomProvider => 'Custom OpenAI-compatible';
+
+  @override
+  String get speechApiMaxDuration =>
+      'API recordings stop automatically after 2 minutes.';
+
+  @override
+  String get speechApiLanguageHint =>
+      'The active app language is sent as a transcription hint.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'Secure speech API key storage is unavailable.';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'Add a speech API key in Settings > Speech.';
+
+  @override
+  String get speechSttApiKeyRejected => 'The speech API key was rejected.';
 }

@@ -2203,5 +2203,27 @@
   "chatProviderErrorSendMessage": "پیغام بھیجنے میں ناکامی ہوئی",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI، Groq یا ایک حسب ضرورت OpenAI-مطابق اینڈ پوائنٹ۔",
+  "speechApiProvider": "اسپیچ ٹو ٹیکسٹ فراہم کنندہ",
+  "speechCloudSttPrivacy": "کلاؤڈ اسپیچ ٹو ٹیکسٹ رازداری",
+  "speechCloudSttPrivacyDescription": "ریکارڈ شدہ مائیکروفون آڈیو کنفیگر شدہ فراہم کنندہ کو بھیجا جاتا ہے۔ API کیز اس ڈیوائس کے محفوظ اسٹوریج میں رہتی ہیں۔",
+  "speechApiKeyOptional": "حسب ضرورت اینڈ پوائنٹس کے لیے اختیاری۔",
+  "speechApiBatchHint": "{provider} بیچ ٹرانسکرپشن استعمال کرتا ہے۔ روکنے اور ٹرانسکرائب کرنے کے لیے مائیکروفون کو دوبارہ تھپتھپائیں۔",
+  "speechApiWebUnavailable": "API اسپیچ ٹو ٹیکسٹ ویب بلڈ پر دستیاب نہیں ہے۔",
+  "speechApiConfigInvalid": "اسپیچ API اینڈ پوائنٹ اور ماڈل چیک کریں۔ ریموٹ اینڈ پوائنٹس کو HTTPS استعمال کرنا ضروری ہے۔",
+  "speechApiRequestInvalid": "اسپیچ اینڈ پوائنٹ یا ماڈل مسترد کر دیا گیا۔",
+  "speechApiRateLimited": "اسپیچ فراہم کنندہ نے کوٹہ یا شرح کی حد کی اطلاع دی۔",
+  "speechApiUnavailable": "اسپیچ فراہم کنندہ عارضی طور پر دستیاب نہیں ہے۔",
+  "speechApiNetwork": "اسپیچ فراہم کنندہ سے رابطہ نہیں ہو سکا۔",
+  "speechApiInvalidResponse": "اسپیچ فراہم کنندہ نے ایک غلط جواب واپس کیا۔",
+  "speechApiEmptyAudio": "کوئی مائیکروفون آڈیو حاصل نہیں ہوا۔",
+  "speechApiEmptyTranscript": "اسپیچ فراہم کنندہ نے کوئی ٹرانسکرپشن واپس نہیں دی۔",
+  "speechApiCustomProvider": "حسب ضرورت OpenAI-مطابق",
+  "speechApiMaxDuration": "API ریکارڈنگ 2 منٹ کے بعد خود بخود رک جاتی ہے۔",
+  "speechApiLanguageHint": "فعال ایپ زبان ٹرانسکرپشن اشارے کے طور پر بھیجی جاتی ہے۔",
+  "speechSttApiKeyStorageUnavailable": "محفوظ اسپیچ API کلید اسٹوریج دستیاب نہیں ہے۔",
+  "speechSttApiKeyMissing": "سیٹنگز > اسپیچ میں اسپیچ API کلید شامل کریں۔",
+  "speechSttApiKeyRejected": "اسپیچ API کلید مسترد کر دی گئی۔"
 }

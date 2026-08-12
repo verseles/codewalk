@@ -1620,7 +1620,6 @@
   "questionReviewAnswers": "Revisar respuestas",
   "permissionRequestTitle": "Solicitud de permiso: {permission}",
   "sessionTitleCannotBeEmpty": "El título no puede estar vacío",
-
   "filesFailedToLoad": "No se pudieron cargar los archivos",
   "filesFailedToSearch": "No se pudo buscar en los archivos",
   "filesNoOpenFilesHint": "Aún no hay archivos abiertos. Escriba para buscar.",
@@ -2204,5 +2203,27 @@
   "chatProviderErrorSendMessage": "No se pudo enviar el mensaje",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq o un endpoint personalizado compatible con OpenAI.",
+  "speechApiProvider": "Proveedor de voz a texto",
+  "speechCloudSttPrivacy": "Privacidad del reconocimiento de voz en la nube",
+  "speechCloudSttPrivacyDescription": "El audio del micrófono grabado se envía al proveedor configurado. Las claves de API se guardan en el almacenamiento seguro de este dispositivo.",
+  "speechApiKeyOptional": "Opcional para endpoints personalizados.",
+  "speechApiBatchHint": "{provider} usa transcripción por lotes. Toca el micrófono de nuevo para detener y transcribir.",
+  "speechApiWebUnavailable": "El reconocimiento de voz por API no está disponible en la versión web.",
+  "speechApiConfigInvalid": "Comprueba el endpoint y el modelo de la API de voz. Los endpoints remotos deben usar HTTPS.",
+  "speechApiRequestInvalid": "El endpoint o el modelo de voz fue rechazado.",
+  "speechApiRateLimited": "El proveedor de voz informó una cuota o un límite de tarifa.",
+  "speechApiUnavailable": "El proveedor de voz no está disponible temporalmente.",
+  "speechApiNetwork": "No se pudo conectar con el proveedor de voz.",
+  "speechApiInvalidResponse": "El proveedor de voz devolvió una respuesta no válida.",
+  "speechApiEmptyAudio": "No se capturó audio del micrófono.",
+  "speechApiEmptyTranscript": "El proveedor de voz no devolvió ninguna transcripción.",
+  "speechApiCustomProvider": "Personalizado compatible con OpenAI",
+  "speechApiMaxDuration": "Las grabaciones de API se detienen automáticamente después de 2 minutos.",
+  "speechApiLanguageHint": "El idioma activo de la aplicación se envía como sugerencia de transcripción.",
+  "speechSttApiKeyStorageUnavailable": "El almacenamiento seguro de la clave de API de voz no está disponible.",
+  "speechSttApiKeyMissing": "Añade una clave de API de voz en Ajustes > Voz.",
+  "speechSttApiKeyRejected": "La clave de API de voz fue rechazada."
 }

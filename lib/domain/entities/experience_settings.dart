@@ -110,7 +110,9 @@ enum OpenCodeThemePreset {
   oneDark,
 }
 
-enum SpeechToTextEngine { native, sherpa, moonshine, parakeet, sensevoice }
+enum SpeechToTextEngine { native, sherpa, moonshine, parakeet, sensevoice, api }
+
+enum SpeechApiProvider { openAi, groq, custom }
 
 enum ReadAloudProvider { native, edgeExperimental, openAiCompatible }
 
@@ -126,6 +128,10 @@ const String kSenseVoiceModelDefault = 'sensevoice-2024-07-17';
 const String kDefaultOpenAiCompatibleTtsBaseUrl = 'https://api.openai.com/v1';
 const String kDefaultOpenAiCompatibleTtsModel = 'gpt-4o-mini-tts';
 const String kDefaultReadAloudResponseFormat = 'mp3';
+const String kDefaultOpenAiSttBaseUrl = 'https://api.openai.com/v1';
+const String kDefaultOpenAiSttModel = 'gpt-4o-mini-transcribe';
+const String kDefaultGroqSttBaseUrl = 'https://api.groq.com/openai/v1';
+const String kDefaultGroqSttModel = 'whisper-large-v3-turbo';
 
 const double kMinSystemFontScale = 0.8;
 const double kMaxSystemFontScale = 1.6;
@@ -596,6 +602,7 @@ String speechToTextEngineKey(SpeechToTextEngine engine) {
     SpeechToTextEngine.moonshine => 'moonshine',
     SpeechToTextEngine.parakeet => 'parakeet',
     SpeechToTextEngine.sensevoice => 'sensevoice',
+    SpeechToTextEngine.api => 'api',
   };
 }
 
@@ -605,7 +612,42 @@ SpeechToTextEngine speechToTextEngineFromKey(String value) {
     'moonshine' => SpeechToTextEngine.moonshine,
     'parakeet' => SpeechToTextEngine.parakeet,
     'sensevoice' => SpeechToTextEngine.sensevoice,
+    'api' || 'cloud' || 'openai_compatible' => SpeechToTextEngine.api,
     _ => SpeechToTextEngine.native,
+  };
+}
+
+String speechApiProviderKey(SpeechApiProvider provider) {
+  return switch (provider) {
+    SpeechApiProvider.openAi => 'openai',
+    SpeechApiProvider.groq => 'groq',
+    SpeechApiProvider.custom => 'custom',
+  };
+}
+
+SpeechApiProvider speechApiProviderFromKey(String value) {
+  return switch (value.trim().toLowerCase()) {
+    'groq' => SpeechApiProvider.groq,
+    'custom' ||
+    'openai_compatible' ||
+    'openai-compatible' => SpeechApiProvider.custom,
+    _ => SpeechApiProvider.openAi,
+  };
+}
+
+String defaultSpeechApiBaseUrl(SpeechApiProvider provider) {
+  return switch (provider) {
+    SpeechApiProvider.openAi => kDefaultOpenAiSttBaseUrl,
+    SpeechApiProvider.groq => kDefaultGroqSttBaseUrl,
+    SpeechApiProvider.custom => kDefaultOpenAiSttBaseUrl,
+  };
+}
+
+String defaultSpeechApiModel(SpeechApiProvider provider) {
+  return switch (provider) {
+    SpeechApiProvider.openAi => kDefaultOpenAiSttModel,
+    SpeechApiProvider.groq => kDefaultGroqSttModel,
+    SpeechApiProvider.custom => kDefaultOpenAiSttModel,
   };
 }
 
@@ -820,6 +862,9 @@ class ExperienceSettings {
       moonshineModelId: kMoonshineModelTiny,
       parakeetModelId: kParakeetModelDefault,
       senseVoiceModelId: kSenseVoiceModelDefault,
+      speechApiProvider: SpeechApiProvider.openAi,
+      speechApiBaseUrl: kDefaultOpenAiSttBaseUrl,
+      speechApiModel: kDefaultOpenAiSttModel,
       pendingPostOnboardingChatTour: false,
       checkUpdatesOnOpen: true,
       readAloudEnabled: true,
@@ -893,6 +938,9 @@ class ExperienceSettings {
     this.moonshineModelId = kMoonshineModelTiny,
     this.parakeetModelId = kParakeetModelDefault,
     this.senseVoiceModelId = kSenseVoiceModelDefault,
+    this.speechApiProvider = SpeechApiProvider.openAi,
+    this.speechApiBaseUrl = kDefaultOpenAiSttBaseUrl,
+    this.speechApiModel = kDefaultOpenAiSttModel,
     this.skipOnboardingWizard = false,
     this.pendingPostOnboardingChatTour = false,
     this.checkUpdatesOnOpen = true,
@@ -968,6 +1016,9 @@ class ExperienceSettings {
   final String moonshineModelId;
   final String parakeetModelId;
   final String senseVoiceModelId;
+  final SpeechApiProvider speechApiProvider;
+  final String speechApiBaseUrl;
+  final String speechApiModel;
   final bool skipOnboardingWizard;
   final bool pendingPostOnboardingChatTour;
   final bool checkUpdatesOnOpen;
@@ -1043,6 +1094,9 @@ class ExperienceSettings {
     String? moonshineModelId,
     String? parakeetModelId,
     String? senseVoiceModelId,
+    SpeechApiProvider? speechApiProvider,
+    String? speechApiBaseUrl,
+    String? speechApiModel,
     bool? skipOnboardingWizard,
     bool? pendingPostOnboardingChatTour,
     bool? checkUpdatesOnOpen,
@@ -1148,6 +1202,9 @@ class ExperienceSettings {
       moonshineModelId: moonshineModelId ?? this.moonshineModelId,
       parakeetModelId: parakeetModelId ?? this.parakeetModelId,
       senseVoiceModelId: senseVoiceModelId ?? this.senseVoiceModelId,
+      speechApiProvider: speechApiProvider ?? this.speechApiProvider,
+      speechApiBaseUrl: speechApiBaseUrl ?? this.speechApiBaseUrl,
+      speechApiModel: speechApiModel ?? this.speechApiModel,
       skipOnboardingWizard: skipOnboardingWizard ?? this.skipOnboardingWizard,
       pendingPostOnboardingChatTour:
           pendingPostOnboardingChatTour ?? this.pendingPostOnboardingChatTour,
@@ -1274,6 +1331,9 @@ class ExperienceSettings {
       'moonshineModelId': moonshineModelId,
       'parakeetModelId': parakeetModelId,
       'senseVoiceModelId': senseVoiceModelId,
+      'speechApiProvider': speechApiProviderKey(speechApiProvider),
+      'speechApiBaseUrl': speechApiBaseUrl,
+      'speechApiModel': speechApiModel,
       'skipOnboardingWizard': skipOnboardingWizard,
       'pendingPostOnboardingChatTour': pendingPostOnboardingChatTour,
       'checkUpdatesOnOpen': checkUpdatesOnOpen,
@@ -1359,6 +1419,9 @@ class ExperienceSettings {
     var moonshineModelId = defaults.moonshineModelId;
     var parakeetModelId = defaults.parakeetModelId;
     var senseVoiceModelId = defaults.senseVoiceModelId;
+    var speechApiProvider = defaults.speechApiProvider;
+    var speechApiBaseUrl = defaults.speechApiBaseUrl;
+    var speechApiModel = defaults.speechApiModel;
     var readAloudEnabled = defaults.readAloudEnabled;
     var readAloudProvider = defaults.readAloudProvider;
     var readAloudRate = defaults.readAloudRate;
@@ -1760,6 +1823,26 @@ class ExperienceSettings {
       senseVoiceModelId = senseVoiceModelIdJson.trim().toLowerCase();
     }
 
+    final speechApiProviderJson = json['speechApiProvider'];
+    if (speechApiProviderJson is String &&
+        speechApiProviderJson.trim().isNotEmpty) {
+      speechApiProvider = speechApiProviderFromKey(speechApiProviderJson);
+    }
+
+    final speechApiBaseUrlJson = json['speechApiBaseUrl'];
+    if (speechApiBaseUrlJson is String &&
+        speechApiBaseUrlJson.trim().isNotEmpty) {
+      speechApiBaseUrl = speechApiBaseUrlJson.trim().replaceFirst(
+        RegExp(r'/+$'),
+        '',
+      );
+    }
+
+    final speechApiModelJson = json['speechApiModel'];
+    if (speechApiModelJson is String && speechApiModelJson.trim().isNotEmpty) {
+      speechApiModel = speechApiModelJson.trim();
+    }
+
     var skipOnboardingWizard = defaults.skipOnboardingWizard;
     final skipOnboardingWizardJson = json['skipOnboardingWizard'];
     if (skipOnboardingWizardJson is bool) {
@@ -1912,6 +1995,9 @@ class ExperienceSettings {
       moonshineModelId: moonshineModelId,
       parakeetModelId: parakeetModelId,
       senseVoiceModelId: senseVoiceModelId,
+      speechApiProvider: speechApiProvider,
+      speechApiBaseUrl: speechApiBaseUrl,
+      speechApiModel: speechApiModel,
       skipOnboardingWizard: skipOnboardingWizard,
       pendingPostOnboardingChatTour: pendingPostOnboardingChatTour,
       checkUpdatesOnOpen: checkUpdatesOnOpen,

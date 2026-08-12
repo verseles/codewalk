@@ -23,6 +23,7 @@ import '../../domain/entities/experience_settings.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../services/speech_input_service.dart';
+import '../services/speech_input_service_api.dart';
 import '../services/speech_input_service_moonshine.dart';
 import '../services/speech_input_service_parakeet.dart';
 import '../services/speech_input_service_sensevoice.dart';
@@ -161,6 +162,14 @@ Color microphoneButtonForegroundColor({
   required ColorScheme colorScheme,
 }) {
   return isListening ? colorScheme.onError : colorScheme.onSecondaryContainer;
+}
+
+@visibleForTesting
+bool speechStatusIndicatesListening({
+  required String status,
+  required bool serviceIsListening,
+}) {
+  return status == 'listening' || (status != 'done' && serviceIsListening);
 }
 
 ButtonStyle composerAttachButtonStyle({
@@ -358,6 +367,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   MoonshineSpeechInputService? _moonshineSpeechServiceInstance;
   ParakeetSpeechInputService? _parakeetSpeechServiceInstance;
   SenseVoiceSpeechInputService? _senseVoiceSpeechServiceInstance;
+  ApiSpeechInputService? _apiSpeechServiceInstance;
   bool _isComposing = false;
   bool _isSending = false;
   bool _isListening = false;
@@ -440,6 +450,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       SpeechEnginePlatformSupport.isParakeetSupported;
   bool get _isSenseVoiceEngineSupported =>
       SpeechEnginePlatformSupport.isSenseVoiceSupported;
+  bool get _isApiEngineSupported => SpeechEnginePlatformSupport.isApiSupported;
 
   bool get _isSoftwareKeyboardVisible {
     final mediaQueryInsetBottom = MediaQuery.maybeOf(
@@ -486,6 +497,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         .sl<SenseVoiceSpeechInputService>();
   }
 
+  ApiSpeechInputService? get _apiSpeechService {
+    if (!_isApiEngineSupported) return null;
+    return _apiSpeechServiceInstance ??= di.sl<ApiSpeechInputService>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -499,7 +515,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     _sendHoldTimer?.cancel();
     _suggestionDebounce?.cancel();
     _speechStartWatchdog?.cancel();
-    unawaited(_activeSpeechService?.stopListening() ?? Future.value());
+    final speechService = _activeSpeechService;
+    if (speechService is ApiSpeechInputService) {
+      unawaited(speechService.cancelSession());
+    } else {
+      unawaited(speechService?.stopListening() ?? Future.value());
+    }
     _controller.dispose();
     _internalFocusNode.dispose();
     super.dispose();
@@ -1649,6 +1670,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         _isParakeetEngineSupported ? _parakeetSpeechService : null,
       SpeechToTextEngine.sensevoice =>
         _isSenseVoiceEngineSupported ? _senseVoiceSpeechService : null,
+      SpeechToTextEngine.api =>
+        _isApiEngineSupported ? _apiSpeechService : null,
     };
   }
 
@@ -1659,6 +1682,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       SpeechToTextEngine.moonshine => context.l10n.speechMoonshine,
       SpeechToTextEngine.parakeet => context.l10n.speechParakeet,
       SpeechToTextEngine.sensevoice => context.l10n.speechSenseVoice,
+      SpeechToTextEngine.api => context.l10n.speechApiEngine,
     };
   }
 
@@ -1666,6 +1690,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     SpeechInputService service,
     SettingsProvider settingsProvider,
   ) {
+    if (service is ApiSpeechInputService) {
+      return Localizations.localeOf(context).toLanguageTag();
+    }
     if (service is! SherpaSpeechInputService) {
       return null;
     }

@@ -137,5 +137,16 @@ void main() {
         });
       }
     });
+
+    test('API engine is supported on native mobile and desktop targets', () {
+      for (final platform in TargetPlatform.values) {
+        debugDefaultTargetPlatformOverride = platform;
+        expect(
+          SpeechEnginePlatformSupport.isApiSupported,
+          isTrue,
+          reason: '$platform',
+        );
+      }
+    });
   });
 }

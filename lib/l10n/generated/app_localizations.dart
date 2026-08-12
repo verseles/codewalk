@@ -11272,6 +11272,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to send message'**
   String get chatProviderErrorSendMessage;
+
+  /// CodeWalk UI string — speechApiEngine
+  ///
+  /// In en, this message translates to:
+  /// **'API'**
+  String get speechApiEngine;
+
+  /// CodeWalk UI string — speechApiEngineSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI, Groq, or a custom OpenAI-compatible endpoint.'**
+  String get speechApiEngineSubtitle;
+
+  /// CodeWalk UI string — speechApiProvider
+  ///
+  /// In en, this message translates to:
+  /// **'Speech-to-text provider'**
+  String get speechApiProvider;
+
+  /// CodeWalk UI string — speechCloudSttPrivacy
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud speech-to-text privacy'**
+  String get speechCloudSttPrivacy;
+
+  /// CodeWalk UI string — speechCloudSttPrivacyDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded microphone audio is sent to the configured provider. API keys stay in secure storage on this device.'**
+  String get speechCloudSttPrivacyDescription;
+
+  /// CodeWalk UI string — speechApiKeyOptional
+  ///
+  /// In en, this message translates to:
+  /// **'Optional for custom endpoints.'**
+  String get speechApiKeyOptional;
+
+  /// CodeWalk UI string — speechApiBatchHint
+  ///
+  /// In en, this message translates to:
+  /// **'{provider} uses batch transcription. Tap the microphone again to stop and transcribe.'**
+  String speechApiBatchHint(String provider);
+
+  /// CodeWalk UI string — speechApiWebUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'API speech-to-text is unavailable on the web build.'**
+  String get speechApiWebUnavailable;
+
+  /// CodeWalk UI string — speechApiConfigInvalid
+  ///
+  /// In en, this message translates to:
+  /// **'Check the speech API endpoint and model. Remote endpoints must use HTTPS.'**
+  String get speechApiConfigInvalid;
+
+  /// CodeWalk UI string — speechApiRequestInvalid
+  ///
+  /// In en, this message translates to:
+  /// **'The speech endpoint or model was rejected.'**
+  String get speechApiRequestInvalid;
+
+  /// CodeWalk UI string — speechApiRateLimited
+  ///
+  /// In en, this message translates to:
+  /// **'The speech provider reported a quota or rate limit.'**
+  String get speechApiRateLimited;
+
+  /// CodeWalk UI string — speechApiUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The speech provider is temporarily unavailable.'**
+  String get speechApiUnavailable;
+
+  /// CodeWalk UI string — speechApiNetwork
+  ///
+  /// In en, this message translates to:
+  /// **'The speech provider could not be reached.'**
+  String get speechApiNetwork;
+
+  /// CodeWalk UI string — speechApiInvalidResponse
+  ///
+  /// In en, this message translates to:
+  /// **'The speech provider returned an invalid response.'**
+  String get speechApiInvalidResponse;
+
+  /// CodeWalk UI string — speechApiEmptyAudio
+  ///
+  /// In en, this message translates to:
+  /// **'No microphone audio was captured.'**
+  String get speechApiEmptyAudio;
+
+  /// CodeWalk UI string — speechApiEmptyTranscript
+  ///
+  /// In en, this message translates to:
+  /// **'The speech provider returned no transcription.'**
+  String get speechApiEmptyTranscript;
+
+  /// CodeWalk UI string — speechApiCustomProvider
+  ///
+  /// In en, this message translates to:
+  /// **'Custom OpenAI-compatible'**
+  String get speechApiCustomProvider;
+
+  /// CodeWalk UI string — speechApiMaxDuration
+  ///
+  /// In en, this message translates to:
+  /// **'API recordings stop automatically after 2 minutes.'**
+  String get speechApiMaxDuration;
+
+  /// CodeWalk UI string — speechApiLanguageHint
+  ///
+  /// In en, this message translates to:
+  /// **'The active app language is sent as a transcription hint.'**
+  String get speechApiLanguageHint;
+
+  /// CodeWalk UI string — speechSttApiKeyStorageUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Secure speech API key storage is unavailable.'**
+  String get speechSttApiKeyStorageUnavailable;
+
+  /// CodeWalk UI string — speechSttApiKeyMissing
+  ///
+  /// In en, this message translates to:
+  /// **'Add a speech API key in Settings > Speech.'**
+  String get speechSttApiKeyMissing;
+
+  /// CodeWalk UI string — speechSttApiKeyRejected
+  ///
+  /// In en, this message translates to:
+  /// **'The speech API key was rejected.'**
+  String get speechSttApiKeyRejected;
 }
 
 class _AppLocalizationsDelegate

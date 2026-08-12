@@ -1450,6 +1450,44 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **When** voice input fails in the composer on Windows
 - **Then** the snackbar action maps typed reasons to Windows Settings: speech settings for `noInputDevice`, microphone privacy for `microphoneDenied`, `deviceBusy`, `unsupportedFormat`, `backendUnavailable`, or `generic`
 
+### API speech-to-text engine
+
+- **Given** the user opens `Settings > Speech`
+- **When** the speech-to-text engine list is shown
+- **Then** the `API` engine is selectable on all mobile and desktop platforms, alongside the native and on-device engines
+- **Then** selecting `API` shows the speech API card with a privacy note that recorded microphone audio is sent to the configured provider and that API keys stay in secure storage on the device
+- **Then** the user can pick `OpenAI`, `Groq`, or `Custom OpenAI-compatible` as the speech-to-text provider
+- **Then** `OpenAI` pins the endpoint to `https://api.openai.com/v1` with the `gpt-4o-mini-transcribe` default model and requires an API key
+- **Then** `Groq` pins the endpoint to `https://api.groq.com/openai/v1` with the `whisper-large-v3-turbo` default model and requires an API key
+- **Then** switching providers restores the pinned endpoint and default model of the newly selected provider
+- **Then** `Custom OpenAI-compatible` allows editing the base URL and model and treats the API key as optional
+- **Then** custom endpoints must use HTTPS, except for `localhost`, `127.0.0.1`, or `::1` HTTP loopback endpoints
+- **When** the user saves an API key
+- **Then** the key is stored per provider in secure storage and is excluded from `ExperienceSettings` JSON
+- **Then** saving an empty key removes the stored key for that provider
+
+### API speech-to-text recording
+
+- **Given** the `API` engine is configured and the user activates voice input
+- **When** the user speaks
+- **Then** CodeWalk captures PCM16 mono 16 kHz audio and transcribes it once on stop by posting a WAV payload as multipart data to the `<baseUrl>/audio/transcriptions` endpoint, with the model and an optional language hint derived from the app language
+- **Then** transcription is final-only: the resulting text is inserted into the composer when the request completes, with no interim results
+- **Then** the recording stops automatically after the configured silence timeout or after 2 minutes at most
+- **Then** the microphone control stays busy through the upload and only returns when the final result or error arrives
+- **When** no speech was captured, the provider returns no transcription, the API key is rejected, the endpoint or model is rejected, the provider rate-limits or is unavailable, the network fails, or the response is invalid
+- **Then** the user sees a typed error instead of silent failure, and the API key is never shown
+- **When** the composer is disposed during capture or upload
+- **Then** the in-flight request is cancelled and the recorded audio is discarded without being uploaded
+- **Then** selecting the `API` engine does not alter native/on-device model settings or their fallback chains
+
+### API engine platform support
+
+- **Given** the app runs on Web
+- **When** speech-engine availability is evaluated
+- **Then** the `API` engine is unavailable and disabled because browser builds must not hold cloud API keys
+- **Then** a persisted `API` selection on Web is migrated to `Native` at startup
+- **Then** the `API` engine has no fallback to another engine when it is unavailable
+
 ---
 
 ## Interactive Prompts

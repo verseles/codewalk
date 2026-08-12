@@ -74,6 +74,7 @@ import '../../presentation/services/session_attention/session_attention_host_ser
 import '../../presentation/services/session_tab_icon_override_store.dart';
 import '../../presentation/services/sherpa_model_manager.dart';
 import '../../presentation/services/sound_service.dart';
+import '../../presentation/services/speech_input_service_api.dart';
 import '../../presentation/services/speech_input_service_moonshine.dart';
 import '../../presentation/services/speech_input_service_parakeet.dart';
 import '../../presentation/services/speech_input_service_sensevoice.dart';
@@ -85,6 +86,7 @@ import '../../presentation/services/tts/openai_compatible_tts_backend.dart';
 import '../../presentation/services/tts/tts_backend.dart';
 import '../../presentation/services/update_check_service.dart';
 import '../../presentation/services/workspace_file_operations_service.dart';
+import '../auth/stt_api_key_storage.dart';
 import '../auth/tts_api_key_storage.dart';
 import '../constants/app_constants.dart';
 import '../network/dio_client.dart';
@@ -136,6 +138,7 @@ Future<void> init() async {
   sl.registerLazySingleton(NotificationService.new);
   sl.registerLazySingleton(SoundService.new);
   sl.registerLazySingleton(TtsApiKeyStorage.new);
+  sl.registerLazySingleton(SttApiKeyStorage.new);
   sl.registerLazySingleton(SessionAttentionSnapshotStore.new);
   final sessionAttentionHostGeneration =
       'main-${DateTime.now().microsecondsSinceEpoch}';
@@ -326,6 +329,9 @@ Future<void> init() async {
   // from user settings (Native/speech_to_text or Sherpa on-device).
   sl.registerLazySingleton(SttSpeechInputService.new);
   if (!kIsWeb) {
+    sl.registerFactory(
+      () => ApiSpeechInputService(apiKeyStorage: sl<SttApiKeyStorage>()),
+    );
     sl.registerLazySingleton(
       () => SherpaSpeechInputService(sl<SherpaModelManager>()),
     );

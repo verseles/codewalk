@@ -54,6 +54,7 @@ This document contains only active architectural decisions that represent the cu
 - ADR-048: Adaptive First-Run Read-Aloud TTS Defaults
 - ADR-049: Cross-Platform Attention Surfaces and Secure Background Continuity
 - ADR-052: Bounded Default-Off Autosave Addendum for the Focused File Editor
+- ADR-053: Client-Owned Configurable API Speech-to-Text (OpenAI / Groq / Custom OpenAI-Compatible)
 
 ---
 
@@ -3324,3 +3325,101 @@ The addendum retains the existing named regression anchors from ADR-043 and appl
 - `lib/presentation/pages/chat_page/chat_page_file_viewer.dart` — editor dirty state, manual `Save`, debounce ownership, and save error presentation.
 - `test/unit/presentation/workspace_file_operations_service_test.dart` — transport, containment, decoder, sentinel, and write regression anchors.
 - `test/widget/chat_page_test.dart` — focused-editor, dirty-tab, path-mutation, and fake-service regression anchors.
+
+---
+
+## ADR-053: Client-Owned Configurable API Speech-to-Text (OpenAI / Groq / Custom OpenAI-Compatible) (2026-08-12)
+
+**Status**: Accepted
+
+**Related**: GitHub issue #97; ADR-006 (Speech Input Architecture with `SpeechInputService` and Platform Policy), ADR-007 (Modular Settings Architecture for `ExperienceSettings`), ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-038/ADR-039/ADR-044 (platform STT policy and `SpeechEnginePlatformSupport`), ADR-046/ADR-047/ADR-048 (client-owned cloud TTS provider precedent).
+
+### Context
+
+On-device STT engines (Native, Sherpa, Moonshine, Parakeet, SenseVoice) require local models and are unavailable or weak on some platforms. Users need an opt-in cloud speech-to-text path that sends recorded microphone audio to a user-configured third-party provider.
+
+The feature must remain client-owned: the OpenCode server must not be involved in transcription, credential storage, or provider routing (ADR-023). It must also protect provider secrets, preserve the existing native/on-device engine set and platform policy unchanged, and keep a bounded, honest failure model — cloud transcription failures must never silently fall back to another engine with different privacy behavior.
+
+The design space is deliberately constrained: only OpenAI, Groq, and user-defined OpenAI-compatible endpoints are offered. Google Cloud Speech-to-Text and xAI are excluded because they do not expose an OpenAI-compatible `/audio/transcriptions` contract; any provider that does expose such a contract is reachable through the Custom preset.
+
+### Decision
+
+Adopt `SpeechToTextEngine.api` as an opt-in engine backed by `ApiSpeechInputService`, with two pinned presets, one configurable provider mode, and strict security/platform boundaries.
+
+1. **Provider scope and pinned presets.** `SpeechApiProvider { openAi, groq, custom }` is the only provider surface. Presets are pinned: OpenAI (`https://api.openai.com/v1`, `gpt-4o-mini-transcribe`) and Groq (`https://api.groq.com/openai/v1`, `whisper-large-v3-turbo`). `setSpeechApiProvider()` resets base URL and model to the provider defaults, and the base URL field is editable only for `custom`. Google and xAI are not offered as presets (see Context); other OpenAI-compatible endpoints are configured through `custom`.
+
+2. **Secure per-provider secrets.** API keys are stored only through `SttApiKeyStorage`, backed by `flutter_secure_storage` and namespaced per provider (`stt_api_key::openai|groq|custom`). Keys never enter `ExperienceSettings`, normal preference payloads, logs, or exported settings. The Custom preset makes the key optional; for OpenAI/Groq a missing key fails with a typed `apiKeyMissing` reason. Saving an empty value deletes the stored key; secure-storage failure fails closed (`apiKeyStorageUnavailable`).
+
+3. **Custom endpoint transport policy.** Custom base URLs must be `https` for any remote host; plain `http` is accepted only for loopback hosts (`localhost`, `127.0.0.1`, `::1`), and the model must be non-empty. Any other configuration fails with `apiConfigInvalid`. This prevents API keys from being transmitted in plaintext to arbitrary hosts while still supporting local OpenAI-compatible proxies.
+
+4. **Mobile/desktop only; Web excluded and migrated.** `SpeechEnginePlatformSupport.isApiSupported => !kIsWeb`. On web the engine tile is disabled, `ApiSpeechInputService.initialize()` fails with `webUnavailable`, and `SettingsProvider.initialize()` migrates a persisted `api` selection back to `native`. This avoids exposing provider keys in browser builds and avoids mixed-content restrictions on HTTPS-hosted web clients.
+
+5. **Final-only WAV upload.** Microphone PCM is accumulated locally with speech-activity threshold, silence timeout, and a 2-minute max duration. When the recording finalizes (manual stop, silence, or timeout), the PCM is encoded to WAV and uploaded exactly once as a multipart file to `POST {baseUrl}/audio/transcriptions` with `model`, `response_format: json`, and an optional `language` hint derived from the app locale. There is no streaming or partial upload; the transcript is inserted at finalize.
+
+6. **Factory service isolation per composer.** `ApiSpeechInputService` is registered in DI with `registerFactory`, not as a lazy singleton. Each composer resolves and caches its own instance and calls `configure()` from the current settings at every voice start; `configure()` also clears the in-memory API key. This prevents credential/config mixing between composers and stale-key reuse after settings changes.
+
+7. **Local/native paths preserved.** Native and all on-device engines (Sherpa, Moonshine, Parakeet, SenseVoice) and the `SpeechEnginePlatformSupport` platform table are unchanged. The API engine is used only when explicitly selected; if it fails to initialize or transcribe, the typed reason is surfaced and no other engine is silently substituted (the API engine has no fallback candidates).
+
+8. **Typed provider errors.** 401/403 → `apiKeyRejected`; 400/404/422 → `apiRequestInvalid`; 429 → `apiRateLimited`; 5xx → `apiUnavailable`; network → `apiNetwork`; malformed response → `apiInvalidResponse`; empty audio/transcript handled explicitly. Stable locale-independent reason keys are mapped to localized copy at the UI boundary.
+
+### Rationale
+
+- **Client-owned model follows the TTS precedent (ADR-046/047/048):** the client talks directly to the user-configured provider; the OpenCode server never sees audio or keys, so no server contract change and no ADR-023 exception is needed.
+- **Pinned presets keep tested defaults and a small provider surface:** OpenAI and Groq are the only curated presets; every other provider must expose an OpenAI-compatible `/audio/transcriptions` endpoint and is configured through Custom. Google/xAI are excluded because they lack that compatible contract; a preset list of incompatible APIs would force per-provider adapters for no client-owned benefit.
+- **Secure storage plus non-secret `ExperienceSettings` mirrors ADR-001 and ADR-046:** keys live in `flutter_secure_storage`; only provider, base URL, and model are ordinary settings.
+- **HTTPS-only remote / HTTP-loopback-only enforcement** prevents key exfiltration over plaintext while supporting local OpenAI-compatible proxies.
+- **Web exclusion** protects keys in browser builds and avoids mixed-content failures on HTTPS-hosted clients.
+- **Final-only upload bounds third-party exposure:** one WAV per utterance, capped at 2 minutes, with visible privacy copy — the same bounded-data principle as ADR-046/047 payload limits.
+- **Factory-per-composer isolation** makes credential/config mixing structurally impossible rather than relying on call-site discipline.
+- **No silent fallback** keeps provider choice honest: a failed cloud transcription must be visible, not quietly replayed through a different engine with different privacy and accuracy behavior.
+
+### Consequences
+
+- ✅ Opt-in cloud STT with pinned OpenAI/Groq presets and any OpenAI-compatible Custom endpoint, on mobile and desktop.
+- ✅ API keys stay in per-provider secure storage only — never in settings, logs, preferences, or exports; storage failure fails closed.
+- ✅ Custom endpoints are restricted to HTTPS (remote) or HTTP loopback; keys are never sent in plaintext to arbitrary hosts.
+- ✅ Web is excluded with automatic migration of saved `api` selections to `native`.
+- ✅ Final-only WAV upload keeps third-party data transfer to one bounded request per utterance (silence timeout + 2-minute cap).
+- ✅ Factory-registered `ApiSpeechInputService` isolates credentials/config per composer and re-reads keys at each session start.
+- ✅ Native and on-device engines, platform tables, and fallback chains are unchanged; the API engine never silently falls back.
+- ✅ Fully ADR-023 compliant: no OpenCode server endpoint, schema, event, or lifecycle change; transcription traffic is client→provider only.
+- ⚠ Recorded microphone audio leaves the device for the configured provider when the API engine is active; settings show privacy copy and the user must opt in explicitly.
+- ⚠ Custom endpoints may diverge from OpenAI semantics (model/format/error behavior); failures surface as typed provider errors.
+- ⚠ Custom API keys are optional, so a misconfigured custom endpoint without a key may produce provider-side 401/403s that surface as `apiKeyRejected`.
+- ⚠ Browser builds lose the cloud engine (migrated to native); users wanting cloud STT must use a native build.
+- ❌ No streaming or partial transcriptions; transcription happens only after the recording finalizes.
+- ❌ Google and xAI are not offered as presets; only OpenAI-compatible endpoints are supported, via Custom.
+- ❌ CodeWalk does not proxy STT through the OpenCode server and never stores STT keys server-side.
+
+### Security Consequences
+
+- **Secrets:** per-provider keys in `flutter_secure_storage` only; provider-namespaced keys (`stt_api_key::<provider>`); in-memory key cleared on every `configure()`; save-empty deletes; secure-storage failure fails closed with a typed reason.
+- **Transport:** `Authorization: Bearer` header is sent only to the validated endpoint — HTTPS for remote hosts, HTTP only for loopback — so keys cannot be sent in plaintext to arbitrary custom hosts.
+- **Data:** only the final WAV (≤ 2 minutes) plus model/language hints are sent; no logs, tool metadata, chat content, or credentials accompany the request.
+- **Isolation:** factory registration per composer prevents one composer's key/config from leaking into another; settings changes re-configure and clear state before the next start.
+
+### Rollback / Fallback Plan
+
+- **User rollback:** switch `Settings > Speech` engine back to Native or an on-device engine; the API engine has no fallback candidates, so selection is explicit and reversible.
+- **Platform migration:** web builds auto-migrate persisted `api` selections to `native` on startup; the engine tile is disabled.
+- **Feature rollback:** remove the `SpeechToTextEngine.api` tile and the `ApiSpeechInputService` factory registration; stored keys remain unused in secure storage until an explicit migration purges the `stt_api_key::` namespace. No settings-data migration is required.
+- **Failure fallback:** any API STT failure shows the typed localized reason; `apiKeyStorageUnavailable`, `apiConfigInvalid`, and `webUnavailable` fail closed before any audio is captured or sent.
+
+### ADR-023 Compatibility
+
+This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception. It adds no OpenCode server endpoint, request/response schema, realtime event, session/message/model/agent lifecycle change, config mutation, or server-side proxy. API STT is a client-owned speech feature: CodeWalk captures microphone audio on the client, encodes it to WAV locally, and sends it directly from the client to the user-configured third-party provider only when `SpeechToTextEngine.api` is selected. The OpenCode server is not involved in capture, transcription, credential storage, provider routing, or result delivery — the same client-owned boundary already established for cloud TTS in ADR-046/ADR-047/ADR-048.
+
+### Key Files
+
+- `lib/domain/entities/experience_settings.dart` — `SpeechApiProvider` enum, pinned preset constants (`kDefaultOpenAiSttBaseUrl`/`kDefaultOpenAiSttModel`, `kDefaultGroqSttBaseUrl`/`kDefaultGroqSttModel`), and non-secret `speechApiProvider`/`speechApiBaseUrl`/`speechApiModel` persistence.
+- `lib/core/auth/stt_api_key_storage.dart` — per-provider `flutter_secure_storage` key storage; the only accepted persistence path for STT secrets.
+- `lib/presentation/services/speech_input_service_api.dart` — `ApiSpeechInputService` engine: endpoint validation, final-only WAV upload, typed provider errors, silence/2-minute finalization.
+- `lib/core/di/injection_container.dart` — `registerFactory(ApiSpeechInputService)` for per-composer isolation.
+- `lib/presentation/utils/speech_engine_platform_support.dart` — `isApiSupported => !kIsWeb`; all other engine flags unchanged.
+- `lib/presentation/providers/settings_provider.dart` — `setSpeechApiProvider`/`setSpeechApiBaseUrl`/`setSpeechApiModel` preset pinning; web `api` → `native` migration.
+- `lib/presentation/pages/settings/sections/speech_settings_section.dart` — engine tile, provider dropdown, base URL (custom-only editable), model, obscured key entry, privacy copy, and typed status.
+- `lib/presentation/widgets/chat_input/chat_input_speech_controller.dart` — engine resolution (API has no fallback candidates), per-start `configure()`, and typed reason snackbars.
+- `lib/presentation/widgets/chat_input_widget.dart` — per-composer `ApiSpeechInputService` instance caching.
+- `lib/l10n/app_en.arb` + locale ARBs — `speechApi*` keys (provider, privacy, batch hint, max duration, language hint, typed errors).
+- `test/unit/` — key storage, engine validation/transport, settings migration, and platform-support coverage.
+- Ref: issue #97

@@ -2202,5 +2202,27 @@
   "chatProviderErrorSendMessage": "فشل إرسال الرسالة",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI أو Groq أو نقطة نهاية مخصصة متوافقة مع OpenAI.",
+  "speechApiProvider": "موفر تحويل الكلام إلى نص",
+  "speechCloudSttPrivacy": "خصوصية تحويل الكلام إلى نص في السحابة",
+  "speechCloudSttPrivacyDescription": "يُرسل الصوت المسجل من الميكروفون إلى الموفر المُعد. تبقى مفاتيح API في التخزين الآمن على هذا الجهاز.",
+  "speechApiKeyOptional": "اختياري لنقاط النهاية المخصصة.",
+  "speechApiBatchHint": "يستخدم {provider} التحويل الدفعي. انقر على الميكروفون مرة أخرى للإيقاف والتحويل.",
+  "speechApiWebUnavailable": "تحويل الكلام إلى نص عبر API غير متاح في إصدار الويب.",
+  "speechApiConfigInvalid": "تحقق من نقطة النهاية والنموذج لـ API الكلام. يجب أن تستخدم نقاط النهاية البعيدة HTTPS.",
+  "speechApiRequestInvalid": "تم رفض نقطة نهاية الكلام أو النموذج.",
+  "speechApiRateLimited": "أبلغ موفر الكلام عن حصة أو حد معدل.",
+  "speechApiUnavailable": "موفر الكلام غير متاح مؤقتًا.",
+  "speechApiNetwork": "تعذر الوصول إلى موفر الكلام.",
+  "speechApiInvalidResponse": "أعاد موفر الكلام استجابة غير صالحة.",
+  "speechApiEmptyAudio": "لم يتم التقاط أي صوت من الميكروفون.",
+  "speechApiEmptyTranscript": "لم يُرجع موفر الكلام أي نص محول.",
+  "speechApiCustomProvider": "مخصص متوافق مع OpenAI",
+  "speechApiMaxDuration": "يتوقف التسجيل عبر API تلقائيًا بعد دقيقتين.",
+  "speechApiLanguageHint": "يُرسل لغة التطبيق النشطة كتلميح للتحويل.",
+  "speechSttApiKeyStorageUnavailable": "التخزين الآمن لمفتاح API الخاص بالكلام غير متاح.",
+  "speechSttApiKeyMissing": "أضف مفتاح API للكلام في الإعدادات > الكلام.",
+  "speechSttApiKeyRejected": "تم رفض مفتاح API الخاص بالكلام."
 }

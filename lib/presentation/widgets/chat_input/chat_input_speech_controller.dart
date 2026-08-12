@@ -27,7 +27,14 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
   ) async {
     final primaryEngine = settingsProvider.speechToTextEngine;
     final candidates = <SpeechToTextEngine>[primaryEngine];
-    if (primaryEngine == SpeechToTextEngine.native) {
+    if (primaryEngine == SpeechToTextEngine.api) {
+      final service = _apiSpeechService;
+      service?.configure(
+        provider: settingsProvider.speechApiProvider,
+        baseUrl: settingsProvider.speechApiBaseUrl,
+        model: settingsProvider.speechApiModel,
+      );
+    } else if (primaryEngine == SpeechToTextEngine.native) {
       if (_isSherpaEngineSupported) {
         candidates.add(SpeechToTextEngine.sherpa);
       }
@@ -134,11 +141,23 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       'runtimeFailed' => l10n.speechRuntimeFailed(label),
       'modelIncomplete' => l10n.speechModelFilesIncomplete(label),
       'platformUnavailable' => l10n.speechUnavailableOnPlatform(label),
+      'webUnavailable' => l10n.speechApiWebUnavailable,
       'noInputDevice' => l10n.speechMicNoInputDevice,
       'deviceBusy' => l10n.speechMicDeviceBusy,
       'unsupportedFormat' => l10n.speechMicUnsupportedFormat,
       'speechPrivacy' => l10n.speechMicSpeechPrivacy,
       'backendUnavailable' => l10n.speechMicBackendUnavailable,
+      'apiConfigInvalid' => l10n.speechApiConfigInvalid,
+      'apiKeyMissing' => l10n.speechSttApiKeyMissing,
+      'apiKeyStorageUnavailable' => l10n.speechSttApiKeyStorageUnavailable,
+      'apiKeyRejected' => l10n.speechSttApiKeyRejected,
+      'apiRequestInvalid' => l10n.speechApiRequestInvalid,
+      'apiRateLimited' => l10n.speechApiRateLimited,
+      'apiUnavailable' => l10n.speechApiUnavailable,
+      'apiNetwork' => l10n.speechApiNetwork,
+      'apiInvalidResponse' => l10n.speechApiInvalidResponse,
+      'emptyAudio' => l10n.speechApiEmptyAudio,
+      'emptyTranscript' => l10n.speechApiEmptyTranscript,
       _ => l10n.msgVoiceInputUnavailable,
     };
   }
@@ -163,6 +182,7 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       settingsProvider,
       l10n,
     );
+    if (!mounted) return;
     if (resolution == null) {
       _finishListeningLoading();
       if (!mounted) return;
@@ -172,6 +192,12 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
 
     final service = resolution.service;
     _activeSpeechService = service;
+    if (resolution.engine == SpeechToTextEngine.api && !service.isAvailable) {
+      _finishListeningLoading();
+      if (!mounted) return;
+      _showVoiceInputUnavailableSnackbar(context, reasonService: service);
+      return;
+    }
     if (resolution.usedFallback && mounted) {
       final label = _speechEngineLabel(resolution.engine);
       final reason = resolution.unavailableReason?.trim();
@@ -306,7 +332,10 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     }
 
     final service = _activeSpeechService;
-    final listening = status == 'listening' || (service?.isListening ?? false);
+    final listening = speechStatusIndicatesListening(
+      status: status,
+      serviceIsListening: service?.isListening ?? false,
+    );
     if (_isListening == listening) return;
     _setState(() {
       _isListening = listening;
@@ -319,13 +348,11 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     _setState(() {
       _isListening = false;
     });
+    final service = _activeSpeechService;
     final isWindows =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
-    if (isWindows) {
-      _showVoiceInputUnavailableSnackbar(
-        context,
-        reasonService: _activeSpeechService,
-      );
+    if (isWindows || service is ApiSpeechInputService) {
+      _showVoiceInputUnavailableSnackbar(context, reasonService: service);
     }
   }
 
@@ -417,17 +444,30 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
+    final service = reasonService ?? _activeSpeechService;
+    final reason = service is ApiSpeechInputService
+        ? _localizedUnavailableReason(
+            l10n,
+            SpeechToTextEngine.api,
+            service.unavailableReasonKey,
+          )
+        : service?.unavailableReason?.trim();
     final isWindows =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
 
-    if (!isWindows) {
+    if (!isWindows || service is ApiSpeechInputService) {
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.msgVoiceInputUnavailable)),
+        SnackBar(
+          content: Text(
+            reason != null && reason.isNotEmpty
+                ? reason
+                : l10n.msgVoiceInputUnavailable,
+          ),
+        ),
       );
       return;
     }
 
-    final service = reasonService ?? _activeSpeechService;
     final reasonKey = service?.unavailableReasonKey;
     final (String label, Future<bool> Function() action) =
         _windowsActionForReason(reasonKey, l10n);

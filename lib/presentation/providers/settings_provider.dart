@@ -255,6 +255,9 @@ class SettingsProvider extends ChangeNotifier {
   String get moonshineModelId => _settings.moonshineModelId;
   String get parakeetModelId => _settings.parakeetModelId;
   String get senseVoiceModelId => _settings.senseVoiceModelId;
+  SpeechApiProvider get speechApiProvider => _settings.speechApiProvider;
+  String get speechApiBaseUrl => _settings.speechApiBaseUrl;
+  String get speechApiModel => _settings.speechApiModel;
   bool get skipOnboardingWizard => _settings.skipOnboardingWizard;
   bool get pendingPostOnboardingChatTour =>
       _settings.pendingPostOnboardingChatTour;
@@ -357,6 +360,12 @@ class SettingsProvider extends ChangeNotifier {
         _settings.speechToTextEngine == SpeechToTextEngine.native) {
       _settings = _settings.copyWith(
         speechToTextEngine: SpeechToTextEngine.parakeet,
+      );
+      shouldPersistPlatformSettings = true;
+    } else if (kIsWeb &&
+        _settings.speechToTextEngine == SpeechToTextEngine.api) {
+      _settings = _settings.copyWith(
+        speechToTextEngine: SpeechToTextEngine.native,
       );
       shouldPersistPlatformSettings = true;
     } else if ((kIsWeb || isIos) &&
@@ -1212,6 +1221,40 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(speechSilenceTimeoutSeconds: normalized);
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setSpeechApiProvider(SpeechApiProvider provider) async {
+    if (_settings.speechApiProvider == provider) return;
+    _settings = _settings.copyWith(
+      speechApiProvider: provider,
+      speechApiBaseUrl: defaultSpeechApiBaseUrl(provider),
+      speechApiModel: defaultSpeechApiModel(provider),
+    );
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setSpeechApiBaseUrl(String? value) async {
+    if (_settings.speechApiProvider != SpeechApiProvider.custom) return;
+    final trimmed = value?.trim().replaceFirst(RegExp(r'/+$'), '');
+    final effective = trimmed != null && trimmed.isNotEmpty
+        ? trimmed
+        : defaultSpeechApiBaseUrl(_settings.speechApiProvider);
+    if (_settings.speechApiBaseUrl == effective) return;
+    _settings = _settings.copyWith(speechApiBaseUrl: effective);
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setSpeechApiModel(String? value) async {
+    final trimmed = value?.trim();
+    final effective = trimmed != null && trimmed.isNotEmpty
+        ? trimmed
+        : defaultSpeechApiModel(_settings.speechApiProvider);
+    if (_settings.speechApiModel == effective) return;
+    _settings = _settings.copyWith(speechApiModel: effective);
     notifyListeners();
     await _persist();
   }

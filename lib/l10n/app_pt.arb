@@ -2203,5 +2203,27 @@
   "chatProviderErrorSendMessage": "Falha ao enviar mensagem",
   "@chatProviderErrorSendMessage": {
     "description": "CodeWalk UI string — chatProviderErrorSendMessage"
-  }
+  },
+  "speechApiEngine": "API",
+  "speechApiEngineSubtitle": "OpenAI, Groq ou um endpoint personalizado compatível com OpenAI.",
+  "speechApiProvider": "Provedor de fala para texto",
+  "speechCloudSttPrivacy": "Privacidade do reconhecimento de fala em nuvem",
+  "speechCloudSttPrivacyDescription": "O áudio do microfone gravado é enviado ao provedor configurado. As chaves de API permanecem no armazenamento seguro deste dispositivo.",
+  "speechApiKeyOptional": "Opcional para endpoints personalizados.",
+  "speechApiBatchHint": "{provider} usa transcrição em lote. Toque no microfone novamente para parar e transcrever.",
+  "speechApiWebUnavailable": "O reconhecimento de fala por API não está disponível na versão web.",
+  "speechApiConfigInvalid": "Verifique o endpoint e o modelo da API de fala. Endpoints remotos devem usar HTTPS.",
+  "speechApiRequestInvalid": "O endpoint ou o modelo de fala foi rejeitado.",
+  "speechApiRateLimited": "O provedor de fala informou uma cota ou limite de taxa.",
+  "speechApiUnavailable": "O provedor de fala está temporariamente indisponível.",
+  "speechApiNetwork": "Não foi possível alcançar o provedor de fala.",
+  "speechApiInvalidResponse": "O provedor de fala retornou uma resposta inválida.",
+  "speechApiEmptyAudio": "Nenhum áudio do microfone foi capturado.",
+  "speechApiEmptyTranscript": "O provedor de fala não retornou nenhuma transcrição.",
+  "speechApiCustomProvider": "Personalizado compatível com OpenAI",
+  "speechApiMaxDuration": "As gravações da API param automaticamente após 2 minutos.",
+  "speechApiLanguageHint": "O idioma ativo do aplicativo é enviado como dica de transcrição.",
+  "speechSttApiKeyStorageUnavailable": "O armazenamento seguro da chave de API de fala está indisponível.",
+  "speechSttApiKeyMissing": "Adicione uma chave de API de fala em Configurações > Fala.",
+  "speechSttApiKeyRejected": "A chave de API de fala foi rejeitada."
 }

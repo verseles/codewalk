@@ -6332,4 +6332,76 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => '메시지 전송에 실패했습니다';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI, Groq 또는 OpenAI 호환 사용자 지정 엔드포인트.';
+
+  @override
+  String get speechApiProvider => '음성 텍스트 변환 제공업체';
+
+  @override
+  String get speechCloudSttPrivacy => '클라우드 음성 텍스트 변환 개인정보 보호';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      '녹음된 마이크 오디오는 구성된 제공업체로 전송됩니다. API 키는 이 기기의 보안 저장소에 유지됩니다.';
+
+  @override
+  String get speechApiKeyOptional => '사용자 지정 엔드포인트의 경우 선택사항입니다.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return '$provider는 배치 변환을 사용합니다. 마이크를 다시 탭하여 중지하고 변환하세요.';
+  }
+
+  @override
+  String get speechApiWebUnavailable => 'API 음성 텍스트 변환은 웹 빌드에서 사용할 수 없습니다.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      '음성 API 엔드포인트와 모델을 확인하세요. 원격 엔드포인트는 HTTPS를 사용해야 합니다.';
+
+  @override
+  String get speechApiRequestInvalid => '음성 엔드포인트 또는 모델이 거부되었습니다.';
+
+  @override
+  String get speechApiRateLimited => '음성 제공업체가 할당량 또는 속도 제한을 보고했습니다.';
+
+  @override
+  String get speechApiUnavailable => '음성 제공업체를 일시적으로 사용할 수 없습니다.';
+
+  @override
+  String get speechApiNetwork => '음성 제공업체에 연결할 수 없습니다.';
+
+  @override
+  String get speechApiInvalidResponse => '음성 제공업체가 잘못된 응답을 반환했습니다.';
+
+  @override
+  String get speechApiEmptyAudio => '마이크 오디오가 캡처되지 않았습니다.';
+
+  @override
+  String get speechApiEmptyTranscript => '음성 제공업체가 변환 결과를 반환하지 않았습니다.';
+
+  @override
+  String get speechApiCustomProvider => 'OpenAI 호환 사용자 지정';
+
+  @override
+  String get speechApiMaxDuration => 'API 녹음은 2분 후 자동으로 중지됩니다.';
+
+  @override
+  String get speechApiLanguageHint => '활성 앱 언어가 변환 힌트로 전송됩니다.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      '보안 음성 API 키 저장소를 사용할 수 없습니다.';
+
+  @override
+  String get speechSttApiKeyMissing => '설정 > 음성에서 음성 API 키를 추가하세요.';
+
+  @override
+  String get speechSttApiKeyRejected => '음성 API 키가 거부되었습니다.';
 }

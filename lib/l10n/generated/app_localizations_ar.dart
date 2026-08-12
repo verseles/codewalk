@@ -6504,4 +6504,80 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get chatProviderErrorSendMessage => 'فشل إرسال الرسالة';
+
+  @override
+  String get speechApiEngine => 'API';
+
+  @override
+  String get speechApiEngineSubtitle =>
+      'OpenAI أو Groq أو نقطة نهاية مخصصة متوافقة مع OpenAI.';
+
+  @override
+  String get speechApiProvider => 'موفر تحويل الكلام إلى نص';
+
+  @override
+  String get speechCloudSttPrivacy => 'خصوصية تحويل الكلام إلى نص في السحابة';
+
+  @override
+  String get speechCloudSttPrivacyDescription =>
+      'يُرسل الصوت المسجل من الميكروفون إلى الموفر المُعد. تبقى مفاتيح API في التخزين الآمن على هذا الجهاز.';
+
+  @override
+  String get speechApiKeyOptional => 'اختياري لنقاط النهاية المخصصة.';
+
+  @override
+  String speechApiBatchHint(String provider) {
+    return 'يستخدم $provider التحويل الدفعي. انقر على الميكروفون مرة أخرى للإيقاف والتحويل.';
+  }
+
+  @override
+  String get speechApiWebUnavailable =>
+      'تحويل الكلام إلى نص عبر API غير متاح في إصدار الويب.';
+
+  @override
+  String get speechApiConfigInvalid =>
+      'تحقق من نقطة النهاية والنموذج لـ API الكلام. يجب أن تستخدم نقاط النهاية البعيدة HTTPS.';
+
+  @override
+  String get speechApiRequestInvalid => 'تم رفض نقطة نهاية الكلام أو النموذج.';
+
+  @override
+  String get speechApiRateLimited => 'أبلغ موفر الكلام عن حصة أو حد معدل.';
+
+  @override
+  String get speechApiUnavailable => 'موفر الكلام غير متاح مؤقتًا.';
+
+  @override
+  String get speechApiNetwork => 'تعذر الوصول إلى موفر الكلام.';
+
+  @override
+  String get speechApiInvalidResponse => 'أعاد موفر الكلام استجابة غير صالحة.';
+
+  @override
+  String get speechApiEmptyAudio => 'لم يتم التقاط أي صوت من الميكروفون.';
+
+  @override
+  String get speechApiEmptyTranscript => 'لم يُرجع موفر الكلام أي نص محول.';
+
+  @override
+  String get speechApiCustomProvider => 'مخصص متوافق مع OpenAI';
+
+  @override
+  String get speechApiMaxDuration =>
+      'يتوقف التسجيل عبر API تلقائيًا بعد دقيقتين.';
+
+  @override
+  String get speechApiLanguageHint =>
+      'يُرسل لغة التطبيق النشطة كتلميح للتحويل.';
+
+  @override
+  String get speechSttApiKeyStorageUnavailable =>
+      'التخزين الآمن لمفتاح API الخاص بالكلام غير متاح.';
+
+  @override
+  String get speechSttApiKeyMissing =>
+      'أضف مفتاح API للكلام في الإعدادات > الكلام.';
+
+  @override
+  String get speechSttApiKeyRejected => 'تم رفض مفتاح API الخاص بالكلام.';
 }
