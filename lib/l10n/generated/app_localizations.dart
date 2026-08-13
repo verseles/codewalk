@@ -11404,6 +11404,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The speech API key was rejected.'**
   String get speechSttApiKeyRejected;
+
+  /// No description provided for @carMessagingConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Android Auto conversations'**
+  String get carMessagingConversations;
+
+  /// No description provided for @carMessagingReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get carMessagingReply;
+
+  /// No description provided for @carMessagingMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get carMessagingMarkRead;
+
+  /// No description provided for @carMessagingChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental CodeWalk conversation replies'**
+  String get carMessagingChannelDescription;
+
+  /// No description provided for @settingsAndroidAutoMessagingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental test-build support for final responses and voice replies. Not approved for Google Play distribution.'**
+  String get settingsAndroidAutoMessagingDescription;
+
+  /// No description provided for @carMessagingDeliveryFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'\'t send reply'**
+  String get carMessagingDeliveryFailedTitle;
+
+  /// No description provided for @carMessagingDeliveryFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your voice reply could not be delivered. Open CodeWalk to retry.'**
+  String get carMessagingDeliveryFailedBody;
 }
 
 class _AppLocalizationsDelegate

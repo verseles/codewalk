@@ -6404,4 +6404,27 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get speechSttApiKeyRejected => '음성 API 키가 거부되었습니다.';
+
+  @override
+  String get carMessagingConversations => 'Android Auto 대화';
+
+  @override
+  String get carMessagingReply => '답장';
+
+  @override
+  String get carMessagingMarkRead => '읽음으로 표시';
+
+  @override
+  String get carMessagingChannelDescription => '실험적인 CodeWalk 대화 응답';
+
+  @override
+  String get settingsAndroidAutoMessagingDescription =>
+      '최종 응답 및 음성 응답에 대한 실험적 테스트 빌드 지원. Google Play 배포 승인되지 않음.';
+
+  @override
+  String get carMessagingDeliveryFailedTitle => '답장을 보내지 못했습니다';
+
+  @override
+  String get carMessagingDeliveryFailedBody =>
+      '음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요.';
 }

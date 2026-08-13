@@ -131,22 +131,33 @@ extension ChatProviderSessionAttentionOps on ChatProvider {
     SessionAttentionIdentity identity,
   ) {
     final resolver = _sessionAttentionCompletionResolver;
-    if (resolver == null) {
-      return;
+    if (resolver != null) {
+      unawaited(
+        resolver
+            .removeIdentity(identity)
+            .then<void>(
+              (_) {},
+              onError: (Object error, StackTrace stackTrace) {
+                AppLogger.warn(
+                  'Failed to delete encrypted session completion snapshot',
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+              },
+            ),
+      );
     }
     unawaited(
-      resolver
-          .removeIdentity(identity)
-          .then<void>(
-            (_) {},
-            onError: (Object error, StackTrace stackTrace) {
-              AppLogger.warn(
-                'Failed to delete encrypted session completion snapshot',
-                error: error,
-                stackTrace: stackTrace,
-              );
-            },
-          ),
+      CarMessagingRuntime.removeIdentity(identity).then<void>(
+        (_) {},
+        onError: (Object error, StackTrace stackTrace) {
+          AppLogger.warn(
+            'Failed to delete car messaging state for session',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      ),
     );
   }
 

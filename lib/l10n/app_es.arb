@@ -2225,5 +2225,12 @@
   "speechApiLanguageHint": "El idioma activo de la aplicación se envía como sugerencia de transcripción.",
   "speechSttApiKeyStorageUnavailable": "El almacenamiento seguro de la clave de API de voz no está disponible.",
   "speechSttApiKeyMissing": "Añade una clave de API de voz en Ajustes > Voz.",
-  "speechSttApiKeyRejected": "La clave de API de voz fue rechazada."
+  "speechSttApiKeyRejected": "La clave de API de voz fue rechazada.",
+  "carMessagingConversations": "Conversaciones de Android Auto",
+  "carMessagingReply": "Responder",
+  "carMessagingMarkRead": "Marcar como leído",
+  "carMessagingChannelDescription": "Respuestas experimentales de conversaciones de CodeWalk",
+  "settingsAndroidAutoMessagingDescription": "Compatibilidad experimental de builds de prueba para respuestas finales y respuestas por voz. No aprobado para distribución en Google Play.",
+  "carMessagingDeliveryFailedTitle": "No se pudo enviar la respuesta",
+  "carMessagingDeliveryFailedBody": "Tu respuesta de voz no se pudo entregar. Abre CodeWalk para volver a intentarlo."
 }

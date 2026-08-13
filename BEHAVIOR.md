@@ -2063,6 +2063,28 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **When** Android background alerts are disabled or there is no active live-monitor window
 - **Then** the persistent monitor notification is not shown
 
+### Experimental Android Auto messaging (debug-only)
+
+- **Given** the app is an Android debug build (`kDebugMode`) compiled with the `CODEWALK_ANDROID_AUTO_MESSAGING` flag (default off) and the experimental auto-messaging setting is enabled (default off)
+- **Then** auto-messaging runs only in debug/test builds when the compile flag and the setting are both enabled; otherwise it is inert
+- **Then** the automotive notification descriptor is registered only in debug builds and never surfaces a custom car UI, template, or vehicle-side processing
+- **When** a final assistant response completes while the screen is locked, the UI is closed, or the process was recreated
+- **Then** the encrypted pending state is persisted before scheduling the WorkManager pass, so locked-screen and closed-UI replies survive process recreation
+- **Then** the notification uses `MessagingStyle` with the final assistant response, carries the exact root session identity, and exposes exactly one labeled voice `RemoteInput` reply action
+- **When** the user sends a voice reply through the notification
+- **Then** the reply is sent through the official directory-scoped `prompt_async` endpoint without a `messageID`
+- **When** the user marks the conversation read through the notification
+- **Then** the root session is marked read locally only — mark-as-read updates no server state
+- **Given** the server profile uses OAuth or Tailscale
+- **Then** auto-messaging is rejected and never runs; only plain/basic background profiles are supported
+- **When** `Cellular data saver` is active
+- **Then** auto-messaging pauses and schedules no background passes
+- **Then** pending work is kept in a bounded AES-GCM-encrypted queue with bounded history and retries, and ambiguous state fails closed instead of sending
+- **Then** deleting the server profile or session, or running cleanup or rollback, cancels and removes any scheduled auto-messaging state
+- **Then** auto-messaging does not use custom speech recognition or text-to-speech and claims no media/Play eligibility
+- **Then** delivery is never realtime: it follows WorkManager scheduling and polling latency, runs only while the device is powered on, the app is not force-stopped, and the device has been unlocked at least once since boot
+- **Then** a dedicated failure notification reports background auto-messaging failures
+
 ---
 
 ## Background and Lifecycle

@@ -6734,4 +6734,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get speechSttApiKeyRejected => 'Ключ API речи был отклонён.';
+
+  @override
+  String get carMessagingConversations => 'Беседы Android Auto';
+
+  @override
+  String get carMessagingReply => 'Ответить';
+
+  @override
+  String get carMessagingMarkRead => 'Отметить как прочитанное';
+
+  @override
+  String get carMessagingChannelDescription =>
+      'Экспериментальные ответы на беседы CodeWalk';
+
+  @override
+  String get settingsAndroidAutoMessagingDescription =>
+      'Экспериментальная поддержка тестовых сборок для финальных ответов и голосовых ответов. Не одобрено для распространения через Google Play.';
+
+  @override
+  String get carMessagingDeliveryFailedTitle => 'Не удалось отправить ответ';
+
+  @override
+  String get carMessagingDeliveryFailedBody =>
+      'Не удалось доставить ваш голосовой ответ. Откройте CodeWalk, чтобы повторить попытку.';
 }

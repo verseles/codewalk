@@ -8603,5 +8603,12 @@
   "speechSttApiKeyRejected": "The speech API key was rejected.",
   "@speechSttApiKeyRejected": {
     "description": "CodeWalk UI string — speechSttApiKeyRejected"
-  }
+  },
+  "carMessagingConversations": "Android Auto conversations",
+  "carMessagingReply": "Reply",
+  "carMessagingMarkRead": "Mark as read",
+  "carMessagingChannelDescription": "Experimental CodeWalk conversation replies",
+  "settingsAndroidAutoMessagingDescription": "Experimental test-build support for final responses and voice replies. Not approved for Google Play distribution.",
+  "carMessagingDeliveryFailedTitle": "Couldn''t send reply",
+  "carMessagingDeliveryFailedBody": "Your voice reply could not be delivered. Open CodeWalk to retry."
 }

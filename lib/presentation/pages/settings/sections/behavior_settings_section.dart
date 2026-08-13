@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/i18n/app_locales.dart';
 import '../../../../core/i18n/l10n_context.dart';
@@ -116,6 +117,28 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
             const SizedBox(height: 8),
             _buildDataSaverCard(context, settingsProvider),
             const SizedBox(height: 16),
+            if (FeatureFlags.androidAutoMessagingPrototype) ...[
+              Card(
+                child: SwitchListTile.adaptive(
+                  key: const ValueKey<String>(
+                    'settings_toggle_android_auto_messaging',
+                  ),
+                  title: Text(context.l10n.carMessagingConversations),
+                  subtitle: Text(
+                    context.l10n.settingsAndroidAutoMessagingDescription,
+                  ),
+                  value: settingsProvider.androidAutoMessagingEnabled,
+                  onChanged: settingsProvider.androidBackgroundAlertsEnabled
+                      ? (value) => unawaited(
+                          settingsProvider.setAndroidAutoMessagingEnabled(
+                            value,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             Card(
               child: Column(
                 children: [

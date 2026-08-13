@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../../core/config/feature_flags.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
@@ -16,6 +17,10 @@ import '../../data/models/chat_realtime_model.dart';
 import '../../data/models/chat_session_model.dart';
 import '../../domain/entities/experience_settings.dart';
 import 'android_background_alert_logic.dart';
+import 'car_messaging/car_messaging_action_handler.dart';
+import 'car_messaging/car_messaging_dispatch_worker.dart';
+import 'car_messaging/car_messaging_gate.dart';
+import 'car_messaging/car_messaging_runtime.dart';
 import 'cellular_data_saver_service.dart';
 import 'notification_service.dart';
 import 'permission_auto_approve_runtime.dart';
@@ -35,7 +40,10 @@ const Duration _backgroundAlertFailureRetryInterval = Duration(minutes: 5);
 void codewalkBackgroundAlertDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     WidgetsFlutterBinding.ensureInitialized();
-    return AndroidBackgroundAlertWorker.executeTask(taskName: task);
+    return AndroidBackgroundAlertWorker.executeTask(
+      taskName: task,
+      inputData: inputData,
+    );
   });
 }
 
@@ -204,6 +212,9 @@ class AndroidBackgroundAlertWorker {
     try {
       await Workmanager().cancelByUniqueName(_backgroundAlertWorkUniqueName);
       await Workmanager().cancelByUniqueName(_backgroundAlertOneOffUniqueName);
+      if (!FeatureFlags.androidAutoMessagingPrototype) {
+        await Workmanager().cancelByTag(carMessagingReplyWorkTag);
+      }
     } catch (error, stackTrace) {
       AppLogger.warn(
         'Failed to cancel Android background alert tasks',
@@ -461,7 +472,10 @@ class AndroidBackgroundAlertWorker {
   }
 
   @pragma('vm:entry-point')
-  static Future<bool> executeTask({required String taskName}) async {
+  static Future<bool> executeTask({
+    required String taskName,
+    Map<String, dynamic>? inputData,
+  }) async {
     if (!_isAndroidRuntime()) {
       return true;
     }
@@ -477,7 +491,11 @@ class AndroidBackgroundAlertWorker {
       planner: const BackgroundAlertPlanner(),
       notificationDispatcher: _BackgroundNotificationDispatcher(),
     );
-    return runner.run(taskName: taskName);
+    final replyId = inputData == null ? null : inputData['replyId']?.toString();
+    return runner.run(
+      taskName: taskName,
+      carReplyId: taskName == carMessagingReplyTaskName ? replyId : null,
+    );
   }
 
   /// Initializes [L10nBridge] from the persisted locale so translated
@@ -515,17 +533,24 @@ class _AndroidBackgroundAlertRunner {
   final _BackgroundNotificationDispatcher _notificationDispatcher;
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
-  Future<bool> run({required String taskName}) async {
+  Future<bool> run({required String taskName, String? carReplyId}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final settings = _readSettings(prefs);
-      if (!shouldRunAndroidBackgroundAlerts(settings) ||
-          _shouldDisableBackgroundDataSaver(settings, prefs)) {
+      final isCarReplyTask = taskName == carMessagingReplyTaskName;
+      if (!shouldRunAndroidBackgroundAlerts(settings)) {
         await AndroidBackgroundAlertWorker.syncRegistration(enabled: false);
         AppLogger.debug(
           'background_alert_worker skipped ($taskName): disabled in settings',
         );
         return true;
+      }
+      if (!settings.androidAutoMessagingEnabled && isCarReplyTask) {
+        await CarMessagingRuntime.cancelPendingReplyWork();
+        return true;
+      }
+      if (_shouldDisableBackgroundDataSaver(settings, prefs)) {
+        return !isCarReplyTask;
       }
 
       final server = await _resolveServerConfig(prefs);
@@ -535,6 +560,23 @@ class _AndroidBackgroundAlertRunner {
       }
 
       final dio = _createDioClient(server);
+      bool carGateOpen() {
+        return shouldRunCarMessagingBackground(
+          settings: _readSettings(prefs),
+          isCellularTransport:
+              CellularDataSaverService.readPersistedTransport(prefs) ==
+              DataSaverTransport.cellular,
+          featureEnabled: FeatureFlags.androidAutoMessagingPrototype,
+        );
+      }
+
+      final carMessagingWorker = carGateOpen()
+          ? CarMessagingDispatchWorker(
+              dio: dio,
+              serverId: server.serverId,
+              gateOpen: carGateOpen,
+            )
+          : null;
       final snapshotKey = _snapshotStorageKey(server.serverId);
       final previousSnapshot = _readSnapshot(prefs, snapshotKey);
       final statusById = await _fetchSessionStatusById(dio);
@@ -543,6 +585,16 @@ class _AndroidBackgroundAlertRunner {
         AppLogger.warn(
           'background_alert_worker skipped ($taskName): status fetch failed',
         );
+        return true;
+      }
+      final carMessagingResult =
+          await carMessagingWorker?.processReplies(
+            statusById,
+            replyId: carReplyId,
+          ) ??
+          const CarMessagingDispatchResult();
+      if (isCarReplyTask) {
+        if (carMessagingResult.pending) return false;
         return true;
       }
 
@@ -637,10 +689,38 @@ class _AndroidBackgroundAlertRunner {
 
       if (!plan.baselineOnly) {
         for (final signal in plan.signals) {
+          final directory =
+              sessionMetadata.directoryBySessionId[signal.sessionId];
+          final isRootCompletion =
+              signal.kind == BackgroundAlertKind.completion &&
+              !sessionMetadata.parentSessionIdByChild.containsKey(
+                signal.sessionId,
+              );
+          final carPublished =
+              isRootCompletion &&
+                  directory != null &&
+                  directory.trim().isNotEmpty &&
+                  !carMessagingResult.notifiedSessionIds.contains(
+                    signal.sessionId,
+                  )
+              ? await carMessagingWorker?.publishCompletion(
+                      sessionId: signal.sessionId,
+                      directory: directory,
+                      title:
+                          sessionMetadata.titleBySessionId[signal.sessionId] ??
+                          signal.body,
+                    ) ==
+                    CarMessagingCompletionResult.published
+              : carMessagingResult.notifiedSessionIds.contains(
+                  signal.sessionId,
+                );
+          if (carPublished) {
+            continue;
+          }
           await _notificationDispatcher.show(
             signal: signal,
             serverId: server.serverId,
-            directory: sessionMetadata.directoryBySessionId[signal.sessionId],
+            directory: directory,
           );
         }
       }
@@ -653,6 +733,7 @@ class _AndroidBackgroundAlertRunner {
       await _scheduleNextProbe(
         previousSnapshot: previousSnapshot,
         currentStatusById: statusById,
+        hasPendingCarReply: carMessagingResult.pending,
       );
 
       AppLogger.debug(
@@ -672,11 +753,12 @@ class _AndroidBackgroundAlertRunner {
   Future<void> _scheduleNextProbe({
     required BackgroundAlertSnapshot previousSnapshot,
     required Map<String, String> currentStatusById,
+    bool hasPendingCarReply = false,
   }) async {
-    if (hasActiveBackgroundSessions(currentStatusById)) {
+    if (hasPendingCarReply || hasActiveBackgroundSessions(currentStatusById)) {
       await _scheduleProbe(
         delay: AndroidBackgroundAlertWorker.activeSessionProbeInterval,
-        reason: 'active-session',
+        reason: hasPendingCarReply ? 'car-reply' : 'active-session',
       );
       return;
     }
@@ -947,8 +1029,7 @@ class _AndroidBackgroundAlertRunner {
               defaultServerId: defaultServerId,
             );
             if (selected != null) {
-              if (selected['oauthEnabled'] == true ||
-                  selected['tailscaleEnabled'] == true) {
+              if (!supportsCarMessagingServerProfile(selected)) {
                 return null;
               }
               final baseUrl = selected['url']?.toString().trim() ?? '';
@@ -972,6 +1053,13 @@ class _AndroidBackgroundAlertRunner {
                   base: AppConstants.secureServerProfileBasicAuthPasswordKey,
                   legacyValue: legacyPassword,
                 );
+                if (!hasRequiredBackgroundBasicCredentials(
+                  basicAuthEnabled: basicEnabled,
+                  username: username,
+                  password: password,
+                )) {
+                  return null;
+                }
                 return _ResolvedServerConfig(
                   serverId: effectiveServerId,
                   baseUrl: baseUrl,

@@ -6754,4 +6754,29 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get speechSttApiKeyRejected =>
       'Der Sprach-API-Schlüssel wurde abgelehnt.';
+
+  @override
+  String get carMessagingConversations => 'Android Auto-Konversationen';
+
+  @override
+  String get carMessagingReply => 'Antworten';
+
+  @override
+  String get carMessagingMarkRead => 'Als gelesen markieren';
+
+  @override
+  String get carMessagingChannelDescription =>
+      'Experimentelle CodeWalk-Antworten auf Konversationen';
+
+  @override
+  String get settingsAndroidAutoMessagingDescription =>
+      'Experimentelle Test-Build-Unterstützung für endgültige Antworten und Sprachantworten. Für die Verteilung über Google Play nicht zugelassen.';
+
+  @override
+  String get carMessagingDeliveryFailedTitle =>
+      'Antwort konnte nicht gesendet werden';
+
+  @override
+  String get carMessagingDeliveryFailedBody =>
+      'Ihre Sprachantwort konnte nicht zugestellt werden. Öffnen Sie CodeWalk, um es erneut zu versuchen.';
 }

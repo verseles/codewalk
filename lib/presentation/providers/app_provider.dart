@@ -19,6 +19,7 @@ import '../../domain/entities/app_info.dart';
 import '../../domain/entities/server_profile.dart';
 import '../../domain/usecases/check_connection.dart';
 import '../../domain/usecases/get_app_info.dart';
+import '../services/car_messaging/car_messaging_runtime.dart';
 import '../services/cellular_data_saver_service.dart';
 import '../services/local_opencode_server_runtime.dart';
 import '../services/local_opencode_server_runtime_types.dart';
@@ -977,6 +978,15 @@ class AppProvider extends ChangeNotifier {
         await _clearOAuthCredentialForProfile(removed);
       }
       await _sessionAttentionCompletionResolver?.removeServer(id);
+      try {
+        await CarMessagingRuntime.removeServer(id);
+      } catch (error, stackTrace) {
+        AppLogger.warn(
+          'Failed to remove car messaging state for server=$id',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
 
       _serverProfiles = _serverProfiles.where((p) => p.id != id).toList();
       _serverHealthById.remove(id);

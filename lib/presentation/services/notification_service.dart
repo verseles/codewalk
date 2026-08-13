@@ -9,6 +9,8 @@ import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/experience_settings.dart';
 import 'app_activation_service.dart';
+import 'car_messaging/car_messaging_action_handler.dart';
+import 'car_messaging/car_messaging_notification.dart';
 import 'session_attention/session_attention_host_protocol.dart';
 import 'web_notification_bridge.dart';
 
@@ -241,8 +243,14 @@ class NotificationService {
       await _plugin.initialize(
         settings: settings,
         onDidReceiveNotificationResponse: (response) {
+          if (_isCarMessagingAction(response)) {
+            unawaited(CarMessagingActionHandler().handle(response));
+            return;
+          }
           unawaited(_handleRawTap(response.payload));
         },
+        onDidReceiveBackgroundNotificationResponse:
+            codewalkCarMessagingBackgroundResponse,
       );
 
       final androidPlugin = _plugin
@@ -778,6 +786,15 @@ class NotificationService {
   void _emitTap(NotificationTapPayload payload) {
     _pendingTap = payload;
     if (!_tapController.isClosed) _tapController.add(payload);
+  }
+
+  bool _isCarMessagingAction(NotificationResponse response) {
+    final payload = NotificationTapPayload.fromRaw(response.payload);
+    if (payload == null || payload.category != carMessagingCategory) {
+      return false;
+    }
+    return response.actionId == carMessagingReplyAction ||
+        response.actionId == carMessagingMarkReadAction;
   }
 
   Future<void> _dismissTappedNotification(

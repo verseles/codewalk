@@ -55,6 +55,7 @@ This document contains only active architectural decisions that represent the cu
 - ADR-049: Cross-Platform Attention Surfaces and Secure Background Continuity
 - ADR-052: Bounded Default-Off Autosave Addendum for the Focused File Editor
 - ADR-053: Client-Owned Configurable API Speech-to-Text (OpenAI / Groq / Custom OpenAI-Compatible)
+- ADR-054: Experimental Test-Only Android Auto Notification Messaging
 
 ---
 
@@ -3423,3 +3424,90 @@ This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception. It
 - `lib/l10n/app_en.arb` + locale ARBs — `speechApi*` keys (provider, privacy, batch hint, max duration, language hint, typed errors).
 - `test/unit/` — key storage, engine validation/transport, settings migration, and platform-support coverage.
 - Ref: issue #97
+
+---
+
+## ADR-054: Experimental Test-Only Android Auto Notification Messaging (2026-08-12)
+
+**Status**: Accepted
+
+**Related**: GitHub issue #99; ADR-003 (realtime/background lifecycle), ADR-017 (Android foreground monitoring), ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-049 (attention surfaces and background continuity), ADR-053 (client-owned API STT as the speech-backend precedent).
+
+### Context
+
+Issue #99 requests an Android Auto notification messaging prototype: surfaced on the car display as a `MessagingStyle` notification with a voice reply action, without opening the Flutter UI. The user explicitly chose to proceed with this experimental prototype while accepting that Google Play's automotive (MF-5) eligibility is unresolved — the feature is therefore test-only and must never ship as a Play-distributed automotive experience without a separate eligibility review and ADR.
+
+Android Auto messaging notifications impose strict constraints: templates-only rendering (no custom UI), a single supported voice-reply `RemoteInput` per notification, no processing/intermediate messages, and no custom microphone/STT/TTS — the car head unit owns capture and speech. Background Android conditions after process death are severely constrained, and OpenCode's official prompt endpoint (`POST /session/:id/prompt_async`) has no client-supplied idempotency key, leaving a residual duplicate-or-loss window at POST time. ADR-049's background attention boundary is read-only; sending an explicit voice reply is a background write that this prototype must gate separately.
+
+### Decision
+
+1. **Double default-off gating.** The feature requires both a default-off Dart feature flag (`lib/core/config/feature_flags.dart`) and a default-off user preference. It is active only when the flag is enabled in a debug/test build and the user has explicitly opted in. Release builds ship only shared inert Dart code: `kDebugMode` keeps the runtime disabled and the automotive descriptor is absent.
+
+2. **Automotive notification descriptor in debug source set only.** The Android automotive notification descriptor (automotive `res/xml/automotive_app_desc.xml` + manifest wiring under `android/app/src/debug/`) lives exclusively in the debug source set and is never part of the release artifact. The shared Dart code (models, encrypted store, services) is compiled into release builds but stays inert there. There is no Play eligibility claim anywhere in the app, manifest, store listing, or metadata.
+
+3. **`MessagingStyle` renders only the final assistant response.** The notification shows the settled final assistant message text for the root session via `NotificationCompat.MessagingStyle`; it never renders diffs, intermediate events, processing states, or child-session content.
+
+4. **Exactly one `RemoteInput` semantic reply plus mark-as-read.** The notification exposes exactly one `RemoteInput` whose `setLabel` describes replying to the assistant; a separate mark-as-read action is local-only. No other actions, inputs, or affordances are added.
+
+5. **Explicit non-goals.** No custom notification UI, no `CarAppService`/`androidx.car.app` templates, no processing/intermediate messages, no custom microphone/STT/TTS (the head unit owns capture and speech; ADR-053's client STT engines are not invoked from this surface), and no Play MF-5 eligibility claim.
+
+6. **Accepted background envelope.** The feature is expected to work when the phone is powered on but the screen is locked/off, the Flutter UI is closed, and Android performs normal process recreation. The reply is persisted via the existing `flutter_local_notifications` `ActionBroadcastReceiver`/background callback (encrypted, bounded) before the existing WorkManager headless execution path is scheduled to send it. A foreground app is not required.
+
+7. **Explicitly excluded conditions.** Powered-off device, explicit Android force-stop, pre-first-unlock (Direct Boot) device state, an unlimited realtime delivery guarantee, and prolonged offline execution are not supported. The feature fails closed outside the accepted envelope.
+
+8. **Honest bounded latency.** Delivery rides WorkManager scheduling latency; the notification and settings copy state this honestly. No foreground service is added and no cellular Data Saver bypass is attempted (per ADR-049's Data Saver stance).
+
+9. **Exact identity and bounded state.** Every persisted reply and reconciled message is bound to the exact root-session `(serverId, directory, rootSessionId)` identity on the active server only. Thread/reply state is persisted as bounded AES-256-GCM encrypted records containing no credentials, OAuth material, Tailscale state, or unbounded history (mirroring ADR-049's snapshot discipline).
+
+10. **Post-process-death auth envelope.** After process death, only plain/no-auth and Basic-authenticated hosts may send replies. OAuth and Tailscale-backed contexts are reopen-required (frozen until the user opens CodeWalk); Data Saver pauses reply scheduling rather than bypassing it.
+
+11. **Official contract send path.** Replies are sent via the official directory-scoped `POST /session/:id/prompt_async` with no `messageID` and no schema invention — preserving ADR-023. Delivery confirmation uses bounded reconciliation against official status/message reads only; no new endpoint, header, or event semantic is added.
+
+12. **Mark-as-read is local only.** The mark-as-read action updates client-side local state only; it never mutates server state.
+
+13. **Residual duplicate-or-loss window.** Because OpenCode's `prompt_async` has no idempotency key, a bounded duplicate-or-loss window exists at POST (e.g., reply persisted, send started, process dies). The client retries a bounded number of times and fails closed (never guessing or fabricating a second send) when the window cannot be resolved; the user is told the reply's delivery is not guaranteed in that edge.
+
+14. **ADR-049 boundary change, narrowly scoped.** This ADR changes ADR-049's prior read-only background attention boundary only for this separately gated explicit voice-reply prototype: where ADR-049 permits a bounded post-idle fetch for display/speech snapshots but never a background write, ADR-054 adds exactly one explicit user-initiated reply send through the official contract. It does not broaden overlay behavior, add background writes beyond this single gated surface, or relax any ADR-049/ADR-003 boundary otherwise.
+
+### Rationale
+
+- Android Auto mandates template-based messaging UX; `MessagingStyle` + one `RemoteInput` is the only compliant shape, and skipping custom UI, car templates, and custom speech keeps the surface minimal and testable.
+- The user accepted the unresolved MF-5 eligibility risk, so confining the automotive descriptor to the debug source set with a double default-off gate makes the prototype reversible and keeps releases clean: release artifacts contain the shared Dart code (models, encrypted store, services), but it remains inert behind `kDebugMode` and the default-off flag, with no automotive descriptor.
+- Reusing the existing `ActionBroadcastReceiver`/WorkManager path avoids a new background-execution mechanism (ADR-017 remains the only FGS) and keeps latency honest and bounded.
+- Exact root-session identity, bounded AES-256-GCM state, and the plain/Basic-only process-death envelope mirror ADR-049's security discipline; the official `prompt_async` path with bounded reconciliation preserves ADR-023.
+- Fail-closed retries and an explicitly documented duplicate-or-loss window are the only honest response to OpenCode's missing idempotency key.
+
+### Consequences
+
+- ✅ Test-only Android Auto messaging prototype with compliant `MessagingStyle` + single reply `RemoteInput` + local mark-as-read.
+- ✅ Double default-off gating and debug-only descriptor keep release builds and Play submissions clean: release artifacts carry shared inert Dart code, but `kDebugMode` disables it at runtime and no automotive descriptor ships.
+- ✅ Reuses existing notification broadcast and WorkManager machinery; no new FGS, no Data Saver bypass, honest bounded latency.
+- ✅ Preserves ADR-023 (official endpoint only, no new contract), ADR-003/ADR-049 boundaries except the single gated reply write, and ADR-049's identity/encryption discipline.
+- ⚠ Residual duplicate-or-loss window at POST is inherent to OpenCode's missing idempotency key; bounded fail-closed retries limit but cannot eliminate it.
+- ⚠ OAuth/Tailscale contexts cannot reply after process death until the user reopens CodeWalk; Data Saver pauses scheduling.
+- ❌ Not eligible for Play automotive distribution; unresolved MF-5 eligibility is an accepted, explicitly tracked risk (issue #99).
+- ❌ No custom UI, car-app templates, processing messages, custom STT/TTS, unlimited realtime, or background execution beyond the accepted envelope.
+
+### Rollback / Cleanup
+
+- **Feature rollback:** disable the Dart feature flag and/or the user preference; both are default-off, and disabling either stops the surface immediately.
+- **Descriptor removal:** deleting the debug source-set automotive descriptor removes the Android Auto surface from all builds; no release artifact ever contains it (shared Dart code remains in release builds but stays inert).
+- **Queue/data cleanup:** reply state and encrypted thread records are purged when the feature is disabled or the identity/session is removed; bounded retention applies while active.
+- **Tests required:** process-death restore behavior, notification action/RemoteInput shape, prompt_async request contract (no `messageID`), auth gating (plain/Basic vs OAuth/Tailscale reopen-required), and Data Saver pause handling.
+
+### ADR-023 Compatibility
+
+This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception. It adds no OpenCode endpoint, request/response schema, realtime event, session/message mutation, authentication contract, or configuration mutation. Replies ride the official directory-scoped `POST /session/:id/prompt_async` exactly as the app's foreground send path does; confirmation uses bounded official status/message reconciliation only. All Android Auto presentation, gating, encryption, and scheduling are client-owned behavior.
+
+### Key Files (Implemented)
+
+- `lib/core/config/feature_flags.dart` — default-off Dart feature flag; the flag plus `kDebugMode` keeps the feature disabled at runtime in release builds.
+- `lib/domain/entities/car_messaging.dart` — messaging entities/models (reply, message, thread state).
+- `lib/data/car_messaging/` — bounded AES-256-GCM encrypted store (`car_messaging_store.dart`, `car_messaging_file_store*.dart`) for persisted replies and thread state.
+- `lib/presentation/services/car_messaging/` — runtime (`car_messaging_runtime.dart`), action handler (`car_messaging_action_handler.dart`), notification construction (`car_messaging_notification.dart`), dispatch (`car_messaging_dispatch_worker.dart`), and gating (`car_messaging_gate.dart`).
+- `lib/presentation/services/notification_service.dart` — `MessagingStyle` notification callback integration with exactly one reply `RemoteInput` and local mark-as-read action.
+- `lib/presentation/services/android_background_alert_worker.dart` — WorkManager headless integration scheduling the official `prompt_async` send.
+- `android/app/src/debug/` — automotive notification descriptor (`res/xml/automotive_app_desc.xml` + `AndroidManifest.xml`) in the debug source set only; never in `src/main/` or release artifacts.
+- `test/unit/data/car_messaging_store_test.dart` — encrypted store coverage (process-death restore, bounded retention).
+- `test/unit/services/car_messaging_*_test.dart` — notification/action shape, auth gating, dispatch worker, and manifest coverage.
+- Ref: issue #99

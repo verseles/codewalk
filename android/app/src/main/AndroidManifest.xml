@@ -54,6 +54,9 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="User-enabled persistent overlay showing CodeWalk session status and response controls" />
         </service>
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false" />
         <!-- FileProvider for sharing the downloaded APK with the system installer -->
         <provider
             android:name="androidx.core.content.FileProvider"

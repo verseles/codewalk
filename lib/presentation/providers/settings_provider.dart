@@ -8,6 +8,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/config/feature_flags.dart';
 import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
@@ -18,6 +19,7 @@ import '../../domain/entities/experience_settings.dart';
 import '../services/android_background_alert_logic.dart';
 import '../services/android_background_alert_worker.dart';
 import '../services/android_foreground_monitor_service.dart';
+import '../services/car_messaging/car_messaging_runtime.dart';
 import '../services/cellular_data_saver_service.dart';
 import '../services/desktop_window_chrome_service.dart';
 import '../services/session_attention/session_attention_host_service.dart';
@@ -65,6 +67,7 @@ typedef SessionAttentionPresentationOverrideReader =
     Future<SessionAttentionPresentation?> Function();
 typedef SessionAttentionPresentationOverrideWriter =
     Future<void> Function(SessionAttentionPresentation presentation);
+typedef CarMessagingDisable = Future<void> Function();
 
 class SettingsProvider extends ChangeNotifier {
   SettingsProvider({
@@ -81,6 +84,7 @@ class SettingsProvider extends ChangeNotifier {
     sessionAttentionPresentationOverrideReader,
     SessionAttentionPresentationOverrideWriter?
     sessionAttentionPresentationOverrideWriter,
+    CarMessagingDisable? carMessagingDisable,
   }) : _localDataSource = localDataSource,
        _dioClient = dioClient,
        _soundService = soundService,
@@ -95,6 +99,8 @@ class SettingsProvider extends ChangeNotifier {
            sessionAttentionPresentationOverrideReader,
        _sessionAttentionPresentationOverrideWriter =
            sessionAttentionPresentationOverrideWriter,
+       _carMessagingDisable =
+           carMessagingDisable ?? CarMessagingRuntime.disable,
        _cellularDataSaverService =
            cellularDataSaverService ?? CellularDataSaverService.disabled() {
     _cellularDataSaverService.addListener(_handleCellularDataSaverChanged);
@@ -113,6 +119,7 @@ class SettingsProvider extends ChangeNotifier {
   final SessionAttentionPresentationOverrideWriter?
   _sessionAttentionPresentationOverrideWriter;
   final CellularDataSaverService _cellularDataSaverService;
+  final CarMessagingDisable _carMessagingDisable;
 
   ExperienceSettings _settings = ExperienceSettings.defaults();
   final Map<NotificationCategory, bool> _serverBackedNotifications =
@@ -235,6 +242,7 @@ class SettingsProvider extends ChangeNotifier {
       _cellularDataSaverService.automaticSyncInterval;
   bool get androidBackgroundAlertsEnabled =>
       _settings.androidBackgroundAlertsEnabled;
+  bool get androidAutoMessagingEnabled => _settings.androidAutoMessagingEnabled;
   SessionAttentionPresentation get sessionAttentionPresentation =>
       _settings.sessionAttentionPresentation;
   SessionAttentionHostCapability get sessionAttentionHostCapability =>
@@ -327,6 +335,27 @@ class SettingsProvider extends ChangeNotifier {
       shouldPersistPlatformSettings =
           await _applyFirstRunReadAloudDefaults() ||
           shouldPersistPlatformSettings;
+    }
+
+    final shouldPurgeDisabledCarMessaging =
+        !FeatureFlags.androidAutoMessagingPrototype &&
+        _settings.androidAutoMessagingEnabled;
+    if (shouldPurgeDisabledCarMessaging) {
+      _settings = _settings.copyWith(androidAutoMessagingEnabled: false);
+      shouldPersistPlatformSettings = true;
+    }
+    if (!kIsWeb &&
+        defaultTargetPlatform == TargetPlatform.android &&
+        shouldPurgeDisabledCarMessaging) {
+      try {
+        await _carMessagingDisable();
+      } catch (error, stackTrace) {
+        AppLogger.warn(
+          'Failed to purge disabled car messaging state',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
     }
 
     // Platform STT policy migration:
@@ -878,10 +907,25 @@ class SettingsProvider extends ChangeNotifier {
     if (_settings.androidBackgroundAlertsEnabled == enabled) {
       return;
     }
-    _settings = _settings.copyWith(androidBackgroundAlertsEnabled: enabled);
+    _settings = _settings.copyWith(
+      androidBackgroundAlertsEnabled: enabled,
+      androidAutoMessagingEnabled: enabled
+          ? _settings.androidAutoMessagingEnabled
+          : false,
+    );
     notifyListeners();
     await _persist();
     await _syncAndroidBackgroundAlertRuntime();
+    if (!enabled) await _carMessagingDisable();
+  }
+
+  Future<void> setAndroidAutoMessagingEnabled(bool enabled) async {
+    if (_settings.androidAutoMessagingEnabled == enabled) return;
+    _settings = _settings.copyWith(androidAutoMessagingEnabled: enabled);
+    notifyListeners();
+    await _persist();
+    await _syncAndroidBackgroundAlertRuntime();
+    if (!enabled) await _carMessagingDisable();
   }
 
   Future<String?> setSessionAttentionPresentation(

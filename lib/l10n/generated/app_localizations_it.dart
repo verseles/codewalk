@@ -6761,4 +6761,29 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get speechSttApiKeyRejected =>
       'La chiave API vocale è stata rifiutata.';
+
+  @override
+  String get carMessagingConversations => 'Conversazioni Android Auto';
+
+  @override
+  String get carMessagingReply => 'Rispondi';
+
+  @override
+  String get carMessagingMarkRead => 'Segna come letto';
+
+  @override
+  String get carMessagingChannelDescription =>
+      'Risposte sperimentali alle conversazioni CodeWalk';
+
+  @override
+  String get settingsAndroidAutoMessagingDescription =>
+      'Supporto sperimentale delle build di test per risposte finali e risposte vocali. Non approvato per la distribuzione su Google Play.';
+
+  @override
+  String get carMessagingDeliveryFailedTitle =>
+      'Impossibile inviare la risposta';
+
+  @override
+  String get carMessagingDeliveryFailedBody =>
+      'La tua risposta vocale non è stata consegnata. Apri CodeWalk per riprovare.';
 }

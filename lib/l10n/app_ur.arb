@@ -2225,5 +2225,12 @@
   "speechApiLanguageHint": "فعال ایپ زبان ٹرانسکرپشن اشارے کے طور پر بھیجی جاتی ہے۔",
   "speechSttApiKeyStorageUnavailable": "محفوظ اسپیچ API کلید اسٹوریج دستیاب نہیں ہے۔",
   "speechSttApiKeyMissing": "سیٹنگز > اسپیچ میں اسپیچ API کلید شامل کریں۔",
-  "speechSttApiKeyRejected": "اسپیچ API کلید مسترد کر دی گئی۔"
+  "speechSttApiKeyRejected": "اسپیچ API کلید مسترد کر دی گئی۔",
+  "carMessagingConversations": "Android Auto گفتگو",
+  "carMessagingReply": "جواب دیں",
+  "carMessagingMarkRead": "پڑھا ہوا نشان زد کریں",
+  "carMessagingChannelDescription": "تجرباتی CodeWalk گفتگو کے جوابات",
+  "settingsAndroidAutoMessagingDescription": "حتمی جوابات اور صوتی جوابات کے لیے تجرباتی ٹیسٹ بلڈ سپورٹ۔ Google Play تقسیم کے لیے منظور شدہ نہیں۔",
+  "carMessagingDeliveryFailedTitle": "جواب بھیجا نہیں جا سکا",
+  "carMessagingDeliveryFailedBody": "آپ کا وائس جواب ڈیلیور نہیں ہو سکا۔ دوبارہ کوشش کرنے کے لیے CodeWalk کھولیں۔"
 }

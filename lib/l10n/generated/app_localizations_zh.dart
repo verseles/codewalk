@@ -6240,4 +6240,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get speechSttApiKeyRejected => '语音 API 密钥被拒绝。';
+
+  @override
+  String get carMessagingConversations => 'Android Auto 对话';
+
+  @override
+  String get carMessagingReply => '回复';
+
+  @override
+  String get carMessagingMarkRead => '标记为已读';
+
+  @override
+  String get carMessagingChannelDescription => '实验性 CodeWalk 对话回复';
+
+  @override
+  String get settingsAndroidAutoMessagingDescription =>
+      '对最终回复和语音回复的实验性测试版支持。未经批准用于 Google Play 分发。';
+
+  @override
+  String get carMessagingDeliveryFailedTitle => '无法发送回复';
+
+  @override
+  String get carMessagingDeliveryFailedBody => '无法发送您的语音回复。打开 CodeWalk 重试。';
 }

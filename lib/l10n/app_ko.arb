@@ -2864,5 +2864,12 @@
   "speechApiLanguageHint": "활성 앱 언어가 변환 힌트로 전송됩니다.",
   "speechSttApiKeyStorageUnavailable": "보안 음성 API 키 저장소를 사용할 수 없습니다.",
   "speechSttApiKeyMissing": "설정 > 음성에서 음성 API 키를 추가하세요.",
-  "speechSttApiKeyRejected": "음성 API 키가 거부되었습니다."
+  "speechSttApiKeyRejected": "음성 API 키가 거부되었습니다.",
+  "carMessagingConversations": "Android Auto 대화",
+  "carMessagingReply": "답장",
+  "carMessagingMarkRead": "읽음으로 표시",
+  "carMessagingChannelDescription": "실험적인 CodeWalk 대화 응답",
+  "settingsAndroidAutoMessagingDescription": "최종 응답 및 음성 응답에 대한 실험적 테스트 빌드 지원. Google Play 배포 승인되지 않음.",
+  "carMessagingDeliveryFailedTitle": "답장을 보내지 못했습니다",
+  "carMessagingDeliveryFailedBody": "음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요."
 }

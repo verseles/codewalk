@@ -2317,6 +2317,16 @@ const englishTemplate = <String, String>{
   'workspaceProjectRemovedFromHistory': 'Project removed from history',
   'workspaceRemoveFromHistory': 'Remove {name} from history',
   'workspaceSuggestions': 'Suggestions',
+  'carMessagingConversations': 'Android Auto conversations',
+  'carMessagingReply': 'Reply',
+  'carMessagingMarkRead': 'Mark as read',
+  'carMessagingChannelDescription':
+      'Experimental CodeWalk conversation replies',
+  'settingsAndroidAutoMessagingDescription':
+      'Experimental test-build support for final responses and voice replies. Not approved for Google Play distribution.',
+  'carMessagingDeliveryFailedTitle': 'Couldn\'t send reply',
+  'carMessagingDeliveryFailedBody':
+      'Your voice reply could not be delivered. Open CodeWalk to retry.',
 };
 
 const translations = <String, Map<String, String>>{
@@ -4581,6 +4591,15 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'تمت إزالة المشروع من السجل',
     'workspaceRemoveFromHistory': 'إزالة {name} من السجل',
     'workspaceSuggestions': 'اقتراحات',
+    'carMessagingConversations': 'محادثات Android Auto',
+    'carMessagingReply': 'رد',
+    'carMessagingMarkRead': 'تحديد كمقروء',
+    'carMessagingChannelDescription': 'ردود محادثات CodeWalk التجريبية',
+    'settingsAndroidAutoMessagingDescription':
+        'دعم تجريبي في إصدارات الاختبار للردود النهائية والردود الصوتية. غير معتمد للتوزيع عبر Google Play.',
+    'carMessagingDeliveryFailedTitle': 'تعذّر إرسال الرد',
+    'carMessagingDeliveryFailedBody':
+        'تعذّر تسليم ردّك الصوتي. افتح CodeWalk لإعادة المحاولة.',
   },
   'bn': {
     'aboutGitHub': 'গিটহাব',
@@ -6968,6 +6987,15 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'প্রজেক্ট ইতিহাস থেকে সরানো হয়েছে',
     'workspaceRemoveFromHistory': 'ইতিহাস থেকে {name} সরান',
     'workspaceSuggestions': 'পরামর্শ',
+    'carMessagingConversations': 'Android Auto কথোপকথন',
+    'carMessagingReply': 'উত্তর',
+    'carMessagingMarkRead': 'পঠিত হিসেবে চিহ্নিত করুন',
+    'carMessagingChannelDescription': 'পরীক্ষামূলক CodeWalk কথোপকথন উত্তর',
+    'settingsAndroidAutoMessagingDescription':
+        'চূড়ান্ত উত্তর এবং ভয়েস উত্তরের জন্য পরীক্ষামূলক টেস্ট-বিল্ড সমর্থন। Google Play-তে বিতরণের জন্য অনুমোদিত নয়।',
+    'carMessagingDeliveryFailedTitle': 'উত্তর পাঠানো যায়নি',
+    'carMessagingDeliveryFailedBody':
+        'আপনার ভয়েস উত্তরটি পৌঁছে দেওয়া যায়নি। আবার চেষ্টা করতে CodeWalk খুলুন।',
   },
   'de': {
     'aboutGitHub': 'GitHub',
@@ -9424,6 +9452,16 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'Projekt aus dem Verlauf entfernt',
     'workspaceRemoveFromHistory': '{name} aus dem Verlauf entfernen',
     'workspaceSuggestions': 'Vorschläge',
+    'carMessagingConversations': 'Android Auto-Konversationen',
+    'carMessagingReply': 'Antworten',
+    'carMessagingMarkRead': 'Als gelesen markieren',
+    'carMessagingChannelDescription':
+        'Experimentelle CodeWalk-Antworten auf Konversationen',
+    'settingsAndroidAutoMessagingDescription':
+        'Experimentelle Test-Build-Unterstützung für endgültige Antworten und Sprachantworten. Für die Verteilung über Google Play nicht zugelassen.',
+    'carMessagingDeliveryFailedTitle': 'Antwort konnte nicht gesendet werden',
+    'carMessagingDeliveryFailedBody':
+        'Ihre Sprachantwort konnte nicht zugestellt werden. Öffnen Sie CodeWalk, um es erneut zu versuchen.',
   },
   'es': {
     'aboutGitHub': 'GitHub',
@@ -11876,6 +11914,16 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'Proyecto eliminado del historial',
     'workspaceRemoveFromHistory': 'Eliminar {name} del historial',
     'workspaceSuggestions': 'Sugerencias',
+    'carMessagingConversations': 'Conversaciones de Android Auto',
+    'carMessagingReply': 'Responder',
+    'carMessagingMarkRead': 'Marcar como leído',
+    'carMessagingChannelDescription':
+        'Respuestas experimentales de conversaciones de CodeWalk',
+    'settingsAndroidAutoMessagingDescription':
+        'Compatibilidad experimental de builds de prueba para respuestas finales y respuestas por voz. No aprobado para distribución en Google Play.',
+    'carMessagingDeliveryFailedTitle': 'No se pudo enviar la respuesta',
+    'carMessagingDeliveryFailedBody':
+        'Tu respuesta de voz no se pudo entregar. Abre CodeWalk para volver a intentarlo.',
   },
   'fr': {
     'aboutGitHub': 'GitHub',
@@ -14359,6 +14407,16 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'Projet retiré de l\'historique',
     'workspaceRemoveFromHistory': 'Retirer {name} de l\'historique',
     'workspaceSuggestions': 'Suggestions',
+    'carMessagingConversations': 'Conversations Android Auto',
+    'carMessagingReply': 'Répondre',
+    'carMessagingMarkRead': 'Marquer comme lu',
+    'carMessagingChannelDescription':
+        'Réponses expérimentales aux conversations CodeWalk',
+    'settingsAndroidAutoMessagingDescription':
+        'Prise en charge expérimentale des builds de test pour les réponses finales et les réponses vocales. Non approuvé pour la distribution via Google Play.',
+    'carMessagingDeliveryFailedTitle': 'Réponse non envoyée',
+    'carMessagingDeliveryFailedBody':
+        'Votre réponse vocale n\'a pas pu être remise. Ouvrez CodeWalk pour réessayer.',
   },
   'hi': {
     'aboutGitHub': 'GitHub',
@@ -16734,6 +16792,15 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'प्रोजेक्ट इतिहास से हटा दिया गया',
     'workspaceRemoveFromHistory': 'इतिहास से {name} निकालें',
     'workspaceSuggestions': 'सुझाव',
+    'carMessagingConversations': 'Android Auto बातचीत',
+    'carMessagingReply': 'जवाब दें',
+    'carMessagingMarkRead': 'पढ़ा हुआ चिह्नित करें',
+    'carMessagingChannelDescription': 'प्रायोगिक CodeWalk वार्तालाप उत्तर',
+    'settingsAndroidAutoMessagingDescription':
+        'अंतिम उत्तरों और वॉइस उत्तरों के लिए प्रायोगिक टेस्ट-बिल्ड समर्थन। Google Play वितरण के लिए अनुमोदित नहीं।',
+    'carMessagingDeliveryFailedTitle': 'जवाब भेजा नहीं जा सका',
+    'carMessagingDeliveryFailedBody':
+        'आपका वॉइस जवाब डिलीवर नहीं किया जा सका। फिर से कोशिश करने के लिए CodeWalk खोलें।',
   },
   'it': {
     'aboutGitHub': 'GitHub',
@@ -19196,6 +19263,16 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'Progetto rimosso dalla cronologia',
     'workspaceRemoveFromHistory': 'Rimuovi {name} dalla cronologia',
     'workspaceSuggestions': 'Suggerimenti',
+    'carMessagingConversations': 'Conversazioni Android Auto',
+    'carMessagingReply': 'Rispondi',
+    'carMessagingMarkRead': 'Segna come letto',
+    'carMessagingChannelDescription':
+        'Risposte sperimentali alle conversazioni CodeWalk',
+    'settingsAndroidAutoMessagingDescription':
+        'Supporto sperimentale delle build di test per risposte finali e risposte vocali. Non approvato per la distribuzione su Google Play.',
+    'carMessagingDeliveryFailedTitle': 'Impossibile inviare la risposta',
+    'carMessagingDeliveryFailedBody':
+        'La tua risposta vocale non è stata consegnata. Apri CodeWalk per riprovare.',
   },
   'ja': {
     'aboutGitHub': 'GitHub',
@@ -21297,6 +21374,15 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': '履歴からプロジェクトを削除しました',
     'workspaceRemoveFromHistory': '履歴から {name} を削除',
     'workspaceSuggestions': '提案',
+    'carMessagingConversations': 'Android Autoの会話',
+    'carMessagingReply': '返信',
+    'carMessagingMarkRead': '既読にする',
+    'carMessagingChannelDescription': '実験的なCodeWalk会話返信',
+    'settingsAndroidAutoMessagingDescription':
+        '最終応答と音声応答の実験的なテストビルドサポート。Google Playでの配布は承認されていません。',
+    'carMessagingDeliveryFailedTitle': '返信を送信できませんでした',
+    'carMessagingDeliveryFailedBody':
+        '音声での返信を配信できませんでした。再試行するにはCodeWalkを開いてください。',
   },
   'ko': {
     'aboutGitHub': 'GitHub',
@@ -23397,6 +23483,15 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': '프로젝트가 기록에서 제거되었습니다',
     'workspaceRemoveFromHistory': '기록에서 {name} 제거',
     'workspaceSuggestions': '추천 프로젝트',
+    'carMessagingConversations': 'Android Auto 대화',
+    'carMessagingReply': '답장',
+    'carMessagingMarkRead': '읽음으로 표시',
+    'carMessagingChannelDescription': '실험적인 CodeWalk 대화 응답',
+    'settingsAndroidAutoMessagingDescription':
+        '최종 응답 및 음성 응답에 대한 실험적 테스트 빌드 지원. Google Play 배포 승인되지 않음.',
+    'carMessagingDeliveryFailedTitle': '답장을 보내지 못했습니다',
+    'carMessagingDeliveryFailedBody':
+        '음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요.',
   },
   'pt': {
     'aboutGitHub': 'GitHub',
@@ -25812,6 +25907,16 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'Projeto removido do histórico',
     'workspaceRemoveFromHistory': 'Remover {name} do histórico',
     'workspaceSuggestions': 'Sugestões',
+    'carMessagingConversations': 'Conversas do Android Auto',
+    'carMessagingReply': 'Responder',
+    'carMessagingMarkRead': 'Marcar como lida',
+    'carMessagingChannelDescription':
+        'Respostas experimentais de conversas do CodeWalk',
+    'settingsAndroidAutoMessagingDescription':
+        'Suporte experimental de build de teste para respostas finais e respostas por voz. Não aprovado para distribuição no Google Play.',
+    'carMessagingDeliveryFailedTitle': 'Não foi possível enviar a resposta',
+    'carMessagingDeliveryFailedBody':
+        'Sua resposta por voz não pôde ser entregue. Abra o CodeWalk para tentar novamente.',
   },
   'ru': {
     'aboutGitHub': 'GitHub',
@@ -28234,6 +28339,16 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'Проект удален из истории',
     'workspaceRemoveFromHistory': 'Удалить {name} из истории',
     'workspaceSuggestions': 'Предложения',
+    'carMessagingConversations': 'Беседы Android Auto',
+    'carMessagingReply': 'Ответить',
+    'carMessagingMarkRead': 'Отметить как прочитанное',
+    'carMessagingChannelDescription':
+        'Экспериментальные ответы на беседы CodeWalk',
+    'settingsAndroidAutoMessagingDescription':
+        'Экспериментальная поддержка тестовых сборок для финальных ответов и голосовых ответов. Не одобрено для распространения через Google Play.',
+    'carMessagingDeliveryFailedTitle': 'Не удалось отправить ответ',
+    'carMessagingDeliveryFailedBody':
+        'Не удалось доставить ваш голосовой ответ. Откройте CodeWalk, чтобы повторить попытку.',
   },
   'ur': {
     'aboutGitHub': 'گٹ ہب',
@@ -30600,6 +30715,15 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': 'پراجیکٹ تاریخ سے ہٹا دیا گیا',
     'workspaceRemoveFromHistory': 'تاریخ سے {name} کو ہٹا دیں۔',
     'workspaceSuggestions': 'تجاویز',
+    'carMessagingConversations': 'Android Auto گفتگو',
+    'carMessagingReply': 'جواب دیں',
+    'carMessagingMarkRead': 'پڑھا ہوا نشان زد کریں',
+    'carMessagingChannelDescription': 'تجرباتی CodeWalk گفتگو کے جوابات',
+    'settingsAndroidAutoMessagingDescription':
+        'حتمی جوابات اور صوتی جوابات کے لیے تجرباتی ٹیسٹ بلڈ سپورٹ۔ Google Play تقسیم کے لیے منظور شدہ نہیں۔',
+    'carMessagingDeliveryFailedTitle': 'جواب بھیجا نہیں جا سکا',
+    'carMessagingDeliveryFailedBody':
+        'آپ کا وائس جواب ڈیلیور نہیں ہو سکا۔ دوبارہ کوشش کرنے کے لیے CodeWalk کھولیں۔',
   },
   'zh': {
     'aboutGitHub': 'GitHub',
@@ -32574,5 +32698,13 @@ const translations = <String, Map<String, String>>{
     'workspaceProjectRemovedFromHistory': '项目已从历史记录中移除',
     'workspaceRemoveFromHistory': '从历史记录中移除 {name}',
     'workspaceSuggestions': '建议',
+    'carMessagingConversations': 'Android Auto 对话',
+    'carMessagingReply': '回复',
+    'carMessagingMarkRead': '标记为已读',
+    'carMessagingChannelDescription': '实验性 CodeWalk 对话回复',
+    'settingsAndroidAutoMessagingDescription':
+        '对最终回复和语音回复的实验性测试版支持。未经批准用于 Google Play 分发。',
+    'carMessagingDeliveryFailedTitle': '无法发送回复',
+    'carMessagingDeliveryFailedBody': '无法发送您的语音回复。打开 CodeWalk 重试。',
   },
 };

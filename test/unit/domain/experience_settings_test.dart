@@ -125,6 +125,22 @@ void main() {
       expect(settings.androidBackgroundAlertsEnabled, isTrue);
     });
 
+    test(
+      'defaults Android Auto messaging to disabled and roundtrips opt-in',
+      () {
+        final defaults = ExperienceSettings.defaults();
+        final enabled = defaults.copyWith(androidAutoMessagingEnabled: true);
+
+        expect(defaults.androidAutoMessagingEnabled, isFalse);
+        expect(
+          ExperienceSettings.fromJson(
+            enabled.toJson(),
+          ).androidAutoMessagingEnabled,
+          isTrue,
+        );
+      },
+    );
+
     test('participates in settings value equality', () {
       final first = ExperienceSettings.defaults().copyWith(
         sessionAttentionPresentation: SessionAttentionPresentation.bubble,

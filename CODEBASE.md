@@ -39,11 +39,13 @@ codewalk/
 │   ├── data/                           # Data layer: datasources, API/storage models, repositories
 │   │   ├── datasources/                # Remote/local IO boundaries
 │   │   │   └── app_local_datasource.dart # SharedPreferences-backed local state, including server-scoped session tabs and session-tab icon overrides
-│   │   └── session_attention/          # Encrypted completion snapshot store and conditional atomic file storage
+│   │   ├── session_attention/          # Encrypted completion snapshot store and conditional atomic file storage
+│   │   └── car_messaging/              # Encrypted car-messaging thread/reply store with conditional atomic file storage and lock file (issue #99)
 │   ├── domain/                         # Domain layer: entities, repository contracts, use cases
 │   │   ├── entities/persisted_session_tabs_state.dart # Versioned open/closed session-tab payload models
 │   │   ├── entities/session_tab_icon_overrides.dart # Versioned per-session session-tab icon override entities (issue #138)
-│   │   └── entities/session_attention_overlay/ # Session-attention identity, item, aggregate, and transport models
+│   │   ├── entities/session_attention_overlay/ # Session-attention identity, item, aggregate, and transport models
+│   │   └── entities/car_messaging.dart # Bounded car-messaging thread/reply/state entities and limits (issue #99)
 │   ├── l10n/                           # Canonical Flutter gen_l10n ARB files (14 locales) and generated delegates
 │   │   ├── app_en.arb                  # English template ARB (1877 UI keys with metadata) — canonical source of truth
 │   │   ├── app_*.arb                   # Translation ARBs (ar, bn, de, es, fr, hi, it, ja, ko, pt, ru, ur, zh) — canonical
@@ -76,6 +78,7 @@ codewalk/
 │       │   ├── session_tab_icon_override_store.dart # Per-server persisted session-tab icon override store
 │       │   ├── session_tab_icon_presets.dart # SessionTabIconPreset enum + localized preset labels
 │       │   ├── session_attention/       # Attention coordinator, completion resolver, host contract/protocol, and platform entrypoints
+│       │   ├── car_messaging/           # Android Auto notification messaging prototype: action handler, gate, dispatch worker, notifier, runtime (issue #99)
 │       │   └── tts/                    # Read-aloud TTS backend contracts, adapters, fresh-install default resolver, generated-audio player, and text extraction
 │       │       ├── read_aloud_default_resolver.dart # Fresh-install read-aloud provider/voice default resolver
 │       │       ├── edge_tts_protocol.dart # Edge/Bing Read Aloud URL, header, frame, SSML, voice-list, and MP3 frame helpers
@@ -95,6 +98,7 @@ codewalk/
 │   ├── android/app/src/main/kotlin/com/verseles/codewalk/
 │       ├── MainActivity.kt              # Android session-overlay/system channel host, composer clipboard content-URI resolver, native CustomTabs OAuth launcher, and activation forwarding
 │       └── overlay/SessionOverlayService.kt # Android foreground overlay host and service-owned Flutter engine
+│   ├── android/app/src/debug/           # Debug/test source-set only: automotive notification descriptor (`@xml/automotive_app_desc`), never in release builds (issue #99)
 │   └── windows/runner/                   # Windows runner sources (incl. `windows_microphone_plugin.{h,cpp}` runner-owned WASAPI bridge for on-device STT — see ADR-038)
 ├── android/app/src/main/res/drawable-*/ # Android notification small icons (`ic_stat_codewalk.png`)
 ├── linux/runner/resources/             # Linux launcher icon + desktop entry icon metadata
@@ -161,6 +165,7 @@ lib/domain/usecases/*.dart                        # Application use cases consum
 lib/domain/entities/quota.dart                    # Quota domain entities: `QuotaSnapshot`, `UsageWindow`, `PaceInfo`, `QuotaEntry`, `QuotaProviderGroup`; `QuotaProviderResult` carries a typed `errorCode` (e.g. `authentication`/`invalid_response`/`request_failed`) parsed from result JSON (issue #96)
 lib/domain/entities/persisted_session_tabs_state.dart # Versioned persisted open/closed session-tab payload and model entities
 lib/domain/entities/session_tab_icon_overrides.dart # Versioned per-session icon override entities (issue #138): `SessionTabIconOverride` (serverId/directory/sessionId/presetId/updatedAtMs with identityKey and JSON round trip) and `SessionTabIconOverridesState` (versioned payload, 256-entry per-server dedup/compaction, encode/decode, `requiresCompaction`)
+lib/domain/entities/car_messaging.dart # Bounded car-messaging entities (issue #99): `CarMessagingEntry`/`CarMessagingThread`/`CarMessagingReply`/`CarMessagingState` with `CarMessagingRole` and `CarMessagingReplyState` enums, JSON round trip, normalization caps (5 threads, 8 entries/thread, 5 queued replies, 1024 scalars), and 24h/30m retention constants
 lib/presentation/providers/app_provider.dart      # Server profiles, health polling, local runtime state, OAuth challenge lifecycle, Tailscale transport orchestration; supportsTailscale (Android/iOS/Linux/macOS), _applyTailscaleTransport() drives per-profile Tailscale node lifecycle (upForProfile/auth URL launch/down), swaps Dio adapter via TailscaleHttpAdapter, propagates active adapter to health-check Dio via createHealthCheckDio; tailscaleEnabled in addServerProfile/updateServerProfile CRUD; exposes reactive Tailscale state getters: tailscaleState, tailscaleNodeState, tailscaleAuthUrl, tailscaleMessage, tailscaleNeedsAuth, tailscaleNeedsMachineAuth, and authenticateTailscale() method; guards health polling/connection when no active server profile is set; includes setup-debug state (SetupDebugEntry, SetupDebugSeverity) for OpenCode installation diagnostics with recordSetupDebugEvent(), exportSetupDebugReport(), clearSetupDebugData(); OAuth challenge tracking via hasOAuthChallenge/getOAuthChallengeHeaders, handleOAuthChallenge (creates OAuthService, runs PKCE flow, sets Dio token, verifies connection), clearOAuthCredential, isOAuthAuthenticated, and oauthEnabled cache-on-activate; supportsCloudflareAccessOAuth includes desktop (macOS/Windows/Linux) and Android, gates iOS out; production health checks probe `GET /global/health` and fall back to `GET /path` on `DioException` (`_checkServerHealth` records OAuth challenges from either response); constructor accepts optional `serverHealthProbe` and `localServerHealthProbe` test seams that bypass the production endpoints when supplied; owns the `SessionTabIconOverrideStore` and removes its per-server overrides on server profile deletion
 lib/presentation/providers/project_provider.dart  # Project/worktree context selection and persistence; exposes file-name, file-content, and workspace-symbol search for Quick Open and composer mentions
 lib/presentation/providers/project_icon_provider.dart # Client-owned project icon orchestration (ADR-040, issue #73): loads cached icons from `ProjectIconStore`, runs discovery via `ProjectIconDiscoveryService`, and exposes per-project `iconFor`/`isLoading`/`isDiscovering` state; `loadStoredIcon(project)` resolves cached/default icons only (used by closed project rows), `autoDiscoverIcon(project)` triggers one-shot discovery after loading stored state (used by open/active project surfaces; tracks per-key attempts via `_autoDiscoveryAttemptedKeys` to avoid repeats), and `discoverIcon(project)` is the lower-level discovery/save operation invoked by `autoDiscoverIcon(project)` and retained for provider orchestration/testing (not a UI button trigger); OpenCode project payloads remain authoritative/unchanged
@@ -199,10 +204,15 @@ lib/presentation/services/desktop_tray_service_io.dart # Desktop tray lifecycle;
 lib/presentation/services/notification_service.dart    # Local notifications; Android uses `@drawable/ic_stat_codewalk` small icon and no longer drives foreground monitor state; exposes `clearNotificationsForSession()` for per-session notification dismissal
 lib/presentation/services/event_feedback_dispatcher.dart  # Routes chat events to notification + sound feedback; includes `dismissForSession()` for reactive foreground notification cleanup when permissions/questions are resolved or sessions become idle
 lib/presentation/services/android_foreground_monitor_service.dart # Android foreground service via MethodChannel; active only during temporary live monitoring for known background work
-lib/presentation/services/android_background_alert_worker.dart # WorkManager-based background polling; 3m active probes, 5m tail probe, and low-data title-cached notification fetches; includes `removeNotifiedRequestIds()` static method to clear replied permission/question IDs from the persisted background snapshot
+lib/presentation/services/android_background_alert_worker.dart # WorkManager-based background polling; 3m active probes, 5m tail probe, and low-data title-cached notification fetches; includes `removeNotifiedRequestIds()` static method to clear replied permission/question IDs from the persisted background snapshot; also dispatches car-messaging reply work (`carMessagingReplyTaskName`) through `CarMessagingDispatchWorker` and teardown via `CarMessagingRuntime` (issue #99)
 lib/presentation/services/android_background_alert_logic.dart # Pure logic for tail probe scheduling, alert planning, and snapshot state
 lib/presentation/services/android_battery_optimization_service.dart # Android battery optimization query/exemption request via MethodChannel
 lib/presentation/services/permission_auto_approve_runtime.dart # Background permission auto-approve context and session ID resolution for Android background continuity
+lib/presentation/services/car_messaging/car_messaging_notification.dart # Android Auto `MessagingStyle` notification spec builder, category/action constants, and identity-derived id/tag helpers
+lib/presentation/services/car_messaging/car_messaging_action_handler.dart # Car reply/mark-read notification action handler with background response entrypoint and Workmanager reply-task scheduling
+lib/presentation/services/car_messaging/car_messaging_dispatch_worker.dart # Queued car-reply dispatch to the server (`prompt_async`), completion publishing, and failure marking
+lib/presentation/services/car_messaging/car_messaging_gate.dart # Pure background gate predicates: debug-build/feature/settings/data-saver conditions and server-profile eligibility
+lib/presentation/services/car_messaging/car_messaging_runtime.dart # Runtime teardown orchestration: notification cancellation, store clear, server/identity removal, and pending reply-work cancellation
 lib/presentation/services/read_aloud_service.dart                # ReadAloudService: provider-routed read-aloud facade; exposes isProviderAvailable for runtime native TTS probes; generated-audio backends (including Edge experimental when user-selected or chosen by fresh-install defaults) are routed through byte playback; loads the secure OpenAI-compatible API key when needed; tracks idle/loading/playing/paused state and per-message playback
 lib/presentation/services/tts/tts_backend.dart                   # TTS backend contract, request/result models, generated-audio result, voice metadata, and normalized backend error kinds
 lib/presentation/services/tts/native_tts_backend.dart            # Native flutter_tts backend with voice/language lookup and platform speech callbacks
@@ -221,6 +231,8 @@ lib/presentation/services/session_tab_icon_presets.dart # `SessionTabIconPreset`
 lib/domain/entities/session_attention_overlay/session_attention_models.dart # Session-attention identity, priority, transport, aggregate, and durable snapshot payload models
 lib/data/session_attention/session_attention_snapshot_store.dart # AES-GCM encrypted session-completion snapshot persistence with secure key storage and dismissal tombstones
 lib/data/session_attention/session_attention_snapshot_file_store*.dart # Conditional atomic application-support file store (IO) and unsupported-platform stub
+lib/data/car_messaging/car_messaging_store.dart # Encrypted car-messaging state store (issue #99): AES-GCM envelope with secure key storage, serialized access, thread/reply bounds, and retention pruning
+lib/data/car_messaging/car_messaging_file_store*.dart # Conditional atomic application-support file store (IO with exclusive lock file, stale-lock recovery, atomic write) and unsupported-platform stub
 lib/presentation/services/session_attention/session_attention_coordinator.dart # Tracks attention timing and monitoring availability
 lib/presentation/services/session_attention/session_attention_completion_resolver.dart # Resolves completed root-session output into encrypted snapshots and publishes changes
 lib/presentation/services/session_attention/session_attention_host_contract.dart # Cross-platform host capability and lifecycle contract
@@ -228,6 +240,8 @@ lib/presentation/services/session_attention/session_attention_host_protocol.dart
 lib/presentation/services/session_attention/session_attention_host_service*.dart # Conditional Android, desktop child-window, iOS in-app, and unsupported host implementation selection
 lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Flutter entrypoints and IPC bridge for desktop child and Android service hosts
 android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android system/platform channel host; native OAuth launch via AndroidX Custom Tabs with ACTION_VIEW fallback
+android/app/src/debug/AndroidManifest.xml # Debug/test source-set only: `com.google.android.gms.car.application` meta-data referencing `@xml/automotive_app_desc`; absent from release builds (issue #99)
+android/app/src/debug/res/xml/automotive_app_desc.xml # Debug/test source-set automotive descriptor declaring `<uses name="notification"/>` (issue #99)
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay.dart # Shared bubble/panel attention presentation
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay_controller.dart # In-app snapshot, read-aloud, and action controller used by ChatPage on iOS
 lib/presentation/services/workspace_file_operations_service.dart # WorkspaceFileOperationsService (issues #89/#90): shell-gated `createFolder`/`createFile`/`rename`/`delete`/`writeFile` with capability probe and ephemeral `/session` lifecycle; server-bound cancellation/failure aborts the active remote operation before session teardown rather than only dropping the local wait; parses shell responses with the official OpenCode tool-state parser; `writeFile` transports UTF-8 content as 48 KiB environment chunks and uses a negotiated GNU/BSD/Python decoder pipeline to stage an atomic mode-preserving replacement; operation logs are privacy-safe; capabilities are cache-scoped per `serverScopeKey::directory`
@@ -495,6 +509,7 @@ test/unit/                             # Unit tests
 test/unit/i18n/arb_catalog_sync_test.dart # ARB ⇄ arb_strings.dart catalog parity: exact keys/values, placeholders, plurals, and ICU apostrophe safety (issue #103)
 test/unit/domain/session_attention_models_test.dart # Session-attention identity, priority, aggregate, and payload models
 test/unit/data/session_attention_snapshot_store_test.dart # Encrypted snapshot round trips, nonce rotation, corruption recovery, atomic-write failures, and tombstones
+test/unit/data/car_messaging_store_test.dart # Encrypted car-messaging store round trips, thread/reply bounds and retention pruning, key/file-store failure handling, and serialized access
 test/unit/presentation/session_attention_coordinator_test.dart # Attention timing and monitoring-availability coverage
 test/unit/presentation/session_attention_delay_coordinator_test.dart # Attention delay-state coverage
 test/unit/presentation/session_attention_completion_resolver_test.dart # Completion snapshot resolution coverage
@@ -533,6 +548,11 @@ test/unit/services/                     # Platform and runtime service unit test
   windows_microphone_service_test.dart   #   Windows microphone access probe and preflight status tests
   speech_input_service_api_test.dart     #   Cloud API STT backend: PCM16 WAV encoding, multipart upload + final transcription, rejected-credential mapping without leaking response details, silence-only skip, insecure custom-endpoint rejection, preset base-URL precedence, and session-epoch restart isolation
   session_tab_icon_override_store_test.dart #   Per-server override store serialization, dedup/compaction, and scoped-key persistence
+  car_messaging_notification_test.dart #   Android Auto MessagingStyle notification spec, category/action constants, and id/tag derivation
+  car_messaging_gate_test.dart        #   Background gate predicates, data-saver interaction, and server-profile eligibility
+  car_messaging_action_handler_test.dart # Car reply/mark-read action handling, reply queueing, and Workmanager scheduling
+  car_messaging_dispatch_worker_test.dart # Queued reply dispatch, completion publishing, and failure marking
+  car_messaging_android_manifest_test.dart # Debug-only automotive descriptor assertions (debug manifest references it; profile/main do not)
 test/unit/di/speech_service_registration_test.dart # DI isolation: `ApiSpeechInputService` factory returns distinct instances per composer (`isNot(same())`), with DI reset/teardown
 test/unit/presentation/                 # Presentation-level service tests; includes `workspace_file_operations_service_test.dart` (issues #89 and #90) covering official tool-state parsing, malformed responses, shell quoting, capability probes, create/rename/delete session teardown, server-bound abort semantics, write-path validation, 48 KiB content chunking, and negotiated GNU/BSD/Python decoding; `app_theme_test.dart` (issue #86) covers `AppVisualStyleTokens.classic`/`refined` factories, theme-extension wiring through `AppTheme.lightFrom`/`darkFrom`, `withResponsiveSnackBars` shape switching, and the `ThemeData.visualStyleTokens` fallback getter
 test/unit/presentation/chat_input_external_files_test.dart # Pure composer external-attachment byte, name/MIME, and image-signature helper coverage
