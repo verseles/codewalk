@@ -1,19 +1,11 @@
-import 'package:flutter/foundation.dart';
-
 import '../../../domain/entities/experience_settings.dart';
 import '../android_background_alert_logic.dart';
 
 bool shouldRunCarMessagingBackground({
   required ExperienceSettings settings,
   required bool isCellularTransport,
-  required bool featureEnabled,
-  bool? debugBuild,
 }) {
-  final debugMode = debugBuild ?? kDebugMode;
-  return debugMode &&
-      featureEnabled &&
-      settings.androidAutoMessagingEnabled &&
-      shouldRunAndroidBackgroundAlerts(settings) &&
+  return shouldRunAndroidBackgroundAlerts(settings) &&
       !shouldDisableBackgroundNetworkForDataSaver(
         settings: settings,
         isCellularTransport: isCellularTransport,

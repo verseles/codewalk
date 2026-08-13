@@ -6664,21 +6664,10 @@ class AppLocalizationsUr extends AppLocalizations {
   String get speechSttApiKeyRejected => 'اسپیچ API کلید مسترد کر دی گئی۔';
 
   @override
-  String get carMessagingConversations => 'Android Auto گفتگو';
-
-  @override
   String get carMessagingReply => 'جواب دیں';
 
   @override
   String get carMessagingMarkRead => 'پڑھا ہوا نشان زد کریں';
-
-  @override
-  String get carMessagingChannelDescription =>
-      'تجرباتی CodeWalk گفتگو کے جوابات';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      'حتمی جوابات اور صوتی جوابات کے لیے تجرباتی ٹیسٹ بلڈ سپورٹ۔ Google Play تقسیم کے لیے منظور شدہ نہیں۔';
 
   @override
   String get carMessagingDeliveryFailedTitle => 'جواب بھیجا نہیں جا سکا';

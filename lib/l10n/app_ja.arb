@@ -2226,11 +2226,8 @@
   "speechSttApiKeyStorageUnavailable": "音声 API キーの安全なストレージを利用できません。",
   "speechSttApiKeyMissing": "設定 > 音声で音声 API キーを追加してください。",
   "speechSttApiKeyRejected": "音声 API キーが拒否されました。",
-  "carMessagingConversations": "Android Autoの会話",
   "carMessagingReply": "返信",
   "carMessagingMarkRead": "既読にする",
-  "carMessagingChannelDescription": "実験的なCodeWalk会話返信",
-  "settingsAndroidAutoMessagingDescription": "最終応答と音声応答の実験的なテストビルドサポート。Google Playでの配布は承認されていません。",
   "carMessagingDeliveryFailedTitle": "返信を送信できませんでした",
   "carMessagingDeliveryFailedBody": "音声での返信を配信できませんでした。再試行するにはCodeWalkを開いてください。"
 }

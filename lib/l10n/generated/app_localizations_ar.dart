@@ -6582,21 +6582,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get speechSttApiKeyRejected => 'تم رفض مفتاح API الخاص بالكلام.';
 
   @override
-  String get carMessagingConversations => 'محادثات Android Auto';
-
-  @override
   String get carMessagingReply => 'رد';
 
   @override
   String get carMessagingMarkRead => 'تحديد كمقروء';
-
-  @override
-  String get carMessagingChannelDescription =>
-      'ردود محادثات CodeWalk التجريبية';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      'دعم تجريبي في إصدارات الاختبار للردود النهائية والردود الصوتية. غير معتمد للتوزيع عبر Google Play.';
 
   @override
   String get carMessagingDeliveryFailedTitle => 'تعذّر إرسال الرد';

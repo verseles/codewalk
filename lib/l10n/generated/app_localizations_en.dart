@@ -6646,21 +6646,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speechSttApiKeyRejected => 'The speech API key was rejected.';
 
   @override
-  String get carMessagingConversations => 'Android Auto conversations';
-
-  @override
   String get carMessagingReply => 'Reply';
 
   @override
   String get carMessagingMarkRead => 'Mark as read';
-
-  @override
-  String get carMessagingChannelDescription =>
-      'Experimental CodeWalk conversation replies';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      'Experimental test-build support for final responses and voice replies. Not approved for Google Play distribution.';
 
   @override
   String get carMessagingDeliveryFailedTitle => 'Couldn\'t send reply';

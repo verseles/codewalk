@@ -8,7 +8,6 @@ import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../core/config/feature_flags.dart';
 import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
@@ -242,7 +241,6 @@ class SettingsProvider extends ChangeNotifier {
       _cellularDataSaverService.automaticSyncInterval;
   bool get androidBackgroundAlertsEnabled =>
       _settings.androidBackgroundAlertsEnabled;
-  bool get androidAutoMessagingEnabled => _settings.androidAutoMessagingEnabled;
   SessionAttentionPresentation get sessionAttentionPresentation =>
       _settings.sessionAttentionPresentation;
   SessionAttentionHostCapability get sessionAttentionHostCapability =>
@@ -335,27 +333,6 @@ class SettingsProvider extends ChangeNotifier {
       shouldPersistPlatformSettings =
           await _applyFirstRunReadAloudDefaults() ||
           shouldPersistPlatformSettings;
-    }
-
-    final shouldPurgeDisabledCarMessaging =
-        !FeatureFlags.androidAutoMessagingPrototype &&
-        _settings.androidAutoMessagingEnabled;
-    if (shouldPurgeDisabledCarMessaging) {
-      _settings = _settings.copyWith(androidAutoMessagingEnabled: false);
-      shouldPersistPlatformSettings = true;
-    }
-    if (!kIsWeb &&
-        defaultTargetPlatform == TargetPlatform.android &&
-        shouldPurgeDisabledCarMessaging) {
-      try {
-        await _carMessagingDisable();
-      } catch (error, stackTrace) {
-        AppLogger.warn(
-          'Failed to purge disabled car messaging state',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
     }
 
     // Platform STT policy migration:
@@ -907,21 +884,7 @@ class SettingsProvider extends ChangeNotifier {
     if (_settings.androidBackgroundAlertsEnabled == enabled) {
       return;
     }
-    _settings = _settings.copyWith(
-      androidBackgroundAlertsEnabled: enabled,
-      androidAutoMessagingEnabled: enabled
-          ? _settings.androidAutoMessagingEnabled
-          : false,
-    );
-    notifyListeners();
-    await _persist();
-    await _syncAndroidBackgroundAlertRuntime();
-    if (!enabled) await _carMessagingDisable();
-  }
-
-  Future<void> setAndroidAutoMessagingEnabled(bool enabled) async {
-    if (_settings.androidAutoMessagingEnabled == enabled) return;
-    _settings = _settings.copyWith(androidAutoMessagingEnabled: enabled);
+    _settings = _settings.copyWith(androidBackgroundAlertsEnabled: enabled);
     notifyListeners();
     await _persist();
     await _syncAndroidBackgroundAlertRuntime();

@@ -6,7 +6,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
-import '../../../core/config/feature_flags.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/car_messaging/car_messaging_store.dart';
 import '../../../domain/entities/car_messaging.dart';
@@ -35,29 +34,24 @@ class CarMessagingActionHandler {
     CarMessagingTaskScheduler? schedule,
     Future<SharedPreferences> Function()? preferences,
     DateTime Function()? now,
-    bool? featureEnabled,
   }) : _store = store ?? CarMessagingStore(),
        _notifier = notifier ?? CarMessagingNotifier(),
        _schedule = schedule ?? _scheduleReply,
        _preferences = preferences ?? SharedPreferences.getInstance,
-       _now = now ?? DateTime.now,
-       _featureEnabled =
-           featureEnabled ?? FeatureFlags.androidAutoMessagingPrototype;
+       _now = now ?? DateTime.now;
 
   final CarMessagingStore _store;
   final CarMessagingNotifier _notifier;
   final CarMessagingTaskScheduler _schedule;
   final Future<SharedPreferences> Function() _preferences;
   final DateTime Function() _now;
-  final bool _featureEnabled;
 
   Future<void> handle(NotificationResponse response) async {
-    if (!_featureEnabled) return;
     final prefs = await _preferences();
+    await prefs.reload();
     final rawSettings = prefs.getString(AppConstants.experienceSettingsKey);
     final settings = _readSettings(rawSettings);
-    if (!settings.androidBackgroundAlertsEnabled ||
-        !settings.androidAutoMessagingEnabled) {
+    if (!settings.androidBackgroundAlertsEnabled) {
       return;
     }
     final payload = _CarMessagingActionPayload.fromRaw(response.payload);

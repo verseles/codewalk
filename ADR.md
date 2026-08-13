@@ -55,7 +55,8 @@ This document contains only active architectural decisions that represent the cu
 - ADR-049: Cross-Platform Attention Surfaces and Secure Background Continuity
 - ADR-052: Bounded Default-Off Autosave Addendum for the Focused File Editor
 - ADR-053: Client-Owned Configurable API Speech-to-Text (OpenAI / Groq / Custom OpenAI-Compatible)
-- ADR-054: Experimental Test-Only Android Auto Notification Messaging
+- ADR-054: Experimental Test-Only Android Auto Notification Messaging ⚠️ SUPERSEDED by ADR-055
+- ADR-055: Production Android Auto Notification Messaging for Sideloaded APK Distribution
 
 ---
 
@@ -3427,9 +3428,9 @@ This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception. It
 
 ---
 
-## ADR-054: Experimental Test-Only Android Auto Notification Messaging (2026-08-12)
+## ADR-054: Experimental Test-Only Android Auto Notification Messaging (2026-08-12) ⚠️ SUPERSEDED by ADR-055
 
-**Status**: Accepted
+**Status**: Superseded — the release/debug gating decision (items 1–2) is superseded by ADR-055 (2026-08-13); the technical messaging/background/ADR-023 decisions (items 3–14) are preserved and carried forward unchanged in ADR-055.
 
 **Related**: GitHub issue #99; ADR-003 (realtime/background lifecycle), ADR-017 (Android foreground monitoring), ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-049 (attention surfaces and background continuity), ADR-053 (client-owned API STT as the speech-backend precedent).
 
@@ -3510,4 +3511,83 @@ This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception. It
 - `android/app/src/debug/` — automotive notification descriptor (`res/xml/automotive_app_desc.xml` + `AndroidManifest.xml`) in the debug source set only; never in `src/main/` or release artifacts.
 - `test/unit/data/car_messaging_store_test.dart` — encrypted store coverage (process-death restore, bounded retention).
 - `test/unit/services/car_messaging_*_test.dart` — notification/action shape, auth gating, dispatch worker, and manifest coverage.
+- Ref: issue #99
+
+---
+
+## ADR-055: Production Android Auto Notification Messaging for Sideloaded APK Distribution (2026-08-13)
+
+**Status**: Accepted
+
+**Related**: GitHub issue #99; ADR-054 (superseded — release/debug gating portions), ADR-003 (realtime/background lifecycle), ADR-017 (Android foreground monitoring), ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-049 (attention surfaces and background continuity), ADR-053 (client-owned API STT as the speech-backend precedent).
+
+### Context
+
+ADR-054 prototyped Android Auto notification messaging behind a double default-off gate and a debug-only automotive descriptor because Google Play automotive (MF-5) eligibility was unresolved and the feature was therefore treated as test-only. Two user clarifications remove that gating rationale:
+
+1. **"Device off" means screen off/locked.** The phone remains powered on with the screen off/locked — which is inside ADR-054's accepted background envelope (process recreation, WorkManager headless path), not the excluded powered-off condition.
+2. **Distribution is direct APK sideload, not Google Play.** Release APKs are installed by sideloading; there is no Play review, store listing, or MF-5 eligibility submission in the distribution path.
+
+The Android Auto technical constraints from ADR-054 remain fully valid because they derive from Android Auto's rendering/input contract and OpenCode's official API — not from distribution: templates-only rendering, exactly one voice-reply `RemoteInput`, no custom UI/STT/TTS, constrained background execution after process death, and `prompt_async` without a client-supplied idempotency key.
+
+### Decision
+
+1. **Automotive descriptor ships in every release APK.** The automotive notification descriptor moves from `android/app/src/debug/` to the main source set — `android/app/src/main/res/xml/automotive_app_desc.xml` — wired in `android/app/src/main/AndroidManifest.xml`. The normal release APK, the only distributed artifact, includes the Android Auto messaging surface.
+
+2. **Debug gating is removed.** Remove the `kDebugMode` runtime gate, the `CODEWALK_ANDROID_AUTO_MESSAGING` compile flag, and the `androidAutoMessagingEnabled` preference/UI toggle. Release builds are no longer inert carriers; car messaging is active behavior in release APKs.
+
+3. **Automatic activation.** Car messaging runs automatically whenever Android background alerts are enabled (the existing background-alert master switch) and the technical gates pass (root-session identity available, supported auth envelope, bounded encrypted store operational). There is no separate automotive toggle.
+
+4. **Preserved technical constraints (unchanged from ADR-054).** Plain/no-auth and Basic-authenticated hosts only after process death; OAuth/Tailscale-backed contexts are reopen-required; Data Saver pauses reply scheduling rather than bypassing it; replies persist in the bounded AES-256-GCM encrypted store; delivery rides honest WorkManager latency; replies are sent via the official directory-scoped `POST /session/:id/prompt_async` with no `messageID`; `MessagingStyle` renders only the settled final assistant response with exactly one reply `RemoteInput` plus local mark-as-read; no custom car UI, `CarAppService`/`androidx.car.app` templates, processing/intermediate messages, or custom microphone/STT/TTS; force-stop, powered-off, and pre-first-unlock states remain excluded and fail closed; no claim of Google Play automotive eligibility anywhere.
+
+5. **Harmless preference cleanup.** The obsolete persisted `androidAutoMessagingEnabled` preference is ignored on load and dropped from the settings JSON on the next persist/save — no explicit migration or key removal, no user-visible effect.
+
+6. **Rollback is not gated.** Rollback is descriptor/code removal or the existing background-alerts master switch — never hidden debug gates.
+
+7. **Existing notification channel reuse.** `MessagingStyle` car notifications reuse the existing `codewalk_agent` notification channel — the same channel, with the same default importance/priority, used by standard completion alerts — so channel behavior (sound/importance/mute) is identical and independent of which producer (car messaging or standard completions) happens to create the channel first. The car alert replaces the standard notification only when a new car message is actually published; otherwise the standard completion fallback remains in place.
+
+### Rationale
+
+- **Sideload distribution removes the Play gate:** with direct APK sideload there is no Play review or MF-5 eligibility submission; keeping the descriptor debug-only would force users to install debug builds for no compliance benefit.
+- **The clarified "device off" meaning is inside the accepted envelope:** screen off/locked with the phone powered on was always supported by ADR-054's background envelope; the powered-off exclusion is unchanged.
+- **Automatic activation follows the existing master switch:** car messaging reuses the background-alerts switch users already understand, eliminating a second opt-in surface and a dead settings toggle.
+- **Technical constraints are distribution-independent:** they come from Android Auto's templates/RemoteInput contract and OpenCode's missing idempotency key, so preserving them verbatim keeps ADR-023 compliance and the honest bounded-latency/fail-closed model.
+- **Eligibility honesty is preserved:** sideloading removes Play review, but the app still makes no claim of Google Play automotive eligibility.
+
+### Consequences
+
+- ✅ Release APKs — the only distributed artifacts — include the Android Auto notification messaging surface.
+- ✅ `kDebugMode` gating, the `CODEWALK_ANDROID_AUTO_MESSAGING` compile flag, and the `androidAutoMessagingEnabled` preference/UI toggle are removed.
+- ✅ Car messaging activates automatically with Android background alerts when technical gates pass.
+- ✅ All ADR-054 technical constraints preserved: plain/Basic-only post-process-death, OAuth/Tailscale frozen, Data Saver pause, encrypted bounded store, honest WorkManager latency, `prompt_async` without `messageID`, no custom car UI/templates/speech, excluded powered-off/force-stop/pre-first-unlock, no Play eligibility claim.
+- ✅ Obsolete `androidAutoMessagingEnabled` preference is ignored on load and dropped from the settings JSON on the next persist/save; no user-visible effect.
+- ✅ `MessagingStyle` car notifications reuse the existing `codewalk_agent` notification channel with the same default importance/priority as standard completion alerts, preserving users' existing Android channel sound/importance/mute settings regardless of which producer (car messaging or standard completions) creates the channel first.
+- ✅ Rollback is simple: descriptor/code removal or the background-alerts master switch.
+- ⚠ Residual duplicate-or-loss window at POST remains (OpenCode has no idempotency key); bounded fail-closed retries unchanged.
+- ⚠ Release APKs now advertise the automotive messaging descriptor to any car system where installed; eligibility copy must stay accurate.
+- ❌ Not eligible for (and does not claim eligibility for) Google Play automotive distribution; any future Play submission requires a separate eligibility review and ADR.
+
+### Rollback / Cleanup
+
+- **Master switch:** turning off Android background alerts stops car messaging immediately — no hidden debug gates.
+- **Code/descriptor removal:** deleting the main-source-set automotive descriptor and the car-messaging code removes the surface from all builds.
+- **Queue/data cleanup:** reply state and encrypted thread records are purged when the feature is disabled or the identity/session is removed; bounded retention applies while active.
+- **Tests required:** descriptor presence in the main source set, release-build activation without flag/toggle, process-death restore, notification action/RemoteInput shape, `prompt_async` request contract (no `messageID`), auth gating (plain/Basic vs OAuth/Tailscale reopen-required), Data Saver pause handling, and `codewalk_agent` notification-channel reuse — same default importance/priority as standard completions, standard fallback retained unless a new car message is actually published.
+
+### ADR-023 Compatibility
+
+This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception — unchanged from ADR-054. It adds no OpenCode endpoint, request/response schema, realtime event, session/message mutation, authentication contract, or configuration mutation. Replies ride the official directory-scoped `POST /session/:id/prompt_async` exactly as the app's foreground send path does; confirmation uses bounded official status/message reconciliation only. All Android Auto presentation, encryption, and scheduling remain client-owned behavior.
+
+### Key Files
+
+- `android/app/src/main/res/xml/automotive_app_desc.xml` — automotive descriptor moved to the main source set (from `android/app/src/debug/`); shipped in every release APK.
+- `android/app/src/main/AndroidManifest.xml` — descriptor wiring in the main manifest.
+- `lib/presentation/services/car_messaging/` — runtime, action handler, notification construction, dispatch worker, and gating (gate source now = background alerts + technical gates).
+- `lib/presentation/services/notification_service.dart` — `MessagingStyle` notification callback with exactly one reply `RemoteInput`, local mark-as-read, reusing the existing `codewalk_agent` notification channel.
+- `lib/presentation/services/android_background_alert_worker.dart` — WorkManager headless integration scheduling the official `prompt_async` send.
+- `lib/domain/entities/car_messaging.dart` — messaging entities/models (reply, message, thread state).
+- `lib/data/car_messaging/` — bounded AES-256-GCM encrypted store for persisted replies and thread state.
+- `lib/core/config/feature_flags.dart` — `CODEWALK_ANDROID_AUTO_MESSAGING` compile flag removed.
+- `lib/domain/entities/experience_settings.dart` + settings UI — `androidAutoMessagingEnabled` preference and toggle removed; the obsolete persisted key is ignored on load and dropped from the settings JSON on the next persist/save.
+- `test/unit/` — updated tests: descriptor/manifest presence in main source set, release activation without flag/toggle, encrypted store (process-death restore), notification/action shape, auth gating, dispatch worker, obsolete-preference ignored-on-load/dropped-on-persist, and `codewalk_agent` notification-channel reuse — same default importance/priority as standard completions, standard fallback retained unless a new car message is actually published.
 - Ref: issue #99

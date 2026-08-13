@@ -9,7 +9,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
-import '../../core/config/feature_flags.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
@@ -20,7 +19,6 @@ import 'android_background_alert_logic.dart';
 import 'car_messaging/car_messaging_action_handler.dart';
 import 'car_messaging/car_messaging_dispatch_worker.dart';
 import 'car_messaging/car_messaging_gate.dart';
-import 'car_messaging/car_messaging_runtime.dart';
 import 'cellular_data_saver_service.dart';
 import 'notification_service.dart';
 import 'permission_auto_approve_runtime.dart';
@@ -212,9 +210,7 @@ class AndroidBackgroundAlertWorker {
     try {
       await Workmanager().cancelByUniqueName(_backgroundAlertWorkUniqueName);
       await Workmanager().cancelByUniqueName(_backgroundAlertOneOffUniqueName);
-      if (!FeatureFlags.androidAutoMessagingPrototype) {
-        await Workmanager().cancelByTag(carMessagingReplyWorkTag);
-      }
+      await Workmanager().cancelByTag(carMessagingReplyWorkTag);
     } catch (error, stackTrace) {
       AppLogger.warn(
         'Failed to cancel Android background alert tasks',
@@ -545,10 +541,6 @@ class _AndroidBackgroundAlertRunner {
         );
         return true;
       }
-      if (!settings.androidAutoMessagingEnabled && isCarReplyTask) {
-        await CarMessagingRuntime.cancelPendingReplyWork();
-        return true;
-      }
       if (_shouldDisableBackgroundDataSaver(settings, prefs)) {
         return !isCarReplyTask;
       }
@@ -566,7 +558,6 @@ class _AndroidBackgroundAlertRunner {
           isCellularTransport:
               CellularDataSaverService.readPersistedTransport(prefs) ==
               DataSaverTransport.cellular,
-          featureEnabled: FeatureFlags.androidAutoMessagingPrototype,
         );
       }
 

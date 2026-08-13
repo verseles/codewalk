@@ -2226,11 +2226,8 @@
   "speechSttApiKeyStorageUnavailable": "Защищённое хранилище ключей API речи недоступно.",
   "speechSttApiKeyMissing": "Добавьте ключ API речи в Настройки > Речь.",
   "speechSttApiKeyRejected": "Ключ API речи был отклонён.",
-  "carMessagingConversations": "Беседы Android Auto",
   "carMessagingReply": "Ответить",
   "carMessagingMarkRead": "Отметить как прочитанное",
-  "carMessagingChannelDescription": "Экспериментальные ответы на беседы CodeWalk",
-  "settingsAndroidAutoMessagingDescription": "Экспериментальная поддержка тестовых сборок для финальных ответов и голосовых ответов. Не одобрено для распространения через Google Play.",
   "carMessagingDeliveryFailedTitle": "Не удалось отправить ответ",
   "carMessagingDeliveryFailedBody": "Не удалось доставить ваш голосовой ответ. Откройте CodeWalk, чтобы повторить попытку."
 }

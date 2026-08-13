@@ -6729,21 +6729,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get speechSttApiKeyRejected => 'A chave de API de fala foi rejeitada.';
 
   @override
-  String get carMessagingConversations => 'Conversas do Android Auto';
-
-  @override
   String get carMessagingReply => 'Responder';
 
   @override
   String get carMessagingMarkRead => 'Marcar como lida';
-
-  @override
-  String get carMessagingChannelDescription =>
-      'Respostas experimentais de conversas do CodeWalk';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      'Suporte experimental de build de teste para respostas finais e respostas por voz. Não aprovado para distribuição no Google Play.';
 
   @override
   String get carMessagingDeliveryFailedTitle =>

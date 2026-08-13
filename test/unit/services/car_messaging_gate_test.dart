@@ -3,16 +3,13 @@ import 'package:codewalk/presentation/services/car_messaging/car_messaging_gate.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('requires both gates and pauses on cellular Data Saver', () {
-    final enabled = ExperienceSettings.defaults().copyWith(
-      androidAutoMessagingEnabled: true,
-    );
+  test('runs in release when background alerts allow network', () {
+    final enabled = ExperienceSettings.defaults();
 
     expect(
       shouldRunCarMessagingBackground(
         settings: enabled,
         isCellularTransport: false,
-        featureEnabled: true,
       ),
       isTrue,
     );
@@ -20,24 +17,14 @@ void main() {
       shouldRunCarMessagingBackground(
         settings: enabled,
         isCellularTransport: true,
-        featureEnabled: true,
       ),
       isFalse,
     );
+    final disabled = enabled.copyWith(androidBackgroundAlertsEnabled: false);
     expect(
       shouldRunCarMessagingBackground(
-        settings: enabled,
+        settings: disabled,
         isCellularTransport: false,
-        featureEnabled: false,
-      ),
-      isFalse,
-    );
-    expect(
-      shouldRunCarMessagingBackground(
-        settings: enabled,
-        isCellularTransport: false,
-        featureEnabled: true,
-        debugBuild: false,
       ),
       isFalse,
     );

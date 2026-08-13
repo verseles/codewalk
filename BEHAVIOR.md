@@ -2063,14 +2063,17 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **When** Android background alerts are disabled or there is no active live-monitor window
 - **Then** the persistent monitor notification is not shown
 
-### Experimental Android Auto messaging (debug-only)
+### Android Auto messaging (release APK)
 
-- **Given** the app is an Android debug build (`kDebugMode`) compiled with the `CODEWALK_ANDROID_AUTO_MESSAGING` flag (default off) and the experimental auto-messaging setting is enabled (default off)
-- **Then** auto-messaging runs only in debug/test builds when the compile flag and the setting are both enabled; otherwise it is inert
-- **Then** the automotive notification descriptor is registered only in debug builds and never surfaces a custom car UI, template, or vehicle-side processing
-- **When** a final assistant response completes while the screen is locked, the UI is closed, or the process was recreated
+- **Given** the app is a normal release APK installed by sideload
+- **Then** auto-messaging is available in release builds: no `kDebugMode` dependency, no `CODEWALK_ANDROID_AUTO_MESSAGING` compile flag, and no opt-in toggle
+- **Then** car messaging automatically follows the Android background alerts master setting, gated only by the real technical constraints below — not by build type or a feature switch
+- **Then** the automotive notification descriptor ships in the main/release source set, so every release APK includes the messaging surface; it never surfaces a custom car UI, template, or vehicle-side processing
+- **When** a final assistant response completes while the screen is off or locked, the UI is closed, or the process was recreated
 - **Then** the encrypted pending state is persisted before scheduling the WorkManager pass, so locked-screen and closed-UI replies survive process recreation
 - **Then** the notification uses `MessagingStyle` with the final assistant response, carries the exact root session identity, and exposes exactly one labeled voice `RemoteInput` reply action
+- **When** a car `MessagingStyle` notification is published for a root-session completion
+- **Then** it replaces the standard completion alert on the same `codewalk_agent` channel; if no new car message is published, the standard alert remains
 - **When** the user sends a voice reply through the notification
 - **Then** the reply is sent through the official directory-scoped `prompt_async` endpoint without a `messageID`
 - **When** the user marks the conversation read through the notification
@@ -2082,7 +2085,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** pending work is kept in a bounded AES-GCM-encrypted queue with bounded history and retries, and ambiguous state fails closed instead of sending
 - **Then** deleting the server profile or session, or running cleanup or rollback, cancels and removes any scheduled auto-messaging state
 - **Then** auto-messaging does not use custom speech recognition or text-to-speech and claims no media/Play eligibility
-- **Then** delivery is never realtime: it follows WorkManager scheduling and polling latency, runs only while the device is powered on, the app is not force-stopped, and the device has been unlocked at least once since boot
+- **Then** delivery is never realtime: it follows WorkManager scheduling and polling latency, runs with the screen off or locked while the device is powered on, and never runs while the device is powered off, the app is force-stopped, or the device has not been unlocked at least once since boot
 - **Then** a dedicated failure notification reports background auto-messaging failures
 
 ---

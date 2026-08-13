@@ -2073,11 +2073,8 @@
   "speechSttApiKeyStorageUnavailable": "Der sichere Speicher für den Sprach-API-Schlüssel ist nicht verfügbar.",
   "speechSttApiKeyMissing": "Fügen Sie unter Einstellungen > Sprache einen Sprach-API-Schlüssel hinzu.",
   "speechSttApiKeyRejected": "Der Sprach-API-Schlüssel wurde abgelehnt.",
-  "carMessagingConversations": "Android Auto-Konversationen",
   "carMessagingReply": "Antworten",
   "carMessagingMarkRead": "Als gelesen markieren",
-  "carMessagingChannelDescription": "Experimentelle CodeWalk-Antworten auf Konversationen",
-  "settingsAndroidAutoMessagingDescription": "Experimentelle Test-Build-Unterstützung für endgültige Antworten und Sprachantworten. Für die Verteilung über Google Play nicht zugelassen.",
   "carMessagingDeliveryFailedTitle": "Antwort konnte nicht gesendet werden",
   "carMessagingDeliveryFailedBody": "Ihre Sprachantwort konnte nicht zugestellt werden. Öffnen Sie CodeWalk, um es erneut zu versuchen."
 }

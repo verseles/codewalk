@@ -2225,11 +2225,8 @@
   "speechSttApiKeyStorageUnavailable": "التخزين الآمن لمفتاح API الخاص بالكلام غير متاح.",
   "speechSttApiKeyMissing": "أضف مفتاح API للكلام في الإعدادات > الكلام.",
   "speechSttApiKeyRejected": "تم رفض مفتاح API الخاص بالكلام.",
-  "carMessagingConversations": "محادثات Android Auto",
   "carMessagingReply": "رد",
   "carMessagingMarkRead": "تحديد كمقروء",
-  "carMessagingChannelDescription": "ردود محادثات CodeWalk التجريبية",
-  "settingsAndroidAutoMessagingDescription": "دعم تجريبي في إصدارات الاختبار للردود النهائية والردود الصوتية. غير معتمد للتوزيع عبر Google Play.",
   "carMessagingDeliveryFailedTitle": "تعذّر إرسال الرد",
   "carMessagingDeliveryFailedBody": "تعذّر تسليم ردّك الصوتي. افتح CodeWalk لإعادة المحاولة."
 }

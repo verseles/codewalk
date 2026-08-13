@@ -65,11 +65,11 @@ CarMessagingNotificationSpec buildCarMessagingNotification({
     tag: tag,
     payload: payload,
     details: AndroidNotificationDetails(
-      'codewalk_car_messaging_v1',
+      'codewalk_agent',
       channelName,
       channelDescription: channelDescription,
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
       category: AndroidNotificationCategory.message,
       styleInformation: MessagingStyleInformation(
         self,
@@ -134,11 +134,10 @@ class CarMessagingNotifier {
       selfName: l10n?.chatMessageYou ?? 'You',
       replyLabel: l10n?.carMessagingReply ?? 'Reply',
       markReadLabel: l10n?.carMessagingMarkRead ?? 'Mark as read',
-      channelName:
-          l10n?.carMessagingConversations ?? 'Android Auto conversations',
+      channelName: l10n?.notificationChannelAgent ?? 'CodeWalk agent',
       channelDescription:
-          l10n?.carMessagingChannelDescription ??
-          'Experimental CodeWalk conversation replies',
+          l10n?.notificationChannelAgentDescription ??
+          'CodeWalk agent completion alerts',
     );
     await _plugin.show(
       id: spec.id,
@@ -170,10 +169,10 @@ class CarMessagingNotifier {
           'Your voice reply could not be delivered. Open CodeWalk to retry.',
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
-          'codewalk_car_messaging_v1',
-          'Android Auto conversations',
-          importance: Importance.high,
-          priority: Priority.high,
+          'codewalk_agent',
+          'CodeWalk agent',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
           autoCancel: true,
         ),
       ),

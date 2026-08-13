@@ -2108,11 +2108,8 @@
   "speechSttApiKeyStorageUnavailable": "La memoria protetta della chiave API vocale non è disponibile.",
   "speechSttApiKeyMissing": "Aggiungi una chiave API vocale in Impostazioni > Voce.",
   "speechSttApiKeyRejected": "La chiave API vocale è stata rifiutata.",
-  "carMessagingConversations": "Conversazioni Android Auto",
   "carMessagingReply": "Rispondi",
   "carMessagingMarkRead": "Segna come letto",
-  "carMessagingChannelDescription": "Risposte sperimentali alle conversazioni CodeWalk",
-  "settingsAndroidAutoMessagingDescription": "Supporto sperimentale delle build di test per risposte finali e risposte vocali. Non approvato per la distribuzione su Google Play.",
   "carMessagingDeliveryFailedTitle": "Impossibile inviare la risposta",
   "carMessagingDeliveryFailedBody": "La tua risposta vocale non è stata consegnata. Apri CodeWalk per riprovare."
 }

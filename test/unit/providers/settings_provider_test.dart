@@ -889,11 +889,9 @@ void main() {
 
       expect(first.keepDesktopRunningInTray, isTrue);
       expect(first.androidBackgroundAlertsEnabled, isTrue);
-      expect(first.androidAutoMessagingEnabled, isFalse);
       expect(first.keepMobileRealtimeForShortPeriod, isTrue);
 
       await first.setKeepDesktopRunningInTray(false);
-      await first.setAndroidAutoMessagingEnabled(true);
       await first.setAndroidBackgroundAlertsEnabled(false);
       await first.setKeepMobileRealtimeForShortPeriod(false);
 
@@ -906,7 +904,6 @@ void main() {
 
       expect(second.keepDesktopRunningInTray, isFalse);
       expect(second.androidBackgroundAlertsEnabled, isFalse);
-      expect(second.androidAutoMessagingEnabled, isFalse);
       expect(carMessagingDisabled, isTrue);
       expect(second.keepMobileRealtimeForShortPeriod, isFalse);
     });

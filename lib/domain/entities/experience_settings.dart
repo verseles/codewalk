@@ -842,7 +842,6 @@ class ExperienceSettings {
       dataSaverEnabled: true,
       dataSaverLevel: DataSaverLevel.standard,
       androidBackgroundAlertsEnabled: true,
-      androidAutoMessagingEnabled: false,
       sessionAttentionPresentation: SessionAttentionPresentation.off,
       keepMobileRealtimeForShortPeriod: true,
       syncResumeGracePeriod: kDefaultSyncResumeGracePeriod,
@@ -919,7 +918,6 @@ class ExperienceSettings {
     required this.dataSaverEnabled,
     required this.dataSaverLevel,
     required this.androidBackgroundAlertsEnabled,
-    this.androidAutoMessagingEnabled = false,
     this.sessionAttentionPresentation = SessionAttentionPresentation.off,
     required this.keepMobileRealtimeForShortPeriod,
     required this.syncResumeGracePeriod,
@@ -998,7 +996,6 @@ class ExperienceSettings {
   final bool dataSaverEnabled;
   final DataSaverLevel dataSaverLevel;
   final bool androidBackgroundAlertsEnabled;
-  final bool androidAutoMessagingEnabled;
   final SessionAttentionPresentation sessionAttentionPresentation;
   final bool keepMobileRealtimeForShortPeriod;
   final Duration syncResumeGracePeriod;
@@ -1077,7 +1074,6 @@ class ExperienceSettings {
     bool? dataSaverEnabled,
     DataSaverLevel? dataSaverLevel,
     bool? androidBackgroundAlertsEnabled,
-    bool? androidAutoMessagingEnabled,
     SessionAttentionPresentation? sessionAttentionPresentation,
     bool? keepMobileRealtimeForShortPeriod,
     Duration? syncResumeGracePeriod,
@@ -1175,8 +1171,6 @@ class ExperienceSettings {
       dataSaverLevel: nextDataSaverLevel,
       androidBackgroundAlertsEnabled:
           androidBackgroundAlertsEnabled ?? this.androidBackgroundAlertsEnabled,
-      androidAutoMessagingEnabled:
-          androidAutoMessagingEnabled ?? this.androidAutoMessagingEnabled,
       sessionAttentionPresentation:
           sessionAttentionPresentation ?? this.sessionAttentionPresentation,
       keepMobileRealtimeForShortPeriod:
@@ -1314,7 +1308,6 @@ class ExperienceSettings {
       'keepDesktopRunningInTray':
           desktopCloseBehavior != DesktopCloseBehavior.close,
       'androidBackgroundAlertsEnabled': androidBackgroundAlertsEnabled,
-      'androidAutoMessagingEnabled': androidAutoMessagingEnabled,
       'sessionAttentionPresentation': sessionAttentionPresentationKey(
         sessionAttentionPresentation,
       ),
@@ -1412,7 +1405,6 @@ class ExperienceSettings {
     var dataSaverLevel = defaults.dataSaverLevel;
     var androidBackgroundAlertsEnabled =
         defaults.androidBackgroundAlertsEnabled;
-    var androidAutoMessagingEnabled = defaults.androidAutoMessagingEnabled;
     var sessionAttentionPresentation = defaults.sessionAttentionPresentation;
     var keepMobileRealtimeForShortPeriod =
         defaults.keepMobileRealtimeForShortPeriod;
@@ -1714,11 +1706,6 @@ class ExperienceSettings {
       androidBackgroundAlertsEnabled = androidBackgroundAlertsEnabledJson;
     }
 
-    final androidAutoMessagingEnabledJson = json['androidAutoMessagingEnabled'];
-    if (androidAutoMessagingEnabledJson is bool) {
-      androidAutoMessagingEnabled = androidAutoMessagingEnabledJson;
-    }
-
     final sessionAttentionPresentationJson =
         json['sessionAttentionPresentation'];
     if (sessionAttentionPresentationJson is String) {
@@ -1988,7 +1975,6 @@ class ExperienceSettings {
       dataSaverEnabled: dataSaverEnabled,
       dataSaverLevel: dataSaverLevel,
       androidBackgroundAlertsEnabled: androidBackgroundAlertsEnabled,
-      androidAutoMessagingEnabled: androidAutoMessagingEnabled,
       sessionAttentionPresentation: sessionAttentionPresentation,
       keepMobileRealtimeForShortPeriod: keepMobileRealtimeForShortPeriod,
       syncResumeGracePeriod: syncResumeGracePeriod,

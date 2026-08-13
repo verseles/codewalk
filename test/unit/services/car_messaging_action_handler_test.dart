@@ -55,9 +55,7 @@ void main() {
   test(
     'persists local echo and encrypted reply before scheduling work',
     () async {
-      final settings = ExperienceSettings.defaults().copyWith(
-        androidAutoMessagingEnabled: true,
-      );
+      final settings = ExperienceSettings.defaults();
       SharedPreferences.setMockInitialValues(<String, Object>{
         AppConstants.experienceSettingsKey: jsonEncode(settings.toJson()),
       });
@@ -93,7 +91,6 @@ void main() {
         store: store,
         preferences: () async => prefs,
         now: () => DateTime.fromMillisecondsSinceEpoch(1000),
-        featureEnabled: true,
         schedule: (replyId) async {
           final persisted = await store.read();
           expect(persisted.replies.single.id, replyId);
@@ -127,15 +124,19 @@ void main() {
     },
   );
 
-  test('gate off leaves durable state untouched', () async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
+  test('background alerts off leaves durable state untouched', () async {
+    final settings = ExperienceSettings.defaults().copyWith(
+      androidBackgroundAlertsEnabled: false,
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      AppConstants.experienceSettingsKey: jsonEncode(settings.toJson()),
+    });
     final store = CarMessagingStore(
       keyStorage: _MemoryKeyStorage(),
       fileStore: _MemoryFileStore(),
     );
     final handler = CarMessagingActionHandler(
       store: store,
-      featureEnabled: false,
       schedule: (_) async => fail('must not schedule'),
     );
 
@@ -152,9 +153,7 @@ void main() {
   });
 
   test('rejects replies from a stale or unsupported server profile', () async {
-    final settings = ExperienceSettings.defaults().copyWith(
-      androidAutoMessagingEnabled: true,
-    );
+    final settings = ExperienceSettings.defaults();
     SharedPreferences.setMockInitialValues(<String, Object>{
       AppConstants.experienceSettingsKey: jsonEncode(settings.toJson()),
       AppConstants.activeServerIdKey: 'server-b',
@@ -188,7 +187,6 @@ void main() {
     final handler = CarMessagingActionHandler(
       store: store,
       preferences: () async => prefs,
-      featureEnabled: true,
       schedule: (_) async => fail('must not schedule'),
     );
     final payload = NotificationTapPayload(
@@ -223,7 +221,6 @@ void main() {
     final handler = CarMessagingActionHandler(
       store: store,
       preferences: () async => prefs,
-      featureEnabled: true,
       schedule: (_) async => fail('must not schedule'),
     );
 
@@ -240,9 +237,7 @@ void main() {
   });
 
   test('reports storage failure without scheduling a reply', () async {
-    final settings = ExperienceSettings.defaults().copyWith(
-      androidAutoMessagingEnabled: true,
-    );
+    final settings = ExperienceSettings.defaults();
     SharedPreferences.setMockInitialValues(<String, Object>{
       AppConstants.experienceSettingsKey: jsonEncode(settings.toJson()),
     });
@@ -255,7 +250,6 @@ void main() {
       ),
       notifier: notifier,
       preferences: () async => prefs,
-      featureEnabled: true,
       schedule: (_) async => fail('must not schedule'),
     );
     final payload = const NotificationTapPayload(
@@ -281,9 +275,7 @@ void main() {
   test(
     'reports failure and does not schedule when reply queue is full',
     () async {
-      final settings = ExperienceSettings.defaults().copyWith(
-        androidAutoMessagingEnabled: true,
-      );
+      final settings = ExperienceSettings.defaults();
       SharedPreferences.setMockInitialValues(<String, Object>{
         AppConstants.experienceSettingsKey: jsonEncode(settings.toJson()),
       });
@@ -328,7 +320,6 @@ void main() {
         notifier: notifier,
         preferences: () async => prefs,
         now: () => DateTime.fromMillisecondsSinceEpoch(1000),
-        featureEnabled: true,
         schedule: (_) async => fail('must not schedule'),
       );
       final payload = NotificationTapPayload(

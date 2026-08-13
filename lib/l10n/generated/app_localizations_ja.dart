@@ -6407,20 +6407,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get speechSttApiKeyRejected => '音声 API キーが拒否されました。';
 
   @override
-  String get carMessagingConversations => 'Android Autoの会話';
-
-  @override
   String get carMessagingReply => '返信';
 
   @override
   String get carMessagingMarkRead => '既読にする';
-
-  @override
-  String get carMessagingChannelDescription => '実験的なCodeWalk会話返信';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      '最終応答と音声応答の実験的なテストビルドサポート。Google Playでの配布は承認されていません。';
 
   @override
   String get carMessagingDeliveryFailedTitle => '返信を送信できませんでした';

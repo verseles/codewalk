@@ -78,7 +78,7 @@ codewalk/
 │       │   ├── session_tab_icon_override_store.dart # Per-server persisted session-tab icon override store
 │       │   ├── session_tab_icon_presets.dart # SessionTabIconPreset enum + localized preset labels
 │       │   ├── session_attention/       # Attention coordinator, completion resolver, host contract/protocol, and platform entrypoints
-│       │   ├── car_messaging/           # Android Auto notification messaging prototype: action handler, gate, dispatch worker, notifier, runtime (issue #99)
+│       │   ├── car_messaging/           # Android Auto notification messaging: action handler, gate, dispatch worker, notifier, runtime (issue #99)
 │       │   └── tts/                    # Read-aloud TTS backend contracts, adapters, fresh-install default resolver, generated-audio player, and text extraction
 │       │       ├── read_aloud_default_resolver.dart # Fresh-install read-aloud provider/voice default resolver
 │       │       ├── edge_tts_protocol.dart # Edge/Bing Read Aloud URL, header, frame, SSML, voice-list, and MP3 frame helpers
@@ -94,11 +94,11 @@ codewalk/
 ├── .opencode/agents/                  # Repo-local OpenCode agents
 ├── android/ linux/ macos/ web/ windows/ # Platform runners/build configs
 │   ├── android/app/build.gradle.kts      # Android build config and AndroidX Browser Custom Tabs dependency
-│   ├── android/app/src/main/AndroidManifest.xml # Android package-visibility query for Custom Tabs
+│   ├── android/app/src/main/AndroidManifest.xml # Android package-visibility query for Custom Tabs; `com.google.android.gms.car.application` meta-data referencing `@xml/automotive_app_desc` (issue #99)
 │   ├── android/app/src/main/kotlin/com/verseles/codewalk/
 │       ├── MainActivity.kt              # Android session-overlay/system channel host, composer clipboard content-URI resolver, native CustomTabs OAuth launcher, and activation forwarding
 │       └── overlay/SessionOverlayService.kt # Android foreground overlay host and service-owned Flutter engine
-│   ├── android/app/src/debug/           # Debug/test source-set only: automotive notification descriptor (`@xml/automotive_app_desc`), never in release builds (issue #99)
+│   ├── android/app/src/debug/           # Debug/test source-set used by session-overlay prototype instrumentation (issue #99 automotive descriptor moved to main source set)
 │   └── windows/runner/                   # Windows runner sources (incl. `windows_microphone_plugin.{h,cpp}` runner-owned WASAPI bridge for on-device STT — see ADR-038)
 ├── android/app/src/main/res/drawable-*/ # Android notification small icons (`ic_stat_codewalk.png`)
 ├── linux/runner/resources/             # Linux launcher icon + desktop entry icon metadata
@@ -211,7 +211,7 @@ lib/presentation/services/permission_auto_approve_runtime.dart # Background perm
 lib/presentation/services/car_messaging/car_messaging_notification.dart # Android Auto `MessagingStyle` notification spec builder, category/action constants, and identity-derived id/tag helpers
 lib/presentation/services/car_messaging/car_messaging_action_handler.dart # Car reply/mark-read notification action handler with background response entrypoint and Workmanager reply-task scheduling
 lib/presentation/services/car_messaging/car_messaging_dispatch_worker.dart # Queued car-reply dispatch to the server (`prompt_async`), completion publishing, and failure marking
-lib/presentation/services/car_messaging/car_messaging_gate.dart # Pure background gate predicates: debug-build/feature/settings/data-saver conditions and server-profile eligibility
+lib/presentation/services/car_messaging/car_messaging_gate.dart # Pure background gate predicates: background-alert master switch, Data Saver pause, and server-profile eligibility (no debug/feature/preference gates)
 lib/presentation/services/car_messaging/car_messaging_runtime.dart # Runtime teardown orchestration: notification cancellation, store clear, server/identity removal, and pending reply-work cancellation
 lib/presentation/services/read_aloud_service.dart                # ReadAloudService: provider-routed read-aloud facade; exposes isProviderAvailable for runtime native TTS probes; generated-audio backends (including Edge experimental when user-selected or chosen by fresh-install defaults) are routed through byte playback; loads the secure OpenAI-compatible API key when needed; tracks idle/loading/playing/paused state and per-message playback
 lib/presentation/services/tts/tts_backend.dart                   # TTS backend contract, request/result models, generated-audio result, voice metadata, and normalized backend error kinds
@@ -240,8 +240,7 @@ lib/presentation/services/session_attention/session_attention_host_protocol.dart
 lib/presentation/services/session_attention/session_attention_host_service*.dart # Conditional Android, desktop child-window, iOS in-app, and unsupported host implementation selection
 lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Flutter entrypoints and IPC bridge for desktop child and Android service hosts
 android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android system/platform channel host; native OAuth launch via AndroidX Custom Tabs with ACTION_VIEW fallback
-android/app/src/debug/AndroidManifest.xml # Debug/test source-set only: `com.google.android.gms.car.application` meta-data referencing `@xml/automotive_app_desc`; absent from release builds (issue #99)
-android/app/src/debug/res/xml/automotive_app_desc.xml # Debug/test source-set automotive descriptor declaring `<uses name="notification"/>` (issue #99)
+android/app/src/main/res/xml/automotive_app_desc.xml # Automotive notification descriptor declaring `<uses name="notification"/>`, shipped in every release APK (issue #99)
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay.dart # Shared bubble/panel attention presentation
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay_controller.dart # In-app snapshot, read-aloud, and action controller used by ChatPage on iOS
 lib/presentation/services/workspace_file_operations_service.dart # WorkspaceFileOperationsService (issues #89/#90): shell-gated `createFolder`/`createFile`/`rename`/`delete`/`writeFile` with capability probe and ephemeral `/session` lifecycle; server-bound cancellation/failure aborts the active remote operation before session teardown rather than only dropping the local wait; parses shell responses with the official OpenCode tool-state parser; `writeFile` transports UTF-8 content as 48 KiB environment chunks and uses a negotiated GNU/BSD/Python decoder pipeline to stage an atomic mode-preserving replacement; operation logs are privacy-safe; capabilities are cache-scoped per `serverScopeKey::directory`
@@ -552,7 +551,7 @@ test/unit/services/                     # Platform and runtime service unit test
   car_messaging_gate_test.dart        #   Background gate predicates, data-saver interaction, and server-profile eligibility
   car_messaging_action_handler_test.dart # Car reply/mark-read action handling, reply queueing, and Workmanager scheduling
   car_messaging_dispatch_worker_test.dart # Queued reply dispatch, completion publishing, and failure marking
-  car_messaging_android_manifest_test.dart # Debug-only automotive descriptor assertions (debug manifest references it; profile/main do not)
+  car_messaging_android_manifest_test.dart # Automotive descriptor assertions (main manifest references it; debug/profile do not)
 test/unit/di/speech_service_registration_test.dart # DI isolation: `ApiSpeechInputService` factory returns distinct instances per composer (`isNot(same())`), with DI reset/teardown
 test/unit/presentation/                 # Presentation-level service tests; includes `workspace_file_operations_service_test.dart` (issues #89 and #90) covering official tool-state parsing, malformed responses, shell quoting, capability probes, create/rename/delete session teardown, server-bound abort semantics, write-path validation, 48 KiB content chunking, and negotiated GNU/BSD/Python decoding; `app_theme_test.dart` (issue #86) covers `AppVisualStyleTokens.classic`/`refined` factories, theme-extension wiring through `AppTheme.lightFrom`/`darkFrom`, `withResponsiveSnackBars` shape switching, and the `ThemeData.visualStyleTokens` fallback getter
 test/unit/presentation/chat_input_external_files_test.dart # Pure composer external-attachment byte, name/MIME, and image-signature helper coverage

@@ -2226,11 +2226,8 @@
   "speechSttApiKeyStorageUnavailable": "O armazenamento seguro da chave de API de fala está indisponível.",
   "speechSttApiKeyMissing": "Adicione uma chave de API de fala em Configurações > Fala.",
   "speechSttApiKeyRejected": "A chave de API de fala foi rejeitada.",
-  "carMessagingConversations": "Conversas do Android Auto",
   "carMessagingReply": "Responder",
   "carMessagingMarkRead": "Marcar como lida",
-  "carMessagingChannelDescription": "Respostas experimentais de conversas do CodeWalk",
-  "settingsAndroidAutoMessagingDescription": "Suporte experimental de build de teste para respostas finais e respostas por voz. Não aprovado para distribuição no Google Play.",
   "carMessagingDeliveryFailedTitle": "Não foi possível enviar a resposta",
   "carMessagingDeliveryFailedBody": "Sua resposta por voz não pôde ser entregue. Abra o CodeWalk para tentar novamente."
 }

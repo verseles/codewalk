@@ -45,6 +45,9 @@ void main() {
     expect(first.id, second.id);
     expect(first.tag, second.tag);
     expect(first.details.category, AndroidNotificationCategory.message);
+    expect(first.details.channelId, 'codewalk_agent');
+    expect(first.details.importance, Importance.defaultImportance);
+    expect(first.details.priority, Priority.defaultPriority);
     final style = first.details.styleInformation as MessagingStyleInformation;
     expect(style.conversationTitle, 'Session title');
     expect(style.messages!.single.text, 'Final answer');

@@ -6681,21 +6681,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get speechSttApiKeyRejected => 'স্পিচ API কী প্রত্যাখ্যান করা হয়েছে।';
 
   @override
-  String get carMessagingConversations => 'Android Auto কথোপকথন';
-
-  @override
   String get carMessagingReply => 'উত্তর';
 
   @override
   String get carMessagingMarkRead => 'পঠিত হিসেবে চিহ্নিত করুন';
-
-  @override
-  String get carMessagingChannelDescription =>
-      'পরীক্ষামূলক CodeWalk কথোপকথন উত্তর';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      'চূড়ান্ত উত্তর এবং ভয়েস উত্তরের জন্য পরীক্ষামূলক টেস্ট-বিল্ড সমর্থন। Google Play-তে বিতরণের জন্য অনুমোদিত নয়।';
 
   @override
   String get carMessagingDeliveryFailedTitle => 'উত্তর পাঠানো যায়নি';

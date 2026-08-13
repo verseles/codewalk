@@ -6797,21 +6797,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get speechSttApiKeyRejected => 'La clé API vocale a été rejetée.';
 
   @override
-  String get carMessagingConversations => 'Conversations Android Auto';
-
-  @override
   String get carMessagingReply => 'Répondre';
 
   @override
   String get carMessagingMarkRead => 'Marquer comme lu';
-
-  @override
-  String get carMessagingChannelDescription =>
-      'Réponses expérimentales aux conversations CodeWalk';
-
-  @override
-  String get settingsAndroidAutoMessagingDescription =>
-      'Prise en charge expérimentale des builds de test pour les réponses finales et les réponses vocales. Non approuvé pour la distribution via Google Play.';
 
   @override
   String get carMessagingDeliveryFailedTitle => 'Réponse non envoyée';

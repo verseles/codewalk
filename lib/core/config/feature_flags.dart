@@ -28,13 +28,4 @@ class FeatureFlags {
     'CODEWALK_PROMPT_ASYNC_IDLE_COMPLETION',
     defaultValue: true,
   );
-
-  /// Experimental notification-messaging prototype for Android Auto.
-  ///
-  /// This remains disabled in normal builds while Android Auto messaging
-  /// eligibility for agent conversations is unresolved.
-  static const bool androidAutoMessagingPrototype = bool.fromEnvironment(
-    'CODEWALK_ANDROID_AUTO_MESSAGING',
-    defaultValue: false,
-  );
 }
