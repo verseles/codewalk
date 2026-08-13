@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.199.0 - 2026-08-13
+
+- feat(android): add experimental auto messaging
+
 ## v1.198.0 - 2026-08-13
 
 - feat(speech): add configurable API transcription
