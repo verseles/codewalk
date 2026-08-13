@@ -2,6 +2,22 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.198.0 - 2026-08-13
+
+- feat(speech): add configurable API transcription
+- fix(quota): validate OpenCode Go usage correctly
+- feat(i18n): complete interface localization
+- docs: sync ai-docs with latest OpenCode content
+- feat(chat): customize session tab icons
+- feat(chat): sync pinned session tabs
+- perf(chat): replace title polling with SSE waiter
+- feat(settings): clarify navigation and grouping
+- fix(linux): preserve data across updates
+- fix(terminal): recover Android IME-cancelled controls
+- remove file
+- fix(chat): support nested subagent navigation
+- fix: complete queued client corrections
+
 ## v1.197.0 - 2026-08-09
 
 - Merge pull request #126 from charleypeng/main
