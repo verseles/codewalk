@@ -30,7 +30,16 @@ const double _kStripTopPadding = 4 * 0.8;
 
 const double _kSessionTabWidth = 244 * 1.3;
 const double _kCompactSessionTabWidth = 214 * 1.3;
-const double _kPinnedSessionTabWidth = 58;
+const double _kPinnedSessionTabWidth = 36;
+const double _kPinnedInactiveTabInset = 4;
+// Floor for the expanded selected pinned tab: the fixed content is 10px inset
+// + 28px leading box + gaps + the trailing usage button (40px compact /
+// 32px desktop, plus 10px padding) = 97px worst case, and the shape needs
+// 2 * (shoulder + radius) = 36px. 100 keeps a little headroom so small
+// trailing-size changes cannot silently overflow. When inactive pinned tabs
+// already fill the region the floor keeps the tab usable and the pinned
+// viewport scrolls to it.
+const double _kPinnedSelectedTabMinWidth = 100;
 const double _kPinnedRegionMaxFraction = 0.5;
 const double _kMinimumRegularRegionWidth = 96;
 
@@ -45,10 +54,13 @@ typedef SessionTabTrailingBuilder =
 
 /// Browser-style tab silhouette: the sides flare outwards at the bottom so the
 /// tab reads as a tab instead of a rounded rectangle, and neighbours interlock.
+/// A zero shoulder keeps the straight sides and top radius only, which the
+/// compact inactive tabs use to stay visually quiet and narrow.
 class _ChromeTabBorder extends ShapeBorder {
-  const _ChromeTabBorder({required this.topRadius});
+  const _ChromeTabBorder({required this.topRadius, this.shoulder = _kTabShoulder});
 
   final double topRadius;
+  final double shoulder;
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
@@ -59,7 +71,7 @@ class _ChromeTabBorder extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    const shoulder = _kTabShoulder;
+    final shoulder = this.shoulder;
     final r = topRadius;
     final lowerCurveTop = rect.bottom - shoulder;
     return Path()
@@ -98,7 +110,8 @@ class _ChromeTabBorder extends ShapeBorder {
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
 
   @override
-  ShapeBorder scale(double t) => _ChromeTabBorder(topRadius: topRadius * t);
+  ShapeBorder scale(double t) =>
+      _ChromeTabBorder(topRadius: topRadius * t, shoulder: shoulder * t);
 }
 
 String sessionTabIdentityKey(SessionTabIdentity identity) {
@@ -222,10 +235,17 @@ class _SessionTabStripState extends State<SessionTabStrip> {
           0.0,
           constraints.maxWidth - horizontalPadding * 2,
         );
-        final desiredPinnedWidth = pinnedTabs.fold<double>(
+        final inactivePinnedWidth = pinnedTabs.fold<double>(
           0,
           (width, tab) =>
-              width + (tab.isSelected ? tabWidth : _kPinnedSessionTabWidth),
+              width + (tab.isSelected ? 0 : _kPinnedSessionTabWidth),
+        );
+        final hasSelectedPinned = pinnedTabs.any((tab) => tab.isSelected);
+        final desiredPinnedWidth =
+            inactivePinnedWidth + (hasSelectedPinned ? tabWidth : 0);
+        final regularMinimum = math.min(
+          _kMinimumRegularRegionWidth,
+          availableWidth * 0.5,
         );
         final pinnedWidthLimit = regularTabs.isEmpty
             ? availableWidth
@@ -233,16 +253,23 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                 0.0,
                 math.min(
                   availableWidth * _kPinnedRegionMaxFraction,
-                  availableWidth -
-                      math.min(
-                        _kMinimumRegularRegionWidth,
-                        availableWidth * 0.5,
-                      ),
+                  availableWidth - regularMinimum,
                 ),
               );
-        final pinnedRegionWidth = math.min(
-          desiredPinnedWidth,
-          pinnedWidthLimit,
+        // The cap grows to fit the expanded selected pinned tab so it stays
+        // fully visible without scrolling, while the regular region keeps at
+        // least its minimum usable width.
+        final growthRoom = regularTabs.isEmpty
+            ? availableWidth
+            : math.max(0.0, availableWidth - regularMinimum);
+        final cap = hasSelectedPinned ? growthRoom : pinnedWidthLimit;
+        final pinnedRegionWidth = math.min(desiredPinnedWidth, cap);
+        // Never collapse the expanded tab: when the inactive pinned tabs
+        // already fill the region, the floor keeps it visible and the pinned
+        // viewport scrolls to reveal it.
+        final selectedPinnedWidth = math.max(
+          _kPinnedSelectedTabMinWidth,
+          pinnedRegionWidth - inactivePinnedWidth,
         );
         final selectedIdentity = _selectedIdentity();
         final selectedIndex = widget.tabs.indexWhere((tab) => tab.isSelected);
@@ -312,7 +339,10 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                                   context,
                                   tab,
                                   tab.isSelected
-                                      ? tabWidth
+                                      ? math.min(
+                                          tabWidth,
+                                          selectedPinnedWidth,
+                                        )
                                       : _kPinnedSessionTabWidth,
                                   compactPinned: !tab.isSelected,
                                 ),
@@ -438,7 +468,12 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                   : hovered
                   ? colorScheme.surface.withValues(alpha: 0.45)
                   : Colors.transparent,
-              shape: _ChromeTabBorder(topRadius: topRadius),
+              shape: _ChromeTabBorder(
+                topRadius: topRadius,
+                // The selected tab keeps the browser-style flare; inactive
+                // tabs drop it so their silhouette stays quiet and narrow.
+                shoulder: selected ? _kTabShoulder : 0,
+              ),
               clipBehavior: Clip.antiAlias,
               child: Stack(
                 children: [
@@ -531,10 +566,11 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                                         minHeight: _kTabMinHeight,
                                       ),
                                       child: Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.only(
-                                              start: _kTabShoulder,
-                                            ),
+                                        padding: EdgeInsetsDirectional.only(
+                                          start: compactPinned
+                                              ? _kPinnedInactiveTabInset
+                                              : _kTabShoulder,
+                                        ),
                                         child: Row(
                                           children: [
                                             _buildLeading(
@@ -578,7 +614,11 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                           ),
                         ),
                         if (trailing == null)
-                          const SizedBox(width: _kTabShoulder)
+                          SizedBox(
+                            width: compactPinned
+                                ? _kPinnedInactiveTabInset
+                                : _kTabShoulder,
+                          )
                         else
                           Padding(
                             padding: const EdgeInsetsDirectional.only(

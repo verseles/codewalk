@@ -622,6 +622,10 @@
 - **When** the user swipes, uses the wheel or trackpad, or the app scrolls programmatically
 - **Then** horizontal scrolling remains available while the scrollbar is completely hidden visually
 - **Then** pinned tabs use a separate leading viewport: inactive pinned tabs are compact icon-only controls with tooltip and semantics, while the selected pinned tab expands to show its normal content
+- **Then** inactive pinned tabs have a reduced fixed width (36px) and no lower browser flare, with the leading icon centered
+- **Then** the selected pinned tab expands to its normal content width, and the pinned region cap grows to fit it so the expanded tab is fully visible without horizontal scrolling, while regular tabs keep at least their minimum usable region width
+- **Then** on viewports too narrow to fit the expanded tab next to the minimum regular region, the expanded pinned tab adapts its width so the title ellipsizes instead of being clipped by a hidden scrollbar
+- **Then** when inactive pinned tabs already fill the pinned region, the expanded selected tab keeps a minimum usable width and the pinned viewport scrolls so auto-reveal keeps it visible, instead of collapsing
 - **Then** the pinned viewport scrolls independently and is responsively capped so regular tabs retain usable space on mobile and desktop, including right-to-left layouts
 
 - **Given** a tab is selected at startup or after selection, insertion, or reorder changes its horizontal position

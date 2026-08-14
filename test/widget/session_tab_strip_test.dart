@@ -50,7 +50,7 @@ void main() {
         tester
             .getSize(find.byKey(ValueKey<String>('session_tab_$pinnedKey')))
             .width,
-        lessThan(80),
+        moreOrLessEquals(36, epsilon: 0.01),
       );
     },
   );
@@ -91,6 +91,271 @@ void main() {
   });
 
   testWidgets(
+    'a single inactive pinned tab stays compact at phone width',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final pinned = _tab('pinned', isPinned: true);
+      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+
+      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned], width: 320));
+      await tester.pump();
+
+      final tabRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
+      );
+      expect(tabRect.width, moreOrLessEquals(36, epsilon: 0.01));
+      final regionRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+      );
+      expect(tabRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+      expect(tabRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+      expect(tabRect.left - regionRect.left, lessThanOrEqualTo(4.01));
+    },
+  );
+
+  testWidgets(
+    'centers the leading icon inside an inactive pinned tab',
+    (tester) async {
+      final pinned = _tab('pinned', isPinned: true);
+      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+
+      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned]));
+      await tester.pump();
+
+      final tabRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
+      );
+      final iconRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_project_icon_$pinnedKey')),
+      );
+      expect(
+        iconRect.center.dx,
+        moreOrLessEquals(tabRect.center.dx, epsilon: 0.01),
+      );
+      // The busy badge still anchors to the leading box corner.
+      final busy = _tab(
+        'busy',
+        isPinned: true,
+        status: SessionStatusType.busy,
+      );
+      final busyKey = sessionTabIdentityKey(busy.identity);
+      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[busy]));
+      await tester.pump();
+      final badgeRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_busy_busy_$busyKey')),
+      );
+      final leadingRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_leading_$busyKey')),
+      );
+      expect(badgeRect.right, moreOrLessEquals(leadingRect.right, epsilon: 0.01));
+      expect(
+        badgeRect.bottom,
+        moreOrLessEquals(leadingRect.bottom, epsilon: 0.01),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'selected pinned tab stays visible when pinned tabs overflow',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final overflow = List<SessionTabRecord>.generate(
+        7,
+        (index) => _tab('pin_$index', isPinned: true),
+      );
+      final selected = _tab(
+        'pin_selected',
+        title: 'Selected overflow',
+        isPinned: true,
+        isSelected: true,
+      );
+      final regular = _tab('regular');
+
+      await tester.pumpWidget(
+        _app(
+          tabs: <SessionTabRecord>[...overflow, selected, regular],
+          width: 320,
+          trailingBuilder: (context, tab) => const SizedBox(
+            key: ValueKey<String>('usage_trailing'),
+            width: 40,
+            height: 40,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final selectedRect = tester.getRect(
+        find.byKey(
+          ValueKey<String>(
+            'session_tab_${sessionTabIdentityKey(selected.identity)}',
+          ),
+        ),
+      );
+      // The expanded tab never collapses below its usable minimum, even with
+      // the production-sized trailing usage button present.
+      expect(selectedRect.width, greaterThanOrEqualTo(100));
+      expect(tester.takeException(), isNull);
+      // The pinned viewport overflows and the reveal keeps the tab reachable.
+      final pinnedScrollable = tester.state<ScrollableState>(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('session_tab_pinned_region_scroll_view'),
+          ),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      expect(pinnedScrollable.position.maxScrollExtent, greaterThan(0));
+      final regionRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+      );
+      expect(selectedRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+      expect(selectedRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+    },
+  );
+
+  testWidgets(
+    'selected pinned tab fits entirely inside its region with regular tabs',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(600, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final pinned = _tab(
+        'pinned',
+        title: 'Selected pinned session',
+        isPinned: true,
+        isSelected: true,
+      );
+      final regular = _tab('regular');
+      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+
+      await tester.pumpWidget(
+        _app(tabs: <SessionTabRecord>[pinned, regular], width: 600),
+      );
+      await tester.pump();
+
+      final regionRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+      );
+      final tabRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
+      );
+      expect(tabRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+      expect(tabRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+      // The expanded tab keeps its full width instead of being clipped.
+      expect(tabRect.width, greaterThanOrEqualTo(300));
+      // The regular region keeps usable space.
+      final regularScrollRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+      );
+      expect(regularScrollRect.width, greaterThanOrEqualTo(96));
+      expect(
+        find.byKey(ValueKey<String>('session_tab_title_$pinnedKey')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'selected pinned tab adapts when the viewport is narrower than expanded',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final pinned = _tab(
+        'pinned',
+        title: 'A very long selected pinned session title',
+        isPinned: true,
+        isSelected: true,
+      );
+      final regular = _tab('regular');
+      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+
+      await tester.pumpWidget(
+        _app(tabs: <SessionTabRecord>[pinned, regular], width: 320),
+      );
+      await tester.pump();
+
+      final regionRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+      );
+      final tabRect = tester.getRect(
+        find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
+      );
+      expect(tabRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+      expect(tabRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+      // Adapted below the full expanded width so it never needs to scroll.
+      expect(tabRect.width, lessThan(278.2));
+      final title = tester.widget<Text>(
+        find.byKey(ValueKey<String>('session_tab_title_$pinnedKey')),
+      );
+      expect(title.overflow, TextOverflow.ellipsis);
+      expect(
+        tester
+            .getRect(
+              find.byKey(
+                const ValueKey<String>('session_tab_strip_scroll_view'),
+              ),
+            )
+            .width,
+        greaterThanOrEqualTo(96),
+      );
+    },
+  );
+
+  testWidgets(
+    'selected pinned tab stays fully visible among other pinned tabs',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(600, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final inactive = _tab('pin_a', isPinned: true);
+      final selected = _tab(
+        'pin_b',
+        title: 'Selected among pinned',
+        isPinned: true,
+        isSelected: true,
+      );
+      final regular = _tab('regular');
+
+      await tester.pumpWidget(
+        _app(
+          tabs: <SessionTabRecord>[inactive, selected, regular],
+          width: 600,
+        ),
+      );
+      await tester.pump();
+
+      final regionRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+      );
+      for (final tab in <SessionTabRecord>[inactive, selected]) {
+        final tabRect = tester.getRect(
+          find.byKey(
+            ValueKey<String>(
+              'session_tab_${sessionTabIdentityKey(tab.identity)}',
+            ),
+          ),
+        );
+        expect(tabRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+        expect(tabRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+      }
+      final selectedRect = tester.getRect(
+        find.byKey(
+          ValueKey<String>(
+            'session_tab_${sessionTabIdentityKey(selected.identity)}',
+          ),
+        ),
+      );
+      expect(selectedRect.width, greaterThanOrEqualTo(300));
+      final regularScrollRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+      );
+      expect(regularScrollRect.width, greaterThanOrEqualTo(96));
+    },
+  );
+
+  testWidgets(
     'pinned overflow scrolls independently and stays leading in RTL',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(360, 200));
@@ -125,6 +390,15 @@ void main() {
 
       final regularScrollView = find.byKey(
         const ValueKey<String>('session_tab_strip_scroll_view'),
+      );
+      // With no selected pinned tab the cap stays at the responsive 50% limit.
+      expect(
+        tester
+            .getRect(
+              find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+            )
+            .width,
+        lessThanOrEqualTo(304 * 0.5 + 0.5),
       );
       expect(
         tester
@@ -754,7 +1028,7 @@ void main() {
       final inactivePath = inactiveShape.getOuterPath(Offset.zero & size);
       final rightShoulder = size.width - 10;
 
-      // The lower shoulders retain their outward flare.
+      // The selected tab keeps its lower outward flare.
       expect(selectedPath.contains(Offset(6, size.height - 2)), isTrue);
       expect(
         selectedPath.contains(Offset(size.width - 6, size.height - 2)),
@@ -767,9 +1041,19 @@ void main() {
       expect(selectedPath.contains(Offset(rightShoulder - 1, 20)), isTrue);
       expect(selectedPath.contains(Offset(rightShoulder + 1, 20)), isFalse);
 
-      // Only the active tab uses the softer 8px top radius.
+      // Inactive tabs drop the flare: straight sides reach the bottom edge.
+      expect(inactivePath.contains(Offset(6, size.height - 2)), isTrue);
+      expect(
+        inactivePath.contains(Offset(size.width - 6, size.height - 2)),
+        isTrue,
+      );
+      expect(inactivePath.contains(Offset(size.width - 9, 20)), isTrue);
+
+      // Only the active tab uses the softer 8px top radius; inactive tabs
+      // round with the 5px radius at the corner itself.
       expect(selectedPath.contains(const Offset(11, 2)), isFalse);
-      expect(inactivePath.contains(const Offset(11, 2)), isTrue);
+      expect(inactivePath.contains(const Offset(1, 1)), isFalse);
+      expect(inactivePath.contains(const Offset(4, 2)), isTrue);
       expect(selectedPath.contains(const Offset(14, 2)), isTrue);
       expect(selectedPath.contains(Offset(size.width / 2, 2)), isTrue);
     }
