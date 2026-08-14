@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.199.2 - 2026-08-14
+
+- fix(chat): restore cache-first session tab performance
+
 ## v1.199.1 - 2026-08-13
 
 - fix(android): enable auto messaging in release
