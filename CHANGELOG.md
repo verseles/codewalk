@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.199.3 - 2026-08-14
+
+- fix(chat): compact inactive pinned tabs and fit the expanded selected one
+
 ## v1.199.2 - 2026-08-14
 
 - fix(chat): restore cache-first session tab performance
