@@ -13,6 +13,7 @@ extension _ChatProviderSessionOps on ChatProvider {
 
     final contextSwitchFetchId = ++_providersFetchId;
     _sessionsFetchId += 1;
+    final contextSwitchSelectionGeneration = _sessionSelectionGeneration;
     _messagesFetchId += 1;
     _eventStreamGeneration += 1;
     Future<void>? fastRealtimeCancellation;
@@ -95,19 +96,22 @@ extension _ChatProviderSessionOps on ChatProvider {
     _sessionTabBootstrapDirectory = reason == 'project'
         ? normalizeOptionalFilePath(newlyOpenedDirectory)
         : null;
+    _invalidateSessionTabReconcileCache();
     _sessionTabBootstrapGeneration += 1;
     _lazySessionBootstrapTask = null;
     _activeContextKey = nextContextKey;
     _currentProjectId = projectProvider.currentProjectId;
     _restoreContextSnapshot(nextContextKey);
-    await _ensureSessionTabsLoaded(serverId: serverId);
-    if (!_isProviderInitializationCurrent(
-      fetchId: contextSwitchFetchId,
-      contextKey: nextContextKey,
-    )) {
-      return;
+    if (!useFastProjectTransition) {
+      await _ensureSessionTabsLoaded(serverId: serverId);
+      if (!_isProviderInitializationCurrent(
+        fetchId: contextSwitchFetchId,
+        contextKey: nextContextKey,
+      )) {
+        return;
+      }
+      _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
     }
-    _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
 
     _errorMessage = null;
     _isLoadingSessionInsights = false;
@@ -131,6 +135,32 @@ extension _ChatProviderSessionOps on ChatProvider {
     _autoTitleLastSignatureBySessionId.clear();
     _autoTitleInFlightSessionIds.clear();
     _autoTitleQueuedSessionIds.clear();
+    if (useFastProjectTransition) {
+      _applySelectionPriorityForCurrentSession();
+      _state = _sessions.isEmpty ? ChatState.initial : ChatState.loaded;
+      _notifyListeners();
+      unawaited(
+        fastRealtimeCancellation?.catchError((Object error, StackTrace stack) {
+              AppLogger.warn(
+                'Background realtime cancellation failed during context switch',
+                error: error,
+                stackTrace: stack,
+              );
+            }) ??
+            Future<void>.value(),
+      );
+      unawaited(
+        _finishFastProjectScopeChanged(
+          fetchId: contextSwitchFetchId,
+          serverId: serverId,
+          scopeId: nextScope,
+          contextKey: nextContextKey,
+          hadContextSnapshot: hadContextSnapshot,
+          selectionGeneration: contextSwitchSelectionGeneration,
+        ),
+      );
+      return;
+    }
     if (!hadContextSnapshot || (_providers.isEmpty && _agents.isEmpty)) {
       await _restoreProviderCatalogSnapshot(
         serverId: serverId,
@@ -149,18 +179,6 @@ extension _ChatProviderSessionOps on ChatProvider {
     _applySelectionPriorityForCurrentSession();
     _state = _sessions.isEmpty ? ChatState.initial : ChatState.loaded;
     _notifyListeners();
-    if (fastRealtimeCancellation != null) {
-      unawaited(
-        fastRealtimeCancellation.catchError((Object error, StackTrace stack) {
-          AppLogger.warn(
-            'Background realtime cancellation failed during context switch',
-            error: error,
-            stackTrace: stack,
-          );
-        }),
-      );
-    }
-
     AppLogger.info(
       'Switching chat context reason=$reason context=$_activeContextKey',
     );
@@ -181,21 +199,88 @@ extension _ChatProviderSessionOps on ChatProvider {
     }
 
     final contextMarkedDirty = _dirtyContextKeys.remove(nextContextKey);
-    if (useFastProjectTransition) {
-      if (contextMarkedDirty || _sessions.isEmpty) {
-        unawaited(loadSessions(preserveVisibleState: true));
-        return;
-      }
-      unawaited(loadLastSession(serverId: serverId, scopeId: nextScope));
-      unawaited(loadSessions(preserveVisibleState: true));
-      return;
-    }
-
     if (contextMarkedDirty || _sessions.isEmpty) {
       await loadSessions();
       return;
     }
 
     await loadLastSession(serverId: serverId, scopeId: nextScope);
+  }
+
+  Future<void> _finishFastProjectScopeChanged({
+    required int fetchId,
+    required String serverId,
+    required String scopeId,
+    required String contextKey,
+    required bool hadContextSnapshot,
+    required int selectionGeneration,
+  }) async {
+    try {
+      await _ensureSessionTabsLoaded(serverId: serverId);
+      if (_sessionTabsDisposed || _activeContextKey != contextKey) {
+        return;
+      }
+      _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
+
+      if (!hadContextSnapshot || (_providers.isEmpty && _agents.isEmpty)) {
+        await _restoreProviderCatalogSnapshot(
+          serverId: serverId,
+          scopeId: scopeId,
+          notify: false,
+          fetchId: fetchId,
+          contextKey: contextKey,
+        );
+        if (_sessionTabsDisposed || _activeContextKey != contextKey) {
+          return;
+        }
+      }
+      if (_sessionTabsDisposed || _activeContextKey != contextKey) {
+        return;
+      }
+      _applySelectionPriorityForCurrentSession();
+      if (_currentSession == null) {
+        _state = _sessions.isEmpty ? ChatState.initial : ChatState.loaded;
+      }
+      _notifyListeners();
+
+      AppLogger.info(
+        'Switching chat context reason=project context=$_activeContextKey',
+      );
+      final providersRefresh = initializeProviders().catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        AppLogger.warn(
+          'Background providers refresh failed during context switch',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      });
+      unawaited(providersRefresh);
+
+      if (_activeContextKey != contextKey) {
+        return;
+      }
+      final contextMarkedDirty = _dirtyContextKeys.remove(contextKey);
+      if (contextMarkedDirty || _sessions.isEmpty) {
+        unawaited(loadSessions(preserveVisibleState: true));
+        return;
+      }
+      unawaited(
+        loadLastSession(
+          serverId: serverId,
+          scopeId: scopeId,
+          expectedSelectionGeneration: selectionGeneration,
+          expectedContextKey: contextKey,
+        ),
+      );
+      unawaited(loadSessions(preserveVisibleState: true));
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Fast project context completion failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

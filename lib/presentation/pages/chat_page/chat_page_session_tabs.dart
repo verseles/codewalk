@@ -1,5 +1,7 @@
 part of '../chat_page.dart';
 
+const _sessionTabActivationSettleDuration = Duration(milliseconds: 120);
+
 extension _ChatPageSessionTabs on _ChatPageState {
   Widget _buildIntegratedWindowTitleBar(BuildContext context) {
     return _buildSessionTabStrip(
@@ -28,29 +30,37 @@ extension _ChatPageSessionTabs on _ChatPageState {
     if (!settingsProvider.showSessionTabs) {
       return const SizedBox.shrink();
     }
-    return Consumer2<ChatProvider, ProjectProvider>(
-      builder: (context, chatProvider, projectProvider, _) {
-        final tabs = chatProvider.sessionTabs;
+    return Selector<ChatProvider, List<SessionTabRecord>>(
+      selector: (_, chatProvider) => chatProvider.sessionTabs,
+      shouldRebuild: (previous, next) => !identical(previous, next),
+      builder: (context, tabs, _) {
         if (tabs.isEmpty) {
           return const SizedBox.shrink();
         }
-        return SessionTabStrip(
-          tabs: tabs,
-          projects: projectProvider.projects,
-          openProjectIds: projectProvider.openProjectIds.toSet(),
-          isCompact: isCompact,
-          fillWidth: fillWidth,
-          transparentBackground: transparentBackground,
-          onActivate: (tab) => unawaited(_activateSessionTab(tab)),
-          onClose: (tab) => unawaited(_closeSessionTab(tab)),
-          onContextMenu: _openSessionTabContextMenu,
-          trailingBuilder: (context, tab) {
-            if (!tab.isSelected) return null;
-            return _buildSessionContextUsageButton(
-              context,
-              chatProvider,
-              targetSize: isCompact ? 40 : 32,
-              menuNavigatorContext: menuNavigatorContext,
+        return Consumer<ProjectProvider>(
+          builder: (context, projectProvider, _) {
+            return SessionTabStrip(
+              tabs: tabs,
+              projects: projectProvider.projects,
+              openProjectIds: projectProvider.openProjectIds.toSet(),
+              isCompact: isCompact,
+              fillWidth: fillWidth,
+              transparentBackground: transparentBackground,
+              onActivate: (tab) => unawaited(_activateSessionTab(tab)),
+              onClose: (tab) => unawaited(_closeSessionTab(tab)),
+              onContextMenu: _openSessionTabContextMenu,
+              trailingBuilder: (context, tab) {
+                if (!tab.isSelected) return null;
+                return Consumer<ChatProvider>(
+                  builder: (context, chatProvider, _) =>
+                      _buildSessionContextUsageButton(
+                        context,
+                        chatProvider,
+                        targetSize: isCompact ? 40 : 32,
+                        menuNavigatorContext: menuNavigatorContext,
+                      ),
+                );
+              },
             );
           },
         );
@@ -198,13 +208,20 @@ extension _ChatPageSessionTabs on _ChatPageState {
       if (_activatingSessionTabIdentity == tab.identity) {
         return inFlight;
       }
+      ++_sessionTabActivationGeneration;
       await inFlight;
       if (!mounted || !_isChatScreenActive()) {
+        _sessionTabActivationCloseGuard = false;
         return false;
       }
     }
 
-    final task = _performSessionTabActivation(tab);
+    final activationGeneration = ++_sessionTabActivationGeneration;
+    _sessionTabActivationCloseGuard = true;
+    final task = _performSessionTabActivation(
+      tab,
+      activationGeneration: activationGeneration,
+    );
     _activatingSessionTabIdentity = tab.identity;
     _sessionTabActivationTask = task;
     try {
@@ -217,26 +234,41 @@ extension _ChatPageSessionTabs on _ChatPageState {
     }
   }
 
-  Future<bool> _performSessionTabActivation(SessionTabRecord tab) async {
+  Future<bool> _performSessionTabActivation(
+    SessionTabRecord tab, {
+    required int activationGeneration,
+  }) async {
     final projectProvider = context.read<ProjectProvider>();
     final chatProvider = context.read<ChatProvider>();
     final priorProject = projectProvider.currentProject;
     final priorSession = chatProvider.currentSession;
     final priorWasNewChatDraft = priorSession == null;
+    bool isCurrentGeneration() {
+      return mounted && _sessionTabActivationGeneration == activationGeneration;
+    }
+
+    bool isCurrentActivation() {
+      return isCurrentGeneration() && _isChatScreenActive();
+    }
 
     try {
       if (tab.identity.serverId != chatProvider.activeServerId) {
+        _releaseSessionTabActivationCloseGuard(activationGeneration);
         _showSessionTabNavigationError();
         return false;
       }
 
       await _switchToSessionTabContext(tab);
-      if (!mounted || !_isChatScreenActive()) {
+      if (!isCurrentGeneration()) {
+        return false;
+      }
+      if (!_isChatScreenActive()) {
         await _restoreSessionTabNavigation(
           project: priorProject,
           session: priorSession,
           wasNewChatDraft: priorWasNewChatDraft,
         );
+        _releaseSessionTabActivationCloseGuard(activationGeneration);
         return false;
       }
       if (!_isSessionTabContextActive(tab)) {
@@ -245,13 +277,20 @@ extension _ChatPageSessionTabs on _ChatPageState {
           session: priorSession,
           wasNewChatDraft: priorWasNewChatDraft,
         );
+        _releaseSessionTabActivationCloseGuard(activationGeneration);
         _showSessionTabNavigationError();
         return false;
       }
 
-      final target = await _waitForSessionTabTarget(tab);
+      var target = chatProvider.sessionForSessionTab(tab.identity);
+      if (target == null && !chatProvider.hasLoadedSessionsAuthoritatively) {
+        target = _placeholderSessionForTab(tab);
+      }
       if (target == null) {
-        if (!mounted || !_isChatScreenActive()) {
+        if (!isCurrentGeneration()) {
+          return false;
+        }
+        if (!_isChatScreenActive()) {
           await _restoreSessionTabNavigation(
             project: priorProject,
             session: priorSession,
@@ -259,15 +298,21 @@ extension _ChatPageSessionTabs on _ChatPageState {
           );
           return false;
         }
-        await _restoreSessionTabNavigation(
-          project: priorProject,
-          session: priorSession,
-          wasNewChatDraft: priorWasNewChatDraft,
-        );
-        _showSessionTabNavigationError();
-        return false;
+        if (chatProvider.hasLoadedSessionsAuthoritatively) {
+          await _restoreSessionTabNavigation(
+            project: priorProject,
+            session: priorSession,
+            wasNewChatDraft: priorWasNewChatDraft,
+          );
+          _showSessionTabNavigationError();
+          return false;
+        }
+        target = _placeholderSessionForTab(tab);
       }
 
+      if (!isCurrentGeneration()) {
+        return false;
+      }
       if (!_isChatScreenActive()) {
         await _restoreSessionTabNavigation(
           project: priorProject,
@@ -276,23 +321,41 @@ extension _ChatPageSessionTabs on _ChatPageState {
         );
         return false;
       }
-      await _handleSessionSwitch(target);
+
+      await _handleSessionSwitch(target, cacheFirst: true);
       final activated =
-          mounted &&
-          _isChatScreenActive() &&
+          isCurrentActivation() &&
           _isSessionTabContextActive(tab) &&
-          context.read<ChatProvider>().currentSession?.id ==
-              tab.identity.sessionId;
+          chatProvider.currentSession?.id == tab.identity.sessionId;
       if (activated) {
-        return true;
+        _scheduleSessionTabRouteRecovery(
+          activationGeneration: activationGeneration,
+          project: priorProject,
+          session: priorSession,
+          wasNewChatDraft: priorWasNewChatDraft,
+        );
+        _verifySessionTabAuthorityAfterActivation(
+          tab: tab,
+          activationGeneration: activationGeneration,
+          project: priorProject,
+          session: priorSession,
+          wasNewChatDraft: priorWasNewChatDraft,
+        );
+        await Future<void>.delayed(_sessionTabActivationSettleDuration);
+        return isCurrentGeneration();
       }
 
-      await _restoreSessionTabNavigation(
-        project: priorProject,
-        session: priorSession,
-        wasNewChatDraft: priorWasNewChatDraft,
-      );
-      _showSessionTabNavigationError();
+      if (isCurrentGeneration()) {
+        await _restoreSessionTabNavigation(
+          project: priorProject,
+          session: priorSession,
+          wasNewChatDraft: priorWasNewChatDraft,
+        );
+        _releaseSessionTabActivationCloseGuard(activationGeneration);
+        if (_isChatScreenActive()) {
+          _showSessionTabNavigationError();
+        }
+      }
       return false;
     } catch (error, stackTrace) {
       AppLogger.warn(
@@ -300,12 +363,17 @@ extension _ChatPageSessionTabs on _ChatPageState {
         error: error,
         stackTrace: stackTrace,
       );
-      await _restoreSessionTabNavigation(
-        project: priorProject,
-        session: priorSession,
-        wasNewChatDraft: priorWasNewChatDraft,
-      );
-      _showSessionTabNavigationError();
+      if (isCurrentGeneration()) {
+        await _restoreSessionTabNavigation(
+          project: priorProject,
+          session: priorSession,
+          wasNewChatDraft: priorWasNewChatDraft,
+        );
+        _releaseSessionTabActivationCloseGuard(activationGeneration);
+        if (_isChatScreenActive()) {
+          _showSessionTabNavigationError();
+        }
+      }
       return false;
     }
   }
@@ -352,42 +420,94 @@ extension _ChatPageSessionTabs on _ChatPageState {
         areEquivalentFilePaths(currentPath, tab.identity.directory);
   }
 
-  Future<ChatSession?> _waitForSessionTabTarget(SessionTabRecord tab) async {
-    final chatProvider = context.read<ChatProvider>();
-    final deadline = DateTime.now().add(const Duration(seconds: 8));
-    while (true) {
-      if (!_isChatScreenActive() ||
-          chatProvider.activeServerId != tab.identity.serverId ||
-          !_isSessionTabContextActive(tab)) {
-        return null;
-      }
-      final target = chatProvider.sessions.where((session) {
-        if (session.id != tab.identity.sessionId) {
-          return false;
-        }
-        final directory = normalizeOptionalFilePath(
-          session.directory ?? session.path?.workspace ?? session.path?.root,
+  ChatSession _placeholderSessionForTab(SessionTabRecord tab) {
+    final timestamp = tab.serverUpdatedAtMs > 0
+        ? tab.serverUpdatedAtMs
+        : tab.lastOpenedAtMs;
+    return ChatSession(
+      id: tab.identity.sessionId,
+      workspaceId: tab.projectId?.trim().isNotEmpty == true
+          ? tab.projectId!.trim()
+          : 'default',
+      time: DateTime.fromMillisecondsSinceEpoch(
+        timestamp > 0 ? timestamp : DateTime.now().millisecondsSinceEpoch,
+      ),
+      title: tab.title.trim().isEmpty ? null : tab.title.trim(),
+      directory: tab.identity.directory,
+    );
+  }
+
+  void _verifySessionTabAuthorityAfterActivation({
+    required SessionTabRecord tab,
+    required int activationGeneration,
+    required Project? project,
+    required ChatSession? session,
+    required bool wasNewChatDraft,
+  }) {
+    unawaited(() async {
+      try {
+        final chatProvider = context.read<ChatProvider>();
+        final targetExists = await chatProvider.waitForSessionTabAuthority(
+          tab.identity,
         );
-        return directory == null || directory == tab.identity.directory;
-      }).firstOrNull;
-      if (target != null) {
-        return target;
+        if (!mounted ||
+            !_isChatScreenActive() ||
+            !_isSessionTabContextActive(tab) ||
+            chatProvider.activeServerId != tab.identity.serverId ||
+            _sessionTabActivationGeneration != activationGeneration ||
+            targetExists != false) {
+          return;
+        }
+        await _restoreSessionTabNavigation(
+          project: project,
+          session: session,
+          wasNewChatDraft: wasNewChatDraft,
+        );
+        if (!mounted ||
+            !_isChatScreenActive() ||
+            _sessionTabActivationGeneration != activationGeneration) {
+          return;
+        }
+        _showSessionTabNavigationError();
+      } catch (error, stackTrace) {
+        AppLogger.warn(
+          'Failed to verify session tab authority',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      } finally {
+        _releaseSessionTabActivationCloseGuard(activationGeneration);
       }
-      if (chatProvider.hasLoadedSessionsAuthoritatively) {
-        return null;
-      }
-      final remaining = deadline.difference(DateTime.now());
-      if (remaining <= Duration.zero) {
-        return null;
-      }
-      const pollInterval = Duration(milliseconds: 80);
-      await Future<void>.delayed(
-        remaining.compareTo(pollInterval) < 0 ? remaining : pollInterval,
-      );
-      if (!mounted) {
-        return null;
-      }
+    }());
+  }
+
+  void _releaseSessionTabActivationCloseGuard(int activationGeneration) {
+    if (_sessionTabActivationGeneration == activationGeneration) {
+      _sessionTabActivationCloseGuard = false;
     }
+  }
+
+  void _scheduleSessionTabRouteRecovery({
+    required int activationGeneration,
+    required Project? project,
+    required ChatSession? session,
+    required bool wasNewChatDraft,
+  }) {
+    unawaited(
+      Future<void>.delayed(const Duration(milliseconds: 120), () async {
+        if (!mounted ||
+            !_isAppInForeground ||
+            _sessionTabActivationGeneration != activationGeneration ||
+            _isChatScreenActive()) {
+          return;
+        }
+        await _restoreSessionTabNavigation(
+          project: project,
+          session: session,
+          wasNewChatDraft: wasNewChatDraft,
+        );
+      }),
+    );
   }
 
   Future<void> _restoreSessionTabNavigation({

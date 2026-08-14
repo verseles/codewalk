@@ -5095,14 +5095,6 @@ void main() {
     await tester.pumpAndSettle();
     await provider.loadSessions();
 
-    await provider.projectProvider.switchProject(projectB.id);
-    await provider.onProjectScopeChanged(waitForRevalidation: false);
-    await provider.initializeProviders();
-    await provider.loadSessions();
-    await provider.projectProvider.switchProject(projectA.id);
-    await provider.onProjectScopeChanged(waitForRevalidation: false);
-    await provider.initializeProviders();
-    await provider.projectProvider.closeProject(projectB.id);
     await provider.loadSessions();
     await provider.selectSession(
       provider.sessions.singleWhere(
@@ -5134,7 +5126,7 @@ void main() {
         ),
       ),
     );
-    await _pumpSessionTabNavigation(tester);
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(provider.projectProvider.currentProject?.id, projectB.id);
     expect(provider.projectProvider.openProjectIds, contains(projectB.id));

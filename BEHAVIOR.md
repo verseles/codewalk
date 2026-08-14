@@ -605,7 +605,7 @@
 
 - **Given** the user activates a tab for another project context
 - **When** that context is closed or not current
-- **Then** CodeWalk switches or reopens the project cache-first, waits boundedly for authoritative target session data, and restores the prior coherent project/session with an error if the target is unavailable
+- **Then** CodeWalk switches or reopens the project/context cache-first and activates the target session immediately from cached, context, or placeholder data, while authoritative target validation runs in the background with a bounded wait; rollback or error to the prior coherent project/session occurs only when the authoritative target is absent
 
 - **Given** the session-tab display toggle is enabled and tabs are nonempty
 - **When** the chat surface is rendered
@@ -716,7 +716,7 @@
 
 - **Given** the user switches project/directory context and that context has cached sessions
 - **When** the switch is triggered from the project context picker (open/reopen/close/switch)
-- **Then** project-scope transitions are serialized, and pointer input in the chat area is blocked immediately while a transition is active
+- **Then** project-scope transitions are serialized, and pointer input is blocked immediately only in the critical chat content area while a transition is active; the session-tab strip remains interactive/responsive during background revalidation
 - **Then** the chat area keeps one visual tree/root `Stack` during the transition, preserving its visual state while transition layers are applied
 - **Then** the `Loading project context...` overlay appears only if the transition remains active after 150 ms; fast or cache-complete transitions finish without a loading flash
 - **Then** the new context renders immediately from cached scope data without waiting for network revalidation

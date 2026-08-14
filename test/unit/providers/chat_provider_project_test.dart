@@ -1272,6 +1272,70 @@ void main() {
     );
 
     test(
+      'fast cold project switch preserves the persisted last-session snapshot',
+      () async {
+        final projectA = Project(
+          id: 'proj_cold_a',
+          name: 'Cold Project A',
+          path: '/repo/cold/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        final projectB = Project(
+          id: 'proj_cold_b',
+          name: 'Cold Project B',
+          path: '/repo/cold/b',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+        );
+        final sessionA = ChatSession(
+          id: 'ses_cold_a',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Cold session A',
+          directory: projectA.path,
+        );
+        final projectProvider = ProjectProvider(
+          projectRepository: FakeProjectRepository(
+            currentProject: projectA,
+            projects: <Project>[projectA, projectB],
+          ),
+          localDataSource: localDataSource,
+        );
+        final scopedProvider = buildProvider(projectProvider: projectProvider);
+        addTearDown(scopedProvider.dispose);
+        chatRepository.sessions
+          ..clear()
+          ..add(sessionA);
+
+        const snapshot = '{"sentinel":true}';
+        await localDataSource.saveLastSessionSnapshot(
+          snapshot,
+          serverId: 'srv_test',
+          scopeId: projectB.path,
+        );
+        await projectProvider.initializeProject();
+        await scopedProvider.loadSessions();
+
+        final networkGate = Completer<void>();
+        chatRepository.getSessionsDelay = () => networkGate.future;
+        await projectProvider.switchProject(projectB.id);
+        await scopedProvider
+            .onProjectScopeChanged(waitForRevalidation: false)
+            .timeout(const Duration(milliseconds: 300));
+
+        expect(
+          await localDataSource.getLastSessionSnapshot(
+            serverId: 'srv_test',
+            scopeId: projectB.path,
+          ),
+          snapshot,
+        );
+
+        networkGate.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      },
+    );
+
+    test(
       'project switch fast-path does not leak draft mode across contexts',
       () async {
         final scopedRepository = FakeChatRepository(

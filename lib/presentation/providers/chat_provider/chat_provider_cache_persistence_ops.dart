@@ -99,25 +99,59 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
       return;
     }
 
-    final previousWrite =
-        _sessionMessagesSnapshotWriteQueue[normalizedSessionId] ??
-        Future<void>.value();
-    late final Future<void> queuedWrite;
-    queuedWrite = previousWrite.then(
-      (_) => _writeSessionMessagesSnapshotBestEffort(
-        normalizedSessionId,
-        filteredMessages,
-        serverId: serverId,
-        scopeId: scopeId,
-      ),
+    _pendingSessionMessagesSnapshotWrites[normalizedSessionId] =
+        _SessionMessagesSnapshotWriteRequest(
+          messages: List<ChatMessage>.unmodifiable(filteredMessages),
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+    final existingTask =
+        _sessionMessagesSnapshotWriteTasks[normalizedSessionId];
+    if (existingTask != null) {
+      await existingTask;
+      return;
+    }
+
+    await _startSessionMessagesSnapshotWriteDrain(normalizedSessionId);
+  }
+
+  Future<void> _startSessionMessagesSnapshotWriteDrain(String sessionId) {
+    late final Future<void> writeTask;
+    writeTask = _drainSessionMessagesSnapshotWrites(sessionId);
+    _sessionMessagesSnapshotWriteTasks[sessionId] = writeTask;
+    unawaited(
+      writeTask.whenComplete(() {
+        if (!identical(
+          _sessionMessagesSnapshotWriteTasks[sessionId],
+          writeTask,
+        )) {
+          return;
+        }
+        _sessionMessagesSnapshotWriteTasks.remove(sessionId);
+        if (_pendingSessionMessagesSnapshotWrites.containsKey(sessionId)) {
+          unawaited(_startSessionMessagesSnapshotWriteDrain(sessionId));
+        }
+      }),
     );
-    _sessionMessagesSnapshotWriteQueue[normalizedSessionId] = queuedWrite;
-    await queuedWrite;
-    if (identical(
-      _sessionMessagesSnapshotWriteQueue[normalizedSessionId],
-      queuedWrite,
-    )) {
-      _sessionMessagesSnapshotWriteQueue.remove(normalizedSessionId);
+    return writeTask;
+  }
+
+  Future<void> _drainSessionMessagesSnapshotWrites(String sessionId) async {
+    // Yield once so synchronous bursts share the same latest request without
+    // delaying the first persistence beyond the current event turn.
+    await Future<void>.value();
+    while (true) {
+      final request = _pendingSessionMessagesSnapshotWrites.remove(sessionId);
+      if (request == null) return;
+      await _writeSessionMessagesSnapshotBestEffort(
+        sessionId,
+        request.messages,
+        serverId: request.serverId,
+        scopeId: request.scopeId,
+      );
+      if (!_pendingSessionMessagesSnapshotWrites.containsKey(sessionId)) {
+        return;
+      }
     }
   }
 
@@ -140,8 +174,21 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
                 .map((message) => ChatMessageModel.fromDomain(message).toJson())
                 .toList(growable: false),
           };
+          final encodeStopwatch = Stopwatch()..start();
+          final encodedPayload = json.encode(payload);
+          encodeStopwatch.stop();
+          AppLogger.recordPerformanceTask(
+            operation: 'session_snapshot_encode',
+            elapsed: encodeStopwatch.elapsed,
+            status: 'ok',
+            tags: const <String>{'chat:snapshot', 'cache:encode'},
+            context: <String, Object?>{
+              'sessionHash': AppLogger.safeContextId(normalizedSessionId),
+              'messageCount': filteredMessages.length,
+            },
+          );
           await localDataSource.saveSessionMessagesSnapshot(
-            json.encode(payload),
+            encodedPayload,
             sessionId: normalizedSessionId,
             serverId: resolvedServerId,
             scopeId: resolvedScopeId,
@@ -520,8 +567,22 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
           .map((message) => ChatMessageModel.fromDomain(message).toJson())
           .toList(growable: false),
     };
+    final encodeStopwatch = Stopwatch()..start();
+    final encodedPayload = json.encode(payload);
+    encodeStopwatch.stop();
+    AppLogger.recordPerformanceTask(
+      operation: 'session_snapshot_encode',
+      elapsed: encodeStopwatch.elapsed,
+      status: 'ok',
+      tags: const <String>{'chat:snapshot', 'cache:encode'},
+      context: <String, Object?>{
+        'sessionHash': AppLogger.safeContextId(session.id),
+        'messageCount': cacheableMessages.length,
+        'lastSession': true,
+      },
+    );
     await localDataSource.saveLastSessionSnapshot(
-      json.encode(payload),
+      encodedPayload,
       serverId: serverId,
       scopeId: scopeId,
     );
@@ -536,41 +597,84 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     String? serverId,
     String? scopeId,
   }) async {
-    late final Future<void> queuedWrite;
-    queuedWrite = _lastSessionSnapshotWriteQueue.then(
-      (_) => _writeLastSessionSnapshotBestEffort(
-        serverId: serverId,
-        scopeId: scopeId,
-      ),
+    final current = _currentSession;
+    if (current == null) {
+      return;
+    }
+    _pendingLastSessionSnapshotWrite = _LastSessionSnapshotWriteRequest(
+      session: current,
+      messages: List<ChatMessage>.unmodifiable(_messages),
+      serverId: serverId,
+      scopeId: scopeId,
     );
-    _lastSessionSnapshotWriteQueue = queuedWrite;
-    await queuedWrite;
+    final existingTask = _lastSessionSnapshotWriteTask;
+    if (existingTask != null) {
+      await existingTask;
+      return;
+    }
+
+    await _startLastSessionSnapshotWriteDrain();
   }
 
-  Future<void> _writeLastSessionSnapshotBestEffort({
-    String? serverId,
-    String? scopeId,
-  }) async {
+  Future<void> _startLastSessionSnapshotWriteDrain() {
+    late final Future<void> writeTask;
+    writeTask = _drainLastSessionSnapshotWrites();
+    _lastSessionSnapshotWriteTask = writeTask;
+    unawaited(
+      writeTask.whenComplete(() {
+        if (!identical(_lastSessionSnapshotWriteTask, writeTask)) {
+          return;
+        }
+        _lastSessionSnapshotWriteTask = null;
+        if (_pendingLastSessionSnapshotWrite != null) {
+          unawaited(_startLastSessionSnapshotWriteDrain());
+        }
+      }),
+    );
+    return writeTask;
+  }
+
+  Future<void> _drainLastSessionSnapshotWrites() async {
+    await Future<void>.value();
+    while (_pendingLastSessionSnapshotWrite != null) {
+      final request = _pendingLastSessionSnapshotWrite;
+      _pendingLastSessionSnapshotWrite = null;
+      if (request == null) return;
+      await _writeLastSessionSnapshotBestEffort(request);
+    }
+  }
+
+  Future<void> _writeLastSessionSnapshotBestEffort(
+    _LastSessionSnapshotWriteRequest request,
+  ) async {
     try {
-      final current = _currentSession;
-      if (current == null) {
-        return;
-      }
-      final resolvedServerId = serverId ?? await _resolveServerIdForStorage();
-      final resolvedScopeId = scopeId ?? _resolveContextScopeId();
+      final resolvedServerId =
+          request.serverId ?? await _resolveServerIdForStorage();
+      final resolvedScopeId = request.scopeId ?? _resolveContextScopeId();
       await _saveLastSessionSnapshot(
-        current,
-        _messages,
+        request.session,
+        request.messages,
         serverId: resolvedServerId,
         scopeId: resolvedScopeId,
       );
-      _cacheSessionMessages(current.id, _messages);
-      await _persistSessionMessagesSnapshotBestEffort(
-        current.id,
-        _messages,
-        serverId: resolvedServerId,
-        scopeId: resolvedScopeId,
+      final current = _currentSession;
+      final currentScopeId = normalizeOptionalFilePath(
+        _resolveContextScopeId(),
       );
+      final writeScopeId = normalizeOptionalFilePath(resolvedScopeId);
+      // Keep the per-session cache at least as fresh as a newer live write.
+      if (current != null &&
+          current.id == request.session.id &&
+          currentScopeId == writeScopeId) {
+        final currentMessages = List<ChatMessage>.unmodifiable(_messages);
+        _cacheSessionMessages(current.id, currentMessages);
+        await _persistSessionMessagesSnapshotBestEffort(
+          current.id,
+          currentMessages,
+          serverId: resolvedServerId,
+          scopeId: resolvedScopeId,
+        );
+      }
     } catch (e, stackTrace) {
       AppLogger.warn(
         'Failed to persist last session snapshot',

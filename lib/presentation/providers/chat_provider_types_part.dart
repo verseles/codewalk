@@ -343,6 +343,63 @@ class SessionTabCandidate {
           : errorToken as String?,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SessionTabCandidate &&
+        other.identity == identity &&
+        other.projectId == projectId &&
+        other.title == title &&
+        other.serverUpdatedAtMs == serverUpdatedAtMs &&
+        other.status == status &&
+        other.isSelected == isSelected &&
+        other.isArchived == isArchived &&
+        other.isRoot == isRoot &&
+        listEquals(other.pendingQuestionIds, pendingQuestionIds) &&
+        other.completionToken == completionToken &&
+        other.errorToken == errorToken;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    identity,
+    projectId,
+    title,
+    serverUpdatedAtMs,
+    status,
+    isSelected,
+    isArchived,
+    isRoot,
+    Object.hashAll(pendingQuestionIds),
+    completionToken,
+    errorToken,
+  );
+}
+
+class _SessionMessagesSnapshotWriteRequest {
+  const _SessionMessagesSnapshotWriteRequest({
+    required this.messages,
+    this.serverId,
+    this.scopeId,
+  });
+
+  final List<ChatMessage> messages;
+  final String? serverId;
+  final String? scopeId;
+}
+
+class _LastSessionSnapshotWriteRequest {
+  const _LastSessionSnapshotWriteRequest({
+    required this.session,
+    required this.messages,
+    this.serverId,
+    this.scopeId,
+  });
+
+  final ChatSession session;
+  final List<ChatMessage> messages;
+  final String? serverId;
+  final String? scopeId;
 }
 
 @immutable

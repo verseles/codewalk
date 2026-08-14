@@ -504,7 +504,7 @@ class SessionTabReconciler {
   }
 }
 
-extension _ChatProviderSessionTabOps on ChatProvider {
+extension ChatProviderSessionTabOps on ChatProvider {
   bool get _isSessionTabRouteVisible =>
       _isForegroundActive && _isChatRouteActive;
 
@@ -683,6 +683,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         ? _pinnedSessionIds.add(sessionId)
         : _pinnedSessionIds.remove(sessionId);
     if (changed) {
+      _invalidateSessionTabReconcileCache();
       _recordPinnedSessionMutation();
       _loadedPinnedSessionContextKey = _activeContextKey;
       _writeThroughPinnedSessionScope(
@@ -800,6 +801,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         ? ids.add(identity.sessionId)
         : ids.remove(identity.sessionId);
     if (!changed) return false;
+    _invalidateSessionTabReconcileCache();
     if (identical(ids, _pinnedSessionIds)) {
       _recordPinnedSessionMutation();
     }
@@ -858,6 +860,88 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         _pinnedSessionWriteQueueByScope.remove(queueKey);
       }
     });
+  }
+
+  ChatSession? sessionForSessionTab(SessionTabIdentity identity) {
+    if (!identity.isValid || identity.serverId != _activeServerId) {
+      return null;
+    }
+
+    ChatSession? findIn(Iterable<ChatSession> sessions, {String? contextKey}) {
+      for (final session in sessions) {
+        if (session.id != identity.sessionId) continue;
+        final resolvedIdentity = _sessionTabIdentityForSession(
+          session,
+          contextKey: contextKey ?? _activeContextKey,
+        );
+        if (resolvedIdentity == identity) return session;
+        final directory = normalizeOptionalFilePath(_sessionDirectory(session));
+        if (directory == null) return session;
+      }
+      return null;
+    }
+
+    final active = findIn(_sessions);
+    if (active != null) return active;
+
+    for (final entry in _contextSnapshots.entries) {
+      if (_serverIdFromContextKey(entry.key) != identity.serverId ||
+          normalizeOptionalFilePath(_scopeIdFromContextKey(entry.key)) !=
+              identity.directory) {
+        continue;
+      }
+      final cached = findIn(entry.value.sessions, contextKey: entry.key);
+      if (cached != null) return cached;
+    }
+    return null;
+  }
+
+  Future<bool?> waitForSessionTabAuthority(
+    SessionTabIdentity identity, {
+    Duration timeout = const Duration(seconds: 3),
+  }) async {
+    if (!identity.isValid) return false;
+
+    bool? resolve() {
+      if (_activeServerId != identity.serverId) return false;
+      if (!_hasLoadedSessionsAuthoritatively) return null;
+      final target = _sessions.where((session) {
+        if (session.id != identity.sessionId) return false;
+        final resolvedIdentity = _sessionTabIdentityForSession(
+          session,
+          contextKey: _activeContextKey,
+        );
+        return resolvedIdentity == identity ||
+            normalizeOptionalFilePath(_sessionDirectory(session)) == null;
+      }).firstOrNull;
+      return target != null;
+    }
+
+    final initial = resolve();
+    if (initial != null) return initial;
+
+    final completer = Completer<bool?>();
+    void onChanged() {
+      final result = resolve();
+      if (result != null && !completer.isCompleted) {
+        completer.complete(result);
+      }
+    }
+
+    addListener(onChanged);
+    _sessionTabAuthorityWaiters.add(completer);
+    final timer = Timer(timeout, () {
+      if (!completer.isCompleted) completer.complete(null);
+    });
+    try {
+      return await completer.future;
+    } finally {
+      timer.cancel();
+      _sessionTabAuthorityWaiters.remove(completer);
+      if (!_sessionTabsDisposed) {
+        removeListener(onChanged);
+      }
+    }
   }
 
   Future<void> _ensureSessionTabsLoaded({String? serverId}) async {
@@ -919,6 +1003,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
           generation == _sessionTabsGeneration &&
           targetServerId == _activeServerId) {
         final hadVisibleTabs = _sessionTabs.isNotEmpty;
+        _invalidateSessionTabReconcileCache();
         _sessionTabs = const <SessionTabRecord>[];
         _sessionTabsPersistedState = const PersistedSessionTabsState();
         _sessionTabsLoadedServerId = null;
@@ -977,8 +1062,32 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     if (iconOverridesState != null) {
       _applySessionTabIconOverrideState(targetServerId, iconOverridesState);
     }
+    _invalidateSessionTabReconcileCache();
     _sessionTabsPersistedState = PersistedSessionTabsState.decode(raw);
     _reconcileSessionTabs();
+  }
+
+  void _invalidateSessionTabReconcileCache() {
+    _sessionTabsPersistedStateEncoded = null;
+    _lastSessionTabReconcileCandidates = null;
+    _sessionTabReconcilePresentationDirty = true;
+  }
+
+  bool _isCurrentSessionTabViewed() {
+    final currentSession = _currentSession;
+    if (currentSession == null) return true;
+    final identity = _sessionTabIdentityForSession(
+      currentSession,
+      contextKey: _activeContextKey,
+    );
+    if (identity == null) return true;
+    final tab = _sessionTabs
+        .where((candidate) => candidate.identity == identity)
+        .firstOrNull;
+    if (tab == null) return false;
+    return tab.pendingQuestionIds.every(tab.seenQuestionIds.contains) &&
+        tab.seenCompletionToken == tab.completionToken &&
+        tab.seenErrorToken == tab.errorToken;
   }
 
   void _reconcileSessionTabs({
@@ -989,8 +1098,20 @@ extension _ChatProviderSessionTabOps on ChatProvider {
   }) {
     final serverId = _activeServerId.trim();
     if (serverId.isEmpty || _sessionTabsLoadedServerId != serverId) return;
-    final previousStateJson = _sessionTabsPersistedState.encode();
     final candidates = _collectSessionTabCandidates(serverId).toList();
+    final shouldMarkCurrentViewed =
+        markCurrentViewed && !_isCurrentSessionTabViewed();
+    if (explicitlyOpened == null &&
+        !forcePersistence &&
+        !_sessionTabReconcilePresentationDirty &&
+        !shouldMarkCurrentViewed &&
+        _lastSessionTabReconcileCandidates != null &&
+        listEquals(_lastSessionTabReconcileCandidates, candidates)) {
+      return;
+    }
+    final previousStateJson =
+        _sessionTabsPersistedStateEncoded ??
+        _sessionTabsPersistedState.encode();
     final pinnedScopes = _pinnedSessionTabScopes(serverId, candidates);
     final result = SessionTabReconciler.reconcile(
       serverId: serverId,
@@ -1034,12 +1155,18 @@ extension _ChatProviderSessionTabOps on ChatProvider {
       );
     }
     final runtimeChanged = !listEquals(_sessionTabs, nextTabs);
-    final persistedChanged = previousStateJson != nextPersistedState.encode();
+    final nextStateJson = nextPersistedState.encode();
+    final persistedChanged = previousStateJson != nextStateJson;
     _sessionTabs = List<SessionTabRecord>.unmodifiable(nextTabs);
     _sessionTabsPersistedState = nextPersistedState;
+    _sessionTabsPersistedStateEncoded = nextStateJson;
+    _lastSessionTabReconcileCandidates = List<SessionTabCandidate>.unmodifiable(
+      candidates,
+    );
+    _sessionTabReconcilePresentationDirty = false;
     _pruneSessionTabEventState(serverId);
     if (persistedChanged || forcePersistence) {
-      _scheduleSessionTabsPersistence();
+      _scheduleSessionTabsPersistence(payload: nextStateJson);
     }
     if (runtimeChanged && notify) _notifyListeners();
   }
@@ -1178,7 +1305,14 @@ extension _ChatProviderSessionTabOps on ChatProvider {
   }) sync* {
     final scopeId = _scopeIdFromContextKey(contextKey);
     if (scopeId == null) return;
-    for (final session in sessions) {
+    final hasCurrentSession = currentSession == null
+        ? true
+        : sessions.any((session) => session.id == currentSession.id);
+    final sourceSessions = List<ChatSession>.from(sessions);
+    if (!hasCurrentSession) {
+      sourceSessions.add(currentSession);
+    }
+    for (final session in sourceSessions) {
       final identity = _sessionTabIdentityForSession(
         session,
         contextKey: contextKey,
@@ -1244,12 +1378,12 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     return null;
   }
 
-  void _scheduleSessionTabsPersistence() {
+  void _scheduleSessionTabsPersistence({String? payload}) {
     final serverId = _sessionTabsLoadedServerId;
     if (serverId == null || serverId.isEmpty) return;
-    final payload = _sessionTabsPersistedState.encode();
+    final encoded = payload ?? _sessionTabsPersistedState.encode();
     unawaited(
-      _enqueueSessionTabsPersistence(serverId: serverId, payload: payload),
+      _enqueueSessionTabsPersistence(serverId: serverId, payload: encoded),
     );
   }
 
@@ -1296,6 +1430,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     String serverId,
     SessionTabIconOverridesState state,
   ) {
+    _invalidateSessionTabReconcileCache();
     _sessionTabIconOverridesByServer[serverId] = {
       for (final entry in state.entries)
         if (entry.serverId == serverId)
@@ -1729,7 +1864,10 @@ extension _ChatProviderSessionTabOps on ChatProvider {
       );
     }
     if (_sessionTabsLoadedServerId != identity.serverId) return;
-    final previous = _sessionTabsPersistedState.encode();
+    final previous =
+        _sessionTabsPersistedStateEncoded ??
+        _sessionTabsPersistedState.encode();
+    _invalidateSessionTabReconcileCache();
     _sessionTabsPersistedState = PersistedSessionTabsState(
       open: _sessionTabsPersistedState.open
           .where(
@@ -1754,7 +1892,9 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     _sessionTabCompletionTokens.removeWhere(
       (candidateIdentity, _) => candidateIdentity == identity,
     );
-    if (previous != _sessionTabsPersistedState.encode()) {
+    final nextStateJson = _sessionTabsPersistedState.encode();
+    _sessionTabsPersistedStateEncoded = nextStateJson;
+    if (previous != nextStateJson) {
       _scheduleSessionTabsPersistence();
     }
     if (runtimeChanged) _notifyListeners();
@@ -1786,6 +1926,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
       nowMs: _sessionTabsNow().millisecondsSinceEpoch,
     );
     if (nextState.encode() == _sessionTabsPersistedState.encode()) return;
+    _invalidateSessionTabReconcileCache();
     _sessionTabsPersistedState = nextState;
     if (_sessionTabBootstrapDirectory == identity.directory) {
       _sessionTabBootstrapDirectory = null;
@@ -1833,6 +1974,7 @@ extension _ChatProviderSessionTabOps on ChatProvider {
         .toList(growable: true);
     final insertionIndex = math.min(math.max(index, 0), open.length);
     open.insert(insertionIndex, tab.toPersisted());
+    _invalidateSessionTabReconcileCache();
     _sessionTabsPersistedState = PersistedSessionTabsState(
       open: open,
       closed: _sessionTabsPersistedState.closed
@@ -1938,8 +2080,11 @@ extension _ChatProviderSessionTabOps on ChatProvider {
     if (normalizedServerId.isEmpty || normalizedDirectory == null) {
       return;
     }
-    final previous = _sessionTabsPersistedState.encode();
+    final previous =
+        _sessionTabsPersistedStateEncoded ??
+        _sessionTabsPersistedState.encode();
     if (_sessionTabsLoadedServerId == normalizedServerId) {
+      _invalidateSessionTabReconcileCache();
       _sessionTabsPersistedState = PersistedSessionTabsState(
         open: _sessionTabsPersistedState.open
             .where(
@@ -1989,8 +2134,10 @@ extension _ChatProviderSessionTabOps on ChatProvider {
           identity.serverId == normalizedServerId &&
           identity.directory == normalizedDirectory,
     );
+    final nextStateJson = _sessionTabsPersistedState.encode();
+    _sessionTabsPersistedStateEncoded = nextStateJson;
     if (_sessionTabsLoadedServerId == normalizedServerId &&
-        previous != _sessionTabsPersistedState.encode()) {
+        previous != nextStateJson) {
       _scheduleSessionTabsPersistence();
     }
     if (runtimeChanged) _notifyListeners();

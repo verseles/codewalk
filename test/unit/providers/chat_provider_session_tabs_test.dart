@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codewalk/core/errors/failures.dart';
+import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/persisted_session_tabs_state.dart';
@@ -495,6 +496,97 @@ void main() {
         );
       },
     );
+
+    test(
+      'resolves current and missing session-tab authority explicitly',
+      () async {
+        await provider.loadSessions();
+        final identity = provider.sessionTabs.single.identity;
+
+        expect(
+          provider.sessionForSessionTab(identity),
+          same(provider.sessions.single),
+        );
+        expect(await provider.waitForSessionTabAuthority(identity), isTrue);
+
+        final missing = _identity('missing', directory: identity.directory);
+        expect(await provider.waitForSessionTabAuthority(missing), isFalse);
+      },
+    );
+
+    test('coalesces rapid outgoing session snapshot writes', () async {
+      final localDataSource = _CountingSnapshotLocalDataSource();
+      final customFixtures = await buildDefaultTestFixtures(
+        localDataSourceOverride: localDataSource,
+      );
+      addTearDown(customFixtures.defaultSettingsProvider.dispose);
+      final sessionA = ChatSession(
+        id: 'session-a',
+        workspaceId: 'default',
+        directory: '/work/project',
+        time: now,
+        title: 'Session A',
+      );
+      final sessionB = sessionA.copyWith(id: 'session-b', title: 'Session B');
+      customFixtures.chatRepository.sessions
+        ..clear()
+        ..addAll(<ChatSession>[sessionA, sessionB]);
+      customFixtures.chatRepository.messagesBySession[sessionA.id] =
+          <ChatMessage>[
+            UserMessage(
+              id: 'message-a',
+              sessionId: 'session-a',
+              time: DateTime.fromMillisecondsSinceEpoch(1),
+              parts: <MessagePart>[
+                TextPart(
+                  id: 'part-a',
+                  messageId: 'message-a',
+                  sessionId: 'session-a',
+                  text: 'A',
+                ),
+              ],
+            ),
+          ];
+      customFixtures.chatRepository.messagesBySession[sessionB.id] =
+          <ChatMessage>[
+            UserMessage(
+              id: 'message-b',
+              sessionId: 'session-b',
+              time: DateTime.fromMillisecondsSinceEpoch(1),
+              parts: <MessagePart>[
+                TextPart(
+                  id: 'part-b',
+                  messageId: 'message-b',
+                  sessionId: 'session-b',
+                  text: 'B',
+                ),
+              ],
+            ),
+          ];
+      final customProvider = buildChatProvider(
+        chatRepository: customFixtures.chatRepository,
+        appRepository: customFixtures.appRepository,
+        localDataSource: localDataSource,
+        defaultSettingsProvider: customFixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+      );
+      addTearDown(customProvider.dispose);
+
+      await customProvider.loadSessions();
+      await customProvider.selectSession(sessionA);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      localDataSource.sessionSnapshotWriteCount = 0;
+
+      await Future.wait(<Future<void>>[
+        customProvider.selectSession(sessionB, awaitNetwork: false),
+        customProvider.selectSession(sessionA, awaitNetwork: false),
+        customProvider.selectSession(sessionB, awaitNetwork: false),
+        customProvider.selectSession(sessionA, awaitNetwork: false),
+      ]);
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+
+      expect(localDataSource.sessionSnapshotWriteCount, lessThanOrEqualTo(2));
+    });
 
     test('closing a tab persists its local tombstone', () async {
       await provider.loadSessions();
@@ -1748,6 +1840,26 @@ class _DelayedSessionTabsLocalDataSource extends InMemoryAppLocalDataSource {
       await releaseServerARead.future;
     }
     return super.getSessionTabsStateJson(serverId: serverId);
+  }
+}
+
+class _CountingSnapshotLocalDataSource extends InMemoryAppLocalDataSource {
+  int sessionSnapshotWriteCount = 0;
+
+  @override
+  Future<void> saveSessionMessagesSnapshot(
+    String snapshotJson, {
+    required String sessionId,
+    String? serverId,
+    String? scopeId,
+  }) async {
+    sessionSnapshotWriteCount += 1;
+    await super.saveSessionMessagesSnapshot(
+      snapshotJson,
+      sessionId: sessionId,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
   }
 }
 

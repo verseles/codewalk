@@ -350,6 +350,8 @@ class _ChatPageState extends State<ChatPage>
   Future<void>? _projectScopeTransitionTask;
   SessionTabIdentity? _activatingSessionTabIdentity;
   Future<bool>? _sessionTabActivationTask;
+  int _sessionTabActivationGeneration = 0;
+  bool _sessionTabActivationCloseGuard = false;
   Set<SessionTabIdentity> _knownSessionTabIdentities = <SessionTabIdentity>{};
   final Set<SessionTabIdentity> _pendingSessionTabHintIdentities =
       <SessionTabIdentity>{};
@@ -2478,7 +2480,21 @@ class _ChatPageState extends State<ChatPage>
                                       isCompact: isMobile,
                                       settingsProvider: settingsProvider,
                                     ),
-                                  Expanded(child: content),
+                                  Expanded(
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        content,
+                                        if (_isProjectScopeTransitioning)
+                                          const AbsorbPointer(
+                                            key: ValueKey<String>(
+                                              'project_scope_transition_blocker',
+                                            ),
+                                            child: SizedBox.expand(),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               );
 
@@ -2486,13 +2502,6 @@ class _ChatPageState extends State<ChatPage>
                                 fit: StackFit.expand,
                                 children: [
                                   bodyContent,
-                                  if (_isProjectScopeTransitioning)
-                                    const AbsorbPointer(
-                                      key: ValueKey<String>(
-                                        'project_scope_transition_blocker',
-                                      ),
-                                      child: SizedBox.expand(),
-                                    ),
                                   if (_showProjectScopeLoadingOverlay)
                                     _buildProjectScopeLoadingOverlay(),
                                 ],

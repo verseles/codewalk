@@ -1619,10 +1619,16 @@ extension _ChatPageScaffold on _ChatPageState {
     );
   }
 
-  Future<void> _handleSessionSwitch(ChatSession session) async {
+  Future<void> _handleSessionSwitch(
+    ChatSession session, {
+    bool cacheFirst = false,
+  }) async {
     if (di.sl.isRegistered<ReadAloudService>()) {
       unawaited(di.sl<ReadAloudService>().stop());
     }
-    await context.read<ChatProvider>().selectSession(session);
+    await context.read<ChatProvider>().selectSession(
+      session,
+      awaitNetwork: !cacheFirst,
+    );
   }
 }

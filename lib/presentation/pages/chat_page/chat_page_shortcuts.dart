@@ -205,6 +205,10 @@ extension _ChatPageShortcuts on _ChatPageState {
     final settingsProvider =
         _settingsProvider ?? context.read<SettingsProvider>();
     if (settingsProvider.showSessionTabs && _isChatScreenActive()) {
+      if (_sessionTabActivationTask != null ||
+          _sessionTabActivationCloseGuard) {
+        return;
+      }
       final chatProvider = _chatProvider ?? context.read<ChatProvider>();
       final currentSessionId = chatProvider.currentSession?.id;
       final currentTab = chatProvider.sessionTabs
@@ -217,9 +221,6 @@ extension _ChatPageShortcuts on _ChatPageState {
           .firstOrNull;
       if (currentTab != null) {
         await _closeSessionTab(currentTab);
-        return;
-      }
-      if (_sessionTabActivationTask != null) {
         return;
       }
     }

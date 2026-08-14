@@ -295,7 +295,9 @@ class ChatProviderTestFixtures {
 /// Builds the standard test fixtures shared by all ChatProvider split-test
 /// files. Call in setUp and assign results to the group-level late variables,
 /// then build the provider with the local buildProvider() wrapper.
-Future<ChatProviderTestFixtures> buildDefaultTestFixtures() async {
+Future<ChatProviderTestFixtures> buildDefaultTestFixtures({
+  InMemoryAppLocalDataSource? localDataSourceOverride,
+}) async {
   final chatRepository = FakeChatRepository(
     sessions: <ChatSession>[
       ChatSession(
@@ -321,7 +323,8 @@ Future<ChatProviderTestFixtures> buildDefaultTestFixtures() async {
         connected: const <String>['provider_a'],
       ),
     );
-  final localDataSource = InMemoryAppLocalDataSource();
+  final localDataSource =
+      localDataSourceOverride ?? InMemoryAppLocalDataSource();
   localDataSource.activeServerId = 'srv_test';
 
   localDataSource.experienceSettingsJson = jsonEncode(

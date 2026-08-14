@@ -401,12 +401,21 @@ class ChatProvider extends ChangeNotifier {
   bool _historyRevertInFlight = false;
   final LinkedHashMap<String, List<ChatMessage>> _sessionMessagesLruCache =
       LinkedHashMap<String, List<ChatMessage>>();
-  final Map<String, Future<void>> _sessionMessagesSnapshotWriteQueue =
+  final Map<String, _SessionMessagesSnapshotWriteRequest>
+  _pendingSessionMessagesSnapshotWrites =
+      <String, _SessionMessagesSnapshotWriteRequest>{};
+  final Map<String, Future<void>> _sessionMessagesSnapshotWriteTasks =
       <String, Future<void>>{};
-  Future<void> _lastSessionSnapshotWriteQueue = Future<void>.value();
+  Future<void>? _lastSessionSnapshotWriteTask;
+  _LastSessionSnapshotWriteRequest? _pendingLastSessionSnapshotWrite;
   List<SessionTabRecord> _sessionTabs = const <SessionTabRecord>[];
   PersistedSessionTabsState _sessionTabsPersistedState =
       const PersistedSessionTabsState();
+  String? _sessionTabsPersistedStateEncoded;
+  List<SessionTabCandidate>? _lastSessionTabReconcileCandidates;
+  bool _sessionTabReconcilePresentationDirty = true;
+  final Set<Completer<bool?>> _sessionTabAuthorityWaiters =
+      <Completer<bool?>>{};
   final Map<String, Future<void>> _sessionTabsWriteQueueByServer =
       <String, Future<void>>{};
   late final SessionTabIconOverrideStore _sessionTabIconOverrideStore;
@@ -464,6 +473,7 @@ class ChatProvider extends ChangeNotifier {
   String _activeServerId = 'legacy';
   int _providersFetchId = 0;
   int _sessionsFetchId = 0;
+  int _sessionSelectionGeneration = 0;
   int _messagesFetchId = 0;
   String? _lastSyncedRemoteModelKey;
   String? _lastSyncedRemoteAgentName;
@@ -959,7 +969,7 @@ class ChatProvider extends ChangeNotifier {
     if (_sessionTabsLoadedServerId != _activeServerId) {
       return const <SessionTabRecord>[];
     }
-    return List<SessionTabRecord>.unmodifiable(_sessionTabs);
+    return _sessionTabs;
   }
 
   List<ChatMessage> get messages => _visibleMessagesForCurrentSession();
@@ -3211,7 +3221,7 @@ class ChatProvider extends ChangeNotifier {
     return AppLogger.runPerformanceTask<void>(
       'load_sessions',
       () async {
-        if (_state == ChatState.loading) return;
+        if (_state == ChatState.loading && !preserveVisibleState) return;
         if (userInitiated) {
           _cellularDataSaverService.noteExplicitUserAction(
             reason: 'load-sessions',
@@ -3435,8 +3445,18 @@ class ChatProvider extends ChangeNotifier {
     required String scopeId,
     String? storedSessionId,
     bool refreshMessages = true,
+    int? expectedSelectionGeneration,
+    String? expectedContextKey,
   }) async {
+    bool isExpectedSelectionCurrent() {
+      return (expectedSelectionGeneration == null ||
+              expectedSelectionGeneration == _sessionSelectionGeneration) &&
+          (expectedContextKey == null ||
+              expectedContextKey == _activeContextKey);
+    }
+
     try {
+      if (!isExpectedSelectionCurrent()) return;
       if (_sessions.isEmpty) {
         _currentSession = null;
         _pendingCurrentSessionHydrationId = null;
@@ -3460,6 +3480,7 @@ class ChatProvider extends ChangeNotifier {
             serverId: serverId,
             scopeId: scopeId,
           );
+      if (!isExpectedSelectionCurrent()) return;
       if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
         return;
       }
@@ -3533,6 +3554,7 @@ class ChatProvider extends ChangeNotifier {
           serverId: serverId,
           scopeId: scopeId,
         );
+        if (!isExpectedSelectionCurrent()) return;
         if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
           return;
         }
@@ -3562,6 +3584,7 @@ class ChatProvider extends ChangeNotifier {
           );
         } else {
           await loadMessages(targetSession.id, automatic: true);
+          if (!isExpectedSelectionCurrent()) return;
         }
       } else {
         if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
@@ -3576,6 +3599,7 @@ class ChatProvider extends ChangeNotifier {
         );
       }
 
+      if (!isExpectedSelectionCurrent()) return;
       if (resolvedStoredSessionId != targetSession.id) {
         await _saveCurrentSessionId(
           targetSession.id,
@@ -3710,7 +3734,9 @@ class ChatProvider extends ChangeNotifier {
   Future<void> selectSession(
     ChatSession session, {
     bool userInitiated = true,
+    bool awaitNetwork = true,
   }) async {
+    _sessionSelectionGeneration += 1;
     final previousSessionId = _currentSession?.id;
     return AppLogger.runPerformanceTask<void>(
       'select_session',
@@ -3719,17 +3745,27 @@ class ChatProvider extends ChangeNotifier {
           _cellularDataSaverService.noteExplicitUserAction(
             reason: 'select-session',
           );
-          await _syncCellularDataSaverRealtimePolicy(
+          final realtimePolicySync = _syncCellularDataSaverRealtimePolicy(
             reason: 'select-session-user',
             forceBurst: true,
           );
+          if (awaitNetwork) {
+            await realtimePolicySync;
+          } else {
+            unawaited(realtimePolicySync);
+          }
         } else {
           if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
             return;
           }
-          await _syncCellularDataSaverRealtimePolicy(
+          final realtimePolicySync = _syncCellularDataSaverRealtimePolicy(
             reason: 'select-session-automatic',
           );
+          if (awaitNetwork) {
+            await realtimePolicySync;
+          } else {
+            unawaited(realtimePolicySync);
+          }
         }
         _isNewChatDraftActive = false;
         if (_currentSession?.id == session.id) {
@@ -3811,10 +3847,19 @@ class ChatProvider extends ChangeNotifier {
           _setState(ChatState.loading);
         }
 
-        await _cancelActiveMessageSubscription(
-          reason: 'session-switch',
-          invalidateGeneration: false,
-        );
+        final messageSubscriptionCancellation =
+            _cancelActiveMessageSubscription(
+              reason: 'session-switch',
+              invalidateGeneration: false,
+              timeout: awaitNetwork
+                  ? const Duration(seconds: 2)
+                  : const Duration(milliseconds: 100),
+            );
+        if (awaitNetwork) {
+          await messageSubscriptionCancellation;
+        } else {
+          unawaited(messageSubscriptionCancellation);
+        }
         AppLogger.info(
           'selectSession generation=$_messageStreamGeneration target=${session.id}',
         );
@@ -3894,6 +3939,8 @@ class ChatProvider extends ChangeNotifier {
               automatic: !userInitiated,
             ),
           );
+        } else if (!awaitNetwork) {
+          unawaited(loadMessages(session.id, automatic: !userInitiated));
         } else {
           await loadMessages(session.id, automatic: !userInitiated);
         }
@@ -5083,6 +5130,13 @@ class ChatProvider extends ChangeNotifier {
     titleGenerator?.cancelPendingWaiters();
     _sessionTabsDisposed = true;
     _sessionTabsGeneration += 1;
+    _providersFetchId += 1;
+    _sessionsFetchId += 1;
+    _messagesFetchId += 1;
+    for (final waiter in _sessionTabAuthorityWaiters.toList()) {
+      if (!waiter.isCompleted) waiter.complete(null);
+    }
+    _sessionTabAuthorityWaiters.clear();
     _cellularDataSaverService.removeListener(_handleCellularDataSaverChanged);
     unawaited(
       _cancelActiveMessageSubscription(
