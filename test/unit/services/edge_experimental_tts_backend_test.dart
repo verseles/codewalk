@@ -7,12 +7,20 @@ import 'package:codewalk/presentation/services/tts/tts_backend.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeEdgeTtsConnection implements EdgeTtsWebSocketConnection {
+  _FakeEdgeTtsConnection({this.readyError});
+
+  final Object? readyError;
   final StreamController<dynamic> _controller = StreamController<dynamic>();
   final List<String> sentTexts = <String>[];
   bool closed = false;
 
   @override
-  Future<void> get ready async {}
+  Future<void> get ready async {
+    final error = readyError;
+    if (error != null) {
+      throw error;
+    }
+  }
 
   @override
   Stream<dynamic> get stream => _controller.stream;
@@ -35,6 +43,20 @@ class _FakeEdgeTtsConnection implements EdgeTtsWebSocketConnection {
   }
 }
 
+class _FakeConnector {
+  _FakeConnector(this.connections);
+
+  int calls = 0;
+  final List<_FakeEdgeTtsConnection> connections;
+
+  EdgeTtsWebSocketConnection call(Uri uri) {
+    capturedUris.add(uri);
+    return connections[calls++ % connections.length];
+  }
+
+  final List<Uri> capturedUris = <Uri>[];
+}
+
 class _IdSequence {
   _IdSequence(this.values);
 
@@ -42,6 +64,17 @@ class _IdSequence {
   final List<String> values;
 
   String next() => values[_index++];
+}
+
+Future<void> _waitFor(bool Function() condition,
+    {Duration timeout = const Duration(seconds: 2)}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (!condition()) {
+    if (DateTime.now().isAfter(deadline)) {
+      fail('Condition was not met within $timeout.');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
 }
 
 void main() {
@@ -211,27 +244,199 @@ void main() {
       },
     );
 
-    test('rejects Edge text over direct protocol limit', () async {
-      final backend = EdgeExperimentalTtsBackend();
-      final tooLong = List<String>.filled(
-        kEdgeTtsMaxInputBytes + 1,
+    test('synthesizes long text in chunks and concatenates audio', () async {
+      final first = _FakeEdgeTtsConnection();
+      final second = _FakeEdgeTtsConnection();
+      final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+        first,
+        second,
+      ]);
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+        '33333333333333333333333333333333',
+        '44444444444444444444444444444444',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: connector.call,
+        idProvider: ids.next,
+      );
+      final longText = List<String>.filled(
+        kEdgeTtsMaxInputBytes + 100,
         'a',
       ).join();
 
-      await expectLater(
-        backend.speakOrSynthesize(
-          TtsSynthesisRequest(text: tooLong, rate: 0.5, pitch: 1.0),
-          const TtsBackendCallbacks(),
+      final resultFuture = backend.speakOrSynthesize(
+        TtsSynthesisRequest(text: longText, rate: 0.5, pitch: 1.0),
+        const TtsBackendCallbacks(),
+      );
+      await _waitFor(() => first.sentTexts.length == 2);
+
+      expect(connector.capturedUris[0].queryParameters['ConnectionId'],
+          '11111111111111111111111111111111');
+      expect(first.sentTexts.first, contains('Path:speech.config\r\n'));
+      expect(first.sentTexts.last, contains('Path:ssml\r\n'));
+
+      first.add(
+        buildEdgeTtsBinaryFrameForTest(
+          headers: const <String, String>{
+            'Path': 'audio',
+            'Content-Type': kEdgeTtsAudioMimeType,
+          },
+          audioBytes: const <int>[1, 2],
         ),
+      );
+      first.add('Path:turn.end\r\n\r\n{}');
+      await _waitFor(() => connector.calls == 2);
+      await _waitFor(() => second.sentTexts.length == 2);
+      second.add(
+        buildEdgeTtsBinaryFrameForTest(
+          headers: const <String, String>{
+            'Path': 'audio',
+            'Content-Type': kEdgeTtsAudioMimeType,
+          },
+          audioBytes: const <int>[3, 4],
+        ),
+      );
+      second.add('Path:turn.end\r\n\r\n{}');
+
+      final result = await resultFuture;
+      expect(result, isA<GeneratedTtsAudio>());
+      final audio = result as GeneratedTtsAudio;
+      expect(audio.bytes, orderedEquals(<int>[1, 2, 3, 4]));
+    });
+
+    test('reports server error frames with the server message', () async {
+      final connection = _FakeEdgeTtsConnection();
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: (_) => connection,
+        idProvider: ids.next,
+      );
+
+      final resultFuture = backend.speakOrSynthesize(
+        const TtsSynthesisRequest(text: 'Hello Edge', rate: 0.5, pitch: 1.0),
+        const TtsBackendCallbacks(),
+      );
+      await Future<void>.delayed(Duration.zero);
+      connection.add('Path:error\r\n\r\nunsupported voice');
+
+      await expectLater(
+        resultFuture,
         throwsA(
-          isA<TtsBackendException>().having(
-            (error) => error.kind,
-            'kind',
-            TtsBackendErrorKind.invalidRequest,
-          ),
+          isA<TtsBackendException>()
+              .having(
+                (error) => error.kind,
+                'kind',
+                TtsBackendErrorKind.providerUnavailable,
+              )
+              .having(
+                (error) => error.message,
+                'message',
+                'unsupported voice',
+              ),
         ),
       );
     });
+
+    test('surfaces HTTP status when websocket upgrade is rejected', () async {
+      final connection = _FakeEdgeTtsConnection(
+        readyError: const EdgeTtsWebSocketUpgradeException(
+          statusCode: 429,
+          reasonPhrase: 'Too Many Requests',
+        ),
+      );
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: (_) => connection,
+        idProvider: ids.next,
+      );
+
+      await expectLater(
+        backend.speakOrSynthesize(
+          const TtsSynthesisRequest(text: 'Hello Edge', rate: 0.5, pitch: 1.0),
+          const TtsBackendCallbacks(),
+        ),
+        throwsA(
+          isA<TtsBackendException>()
+              .having(
+                (error) => error.kind,
+                'kind',
+                TtsBackendErrorKind.rateLimitedOrQuota,
+              )
+              .having(
+                (error) => error.statusCode,
+                'statusCode',
+                429,
+              )
+              .having(
+                (error) => error.message,
+                'message',
+                contains('HTTP 429'),
+              ),
+        ),
+      );
+    });
+
+    test(
+      'retries handshake once with adjusted clock skew on 403 with Date',
+      () async {
+        final rejected = _FakeEdgeTtsConnection(
+          readyError: const EdgeTtsWebSocketUpgradeException(
+            statusCode: 403,
+            reasonPhrase: 'Forbidden',
+            dateHeader: 'Wed, 08 Jul 2026 17:00:00 GMT',
+          ),
+        );
+        final accepted = _FakeEdgeTtsConnection();
+        final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+          rejected,
+          accepted,
+        ]);
+        final ids = _IdSequence(<String>[
+          '11111111111111111111111111111111',
+          '22222222222222222222222222222222',
+        ]);
+        final backend = EdgeExperimentalTtsBackend(
+          connector: connector.call,
+          nowProvider: () => DateTime.utc(2026, 7, 8, 16),
+          idProvider: ids.next,
+        );
+
+        final resultFuture = backend.speakOrSynthesize(
+          const TtsSynthesisRequest(text: 'Hello Edge', rate: 0.5, pitch: 1.0),
+          const TtsBackendCallbacks(),
+        );
+        await _waitFor(() => connector.calls == 2);
+
+        expect(
+          connector.capturedUris[1].queryParameters['Sec-MS-GEC'],
+          edgeTtsSecMsGec(DateTime.utc(2026, 7, 8, 17)),
+        );
+
+        accepted.add(
+          buildEdgeTtsBinaryFrameForTest(
+            headers: const <String, String>{
+              'Path': 'audio',
+              'Content-Type': kEdgeTtsAudioMimeType,
+            },
+            audioBytes: const <int>[9, 8, 7],
+          ),
+        );
+        accepted.add('Path:turn.end\r\n\r\n{}');
+
+        final result = await resultFuture;
+        expect(result, isA<GeneratedTtsAudio>());
+        final audio = result as GeneratedTtsAudio;
+        expect(audio.bytes, orderedEquals(<int>[9, 8, 7]));
+      },
+    );
 
     test('stop closes active Edge websocket connection', () async {
       final connection = _FakeEdgeTtsConnection();
@@ -263,6 +468,48 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('chunking splits long text at natural boundaries', () {
+      final chunks = splitEdgeTtsTextChunks(
+        List<String>.filled(kEdgeTtsMaxInputBytes + 500, 'a').join(' '),
+      );
+
+      expect(chunks.length, greaterThan(1));
+      for (final chunk in chunks) {
+        expect(chunk, isNotEmpty);
+        expect(
+          edgeTtsEscapedByteLength(chunk),
+          lessThanOrEqualTo(kEdgeTtsMaxInputBytes),
+        );
+      }
+      expect(
+        chunks.map((chunk) => chunk.replaceAll(' ', '')).join(),
+        List<String>.filled(kEdgeTtsMaxInputBytes + 500, 'a').join(),
+      );
+    });
+
+    test('chunking never splits multibyte characters', () {
+      final emoji = '😀' * 1500;
+      final chunks = splitEdgeTtsTextChunks(emoji);
+
+      expect(chunks.length, greaterThan(1));
+      for (final chunk in chunks) {
+        expect(chunk.runes.every((rune) => rune > 0xFFFF), isTrue);
+        expect(
+          edgeTtsEscapedByteLength(chunk),
+          lessThanOrEqualTo(kEdgeTtsMaxInputBytes),
+        );
+      }
+    });
+
+    test('parses RFC 7231 HTTP date headers', () {
+      expect(
+        parseEdgeTtsHttpDate('Wed, 08 Jul 2026 17:00:00 GMT'),
+        DateTime.utc(2026, 7, 8, 17),
+      );
+      expect(parseEdgeTtsHttpDate('garbage'), isNull);
+      expect(parseEdgeTtsHttpDate('Wed, 99 Jul 2026 17:00:00 GMT'), isNull);
     });
   });
 }

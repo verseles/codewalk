@@ -225,6 +225,121 @@ bool isEdgeTtsInputTooLong(String value) {
   return edgeTtsInputByteLength(value) > kEdgeTtsMaxInputBytes;
 }
 
+const Map<String, String> _edgeTtsXmlEscapeMap = <String, String>{
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&apos;',
+};
+
+/// Byte length of [value] after XML escaping, matching what the server
+/// receives inside the SSML payload.
+int edgeTtsEscapedByteLength(String value) {
+  var length = 0;
+  for (final rune in value.runes) {
+    final char = String.fromCharCode(rune);
+    final escaped = _edgeTtsXmlEscapeMap[char];
+    length += utf8.encode(escaped ?? char).length;
+  }
+  return length;
+}
+
+/// Splits [text] (after control character cleanup) into chunks whose
+/// XML-escaped byte length never exceeds [maxBytes].
+///
+/// Splits prefer newlines, then spaces; when no natural boundary fits, the
+/// chunk is cut on a UTF-8 safe boundary. Since escaping happens per chunk,
+/// XML entities can never be split. Returns an empty list for empty input.
+List<String> splitEdgeTtsTextChunks(
+  String text, {
+  int maxBytes = kEdgeTtsMaxInputBytes,
+}) {
+  if (maxBytes <= 0) {
+    throw ArgumentError.value(maxBytes, 'maxBytes', 'must be positive');
+  }
+  final cleaned = stripEdgeTtsControlChars(text);
+  if (edgeTtsEscapedByteLength(cleaned) <= maxBytes) {
+    return cleaned.isEmpty ? <String>[] : <String>[cleaned];
+  }
+  final chunks = <String>[];
+  var remaining = cleaned;
+  while (edgeTtsEscapedByteLength(remaining) > maxBytes) {
+    final splitAt = _findEdgeTtsSplitPoint(remaining, maxBytes);
+    if (splitAt <= 0) {
+      break;
+    }
+    final chunk = remaining.substring(0, splitAt).trim();
+    if (chunk.isNotEmpty) {
+      chunks.add(chunk);
+    }
+    remaining = remaining.substring(splitAt).trimLeft();
+  }
+  if (remaining.isNotEmpty) {
+    chunks.add(remaining);
+  }
+  return chunks;
+}
+
+int _findEdgeTtsSplitPoint(String text, int maxBytes) {
+  var lastNewline = -1;
+  var lastSpace = -1;
+  var lastFitting = 0;
+  var byteLength = 0;
+  var offset = 0;
+  for (final rune in text.runes) {
+    final char = String.fromCharCode(rune);
+    final escaped = _edgeTtsXmlEscapeMap[char];
+    byteLength += utf8.encode(escaped ?? char).length;
+    if (byteLength > maxBytes) {
+      if (lastNewline >= 0) {
+        return lastNewline;
+      }
+      if (lastSpace >= 0) {
+        return lastSpace;
+      }
+      return lastFitting;
+    }
+    lastFitting = offset + char.length;
+    if (char == '\n') {
+      lastNewline = offset;
+    } else if (char == ' ') {
+      lastSpace = offset;
+    }
+    offset += char.length;
+  }
+  return text.length;
+}
+
+const List<String> _edgeTtsHttpMonths = <String>[
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/// Parses an RFC 7231 HTTP date header such as
+/// `Wed, 08 Jul 2026 16:00:00 GMT` into a UTC [DateTime].
+DateTime? parseEdgeTtsHttpDate(String value) {
+  final match = RegExp(
+    r'(\d{2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',
+  ).firstMatch(value);
+  if (match == null) {
+    return null;
+  }
+  final month = _edgeTtsHttpMonths.indexOf(match.group(2)!);
+  if (month < 0) {
+    return null;
+  }
+  final day = int.parse(match.group(1)!);
+  final year = int.parse(match.group(3)!);
+  final hour = int.parse(match.group(4)!);
+  final minute = int.parse(match.group(5)!);
+  final second = int.parse(match.group(6)!);
+  if (day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59) {
+    return null;
+  }
+  return DateTime.utc(year, month + 1, day, hour, minute, second);
+}
+
 double edgeTtsRatePercentFromReadAloudRate(double rate) {
   return ((rate.clamp(0.0, 1.0) - 0.5) * 100).roundToDouble();
 }

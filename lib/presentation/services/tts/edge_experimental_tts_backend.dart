@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../core/i18n/l10n_bridge.dart';
+import '../../../core/logging/app_logger.dart';
 import '../../../domain/entities/experience_settings.dart';
 import 'edge_tts_protocol.dart';
 import 'edge_tts_websocket.dart';
@@ -36,6 +37,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
   final EdgeTtsIdProvider _idProvider;
   EdgeTtsWebSocketConnection? _activeConnection;
   bool _cancelled = false;
+  Duration _clockSkew = Duration.zero;
 
   @override
   ReadAloudProvider get provider => ReadAloudProvider.edgeExperimental;
@@ -50,7 +52,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
   Future<List<TtsVoiceOption>> getVoices() async {
     try {
       final response = await _dio.get<dynamic>(
-        edgeTtsVoicesUri(nowUtc: _nowProvider().toUtc()).toString(),
+        edgeTtsVoicesUri(nowUtc: _now()).toString(),
         options: Options(
           responseType: ResponseType.json,
           connectTimeout: kEdgeTtsConnectTimeout,
@@ -59,7 +61,13 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         ),
       );
       return parseEdgeTtsVoices(response.data);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Edge TTS voice list request failed',
+        error: error,
+        stackTrace: stackTrace,
+        tags: <String>{'tts', 'edge'},
+      );
       return const <TtsVoiceOption>[];
     }
   }
@@ -87,27 +95,63 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
             'There is no text to read aloud.',
       );
     }
-    if (isEdgeTtsInputTooLong(text)) {
-      throw TtsBackendException(
-        TtsBackendErrorKind.invalidRequest,
-        L10nBridge.current?.speechEdgeTextTooLong ??
-            'Microsoft Edge Speech can read up to 4096 bytes at a time.',
-      );
-    }
 
-    final connectionId = _idProvider().replaceAll('-', '');
-    final requestId = _idProvider().replaceAll('-', '');
-    final uri = edgeTtsWebSocketUri(
-      connectionId: connectionId,
-      nowUtc: _nowProvider().toUtc(),
-    );
-    final connection = _connector(uri);
-    _cancelled = false;
-    _activeConnection = connection;
+    final chunks = splitEdgeTtsTextChunks(text);
+    final voice = _effectiveVoice(request.voiceId);
+    final locale = _effectiveLocale(request.voiceLocale, voice);
     final audio = BytesBuilder(copy: false);
+    _cancelled = false;
 
     try {
-      await connection.ready.timeout(kEdgeTtsConnectTimeout);
+      callbacks.onStart?.call();
+      for (var index = 0; index < chunks.length; index += 1) {
+        _throwIfCancelled();
+        await _synthesizeChunk(
+          request: request,
+          chunk: chunks[index],
+          chunkIndex: index,
+          chunkCount: chunks.length,
+          voice: voice,
+          locale: locale,
+          audio: audio,
+        );
+        AppLogger.debug(
+          'Edge TTS chunk synthesized',
+          metrics: <String, Object?>{
+            'chunk': index + 1,
+            'chunks': chunks.length,
+            'audioBytes': audio.length,
+          },
+          tags: <String>{'tts', 'edge'},
+        );
+      }
+      final bytes = audio.takeBytes();
+      if (bytes.isEmpty) {
+        throw TtsBackendException(
+          TtsBackendErrorKind.providerUnavailable,
+          L10nBridge.current?.speechEdgeEmptyAudio ??
+              'Microsoft Edge Speech returned an empty audio response.',
+        );
+      }
+      return GeneratedTtsAudio(
+        bytes: Uint8List.fromList(bytes),
+        mimeType: kEdgeTtsAudioMimeType,
+      );
+    } on TimeoutException catch (_) {
+      throw TtsBackendException(
+        TtsBackendErrorKind.network,
+        L10nBridge.current?.speechEdgeTimedOut ??
+            'Microsoft Edge Speech timed out.',
+      );
+    } on FormatException catch (_) {
+      throw TtsBackendException(
+        TtsBackendErrorKind.providerUnavailable,
+        L10nBridge.current?.speechEdgeMalformedAudio ??
+            'Microsoft Edge Speech returned malformed audio data.',
+      );
+    } on TtsBackendException {
+      rethrow;
+    } catch (error, stackTrace) {
       if (_cancelled) {
         throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
@@ -115,25 +159,65 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
               'Microsoft Edge Speech was cancelled.',
         );
       }
-      final voice = _effectiveVoice(request.voiceId);
-      final locale = _effectiveLocale(request.voiceLocale, voice);
+      AppLogger.warn(
+        'Edge TTS synthesis failed',
+        error: error,
+        stackTrace: stackTrace,
+        tags: <String>{'tts', 'edge'},
+      );
+      throw TtsBackendException(
+        TtsBackendErrorKind.network,
+        L10nBridge.current?.speechEdgeUnreachable ??
+            'Microsoft Edge Speech could not be reached.',
+      );
+    }
+  }
+
+  /// Synthesizes one text chunk over a fresh websocket connection and
+  /// appends the received audio bytes to [audio].
+  Future<void> _synthesizeChunk({
+    required TtsSynthesisRequest request,
+    required String chunk,
+    required int chunkIndex,
+    required int chunkCount,
+    required String voice,
+    required String locale,
+    required BytesBuilder audio,
+  }) async {
+    final connectionId = _idProvider().replaceAll('-', '');
+    final connection = await _connectWithRetry(connectionId: connectionId);
+    _activeConnection = connection;
+
+    try {
+      await connection.ready.timeout(kEdgeTtsConnectTimeout);
+      _throwIfCancelled();
+      final requestId = _idProvider().replaceAll('-', '');
       connection.sendText(
-        edgeTtsSpeechConfigFrame(nowUtc: _nowProvider().toUtc()),
+        edgeTtsSpeechConfigFrame(nowUtc: _now()),
       );
       connection.sendText(
         edgeTtsSsmlFrame(
           requestId: requestId,
           ssml: buildEdgeTtsSsml(
-            text: text,
+            text: chunk,
             voice: voice,
             locale: locale,
             rate: edgeTtsRateAttribute(request.rate),
             pitch: edgeTtsPitchAttribute(1.0),
           ),
-          nowUtc: _nowProvider().toUtc(),
+          nowUtc: _now(),
         ),
       );
-      callbacks.onStart?.call();
+      AppLogger.debug(
+        'Edge TTS chunk requested',
+        metrics: <String, Object?>{
+          'chunk': chunkIndex + 1,
+          'chunks': chunkCount,
+          'chunkBytes': edgeTtsEscapedByteLength(chunk),
+          'voice': voice,
+        },
+        tags: <String>{'tts', 'edge'},
+      );
       var receivedTurnEnd = false;
 
       await for (final event in connection.stream.timeout(
@@ -148,6 +232,21 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         }
         if (event is String) {
           final frame = parseEdgeTtsTextFrame(event);
+          if (frame.path == 'error') {
+            AppLogger.warn(
+              'Edge TTS server reported an error frame',
+              metrics: <String, Object?>{
+                'path': frame.path,
+                'body': frame.body,
+                'chunk': chunkIndex + 1,
+              },
+              tags: <String>{'tts', 'edge'},
+            );
+            throw TtsBackendException(
+              TtsBackendErrorKind.providerUnavailable,
+              _serverErrorMessage(frame.body),
+            );
+          }
           if (frame.path == 'turn.end') {
             receivedTurnEnd = true;
             break;
@@ -196,50 +295,27 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         );
       }
       if (!receivedTurnEnd) {
+        if (audio.isEmpty) {
+          throw TtsBackendException(
+            TtsBackendErrorKind.providerUnavailable,
+            L10nBridge.current?.speechEdgeEmptyAudio ??
+                'Microsoft Edge Speech returned an empty audio response.',
+          );
+        }
         throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
           L10nBridge.current?.speechEdgeSynthesisInterrupted ??
               'Microsoft Edge Speech ended before synthesis completed.',
         );
       }
-      final bytes = audio.takeBytes();
-      if (bytes.isEmpty) {
-        throw TtsBackendException(
-          TtsBackendErrorKind.providerUnavailable,
-          L10nBridge.current?.speechEdgeEmptyAudio ??
-              'Microsoft Edge Speech returned an empty audio response.',
-        );
-      }
-      return GeneratedTtsAudio(
-        bytes: Uint8List.fromList(bytes),
-        mimeType: kEdgeTtsAudioMimeType,
-      );
-    } on TimeoutException catch (_) {
-      throw TtsBackendException(
-        TtsBackendErrorKind.network,
-        L10nBridge.current?.speechEdgeTimedOut ??
-            'Microsoft Edge Speech timed out.',
-      );
-    } on FormatException catch (_) {
-      throw TtsBackendException(
-        TtsBackendErrorKind.providerUnavailable,
-        L10nBridge.current?.speechEdgeMalformedAudio ??
-            'Microsoft Edge Speech returned malformed audio data.',
-      );
-    } on TtsBackendException {
-      rethrow;
-    } catch (_) {
-      if (_cancelled) {
-        throw TtsBackendException(
-          TtsBackendErrorKind.providerUnavailable,
-          L10nBridge.current?.speechEdgeCancelled ??
-              'Microsoft Edge Speech was cancelled.',
-        );
-      }
-      throw TtsBackendException(
-        TtsBackendErrorKind.network,
-        L10nBridge.current?.speechEdgeUnreachable ??
-            'Microsoft Edge Speech could not be reached.',
+      AppLogger.debug(
+        'Edge TTS turn.end received',
+        metrics: <String, Object?>{
+          'chunk': chunkIndex + 1,
+          'chunks': chunkCount,
+          'audioBytes': audio.length,
+        },
+        tags: <String>{'tts', 'edge'},
       );
     } finally {
       if (identical(_activeConnection, connection)) {
@@ -252,6 +328,124 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         );
       } catch (_) {}
     }
+  }
+
+  /// Opens the websocket, applying one clock-skew retry when the server
+  /// rejects the handshake with HTTP 403 and provides a Date header.
+  Future<EdgeTtsWebSocketConnection> _connectWithRetry({
+    required String connectionId,
+  }) async {
+    EdgeTtsWebSocketConnection? connection;
+    for (var attempt = 0; attempt < 2; attempt += 1) {
+      connection = _openConnection(connectionId);
+      try {
+        await connection.ready.timeout(kEdgeTtsConnectTimeout);
+        return connection;
+      } on EdgeTtsWebSocketUpgradeException catch (error) {
+        AppLogger.warn(
+          'Edge TTS websocket upgrade failed',
+          error: error,
+          metrics: <String, Object?>{
+            'attempt': attempt + 1,
+            'statusCode': error.statusCode,
+            'reason': error.reasonPhrase,
+            'dateHeader': error.dateHeader,
+          },
+          tags: <String>{'tts', 'edge'},
+        );
+        if (!_tryAdjustClockSkew(error) || attempt == 1) {
+          throw TtsBackendException(
+            _errorKindForStatus(error.statusCode),
+            _upgradeErrorMessage(error),
+            statusCode: error.statusCode,
+          );
+        }
+        try {
+          await connection.close().timeout(
+            const Duration(seconds: 2),
+            onTimeout: () {},
+          );
+        } catch (_) {}
+      }
+    }
+    throw TtsBackendException(
+      TtsBackendErrorKind.network,
+      L10nBridge.current?.speechEdgeUnreachable ??
+          'Microsoft Edge Speech could not be reached.',
+    );
+  }
+
+  /// When the handshake fails with HTTP 403 and a parseable `Date` header,
+  /// stores the clock skew so the next Sec-MS-GEC token is computed with the
+  /// server's time. Returns whether a retry should be attempted.
+  bool _tryAdjustClockSkew(EdgeTtsWebSocketUpgradeException error) {
+    if (error.statusCode != 403 || error.dateHeader == null) {
+      return false;
+    }
+    final serverTime = parseEdgeTtsHttpDate(error.dateHeader!);
+    if (serverTime == null) {
+      return false;
+    }
+    _clockSkew = serverTime.difference(_nowProvider().toUtc());
+    AppLogger.info(
+      'Edge TTS clock skew adjusted; retrying handshake once',
+      metrics: <String, Object?>{
+        'serverTime': serverTime.toIso8601String(),
+        'skewSeconds': _clockSkew.inSeconds,
+      },
+      tags: <String>{'tts', 'edge'},
+    );
+    return true;
+  }
+
+  EdgeTtsWebSocketConnection _openConnection(String connectionId) {
+    final connection = _connector(
+      edgeTtsWebSocketUri(
+        connectionId: connectionId,
+        nowUtc: _now(),
+      ),
+    );
+    _activeConnection = connection;
+    return connection;
+  }
+
+  /// Current UTC time, adjusted by the last known clock skew.
+  DateTime _now() => _nowProvider().toUtc().add(_clockSkew);
+
+  void _throwIfCancelled() {
+    if (!_cancelled) {
+      return;
+    }
+    throw TtsBackendException(
+      TtsBackendErrorKind.providerUnavailable,
+      L10nBridge.current?.speechEdgeCancelled ??
+          'Microsoft Edge Speech was cancelled.',
+    );
+  }
+
+  String _serverErrorMessage(String body) {
+    final trimmed = body.trim();
+    if (trimmed.isNotEmpty && trimmed.length <= 200) {
+      return trimmed;
+    }
+    return L10nBridge.current?.speechEdgeSynthesisInterrupted ??
+        'Microsoft Edge Speech ended before synthesis completed.';
+  }
+
+  TtsBackendErrorKind _errorKindForStatus(int statusCode) {
+    if (statusCode == 429) {
+      return TtsBackendErrorKind.rateLimitedOrQuota;
+    }
+    if (statusCode == 403) {
+      return TtsBackendErrorKind.providerUnavailable;
+    }
+    return TtsBackendErrorKind.network;
+  }
+
+  String _upgradeErrorMessage(EdgeTtsWebSocketUpgradeException error) {
+    final base = L10nBridge.current?.speechEdgeUnreachable ??
+        'Microsoft Edge Speech could not be reached.';
+    return '$base (HTTP ${error.statusCode})';
   }
 
   @override

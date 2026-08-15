@@ -68,25 +68,6 @@ Future<WebSocket> _connectEdgeTtsWebSocket(Uri uri) async {
   }
 }
 
-class EdgeTtsWebSocketUpgradeException implements Exception {
-  const EdgeTtsWebSocketUpgradeException({
-    required this.statusCode,
-    this.reasonPhrase,
-    this.body,
-    this.dateHeader,
-  });
-
-  final int statusCode;
-  final String? reasonPhrase;
-  final String? body;
-  final String? dateHeader;
-
-  @override
-  String toString() =>
-      'EdgeTtsWebSocketUpgradeException(statusCode: $statusCode, '
-      'reasonPhrase: $reasonPhrase)';
-}
-
 class _IoEdgeTtsWebSocketConnection implements EdgeTtsWebSocketConnection {
   _IoEdgeTtsWebSocketConnection(this._socketFuture);
 

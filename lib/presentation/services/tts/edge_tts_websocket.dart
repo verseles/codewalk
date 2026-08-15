@@ -11,6 +11,25 @@ abstract class EdgeTtsWebSocketConnection {
   Future<void> close();
 }
 
+class EdgeTtsWebSocketUpgradeException implements Exception {
+  const EdgeTtsWebSocketUpgradeException({
+    required this.statusCode,
+    this.reasonPhrase,
+    this.body,
+    this.dateHeader,
+  });
+
+  final int statusCode;
+  final String? reasonPhrase;
+  final String? body;
+  final String? dateHeader;
+
+  @override
+  String toString() =>
+      'EdgeTtsWebSocketUpgradeException(statusCode: $statusCode, '
+      'reasonPhrase: $reasonPhrase)';
+}
+
 EdgeTtsWebSocketConnection openEdgeTtsWebSocket(Uri uri) {
   return openEdgeTtsWebSocketImpl(uri);
 }
