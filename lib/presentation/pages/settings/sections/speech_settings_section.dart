@@ -2016,12 +2016,26 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             )
             ? settingsProvider.readAloudVoiceId
             : null;
-        return DropdownButtonFormField<String>(
-          initialValue: selected,
+        return SearchableDropdownFormField<String>(
+          value: selected,
           decoration: InputDecoration(
             labelText: context.l10n.settingsReadAloudVoice,
             helperText: context.l10n.settingsReadAloudVoiceHint,
+            border: const OutlineInputBorder(),
           ),
+          isExpanded: true,
+          searchTermsBuilder: (value) {
+            for (final voice in voices) {
+              if (voice['name'] == value) {
+                return <String>[
+                  value,
+                  voice['locale'] ?? '',
+                  voice['label'] ?? '',
+                ];
+              }
+            }
+            return <String>[value];
+          },
           items: voices.map((voice) {
             final id = voice['name'] ?? '';
             final locale = voice['locale'] ?? '';
@@ -2033,6 +2047,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             return DropdownMenuItem<String>(value: id, child: Text(label));
           }).toList(),
           onChanged: (value) {
+            if (value == null) return;
             final selectedVoice = voices.firstWhere(
               (voice) => voice['name'] == value,
               orElse: () => const <String, String>{},
@@ -2081,12 +2096,26 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             )
             ? settingsProvider.readAloudVoiceId
             : null;
-        return DropdownButtonFormField<String>(
-          initialValue: selected,
+        return SearchableDropdownFormField<String>(
+          value: selected,
           decoration: InputDecoration(
             labelText: context.l10n.speechEdgeVoice,
             helperText: context.l10n.speechEdgeVoicesLoaded,
+            border: const OutlineInputBorder(),
           ),
+          isExpanded: true,
+          searchTermsBuilder: (value) {
+            for (final voice in voices) {
+              if (voice['name'] == value) {
+                return <String>[
+                  value,
+                  voice['locale'] ?? '',
+                  voice['label'] ?? '',
+                ];
+              }
+            }
+            return <String>[value];
+          },
           items: voices.map((voice) {
             final id = voice['name'] ?? '';
             final locale = voice['locale'] ?? '';
@@ -2098,6 +2127,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             return DropdownMenuItem<String>(value: id, child: Text(label));
           }).toList(),
           onChanged: (value) {
+            if (value == null) return;
             final selectedVoice = voices.firstWhere(
               (voice) => voice['name'] == value,
               orElse: () => const <String, String>{},
