@@ -190,7 +190,10 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       }
       final bytes = audio.takeBytes();
       if (bytes.isEmpty) {
-        throw const _EdgeEmptyAudioException(retryable: true);
+        // Only reachable when every chunk completed its turn with zero
+        // audio (a discontinued voice closes without turn.end instead,
+        // handled above as retryable): legitimate silence, no retry.
+        throw const _EdgeEmptyAudioException(retryable: false);
       }
       return GeneratedTtsAudio(
         bytes: bytes,
