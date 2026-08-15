@@ -1539,6 +1539,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech は実験的な機能です",
   "speechEdgeExperimentalDescription": "このデバイスから非公式の Edge 読み上げサービスを直接使用します。読み上げを利用するとメッセージテキストが Microsoft に送信され、Microsoft が非公開プロトコルを変更した場合はサービスが使えなくなる可能性があります。",
   "speechEdgeVoice": "Edge の音声",
+  "speechEdgeVoiceUnavailable": "選択した音声は使用できなくなりました。默認の Edge 音声を使用します。",
   "speechEdgeVoiceListUnavailable": "デフォルトの Edge 音声を使用します。現在、音声リストを読み込めませんでした。",
   "speechEdgeVoicesLoaded": "Microsoft Edge Speech の音声から読み込みました。",
   "speechCloudTtsPrivacy": "クラウドTTSのプライバシー",

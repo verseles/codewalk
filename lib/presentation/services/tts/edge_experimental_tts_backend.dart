@@ -9,6 +9,7 @@ import '../../../core/logging/app_logger.dart';
 import '../../../domain/entities/experience_settings.dart';
 import 'edge_tts_protocol.dart';
 import 'edge_tts_websocket.dart';
+import 'read_aloud_default_resolver.dart';
 import 'tts_backend.dart';
 
 const String kDefaultEdgeTtsVoice = 'en-US-EmmaMultilingualNeural';
@@ -100,14 +101,61 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
             'There is no text to read aloud.',
       );
     }
+    _cancelled = false;
 
+    final voice = _effectiveVoice(request.voiceId);
+    final locale = _effectiveLocale(request.voiceLocale, voice);
+    try {
+      return await _synthesizeAll(
+        request: request,
+        callbacks: callbacks,
+        text: text,
+        voice: voice,
+        locale: locale,
+      );
+    } on _EdgeEmptyAudioException {
+      // The configured voice no longer exists in Microsoft's catalog: the
+      // server accepts the connection but closes it without any audio.
+      // Retry once with the default voice for the locale before failing.
+      final fallback = ReadAloudDefaultResolver.edgePreferenceForLocale(
+        appLocaleCode: locale,
+      );
+      if (_cancelled || fallback.voiceId == voice) {
+        throw _emptyAudioException();
+      }
+      AppLogger.warn(
+        'Edge TTS voice unavailable; retrying with the default voice',
+        metrics: <String, Object?>{
+          'voice': voice,
+          'fallbackVoice': fallback.voiceId,
+        },
+        tags: <String>{'tts', 'edge'},
+      );
+      try {
+        return await _synthesizeAll(
+          request: request,
+          callbacks: callbacks,
+          text: text,
+          voice: fallback.voiceId,
+          locale: fallback.locale,
+        );
+      } on _EdgeEmptyAudioException {
+        throw _emptyAudioException();
+      }
+    }
+  }
+
+  Future<TtsSynthesisResult> _synthesizeAll({
+    required TtsSynthesisRequest request,
+    required TtsBackendCallbacks callbacks,
+    required String text,
+    required String voice,
+    required String locale,
+  }) async {
     final chunks = splitEdgeTtsTextChunks(text);
     final speakable = _withoutUnspeakableChunks(chunks);
     final effectiveChunks = speakable.isNotEmpty ? speakable : chunks;
-    final voice = _effectiveVoice(request.voiceId);
-    final locale = _effectiveLocale(request.voiceLocale, voice);
     final audio = BytesBuilder(copy: false);
-    _cancelled = false;
 
     try {
       callbacks.onStart?.call();
@@ -134,11 +182,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       }
       final bytes = audio.takeBytes();
       if (bytes.isEmpty) {
-        throw TtsBackendException(
-          TtsBackendErrorKind.providerUnavailable,
-          L10nBridge.current?.speechEdgeEmptyAudio ??
-              'Microsoft Edge Speech returned an empty audio response.',
-        );
+        throw const _EdgeEmptyAudioException();
       }
       return GeneratedTtsAudio(
         bytes: bytes,
@@ -157,6 +201,8 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
             'Microsoft Edge Speech returned malformed audio data.',
       );
     } on TtsBackendException {
+      rethrow;
+    } on _EdgeEmptyAudioException {
       rethrow;
     } catch (error, stackTrace) {
       if (_cancelled) {
@@ -302,11 +348,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       }
       if (!receivedTurnEnd) {
         if (audio.length == audioBeforeChunk) {
-          throw TtsBackendException(
-            TtsBackendErrorKind.providerUnavailable,
-            L10nBridge.current?.speechEdgeEmptyAudio ??
-                'Microsoft Edge Speech returned an empty audio response.',
-          );
+          throw const _EdgeEmptyAudioException();
         }
         throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
@@ -317,14 +359,10 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       if (audio.length == audioBeforeChunk) {
         // A chunk with no speakable content (e.g. emoji or a separator line)
         // legitimately produces no audio. Only fail when it is the sole
-        // chunk; the aggregate empty check in speakOrSynthesize covers the
+        // chunk; the aggregate empty check in _synthesizeAll covers the
         // all-chunks-silent case.
         if (chunkCount == 1) {
-          throw TtsBackendException(
-            TtsBackendErrorKind.providerUnavailable,
-            L10nBridge.current?.speechEdgeEmptyAudio ??
-                'Microsoft Edge Speech returned an empty audio response.',
-          );
+          throw const _EdgeEmptyAudioException();
         }
         AppLogger.warn(
           'Edge TTS chunk produced no audio',
@@ -575,6 +613,21 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
     }
     return 'en-US';
   }
+
+  TtsBackendException _emptyAudioException() {
+    return TtsBackendException(
+      TtsBackendErrorKind.providerUnavailable,
+      L10nBridge.current?.speechEdgeEmptyAudio ??
+          'Microsoft Edge Speech returned an empty audio response.',
+    );
+  }
+}
+
+/// Internal marker for a synthesis that produced no audio at all (stream
+/// closed without `turn.end` or with a turn that carried zero bytes), which
+/// is how the server signals a voice that is no longer in its catalog.
+class _EdgeEmptyAudioException implements Exception {
+  const _EdgeEmptyAudioException();
 }
 
 @visibleForTesting

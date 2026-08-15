@@ -5317,6 +5317,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get speechEdgeVoice => 'Голос Edge';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'Выбранный голос больше недоступен. Используется голос Edge по умолчанию.';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'Используется голос Edge по умолчанию. Список голосов не удалось загрузить.';
 

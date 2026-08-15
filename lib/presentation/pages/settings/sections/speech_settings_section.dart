@@ -2090,55 +2090,80 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             subtitle: Text(context.l10n.speechEdgeVoiceListUnavailable),
           );
         }
-        final selected =
-            voices.any(
-              (voice) => voice['name'] == settingsProvider.readAloudVoiceId,
-            )
+        final selected = voices.any(
+          (voice) => voice['name'] == settingsProvider.readAloudVoiceId,
+        )
             ? settingsProvider.readAloudVoiceId
             : null;
-        return SearchableDropdownFormField<String>(
-          value: selected,
-          decoration: InputDecoration(
-            labelText: context.l10n.speechEdgeVoice,
-            helperText: context.l10n.speechEdgeVoicesLoaded,
-            border: const OutlineInputBorder(),
-          ),
-          isExpanded: true,
-          searchTermsBuilder: (value) {
-            for (final voice in voices) {
-              if (voice['name'] == value) {
-                return <String>[
-                  value,
-                  voice['locale'] ?? '',
-                  voice['label'] ?? '',
-                ];
-              }
-            }
-            return <String>[value];
-          },
-          items: voices.map((voice) {
-            final id = voice['name'] ?? '';
-            final locale = voice['locale'] ?? '';
-            final label = voice['label']?.isNotEmpty == true
-                ? voice['label']!
-                : locale.isNotEmpty
-                ? '$id ($locale)'
-                : id;
-            return DropdownMenuItem<String>(value: id, child: Text(label));
-          }).toList(),
-          onChanged: (value) {
-            if (value == null) return;
-            final selectedVoice = voices.firstWhere(
-              (voice) => voice['name'] == value,
-              orElse: () => const <String, String>{},
-            );
-            unawaited(
-              settingsProvider.setReadAloudVoiceSelection(
-                id: value,
-                locale: selectedVoice['locale'],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (selected == null) ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Symbols.warning_amber_rounded),
+                title: Text(context.l10n.speechEdgeVoiceUnavailable),
+                trailing: TextButton(
+                  onPressed: () {
+                    unawaited(
+                      settingsProvider.setReadAloudVoiceSelection(
+                        id: null,
+                        locale: null,
+                      ),
+                    );
+                  },
+                  child: Text(context.l10n.commonReset),
+                ),
               ),
-            );
-          },
+            ],
+            SearchableDropdownFormField<String>(
+              value: selected,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechEdgeVoice,
+                helperText: context.l10n.speechEdgeVoicesLoaded,
+                border: const OutlineInputBorder(),
+              ),
+              isExpanded: true,
+              searchTermsBuilder: (value) {
+                for (final voice in voices) {
+                  if (voice['name'] == value) {
+                    return <String>[
+                      value,
+                      voice['locale'] ?? '',
+                      voice['label'] ?? '',
+                    ];
+                  }
+                }
+                return <String>[value];
+              },
+              items: voices.map((voice) {
+                final id = voice['name'] ?? '';
+                final locale = voice['locale'] ?? '';
+                final label = voice['label']?.isNotEmpty == true
+                    ? voice['label']!
+                    : locale.isNotEmpty
+                    ? '$id ($locale)'
+                    : id;
+                return DropdownMenuItem<String>(
+                  value: id,
+                  child: Text(label),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                final selectedVoice = voices.firstWhere(
+                  (voice) => voice['name'] == value,
+                  orElse: () => const <String, String>{},
+                );
+                unawaited(
+                  settingsProvider.setReadAloudVoiceSelection(
+                    id: value,
+                    locale: selectedVoice['locale'],
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );

@@ -5284,6 +5284,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String get speechEdgeVoice => 'Edge ভয়েস';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'নির্বাচিত ভোয়সটি আর উপলব্ধ নেই। ডিফল্ট Edge ভোয়স ব্যবহার করা হচ্ছে।';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'ডিফল্ট Edge ভয়েস ব্যবহার করা হচ্ছে। এই মুহূর্তে ভয়েস তালিকা লোড করা যায়নি।';
 

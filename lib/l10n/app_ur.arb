@@ -1579,6 +1579,7 @@
   "speechEdgeUnsupportedAudio": "مائیکروسافٹ ایج اسپیچ نے غیر تعاون یافتہ آڈیو ڈیٹا واپس کیا۔",
   "speechEdgeUnsupportedFrame": "مائیکروسافٹ ایج اسپیچ نے ایک غیر تعاون یافتہ ویب ساکٹ فریم واپس کیا۔",
   "speechEdgeVoice": "Edge آواز",
+  "speechEdgeVoiceUnavailable": "منتخب آواز اب دستیاب نہیں ہے۔ ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔",
   "speechEdgeVoiceListUnavailable": "ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔ آوازوں کی فہرست ابھی لوڈ نہیں ہو سکی۔",
   "speechEdgeVoicesLoaded": "Microsoft Edge Speech آوازوں سے لوڈ کیا گیا۔",
   "speechEngine": "انجن",

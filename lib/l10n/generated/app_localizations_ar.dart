@@ -5212,6 +5212,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get speechEdgeVoice => 'صوت Edge';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'الصوت المحدد لم يعد متاحًا. سيتم استخدام صوت Edge الافتراضي.';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'يتم استخدام صوت Edge الافتراضي. تعذّر تحميل قائمة الأصوات الآن.';
 

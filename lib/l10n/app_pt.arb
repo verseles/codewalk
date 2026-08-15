@@ -1583,6 +1583,7 @@
   "speechEdgeExperimentalDescription": "Usa o serviço não oficial Edge Read Aloud diretamente deste dispositivo. O texto das mensagens é enviado à Microsoft ao usar a leitura em voz alta, e o serviço pode parar de funcionar se a Microsoft alterar o protocolo privado.",
   "speechEdgeExperimentalTitle": "O Microsoft Edge Speech é experimental",
   "speechEdgeVoice": "Voz do Edge",
+  "speechEdgeVoiceUnavailable": "A voz selecionada não está mais disponível. Usando a voz padrão do Edge.",
   "speechEdgeVoiceListUnavailable": "Usando a voz padrão do Edge. A lista de vozes não pôde ser carregada no momento.",
   "speechEdgeVoicesLoaded": "Carregado das vozes do Microsoft Edge Speech.",
   "speechFailedToRemoveModel": "Falha ao remover o modelo: {error}",

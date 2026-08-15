@@ -5253,6 +5253,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speechEdgeVoice => 'Edge voice';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'The selected voice is no longer available. Using the default Edge voice.';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'Using the default Edge voice. Voice list could not be loaded right now.';
 

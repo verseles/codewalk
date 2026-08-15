@@ -1539,6 +1539,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech प्रायोगिक है",
   "speechEdgeExperimentalDescription": "इस डिवाइस से सीधे अनाधिकारिक Edge Read Aloud सेवा का उपयोग करता है। जब आप रीड अलाउड का उपयोग करते हैं तो संदेश टेक्स्ट Microsoft को भेजा जाता है, और यदि Microsoft निजी प्रोटोकॉल बदलता है तो सेवा टूट सकती है।",
   "speechEdgeVoice": "Edge आवाज़",
+  "speechEdgeVoiceUnavailable": "चयनित आवाज़ अब उपलब्ध नहीं है। डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है।",
   "speechEdgeVoiceListUnavailable": "डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है। आवाज़ सूची अभी लोड नहीं की जा सकी।",
   "speechEdgeVoicesLoaded": "Microsoft Edge Speech आवाज़ों से लोड किया गया।",
   "speechCloudTtsPrivacy": "क्लाउड TTS गोपनीयता",

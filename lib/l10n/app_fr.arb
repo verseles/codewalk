@@ -1732,6 +1732,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech est expérimental",
   "speechEdgeExperimentalDescription": "Utilise directement le service non officiel Lire à voix haute d''Edge depuis cet appareil. Le texte des messages est envoyé à Microsoft lorsque vous utilisez la lecture à voix haute, et le service peut cesser de fonctionner si Microsoft modifie le protocole privé.",
   "speechEdgeVoice": "Voix Edge",
+  "speechEdgeVoiceUnavailable": "La voix sélectionnée n''est plus disponible. La voix Edge par défaut sera utilisée.",
   "speechEdgeVoiceListUnavailable": "Utilisation de la voix Edge par défaut. La liste des voix n''a pas pu être chargée pour le moment.",
   "speechEdgeVoicesLoaded": "Chargé depuis les voix de Microsoft Edge Speech.",
   "speechCloudTtsPrivacy": "Confidentialité de la synthèse vocale cloud",

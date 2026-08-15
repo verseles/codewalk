@@ -5352,6 +5352,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get speechEdgeVoice => 'Voz de Edge';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'La voz seleccionada ya no está disponible. Se usará la voz predeterminada de Edge.';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'Usando la voz predeterminada de Edge. La lista de voces no se pudo cargar en este momento.';
 

@@ -9368,6 +9368,12 @@ abstract class AppLocalizations {
   /// **'Edge voice'**
   String get speechEdgeVoice;
 
+  /// CodeWalk UI string — speechEdgeVoiceUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The selected voice is no longer available. Using the default Edge voice.'**
+  String get speechEdgeVoiceUnavailable;
+
   /// CodeWalk UI string — speechEdgeVoiceListUnavailable
   ///
   /// In en, this message translates to:

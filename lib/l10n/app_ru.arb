@@ -1690,6 +1690,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech — экспериментально",
   "speechEdgeExperimentalDescription": "Использует неофициальный сервис Edge Read Aloud напрямую с этого устройства. Текст сообщения отправляется в Microsoft при использовании озвучивания, и сервис может перестать работать, если Microsoft изменит закрытый протокол.",
   "speechEdgeVoice": "Голос Edge",
+  "speechEdgeVoiceUnavailable": "Выбранный голос больше недоступен. Используется голос Edge по умолчанию.",
   "speechEdgeVoiceListUnavailable": "Используется голос Edge по умолчанию. Список голосов не удалось загрузить.",
   "speechEdgeVoicesLoaded": "Загружено из голосов Microsoft Edge Speech.",
   "speechCloudTtsPrivacy": "Конфиденциальность облачного TTS",

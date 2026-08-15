@@ -1732,6 +1732,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech ist experimentell",
   "speechEdgeExperimentalDescription": "Nutzt den inoffiziellen Edge-Vorlesedienst direkt von diesem Gerät. Nachrichtentext wird an Microsoft gesendet, wenn Sie Vorlesen verwenden; der Dienst kann ausfallen, wenn Microsoft das private Protokoll ändert.",
   "speechEdgeVoice": "Edge-Stimme",
+  "speechEdgeVoiceUnavailable": "Die ausgewählte Stimme ist nicht mehr verfügbar. Die Standard-Edge-Stimme wird verwendet.",
   "speechEdgeVoiceListUnavailable": "Standard-Edge-Stimme wird verwendet. Die Stimmliste konnte gerade nicht geladen werden.",
   "speechEdgeVoicesLoaded": "Aus Microsoft-Edge-Speech-Stimmen geladen.",
   "speechCloudTtsPrivacy": "Cloud-TTS-Datenschutz",

@@ -2255,6 +2255,8 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** text over the Edge request size limit is split into byte-safe chunks and each chunk is synthesized and concatenated into a single playback
 - **Then** CodeWalk reports the HTTP status when the Edge websocket handshake is rejected, and retries once with the server clock when a 403 includes a `Date` header
 - **Then** server error frames from Edge are reported instead of being silently ignored
+- **Then** when the configured Edge voice produces no audio (a voice no longer in Microsoft's catalog), CodeWalk retries once with the default voice for the locale
+- **Then** Settings > Speech warns when the saved Edge voice is not in the discovered catalog and offers a reset to the default voice
 - **When** direct Edge synthesis fails because Microsoft changes or rejects the private protocol
 - **Then** CodeWalk reports a user-visible read-aloud error and does not silently switch to native TTS
 

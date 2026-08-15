@@ -199,4 +199,57 @@ void main() {
     provider.dispose();
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('Edge voice picker warns and resets a discontinued voice',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    di.sl.registerSingleton<SherpaModelManager>(SherpaModelManager());
+    di.sl.registerSingleton<MoonshineModelManager>(MoonshineModelManager());
+    di.sl.registerSingleton<ParakeetModelManager>(ParakeetModelManager());
+    di.sl.registerSingleton<SenseVoiceModelManager>(SenseVoiceModelManager());
+    di.sl.registerSingleton<SttApiKeyStorage>(
+      SttApiKeyStorage(backend: _SttStorageBackend()),
+    );
+    di.sl.registerSingleton<TtsApiKeyStorage>(
+      TtsApiKeyStorage(backend: _TtsStorageBackend()),
+    );
+    di.sl.registerSingleton<ReadAloudService>(
+      ReadAloudService(backends: <ReadAloudProvider, TtsBackend>{
+        ReadAloudProvider.edgeExperimental: _FakeTtsBackend(),
+      }),
+    );
+    final provider = await _buildProvider();
+    await provider.setReadAloudVoiceSelection(
+      id: 'pt-BR-OldRemovedVoiceNeural',
+      locale: 'pt-BR',
+    );
+
+    await _pumpSection(tester, provider);
+
+    await tester.scrollUntilVisible(
+      find.text('Edge voice'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.textContaining('no longer available'), findsOneWidget);
+    expect(find.text('Reset'), findsOneWidget);
+
+    await tester.tap(find.text('Reset'), warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(provider.readAloudVoiceId, isNull);
+    expect(provider.readAloudVoiceLocale, isNull);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    provider.dispose();
+    debugDefaultTargetPlatformOverride = null;
+  });
 }

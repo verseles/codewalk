@@ -5083,6 +5083,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get speechEdgeVoice => 'Edge の音声';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      '選択した音声は使用できなくなりました。默認の Edge 音声を使用します。';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'デフォルトの Edge 音声を使用します。現在、音声リストを読み込めませんでした。';
 

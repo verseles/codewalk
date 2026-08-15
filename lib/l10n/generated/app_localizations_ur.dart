@@ -5271,6 +5271,10 @@ class AppLocalizationsUr extends AppLocalizations {
   String get speechEdgeVoice => 'Edge آواز';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'منتخب آواز اب دستیاب نہیں ہے۔ ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔ آوازوں کی فہرست ابھی لوڈ نہیں ہو سکی۔';
 

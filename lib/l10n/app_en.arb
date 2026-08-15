@@ -6748,6 +6748,10 @@
   "@speechEdgeVoice": {
     "description": "CodeWalk UI string — speechEdgeVoice"
   },
+  "speechEdgeVoiceUnavailable": "The selected voice is no longer available. Using the default Edge voice.",
+  "@speechEdgeVoiceUnavailable": {
+    "description": "CodeWalk UI string — speechEdgeVoiceUnavailable"
+  },
   "speechEdgeVoiceListUnavailable": "Using the default Edge voice. Voice list could not be loaded right now.",
   "@speechEdgeVoiceListUnavailable": {
     "description": "CodeWalk UI string — speechEdgeVoiceListUnavailable"

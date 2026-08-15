@@ -1539,6 +1539,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge 语音为实验功能",
   "speechEdgeExperimentalDescription": "直接从此设备使用非官方的 Edge 朗读服务。使用朗读时，消息文本会发送给 Microsoft；如果 Microsoft 更改私有协议，该服务可能会失效。",
   "speechEdgeVoice": "Edge 语音",
+  "speechEdgeVoiceUnavailable": "所选语音不再可用。正在使用默认 Edge 语音。",
   "speechEdgeVoiceListUnavailable": "正在使用默认 Edge 语音。目前无法加载语音列表。",
   "speechEdgeVoicesLoaded": "已从 Microsoft Edge 语音加载。",
   "speechCloudTtsPrivacy": "云端 TTS 隐私",

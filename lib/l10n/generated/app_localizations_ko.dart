@@ -5083,6 +5083,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechEdgeVoice => 'Edge 음성';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      '선택한 목소리를 더 이상 사용할 수 없습니다. 기본 Edge 목소리를 사용합니다.';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       '기본 Edge 음성을 사용 중입니다. 지금은 음성 목록을 불러올 수 없습니다.';
 

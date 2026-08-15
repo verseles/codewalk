@@ -1849,6 +1849,7 @@
   "speechEdgeUnsupportedFrame": "Microsoft Edge Speech ha restituito un frame websocket non supportato.",
   "speechEdgeExperimentalDescription": "Usa il servizio non ufficiale Edge Read Aloud direttamente da questo dispositivo. Il testo del messaggio viene inviato a Microsoft quando usi la lettura ad alta voce e il servizio potrebbe smettere di funzionare se Microsoft modifica il protocollo privato.",
   "speechEdgeVoice": "Voce Edge",
+  "speechEdgeVoiceUnavailable": "La voce selezionata non è più disponibile. Verrà usata la voce Edge predefinita.",
   "speechEdgeVoiceListUnavailable": "In uso la voce Edge predefinita. L''elenco delle voci non è stato caricato in questo momento.",
   "speechEdgeVoicesLoaded": "Caricate dalle voci di Microsoft Edge Speech.",
   "speechCloudTtsPrivacy": "Privacy del TTS cloud",

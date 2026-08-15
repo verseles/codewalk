@@ -190,14 +190,122 @@ void main() {
       await expectLater(
         resultFuture,
         throwsA(
-          isA<TtsBackendException>().having(
-            (error) => error.kind,
-            'kind',
-            TtsBackendErrorKind.providerUnavailable,
-          ),
+          isA<TtsBackendException>()
+              .having(
+                (error) => error.kind,
+                'kind',
+                TtsBackendErrorKind.providerUnavailable,
+              )
+              .having(
+                (error) => error.message,
+                'message',
+                'Microsoft Edge Speech returned an empty audio response.',
+              ),
         ),
       );
     });
+
+    test(
+      'retries once with the default locale voice when the configured '
+      'voice produces no audio',
+      () async {
+        final rejected = _FakeEdgeTtsConnection();
+        final accepted = _FakeEdgeTtsConnection();
+        final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+          rejected,
+          accepted,
+        ]);
+        final ids = _IdSequence(<String>[
+          '11111111111111111111111111111111',
+          '22222222222222222222222222222222',
+          '33333333333333333333333333333333',
+          '44444444444444444444444444444444',
+        ]);
+        final backend = EdgeExperimentalTtsBackend(
+          connector: connector.call,
+          idProvider: ids.next,
+        );
+
+        final resultFuture = backend.speakOrSynthesize(
+          const TtsSynthesisRequest(
+            text: 'Hello Edge',
+            voiceId: 'pt-BR-AntonioNeural',
+            voiceLocale: 'pt-BR',
+            rate: 0.5,
+            pitch: 1.0,
+          ),
+          const TtsBackendCallbacks(),
+        );
+        await _waitFor(() => rejected.sentTexts.length == 2);
+        expect(rejected.sentTexts.last, contains('pt-BR-AntonioNeural'));
+
+        // Server closes the connection without audio (voice no longer in
+        // catalog): the backend must retry with pt-BR-FranciscaNeural.
+        await rejected.close();
+        await _waitFor(() => accepted.sentTexts.length == 2);
+        expect(accepted.sentTexts.last, contains('pt-BR-FranciscaNeural'));
+
+        accepted.add(
+          buildEdgeTtsBinaryFrameForTest(
+            headers: const <String, String>{
+              'Path': 'audio',
+              'Content-Type': kEdgeTtsAudioMimeType,
+            },
+            audioBytes: const <int>[7, 8, 9],
+          ),
+        );
+        accepted.add('Path:turn.end\r\n\r\n{}');
+
+        final result = await resultFuture;
+        expect(result, isA<GeneratedTtsAudio>());
+        final audio = result as GeneratedTtsAudio;
+        expect(audio.bytes, orderedEquals(<int>[7, 8, 9]));
+      },
+    );
+
+    test(
+      'does not retry when the configured voice is already the locale '
+      'default',
+      () async {
+        final connection = _FakeEdgeTtsConnection();
+        final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+          connection,
+        ]);
+        final ids = _IdSequence(<String>[
+          '11111111111111111111111111111111',
+          '22222222222222222222222222222222',
+        ]);
+        final backend = EdgeExperimentalTtsBackend(
+          connector: connector.call,
+          idProvider: ids.next,
+        );
+
+        final resultFuture = backend.speakOrSynthesize(
+          const TtsSynthesisRequest(
+            text: 'Hello Edge',
+            voiceId: 'pt-BR-FranciscaNeural',
+            voiceLocale: 'pt-BR',
+            rate: 0.5,
+            pitch: 1.0,
+          ),
+          const TtsBackendCallbacks(),
+        );
+        await _waitFor(() => connection.sentTexts.length == 2);
+        await connection.close();
+
+        await expectLater(
+          resultFuture,
+          throwsA(
+            isA<TtsBackendException>().having(
+              (error) => error.message,
+              'message',
+              'Microsoft Edge Speech returned an empty audio response.',
+            ),
+          ),
+        );
+        expect(connector.calls, 1);
+      },
+    );
 
     test(
       'rejects partial audio when Edge stream ends before turn end',

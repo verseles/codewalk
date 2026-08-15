@@ -1539,6 +1539,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech পরীক্ষামূলক",
   "speechEdgeExperimentalDescription": "এই ডিভাইস থেকে সরাসরি অননুমোদিত Edge Read Aloud পরিষেবা ব্যবহার করে। আপনি read aloud ব্যবহার করলে বার্তার টেক্সট Microsoft-এ পাঠানো হয় এবং Microsoft প্রাইভেট প্রোটোকল পরিবর্তন করলে পরিষেবাটি ভেঙে যেতে পারে।",
   "speechEdgeVoice": "Edge ভয়েস",
+  "speechEdgeVoiceUnavailable": "নির্বাচিত ভোয়সটি আর উপলব্ধ নেই। ডিফল্ট Edge ভোয়স ব্যবহার করা হচ্ছে।",
   "speechEdgeVoiceListUnavailable": "ডিফল্ট Edge ভয়েস ব্যবহার করা হচ্ছে। এই মুহূর্তে ভয়েস তালিকা লোড করা যায়নি।",
   "speechEdgeVoicesLoaded": "Microsoft Edge Speech ভয়েস থেকে লোড করা হয়েছে।",
   "speechCloudTtsPrivacy": "ক্লাউড TTS গোপনীয়তা",

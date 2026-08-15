@@ -4969,6 +4969,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechEdgeVoice => 'Edge 语音';
 
   @override
+  String get speechEdgeVoiceUnavailable => '所选语音不再可用。正在使用默认 Edge 语音。';
+
+  @override
   String get speechEdgeVoiceListUnavailable => '正在使用默认 Edge 语音。目前无法加载语音列表。';
 
   @override

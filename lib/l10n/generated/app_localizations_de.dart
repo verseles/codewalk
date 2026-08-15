@@ -5336,6 +5336,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get speechEdgeVoice => 'Edge-Stimme';
 
   @override
+  String get speechEdgeVoiceUnavailable =>
+      'Die ausgewählte Stimme ist nicht mehr verfügbar. Die Standard-Edge-Stimme wird verwendet.';
+
+  @override
   String get speechEdgeVoiceListUnavailable =>
       'Standard-Edge-Stimme wird verwendet. Die Stimmliste konnte gerade nicht geladen werden.';
 

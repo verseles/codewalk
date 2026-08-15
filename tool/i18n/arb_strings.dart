@@ -2073,6 +2073,7 @@ const englishTemplate = <String, String>{
   'speechEdgeUnsupportedFrame':
       'Microsoft Edge Speech returned an unsupported websocket frame.',
   'speechEdgeVoice': 'Edge voice',
+  'speechEdgeVoiceUnavailable': 'The selected voice is no longer available. Using the default Edge voice.',
   'speechEdgeVoiceListUnavailable':
       'Using the default Edge voice. Voice list could not be loaded right now.',
   'speechEdgeVoicesLoaded': 'Loaded from Microsoft Edge Speech voices.',
@@ -4353,6 +4354,19 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'أعاد Microsoft Edge Speech إطار websocket غير مدعوم.',
     'speechEdgeVoice': 'صوت Edge',
+    'speechEdgeVoiceUnavailable': '所选语音不再可用。正在使用默认 Edge 语音。',
+    'speechEdgeVoiceUnavailable': 'منتخب آواز اب دستیاب نہیں ہے۔ ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔',
+    'speechEdgeVoiceUnavailable': 'Выбранный голос больше недоступен. Используется голос Edge по умолчанию.',
+    'speechEdgeVoiceUnavailable': 'A voz selecionada não está mais disponível. Usando a voz padrão do Edge.',
+    'speechEdgeVoiceUnavailable': '선택한 목소리를 더 이상 사용할 수 없습니다. 기본 Edge 목소리를 사용합니다.',
+    'speechEdgeVoiceUnavailable': '選択した音声は使用できなくなりました。默認の Edge 音声を使用します。',
+    'speechEdgeVoiceUnavailable': 'La voce selezionata non è più disponibile. Verrà usata la voce Edge predefinita.',
+    'speechEdgeVoiceUnavailable': 'चयनित आवाज़ अब उपलब्ध नहीं है। डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है।',
+    'speechEdgeVoiceUnavailable': 'La voix sélectionnée n\\'est plus disponible. La voix Edge par défaut sera utilisée.',
+    'speechEdgeVoiceUnavailable': 'La voz seleccionada ya no está disponible. Se usará la voz predeterminada de Edge.',
+    'speechEdgeVoiceUnavailable': 'Die ausgewählte Stimme ist nicht mehr verfügbar. Die Standard-Edge-Stimme wird verwendet.',
+    'speechEdgeVoiceUnavailable': 'নির্বাচিত ভোয়সটি আর উপলব্ধ নেই। ডিফল্ট Edge ভোয়স ব্যবহার করা হচ্ছে।',
+    'speechEdgeVoiceUnavailable': 'الصوت المحدد لم يعد متاحًا. سيتم استخدام صوت Edge الافتراضي.',
     'speechEdgeVoiceListUnavailable':
         'يتم استخدام صوت Edge الافتراضي. تعذّر تحميل قائمة الأصوات الآن.',
     'speechEdgeVoicesLoaded': 'تم التحميل من أصوات Microsoft Edge Speech.',

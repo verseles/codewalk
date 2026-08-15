@@ -1538,6 +1538,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech تجريبي",
   "speechEdgeExperimentalDescription": "يستخدم خدمة القراءة بصوت عالٍ غير الرسمية من Edge مباشرة من هذا الجهاز. يُرسل نص الرسالة إلى Microsoft عند استخدام القراءة بصوت عالٍ، وقد تتعطل الخدمة إذا غيّرت Microsoft البروتوكول الخاص.",
   "speechEdgeVoice": "صوت Edge",
+  "speechEdgeVoiceUnavailable": "الصوت المحدد لم يعد متاحًا. سيتم استخدام صوت Edge الافتراضي.",
   "speechEdgeVoiceListUnavailable": "يتم استخدام صوت Edge الافتراضي. تعذّر تحميل قائمة الأصوات الآن.",
   "speechEdgeVoicesLoaded": "تم التحميل من أصوات Microsoft Edge Speech.",
   "speechCloudTtsPrivacy": "خصوصية TTS السحابي",

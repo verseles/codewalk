@@ -1539,6 +1539,7 @@
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech는 실험적입니다",
   "speechEdgeExperimentalDescription": "비공식 Edge 읽어주기 서비스를 이 기기에서 직접 사용합니다. 읽어주기를 사용하면 메시지 텍스트가 Microsoft로 전송되며, Microsoft가 비공개 프로토콜을 변경하면 서비스가 중단될 수 있습니다.",
   "speechEdgeVoice": "Edge 음성",
+  "speechEdgeVoiceUnavailable": "선택한 목소리를 더 이상 사용할 수 없습니다. 기본 Edge 목소리를 사용합니다.",
   "speechEdgeVoiceListUnavailable": "기본 Edge 음성을 사용 중입니다. 지금은 음성 목록을 불러올 수 없습니다.",
   "speechEdgeVoicesLoaded": "Microsoft Edge Speech 음성에서 로드되었습니다.",
   "speechCloudTtsPrivacy": "클라우드 TTS 개인정보 보호",
