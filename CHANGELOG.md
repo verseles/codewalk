@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.200.2 - 2026-08-15
+
+- fix(tts): mark aggregate completed-turn silence as non-retryable
+- fix(tts): apply review corrections to Edge voice fallback
+- fix(tts): recover from discontinued Edge voices and warn in settings
+
 ## v1.200.1 - 2026-08-15
 
 - feat(settings): add search to read-aloud voice pickers
