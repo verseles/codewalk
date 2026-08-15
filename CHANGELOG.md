@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.200.0 - 2026-08-15
+
+- test(tts): pin splitter invariants and skip unspeakable chunks
+- fix(tts): refine Edge TTS chunking and cancellation after re-review
+- fix(tts): apply review corrections to Edge TTS error handling
+- fix(tts): diagnose and recover from premature Edge TTS failures
+
 ## v1.199.3 - 2026-08-14
 
 - fix(chat): compact inactive pinned tabs and fit the expanded selected one
