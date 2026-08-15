@@ -11321,6 +11321,114 @@ void main() {
   );
 
   testWidgets(
+    'pending question card stays visible when terminal panel is open on compact layout',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 1000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final terminalRemoteDataSource = _PendingTerminalRemoteDataSource();
+      if (di.sl.isRegistered<TerminalRemoteDataSource>()) {
+        await di.sl.unregister<TerminalRemoteDataSource>();
+      }
+      di.sl.registerSingleton<TerminalRemoteDataSource>(
+        terminalRemoteDataSource,
+      );
+      addTearDown(() async {
+        terminalRemoteDataSource.finishPendingRequest();
+        if (di.sl.isRegistered<TerminalRemoteDataSource>() &&
+            identical(
+              di.sl<TerminalRemoteDataSource>(),
+              terminalRemoteDataSource,
+            )) {
+          await di.sl.unregister<TerminalRemoteDataSource>();
+        }
+      });
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_terminal_question',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Terminal Session',
+          ),
+        ],
+      );
+      repository.messagesBySession['ses_terminal_question'] = <ChatMessage>[];
+      repository.pendingQuestions = const <ChatQuestionRequest>[
+        ChatQuestionRequest(
+          id: 'q_terminal_1',
+          sessionId: 'ses_terminal_question',
+          questions: <ChatQuestionInfo>[
+            ChatQuestionInfo(
+              question: 'Choose a mode',
+              header: 'Mode',
+              options: <ChatQuestionOption>[
+                ChatQuestionOption(label: 'Safe', description: 'Be careful'),
+              ],
+            ),
+          ],
+        ),
+      ];
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+      final settingsProvider = SettingsProvider(
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        soundService: SoundService(),
+      );
+      await settingsProvider.initialize();
+      await settingsProvider.setCheckUpdatesOnOpen(false);
+      addTearDown(settingsProvider.dispose);
+
+      await tester.pumpWidget(
+        _testApp(
+          provider,
+          appProvider,
+          settingsProvider: settingsProvider,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(
+          const ValueKey<String>('interaction_question_request_q_terminal_1'),
+        ),
+        findsOneWidget,
+        reason: 'Question card should be visible before the terminal opens.',
+      );
+
+      await settingsProvider.setTerminalPanelVisible(true);
+      await _pumpUiFrames(tester);
+
+      expect(settingsProvider.terminalPanelVisible, isTrue);
+      expect(
+        find.byKey(const ValueKey<String>('terminal_panel')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>('interaction_question_request_q_terminal_1'),
+        ),
+        findsOneWidget,
+        reason:
+            'Question card must stay visible when the terminal panel hides the composer.',
+      );
+    },
+  );
+
+  testWidgets(
     'toggling auto-approve with no pending permissions keeps the viewport stable',
     (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(390, 844));

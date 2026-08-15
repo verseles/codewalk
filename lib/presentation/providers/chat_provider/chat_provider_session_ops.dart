@@ -78,6 +78,8 @@ extension _ChatProviderSessionOps on ChatProvider {
     _recoverableSyncAlertEscalated = false;
     _degradedPollingTimer?.cancel();
     _degradedPollingTimer = null;
+    _pendingQuestionsRetryTimer?.cancel();
+    _pendingQuestionsRetryAttempts = 0;
     if (_refreshlessRealtimeEnabled) {
       _setSyncState(ChatSyncState.reconnecting, reason: 'context-switch');
     }

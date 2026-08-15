@@ -242,6 +242,16 @@ class ChatProvider extends ChangeNotifier {
   bool get debugHasGlobalEventSubscription => _globalEventSubscription != null;
 
   @visibleForTesting
+  set debugPendingQuestionsRetryBaseDelay(Duration value) {
+    _pendingQuestionsRetryBaseDelay = value;
+  }
+
+  @visibleForTesting
+  set debugQuestionServerAuthorityGrace(Duration value) {
+    _questionServerAuthorityGrace = value;
+  }
+
+  @visibleForTesting
   bool debugShouldSkipLocalUserAppendAsDuplicateEcho({
     required UserMessage localMessage,
     required List<ChatMessage> mergedMessages,
@@ -347,6 +357,17 @@ class ChatProvider extends ChangeNotifier {
   // request. Cleared on the next successful reply/reject, a fresh ask event,
   // or an explicit `dismissQuestionSubmitError` call.
   final Set<String> _questionSubmitFailedRequestIds = <String>{};
+  // First time each question request ID was seen locally (SSE or REST). Used
+  // by the pending-questions merge to keep questions that just arrived via SSE
+  // visible even when the server list has not caught up, while still treating
+  // GET /question as authoritative for removal (issue #143).
+  final Map<String, DateTime> _questionFirstSeenAtById = <String, DateTime>{};
+  Duration _questionServerAuthorityGrace = const Duration(seconds: 15);
+  // Bounded retry for a failed pending-questions fetch: transient failures
+  // must not leave pending questions invisible for the rest of the session.
+  int _pendingQuestionsRetryAttempts = 0;
+  Timer? _pendingQuestionsRetryTimer;
+  Duration _pendingQuestionsRetryBaseDelay = const Duration(seconds: 5);
   final Set<String> _sessionUnreadCompletionIds = <String>{};
   final Map<String, DateTime> _sessionUnreadCompletionTimestamps =
       <String, DateTime>{};
@@ -2485,8 +2506,6 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
     _cellularDataSaverService.noteExplicitUserAction(reason: 'reply-question');
-    final tombstoneKey = _questionInteractionKey(requestId);
-    _rememberDismissedInteractionTombstone(tombstoneKey);
     _isRespondingInteraction = true;
     notifyListeners();
     try {
@@ -2499,7 +2518,6 @@ class ChatProvider extends ChangeNotifier {
       );
       result.fold(
         (failure) {
-          _dismissedInteractionTombstones.remove(tombstoneKey);
           // Mirror OpenChamber 1.12.1: when submit/dismiss fails, keep the
           // request visible with an error indicator so the user can retry.
           _questionSubmitFailedRequestIds.add(requestId);
@@ -2532,8 +2550,6 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
     _cellularDataSaverService.noteExplicitUserAction(reason: 'reject-question');
-    final tombstoneKey = _questionInteractionKey(requestId);
-    _rememberDismissedInteractionTombstone(tombstoneKey);
     _isRespondingInteraction = true;
     notifyListeners();
     try {
@@ -2545,7 +2561,6 @@ class ChatProvider extends ChangeNotifier {
       );
       result.fold(
         (failure) {
-          _dismissedInteractionTombstones.remove(tombstoneKey);
           _questionSubmitFailedRequestIds.add(requestId);
           _handleFailure(failure);
         },
@@ -3600,6 +3615,12 @@ class ChatProvider extends ChangeNotifier {
       }
 
       if (!isExpectedSelectionCurrent()) return;
+      if (!_cellularDataSaverService.isDataSaverActive) {
+        // Cold start / project-switch restore keeps the persisted session but
+        // must also revalidate pending interactions; questions are not part of
+        // the persisted snapshot (issue #143).
+        unawaited(_loadPendingInteractions());
+      }
       if (resolvedStoredSessionId != targetSession.id) {
         await _saveCurrentSessionId(
           targetSession.id,
@@ -3772,6 +3793,13 @@ class ChatProvider extends ChangeNotifier {
           _dismissNotificationsForSession(session.id);
           _recordVisibleSessionTab(session);
           if (userInitiated) {
+            // Re-selecting the already-current session must still revalidate
+            // pending interactions: the server does not replay SSE events
+            // after a gap (background/stream loss), so GET /question is the
+            // only way to recover a question that arrived while away.
+            if (!_cellularDataSaverService.isDataSaverActive) {
+              unawaited(_loadPendingInteractions());
+            }
             unawaited(
               loadSessionInsights(
                 session.id,
@@ -3823,6 +3851,12 @@ class ChatProvider extends ChangeNotifier {
           if (_cellularDataSaverService.isAggressiveDataSaverActive) {
             unawaited(_loadPendingInteractions(visibleSessionOnly: true));
           }
+        } else {
+          // Normal mode: session re-entry must actively revalidate pending
+          // interactions (ADR-020/ADR-003). The server does not replay
+          // question events after a gap, so GET /question is the only
+          // authoritative recovery source (issue #143).
+          unawaited(_loadPendingInteractions());
         }
 
         final warmCachedMessages = _cachedSessionMessages(session.id);
@@ -5159,6 +5193,7 @@ class ChatProvider extends ChangeNotifier {
     _degradedPollingTimer?.cancel();
     _resumeGraceTimer?.cancel();
     _foregroundResumeSyncTimer?.cancel();
+    _pendingQuestionsRetryTimer?.cancel();
     _sessionUnreadHighlightTimer?.cancel();
     if (_ownsSessionAttentionCoordinator) {
       _sessionAttentionCoordinator.dispose();

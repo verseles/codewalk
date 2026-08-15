@@ -79,6 +79,8 @@ class ChatMessageWidget extends StatefulWidget {
     this.taskToolChildSummariesByPartId =
         const <String, TaskToolChildSummary>{},
     this.searchHighlightQuery,
+    this.pendingQuestionCallIds = const <String>{},
+    this.onShowQuestion,
   });
 
   final ChatMessage message;
@@ -100,6 +102,16 @@ class ChatMessageWidget extends StatefulWidget {
   final void Function(String path, int? line, int? col)? onFileTap;
   final Map<String, TaskToolChildSummary> taskToolChildSummariesByPartId;
   final String? searchHighlightQuery;
+
+  /// Call IDs of pending question requests in the current thread. Tool parts
+  /// that reference one of these IDs (via their tool call) surface a "view
+  /// question" action instead of the raw technical details as the primary
+  /// affordance.
+  final Set<String> pendingQuestionCallIds;
+
+  /// Invoked when the user taps the "view question" action of a tool part
+  /// that is waiting on a pending question request.
+  final ValueChanged<ToolPart>? onShowQuestion;
 
   @override
   State<ChatMessageWidget> createState() => _ChatMessageWidgetState();

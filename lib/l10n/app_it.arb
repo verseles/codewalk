@@ -381,6 +381,7 @@
   "chatMessageSaveFile": "Salva file",
   "chatMessageShortDate": "{month}/{day}",
   "chatMessageShow": "Mostra",
+  "chatMessageShowQuestion": "Vedi domanda",
   "chatMessageShowLess": "Mostra meno",
   "chatMessageShowLessCompact": "Meno",
   "chatMessageShowMore": "Mostra più",

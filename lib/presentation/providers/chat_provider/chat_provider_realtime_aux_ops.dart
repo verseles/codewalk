@@ -562,19 +562,18 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     questionsResult.fold(
       (failure) {
         AppLogger.warn('Failed to load pending questions: $failure');
+        _schedulePendingQuestionsRetry();
       },
       (questions) {
+        _pendingQuestionsRetryAttempts = 0;
+        _pendingQuestionsRetryTimer?.cancel();
         final grouped = <String, List<ChatQuestionRequest>>{};
         for (final item in questions) {
           if (restrictToVisible &&
               !_isVisibleAggressiveSessionId(item.sessionId)) {
             continue;
           }
-          if (_dismissedInteractionTombstones.contains(
-            _questionInteractionKey(item.id),
-          )) {
-            continue;
-          }
+          _questionFirstSeenAtById.putIfAbsent(item.id, DateTime.now);
           grouped
               .putIfAbsent(item.sessionId, () => <ChatQuestionRequest>[])
               .add(item);
@@ -673,12 +672,21 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     _threadPermissionsVersion++;
   }
 
-  String _permissionInteractionKey(String requestId) {
-    return 'permission:$requestId';
+  void _schedulePendingQuestionsRetry() {
+    if (_pendingQuestionsRetryAttempts >= 2) {
+      return;
+    }
+    _pendingQuestionsRetryAttempts += 1;
+    final delay = _pendingQuestionsRetryBaseDelay *
+        _pendingQuestionsRetryAttempts;
+    _pendingQuestionsRetryTimer?.cancel();
+    _pendingQuestionsRetryTimer = Timer(delay, () {
+      unawaited(_loadPendingInteractions());
+    });
   }
 
-  String _questionInteractionKey(String requestId) {
-    return 'question:$requestId';
+  String _permissionInteractionKey(String requestId) {
+    return 'permission:$requestId';
   }
 
   void _rememberDismissedInteractionTombstone(String key) {
@@ -726,33 +734,54 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
   Map<String, List<ChatQuestionRequest>> _mergePendingQuestionsBySession(
     Map<String, List<ChatQuestionRequest>> grouped,
   ) {
+    // GET /question is authoritative for removal (ADR-023 contract-first):
+    // requests the server no longer lists are resolved and must disappear.
+    // Two exceptions keep the UI correct during races:
+    // - requests that arrived via SSE moments ago, while the server list may
+    //   not have caught up yet (bounded by _questionServerAuthorityGrace);
+    // - requests with a submit/reject failure marker, so the user can retry.
     final merged = <String, List<ChatQuestionRequest>>{};
-    for (final entry in _pendingQuestionsBySession.entries) {
-      final filtered = entry.value
-          .where(
-            (item) => !_dismissedInteractionTombstones.contains(
-              _questionInteractionKey(item.id),
-            ),
-          )
-          .toList(growable: false);
-      if (filtered.isNotEmpty) {
-        merged[entry.key] = filtered;
-      }
-    }
+    final serverRequestIds = <String>{};
     for (final entry in grouped.entries) {
-      final byId = <String, ChatQuestionRequest>{
-        for (final item in merged[entry.key] ?? const <ChatQuestionRequest>[])
-          item.id: item,
-      };
       for (final item in entry.value) {
-        byId[item.id] = item;
+        serverRequestIds.add(item.id);
       }
-      if (byId.isEmpty) {
-        merged.remove(entry.key);
-      } else {
-        merged[entry.key] = byId.values.toList(growable: false);
+      merged[entry.key] = List<ChatQuestionRequest>.from(entry.value);
+    }
+    final graceCutoff = DateTime.now().subtract(
+      _questionServerAuthorityGrace,
+    );
+    for (final entry in _pendingQuestionsBySession.entries) {
+      for (final item in entry.value) {
+        if (serverRequestIds.contains(item.id)) {
+          continue;
+        }
+        final arrivedAt = _questionFirstSeenAtById[item.id];
+        final locallyFresh =
+            arrivedAt != null && arrivedAt.isAfter(graceCutoff);
+        final failedForRetry = _questionSubmitFailedRequestIds.contains(
+          item.id,
+        );
+        if (!locallyFresh && !failedForRetry) {
+          continue;
+        }
+        final list = merged.putIfAbsent(
+          entry.key,
+          () => <ChatQuestionRequest>[],
+        );
+        if (!list.any((q) => q.id == item.id)) {
+          list.add(item);
+        }
       }
     }
+    // Prune arrival bookkeeping for requests no longer pending anywhere.
+    _questionFirstSeenAtById.removeWhere((id, _) {
+      if (serverRequestIds.contains(id)) {
+        return false;
+      }
+      return !_questionSubmitFailedRequestIds.contains(id) &&
+          !merged.values.any((list) => list.any((q) => q.id == id));
+    });
     return merged;
   }
 

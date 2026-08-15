@@ -243,6 +243,7 @@
   "chatMessageRunningTask": "タスク実行中",
   "chatMessageSaveFile": "ファイルを保存",
   "chatMessageShow": "表示",
+  "chatMessageShowQuestion": "質問を表示",
   "chatMessageShowLess": "表示を減らす",
   "chatMessageShowLessCompact": "閉じる",
   "chatMessageShowMore": "もっと表示",

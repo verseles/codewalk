@@ -1627,6 +1627,9 @@ class FakeChatRepository implements ChatRepository {
   Failure? sessionDiffFailure;
   Future<void> Function()? listPermissionsDelay;
   Future<void> Function()? listQuestionsDelay;
+  Failure? listQuestionsFailure;
+  int listQuestionsCallCount = 0;
+  Object? replyQuestionThrow;
   final StreamController<Either<Failure, ChatEvent>> eventController =
       StreamController<Either<Failure, ChatEvent>>.broadcast();
   final StreamController<Either<Failure, ChatEvent>> globalEventController =
@@ -1945,6 +1948,11 @@ class FakeChatRepository implements ChatRepository {
     String? directory,
   }) async {
     if (listQuestionsDelay != null) await listQuestionsDelay!();
+    listQuestionsCallCount += 1;
+    final failure = listQuestionsFailure;
+    if (failure != null) {
+      return Left(failure);
+    }
     return Right(List<ChatQuestionRequest>.from(pendingQuestions));
   }
 
@@ -1958,6 +1966,10 @@ class FakeChatRepository implements ChatRepository {
     lastQuestionReplySessionId = sessionId;
     lastQuestionReplyRequestId = requestId;
     lastQuestionAnswers = answers;
+    final throwable = replyQuestionThrow;
+    if (throwable != null) {
+      Error.throwWithStackTrace(throwable, StackTrace.current);
+    }
     if (replyQuestionFailure != null) {
       return Left(replyQuestionFailure!);
     }

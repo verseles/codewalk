@@ -799,6 +799,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatMessageShow => '显示';
 
   @override
+  String get chatMessageShowQuestion => '查看问题';
+
+  @override
   String get chatMessageShowLess => '显示较少';
 
   @override

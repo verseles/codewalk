@@ -25,6 +25,9 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     final descriptionLabel = _resolveToolDescriptionLabel(part);
     final typeLabel = _resolveToolTypeLabel(part);
     final isTaskTool = _normalizeToolName(part.tool) == 'task';
+    final isQuestionTool = _normalizeToolName(part.tool) == 'question';
+    final hasPendingQuestion =
+        isQuestionTool && widget.pendingQuestionCallIds.contains(part.callId);
     final hasDetails = part.state.status != ToolStatus.pending;
     final toolIdentityToken = _toolPartIdentityToken(part);
     final latestTaskCommand =
@@ -150,6 +153,10 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
               partId: part.id,
               hasDetails: hasDetails,
               details: _buildToolStateDetails(context, part.state, part.tool),
+              pendingQuestionAction: hasPendingQuestion &&
+                      widget.onShowQuestion != null
+                  ? () => widget.onShowQuestion!(part)
+                  : null,
             ),
           ],
         ],
@@ -703,6 +710,7 @@ class _ToolPartDetailsToggle extends StatelessWidget {
     required this.partId,
     required this.hasDetails,
     required this.details,
+    this.pendingQuestionAction,
   });
 
   final bool expanded;
@@ -710,9 +718,11 @@ class _ToolPartDetailsToggle extends StatelessWidget {
   final String partId;
   final bool hasDetails;
   final Widget details;
+  final VoidCallback? pendingQuestionAction;
   @override
   Widget build(BuildContext context) {
-    if (!hasDetails) {
+    final hasQuestionAction = pendingQuestionAction != null;
+    if (!hasDetails && !hasQuestionAction) {
       return const SizedBox.shrink();
     }
     final compactLayout = MediaQuery.sizeOf(context).width < 600;
@@ -723,22 +733,51 @@ class _ToolPartDetailsToggle extends StatelessWidget {
         if (expanded) details,
         Align(
           alignment: Alignment.centerRight,
-          child: TextButton(
-            key: ValueKey<String>('tool_part_details_button_$partId'),
-            onPressed: () => onExpandedChanged(!expanded),
-            style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            ),
-            child: Text(
-              expanded
-                  ? context.l10n.chatMessageHide
-                  : (compactLayout
-                        ? context.l10n.chatMessageShow
-                        : context.l10n.chatMessageDetails),
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasQuestionAction)
+                TextButton.icon(
+                  key: ValueKey<String>(
+                    'tool_part_question_action_$partId',
+                  ),
+                  onPressed: pendingQuestionAction,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                  ),
+                  icon: const Icon(Symbols.help_outline_rounded, size: 14),
+                  label: Text(context.l10n.chatMessageShowQuestion),
+                ),
+              if (hasDetails) ...[
+                const SizedBox(width: 8),
+                TextButton(
+                  key: ValueKey<String>('tool_part_details_button_$partId'),
+                  onPressed: () => onExpandedChanged(!expanded),
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                  ),
+                  child: Text(
+                    expanded
+                        ? context.l10n.chatMessageHide
+                        : (compactLayout
+                              ? context.l10n.chatMessageShow
+                              : context.l10n.chatMessageDetails),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],

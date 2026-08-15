@@ -109,6 +109,13 @@ extension _ChatProviderRealtimeOps on ChatProvider {
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;
     }
+    // Degraded polling re-fetches messages/sessions but used to skip pending
+    // interactions: a question asked while the SSE stream was silently dead
+    // stayed hidden forever (issue #143).
+    await _loadPendingInteractions();
+    if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
+      return;
+    }
     await _syncSelectionFromRemote(
       reason: 'degraded-sync:$reason',
       force: true,

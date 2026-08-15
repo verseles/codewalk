@@ -817,6 +817,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get chatMessageShow => '表示';
 
   @override
+  String get chatMessageShowQuestion => '質問を表示';
+
+  @override
   String get chatMessageShowLess => '表示を減らす';
 
   @override

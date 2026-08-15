@@ -454,6 +454,7 @@ extension _ChatProviderEventReducerGlobalOps on ChatProvider {
           sessionQuestions[existingIndex] = question;
         }
         nextPendingQuestionsBySession[question.sessionId] = sessionQuestions;
+        _questionFirstSeenAtById.putIfAbsent(question.id, DateTime.now);
         break;
       case 'question.replied':
       case 'question.rejected':

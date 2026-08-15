@@ -862,6 +862,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get chatMessageShow => 'دکھائیں';
 
   @override
+  String get chatMessageShowQuestion => 'سوال دیکھیں';
+
+  @override
   String get chatMessageShowLess => 'کم دکھائیں';
 
   @override

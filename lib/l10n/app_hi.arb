@@ -243,6 +243,7 @@
   "chatMessageRunningTask": "कार्य चलाया जा रहा है",
   "chatMessageSaveFile": "फ़ाइल सहेजें",
   "chatMessageShow": "दिखाएं",
+  "chatMessageShowQuestion": "প্রশ্ন দেখুন",
   "chatMessageShowLess": "कम दिखाएं",
   "chatMessageShowLessCompact": "कम",
   "chatMessageShowMore": "और दिखाएं",

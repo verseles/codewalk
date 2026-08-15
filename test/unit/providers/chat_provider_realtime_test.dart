@@ -5623,6 +5623,248 @@ void main() {
         expect(assistantMessages.single.id, 'msg_assistant_tail');
       },
     );
+
+    group('issue 143 - pending question rehydration', () {
+      ChatQuestionRequest questionFor(String sessionId, String id) {
+        return ChatQuestionRequest(
+          id: id,
+          sessionId: sessionId,
+          questions: <ChatQuestionInfo>[
+            ChatQuestionInfo(
+              question: 'Proceed?',
+              header: 'Confirm',
+              options: <ChatQuestionOption>[
+                ChatQuestionOption(label: 'Yes', description: 'Continue'),
+              ],
+            ),
+          ],
+        );
+      }
+
+      Future<void> settleEmptyInteractions() => settleUntil(
+            () =>
+                provider.currentSessionQuestions.isEmpty &&
+                provider.currentSessionPermissions.isEmpty,
+            reason: 'Expected initial interactions to settle.',
+          );
+
+      Future<void> settleRealtimeSubscription() => settleUntil(
+            () => provider.debugHasRealtimeEventSubscription,
+            reason: 'Expected realtime subscription to start.',
+          );
+
+      test('normal mode session re-entry reloads pending questions', () async {
+        chatRepository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_1',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              title: 'Session 1',
+            ),
+            ChatSession(
+              id: 'ses_2',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(2000),
+              title: 'Session 2',
+            ),
+          ],
+        );
+        provider = buildProvider();
+        provider.debugPendingQuestionsRetryBaseDelay = Duration.zero;
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final first = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(first);
+        await provider.refresh();
+        await settleEmptyInteractions();
+
+        final target = provider.sessions.firstWhere((s) => s.id == 'ses_2');
+        chatRepository.pendingQuestions = <ChatQuestionRequest>[
+          questionFor('ses_2', 'question_reentry'),
+        ];
+
+        await provider.selectSession(target);
+
+        await settleUntil(
+          () =>
+              provider.currentSessionQuestions.singleOrNull?.id ==
+              'question_reentry',
+          reason:
+              'Expected normal-mode session re-entry to revalidate pending questions.',
+        );
+      });
+
+      test('normal mode re-selecting current session revalidates questions', () async {
+        provider = buildProvider();
+        provider.debugPendingQuestionsRetryBaseDelay = Duration.zero;
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final first = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(first);
+        await provider.refresh();
+        await settleEmptyInteractions();
+
+        chatRepository.pendingQuestions = <ChatQuestionRequest>[
+          questionFor('ses_1', 'question_reselect'),
+        ];
+
+        await provider.selectSession(first);
+
+        await settleUntil(
+          () =>
+              provider.currentSessionQuestions.singleOrNull?.id ==
+              'question_reselect',
+          reason:
+              'Expected re-selecting the current session to revalidate pending questions.',
+        );
+      });
+
+      test('failed pending questions fetch retries with bounded backoff', () async {
+        provider = buildProvider();
+        provider.debugPendingQuestionsRetryBaseDelay = Duration.zero;
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final first = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(first);
+        await provider.refresh();
+        await settleEmptyInteractions();
+
+        chatRepository.listQuestionsCallCount = 0;
+        chatRepository.listQuestionsFailure = ServerFailure(
+          'transient failure',
+        );
+        chatRepository.pendingQuestions = <ChatQuestionRequest>[
+          questionFor('ses_1', 'question_retry'),
+        ];
+
+        await provider.reloadPendingInteractionsForTest();
+        await settleUntil(
+          () => chatRepository.listQuestionsCallCount >= 2,
+          reason: 'Expected a bounded retry after the failed questions fetch.',
+        );
+
+        chatRepository.listQuestionsFailure = null;
+        await provider.reloadPendingInteractionsForTest();
+        await settleUntil(
+          () =>
+              provider.currentSessionQuestions.singleOrNull?.id ==
+              'question_retry',
+          reason:
+              'Expected the retried fetch to surface the pending question.',
+        );
+      });
+
+      test('question stays rehydratable after a failed reply attempt', () async {
+        provider = buildProvider();
+        provider.debugPendingQuestionsRetryBaseDelay = Duration.zero;
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final first = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(first);
+        await provider.refresh();
+        chatRepository.pendingQuestions = <ChatQuestionRequest>[
+          questionFor('ses_1', 'question_retryable'),
+        ];
+        await provider.reloadPendingInteractionsForTest();
+        await settleUntil(
+          () =>
+              provider.currentSessionQuestions.singleOrNull?.id ==
+              'question_retryable',
+          reason: 'Expected the pending question to be visible.',
+        );
+
+        // A transport-level exception (not a Left failure) must not leave a
+        // tombstone behind that hides the still-pending question on the next
+        // rehydration.
+        chatRepository.replyQuestionThrow = StateError('transport dropped');
+        await expectLater(
+          provider.submitQuestionAnswers(
+            requestId: 'question_retryable',
+            answers: const <List<String>>[<String>['Yes']],
+          ),
+          throwsA(isA<StateError>()),
+        );
+
+        expect(
+          provider.currentSessionQuestions.singleOrNull?.id,
+          'question_retryable',
+          reason:
+              'Expected the failed reply to keep the question visible for retry.',
+        );
+
+        await provider.reloadPendingInteractionsForTest();
+        expect(
+          provider.currentSessionQuestions.singleOrNull?.id,
+          'question_retryable',
+          reason:
+              'Rehydration must not suppress a question whose reply failed.',
+        );
+      });
+
+      test('pending questions merge treats server list as authoritative', () async {
+        provider = buildProvider();
+        provider.debugPendingQuestionsRetryBaseDelay = Duration.zero;
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final first = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(first);
+        await provider.refresh();
+        await settleEmptyInteractions();
+        await settleRealtimeSubscription();
+
+        // A question arrives via SSE while the server list may not have
+        // caught up yet.
+        chatRepository.emitEvent(
+          ChatEvent(
+            type: 'question.asked',
+            properties: <String, dynamic>{
+              'question': <String, dynamic>{
+                'id': 'question_sse',
+                'sessionID': 'ses_1',
+                'questions': <Map<String, dynamic>>[
+                  <String, dynamic>{
+                    'question': 'Proceed?',
+                    'header': 'Confirm',
+                    'options': <Map<String, dynamic>>[
+                      <String, dynamic>{
+                        'label': 'Yes',
+                        'description': 'Continue',
+                      },
+                    ],
+                    'multiple': false,
+                    'custom': false,
+                  },
+                ],
+              },
+            },
+          ),
+        );
+        await settleUntil(
+          () =>
+              provider.currentSessionQuestions.singleOrNull?.id ==
+              'question_sse',
+          reason: 'Expected the SSE question to appear.',
+        );
+
+        // Server no longer lists it (resolved elsewhere): within the grace
+        // window the fresh SSE arrival survives a rehydration race.
+        provider.debugQuestionServerAuthorityGrace = const Duration(hours: 1);
+        chatRepository.pendingQuestions = const <ChatQuestionRequest>[];
+        await provider.reloadPendingInteractionsForTest();
+        expect(
+          provider.currentSessionQuestions.singleOrNull?.id,
+          'question_sse',
+          reason:
+              'Fresh SSE-arrived questions must survive within the grace window.',
+        );
+
+        // Past the grace window the server list is authoritative for removal.
+        provider.debugQuestionServerAuthorityGrace = Duration.zero;
+        await provider.reloadPendingInteractionsForTest();
+        expect(provider.currentSessionQuestions, isEmpty);
+      });
+    });
   });
 }
 

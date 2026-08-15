@@ -846,6 +846,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatMessageShow => 'إظهار';
 
   @override
+  String get chatMessageShowQuestion => 'عرض السؤال';
+
+  @override
   String get chatMessageShowLess => 'عرض أقل';
 
   @override

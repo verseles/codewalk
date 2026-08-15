@@ -227,18 +227,38 @@ class ChatQuestionInfoModel {
 class ChatQuestionRequestModel {
 
   factory ChatQuestionRequestModel.fromJson(Map<String, dynamic> json) {
+    // Defensive unwrap: some server builds nest the request under an envelope
+    // key or use camelCase field names; the SSE reducers already unwrap
+    // `question`/`request`/`info`, and the REST list must tolerate the same
+    // shapes so requests never land under an empty session key. Only descend
+    // into an envelope when the top level carries no request fields.
+    var payload = json;
+    if (json['id'] == null &&
+        json['sessionID'] == null &&
+        json['sessionId'] == null) {
+      for (final key in const <String>['question', 'request', 'info']) {
+        final candidate = json[key];
+        if (candidate is Map<String, dynamic>) {
+          payload = candidate;
+          break;
+        }
+      }
+    }
     return ChatQuestionRequestModel(
-      id: json['id'] as String? ?? '',
-      sessionId: json['sessionID'] as String? ?? '',
+      id: payload['id'] as String? ?? payload['requestID'] as String? ?? '',
+      sessionId:
+          payload['sessionID'] as String? ??
+          payload['sessionId'] as String? ??
+          '',
       questions:
-          (json['questions'] as List<dynamic>?)
+          (payload['questions'] as List<dynamic>?)
               ?.whereType<Map<String, dynamic>>()
               .map(ChatQuestionInfoModel.fromJson)
               .toList(growable: false) ??
           const <ChatQuestionInfoModel>[],
-      tool: json['tool'] is Map<String, dynamic>
+      tool: payload['tool'] is Map<String, dynamic>
           ? ChatToolRequestRefModel.fromJson(
-              json['tool'] as Map<String, dynamic>,
+              payload['tool'] as Map<String, dynamic>,
             )
           : null,
     );

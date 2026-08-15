@@ -243,6 +243,7 @@
   "chatMessageRunningTask": "Executando tarefa",
   "chatMessageSaveFile": "Salvar arquivo",
   "chatMessageShow": "Mostrar",
+  "chatMessageShowQuestion": "Ver pergunta",
   "chatMessageShowLess": "Mostrar menos",
   "chatMessageShowLessCompact": "Menos",
   "chatMessageShowMore": "Mostrar mais",

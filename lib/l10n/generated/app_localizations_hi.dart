@@ -866,6 +866,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get chatMessageShow => 'दिखाएं';
 
   @override
+  String get chatMessageShowQuestion => 'প্রশ্ন দেখুন';
+
+  @override
   String get chatMessageShowLess => 'कम दिखाएं';
 
   @override

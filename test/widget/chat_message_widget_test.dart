@@ -584,6 +584,150 @@ void main() {
     },
   );
 
+  testWidgets(
+    'pending question tool part shows view-question action as primary',
+    (WidgetTester tester) async {
+      final message = AssistantMessage(
+        id: 'msg_question_action',
+        sessionId: 'ses_question_action',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        parts: <MessagePart>[
+          ToolPart(
+            id: 'part_question_action',
+            messageId: 'msg_question_action',
+            sessionId: 'ses_question_action',
+            callId: 'call_question_1',
+            tool: 'question',
+            state: ToolStatePending(),
+          ),
+        ],
+      );
+      ToolPart? revealedPart;
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: message,
+              pendingQuestionCallIds: const <String>{'call_question_1'},
+              onShowQuestion: (part) => revealedPart = part,
+            ),
+          ),
+        ),
+      );
+
+      final action = find.byKey(
+        const ValueKey<String>(
+          'tool_part_question_action_part_question_action',
+        ),
+      );
+      expect(action, findsOneWidget);
+      expect(find.text('View question'), findsOneWidget);
+
+      await tester.tap(action);
+      expect(revealedPart?.callId, 'call_question_1');
+    },
+  );
+
+  testWidgets(
+    'pending question tool part keeps technical details as secondary action',
+    (WidgetTester tester) async {
+      final message = AssistantMessage(
+        id: 'msg_question_action_details',
+        sessionId: 'ses_question_action_details',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        parts: <MessagePart>[
+          ToolPart(
+            id: 'part_question_action_details',
+            messageId: 'msg_question_action_details',
+            sessionId: 'ses_question_action_details',
+            callId: 'call_question_2',
+            tool: 'question',
+            state: ToolStateCompleted(
+              input: const <String, dynamic>{'question': 'Proceed?'},
+              output: '{"answers": []}',
+              time: ToolTime(
+                start: DateTime.fromMillisecondsSinceEpoch(1000),
+                end: DateTime.fromMillisecondsSinceEpoch(1100),
+              ),
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: message,
+              pendingQuestionCallIds: const <String>{'call_question_2'},
+              onShowQuestion: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_question_action_part_question_action_details',
+          ),
+        ),
+        findsOneWidget,
+      );
+      final detailsToggle = find.byKey(
+        const ValueKey<String>(
+          'tool_part_details_button_part_question_action_details',
+        ),
+      );
+      expect(detailsToggle, findsOneWidget);
+
+      await tester.tap(detailsToggle);
+      await tester.pumpAndSettle();
+      expect(find.text('Hide'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'question tool part without pending request shows no question action',
+    (WidgetTester tester) async {
+      final message = AssistantMessage(
+        id: 'msg_question_no_pending',
+        sessionId: 'ses_question_no_pending',
+        time: DateTime.fromMillisecondsSinceEpoch(1000),
+        parts: <MessagePart>[
+          ToolPart(
+            id: 'part_question_no_pending',
+            messageId: 'msg_question_no_pending',
+            sessionId: 'ses_question_no_pending',
+            callId: 'call_question_3',
+            tool: 'question',
+            state: ToolStatePending(),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: ChatMessageWidget(
+              message: message,
+              pendingQuestionCallIds: const <String>{'call_other'},
+              onShowQuestion: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_question_action_part_question_no_pending',
+          ),
+        ),
+        findsNothing,
+      );
+      expect(find.text('View question'), findsNothing);
+    },
+  );
+
   testWidgets('hides step blocks from assistant message body', (
     WidgetTester tester,
   ) async {

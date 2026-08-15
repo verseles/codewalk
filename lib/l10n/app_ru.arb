@@ -249,6 +249,7 @@
   "chatMessageRunningTask": "Выполнение задачи",
   "chatMessageSaveFile": "Сохранить файл",
   "chatMessageShow": "Показать",
+  "chatMessageShowQuestion": "Показать вопрос",
   "chatMessageShowLess": "Показать меньше",
   "chatMessageShowLessCompact": "Меньше",
   "chatMessageShowMore": "Показать больше",

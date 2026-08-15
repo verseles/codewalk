@@ -15,6 +15,11 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
       chatProvider: chatProvider,
       message: message,
     );
+    final pendingQuestionCallIds = <String>{
+      for (final request in chatProvider.currentThreadQuestionRequests)
+        if (request.tool != null && request.tool!.callId.trim().isNotEmpty)
+          request.tool!.callId,
+    };
     final isLatestRevertible =
         message is UserMessage && message.id == latestRevertibleMessageId;
     final isHistoricalUserMessage =
@@ -56,6 +61,11 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
           : null,
       taskToolChildSummariesByPartId: taskToolChildSummariesByPartId,
       searchHighlightQuery: _timelineSearchHighlightQuery,
+      pendingQuestionCallIds: pendingQuestionCallIds,
+      onShowQuestion: (part) {
+        // Reveal the interactive question card docked above the composer.
+        _scrollToBottom(force: true);
+      },
     );
     if (wrapRevealAnchor && finalAssistantRevealMessageId == message.id) {
       messageWidget = Column(
@@ -544,8 +554,11 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
                         ),
                       ),
 
-                      if (!hideComposerForTerminal)
-                        _buildInteractionPrompts(chatProvider),
+                      // Question/permission cards must stay reachable even
+                      // when the composer is hidden behind the terminal panel
+                      // on compact layouts (issue #143): the user still needs
+                      // to answer a pending question there.
+                      _buildInteractionPrompts(chatProvider),
 
                       if (!hideComposerForTerminal)
                         _buildComposerReasoningStatusSlot(composerStatus),

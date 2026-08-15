@@ -1100,6 +1100,10 @@
     "description": "CodeWalk UI string — chatMessageSaveFile"
   },
   "chatMessageShow": "Show",
+  "chatMessageShowQuestion": "View question",
+  "@chatMessageShowQuestion": {
+    "description": "CodeWalk UI string — chatMessageShowQuestion"
+  },
   "@chatMessageShow": {
     "description": "CodeWalk UI string — chatMessageShow"
   },

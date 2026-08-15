@@ -243,6 +243,7 @@
   "chatMessageRunningTask": "작업 실행 중",
   "chatMessageSaveFile": "파일 저장",
   "chatMessageShow": "보기",
+  "chatMessageShowQuestion": "질문 보기",
   "chatMessageShowLess": "덜 보기",
   "chatMessageShowLessCompact": "접기",
   "chatMessageShowMore": "더 보기",

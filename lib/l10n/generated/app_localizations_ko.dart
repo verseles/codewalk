@@ -817,6 +817,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get chatMessageShow => '보기';
 
   @override
+  String get chatMessageShowQuestion => '질문 보기';
+
+  @override
   String get chatMessageShowLess => '덜 보기';
 
   @override

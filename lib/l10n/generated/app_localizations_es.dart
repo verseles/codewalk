@@ -879,6 +879,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatMessageShow => 'Mostrar';
 
   @override
+  String get chatMessageShowQuestion => 'Ver pregunta';
+
+  @override
   String get chatMessageShowLess => 'Mostrar menos';
 
   @override

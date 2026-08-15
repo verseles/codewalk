@@ -376,6 +376,7 @@
   "chatMessageRunningTask": "Aufgabe wird ausgeführt",
   "chatMessageSaveFile": "Datei speichern",
   "chatMessageShow": "Anzeigen",
+  "chatMessageShowQuestion": "Frage anzeigen",
   "chatMessageShowLess": "Weniger anzeigen",
   "chatMessageShowLessCompact": "Weniger",
   "chatMessageShowMore": "Mehr anzeigen",

@@ -1583,6 +1583,12 @@ abstract class AppLocalizations {
   /// **'Show'**
   String get chatMessageShow;
 
+  /// CodeWalk UI string — chatMessageShowQuestion
+  ///
+  /// In en, this message translates to:
+  /// **'View question'**
+  String get chatMessageShowQuestion;
+
   /// CodeWalk UI string — chatMessageShowLess
   ///
   /// In en, this message translates to:

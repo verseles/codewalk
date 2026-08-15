@@ -926,6 +926,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
           sessionQuestions[existingIndex] = question;
         }
         _pendingQuestionsBySession[question.sessionId] = sessionQuestions;
+        _questionFirstSeenAtById.putIfAbsent(question.id, DateTime.now);
         _threadPermissionsVersion++;
         _notifyListeners();
         break;

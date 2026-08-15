@@ -242,6 +242,7 @@
   "chatMessageRunningTask": "مهمة قيد التشغيل",
   "chatMessageSaveFile": "حفظ الملف",
   "chatMessageShow": "إظهار",
+  "chatMessageShowQuestion": "عرض السؤال",
   "chatMessageShowLess": "عرض أقل",
   "chatMessageShowLessCompact": "أقل",
   "chatMessageShowMore": "عرض المزيد",

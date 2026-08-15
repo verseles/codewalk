@@ -257,6 +257,7 @@
   "chatMessageSaveFile": "فائل محفوظ کریں۔",
   "chatMessageShortDate": "{month}/{day}",
   "chatMessageShow": "دکھائیں",
+  "chatMessageShowQuestion": "سوال دیکھیں",
   "chatMessageShowLess": "کم دکھائیں",
   "chatMessageShowLessCompact": "کم",
   "chatMessageShowMore": "مزید دکھائیں",

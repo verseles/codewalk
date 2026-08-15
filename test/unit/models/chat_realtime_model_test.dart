@@ -61,4 +61,53 @@ void main() {
       expect(model.properties, <String, dynamic>{'sessionID': 'ses_flat'});
     });
   });
+
+  group('ChatQuestionRequestModel', () {
+    test('parses canonical sessionID shape', () {
+      final model = ChatQuestionRequestModel.fromJson(<String, dynamic>{
+        'id': 'q_1',
+        'sessionID': 'ses_1',
+        'questions': <Map<String, dynamic>>[],
+      });
+
+      expect(model.id, 'q_1');
+      expect(model.sessionId, 'ses_1');
+    });
+
+    test('tolerates camelCase sessionId', () {
+      final model = ChatQuestionRequestModel.fromJson(<String, dynamic>{
+        'id': 'q_1',
+        'sessionId': 'ses_1',
+        'questions': <Map<String, dynamic>>[],
+      });
+
+      expect(model.id, 'q_1');
+      expect(model.sessionId, 'ses_1');
+    });
+
+    test('tolerates request envelope and requestID fallback', () {
+      final model = ChatQuestionRequestModel.fromJson(<String, dynamic>{
+        'request': <String, dynamic>{
+          'requestID': 'q_2',
+          'sessionId': 'ses_2',
+          'questions': <Map<String, dynamic>>[],
+        },
+      });
+
+      expect(model.id, 'q_2');
+      expect(model.sessionId, 'ses_2');
+    });
+
+    test('does not descend into info when top level has request fields', () {
+      final model = ChatQuestionRequestModel.fromJson(<String, dynamic>{
+        'id': 'q_3',
+        'sessionID': 'ses_3',
+        'questions': <Map<String, dynamic>>[],
+        'info': <String, dynamic>{'id': 'q_wrong', 'sessionID': 'ses_wrong'},
+      });
+
+      expect(model.id, 'q_3');
+      expect(model.sessionId, 'ses_3');
+    });
+  });
 }

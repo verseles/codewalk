@@ -243,6 +243,7 @@
   "chatMessageRunningTask": "正在运行的任务",
   "chatMessageSaveFile": "保存文件",
   "chatMessageShow": "显示",
+  "chatMessageShowQuestion": "查看问题",
   "chatMessageShowLess": "显示较少",
   "chatMessageShowLessCompact": "收起",
   "chatMessageShowMore": "显示更多",
