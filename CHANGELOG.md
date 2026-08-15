@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.200.1 - 2026-08-15
+
+- feat(settings): add search to read-aloud voice pickers
+
 ## v1.200.0 - 2026-08-15
 
 - test(tts): pin splitter invariants and skip unspeakable chunks
