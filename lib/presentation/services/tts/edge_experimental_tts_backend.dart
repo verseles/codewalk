@@ -15,6 +15,11 @@ const String kDefaultEdgeTtsVoice = 'en-US-EmmaMultilingualNeural';
 const Duration kEdgeTtsConnectTimeout = Duration(seconds: 10);
 const Duration kEdgeTtsSynthesisTimeout = Duration(seconds: 45);
 
+final RegExp _edgeTtsSpeakableContent = RegExp(
+  r'[\p{L}\p{N}]',
+  unicode: true,
+);
+
 typedef EdgeTtsNowProvider = DateTime Function();
 typedef EdgeTtsIdProvider = String Function();
 
@@ -97,6 +102,8 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
     }
 
     final chunks = splitEdgeTtsTextChunks(text);
+    final speakable = _withoutUnspeakableChunks(chunks);
+    final effectiveChunks = speakable.isNotEmpty ? speakable : chunks;
     final voice = _effectiveVoice(request.voiceId);
     final locale = _effectiveLocale(request.voiceLocale, voice);
     final audio = BytesBuilder(copy: false);
@@ -104,13 +111,13 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
 
     try {
       callbacks.onStart?.call();
-      for (var index = 0; index < chunks.length; index += 1) {
+      for (var index = 0; index < effectiveChunks.length; index += 1) {
         _throwIfCancelled();
         await _synthesizeChunk(
           request: request,
-          chunk: chunks[index],
+          chunk: effectiveChunks[index],
           chunkIndex: index,
-          chunkCount: chunks.length,
+          chunkCount: effectiveChunks.length,
           voice: voice,
           locale: locale,
           audio: audio,
@@ -481,6 +488,16 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
 
   /// Current UTC time, adjusted by the last known clock skew.
   DateTime _now() => _nowProvider().toUtc().add(_clockSkew);
+
+  /// Filters out chunks with no speakable content (e.g. emoji or separator
+  /// lines) so they do not cost a websocket round trip. Returns the input
+  /// unchanged when nothing would remain, preserving the original error paths.
+  static List<String> _withoutUnspeakableChunks(List<String> chunks) {
+    final speakable = chunks
+        .where((chunk) => chunk.contains(_edgeTtsSpeakableContent))
+        .toList(growable: false);
+    return speakable.isEmpty ? chunks : speakable;
+  }
 
   void _throwIfCancelled() {
     if (!_cancelled) {

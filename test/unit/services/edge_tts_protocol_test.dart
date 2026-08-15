@@ -155,6 +155,50 @@ void main() {
       expect(chunks.join().length, 1200);
     });
 
+    test('splitter byte accounting matches the escaped SSML payload', () {
+      const corpus = <String>[
+        'plain ascii text',
+        '&<>"\'',
+        'café 日本語 中文',
+        '😀🎉👨‍👩‍👧‍👦',
+        'line one\nline two\tindented',
+        'no-break\u00a0space',
+        'bom\ufeffmark',
+      ];
+      for (final value in corpus) {
+        expect(
+          edgeTtsEscapedByteLength(value),
+          utf8.encode(escapeEdgeTtsXml(value)).length,
+        );
+      }
+    });
+
+    test('splitter prefers newline boundaries and skips leading breaks',
+        () {
+      final chunks = splitEdgeTtsTextChunks(
+        '\n${'a' * kEdgeTtsMaxInputBytes}\n${'b' * 100}',
+      );
+
+      expect(chunks, hasLength(2));
+      expect(chunks.first, startsWith('a'));
+      expect(chunks.first, isNot(startsWith('\n')));
+      expect(chunks.last, startsWith('b'));
+      for (final chunk in chunks) {
+        expect(
+          edgeTtsEscapedByteLength(chunk),
+          lessThanOrEqualTo(kEdgeTtsMaxInputBytes),
+        );
+      }
+    });
+
+    test('splitter emits an over-limit single rune for tiny maxBytes', () {
+      final chunks = splitEdgeTtsTextChunks('😀a', maxBytes: 2);
+
+      expect(chunks, hasLength(2));
+      expect(chunks.first, '😀');
+      expect(chunks.last, 'a');
+    });
+
     test('rejects impossible HTTP dates like February 31', () {
       expect(parseEdgeTtsHttpDate('Tue, 31 Feb 2026 17:00:00 GMT'), isNull);
       expect(parseEdgeTtsHttpDate('Tue, 31 Apr 2026 17:00:00 GMT'), isNull);

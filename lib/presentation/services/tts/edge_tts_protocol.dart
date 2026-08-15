@@ -282,7 +282,14 @@ List<String> splitEdgeTtsTextChunks(
   final chunks = <String>[];
   final units = cleaned;
   var start = 0;
-  var i = 0;
+  while (start < units.length &&
+      _edgeTtsIsAsciiWhitespace(units.codeUnitAt(start))) {
+    start += 1;
+  }
+  if (start >= units.length) {
+    return const <String>[];
+  }
+  var i = start;
   var segmentBytes = 0;
   var lastNewline = -1;
   var lastSpace = -1;

@@ -34,7 +34,10 @@ class _FakeEdgeTtsConnection implements EdgeTtsWebSocketConnection {
   Future<void> close() async {
     closed = true;
     if (!_controller.isClosed) {
-      await _controller.close();
+      // Not awaited: StreamController.close() only completes once an active
+      // listener consumes the done event, so awaiting it here would hang for
+      // the 2s timeout whenever the backend closes before listening.
+      _controller.close();
     }
   }
 
@@ -725,6 +728,67 @@ void main() {
           lessThanOrEqualTo(kEdgeTtsMaxInputBytes),
         );
       }
+    });
+
+    test('skips chunks without speakable content', () async {
+      final first = _FakeEdgeTtsConnection();
+      final second = _FakeEdgeTtsConnection();
+      final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+        first,
+        second,
+      ]);
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+        '33333333333333333333333333333333',
+        '44444444444444444444444444444444',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: connector.call,
+        idProvider: ids.next,
+      );
+      final longText = List<String>.filled(
+        kEdgeTtsMaxInputBytes + 100,
+        'a',
+      ).join();
+      final text = '🎉\n$longText';
+
+      final resultFuture = backend.speakOrSynthesize(
+        TtsSynthesisRequest(text: text, rate: 0.5, pitch: 1.0),
+        const TtsBackendCallbacks(),
+      );
+      await _waitFor(() => first.sentTexts.length == 2);
+
+      expect(first.sentTexts.last, isNot(contains('🎉')));
+      expect(first.sentTexts.last, contains(kDefaultEdgeTtsVoice));
+
+      first.add(
+        buildEdgeTtsBinaryFrameForTest(
+          headers: const <String, String>{
+            'Path': 'audio',
+            'Content-Type': kEdgeTtsAudioMimeType,
+          },
+          audioBytes: const <int>[1, 2],
+        ),
+      );
+      first.add('Path:turn.end\r\n\r\n{}');
+      await _waitFor(() => second.sentTexts.length == 2);
+      second.add(
+        buildEdgeTtsBinaryFrameForTest(
+          headers: const <String, String>{
+            'Path': 'audio',
+            'Content-Type': kEdgeTtsAudioMimeType,
+          },
+          audioBytes: const <int>[3, 4],
+        ),
+      );
+      second.add('Path:turn.end\r\n\r\n{}');
+
+      final result = await resultFuture;
+      expect(result, isA<GeneratedTtsAudio>());
+      final audio = result as GeneratedTtsAudio;
+      expect(audio.bytes, orderedEquals(<int>[1, 2, 3, 4]));
+      expect(first.sentTexts.last, isNot(contains('🎉')));
     });
 
     test('parses RFC 7231 HTTP date headers', () {
