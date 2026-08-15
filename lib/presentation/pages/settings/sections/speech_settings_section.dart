@@ -2090,15 +2090,20 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             subtitle: Text(context.l10n.speechEdgeVoiceListUnavailable),
           );
         }
+        final savedVoiceId = settingsProvider.readAloudVoiceId;
+        final voiceMissing =
+            savedVoiceId != null &&
+            savedVoiceId.trim().isNotEmpty &&
+            !voices.any((voice) => voice['name'] == savedVoiceId);
         final selected = voices.any(
-          (voice) => voice['name'] == settingsProvider.readAloudVoiceId,
+          (voice) => voice['name'] == savedVoiceId,
         )
-            ? settingsProvider.readAloudVoiceId
+            ? savedVoiceId
             : null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (selected == null) ...[
+            if (voiceMissing) ...[
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Symbols.warning_amber_rounded),

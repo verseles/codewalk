@@ -4354,18 +4354,6 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'أعاد Microsoft Edge Speech إطار websocket غير مدعوم.',
     'speechEdgeVoice': 'صوت Edge',
-    'speechEdgeVoiceUnavailable': '所选语音不再可用。正在使用默认 Edge 语音。',
-    'speechEdgeVoiceUnavailable': 'منتخب آواز اب دستیاب نہیں ہے۔ ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔',
-    'speechEdgeVoiceUnavailable': 'Выбранный голос больше недоступен. Используется голос Edge по умолчанию.',
-    'speechEdgeVoiceUnavailable': 'A voz selecionada não está mais disponível. Usando a voz padrão do Edge.',
-    'speechEdgeVoiceUnavailable': '선택한 목소리를 더 이상 사용할 수 없습니다. 기본 Edge 목소리를 사용합니다.',
-    'speechEdgeVoiceUnavailable': '選択した音声は使用できなくなりました。默認の Edge 音声を使用します。',
-    'speechEdgeVoiceUnavailable': 'La voce selezionata non è più disponibile. Verrà usata la voce Edge predefinita.',
-    'speechEdgeVoiceUnavailable': 'चयनित आवाज़ अब उपलब्ध नहीं है। डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है।',
-    'speechEdgeVoiceUnavailable': 'La voix sélectionnée n\\'est plus disponible. La voix Edge par défaut sera utilisée.',
-    'speechEdgeVoiceUnavailable': 'La voz seleccionada ya no está disponible. Se usará la voz predeterminada de Edge.',
-    'speechEdgeVoiceUnavailable': 'Die ausgewählte Stimme ist nicht mehr verfügbar. Die Standard-Edge-Stimme wird verwendet.',
-    'speechEdgeVoiceUnavailable': 'নির্বাচিত ভোয়সটি আর উপলব্ধ নেই। ডিফল্ট Edge ভোয়স ব্যবহার করা হচ্ছে।',
     'speechEdgeVoiceUnavailable': 'الصوت المحدد لم يعد متاحًا. سيتم استخدام صوت Edge الافتراضي.',
     'speechEdgeVoiceListUnavailable':
         'يتم استخدام صوت Edge الافتراضي. تعذّر تحميل قائمة الأصوات الآن.',
@@ -6746,6 +6734,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech একটি অসমর্থিত websocket ফ্রেম ফিরিয়েছে।',
     'speechEdgeVoice': 'Edge ভয়েস',
+    'speechEdgeVoiceUnavailable': 'নির্বাচিত ভোয়সটি আর উপলব্ধ নেই। ডিফল্ট Edge ভোয়স ব্যবহার করা হচ্ছে।',
     'speechEdgeVoiceListUnavailable':
         'ডিফল্ট Edge ভয়েস ব্যবহার করা হচ্ছে। এই মুহূর্তে ভয়েস তালিকা লোড করা যায়নি।',
     'speechEdgeVoicesLoaded':
@@ -9197,6 +9186,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech hat einen nicht unterstützten Websocket-Frame zurückgegeben.',
     'speechEdgeVoice': 'Edge-Stimme',
+    'speechEdgeVoiceUnavailable': 'Die ausgewählte Stimme ist nicht mehr verfügbar. Die Standard-Edge-Stimme wird verwendet.',
     'speechEdgeVoiceListUnavailable':
         'Standard-Edge-Stimme wird verwendet. Die Stimmliste konnte gerade nicht geladen werden.',
     'speechEdgeVoicesLoaded': 'Aus Microsoft-Edge-Speech-Stimmen geladen.',
@@ -11655,6 +11645,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech devolvió un marco websocket no compatible.',
     'speechEdgeVoice': 'Voz de Edge',
+    'speechEdgeVoiceUnavailable': 'La voz seleccionada ya no está disponible. Se usará la voz predeterminada de Edge.',
     'speechEdgeVoiceListUnavailable':
         'Usando la voz predeterminada de Edge. La lista de voces no se pudo cargar en este momento.',
     'speechEdgeVoicesLoaded':
@@ -14140,6 +14131,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech a renvoyé une trame websocket non prise en charge.',
     'speechEdgeVoice': 'Voix Edge',
+    'speechEdgeVoiceUnavailable': 'La voix sélectionnée n\'est plus disponible. La voix Edge par défaut sera utilisée.',
     'speechEdgeVoiceListUnavailable':
         'Utilisation de la voix Edge par défaut. La liste des voix n\'a pas pu être chargée pour le moment.',
     'speechEdgeVoicesLoaded':
@@ -16532,6 +16524,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech ने एक अनसमर्थित वेबसॉकेट फ्रेम लौटाया।',
     'speechEdgeVoice': 'Edge आवाज़',
+    'speechEdgeVoiceUnavailable': 'चयनित आवाज़ अब उपलब्ध नहीं है। डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है।',
     'speechEdgeVoiceListUnavailable':
         'डिफ़ॉल्ट Edge आवाज़ का उपयोग किया जा रहा है। आवाज़ सूची अभी लोड नहीं की जा सकी।',
     'speechEdgeVoicesLoaded': 'Microsoft Edge Speech आवाज़ों से लोड किया गया।',
@@ -18988,6 +18981,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech ha restituito un frame websocket non supportato.',
     'speechEdgeVoice': 'Voce Edge',
+    'speechEdgeVoiceUnavailable': 'La voce selezionata non è più disponibile. Verrà usata la voce Edge predefinita.',
     'speechEdgeVoiceListUnavailable':
         'In uso la voce Edge predefinita. L\'elenco delle voci non è stato caricato in questo momento.',
     'speechEdgeVoicesLoaded': 'Caricate dalle voci di Microsoft Edge Speech.',
@@ -21131,6 +21125,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech がサポートされていない WebSocket フレームを返しました。',
     'speechEdgeVoice': 'Edge の音声',
+    'speechEdgeVoiceUnavailable': '選択した音声は使用できなくなりました。デフォルトの Edge 音声を使用します。',
     'speechEdgeVoiceListUnavailable':
         'デフォルトの Edge 音声を使用します。現在、音声リストを読み込めませんでした。',
     'speechEdgeVoicesLoaded': 'Microsoft Edge Speech の音声から読み込みました。',
@@ -23232,6 +23227,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech가 지원되지 않는 websocket 프레임을 반환했습니다.',
     'speechEdgeVoice': 'Edge 음성',
+    'speechEdgeVoiceUnavailable': '선택한 목소리를 더 이상 사용할 수 없습니다. 기본 Edge 목소리를 사용합니다.',
     'speechEdgeVoiceListUnavailable':
         '기본 Edge 음성을 사용 중입니다. 지금은 음성 목록을 불러올 수 없습니다.',
     'speechEdgeVoicesLoaded': 'Microsoft Edge Speech 음성에서 로드되었습니다.',
@@ -25622,6 +25618,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'O Microsoft Edge Speech retornou um quadro websocket não suportado.',
     'speechEdgeVoice': 'Voz do Edge',
+    'speechEdgeVoiceUnavailable': 'A voz selecionada não está mais disponível. Usando a voz padrão do Edge.',
     'speechEdgeVoiceListUnavailable':
         'Usando a voz padrão do Edge. A lista de vozes não pôde ser carregada no momento.',
     'speechEdgeVoicesLoaded': 'Carregado das vozes do Microsoft Edge Speech.',
@@ -28054,6 +28051,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'Microsoft Edge Speech вернул неподдерживаемый websocket-кадр.',
     'speechEdgeVoice': 'Голос Edge',
+    'speechEdgeVoiceUnavailable': 'Выбранный голос больше недоступен. Используется голос Edge по умолчанию.',
     'speechEdgeVoiceListUnavailable':
         'Используется голос Edge по умолчанию. Список голосов не удалось загрузить.',
     'speechEdgeVoicesLoaded': 'Загружено из голосов Microsoft Edge Speech.',
@@ -30428,6 +30426,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedFrame':
         'مائیکروسافٹ ایج اسپیچ نے ایک غیر تعاون یافتہ ویب ساکٹ فریم واپس کیا۔',
     'speechEdgeVoice': 'Edge آواز',
+    'speechEdgeVoiceUnavailable': 'منتخب آواز اب دستیاب نہیں ہے۔ ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔',
     'speechEdgeVoiceListUnavailable':
         'ڈیفالٹ Edge آواز استعمال ہو رہی ہے۔ آوازوں کی فہرست ابھی لوڈ نہیں ہو سکی۔',
     'speechEdgeVoicesLoaded': 'Microsoft Edge Speech آوازوں سے لوڈ کیا گیا۔',
@@ -32444,6 +32443,7 @@ const translations = <String, Map<String, String>>{
     'speechEdgeUnsupportedAudio': 'Microsoft Edge 语音返回了不支持的音频数据。',
     'speechEdgeUnsupportedFrame': 'Microsoft Edge 语音返回了不支持的 websocket 帧。',
     'speechEdgeVoice': 'Edge 语音',
+    'speechEdgeVoiceUnavailable': '所选语音不再可用。正在使用默认 Edge 语音。',
     'speechEdgeVoiceListUnavailable': '正在使用默认 Edge 语音。目前无法加载语音列表。',
     'speechEdgeVoicesLoaded': '已从 Microsoft Edge 语音加载。',
     'speechEngine': '引擎',

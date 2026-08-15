@@ -308,6 +308,115 @@ void main() {
     );
 
     test(
+      'does not retry when the locale has no known default voice',
+      () async {
+        // nl-NL has no entry in the resolver tables; the fallback would be
+        // en-US, which must NOT be used to read Dutch text.
+        final connection = _FakeEdgeTtsConnection();
+        final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+          connection,
+        ]);
+        final ids = _IdSequence(<String>[
+          '11111111111111111111111111111111',
+          '22222222222222222222222222222222',
+        ]);
+        final backend = EdgeExperimentalTtsBackend(
+          connector: connector.call,
+          idProvider: ids.next,
+        );
+
+        final resultFuture = backend.speakOrSynthesize(
+          const TtsSynthesisRequest(
+            text: 'Hallo',
+            voiceId: 'nl-NL-ColetteNeural',
+            voiceLocale: 'nl-NL',
+            rate: 0.5,
+            pitch: 1.0,
+          ),
+          const TtsBackendCallbacks(),
+        );
+        await _waitFor(() => connection.sentTexts.length == 2);
+        await connection.close();
+
+        await expectLater(
+          resultFuture,
+          throwsA(
+            isA<TtsBackendException>().having(
+              (error) => error.message,
+              'message',
+              'Microsoft Edge Speech returned an empty audio response.',
+            ),
+          ),
+        );
+        expect(connector.calls, 1);
+      },
+    );
+
+    test(
+      'does not retry after partial audio when a later chunk disconnects',
+      () async {
+        final first = _FakeEdgeTtsConnection();
+        final second = _FakeEdgeTtsConnection();
+        final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+          first,
+          second,
+        ]);
+        final ids = _IdSequence(<String>[
+          '11111111111111111111111111111111',
+          '22222222222222222222222222222222',
+          '33333333333333333333333333333333',
+          '44444444444444444444444444444444',
+        ]);
+        final backend = EdgeExperimentalTtsBackend(
+          connector: connector.call,
+          idProvider: ids.next,
+        );
+        final longText = List<String>.filled(
+          kEdgeTtsMaxInputBytes + 100,
+          'a',
+        ).join();
+
+        final resultFuture = backend.speakOrSynthesize(
+          TtsSynthesisRequest(
+            text: longText,
+            voiceId: 'pt-BR-AntonioNeural',
+            voiceLocale: 'pt-BR',
+            rate: 0.5,
+            pitch: 1.0,
+          ),
+          const TtsBackendCallbacks(),
+        );
+        await _waitFor(() => first.sentTexts.length == 2);
+        first.add(
+          buildEdgeTtsBinaryFrameForTest(
+            headers: const <String, String>{
+              'Path': 'audio',
+              'Content-Type': kEdgeTtsAudioMimeType,
+            },
+            audioBytes: const <int>[1, 2, 3],
+          ),
+        );
+        first.add('Path:turn.end\r\n\r\n{}');
+        await _waitFor(() => second.sentTexts.length == 2);
+        // Second chunk closes without turn.end and without audio: a
+        // mid-stream disconnect, not a discontinued voice.
+        await second.close();
+
+        await expectLater(
+          resultFuture,
+          throwsA(
+            isA<TtsBackendException>().having(
+              (error) => error.message,
+              'message',
+              'Microsoft Edge Speech ended before synthesis completed.',
+            ),
+          ),
+        );
+        expect(connector.calls, 2);
+      },
+    );
+
+    test(
       'rejects partial audio when Edge stream ends before turn end',
       () async {
         final connection = _FakeEdgeTtsConnection();

@@ -113,14 +113,22 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         voice: voice,
         locale: locale,
       );
-    } on _EdgeEmptyAudioException {
-      // The configured voice no longer exists in Microsoft's catalog: the
-      // server accepts the connection but closes it without any audio.
-      // Retry once with the default voice for the locale before failing.
+    } on _EdgeEmptyAudioException catch (error) {
+      // The server closed the connection without producing any audio, which
+      // is how it signals a voice that is no longer in its catalog. Retry
+      // once with the default voice for the locale before failing. Turns
+      // that legitimately produced silence (e.g. unspeakable text) are not
+      // retryable.
+      if (!error.retryable) {
+        throw _emptyAudioException();
+      }
       final fallback = ReadAloudDefaultResolver.edgePreferenceForLocale(
         appLocaleCode: locale,
       );
-      if (_cancelled || fallback.voiceId == voice) {
+      final sameLanguage =
+          locale.split('-').first.toLowerCase() ==
+          fallback.locale.split('-').first.toLowerCase();
+      if (_cancelled || !sameLanguage || fallback.voiceId == voice) {
         throw _emptyAudioException();
       }
       AppLogger.warn(
@@ -182,7 +190,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       }
       final bytes = audio.takeBytes();
       if (bytes.isEmpty) {
-        throw const _EdgeEmptyAudioException();
+        throw const _EdgeEmptyAudioException(retryable: true);
       }
       return GeneratedTtsAudio(
         bytes: bytes,
@@ -348,7 +356,18 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       }
       if (!receivedTurnEnd) {
         if (audio.length == audioBeforeChunk) {
-          throw const _EdgeEmptyAudioException();
+          // A stream that closed without `turn.end` and without any audio is
+          // the server's signature for a discontinued voice. When earlier
+          // chunks produced audio, this is a mid-stream disconnect instead,
+          // reported as an interruption.
+          if (audio.length == 0) {
+            throw const _EdgeEmptyAudioException(retryable: true);
+          }
+          throw TtsBackendException(
+            TtsBackendErrorKind.providerUnavailable,
+            L10nBridge.current?.speechEdgeSynthesisInterrupted ??
+                'Microsoft Edge Speech ended before synthesis completed.',
+          );
         }
         throw TtsBackendException(
           TtsBackendErrorKind.providerUnavailable,
@@ -360,9 +379,9 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         // A chunk with no speakable content (e.g. emoji or a separator line)
         // legitimately produces no audio. Only fail when it is the sole
         // chunk; the aggregate empty check in _synthesizeAll covers the
-        // all-chunks-silent case.
+        // all-chunks-silent case. A completed turn is not retryable.
         if (chunkCount == 1) {
-          throw const _EdgeEmptyAudioException();
+          throw const _EdgeEmptyAudioException(retryable: false);
         }
         AppLogger.warn(
           'Edge TTS chunk produced no audio',
@@ -624,10 +643,13 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
 }
 
 /// Internal marker for a synthesis that produced no audio at all (stream
-/// closed without `turn.end` or with a turn that carried zero bytes), which
-/// is how the server signals a voice that is no longer in its catalog.
+/// closed without `turn.end`), which is how the server signals a voice that
+/// is no longer in its catalog. [retryable] is false for turns that
+/// completed but legitimately produced silence (e.g. unspeakable text).
 class _EdgeEmptyAudioException implements Exception {
-  const _EdgeEmptyAudioException();
+  const _EdgeEmptyAudioException({required this.retryable});
+
+  final bool retryable;
 }
 
 @visibleForTesting
