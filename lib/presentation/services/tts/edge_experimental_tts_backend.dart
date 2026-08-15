@@ -134,7 +134,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         );
       }
       return GeneratedTtsAudio(
-        bytes: Uint8List.fromList(bytes),
+        bytes: bytes,
         mimeType: kEdgeTtsAudioMimeType,
       );
     } on TimeoutException catch (_) {
@@ -186,10 +186,8 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
   }) async {
     final connectionId = _idProvider().replaceAll('-', '');
     final connection = await _connectWithRetry(connectionId: connectionId);
-    _activeConnection = connection;
 
     try {
-      await connection.ready.timeout(kEdgeTtsConnectTimeout);
       _throwIfCancelled();
       final requestId = _idProvider().replaceAll('-', '');
       connection.sendText(
@@ -218,6 +216,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         },
         tags: <String>{'tts', 'edge'},
       );
+      final audioBeforeChunk = audio.length;
       var receivedTurnEnd = false;
 
       await for (final event in connection.stream.timeout(
@@ -295,7 +294,7 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         );
       }
       if (!receivedTurnEnd) {
-        if (audio.isEmpty) {
+        if (audio.length == audioBeforeChunk) {
           throw TtsBackendException(
             TtsBackendErrorKind.providerUnavailable,
             L10nBridge.current?.speechEdgeEmptyAudio ??
@@ -306,6 +305,13 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
           TtsBackendErrorKind.providerUnavailable,
           L10nBridge.current?.speechEdgeSynthesisInterrupted ??
               'Microsoft Edge Speech ended before synthesis completed.',
+        );
+      }
+      if (audio.length == audioBeforeChunk) {
+        throw TtsBackendException(
+          TtsBackendErrorKind.providerUnavailable,
+          L10nBridge.current?.speechEdgeEmptyAudio ??
+              'Microsoft Edge Speech returned an empty audio response.',
         );
       }
       AppLogger.debug(
@@ -332,40 +338,56 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
 
   /// Opens the websocket, applying one clock-skew retry when the server
   /// rejects the handshake with HTTP 403 and provides a Date header.
+  ///
+  /// The returned connection is already ready and its ownership (closing)
+  /// transfers to the caller. Every failed attempt is closed and detached
+  /// from [_activeConnection] before returning or throwing.
   Future<EdgeTtsWebSocketConnection> _connectWithRetry({
     required String connectionId,
   }) async {
-    EdgeTtsWebSocketConnection? connection;
     for (var attempt = 0; attempt < 2; attempt += 1) {
-      connection = _openConnection(connectionId);
+      _throwIfCancelled();
+      final connection = _openConnection(connectionId);
       try {
         await connection.ready.timeout(kEdgeTtsConnectTimeout);
         return connection;
-      } on EdgeTtsWebSocketUpgradeException catch (error) {
-        AppLogger.warn(
-          'Edge TTS websocket upgrade failed',
-          error: error,
-          metrics: <String, Object?>{
-            'attempt': attempt + 1,
-            'statusCode': error.statusCode,
-            'reason': error.reasonPhrase,
-            'dateHeader': error.dateHeader,
-          },
-          tags: <String>{'tts', 'edge'},
-        );
-        if (!_tryAdjustClockSkew(error) || attempt == 1) {
+      } catch (error, stackTrace) {
+        if (error is EdgeTtsWebSocketUpgradeException) {
+          AppLogger.warn(
+            'Edge TTS websocket upgrade failed',
+            error: error,
+            metrics: <String, Object?>{
+              'attempt': attempt + 1,
+              'statusCode': error.statusCode,
+              'reason': error.reasonPhrase,
+              'dateHeader': error.dateHeader,
+            },
+            tags: <String>{'tts', 'edge'},
+          );
+          if (_tryAdjustClockSkew(error) && attempt == 0) {
+            await _closeAndDetach(connection);
+            continue;
+          }
+          await _closeAndDetach(connection);
           throw TtsBackendException(
             _errorKindForStatus(error.statusCode),
             _upgradeErrorMessage(error),
             statusCode: error.statusCode,
           );
         }
-        try {
-          await connection.close().timeout(
-            const Duration(seconds: 2),
-            onTimeout: () {},
-          );
-        } catch (_) {}
+        AppLogger.warn(
+          'Edge TTS websocket connect failed',
+          error: error,
+          stackTrace: stackTrace,
+          metrics: <String, Object?>{'attempt': attempt + 1},
+          tags: <String>{'tts', 'edge'},
+        );
+        await _closeAndDetach(connection);
+        throw TtsBackendException(
+          TtsBackendErrorKind.network,
+          L10nBridge.current?.speechEdgeUnreachable ??
+              'Microsoft Edge Speech could not be reached.',
+        );
       }
     }
     throw TtsBackendException(
@@ -373,6 +395,18 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
       L10nBridge.current?.speechEdgeUnreachable ??
           'Microsoft Edge Speech could not be reached.',
     );
+  }
+
+  Future<void> _closeAndDetach(EdgeTtsWebSocketConnection connection) async {
+    if (identical(_activeConnection, connection)) {
+      _activeConnection = null;
+    }
+    try {
+      await connection.close().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {},
+      );
+    } catch (_) {}
   }
 
   /// When the handshake fails with HTTP 403 and a parseable `Date` header,

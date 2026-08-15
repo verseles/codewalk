@@ -438,6 +438,183 @@ void main() {
       },
     );
 
+    test('does not retry when 403 lacks a Date header', () async {
+      final rejected = _FakeEdgeTtsConnection(
+        readyError: const EdgeTtsWebSocketUpgradeException(
+          statusCode: 403,
+          reasonPhrase: 'Forbidden',
+        ),
+      );
+      final connector = _FakeConnector(<_FakeEdgeTtsConnection>[rejected]);
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: connector.call,
+        idProvider: ids.next,
+      );
+
+      await expectLater(
+        backend.speakOrSynthesize(
+          const TtsSynthesisRequest(text: 'Hello Edge', rate: 0.5, pitch: 1.0),
+          const TtsBackendCallbacks(),
+        ),
+        throwsA(
+          isA<TtsBackendException>()
+              .having(
+                (error) => error.statusCode,
+                'statusCode',
+                403,
+              )
+              .having(
+                (error) => error.message,
+                'message',
+                contains('HTTP 403'),
+              ),
+        ),
+      );
+      expect(connector.calls, 1);
+      expect(rejected.closed, isTrue);
+    });
+
+    test('surfaces final error when the retried handshake also fails',
+        () async {
+      final first = _FakeEdgeTtsConnection(
+        readyError: const EdgeTtsWebSocketUpgradeException(
+          statusCode: 403,
+          reasonPhrase: 'Forbidden',
+          dateHeader: 'Wed, 08 Jul 2026 17:00:00 GMT',
+        ),
+      );
+      final second = _FakeEdgeTtsConnection(
+        readyError: const EdgeTtsWebSocketUpgradeException(
+          statusCode: 403,
+          reasonPhrase: 'Forbidden',
+          dateHeader: 'Wed, 08 Jul 2026 17:00:00 GMT',
+        ),
+      );
+      final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+        first,
+        second,
+      ]);
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: connector.call,
+        idProvider: ids.next,
+      );
+
+      await expectLater(
+        backend.speakOrSynthesize(
+          const TtsSynthesisRequest(text: 'Hello Edge', rate: 0.5, pitch: 1.0),
+          const TtsBackendCallbacks(),
+        ),
+        throwsA(
+          isA<TtsBackendException>()
+              .having(
+                (error) => error.statusCode,
+                'statusCode',
+                403,
+              )
+              .having(
+                (error) => error.kind,
+                'kind',
+                TtsBackendErrorKind.providerUnavailable,
+              ),
+        ),
+      );
+      expect(connector.calls, 2);
+      expect(first.closed, isTrue);
+      expect(second.closed, isTrue);
+    });
+
+    test('stop between chunks aborts before opening the next connection',
+        () async {
+      final first = _FakeEdgeTtsConnection();
+      final second = _FakeEdgeTtsConnection();
+      final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+        first,
+        second,
+      ]);
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+        '33333333333333333333333333333333',
+        '44444444444444444444444444444444',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: connector.call,
+        idProvider: ids.next,
+      );
+      final longText = List<String>.filled(
+        kEdgeTtsMaxInputBytes + 100,
+        'a',
+      ).join();
+
+      final resultFuture = backend.speakOrSynthesize(
+        TtsSynthesisRequest(text: longText, rate: 0.5, pitch: 1.0),
+        const TtsBackendCallbacks(),
+      );
+      await _waitFor(() => first.sentTexts.length == 2);
+      first.add(
+        buildEdgeTtsBinaryFrameForTest(
+          headers: const <String, String>{
+            'Path': 'audio',
+            'Content-Type': kEdgeTtsAudioMimeType,
+          },
+          audioBytes: const <int>[1, 2],
+        ),
+      );
+      first.add('Path:turn.end\r\n\r\n{}');
+      await backend.stop();
+
+      await expectLater(
+        resultFuture,
+        throwsA(
+          isA<TtsBackendException>().having(
+            (error) => error.message,
+            'message',
+            'Microsoft Edge Speech was cancelled.',
+          ),
+        ),
+      );
+      expect(connector.calls, 1);
+      expect(second.closed, isFalse);
+    });
+
+    test('rejects a chunk that ends with turn.end but zero audio', () async {
+      final connection = _FakeEdgeTtsConnection();
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: (_) => connection,
+        idProvider: ids.next,
+      );
+
+      final resultFuture = backend.speakOrSynthesize(
+        const TtsSynthesisRequest(text: 'Hello Edge', rate: 0.5, pitch: 1.0),
+        const TtsBackendCallbacks(),
+      );
+      await Future<void>.delayed(Duration.zero);
+      connection.add('Path:turn.end\r\n\r\n{}');
+
+      await expectLater(
+        resultFuture,
+        throwsA(
+          isA<TtsBackendException>().having(
+            (error) => error.message,
+            'message',
+            'Microsoft Edge Speech returned an empty audio response.',
+          ),
+        ),
+      );
+    });
+
     test('stop closes active Edge websocket connection', () async {
       final connection = _FakeEdgeTtsConnection();
       final ids = _IdSequence(<String>[

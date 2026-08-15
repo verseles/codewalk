@@ -130,14 +130,35 @@ void main() {
         kEdgeTtsMaxInputBytes,
         'a',
       ).join();
-      final tooLongText = List<String>.filled(
-        kEdgeTtsMaxInputBytes + 1,
-        'a',
-      ).join();
 
-      expect(edgeTtsInputByteLength('abc\u0001'), 3);
-      expect(isEdgeTtsInputTooLong(maxLengthText), isFalse);
-      expect(isEdgeTtsInputTooLong(tooLongText), isTrue);
+      expect(splitEdgeTtsTextChunks(maxLengthText), hasLength(1));
+      expect(
+        splitEdgeTtsTextChunks('$maxLengthText a'),
+        hasLength(2),
+      );
+      expect(edgeTtsEscapedByteLength('abc'), 3);
+      expect(edgeTtsEscapedByteLength('a&b'), 7);
+    });
+
+    test('splits by escaped byte length, not raw characters', () {
+      // '&' escapes to '&amp;' (5 bytes each), so 1200 ampersands are
+      // ~6000 escaped bytes and must span multiple chunks.
+      final chunks = splitEdgeTtsTextChunks('&' * 1200);
+
+      expect(chunks.length, greaterThan(1));
+      for (final chunk in chunks) {
+        expect(
+          edgeTtsEscapedByteLength(chunk),
+          lessThanOrEqualTo(kEdgeTtsMaxInputBytes),
+        );
+      }
+      expect(chunks.join().length, 1200);
+    });
+
+    test('rejects impossible HTTP dates like February 31', () {
+      expect(parseEdgeTtsHttpDate('Tue, 31 Feb 2026 17:00:00 GMT'), isNull);
+      expect(parseEdgeTtsHttpDate('Tue, 31 Apr 2026 17:00:00 GMT'), isNull);
+      expect(parseEdgeTtsHttpDate('Wed, 08 Jul 2026 25:00:00 GMT'), isNull);
     });
   });
 }

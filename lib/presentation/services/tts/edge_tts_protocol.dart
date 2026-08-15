@@ -217,14 +217,6 @@ String escapeEdgeTtsXml(String value) {
       .replaceAll("'", '&apos;');
 }
 
-int edgeTtsInputByteLength(String value) {
-  return utf8.encode(stripEdgeTtsControlChars(value)).length;
-}
-
-bool isEdgeTtsInputTooLong(String value) {
-  return edgeTtsInputByteLength(value) > kEdgeTtsMaxInputBytes;
-}
-
 const Map<String, String> _edgeTtsXmlEscapeMap = <String, String>{
   '&': '&amp;',
   '<': '&lt;',
@@ -238,11 +230,18 @@ const Map<String, String> _edgeTtsXmlEscapeMap = <String, String>{
 int edgeTtsEscapedByteLength(String value) {
   var length = 0;
   for (final rune in value.runes) {
-    final char = String.fromCharCode(rune);
-    final escaped = _edgeTtsXmlEscapeMap[char];
-    length += utf8.encode(escaped ?? char).length;
+    final escaped = _edgeTtsXmlEscapeMap[String.fromCharCode(rune)];
+    // All XML entities are pure ASCII, so code unit length == byte length.
+    length += escaped == null ? _edgeTtsUtf8ByteLength(rune) : escaped.length;
   }
   return length;
+}
+
+int _edgeTtsUtf8ByteLength(int rune) {
+  if (rune < 0x80) return 1;
+  if (rune < 0x800) return 2;
+  if (rune < 0x10000) return 3;
+  return 4;
 }
 
 /// Splits [text] (after control character cleanup) into chunks whose
@@ -264,16 +263,27 @@ List<String> splitEdgeTtsTextChunks(
   }
   final chunks = <String>[];
   var remaining = cleaned;
-  while (edgeTtsEscapedByteLength(remaining) > maxBytes) {
+  var remainingBytes = edgeTtsEscapedByteLength(remaining);
+  while (remainingBytes > maxBytes) {
     final splitAt = _findEdgeTtsSplitPoint(remaining, maxBytes);
     if (splitAt <= 0) {
-      break;
+      // No single rune fits (maxBytes smaller than the first escaped rune):
+      // advance by one rune so the loop always makes progress.
+      final firstRuneLength = remaining.runes.first <= 0xFFFF ? 1 : 2;
+      final chunk = remaining.substring(0, firstRuneLength);
+      if (chunk.trim().isNotEmpty) {
+        chunks.add(chunk.trim());
+      }
+      remaining = remaining.substring(firstRuneLength);
+      remainingBytes = edgeTtsEscapedByteLength(remaining);
+      continue;
     }
     final chunk = remaining.substring(0, splitAt).trim();
     if (chunk.isNotEmpty) {
       chunks.add(chunk);
     }
     remaining = remaining.substring(splitAt).trimLeft();
+    remainingBytes = edgeTtsEscapedByteLength(remaining);
   }
   if (remaining.isNotEmpty) {
     chunks.add(remaining);
@@ -288,25 +298,27 @@ int _findEdgeTtsSplitPoint(String text, int maxBytes) {
   var byteLength = 0;
   var offset = 0;
   for (final rune in text.runes) {
-    final char = String.fromCharCode(rune);
-    final escaped = _edgeTtsXmlEscapeMap[char];
-    byteLength += utf8.encode(escaped ?? char).length;
+    final escaped = _edgeTtsXmlEscapeMap[String.fromCharCode(rune)];
+    byteLength += escaped == null
+        ? _edgeTtsUtf8ByteLength(rune)
+        : escaped.length;
     if (byteLength > maxBytes) {
-      if (lastNewline >= 0) {
+      if (lastNewline > 0) {
         return lastNewline;
       }
-      if (lastSpace >= 0) {
+      if (lastSpace > 0) {
         return lastSpace;
       }
       return lastFitting;
     }
-    lastFitting = offset + char.length;
-    if (char == '\n') {
+    final codeUnits = rune <= 0xFFFF ? 1 : 2;
+    lastFitting = offset + codeUnits;
+    if (rune == 0x0A) {
       lastNewline = offset;
-    } else if (char == ' ') {
+    } else if (rune == 0x20) {
       lastSpace = offset;
     }
-    offset += char.length;
+    offset += codeUnits;
   }
   return text.length;
 }
@@ -318,6 +330,9 @@ const List<String> _edgeTtsHttpMonths = <String>[
 
 /// Parses an RFC 7231 HTTP date header such as
 /// `Wed, 08 Jul 2026 16:00:00 GMT` into a UTC [DateTime].
+///
+/// Returns `null` for malformed input and for impossible calendar dates
+/// (e.g. `31 Feb`) so callers never apply a wrong clock skew.
 DateTime? parseEdgeTtsHttpDate(String value) {
   final match = RegExp(
     r'(\d{2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',
@@ -337,7 +352,11 @@ DateTime? parseEdgeTtsHttpDate(String value) {
   if (day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59) {
     return null;
   }
-  return DateTime.utc(year, month + 1, day, hour, minute, second);
+  final parsed = DateTime.utc(year, month + 1, day, hour, minute, second);
+  if (parsed.day != day || parsed.month != month + 1) {
+    return null;
+  }
+  return parsed;
 }
 
 double edgeTtsRatePercentFromReadAloudRate(double rate) {
