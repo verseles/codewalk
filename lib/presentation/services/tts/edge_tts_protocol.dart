@@ -217,26 +217,6 @@ String escapeEdgeTtsXml(String value) {
       .replaceAll("'", '&apos;');
 }
 
-const Map<String, String> _edgeTtsXmlEscapeMap = <String, String>{
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&apos;',
-};
-
-/// Byte length of [value] after XML escaping, matching what the server
-/// receives inside the SSML payload.
-int edgeTtsEscapedByteLength(String value) {
-  var length = 0;
-  for (final rune in value.runes) {
-    final escaped = _edgeTtsXmlEscapeMap[String.fromCharCode(rune)];
-    // All XML entities are pure ASCII, so code unit length == byte length.
-    length += escaped == null ? _edgeTtsUtf8ByteLength(rune) : escaped.length;
-  }
-  return length;
-}
-
 int _edgeTtsUtf8ByteLength(int rune) {
   if (rune < 0x80) return 1;
   if (rune < 0x800) return 2;
@@ -244,12 +224,47 @@ int _edgeTtsUtf8ByteLength(int rune) {
   return 4;
 }
 
+int _edgeTtsRuneEscapedByteLength(int rune) {
+  switch (rune) {
+    case 0x26: // &
+      return 5; // &amp;
+    case 0x3C: // <
+      return 4; // &lt;
+    case 0x3E: // >
+      return 4; // &gt;
+    case 0x22: // "
+      return 6; // &quot;
+    case 0x27: // '
+      return 6; // &apos;
+    default:
+      return _edgeTtsUtf8ByteLength(rune);
+  }
+}
+
+/// Byte length of [value] after XML escaping, matching what the server
+/// receives inside the SSML payload.
+int edgeTtsEscapedByteLength(String value) {
+  var length = 0;
+  for (final rune in value.runes) {
+    length += _edgeTtsRuneEscapedByteLength(rune);
+  }
+  return length;
+}
+
+bool _edgeTtsIsAsciiWhitespace(int codeUnit) {
+  return codeUnit == 0x20 ||
+      (codeUnit >= 0x09 && codeUnit <= 0x0D);
+}
+
 /// Splits [text] (after control character cleanup) into chunks whose
 /// XML-escaped byte length never exceeds [maxBytes].
 ///
 /// Splits prefer newlines, then spaces; when no natural boundary fits, the
 /// chunk is cut on a UTF-8 safe boundary. Since escaping happens per chunk,
-/// XML entities can never be split. Returns an empty list for empty input.
+/// XML entities can never be split. When a single escaped rune is itself
+/// larger than [maxBytes] (only possible with tiny limits), that rune is
+/// emitted as its own over-limit chunk so the split always terminates.
+/// Returns an empty list for empty input.
 List<String> splitEdgeTtsTextChunks(
   String text, {
   int maxBytes = kEdgeTtsMaxInputBytes,
@@ -258,69 +273,79 @@ List<String> splitEdgeTtsTextChunks(
     throw ArgumentError.value(maxBytes, 'maxBytes', 'must be positive');
   }
   final cleaned = stripEdgeTtsControlChars(text);
+  if (cleaned.isEmpty) {
+    return const <String>[];
+  }
   if (edgeTtsEscapedByteLength(cleaned) <= maxBytes) {
-    return cleaned.isEmpty ? <String>[] : <String>[cleaned];
+    return <String>[cleaned];
   }
   final chunks = <String>[];
-  var remaining = cleaned;
-  var remainingBytes = edgeTtsEscapedByteLength(remaining);
-  while (remainingBytes > maxBytes) {
-    final splitAt = _findEdgeTtsSplitPoint(remaining, maxBytes);
-    if (splitAt <= 0) {
-      // No single rune fits (maxBytes smaller than the first escaped rune):
-      // advance by one rune so the loop always makes progress.
-      final firstRuneLength = remaining.runes.first <= 0xFFFF ? 1 : 2;
-      final chunk = remaining.substring(0, firstRuneLength);
-      if (chunk.trim().isNotEmpty) {
-        chunks.add(chunk.trim());
-      }
-      remaining = remaining.substring(firstRuneLength);
-      remainingBytes = edgeTtsEscapedByteLength(remaining);
-      continue;
-    }
-    final chunk = remaining.substring(0, splitAt).trim();
-    if (chunk.isNotEmpty) {
-      chunks.add(chunk);
-    }
-    remaining = remaining.substring(splitAt).trimLeft();
-    remainingBytes = edgeTtsEscapedByteLength(remaining);
-  }
-  if (remaining.isNotEmpty) {
-    chunks.add(remaining);
-  }
-  return chunks;
-}
-
-int _findEdgeTtsSplitPoint(String text, int maxBytes) {
+  final units = cleaned;
+  var start = 0;
+  var i = 0;
+  var segmentBytes = 0;
   var lastNewline = -1;
   var lastSpace = -1;
   var lastFitting = 0;
-  var byteLength = 0;
-  var offset = 0;
-  for (final rune in text.runes) {
-    final escaped = _edgeTtsXmlEscapeMap[String.fromCharCode(rune)];
-    byteLength += escaped == null
-        ? _edgeTtsUtf8ByteLength(rune)
-        : escaped.length;
-    if (byteLength > maxBytes) {
-      if (lastNewline > 0) {
-        return lastNewline;
+  while (i < units.length) {
+    final unit = units.codeUnitAt(i);
+    var rune = unit;
+    var width = 1;
+    if (unit >= 0xD800 && unit <= 0xDBFF && i + 1 < units.length) {
+      final low = units.codeUnitAt(i + 1);
+      if (low >= 0xDC00 && low <= 0xDFFF) {
+        rune = 0x10000 + ((unit - 0xD800) << 10) + (low - 0xDC00);
+        width = 2;
       }
-      if (lastSpace > 0) {
-        return lastSpace;
-      }
-      return lastFitting;
     }
-    final codeUnits = rune <= 0xFFFF ? 1 : 2;
-    lastFitting = offset + codeUnits;
+    final runeBytes = _edgeTtsRuneEscapedByteLength(rune);
+    if (segmentBytes + runeBytes > maxBytes) {
+      var cut = lastFitting;
+      if (lastNewline > start) {
+        cut = lastNewline;
+      } else if (lastSpace > start) {
+        cut = lastSpace;
+      }
+      if (cut > start) {
+        final chunk = units.substring(start, cut).trim();
+        if (chunk.isNotEmpty) {
+          chunks.add(chunk);
+        }
+        var next = cut;
+        while (next < units.length && _edgeTtsIsAsciiWhitespace(units.codeUnitAt(next))) {
+          next += 1;
+        }
+        start = next;
+      } else {
+        final chunk = units.substring(start, start + width).trim();
+        if (chunk.isNotEmpty) {
+          chunks.add(chunk);
+        }
+        start += width;
+      }
+      segmentBytes = 0;
+      lastNewline = -1;
+      lastSpace = -1;
+      lastFitting = -1;
+      i = start;
+      continue;
+    }
+    segmentBytes += runeBytes;
+    lastFitting = i + width;
     if (rune == 0x0A) {
-      lastNewline = offset;
+      lastNewline = i;
     } else if (rune == 0x20) {
-      lastSpace = offset;
+      lastSpace = i;
     }
-    offset += codeUnits;
+    i += width;
   }
-  return text.length;
+  if (start < units.length) {
+    final tail = units.substring(start).trim();
+    if (tail.isNotEmpty) {
+      chunks.add(tail);
+    }
+  }
+  return chunks;
 }
 
 const List<String> _edgeTtsHttpMonths = <String>[

@@ -615,6 +615,53 @@ void main() {
       );
     });
 
+    test('keeps audio from earlier chunks when a later chunk is silent',
+        () async {
+      final first = _FakeEdgeTtsConnection();
+      final second = _FakeEdgeTtsConnection();
+      final connector = _FakeConnector(<_FakeEdgeTtsConnection>[
+        first,
+        second,
+      ]);
+      final ids = _IdSequence(<String>[
+        '11111111111111111111111111111111',
+        '22222222222222222222222222222222',
+        '33333333333333333333333333333333',
+        '44444444444444444444444444444444',
+      ]);
+      final backend = EdgeExperimentalTtsBackend(
+        connector: connector.call,
+        idProvider: ids.next,
+      );
+      final longText = List<String>.filled(
+        kEdgeTtsMaxInputBytes + 100,
+        'a',
+      ).join();
+
+      final resultFuture = backend.speakOrSynthesize(
+        TtsSynthesisRequest(text: longText, rate: 0.5, pitch: 1.0),
+        const TtsBackendCallbacks(),
+      );
+      await _waitFor(() => first.sentTexts.length == 2);
+      first.add(
+        buildEdgeTtsBinaryFrameForTest(
+          headers: const <String, String>{
+            'Path': 'audio',
+            'Content-Type': kEdgeTtsAudioMimeType,
+          },
+          audioBytes: const <int>[1, 2],
+        ),
+      );
+      first.add('Path:turn.end\r\n\r\n{}');
+      await _waitFor(() => second.sentTexts.length == 2);
+      second.add('Path:turn.end\r\n\r\n{}');
+
+      final result = await resultFuture;
+      expect(result, isA<GeneratedTtsAudio>());
+      final audio = result as GeneratedTtsAudio;
+      expect(audio.bytes, orderedEquals(<int>[1, 2]));
+    });
+
     test('stop closes active Edge websocket connection', () async {
       final connection = _FakeEdgeTtsConnection();
       final ids = _IdSequence(<String>[

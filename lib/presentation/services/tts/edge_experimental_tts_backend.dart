@@ -308,21 +308,36 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
         );
       }
       if (audio.length == audioBeforeChunk) {
-        throw TtsBackendException(
-          TtsBackendErrorKind.providerUnavailable,
-          L10nBridge.current?.speechEdgeEmptyAudio ??
-              'Microsoft Edge Speech returned an empty audio response.',
+        // A chunk with no speakable content (e.g. emoji or a separator line)
+        // legitimately produces no audio. Only fail when it is the sole
+        // chunk; the aggregate empty check in speakOrSynthesize covers the
+        // all-chunks-silent case.
+        if (chunkCount == 1) {
+          throw TtsBackendException(
+            TtsBackendErrorKind.providerUnavailable,
+            L10nBridge.current?.speechEdgeEmptyAudio ??
+                'Microsoft Edge Speech returned an empty audio response.',
+          );
+        }
+        AppLogger.warn(
+          'Edge TTS chunk produced no audio',
+          metrics: <String, Object?>{
+            'chunk': chunkIndex + 1,
+            'chunks': chunkCount,
+          },
+          tags: <String>{'tts', 'edge'},
+        );
+      } else {
+        AppLogger.debug(
+          'Edge TTS turn.end received',
+          metrics: <String, Object?>{
+            'chunk': chunkIndex + 1,
+            'chunks': chunkCount,
+            'audioBytes': audio.length - audioBeforeChunk,
+          },
+          tags: <String>{'tts', 'edge'},
         );
       }
-      AppLogger.debug(
-        'Edge TTS turn.end received',
-        metrics: <String, Object?>{
-          'chunk': chunkIndex + 1,
-          'chunks': chunkCount,
-          'audioBytes': audio.length,
-        },
-        tags: <String>{'tts', 'edge'},
-      );
     } finally {
       if (identical(_activeConnection, connection)) {
         _activeConnection = null;
@@ -369,6 +384,13 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
             continue;
           }
           await _closeAndDetach(connection);
+          if (_cancelled) {
+            throw TtsBackendException(
+              TtsBackendErrorKind.providerUnavailable,
+              L10nBridge.current?.speechEdgeCancelled ??
+                  'Microsoft Edge Speech was cancelled.',
+            );
+          }
           throw TtsBackendException(
             _errorKindForStatus(error.statusCode),
             _upgradeErrorMessage(error),
@@ -383,6 +405,20 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
           tags: <String>{'tts', 'edge'},
         );
         await _closeAndDetach(connection);
+        if (_cancelled) {
+          throw TtsBackendException(
+            TtsBackendErrorKind.providerUnavailable,
+            L10nBridge.current?.speechEdgeCancelled ??
+                'Microsoft Edge Speech was cancelled.',
+          );
+        }
+        if (error is TimeoutException) {
+          throw TtsBackendException(
+            TtsBackendErrorKind.network,
+            L10nBridge.current?.speechEdgeTimedOut ??
+                'Microsoft Edge Speech timed out.',
+          );
+        }
         throw TtsBackendException(
           TtsBackendErrorKind.network,
           L10nBridge.current?.speechEdgeUnreachable ??
