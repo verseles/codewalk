@@ -390,6 +390,8 @@ class ChatProvider extends ChangeNotifier {
   // Coalesces overlapping pending-interaction loads (same effective scope).
   Future<void>? _pendingInteractionsLoadInFlight;
   bool? _pendingInteractionsLoadVisibleOnly;
+  String? _pendingInteractionsLoadContextKey;
+  String? _pendingInteractionsLoadSessionId;
   final Set<String> _sessionUnreadCompletionIds = <String>{};
   final Map<String, DateTime> _sessionUnreadCompletionTimestamps =
       <String, DateTime>{};

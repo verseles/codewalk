@@ -500,14 +500,20 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
   // Coalesces overlapping pending-interaction loads: startup, session
   // switches, degraded polls, and the retry timer can all fire concurrently,
   // and sharing one in-flight future avoids duplicate GET /permission +
-  // GET /question pairs (issue #143). The inner load keeps the generation
+  // GET /question pairs (issue #143). Coalescing is keyed by the effective
+  // scope (context, and visible session for visible-only loads) so a load
+  // started for a previous context can never absorb — and then discard —
+  // the fresh load a new context needs. The inner load keeps the generation
   // guard so stale results are still discarded.
   Future<void> _loadPendingInteractions({
     bool visibleSessionOnly = false,
   }) {
     final inFlight = _pendingInteractionsLoadInFlight;
     if (inFlight != null &&
-        _pendingInteractionsLoadVisibleOnly == visibleSessionOnly) {
+        _pendingInteractionsLoadVisibleOnly == visibleSessionOnly &&
+        _pendingInteractionsLoadContextKey == _activeContextKey &&
+        (!visibleSessionOnly ||
+            _pendingInteractionsLoadSessionId == _currentSession?.id)) {
       return inFlight;
     }
     final future = _loadPendingInteractionsInner(
@@ -515,10 +521,14 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     );
     _pendingInteractionsLoadInFlight = future;
     _pendingInteractionsLoadVisibleOnly = visibleSessionOnly;
+    _pendingInteractionsLoadContextKey = _activeContextKey;
+    _pendingInteractionsLoadSessionId = _currentSession?.id;
     future.whenComplete(() {
       if (identical(_pendingInteractionsLoadInFlight, future)) {
         _pendingInteractionsLoadInFlight = null;
         _pendingInteractionsLoadVisibleOnly = null;
+        _pendingInteractionsLoadContextKey = null;
+        _pendingInteractionsLoadSessionId = null;
       }
     });
     return future;
