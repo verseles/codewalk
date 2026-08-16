@@ -33,14 +33,19 @@ const double _kSessionTabWidth = 244 * 1.3;
 const double _kCompactSessionTabWidth = 214 * 1.3;
 const double _kPinnedSessionTabWidth = 36;
 const double _kPinnedInactiveTabInset = 4;
-// Floor for regular tabs: the largest selected-tab chrome is 10px start
-// padding + 28px leading box + 7px + 2px gaps + the trailing usage button
-// (40px compact / 32px desktop, plus 10px padding) = 97px worst case. 150
-// desktop / 140 compact keep a readable title area (61px desktop / 43px
-// compact) while short titles still shrink the tab; compact trades title
-// room for strip capacity.
+// Floor for regular tabs WITH the trailing usage knob (the selected tab):
+// chrome is 10px start padding + 28px leading box + 7px + 2px gaps + the
+// trailing usage button (40px compact / 32px desktop, plus 10px padding) =
+// 89px desktop / 97px compact. 150 / 140 leave a readable title area
+// (61px desktop / 43px compact) while short titles still shrink the tab.
 const double _kMinimumSessionTabWidth = 150;
 const double _kMinimumCompactSessionTabWidth = 140;
+// Floor for tabs WITHOUT the knob (inactive): chrome is 10 + 28 + 7 + 2 + 10
+// = 57px, so 120 desktop leaves 63px of title area (close to the selected
+// tab's 61px) and 100 compact leaves 43px (equal to the selected tab's).
+// Production guarantees trailing == null exactly for inactive tabs.
+const double _kMinimumInactiveSessionTabWidth = 120;
+const double _kMinimumInactiveCompactSessionTabWidth = 100;
 // Guards against float rounding engaging the ellipsis at the exact fit.
 const double _kTabWidthSlack = 1.0;
 // Floor for the expanded selected pinned tab: the fixed content is 10px inset
@@ -236,11 +241,8 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         final maxTabWidth = widget.isCompact
             ? _kCompactSessionTabWidth
             : _kSessionTabWidth;
-        final minTabWidth = widget.isCompact
-            ? _kMinimumCompactSessionTabWidth
-            : _kMinimumSessionTabWidth;
         // The viewport still caps the maximum so the strip stays responsive
-        // to the available width; tabs never compress below the minimum.
+        // to the available width; tabs never compress below their floor.
         final effectiveMaxTabWidth = math.min(
           maxTabWidth,
           math.max(0.0, constraints.maxWidth - horizontalPadding * 2),
@@ -273,7 +275,6 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                 selectedPinned,
                 selectedPinnedTrailing,
                 maxTabWidth: effectiveMaxTabWidth,
-                minTabWidth: minTabWidth,
               );
         final desiredPinnedWidth =
             inactivePinnedWidth + selectedPinnedContentWidth;
@@ -318,7 +319,6 @@ class _SessionTabStripState extends State<SessionTabStrip> {
               tab,
               trailing,
               maxTabWidth: effectiveMaxTabWidth,
-              minTabWidth: minTabWidth,
             ),
             trailing: trailing,
           ));
@@ -512,22 +512,30 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     return width;
   }
 
-  /// Width derived from the tab content, clamped between the minimum and the
+  /// Width derived from the tab content, clamped between a floor and the
   /// maximum. Only the first line of the title is measured because the tab
   /// paints a single ellipsized line. The trailing usage button width is fixed
   /// in production (40px compact / 32px desktop, plus 10px padding); a custom
-  /// trailing builder only needs to stay within those bounds.
+  /// trailing builder only needs to stay within those bounds. Tabs without a
+  /// trailing control use the smaller floor because they do not reserve the
+  /// knob's space.
   double _contentTabWidth(
     BuildContext context,
     SessionTabRecord tab,
     Widget? trailing, {
     required double maxTabWidth,
-    required double minTabWidth,
   }) {
     final trailingWidth = trailing == null
         ? _kTabShoulder
         : (widget.isCompact ? 40.0 : 32.0) + _kTabShoulder;
     final chrome = _kTabShoulder + 28 + 7 + 2 + trailingWidth;
+    final minTabWidth = trailing == null
+        ? (widget.isCompact
+            ? _kMinimumInactiveCompactSessionTabWidth
+            : _kMinimumInactiveSessionTabWidth)
+        : (widget.isCompact
+            ? _kMinimumCompactSessionTabWidth
+            : _kMinimumSessionTabWidth);
     final title = _displayTitle(context, tab).split('\n').first;
     final titleWidth = _measureTitleWidth(context, title, tab.isSelected);
     // The minimum is applied last so a viewport narrower than the minimum

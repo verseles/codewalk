@@ -1219,7 +1219,7 @@ void main() {
           )
           .width;
       // The minimum is a fixed floor for one-character titles.
-      expect(widthOf(tabs[0]), moreOrLessEquals(150, epsilon: 0.01));
+      expect(widthOf(tabs[0]), moreOrLessEquals(120, epsilon: 0.01));
       // Content-derived widths sit between the floor and the cap.
       expect(
         widthOf(tabs[1]),
@@ -1232,6 +1232,158 @@ void main() {
       expect(widthOf(tabs[2]), moreOrLessEquals(317.2, epsilon: 0.01));
     },
   );
+
+  testWidgets('inactive tab without knob uses the smaller floor while the selected tab keeps the knob floor', (
+    tester,
+  ) async {
+    final inactive = _tab('inactive', title: 'A');
+    final selected = _tab('selected', title: 'A', isSelected: true);
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[inactive, selected],
+        trailingBuilder: (context, tab) => tab.isSelected
+            ? const SizedBox(
+                key: ValueKey<String>('usage_trailing'),
+                width: 32,
+                height: 32,
+              )
+            : null,
+      ),
+    );
+    await tester.pump();
+
+    double widthOf(SessionTabRecord tab) => tester
+        .getSize(
+          find.byKey(
+            ValueKey<String>(
+              'session_tab_${sessionTabIdentityKey(tab.identity)}',
+            ),
+          ),
+        )
+        .width;
+    expect(widthOf(inactive), moreOrLessEquals(120, epsilon: 0.01));
+    expect(widthOf(selected), moreOrLessEquals(150, epsilon: 0.01));
+  });
+
+  testWidgets('compact inactive tab without knob uses the smaller floor', (
+    tester,
+  ) async {
+    final inactive = _tab('inactive', title: 'A');
+    final selected = _tab('selected', title: 'A', isSelected: true);
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[inactive, selected],
+        isCompact: true,
+        trailingBuilder: (context, tab) => tab.isSelected
+            ? const SizedBox(
+                key: ValueKey<String>('usage_trailing'),
+                width: 40,
+                height: 40,
+              )
+            : null,
+      ),
+    );
+    await tester.pump();
+
+    double widthOf(SessionTabRecord tab) => tester
+        .getSize(
+          find.byKey(
+            ValueKey<String>(
+              'session_tab_${sessionTabIdentityKey(tab.identity)}',
+            ),
+          ),
+        )
+        .width;
+    expect(widthOf(inactive), moreOrLessEquals(100, epsilon: 0.01));
+    expect(widthOf(selected), moreOrLessEquals(140, epsilon: 0.01));
+  });
+
+  testWidgets('selecting a tab swaps which tab reserves the knob width', (
+    tester,
+  ) async {
+    var tabs = <SessionTabRecord>[
+      _tab('a', title: 'A', isSelected: true),
+      _tab('b', title: 'A'),
+    ];
+    late void Function(VoidCallback fn) rebuild;
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SessionTabStrip(
+                tabs: tabs,
+                projects: const [],
+                openProjectIds: const <String>{},
+                isCompact: false,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (tab, position, {required haptic}) async {},
+                trailingBuilder: (context, tab) => tab.isSelected
+                    ? const SizedBox(
+                        key: ValueKey<String>('usage_trailing'),
+                        width: 32,
+                        height: 32,
+                      )
+                    : null,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    double widthOf(int index) => tester
+        .getSize(
+          find.byKey(
+            ValueKey<String>(
+              'session_tab_${sessionTabIdentityKey(tabs[index].identity)}',
+            ),
+          ),
+        )
+        .width;
+    expect(widthOf(0), moreOrLessEquals(150, epsilon: 0.01));
+    expect(widthOf(1), moreOrLessEquals(120, epsilon: 0.01));
+
+    rebuild(() {
+      tabs = [
+        _tab('a', title: 'A'),
+        _tab('b', title: 'A', isSelected: true),
+      ];
+    });
+    await tester.pump();
+
+    expect(widthOf(0), moreOrLessEquals(120, epsilon: 0.01));
+    expect(widthOf(1), moreOrLessEquals(150, epsilon: 0.01));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a selected tab whose trailing builder returns null uses the smaller floor', (
+    tester,
+  ) async {
+    final tab = _tab('selected', title: 'A', isSelected: true);
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
+    await tester.pump();
+
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(120, epsilon: 0.01),
+    );
+  });
 
   testWidgets('selected tab reserves the trailing usage button width', (
     tester,
@@ -1273,7 +1425,7 @@ void main() {
     expect(
       widthOf(selected),
       moreOrLessEquals(
-        _expectedContentWidth(tester, 'Session X', selected: true),
+        _expectedContentWidth(tester, 'Session X', selected: true, hasTrailing: true),
         epsilon: 0.01,
       ),
     );
@@ -1295,7 +1447,7 @@ void main() {
             ),
           )
           .width,
-      moreOrLessEquals(140, epsilon: 0.01),
+      moreOrLessEquals(100, epsilon: 0.01),
     );
 
     final medium = _tab('medium', title: 'Session X');
@@ -1342,7 +1494,7 @@ void main() {
               ),
             )
             .width,
-        moreOrLessEquals(150, epsilon: 0.01),
+        moreOrLessEquals(120, epsilon: 0.01),
       );
     }
     final scrollable = tester.state<ScrollableState>(
@@ -1365,9 +1517,9 @@ void main() {
         (index) => _tab('short_$index', title: 'A'),
       );
 
-      // 140px viewport minus 16px padding caps the maximum at 124px, below
-      // the 150px minimum: tabs must stay at their floor and scroll.
-      await tester.pumpWidget(_app(tabs: tabs, width: 140));
+      // 100px viewport minus 16px padding caps the maximum at 84px, below
+      // the 120px inactive floor: tabs must stay at their floor and scroll.
+      await tester.pumpWidget(_app(tabs: tabs, width: 100));
       await tester.pump();
 
       for (final tab in tabs) {
@@ -1381,7 +1533,7 @@ void main() {
                 ),
               )
               .width,
-          moreOrLessEquals(150, epsilon: 0.01),
+          moreOrLessEquals(120, epsilon: 0.01),
         );
       }
       final scrollable = tester.state<ScrollableState>(
@@ -1499,7 +1651,7 @@ void main() {
           ),
         )
         .width;
-    expect(widthOf(short), moreOrLessEquals(150, epsilon: 0.01));
+    expect(widthOf(short), moreOrLessEquals(120, epsilon: 0.01));
     expect(
       widthOf(medium),
       moreOrLessEquals(
@@ -1571,7 +1723,7 @@ void main() {
       tester
           .getSize(find.byKey(const ValueKey<String>('session_tab_strip')))
           .width,
-      moreOrLessEquals(316, epsilon: 0.01),
+      moreOrLessEquals(256, epsilon: 0.01),
     );
   });
 
@@ -1603,7 +1755,7 @@ void main() {
           )
           .width,
       moreOrLessEquals(
-        _expectedContentWidth(tester, 'Short', selected: true),
+        _expectedContentWidth(tester, 'Short', selected: true, hasTrailing: true),
         epsilon: 0.01,
       ),
     );
@@ -1614,7 +1766,7 @@ void main() {
           )
           .width,
       moreOrLessEquals(
-        _expectedContentWidth(tester, 'Short', selected: true),
+        _expectedContentWidth(tester, 'Short', selected: true, hasTrailing: true),
         epsilon: 0.01,
       ),
     );
@@ -1720,7 +1872,13 @@ void main() {
                 onActivate: (_) {},
                 onClose: (_) {},
                 onContextMenu: (tab, position, {required haptic}) async {},
-                trailingBuilder: (context, tab) => null,
+                trailingBuilder: (context, tab) => tab.isSelected
+                    ? const SizedBox(
+                        key: ValueKey<String>('usage_trailing'),
+                        width: 32,
+                        height: 32,
+                      )
+                    : null,
               );
             },
           ),
@@ -1737,7 +1895,8 @@ void main() {
         matching: find.byType(Scrollable),
       ),
     );
-    // The selected tab [150, 300] is fully visible inside [50, 354].
+    // The selected tab (with knob, floor 150) spans [120, 270] and is fully
+    // visible inside [50, 354].
     scrollable.position.jumpTo(50);
     await tester.pump();
 
@@ -1761,6 +1920,73 @@ void main() {
       scrollable.position.pixels,
       moreOrLessEquals(50, epsilon: 0.5),
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('selection swap reveals the selected tab in a narrow viewport with mixed floors', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var tabs = <SessionTabRecord>[
+      _tab('a', title: 'A', isSelected: true),
+      for (var i = 1; i < 6; i++) _tab('tab_$i', title: 'A'),
+    ];
+    late void Function(VoidCallback fn) rebuild;
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SessionTabStrip(
+                tabs: tabs,
+                projects: const [],
+                openProjectIds: const <String>{},
+                isCompact: false,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (tab, position, {required haptic}) async {},
+                trailingBuilder: (context, tab) => tab.isSelected
+                    ? const SizedBox(
+                        key: ValueKey<String>('usage_trailing'),
+                        width: 32,
+                        height: 32,
+                      )
+                    : null,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    rebuild(() {
+      tabs = [
+        _tab('a', title: 'A'),
+        for (var i = 1; i < 5; i++) _tab('tab_$i', title: 'A'),
+        _tab('tab_5', title: 'A', isSelected: true),
+      ];
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // The newly selected tab grows to the knob floor (150) among 120px
+    // inactive tabs and must be brought into view.
+    final viewportRect = tester.getRect(
+      find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+    );
+    final selectedRect = tester.getRect(
+      find.byKey(
+        ValueKey<String>(
+          'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
+        ),
+      ),
+    );
+    expect(selectedRect.left, greaterThanOrEqualTo(viewportRect.left - 0.5));
+    expect(selectedRect.right, lessThanOrEqualTo(viewportRect.right + 0.5));
     expect(tester.takeException(), isNull);
   });
 
@@ -1803,7 +2029,7 @@ void main() {
         ValueKey<String>('session_tab_${sessionTabIdentityKey(tabs.last.identity)}');
     double selectedWidth() =>
         tester.getSize(find.byKey(selectedKey)).width;
-    expect(selectedWidth(), moreOrLessEquals(150, epsilon: 0.01));
+    expect(selectedWidth(), moreOrLessEquals(120, epsilon: 0.01));
 
     rebuild(() {
       tabs = [
@@ -1832,6 +2058,7 @@ double _expectedContentWidth(
   WidgetTester tester,
   String title, {
   bool selected = false,
+  bool hasTrailing = false,
   bool compact = false,
   double textScale = 1.0,
 }) {
@@ -1845,11 +2072,14 @@ double _expectedContentWidth(
     textDirection: Directionality.of(context),
     textScaler: TextScaler.linear(textScale),
   )..layout();
-  final trailingWidth = selected ? (compact ? 40.0 : 32.0) + 10.0 : 10.0;
+  final trailingWidth = hasTrailing ? (compact ? 40.0 : 32.0) + 10.0 : 10.0;
   final chrome = 10.0 + 28 + 7 + 2 + trailingWidth;
-  // The minimum wins over a narrower effective maximum, mirroring the strip.
+  // Tabs without the knob use the smaller floor; the minimum wins over a
+  // narrower effective maximum, mirroring the strip.
   return math.max(
-    compact ? 140.0 : 150.0,
+    hasTrailing
+        ? (compact ? 140.0 : 150.0)
+        : (compact ? 100.0 : 120.0),
     math.min(
       compact ? 278.2 : 317.2,
       (chrome + painter.width + 1.0).ceilToDouble(),
