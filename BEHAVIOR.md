@@ -1538,6 +1538,13 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **Then** switching to an unrelated session does not surface that question there
 - **When** the user replies or rejects the question
 - **Then** the resolved question request is removed from the local pending state immediately
+- **When** the user opens or reopens a session while the app was closed, backgrounded, or the realtime stream was down
+- **Then** the app revalidates pending questions from the server (`GET /question`) on session entry, cold-start restore, project switch, and degraded polling, so a question that arrived during the gap still appears as an interactive card without requiring a new server event
+- **Then** a pending-question tool call in the timeline offers a "View question" action that reveals the card as the primary affordance, with the raw technical details kept as a secondary toggle
+- **Then** the question card stays visible even when the terminal panel hides the composer on compact layouts
+- **When** the pending-question fetch fails transiently
+- **Then** the app retries it with a bounded backoff (two retries) instead of leaving questions hidden until the next session action
+- **Then** a question that was answered locally is not resurrected by a stale server list within a short propagation window
 
 ---
 
