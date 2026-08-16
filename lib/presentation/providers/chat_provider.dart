@@ -898,7 +898,7 @@ class ChatProvider extends ChangeNotifier {
     // interaction scope changed with the data saver level, so applying the
     // older result could populate all-session state right after aggressive
     // mode activated.
-    _pendingInteractionsFetchId++;
+    _invalidatePendingInteractionsLoads();
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       _globalRefreshDebounce?.cancel();
       _globalRefreshDebounce = null;
@@ -5238,7 +5238,7 @@ class ChatProvider extends ChangeNotifier {
     _resumeGraceTimer?.cancel();
     _foregroundResumeSyncTimer?.cancel();
     _pendingQuestionsRetryTimer?.cancel();
-    _pendingInteractionsFetchId++;
+    _invalidatePendingInteractionsLoads();
     _sessionUnreadHighlightTimer?.cancel();
     if (_ownsSessionAttentionCoordinator) {
       _sessionAttentionCoordinator.dispose();

@@ -534,6 +534,17 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     return future;
   }
 
+  // Invalidates any pending-interactions load in flight and drops the
+  // coalescing state so a later call can never join a future that is
+  // guaranteed to be discarded by the generation/context guard.
+  void _invalidatePendingInteractionsLoads() {
+    _pendingInteractionsFetchId++;
+    _pendingInteractionsLoadInFlight = null;
+    _pendingInteractionsLoadVisibleOnly = null;
+    _pendingInteractionsLoadContextKey = null;
+    _pendingInteractionsLoadSessionId = null;
+  }
+
   Future<void> _loadPendingInteractionsInner({
     bool visibleSessionOnly = false,
   }) async {
