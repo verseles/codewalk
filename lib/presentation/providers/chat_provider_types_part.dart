@@ -505,6 +505,7 @@ class _ChatContextSnapshot {
     required this.activeSendDraft,
     required this.rejectedDraft,
     required this.questionSubmitFailedRequestIds,
+    required this.questionSubmitFailedAtById,
     required this.providers,
     required this.defaultModels,
     required this.connectedProviderIds,
@@ -544,6 +545,7 @@ class _ChatContextSnapshot {
   final ChatComposerDraft? activeSendDraft;
   final _RejectedDraftEnvelope? rejectedDraft;
   final Set<String> questionSubmitFailedRequestIds;
+  final Map<String, DateTime> questionSubmitFailedAtById;
   final List<Provider> providers;
   final Map<String, String> defaultModels;
   final List<String> connectedProviderIds;

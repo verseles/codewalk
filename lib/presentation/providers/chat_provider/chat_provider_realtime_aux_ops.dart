@@ -497,7 +497,34 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     );
   }
 
+  // Coalesces overlapping pending-interaction loads: startup, session
+  // switches, degraded polls, and the retry timer can all fire concurrently,
+  // and sharing one in-flight future avoids duplicate GET /permission +
+  // GET /question pairs (issue #143). The inner load keeps the generation
+  // guard so stale results are still discarded.
   Future<void> _loadPendingInteractions({
+    bool visibleSessionOnly = false,
+  }) {
+    final inFlight = _pendingInteractionsLoadInFlight;
+    if (inFlight != null &&
+        _pendingInteractionsLoadVisibleOnly == visibleSessionOnly) {
+      return inFlight;
+    }
+    final future = _loadPendingInteractionsInner(
+      visibleSessionOnly: visibleSessionOnly,
+    );
+    _pendingInteractionsLoadInFlight = future;
+    _pendingInteractionsLoadVisibleOnly = visibleSessionOnly;
+    future.whenComplete(() {
+      if (identical(_pendingInteractionsLoadInFlight, future)) {
+        _pendingInteractionsLoadInFlight = null;
+        _pendingInteractionsLoadVisibleOnly = null;
+      }
+    });
+    return future;
+  }
+
+  Future<void> _loadPendingInteractionsInner({
     bool visibleSessionOnly = false,
   }) async {
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
@@ -783,9 +810,14 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     // GET /question is authoritative for removal (ADR-023 contract-first):
     // requests the server no longer lists are resolved and must disappear.
     // Two exceptions keep the UI correct during races:
-    // - requests that arrived via SSE moments ago, while the server list may
-    //   not have caught up yet (bounded by _questionServerAuthorityGrace);
-    // - requests with a submit/reject failure marker, so the user can retry.
+    // - requests that arrived moments ago (SSE or REST), while the server
+    //   list may not have caught up yet (bounded by
+    //   _questionServerAuthorityGrace). A question resolved remotely during
+    //   an SSE gap can therefore stay visible briefly after an authoritative
+    //   empty response — a bounded, self-healing ghost card, accepted in
+    //   exchange for never dropping genuinely fresh arrivals;
+    // - requests with a submit/reject failure marker, so the user can retry
+    //   (bounded by _questionSubmitFailedRetention).
     final merged = <String, List<ChatQuestionRequest>>{};
     final serverRequestIds = <String>{};
     for (final entry in grouped.entries) {

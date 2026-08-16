@@ -48,6 +48,9 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       questionSubmitFailedRequestIds: Set<String>.from(
         _questionSubmitFailedRequestIds,
       ),
+      questionSubmitFailedAtById: Map<String, DateTime>.from(
+        _questionSubmitFailedAtById,
+      ),
       providers: List<Provider>.from(_providers),
       defaultModels: Map<String, String>.from(_defaultModels),
       connectedProviderIds: List<String>.from(_connectedProviderIds),
@@ -110,6 +113,7 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       _clearActiveSendDraft();
       _clearRejectedDraft();
       _questionSubmitFailedRequestIds.clear();
+      _questionSubmitFailedAtById.clear();
       _providers = <Provider>[];
       _defaultModels = <String, String>{};
       _connectedProviderIds = <String>[];
@@ -185,6 +189,9 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     _questionSubmitFailedRequestIds
       ..clear()
       ..addAll(snapshot.questionSubmitFailedRequestIds);
+    _questionSubmitFailedAtById
+      ..clear()
+      ..addAll(snapshot.questionSubmitFailedAtById);
     _providers = List<Provider>.from(snapshot.providers);
     _defaultModels = Map<String, String>.from(snapshot.defaultModels);
     _connectedProviderIds = List<String>.from(snapshot.connectedProviderIds);

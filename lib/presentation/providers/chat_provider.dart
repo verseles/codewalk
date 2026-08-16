@@ -387,6 +387,9 @@ class ChatProvider extends ChangeNotifier {
   int _pendingQuestionsRetryAttempts = 0;
   Timer? _pendingQuestionsRetryTimer;
   Duration _pendingQuestionsRetryBaseDelay = const Duration(seconds: 5);
+  // Coalesces overlapping pending-interaction loads (same effective scope).
+  Future<void>? _pendingInteractionsLoadInFlight;
+  bool? _pendingInteractionsLoadVisibleOnly;
   final Set<String> _sessionUnreadCompletionIds = <String>{};
   final Map<String, DateTime> _sessionUnreadCompletionTimestamps =
       <String, DateTime>{};
@@ -889,6 +892,11 @@ class ChatProvider extends ChangeNotifier {
     if (!_refreshlessRealtimeEnabled) {
       return;
     }
+    // Invalidate any pending-interactions load in flight: the effective
+    // interaction scope changed with the data saver level, so applying the
+    // older result could populate all-session state right after aggressive
+    // mode activated.
+    _pendingInteractionsFetchId++;
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       _globalRefreshDebounce?.cancel();
       _globalRefreshDebounce = null;
@@ -5228,6 +5236,7 @@ class ChatProvider extends ChangeNotifier {
     _resumeGraceTimer?.cancel();
     _foregroundResumeSyncTimer?.cancel();
     _pendingQuestionsRetryTimer?.cancel();
+    _pendingInteractionsFetchId++;
     _sessionUnreadHighlightTimer?.cancel();
     if (_ownsSessionAttentionCoordinator) {
       _sessionAttentionCoordinator.dispose();

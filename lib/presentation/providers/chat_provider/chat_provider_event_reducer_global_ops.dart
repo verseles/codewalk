@@ -563,6 +563,7 @@ extension _ChatProviderEventReducerGlobalOps on ChatProvider {
       activeSendDraft: snapshot.activeSendDraft,
       rejectedDraft: snapshot.rejectedDraft,
       questionSubmitFailedRequestIds: snapshot.questionSubmitFailedRequestIds,
+      questionSubmitFailedAtById: snapshot.questionSubmitFailedAtById,
       providers: snapshot.providers,
       defaultModels: snapshot.defaultModels,
       connectedProviderIds: snapshot.connectedProviderIds,
