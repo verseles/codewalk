@@ -733,8 +733,11 @@ class _ToolPartDetailsToggle extends StatelessWidget {
         if (expanded) details,
         Align(
           alignment: Alignment.centerRight,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Wrap(
+            spacing: 8,
+            runAlignment: WrapAlignment.end,
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (hasQuestionAction)
                 TextButton.icon(
@@ -754,8 +757,7 @@ class _ToolPartDetailsToggle extends StatelessWidget {
                   icon: const Icon(Symbols.help_outline_rounded, size: 14),
                   label: Text(context.l10n.chatMessageShowQuestion),
                 ),
-              if (hasDetails) ...[
-                const SizedBox(width: 8),
+              if (hasDetails)
                 TextButton(
                   key: ValueKey<String>('tool_part_details_button_$partId'),
                   onPressed: () => onExpandedChanged(!expanded),
@@ -776,7 +778,6 @@ class _ToolPartDetailsToggle extends StatelessWidget {
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
-              ],
             ],
           ),
         ),

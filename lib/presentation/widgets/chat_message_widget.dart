@@ -138,6 +138,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   bool _lastResponding = false;
   int _lastLocalUiStateVersion = 0;
   int _lastTaskToolSummaryHash = 0;
+  int _lastPendingQuestionCallIdsHash = 0;
   VoidCallback? _lastInlineRevertToHere;
   ValueChanged<SubtaskPart>? _lastSubtaskNavigate;
   ValueChanged<ToolPart>? _lastTaskToolNavigate;
@@ -337,6 +338,8 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
         taskToolSummaryHash == _lastTaskToolSummaryHash &&
         identical(widget.onSubtaskNavigate, _lastSubtaskNavigate) &&
         identical(widget.onTaskToolNavigate, _lastTaskToolNavigate) &&
+        Object.hashAllUnordered(widget.pendingQuestionCallIds) ==
+            _lastPendingQuestionCallIdsHash &&
         density.vertical == _lastVisualDensityVertical &&
         density.horizontal == _lastVisualDensityHorizontal &&
         themeTokens.themeId == _lastThemeKey;
@@ -361,6 +364,9 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     _lastTaskToolSummaryHash = taskToolSummaryHash;
     _lastSubtaskNavigate = widget.onSubtaskNavigate;
     _lastTaskToolNavigate = widget.onTaskToolNavigate;
+    _lastPendingQuestionCallIdsHash = Object.hashAllUnordered(
+      widget.pendingQuestionCallIds,
+    );
     _lastVisualDensityVertical = density.vertical;
     _lastVisualDensityHorizontal = density.horizontal;
     _lastThemeKey = themeTokens.themeId;

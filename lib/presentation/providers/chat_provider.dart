@@ -252,6 +252,11 @@ class ChatProvider extends ChangeNotifier {
   }
 
   @visibleForTesting
+  set debugQuestionSubmitFailedRetention(Duration value) {
+    _questionSubmitFailedRetention = value;
+  }
+
+  @visibleForTesting
   bool debugShouldSkipLocalUserAppendAsDuplicateEcho({
     required UserMessage localMessage,
     required List<ChatMessage> mergedMessages,
@@ -357,12 +362,26 @@ class ChatProvider extends ChangeNotifier {
   // request. Cleared on the next successful reply/reject, a fresh ask event,
   // or an explicit `dismissQuestionSubmitError` call.
   final Set<String> _questionSubmitFailedRequestIds = <String>{};
+  // When each failed submit/reject was recorded, so the retry retention in the
+  // pending-questions merge stays bounded.
+  final Map<String, DateTime> _questionSubmitFailedAtById =
+      <String, DateTime>{};
+  Duration _questionSubmitFailedRetention = const Duration(seconds: 30);
+  // Request IDs the user (or the server via SSE) resolved locally. Kept for a
+  // short window so a stale GET /question response that still lists them does
+  // not resurrect the card while the server propagates the resolution.
+  final Map<String, DateTime> _recentlyResolvedQuestionIds =
+      <String, DateTime>{};
   // First time each question request ID was seen locally (SSE or REST). Used
   // by the pending-questions merge to keep questions that just arrived via SSE
   // visible even when the server list has not caught up, while still treating
   // GET /question as authoritative for removal (issue #143).
   final Map<String, DateTime> _questionFirstSeenAtById = <String, DateTime>{};
   Duration _questionServerAuthorityGrace = const Duration(seconds: 15);
+  // Monotonic generation so overlapping _loadPendingInteractions calls (rapid
+  // session switches, retry timers, degraded polls) cannot apply stale results
+  // or results from a previous server/project context.
+  int _pendingInteractionsFetchId = 0;
   // Bounded retry for a failed pending-questions fetch: transient failures
   // must not leave pending questions invisible for the rest of the session.
   int _pendingQuestionsRetryAttempts = 0;
@@ -1096,6 +1115,7 @@ class ChatProvider extends ChangeNotifier {
 
   void dismissQuestionSubmitError(String requestId) {
     if (_questionSubmitFailedRequestIds.remove(requestId)) {
+      _questionSubmitFailedAtById.remove(requestId);
       _threadPermissionsVersion++;
       notifyListeners();
     }
@@ -2521,10 +2541,14 @@ class ChatProvider extends ChangeNotifier {
           // Mirror OpenChamber 1.12.1: when submit/dismiss fails, keep the
           // request visible with an error indicator so the user can retry.
           _questionSubmitFailedRequestIds.add(requestId);
+          _questionSubmitFailedAtById[requestId] = DateTime.now();
           _handleFailure(failure);
         },
         (_) {
           _questionSubmitFailedRequestIds.remove(requestId);
+          _questionSubmitFailedAtById.remove(requestId);
+          _recentlyResolvedQuestionIds[requestId] = DateTime.now();
+          _questionFirstSeenAtById.remove(requestId);
           for (final sessionId in _pendingQuestionsBySession.keys.toList()) {
             final filtered = _pendingQuestionsBySession[sessionId]!
                 .where((item) => item.id != requestId)
@@ -2562,10 +2586,14 @@ class ChatProvider extends ChangeNotifier {
       result.fold(
         (failure) {
           _questionSubmitFailedRequestIds.add(requestId);
+          _questionSubmitFailedAtById[requestId] = DateTime.now();
           _handleFailure(failure);
         },
         (_) {
           _questionSubmitFailedRequestIds.remove(requestId);
+          _questionSubmitFailedAtById.remove(requestId);
+          _recentlyResolvedQuestionIds[requestId] = DateTime.now();
+          _questionFirstSeenAtById.remove(requestId);
           for (final sessionId in _pendingQuestionsBySession.keys.toList()) {
             final filtered = _pendingQuestionsBySession[sessionId]!
                 .where((item) => item.id != requestId)
@@ -3615,10 +3643,12 @@ class ChatProvider extends ChangeNotifier {
       }
 
       if (!isExpectedSelectionCurrent()) return;
-      if (!_cellularDataSaverService.isDataSaverActive) {
+      if (!_cellularDataSaverService.isAggressiveDataSaverActive) {
         // Cold start / project-switch restore keeps the persisted session but
         // must also revalidate pending interactions; questions are not part of
-        // the persisted snapshot (issue #143).
+        // the persisted snapshot (issue #143). Aggressive mode keeps its
+        // visible-only semantics (a full load here would run the wipe when no
+        // visible session exists yet and pause realtime).
         unawaited(_loadPendingInteractions());
       }
       if (resolvedStoredSessionId != targetSession.id) {
@@ -3797,7 +3827,11 @@ class ChatProvider extends ChangeNotifier {
             // pending interactions: the server does not replay SSE events
             // after a gap (background/stream loss), so GET /question is the
             // only way to recover a question that arrived while away.
-            if (!_cellularDataSaverService.isDataSaverActive) {
+            if (!_cellularDataSaverService.isAggressiveDataSaverActive) {
+              // Revalidation also covers standard data saver; aggressive mode
+              // relies on its visible-session-only reload path (a full load
+              // here would run the aggressive wipe when no visible session
+              // exists and pause realtime).
               unawaited(_loadPendingInteractions());
             }
             unawaited(
@@ -3848,14 +3882,14 @@ class ChatProvider extends ChangeNotifier {
               forceBurst: true,
             ),
           );
-          if (_cellularDataSaverService.isAggressiveDataSaverActive) {
-            unawaited(_loadPendingInteractions(visibleSessionOnly: true));
-          }
+        }
+        if (_cellularDataSaverService.isAggressiveDataSaverActive) {
+          unawaited(_loadPendingInteractions(visibleSessionOnly: true));
         } else {
-          // Normal mode: session re-entry must actively revalidate pending
-          // interactions (ADR-020/ADR-003). The server does not replay
-          // question events after a gap, so GET /question is the only
-          // authoritative recovery source (issue #143).
+          // Session re-entry must actively revalidate pending interactions
+          // (ADR-020/ADR-003). The server does not replay question events
+          // after a gap, so GET /question is the only authoritative recovery
+          // source (issue #143). Aggressive data saver self-restricts above.
           unawaited(_loadPendingInteractions());
         }
 

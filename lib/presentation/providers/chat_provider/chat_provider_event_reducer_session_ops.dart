@@ -960,6 +960,8 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
         } else {
           _pendingQuestionsBySession[sessionId] = filtered;
         }
+        _recentlyResolvedQuestionIds[requestId] = DateTime.now();
+        _questionFirstSeenAtById.remove(requestId);
         _threadPermissionsVersion++;
         // Reactive dismiss: when no pending permissions AND no pending
         // questions remain for this session, clear its notifications so

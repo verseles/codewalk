@@ -674,8 +674,10 @@ void main() {
         );
         expect(provider.questionSubmitFailedRequestIds, contains('q_orphan_1'));
 
-        // Now the server list no longer includes the request; the
-        // reload prunes the orphan failure marker.
+        // The submit-failure marker is retained for a short window so the user
+        // can retry even if the server list momentarily omits the request;
+        // once the retention expires, the reload prunes the orphan marker.
+        provider.debugQuestionSubmitFailedRetention = Duration.zero;
         chatRepository.pendingQuestions = const <ChatQuestionRequest>[];
         await provider.reloadPendingInteractionsForTest();
 

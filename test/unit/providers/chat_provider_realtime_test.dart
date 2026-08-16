@@ -5864,6 +5864,49 @@ void main() {
         await provider.reloadPendingInteractionsForTest();
         expect(provider.currentSessionQuestions, isEmpty);
       });
+
+      test('answered question is not resurrected by a stale server list', () async {
+        provider = buildProvider();
+        provider.debugPendingQuestionsRetryBaseDelay = Duration.zero;
+        provider.debugQuestionServerAuthorityGrace = const Duration(hours: 1);
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final first = provider.sessions.firstWhere((s) => s.id == 'ses_1');
+        await provider.selectSession(first);
+        await provider.refresh();
+        chatRepository.pendingQuestions = <ChatQuestionRequest>[
+          questionFor('ses_1', 'question_answered'),
+        ];
+        await provider.reloadPendingInteractionsForTest();
+        await settleUntil(
+          () =>
+              provider.currentSessionQuestions.singleOrNull?.id ==
+              'question_answered',
+          reason: 'Expected the pending question to be visible.',
+        );
+
+        await provider.submitQuestionAnswers(
+          requestId: 'question_answered',
+          answers: const <List<String>>[<String>['Yes']],
+        );
+        await settleUntil(
+          () => provider.currentSessionQuestions.isEmpty,
+          reason:
+              'Expected the answered question to disappear optimistically.',
+        );
+
+        // Simulate a stale GET /question response that still lists the
+        // answered request because the server has not propagated yet.
+        chatRepository.pendingQuestions = <ChatQuestionRequest>[
+          questionFor('ses_1', 'question_answered'),
+        ];
+        await provider.reloadPendingInteractionsForTest();
+        expect(
+          provider.currentSessionQuestions,
+          isEmpty,
+          reason: 'A stale server list must not resurrect an answered question.',
+        );
+      });
     });
   });
 }

@@ -492,6 +492,8 @@ extension _ChatProviderEventReducerGlobalOps on ChatProvider {
         } else {
           nextPendingQuestionsBySession[sessionId] = filtered;
         }
+        _recentlyResolvedQuestionIds[requestId] = DateTime.now();
+        _questionFirstSeenAtById.remove(requestId);
         break;
       default:
         return false;

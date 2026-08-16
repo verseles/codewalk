@@ -14764,7 +14764,7 @@ const translations = <String, Map<String, String>>{
     'chatMessageSaveFile': 'फ़ाइल सहेजें',
     'chatMessageShortDate': '{month}/{day}',
     'chatMessageShow': 'दिखाएं',
-    'chatMessageShowQuestion': 'প্রশ্ন দেখুন',
+    'chatMessageShowQuestion': 'प्रश्न देखें',
     'chatMessageShowLess': 'कम दिखाएं',
     'chatMessageShowLessCompact': 'कम',
     'chatMessageShowMore': 'और दिखाएं',

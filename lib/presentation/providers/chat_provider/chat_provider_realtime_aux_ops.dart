@@ -503,6 +503,17 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;
     }
+    final fetchId = ++_pendingInteractionsFetchId;
+    final contextKey = _activeContextKey;
+    final directory = projectProvider.currentDirectory;
+    // Guard against stale/overlapping loads: a response from an older fetch or
+    // from a previous server/project context must never overwrite the active
+    // context's interaction state.
+    bool isCurrentFetch() =>
+        fetchId == _pendingInteractionsFetchId &&
+        contextKey == _activeContextKey &&
+        directory == projectProvider.currentDirectory;
+
     final restrictToVisible =
         visibleSessionOnly ||
         _cellularDataSaverService.isAggressiveDataSaverActive;
@@ -517,12 +528,11 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       );
       return;
     }
-    final directory = projectProvider.currentDirectory;
 
     final permissionsResult = await listPendingPermissions(
       directory: directory,
     );
-    if (directory != projectProvider.currentDirectory) {
+    if (!isCurrentFetch()) {
       return;
     }
     permissionsResult.fold(
@@ -556,7 +566,7 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       return;
     }
     final questionsResult = await listPendingQuestions(directory: directory);
-    if (directory != projectProvider.currentDirectory) {
+    if (!isCurrentFetch()) {
       return;
     }
     questionsResult.fold(
@@ -567,10 +577,22 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       (questions) {
         _pendingQuestionsRetryAttempts = 0;
         _pendingQuestionsRetryTimer?.cancel();
+        final resolvedCutoff = DateTime.now().subtract(
+          _questionServerAuthorityGrace,
+        );
         final grouped = <String, List<ChatQuestionRequest>>{};
         for (final item in questions) {
           if (restrictToVisible &&
               !_isVisibleAggressiveSessionId(item.sessionId)) {
+            continue;
+          }
+          if (item.id.trim().isEmpty || item.sessionId.trim().isEmpty) {
+            continue;
+          }
+          final resolvedAt = _recentlyResolvedQuestionIds[item.id];
+          if (resolvedAt != null && resolvedAt.isAfter(resolvedCutoff)) {
+            // Answered/rejected moments ago; the server list may still carry
+            // it until the resolution propagates.
             continue;
           }
           _questionFirstSeenAtById.putIfAbsent(item.id, DateTime.now);
@@ -578,21 +600,39 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
               .putIfAbsent(item.sessionId, () => <ChatQuestionRequest>[])
               .add(item);
         }
-        // Prune submit-failure markers whose request IDs are no longer
-        // present in the server's pending list, preventing the local
-        // failure set from growing unbounded over a long-lived session.
-        // Note: this uses the *server-provided* list, not the merged
-        // snapshot, so locally-orphaned markers get reaped even if the
-        // local merge retained them.
-        final serverPendingIds = <String>{
-          for (final list in grouped.values) ...list.map((q) => q.id),
-        };
-        _questionSubmitFailedRequestIds.removeWhere(
-          (id) => !serverPendingIds.contains(id),
-        );
+        _questionSubmitFailedAtById.removeWhere((id, failedAt) {
+          final expired =
+              DateTime.now().difference(failedAt) >
+              _questionSubmitFailedRetention;
+          if (expired) {
+            _questionSubmitFailedRequestIds.remove(id);
+          }
+          return expired;
+        });
         _pendingQuestionsBySession = restrictToVisible
             ? grouped
             : _mergePendingQuestionsBySession(grouped);
+        // Prune submit-failure markers and resolution bookkeeping once the
+        // merged (server-authoritative) snapshot no longer carries them.
+        final mergedPendingIds = <String>{
+          for (final list in _pendingQuestionsBySession.values)
+            ...list.map((q) => q.id),
+        };
+        _questionSubmitFailedRequestIds.removeWhere(
+          (id) => !mergedPendingIds.contains(id),
+        );
+        _questionSubmitFailedAtById.removeWhere(
+          (id, _) => !mergedPendingIds.contains(id),
+        );
+        _recentlyResolvedQuestionIds.removeWhere(
+          (_, resolvedAt) => resolvedAt.isBefore(resolvedCutoff),
+        );
+        final firstSeenCutoff = DateTime.now().subtract(
+          _questionServerAuthorityGrace,
+        );
+        _questionFirstSeenAtById.removeWhere(
+          (_, seenAt) => seenAt.isBefore(firstSeenCutoff),
+        );
         _threadPermissionsVersion++;
       },
     );
@@ -681,6 +721,12 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
         _pendingQuestionsRetryAttempts;
     _pendingQuestionsRetryTimer?.cancel();
     _pendingQuestionsRetryTimer = Timer(delay, () {
+      if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
+        // Background suppression consumed the attempt; reset so a later
+        // natural trigger (foreground resume, next re-entry) retries fresh.
+        _pendingQuestionsRetryAttempts = 0;
+        return;
+      }
       unawaited(_loadPendingInteractions());
     });
   }
