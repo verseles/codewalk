@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.202.0 - 2026-08-16
+
+- fix(tabs): stop inactive tabs from reserving the context-usage knob space
+- feat(tabs): size session tab widths to titles between minimum and maximum
+
 ## v1.201.0 - 2026-08-16
 
 - docs(behavior): document pending-question rehydration and view-question action
