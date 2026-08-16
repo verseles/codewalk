@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:codewalk/core/i18n/l10n_context.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
@@ -1193,6 +1196,665 @@ void main() {
       isNot(titleOf(inactive).style!.fontWeight),
     );
   });
+
+  testWidgets(
+    'regular tabs size to content between minimum and maximum widths',
+    (tester) async {
+      final tabs = <SessionTabRecord>[
+        _tab('short', title: 'A'),
+        _tab('medium', title: 'Session X'),
+        _tab('long', title: 'A very long session title'),
+      ];
+
+      await tester.pumpWidget(_app(tabs: tabs));
+      await tester.pump();
+
+      double widthOf(SessionTabRecord tab) => tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
+            ),
+          )
+          .width;
+      // The minimum is a fixed floor for one-character titles.
+      expect(widthOf(tabs[0]), moreOrLessEquals(150, epsilon: 0.01));
+      // Content-derived widths sit between the floor and the cap.
+      expect(
+        widthOf(tabs[1]),
+        moreOrLessEquals(
+          _expectedContentWidth(tester, 'Session X'),
+          epsilon: 0.01,
+        ),
+      );
+      // Long titles cap at the maximum.
+      expect(widthOf(tabs[2]), moreOrLessEquals(317.2, epsilon: 0.01));
+    },
+  );
+
+  testWidgets('selected tab reserves the trailing usage button width', (
+    tester,
+  ) async {
+    final inactive = _tab('inactive', title: 'Session X');
+    final selected = _tab('selected', title: 'Session X', isSelected: true);
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[inactive, selected],
+        trailingBuilder: (context, tab) => tab.isSelected
+            ? const SizedBox(
+                key: ValueKey<String>('usage_trailing'),
+                width: 32,
+                height: 32,
+              )
+            : null,
+      ),
+    );
+    await tester.pump();
+
+    double widthOf(SessionTabRecord tab) => tester
+        .getSize(
+          find.byKey(
+            ValueKey<String>(
+              'session_tab_${sessionTabIdentityKey(tab.identity)}',
+            ),
+          ),
+        )
+        .width;
+    expect(
+      widthOf(inactive),
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'Session X'),
+        epsilon: 0.01,
+      ),
+    );
+    // Chrome grows by the 32px button plus 10px padding.
+    expect(
+      widthOf(selected),
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'Session X', selected: true),
+        epsilon: 0.01,
+      ),
+    );
+  });
+
+  testWidgets('compact tabs use the compact minimum width', (tester) async {
+    final tab = _tab('short', title: 'A');
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab], isCompact: true));
+    await tester.pump();
+
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(140, epsilon: 0.01),
+    );
+
+    final medium = _tab('medium', title: 'Session X');
+    await tester.pumpWidget(
+      _app(tabs: <SessionTabRecord>[medium], isCompact: true),
+    );
+    await tester.pump();
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(medium.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'Session X', compact: true),
+        epsilon: 0.01,
+      ),
+    );
+  });
+
+  testWidgets('tabs never shrink below the minimum when the viewport is narrow', (
+    tester,
+  ) async {
+    final tabs = List<SessionTabRecord>.generate(
+      5,
+      (index) => _tab('short_$index', title: 'A'),
+    );
+
+    await tester.pumpWidget(_app(tabs: tabs, width: 200));
+    await tester.pump();
+
+    for (final tab in tabs) {
+      expect(
+        tester
+            .getSize(
+              find.byKey(
+                ValueKey<String>(
+                  'session_tab_${sessionTabIdentityKey(tab.identity)}',
+                ),
+              ),
+            )
+            .width,
+        moreOrLessEquals(150, epsilon: 0.01),
+      );
+    }
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('session_tab_strip_scroll_view'),
+        ),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(scrollable.position.maxScrollExtent, greaterThan(0));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'minimum wins when the viewport is narrower than the minimum',
+    (tester) async {
+      final tabs = List<SessionTabRecord>.generate(
+        3,
+        (index) => _tab('short_$index', title: 'A'),
+      );
+
+      // 140px viewport minus 16px padding caps the maximum at 124px, below
+      // the 150px minimum: tabs must stay at their floor and scroll.
+      await tester.pumpWidget(_app(tabs: tabs, width: 140));
+      await tester.pump();
+
+      for (final tab in tabs) {
+        expect(
+          tester
+              .getSize(
+                find.byKey(
+                  ValueKey<String>(
+                    'session_tab_${sessionTabIdentityKey(tab.identity)}',
+                  ),
+                ),
+              )
+              .width,
+          moreOrLessEquals(150, epsilon: 0.01),
+        );
+      }
+      final scrollable = tester.state<ScrollableState>(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('session_tab_strip_scroll_view'),
+          ),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      expect(scrollable.position.maxScrollExtent, greaterThan(0));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'long titles cap at the viewport width when it is narrower than the maximum',
+    (tester) async {
+      final tab = _tab('long', title: 'X' * 30);
+
+      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab], width: 300));
+      await tester.pump();
+
+      expect(
+        tester
+            .getSize(
+              find.byKey(
+                ValueKey<String>(
+                  'session_tab_${sessionTabIdentityKey(tab.identity)}',
+                ),
+              ),
+            )
+            .width,
+        moreOrLessEquals(284, epsilon: 0.01),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('long titles cap at the maximum width and ellipsize', (
+    tester,
+  ) async {
+    final tab = _tab('long', title: 'X' * 60);
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
+    await tester.pump();
+
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(317.2, epsilon: 0.01),
+    );
+    final title = tester.widget<Text>(
+      find.byKey(
+        ValueKey<String>(
+          'session_tab_title_${sessionTabIdentityKey(tab.identity)}',
+        ),
+      ),
+    );
+    expect(title.maxLines, 1);
+    expect(title.overflow, TextOverflow.ellipsis);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty titles measure the localized Untitled string', (
+    tester,
+  ) async {
+    final tab = _tab('untitled', title: '   ');
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
+    await tester.pump();
+
+    final context = tester.element(find.byType(SessionTabStrip));
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(
+        _expectedContentWidth(tester, context.l10n.sessionExportUntitled),
+        epsilon: 0.01,
+      ),
+    );
+  });
+
+  testWidgets('text scale grows content but leaves the minimum fixed', (
+    tester,
+  ) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final short = _tab('short', title: 'A');
+    final medium = _tab('medium', title: 'Session X');
+
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[short, medium]));
+    await tester.pump();
+
+    double widthOf(SessionTabRecord tab) => tester
+        .getSize(
+          find.byKey(
+            ValueKey<String>(
+              'session_tab_${sessionTabIdentityKey(tab.identity)}',
+            ),
+          ),
+        )
+        .width;
+    expect(widthOf(short), moreOrLessEquals(150, epsilon: 0.01));
+    expect(
+      widthOf(medium),
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'Session X', textScale: 2.0),
+        epsilon: 0.01,
+      ),
+    );
+  });
+
+  testWidgets('measures RTL titles and stays in bounds', (tester) async {
+    final tab = _tab('rtl', title: 'مثال عربي');
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[tab],
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'مثال عربي'),
+        epsilon: 0.01,
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('strip shrinks to content when fillWidth is false', (
+    tester,
+  ) async {
+    final tabs = <SessionTabRecord>[_tab('a', title: 'A'), _tab('b', title: 'B')];
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: UnconstrainedBox(
+              child: SessionTabStrip(
+                tabs: tabs,
+                projects: const [],
+                openProjectIds: const <String>{},
+                isCompact: false,
+                fillWidth: false,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (tab, position, {required haptic}) async {},
+                trailingBuilder: (context, tab) => null,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey<String>('session_tab_strip')))
+          .width,
+      moreOrLessEquals(316, epsilon: 0.01),
+    );
+  });
+
+  testWidgets('selected pinned tab sizes to its content width', (tester) async {
+    final selected = _tab(
+      'pinned',
+      title: 'Short',
+      isPinned: true,
+      isSelected: true,
+    );
+
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[selected],
+        trailingBuilder: (context, tab) =>
+            const SizedBox(key: ValueKey<String>('pinned_trailing'), width: 32),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(selected.identity)}',
+              ),
+            ),
+          )
+          .width,
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'Short', selected: true),
+        epsilon: 0.01,
+      ),
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+          )
+          .width,
+      moreOrLessEquals(
+        _expectedContentWidth(tester, 'Short', selected: true),
+        epsilon: 0.01,
+      ),
+    );
+  });
+
+  testWidgets('pinning or unpinning the selected tab reveals it in its new region', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var tabs = <SessionTabRecord>[
+      for (var i = 0; i < 6; i++) _tab('before_$i', title: 'X' * 30),
+      _tab('selected', title: 'A', isSelected: true),
+    ];
+    late void Function(VoidCallback fn) rebuild;
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SessionTabStrip(
+                tabs: tabs,
+                projects: const [],
+                openProjectIds: const <String>{},
+                isCompact: false,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (tab, position, {required haptic}) async {},
+                trailingBuilder: (context, tab) => null,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final selectedKey = ValueKey<String>(
+      'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
+    );
+    Rect selectedRect() => tester.getRect(find.byKey(selectedKey));
+
+    // Pin the selected tab: it moves to the overflowing pinned region and the
+    // reveal must bring it into the pinned viewport.
+    rebuild(() {
+      tabs = [
+        ...tabs.take(6),
+        _tab('selected', title: 'A', isSelected: true, isPinned: true),
+      ];
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final pinnedViewport = tester.getRect(
+      find.byKey(const ValueKey<String>('session_tab_pinned_region_scroll_view')),
+    );
+    expect(selectedRect().left, greaterThanOrEqualTo(pinnedViewport.left - 0.5));
+    expect(selectedRect().right, lessThanOrEqualTo(pinnedViewport.right + 0.5));
+
+    // Unpin it back: the reveal must bring it into the regular viewport.
+    rebuild(() {
+      tabs = [
+        ...tabs.take(6),
+        _tab('selected', title: 'A', isSelected: true),
+      ];
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final regularViewport = tester.getRect(
+      find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+    );
+    expect(selectedRect().left, greaterThanOrEqualTo(regularViewport.left - 0.5));
+    expect(selectedRect().right, lessThanOrEqualTo(regularViewport.right + 0.5));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('unrelated tab width changes do not yank a visible selected tab', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var tabs = <SessionTabRecord>[
+      _tab('lead', title: 'A'),
+      _tab('selected', title: 'A', isSelected: true),
+      for (var i = 0; i < 5; i++) _tab('trail_$i', title: 'X' * 30),
+    ];
+    late void Function(VoidCallback fn) rebuild;
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SessionTabStrip(
+                tabs: tabs,
+                projects: const [],
+                openProjectIds: const <String>{},
+                isCompact: false,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (tab, position, {required haptic}) async {},
+                trailingBuilder: (context, tab) => null,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('session_tab_strip_scroll_view'),
+        ),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    // The selected tab [150, 300] is fully visible inside [50, 354].
+    scrollable.position.jumpTo(50);
+    await tester.pump();
+
+    // Rename an unrelated trailing tab: its width changes, which fires the
+    // reveal trigger, but the selected tab stays fully visible so the scroll
+    // offset must not move.
+    rebuild(() {
+      tabs = [
+        tabs[0],
+        tabs[1],
+        tabs[2],
+        tabs[3],
+        tabs[4],
+        _tab('trail_5', title: 'X' * 8),
+      ];
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(
+      scrollable.position.pixels,
+      moreOrLessEquals(50, epsilon: 0.5),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('renaming a tab re-measures its width and keeps the selected tab visible', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var tabs = <SessionTabRecord>[
+      for (var i = 0; i < 3; i++) _tab('before_$i', title: 'X' * 30),
+      _tab('selected', title: 'A', isSelected: true),
+    ];
+    late void Function(VoidCallback fn) rebuild;
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SessionTabStrip(
+                tabs: tabs,
+                projects: const [],
+                openProjectIds: const <String>{},
+                isCompact: false,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (tab, position, {required haptic}) async {},
+                trailingBuilder: (context, tab) => null,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final selectedKey =
+        ValueKey<String>('session_tab_${sessionTabIdentityKey(tabs.last.identity)}');
+    double selectedWidth() =>
+        tester.getSize(find.byKey(selectedKey)).width;
+    expect(selectedWidth(), moreOrLessEquals(150, epsilon: 0.01));
+
+    rebuild(() {
+      tabs = [
+        ...tabs.take(3),
+        _tab('selected', title: 'X' * 30, isSelected: true),
+      ];
+    });
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // The viewport caps the re-measured width (320 - 16px padding).
+    expect(selectedWidth(), moreOrLessEquals(304, epsilon: 0.01));
+    final viewportRect = tester.getRect(
+      find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+    );
+    final selectedRect = tester.getRect(find.byKey(selectedKey));
+    expect(selectedRect.left, greaterThanOrEqualTo(viewportRect.left - 0.5));
+    expect(selectedRect.right, lessThanOrEqualTo(viewportRect.right + 0.5));
+    expect(tester.takeException(), isNull);
+  });
+}
+
+/// Mirrors the strip's content-width computation using the app's real text
+/// style, so expectations stay exact for the actual font metrics.
+double _expectedContentWidth(
+  WidgetTester tester,
+  String title, {
+  bool selected = false,
+  bool compact = false,
+  double textScale = 1.0,
+}) {
+  final context = tester.element(find.byType(SessionTabStrip));
+  final style = Theme.of(context).textTheme.labelLarge?.copyWith(
+    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+  );
+  final painter = TextPainter(
+    text: TextSpan(text: title.split('\n').first, style: style),
+    maxLines: 1,
+    textDirection: Directionality.of(context),
+    textScaler: TextScaler.linear(textScale),
+  )..layout();
+  final trailingWidth = selected ? (compact ? 40.0 : 32.0) + 10.0 : 10.0;
+  final chrome = 10.0 + 28 + 7 + 2 + trailingWidth;
+  // The minimum wins over a narrower effective maximum, mirroring the strip.
+  return math.max(
+    compact ? 140.0 : 150.0,
+    math.min(
+      compact ? 278.2 : 317.2,
+      (chrome + painter.width + 1.0).ceilToDouble(),
+    ),
+  );
 }
 
 Material _tabMaterial(WidgetTester tester, SessionTabRecord tab) {
@@ -1213,6 +1875,7 @@ Widget _app({
   SessionTabTrailingBuilder? trailingBuilder,
   double width = 800,
   bool isCompact = false,
+  bool fillWidth = true,
   TextDirection textDirection = TextDirection.ltr,
 }) {
   return localizedMaterialApp(
@@ -1228,6 +1891,7 @@ Widget _app({
               projects: projects,
               openProjectIds: openProjectIds,
               isCompact: isCompact,
+              fillWidth: fillWidth,
               onActivate: (tab) => onActivate?.call(tab.identity),
               onClose: (tab) => onClose?.call(tab.identity),
               onContextMenu:

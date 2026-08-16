@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -32,6 +33,16 @@ const double _kSessionTabWidth = 244 * 1.3;
 const double _kCompactSessionTabWidth = 214 * 1.3;
 const double _kPinnedSessionTabWidth = 36;
 const double _kPinnedInactiveTabInset = 4;
+// Floor for regular tabs: the largest selected-tab chrome is 10px start
+// padding + 28px leading box + 7px + 2px gaps + the trailing usage button
+// (40px compact / 32px desktop, plus 10px padding) = 97px worst case. 150
+// desktop / 140 compact keep a readable title area (61px desktop / 43px
+// compact) while short titles still shrink the tab; compact trades title
+// room for strip capacity.
+const double _kMinimumSessionTabWidth = 150;
+const double _kMinimumCompactSessionTabWidth = 140;
+// Guards against float rounding engaging the ellipsis at the exact fit.
+const double _kTabWidthSlack = 1.0;
 // Floor for the expanded selected pinned tab: the fixed content is 10px inset
 // + 28px leading box + gaps + the trailing usage button (40px compact /
 // 32px desktop, plus 10px padding) = 97px worst case, and the shape needs
@@ -49,6 +60,9 @@ typedef SessionTabContextMenuCallback =
       Offset globalPosition, {
       required bool haptic,
     });
+/// Builds the trailing control (for example the context-usage button) of the
+/// selected tab. Invoked only for the selected regular tab and the expanded
+/// selected pinned tab; inactive tabs never show a trailing control.
 typedef SessionTabTrailingBuilder =
     Widget? Function(BuildContext context, SessionTabRecord tab);
 
@@ -167,8 +181,9 @@ class _SessionTabStripState extends State<SessionTabStrip> {
   Offset? _lastPointerGlobalPosition;
   SessionTabIdentity? _lastSelectedIdentity;
   int? _lastSelectedIndex;
+  bool? _lastSelectedIsPinned;
   double? _lastViewportWidth;
-  double? _lastTabWidth;
+  List<double>? _lastLayoutWidths;
   bool? _lastIsCompact;
   bool? _lastFillWidth;
   SessionTabIdentity? _pendingEnsureVisibleIdentity;
@@ -221,7 +236,12 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         final maxTabWidth = widget.isCompact
             ? _kCompactSessionTabWidth
             : _kSessionTabWidth;
-        final tabWidth = math.min(
+        final minTabWidth = widget.isCompact
+            ? _kMinimumCompactSessionTabWidth
+            : _kMinimumSessionTabWidth;
+        // The viewport still caps the maximum so the strip stays responsive
+        // to the available width; tabs never compress below the minimum.
+        final effectiveMaxTabWidth = math.min(
           maxTabWidth,
           math.max(0.0, constraints.maxWidth - horizontalPadding * 2),
         );
@@ -240,9 +260,23 @@ class _SessionTabStripState extends State<SessionTabStrip> {
           (width, tab) =>
               width + (tab.isSelected ? 0 : _kPinnedSessionTabWidth),
         );
-        final hasSelectedPinned = pinnedTabs.any((tab) => tab.isSelected);
+        final selectedPinned = pinnedTabs
+            .where((tab) => tab.isSelected)
+            .firstOrNull;
+        final selectedPinnedTrailing = selectedPinned == null
+            ? null
+            : widget.trailingBuilder(context, selectedPinned);
+        final selectedPinnedContentWidth = selectedPinned == null
+            ? 0.0
+            : _contentTabWidth(
+                context,
+                selectedPinned,
+                selectedPinnedTrailing,
+                maxTabWidth: effectiveMaxTabWidth,
+                minTabWidth: minTabWidth,
+              );
         final desiredPinnedWidth =
-            inactivePinnedWidth + (hasSelectedPinned ? tabWidth : 0);
+            inactivePinnedWidth + selectedPinnedContentWidth;
         final regularMinimum = math.min(
           _kMinimumRegularRegionWidth,
           availableWidth * 0.5,
@@ -262,7 +296,7 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         final growthRoom = regularTabs.isEmpty
             ? availableWidth
             : math.max(0.0, availableWidth - regularMinimum);
-        final cap = hasSelectedPinned ? growthRoom : pinnedWidthLimit;
+        final cap = selectedPinned != null ? growthRoom : pinnedWidthLimit;
         final pinnedRegionWidth = math.min(desiredPinnedWidth, cap);
         // Never collapse the expanded tab: when the inactive pinned tabs
         // already fill the region, the floor keeps it visible and the pinned
@@ -271,18 +305,46 @@ class _SessionTabStripState extends State<SessionTabStrip> {
           _kPinnedSelectedTabMinWidth,
           pinnedRegionWidth - inactivePinnedWidth,
         );
+        final regularLayout =
+            <({SessionTabRecord tab, double width, Widget? trailing})>[];
+        for (final tab in regularTabs) {
+          final trailing = tab.isSelected
+              ? widget.trailingBuilder(context, tab)
+              : null;
+          regularLayout.add((
+            tab: tab,
+            width: _contentTabWidth(
+              context,
+              tab,
+              trailing,
+              maxTabWidth: effectiveMaxTabWidth,
+              minTabWidth: minTabWidth,
+            ),
+            trailing: trailing,
+          ));
+        }
         final selectedIdentity = _selectedIdentity();
         final selectedIndex = widget.tabs.indexWhere((tab) => tab.isSelected);
+        final selectedIsPinned = selectedIdentity != null
+            ? widget.tabs[selectedIndex].isPinned
+            : false;
+        final layoutWidths = <double>[
+          for (final tab in pinnedTabs)
+            tab.isSelected ? selectedPinnedContentWidth : _kPinnedSessionTabWidth,
+          for (final entry in regularLayout) entry.width,
+        ];
         if (selectedIdentity != _lastSelectedIdentity ||
             selectedIndex != _lastSelectedIndex ||
+            selectedIsPinned != _lastSelectedIsPinned ||
             constraints.maxWidth != _lastViewportWidth ||
-            tabWidth != _lastTabWidth ||
+            !listEquals(layoutWidths, _lastLayoutWidths) ||
             widget.isCompact != _lastIsCompact ||
             widget.fillWidth != _lastFillWidth) {
           _lastSelectedIdentity = selectedIdentity;
           _lastSelectedIndex = selectedIndex;
+          _lastSelectedIsPinned = selectedIsPinned;
           _lastViewportWidth = constraints.maxWidth;
-          _lastTabWidth = tabWidth;
+          _lastLayoutWidths = layoutWidths;
           _lastIsCompact = widget.isCompact;
           _lastFillWidth = widget.fillWidth;
           _scheduleEnsureSelectedVisible(selectedIdentity);
@@ -340,11 +402,14 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                                   tab,
                                   tab.isSelected
                                       ? math.min(
-                                          tabWidth,
+                                          selectedPinnedContentWidth,
                                           selectedPinnedWidth,
                                         )
                                       : _kPinnedSessionTabWidth,
                                   compactPinned: !tab.isSelected,
+                                  trailing: tab.isSelected
+                                      ? selectedPinnedTrailing
+                                      : null,
                                 ),
                             ],
                           ),
@@ -372,8 +437,13 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              for (final tab in regularTabs)
-                                _buildTab(context, tab, tabWidth),
+                              for (final entry in regularLayout)
+                                _buildTab(
+                                  context,
+                                  entry.tab,
+                                  entry.width,
+                                  trailing: entry.trailing,
+                                ),
                             ],
                           ),
                         ),
@@ -416,16 +486,70 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     return Offset.zero;
   }
 
+  String _displayTitle(BuildContext context, SessionTabRecord tab) {
+    final trimmed = tab.title.trim();
+    return trimmed.isEmpty ? context.l10n.sessionExportUntitled : trimmed;
+  }
+
+  double _measureTitleWidth(
+    BuildContext context,
+    String title,
+    bool selected,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: title,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+        ),
+      ),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
+
+  /// Width derived from the tab content, clamped between the minimum and the
+  /// maximum. Only the first line of the title is measured because the tab
+  /// paints a single ellipsized line. The trailing usage button width is fixed
+  /// in production (40px compact / 32px desktop, plus 10px padding); a custom
+  /// trailing builder only needs to stay within those bounds.
+  double _contentTabWidth(
+    BuildContext context,
+    SessionTabRecord tab,
+    Widget? trailing, {
+    required double maxTabWidth,
+    required double minTabWidth,
+  }) {
+    final trailingWidth = trailing == null
+        ? _kTabShoulder
+        : (widget.isCompact ? 40.0 : 32.0) + _kTabShoulder;
+    final chrome = _kTabShoulder + 28 + 7 + 2 + trailingWidth;
+    final title = _displayTitle(context, tab).split('\n').first;
+    final titleWidth = _measureTitleWidth(context, title, tab.isSelected);
+    // The minimum is applied last so a viewport narrower than the minimum
+    // still keeps the tab at its floor and lets the strip scroll.
+    return math.max(
+      minTabWidth,
+      math.min(
+        maxTabWidth,
+        (chrome + titleWidth + _kTabWidthSlack).ceilToDouble(),
+      ),
+    );
+  }
+
   Widget _buildTab(
     BuildContext context,
     SessionTabRecord tab,
     double tabWidth, {
     bool compactPinned = false,
+    Widget? trailing,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final title = tab.title.trim().isEmpty
-        ? context.l10n.sessionExportUntitled
-        : tab.title.trim();
+    final title = _displayTitle(context, tab);
     final key = sessionTabIdentityKey(tab.identity);
     final selected = tab.isSelected;
     final project = _projectForTab(tab);
@@ -435,9 +559,6 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         ? colorScheme.onSurface
         : colorScheme.onSurfaceVariant;
     final hovered = _hoveredIdentity == tab.identity;
-    final trailing = compactPinned
-        ? null
-        : widget.trailingBuilder(context, tab);
 
     void openContextMenu({required bool haptic}) {
       unawaited(
@@ -877,6 +998,21 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         return;
       }
       final position = controller.position;
+      // Skip the animation when the selected tab is already fully visible:
+      // width changes of unrelated tabs must not yank the user's scroll.
+      // A tab fully inside the viewport satisfies
+      // revealTrailing <= pixels <= revealLeading; the interval is empty when
+      // the tab is wider than the viewport, so it never skips then.
+      final revealLeading = viewport
+          .getOffsetToReveal(tabRenderObject, 0.0)
+          .offset;
+      final revealTrailing = viewport
+          .getOffsetToReveal(tabRenderObject, 1.0)
+          .offset;
+      if (revealTrailing <= position.pixels &&
+          position.pixels <= revealLeading) {
+        return;
+      }
       final target = viewport
           .getOffsetToReveal(tabRenderObject, 0.5)
           .offset
