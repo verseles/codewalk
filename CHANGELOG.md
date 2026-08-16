@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.201.0 - 2026-08-16
+
+- docs(behavior): document pending-question rehydration and view-question action
+- fix(chat): drop invalidated pending-interaction loads from coalescing
+- fix(chat): key pending-interaction coalescing by effective scope
+- fix(chat): invalidate and coalesce pending-interaction loads per reviewer
+- fix(chat): harden pending-question rehydration after review
+- fix(chat): rehydrate pending question cards on session re-entry
+
 ## v1.200.2 - 2026-08-15
 
 - fix(tts): mark aggregate completed-turn silence as non-retryable
