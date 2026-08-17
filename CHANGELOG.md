@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.203.0 - 2026-08-17
+
+- fix(chat): coalesce desktop persistence writes
+- fix(chat): reduce desktop persistence jank
+
 ## v1.202.0 - 2026-08-16
 
 - fix(tabs): stop inactive tabs from reserving the context-usage knob space
