@@ -677,7 +677,7 @@ Enforce runtime usage through platform services: Android notifications use `@dra
 
 ---
 
-## ADR-016: Hybrid File-Backed Cache for Large Chat Payloads (2026-02-20, updated 2026-06-23)
+## ADR-016: Hybrid File-Backed Cache for Large Chat Payloads (2026-02-20, updated 2026-08-17)
 
 **Status**: Accepted
 
@@ -689,6 +689,8 @@ CodeWalk caches session lists, last-session snapshots, and per-session message s
 
 The 2026-06-15 revision replaced the file-backed store with a SharedPreferences-only path. While that removed a stale abstraction, native IO targets (Windows, macOS, Linux, Android) hit the platform preference-store payload limits and suffered a measurable Windows/desktop performance regression when storing large chat payloads. Legacy snapshots from before that revision may also still be sitting in the preference store, acting as a latent compatibility risk that needs to be drained on first access.
 
+Hot metadata paths have a separate performance and ordering risk: on Linux and Windows, the SharedPreferences plugin rewrites the whole preferences file synchronously for each `set*` or `remove`. Session-tab reconciliation can receive bursts of SSE-driven updates, and a delayed write can race an awaited load, cleanup, or provider disposal unless the pending state is flushed and ordered. Issue #152 establishes this as an anti-regression boundary for local persistence.
+
 ### Decision
 
 Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, with SharedPreferences reserved for cache metadata, the existing SharedPreferences fallback when no file store exists, and proactive migration of any legacy large payload out of SharedPreferences into the file-backed store.
@@ -698,6 +700,11 @@ Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, w
 3. **No-file-store fallback** — on targets without a `ChatCachePayloadStore` implementation, the helpers keep the existing SharedPreferences read/write fallback. This preserves current web/test behavior while the Windows/desktop fix moves native IO payloads out of the preference store.
 4. **Best-effort migration of known large-payload preference keys** — at the start of `loadSessions()`, schedule a background sweep of `SharedPreferences` entries matching the known large-payload key families (`cached_sessions*`, `last_session_snapshot*`, `session_messages_snapshot::*`, defined by `AppConstants.cachedSessionsKey`, `lastSessionSnapshotKey`, and `sessionMessagesSnapshotKey`). The read path returns a legacy preference payload immediately, treats it as the newest source when a file-backed copy also exists, and queues the file write/preference removal in the background. Per-key mutation queues prevent background migration from overwriting newer cache writes; a per-process in-memory set (`_migratedLargeCacheKeys`) tracks keys cleared during the current run. There is no versioned persisted migration marker.
 5. **Conditional export boundary** — the file-backed store is exposed via the existing conditional export pattern (`chat_cache_payload_store_io.dart` / `chat_cache_payload_store_stub.dart`) so web builds stay green without runtime platform checks.
+6. **Guard hot-path metadata writes (issue #152)** — `AppLocalDataSource` routes `setString`, `setInt`, `setBool`, and `remove` through `_GuardedSharedPreferences`. Equality/existence checks return before calling the plugin for no-op operations. Any new metadata persistence must use the same guard or an equivalent guard at its storage boundary.
+7. **Coalesce bursty metadata with explicit ordering** — session-tab state remains server-scoped under `session_tabs_state::<serverId>`. `ChatProvider` uses a trailing 750 ms debounce with latest-wins pending payloads, serializes writes per server, explicitly flushes before awaited tab-load/context-cleanup paths, and drains pending state into the write queue during provider disposal. Any future debounced metadata persistence must preserve equivalent flush and ordering guarantees.
+8. **Keep write instrumentation opt-in and lazy** — the `shared_preferences_write` performance task is invoked through `AppLogger.runPerformanceTask`, and UTF-8 byte sizing is evaluated only while performance logging is enabled.
+
+This is an addendum to ADR-016, which owns the local persistence boundary. ADR-020 remains the related session-level SWR consumer of these helpers; it does not need a duplicate decision or a new ADR.
 
 ### Rationale
 
@@ -706,6 +713,10 @@ Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, w
 - Keeping small metadata in `SharedPreferences` preserves the contract that cache state is durable across app restarts and avoids file I/O on every read for the hot path.
 - The no-file-store fallback keeps the code path uniform without breaking web builds or tests that inject no store; the Windows regression is addressed by ensuring all native IO targets have a real file-backed store.
 - Best-effort background migration of the known large-payload key families out of `SharedPreferences` prevents the preference store from staying bloated by oversized entries written before the fix without blocking the first cache restore on Windows; the read path treats any residual `SharedPreferences` copy as newer than file-backed data and queues it for draining.
+- Generic equality/existence guards prevent redundant whole-preferences-file rewrites on hot paths without changing the public local-data-source contract.
+- Trailing latest-wins coalescing bounds burst cost while per-server queues and explicit flushes prevent a delayed write from being overtaken by an awaited read or cleanup operation.
+- Lazy, opt-in instrumentation preserves the diagnostic signal when requested without computing payload sizes or creating performance-task overhead when logging is disabled.
+- Keeping this rule in ADR-016 avoids duplicating the persistence boundary in ADR-020 or creating a separate ADR for an implementation constraint that applies to the same storage decision.
 
 ### Consequences
 
@@ -713,17 +724,27 @@ Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, w
 - ✅ The cache contract (server/context-scoped keys, metadata layout) is unchanged; only the payload backend becomes hybrid.
 - ✅ Legacy chat payloads under the known large-payload keys (`cached_sessions*`, `last_session_snapshot*`, `session_messages_snapshot::*`) are drained from `SharedPreferences` in the background after `loadSessions()` starts, preventing silent loss and preference-store bloat without blocking the first restore; residual `SharedPreferences` copies win over file-backed copies and are migrated forward.
 - ✅ Web/test configurations without a file store keep the existing SharedPreferences fallback semantics.
+- ✅ No-op SharedPreferences metadata writes are skipped, and bursty session-tab updates are coalesced without losing the latest server-scoped state.
+- ✅ Explicit flushes and per-server ordering preserve persistence visibility across awaited load/cleanup paths; provider disposal drains pending state into the same ordered write queue.
+- ✅ The change is client-local persistence only: it does not change the OpenCode wire protocol, server event semantics, documented visual behavior, or ADR-023 compatibility.
+- ⚠ Debouncing intentionally delays ordinary session-tab persistence by up to 750 ms; lifecycle boundaries must flush before relying on the durable value.
+- ⚠ Future metadata persistence must use the guarded/coalesced boundary rather than introducing an unguarded direct SharedPreferences hot path.
 - ⚠ Requires the conditional import boundary (`ChatCachePayloadStore` IO vs. stub) to keep web builds green — same pattern already used by the Tailscale adapter (ADR-036) and the SSE adapter (ADR-018).
 - ⚠ The migration key list is explicit; adding a new large-payload key family requires updating `_isLargeCachePayloadPreferenceKey` so the sweep stays complete.
 - ❌ Web can still persist large chat snapshots through its preference fallback; a true web no-store or IndexedDB-backed cache is a separate decision.
+- ❌ Direct SharedPreferences consumers outside this boundary are not automatically coalesced; if they become hot-path metadata persistence, they must adopt an equivalent guard and ordering policy.
 
 ### Key Files
 
-- `lib/data/datasources/app_local_datasource.dart`
-- `lib/data/datasources/app_local_datasource_storage_helpers.dart`
+- `lib/data/datasources/app_local_datasource.dart` — `_GuardedSharedPreferences`, `AppLocalDataSourceImpl`
+- `lib/data/datasources/app_local_datasource_storage_helpers.dart` — large-payload file-store/fallback helpers
 - `lib/data/cache/chat_cache_payload_store_io.dart` — file-backed store implementation for native IO targets
 - `lib/data/cache/chat_cache_payload_store_stub.dart` — no-file-store fallback for web/tests
+- `lib/presentation/providers/chat_provider.dart` — per-server debounce state and `dispose`
+- `lib/presentation/providers/chat_provider/chat_provider_session_tab_ops.dart` — `_scheduleSessionTabsPersistence`, `flushSessionTabsPersistence`, `_enqueueSessionTabsPersistenceOperation`
+- `lib/core/logging/app_logger.dart` — `runPerformanceTask`
 - `test/unit/datasources/app_local_datasource_impl_test.dart`
+- `test/unit/providers/chat_provider_session_tabs_test.dart` — burst coalescing coverage
 
 ---
 

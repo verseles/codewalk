@@ -5243,7 +5243,19 @@ class ChatProvider extends ChangeNotifier {
     for (final timer in _sessionTabsPersistenceDebounceByServer.values) {
       timer.cancel();
     }
+    final pendingSessionTabPayloads = Map<String, String>.from(
+      _sessionTabsPendingPayloadByServer,
+    );
     _sessionTabsPersistenceDebounceByServer.clear();
+    _sessionTabsPendingPayloadByServer.clear();
+    for (final entry in pendingSessionTabPayloads.entries) {
+      unawaited(
+        _enqueueSessionTabsPersistence(
+          serverId: entry.key,
+          payload: entry.value,
+        ),
+      );
+    }
     _sessionAttentionPublishDebounce?.cancel();
     _sessionAttentionThresholdTimer?.cancel();
     for (final timer in _messageFallbackDebounceById.values) {

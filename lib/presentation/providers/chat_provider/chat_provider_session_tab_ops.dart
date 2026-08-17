@@ -987,6 +987,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
         }
       }
     }
+    await flushSessionTabsPersistence(targetServerId);
     try {
       raw = await _enqueueSessionTabsPersistenceOperation<String?>(
         serverId: targetServerId,
@@ -2075,6 +2076,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
       return;
     }
 
+    await flushSessionTabsPersistence(normalizedServerId);
     try {
       await _enqueueSessionTabsPersistenceOperation<void>(
         serverId: normalizedServerId,

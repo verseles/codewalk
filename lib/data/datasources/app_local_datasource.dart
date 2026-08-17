@@ -442,7 +442,7 @@ class _GuardedSharedPreferences {
     return _write(
       type: 'string',
       key: key,
-      sizeBytes: value.length,
+      sizeBytesBuilder: () => utf8.encode(value).length,
       action: () => _inner.setString(key, value),
     );
   }
@@ -486,16 +486,19 @@ class _GuardedSharedPreferences {
     required String type,
     required String key,
     required Future<bool> Function() action,
-    int? sizeBytes,
+    int Function()? sizeBytesBuilder,
   }) {
     return AppLogger.runPerformanceTask<bool>(
       'shared_preferences_write',
       action,
       tags: const <String>{'persistence:shared_preferences', 'ui:write'},
-      contextBuilder: () => <String, Object?>{
-        'type': type,
-        'keyHash': AppLogger.safeContextId(key),
-        if (sizeBytes != null) 'sizeBytes': sizeBytes,
+      contextBuilder: () {
+        final sizeBytes = sizeBytesBuilder?.call();
+        return <String, Object?>{
+          'type': type,
+          'keyHash': AppLogger.safeContextId(key),
+          if (sizeBytes != null) 'sizeBytes': sizeBytes,
+        };
       },
     );
   }
