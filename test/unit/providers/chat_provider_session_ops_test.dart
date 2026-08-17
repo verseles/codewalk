@@ -1561,6 +1561,43 @@ void main() {
     );
 
     test(
+      'foreground resume preserves visible state and ignores duplicate active calls',
+      () async {
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+
+        final sessionsBefore = chatRepository.getSessionsCallCount;
+        final messagesBefore = chatRepository.getMessagesCallCount;
+        final states = <ChatState>[];
+        provider.addListener(() => states.add(provider.state));
+
+        await provider.setForegroundActive(false);
+        await provider.setForegroundActive(true);
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+
+        expect(provider.state, ChatState.loaded);
+        expect(states, isNot(contains(ChatState.loading)));
+        expect(
+          chatRepository.getSessionsCallCount,
+          greaterThan(sessionsBefore),
+        );
+        expect(
+          chatRepository.getMessagesCallCount,
+          greaterThan(messagesBefore),
+        );
+
+        final sessionsAfterResume = chatRepository.getSessionsCallCount;
+        final messagesAfterResume = chatRepository.getMessagesCallCount;
+        await provider.setForegroundActive(true);
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+
+        expect(chatRepository.getSessionsCallCount, sessionsAfterResume);
+        expect(chatRepository.getMessagesCallCount, messagesAfterResume);
+      },
+    );
+
+    test(
       'global session.updated applies incrementally without broad session reload',
       () async {
         appRepository.providersResult = Right(

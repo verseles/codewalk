@@ -123,6 +123,9 @@ extension _ChatProviderRealtimeOps on ChatProvider {
   }
 
   Future<void> _resumeRealtimeAfterForeground() async {
+    if (_sessionTabsDisposed || !_isForegroundActive) {
+      return;
+    }
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       await _stopRealtimeEventSubscriptions(reason: 'background-data-saver');
       return;
@@ -144,18 +147,43 @@ extension _ChatProviderRealtimeOps on ChatProvider {
     AppLogger.info('sync_resume_reconcile_start');
     try {
       await _startRealtimeEventSubscription();
-      if (_cellularDataSaverService.shouldSuppressBackgroundWork) return;
+      if (_sessionTabsDisposed ||
+          !_isForegroundActive ||
+          _cellularDataSaverService.shouldSuppressBackgroundWork) {
+        return;
+      }
       await _loadPendingInteractions();
-      if (_cellularDataSaverService.shouldSuppressBackgroundWork) return;
-      await loadSessions();
-      if (_cellularDataSaverService.shouldSuppressBackgroundWork) return;
+      if (_sessionTabsDisposed ||
+          !_isForegroundActive ||
+          _cellularDataSaverService.shouldSuppressBackgroundWork) {
+        return;
+      }
+      await loadSessions(
+        preserveVisibleState: true,
+        restoreLastSessionSnapshot: false,
+        refreshSelectedSessionMessages: false,
+        refreshSessionStatus: false,
+      );
+      if (_sessionTabsDisposed ||
+          !_isForegroundActive ||
+          _cellularDataSaverService.shouldSuppressBackgroundWork) {
+        return;
+      }
       await refreshActiveSessionView(reason: 'foreground-resume');
-      if (_cellularDataSaverService.shouldSuppressBackgroundWork) return;
+      if (_sessionTabsDisposed ||
+          !_isForegroundActive ||
+          _cellularDataSaverService.shouldSuppressBackgroundWork) {
+        return;
+      }
       final currentSessionId = _currentSession?.id;
       if (currentSessionId != null) {
         await loadSessionInsights(currentSessionId, silent: true);
       }
-      if (_cellularDataSaverService.shouldSuppressBackgroundWork) return;
+      if (_sessionTabsDisposed ||
+          !_isForegroundActive ||
+          _cellularDataSaverService.shouldSuppressBackgroundWork) {
+        return;
+      }
       await _syncSelectionFromRemote(reason: 'foreground-resume', force: true);
       AppLogger.info('sync_resume_reconcile_complete');
     } finally {
@@ -164,7 +192,8 @@ extension _ChatProviderRealtimeOps on ChatProvider {
   }
 
   Future<void> _startRealtimeEventSubscription() async {
-    if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
+    if (_sessionTabsDisposed ||
+        _cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;
     }
     if (_realtimeSubscriptionRestartInFlight) {
@@ -176,6 +205,9 @@ extension _ChatProviderRealtimeOps on ChatProvider {
     _realtimeSubscriptionRestartInFlight = true;
     try {
       do {
+        if (_sessionTabsDisposed) {
+          return;
+        }
         _realtimeSubscriptionRestartQueued = false;
 
         final generation = ++_eventStreamGeneration;
@@ -187,14 +219,18 @@ extension _ChatProviderRealtimeOps on ChatProvider {
           previousSubscription,
           label: 'realtime event',
         );
+        if (_sessionTabsDisposed) {
+          return;
+        }
         await _cancelSubscriptionSafely(
           previousGlobalSubscription,
           label: 'global event',
         );
-        if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
+        if (_sessionTabsDisposed ||
+            _cellularDataSaverService.shouldSuppressBackgroundWork) {
           return;
         }
-        if (!_isForegroundActive) {
+        if (_sessionTabsDisposed || !_isForegroundActive) {
           AppLogger.info('sync_subscription_start_skip reason=background');
           return;
         }
@@ -206,6 +242,9 @@ extension _ChatProviderRealtimeOps on ChatProvider {
         }
         _startSyncHealthMonitor();
 
+        if (_sessionTabsDisposed) {
+          return;
+        }
         final directory = projectProvider.currentDirectory;
         final newSubscription = watchChatEvents(directory: directory).listen(
           (result) {
@@ -245,6 +284,13 @@ extension _ChatProviderRealtimeOps on ChatProvider {
           },
         );
 
+        if (_sessionTabsDisposed) {
+          await _cancelSubscriptionSafely(
+            newSubscription,
+            label: 'realtime event (disposed)',
+          );
+          return;
+        }
         if (generation != _eventStreamGeneration) {
           await _cancelSubscriptionSafely(
             newSubscription,
@@ -258,6 +304,10 @@ extension _ChatProviderRealtimeOps on ChatProvider {
         if (_cellularDataSaverService.isAggressiveDataSaverActive) {
           AppLogger.info('data_saver_aggressive_global_stream_paused');
           continue;
+        }
+
+        if (_sessionTabsDisposed) {
+          return;
         }
 
         final globalSubscription = watchGlobalChatEvents().listen(
@@ -301,6 +351,13 @@ extension _ChatProviderRealtimeOps on ChatProvider {
           },
         );
 
+        if (_sessionTabsDisposed) {
+          await _cancelSubscriptionSafely(
+            globalSubscription,
+            label: 'global event (disposed)',
+          );
+          return;
+        }
         if (generation != _eventStreamGeneration) {
           await _cancelSubscriptionSafely(
             globalSubscription,

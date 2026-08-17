@@ -26,7 +26,7 @@ extension _ChatPageLifecycle on _ChatPageState {
     );
     if (_lastForegroundPolicySettingsSignature !=
         nextForegroundPolicySignature) {
-      _applyForegroundPolicy(reason: 'settings-changed');
+      unawaited(_applyForegroundPolicy(reason: 'settings-changed'));
       _lastForegroundPolicySettingsSignature = nextForegroundPolicySignature;
     }
     _autoApprovePermissionCooldownIds.clear();
@@ -511,7 +511,10 @@ extension _ChatPageLifecycle on _ChatPageState {
     }
   }
 
-  void _applyForegroundPolicy({required String reason}) {
+  Future<void> _applyForegroundPolicy({
+    required String reason,
+    bool forceResume = false,
+  }) async {
     final provider = _chatProvider;
     if (provider == null) {
       return;
@@ -607,7 +610,7 @@ extension _ChatPageLifecycle on _ChatPageState {
     if (_isAppInForeground) {
       AppLogger.debug('foreground_policy reason=$reason mode=active');
       syncAndroidForegroundMonitor(enabled: false, activeSessionCount: 0);
-      unawaited(provider.setForegroundActive(true));
+      await provider.setForegroundActive(true, forceResume: forceResume);
       return;
     }
 
@@ -616,7 +619,7 @@ extension _ChatPageLifecycle on _ChatPageState {
         'foreground_policy reason=$reason mode=background-disabled',
       );
       syncAndroidForegroundMonitor(enabled: false, activeSessionCount: 0);
-      unawaited(provider.setForegroundActive(false));
+      await provider.setForegroundActive(false);
       return;
     }
 
@@ -627,7 +630,7 @@ extension _ChatPageLifecycle on _ChatPageState {
         (settingsProvider?.desktopCloseBehavior != DesktopCloseBehavior.close);
     if (keepDesktopRealtime) {
       AppLogger.debug('foreground_policy reason=$reason mode=desktop-tray');
-      unawaited(provider.setForegroundActive(true));
+      await provider.setForegroundActive(true, forceResume: forceResume);
       return;
     }
 
@@ -641,7 +644,7 @@ extension _ChatPageLifecycle on _ChatPageState {
         enabled: hasActiveSession,
         activeSessionCount: activeSessionCount,
       );
-      unawaited(provider.setForegroundActive(true));
+      await provider.setForegroundActive(true, forceResume: forceResume);
       if (hasActiveSession) {
         scheduleAndroidProbe(
           AndroidBackgroundAlertWorker.activeSessionProbeInterval,
@@ -663,7 +666,7 @@ extension _ChatPageLifecycle on _ChatPageState {
 
     AppLogger.debug('foreground_policy reason=$reason mode=paused');
     syncAndroidForegroundMonitor(enabled: false, activeSessionCount: 0);
-    unawaited(provider.setForegroundActive(false));
+    await provider.setForegroundActive(false);
     if (hasActiveSession) {
       scheduleAndroidProbe(
         AndroidBackgroundAlertWorker.activeSessionProbeInterval,

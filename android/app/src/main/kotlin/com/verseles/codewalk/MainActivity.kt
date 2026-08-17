@@ -3,6 +3,7 @@ package com.verseles.codewalk
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.ActivityNotFoundException
+import android.app.ActivityManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
@@ -48,10 +49,19 @@ class MainActivity : FlutterActivity() {
     private var sessionOverlayActivationChannel: MethodChannel? = null
     private var systemChannel: MethodChannel? = null
     private var activeOAuthFlowId: String? = null
+    private var activityWasRecreated = false
+    private var lastTrimMemoryLevel = -1
+    private var flutterEngineIdentity = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activityWasRecreated = savedInstanceState != null
         activeOAuthFlowId = savedInstanceState?.getString(OAUTH_FLOW_ID_STATE)
+    }
+
+    override fun onTrimMemory(level: Int) {
+        lastTrimMemoryLevel = level
+        super.onTrimMemory(level)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -61,6 +71,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        flutterEngineIdentity = System.identityHashCode(flutterEngine)
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -162,6 +173,9 @@ class MainActivity : FlutterActivity() {
                 "requestDisableBatteryOptimizations" -> {
                     result.success(requestDisableBatteryOptimizations())
                 }
+                "getAndroidProcessDiagnostics" -> {
+                    result.success(androidProcessDiagnostics())
+                }
                 "launchOAuthAuthorization" -> {
                     result.success(
                         launchOAuthAuthorization(
@@ -173,6 +187,32 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         } }
+    }
+
+    private fun androidProcessDiagnostics(): Map<String, Any?> {
+        val diagnostics = mutableMapOf<String, Any?>(
+            "pid" to android.os.Process.myPid(),
+            "activityId" to System.identityHashCode(this),
+            "engineId" to flutterEngineIdentity,
+            "activityRecreated" to activityWasRecreated,
+            "lastTrimMemoryLevel" to lastTrimMemoryLevel,
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val activityManager =
+                getSystemService(ACTIVITY_SERVICE) as? ActivityManager
+            val exitInfo = activityManager
+                ?.getHistoricalProcessExitReasons(packageName, 0, 1)
+                ?.firstOrNull()
+            if (exitInfo != null) {
+                diagnostics["lastExitReason"] = exitInfo.reason
+                diagnostics["lastExitStatus"] = exitInfo.status
+                diagnostics["lastExitImportance"] = exitInfo.importance
+                diagnostics["lastExitPssKb"] = exitInfo.pss
+                diagnostics["lastExitRssKb"] = exitInfo.rss
+                diagnostics["lastExitTimestampEpochMs"] = exitInfo.timestamp
+            }
+        }
+        return diagnostics
     }
 
     private fun launchOAuthAuthorization(rawUrl: String?, flowId: String?): String? {

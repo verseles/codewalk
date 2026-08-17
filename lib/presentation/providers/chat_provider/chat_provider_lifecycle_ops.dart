@@ -2,8 +2,22 @@ part of '../chat_provider.dart';
 
 extension ChatProviderLifecycleOps on ChatProvider {
   // Foreground/background lifecycle.
-  Future<void> setForegroundActive(bool isActive) async {
+  Future<void> setForegroundActive(
+    bool isActive, {
+    bool forceResume = false,
+  }) async {
+    if (_sessionTabsDisposed) {
+      return;
+    }
     final wasActive = _isForegroundActive;
+    final shouldForceResume = isActive && forceResume && wasActive;
+    if (wasActive == isActive && !shouldForceResume) {
+      final resumeTask = isActive ? _foregroundResumeTask : null;
+      if (resumeTask != null) {
+        await resumeTask;
+      }
+      return;
+    }
     _isForegroundActive = isActive;
     if (isActive && !wasActive) {
       _markCurrentSessionTabViewed();
@@ -62,7 +76,15 @@ extension ChatProviderLifecycleOps on ChatProvider {
       }
     }
     await _syncCellularDataSaverRealtimePolicy(reason: 'foreground-return');
-    await _resumeRealtimeAfterForeground();
+    final resumeTask = _foregroundResumeTask ??=
+        _resumeRealtimeAfterForeground();
+    try {
+      await resumeTask;
+    } finally {
+      if (identical(_foregroundResumeTask, resumeTask)) {
+        _foregroundResumeTask = null;
+      }
+    }
   }
 
   // Foreground state setter.
@@ -134,6 +156,9 @@ extension ChatProviderLifecycleOps on ChatProvider {
     bool preferDelta = true,
     bool refreshAfterJoiningInFlight = false,
   }) async {
+    if (_sessionTabsDisposed) {
+      return;
+    }
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;
     }

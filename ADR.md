@@ -177,10 +177,16 @@ Use realtime streams as the primary sync mechanism, automatically enter degraded
 
 **Note** (issue #98): ADR-049 permits the sole exception to the non-current full-message-fetch rule: after an authoritative `session.idle`, a bounded, directory-scoped final message fetch may run only for the matching root session on the active server, identified by the exact `serverId`, directory, and session ID. It is for secure attention display/speech snapshots only; it does not apply diffs, fetch child sessions, or broaden background sync.
 
+**Note** (2026-08-17): Foreground reconciliation is now coalesced and visible-state-preserving. Android-only forced resume handles the mobile short-hold case; standard data-saver reconciliation skips stale last-session snapshot hydration; and disposal guards prevent subscription recreation. No OpenCode protocol or SSE contract semantics changed, and no ADR-023 exception is required.
+
 ### Key Files
 
+- `lib/presentation/providers/chat_provider.dart`
+- `lib/presentation/providers/chat_provider/chat_provider_event_reducer_global_ops.dart`
+- `lib/presentation/providers/chat_provider/chat_provider_lifecycle_ops.dart`
 - `lib/presentation/providers/chat_provider/chat_provider_realtime_ops.dart`
 - `lib/presentation/providers/chat_provider/chat_provider_realtime_aux_ops.dart`
+- `lib/presentation/pages/chat_page.dart`
 - `lib/presentation/pages/chat_page/chat_page_lifecycle.dart`
 - `lib/presentation/pages/app_shell_page.dart`
 - `lib/presentation/services/desktop_tray_service.dart`

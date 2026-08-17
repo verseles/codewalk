@@ -766,7 +766,7 @@ class _ChatPageState extends State<ChatPage>
           nextSettingsProvider.pendingPostOnboardingChatTour;
       _queuedPendingPostOnboardingTourAutoStart =
           nextSettingsProvider.pendingPostOnboardingChatTour;
-      _applyForegroundPolicy(reason: 'settings-provider-attached');
+      unawaited(_applyForegroundPolicy(reason: 'settings-provider-attached'));
       _lastForegroundPolicySettingsSignature =
           _foregroundPolicySettingsSignature(nextSettingsProvider.settings);
       _lastEditorAutosaveEnabled = nextSettingsProvider.editorAutosaveEnabled;
@@ -901,7 +901,10 @@ class _ChatPageState extends State<ChatPage>
             state == AppLifecycleState.resumed ||
             state == AppLifecycleState.inactive,
       );
-      _applyForegroundPolicy(reason: 'app-lifecycle-${state.name}');
+      final foregroundPolicyTask = _applyForegroundPolicy(
+        reason: 'app-lifecycle-${state.name}',
+        forceResume: _isAndroidRuntime && _isAppInForeground,
+      );
       unawaited(
         _syncBackgroundPermissionAutoApproveContext(
           reason: 'app-lifecycle-${state.name}',
@@ -914,23 +917,33 @@ class _ChatPageState extends State<ChatPage>
           _resumeRefreshViewportRestorePending = true;
           _returnRevealGeneration += 1;
           unawaited(
-            provider
-                .refreshActiveSessionView(reason: 'app-lifecycle-resumed')
-                .whenComplete(() {
-                  _resumeRefreshViewportRestorePending = false;
-                  if (!mounted ||
-                      !_isAppInForeground ||
-                      !_isChatScreenActive()) {
-                    return;
-                  }
-                  _handleReturnToChat(
-                    provider,
-                    reason: 'app-resumed-refresh-complete',
-                  );
-                }),
+            foregroundPolicyTask.then<void>(
+              (_) {
+                _resumeRefreshViewportRestorePending = false;
+                if (!mounted || !_isAppInForeground || !_isChatScreenActive()) {
+                  return;
+                }
+                _handleReturnToChat(
+                  provider,
+                  reason: 'app-resumed-refresh-complete',
+                );
+              },
+              onError: (Object error, StackTrace stackTrace) {
+                _resumeRefreshViewportRestorePending = false;
+                AppLogger.warn(
+                  'Foreground resume policy failed',
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+              },
+            ),
           );
+        } else {
+          unawaited(foregroundPolicyTask);
         }
         _handleReturnToChat(provider, reason: 'app-resumed');
+      } else {
+        unawaited(foregroundPolicyTask);
       }
     }
     if (_isAppInForeground &&
@@ -952,7 +965,7 @@ class _ChatPageState extends State<ChatPage>
     _isAppInForeground = false;
     _flushActiveFileEditorDrafts();
     _chatProvider?.setAppInForeground(false);
-    _applyForegroundPolicy(reason: 'window-minimize');
+    unawaited(_applyForegroundPolicy(reason: 'window-minimize'));
   }
 
   @override
@@ -960,7 +973,7 @@ class _ChatPageState extends State<ChatPage>
     _isAppInForeground = true;
     _chatProvider?.setAppInForeground(true);
     _returnRevealGeneration += 1;
-    _applyForegroundPolicy(reason: 'window-restore');
+    unawaited(_applyForegroundPolicy(reason: 'window-restore'));
     _startForegroundWarningGrace();
     final provider = _chatProvider;
     if (provider != null) {
@@ -975,7 +988,7 @@ class _ChatPageState extends State<ChatPage>
       _isAppInForeground = true;
       _chatProvider?.setAppInForeground(true);
       _returnRevealGeneration += 1;
-      _applyForegroundPolicy(reason: 'window-focus');
+      unawaited(_applyForegroundPolicy(reason: 'window-focus'));
       _startForegroundWarningGrace();
       final provider = _chatProvider;
       if (provider != null) {
@@ -1007,6 +1020,13 @@ class _ChatPageState extends State<ChatPage>
     };
   }
 
+  bool get _isAndroidRuntime {
+    if (kIsWeb) {
+      return false;
+    }
+    return defaultTargetPlatform == TargetPlatform.android;
+  }
+
   void _setState(VoidCallback fn) {
     if (SchedulerBinding.instance.schedulerPhase ==
         SchedulerPhase.persistentCallbacks) {
@@ -1025,7 +1045,7 @@ class _ChatPageState extends State<ChatPage>
 
     // Set scroll to bottom callback
     chatProvider.setScrollToBottomCallback(_requestPassiveScrollToBottom);
-    _applyForegroundPolicy(reason: 'chat-load-initial-data');
+    unawaited(_applyForegroundPolicy(reason: 'chat-load-initial-data'));
 
     // Technical comment translated to English.
     _initializeChatProvider(chatProvider);

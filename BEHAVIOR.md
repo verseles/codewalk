@@ -2140,6 +2140,8 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Given** the app was in background
 - **When** the user returns to the app
 - **Then** the app automatically reconnects to the server and resynchronizes state (missed messages, updated sessions, etc.)
+- **Then** the visible chat and selected session stay in place while reconciliation runs instead of entering a full loading/reset path
+- **Then** foreground reconciliation does not restore a stale last-session snapshot over the visible state
 - **Then** transient resume-time probe failures use a short confirmation window before unhealthy/disconnected warning UI is shown, so false alerts do not flash while connectivity is still settling
 - **Then** pending question and permission refreshes merge with live SSE updates during reconnect/resume instead of wiping newer in-memory prompts that arrived while the HTTP refresh was in flight
 - **Then** when standard `Cellular data saver` is active on mobile data, resume-time automatic sync is limited to one immediate foreground burst and idle realtime may stay paused afterward until the next 1-minute window or an explicit user action
@@ -2149,7 +2151,27 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** the app resumes from background
 - **When** both lifecycle and reconnect triggers fire
-- **Then** only one refresh cycle executes — no duplicate network calls
+- **Then** the triggers are coalesced into one foreground reconciliation — no duplicate refresh or subscription work
+
+### Android short-hold resume reconciliation
+
+- **Given** Android mobile keeps realtime active briefly for an active response while the app is backgrounded
+- **When** the app resumes during that short hold
+- **Then** CodeWalk can force the foreground reconciliation even when the provider is already marked foreground-active
+- **Then** iOS, desktop, and web retain their existing lifecycle and reconnect behavior without this Android-only force
+
+### Cellular data saver resume reconciliation
+
+- **Given** standard or aggressive `Cellular data saver` is active on cellular data
+- **When** resume synchronization runs
+- **Then** standard mode revalidates the session list while preserving the visible state, and aggressive mode refreshes only the visible active session and pending interactions
+- **Then** neither mode rehydrates a stale visible snapshot, and an explicit foreground reconciliation refreshes the active state
+
+### Lifecycle disposal does not recreate realtime subscriptions
+
+- **Given** lifecycle disposal or background invalidation has canceled or invalidated realtime subscriptions
+- **When** an in-flight subscription restart reaches a later cancellation or creation step
+- **Then** stale subscriptions are canceled or ignored and no new realtime subscription is attached after invalidation
 
 ---
 
@@ -2395,6 +2417,15 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** each exported line includes the entry's sorted tags and a JSON-encoded `Metrics` block alongside the timestamp, level, message, error, and stack trace
 - **When** an exported entry is restored through `LogEntry.fromJson`
 - **Then** the original `tags` set and `metrics` map are restored so round-tripping between exports and offline analysis preserves the task timing payload (`taskId`, `status`, `elapsedMs`, `operation`, `parentTaskId`, `context`)
+
+### Android process diagnostics are bounded and sanitized
+
+- **Given** CodeWalk starts or an unhandled Dart, framework, platform, or zone error occurs on Android
+- **When** process diagnostics are recorded
+- **Then** CodeWalk stores a local ring of at most 12 records containing system metadata and coarse error markers only, such as process/activity/engine/lifecycle/exit metadata, source, error type, and a stack hash
+- **Then** records contain no user content, prompts, credentials, URLs, clipboard data, or full stack traces
+- **Then** writes are queued, best-effort, and non-blocking, so a diagnostic failure cannot block startup or lifecycle handling
+- **Then** the records support later diagnosis of rare Android process termination or recreation and do not claim to prevent or solve it
 
 ---
 

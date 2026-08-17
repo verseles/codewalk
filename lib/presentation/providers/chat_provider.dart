@@ -423,6 +423,7 @@ class ChatProvider extends ChangeNotifier {
   int _localMessageIdSequence = 0;
   Future<void>? _activeSessionRefreshTask;
   String? _activeSessionRefreshSessionId;
+  Future<void>? _foregroundResumeTask;
   bool _isLoadingOlderMessages = false;
   bool _hasMoreOldMessages = false;
   // Tracks an existing selected session whose timeline is still hydrating.
@@ -664,6 +665,9 @@ class ChatProvider extends ChangeNotifier {
   bool _hasPendingRenderFlush = false;
 
   void _notifyListeners({String reason = 'chat_provider'}) {
+    if (_sessionTabsDisposed) {
+      return;
+    }
     _scheduleSessionAttentionPublish();
     if (!_isForegroundActive) {
       if (AppLogger.performanceLoggingEnabled) {
@@ -679,6 +683,10 @@ class ChatProvider extends ChangeNotifier {
     _notifyScheduled = true;
     scheduleMicrotask(() {
       _notifyScheduled = false;
+      if (_sessionTabsDisposed) {
+        _pendingNotifyReasons.clear();
+        return;
+      }
       if (!AppLogger.performanceLoggingEnabled) {
         _pendingNotifyReasons.clear();
         notifyListeners();
@@ -3285,10 +3293,12 @@ class ChatProvider extends ChangeNotifier {
     bool userInitiated = false,
     bool refreshSelectedSessionMessages = true,
     bool refreshSessionStatus = true,
+    bool restoreLastSessionSnapshot = true,
   }) async {
     return AppLogger.runPerformanceTask<void>(
       'load_sessions',
       () async {
+        if (_sessionTabsDisposed) return;
         if (_state == ChatState.loading && !preserveVisibleState) return;
         if (userInitiated) {
           _cellularDataSaverService.noteExplicitUserAction(
@@ -3330,11 +3340,13 @@ class ChatProvider extends ChangeNotifier {
         try {
           // First try loading from cache
           await _loadCachedSessions(serverId: serverId, scopeId: scopeId);
-          await _restoreLastSessionSnapshotFromCache(
-            serverId: serverId,
-            scopeId: scopeId,
-            preferredSessionId: storedSessionId,
-          );
+          if (restoreLastSessionSnapshot) {
+            await _restoreLastSessionSnapshotFromCache(
+              serverId: serverId,
+              scopeId: scopeId,
+              preferredSessionId: storedSessionId,
+            );
+          }
           _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
 
           Future<void> revalidateFromServer({
@@ -5294,8 +5306,12 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
     _eventStreamGeneration += 1;
-    _eventSubscription?.cancel();
-    _globalEventSubscription?.cancel();
+    final eventSubscription = _eventSubscription;
+    final globalEventSubscription = _globalEventSubscription;
+    _eventSubscription = null;
+    _globalEventSubscription = null;
+    eventSubscription?.cancel();
+    globalEventSubscription?.cancel();
     _globalRefreshDebounce?.cancel();
     _deltaNotifyDebounce?.cancel();
     for (final timer in _sessionTabsPersistenceDebounceByServer.values) {

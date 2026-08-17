@@ -54,6 +54,8 @@ class AppConstants {
       'session_attention_presentation_override';
   static const String sessionAttentionMainHeartbeatEpochMsKey =
       'session_attention_main_heartbeat_epoch_ms';
+  static const String androidProcessDiagnosticsKey =
+      'android_process_diagnostics_v1';
   static const String localeCodeKey = 'locale_code';
 
   // Update check keys

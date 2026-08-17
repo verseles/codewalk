@@ -12,6 +12,7 @@ import 'core/constants/app_constants.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/i18n/app_locales.dart';
 import 'core/i18n/l10n_bridge.dart';
+import 'core/logging/android_process_diagnostics.dart';
 import 'core/logging/app_logger.dart';
 import 'domain/entities/experience_settings.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -40,6 +41,7 @@ Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await runZonedGuarded<Future<void>>(() async {
     AppLogger.installGlobalHandlers();
+    unawaited(AndroidProcessDiagnostics.recordStartup());
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(

@@ -750,6 +750,68 @@ void main() {
     );
 
     test(
+      'standard data saver foreground resume keeps visible state while reconciling',
+      () async {
+        final dataSaverService = CellularDataSaverService.disabled()
+          ..debugSetDataSaverLevel(DataSaverLevel.standard)
+          ..debugSetTransport(DataSaverTransport.cellular);
+        addTearDown(dataSaverService.dispose);
+        provider = buildProvider(cellularDataSaverService: dataSaverService);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        final states = <ChatState>[];
+        provider.addListener(() => states.add(provider.state));
+        chatRepository.messagesBySession['ses_1'] = <ChatMessage>[
+          AssistantMessage(
+            id: 'msg_standard_resume',
+            sessionId: 'ses_1',
+            time: DateTime.fromMillisecondsSinceEpoch(3000),
+            completedTime: DateTime.fromMillisecondsSinceEpoch(3100),
+            parts: const <MessagePart>[
+              TextPart(
+                id: 'part_standard_resume',
+                messageId: 'msg_standard_resume',
+                sessionId: 'ses_1',
+                text: 'reconciled',
+              ),
+            ],
+          ),
+        ];
+
+        await provider.setForegroundActive(false);
+        await provider.setForegroundActive(true);
+        await settleUntil(
+          () => provider.messages.any(
+            (message) => message.id == 'msg_standard_resume',
+          ),
+          reason: 'Expected standard data saver resume reconciliation.',
+        );
+
+        expect(states, isNot(contains(ChatState.loading)));
+        expect(provider.messages.single.id, 'msg_standard_resume');
+      },
+    );
+
+    test(
+      'foreground resume does not recreate realtime subscriptions after dispose',
+      () async {
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.setForegroundActive(false);
+
+        final resumeTask = provider.setForegroundActive(true);
+        provider.dispose();
+        await resumeTask;
+        await pumpEventQueue();
+
+        expect(provider.debugHasRealtimeEventSubscription, isFalse);
+        expect(provider.debugHasGlobalEventSubscription, isFalse);
+      },
+    );
+
+    test(
       'aggressive data saver stops realtime while chat route is hidden',
       () async {
         final dataSaverService = CellularDataSaverService.disabled()

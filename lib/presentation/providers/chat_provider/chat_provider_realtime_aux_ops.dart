@@ -242,7 +242,12 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       );
       return;
     }
-    await loadSessions(preserveVisibleState: true);
+    await loadSessions(
+      preserveVisibleState: true,
+      restoreLastSessionSnapshot: false,
+      refreshSelectedSessionMessages: false,
+      refreshSessionStatus: false,
+    );
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;
     }

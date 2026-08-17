@@ -6,6 +6,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'android_process_diagnostics.dart';
+
 /// Centralized logger with debug gating and lightweight redaction.
 class AppLogger {
   AppLogger._();
@@ -78,6 +80,11 @@ class AppLogger {
         error: details.exception,
         stackTrace: details.stack,
       );
+      _recordUnhandledDiagnostic(
+        source: 'flutter',
+        errorType: details.exception.runtimeType.toString(),
+        stackTrace: details.stack,
+      );
     };
 
     final dispatcher = ui.PlatformDispatcher.instance;
@@ -88,9 +95,14 @@ class AppLogger {
         error: errorObject,
         stackTrace: stackTrace,
       );
+      _recordUnhandledDiagnostic(
+        source: 'platform',
+        errorType: errorObject.runtimeType.toString(),
+        stackTrace: stackTrace,
+      );
       final handledByPrevious =
           previousDispatcherHandler?.call(errorObject, stackTrace) ?? false;
-      return handledByPrevious || true;
+      return handledByPrevious;
     };
   }
 
@@ -99,6 +111,25 @@ class AppLogger {
       'Unhandled zone exception',
       error: errorObject,
       stackTrace: stackTrace,
+    );
+    _recordUnhandledDiagnostic(
+      source: 'zone',
+      errorType: errorObject.runtimeType.toString(),
+      stackTrace: stackTrace,
+    );
+  }
+
+  static void _recordUnhandledDiagnostic({
+    required String source,
+    required String errorType,
+    required StackTrace? stackTrace,
+  }) {
+    unawaited(
+      AndroidProcessDiagnostics.recordDartError(
+        source: source,
+        errorType: errorType,
+        stackHash: safeContextId(stackTrace),
+      ),
     );
   }
 

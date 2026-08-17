@@ -33,7 +33,7 @@ codewalk/
 │   ├── core/                           # Config, constants, DI, errors, logging, network
 │   │   ├── auth/                        # OAuth module plus secure OAuth/TTS/STT-API credential storage
 │   │   ├── i18n/                        # Locale registry, context bridge, localization helpers
-│   │   ├── logging/                     # AppLogger: gated in-memory log buffer + performance measurement (default off)
+│   │   ├── logging/                     # AppLogger plus a bounded local Android process/error diagnostic ring and method-channel normalizer
 │   │   ├── tailscale/                    # Tailscale transport: service (IO/stub), node state, Dio adapter
 │   │   └── utils/                       # Core utilities (path, timeline search)
 │   ├── data/                           # Data layer: datasources, API/storage models, repositories
@@ -96,7 +96,7 @@ codewalk/
 │   ├── android/app/build.gradle.kts      # Android build config and AndroidX Browser Custom Tabs dependency
 │   ├── android/app/src/main/AndroidManifest.xml # Android package-visibility query for Custom Tabs; `com.google.android.gms.car.application` meta-data referencing `@xml/automotive_app_desc` (issue #99)
 │   ├── android/app/src/main/kotlin/com/verseles/codewalk/
-│       ├── MainActivity.kt              # Android session-overlay/system channel host, composer clipboard content-URI resolver, native CustomTabs OAuth launcher, and activation forwarding
+│       ├── MainActivity.kt              # Android session-overlay/system channel host, Android process-diagnostic method-channel query, composer clipboard content-URI resolver, native CustomTabs OAuth launcher, and activation forwarding
 │       └── overlay/SessionOverlayService.kt # Android foreground overlay host and service-owned Flutter engine
 │   ├── android/app/src/debug/           # Debug/test source-set used by session-overlay prototype instrumentation (issue #99 automotive descriptor moved to main source set)
 │   └── windows/runner/                   # Windows runner sources (incl. `windows_microphone_plugin.{h,cpp}` runner-owned WASAPI bridge for on-device STT — see ADR-038)
@@ -118,7 +118,7 @@ lib/presentation/pages/settings_page.dart     # Settings landing and responsive 
 lib/presentation/pages/chat_page.dart         # Main chat/session/file UI entry; mounts the in-app session-attention overlay on iOS; uses WindowSizeClass for responsive layout; guards startup logic against no-active-server state; timeline empty state includes CTA to setup wizard; exposes buildComposerReceivingTips() for the localized composer status-tip catalog
   └── chat_page_local_models_part.dart # Local UI state classes (part of chat_page.dart; see commit 8759defc)
 lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Desktop child-window and Android service-engine Flutter entrypoints
-android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android platform-channel host (session overlay, composer clipboard, launches native OAuth in CustomTabs) and activation handoff entrypoint
+android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android platform-channel host (session overlay, process-diagnostic method-channel query, composer clipboard, launches native OAuth in CustomTabs) and activation handoff entrypoint
 android/app/src/main/kotlin/com/verseles/codewalk/overlay/SessionOverlayService.kt # Android foreground-service overlay entrypoint
 lib/presentation/pages/logs_page.dart           # In-app App Logs surface; gated by `SettingsProvider.loggingEnabled` (disabled by default) — renders `_LogsDisabledState` empty-state with enable action when off, otherwise filters by time range/level/search/performance, supports **tag filter chips** (common task/network/cache presets plus **custom tag** input dialog), copies filtered entries, surfaces `Slowest performance logs` modal or, when a `task:*` tag is selected, `Slowest tasks` modal; AppLogger/measurePerformance toggle persisted via SettingsProvider
 .github/workflows/ci.yml                      # CI workflow entry
@@ -129,7 +129,7 @@ lib/presentation/pages/logs_page.dart           # In-app App Logs surface; gated
 
 ```text
 lib/core/di/injection_container.dart              # Registers datasources, repositories, usecases, providers, TailscaleService, WorkspaceFileOperationsService, TtsApiKeyStorage, SttApiKeyStorage, and ReadAloudService TTS backends; registers ApiSpeechInputService as a factory (non-web only, `ApiSpeechInputService(apiKeyStorage: sl<SttApiKeyStorage>())`) so each composer resolves its own isolated instance; injects SettingsProvider's nativeReadAloudAvailabilityProbe from ReadAloudService.isProviderAvailable(ReadAloudProvider.native); wires tailscaleService into AppProvider factory; _loadLocalConfig applies tailscaleEnabled on active profile
-lib/core/constants/app_constants.dart             # Shared persistence keys, including `AppConstants.sessionTabsStateKey` (`session_tabs_state`) and `sessionTabIconOverridesKey` (`session_tab_icon_overrides`); `opencodeGoWorkspaceIdKey`/`opencodeGoAuthCookieKey` remain only as legacy OpenCode Go purge targets (issue #96)
+lib/core/constants/app_constants.dart             # Shared persistence keys, including `AppConstants.sessionTabsStateKey` (`session_tabs_state`), `sessionTabIconOverridesKey` (`session_tab_icon_overrides`), and `androidProcessDiagnosticsKey` (`android_process_diagnostics_v1`); `opencodeGoWorkspaceIdKey`/`opencodeGoAuthCookieKey` remain only as legacy OpenCode Go purge targets (issue #96)
 lib/core/i18n/app_locales.dart                     # Locale registry: 14 supported locales, resolution callback, native-name metadata, PT_BR normalization
 lib/core/i18n/l10n_context.dart                    # BuildContext extension: `context.l10n` shorthand for AppLocalizations access
 lib/core/i18n/l10n_bridge.dart                     # Static L10nBridge for context-free localization (tray, background services)
@@ -138,6 +138,7 @@ lib/core/network/dio_client.dart                  # HTTP client config, auth, ba
 lib/core/network/dio_sse_adapter.dart              # Conditional export: routes to IO or stub adapter
 lib/core/network/dio_sse_adapter_io.dart           # IO platforms: configures IOHttpClientAdapter with separate HttpClient for SSE (2h idle, 4 max connections)
 lib/core/network/dio_sse_adapter_stub.dart         # Web platform: no-op (browser manages connections natively)
+lib/core/logging/android_process_diagnostics.dart  # Bounded local Android process/error diagnostic ring; normalizes native method-channel metadata and persists a capped local record list
 lib/core/tailscale/tailscale_service.dart          # Conditional export barrel: routes to IO or stub TailscaleService via `export if (dart.library.io)`; re-exports TailscaleState
 lib/core/tailscale/tailscale_service_io.dart       # IO implementation: per-profile Tailscale node lifecycle (up/down/state), state change broadcast via StreamController, wraps `tailscale` Dart package; isolates per-profile state dir, builds hostname from profile label
 lib/core/tailscale/tailscale_service_stub.dart     # Non-IO platforms: TailscaleService stub (state=unsupported, hasClient=false, httpClient/down throw UnsupportedError)
@@ -239,7 +240,7 @@ lib/presentation/services/session_attention/session_attention_host_contract.dart
 lib/presentation/services/session_attention/session_attention_host_protocol.dart # Versioned host snapshot and command protocol
 lib/presentation/services/session_attention/session_attention_host_service*.dart # Conditional Android, desktop child-window, iOS in-app, and unsupported host implementation selection
 lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Flutter entrypoints and IPC bridge for desktop child and Android service hosts
-android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android system/platform channel host; native OAuth launch via AndroidX Custom Tabs with ACTION_VIEW fallback
+android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android system/platform channel host with process-diagnostic method-channel query; native OAuth launch via AndroidX Custom Tabs with ACTION_VIEW fallback
 android/app/src/main/res/xml/automotive_app_desc.xml # Automotive notification descriptor declaring `<uses name="notification"/>`, shipped in every release APK (issue #99)
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay.dart # Shared bubble/panel attention presentation
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay_controller.dart # In-app snapshot, read-aloud, and action controller used by ChatPage on iOS
@@ -305,14 +306,14 @@ lib/presentation/widgets/quota/pace_label.dart               # Pace % chip: desk
 lib/presentation/pages/chat_page.dart
 lib/presentation/pages/chat_page_types_part.dart   # Shared intents, configurations, and keys including `_ViewportBuildKey`, `_AssistantWorkCompactionDecision`, and scoped desktop Selector/Selector2 build-key typedefs so composer selection changes skip full ChatProvider rebuilds
 lib/presentation/pages/chat_page_local_models_part.dart # Local UI state classes (part of chat_page.dart; see commit 8759defc); `_FileExplorerContextState` carries `WorkspaceFileOperationsCapabilities?` plus `fileOperationCapabilitiesLoading` flag and `fileOperationCapabilitiesLoad` Future (issue #90), `rootDirectory`, `directoryChildren`, `expandedDirectories`, `loadingDirectories`, `directoryErrors`, `tabsByPath`, `editorDraftsByPath` (issue #90), `FileTabSelectionState`, line-selection maps (`selectedLinesByPath`, `lastSelectedLineByPath`), `pendingScrollToLine`, `rootLoadScheduled`, and `treeError`; `_FileEditorDraftState` (issue #90) wraps a per-path `CodeLineEditingController.fromText` (built with `CodeLineOptions(lineBreak: ...)` so the original LF / CRLF / CR line-break style is preserved via `_detectTextLineBreak`) + `CodeScrollController`, tracks `savedContent`, `isSaving`, `saveErrorMessage`, exposes `isDirty`, and provides `markSavedContent`/`replaceSavedContent`/`dispose`; `resetForRoot(nextRootDirectory)` clears capabilities + tab selection + drafts on context switch (issues #89 and #90)
-lib/presentation/providers/chat_provider.dart        # ChatProvider facade and owner of session-tab state, per-session icon overrides (issue #138), and persistence orchestration
+lib/presentation/providers/chat_provider.dart        # ChatProvider facade and owner of session-tab state, per-session icon overrides (issue #138), persistence orchestration, coalesced foreground-resume reconciliation, and disposal-safe realtime lifecycle
 lib/presentation/widgets/chat_input_widget.dart
 ```
 
 ### `lib/presentation/pages/chat_page/` clusters (current, 26 files)
 
 ```text
-chat_page_lifecycle.dart                           # App/window lifecycle, foreground policy, resume refresh, background permission context, and file-editor autosave lifecycle handoff; coordinates pending per-path save work on lifecycle/close without owning the editor timer or save transport; does not stop read-aloud on lifecycle state changes
+chat_page_lifecycle.dart                           # App/window lifecycle, foreground policy, coalesced resume refresh with visible-state-preserving viewport restoration, background permission context, and file-editor autosave lifecycle handoff; coordinates pending per-path save work on lifecycle/close without owning the editor timer or save transport; does not stop read-aloud on lifecycle state changes
 chat_page_scroll_coordinator.dart                  # Unified scroll ownership via `_ScrollOwner` enum (none, userDrag, paginationRestore, newMessage, streaming, returnReveal, contentShrinkSnap, searchResult); handles top-scroll older-history trigger and viewport anchor restoration; gates programmatic scrolls against user drag priority; `_loadOlderMessagesAndRestoreAnchor` settles prepend extent with `endOfFrame` plus a follow-up `Future.microtask` so the second sliver/layout pass is observed, then computes the final extent delta and `jumpTo` to keep the visible anchor stable (double-extent restore)
 chat_page_workspace_controller.dart
 chat_page_shortcuts.dart
@@ -351,19 +352,21 @@ lib/presentation/widgets/chat_message/chat_message_part_dispatch.dart # Reorders
 lib/presentation/utils/tool_presentation.dart                      # Shared tool label/icon formatting reused by chat bubbles and the fixed composer live-progress surface
 ```
 
-### `lib/presentation/providers/chat_provider/` clusters (current, 22 files)
+### `lib/presentation/providers/chat_provider/` clusters (current, 24 files)
 
 ```text
 chat_provider_core.dart
 chat_provider_session_ops.dart           # Implements undo/redo turn logic, guarded historical `revertToTurn`, revert boundary advancement, and composer draft restoration
-chat_provider_lifecycle_ops.dart                 # Extension `ChatProviderLifecycleOps` on `ChatProvider` holding 9 public lifecycle methods + 1 getter
+chat_provider_lifecycle_ops.dart                 # Extension `ChatProviderLifecycleOps` on `ChatProvider`; coalesces foreground-resume work and exits safely when session-tab state is disposed
 chat_provider_history_ops.dart                   # Extension `ChatProviderHistoryOps` on `ChatProvider` for history state/branching and revert support
-chat_provider_realtime_ops.dart           # Realtime event handling; defers stale `session.idle` reconciliation until the active send stream settles so server-driven lifecycle stays authoritative across follow-up sends
-chat_provider_realtime_aux_ops.dart                # Post-reconnect recovery with _postReconnectRecoveryInFlight guard; degraded mode preservation across background/foreground transitions
+chat_provider_realtime_ops.dart           # Realtime event handling; coalesces foreground-resume reconciliation, preserves visible session state during revalidation, and guards subscription restarts with disposal/generation checks; defers stale `session.idle` reconciliation until the active send stream settles so server-driven lifecycle stays authoritative across follow-up sends
+chat_provider_realtime_aux_ops.dart                # Post-reconnect recovery with _postReconnectRecoveryInFlight guard and visible-state-preserving session revalidation; degraded mode preservation across background/foreground transitions
 chat_provider_event_reducer_helpers.dart        # Shared event-info and session-merge helpers used by both the session-scoped reducer and the global event router (`_ChatProviderEventReducerHelpers`): `_eventInfoContainsAny`, `_mergeSessionFromEventInfo` (field-by-field copy based on `info` keys including `workspaceId`, `time`/`archivedAt`, `title`/`name`/`sessionTitle`, and `parentID`/`parentId`), and other low-level utilities shared across reducer parts
 chat_provider_event_reducer_session_ops.dart    # Event-scope reducer for the active session stream (`_ChatProviderEventReducerSessionOps`): active session receives the full `message.created`/`updated`, `message.part.updated`/`delta`/`removed`, `message.removed`, `session.diff`, and `todo.updated` stream; non-current `message.*`/`session.diff`/`todo.updated` events break early so background message fallback fetches never fire for inactive sessions, while non-current `session.status`/`session.idle`/`session.error` plus `permission.*`/`question.*` events still flow and are summarized into status/unread/error/pending-interaction attention; v2 permission/question SSE aliases + `message.part.delta` (merged with `message.part.updated`) + `session.next.moved` (dirties current context and triggers session/status/active-session refresh); reconcile one-shot guard via `_messageStreamGeneration`, dedup key composition via `_composeEventDeduplicationKey`/`_recentEventIds`, reactive notification dismissal on `permission.replied`/`question.replied`/`question.rejected`/`session.idle` (current session) + `removeNotifiedRequestIds()` to sync background alert snapshot; live deltas advance `_messageLocalDeltaVersionById` and route through `_scheduleDeltaNotification`; `session.idle` flushes delta notifications and cancels pending per-message fallback timers for the idle session
 chat_provider_event_reducer_global_ops.dart     # Global event router (`_ChatProviderEventReducerGlobalOps`) dispatches by target context — non-directory events dirty the active context, same-context events fall through `_tryApplyGlobalEventIncremental` then `_scheduleGlobalFallbackReconcile`, and inactive context snapshots are patched in-place by `_tryApplyGlobalEventToInactiveSnapshot` for `session.created`/`updated`/`deleted`/`status`/`idle`/`error` and `permission.*`/`question.*` shapes so dirty contexts revalidate on return
 chat_provider_message_merge_ops.dart             # Debounced per-message fallback orchestration (`_scheduleDebouncedMessageFallback`, `_fetchMessageFallback`) carrying `expectedLocalDeltaVersion` so stale responses merge completion metadata only; non-current `message.*` events are gated by the event reducer before reaching `_fetchMessageFallback`, so realtime normally uses it only for current-session message resolution (applied via `_updateOrAddMessage`); `applyToCurrentSession` and the inactive branch writing to the per-session cached snapshot remain available for explicit fallback/cache use cases only; local user message reconcile helpers (`_shouldSkipLocalUserAppendAsDuplicateEcho`, `_mergeServerMessagesWithPendingLocalUsers`, `_mergeServerTailWithCachedMessages`, `_findOptimisticTailOverlap`, `_mergeServerMessagesWithActiveLocalTail`) for SWR overlap + optimistic-tail preservation with bounded tail fallback
+message_reconciliation.dart                         # Non-regressive message snapshot reconciliation decisions for preserving newer visible timeline state
+chat_provider_reconciliation_guard.dart             # Applies message reconciliation to visible state, logs decisions, and suppresses no-op writes
 chat_provider_message_state_ops.dart             # Message state mutations; per-message local delta version (`_messageLocalDeltaVersion`, `_markLocalMessageDeltaAdvanced`) feeds monotonic fallback guards; non-overlapping delta appender (`_appendNonOverlappingDelta`) and incremental part merge (`_mergeIncrementalPartUpdate`); assistant non-regressive merge helpers (`_mergeAssistantCompletionMetadataOnly`, `_mergeCompletedAssistantUpdate`, `_mergeAssistantMessageUpdate`, `_mergeCompletionStatusOnly`) preserve completed snapshots and visible terminal tool states; auto-title scheduling guard skips subsessions
 chat_provider_draft_part.dart                    # Loads/persists per-session composer drafts and manages rejected-draft envelopes; unconditional draft preservation across background transitions (removed foreground guards from _stashRejectedDraftForRetry)
 chat_provider_selection_sync_ops.dart

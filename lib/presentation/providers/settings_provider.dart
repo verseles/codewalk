@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/i18n/l10n_bridge.dart';
+import '../../core/logging/android_process_diagnostics.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
 import '../../data/datasources/app_local_datasource.dart';
@@ -391,6 +392,7 @@ class SettingsProvider extends ChangeNotifier {
     _cellularDataSaverService.applyLevel(_settings.dataSaverLevel);
     AppLogger.setLoggingEnabled(_settings.loggingEnabled);
     AppLogger.setPerformanceLoggingEnabled(_settings.performanceLoggingEnabled);
+    unawaited(_publishPersistedAndroidDiagnostics());
     _lastBackgroundDataSaverDisableState =
         _cellularDataSaverService.shouldDisableBackgroundNetworkTasks;
     await _restoreSessionAttentionHost();
@@ -1209,8 +1211,25 @@ class SettingsProvider extends ChangeNotifier {
     }
     _settings = _settings.copyWith(loggingEnabled: enabled);
     AppLogger.setLoggingEnabled(enabled);
+    if (enabled) {
+      unawaited(_publishPersistedAndroidDiagnostics());
+    }
     notifyListeners();
     await _persist();
+  }
+
+  Future<void> _publishPersistedAndroidDiagnostics() async {
+    if (!AppLogger.loggingEnabled) {
+      return;
+    }
+    final records = await AndroidProcessDiagnostics.readRecords();
+    for (final record in records) {
+      AppLogger.info(
+        'Android process diagnostic',
+        tags: const <String>{'lifecycle:diagnostic'},
+        metrics: record,
+      );
+    }
   }
 
   Future<void> setSpeechToTextEngine(SpeechToTextEngine engine) async {
