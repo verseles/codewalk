@@ -104,127 +104,161 @@ class MyApp extends StatelessWidget {
       ],
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          return Consumer2<SettingsProvider, LocaleProvider>(
-            builder: (context, settingsProvider, localeProvider, _) {
-              final appDensity = settingsProvider.appDensity;
-              final useDynamic = settingsProvider.useDynamicColor;
-              final useAmoledDark = settingsProvider.useAmoledDark;
-              final customSeed = settingsProvider.customColorSeed;
-              final contrastLevel = settingsProvider.contrastLevel;
-              final themePreset = settingsProvider.themePreset;
-              final visualStyle = settingsProvider.visualStyle;
+          return Selector<
+            SettingsProvider,
+            ({
+              AppDensity appDensity,
+              bool useDynamicColor,
+              bool useAmoledDark,
+              int? customColorSeed,
+              double contrastLevel,
+              OpenCodeThemePreset? themePreset,
+              VisualStyle visualStyle,
+              ThemeModeOption themeMode,
+              double systemFontScale,
+              bool dynamicColorAvailable,
+            })
+          >(
+            selector: (context, settingsProvider) => (
+              appDensity: settingsProvider.appDensity,
+              useDynamicColor: settingsProvider.useDynamicColor,
+              useAmoledDark: settingsProvider.useAmoledDark,
+              customColorSeed: settingsProvider.customColorSeed,
+              contrastLevel: settingsProvider.contrastLevel,
+              themePreset: settingsProvider.themePreset,
+              visualStyle: settingsProvider.visualStyle,
+              themeMode: settingsProvider.themeMode,
+              systemFontScale: settingsProvider.systemFontScale,
+              dynamicColorAvailable: settingsProvider.dynamicColorAvailable,
+            ),
+            builder: (context, appSettings, _) {
+              return Consumer<LocaleProvider>(
+                builder: (context, localeProvider, _) {
+                  final settingsProvider = context.read<SettingsProvider>();
+                  final appDensity = appSettings.appDensity;
+                  final useDynamic = appSettings.useDynamicColor;
+                  final useAmoledDark = appSettings.useAmoledDark;
+                  final customSeed = appSettings.customColorSeed;
+                  final contrastLevel = appSettings.contrastLevel;
+                  final themePreset = appSettings.themePreset;
+                  final visualStyle = appSettings.visualStyle;
 
-              // Sync actual dynamic color availability to provider so
-              // the settings UI can reflect reality (not just platform
-              // heuristic).
-              // Consider dynamic color available when the platform provides
-              // at least one scheme (light or dark).
-              final hasDynamic = lightDynamic != null || darkDynamic != null;
-              if (settingsProvider.dynamicColorAvailable != hasDynamic) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  settingsProvider.updateDynamicColorAvailability(
-                    available: hasDynamic,
-                  );
-                });
-              }
+                  // Sync actual dynamic color availability to provider so
+                  // the settings UI can reflect reality (not just platform
+                  // heuristic).
+                  // Consider dynamic color available when the platform provides
+                  // at least one scheme (light or dark).
+                  final hasDynamic =
+                      lightDynamic != null || darkDynamic != null;
+                  if (appSettings.dynamicColorAvailable != hasDynamic) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      settingsProvider.updateDynamicColorAvailability(
+                        available: hasDynamic,
+                      );
+                    });
+                  }
 
-              // Resolve seed color: custom pick or default brand
-              final seedColor = customSeed != null
-                  ? Color(customSeed)
-                  : AppTheme.seedColor;
+                  // Resolve seed color: custom pick or default brand
+                  final seedColor = customSeed != null
+                      ? Color(customSeed)
+                      : AppTheme.seedColor;
 
-              final presetLightScheme = openCodeLightSchemeFor(themePreset);
-              final presetDarkScheme = openCodeDarkSchemeFor(themePreset);
+                  final presetLightScheme = openCodeLightSchemeFor(themePreset);
+                  final presetDarkScheme = openCodeDarkSchemeFor(themePreset);
 
-              // Use dynamic platform colors when available and enabled
-              final lightScheme =
-                  presetLightScheme ??
-                  (useDynamic && lightDynamic != null
-                      ? lightDynamic
-                      : ColorScheme.fromSeed(
-                          seedColor: seedColor,
-                          brightness: Brightness.light,
-                          contrastLevel: contrastLevel,
-                        ));
-              final darkScheme =
-                  presetDarkScheme ??
-                  (useDynamic && darkDynamic != null
-                      ? darkDynamic
-                      : ColorScheme.fromSeed(
-                          seedColor: seedColor,
-                          brightness: Brightness.dark,
-                          contrastLevel: contrastLevel,
-                        ));
-              final resolvedDarkScheme = useAmoledDark
-                  ? _applyAmoledDarkScheme(darkScheme)
-                  : darkScheme;
-              final lightThemeTokens = themePreset != null
-                  ? openCodeThemeTokensFor(themePreset, Brightness.light)
-                  : null;
-              final darkThemeTokens = themePreset != null
-                  ? openCodeThemeTokensFor(themePreset, Brightness.dark)
-                  : null;
-              final lightResolvedTokens =
-                  lightThemeTokens ?? classicThemeTokensFrom(lightScheme);
-              final darkResolvedTokens =
-                  darkThemeTokens ?? classicThemeTokensFrom(resolvedDarkScheme);
+                  // Use dynamic platform colors when available and enabled
+                  final lightScheme =
+                      presetLightScheme ??
+                      (useDynamic && lightDynamic != null
+                          ? lightDynamic
+                          : ColorScheme.fromSeed(
+                              seedColor: seedColor,
+                              brightness: Brightness.light,
+                              contrastLevel: contrastLevel,
+                            ));
+                  final darkScheme =
+                      presetDarkScheme ??
+                      (useDynamic && darkDynamic != null
+                          ? darkDynamic
+                          : ColorScheme.fromSeed(
+                              seedColor: seedColor,
+                              brightness: Brightness.dark,
+                              contrastLevel: contrastLevel,
+                            ));
+                  final resolvedDarkScheme = useAmoledDark
+                      ? _applyAmoledDarkScheme(darkScheme)
+                      : darkScheme;
+                  final lightThemeTokens = themePreset != null
+                      ? openCodeThemeTokensFor(themePreset, Brightness.light)
+                      : null;
+                  final darkThemeTokens = themePreset != null
+                      ? openCodeThemeTokensFor(themePreset, Brightness.dark)
+                      : null;
+                  final lightResolvedTokens =
+                      lightThemeTokens ?? classicThemeTokensFrom(lightScheme);
+                  final darkResolvedTokens =
+                      darkThemeTokens ??
+                      classicThemeTokensFrom(resolvedDarkScheme);
 
-              // Map user theme mode preference to Flutter ThemeMode
-              final themeMode = switch (settingsProvider.themeMode) {
-                ThemeModeOption.light => ThemeMode.light,
-                ThemeModeOption.dark => ThemeMode.dark,
-                ThemeModeOption.system => ThemeMode.system,
-              };
-              final systemFontScale = settingsProvider.systemFontScale;
-              return MaterialApp(
-                title: AppConstants.appName,
-                theme: AppTheme.lightFrom(
-                  lightScheme,
-                  appDensity: appDensity,
-                  visualStyle: visualStyle,
-                  themeExtensions: <ThemeExtension<dynamic>>[
-                    lightResolvedTokens,
-                  ],
-                ),
-                darkTheme: AppTheme.darkFrom(
-                  resolvedDarkScheme,
-                  appDensity: appDensity,
-                  visualStyle: visualStyle,
-                  themeExtensions: <ThemeExtension<dynamic>>[
-                    darkResolvedTokens,
-                  ],
-                ),
-                themeMode: themeMode,
-                locale: localeProvider.effectiveLocale,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                supportedLocales: AppLocales.supported,
-                localeResolutionCallback: AppLocales.resolutionCallback,
-                builder: (context, child) {
-                  L10nBridge.update(AppLocalizations.of(context));
-                  final mediaQuery = MediaQuery.of(context);
-                  final composedScaler = TextScaler.linear(systemFontScale);
-                  return Theme(
-                    data: AppTheme.withResponsiveSnackBars(
-                      Theme.of(context),
-                      mediaQuery,
-                      textDirection:
-                          Directionality.maybeOf(context) ?? TextDirection.ltr,
+                  // Map user theme mode preference to Flutter ThemeMode
+                  final themeMode = switch (appSettings.themeMode) {
+                    ThemeModeOption.light => ThemeMode.light,
+                    ThemeModeOption.dark => ThemeMode.dark,
+                    ThemeModeOption.system => ThemeMode.system,
+                  };
+                  final systemFontScale = appSettings.systemFontScale;
+                  return MaterialApp(
+                    title: AppConstants.appName,
+                    theme: AppTheme.lightFrom(
+                      lightScheme,
+                      appDensity: appDensity,
+                      visualStyle: visualStyle,
+                      themeExtensions: <ThemeExtension<dynamic>>[
+                        lightResolvedTokens,
+                      ],
                     ),
-                    child: MediaQuery(
-                      data: mediaQuery.copyWith(textScaler: composedScaler),
-                      child: DesktopWindowChromeFrame(
-                        child: child ?? const SizedBox.shrink(),
-                      ),
+                    darkTheme: AppTheme.darkFrom(
+                      resolvedDarkScheme,
+                      appDensity: appDensity,
+                      visualStyle: visualStyle,
+                      themeExtensions: <ThemeExtension<dynamic>>[
+                        darkResolvedTokens,
+                      ],
                     ),
+                    themeMode: themeMode,
+                    locale: localeProvider.effectiveLocale,
+                    localizationsDelegates: const [
+                      AppLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    supportedLocales: AppLocales.supported,
+                    localeResolutionCallback: AppLocales.resolutionCallback,
+                    builder: (context, child) {
+                      L10nBridge.update(AppLocalizations.of(context));
+                      final mediaQuery = MediaQuery.of(context);
+                      final composedScaler = TextScaler.linear(systemFontScale);
+                      return Theme(
+                        data: AppTheme.withResponsiveSnackBars(
+                          Theme.of(context),
+                          mediaQuery,
+                          textDirection:
+                              Directionality.maybeOf(context) ??
+                              TextDirection.ltr,
+                        ),
+                        child: MediaQuery(
+                          data: mediaQuery.copyWith(textScaler: composedScaler),
+                          child: DesktopWindowChromeFrame(
+                            child: child ?? const SizedBox.shrink(),
+                          ),
+                        ),
+                      );
+                    },
+                    home: const AppShellPage(),
+                    debugShowCheckedModeBanner: false,
                   );
                 },
-                home: const AppShellPage(),
-                debugShowCheckedModeBanner: false,
               );
             },
           );
