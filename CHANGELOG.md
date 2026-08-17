@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.207.0 - 2026-08-17
+
+- fix(app): avoid rebuilding MaterialApp for unrelated settings
+
 ## v1.206.0 - 2026-08-17
 
 - docs(behavior): document live settings updates and About update check
