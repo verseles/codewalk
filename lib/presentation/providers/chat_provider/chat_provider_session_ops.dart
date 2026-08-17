@@ -100,6 +100,7 @@ extension _ChatProviderSessionOps on ChatProvider {
         : null;
     _invalidateSessionTabReconcileCache();
     _sessionTabBootstrapGeneration += 1;
+    _newChatDraftGeneration += 1;
     _lazySessionBootstrapTask = null;
     _activeContextKey = nextContextKey;
     _currentProjectId = projectProvider.currentProjectId;

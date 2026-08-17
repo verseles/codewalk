@@ -624,22 +624,33 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
                                     }
 
                                     _prepareForOutgoingUserMessage();
-                                    await chatProvider.submitMessage(
-                                      submission.text.trim(),
-                                      commandMode: true,
-                                    );
+                                    final sent = await chatProvider
+                                        .submitMessage(
+                                          submission.text.trim(),
+                                          commandMode: true,
+                                        );
+                                    if (!sent) {
+                                      throw StateError(
+                                        'Chat command was not sent',
+                                      );
+                                    }
                                     _scrollToBottom(force: true);
                                     return;
                                   }
 
                                   _prepareForOutgoingUserMessage();
-                                  await chatProvider.submitMessage(
+                                  final sent = await chatProvider.submitMessage(
                                     submission.text,
                                     attachments: submission.attachments,
                                     shellMode:
                                         submission.mode ==
                                         ChatComposerMode.shell,
                                   );
+                                  if (!sent) {
+                                    throw StateError(
+                                      'Chat message was not sent',
+                                    );
+                                  }
                                   await clearComposerContextIfNeeded();
                                   _scrollToBottom(force: true);
                                 },

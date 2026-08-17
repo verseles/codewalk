@@ -187,12 +187,13 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
               'messageCount': filteredMessages.length,
             },
           );
-          final wrotePayload = await localDataSource.saveSessionMessagesSnapshot(
-            encodedPayload,
-            sessionId: normalizedSessionId,
-            serverId: resolvedServerId,
-            scopeId: resolvedScopeId,
-          );
+          final wrotePayload = await localDataSource
+              .saveSessionMessagesSnapshot(
+                encodedPayload,
+                sessionId: normalizedSessionId,
+                serverId: resolvedServerId,
+                scopeId: resolvedScopeId,
+              );
           // Skip the updatedAt metadata write when the payload is unchanged:
           // on desktop each setInt rewrites the whole prefs file on the UI
           // isolate (issue #152), and freshness has a multi-day TTL anyway.
@@ -760,14 +761,17 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     }
   }
 
-  Future<void> _persistSessionCacheBestEffort() async {
+  Future<void> _persistSessionCacheBestEffort({
+    String? serverId,
+    String? scopeId,
+  }) async {
     try {
-      final serverId = await _resolveServerIdForStorage();
-      final scopeId = _resolveContextScopeId();
+      final resolvedServerId = serverId ?? await _resolveServerIdForStorage();
+      final resolvedScopeId = scopeId ?? _resolveContextScopeId();
       await _saveCachedSessions(
         _sessions,
-        serverId: serverId,
-        scopeId: scopeId,
+        serverId: resolvedServerId,
+        scopeId: resolvedScopeId,
       );
     } catch (e, stackTrace) {
       AppLogger.warn(
@@ -795,18 +799,31 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     required String serverId,
     required String scopeId,
   }) async {
+    final queueKey = '$serverId::$scopeId';
+    final previous =
+        _currentSessionIdWriteQueueByScope[queueKey] ?? Future<void>.value();
+    final next = previous.then((_) async {
+      try {
+        await localDataSource.saveCurrentSessionId(
+          sessionId,
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+      } catch (e, stackTrace) {
+        AppLogger.warn(
+          'Failed to save current session ID',
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
+    });
+    _currentSessionIdWriteQueueByScope[queueKey] = next;
     try {
-      await localDataSource.saveCurrentSessionId(
-        sessionId,
-        serverId: serverId,
-        scopeId: scopeId,
-      );
-    } catch (e, stackTrace) {
-      AppLogger.warn(
-        'Failed to save current session ID',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      await next;
+    } finally {
+      if (identical(_currentSessionIdWriteQueueByScope[queueKey], next)) {
+        _currentSessionIdWriteQueueByScope.remove(queueKey);
+      }
     }
   }
 }

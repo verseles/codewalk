@@ -193,9 +193,7 @@ class ChatProvider extends ChangeNotifier {
     Duration shortcutCycleWindow = const Duration(seconds: 3),
     DateTime Function()? sessionTabsNow,
     SessionTabIconOverrideStore? sessionTabIconOverrideStore,
-    Duration sessionTabsPersistenceDebounce = const Duration(
-      milliseconds: 750,
-    ),
+    Duration sessionTabsPersistenceDebounce = const Duration(milliseconds: 750),
   }) : _sessionTabsPersistenceDebounceDuration =
            sessionTabsPersistenceDebounce {
     _cellularDataSaverService =
@@ -442,7 +440,10 @@ class ChatProvider extends ChangeNotifier {
   String? _preserveBusyStatusOnNextStreamDoneSessionId;
   ChatComposerDraft? _activeSendDraft;
   bool _isNewChatDraftActive = false;
+  int _newChatDraftGeneration = 0;
   Future<void>? _lazySessionBootstrapTask;
+  final Map<String, Future<void>> _currentSessionIdWriteQueueByScope =
+      <String, Future<void>>{};
   _RejectedDraftEnvelope? _rejectedDraft;
   _HistoryComposerSync? _pendingHistoryComposerSync;
   _PendingReplacementBranch? _pendingReplacementBranch;
@@ -1115,8 +1116,9 @@ class ChatProvider extends ChangeNotifier {
 
   @visibleForTesting
   Future<void> debugWaitForSessionTabPersistence() async {
-    for (final serverId
-        in _sessionTabsPendingPayloadByServer.keys.toList(growable: false)) {
+    for (final serverId in _sessionTabsPendingPayloadByServer.keys.toList(
+      growable: false,
+    )) {
       await flushSessionTabsPersistence(serverId);
     }
     await Future.wait(<Future<void>>[
@@ -3700,6 +3702,7 @@ class ChatProvider extends ChangeNotifier {
       );
     }
 
+    _newChatDraftGeneration++;
     _lazySessionBootstrapTask = null;
     _currentSession = null;
     _isNewChatDraftActive = true;
@@ -3724,9 +3727,22 @@ class ChatProvider extends ChangeNotifier {
   /// Create new session
   Future<void> createNewSession({String? parentId, String? title}) async {
     final contextKeyAtStart = _activeContextKey;
-    _isNewChatDraftActive = false;
+    final draftGenerationAtStart = _newChatDraftGeneration;
+    final selectionGenerationAtStart = _sessionSelectionGeneration;
+    final wasDraftActive = _isNewChatDraftActive;
     final projectId = projectProvider.currentProjectId;
     final directory = projectProvider.currentDirectory;
+    final serverIdAtStart =
+        _serverIdFromContextKey(contextKeyAtStart) ?? _activeServerId;
+    final scopeIdAtStart =
+        _scopeIdFromContextKey(contextKeyAtStart) ?? _resolveContextScopeId();
+
+    bool isCurrentCreation() {
+      return contextKeyAtStart == _activeContextKey &&
+          draftGenerationAtStart == _newChatDraftGeneration &&
+          selectionGenerationAtStart == _sessionSelectionGeneration;
+    }
+
     _setState(ChatState.loading);
 
     // Generate time-based title
@@ -3741,9 +3757,9 @@ class ChatProvider extends ChangeNotifier {
       ),
     );
 
-    if (contextKeyAtStart != _activeContextKey) {
+    if (!isCurrentCreation()) {
       AppLogger.info(
-        'Ignoring createNewSession result after context switch from=$contextKeyAtStart to=$_activeContextKey',
+        'Ignoring stale createNewSession result context=$contextKeyAtStart current=$_activeContextKey draftGeneration=$draftGenerationAtStart currentDraftGeneration=$_newChatDraftGeneration selectionGeneration=$selectionGenerationAtStart currentSelectionGeneration=$_sessionSelectionGeneration',
       );
       return;
     }
@@ -3765,6 +3781,14 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
+    await _ensureSessionTabsLoaded(serverId: serverIdAtStart);
+    if (!isCurrentCreation()) {
+      AppLogger.info(
+        'Ignoring stale createNewSession commit context=$contextKeyAtStart current=$_activeContextKey draftGeneration=$draftGenerationAtStart currentDraftGeneration=$_newChatDraftGeneration selectionGeneration=$selectionGenerationAtStart currentSelectionGeneration=$_sessionSelectionGeneration',
+      );
+      return;
+    }
+
     _sessions = List<ChatSession>.from(_sessions);
     _removeSessionById(session.id, removePin: false);
     _sessions.add(session);
@@ -3781,25 +3805,31 @@ class ChatProvider extends ChangeNotifier {
     _clearRejectedDraft();
     _sessionInsightsError = null;
 
-    final serverId = await _resolveServerScopeId();
-    final scopeId = _resolveContextScopeId();
-    await _ensureSessionTabsLoaded(serverId: serverId);
+    _storeCurrentSessionSelectionOverride();
+    _recordVisibleSessionTab(session);
+    if (wasDraftActive) {
+      _isNewChatDraftActive = false;
+    }
+    _setState(ChatState.loaded);
+
     await _saveCurrentSessionId(
       session.id,
-      serverId: serverId,
-      scopeId: scopeId,
+      serverId: serverIdAtStart,
+      scopeId: scopeIdAtStart,
     );
-    _storeCurrentSessionSelectionOverride();
     unawaited(
       _persistLastSessionSnapshotBestEffort(
-        serverId: serverId,
-        scopeId: scopeId,
+        serverId: serverIdAtStart,
+        scopeId: scopeIdAtStart,
       ),
     );
-    unawaited(_persistSessionCacheBestEffort());
+    unawaited(
+      _persistSessionCacheBestEffort(
+        serverId: serverIdAtStart,
+        scopeId: scopeIdAtStart,
+      ),
+    );
     unawaited(loadSessionInsights(session.id, silent: true));
-    _recordVisibleSessionTab(session);
-    _setState(ChatState.loaded);
   }
 
   /// Generate time-based session title
@@ -3811,6 +3841,9 @@ class ChatProvider extends ChangeNotifier {
     bool awaitNetwork = true,
   }) async {
     _sessionSelectionGeneration += 1;
+    if (userInitiated && _isNewChatDraftActive) {
+      _newChatDraftGeneration++;
+    }
     final previousSessionId = _currentSession?.id;
     return AppLogger.runPerformanceTask<void>(
       'select_session',
@@ -4314,7 +4347,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> submitMessage(
+  Future<bool> submitMessage(
     String text, {
     List<FileInputPart> attachments = const <FileInputPart>[],
     bool shellMode = false,
@@ -4325,7 +4358,7 @@ class ChatProvider extends ChangeNotifier {
         ? const <FileInputPart>[]
         : attachments;
     if (trimmedText.isEmpty && effectiveAttachments.isEmpty) {
-      return;
+      return false;
     }
     _traceFinal(
       'submit-message',
@@ -4333,7 +4366,7 @@ class ChatProvider extends ChangeNotifier {
       details:
           'textLen=${trimmedText.length} attachments=${effectiveAttachments.length} shellMode=$shellMode commandMode=$commandMode',
     );
-    await sendMessage(
+    return sendMessage(
       trimmedText,
       attachments: effectiveAttachments,
       shellMode: shellMode,
@@ -4381,23 +4414,48 @@ class ChatProvider extends ChangeNotifier {
       return false;
     }
 
+    final bootstrapContextKey = !hasSessionOverride && _currentSession == null
+        ? _activeContextKey
+        : null;
+    final bootstrapDraftGeneration = bootstrapContextKey == null
+        ? null
+        : _newChatDraftGeneration;
+    final bootstrapSelectionGeneration = bootstrapContextKey == null
+        ? null
+        : _sessionSelectionGeneration;
+
     _cellularDataSaverService.noteExplicitUserAction(reason: 'send-message');
     await _syncCellularDataSaverRealtimePolicy(
       reason: 'send-message-user',
       forceBurst: true,
     );
 
-    if (!hasSessionOverride && _currentSession == null) {
+    if (bootstrapContextKey != null) {
+      if (bootstrapContextKey != _activeContextKey ||
+          bootstrapDraftGeneration != _newChatDraftGeneration ||
+          bootstrapSelectionGeneration != _sessionSelectionGeneration) {
+        return false;
+      }
       final inFlight = _lazySessionBootstrapTask;
       if (inFlight != null) {
         await inFlight;
-      } else {
-        _lazySessionBootstrapTask = createNewSession();
+      } else if (_currentSession == null) {
+        final bootstrapTask = createNewSession();
+        _lazySessionBootstrapTask = bootstrapTask;
         try {
-          await _lazySessionBootstrapTask;
+          await bootstrapTask;
         } finally {
-          _lazySessionBootstrapTask = null;
+          if (identical(_lazySessionBootstrapTask, bootstrapTask)) {
+            _lazySessionBootstrapTask = null;
+          }
         }
+      }
+      // A lazy create may finish after the user has changed sessions or
+      // context. Never send the original draft into the newly current session.
+      if (bootstrapContextKey != _activeContextKey ||
+          bootstrapDraftGeneration != _newChatDraftGeneration ||
+          bootstrapSelectionGeneration != _sessionSelectionGeneration) {
+        return false;
       }
       if (_currentSession == null) {
         return false;

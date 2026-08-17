@@ -65,6 +65,7 @@ typedef SessionTabContextMenuCallback =
       Offset globalPosition, {
       required bool haptic,
     });
+
 /// Builds the trailing control (for example the context-usage button) of the
 /// selected tab. Invoked only for the selected regular tab and the expanded
 /// selected pinned tab; inactive tabs never show a trailing control.
@@ -76,7 +77,10 @@ typedef SessionTabTrailingBuilder =
 /// A zero shoulder keeps the straight sides and top radius only, which the
 /// compact inactive tabs use to stay visually quiet and narrow.
 class _ChromeTabBorder extends ShapeBorder {
-  const _ChromeTabBorder({required this.topRadius, this.shoulder = _kTabShoulder});
+  const _ChromeTabBorder({
+    required this.topRadius,
+    this.shoulder = _kTabShoulder,
+  });
 
   final double topRadius;
   final double shoulder;
@@ -181,7 +185,10 @@ class _SessionTabStripState extends State<SessionTabStrip> {
       <SessionTabIdentity, GlobalKey>{};
   final Map<SessionTabIdentity, FocusNode> _tabFocusNodes =
       <SessionTabIdentity, FocusNode>{};
+  final Map<SessionTabIdentity, WidgetStatesController> _tabStatesControllers =
+      <SessionTabIdentity, WidgetStatesController>{};
   SessionTabIdentity? _hoveredIdentity;
+  SessionTabIdentity? _hoveredTrailingIdentity;
   SessionTabIdentity? _lastPointerIdentity;
   Offset? _lastPointerGlobalPosition;
   SessionTabIdentity? _lastSelectedIdentity;
@@ -198,10 +205,19 @@ class _SessionTabStripState extends State<SessionTabStrip> {
   void didUpdateWidget(covariant SessionTabStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
     final identities = widget.tabs.map((tab) => tab.identity).toSet();
+    final selectedIdentities = widget.tabs
+        .where((tab) => tab.isSelected)
+        .map((tab) => tab.identity)
+        .toSet();
     // A closed tab never gets a pointer-exit, so drop reveal state that points
     // at a tab which no longer exists.
     if (_hoveredIdentity != null && !identities.contains(_hoveredIdentity)) {
       _hoveredIdentity = null;
+    }
+    if (_hoveredTrailingIdentity != null &&
+        (!identities.contains(_hoveredTrailingIdentity) ||
+            !selectedIdentities.contains(_hoveredTrailingIdentity))) {
+      _hoveredTrailingIdentity = null;
     }
     if (_lastPointerIdentity != null &&
         !identities.contains(_lastPointerIdentity)) {
@@ -216,6 +232,13 @@ class _SessionTabStripState extends State<SessionTabStrip> {
       _tabFocusNodes.remove(entry.key);
       entry.value.dispose();
     }
+    final removedStateControllers = _tabStatesControllers.entries
+        .where((entry) => !identities.contains(entry.key))
+        .toList(growable: false);
+    for (final entry in removedStateControllers) {
+      _tabStatesControllers.remove(entry.key);
+      entry.value.dispose();
+    }
   }
 
   @override
@@ -224,6 +247,9 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     _pinnedScrollController.dispose();
     for (final focusNode in _tabFocusNodes.values) {
       focusNode.dispose();
+    }
+    for (final controller in _tabStatesControllers.values) {
+      controller.dispose();
     }
     super.dispose();
   }
@@ -330,7 +356,9 @@ class _SessionTabStripState extends State<SessionTabStrip> {
             : false;
         final layoutWidths = <double>[
           for (final tab in pinnedTabs)
-            tab.isSelected ? selectedPinnedContentWidth : _kPinnedSessionTabWidth,
+            tab.isSelected
+                ? selectedPinnedContentWidth
+                : _kPinnedSessionTabWidth,
           for (final entry in regularLayout) entry.width,
         ];
         if (selectedIdentity != _lastSelectedIdentity ||
@@ -465,6 +493,26 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     setState(() => _hoveredIdentity = identity);
   }
 
+  void _setTrailingHovered(SessionTabIdentity? identity) {
+    if (!mounted || _hoveredTrailingIdentity == identity) {
+      return;
+    }
+    setState(() => _hoveredTrailingIdentity = identity);
+  }
+
+  FocusNode _focusNodeFor(SessionTabRecord tab, String key) {
+    return _tabFocusNodes.putIfAbsent(tab.identity, () {
+      return FocusNode(debugLabel: 'Session tab $key');
+    });
+  }
+
+  WidgetStatesController _statesControllerFor(SessionTabRecord tab) {
+    return _tabStatesControllers.putIfAbsent(
+      tab.identity,
+      WidgetStatesController.new,
+    );
+  }
+
   void _handlePointerDown(SessionTabRecord tab, PointerDownEvent event) {
     _lastPointerIdentity = tab.identity;
     _lastPointerGlobalPosition = event.position;
@@ -491,11 +539,7 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     return trimmed.isEmpty ? context.l10n.sessionExportUntitled : trimmed;
   }
 
-  double _measureTitleWidth(
-    BuildContext context,
-    String title,
-    bool selected,
-  ) {
+  double _measureTitleWidth(BuildContext context, String title, bool selected) {
     final painter = TextPainter(
       text: TextSpan(
         text: title,
@@ -531,11 +575,11 @@ class _SessionTabStripState extends State<SessionTabStrip> {
     final chrome = _kTabShoulder + 28 + 7 + 2 + trailingWidth;
     final minTabWidth = trailing == null
         ? (widget.isCompact
-            ? _kMinimumInactiveCompactSessionTabWidth
-            : _kMinimumInactiveSessionTabWidth)
+              ? _kMinimumInactiveCompactSessionTabWidth
+              : _kMinimumInactiveSessionTabWidth)
         : (widget.isCompact
-            ? _kMinimumCompactSessionTabWidth
-            : _kMinimumSessionTabWidth);
+              ? _kMinimumCompactSessionTabWidth
+              : _kMinimumSessionTabWidth);
     final title = _displayTitle(context, tab).split('\n').first;
     final titleWidth = _measureTitleWidth(context, title, tab.isSelected);
     // The minimum is applied last so a viewport narrower than the minimum
@@ -567,6 +611,14 @@ class _SessionTabStripState extends State<SessionTabStrip> {
         ? colorScheme.onSurface
         : colorScheme.onSurfaceVariant;
     final hovered = _hoveredIdentity == tab.identity;
+    final trailingHovered = _hoveredTrailingIdentity == tab.identity;
+    final tabSurfaceColor = selected
+        ? colorScheme.surface
+        : hovered && !trailingHovered
+        ? colorScheme.surface.withValues(alpha: 0.45)
+        : Colors.transparent;
+    final focusNode = _focusNodeFor(tab, key);
+    final statesController = _statesControllerFor(tab);
 
     void openContextMenu({required bool haptic}) {
       unawaited(
@@ -586,153 +638,161 @@ class _SessionTabStripState extends State<SessionTabStrip> {
           child: SizedBox(
             key: _tabKeys.putIfAbsent(tab.identity, GlobalKey.new),
             width: tabWidth,
-            child: Material(
-              key: ValueKey<String>('session_tab_$key'),
-              // The selected tab shares the content surface colour, which is what
-              // creates the visual continuity with the chat panel underneath. No
-              // border on any side: a bottom stroke would draw a hairline between
-              // the tab and the content it is supposed to be joined to.
-              color: selected
-                  ? colorScheme.surface
-                  : hovered
-                  ? colorScheme.surface.withValues(alpha: 0.45)
-                  : Colors.transparent,
-              shape: _ChromeTabBorder(
-                topRadius: topRadius,
-                // The selected tab keeps the browser-style flare; inactive
-                // tabs drop it so their silhouette stays quiet and narrow.
-                shoulder: selected ? _kTabShoulder : 0,
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: CallbackShortcuts(
-                            bindings: <ShortcutActivator, VoidCallback>{
-                              const SingleActivator(
-                                LogicalKeyboardKey.contextMenu,
-                              ): () =>
-                                  openContextMenu(haptic: false),
-                              const SingleActivator(
-                                LogicalKeyboardKey.f10,
-                                shift: true,
-                              ): () =>
-                                  openContextMenu(haptic: false),
-                              const SingleActivator(
-                                LogicalKeyboardKey.delete,
-                              ): () =>
-                                  _handleClose(tab),
-                            },
-                            child: Semantics(
-                              button: true,
-                              selected: selected,
-                              label: _semanticLabel(context, tab, title),
-                              onTap: () => _handleActivate(tab),
-                              onDismiss: () => _handleClose(tab),
-                              onLongPress: () => openContextMenu(haptic: true),
-                              customSemanticsActions:
-                                  <CustomSemanticsAction, VoidCallback>{
-                                    CustomSemanticsAction(
-                                      label: context.l10n.chatSessionActions,
-                                    ): () =>
-                                        openContextMenu(haptic: false),
-                                  },
-                              child: Tooltip(
-                                message: title,
-                                excludeFromSemantics: true,
-                                child: ExcludeSemantics(
-                                  child: InkWell(
-                                    key: ValueKey<String>(
-                                      'session_tab_activate_$key',
-                                    ),
-                                    focusNode: _tabFocusNodes.putIfAbsent(
-                                      tab.identity,
-                                      () => FocusNode(
-                                        debugLabel: 'Session tab $key',
-                                      ),
-                                    ),
-                                    borderRadius: radius,
-                                    overlayColor:
-                                        WidgetStateProperty.resolveWith<Color?>(
-                                          (states) {
-                                            if (states.contains(
-                                              WidgetState.pressed,
-                                            )) {
-                                              return colorScheme.primary
-                                                  .withValues(alpha: 0.18);
-                                            }
-                                            if (states.contains(
-                                              WidgetState.focused,
-                                            )) {
-                                              return colorScheme.primary
-                                                  .withValues(alpha: 0.14);
-                                            }
-                                            if (states.contains(
-                                              WidgetState.hovered,
-                                            )) {
-                                              return colorScheme.primary
-                                                  .withValues(alpha: 0.09);
-                                            }
-                                            return null;
-                                          },
+            child: AnimatedBuilder(
+              animation: statesController,
+              builder: (context, _) {
+                final focused = statesController.value.contains(
+                  WidgetState.focused,
+                );
+                final tabOverlayColor = trailingHovered
+                    ? Colors.transparent
+                    : focused
+                    ? colorScheme.primary.withValues(alpha: 0.14)
+                    : hovered
+                    ? colorScheme.primary.withValues(alpha: 0.09)
+                    : Colors.transparent;
+                return Material(
+                  key: ValueKey<String>('session_tab_$key'),
+                  // The selected tab shares the content surface colour, which is what
+                  // creates the visual continuity with the chat panel underneath. No
+                  // border on any side: a bottom stroke would draw a hairline between
+                  // the tab and the content it is supposed to be joined to.
+                  color: tabSurfaceColor,
+                  shape: _ChromeTabBorder(
+                    topRadius: topRadius,
+                    // The selected tab keeps the browser-style flare; inactive
+                    // tabs drop it so their silhouette stays quiet and narrow.
+                    shoulder: selected ? _kTabShoulder : 0,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: ColoredBox(
+                            key: ValueKey<String>('session_tab_overlay_$key'),
+                            color: tabOverlayColor,
+                          ),
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: CallbackShortcuts(
+                                bindings: <ShortcutActivator, VoidCallback>{
+                                  const SingleActivator(
+                                    LogicalKeyboardKey.contextMenu,
+                                  ): () =>
+                                      openContextMenu(haptic: false),
+                                  const SingleActivator(
+                                    LogicalKeyboardKey.f10,
+                                    shift: true,
+                                  ): () =>
+                                      openContextMenu(haptic: false),
+                                  const SingleActivator(
+                                    LogicalKeyboardKey.delete,
+                                  ): () =>
+                                      _handleClose(tab),
+                                },
+                                child: Semantics(
+                                  button: true,
+                                  selected: selected,
+                                  label: _semanticLabel(context, tab, title),
+                                  onTap: () => _handleActivate(tab),
+                                  onDismiss: () => _handleClose(tab),
+                                  onLongPress: () =>
+                                      openContextMenu(haptic: true),
+                                  customSemanticsActions:
+                                      <CustomSemanticsAction, VoidCallback>{
+                                        CustomSemanticsAction(
+                                          label:
+                                              context.l10n.chatSessionActions,
+                                        ): () =>
+                                            openContextMenu(haptic: false),
+                                      },
+                                  child: Tooltip(
+                                    message: title,
+                                    excludeFromSemantics: true,
+                                    child: ExcludeSemantics(
+                                      child: InkWell(
+                                        key: ValueKey<String>(
+                                          'session_tab_activate_$key',
                                         ),
-                                    onTap: () => _handleActivate(tab),
-                                    onDoubleTap: () => _handleClose(tab),
-                                    onSecondaryTapUp: (details) => unawaited(
-                                      widget.onContextMenu(
-                                        tab,
-                                        details.globalPosition,
-                                        haptic: false,
-                                      ),
-                                    ),
-                                    onLongPress: () =>
-                                        openContextMenu(haptic: true),
-                                    child: ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        minHeight: _kTabMinHeight,
-                                      ),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.only(
-                                          start: compactPinned
-                                              ? _kPinnedInactiveTabInset
-                                              : _kTabShoulder,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            _buildLeading(
-                                              context,
-                                              tab,
-                                              project,
-                                              title,
-                                            ),
-                                            if (!compactPinned) ...[
-                                              const SizedBox(width: 7),
-                                              Expanded(
-                                                child: Text(
-                                                  title,
-                                                  key: ValueKey<String>(
-                                                    'session_tab_title_$key',
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .labelLarge
-                                                      ?.copyWith(
-                                                        color: foreground,
-                                                        fontWeight: selected
-                                                            ? FontWeight.w700
-                                                            : FontWeight.w600,
-                                                      ),
-                                                ),
+                                        focusNode: focusNode,
+                                        statesController: statesController,
+                                        borderRadius: radius,
+                                        overlayColor:
+                                            WidgetStateProperty.resolveWith<
+                                              Color?
+                                            >((states) {
+                                              if (states.contains(
+                                                WidgetState.pressed,
+                                              )) {
+                                                return colorScheme.primary
+                                                    .withValues(alpha: 0.18);
+                                              }
+                                              return Colors.transparent;
+                                            }),
+                                        onTap: () => _handleActivate(tab),
+                                        onDoubleTap: () => _handleClose(tab),
+                                        onSecondaryTapUp: (details) =>
+                                            unawaited(
+                                              widget.onContextMenu(
+                                                tab,
+                                                details.globalPosition,
+                                                haptic: false,
                                               ),
-                                              const SizedBox(width: 2),
-                                            ],
-                                          ],
+                                            ),
+                                        onLongPress: () =>
+                                            openContextMenu(haptic: true),
+                                        child: ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            minHeight: _kTabMinHeight,
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsetsDirectional.only(
+                                              start: compactPinned
+                                                  ? _kPinnedInactiveTabInset
+                                                  : _kTabShoulder,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                _buildLeading(
+                                                  context,
+                                                  tab,
+                                                  project,
+                                                  title,
+                                                ),
+                                                if (!compactPinned) ...[
+                                                  const SizedBox(width: 7),
+                                                  Expanded(
+                                                    child: Text(
+                                                      title,
+                                                      key: ValueKey<String>(
+                                                        'session_tab_title_$key',
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .labelLarge
+                                                          ?.copyWith(
+                                                            color: foreground,
+                                                            fontWeight: selected
+                                                                ? FontWeight
+                                                                      .w700
+                                                                : FontWeight
+                                                                      .w600,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -740,26 +800,34 @@ class _SessionTabStripState extends State<SessionTabStrip> {
                                 ),
                               ),
                             ),
-                          ),
+                            if (trailing == null)
+                              SizedBox(
+                                width: compactPinned
+                                    ? _kPinnedInactiveTabInset
+                                    : _kTabShoulder,
+                              )
+                            else
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  end: _kTabShoulder,
+                                ),
+                                child: MouseRegion(
+                                  key: ValueKey<String>(
+                                    'session_tab_trailing_$key',
+                                  ),
+                                  onEnter: (_) =>
+                                      _setTrailingHovered(tab.identity),
+                                  onExit: (_) => _setTrailingHovered(null),
+                                  child: trailing,
+                                ),
+                              ),
+                          ],
                         ),
-                        if (trailing == null)
-                          SizedBox(
-                            width: compactPinned
-                                ? _kPinnedInactiveTabInset
-                                : _kTabShoulder,
-                          )
-                        else
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              end: _kTabShoulder,
-                            ),
-                            child: trailing,
-                          ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),
@@ -949,6 +1017,9 @@ class _SessionTabStripState extends State<SessionTabStrip> {
   }
 
   void _handleClose(SessionTabRecord tab) {
+    if (!tab.identity.isValid) {
+      return;
+    }
     final fallback = sessionTabCloseFallback(widget.tabs, tab.identity);
     widget.onClose(tab);
     if (fallback == null) {

@@ -6917,6 +6917,24 @@ void main() {
         find.byKey(const ValueKey<String>('file_tree_list')),
         findsOneWidget,
       );
+      final fileTreeList = find.byKey(const ValueKey<String>('file_tree_list'));
+      final fileTreeScrollable = find.descendant(
+        of: fileTreeList,
+        matching: find.byType(Scrollable),
+      );
+      Future<void> expectRootIcon(String path, IconData icon) async {
+        final item = find.byKey(ValueKey<String>('file_tree_item_$path'));
+        await tester.scrollUntilVisible(
+          item,
+          120,
+          scrollable: fileTreeScrollable,
+        );
+        expect(
+          find.descendant(of: item, matching: find.byIcon(icon)),
+          findsOneWidget,
+        );
+      }
+
       expect(
         find.descendant(
           of: find.byKey(
@@ -7023,113 +7041,22 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/vite.config.ts'),
-          ),
-          matching: find.byIcon(SimpleIcons.vite),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/vite-env.d.ts'),
-          ),
-          matching: find.byIcon(SimpleIcons.vite),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/id_rsa'),
-          ),
-          matching: find.byIcon(SimpleIcons.passbolt),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/id_ed25519'),
-          ),
-          matching: find.byIcon(SimpleIcons.passbolt),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/dev.pem'),
-          ),
-          matching: find.byIcon(SimpleIcons.passbolt),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/logo.svg'),
-          ),
-          matching: find.byIcon(SimpleIcons.svg),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/vector.svgz'),
-          ),
-          matching: find.byIcon(SimpleIcons.inkscape),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/photo.png'),
-          ),
-          matching: find.byIcon(SimpleIcons.googlephotos),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/.env.production'),
-          ),
-          matching: find.byIcon(SimpleIcons.dotenv),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/notes.txt'),
-          ),
-          matching: find.byIcon(Symbols.article),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/data.csv'),
-          ),
-          matching: find.byIcon(Symbols.table_chart),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('file_tree_item_/repo/a/data.tsv'),
-          ),
-          matching: find.byIcon(Symbols.table_rows),
-        ),
-        findsOneWidget,
+      await expectRootIcon('/repo/a/vite.config.ts', SimpleIcons.vite);
+      await expectRootIcon('/repo/a/vite-env.d.ts', SimpleIcons.vite);
+      await expectRootIcon('/repo/a/id_rsa', SimpleIcons.passbolt);
+      await expectRootIcon('/repo/a/id_ed25519', SimpleIcons.passbolt);
+      await expectRootIcon('/repo/a/dev.pem', SimpleIcons.passbolt);
+      await expectRootIcon('/repo/a/logo.svg', SimpleIcons.svg);
+      await expectRootIcon('/repo/a/vector.svgz', SimpleIcons.inkscape);
+      await expectRootIcon('/repo/a/photo.png', SimpleIcons.googlephotos);
+      await expectRootIcon('/repo/a/.env.production', SimpleIcons.dotenv);
+      await expectRootIcon('/repo/a/notes.txt', Symbols.article);
+      await expectRootIcon('/repo/a/data.csv', Symbols.table_chart);
+      await expectRootIcon('/repo/a/data.tsv', Symbols.table_rows);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey<String>('file_tree_item_/repo/a/.github')),
+        -120,
+        scrollable: fileTreeScrollable,
       );
       await tester.tap(
         find.byKey(const ValueKey<String>('file_tree_item_/repo/a/.github')),
@@ -11388,11 +11315,7 @@ void main() {
       addTearDown(settingsProvider.dispose);
 
       await tester.pumpWidget(
-        _testApp(
-          provider,
-          appProvider,
-          settingsProvider: settingsProvider,
-        ),
+        _testApp(provider, appProvider, settingsProvider: settingsProvider),
       );
       await tester.pumpAndSettle();
 
@@ -13987,6 +13910,74 @@ void main() {
       findsNothing,
     );
     expect(find.text('How can I help you today?'), findsOneWidget);
+  });
+
+  testWidgets('New Chat keeps a selected presentation tab while drafting', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_new_chat_placeholder',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Existing session',
+        ),
+      ],
+    );
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('New Chat').first);
+    await tester.pumpAndSettle();
+
+    final strip = find.byKey(const ValueKey<String>('session_tab_strip'));
+    expect(strip, findsOneWidget);
+    expect(
+      find.descendant(of: strip, matching: find.text('New Chat')),
+      findsOneWidget,
+    );
+    expect(provider.sessionTabs.where((tab) => tab.isSelected), isEmpty);
+    expect(
+      provider.sessionTabs.every((tab) => tab.identity.sessionId.isNotEmpty),
+      isTrue,
+    );
+
+    final chatInputFieldFinder = find.descendant(
+      of: find.byKey(const ValueKey<String>('composer_input_row')),
+      matching: find.byType(TextField),
+    );
+    await tester.tap(
+      find.descendant(of: strip, matching: find.text('New Chat')),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      tester.widget<TextField>(chatInputFieldFinder).focusNode?.hasFocus,
+      isTrue,
+    );
+
+    await provider.createNewSession();
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: strip, matching: find.text('New Chat')),
+      findsNothing,
+    );
+    expect(provider.sessionTabs, isNotEmpty);
+    expect(provider.sessionTabs.where((tab) => tab.isSelected), hasLength(1));
   });
 
   testWidgets('keyboard shortcut focuses composer with mod+l on desktop', (

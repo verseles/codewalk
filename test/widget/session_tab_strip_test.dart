@@ -93,132 +93,125 @@ void main() {
     );
   });
 
-  testWidgets(
-    'a single inactive pinned tab stays compact at phone width',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(360, 200));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final pinned = _tab('pinned', isPinned: true);
-      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+  testWidgets('a single inactive pinned tab stays compact at phone width', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final pinned = _tab('pinned', isPinned: true);
+    final pinnedKey = sessionTabIdentityKey(pinned.identity);
 
-      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned], width: 320));
-      await tester.pump();
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned], width: 320));
+    await tester.pump();
 
-      final tabRect = tester.getRect(
-        find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
-      );
-      expect(tabRect.width, moreOrLessEquals(36, epsilon: 0.01));
-      final regionRect = tester.getRect(
-        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
-      );
-      expect(tabRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
-      expect(tabRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
-      expect(tabRect.left - regionRect.left, lessThanOrEqualTo(4.01));
-    },
-  );
+    final tabRect = tester.getRect(
+      find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
+    );
+    expect(tabRect.width, moreOrLessEquals(36, epsilon: 0.01));
+    final regionRect = tester.getRect(
+      find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+    );
+    expect(tabRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+    expect(tabRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+    expect(tabRect.left - regionRect.left, lessThanOrEqualTo(4.01));
+  });
 
-  testWidgets(
-    'centers the leading icon inside an inactive pinned tab',
-    (tester) async {
-      final pinned = _tab('pinned', isPinned: true);
-      final pinnedKey = sessionTabIdentityKey(pinned.identity);
+  testWidgets('centers the leading icon inside an inactive pinned tab', (
+    tester,
+  ) async {
+    final pinned = _tab('pinned', isPinned: true);
+    final pinnedKey = sessionTabIdentityKey(pinned.identity);
 
-      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned]));
-      await tester.pump();
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[pinned]));
+    await tester.pump();
 
-      final tabRect = tester.getRect(
-        find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
-      );
-      final iconRect = tester.getRect(
-        find.byKey(ValueKey<String>('session_tab_project_icon_$pinnedKey')),
-      );
-      expect(
-        iconRect.center.dx,
-        moreOrLessEquals(tabRect.center.dx, epsilon: 0.01),
-      );
-      // The busy badge still anchors to the leading box corner.
-      final busy = _tab(
-        'busy',
-        isPinned: true,
-        status: SessionStatusType.busy,
-      );
-      final busyKey = sessionTabIdentityKey(busy.identity);
-      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[busy]));
-      await tester.pump();
-      final badgeRect = tester.getRect(
-        find.byKey(ValueKey<String>('session_tab_busy_busy_$busyKey')),
-      );
-      final leadingRect = tester.getRect(
-        find.byKey(ValueKey<String>('session_tab_leading_$busyKey')),
-      );
-      expect(badgeRect.right, moreOrLessEquals(leadingRect.right, epsilon: 0.01));
-      expect(
-        badgeRect.bottom,
-        moreOrLessEquals(leadingRect.bottom, epsilon: 0.01),
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
+    final tabRect = tester.getRect(
+      find.byKey(ValueKey<String>('session_tab_$pinnedKey')),
+    );
+    final iconRect = tester.getRect(
+      find.byKey(ValueKey<String>('session_tab_project_icon_$pinnedKey')),
+    );
+    expect(
+      iconRect.center.dx,
+      moreOrLessEquals(tabRect.center.dx, epsilon: 0.01),
+    );
+    // The busy badge still anchors to the leading box corner.
+    final busy = _tab('busy', isPinned: true, status: SessionStatusType.busy);
+    final busyKey = sessionTabIdentityKey(busy.identity);
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[busy]));
+    await tester.pump();
+    final badgeRect = tester.getRect(
+      find.byKey(ValueKey<String>('session_tab_busy_busy_$busyKey')),
+    );
+    final leadingRect = tester.getRect(
+      find.byKey(ValueKey<String>('session_tab_leading_$busyKey')),
+    );
+    expect(badgeRect.right, moreOrLessEquals(leadingRect.right, epsilon: 0.01));
+    expect(
+      badgeRect.bottom,
+      moreOrLessEquals(leadingRect.bottom, epsilon: 0.01),
+    );
+    expect(tester.takeException(), isNull);
+  });
 
-  testWidgets(
-    'selected pinned tab stays visible when pinned tabs overflow',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(360, 200));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final overflow = List<SessionTabRecord>.generate(
-        7,
-        (index) => _tab('pin_$index', isPinned: true),
-      );
-      final selected = _tab(
-        'pin_selected',
-        title: 'Selected overflow',
-        isPinned: true,
-        isSelected: true,
-      );
-      final regular = _tab('regular');
+  testWidgets('selected pinned tab stays visible when pinned tabs overflow', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final overflow = List<SessionTabRecord>.generate(
+      7,
+      (index) => _tab('pin_$index', isPinned: true),
+    );
+    final selected = _tab(
+      'pin_selected',
+      title: 'Selected overflow',
+      isPinned: true,
+      isSelected: true,
+    );
+    final regular = _tab('regular');
 
-      await tester.pumpWidget(
-        _app(
-          tabs: <SessionTabRecord>[...overflow, selected, regular],
-          width: 320,
-          trailingBuilder: (context, tab) => const SizedBox(
-            key: ValueKey<String>('usage_trailing'),
-            width: 40,
-            height: 40,
-          ),
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[...overflow, selected, regular],
+        width: 320,
+        trailingBuilder: (context, tab) => const SizedBox(
+          key: ValueKey<String>('usage_trailing'),
+          width: 40,
+          height: 40,
         ),
-      );
-      await tester.pump();
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
 
-      final selectedRect = tester.getRect(
-        find.byKey(
-          ValueKey<String>(
-            'session_tab_${sessionTabIdentityKey(selected.identity)}',
-          ),
+    final selectedRect = tester.getRect(
+      find.byKey(
+        ValueKey<String>(
+          'session_tab_${sessionTabIdentityKey(selected.identity)}',
         ),
-      );
-      // The expanded tab never collapses below its usable minimum, even with
-      // the production-sized trailing usage button present.
-      expect(selectedRect.width, greaterThanOrEqualTo(100));
-      expect(tester.takeException(), isNull);
-      // The pinned viewport overflows and the reveal keeps the tab reachable.
-      final pinnedScrollable = tester.state<ScrollableState>(
-        find.descendant(
-          of: find.byKey(
-            const ValueKey<String>('session_tab_pinned_region_scroll_view'),
-          ),
-          matching: find.byType(Scrollable),
+      ),
+    );
+    // The expanded tab never collapses below its usable minimum, even with
+    // the production-sized trailing usage button present.
+    expect(selectedRect.width, greaterThanOrEqualTo(100));
+    expect(tester.takeException(), isNull);
+    // The pinned viewport overflows and the reveal keeps the tab reachable.
+    final pinnedScrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(
+          const ValueKey<String>('session_tab_pinned_region_scroll_view'),
         ),
-      );
-      expect(pinnedScrollable.position.maxScrollExtent, greaterThan(0));
-      final regionRect = tester.getRect(
-        find.byKey(const ValueKey<String>('session_tab_pinned_region')),
-      );
-      expect(selectedRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
-      expect(selectedRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
-    },
-  );
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(pinnedScrollable.position.maxScrollExtent, greaterThan(0));
+    final regionRect = tester.getRect(
+      find.byKey(const ValueKey<String>('session_tab_pinned_region')),
+    );
+    expect(selectedRect.left, greaterThanOrEqualTo(regionRect.left - 0.5));
+    expect(selectedRect.right, lessThanOrEqualTo(regionRect.right + 0.5));
+  });
 
   testWidgets(
     'selected pinned tab fits entirely inside its region with regular tabs',
@@ -322,10 +315,7 @@ void main() {
       final regular = _tab('regular');
 
       await tester.pumpWidget(
-        _app(
-          tabs: <SessionTabRecord>[inactive, selected, regular],
-          width: 600,
-        ),
+        _app(tabs: <SessionTabRecord>[inactive, selected, regular], width: 600),
       );
       await tester.pump();
 
@@ -1014,6 +1004,121 @@ void main() {
     expect(_tabMaterial(tester, inactive).color, Colors.transparent);
   });
 
+  testWidgets('tab hover covers the title while the knob keeps its circle', (
+    tester,
+  ) async {
+    final selected = _tab('alpha', isSelected: true);
+    final key = sessionTabIdentityKey(selected.identity);
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[selected],
+        trailingBuilder: (context, tab) => const SizedBox(
+          key: ValueKey<String>('test_usage_knob'),
+          width: 32,
+          height: 32,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    Color overlay() => _tabOverlay(tester, selected).color;
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+    await mouse.moveTo(
+      tester.getCenter(
+        find.byKey(ValueKey<String>('session_tab_activate_$key')),
+      ),
+    );
+    await tester.pump();
+    expect(
+      overlay(),
+      Theme.of(
+        tester.element(find.byType(SessionTabStrip)),
+      ).colorScheme.primary.withValues(alpha: 0.09),
+    );
+
+    await mouse.moveTo(
+      tester.getCenter(
+        find.byKey(ValueKey<String>('session_tab_trailing_$key')),
+      ),
+    );
+    await tester.pump();
+    expect(overlay(), Colors.transparent);
+
+    final inactive = _tab('alpha');
+    final nextSelected = _tab('beta', isSelected: true);
+    await tester.pumpWidget(
+      _app(
+        tabs: <SessionTabRecord>[inactive, nextSelected],
+        trailingBuilder: (context, tab) => const SizedBox(
+          key: ValueKey<String>('test_usage_knob'),
+          width: 32,
+          height: 32,
+        ),
+      ),
+    );
+    await tester.pump();
+    await mouse.moveTo(
+      tester.getCenter(
+        find.byKey(ValueKey<String>('session_tab_activate_$key')),
+      ),
+    );
+    await tester.pump();
+    expect(
+      _tabOverlay(tester, inactive).color,
+      Theme.of(
+        tester.element(find.byType(SessionTabStrip)),
+      ).colorScheme.primary.withValues(alpha: 0.09),
+    );
+  });
+
+  testWidgets('keyboard focus covers the complete tab', (tester) async {
+    final selected = _tab('alpha', isSelected: true);
+    final key = sessionTabIdentityKey(selected.identity);
+    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[selected]));
+    await tester.pump();
+
+    final focusNode = tester
+        .widget<InkWell>(
+          find.byKey(ValueKey<String>('session_tab_activate_$key')),
+        )
+        .focusNode!;
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, isTrue);
+    expect(
+      tester
+          .widget<InkWell>(
+            find.byKey(ValueKey<String>('session_tab_activate_$key')),
+          )
+          .statesController
+          ?.value,
+      contains(WidgetState.focused),
+    );
+    expect(
+      _tabOverlay(tester, selected).color,
+      Theme.of(
+        tester.element(find.byType(SessionTabStrip)),
+      ).colorScheme.primary.withValues(alpha: 0.14),
+    );
+    final overlayColor = tester
+        .widget<InkWell>(
+          find.byKey(ValueKey<String>('session_tab_activate_$key')),
+        )
+        .overlayColor!;
+    expect(
+      overlayColor.resolve(<WidgetState>{WidgetState.hovered}),
+      Colors.transparent,
+    );
+    expect(
+      overlayColor.resolve(<WidgetState>{WidgetState.focused}),
+      Colors.transparent,
+    );
+  });
+
   testWidgets('tabs use lower flares, straight sides, and soft top corners', (
     tester,
   ) async {
@@ -1233,38 +1338,39 @@ void main() {
     },
   );
 
-  testWidgets('inactive tab without knob uses the smaller floor while the selected tab keeps the knob floor', (
-    tester,
-  ) async {
-    final inactive = _tab('inactive', title: 'A');
-    final selected = _tab('selected', title: 'A', isSelected: true);
+  testWidgets(
+    'inactive tab without knob uses the smaller floor while the selected tab keeps the knob floor',
+    (tester) async {
+      final inactive = _tab('inactive', title: 'A');
+      final selected = _tab('selected', title: 'A', isSelected: true);
 
-    await tester.pumpWidget(
-      _app(
-        tabs: <SessionTabRecord>[inactive, selected],
-        trailingBuilder: (context, tab) => tab.isSelected
-            ? const SizedBox(
-                key: ValueKey<String>('usage_trailing'),
-                width: 32,
-                height: 32,
-              )
-            : null,
-      ),
-    );
-    await tester.pump();
+      await tester.pumpWidget(
+        _app(
+          tabs: <SessionTabRecord>[inactive, selected],
+          trailingBuilder: (context, tab) => tab.isSelected
+              ? const SizedBox(
+                  key: ValueKey<String>('usage_trailing'),
+                  width: 32,
+                  height: 32,
+                )
+              : null,
+        ),
+      );
+      await tester.pump();
 
-    double widthOf(SessionTabRecord tab) => tester
-        .getSize(
-          find.byKey(
-            ValueKey<String>(
-              'session_tab_${sessionTabIdentityKey(tab.identity)}',
+      double widthOf(SessionTabRecord tab) => tester
+          .getSize(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+              ),
             ),
-          ),
-        )
-        .width;
-    expect(widthOf(inactive), moreOrLessEquals(120, epsilon: 0.01));
-    expect(widthOf(selected), moreOrLessEquals(150, epsilon: 0.01));
-  });
+          )
+          .width;
+      expect(widthOf(inactive), moreOrLessEquals(120, epsilon: 0.01));
+      expect(widthOf(selected), moreOrLessEquals(150, epsilon: 0.01));
+    },
+  );
 
   testWidgets('compact inactive tab without knob uses the smaller floor', (
     tester,
@@ -1351,10 +1457,7 @@ void main() {
     expect(widthOf(1), moreOrLessEquals(120, epsilon: 0.01));
 
     rebuild(() {
-      tabs = [
-        _tab('a', title: 'A'),
-        _tab('b', title: 'A', isSelected: true),
-      ];
+      tabs = [_tab('a', title: 'A'), _tab('b', title: 'A', isSelected: true)];
     });
     await tester.pump();
 
@@ -1363,27 +1466,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a selected tab whose trailing builder returns null uses the smaller floor', (
-    tester,
-  ) async {
-    final tab = _tab('selected', title: 'A', isSelected: true);
+  testWidgets(
+    'a selected tab whose trailing builder returns null uses the smaller floor',
+    (tester) async {
+      final tab = _tab('selected', title: 'A', isSelected: true);
 
-    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
-    await tester.pump();
+      await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab]));
+      await tester.pump();
 
-    expect(
-      tester
-          .getSize(
-            find.byKey(
-              ValueKey<String>(
-                'session_tab_${sessionTabIdentityKey(tab.identity)}',
+      expect(
+        tester
+            .getSize(
+              find.byKey(
+                ValueKey<String>(
+                  'session_tab_${sessionTabIdentityKey(tab.identity)}',
+                ),
               ),
-            ),
-          )
-          .width,
-      moreOrLessEquals(120, epsilon: 0.01),
-    );
-  });
+            )
+            .width,
+        moreOrLessEquals(120, epsilon: 0.01),
+      );
+    },
+  );
 
   testWidgets('selected tab reserves the trailing usage button width', (
     tester,
@@ -1425,7 +1529,12 @@ void main() {
     expect(
       widthOf(selected),
       moreOrLessEquals(
-        _expectedContentWidth(tester, 'Session X', selected: true, hasTrailing: true),
+        _expectedContentWidth(
+          tester,
+          'Session X',
+          selected: true,
+          hasTrailing: true,
+        ),
         epsilon: 0.01,
       ),
     );
@@ -1434,7 +1543,9 @@ void main() {
   testWidgets('compact tabs use the compact minimum width', (tester) async {
     final tab = _tab('short', title: 'A');
 
-    await tester.pumpWidget(_app(tabs: <SessionTabRecord>[tab], isCompact: true));
+    await tester.pumpWidget(
+      _app(tabs: <SessionTabRecord>[tab], isCompact: true),
+    );
     await tester.pump();
 
     expect(
@@ -1472,54 +1583,15 @@ void main() {
     );
   });
 
-  testWidgets('tabs never shrink below the minimum when the viewport is narrow', (
-    tester,
-  ) async {
-    final tabs = List<SessionTabRecord>.generate(
-      5,
-      (index) => _tab('short_$index', title: 'A'),
-    );
-
-    await tester.pumpWidget(_app(tabs: tabs, width: 200));
-    await tester.pump();
-
-    for (final tab in tabs) {
-      expect(
-        tester
-            .getSize(
-              find.byKey(
-                ValueKey<String>(
-                  'session_tab_${sessionTabIdentityKey(tab.identity)}',
-                ),
-              ),
-            )
-            .width,
-        moreOrLessEquals(120, epsilon: 0.01),
-      );
-    }
-    final scrollable = tester.state<ScrollableState>(
-      find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('session_tab_strip_scroll_view'),
-        ),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    expect(scrollable.position.maxScrollExtent, greaterThan(0));
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets(
-    'minimum wins when the viewport is narrower than the minimum',
+    'tabs never shrink below the minimum when the viewport is narrow',
     (tester) async {
       final tabs = List<SessionTabRecord>.generate(
-        3,
+        5,
         (index) => _tab('short_$index', title: 'A'),
       );
 
-      // 100px viewport minus 16px padding caps the maximum at 84px, below
-      // the 120px inactive floor: tabs must stay at their floor and scroll.
-      await tester.pumpWidget(_app(tabs: tabs, width: 100));
+      await tester.pumpWidget(_app(tabs: tabs, width: 200));
       await tester.pump();
 
       for (final tab in tabs) {
@@ -1548,6 +1620,43 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('minimum wins when the viewport is narrower than the minimum', (
+    tester,
+  ) async {
+    final tabs = List<SessionTabRecord>.generate(
+      3,
+      (index) => _tab('short_$index', title: 'A'),
+    );
+
+    // 100px viewport minus 16px padding caps the maximum at 84px, below
+    // the 120px inactive floor: tabs must stay at their floor and scroll.
+    await tester.pumpWidget(_app(tabs: tabs, width: 100));
+    await tester.pump();
+
+    for (final tab in tabs) {
+      expect(
+        tester
+            .getSize(
+              find.byKey(
+                ValueKey<String>(
+                  'session_tab_${sessionTabIdentityKey(tab.identity)}',
+                ),
+              ),
+            )
+            .width,
+        moreOrLessEquals(120, epsilon: 0.01),
+      );
+    }
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(scrollable.position.maxScrollExtent, greaterThan(0));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'long titles cap at the viewport width when it is narrower than the maximum',
@@ -1665,10 +1774,7 @@ void main() {
     final tab = _tab('rtl', title: 'مثال عربي');
 
     await tester.pumpWidget(
-      _app(
-        tabs: <SessionTabRecord>[tab],
-        textDirection: TextDirection.rtl,
-      ),
+      _app(tabs: <SessionTabRecord>[tab], textDirection: TextDirection.rtl),
     );
     await tester.pump();
 
@@ -1693,7 +1799,10 @@ void main() {
   testWidgets('strip shrinks to content when fillWidth is false', (
     tester,
   ) async {
-    final tabs = <SessionTabRecord>[_tab('a', title: 'A'), _tab('b', title: 'B')];
+    final tabs = <SessionTabRecord>[
+      _tab('a', title: 'A'),
+      _tab('b', title: 'B'),
+    ];
 
     await tester.pumpWidget(
       localizedMaterialApp(
@@ -1755,7 +1864,12 @@ void main() {
           )
           .width,
       moreOrLessEquals(
-        _expectedContentWidth(tester, 'Short', selected: true, hasTrailing: true),
+        _expectedContentWidth(
+          tester,
+          'Short',
+          selected: true,
+          hasTrailing: true,
+        ),
         epsilon: 0.01,
       ),
     );
@@ -1766,290 +1880,310 @@ void main() {
           )
           .width,
       moreOrLessEquals(
-        _expectedContentWidth(tester, 'Short', selected: true, hasTrailing: true),
+        _expectedContentWidth(
+          tester,
+          'Short',
+          selected: true,
+          hasTrailing: true,
+        ),
         epsilon: 0.01,
       ),
     );
   });
 
-  testWidgets('pinning or unpinning the selected tab reveals it in its new region', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 200));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    var tabs = <SessionTabRecord>[
-      for (var i = 0; i < 6; i++) _tab('before_$i', title: 'X' * 30),
-      _tab('selected', title: 'A', isSelected: true),
-    ];
-    late void Function(VoidCallback fn) rebuild;
-
-    await tester.pumpWidget(
-      localizedMaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) {
-              rebuild = setState;
-              return SessionTabStrip(
-                tabs: tabs,
-                projects: const [],
-                openProjectIds: const <String>{},
-                isCompact: false,
-                onActivate: (_) {},
-                onClose: (_) {},
-                onContextMenu: (tab, position, {required haptic}) async {},
-                trailingBuilder: (context, tab) => null,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final selectedKey = ValueKey<String>(
-      'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
-    );
-    Rect selectedRect() => tester.getRect(find.byKey(selectedKey));
-
-    // Pin the selected tab: it moves to the overflowing pinned region and the
-    // reveal must bring it into the pinned viewport.
-    rebuild(() {
-      tabs = [
-        ...tabs.take(6),
-        _tab('selected', title: 'A', isSelected: true, isPinned: true),
-      ];
-    });
-    await tester.pump();
-    await tester.pumpAndSettle();
-
-    final pinnedViewport = tester.getRect(
-      find.byKey(const ValueKey<String>('session_tab_pinned_region_scroll_view')),
-    );
-    expect(selectedRect().left, greaterThanOrEqualTo(pinnedViewport.left - 0.5));
-    expect(selectedRect().right, lessThanOrEqualTo(pinnedViewport.right + 0.5));
-
-    // Unpin it back: the reveal must bring it into the regular viewport.
-    rebuild(() {
-      tabs = [
-        ...tabs.take(6),
+  testWidgets(
+    'pinning or unpinning the selected tab reveals it in its new region',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      var tabs = <SessionTabRecord>[
+        for (var i = 0; i < 6; i++) _tab('before_$i', title: 'X' * 30),
         _tab('selected', title: 'A', isSelected: true),
       ];
-    });
-    await tester.pump();
-    await tester.pumpAndSettle();
+      late void Function(VoidCallback fn) rebuild;
 
-    final regularViewport = tester.getRect(
-      find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
-    );
-    expect(selectedRect().left, greaterThanOrEqualTo(regularViewport.left - 0.5));
-    expect(selectedRect().right, lessThanOrEqualTo(regularViewport.right + 0.5));
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('unrelated tab width changes do not yank a visible selected tab', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 200));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    var tabs = <SessionTabRecord>[
-      _tab('lead', title: 'A'),
-      _tab('selected', title: 'A', isSelected: true),
-      for (var i = 0; i < 5; i++) _tab('trail_$i', title: 'X' * 30),
-    ];
-    late void Function(VoidCallback fn) rebuild;
-
-    await tester.pumpWidget(
-      localizedMaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) {
-              rebuild = setState;
-              return SessionTabStrip(
-                tabs: tabs,
-                projects: const [],
-                openProjectIds: const <String>{},
-                isCompact: false,
-                onActivate: (_) {},
-                onClose: (_) {},
-                onContextMenu: (tab, position, {required haptic}) async {},
-                trailingBuilder: (context, tab) => tab.isSelected
-                    ? const SizedBox(
-                        key: ValueKey<String>('usage_trailing'),
-                        width: 32,
-                        height: 32,
-                      )
-                    : null,
-              );
-            },
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return SessionTabStrip(
+                  tabs: tabs,
+                  projects: const [],
+                  openProjectIds: const <String>{},
+                  isCompact: false,
+                  onActivate: (_) {},
+                  onClose: (_) {},
+                  onContextMenu: (tab, position, {required haptic}) async {},
+                  trailingBuilder: (context, tab) => null,
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final scrollable = tester.state<ScrollableState>(
-      find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('session_tab_strip_scroll_view'),
+      final selectedKey = ValueKey<String>(
+        'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
+      );
+      Rect selectedRect() => tester.getRect(find.byKey(selectedKey));
+
+      // Pin the selected tab: it moves to the overflowing pinned region and the
+      // reveal must bring it into the pinned viewport.
+      rebuild(() {
+        tabs = [
+          ...tabs.take(6),
+          _tab('selected', title: 'A', isSelected: true, isPinned: true),
+        ];
+      });
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final pinnedViewport = tester.getRect(
+        find.byKey(
+          const ValueKey<String>('session_tab_pinned_region_scroll_view'),
         ),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    // The selected tab (with knob, floor 150) spans [120, 270] and is fully
-    // visible inside [50, 354].
-    scrollable.position.jumpTo(50);
-    await tester.pump();
+      );
+      expect(
+        selectedRect().left,
+        greaterThanOrEqualTo(pinnedViewport.left - 0.5),
+      );
+      expect(
+        selectedRect().right,
+        lessThanOrEqualTo(pinnedViewport.right + 0.5),
+      );
 
-    // Rename an unrelated trailing tab: its width changes, which fires the
-    // reveal trigger, but the selected tab stays fully visible so the scroll
-    // offset must not move.
-    rebuild(() {
-      tabs = [
-        tabs[0],
-        tabs[1],
-        tabs[2],
-        tabs[3],
-        tabs[4],
-        _tab('trail_5', title: 'X' * 8),
+      // Unpin it back: the reveal must bring it into the regular viewport.
+      rebuild(() {
+        tabs = [
+          ...tabs.take(6),
+          _tab('selected', title: 'A', isSelected: true),
+        ];
+      });
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final regularViewport = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+      );
+      expect(
+        selectedRect().left,
+        greaterThanOrEqualTo(regularViewport.left - 0.5),
+      );
+      expect(
+        selectedRect().right,
+        lessThanOrEqualTo(regularViewport.right + 0.5),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'unrelated tab width changes do not yank a visible selected tab',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      var tabs = <SessionTabRecord>[
+        _tab('lead', title: 'A'),
+        _tab('selected', title: 'A', isSelected: true),
+        for (var i = 0; i < 5; i++) _tab('trail_$i', title: 'X' * 30),
       ];
-    });
-    await tester.pump();
-    await tester.pumpAndSettle();
+      late void Function(VoidCallback fn) rebuild;
 
-    expect(
-      scrollable.position.pixels,
-      moreOrLessEquals(50, epsilon: 0.5),
-    );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('selection swap reveals the selected tab in a narrow viewport with mixed floors', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 200));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    var tabs = <SessionTabRecord>[
-      _tab('a', title: 'A', isSelected: true),
-      for (var i = 1; i < 6; i++) _tab('tab_$i', title: 'A'),
-    ];
-    late void Function(VoidCallback fn) rebuild;
-
-    await tester.pumpWidget(
-      localizedMaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) {
-              rebuild = setState;
-              return SessionTabStrip(
-                tabs: tabs,
-                projects: const [],
-                openProjectIds: const <String>{},
-                isCompact: false,
-                onActivate: (_) {},
-                onClose: (_) {},
-                onContextMenu: (tab, position, {required haptic}) async {},
-                trailingBuilder: (context, tab) => tab.isSelected
-                    ? const SizedBox(
-                        key: ValueKey<String>('usage_trailing'),
-                        width: 32,
-                        height: 32,
-                      )
-                    : null,
-              );
-            },
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return SessionTabStrip(
+                  tabs: tabs,
+                  projects: const [],
+                  openProjectIds: const <String>{},
+                  isCompact: false,
+                  onActivate: (_) {},
+                  onClose: (_) {},
+                  onContextMenu: (tab, position, {required haptic}) async {},
+                  trailingBuilder: (context, tab) => tab.isSelected
+                      ? const SizedBox(
+                          key: ValueKey<String>('usage_trailing'),
+                          width: 32,
+                          height: 32,
+                        )
+                      : null,
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    rebuild(() {
-      tabs = [
-        _tab('a', title: 'A'),
-        for (var i = 1; i < 5; i++) _tab('tab_$i', title: 'A'),
-        _tab('tab_5', title: 'A', isSelected: true),
-      ];
-    });
-    await tester.pump();
-    await tester.pumpAndSettle();
-
-    // The newly selected tab grows to the knob floor (150) among 120px
-    // inactive tabs and must be brought into view.
-    final viewportRect = tester.getRect(
-      find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
-    );
-    final selectedRect = tester.getRect(
-      find.byKey(
-        ValueKey<String>(
-          'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
+      final scrollable = tester.state<ScrollableState>(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey<String>('session_tab_strip_scroll_view'),
+          ),
+          matching: find.byType(Scrollable),
         ),
-      ),
-    );
-    expect(selectedRect.left, greaterThanOrEqualTo(viewportRect.left - 0.5));
-    expect(selectedRect.right, lessThanOrEqualTo(viewportRect.right + 0.5));
-    expect(tester.takeException(), isNull);
-  });
+      );
+      // The selected tab (with knob, floor 150) spans [120, 270] and is fully
+      // visible inside [50, 354].
+      scrollable.position.jumpTo(50);
+      await tester.pump();
 
-  testWidgets('renaming a tab re-measures its width and keeps the selected tab visible', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 200));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    var tabs = <SessionTabRecord>[
-      for (var i = 0; i < 3; i++) _tab('before_$i', title: 'X' * 30),
-      _tab('selected', title: 'A', isSelected: true),
-    ];
-    late void Function(VoidCallback fn) rebuild;
+      // Rename an unrelated trailing tab: its width changes, which fires the
+      // reveal trigger, but the selected tab stays fully visible so the scroll
+      // offset must not move.
+      rebuild(() {
+        tabs = [
+          tabs[0],
+          tabs[1],
+          tabs[2],
+          tabs[3],
+          tabs[4],
+          _tab('trail_5', title: 'X' * 8),
+        ];
+      });
+      await tester.pump();
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      localizedMaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) {
-              rebuild = setState;
-              return SessionTabStrip(
-                tabs: tabs,
-                projects: const [],
-                openProjectIds: const <String>{},
-                isCompact: false,
-                onActivate: (_) {},
-                onClose: (_) {},
-                onContextMenu: (tab, position, {required haptic}) async {},
-                trailingBuilder: (context, tab) => null,
-              );
-            },
+      expect(scrollable.position.pixels, moreOrLessEquals(50, epsilon: 0.5));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'selection swap reveals the selected tab in a narrow viewport with mixed floors',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      var tabs = <SessionTabRecord>[
+        _tab('a', title: 'A', isSelected: true),
+        for (var i = 1; i < 6; i++) _tab('tab_$i', title: 'A'),
+      ];
+      late void Function(VoidCallback fn) rebuild;
+
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return SessionTabStrip(
+                  tabs: tabs,
+                  projects: const [],
+                  openProjectIds: const <String>{},
+                  isCompact: false,
+                  onActivate: (_) {},
+                  onClose: (_) {},
+                  onContextMenu: (tab, position, {required haptic}) async {},
+                  trailingBuilder: (context, tab) => tab.isSelected
+                      ? const SizedBox(
+                          key: ValueKey<String>('usage_trailing'),
+                          width: 32,
+                          height: 32,
+                        )
+                      : null,
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final selectedKey =
-        ValueKey<String>('session_tab_${sessionTabIdentityKey(tabs.last.identity)}');
-    double selectedWidth() =>
-        tester.getSize(find.byKey(selectedKey)).width;
-    expect(selectedWidth(), moreOrLessEquals(120, epsilon: 0.01));
+      rebuild(() {
+        tabs = [
+          _tab('a', title: 'A'),
+          for (var i = 1; i < 5; i++) _tab('tab_$i', title: 'A'),
+          _tab('tab_5', title: 'A', isSelected: true),
+        ];
+      });
+      await tester.pump();
+      await tester.pumpAndSettle();
 
-    rebuild(() {
-      tabs = [
-        ...tabs.take(3),
-        _tab('selected', title: 'X' * 30, isSelected: true),
+      // The newly selected tab grows to the knob floor (150) among 120px
+      // inactive tabs and must be brought into view.
+      final viewportRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+      );
+      final selectedRect = tester.getRect(
+        find.byKey(
+          ValueKey<String>(
+            'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
+          ),
+        ),
+      );
+      expect(selectedRect.left, greaterThanOrEqualTo(viewportRect.left - 0.5));
+      expect(selectedRect.right, lessThanOrEqualTo(viewportRect.right + 0.5));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'renaming a tab re-measures its width and keeps the selected tab visible',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      var tabs = <SessionTabRecord>[
+        for (var i = 0; i < 3; i++) _tab('before_$i', title: 'X' * 30),
+        _tab('selected', title: 'A', isSelected: true),
       ];
-    });
-    await tester.pump();
-    await tester.pumpAndSettle();
+      late void Function(VoidCallback fn) rebuild;
 
-    // The viewport caps the re-measured width (320 - 16px padding).
-    expect(selectedWidth(), moreOrLessEquals(304, epsilon: 0.01));
-    final viewportRect = tester.getRect(
-      find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
-    );
-    final selectedRect = tester.getRect(find.byKey(selectedKey));
-    expect(selectedRect.left, greaterThanOrEqualTo(viewportRect.left - 0.5));
-    expect(selectedRect.right, lessThanOrEqualTo(viewportRect.right + 0.5));
-    expect(tester.takeException(), isNull);
-  });
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return SessionTabStrip(
+                  tabs: tabs,
+                  projects: const [],
+                  openProjectIds: const <String>{},
+                  isCompact: false,
+                  onActivate: (_) {},
+                  onClose: (_) {},
+                  onContextMenu: (tab, position, {required haptic}) async {},
+                  trailingBuilder: (context, tab) => null,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      final selectedKey = ValueKey<String>(
+        'session_tab_${sessionTabIdentityKey(tabs.last.identity)}',
+      );
+      double selectedWidth() => tester.getSize(find.byKey(selectedKey)).width;
+      expect(selectedWidth(), moreOrLessEquals(120, epsilon: 0.01));
+
+      rebuild(() {
+        tabs = [
+          ...tabs.take(3),
+          _tab('selected', title: 'X' * 30, isSelected: true),
+        ];
+      });
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // The viewport caps the re-measured width (320 - 16px padding).
+      expect(selectedWidth(), moreOrLessEquals(304, epsilon: 0.01));
+      final viewportRect = tester.getRect(
+        find.byKey(const ValueKey<String>('session_tab_strip_scroll_view')),
+      );
+      final selectedRect = tester.getRect(find.byKey(selectedKey));
+      expect(selectedRect.left, greaterThanOrEqualTo(viewportRect.left - 0.5));
+      expect(selectedRect.right, lessThanOrEqualTo(viewportRect.right + 0.5));
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 /// Mirrors the strip's content-width computation using the app's real text
@@ -2077,9 +2211,7 @@ double _expectedContentWidth(
   // Tabs without the knob use the smaller floor; the minimum wins over a
   // narrower effective maximum, mirroring the strip.
   return math.max(
-    hasTrailing
-        ? (compact ? 140.0 : 150.0)
-        : (compact ? 100.0 : 120.0),
+    hasTrailing ? (compact ? 140.0 : 150.0) : (compact ? 100.0 : 120.0),
     math.min(
       compact ? 278.2 : 317.2,
       (chrome + painter.width + 1.0).ceilToDouble(),
@@ -2091,6 +2223,16 @@ Material _tabMaterial(WidgetTester tester, SessionTabRecord tab) {
   return tester.widget<Material>(
     find.byKey(
       ValueKey<String>('session_tab_${sessionTabIdentityKey(tab.identity)}'),
+    ),
+  );
+}
+
+ColoredBox _tabOverlay(WidgetTester tester, SessionTabRecord tab) {
+  return tester.widget<ColoredBox>(
+    find.byKey(
+      ValueKey<String>(
+        'session_tab_overlay_${sessionTabIdentityKey(tab.identity)}',
+      ),
     ),
   );
 }

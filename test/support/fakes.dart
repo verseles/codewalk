@@ -194,6 +194,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   final Map<String, String> scopedStrings = <String, String>{};
   final Map<String, int> scopedInts = <String, int>{};
   final Map<String, bool> scopedBools = <String, bool>{};
+  Future<void> Function(String sessionId)? saveCurrentSessionIdDelay;
 
   String _key(String base, {String? serverId, String? scopeId}) {
     if (serverId == null || serverId.isEmpty) {
@@ -882,6 +883,10 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final delay = saveCurrentSessionIdDelay;
+    if (delay != null) {
+      await delay(sessionId);
+    }
     if (serverId == null && scopeId == null) {
       currentSessionId = sessionId;
       return;
@@ -1556,6 +1561,7 @@ class FakeChatRepository implements ChatRepository {
 
   String? lastGetSessionsDirectory;
   int getSessionsCallCount = 0;
+  int createSessionCallCount = 0;
   int getMessagesCallCount = 0;
   int getMessageCallCount = 0;
   int? lastGetMessagesLimit;
@@ -1576,6 +1582,7 @@ class FakeChatRepository implements ChatRepository {
 
   // Optional delay hooks for concurrency verification in tests.
   Future<void> Function()? getSessionsDelay;
+  Future<void> Function()? createSessionDelay;
   Future<void> Function()? getMessagesDelay;
   Future<void> Function()? getSessionChildrenDelay;
   Future<void> Function()? getSessionTodoDelay;
@@ -1699,6 +1706,8 @@ class FakeChatRepository implements ChatRepository {
     SessionCreateInput input, {
     String? directory,
   }) async {
+    createSessionCallCount += 1;
+    if (createSessionDelay != null) await createSessionDelay!();
     if (createSessionFailure != null) return Left(createSessionFailure!);
     final created = ChatSession(
       id: 'ses_${sessions.length + 1}',

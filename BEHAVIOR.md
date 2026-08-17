@@ -581,6 +581,12 @@
 - **Then** persisted tab order remains stable through selection, title, status, and attention changes; newly eligible or explicitly reopened tabs append to the end
 - **Then** explicitly closing a tab only writes local suppression, never archives, deletes, or mutates the OpenCode session, and ordinary refresh/replay does not resurrect it; a successful explicit reopen or strictly newer authoritative interaction can append it again
 
+- **Given** `New Chat` is in draft state, session tabs are enabled, and no session has been persisted
+- **When** the recent session tab strip is rendered for the current context
+- **Then** the strip shows a selected local `New Chat` placeholder for that context, even without a persisted session
+- **Then** the placeholder has no close action, context menu, or trailing session control, and is excluded from provider session tabs and tab persistence
+- **Then** a failed lazy creation leaves the placeholder in the creation-failed state, and a successfully created session replaces the placeholder before prompt delivery completes
+
 - **Given** a root session is pinned in the Conversations sidebar for one of the active server's known project scopes
 - **When** session tabs are loaded or reconciled
 - **Then** the existing context-scoped sidebar pin is the sole durable pin authority, and the matching tab remains eligible even when it is older than 3 hours or locally suppressed
@@ -628,6 +634,14 @@
 - **Then** on viewports too narrow to fit the expanded tab next to the minimum regular region, the expanded pinned tab adapts its width so the title ellipsizes instead of being clipped by a hidden scrollbar
 - **Then** when inactive pinned tabs already fill the pinned region, the expanded selected tab keeps a minimum usable width and the pinned viewport scrolls so auto-reveal keeps it visible, instead of collapsing
 - **Then** the pinned viewport scrolls independently and is responsively capped so regular tabs retain usable space on mobile and desktop, including right-to-left layouts
+
+- **Given** a session tab is rendered with a trailing control
+- **When** the tab body is hovered or focused
+- **Then** the overlay covers the entire tab
+- **When** the trailing control is hovered
+- **Then** only the control's circular highlight remains visible
+- **When** the tab receives keyboard focus
+- **Then** the full-tab overlay remains active
 
 - **Given** a tab is selected at startup or after selection, insertion, or reorder changes its horizontal position
 - **When** the tab strip updates
@@ -839,6 +853,10 @@
 - **Given** `New Chat` is in draft state (no active session yet)
 - **When** the user sends the first message
 - **Then** the client creates a new session automatically and sends that message in the same action
+
+- **Given** lazy session creation is waiting after the first send from a draft
+- **When** the user changes the selected session or context before creation completes
+- **Then** the original prompt is not sent to the newly selected session, and the latest persisted session selection remains authoritative when creation settles
 
 ### User can cancel a response
 

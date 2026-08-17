@@ -2,6 +2,30 @@ part of '../chat_page.dart';
 
 const _sessionTabActivationSettleDuration = Duration(milliseconds: 120);
 
+bool _isNewChatDraftTab(SessionTabRecord tab) {
+  return tab.identity.sessionId.isEmpty;
+}
+
+SessionTabRecord _newChatDraftTab({
+  required ChatProvider chatProvider,
+  required ProjectProvider projectProvider,
+  required String title,
+}) {
+  return SessionTabRecord(
+    identity: SessionTabIdentity(
+      serverId: chatProvider.activeServerId,
+      directory: projectProvider.currentDirectory ?? '',
+      sessionId: '',
+    ),
+    projectId: projectProvider.currentProjectId,
+    title: title,
+    lastOpenedAtMs: 0,
+    serverUpdatedAtMs: 0,
+    status: SessionStatusType.idle,
+    isSelected: true,
+  );
+}
+
 extension _ChatPageSessionTabs on _ChatPageState {
   Widget _buildIntegratedWindowTitleBar(BuildContext context) {
     return _buildSessionTabStrip(
@@ -30,15 +54,38 @@ extension _ChatPageSessionTabs on _ChatPageState {
     if (!settingsProvider.showSessionTabs) {
       return const SizedBox.shrink();
     }
-    return Selector<ChatProvider, List<SessionTabRecord>>(
-      selector: (_, chatProvider) => chatProvider.sessionTabs,
-      shouldRebuild: (previous, next) => !identical(previous, next),
-      builder: (context, tabs, _) {
-        if (tabs.isEmpty) {
+    return Selector<
+      ChatProvider,
+      ({List<SessionTabRecord> tabs, bool showDraft})
+    >(
+      selector: (_, chatProvider) => (
+        tabs: chatProvider.sessionTabs,
+        showDraft:
+            chatProvider.isDraftingNewChat &&
+            chatProvider.currentSession == null,
+      ),
+      shouldRebuild: (previous, next) =>
+          !identical(previous.tabs, next.tabs) ||
+          previous.showDraft != next.showDraft,
+      builder: (context, selection, _) {
+        if (selection.tabs.isEmpty && !selection.showDraft) {
           return const SizedBox.shrink();
         }
         return Consumer<ProjectProvider>(
           builder: (context, projectProvider, _) {
+            final tabs = selection.showDraft
+                ? <SessionTabRecord>[
+                    ...selection.tabs,
+                    _newChatDraftTab(
+                      chatProvider: context.read<ChatProvider>(),
+                      projectProvider: projectProvider,
+                      title: context.l10n.chatNewChat,
+                    ),
+                  ]
+                : selection.tabs;
+            if (tabs.isEmpty) {
+              return const SizedBox.shrink();
+            }
             return SessionTabStrip(
               tabs: tabs,
               projects: projectProvider.projects,
@@ -50,7 +97,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
               onClose: (tab) => unawaited(_closeSessionTab(tab)),
               onContextMenu: _openSessionTabContextMenu,
               trailingBuilder: (context, tab) {
-                if (!tab.isSelected) return null;
+                if (!tab.isSelected || _isNewChatDraftTab(tab)) return null;
                 return Consumer<ChatProvider>(
                   builder: (context, chatProvider, _) =>
                       _buildSessionContextUsageButton(
@@ -73,6 +120,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
     Offset globalPosition, {
     required bool haptic,
   }) async {
+    if (_isNewChatDraftTab(tab)) return;
     if (!tab.isSelected && !await _activateSessionTab(tab)) {
       return;
     }
@@ -202,6 +250,10 @@ extension _ChatPageSessionTabs on _ChatPageState {
   Future<bool> _activateSessionTab(SessionTabRecord tab) async {
     if (!_isChatScreenActive()) {
       return false;
+    }
+    if (_isNewChatDraftTab(tab)) {
+      _inputFocusNode.requestFocus();
+      return true;
     }
     final inFlight = _sessionTabActivationTask;
     if (inFlight != null) {
@@ -566,6 +618,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
     if (!_isChatScreenActive()) {
       return;
     }
+    if (_isNewChatDraftTab(tab)) return;
     final chatProvider = context.read<ChatProvider>();
     final tabs = chatProvider.sessionTabs;
     final current = tabs
