@@ -1978,6 +1978,21 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the notice is not shown when no newer version is known or when the user dismissed that version
 - **Then** temporary update-check failures remain silent and do not block Settings
 
+### Settings controls update immediately
+
+- **Given** the user changes any settings control (switch, radio, segmented control, dropdown)
+- **When** the setting is persisted
+- **Then** the visible control updates immediately, without leaving and re-entering Settings
+- **Then** a failure in a non-essential `SettingsProvider` listener (locale sync, desktop tray, chat lifecycle) is logged with `settings:listener` tags and never blocks the settings UI or later listeners
+
+### Manual update check in About
+
+- **Given** the user opens `Settings` > `About` and taps `Check for updates`
+- **When** the check is pending
+- **Then** the About screen immediately shows a spinner and `Checking...` state and disables the action until the check settles
+- **Then** on completion the screen shows the newer-version update card, the up-to-date tile, or clears the checking state when the check fails
+- **Then** the checking state always resets, even if a settings notification listener fails during the check, so About is never left stuck in `Checking...`
+
 ### Desktop update install snackbars
 
 - **Given** an update install is started on desktop (Linux, macOS, Windows)
