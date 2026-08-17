@@ -38,11 +38,18 @@ class _FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
   }
 
   @override
-  Future<void> write(String key, String value) async {
+  Future<bool> write(String key, String value) async {
+    final inMemory = _touchMemory(key);
+    if (inMemory == value) {
+      // Payload already persisted with the exact same content; skip the disk
+      // write entirely to avoid jank from redundant file I/O (issue #152).
+      return false;
+    }
     _storeMemory(key, value);
     final file = await _fileForKey(key);
     await file.parent.create(recursive: true);
     await file.writeAsString(value, flush: true);
+    return true;
   }
 
   @override

@@ -193,7 +193,11 @@ class ChatProvider extends ChangeNotifier {
     Duration shortcutCycleWindow = const Duration(seconds: 3),
     DateTime Function()? sessionTabsNow,
     SessionTabIconOverrideStore? sessionTabIconOverrideStore,
-  }) {
+    Duration sessionTabsPersistenceDebounce = const Duration(
+      milliseconds: 750,
+    ),
+  }) : _sessionTabsPersistenceDebounceDuration =
+           sessionTabsPersistenceDebounce {
     _cellularDataSaverService =
         cellularDataSaverService ?? CellularDataSaverService.disabled();
     _ownsSessionAttentionCoordinator = sessionAttentionCoordinator == null;
@@ -463,6 +467,11 @@ class ChatProvider extends ChangeNotifier {
       <Completer<bool?>>{};
   final Map<String, Future<void>> _sessionTabsWriteQueueByServer =
       <String, Future<void>>{};
+  final Duration _sessionTabsPersistenceDebounceDuration;
+  final Map<String, String> _sessionTabsPendingPayloadByServer =
+      <String, String>{};
+  final Map<String, Timer> _sessionTabsPersistenceDebounceByServer =
+      <String, Timer>{};
   late final SessionTabIconOverrideStore _sessionTabIconOverrideStore;
   final Map<String, Map<SessionTabIdentity, SessionTabIconOverride>>
   _sessionTabIconOverridesByServer =
@@ -1106,6 +1115,10 @@ class ChatProvider extends ChangeNotifier {
 
   @visibleForTesting
   Future<void> debugWaitForSessionTabPersistence() async {
+    for (final serverId
+        in _sessionTabsPendingPayloadByServer.keys.toList(growable: false)) {
+      await flushSessionTabsPersistence(serverId);
+    }
     await Future.wait(<Future<void>>[
       ..._sessionTabsWriteQueueByServer.values,
       ..._pinnedSessionWriteQueueByScope.values,
@@ -5227,6 +5240,10 @@ class ChatProvider extends ChangeNotifier {
     _globalEventSubscription?.cancel();
     _globalRefreshDebounce?.cancel();
     _deltaNotifyDebounce?.cancel();
+    for (final timer in _sessionTabsPersistenceDebounceByServer.values) {
+      timer.cancel();
+    }
+    _sessionTabsPersistenceDebounceByServer.clear();
     _sessionAttentionPublishDebounce?.cancel();
     _sessionAttentionThresholdTimer?.cancel();
     for (final timer in _messageFallbackDebounceById.values) {

@@ -49,12 +49,12 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     if (secureValue != null && secureValue.trim().isNotEmpty) {
       return secureValue;
     }
-    final legacyValue = sharedPreferences.getString(legacyKey);
+    final legacyValue = _sharedPreferences.getString(legacyKey);
     if (legacyValue == null || legacyValue.trim().isEmpty) {
       return null;
     }
     await _writeSecureValue(secureKey, legacyValue);
-    await sharedPreferences.remove(legacyKey);
+    await _sharedPreferences.remove(legacyKey);
     return legacyValue;
   }
 
@@ -117,10 +117,10 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
       () async {
         final store = _chatCachePayloadStore;
         if (store == null) {
-          return sharedPreferences.getString(key);
+          return _sharedPreferences.getString(key);
         }
 
-        final legacy = sharedPreferences.getString(key);
+        final legacy = _sharedPreferences.getString(key);
         if (legacy != null && legacy.trim().isNotEmpty) {
           final migration = _scheduleLegacyLargeCacheMigration(key, legacy);
           if (migration != null) unawaited(migration);
@@ -130,9 +130,9 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
           unawaited(
             _queueLargeCacheMutation(key, () async {
               try {
-                final current = sharedPreferences.getString(key);
+                final current = _sharedPreferences.getString(key);
                 if (current != null && current.trim().isEmpty) {
-                  await sharedPreferences.remove(key);
+                  await _sharedPreferences.remove(key);
                   _migratedLargeCacheKeys.add(key);
                 }
               } catch (_) {
@@ -176,7 +176,7 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
 
     final List<String> keys;
     try {
-      keys = sharedPreferences
+      keys = _sharedPreferences
           .getKeys()
           .where(_isLargeCachePayloadPreferenceKey)
           .toList(growable: false);
@@ -190,13 +190,13 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
       () async {
         final migrations = <Future<void>>[];
         for (final key in keys) {
-          final legacy = sharedPreferences.getString(key);
+          final legacy = _sharedPreferences.getString(key);
           if (legacy == null) continue;
           if (legacy.trim().isEmpty) {
             migrations.add(
               _queueLargeCacheMutation(key, () async {
                 try {
-                  await sharedPreferences.remove(key);
+                  await _sharedPreferences.remove(key);
                   _migratedLargeCacheKeys.add(key);
                 } catch (_) {
                   _migratedLargeCacheKeys.remove(key);
@@ -229,10 +229,10 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
         await AppLogger.runPerformanceTask<void>(
           'cache_migrate_legacy_payload',
           () async {
-            if (sharedPreferences.getString(key) != value) return;
+            if (_sharedPreferences.getString(key) != value) return;
             await store.write(key, value);
-            if (sharedPreferences.getString(key) == value) {
-              await sharedPreferences.remove(key);
+            if (_sharedPreferences.getString(key) == value) {
+              await _sharedPreferences.remove(key);
             }
           },
           tags: const <String>{'cache:migrate'},
@@ -241,7 +241,7 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
             'sizeBytes': value.length,
           },
         );
-        if (sharedPreferences.getString(key) != value) {
+        if (_sharedPreferences.getString(key) != value) {
           _migratedLargeCacheKeys.add(key);
         }
       } catch (_) {
@@ -286,28 +286,32 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     return key == base || key.startsWith('$base::');
   }
 
-  Future<void> _writeLargeCachePayload(String key, String value) async {
-    return AppLogger.runPerformanceTask<void>(
+  Future<bool> _writeLargeCachePayload(String key, String value) async {
+    return AppLogger.runPerformanceTask<bool>(
       'cache_write',
       () async {
         final store = _chatCachePayloadStore;
         if (store == null) {
-          await sharedPreferences.setString(key, value);
-          return;
+          if (_sharedPreferences.getString(key) == value) return false;
+          await _sharedPreferences.setString(key, value);
+          return true;
         }
+        var wrote = false;
         await _queueLargeCacheMutation(key, () async {
           try {
-            await store.write(key, value);
-            await sharedPreferences.remove(key);
+            wrote = await store.write(key, value);
+            await _sharedPreferences.remove(key);
             _migratedLargeCacheKeys.add(key);
           } catch (_) {
             _migratedLargeCacheKeys.remove(key);
             try {
               await store.remove(key);
             } catch (_) {}
-            await sharedPreferences.setString(key, value);
+            await _sharedPreferences.setString(key, value);
+            wrote = true;
           }
         });
+        return wrote;
       },
       tags: const <String>{'cache:write'},
       contextBuilder: () => <String, Object?>{
@@ -326,7 +330,7 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
           try {
             await store.remove(key);
           } catch (_) {}
-          await sharedPreferences.remove(key);
+          await _sharedPreferences.remove(key);
           _migratedLargeCacheKeys.add(key);
         });
       } catch (_) {
@@ -334,7 +338,7 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
       }
       return;
     }
-    await sharedPreferences.remove(key);
+    await _sharedPreferences.remove(key);
   }
 
   Future<void> _clearLargeCachePayloads() async {

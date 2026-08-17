@@ -22639,6 +22639,7 @@ ChatProvider _buildChatProvider({
     foregroundResumeSyncIndicatorDuration: const Duration(milliseconds: 250),
     foregroundResumeSyncIndicatorMaxCycles: 2,
     abortSuppressionWindow: const Duration(milliseconds: 500),
+    sessionTabsPersistenceDebounce: Duration.zero,
   );
 }
 

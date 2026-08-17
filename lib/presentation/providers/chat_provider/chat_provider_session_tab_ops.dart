@@ -1166,7 +1166,10 @@ extension ChatProviderSessionTabOps on ChatProvider {
     _sessionTabReconcilePresentationDirty = false;
     _pruneSessionTabEventState(serverId);
     if (persistedChanged || forcePersistence) {
-      _scheduleSessionTabsPersistence(payload: nextStateJson);
+      _scheduleSessionTabsPersistence(
+        payload: nextStateJson,
+        force: forcePersistence,
+      );
     }
     if (runtimeChanged && notify) _notifyListeners();
   }
@@ -1378,13 +1381,63 @@ extension ChatProviderSessionTabOps on ChatProvider {
     return null;
   }
 
-  void _scheduleSessionTabsPersistence({String? payload}) {
+  /// Debounces session-tab persistence so a burst of SSE events coalesces
+  /// into a single whole-prefs-file write on desktop (issue #152). Each
+  /// reconcile replaces the pending payload (latest-wins); awaited callers
+  /// must call [flushSessionTabsPersistence] before waiting on the queue.
+  void _scheduleSessionTabsPersistence({String? payload, bool force = false}) {
     final serverId = _sessionTabsLoadedServerId;
     if (serverId == null || serverId.isEmpty) return;
     final encoded = payload ?? _sessionTabsPersistedState.encode();
-    unawaited(
-      _enqueueSessionTabsPersistence(serverId: serverId, payload: encoded),
+    _sessionTabsPendingPayloadByServer[serverId] = encoded;
+    final debounce = _sessionTabsPersistenceDebounceByServer.remove(serverId);
+    debounce?.cancel();
+    if (force) {
+      unawaited(
+        _enqueueSessionTabsPersistence(
+          serverId: serverId,
+          payload: _sessionTabsPendingPayloadByServer.remove(serverId) ??
+              encoded,
+        ),
+      );
+      return;
+    }
+    if (_sessionTabsPersistenceDebounceDuration == Duration.zero) {
+      unawaited(
+        _enqueueSessionTabsPersistence(
+          serverId: serverId,
+          payload: _sessionTabsPendingPayloadByServer.remove(serverId) ??
+              encoded,
+        ),
+      );
+      return;
+    }
+    _sessionTabsPersistenceDebounceByServer[serverId] = Timer(
+      _sessionTabsPersistenceDebounceDuration,
+      () {
+        _sessionTabsPersistenceDebounceByServer.remove(serverId);
+        unawaited(
+          _enqueueSessionTabsPersistence(
+            serverId: serverId,
+            payload: _sessionTabsPendingPayloadByServer.remove(serverId) ??
+                encoded,
+          ),
+        );
+      },
     );
+  }
+
+  /// Flushes any pending debounced session-tab persistence for [serverId] and
+  /// returns a future that completes when the write has been enqueued.
+  /// Callers that must observe the persisted state (e.g. cleanup paths) await
+  /// this before waiting on [_sessionTabsWriteQueueByServer].
+  Future<void> flushSessionTabsPersistence(String serverId) async {
+    final debounce = _sessionTabsPersistenceDebounceByServer.remove(serverId);
+    debounce?.cancel();
+    final pending = _sessionTabsPendingPayloadByServer.remove(serverId);
+    if (pending != null) {
+      await _enqueueSessionTabsPersistence(serverId: serverId, payload: pending);
+    }
   }
 
   Future<void> _enqueueSessionTabsPersistence({
@@ -2016,6 +2069,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
       directory: normalizedDirectory,
     );
     if (_sessionTabsLoadedServerId == normalizedServerId) {
+      await flushSessionTabsPersistence(normalizedServerId);
       final pendingWrite = _sessionTabsWriteQueueByServer[normalizedServerId];
       if (pendingWrite != null) await pendingWrite;
       return;
@@ -2066,6 +2120,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
       directory: normalizedDirectory,
     );
     if (_sessionTabsLoadedServerId == normalizedServerId) {
+      await flushSessionTabsPersistence(normalizedServerId);
       final activeWrite = _sessionTabsWriteQueueByServer[normalizedServerId];
       if (activeWrite != null) await activeWrite;
     }

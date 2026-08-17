@@ -187,18 +187,23 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
               'messageCount': filteredMessages.length,
             },
           );
-          await localDataSource.saveSessionMessagesSnapshot(
+          final wrotePayload = await localDataSource.saveSessionMessagesSnapshot(
             encodedPayload,
             sessionId: normalizedSessionId,
             serverId: resolvedServerId,
             scopeId: resolvedScopeId,
           );
-          await localDataSource.saveSessionMessagesSnapshotUpdatedAt(
-            DateTime.now().millisecondsSinceEpoch,
-            sessionId: normalizedSessionId,
-            serverId: resolvedServerId,
-            scopeId: resolvedScopeId,
-          );
+          // Skip the updatedAt metadata write when the payload is unchanged:
+          // on desktop each setInt rewrites the whole prefs file on the UI
+          // isolate (issue #152), and freshness has a multi-day TTL anyway.
+          if (wrotePayload) {
+            await localDataSource.saveSessionMessagesSnapshotUpdatedAt(
+              DateTime.now().millisecondsSinceEpoch,
+              sessionId: normalizedSessionId,
+              serverId: resolvedServerId,
+              scopeId: resolvedScopeId,
+            );
+          }
 
           await _touchPersistedSessionMessagesSnapshotId(
             normalizedSessionId,

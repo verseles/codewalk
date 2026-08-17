@@ -588,6 +588,71 @@ void main() {
       expect(localDataSource.sessionSnapshotWriteCount, lessThanOrEqualTo(2));
     });
 
+    test('debounces tab state persistence across a burst of reconciles',
+        () async {
+      final localDataSource = _CountingTabsWriteLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final customFixtures = await buildDefaultTestFixtures(
+        localDataSourceOverride: localDataSource,
+      );
+      addTearDown(customFixtures.defaultSettingsProvider.dispose);
+      customFixtures.chatRepository.sessions
+        ..clear()
+        ..add(
+          ChatSession(
+            id: 'session-live',
+            workspaceId: 'default',
+            directory: '/work/project',
+            time: now,
+            title: 'Live session',
+          ),
+        );
+      final customProvider = buildChatProvider(
+        chatRepository: customFixtures.chatRepository,
+        appRepository: customFixtures.appRepository,
+        localDataSource: localDataSource,
+        defaultSettingsProvider: customFixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+      );
+      addTearDown(customProvider.dispose);
+
+      await customProvider.loadSessions();
+      await customProvider.debugWaitForSessionTabPersistence();
+      localDataSource.sessionTabsWriteCount = 0;
+
+      // Burst of session.updated events with increasing server timestamps.
+      // Each event defeats the reconcile early-return guard (serverUpdatedAtMs
+      // participates in candidate equality) and would previously enqueue a
+      // whole-prefs-file write; the debounce must collapse them into one.
+      for (var i = 0; i < 5; i++) {
+        customFixtures.chatRepository.emitEvent(
+          ChatEvent(
+            type: 'session.updated',
+            properties: <String, dynamic>{
+              'directory': '/work/project',
+              'info': <String, dynamic>{
+                'id': 'session-live',
+                'workspaceId': 'default',
+                'title': 'Live session $i',
+                'time': <String, dynamic>{
+                  'created': now.millisecondsSinceEpoch,
+                  'updated': now.millisecondsSinceEpoch + 1 + i,
+                },
+              },
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      expect(localDataSource.sessionTabsWriteCount, 0,
+          reason: 'burst must not write before the debounce window');
+
+      await customProvider.debugWaitForSessionTabPersistence();
+      expect(localDataSource.sessionTabsWriteCount, 1,
+          reason: 'burst must collapse into a single latest-wins write');
+    });
+
     test('closing a tab persists its local tombstone', () async {
       await provider.loadSessions();
       final identity = provider.sessionTabs.single.identity;
@@ -1847,19 +1912,32 @@ class _CountingSnapshotLocalDataSource extends InMemoryAppLocalDataSource {
   int sessionSnapshotWriteCount = 0;
 
   @override
-  Future<void> saveSessionMessagesSnapshot(
+  Future<bool> saveSessionMessagesSnapshot(
     String snapshotJson, {
     required String sessionId,
     String? serverId,
     String? scopeId,
   }) async {
     sessionSnapshotWriteCount += 1;
-    await super.saveSessionMessagesSnapshot(
+    return super.saveSessionMessagesSnapshot(
       snapshotJson,
       sessionId: sessionId,
       serverId: serverId,
       scopeId: scopeId,
     );
+  }
+}
+
+class _CountingTabsWriteLocalDataSource extends InMemoryAppLocalDataSource {
+  int sessionTabsWriteCount = 0;
+
+  @override
+  Future<void> saveSessionTabsStateJson(
+    String stateJson, {
+    required String serverId,
+  }) async {
+    sessionTabsWriteCount += 1;
+    await super.saveSessionTabsStateJson(stateJson, serverId: serverId);
   }
 }
 

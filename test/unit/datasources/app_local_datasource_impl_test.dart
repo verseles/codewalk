@@ -27,8 +27,12 @@ class _InMemoryChatCachePayloadStore implements ChatCachePayloadStore {
   }
 
   @override
-  Future<void> write(String key, String value) async {
+  Future<bool> write(String key, String value) async {
+    if (values[key] == value) {
+      return false;
+    }
     values[key] = value;
+    return true;
   }
 }
 
@@ -47,7 +51,7 @@ class _ThrowingChatCachePayloadStore implements ChatCachePayloadStore {
   }
 
   @override
-  Future<void> write(String key, String value) async {
+  Future<bool> write(String key, String value) async {
     throw StateError('cache write failed');
   }
 }
@@ -55,7 +59,7 @@ class _ThrowingChatCachePayloadStore implements ChatCachePayloadStore {
 class _WriteAlwaysFailsChatCachePayloadStore
     extends _InMemoryChatCachePayloadStore {
   @override
-  Future<void> write(String key, String value) async {
+  Future<bool> write(String key, String value) async {
     throw StateError('cache write failed');
   }
 }

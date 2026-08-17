@@ -342,7 +342,9 @@ abstract class AppLocalDataSource {
   });
 
   /// Persist per-session message snapshot for cache-first session switching.
-  Future<void> saveSessionMessagesSnapshot(
+  /// Returns `true` when a payload was actually written to disk and `false`
+  /// when the snapshot was already identical (so callers can skip metadata).
+  Future<bool> saveSessionMessagesSnapshot(
     String snapshotJson, {
     required String sessionId,
     String? serverId,
@@ -418,17 +420,99 @@ abstract class AppLocalDataSource {
   Future<void> migrateLegacyLargeCachePayloads();
 }
 
+/// Wraps [SharedPreferences] to skip no-op writes.
+///
+/// On Linux/Windows the plugin rewrites the whole preferences file
+/// synchronously on the UI isolate for every `set*`/`remove`, so avoiding
+/// redundant writes removes hot-path jank (issue #152).
+class _GuardedSharedPreferences {
+  _GuardedSharedPreferences(this._inner);
+
+  final SharedPreferences _inner;
+
+  String? getString(String key) => _inner.getString(key);
+  bool? getBool(String key) => _inner.getBool(key);
+  int? getInt(String key) => _inner.getInt(key);
+  Set<String> getKeys() => _inner.getKeys();
+
+  Future<bool> setString(String key, String value) {
+    if (_inner.getString(key) == value) {
+      return Future<bool>.value(true);
+    }
+    return _write(
+      type: 'string',
+      key: key,
+      sizeBytes: value.length,
+      action: () => _inner.setString(key, value),
+    );
+  }
+
+  Future<bool> setInt(String key, int value) {
+    if (_inner.getInt(key) == value) {
+      return Future<bool>.value(true);
+    }
+    return _write(
+      type: 'int',
+      key: key,
+      action: () => _inner.setInt(key, value),
+    );
+  }
+
+  Future<bool> setBool(String key, bool value) {
+    if (_inner.getBool(key) == value) {
+      return Future<bool>.value(true);
+    }
+    return _write(
+      type: 'bool',
+      key: key,
+      action: () => _inner.setBool(key, value),
+    );
+  }
+
+  Future<bool> remove(String key) {
+    if (!_inner.containsKey(key)) {
+      return Future<bool>.value(true);
+    }
+    return _write(
+      type: 'remove',
+      key: key,
+      action: () => _inner.remove(key),
+    );
+  }
+
+  Future<bool> clear() => _inner.clear();
+
+  Future<bool> _write({
+    required String type,
+    required String key,
+    required Future<bool> Function() action,
+    int? sizeBytes,
+  }) {
+    return AppLogger.runPerformanceTask<bool>(
+      'shared_preferences_write',
+      action,
+      tags: const <String>{'persistence:shared_preferences', 'ui:write'},
+      contextBuilder: () => <String, Object?>{
+        'type': type,
+        'keyHash': AppLogger.safeContextId(key),
+        if (sizeBytes != null) 'sizeBytes': sizeBytes,
+      },
+    );
+  }
+}
+
 /// Technical comment translated to English.
 class AppLocalDataSourceImpl implements AppLocalDataSource {
   AppLocalDataSourceImpl({
-    required this.sharedPreferences,
+    required SharedPreferences sharedPreferences,
     FlutterSecureStorage? secureStorage,
     ChatCachePayloadStore? chatCachePayloadStore,
-  }) : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+  }) : _sharedPreferences = _GuardedSharedPreferences(sharedPreferences),
+       _secureStorage = secureStorage ?? const FlutterSecureStorage(),
        _chatCachePayloadStore =
            chatCachePayloadStore ?? createChatCachePayloadStore();
 
-  final SharedPreferences sharedPreferences;
+  final _GuardedSharedPreferences _sharedPreferences;
   final FlutterSecureStorage _secureStorage;
   final ChatCachePayloadStore? _chatCachePayloadStore;
   final Set<String> _migratedLargeCacheKeys = <String>{};
@@ -438,27 +522,27 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getServerHost() async {
-    return sharedPreferences.getString(AppConstants.serverHostKey);
+    return _sharedPreferences.getString(AppConstants.serverHostKey);
   }
 
   @override
   Future<void> saveServerHost(String host) async {
-    await sharedPreferences.setString(AppConstants.serverHostKey, host);
+    await _sharedPreferences.setString(AppConstants.serverHostKey, host);
   }
 
   @override
   Future<int?> getServerPort() async {
-    return sharedPreferences.getInt(AppConstants.serverPortKey);
+    return _sharedPreferences.getInt(AppConstants.serverPortKey);
   }
 
   @override
   Future<void> saveServerPort(int port) async {
-    await sharedPreferences.setInt(AppConstants.serverPortKey, port);
+    await _sharedPreferences.setInt(AppConstants.serverPortKey, port);
   }
 
   @override
   Future<String?> getServerProfilesJson() async {
-    final raw = sharedPreferences.getString(AppConstants.serverProfilesKey);
+    final raw = _sharedPreferences.getString(AppConstants.serverProfilesKey);
     if (raw == null || raw.trim().isEmpty) {
       return raw;
     }
@@ -536,7 +620,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
               return copy;
             })
             .toList(growable: false);
-        await sharedPreferences.setString(
+        await _sharedPreferences.setString(
           AppConstants.serverProfilesKey,
           jsonEncode(sanitizedProfiles),
         );
@@ -553,7 +637,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     try {
       final decoded = jsonDecode(profilesJson);
       if (decoded is! List) {
-        await sharedPreferences.setString(
+        await _sharedPreferences.setString(
           AppConstants.serverProfilesKey,
           profilesJson,
         );
@@ -588,12 +672,12 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
         sanitizedProfiles.add(profile);
       }
 
-      await sharedPreferences.setString(
+      await _sharedPreferences.setString(
         AppConstants.serverProfilesKey,
         jsonEncode(sanitizedProfiles),
       );
     } catch (_) {
-      await sharedPreferences.setString(
+      await _sharedPreferences.setString(
         AppConstants.serverProfilesKey,
         profilesJson,
       );
@@ -602,26 +686,26 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getActiveServerId() async {
-    return sharedPreferences.getString(AppConstants.activeServerIdKey);
+    return _sharedPreferences.getString(AppConstants.activeServerIdKey);
   }
 
   @override
   Future<void> saveActiveServerId(String serverId) async {
-    await sharedPreferences.setString(AppConstants.activeServerIdKey, serverId);
+    await _sharedPreferences.setString(AppConstants.activeServerIdKey, serverId);
   }
 
   @override
   Future<String?> getDefaultServerId() async {
-    return sharedPreferences.getString(AppConstants.defaultServerIdKey);
+    return _sharedPreferences.getString(AppConstants.defaultServerIdKey);
   }
 
   @override
   Future<void> saveDefaultServerId(String? serverId) async {
     if (serverId == null || serverId.trim().isEmpty) {
-      await sharedPreferences.remove(AppConstants.defaultServerIdKey);
+      await _sharedPreferences.remove(AppConstants.defaultServerIdKey);
       return;
     }
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       AppConstants.defaultServerIdKey,
       serverId,
     );
@@ -629,17 +713,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getLocalOpencodeCommand() async {
-    return sharedPreferences.getString(AppConstants.localOpencodeCommandKey);
+    return _sharedPreferences.getString(AppConstants.localOpencodeCommandKey);
   }
 
   @override
   Future<void> saveLocalOpencodeCommand(String? commandPath) async {
     final normalized = commandPath?.trim() ?? '';
     if (normalized.isEmpty) {
-      await sharedPreferences.remove(AppConstants.localOpencodeCommandKey);
+      await _sharedPreferences.remove(AppConstants.localOpencodeCommandKey);
       return;
     }
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       AppConstants.localOpencodeCommandKey,
       normalized,
     );
@@ -668,11 +752,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     );
     if (normalizedApiKey.isEmpty) {
       await _deleteSecureValue(secureKey);
-      await sharedPreferences.remove(legacyKey);
+      await _sharedPreferences.remove(legacyKey);
       return;
     }
     await _writeSecureValue(secureKey, normalizedApiKey);
-    await sharedPreferences.remove(legacyKey);
+    await _sharedPreferences.remove(legacyKey);
   }
 
   @override
@@ -701,7 +785,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedProviderKey,
         serverId: serverId,
@@ -716,7 +800,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.selectedProviderKey,
         serverId: serverId,
@@ -728,7 +812,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getSelectedModel({String? serverId, String? scopeId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedModelKey,
         serverId: serverId,
@@ -743,7 +827,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.selectedModelKey,
         serverId: serverId,
@@ -755,7 +839,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getSelectedAgent({String? serverId, String? scopeId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedAgentKey,
         serverId: serverId,
@@ -776,10 +860,10 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       scopeId: scopeId,
     );
     if (agentName == null || agentName.trim().isEmpty) {
-      await sharedPreferences.remove(key);
+      await _sharedPreferences.remove(key);
       return;
     }
-    await sharedPreferences.setString(key, agentName);
+    await _sharedPreferences.setString(key, agentName);
   }
 
   @override
@@ -787,7 +871,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedVariantMapKey,
         serverId: serverId,
@@ -802,7 +886,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.selectedVariantMapKey,
         serverId: serverId,
@@ -817,7 +901,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.sessionSelectionOverridesKey,
         serverId: serverId,
@@ -832,7 +916,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.sessionSelectionOverridesKey,
         serverId: serverId,
@@ -847,7 +931,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.agentSelectionMemoryKey,
         serverId: serverId,
@@ -862,7 +946,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.agentSelectionMemoryKey,
         serverId: serverId,
@@ -878,7 +962,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _sessionScopedKey(
         AppConstants.sessionComposerDraftKey,
         sessionId: sessionId,
@@ -902,10 +986,10 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       scopeId: scopeId,
     );
     if (draftJson == null || draftJson.trim().isEmpty) {
-      await sharedPreferences.remove(key);
+      await _sharedPreferences.remove(key);
       return;
     }
-    await sharedPreferences.setString(key, draftJson);
+    await _sharedPreferences.setString(key, draftJson);
   }
 
   @override
@@ -913,7 +997,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.recentModelsKey,
         serverId: serverId,
@@ -928,7 +1012,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.recentModelsKey,
         serverId: serverId,
@@ -943,7 +1027,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.favoriteModelsKey,
         serverId: serverId,
@@ -963,11 +1047,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     final prefix =
         '${AppConstants.favoriteModelsKey}::${Uri.encodeComponent(normalizedServerId)}::';
     final values = <String>[];
-    for (final key in sharedPreferences.getKeys()) {
+    for (final key in _sharedPreferences.getKeys()) {
       if (!key.startsWith(prefix)) {
         continue;
       }
-      final value = sharedPreferences.getString(key);
+      final value = _sharedPreferences.getString(key);
       if (value == null || value.trim().isEmpty) {
         continue;
       }
@@ -984,12 +1068,12 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     }
     final prefix =
         '${AppConstants.favoriteModelsKey}::${Uri.encodeComponent(normalizedServerId)}::';
-    final keysToDelete = sharedPreferences
+    final keysToDelete = _sharedPreferences
         .getKeys()
         .where((key) => key.startsWith(prefix))
         .toList(growable: false);
     for (final key in keysToDelete) {
-      await sharedPreferences.remove(key);
+      await _sharedPreferences.remove(key);
     }
   }
 
@@ -999,7 +1083,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.favoriteModelsKey,
         serverId: serverId,
@@ -1014,7 +1098,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.providerCatalogCacheKey,
         serverId: serverId,
@@ -1029,7 +1113,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.providerCatalogCacheKey,
         serverId: serverId,
@@ -1044,7 +1128,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.pinnedSessionsKey,
         serverId: serverId,
@@ -1064,11 +1148,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     final prefix =
         '${AppConstants.pinnedSessionsKey}::${Uri.encodeComponent(normalizedServerId)}::';
     final result = <String, Set<String>>{};
-    for (final key in sharedPreferences.getKeys()) {
+    for (final key in _sharedPreferences.getKeys()) {
       if (!key.startsWith(prefix)) continue;
       final encodedScope = key.substring(prefix.length);
       if (encodedScope.isEmpty) continue;
-      final raw = sharedPreferences.getString(key);
+      final raw = _sharedPreferences.getString(key);
       if (raw == null || raw.trim().isEmpty) continue;
       try {
         final scopeId = Uri.decodeComponent(encodedScope);
@@ -1095,7 +1179,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.pinnedSessionsKey,
         serverId: serverId,
@@ -1110,7 +1194,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.cannedAnswersKey,
         serverId: serverId,
@@ -1125,7 +1209,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.cannedAnswersKey,
         serverId: serverId,
@@ -1140,7 +1224,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.modelUsageCountsKey,
         serverId: serverId,
@@ -1155,7 +1239,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.modelUsageCountsKey,
         serverId: serverId,
@@ -1167,22 +1251,22 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getThemeMode() async {
-    return sharedPreferences.getString(AppConstants.themeKey);
+    return _sharedPreferences.getString(AppConstants.themeKey);
   }
 
   @override
   Future<void> saveThemeMode(String themeMode) async {
-    await sharedPreferences.setString(AppConstants.themeKey, themeMode);
+    await _sharedPreferences.setString(AppConstants.themeKey, themeMode);
   }
 
   @override
   Future<String?> getExperienceSettingsJson() async {
-    return sharedPreferences.getString(AppConstants.experienceSettingsKey);
+    return _sharedPreferences.getString(AppConstants.experienceSettingsKey);
   }
 
   @override
   Future<void> saveExperienceSettingsJson(String settingsJson) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       AppConstants.experienceSettingsKey,
       settingsJson,
     );
@@ -1190,7 +1274,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getSessionTabsStateJson({required String serverId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(AppConstants.sessionTabsStateKey, serverId: serverId),
     );
   }
@@ -1200,7 +1284,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String stateJson, {
     required String serverId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(AppConstants.sessionTabsStateKey, serverId: serverId),
       stateJson,
     );
@@ -1210,7 +1294,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   Future<String?> getSessionTabIconOverridesJson({
     required String serverId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(AppConstants.sessionTabIconOverridesKey, serverId: serverId),
     );
   }
@@ -1220,7 +1304,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String stateJson, {
     required String serverId,
   }) async {
-    final saved = await sharedPreferences.setString(
+    final saved = await _sharedPreferences.setString(
       _scopedKey(AppConstants.sessionTabIconOverridesKey, serverId: serverId),
       stateJson,
     );
@@ -1231,7 +1315,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<void> deleteSessionTabIconOverrides({required String serverId}) async {
-    final removed = await sharedPreferences.remove(
+    final removed = await _sharedPreferences.remove(
       _scopedKey(AppConstants.sessionTabIconOverridesKey, serverId: serverId),
     );
     if (!removed) {
@@ -1241,7 +1325,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getLastSessionId() async {
-    return sharedPreferences.getString(AppConstants.lastSessionIdKey);
+    return _sharedPreferences.getString(AppConstants.lastSessionIdKey);
   }
 
   @override
@@ -1250,7 +1334,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.lastSessionIdKey,
         serverId: serverId,
@@ -1265,7 +1349,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.currentSessionIdKey,
         serverId: serverId,
@@ -1276,7 +1360,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getCurrentProjectId({String? serverId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(AppConstants.currentProjectIdKey, serverId: serverId),
     );
   }
@@ -1286,7 +1370,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String projectId, {
     String? serverId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(AppConstants.currentProjectIdKey, serverId: serverId),
       projectId,
     );
@@ -1294,7 +1378,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getOpenProjectIdsJson({String? serverId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(AppConstants.openProjectIdsKey, serverId: serverId),
     );
   }
@@ -1304,7 +1388,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String projectIdsJson, {
     String? serverId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(AppConstants.openProjectIdsKey, serverId: serverId),
       projectIdsJson,
     );
@@ -1312,7 +1396,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getArchivedProjectIdsJson({String? serverId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(AppConstants.archivedProjectIdsKey, serverId: serverId),
     );
   }
@@ -1322,7 +1406,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String projectIdsJson, {
     String? serverId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(AppConstants.archivedProjectIdsKey, serverId: serverId),
       projectIdsJson,
     );
@@ -1330,7 +1414,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getHiddenProjectPathsJson({String? serverId}) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(AppConstants.hiddenProjectPathsKey, serverId: serverId),
     );
   }
@@ -1340,7 +1424,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String projectPathsJson, {
     String? serverId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(AppConstants.hiddenProjectPathsKey, serverId: serverId),
       projectPathsJson,
     );
@@ -1352,7 +1436,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.currentSessionIdKey,
         serverId: serverId,
@@ -1391,7 +1475,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getInt(
+    return _sharedPreferences.getInt(
       _scopedKey(
         AppConstants.cachedSessionsUpdatedAtKey,
         serverId: serverId,
@@ -1406,7 +1490,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setInt(
+    await _sharedPreferences.setInt(
       _scopedKey(
         AppConstants.cachedSessionsUpdatedAtKey,
         serverId: serverId,
@@ -1448,7 +1532,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getInt(
+    return _sharedPreferences.getInt(
       _scopedKey(
         AppConstants.lastSessionSnapshotUpdatedAtKey,
         serverId: serverId,
@@ -1463,7 +1547,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setInt(
+    await _sharedPreferences.setInt(
       _scopedKey(
         AppConstants.lastSessionSnapshotUpdatedAtKey,
         serverId: serverId,
@@ -1485,7 +1569,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
         scopeId: scopeId,
       ),
     );
-    await sharedPreferences.remove(
+    await _sharedPreferences.remove(
       _scopedKey(
         AppConstants.lastSessionSnapshotUpdatedAtKey,
         serverId: serverId,
@@ -1510,7 +1594,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   }
 
   @override
-  Future<void> saveSessionMessagesSnapshot(
+  Future<bool> saveSessionMessagesSnapshot(
     String snapshotJson, {
     required String sessionId,
     String? serverId,
@@ -1522,7 +1606,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       serverId: serverId,
       scopeId: scopeId,
     );
-    await _writeLargeCachePayload(key, snapshotJson);
+    return _writeLargeCachePayload(key, snapshotJson);
   }
 
   @override
@@ -1531,7 +1615,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getInt(
+    return _sharedPreferences.getInt(
       _sessionScopedKey(
         AppConstants.sessionMessagesSnapshotUpdatedAtKey,
         sessionId: sessionId,
@@ -1548,7 +1632,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setInt(
+    await _sharedPreferences.setInt(
       _sessionScopedKey(
         AppConstants.sessionMessagesSnapshotUpdatedAtKey,
         sessionId: sessionId,
@@ -1573,7 +1657,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
         scopeId: scopeId,
       ),
     );
-    await sharedPreferences.remove(
+    await _sharedPreferences.remove(
       _sessionScopedKey(
         AppConstants.sessionMessagesSnapshotUpdatedAtKey,
         sessionId: sessionId,
@@ -1588,7 +1672,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return sharedPreferences.getString(
+    return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.sessionMessagesSnapshotIdsKey,
         serverId: serverId,
@@ -1603,7 +1687,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       _scopedKey(
         AppConstants.sessionMessagesSnapshotIdsKey,
         serverId: serverId,
@@ -1696,18 +1780,18 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     ];
 
     for (final key in keys) {
-      await sharedPreferences.remove(key);
+      await _sharedPreferences.remove(key);
     }
   }
 
   @override
   Future<String?> getDismissedUpdateVersion() async {
-    return sharedPreferences.getString(AppConstants.dismissedUpdateVersionKey);
+    return _sharedPreferences.getString(AppConstants.dismissedUpdateVersionKey);
   }
 
   @override
   Future<void> saveDismissedUpdateVersion(String version) async {
-    await sharedPreferences.setString(
+    await _sharedPreferences.setString(
       AppConstants.dismissedUpdateVersionKey,
       version,
     );
@@ -1715,14 +1799,14 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<bool?> getBasicAuthEnabled({String? serverId}) async {
-    return sharedPreferences.getBool(
+    return _sharedPreferences.getBool(
       _scopedKey(AppConstants.basicAuthEnabledKey, serverId: serverId),
     );
   }
 
   @override
   Future<void> saveBasicAuthEnabled(bool enabled, {String? serverId}) async {
-    await sharedPreferences.setBool(
+    await _sharedPreferences.setBool(
       _scopedKey(AppConstants.basicAuthEnabledKey, serverId: serverId),
       enabled,
     );
@@ -1759,11 +1843,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     );
     if (username.trim().isEmpty) {
       await _deleteSecureValue(secureKey);
-      await sharedPreferences.remove(legacyKey);
+      await _sharedPreferences.remove(legacyKey);
       return;
     }
     await _writeSecureValue(secureKey, username);
-    await sharedPreferences.remove(legacyKey);
+    await _sharedPreferences.remove(legacyKey);
   }
 
   @override
@@ -1797,17 +1881,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     );
     if (password.trim().isEmpty) {
       await _deleteSecureValue(secureKey);
-      await sharedPreferences.remove(legacyKey);
+      await _sharedPreferences.remove(legacyKey);
       return;
     }
     await _writeSecureValue(secureKey, password);
-    await sharedPreferences.remove(legacyKey);
+    await _sharedPreferences.remove(legacyKey);
   }
 
   @override
   Future<void> clearAll() async {
     await _clearLargeCachePayloads();
-    await sharedPreferences.clear();
+    await _sharedPreferences.clear();
     try {
       await _secureStorage.deleteAll();
     } catch (_) {

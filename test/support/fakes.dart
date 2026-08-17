@@ -827,19 +827,23 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
-  Future<void> saveSessionMessagesSnapshot(
+  Future<bool> saveSessionMessagesSnapshot(
     String snapshotJson, {
     required String sessionId,
     String? serverId,
     String? scopeId,
   }) async {
-    scopedStrings[_sessionKey(
-          'session_messages_snapshot',
-          sessionId: sessionId,
-          serverId: serverId,
-          scopeId: scopeId,
-        )] =
-        snapshotJson;
+    final key = _sessionKey(
+      'session_messages_snapshot',
+      sessionId: sessionId,
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (scopedStrings[key] == snapshotJson) {
+      return false;
+    }
+    scopedStrings[key] = snapshotJson;
+    return true;
   }
 
   @override
