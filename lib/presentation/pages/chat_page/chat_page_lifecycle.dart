@@ -8,6 +8,19 @@ extension _ChatPageLifecycle on _ChatPageState {
   }
 
   void _handleSettingsChanged() {
+    try {
+      _handleSettingsChangedBody();
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Settings listener failed in chat page',
+        error: error,
+        stackTrace: stackTrace,
+        tags: const <String>{'settings:listener', 'chat'},
+      );
+    }
+  }
+
+  void _handleSettingsChangedBody() {
     final settings =
         _settingsProvider?.settings ?? ExperienceSettings.defaults();
     final pendingPostOnboardingTour = settings.pendingPostOnboardingChatTour;

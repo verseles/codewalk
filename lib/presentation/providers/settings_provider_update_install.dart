@@ -22,8 +22,8 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
   Future<void> checkForUpdate() async {
     _checkingForUpdate = true;
     _lastCheckFoundNoUpdate = false;
-    notifyListeners();
     try {
+      notifyListeners();
       final info = await PackageInfo.fromPlatform();
       _updateCheckService.clearCache();
       final result = await _updateCheckService.check(info.version);

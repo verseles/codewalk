@@ -58,6 +58,9 @@ class _AppShellPageState extends State<AppShellPage> {
   }
 
   void _handleSettingsChanged() {
+    // Runs on every SettingsProvider notification before the Settings page
+    // consumers. _configureDesktopTray catches its own failures, so this
+    // listener never throws synchronously and cannot stop later listeners.
     unawaited(_configureDesktopTray());
   }
 

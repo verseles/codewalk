@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codewalk/core/network/dio_client.dart';
@@ -5,9 +6,11 @@ import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/session_attention/session_attention_host_service.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:codewalk/presentation/services/update_check_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../support/fakes.dart';
 
@@ -31,6 +34,18 @@ class _FailingExperienceSettingsDataSource extends InMemoryAppLocalDataSource {
     }
     await super.saveExperienceSettingsJson(settingsJson);
   }
+}
+
+class _CompleterUpdateCheckService extends UpdateCheckService {
+  _CompleterUpdateCheckService(this.completer);
+
+  final Completer<UpdateCheckResult?> completer;
+
+  @override
+  Future<UpdateCheckResult?> check(String currentVersion) => completer.future;
+
+  @override
+  void clearCache() {}
 }
 
 class _FakeSessionAttentionHostService implements SessionAttentionHostService {
@@ -127,6 +142,41 @@ void main() {
         expect(saved['androidBackgroundAlertsEnabled'], isTrue);
       },
     );
+
+    test('checkForUpdate resets checking state when a listener throws', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      PackageInfo.setMockInitialValues(
+        appName: 'CodeWalk',
+        packageName: 'com.verseles.codewalk',
+        version: '1.2.3',
+        buildNumber: '45',
+        buildSignature: '',
+      );
+      final local = InMemoryAppLocalDataSource();
+      final completer = Completer<UpdateCheckResult?>();
+      final provider = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+        updateCheckService: _CompleterUpdateCheckService(completer),
+      );
+      await provider.initialize();
+      addTearDown(provider.dispose);
+
+      final previousOnError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      addTearDown(() => FlutterError.onError = previousOnError);
+      provider.addListener(() => throw StateError('listener boom'));
+
+      final future = provider.checkForUpdate();
+      expect(provider.checkingForUpdate, isTrue);
+
+      completer.complete(null);
+      await future;
+
+      expect(provider.checkingForUpdate, isFalse);
+      expect(provider.updateCheckResult, isNull);
+    });
 
     test('persists the session attention presentation override', () async {
       final local = InMemoryAppLocalDataSource();

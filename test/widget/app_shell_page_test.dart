@@ -34,8 +34,10 @@ import 'package:codewalk/domain/usecases/watch_global_chat_events.dart';
 import 'package:codewalk/l10n/generated/app_localizations.dart';
 import 'package:codewalk/presentation/pages/app_shell_page.dart';
 import 'package:codewalk/presentation/pages/onboarding_wizard_page.dart';
+import 'package:codewalk/presentation/pages/settings_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
+import 'package:codewalk/presentation/providers/locale_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
@@ -351,6 +353,105 @@ void main() {
       expect(find.text('Conversations'), findsNothing);
     },
   );
+
+  testWidgets('settings controls update live under the full shell topology', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test'
+      ..defaultServerId = 'srv_test'
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}'
+      ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 'srv_test',
+          'url': 'http://127.0.0.1:4096',
+          'label': 'Test Server',
+          'basicAuthEnabled': false,
+          'basicAuthUsername': '',
+          'basicAuthPassword': '',
+          'createdAt': 0,
+          'updatedAt': 0,
+        },
+      ]);
+    final chatProvider = _buildChatProvider(localDataSource: localDataSource);
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    final settingsProvider = SettingsProvider(
+      localDataSource: chatProvider.localDataSource,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    unawaited(settingsProvider.initialize());
+    addTearDown(settingsProvider.dispose);
+
+    final localeProvider = LocaleProvider(
+      settingsProvider: settingsProvider,
+    );
+    unawaited(localeProvider.initialize());
+    addTearDown(localeProvider.dispose);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ChatProvider>.value(value: chatProvider),
+          ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+          ChangeNotifierProvider<ProjectProvider>.value(
+            value: chatProvider.projectProvider,
+          ),
+          ChangeNotifierProvider<SettingsProvider>.value(
+            value: settingsProvider,
+          ),
+          ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
+        ],
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocales.supported,
+          theme: AppTheme.lightFrom(
+            ColorScheme.fromSeed(seedColor: AppTheme.seedColor),
+          ).copyWith(splashFactory: InkRipple.splashFactory),
+          home: const AppShellPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('sidebar_settings_icon_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsPage), findsOneWidget);
+
+    await tester.tap(find.text('Appearance').first);
+    await tester.pumpAndSettle();
+
+    final tipsToggle = find.byKey(
+      const ValueKey<String>('settings_toggle_composer_tips'),
+    );
+    await tester.scrollUntilVisible(
+      tipsToggle,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final before = tester.widget<SwitchListTile>(tipsToggle).value;
+    await tester.tap(tipsToggle);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<SwitchListTile>(tipsToggle).value, isNot(before));
+    expect(settingsProvider.showComposerTips, isNot(before));
+    expect(find.byType(SettingsPage), findsOneWidget);
+  });
 }
 
 class _FakeUpdateCheckService extends UpdateCheckService {

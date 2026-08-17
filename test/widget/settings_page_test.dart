@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codewalk/core/i18n/app_locales.dart';
@@ -599,6 +600,108 @@ void main() {
     );
   });
 
+  testWidgets('About manual update check shows checking state immediately', (
+    WidgetTester tester,
+  ) async {
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final completer = Completer<UpdateCheckResult?>();
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+      updateCheckService: _CompleterUpdateCheckService(completer),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: _localizedMaterialApp(
+          home: const SettingsPage(initialSectionId: 'about'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Check for updates'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Check for updates'));
+    await tester.pump();
+
+    expect(settingsProvider.checkingForUpdate, isTrue);
+    expect(find.text('Checking...'), findsOneWidget);
+
+    completer.complete(
+      const UpdateCheckResult(
+        latestVersion: '1.3.0',
+        releaseUrl:
+            'https://github.com/verseles/codewalk/releases/tag/v1.3.0',
+        isNewer: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(settingsProvider.checkingForUpdate, isFalse);
+    expect(settingsProvider.updateCheckResult?.latestVersion, '1.3.0');
+    expect(find.text('Checking...'), findsNothing);
+  });
+
+  testWidgets('an earlier throwing settings listener does not block the UI', (
+    WidgetTester tester,
+  ) async {
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+
+    final previousOnError = FlutterError.onError;
+    FlutterError.onError = (_) {};
+    addTearDown(() => FlutterError.onError = previousOnError);
+    settingsProvider.addListener(() => throw StateError('earlier listener boom'));
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: _localizedMaterialApp(home: const SettingsPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Behavior').first);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(
+        const ValueKey<String>('settings_toggle_composer_spell_check'),
+      ),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final toggleFinder = find.byKey(
+      const ValueKey<String>('settings_toggle_composer_spell_check'),
+    );
+    expect(tester.widget<SwitchListTile>(toggleFinder).value, isTrue);
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<SwitchListTile>(toggleFinder).value, isFalse);
+    expect(settingsProvider.composerSpellCheckEnabled, isFalse);
+  });
+
   testWidgets('Behavior settings toggles composer spell check preference', (
     WidgetTester tester,
   ) async {
@@ -1191,6 +1294,18 @@ class _FakeUpdateCheckService extends UpdateCheckService {
 
   @override
   Future<UpdateCheckResult?> check(String currentVersion) async => result;
+
+  @override
+  void clearCache() {}
+}
+
+class _CompleterUpdateCheckService extends UpdateCheckService {
+  _CompleterUpdateCheckService(this.completer);
+
+  final Completer<UpdateCheckResult?> completer;
+
+  @override
+  Future<UpdateCheckResult?> check(String currentVersion) => completer.future;
 
   @override
   void clearCache() {}

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../core/i18n/app_locales.dart';
+import '../../core/logging/app_logger.dart';
 import 'settings_provider.dart';
 
 class LocaleProvider extends ChangeNotifier {
@@ -53,11 +54,20 @@ class LocaleProvider extends ChangeNotifier {
   }
 
   void _handleSettingsChanged() {
-    final next = _normalizeLocaleCode(_settingsProvider.localeCode);
-    if (_localeCode == next) {
-      return;
+    try {
+      final next = _normalizeLocaleCode(_settingsProvider.localeCode);
+      if (_localeCode == next) {
+        return;
+      }
+      _localeCode = next;
+      notifyListeners();
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Settings listener failed in locale provider',
+        error: error,
+        stackTrace: stackTrace,
+        tags: const <String>{'settings:listener', 'locale'},
+      );
     }
-    _localeCode = next;
-    notifyListeners();
   }
 }
