@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.206.0 - 2026-08-17
+
+- docs(behavior): document live settings updates and About update check
+- fix(settings): keep settings UI live when a settings listener fails
+
 ## v1.205.0 - 2026-08-17
 
 - fix(android): resume chat reliably and record bounded process diagnostics
