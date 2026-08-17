@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.205.0 - 2026-08-17
+
+- fix(android): resume chat reliably and record bounded process diagnostics
+
 ## v1.204.0 - 2026-08-17
 
 - feat(chat): add session tab draft flow
