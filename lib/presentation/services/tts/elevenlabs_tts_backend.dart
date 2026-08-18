@@ -43,6 +43,10 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
   /// back to the static map when a model was never fetched.
   final Map<String, int> _modelCharLimits = <String, int>{};
 
+  /// Monotonic counter so an overlapping, older model-list request cannot
+  /// overwrite limits fetched for the current context.
+  int _modelsFetchGeneration = 0;
+
   @override
   ReadAloudProvider get provider => ReadAloudProvider.elevenLabs;
 
@@ -102,6 +106,7 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
     }
     // The cache must only reflect the most recent fetch; limits learned from
     // a previous base URL/account must not leak into the current context.
+    final generation = ++_modelsFetchGeneration;
     _modelCharLimits.clear();
     try {
       final response = await _dio.get<dynamic>(
@@ -116,7 +121,7 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
           },
         ),
       );
-      return _parseModels(response.data);
+      return _parseModels(response.data, generation: generation);
     } catch (error, stackTrace) {
       AppLogger.warn(
         'ElevenLabs model list request failed',
@@ -250,7 +255,7 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
     return voices;
   }
 
-  List<TtsModelOption> _parseModels(Object? data) {
+  List<TtsModelOption> _parseModels(Object? data, {required int generation}) {
     if (data is! List) {
       return const <TtsModelOption>[];
     }
@@ -265,7 +270,8 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
       final maxCharacters = entry['max_characters_request'] is num
           ? (entry['max_characters_request'] as num).toInt()
           : null;
-      if (maxCharacters != null) {
+      if (maxCharacters != null &&
+          generation == _modelsFetchGeneration) {
         _modelCharLimits[id.toLowerCase()] = maxCharacters;
       }
       models.add(

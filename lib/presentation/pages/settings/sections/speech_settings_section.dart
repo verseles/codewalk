@@ -2643,10 +2643,15 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                 border: const OutlineInputBorder(),
               ),
               isExpanded: true,
-              searchTermsBuilder: (value) => <String>[
-                value,
-                ...models.map((model) => model['label'] ?? ''),
-              ],
+              searchTermsBuilder: (value) {
+                if (value == kCustomModelKey) {
+                  return <String>[context.l10n.speechCustomModel];
+                }
+                final labels = models
+                    .where((model) => model['name'] == value)
+                    .map((model) => model['label'] ?? '');
+                return <String>[value, ...labels];
+              },
               items: <DropdownMenuItem<String>>[
                 for (final model in models)
                   DropdownMenuItem<String>(
