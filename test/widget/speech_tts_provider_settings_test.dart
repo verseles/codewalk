@@ -21,9 +21,10 @@ import '../support/fakes.dart';
 import '../support/pump_localized_app.dart';
 
 class _FakeTtsBackend implements TtsBackend {
-  _FakeTtsBackend(this._provider);
+  _FakeTtsBackend(this._provider, {this.voicesDelay});
 
   final ReadAloudProvider _provider;
+  final Duration? voicesDelay;
 
   @override
   ReadAloudProvider get provider => _provider;
@@ -40,6 +41,9 @@ class _FakeTtsBackend implements TtsBackend {
     String? baseUrl,
     String? model,
   }) async {
+    if (voicesDelay != null) {
+      await Future<void>.delayed(voicesDelay!);
+    }
     return const <TtsVoiceOption>[
       TtsVoiceOption(id: 'voice-a', label: 'Voice A', locale: 'pt-BR'),
       TtsVoiceOption(id: 'voice-b', label: 'Voice B', locale: 'en-US'),
@@ -117,6 +121,27 @@ void _registerDi(_TtsStorageBackend ttsBackend) {
         ReadAloudProvider.elevenLabs,
       ),
       ReadAloudProvider.nim: _FakeTtsBackend(ReadAloudProvider.nim),
+    }),
+  );
+}
+
+void _registerDiWithDelayedElevenLabs(_TtsStorageBackend ttsBackend) {
+  di.sl.registerSingleton<SherpaModelManager>(SherpaModelManager());
+  di.sl.registerSingleton<MoonshineModelManager>(MoonshineModelManager());
+  di.sl.registerSingleton<ParakeetModelManager>(ParakeetModelManager());
+  di.sl.registerSingleton<SenseVoiceModelManager>(SenseVoiceModelManager());
+  di.sl.registerSingleton<SttApiKeyStorage>(
+    SttApiKeyStorage(backend: _SttStorageBackend()),
+  );
+  di.sl.registerSingleton<TtsApiKeyStorage>(
+    TtsApiKeyStorage(backend: ttsBackend),
+  );
+  di.sl.registerSingleton<ReadAloudService>(
+    ReadAloudService(backends: <ReadAloudProvider, TtsBackend>{
+      ReadAloudProvider.elevenLabs: _FakeTtsBackend(
+        ReadAloudProvider.elevenLabs,
+        voicesDelay: const Duration(milliseconds: 300),
+      ),
     }),
   );
 }
@@ -264,6 +289,40 @@ void main() {
     );
     expect(speedSlider, findsNothing);
     expect(find.textContaining('not supported by NVIDIA NIM'), findsWidgets);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'voice list displays after a delayed discovery completes across frames',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    _registerDiWithDelayedElevenLabs(_TtsStorageBackend());
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    expect(find.text('Loaded from the provider voices.'), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.scrollUntilVisible(
+      find.text('Loaded from the provider voices.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Loaded from the provider voices.'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

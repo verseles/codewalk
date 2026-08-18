@@ -85,7 +85,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   String? _readAloudApiKeyStatus;
   int _readAloudApiKeyGeneration = 0;
   ReadAloudProvider? _lastSeenReadAloudProvider;
-  bool _remoteVoiceReloadPending = true;
+  String? _remoteVoicePendingKey;
   final Map<String, Future<List<Map<String, String>>>>
   _remoteReadAloudVoicesCache =
       <String, Future<List<Map<String, String>>>>{};
@@ -234,7 +234,8 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       });
       return;
     }
-    final provider = context.read<SettingsProvider>().readAloudProvider;
+    final settingsProvider = context.read<SettingsProvider>();
+    final provider = settingsProvider.readAloudProvider;
     final value = _readAloudApiKeyController.text;
     final generation = ++_readAloudApiKeyGeneration;
     setState(() {
@@ -245,7 +246,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       await di.sl<TtsApiKeyStorage>().write(provider, value);
       _readAloudApiKeyController.clear();
       _remoteReadAloudVoicesCache.clear();
-      _remoteVoiceReloadPending = true;
+      _remoteVoicePendingKey = _remoteVoiceCacheKey(settingsProvider);
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
         _hasReadAloudApiKey = value.trim().isNotEmpty;
@@ -332,7 +333,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           _readAloudApiKeyStatus = null;
           _edgeReadAloudVoicesFuture = null;
           _remoteReadAloudVoicesCache.clear();
-          _remoteVoiceReloadPending = true;
+          _remoteVoicePendingKey = _remoteVoiceCacheKey(settingsProvider);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               _loadReadAloudApiKeyState();
@@ -2350,11 +2351,16 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     );
   }
 
+  String _remoteVoiceCacheKey(SettingsProvider settingsProvider) {
+    return '${settingsProvider.readAloudProvider}|'
+        '${settingsProvider.readAloudBaseUrl}|'
+        '${settingsProvider.readAloudModel}';
+  }
+
   void _requestRemoteVoiceReload() {
-    if (_remoteVoiceReloadPending) {
-      return;
-    }
-    _remoteVoiceReloadPending = true;
+    _remoteVoicePendingKey = _remoteVoiceCacheKey(
+      context.read<SettingsProvider>(),
+    );
     setState(() {});
   }
 
@@ -2369,21 +2375,21 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         '$provider|${settingsProvider.readAloudBaseUrl}|'
         '${settingsProvider.readAloudModel}';
     final Future<List<Map<String, String>>>? future;
-    if (_remoteVoiceReloadPending) {
+    if (_remoteVoicePendingKey == cacheKey) {
       future = _remoteReadAloudVoicesCache[cacheKey] ??=
           _remoteReadAloudVoices(
             provider: provider,
             settingsProvider: settingsProvider,
-          );
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _remoteVoiceReloadPending) {
-          setState(() {
-            _remoteVoiceReloadPending = false;
-          });
-        }
-      });
+          )
+              ..whenComplete(() {
+                if (mounted && _remoteVoicePendingKey == cacheKey) {
+                  setState(() {
+                    _remoteVoicePendingKey = null;
+                  });
+                }
+              });
     } else {
-      future = null;
+      future = _remoteReadAloudVoicesCache[cacheKey];
     }
     return FutureBuilder<List<Map<String, String>>>(
       future: future,
