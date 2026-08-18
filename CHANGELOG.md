@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.209.1 - 2026-08-18
+
+- fix(tts): map ElevenLabs speed to the API-valid 0.7-1.2 range
+- docs(codebase): map ElevenLabs and NVIDIA NIM TTS backends
+
 ## v1.209.0 - 2026-08-18
 
 - docs(behavior): document ElevenLabs and NVIDIA NIM read-aloud providers
