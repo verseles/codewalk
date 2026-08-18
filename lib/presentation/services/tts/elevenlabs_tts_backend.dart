@@ -38,10 +38,12 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
   final Dio _dio;
   final bool _ownsDio;
 
-  /// Provider-reported character limits per model, keyed by lowercase
-  /// model id. Populated whenever a model list is fetched; synthesis falls
-  /// back to the static map when a model was never fetched.
-  final Map<String, int> _modelCharLimits = <String, int>{};
+  /// Provider-reported character limits per model, scoped by normalized base
+  /// URL and keyed by lowercase model id. Populated whenever a model list is
+  /// fetched; synthesis falls back to the static map when a model (or the
+  /// current base URL) was never fetched.
+  final Map<String, Map<String, int>> _modelCharLimits =
+      <String, Map<String, int>>{};
 
   /// Monotonic counter so an overlapping, older model-list request cannot
   /// overwrite limits fetched for the current context.
@@ -108,9 +110,10 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
     // a previous base URL/account must not leak into the current context.
     final generation = ++_modelsFetchGeneration;
     _modelCharLimits.clear();
+    final base = _normalizeBaseUrl(baseUrl);
     try {
       final response = await _dio.get<dynamic>(
-        '${_normalizeBaseUrl(baseUrl)}/models',
+        '$base/models',
         options: Options(
           responseType: ResponseType.json,
           connectTimeout: const Duration(seconds: 10),
@@ -121,7 +124,8 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
           },
         ),
       );
-      return _parseModels(response.data, generation: generation);
+      return _parseModels(response.data,
+          generation: generation, baseUrl: base);
     } catch (error, stackTrace) {
       AppLogger.warn(
         'ElevenLabs model list request failed',
@@ -163,7 +167,7 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
       );
     }
     final model = _effectiveModel(request.model);
-    final limit = _charLimitFor(model);
+    final limit = _charLimitFor(model, request.baseUrl);
     if (limit != null && text.length > limit) {
       throw TtsBackendException(
         TtsBackendErrorKind.invalidRequest,
@@ -255,7 +259,11 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
     return voices;
   }
 
-  List<TtsModelOption> _parseModels(Object? data, {required int generation}) {
+  List<TtsModelOption> _parseModels(
+    Object? data, {
+    required int generation,
+    required String baseUrl,
+  }) {
     if (data is! List) {
       return const <TtsModelOption>[];
     }
@@ -270,9 +278,9 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
       final maxCharacters = entry['max_characters_request'] is num
           ? (entry['max_characters_request'] as num).toInt()
           : null;
-      if (maxCharacters != null &&
-          generation == _modelsFetchGeneration) {
-        _modelCharLimits[id.toLowerCase()] = maxCharacters;
+      if (maxCharacters != null && generation == _modelsFetchGeneration) {
+        _modelCharLimits.putIfAbsent(baseUrl, () => <String, int>{})[
+            id.toLowerCase()] = maxCharacters;
       }
       models.add(
         TtsModelOption(
@@ -285,9 +293,10 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
     return models;
   }
 
-  int? _charLimitFor(String model) {
+  int? _charLimitFor(String model, String? baseUrl) {
     final normalized = model.trim().toLowerCase();
-    return _modelCharLimits[normalized] ?? elevenLabsModelCharLimit(model);
+    final limits = _modelCharLimits[_normalizeBaseUrl(baseUrl)];
+    return limits?[normalized] ?? elevenLabsModelCharLimit(model);
   }
 
   String _effectiveModel(String? model) {

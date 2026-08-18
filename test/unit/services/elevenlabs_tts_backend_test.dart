@@ -301,6 +301,53 @@ void main() {
       );
     });
 
+    test('scopes cached character limits to the fetched base URL', () async {
+      final adapter = _MockDioAdapter()
+        ..responses.add(
+          _jsonBody(200, jsonEncode(<dynamic>[
+            <String, dynamic>{
+              'model_id': 'custom-lite',
+              'name': 'Custom Lite',
+              'max_characters_request': 500,
+              'can_do_text_to_speech': true,
+            },
+          ])),
+        );
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = ElevenLabsTtsBackend(dio: dio);
+
+      await backend.getModels(
+        apiKey: 'xi-test',
+        baseUrl: 'https://api.elevenlabs.io/v1',
+      );
+
+      // A request against a different base URL must not use the limit learned
+      // from the first endpoint, so an oversized text is not rejected locally.
+      await expectLater(
+        backend.speakOrSynthesize(
+          TtsSynthesisRequest(
+            text: 'a' * 501,
+            rate: 0.5,
+            pitch: 1.0,
+            apiKey: 'xi-test',
+            baseUrl: 'https://other.elevenlabs.example/v1',
+            voiceId: 'voice-a',
+            model: 'custom-lite',
+          ),
+          _callbacks,
+        ),
+        throwsA(
+          isA<TtsBackendException>().having(
+            (error) => error.kind,
+            'kind',
+            isNot(TtsBackendErrorKind.invalidRequest),
+          ),
+        ),
+      );
+      // The synthesis reached HTTP (the preflight did not reject it).
+      expect(adapter.capturedRequests.length, greaterThanOrEqualTo(2));
+    });
+
     test('posts text-to-speech request with xi-api-key and returns audio', () async {
       final adapter = _MockDioAdapter()
         ..responses.add(_audioBody(200, <int>[1, 2, 3]));
