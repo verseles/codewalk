@@ -268,6 +268,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     if (!di.sl.isRegistered<ReadAloudService>()) {
       return const <Map<String, String>>[];
     }
+    final baseUrl = settingsProvider.readAloudBaseUrl;
+    final parsedBaseUrl = Uri.tryParse(baseUrl);
+    if (parsedBaseUrl == null ||
+        !parsedBaseUrl.hasScheme ||
+        !parsedBaseUrl.hasAuthority ||
+        !(parsedBaseUrl.scheme == 'http' || parsedBaseUrl.scheme == 'https')) {
+      return const <Map<String, String>>[];
+    }
     String? apiKey;
     if (di.sl.isRegistered<TtsApiKeyStorage>()) {
       try {
@@ -279,7 +287,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     return di.sl<ReadAloudService>().getVoicesForProvider(
       provider,
       apiKey: apiKey,
-      baseUrl: settingsProvider.readAloudBaseUrl,
+      baseUrl: baseUrl,
       model: settingsProvider.readAloudModel,
     );
   }
@@ -2236,6 +2244,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           subtitle: Text(context.l10n.speechCloudTtsPrivacyDescription),
         ),
         TextFormField(
+          key: ValueKey(
+            'read-aloud-base-url-${settingsProvider.readAloudProvider.name}',
+          ),
           initialValue: settingsProvider.readAloudBaseUrl,
           decoration: InputDecoration(
             labelText: context.l10n.speechBaseUrl,
@@ -2250,6 +2261,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
         TextFormField(
+          key: ValueKey(
+            'read-aloud-model-${settingsProvider.readAloudProvider.name}',
+          ),
           initialValue: settingsProvider.readAloudModel,
           decoration: InputDecoration(
             labelText: context.l10n.speechModel,
@@ -2452,6 +2466,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           subtitle: Text(context.l10n.speechCloudTtsPrivacyDescription),
         ),
         TextFormField(
+          key: const ValueKey('read-aloud-base-url-elevenlabs'),
           initialValue: settingsProvider.readAloudBaseUrl,
           decoration: InputDecoration(
             labelText: context.l10n.speechBaseUrl,
@@ -2466,6 +2481,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
         TextFormField(
+          key: const ValueKey('read-aloud-model-elevenlabs'),
           initialValue: settingsProvider.readAloudModel,
           decoration: InputDecoration(
             labelText: context.l10n.speechModel,
@@ -2500,6 +2516,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           subtitle: Text(context.l10n.speechCloudTtsPrivacyDescription),
         ),
         TextFormField(
+          key: const ValueKey('read-aloud-base-url-nim'),
           initialValue: settingsProvider.readAloudBaseUrl,
           decoration: InputDecoration(
             labelText: context.l10n.speechBaseUrl,
@@ -2512,6 +2529,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
         TextFormField(
+          key: const ValueKey('read-aloud-model-nim'),
           initialValue: settingsProvider.readAloudModel,
           decoration: InputDecoration(
             labelText: context.l10n.speechModel,

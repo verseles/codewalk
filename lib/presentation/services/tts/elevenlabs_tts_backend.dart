@@ -172,10 +172,15 @@ class ElevenLabsTtsBackend implements TtsBackend {
 
   List<TtsVoiceOption> _parseVoices(dynamic data) {
     final voices = <TtsVoiceOption>[];
-    if (data is! List) {
+    final Iterable<dynamic> entries;
+    if (data is List) {
+      entries = data;
+    } else if (data is Map && data['voices'] is List) {
+      entries = data['voices'] as List<dynamic>;
+    } else {
       return voices;
     }
-    for (final entry in data) {
+    for (final entry in entries) {
       if (entry is! Map) continue;
       final id = entry['voice_id']?.toString();
       final name = entry['name']?.toString();

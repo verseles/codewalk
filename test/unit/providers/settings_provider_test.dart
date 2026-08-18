@@ -2053,6 +2053,28 @@ void main() {
       },
     );
 
+    test('NIM empty base URL survives persistence and reload', () async {
+      final local = InMemoryAppLocalDataSource();
+      final first = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await first.initialize();
+      await first.setReadAloudProvider(ReadAloudProvider.nim);
+
+      final second = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await second.initialize();
+
+      expect(second.readAloudProvider, ReadAloudProvider.nim);
+      expect(second.readAloudBaseUrl, isEmpty);
+      expect(second.readAloudBaseUrl, isNot(kDefaultOpenAiCompatibleTtsBaseUrl));
+    });
+
     test('read-aloud settings survive JSON roundtrip', () async {
       final local = InMemoryAppLocalDataSource();
       final first = SettingsProvider(

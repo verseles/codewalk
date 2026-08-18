@@ -244,7 +244,7 @@ class NvidiaNimTtsBackend implements TtsBackend {
 TtsBackendException mapNimDioException(DioException error) {
   final statusCode = error.response?.statusCode;
   final message = extractDioErrorMessage(error);
-  if (statusCode == 400 || statusCode == 422) {
+  if (statusCode == 400 || statusCode == 404 || statusCode == 422) {
     return TtsBackendException(
       TtsBackendErrorKind.invalidRequest,
       message ??

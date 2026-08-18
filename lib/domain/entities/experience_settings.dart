@@ -1947,12 +1947,14 @@ class ExperienceSettings {
     }
 
     final readAloudBaseUrlJson = json['readAloudBaseUrl'];
-    if (readAloudBaseUrlJson is String &&
-        readAloudBaseUrlJson.trim().isNotEmpty) {
-      readAloudBaseUrl = readAloudBaseUrlJson.trim().replaceFirst(
-        RegExp(r'/+$'),
-        '',
-      );
+    if (readAloudBaseUrlJson is String) {
+      readAloudBaseUrl = readAloudBaseUrlJson
+          .trim()
+          .replaceFirst(RegExp(r'/+$'), '');
+    }
+    if (readAloudBaseUrl.isEmpty &&
+        readAloudProvider != ReadAloudProvider.nim) {
+      readAloudBaseUrl = kDefaultOpenAiCompatibleTtsBaseUrl;
     }
 
     final readAloudResponseFormatJson = json['readAloudResponseFormat'];

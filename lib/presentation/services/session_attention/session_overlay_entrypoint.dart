@@ -24,7 +24,9 @@ import '../android_background_alert_logic.dart';
 import '../cellular_data_saver_service.dart';
 import '../read_aloud_service.dart';
 import '../tts/edge_experimental_tts_backend.dart';
+import '../tts/elevenlabs_tts_backend.dart';
 import '../tts/native_tts_backend.dart';
+import '../tts/nvidia_nim_tts_backend.dart';
 import '../tts/openai_compatible_tts_backend.dart';
 import '../tts/tts_backend.dart';
 import 'session_attention_completion_resolver.dart';
@@ -113,6 +115,8 @@ class _SessionAttentionHostAppState extends State<SessionAttentionHostApp> {
           ReadAloudProvider.native: NativeTtsBackend(),
           ReadAloudProvider.edgeExperimental: EdgeExperimentalTtsBackend(),
           ReadAloudProvider.openAiCompatible: OpenAiCompatibleTtsBackend(),
+          ReadAloudProvider.elevenLabs: ElevenLabsTtsBackend(),
+          ReadAloudProvider.nim: NvidiaNimTtsBackend(),
         },
       );
       final controller = SessionAttentionOverlayController(

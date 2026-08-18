@@ -325,13 +325,14 @@ void main() {
         expect(adapter.capturedRequests, isEmpty);
       });
 
-      test('parses the voices list with category labels', () async {
+      test('parses the standard voices envelope with category labels', () async {
         final adapter = _MockDioAdapter()
           ..responses.add(
             _jsonBody(
               200,
-              '[{"voice_id":"v1","name":"Aria","labels":{"category":"premium"}},'
-              '{"voice_id":"v2","name":"Roger","labels":{}}]',
+              '{"voices":[{"voice_id":"v1","name":"Aria",'
+              '"labels":{"category":"premium"}},'
+              '{"voice_id":"v2","name":"Roger","labels":{}}]}',
             ),
           );
         final dio = Dio()..httpClientAdapter = adapter;
@@ -351,6 +352,22 @@ void main() {
           'https://api.elevenlabs.io/v1/voices',
         );
         expect(adapter.capturedRequests.single.headers['xi-api-key'], 'xi-test');
+      });
+
+      test('still accepts a bare list response', () async {
+        final adapter = _MockDioAdapter()
+          ..responses.add(
+            _jsonBody(200, '[{"voice_id":"v1","name":"Aria"}]'),
+          );
+        final dio = Dio()..httpClientAdapter = adapter;
+        final backend = ElevenLabsTtsBackend(dio: dio);
+
+        final voices = await backend.getVoices(
+          apiKey: 'xi-test',
+          baseUrl: 'https://api.elevenlabs.io/v1',
+        );
+
+        expect(voices.single.id, 'v1');
       });
 
       test('returns empty list when the request fails', () async {

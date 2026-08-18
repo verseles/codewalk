@@ -260,6 +260,7 @@ void main() {
         ..responses.addAll(<ResponseBody>[
           _jsonBody(400, '{"detail":"Bad request"}'),
           _jsonBody(401, '{"detail":"Unauthorized"}'),
+          _jsonBody(404, '{"detail":"Not found"}'),
           _jsonBody(429, '{"detail":"Quota exceeded"}'),
           _jsonBody(503, '{"detail":"Unavailable"}'),
         ]);
@@ -287,6 +288,7 @@ void main() {
 
       expect((await failOnce()).kind, TtsBackendErrorKind.invalidRequest);
       expect((await failOnce()).kind, TtsBackendErrorKind.invalidApiKey);
+      expect((await failOnce()).kind, TtsBackendErrorKind.invalidRequest);
       expect((await failOnce()).kind, TtsBackendErrorKind.rateLimitedOrQuota);
       expect((await failOnce()).kind, TtsBackendErrorKind.providerUnavailable);
     });
