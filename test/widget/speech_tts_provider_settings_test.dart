@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk/core/auth/stt_api_key_storage.dart';
 import 'package:codewalk/core/auth/tts_api_key_storage.dart';
 import 'package:codewalk/core/di/injection_container.dart' as di;
@@ -15,6 +17,7 @@ import 'package:codewalk/presentation/services/tts/tts_backend.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../support/fakes.dart';
@@ -25,6 +28,7 @@ class _FakeTtsBackend implements TtsBackend {
 
   final ReadAloudProvider _provider;
   final Duration? voicesDelay;
+  final List<String?> requestedBaseUrls = <String?>[];
 
   @override
   ReadAloudProvider get provider => _provider;
@@ -41,6 +45,7 @@ class _FakeTtsBackend implements TtsBackend {
     String? baseUrl,
     String? model,
   }) async {
+    requestedBaseUrls.add(baseUrl);
     if (voicesDelay != null) {
       await Future<void>.delayed(voicesDelay!);
     }
@@ -87,6 +92,7 @@ class _SttStorageBackend implements SttApiKeyStorageBackend {
 
 class _TtsStorageBackend implements TtsApiKeyStorageBackend {
   final Map<String, String> values = <String, String>{};
+  Completer<void>? writeGate;
 
   @override
   Future<void> delete({required String key}) async => values.remove(key);
@@ -96,11 +102,15 @@ class _TtsStorageBackend implements TtsApiKeyStorageBackend {
 
   @override
   Future<void> write({required String key, required String value}) async {
+    await writeGate?.future;
     values[key] = value;
   }
 }
 
-void _registerDi(_TtsStorageBackend ttsBackend) {
+void _registerDi(
+  _TtsStorageBackend ttsBackend, {
+  _FakeTtsBackend? elevenLabs,
+}) {
   di.sl.registerSingleton<SherpaModelManager>(SherpaModelManager());
   di.sl.registerSingleton<MoonshineModelManager>(MoonshineModelManager());
   di.sl.registerSingleton<ParakeetModelManager>(ParakeetModelManager());
@@ -117,9 +127,8 @@ void _registerDi(_TtsStorageBackend ttsBackend) {
       ReadAloudProvider.edgeExperimental: _FakeTtsBackend(
         ReadAloudProvider.edgeExperimental,
       ),
-      ReadAloudProvider.elevenLabs: _FakeTtsBackend(
-        ReadAloudProvider.elevenLabs,
-      ),
+      ReadAloudProvider.elevenLabs:
+          elevenLabs ?? _FakeTtsBackend(ReadAloudProvider.elevenLabs),
       ReadAloudProvider.nim: _FakeTtsBackend(ReadAloudProvider.nim),
     }),
   );
@@ -323,6 +332,81 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Loaded from the provider voices.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'key save during a base URL edit never arms discovery for the edited '
+      'value', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    final ttsBackend = _TtsStorageBackend()..writeGate = Completer<void>();
+    final fakeElevenLabs = _FakeTtsBackend(ReadAloudProvider.elevenLabs);
+    _registerDi(ttsBackend, elevenLabs: fakeElevenLabs);
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('read-aloud-base-url-elevenlabs')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('read-aloud-base-url-elevenlabs')),
+      'https://api.elevenlabs.io/v1',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('read-aloud-api-key')),
+      'xi-key',
+    );
+    await tester.tap(find.byIcon(Symbols.save), warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('read-aloud-base-url-elevenlabs')),
+      'https://api.elevenlabs.io/v2',
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    ttsBackend.writeGate!.complete();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(provider.readAloudBaseUrl, 'https://api.elevenlabs.io/v2');
+    expect(
+      fakeElevenLabs.requestedBaseUrls
+          .where((url) => url == 'https://api.elevenlabs.io/v2'),
+      isEmpty,
+    );
+    expect(find.text('Loaded from the provider voices.'), findsNothing);
+
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.scrollUntilVisible(
+      find.text('Loaded from the provider voices.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Loaded from the provider voices.'), findsOneWidget);
+    expect(
+      fakeElevenLabs.requestedBaseUrls
+          .where((url) => url == 'https://api.elevenlabs.io/v2'),
+      isNotEmpty,
+    );
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

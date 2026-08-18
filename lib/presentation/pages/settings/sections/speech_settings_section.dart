@@ -2318,6 +2318,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       children: [
         const SizedBox(height: 12),
         TextFormField(
+          key: const ValueKey('read-aloud-api-key'),
           controller: _readAloudApiKeyController,
           decoration: InputDecoration(
             labelText: context.l10n.speechApiKey,
@@ -2384,16 +2385,22 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           _remoteReadAloudVoices(
             provider: provider,
             settingsProvider: settingsProvider,
-          )
-              ..whenComplete(() {
-                if (mounted && _remoteVoicePendingKey == cacheKey) {
-                  setState(() {
-                    _remoteVoicePendingKey = null;
-                  });
-                }
-              });
+          );
+      final request = future;
+      request.whenComplete(() {
+        if (mounted &&
+            _remoteVoicePendingKey == cacheKey &&
+            identical(_remoteReadAloudVoicesCache[cacheKey], request)) {
+          setState(() {
+            _remoteVoicePendingKey = null;
+          });
+        }
+      });
     } else {
-      future = _remoteReadAloudVoicesCache[cacheKey];
+      future = _remoteReadAloudVoicesCache[cacheKey] ??
+          Future<List<Map<String, String>>>.value(
+            const <Map<String, String>>[],
+          );
     }
     return FutureBuilder<List<Map<String, String>>>(
       future: future,
