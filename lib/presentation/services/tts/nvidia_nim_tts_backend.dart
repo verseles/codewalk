@@ -14,7 +14,24 @@ int nimTtsCharLimit(String model) {
   return model.toLowerCase().contains('chatterbox') ? 500 : 2000;
 }
 
-class NvidiaNimTtsBackend implements TtsBackend {
+/// Known NVIDIA Speech NIM TTS models. The NIM microservice has no model
+/// listing endpoint (each deployment runs a single model), so this curated
+/// list feeds the settings model picker while custom deployments stay
+/// reachable through the "Custom model" entry.
+const List<TtsModelOption> kNimTtsModelOptions = <TtsModelOption>[
+  TtsModelOption(
+    id: 'chatterbox-tts-multilingual',
+    label: 'Chatterbox TTS Multilingual',
+    maxCharacters: 500,
+  ),
+  TtsModelOption(
+    id: 'magpie-tts-multilingual',
+    label: 'Magpie TTS Multilingual',
+    maxCharacters: 2000,
+  ),
+];
+
+class NvidiaNimTtsBackend implements TtsBackend, TtsModelDiscovery {
   NvidiaNimTtsBackend({Dio? dio})
     : _dio = dio ?? Dio(),
       _ownsDio = dio == null;
@@ -69,6 +86,15 @@ class NvidiaNimTtsBackend implements TtsBackend {
 
   @override
   Future<List<String>> getLanguages() async => const <String>[];
+
+  @override
+  Future<List<TtsModelOption>> getModels({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    return kNimTtsModelOptions;
+  }
 
   @override
   Future<TtsSynthesisResult> speakOrSynthesize(

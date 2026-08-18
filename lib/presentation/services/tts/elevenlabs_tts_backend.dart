@@ -30,13 +30,18 @@ int? elevenLabsModelCharLimit(String model) {
   };
 }
 
-class ElevenLabsTtsBackend implements TtsBackend {
+class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
   ElevenLabsTtsBackend({Dio? dio})
     : _dio = dio ?? Dio(),
       _ownsDio = dio == null;
 
   final Dio _dio;
   final bool _ownsDio;
+
+  /// Provider-reported character limits per model, keyed by lowercase
+  /// model id. Populated whenever a model list is fetched; synthesis falls
+  /// back to the static map when a model was never fetched.
+  final Map<String, int> _modelCharLimits = <String, int>{};
 
   @override
   ReadAloudProvider get provider => ReadAloudProvider.elevenLabs;
@@ -86,6 +91,41 @@ class ElevenLabsTtsBackend implements TtsBackend {
   Future<List<String>> getLanguages() async => const <String>[];
 
   @override
+  Future<List<TtsModelOption>> getModels({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    final key = apiKey?.trim();
+    if (key == null || key.isEmpty) {
+      return const <TtsModelOption>[];
+    }
+    try {
+      final response = await _dio.get<dynamic>(
+        '${_normalizeBaseUrl(baseUrl)}/models',
+        options: Options(
+          responseType: ResponseType.json,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 30),
+          headers: <String, String>{
+            'xi-api-key': key,
+            'Accept': 'application/json',
+          },
+        ),
+      );
+      return _parseModels(response.data);
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'ElevenLabs model list request failed',
+        error: error,
+        stackTrace: stackTrace,
+        tags: <String>{'tts', 'elevenlabs'},
+      );
+      return const <TtsModelOption>[];
+    }
+  }
+
+  @override
   Future<TtsSynthesisResult> speakOrSynthesize(
     TtsSynthesisRequest request,
     TtsBackendCallbacks callbacks,
@@ -115,7 +155,7 @@ class ElevenLabsTtsBackend implements TtsBackend {
       );
     }
     final model = _effectiveModel(request.model);
-    final limit = elevenLabsModelCharLimit(model);
+    final limit = _charLimitFor(model);
     if (limit != null && text.length > limit) {
       throw TtsBackendException(
         TtsBackendErrorKind.invalidRequest,
@@ -205,6 +245,40 @@ class ElevenLabsTtsBackend implements TtsBackend {
       );
     }
     return voices;
+  }
+
+  List<TtsModelOption> _parseModels(Object? data) {
+    if (data is! List) {
+      return const <TtsModelOption>[];
+    }
+    final models = <TtsModelOption>[];
+    for (final entry in data) {
+      if (entry is! Map) continue;
+      final id = entry['model_id']?.toString();
+      if (id == null || id.isEmpty) continue;
+      final canSynthesize = entry['can_do_text_to_speech'];
+      if (canSynthesize == false) continue;
+      final name = entry['name']?.toString();
+      final maxCharacters = entry['max_characters_request'] is num
+          ? (entry['max_characters_request'] as num).toInt()
+          : null;
+      if (maxCharacters != null) {
+        _modelCharLimits[id.toLowerCase()] = maxCharacters;
+      }
+      models.add(
+        TtsModelOption(
+          id: id,
+          label: (name != null && name.isNotEmpty) ? name : id,
+          maxCharacters: maxCharacters,
+        ),
+      );
+    }
+    return models;
+  }
+
+  int? _charLimitFor(String model) {
+    final normalized = model.trim().toLowerCase();
+    return _modelCharLimits[normalized] ?? elevenLabsModelCharLimit(model);
   }
 
   String _effectiveModel(String? model) {

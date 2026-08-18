@@ -62,6 +62,35 @@ class TtsVoiceOption {
   final Map<String, String> providerMetadata;
 }
 
+class TtsModelOption {
+  const TtsModelOption({
+    required this.id,
+    required this.label,
+    this.maxCharacters,
+    this.providerMetadata = const <String, String>{},
+  });
+
+  final String id;
+  final String label;
+
+  /// Provider-reported maximum characters per synthesis request, when known.
+  final int? maxCharacters;
+  final Map<String, String> providerMetadata;
+}
+
+/// Optional capability for TTS backends that can enumerate their models.
+/// Backends that cannot (native engine, generic OpenAI-compatible) simply do
+/// not implement it and the settings UI falls back to the free-text field.
+/// Declared as a subtype of [TtsBackend] so an `is! TtsModelDiscovery` check
+/// promotes a `TtsBackend`-typed value.
+abstract interface class TtsModelDiscovery implements TtsBackend {
+  Future<List<TtsModelOption>> getModels({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  });
+}
+
 class TtsSynthesisRequest {
   const TtsSynthesisRequest({
     required this.text,

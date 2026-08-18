@@ -25,6 +25,8 @@ import '../../../utils/windows_settings_links.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
 
+const String kCustomModelKey = '__codewalk_custom_model__';
+
 class _SherpaModelEntry {
   const _SherpaModelEntry({
     required this.code,
@@ -89,6 +91,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   final Map<String, Future<List<Map<String, String>>>>
   _remoteReadAloudVoicesCache =
       <String, Future<List<Map<String, String>>>>{};
+  String? _remoteModelsPendingKey;
+  final Map<String, Future<List<Map<String, String>>>> _remoteModelsCache =
+      <String, Future<List<Map<String, String>>>>{};
+  bool _editingCustomModel = false;
   final TextEditingController _speechApiKeyController = TextEditingController();
   bool _loadingSpeechApiKey = false;
   bool _hasSpeechApiKey = false;
@@ -239,6 +245,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final value = _readAloudApiKeyController.text;
     final generation = ++_readAloudApiKeyGeneration;
     final savedCacheKey = _remoteVoiceCacheKey(settingsProvider);
+    final savedModelsCacheKey = _remoteModelsCacheKey(settingsProvider);
     setState(() {
       _loadingReadAloudApiKey = true;
       _readAloudApiKeyStatus = null;
@@ -250,6 +257,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       _remoteVoicePendingKey =
           _remoteVoiceCacheKey(settingsProvider) == savedCacheKey
           ? savedCacheKey
+          : null;
+      _remoteModelsCache.clear();
+      _remoteModelsPendingKey =
+          _remoteModelsCacheKey(settingsProvider) == savedModelsCacheKey
+          ? savedModelsCacheKey
           : null;
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
@@ -299,6 +311,42 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     );
   }
 
+  Future<List<Map<String, String>>> _remoteReadAloudModels({
+    required ReadAloudProvider provider,
+    required SettingsProvider settingsProvider,
+  }) async {
+    if (!di.sl.isRegistered<ReadAloudService>()) {
+      return const <Map<String, String>>[];
+    }
+    // NVIDIA NIM exposes a static curated list (no listing endpoint), so it
+    // does not require a reachable base URL or a saved key.
+    if (provider == ReadAloudProvider.nim) {
+      return di.sl<ReadAloudService>().getModelsForProvider(provider);
+    }
+    final baseUrl = settingsProvider.readAloudBaseUrl;
+    final parsedBaseUrl = Uri.tryParse(baseUrl);
+    if (parsedBaseUrl == null ||
+        !parsedBaseUrl.hasScheme ||
+        !parsedBaseUrl.hasAuthority ||
+        !(parsedBaseUrl.scheme == 'http' || parsedBaseUrl.scheme == 'https')) {
+      return const <Map<String, String>>[];
+    }
+    String? apiKey;
+    if (di.sl.isRegistered<TtsApiKeyStorage>()) {
+      try {
+        apiKey = await di.sl<TtsApiKeyStorage>().read(provider);
+      } catch (_) {
+        apiKey = null;
+      }
+    }
+    return di.sl<ReadAloudService>().getModelsForProvider(
+      provider,
+      apiKey: apiKey,
+      baseUrl: baseUrl,
+      model: settingsProvider.readAloudModel,
+    );
+  }
+
   Future<void> _testReadAloudVoice(SettingsProvider settingsProvider) async {
     if (!di.sl.isRegistered<ReadAloudService>()) {
       return;
@@ -338,6 +386,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           _edgeReadAloudVoicesFuture = null;
           _remoteReadAloudVoicesCache.clear();
           _remoteVoicePendingKey = _remoteVoiceCacheKey(settingsProvider);
+          _remoteModelsCache.clear();
+          _remoteModelsPendingKey = _remoteModelsCacheKey(settingsProvider);
+          _editingCustomModel = false;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               _loadReadAloudApiKeyState();
@@ -2494,6 +2545,144 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     );
   }
 
+  String _remoteModelsCacheKey(SettingsProvider settingsProvider) {
+    // The model list is independent of the currently selected model, so only
+    // the provider and base URL invalidate the cache.
+    return '${settingsProvider.readAloudProvider}|'
+        '${settingsProvider.readAloudBaseUrl}';
+  }
+
+  void _requestRemoteModelsReload() {
+    _remoteModelsPendingKey = _remoteModelsCacheKey(
+      context.read<SettingsProvider>(),
+    );
+    setState(() {});
+  }
+
+  Widget _buildRemoteModelPicker(
+    ReadAloudProvider provider,
+    SettingsProvider settingsProvider,
+  ) {
+    if (!di.sl.isRegistered<ReadAloudService>()) {
+      return const SizedBox.shrink();
+    }
+    final cacheKey = _remoteModelsCacheKey(settingsProvider);
+    final Future<List<Map<String, String>>>? future;
+    if (_remoteModelsPendingKey == cacheKey) {
+      future = _remoteModelsCache[cacheKey] ??=
+          _remoteReadAloudModels(
+            provider: provider,
+            settingsProvider: settingsProvider,
+          );
+      final request = future;
+      request.whenComplete(() {
+        if (mounted &&
+            _remoteModelsPendingKey == cacheKey &&
+            identical(_remoteModelsCache[cacheKey], request)) {
+          setState(() {
+            _remoteModelsPendingKey = null;
+          });
+        }
+      });
+    } else {
+      future = _remoteModelsCache[cacheKey] ??
+          Future<List<Map<String, String>>>.value(
+            const <Map<String, String>>[],
+          );
+    }
+    return FutureBuilder<List<Map<String, String>>>(
+      future: future,
+      builder: (context, snapshot) {
+        final models = snapshot.data ?? const <Map<String, String>>[];
+        if (models.isEmpty) {
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(context.l10n.speechRemoteModel),
+            subtitle: Text(context.l10n.speechRemoteModelListUnavailable),
+          );
+        }
+        final defaultModel = provider == ReadAloudProvider.nim
+            ? kDefaultNimTtsModel
+            : kDefaultElevenLabsTtsModel;
+        final saved = settingsProvider.readAloudModel.trim();
+        final known = models.any((model) => model['name'] == saved);
+        final customMode = _editingCustomModel || (saved.isNotEmpty && !known);
+        final effective = saved.isNotEmpty ? saved : defaultModel;
+        final selected = known
+            ? saved
+            : customMode
+            ? kCustomModelKey
+            : models.any((model) => model['name'] == effective)
+            ? effective
+            : null;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SearchableDropdownFormField<String>(
+              value: selected,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechRemoteModel,
+                helperText: context.l10n.speechRemoteModelsLoaded,
+                border: const OutlineInputBorder(),
+              ),
+              isExpanded: true,
+              searchTermsBuilder: (value) => <String>[
+                value,
+                ...models.map((model) => model['label'] ?? ''),
+              ],
+              items: <DropdownMenuItem<String>>[
+                for (final model in models)
+                  DropdownMenuItem<String>(
+                    value: model['name'],
+                    child: Text(
+                      model['label']?.isNotEmpty == true
+                          ? model['label']!
+                          : (model['name'] ?? ''),
+                    ),
+                  ),
+                DropdownMenuItem<String>(
+                  value: kCustomModelKey,
+                  child: Text(context.l10n.speechCustomModel),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                if (value == kCustomModelKey) {
+                  setState(() {
+                    _editingCustomModel = true;
+                  });
+                  return;
+                }
+                setState(() {
+                  _editingCustomModel = false;
+                });
+                unawaited(settingsProvider.setReadAloudModel(value));
+                _requestRemoteVoiceReload();
+              },
+            ),
+            if (customMode) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                key: ValueKey('read-aloud-custom-model-${provider.name}'),
+                initialValue: !known ? saved : '',
+                decoration: InputDecoration(
+                  labelText: context.l10n.speechModel,
+                  helperText: context.l10n.speechModelDefaultHelper(
+                    defaultModel,
+                  ),
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: (value) =>
+                    unawaited(settingsProvider.setReadAloudModel(value)),
+                onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildElevenLabsReadAloudFields(
     SettingsProvider settingsProvider,
   ) {
@@ -2517,23 +2706,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           keyboardType: TextInputType.url,
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudBaseUrl(value)),
-          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
+          onFieldSubmitted: (_) {
+            _requestRemoteVoiceReload();
+            _requestRemoteModelsReload();
+          },
         ),
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
-        TextFormField(
-          key: const ValueKey('read-aloud-model-elevenlabs'),
-          initialValue: settingsProvider.readAloudModel,
-          decoration: InputDecoration(
-            labelText: context.l10n.speechModel,
-            helperText: context.l10n.speechModelDefaultHelper(
-              kDefaultElevenLabsTtsModel,
-            ),
-          ),
-          onChanged: (value) =>
-              unawaited(settingsProvider.setReadAloudModel(value)),
-          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
-        ),
+        _buildRemoteModelPicker(ReadAloudProvider.elevenLabs, settingsProvider),
         const SizedBox(height: 12),
         _buildRemoteVoicePicker(
           ReadAloudProvider.elevenLabs,
@@ -2567,23 +2747,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           keyboardType: TextInputType.url,
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudBaseUrl(value)),
-          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
+          onFieldSubmitted: (_) {
+            _requestRemoteVoiceReload();
+            _requestRemoteModelsReload();
+          },
         ),
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
-        TextFormField(
-          key: const ValueKey('read-aloud-model-nim'),
-          initialValue: settingsProvider.readAloudModel,
-          decoration: InputDecoration(
-            labelText: context.l10n.speechModel,
-            helperText: context.l10n.speechModelDefaultHelper(
-              kDefaultNimTtsModel,
-            ),
-          ),
-          onChanged: (value) =>
-              unawaited(settingsProvider.setReadAloudModel(value)),
-          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
-        ),
+        _buildRemoteModelPicker(ReadAloudProvider.nim, settingsProvider),
         const SizedBox(height: 12),
         _buildRemoteVoicePicker(ReadAloudProvider.nim, settingsProvider),
         const SizedBox(height: 8),

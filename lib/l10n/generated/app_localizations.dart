@@ -9398,6 +9398,30 @@ abstract class AppLocalizations {
   /// **'Loaded from the provider voices.'**
   String get speechRemoteVoicesLoaded;
 
+  /// CodeWalk UI string — speechRemoteModel
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get speechRemoteModel;
+
+  /// CodeWalk UI string — speechRemoteModelListUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The model list could not be loaded right now. You can type a custom model below.'**
+  String get speechRemoteModelListUnavailable;
+
+  /// CodeWalk UI string — speechRemoteModelsLoaded
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded from the provider models.'**
+  String get speechRemoteModelsLoaded;
+
+  /// CodeWalk UI string — speechCustomModel
+  ///
+  /// In en, this message translates to:
+  /// **'Custom model…'**
+  String get speechCustomModel;
+
   /// CodeWalk UI string — speechEdgeExperimentalTitle
   ///
   /// In en, this message translates to:

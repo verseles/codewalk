@@ -165,6 +165,100 @@ void main() {
       expect(adapter.capturedRequests, isEmpty);
     });
 
+    test('parses the models envelope and filters non-TTS models', () async {
+      final adapter = _MockDioAdapter()
+        ..responses.add(
+          _jsonBody(200, jsonEncode(<dynamic>[
+            <String, dynamic>{
+              'model_id': 'eleven_flash_v2_5',
+              'name': 'Eleven Flash v2.5',
+              'max_characters_request': 40000,
+              'can_do_text_to_speech': true,
+            },
+            <String, dynamic>{
+              'model_id': 'eleven_v3',
+              'name': 'Eleven v3',
+              'max_characters_request': 5000,
+              'can_do_text_to_speech': true,
+            },
+            <String, dynamic>{
+              'model_id': 'eleven_voice_generation',
+              'name': 'Voice Generation',
+              'can_do_text_to_speech': false,
+            },
+            <String, dynamic>{'name': 'Missing id entry'},
+          ])),
+        );
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = ElevenLabsTtsBackend(dio: dio);
+
+      final models = await backend.getModels(apiKey: 'xi-test');
+
+      expect(models.map((model) => model.id), <String>[
+        'eleven_flash_v2_5',
+        'eleven_v3',
+      ]);
+      expect(models.first.maxCharacters, 40000);
+      expect(models.last.maxCharacters, 5000);
+      expect(
+        adapter.capturedRequests.single.uri.toString(),
+        'https://api.elevenlabs.io/v1/models',
+      );
+    });
+
+    test('returns empty models without an API key', () async {
+      final adapter = _MockDioAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = ElevenLabsTtsBackend(dio: dio);
+
+      final models = await backend.getModels();
+
+      expect(models, isEmpty);
+      expect(adapter.capturedRequests, isEmpty);
+    });
+
+    test('uses the provider-reported character limit for preflight', () async {
+      final adapter = _MockDioAdapter()
+        ..responses.add(
+          _jsonBody(200, jsonEncode(<dynamic>[
+            <String, dynamic>{
+              'model_id': 'custom-lite',
+              'name': 'Custom Lite',
+              'max_characters_request': 500,
+              'can_do_text_to_speech': true,
+            },
+          ])),
+        );
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = ElevenLabsTtsBackend(dio: dio);
+
+      await backend.getModels(apiKey: 'xi-test');
+
+      await expectLater(
+        backend.speakOrSynthesize(
+          TtsSynthesisRequest(
+            text: 'a' * 501,
+            rate: 0.5,
+            pitch: 1.0,
+            apiKey: 'xi-test',
+            voiceId: 'voice-a',
+            model: 'custom-lite',
+          ),
+          _callbacks,
+        ),
+        throwsA(
+          isA<TtsBackendException>().having(
+            (error) => error.kind,
+            'kind',
+            TtsBackendErrorKind.invalidRequest,
+          ),
+        ),
+      );
+      // Only the model list fetch was performed; the oversized synthesis was
+      // rejected before any HTTP request.
+      expect(adapter.capturedRequests, hasLength(1));
+    });
+
     test('posts text-to-speech request with xi-api-key and returns audio', () async {
       final adapter = _MockDioAdapter()
         ..responses.add(_audioBody(200, <int>[1, 2, 3]));

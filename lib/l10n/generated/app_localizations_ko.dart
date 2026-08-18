@@ -5100,6 +5100,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechRemoteVoicesLoaded => 'Loaded from the provider voices.';
 
   @override
+  String get speechRemoteModel => 'Model';
+
+  @override
+  String get speechRemoteModelListUnavailable =>
+      'The model list could not be loaded right now. You can type a custom model below.';
+
+  @override
+  String get speechRemoteModelsLoaded => 'Loaded from the provider models.';
+
+  @override
+  String get speechCustomModel => 'Custom model…';
+
+  @override
   String get speechEdgeExperimentalTitle => 'Microsoft Edge Speech는 실험적입니다';
 
   @override

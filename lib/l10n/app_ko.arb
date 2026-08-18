@@ -2415,6 +2415,10 @@
   "speechRemoteVoiceUnavailable": "The selected voice is no longer available in the provider catalog.",
   "speechRemoteVoiceListUnavailable": "Using the default voice. The voice list could not be loaded right now.",
   "speechRemoteVoicesLoaded": "Loaded from the provider voices.",
+  "speechRemoteModel": "Model",
+  "speechRemoteModelListUnavailable": "The model list could not be loaded right now. You can type a custom model below.",
+  "speechRemoteModelsLoaded": "Loaded from the provider models.",
+  "speechCustomModel": "Custom model…",
   "speechPitchHiddenForProvider": "Pitch is not supported by this TTS provider and is hidden.",
 
   "speechProviderTemporarilyUnavailable": "TTS 공급자를 일시적으로 사용할 수 없습니다.",

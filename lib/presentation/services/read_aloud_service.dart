@@ -286,6 +286,34 @@ class ReadAloudService extends ChangeNotifier {
     return _backendFor(ReadAloudProvider.native).getLanguages();
   }
 
+  /// Available models for a provider, when the backend can enumerate them.
+  /// Returns an empty list for providers without model discovery.
+  Future<List<Map<String, String>>> getModelsForProvider(
+    ReadAloudProvider provider, {
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    final backend = _backendFor(provider);
+    if (backend is! TtsModelDiscovery) {
+      return const <Map<String, String>>[];
+    }
+    final models = await backend.getModels(
+      apiKey: apiKey,
+      baseUrl: baseUrl,
+      model: model,
+    );
+    return models
+        .map(
+          (model) => <String, String>{
+            'name': model.id,
+            'label': model.label,
+            'maxCharacters': model.maxCharacters?.toString() ?? '',
+          },
+        )
+        .toList();
+  }
+
   TtsBackend _backendFor(ReadAloudProvider provider) {
     return _backends[provider] ?? _backends[ReadAloudProvider.native]!;
   }

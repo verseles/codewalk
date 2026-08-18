@@ -63,6 +63,22 @@ void main() {
       expect(backend.playbackMode, TtsPlaybackMode.generatedAudio);
     });
 
+    test('lists the known NIM TTS models without a network request', () async {
+      final adapter = _MockDioAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = NvidiaNimTtsBackend(dio: dio);
+
+      final models = await backend.getModels();
+
+      expect(models.map((model) => model.id), containsAll(<String>[
+        'chatterbox-tts-multilingual',
+        'magpie-tts-multilingual',
+      ]));
+      expect(models.firstWhere((m) => m.id == 'chatterbox-tts-multilingual').maxCharacters, 500);
+      expect(models.firstWhere((m) => m.id == 'magpie-tts-multilingual').maxCharacters, 2000);
+      expect(adapter.capturedRequests, isEmpty);
+    });
+
     test('throws missing key before making any request', () async {
       final adapter = _MockDioAdapter();
       final dio = Dio()..httpClientAdapter = adapter;
@@ -148,7 +164,7 @@ void main() {
             apiKey: 'nv-test',
             baseUrl: 'https://ai.api.nvidia.com/v1',
             voiceId: 'voice-a',
-            model: 'chatterbox-tts-multilingual:1.1.0',
+            model: 'chatterbox-tts-multilingual',
           ),
           _callbacks,
         ),
@@ -169,7 +185,7 @@ void main() {
             apiKey: 'nv-test',
             baseUrl: 'https://ai.api.nvidia.com/v1',
             voiceId: 'voice-a',
-            model: 'magpie-tts-multilingual:1.10.0',
+            model: 'magpie-tts-multilingual',
           ),
           _callbacks,
         ),
@@ -197,7 +213,7 @@ void main() {
           pitch: 1.0,
           apiKey: 'nv-test',
           baseUrl: 'https://ai.api.nvidia.com/v1///',
-          model: 'magpie-tts-multilingual:1.10.0',
+          model: 'magpie-tts-multilingual',
           voiceId: 'voice-a',
           voiceLocale: 'pt-BR',
         ),
@@ -224,7 +240,7 @@ void main() {
           isTrue);
       expect(
         form.fields.any(
-          (f) => f.key == 'model' && f.value == 'magpie-tts-multilingual:1.10.0',
+          (f) => f.key == 'model' && f.value == 'magpie-tts-multilingual',
         ),
         isTrue,
       );

@@ -138,7 +138,9 @@ const String kDefaultElevenLabsTtsModel = 'eleven_flash_v2_5';
 // NVIDIA Speech NIM hosted endpoints are account-specific (one deployment per
 // account on build.nvidia.com), so there is no universal default base URL.
 const String kDefaultNimTtsBaseUrl = '';
-const String kDefaultNimTtsModel = 'magpie-tts-multilingual:1.10.0';
+// The `model` field id expected by the NVIDIA NIM speech API (no version
+// suffix; versions are selected per deployment).
+const String kDefaultNimTtsModel = 'magpie-tts-multilingual';
 const String kDefaultReadAloudResponseFormat = 'mp3';
 const String kDefaultOpenAiSttBaseUrl = 'https://api.openai.com/v1';
 const String kDefaultOpenAiSttModel = 'gpt-4o-mini-transcribe';

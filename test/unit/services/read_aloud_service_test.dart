@@ -211,6 +211,63 @@ class _FakeGeneratedBackend implements TtsBackend {
   void dispose() {}
 }
 
+class _FakeModelDiscoveryBackend implements TtsBackend, TtsModelDiscovery {
+  String? lastApiKey;
+
+  @override
+  Future<List<TtsModelOption>> getModels({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    lastApiKey = apiKey;
+    return const <TtsModelOption>[
+      TtsModelOption(id: 'model-a', label: 'Model A', maxCharacters: 500),
+    ];
+  }
+
+  @override
+  Future<bool> get isAvailable async => true;
+
+  @override
+  TtsPlaybackMode get playbackMode => TtsPlaybackMode.generatedAudio;
+
+  @override
+  ReadAloudProvider get provider => ReadAloudProvider.edgeExperimental;
+
+  @override
+  Future<TtsSynthesisResult> speakOrSynthesize(
+    TtsSynthesisRequest request,
+    TtsBackendCallbacks callbacks,
+  ) async {
+    return GeneratedTtsAudio(
+      bytes: Uint8List.fromList(<int>[1, 2, 3]),
+      mimeType: 'audio/mpeg',
+    );
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> pause() async {}
+
+  @override
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    return const <TtsVoiceOption>[];
+  }
+
+  @override
+  Future<List<String>> getLanguages() async => const <String>[];
+
+  @override
+  void dispose() {}
+}
+
 class _FakeTtsApiKeyStorageBackend implements TtsApiKeyStorageBackend {
   final Map<String, String> values = <String, String>{};
 
@@ -417,6 +474,53 @@ void main() {
       expect(service.state, ReadAloudState.idle);
       expect(service.activeMessageId, isNull);
 
+      await service.dispose();
+    });
+
+    test('getModelsForProvider returns empty without model discovery', () async {
+      final backend = _FakeGeneratedBackend();
+      final player = _FakeTtsAudioPlayer();
+      final service = ReadAloudService(
+        backends: <ReadAloudProvider, TtsBackend>{
+          ReadAloudProvider.edgeExperimental: backend,
+        },
+        audioPlayer: player,
+      );
+
+      final models = await service.getModelsForProvider(
+        ReadAloudProvider.edgeExperimental,
+      );
+
+      expect(models, isEmpty);
+      await service.dispose();
+    });
+
+    test('getModelsForProvider maps discovery-backed models', () async {
+      final backend = _FakeModelDiscoveryBackend();
+      final player = _FakeTtsAudioPlayer();
+      final service = ReadAloudService(
+        backends: <ReadAloudProvider, TtsBackend>{
+          ReadAloudProvider.edgeExperimental: backend,
+        },
+        audioPlayer: player,
+      );
+
+      final models = await service.getModelsForProvider(
+        ReadAloudProvider.edgeExperimental,
+        apiKey: 'xi-test',
+      );
+
+      expect(
+        models,
+        <Map<String, String>>[
+          <String, String>{
+            'name': 'model-a',
+            'label': 'Model A',
+            'maxCharacters': '500',
+          },
+        ],
+      );
+      expect(backend.lastApiKey, 'xi-test');
       await service.dispose();
     });
 

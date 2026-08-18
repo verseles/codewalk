@@ -6768,6 +6768,22 @@
   "@speechRemoteVoicesLoaded": {
     "description": "CodeWalk UI string — speechRemoteVoicesLoaded"
   },
+  "speechRemoteModel": "Model",
+  "@speechRemoteModel": {
+    "description": "CodeWalk UI string — speechRemoteModel"
+  },
+  "speechRemoteModelListUnavailable": "The model list could not be loaded right now. You can type a custom model below.",
+  "@speechRemoteModelListUnavailable": {
+    "description": "CodeWalk UI string — speechRemoteModelListUnavailable"
+  },
+  "speechRemoteModelsLoaded": "Loaded from the provider models.",
+  "@speechRemoteModelsLoaded": {
+    "description": "CodeWalk UI string — speechRemoteModelsLoaded"
+  },
+  "speechCustomModel": "Custom model…",
+  "@speechCustomModel": {
+    "description": "CodeWalk UI string — speechCustomModel"
+  },
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech is experimental",
   "@speechEdgeExperimentalTitle": {
     "description": "CodeWalk UI string — speechEdgeExperimentalTitle"

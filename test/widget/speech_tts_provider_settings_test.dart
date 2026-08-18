@@ -23,7 +23,7 @@ import 'package:provider/provider.dart';
 import '../support/fakes.dart';
 import '../support/pump_localized_app.dart';
 
-class _FakeTtsBackend implements TtsBackend {
+class _FakeTtsBackend implements TtsBackend, TtsModelDiscovery {
   _FakeTtsBackend(this._provider, {this.voicesDelay});
 
   final ReadAloudProvider _provider;
@@ -38,6 +38,18 @@ class _FakeTtsBackend implements TtsBackend {
 
   @override
   Future<bool> get isAvailable async => true;
+
+  @override
+  Future<List<TtsModelOption>> getModels({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    return const <TtsModelOption>[
+      TtsModelOption(id: 'model-a', label: 'Model A', maxCharacters: 1000),
+      TtsModelOption(id: 'model-b', label: 'Model B', maxCharacters: 2000),
+    ];
+  }
 
   @override
   Future<List<TtsVoiceOption>> getVoices({
@@ -407,6 +419,106 @@ void main() {
           .where((url) => url == 'https://api.elevenlabs.io/v2'),
       isNotEmpty,
     );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'ElevenLabs model picker lists provider models and selection updates '
+      'the saved model', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    _registerDi(_TtsStorageBackend());
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Loaded from the provider models.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Loaded from the provider models.'), findsOneWidget);
+
+    await tester.tap(
+      find.text('Loaded from the provider models.'),
+      warnIfMissed: false,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(BottomSheet), matching: finder);
+
+    expect(inSheet(find.text('Model A')), findsOneWidget);
+    expect(inSheet(find.text('Model B')), findsOneWidget);
+
+    await tester.ensureVisible(inSheet(find.text('Model B')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(inSheet(find.text('Model B')), warnIfMissed: true);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(provider.readAloudModel, 'model-b');
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets('model picker custom entry reveals a free-text model field',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    _registerDi(_TtsStorageBackend());
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Loaded from the provider models.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(
+      find.text('Loaded from the provider models.'),
+      warnIfMissed: false,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(BottomSheet), matching: finder);
+
+    await tester.ensureVisible(inSheet(find.text('Custom model…')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(inSheet(find.text('Custom model…')), warnIfMissed: true);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final customField = find.byKey(
+      const ValueKey('read-aloud-custom-model-elevenLabs'),
+    );
+    expect(customField, findsOneWidget);
+    await tester.enterText(customField, 'my-custom-model');
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(provider.readAloudModel, 'my-custom-model');
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
