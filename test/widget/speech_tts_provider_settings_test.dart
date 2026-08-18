@@ -24,10 +24,11 @@ import '../support/fakes.dart';
 import '../support/pump_localized_app.dart';
 
 class _FakeTtsBackend implements TtsBackend, TtsModelDiscovery {
-  _FakeTtsBackend(this._provider, {this.voicesDelay});
+  _FakeTtsBackend(this._provider, {this.voicesDelay, this.models});
 
   final ReadAloudProvider _provider;
   final Duration? voicesDelay;
+  final List<TtsModelOption>? models;
   final List<String?> requestedBaseUrls = <String?>[];
 
   @override
@@ -45,10 +46,11 @@ class _FakeTtsBackend implements TtsBackend, TtsModelDiscovery {
     String? baseUrl,
     String? model,
   }) async {
-    return const <TtsModelOption>[
-      TtsModelOption(id: 'model-a', label: 'Model A', maxCharacters: 1000),
-      TtsModelOption(id: 'model-b', label: 'Model B', maxCharacters: 2000),
-    ];
+    return models ??
+        const <TtsModelOption>[
+          TtsModelOption(id: 'model-a', label: 'Model A', maxCharacters: 1000),
+          TtsModelOption(id: 'model-b', label: 'Model B', maxCharacters: 2000),
+        ];
   }
 
   @override
@@ -511,6 +513,53 @@ void main() {
     await tester.tap(inSheet(find.text('Custom model…')), warnIfMissed: true);
     await tester.pump(const Duration(milliseconds: 300));
 
+    final customField = find.byKey(
+      const ValueKey('read-aloud-custom-model-elevenLabs'),
+    );
+    expect(customField, findsOneWidget);
+    await tester.enterText(customField, 'my-custom-model');
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(provider.readAloudModel, 'my-custom-model');
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'model picker keeps a custom model field when discovery is unavailable',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    final fakeElevenLabs = _FakeTtsBackend(
+      ReadAloudProvider.elevenLabs,
+      models: const <TtsModelOption>[],
+    );
+    _registerDi(_TtsStorageBackend(), elevenLabs: fakeElevenLabs);
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('read-aloud-custom-model-elevenLabs')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.text('The model list could not be loaded right now. You can type '
+          'a custom model below.'),
+      findsOneWidget,
+    );
     final customField = find.byKey(
       const ValueKey('read-aloud-custom-model-elevenLabs'),
     );

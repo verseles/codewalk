@@ -259,6 +259,48 @@ void main() {
       expect(adapter.capturedRequests, hasLength(1));
     });
 
+    test('clears cached character limits when a new fetch has no models', () async {
+      final adapter = _MockDioAdapter()
+        ..responses.add(
+          _jsonBody(200, jsonEncode(<dynamic>[
+            <String, dynamic>{
+              'model_id': 'custom-lite',
+              'name': 'Custom Lite',
+              'max_characters_request': 500,
+              'can_do_text_to_speech': true,
+            },
+          ])),
+        );
+      final dio = Dio()..httpClientAdapter = adapter;
+      final backend = ElevenLabsTtsBackend(dio: dio);
+
+      await backend.getModels(apiKey: 'xi-test');
+      // A subsequent empty fetch (e.g. another account without the model)
+      // must not keep applying the previously learned limit.
+      await backend.getModels(apiKey: 'other-key');
+
+      await expectLater(
+        backend.speakOrSynthesize(
+          TtsSynthesisRequest(
+            text: 'a' * 501,
+            rate: 0.5,
+            pitch: 1.0,
+            apiKey: 'other-key',
+            voiceId: 'voice-a',
+            model: 'custom-lite',
+          ),
+          _callbacks,
+        ),
+        throwsA(
+          isA<TtsBackendException>().having(
+            (error) => error.kind,
+            'kind',
+            isNot(TtsBackendErrorKind.invalidRequest),
+          ),
+        ),
+      );
+    });
+
     test('posts text-to-speech request with xi-api-key and returns audio', () async {
       final adapter = _MockDioAdapter()
         ..responses.add(_audioBody(200, <int>[1, 2, 3]));

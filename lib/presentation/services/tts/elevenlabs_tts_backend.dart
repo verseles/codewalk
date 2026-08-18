@@ -100,6 +100,9 @@ class ElevenLabsTtsBackend implements TtsBackend, TtsModelDiscovery {
     if (key == null || key.isEmpty) {
       return const <TtsModelOption>[];
     }
+    // The cache must only reflect the most recent fetch; limits learned from
+    // a previous base URL/account must not leak into the current context.
+    _modelCharLimits.clear();
     try {
       final response = await _dio.get<dynamic>(
         '${_normalizeBaseUrl(baseUrl)}/models',

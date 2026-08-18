@@ -253,16 +253,19 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     try {
       await di.sl<TtsApiKeyStorage>().write(provider, value);
       _readAloudApiKeyController.clear();
-      _remoteReadAloudVoicesCache.clear();
-      _remoteVoicePendingKey =
-          _remoteVoiceCacheKey(settingsProvider) == savedCacheKey
-          ? savedCacheKey
-          : null;
-      _remoteModelsCache.clear();
-      _remoteModelsPendingKey =
-          _remoteModelsCacheKey(settingsProvider) == savedModelsCacheKey
-          ? savedModelsCacheKey
-          : null;
+      // Only invalidate the discovery state captured at save start. If the
+      // provider or base URL changed while the key was being written, that
+      // other path owns the pending/cache state and clearing it here would
+      // drop a freshly armed reload.
+      if (_remoteVoiceCacheKey(settingsProvider) == savedCacheKey) {
+        _remoteReadAloudVoicesCache.clear();
+        _remoteVoicePendingKey = savedCacheKey;
+      }
+      if (_remoteModelsCacheKey(settingsProvider) == savedModelsCacheKey) {
+        _remoteModelsCache.clear();
+        _remoteModelsPendingKey = savedModelsCacheKey;
+        _editingCustomModel = false;
+      }
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
         _hasReadAloudApiKey = value.trim().isNotEmpty;
@@ -2595,10 +2598,24 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       builder: (context, snapshot) {
         final models = snapshot.data ?? const <Map<String, String>>[];
         if (models.isEmpty) {
-          return ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(context.l10n.speechRemoteModel),
-            subtitle: Text(context.l10n.speechRemoteModelListUnavailable),
+          // Discovery unavailable (no saved key, unreachable base URL, or a
+          // failed fetch): keep the free-text custom model field so users can
+          // still configure a model, matching the message below.
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(context.l10n.speechRemoteModel),
+                subtitle: Text(context.l10n.speechRemoteModelListUnavailable),
+              ),
+              const SizedBox(height: 12),
+              _buildCustomModelField(
+                provider,
+                settingsProvider,
+                initialValue: settingsProvider.readAloudModel.trim(),
+              ),
+            ],
           );
         }
         final defaultModel = provider == ReadAloudProvider.nim
@@ -2662,24 +2679,37 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             if (customMode) ...[
               const SizedBox(height: 12),
-              TextFormField(
-                key: ValueKey('read-aloud-custom-model-${provider.name}'),
+              _buildCustomModelField(
+                provider,
+                settingsProvider,
                 initialValue: !known ? saved : '',
-                decoration: InputDecoration(
-                  labelText: context.l10n.speechModel,
-                  helperText: context.l10n.speechModelDefaultHelper(
-                    defaultModel,
-                  ),
-                  border: const OutlineInputBorder(),
-                ),
-                onChanged: (value) =>
-                    unawaited(settingsProvider.setReadAloudModel(value)),
-                onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
               ),
             ],
           ],
         );
       },
+    );
+  }
+
+  Widget _buildCustomModelField(
+    ReadAloudProvider provider,
+    SettingsProvider settingsProvider, {
+    required String initialValue,
+  }) {
+    final defaultModel = provider == ReadAloudProvider.nim
+        ? kDefaultNimTtsModel
+        : kDefaultElevenLabsTtsModel;
+    return TextFormField(
+      key: ValueKey('read-aloud-custom-model-${provider.name}'),
+      initialValue: initialValue,
+      decoration: InputDecoration(
+        labelText: context.l10n.speechModel,
+        helperText: context.l10n.speechModelDefaultHelper(defaultModel),
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: (value) =>
+          unawaited(settingsProvider.setReadAloudModel(value)),
+      onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
     );
   }
 
