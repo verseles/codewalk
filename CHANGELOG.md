@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.209.0 - 2026-08-18
+
+- docs(behavior): document ElevenLabs and NVIDIA NIM read-aloud providers
+- test(tts): harden voice-picker race handling and lock key-save guard
+- fix(tts): snapshot discovery key before the key-save write
+- fix(tts): keep voice picker attached to in-flight discovery
+- fix(tts): trigger remote voice discovery only on explicit submit
+- fix(tts): address reviewer findings for cloud read-aloud providers
+- feat(tts): add ElevenLabs and NVIDIA NIM read-aloud providers
+
 ## v1.208.0 - 2026-08-18
 
 - fix(notifications): keep cached session title for background group summary
