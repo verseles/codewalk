@@ -627,6 +627,7 @@ class _AndroidBackgroundAlertRunner {
         ...previousSnapshot.sessionTitleById,
         ...sessionMetadata.titleBySessionId,
       };
+      var effectiveTitles = cachedTitles;
       final currentState = BackgroundPollingState(
         sessionStatusById: statusById,
         sessionUpdatedAtById: sessionMetadata.updatedAtBySessionId.isEmpty
@@ -660,6 +661,7 @@ class _AndroidBackgroundAlertRunner {
           ...cachedTitles,
           ...sessionMetadata.titleBySessionId,
         };
+        effectiveTitles = refreshedTitles;
         final refreshedState = BackgroundPollingState(
           sessionStatusById: statusById,
           sessionUpdatedAtById: sessionMetadata.updatedAtBySessionId,
@@ -712,7 +714,7 @@ class _AndroidBackgroundAlertRunner {
             signal: signal,
             serverId: server.serverId,
             directory: directory,
-            sessionTitle: sessionMetadata.titleBySessionId[signal.sessionId],
+            sessionTitle: effectiveTitles[signal.sessionId],
           );
         }
       }
