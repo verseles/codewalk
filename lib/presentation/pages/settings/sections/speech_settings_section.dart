@@ -85,6 +85,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   String? _readAloudApiKeyStatus;
   int _readAloudApiKeyGeneration = 0;
   ReadAloudProvider? _lastSeenReadAloudProvider;
+  bool _remoteVoiceReloadPending = true;
   final Map<String, Future<List<Map<String, String>>>>
   _remoteReadAloudVoicesCache =
       <String, Future<List<Map<String, String>>>>{};
@@ -244,6 +245,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       await di.sl<TtsApiKeyStorage>().write(provider, value);
       _readAloudApiKeyController.clear();
       _remoteReadAloudVoicesCache.clear();
+      _remoteVoiceReloadPending = true;
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
         _hasReadAloudApiKey = value.trim().isNotEmpty;
@@ -330,6 +332,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           _readAloudApiKeyStatus = null;
           _edgeReadAloudVoicesFuture = null;
           _remoteReadAloudVoicesCache.clear();
+          _remoteVoiceReloadPending = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               _loadReadAloudApiKeyState();
@@ -2347,6 +2350,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     );
   }
 
+  void _requestRemoteVoiceReload() {
+    if (_remoteVoiceReloadPending) {
+      return;
+    }
+    _remoteVoiceReloadPending = true;
+    setState(() {});
+  }
+
   Widget _buildRemoteVoicePicker(
     ReadAloudProvider provider,
     SettingsProvider settingsProvider,
@@ -2357,11 +2368,23 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final cacheKey =
         '$provider|${settingsProvider.readAloudBaseUrl}|'
         '${settingsProvider.readAloudModel}';
-    final future = _remoteReadAloudVoicesCache[cacheKey] ??=
-        _remoteReadAloudVoices(
-          provider: provider,
-          settingsProvider: settingsProvider,
-        );
+    final Future<List<Map<String, String>>>? future;
+    if (_remoteVoiceReloadPending) {
+      future = _remoteReadAloudVoicesCache[cacheKey] ??=
+          _remoteReadAloudVoices(
+            provider: provider,
+            settingsProvider: settingsProvider,
+          );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _remoteVoiceReloadPending) {
+          setState(() {
+            _remoteVoiceReloadPending = false;
+          });
+        }
+      });
+    } else {
+      future = null;
+    }
     return FutureBuilder<List<Map<String, String>>>(
       future: future,
       builder: (context, snapshot) {
@@ -2477,6 +2500,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           keyboardType: TextInputType.url,
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudBaseUrl(value)),
+          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
         ),
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
@@ -2491,6 +2515,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           ),
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudModel(value)),
+          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
         ),
         const SizedBox(height: 12),
         _buildRemoteVoicePicker(
@@ -2525,6 +2550,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           keyboardType: TextInputType.url,
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudBaseUrl(value)),
+          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
         ),
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
@@ -2539,6 +2565,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           ),
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudModel(value)),
+          onFieldSubmitted: (_) => _requestRemoteVoiceReload(),
         ),
         const SizedBox(height: 12),
         _buildRemoteVoicePicker(ReadAloudProvider.nim, settingsProvider),
