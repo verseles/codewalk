@@ -79,12 +79,14 @@ codewalk/
 │       │   ├── session_tab_icon_presets.dart # SessionTabIconPreset enum + localized preset labels
 │       │   ├── session_attention/       # Attention coordinator, completion resolver, host contract/protocol, and platform entrypoints
 │       │   ├── car_messaging/           # Android Auto notification messaging: action handler, gate, dispatch worker, notifier, runtime (issue #99)
-│       │   └── tts/                    # Read-aloud TTS backend contracts, adapters, fresh-install default resolver, generated-audio player, and text extraction
+│       │   └── tts/                    # Read-aloud TTS contracts, native/cloud backend adapters, executor, defaults, generated-audio player, and text extraction
 │       │       ├── read_aloud_default_resolver.dart # Fresh-install read-aloud provider/voice default resolver
 │       │       ├── edge_tts_protocol.dart # Edge/Bing Read Aloud URL, header, frame, SSML, voice-list, and MP3 frame helpers
 │       │       ├── edge_tts_websocket.dart # Conditional Edge TTS websocket transport contract/export
 │       │       ├── edge_tts_websocket_io.dart # `dart:io` websocket upgrade transport for native targets
-│       │       └── edge_tts_websocket_stub.dart # `web_socket_channel` transport for non-IO targets
+│       │       ├── edge_tts_websocket_stub.dart # `web_socket_channel` transport for non-IO targets
+│       │       ├── elevenlabs_tts_backend.dart # ElevenLabs cloud TTS voice discovery and generated MP3 synthesis
+│       │       └── nvidia_nim_tts_backend.dart # NVIDIA Speech NIM cloud TTS voice discovery and generated WAV synthesis
 │       ├── utils/ # Presentation helpers (incl. WindowSizeClass MD3 breakpoints, diff parser, file path detector, file path markdown, math markdown)
 │       └── theme/                      # Material You theme: AppTheme, AppShapes, BrandColor seeds, AppSemanticColors, AppVisualStyleTokens (issue #86)
 ├── test/                               # Unit, widget, integration, presentation, support tests
@@ -111,13 +113,13 @@ codewalk/
 ## Entry Points
 
 ```text
-lib/main.dart                                # Runtime entry; DI, providers, DynamicColorBuilder with user theme prefs (theme mode, dynamic color, AMOLED dark, brand seed, contrast, OpenCode preset, visual style); syncs dynamic color availability to SettingsProvider via postFrameCallback; passes `settingsProvider.visualStyle` into `AppTheme.lightFrom`/`darkFrom` alongside `OpenCodeThemeTokens` extensions
+lib/main.dart                                # Runtime entry; DI (including the provider-routed TTS backend registry), providers, DynamicColorBuilder with user theme prefs (theme mode, dynamic color, AMOLED dark, brand seed, contrast, OpenCode preset, visual style); syncs dynamic color availability to SettingsProvider via postFrameCallback; passes `settingsProvider.visualStyle` into `AppTheme.lightFrom`/`darkFrom` alongside `OpenCodeThemeTokens` extensions
 lib/presentation/pages/app_shell_page.dart   # Root shell; gates onboarding wizard, mounts ChatPage and desktop tray behavior; triggers startup/hourly update toast via `addPostFrameCallback` + `UpdateCheckResult` when `checkUpdatesOnOpen` is enabled; reacts to `UpdateInstallState` transitions with platform-aware snackbars (Android downloading progress, desktop installing spinner, done/retry states) and triggers `startInstall()`
 lib/presentation/pages/onboarding_wizard_page.dart # First-run wizard shown when no server is configured
 lib/presentation/pages/settings_page.dart     # Settings landing and responsive split/detail shell; navigates to section destinations grouped by category (setup, experience, input, support) with a searchable section list; shows the shared update notice at the top when `SettingsProvider.updateCheckResult` contains a newer non-dismissed CodeWalk version
 lib/presentation/pages/chat_page.dart         # Main chat/session/file UI entry; mounts the in-app session-attention overlay on iOS; uses WindowSizeClass for responsive layout; guards startup logic against no-active-server state; timeline empty state includes CTA to setup wizard; exposes buildComposerReceivingTips() for the localized composer status-tip catalog
   └── chat_page_local_models_part.dart # Local UI state classes (part of chat_page.dart; see commit 8759defc)
-lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Desktop child-window and Android service-engine Flutter entrypoints
+lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Desktop child-window and Android service-engine Flutter entrypoints; builds the host ReadAloudService with native, Edge, OpenAI-compatible, ElevenLabs, and NVIDIA NIM TTS backends
 android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android platform-channel host (session overlay, process-diagnostic method-channel query, composer clipboard, launches native OAuth in CustomTabs) and activation handoff entrypoint
 android/app/src/main/kotlin/com/verseles/codewalk/overlay/SessionOverlayService.kt # Android foreground-service overlay entrypoint
 lib/presentation/pages/logs_page.dart           # In-app App Logs surface; gated by `SettingsProvider.loggingEnabled` (disabled by default) — renders `_LogsDisabledState` empty-state with enable action when off, otherwise filters by time range/level/search/performance, supports **tag filter chips** (common task/network/cache presets plus **custom tag** input dialog), copies filtered entries, surfaces `Slowest performance logs` modal or, when a `task:*` tag is selected, `Slowest tasks` modal; AppLogger/measurePerformance toggle persisted via SettingsProvider
@@ -128,7 +130,7 @@ lib/presentation/pages/logs_page.dart           # In-app App Logs surface; gated
 ## Core Modules
 
 ```text
-lib/core/di/injection_container.dart              # Registers datasources, repositories, usecases, providers, TailscaleService, WorkspaceFileOperationsService, TtsApiKeyStorage, SttApiKeyStorage, and ReadAloudService TTS backends; registers ApiSpeechInputService as a factory (non-web only, `ApiSpeechInputService(apiKeyStorage: sl<SttApiKeyStorage>())`) so each composer resolves its own isolated instance; injects SettingsProvider's nativeReadAloudAvailabilityProbe from ReadAloudService.isProviderAvailable(ReadAloudProvider.native); wires tailscaleService into AppProvider factory; _loadLocalConfig applies tailscaleEnabled on active profile
+lib/core/di/injection_container.dart              # Registers datasources, repositories, usecases, providers, TailscaleService, WorkspaceFileOperationsService, TtsApiKeyStorage, SttApiKeyStorage, and ReadAloudService's native, Edge, OpenAI-compatible, ElevenLabs, and NVIDIA NIM TTS backends; registers ApiSpeechInputService as a factory (non-web only, `ApiSpeechInputService(apiKeyStorage: sl<SttApiKeyStorage>())`) so each composer resolves its own isolated instance; injects SettingsProvider's nativeReadAloudAvailabilityProbe from ReadAloudService.isProviderAvailable(ReadAloudProvider.native); wires tailscaleService into AppProvider factory; _loadLocalConfig applies tailscaleEnabled on active profile
 lib/core/constants/app_constants.dart             # Shared persistence keys, including `AppConstants.sessionTabsStateKey` (`session_tabs_state`), `sessionTabIconOverridesKey` (`session_tab_icon_overrides`), and `androidProcessDiagnosticsKey` (`android_process_diagnostics_v1`); `opencodeGoWorkspaceIdKey`/`opencodeGoAuthCookieKey` remain only as legacy OpenCode Go purge targets (issue #96)
 lib/core/i18n/app_locales.dart                     # Locale registry: 14 supported locales, resolution callback, native-name metadata, PT_BR normalization
 lib/core/i18n/l10n_context.dart                    # BuildContext extension: `context.l10n` shorthand for AppLocalizations access
@@ -214,13 +216,16 @@ lib/presentation/services/car_messaging/car_messaging_action_handler.dart # Car 
 lib/presentation/services/car_messaging/car_messaging_dispatch_worker.dart # Queued car-reply dispatch to the server (`prompt_async`), completion publishing, and failure marking
 lib/presentation/services/car_messaging/car_messaging_gate.dart # Pure background gate predicates: background-alert master switch, Data Saver pause, and server-profile eligibility (no debug/feature/preference gates)
 lib/presentation/services/car_messaging/car_messaging_runtime.dart # Runtime teardown orchestration: notification cancellation, store clear, server/identity removal, and pending reply-work cancellation
-lib/presentation/services/read_aloud_service.dart                # ReadAloudService: provider-routed read-aloud facade; exposes isProviderAvailable for runtime native TTS probes; generated-audio backends (including Edge experimental when user-selected or chosen by fresh-install defaults) are routed through byte playback; loads the secure OpenAI-compatible API key when needed; tracks idle/loading/playing/paused state and per-message playback
-lib/presentation/services/tts/tts_backend.dart                   # TTS backend contract, request/result models, generated-audio result, voice metadata, and normalized backend error kinds
+lib/presentation/services/read_aloud_service.dart                # ReadAloudService: provider-routed read-aloud facade; exposes isProviderAvailable for runtime native TTS probes; generated-audio backends (including Edge experimental, ElevenLabs, and NVIDIA NIM) are routed through byte playback; loads per-provider secure cloud TTS API keys when needed; tracks idle/loading/playing/paused state and per-message playback
+lib/presentation/services/tts/tts_backend.dart                   # TTS backend contract, request/result models, generated-audio result, voice metadata, normalized backend error kinds, and provider-aware `getVoices({apiKey, baseUrl, model})` configuration
+lib/presentation/services/tts/tts_executor.dart                 # Provider backend selection, secure cloud-key lookup, serialized stop handling, and stale speech-job protection
 lib/presentation/services/tts/native_tts_backend.dart            # Native flutter_tts backend with voice/language lookup and platform speech callbacks
 lib/presentation/services/tts/read_aloud_default_resolver.dart   # Fresh-install read-aloud defaults: Linux selects Edge experimental; other platforms select native when runtime probe succeeds, otherwise Edge with locale-mapped voice
 lib/presentation/services/tts/generated_tts_audio_player.dart    # audioplayers-backed byte playback adapter for generated cloud TTS audio
 lib/presentation/services/tts/openai_compatible_tts_backend.dart # OpenAI-compatible `/audio/speech` backend with model/voice/base URL/format options and Dio error mapping
 lib/presentation/services/tts/edge_experimental_tts_backend.dart # Experimental Microsoft Edge/Bing Read Aloud backend; user-selectable and used by fresh-install defaults when native TTS is unavailable; discovers voices, performs direct websocket synthesis, and returns generated MP3 audio bytes
+lib/presentation/services/tts/elevenlabs_tts_backend.dart        # ElevenLabs cloud TTS backend; API-key voice discovery, model/base-URL synthesis, generated MP3 audio, character limits, and Dio error mapping
+lib/presentation/services/tts/nvidia_nim_tts_backend.dart        # NVIDIA Speech NIM cloud TTS backend; API-key/base-URL voice discovery, model/language synthesis, generated WAV audio, character limits, and Dio error mapping
 lib/presentation/services/tts/edge_tts_protocol.dart             # Edge/Bing Read Aloud protocol helpers for signed URLs, browser headers, SSML, frame parsing, voice catalog parsing, limits, and MP3 MIME/format constants
 lib/presentation/services/tts/edge_tts_websocket.dart            # Conditional websocket abstraction used by the Edge backend
 lib/presentation/services/tts/edge_tts_websocket_io.dart         # Native websocket transport using `dart:io` upgrade headers compatible with Edge/Bing Read Aloud
@@ -239,7 +244,7 @@ lib/presentation/services/session_attention/session_attention_completion_resolve
 lib/presentation/services/session_attention/session_attention_host_contract.dart # Cross-platform host capability and lifecycle contract
 lib/presentation/services/session_attention/session_attention_host_protocol.dart # Versioned host snapshot and command protocol
 lib/presentation/services/session_attention/session_attention_host_service*.dart # Conditional Android, desktop child-window, iOS in-app, and unsupported host implementation selection
-lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Flutter entrypoints and IPC bridge for desktop child and Android service hosts
+lib/presentation/services/session_attention/session_overlay_entrypoint.dart # Flutter entrypoints and IPC bridge for desktop child and Android service hosts; constructs the overlay ReadAloudService with the complete native/cloud TTS backend registry
 android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt # Android system/platform channel host with process-diagnostic method-channel query; native OAuth launch via AndroidX Custom Tabs with ACTION_VIEW fallback
 android/app/src/main/res/xml/automotive_app_desc.xml # Automotive notification descriptor declaring `<uses name="notification"/>`, shipped in every release APK (issue #99)
 lib/presentation/widgets/session_attention_overlay/session_attention_overlay.dart # Shared bubble/panel attention presentation
@@ -545,6 +550,9 @@ test/unit/services/                     # Platform and runtime service unit test
   read_aloud_default_resolver_test.dart  #   Fresh-install read-aloud provider selection and Edge locale voice fallback tests
   read_aloud_text_extractor_test.dart    #   Assistant text extraction and Markdown sanitization before TTS/cloud read-aloud
   openai_compatible_tts_backend_test.dart # OpenAI-compatible TTS request payload, response audio handling, and provider error mapping
+  elevenlabs_tts_backend_test.dart       #   ElevenLabs voice parsing, model/voice request payload, generated MP3 handling, limits, and error mapping
+  nvidia_nim_tts_backend_test.dart       #   NVIDIA NIM voice parsing, multipart synthesis/audio validation, limits, and error mapping
+  tts_executor_test.dart                 #   Provider selection, per-provider API-key lookup, serialized stop handling, and speech-job cancellation guards
   edge_tts_protocol_test.dart            #   Edge/Bing Read Aloud URL signing, headers, SSML, frame parsing, MP3 audio frames, and input limits
   edge_experimental_tts_backend_test.dart #   Edge experimental voice parsing, direct websocket synthesis to generated MP3 audio bytes, error mapping, and stop/close behavior
   windows_microphone_service_test.dart   #   Windows microphone access probe and preflight status tests
@@ -603,7 +611,7 @@ tool/release/changelog.py              # Changelog update/extract helper used by
 - `make web` builds the static Flutter web app into `build/web` with configurable `WEB_BASE_HREF` (default `/`) and verifies the expected entry files for Cloudflare Pages or static hosting upload.
 - `make release V=patch|minor|major` requires a clean worktree, updates `CHANGELOG.md` through `tool/release/changelog.py`, bumps `pubspec.yaml`, commits, tags, and pushes.
 - Android manifest declares `REQUEST_INSTALL_PACKAGES` permission and a `FileProvider` authority (`com.verseles.codewalk.fileprovider`) required for APK sideload installs via `open_filex`.
-- Sensitive server credentials and cloud TTS/STT API keys (currently OpenAI-compatible) are persisted through `flutter_secure_storage` (v10.0.0) via `AppLocalDataSource` / `TtsApiKeyStorage` / `SttApiKeyStorage`.
+- Sensitive server credentials and cloud TTS/STT API keys (OpenAI-compatible, ElevenLabs, and NVIDIA NIM for TTS) are persisted through `flutter_secure_storage` (v10.0.0) via `AppLocalDataSource` / `TtsApiKeyStorage` / `SttApiKeyStorage`.
 - Platform folders currently present: `android/`, `linux/`, `macos/`, `web/`, `windows/`.
 - Linux keeps native STT disabled; new installs default to Parakeet while Sherpa, Moonshine, Parakeet, and SenseVoice remain explicit desktop-selectable alternatives.
 - Android build targets Java 17 (`sourceCompatibility`, `targetCompatibility`, `jvmTarget`).
@@ -630,12 +638,14 @@ tool/release/changelog.py              # Changelog update/extract helper used by
 
 ### Read-Aloud / TTS
 
-- **Settings**: `ExperienceSettings` stores non-secret provider/model/base URL/voice/locale/format preferences; existing persisted settings are preserved; `TtsApiKeyStorage` stores the OpenAI-compatible TTS API key separately in secure storage.
+- **Settings**: `ExperienceSettings` stores non-secret provider/model/base URL/voice/locale/format preferences; existing persisted settings are preserved; `TtsApiKeyStorage` stores cloud TTS API keys separately per provider in secure storage.
 - **Flow**: `chat_message_content.dart` extracts sanitized assistant text with `ReadAloudTextExtractor`, calls `ReadAloudService.speak()` with `SettingsProvider` read-aloud options, shows the active loading state before playback, and opens Settings > Speech on read-aloud control long-press.
 - **Lifecycle**: ChatPage app/window lifecycle transitions leave ReadAloudService active so read-aloud is not stopped by inactive/hidden/paused/resumed state changes.
 - **First-run defaults**: `SettingsProvider` applies `ReadAloudDefaultResolver` only when no `ExperienceSettings` JSON exists; Linux fresh installs select Edge experimental because native `flutter_tts` is unavailable, Windows/macOS/others select native when `ReadAloudService.isProviderAvailable(ReadAloudProvider.native)` succeeds, and native-unavailable installs fall back to Edge with a locale-mapped voice.
-- **Backends**: `ReadAloudService` routes native, OpenAI-compatible, and Edge experimental providers; OpenAI-compatible and Edge use generated-audio `TtsBackend` adapters plus `TtsAudioPlayer` byte playback; all providers share idle/loading/playing/paused service state.
+- **Backends**: `ReadAloudService` routes native, OpenAI-compatible, Edge experimental, ElevenLabs, and NVIDIA NIM providers; the generated-audio backends use `TtsBackend` adapters plus `TtsAudioPlayer` byte playback, while native uses `flutter_tts`; all providers share idle/loading/playing/paused service state. `TtsBackend.getVoices` accepts optional API key, base URL, and model parameters for provider-specific voice discovery.
 - **Edge experimental**: `EdgeExperimentalTtsBackend` discovers Microsoft Edge/Bing Read Aloud voices, synthesizes directly over conditional websocket transport, and returns generated MP3 bytes.
+- **ElevenLabs**: `ElevenLabsTtsBackend` discovers voices through the ElevenLabs API and synthesizes model-selected speech as generated MP3 bytes.
+- **NVIDIA NIM**: `NvidiaNimTtsBackend` discovers deployment voices and synthesizes model/language-selected speech through the configured NIM base URL as generated WAV bytes.
 
 ### Session Attention Overlay Workflow
 
