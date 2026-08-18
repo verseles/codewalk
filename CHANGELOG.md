@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.208.0 - 2026-08-18
+
+- fix(notifications): keep cached session title for background group summary
+- fix(notifications): include session title in all OS notifications
+
 ## v1.207.0 - 2026-08-17
 
 - fix(app): avoid rebuilding MaterialApp for unrelated settings
