@@ -6,10 +6,17 @@ import 'package:dio/dio.dart';
 import '../../../core/i18n/l10n_bridge.dart';
 import '../../../core/logging/app_logger.dart';
 import '../../../domain/entities/experience_settings.dart';
-import 'openai_compatible_tts_backend.dart';
 import 'tts_backend.dart';
 
 const String kElevenLabsOutputFormat = 'mp3';
+
+/// ElevenLabs `voice_settings.speed` is validated to the 0.7–1.2 range.
+/// Mapping the read-aloud rate (0.0–1.0) into that range keeps the slider
+/// meaningful and always accepted by the API.
+double elevenLabsSpeedFromReadAloudRate(double rate) {
+  final clamped = rate.clamp(0.0, 1.0);
+  return 0.7 + clamped * 0.5;
+}
 
 /// Character limits per ElevenLabs model. Unknown models are not preflight
 /// restricted so providers can add models without client changes.
@@ -125,7 +132,7 @@ class ElevenLabsTtsBackend implements TtsBackend {
           'model_id': model,
           'output_format': kElevenLabsOutputFormat,
           'voice_settings': <String, double>{
-            'speed': openAiSpeedFromReadAloudRate(request.rate),
+            'speed': elevenLabsSpeedFromReadAloudRate(request.rate),
           },
         },
         options: Options(

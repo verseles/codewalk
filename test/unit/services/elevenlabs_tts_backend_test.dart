@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/presentation/services/tts/elevenlabs_tts_backend.dart';
-import 'package:codewalk/presentation/services/tts/openai_compatible_tts_backend.dart';
 import 'package:codewalk/presentation/services/tts/tts_backend.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,9 +61,14 @@ void main() {
     });
 
     test('maps rate to voice speed within the ElevenLabs range', () {
-      expect(openAiSpeedFromReadAloudRate(0.0), 0.5);
-      expect(openAiSpeedFromReadAloudRate(0.5), 1.25);
-      expect(openAiSpeedFromReadAloudRate(1.0), 2.0);
+      expect(elevenLabsSpeedFromReadAloudRate(0.0), 0.7);
+      expect(elevenLabsSpeedFromReadAloudRate(0.5), 0.95);
+      expect(elevenLabsSpeedFromReadAloudRate(1.0), 1.2);
+      for (final rate in <double>[0.0, 0.25, 0.5, 0.75, 1.0]) {
+        final speed = elevenLabsSpeedFromReadAloudRate(rate);
+        expect(speed, greaterThanOrEqualTo(0.7));
+        expect(speed, lessThanOrEqualTo(1.2));
+      }
     });
 
     test('throws missing key before making any request', () async {
@@ -198,7 +202,7 @@ void main() {
       expect(body['model_id'], 'eleven_flash_v2_5');
       expect(body['output_format'], 'mp3');
       final settings = body['voice_settings'] as Map<String, dynamic>;
-      expect(settings['speed'], 1.25);
+      expect(settings['speed'], 0.95);
       expect(jsonEncode(body), isNot(contains('xi-test')));
     });
 
