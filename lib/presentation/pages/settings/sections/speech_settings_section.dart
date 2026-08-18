@@ -238,6 +238,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final provider = settingsProvider.readAloudProvider;
     final value = _readAloudApiKeyController.text;
     final generation = ++_readAloudApiKeyGeneration;
+    final savedCacheKey = _remoteVoiceCacheKey(settingsProvider);
     setState(() {
       _loadingReadAloudApiKey = true;
       _readAloudApiKeyStatus = null;
@@ -246,7 +247,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       await di.sl<TtsApiKeyStorage>().write(provider, value);
       _readAloudApiKeyController.clear();
       _remoteReadAloudVoicesCache.clear();
-      _remoteVoicePendingKey = _remoteVoiceCacheKey(settingsProvider);
+      _remoteVoicePendingKey =
+          _remoteVoiceCacheKey(settingsProvider) == savedCacheKey
+          ? savedCacheKey
+          : null;
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
         _hasReadAloudApiKey = value.trim().isNotEmpty;
