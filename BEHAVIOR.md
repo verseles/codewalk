@@ -2281,9 +2281,9 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** the user opens Settings > Speech
 - **When** the Text to speech section is visible
-- **Then** the user can select `System / Native`, `Microsoft Edge Speech (experimental)`, or `OpenAI-compatible`
+- **Then** the user can select `System / Native`, `Microsoft Edge Speech (experimental)`, `OpenAI-compatible`, `ElevenLabs`, or `NVIDIA NIM`
 - **Then** the user can enable/disable read-aloud and test the selected voice
-- **Then** the user can adjust speaking speed (0.0–1.0)
+- **Then** the user can adjust speaking speed (0.0–1.0) except for NVIDIA NIM, which hides the speed control
 - **Then** voice pitch (0.5–2.0) is shown only for the native provider
 
 ### First-run TTS defaults
@@ -2318,7 +2318,33 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** CodeWalk calls the configured `/v1/audio/speech` endpoint with the sanitized message text and plays the returned audio bytes
 - **Then** missing, invalid, rate-limited, network, or provider errors are mapped to user-visible read-aloud errors
 
-### Microsoft Edge Speech experimental provider
+### ElevenLabs TTS provider
+
+- **Given** `ElevenLabs` is selected
+- **When** the user configures read-aloud settings
+- **Then** Settings > Speech exposes base URL, model, voice, and API key controls
+- **Then** the API key is saved only in secure storage on the device and sent as the `xi-api-key` header
+- **When** a message is read aloud with this provider
+- **Then** CodeWalk calls the configured `/text-to-speech/{voice_id}` endpoint with the message text, the selected model, MP3 output, and a speed derived from the read-aloud rate
+- **Then** text over the selected model's character limit is rejected with a user-visible error instead of being truncated
+- **Then** voice discovery loads the provider voice catalog and warns when the saved voice is no longer available
+- **Then** voice discovery only runs after the provider is selected, the API key is saved, or the base URL/model field is submitted — never while typing
+- **Then** missing, invalid, rate-limited, network, or provider errors are mapped to user-visible read-aloud errors
+
+### NVIDIA Speech NIM provider
+
+- **Given** `NVIDIA NIM` is selected
+- **When** the user configures read-aloud settings
+- **Then** Settings > Speech exposes base URL, model, voice, and API key controls
+- **Then** the base URL is required and has no default; CodeWalk requires the user's account-specific deployment URL
+- **Then** the API key is saved only in secure storage on the device and sent as a Bearer token
+- **Then** the speed control is hidden because NVIDIA NIM does not support a rate parameter
+- **When** a message is read aloud with this provider
+- **Then** CodeWalk posts the message text, voice, language (from the voice locale, defaulting to English), and model to the configured `/audio/synthesize` endpoint and plays the returned WAV audio
+- **Then** text over the model's character limit is rejected with a user-visible error instead of being truncated
+- **Then** voice discovery loads the provider voice catalog when a base URL is configured and warns when the saved voice is no longer available
+- **Then** voice discovery only runs after the provider is selected, the API key is saved, or the base URL/model field is submitted — never while typing
+- **Then** missing, invalid, rate-limited, network, or provider errors are mapped to user-visible read-aloud errors
 
 - **Given** `Microsoft Edge Speech (experimental)` is selected
 - **When** Settings > Speech renders provider-specific options
