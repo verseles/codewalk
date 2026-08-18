@@ -712,6 +712,7 @@ class _AndroidBackgroundAlertRunner {
             signal: signal,
             serverId: server.serverId,
             directory: directory,
+            sessionTitle: sessionMetadata.titleBySessionId[signal.sessionId],
           );
         }
       }
@@ -1372,6 +1373,7 @@ class _BackgroundNotificationDispatcher {
     required BackgroundAlertSignal signal,
     required String serverId,
     String? directory,
+    String? sessionTitle,
   }) async {
     await _ensureInitialized();
     if (!_initialized || !_notificationsEnabled) {
@@ -1414,11 +1416,14 @@ class _BackgroundNotificationDispatcher {
       );
 
       if (hasSessionId) {
+        final normalizedSessionTitle = sessionTitle?.trim();
         await _plugin.show(
           id: _summaryNotificationId(normalizedSessionId),
           title:
-              L10nBridge.current?.notificationConversationUpdates ??
-              'Conversation updates',
+              normalizedSessionTitle != null && normalizedSessionTitle.isNotEmpty
+                  ? normalizedSessionTitle
+                  : (L10nBridge.current?.notificationConversationUpdates ??
+                      'Conversation updates'),
           body:
               L10nBridge.current?.notificationOpenToClear ??
               'Open this conversation to clear related notifications.',

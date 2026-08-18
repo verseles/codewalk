@@ -293,6 +293,7 @@ class NotificationService {
     String? sessionId,
     String? serverId,
     String? directory,
+    String? sessionTitle,
     bool playSound = true,
     SoundOption soundOption = SoundOption.systemDefault,
     String? soundSource,
@@ -348,6 +349,7 @@ class NotificationService {
         await _showAndroidGroupSummary(
           category: category,
           sessionId: normalizedSessionId,
+          sessionTitle: sessionTitle,
           payload: payload,
         );
       }
@@ -532,6 +534,7 @@ class NotificationService {
   Future<void> _showAndroidGroupSummary({
     required String category,
     required String sessionId,
+    String? sessionTitle,
     required String payload,
   }) async {
     if (!_isAndroidRuntime) {
@@ -561,15 +564,24 @@ class NotificationService {
 
     await _plugin.show(
       id: _summaryNotificationId(sessionId),
-      title:
-          L10nBridge.current?.notificationConversationUpdates ??
-          'Conversation updates',
+      title: _resolveGroupSummaryTitle(sessionTitle),
       body:
           L10nBridge.current?.notificationOpenToClear ??
           'Open this conversation to clear related notifications.',
       notificationDetails: summaryDetails,
       payload: payload,
     );
+  }
+
+  /// Resolves the Android group-summary title from a resolved session title,
+  /// falling back to the generic "Conversation updates" label when absent.
+  String _resolveGroupSummaryTitle(String? sessionTitle) {
+    final normalized = sessionTitle?.trim();
+    if (normalized != null && normalized.isNotEmpty) {
+      return normalized;
+    }
+    return L10nBridge.current?.notificationConversationUpdates ??
+        'Conversation updates';
   }
 
   Importance _androidImportanceForCategory(String category) {

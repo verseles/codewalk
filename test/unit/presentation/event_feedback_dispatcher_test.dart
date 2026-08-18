@@ -16,7 +16,9 @@ class _FakeNotificationService extends NotificationService {
   String? lastBody;
   String? lastCategory;
   String? lastSessionId;
+  String? lastServerId;
   String? lastDirectory;
+  String? lastSessionTitle;
   bool? lastPlaySound;
   SoundOption? lastSoundOption;
   String? lastSoundSource;
@@ -31,6 +33,7 @@ class _FakeNotificationService extends NotificationService {
     String? sessionId,
     String? serverId,
     String? directory,
+    String? sessionTitle,
     bool playSound = true,
     SoundOption soundOption = SoundOption.systemDefault,
     String? soundSource,
@@ -40,7 +43,9 @@ class _FakeNotificationService extends NotificationService {
     lastBody = body;
     lastCategory = category;
     lastSessionId = sessionId;
+    lastServerId = serverId;
     lastDirectory = directory;
+    lastSessionTitle = sessionTitle;
     lastPlaySound = playSound;
     lastSoundOption = soundOption;
     lastSoundSource = soundSource;
@@ -304,6 +309,147 @@ void main() {
     expect(notificationService.lastCategory, 'permissions');
     expect(notificationService.lastSessionId, 'ses_v2');
     expect(notificationService.lastTitle, 'Background task');
+  });
+
+  test('resolves session title from nested v2 request payload', () async {
+    final settingsProvider = SettingsProvider(
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      soundService: _FakeSoundService(),
+    );
+    await settingsProvider.initialize();
+    final notificationService = _FakeNotificationService();
+    final dispatcher = EventFeedbackDispatcher(
+      settingsProvider: settingsProvider,
+      notificationService: notificationService,
+      soundService: _FakeSoundService(),
+    );
+
+    await dispatcher.handle(
+      const ChatEvent(
+        type: 'permission.v2.asked',
+        properties: <String, dynamic>{
+          'request': <String, dynamic>{
+            'id': 'perm_v2',
+            'sessionID': 'ses_v2',
+            'sessionTitle': 'Nested build',
+          },
+        },
+      ),
+      currentSessionId: 'ses_current',
+    );
+
+    expect(notificationService.lastSessionId, 'ses_v2');
+    expect(notificationService.lastTitle, 'Nested build');
+    expect(notificationService.lastSessionTitle, 'Nested build');
+  });
+
+  test('resolves session title from nested session object key', () async {
+    final settingsProvider = SettingsProvider(
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      soundService: _FakeSoundService(),
+    );
+    await settingsProvider.initialize();
+    final notificationService = _FakeNotificationService();
+    final dispatcher = EventFeedbackDispatcher(
+      settingsProvider: settingsProvider,
+      notificationService: notificationService,
+      soundService: _FakeSoundService(),
+    );
+
+    await dispatcher.handle(
+      const ChatEvent(
+        type: 'session.idle',
+        properties: <String, dynamic>{
+          'sessionID': 'ses_s',
+          'session': <String, dynamic>{'title': 'Title from session object'},
+        },
+      ),
+    );
+
+    expect(notificationService.lastTitle, 'Title from session object');
+  });
+
+  test('falls back to l10n Session label when no title and no hint', () async {
+    final settingsProvider = SettingsProvider(
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      soundService: _FakeSoundService(),
+    );
+    await settingsProvider.initialize();
+    final notificationService = _FakeNotificationService();
+    final dispatcher = EventFeedbackDispatcher(
+      settingsProvider: settingsProvider,
+      notificationService: notificationService,
+      soundService: _FakeSoundService(),
+    );
+
+    await dispatcher.handle(
+      const ChatEvent(
+        type: 'session.idle',
+        properties: <String, dynamic>{'sessionID': 'ses_x'},
+      ),
+    );
+
+    expect(notificationService.lastTitle, 'Session');
+    expect(notificationService.lastSessionTitle, isNull);
+  });
+
+  test('session.error uses resolved title from event', () async {
+    final settingsProvider = SettingsProvider(
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      soundService: _FakeSoundService(),
+    );
+    await settingsProvider.initialize();
+    final notificationService = _FakeNotificationService();
+    final dispatcher = EventFeedbackDispatcher(
+      settingsProvider: settingsProvider,
+      notificationService: notificationService,
+      soundService: _FakeSoundService(),
+    );
+
+    await dispatcher.handle(
+      const ChatEvent(
+        type: 'session.error',
+        properties: <String, dynamic>{
+          'sessionID': 'ses_e',
+          'title': 'Crash task',
+        },
+      ),
+    );
+
+    expect(notificationService.lastCategory, 'errors');
+    expect(notificationService.lastTitle, 'Crash task');
+    expect(notificationService.lastSessionTitle, 'Crash task');
+  });
+
+  test('propagates serverId to notification service', () async {
+    final settingsProvider = SettingsProvider(
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      soundService: _FakeSoundService(),
+    );
+    await settingsProvider.initialize();
+    final notificationService = _FakeNotificationService();
+    final dispatcher = EventFeedbackDispatcher(
+      settingsProvider: settingsProvider,
+      notificationService: notificationService,
+      soundService: _FakeSoundService(),
+    );
+
+    await dispatcher.handle(
+      const ChatEvent(
+        type: 'session.idle',
+        properties: <String, dynamic>{'sessionID': 'ses_srv'},
+      ),
+      sessionTitleHint: 'Server Session',
+      serverId: 'server-a',
+    );
+
+    expect(notificationService.lastServerId, 'server-a');
+    expect(notificationService.lastTitle, 'Server Session');
   });
 
   test('does not throttle different sessions in the same category', () async {

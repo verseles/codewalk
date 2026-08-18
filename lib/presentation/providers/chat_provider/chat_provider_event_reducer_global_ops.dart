@@ -651,6 +651,7 @@ extension _ChatProviderEventReducerGlobalOps on ChatProvider {
             _isRootSessionInList(eventSessionId, snapshot.sessions),
         isAppInForeground: _isAppInForeground,
         currentSessionId: _isChatRouteActive ? _currentSession?.id : null,
+        serverId: _activeServerId,
       ),
     );
   }

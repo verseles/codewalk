@@ -59,6 +59,7 @@ class EventFeedbackDispatcher {
     bool isRootSession = true,
     bool isAppInForeground = true,
     String? currentSessionId,
+    String? serverId,
   }) async {
     final signal = _signalForEvent(
       event,
@@ -110,7 +111,9 @@ class EventFeedbackDispatcher {
           body: signal.body,
           category: signal.categoryKey,
           sessionId: signal.sessionId,
+          serverId: serverId,
           directory: signal.directory,
+          sessionTitle: signal.sessionTitle,
           playSound: shouldSound && !isAppInForeground,
           soundOption: soundOption,
           soundSource: soundSource,
@@ -173,6 +176,7 @@ class EventFeedbackDispatcher {
           soundCategory: SoundCategory.permissions,
           categoryKey: 'permissions',
           title: sessionTitle ?? (l10n?.notificationSession ?? 'Session'),
+          sessionTitle: sessionTitle,
           body:
               l10n?.notificationPermissionOrQuestionNeedsInput ??
               'A tool permission or question needs your input.',
@@ -185,6 +189,7 @@ class EventFeedbackDispatcher {
           soundCategory: SoundCategory.errors,
           categoryKey: 'errors',
           title: sessionTitle ?? (l10n?.notificationSession ?? 'Session'),
+          sessionTitle: sessionTitle,
           body:
               l10n?.notificationSessionError ?? 'A session reported an error.',
           sessionId: sessionId,
@@ -199,6 +204,7 @@ class EventFeedbackDispatcher {
           soundCategory: SoundCategory.agent,
           categoryKey: 'agent',
           title: sessionTitle ?? (l10n?.notificationSession ?? 'Session'),
+          sessionTitle: sessionTitle,
           body:
               l10n?.notificationAgentFinished ??
               'Agent finished the current response.',
@@ -214,25 +220,47 @@ class EventFeedbackDispatcher {
     Map<String, dynamic> properties, {
     String? sessionTitleHint,
   }) {
-    final direct = properties['sessionTitle']?.toString().trim();
-    if (direct != null && direct.isNotEmpty) {
-      return direct;
+    String? readTitle(Map<dynamic, dynamic> source) {
+      final sessionTitle = source['sessionTitle']?.toString().trim();
+      if (sessionTitle != null && sessionTitle.isNotEmpty) {
+        return sessionTitle;
+      }
+      final title = source['title']?.toString().trim();
+      if (title != null && title.isNotEmpty) {
+        return title;
+      }
+      return null;
     }
 
-    final title = properties['title']?.toString().trim();
-    if (title != null && title.isNotEmpty) {
-      return title;
+    final direct = readTitle(properties);
+    if (direct != null) {
+      return direct;
     }
 
     final info = properties['info'];
     if (info is Map) {
-      final nestedSessionTitle = info['sessionTitle']?.toString().trim();
-      if (nestedSessionTitle != null && nestedSessionTitle.isNotEmpty) {
-        return nestedSessionTitle;
+      final nested = readTitle(info);
+      if (nested != null) {
+        return nested;
       }
-      final nestedTitle = info['title']?.toString().trim();
-      if (nestedTitle != null && nestedTitle.isNotEmpty) {
-        return nestedTitle;
+    }
+
+    // Parity with extractEventSessionId: v2 permission/question events place
+    // the authoritative payload under `request`; `session` may carry the full
+    // session object.
+    for (final key in const <String>[
+      'request',
+      'permission',
+      'question',
+      'session',
+      'part',
+    ]) {
+      final nested = properties[key];
+      if (nested is Map) {
+        final title = readTitle(nested);
+        if (title != null) {
+          return title;
+        }
       }
     }
 
@@ -253,6 +281,7 @@ class _FeedbackSignal {
     required this.body,
     this.sessionId,
     this.directory,
+    this.sessionTitle,
   });
 
   final NotificationCategory notificationCategory;
@@ -262,4 +291,5 @@ class _FeedbackSignal {
   final String body;
   final String? sessionId;
   final String? directory;
+  final String? sessionTitle;
 }

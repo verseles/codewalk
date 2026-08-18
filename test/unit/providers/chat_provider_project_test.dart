@@ -3221,6 +3221,7 @@ class _RecordingEventFeedbackDispatcher extends EventFeedbackDispatcher {
     bool isRootSession = true,
     bool isAppInForeground = true,
     String? currentSessionId,
+    String? serverId,
   }) async {
     handledTypes.add(event.type);
     lastCurrentSessionId = currentSessionId;

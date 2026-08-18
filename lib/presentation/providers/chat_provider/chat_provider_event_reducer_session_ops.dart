@@ -102,6 +102,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
             isRootSession: _isRootSessionId(feedbackSessionId),
             isAppInForeground: _isAppInForeground,
             currentSessionId: visibleCurrentSessionId,
+            serverId: _activeServerId,
           ),
         );
       }

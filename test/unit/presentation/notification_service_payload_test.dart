@@ -1,9 +1,16 @@
 import 'package:codewalk/presentation/services/notification_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const MethodChannel notificationChannel = MethodChannel(
+  'dexterous.com/flutter/local_notifications',
+);
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('serializes and parses notification payload with session id', () {
     const payload = NotificationTapPayload(
       category: 'agent',
@@ -197,4 +204,159 @@ void main() {
     expect(NotificationTapPayload.fromRaw('invalid-json'), isNull);
     expect(NotificationTapPayload.fromRaw('{}'), isNull);
   });
+
+  test(
+    'android group summary uses the resolved session title',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+      });
+      FlutterLocalNotificationsPlatform.instance =
+          AndroidFlutterLocalNotificationsPlugin();
+      addTearDown(() {
+        FlutterLocalNotificationsPlatform.instance =
+            AndroidFlutterLocalNotificationsPlugin();
+      });
+      final shows = await _captureShows();
+
+      final service = NotificationService(
+        assumeInitialized: true,
+      );
+      addTearDown(service.dispose);
+
+      final result = await service.notify(
+        title: 'Build feature',
+        body: 'Agent finished',
+        category: 'agent',
+        sessionId: 'ses_1',
+        serverId: 'server-a',
+        directory: '/tmp/workspace',
+        sessionTitle: 'Build feature',
+      );
+
+      expect(result, isTrue);
+      expect(shows, hasLength(2));
+      final summary = shows.singleWhere(
+        (show) => show.isGroupSummary,
+      );
+      expect(summary.title, 'Build feature');
+      expect(summary.body, isNotNull);
+      final payload = NotificationTapPayload.fromRaw(summary.payload);
+      expect(payload?.sessionId, 'ses_1');
+      expect(payload?.serverId, 'server-a');
+      expect(payload?.directory, '/tmp/workspace');
+    },
+  );
+
+  test(
+    'android group summary falls back when session title is blank',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+      });
+      FlutterLocalNotificationsPlatform.instance =
+          AndroidFlutterLocalNotificationsPlugin();
+      addTearDown(() {
+        FlutterLocalNotificationsPlatform.instance =
+            AndroidFlutterLocalNotificationsPlugin();
+      });
+      final shows = await _captureShows();
+
+      final service = NotificationService(
+        assumeInitialized: true,
+      );
+      addTearDown(service.dispose);
+
+      await service.notify(
+        title: 'Conversation',
+        body: 'Agent finished',
+        category: 'agent',
+        sessionId: 'ses_2',
+        sessionTitle: '   ',
+      );
+
+      final summary = shows.singleWhere(
+        (show) => show.isGroupSummary,
+      );
+      expect(summary.title, 'Conversation updates');
+    },
+  );
+
+  test(
+    'android group summary is skipped when there is no session id',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+      });
+      FlutterLocalNotificationsPlatform.instance =
+          AndroidFlutterLocalNotificationsPlugin();
+      addTearDown(() {
+        FlutterLocalNotificationsPlatform.instance =
+            AndroidFlutterLocalNotificationsPlugin();
+      });
+      final shows = await _captureShows();
+
+      final service = NotificationService(
+        assumeInitialized: true,
+      );
+      addTearDown(service.dispose);
+
+      await service.notify(
+        title: 'Alert',
+        body: 'Body',
+        category: 'agent',
+      );
+
+      expect(shows, hasLength(1));
+      expect(shows.single.isGroupSummary, isFalse);
+    },
+  );
+}
+
+Future<List<_RecordedShow>> _captureShows() async {
+  final shows = <_RecordedShow>[];
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  messenger.setMockMethodCallHandler(notificationChannel, (call) async {
+    if (call.method == 'show') {
+      final args = Map<String, dynamic>.from(call.arguments as Map);
+      final specifics =
+          Map<String, dynamic>.from(args['platformSpecifics'] as Map? ?? const {});
+      shows.add(
+        _RecordedShow(
+          id: args['id'] as int? ?? 0,
+          title: args['title']?.toString(),
+          body: args['body']?.toString(),
+          payload: args['payload']?.toString(),
+          setAsGroupSummary: specifics['setAsGroupSummary'] == true,
+        ),
+      );
+    }
+    return null;
+  });
+  addTearDown(() {
+    messenger.setMockMethodCallHandler(notificationChannel, null);
+  });
+  return shows;
+}
+
+class _RecordedShow {
+  const _RecordedShow({
+    required this.id,
+    this.title,
+    this.body,
+    this.payload,
+    this.setAsGroupSummary = false,
+  });
+
+  final int id;
+  final String? title;
+  final String? body;
+  final String? payload;
+  final bool setAsGroupSummary;
+
+  bool get isGroupSummary => setAsGroupSummary;
 }

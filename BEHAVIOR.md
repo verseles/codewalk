@@ -2094,6 +2094,16 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the app selects the payload session, switching project directory first when the payload includes a different directory
 - **Then** the consumed notification is dismissed, and selecting that same session also clears other tracked notifications for the session
 
+### Session title in notifications
+
+- **Given** the app is running and a session-scoped notification is dispatched (completion, error, permission, or question)
+- **Then** the notification title is the source session title whenever it is resolvable, resolved in order: top-level `sessionTitle`/`title`, `info` map, the nested `request`/`permission`/`question`/`session`/`part` maps (matching the event-session-id extractor), then the provider session-title hint
+- **When** no session title is resolvable (cold start, unknown session, or an event without title)
+- **Then** the notification falls back to the localized `Session` label
+- **When** a session-scoped notification is published on Android and the session has an id
+- **Then** its per-session group summary shows the same resolved session title, falling back to the localized `Conversation updates` label when no title is resolvable
+- **Then** the tap payload carries the server id, session id, and directory identity so taps navigate to the target session; the session title is not serialized in the payload
+
 ### Server offline does NOT notify
 
 - **Given** the active server goes offline
