@@ -5205,6 +5205,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get speechProviderOpenAiCompatible => 'متوافق مع OpenAI';
 
   @override
+  String get speechProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get speechProviderNvidiaNim => 'NVIDIA NIM';
+
+  @override
+  String get speechNimSpeedNotSupported =>
+      'Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.';
+
+  @override
+  String get speechRemoteVoice => 'Voice';
+
+  @override
+  String get speechRemoteVoiceUnavailable =>
+      'The selected voice is no longer available in the provider catalog.';
+
+  @override
+  String get speechRemoteVoiceListUnavailable =>
+      'Using the default voice. The voice list could not be loaded right now.';
+
+  @override
+  String get speechRemoteVoicesLoaded => 'Loaded from the provider voices.';
+
+  @override
   String get speechEdgeExperimentalTitle => 'Microsoft Edge Speech تجريبي';
 
   @override
@@ -5255,6 +5279,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get speechPitchNotSupported =>
       'نبرة الصوت غير مدعومة في TTS المتوافق مع OpenAI وتكون مخفية لهذا المزوّد.';
+
+  @override
+  String get speechPitchHiddenForProvider =>
+      'Pitch is not supported by this TTS provider and is hidden.';
 
   @override
   String get speechTestVoice => 'اختبار الصوت';
@@ -6177,6 +6205,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get speechProviderQuotaRateLimit => 'أبلغ مزود TTS عن حصة أو حد معدل.';
+
+  @override
+  String get speechReadAloudNoVoice => 'Select a voice for this TTS provider.';
+
+  @override
+  String get speechProviderTextTooLong =>
+      'The text is too long for this TTS model.';
+
+  @override
+  String get speechProviderInvalidAudio =>
+      'The TTS provider returned unrecognized audio.';
+
+  @override
+  String get speechNimBaseUrlRequired =>
+      'Enter the NVIDIA NIM deployment base URL in Settings > Speech.';
 
   @override
   String get speechProviderTemporarilyUnavailable =>

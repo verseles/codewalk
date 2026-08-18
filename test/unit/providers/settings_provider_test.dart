@@ -2001,6 +2001,58 @@ void main() {
       },
     );
 
+    test(
+      'switching to ElevenLabs or NIM applies provider-aware defaults',
+      () async {
+        final local = InMemoryAppLocalDataSource();
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+        );
+        await provider.initialize();
+        await provider.setReadAloudProvider(ReadAloudProvider.openAiCompatible);
+        await provider.setReadAloudModel('tts-1');
+        await provider.setReadAloudBaseUrl('https://tts.example.com/v1');
+
+        await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+        expect(provider.readAloudProvider, ReadAloudProvider.elevenLabs);
+        expect(provider.readAloudModel, kDefaultElevenLabsTtsModel);
+        expect(provider.readAloudBaseUrl, kDefaultElevenLabsTtsBaseUrl);
+        expect(provider.readAloudVoiceId, isNull);
+
+        await provider.setReadAloudProvider(ReadAloudProvider.nim);
+
+        expect(provider.readAloudProvider, ReadAloudProvider.nim);
+        expect(provider.readAloudModel, kDefaultNimTtsModel);
+        expect(provider.readAloudBaseUrl, kDefaultNimTtsBaseUrl);
+        expect(provider.readAloudVoiceId, isNull);
+      },
+    );
+
+    test(
+      'clearing model or base URL falls back to provider defaults',
+      () async {
+        final local = InMemoryAppLocalDataSource();
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+        );
+        await provider.initialize();
+        await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+        await provider.setReadAloudModel('eleven_v3');
+        await provider.setReadAloudBaseUrl('https://residency.example/v1');
+
+        await provider.setReadAloudModel('');
+        await provider.setReadAloudBaseUrl('');
+
+        expect(provider.readAloudModel, kDefaultElevenLabsTtsModel);
+        expect(provider.readAloudBaseUrl, kDefaultElevenLabsTtsBaseUrl);
+      },
+    );
+
     test('read-aloud settings survive JSON roundtrip', () async {
       final local = InMemoryAppLocalDataSource();
       final first = SettingsProvider(

@@ -99,7 +99,11 @@ class NativeTtsBackend implements TtsBackend {
   }
 
   @override
-  Future<List<TtsVoiceOption>> getVoices() async {
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
     try {
       final voices = await _tts.getVoices;
       return voices.map<TtsVoiceOption>((dynamic value) {

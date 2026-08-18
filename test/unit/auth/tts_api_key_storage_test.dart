@@ -46,6 +46,23 @@ void main() {
       expect(await storage.read(ReadAloudProvider.edgeExperimental), isNull);
     });
 
+    test('namespaces keys for every cloud provider', () async {
+      final backend = _FakeTtsApiKeyStorageBackend();
+      final storage = TtsApiKeyStorage(backend: backend);
+
+      await storage.write(ReadAloudProvider.elevenLabs, 'xi-key');
+      await storage.write(ReadAloudProvider.nim, 'nv-key');
+
+      final keys = backend.values.keys.toList()..sort();
+      expect(keys, hasLength(2));
+      expect(keys[0], contains('elevenlabs'));
+      expect(keys[0], isNot(contains('openai_compatible')));
+      expect(keys[1], contains('::nim'));
+      expect(await storage.read(ReadAloudProvider.elevenLabs), 'xi-key');
+      expect(await storage.read(ReadAloudProvider.nim), 'nv-key');
+      expect(await storage.read(ReadAloudProvider.openAiCompatible), isNull);
+    });
+
     test('empty writes delete existing keys', () async {
       final backend = _FakeTtsApiKeyStorageBackend();
       final storage = TtsApiKeyStorage(backend: backend);

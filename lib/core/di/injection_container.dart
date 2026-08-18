@@ -81,7 +81,9 @@ import '../../presentation/services/speech_input_service_sensevoice.dart';
 import '../../presentation/services/speech_input_service_sherpa.dart';
 import '../../presentation/services/speech_input_service_stt.dart';
 import '../../presentation/services/tts/edge_experimental_tts_backend.dart';
+import '../../presentation/services/tts/elevenlabs_tts_backend.dart';
 import '../../presentation/services/tts/native_tts_backend.dart';
+import '../../presentation/services/tts/nvidia_nim_tts_backend.dart';
 import '../../presentation/services/tts/openai_compatible_tts_backend.dart';
 import '../../presentation/services/tts/tts_backend.dart';
 import '../../presentation/services/update_check_service.dart';
@@ -296,6 +298,8 @@ Future<void> init() async {
         ReadAloudProvider.native: NativeTtsBackend(),
         ReadAloudProvider.edgeExperimental: EdgeExperimentalTtsBackend(),
         ReadAloudProvider.openAiCompatible: OpenAiCompatibleTtsBackend(),
+        ReadAloudProvider.elevenLabs: ElevenLabsTtsBackend(),
+        ReadAloudProvider.nim: NvidiaNimTtsBackend(),
       },
     );
     String? lastActiveSnapshotId;

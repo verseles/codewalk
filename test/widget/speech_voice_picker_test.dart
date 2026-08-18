@@ -31,7 +31,11 @@ class _FakeTtsBackend implements TtsBackend {
   Future<bool> get isAvailable async => true;
 
   @override
-  Future<List<TtsVoiceOption>> getVoices() async {
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
     return const <TtsVoiceOption>[
       TtsVoiceOption(
         id: 'pt-BR-AntonioNeural',

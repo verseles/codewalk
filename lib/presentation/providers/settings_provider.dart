@@ -1331,6 +1331,9 @@ class SettingsProvider extends ChangeNotifier {
       readAloudVoice: () => null,
       readAloudVoiceId: () => null,
       readAloudVoiceLocale: () => null,
+      readAloudModel: defaultReadAloudModel(value),
+      readAloudBaseUrl: defaultReadAloudBaseUrl(value),
+      readAloudResponseFormat: kDefaultReadAloudResponseFormat,
     );
     notifyListeners();
     await _persist();
@@ -1401,7 +1404,7 @@ class SettingsProvider extends ChangeNotifier {
     final trimmed = value?.trim();
     final effective = (trimmed != null && trimmed.isNotEmpty)
         ? trimmed
-        : kDefaultOpenAiCompatibleTtsModel;
+        : defaultReadAloudModel(_settings.readAloudProvider);
     if (_settings.readAloudModel == effective) {
       return;
     }
@@ -1414,7 +1417,7 @@ class SettingsProvider extends ChangeNotifier {
     final trimmed = value?.trim().replaceFirst(RegExp(r'/+$'), '');
     final effective = (trimmed != null && trimmed.isNotEmpty)
         ? trimmed
-        : kDefaultOpenAiCompatibleTtsBaseUrl;
+        : defaultReadAloudBaseUrl(_settings.readAloudProvider);
     if (_settings.readAloudBaseUrl == effective) {
       return;
     }

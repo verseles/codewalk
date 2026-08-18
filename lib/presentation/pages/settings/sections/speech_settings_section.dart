@@ -81,9 +81,13 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   final TextEditingController _readAloudApiKeyController =
       TextEditingController();
   bool _loadingReadAloudApiKey = false;
-  bool _hasOpenAiCompatibleApiKey = false;
+  bool _hasReadAloudApiKey = false;
   String? _readAloudApiKeyStatus;
   int _readAloudApiKeyGeneration = 0;
+  ReadAloudProvider? _lastSeenReadAloudProvider;
+  final Map<String, Future<List<Map<String, String>>>>
+  _remoteReadAloudVoicesCache =
+      <String, Future<List<Map<String, String>>>>{};
   final TextEditingController _speechApiKeyController = TextEditingController();
   bool _loadingSpeechApiKey = false;
   bool _hasSpeechApiKey = false;
@@ -200,18 +204,17 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     if (!di.sl.isRegistered<TtsApiKeyStorage>()) {
       return;
     }
+    final provider = context.read<SettingsProvider>().readAloudProvider;
     final generation = ++_readAloudApiKeyGeneration;
     setState(() {
       _loadingReadAloudApiKey = true;
       _readAloudApiKeyStatus = null;
     });
     try {
-      final key = await di.sl<TtsApiKeyStorage>().read(
-        ReadAloudProvider.openAiCompatible,
-      );
+      final key = await di.sl<TtsApiKeyStorage>().read(provider);
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
-        _hasOpenAiCompatibleApiKey = key != null && key.isNotEmpty;
+        _hasReadAloudApiKey = key != null && key.isNotEmpty;
         _loadingReadAloudApiKey = false;
       });
     } catch (_) {
@@ -223,13 +226,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     }
   }
 
-  Future<void> _saveOpenAiCompatibleApiKey() async {
+  Future<void> _saveReadAloudApiKey() async {
     if (!di.sl.isRegistered<TtsApiKeyStorage>()) {
       setState(() {
         _readAloudApiKeyStatus = context.l10n.speechApiKeyStorageUnavailable;
       });
       return;
     }
+    final provider = context.read<SettingsProvider>().readAloudProvider;
     final value = _readAloudApiKeyController.text;
     final generation = ++_readAloudApiKeyGeneration;
     setState(() {
@@ -237,14 +241,12 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       _readAloudApiKeyStatus = null;
     });
     try {
-      await di.sl<TtsApiKeyStorage>().write(
-        ReadAloudProvider.openAiCompatible,
-        value,
-      );
+      await di.sl<TtsApiKeyStorage>().write(provider, value);
       _readAloudApiKeyController.clear();
+      _remoteReadAloudVoicesCache.clear();
       if (!mounted || generation != _readAloudApiKeyGeneration) return;
       setState(() {
-        _hasOpenAiCompatibleApiKey = value.trim().isNotEmpty;
+        _hasReadAloudApiKey = value.trim().isNotEmpty;
         _loadingReadAloudApiKey = false;
         _readAloudApiKeyStatus = value.trim().isEmpty
             ? context.l10n.speechApiKeyRemoved
@@ -257,6 +259,29 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         _readAloudApiKeyStatus = context.l10n.speechApiKeyStorageUnavailable;
       });
     }
+  }
+
+  Future<List<Map<String, String>>> _remoteReadAloudVoices({
+    required ReadAloudProvider provider,
+    required SettingsProvider settingsProvider,
+  }) async {
+    if (!di.sl.isRegistered<ReadAloudService>()) {
+      return const <Map<String, String>>[];
+    }
+    String? apiKey;
+    if (di.sl.isRegistered<TtsApiKeyStorage>()) {
+      try {
+        apiKey = await di.sl<TtsApiKeyStorage>().read(provider);
+      } catch (_) {
+        apiKey = null;
+      }
+    }
+    return di.sl<ReadAloudService>().getVoicesForProvider(
+      provider,
+      apiKey: apiKey,
+      baseUrl: settingsProvider.readAloudBaseUrl,
+      model: settingsProvider.readAloudModel,
+    );
   }
 
   Future<void> _testReadAloudVoice(SettingsProvider settingsProvider) async {
@@ -290,6 +315,19 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
+        final readAloudProvider = settingsProvider.readAloudProvider;
+        if (readAloudProvider != _lastSeenReadAloudProvider) {
+          _lastSeenReadAloudProvider = readAloudProvider;
+          _readAloudApiKeyController.clear();
+          _readAloudApiKeyStatus = null;
+          _edgeReadAloudVoicesFuture = null;
+          _remoteReadAloudVoicesCache.clear();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _loadReadAloudApiKeyState();
+            }
+          });
+        }
         final selectedEngine = settingsProvider.speechToTextEngine;
         final silenceValue =
             _silenceDraftSeconds ??
@@ -1985,6 +2023,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           value: ReadAloudProvider.openAiCompatible,
           child: Text(context.l10n.speechProviderOpenAiCompatible),
         ),
+        DropdownMenuItem(
+          value: ReadAloudProvider.elevenLabs,
+          child: Text(context.l10n.speechProviderElevenLabs),
+        ),
+        DropdownMenuItem(
+          value: ReadAloudProvider.nim,
+          child: Text(context.l10n.speechProviderNvidiaNim),
+        ),
       ],
       onChanged: (value) {
         if (value == null) return;
@@ -2201,41 +2247,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
           onChanged: (value) =>
               unawaited(settingsProvider.setReadAloudBaseUrl(value)),
         ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: _readAloudApiKeyController,
-          decoration: InputDecoration(
-            labelText: context.l10n.speechApiKey,
-            helperText: _hasOpenAiCompatibleApiKey
-                ? context.l10n.speechApiKeySavedHelper
-                : context.l10n.speechNoApiKeySaved,
-            suffixIcon: _loadingReadAloudApiKey
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : IconButton(
-                    tooltip: context.l10n.speechSaveApiKey,
-                    icon: const Icon(Symbols.save),
-                    onPressed: () => unawaited(_saveOpenAiCompatibleApiKey()),
-                  ),
-          ),
-          obscureText: true,
-          enableSuggestions: false,
-          autocorrect: false,
-          onFieldSubmitted: (_) => unawaited(_saveOpenAiCompatibleApiKey()),
-        ),
-        if (_readAloudApiKeyStatus != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            _readAloudApiKeyStatus!,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+        _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
         TextFormField(
           initialValue: settingsProvider.readAloudModel,
@@ -2272,6 +2284,249 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         const SizedBox(height: 8),
         Text(
           context.l10n.speechPitchNotSupported,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReadAloudApiKeyField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _readAloudApiKeyController,
+          decoration: InputDecoration(
+            labelText: context.l10n.speechApiKey,
+            helperText: _hasReadAloudApiKey
+                ? context.l10n.speechApiKeySavedHelper
+                : context.l10n.speechNoApiKeySaved,
+            suffixIcon: _loadingReadAloudApiKey
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : IconButton(
+                    tooltip: context.l10n.speechSaveApiKey,
+                    icon: const Icon(Symbols.save),
+                    onPressed: () => unawaited(_saveReadAloudApiKey()),
+                  ),
+          ),
+          obscureText: true,
+          enableSuggestions: false,
+          autocorrect: false,
+          onFieldSubmitted: (_) => unawaited(_saveReadAloudApiKey()),
+        ),
+        if (_readAloudApiKeyStatus != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _readAloudApiKeyStatus!,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRemoteVoicePicker(
+    ReadAloudProvider provider,
+    SettingsProvider settingsProvider,
+  ) {
+    if (!di.sl.isRegistered<ReadAloudService>()) {
+      return const SizedBox.shrink();
+    }
+    final cacheKey =
+        '$provider|${settingsProvider.readAloudBaseUrl}|'
+        '${settingsProvider.readAloudModel}';
+    final future = _remoteReadAloudVoicesCache[cacheKey] ??=
+        _remoteReadAloudVoices(
+          provider: provider,
+          settingsProvider: settingsProvider,
+        );
+    return FutureBuilder<List<Map<String, String>>>(
+      future: future,
+      builder: (context, snapshot) {
+        final voices = snapshot.data ?? const <Map<String, String>>[];
+        if (voices.isEmpty) {
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(context.l10n.speechRemoteVoice),
+            subtitle: Text(context.l10n.speechRemoteVoiceListUnavailable),
+          );
+        }
+        final savedVoiceId = settingsProvider.readAloudVoiceId;
+        final voiceMissing =
+            savedVoiceId != null &&
+            savedVoiceId.trim().isNotEmpty &&
+            !voices.any((voice) => voice['name'] == savedVoiceId);
+        final selected = voices.any(
+          (voice) => voice['name'] == savedVoiceId,
+        )
+            ? savedVoiceId
+            : null;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (voiceMissing) ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Symbols.warning_amber_rounded),
+                title: Text(context.l10n.speechRemoteVoiceUnavailable),
+                trailing: TextButton(
+                  onPressed: () {
+                    unawaited(
+                      settingsProvider.setReadAloudVoiceSelection(
+                        id: null,
+                        locale: null,
+                      ),
+                    );
+                  },
+                  child: Text(context.l10n.commonReset),
+                ),
+              ),
+            ],
+            SearchableDropdownFormField<String>(
+              value: selected,
+              decoration: InputDecoration(
+                labelText: context.l10n.speechRemoteVoice,
+                helperText: context.l10n.speechRemoteVoicesLoaded,
+                border: const OutlineInputBorder(),
+              ),
+              isExpanded: true,
+              searchTermsBuilder: (value) {
+                for (final voice in voices) {
+                  if (voice['name'] == value) {
+                    return <String>[
+                      value,
+                      voice['locale'] ?? '',
+                      voice['label'] ?? '',
+                    ];
+                  }
+                }
+                return <String>[value];
+              },
+              items: voices.map((voice) {
+                final id = voice['name'] ?? '';
+                final locale = voice['locale'] ?? '';
+                final label = voice['label']?.isNotEmpty == true
+                    ? voice['label']!
+                    : locale.isNotEmpty
+                    ? '$id ($locale)'
+                    : id;
+                return DropdownMenuItem<String>(value: id, child: Text(label));
+              }).toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                final selectedVoice = voices.firstWhere(
+                  (voice) => voice['name'] == value,
+                  orElse: () => const <String, String>{},
+                );
+                unawaited(
+                  settingsProvider.setReadAloudVoiceSelection(
+                    id: value,
+                    locale: selectedVoice['locale'],
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildElevenLabsReadAloudFields(
+    SettingsProvider settingsProvider,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(context.l10n.speechCloudTtsPrivacy),
+          subtitle: Text(context.l10n.speechCloudTtsPrivacyDescription),
+        ),
+        TextFormField(
+          initialValue: settingsProvider.readAloudBaseUrl,
+          decoration: InputDecoration(
+            labelText: context.l10n.speechBaseUrl,
+            helperText: context.l10n.speechBaseUrlExample(
+              kDefaultElevenLabsTtsBaseUrl,
+            ),
+          ),
+          keyboardType: TextInputType.url,
+          onChanged: (value) =>
+              unawaited(settingsProvider.setReadAloudBaseUrl(value)),
+        ),
+        _buildReadAloudApiKeyField(),
+        const SizedBox(height: 12),
+        TextFormField(
+          initialValue: settingsProvider.readAloudModel,
+          decoration: InputDecoration(
+            labelText: context.l10n.speechModel,
+            helperText: context.l10n.speechModelDefaultHelper(
+              kDefaultElevenLabsTtsModel,
+            ),
+          ),
+          onChanged: (value) =>
+              unawaited(settingsProvider.setReadAloudModel(value)),
+        ),
+        const SizedBox(height: 12),
+        _buildRemoteVoicePicker(
+          ReadAloudProvider.elevenLabs,
+          settingsProvider,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.speechPitchHiddenForProvider,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNimReadAloudFields(SettingsProvider settingsProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(context.l10n.speechCloudTtsPrivacy),
+          subtitle: Text(context.l10n.speechCloudTtsPrivacyDescription),
+        ),
+        TextFormField(
+          initialValue: settingsProvider.readAloudBaseUrl,
+          decoration: InputDecoration(
+            labelText: context.l10n.speechBaseUrl,
+            helperText: context.l10n.speechNimBaseUrlRequired,
+          ),
+          keyboardType: TextInputType.url,
+          onChanged: (value) =>
+              unawaited(settingsProvider.setReadAloudBaseUrl(value)),
+        ),
+        _buildReadAloudApiKeyField(),
+        const SizedBox(height: 12),
+        TextFormField(
+          initialValue: settingsProvider.readAloudModel,
+          decoration: InputDecoration(
+            labelText: context.l10n.speechModel,
+            helperText: context.l10n.speechModelDefaultHelper(
+              kDefaultNimTtsModel,
+            ),
+          ),
+          onChanged: (value) =>
+              unawaited(settingsProvider.setReadAloudModel(value)),
+        ),
+        const SizedBox(height: 12),
+        _buildRemoteVoicePicker(ReadAloudProvider.nim, settingsProvider),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.speechNimSpeedNotSupported,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -2326,6 +2581,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               const Divider(height: 1),
               _buildOpenAiCompatibleReadAloudFields(settingsProvider),
             ],
+            if (readAloudProvider == ReadAloudProvider.elevenLabs) ...[
+              const Divider(height: 1),
+              _buildElevenLabsReadAloudFields(settingsProvider),
+            ],
+            if (readAloudProvider == ReadAloudProvider.nim) ...[
+              const Divider(height: 1),
+              _buildNimReadAloudFields(settingsProvider),
+            ],
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
@@ -2337,23 +2600,31 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               ),
             ),
             const Divider(height: 1),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(context.l10n.settingsReadAloudSpeed),
-              subtitle: Text(context.l10n.settingsReadAloudSpeedDescription),
-              trailing: SizedBox(
-                width: 120,
-                child: Slider(
-                  value: settingsProvider.readAloudRate,
-                  min: 0.0,
-                  max: 1.0,
-                  divisions: 10,
-                  label: settingsProvider.readAloudRate.toStringAsFixed(1),
-                  onChanged: (value) =>
-                      unawaited(settingsProvider.setReadAloudRate(value)),
+            if (readAloudProvider == ReadAloudProvider.nim) ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(context.l10n.settingsReadAloudSpeed),
+                subtitle: Text(context.l10n.speechNimSpeedNotSupported),
+              ),
+            ] else ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(context.l10n.settingsReadAloudSpeed),
+                subtitle: Text(context.l10n.settingsReadAloudSpeedDescription),
+                trailing: SizedBox(
+                  width: 120,
+                  child: Slider(
+                    value: settingsProvider.readAloudRate,
+                    min: 0.0,
+                    max: 1.0,
+                    divisions: 10,
+                    label: settingsProvider.readAloudRate.toStringAsFixed(1),
+                    onChanged: (value) =>
+                        unawaited(settingsProvider.setReadAloudRate(value)),
+                  ),
                 ),
               ),
-            ),
+            ],
             if (readAloudProvider == ReadAloudProvider.native) ...[
               const Divider(height: 1),
               ListTile(

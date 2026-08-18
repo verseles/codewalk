@@ -55,7 +55,11 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
   Future<bool> get isAvailable async => true;
 
   @override
-  Future<List<TtsVoiceOption>> getVoices() async {
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
     try {
       final response = await _dio.get<dynamic>(
         edgeTtsVoicesUri(nowUtc: _now()).toString(),

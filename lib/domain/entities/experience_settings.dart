@@ -114,7 +114,13 @@ enum SpeechToTextEngine { native, sherpa, moonshine, parakeet, sensevoice, api }
 
 enum SpeechApiProvider { openAi, groq, custom }
 
-enum ReadAloudProvider { native, edgeExperimental, openAiCompatible }
+enum ReadAloudProvider {
+  native,
+  edgeExperimental,
+  openAiCompatible,
+  elevenLabs,
+  nim,
+}
 
 enum DesktopCloseBehavior { tray, minimize, close }
 
@@ -127,6 +133,12 @@ const String kParakeetModelDefault = 'parakeet-v3';
 const String kSenseVoiceModelDefault = 'sensevoice-2024-07-17';
 const String kDefaultOpenAiCompatibleTtsBaseUrl = 'https://api.openai.com/v1';
 const String kDefaultOpenAiCompatibleTtsModel = 'gpt-4o-mini-tts';
+const String kDefaultElevenLabsTtsBaseUrl = 'https://api.elevenlabs.io/v1';
+const String kDefaultElevenLabsTtsModel = 'eleven_flash_v2_5';
+// NVIDIA Speech NIM hosted endpoints are account-specific (one deployment per
+// account on build.nvidia.com), so there is no universal default base URL.
+const String kDefaultNimTtsBaseUrl = '';
+const String kDefaultNimTtsModel = 'magpie-tts-multilingual:1.10.0';
 const String kDefaultReadAloudResponseFormat = 'mp3';
 const String kDefaultOpenAiSttBaseUrl = 'https://api.openai.com/v1';
 const String kDefaultOpenAiSttModel = 'gpt-4o-mini-transcribe';
@@ -656,6 +668,8 @@ String readAloudProviderKey(ReadAloudProvider provider) {
     ReadAloudProvider.native => 'native',
     ReadAloudProvider.edgeExperimental => 'edge_experimental',
     ReadAloudProvider.openAiCompatible => 'openai_compatible',
+    ReadAloudProvider.elevenLabs => 'elevenlabs',
+    ReadAloudProvider.nim => 'nim',
   };
 }
 
@@ -669,7 +683,32 @@ ReadAloudProvider readAloudProviderFromKey(String value) {
     'openai_compatible' ||
     'openai-compatible' ||
     'openai_compat' => ReadAloudProvider.openAiCompatible,
+    'elevenlabs' ||
+    'eleven_labs' => ReadAloudProvider.elevenLabs,
+    'nim' ||
+    'nvidia_nim' ||
+    'nvidia' => ReadAloudProvider.nim,
     _ => ReadAloudProvider.native,
+  };
+}
+
+String defaultReadAloudBaseUrl(ReadAloudProvider provider) {
+  return switch (provider) {
+    ReadAloudProvider.native => kDefaultOpenAiCompatibleTtsBaseUrl,
+    ReadAloudProvider.edgeExperimental => kDefaultOpenAiCompatibleTtsBaseUrl,
+    ReadAloudProvider.openAiCompatible => kDefaultOpenAiCompatibleTtsBaseUrl,
+    ReadAloudProvider.elevenLabs => kDefaultElevenLabsTtsBaseUrl,
+    ReadAloudProvider.nim => kDefaultNimTtsBaseUrl,
+  };
+}
+
+String defaultReadAloudModel(ReadAloudProvider provider) {
+  return switch (provider) {
+    ReadAloudProvider.native => kDefaultOpenAiCompatibleTtsModel,
+    ReadAloudProvider.edgeExperimental => kDefaultOpenAiCompatibleTtsModel,
+    ReadAloudProvider.openAiCompatible => kDefaultOpenAiCompatibleTtsModel,
+    ReadAloudProvider.elevenLabs => kDefaultElevenLabsTtsModel,
+    ReadAloudProvider.nim => kDefaultNimTtsModel,
   };
 }
 

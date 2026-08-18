@@ -186,7 +186,7 @@ class TtsExecutor {
   }
 
   Future<String?> _apiKeyFor(ReadAloudProvider provider) async {
-    if (provider != ReadAloudProvider.openAiCompatible) {
+    if (!_apiKeyProviders.contains(provider)) {
       return null;
     }
     try {
@@ -198,6 +198,12 @@ class TtsExecutor {
       );
     }
   }
+
+  static const Set<ReadAloudProvider> _apiKeyProviders = <ReadAloudProvider>{
+    ReadAloudProvider.openAiCompatible,
+    ReadAloudProvider.elevenLabs,
+    ReadAloudProvider.nim,
+  };
 
   void dispose() {
     _generation += 1;

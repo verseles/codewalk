@@ -37,7 +37,11 @@ class OpenAiCompatibleTtsBackend implements TtsBackend {
   Future<bool> get isAvailable async => true;
 
   @override
-  Future<List<TtsVoiceOption>> getVoices() async {
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
     return kOpenAiCompatibleVoiceIds
         .map((id) => TtsVoiceOption(id: id, label: id))
         .toList(growable: false);

@@ -6740,6 +6740,34 @@
   "@speechProviderOpenAiCompatible": {
     "description": "CodeWalk UI string — speechProviderOpenAiCompatible"
   },
+  "speechProviderElevenLabs": "ElevenLabs",
+  "@speechProviderElevenLabs": {
+    "description": "CodeWalk UI string — speechProviderElevenLabs"
+  },
+  "speechProviderNvidiaNim": "NVIDIA NIM",
+  "@speechProviderNvidiaNim": {
+    "description": "CodeWalk UI string — speechProviderNvidiaNim"
+  },
+  "speechNimSpeedNotSupported": "Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.",
+  "@speechNimSpeedNotSupported": {
+    "description": "CodeWalk UI string — speechNimSpeedNotSupported"
+  },
+  "speechRemoteVoice": "Voice",
+  "@speechRemoteVoice": {
+    "description": "CodeWalk UI string — speechRemoteVoice"
+  },
+  "speechRemoteVoiceUnavailable": "The selected voice is no longer available in the provider catalog.",
+  "@speechRemoteVoiceUnavailable": {
+    "description": "CodeWalk UI string — speechRemoteVoiceUnavailable"
+  },
+  "speechRemoteVoiceListUnavailable": "Using the default voice. The voice list could not be loaded right now.",
+  "@speechRemoteVoiceListUnavailable": {
+    "description": "CodeWalk UI string — speechRemoteVoiceListUnavailable"
+  },
+  "speechRemoteVoicesLoaded": "Loaded from the provider voices.",
+  "@speechRemoteVoicesLoaded": {
+    "description": "CodeWalk UI string — speechRemoteVoicesLoaded"
+  },
   "speechEdgeExperimentalTitle": "Microsoft Edge Speech is experimental",
   "@speechEdgeExperimentalTitle": {
     "description": "CodeWalk UI string — speechEdgeExperimentalTitle"
@@ -6799,6 +6827,10 @@
   "speechPitchNotSupported": "Pitch is not supported by OpenAI-compatible TTS and is hidden for this provider.",
   "@speechPitchNotSupported": {
     "description": "CodeWalk UI string — speechPitchNotSupported"
+  },
+  "speechPitchHiddenForProvider": "Pitch is not supported by this TTS provider and is hidden.",
+  "@speechPitchHiddenForProvider": {
+    "description": "CodeWalk UI string — speechPitchHiddenForProvider"
   },
   "speechTestVoice": "Test voice",
   "@speechTestVoice": {
@@ -8077,6 +8109,22 @@
   "speechProviderQuotaRateLimit": "The TTS provider reported a quota or rate limit.",
   "@speechProviderQuotaRateLimit": {
     "description": "CodeWalk UI string — speechProviderQuotaRateLimit"
+  },
+  "speechReadAloudNoVoice": "Select a voice for this TTS provider.",
+  "@speechReadAloudNoVoice": {
+    "description": "CodeWalk UI string — speechReadAloudNoVoice"
+  },
+  "speechProviderTextTooLong": "The text is too long for this TTS model.",
+  "@speechProviderTextTooLong": {
+    "description": "CodeWalk UI string — speechProviderTextTooLong"
+  },
+  "speechProviderInvalidAudio": "The TTS provider returned unrecognized audio.",
+  "@speechProviderInvalidAudio": {
+    "description": "CodeWalk UI string — speechProviderInvalidAudio"
+  },
+  "speechNimBaseUrlRequired": "Enter the NVIDIA NIM deployment base URL in Settings > Speech.",
+  "@speechNimBaseUrlRequired": {
+    "description": "CodeWalk UI string — speechNimBaseUrlRequired"
   },
   "speechProviderTemporarilyUnavailable": "The TTS provider is temporarily unavailable.",
   "@speechProviderTemporarilyUnavailable": {

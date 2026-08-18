@@ -194,7 +194,11 @@ class _FakeGeneratedBackend implements TtsBackend {
   }
 
   @override
-  Future<List<TtsVoiceOption>> getVoices() async {
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
     return const <TtsVoiceOption>[];
   }
 

@@ -5076,6 +5076,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechProviderOpenAiCompatible => 'OpenAI 호환';
 
   @override
+  String get speechProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get speechProviderNvidiaNim => 'NVIDIA NIM';
+
+  @override
+  String get speechNimSpeedNotSupported =>
+      'Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.';
+
+  @override
+  String get speechRemoteVoice => 'Voice';
+
+  @override
+  String get speechRemoteVoiceUnavailable =>
+      'The selected voice is no longer available in the provider catalog.';
+
+  @override
+  String get speechRemoteVoiceListUnavailable =>
+      'Using the default voice. The voice list could not be loaded right now.';
+
+  @override
+  String get speechRemoteVoicesLoaded => 'Loaded from the provider voices.';
+
+  @override
   String get speechEdgeExperimentalTitle => 'Microsoft Edge Speech는 실험적입니다';
 
   @override
@@ -5125,6 +5149,10 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get speechPitchNotSupported =>
       '피치는 OpenAI 호환 TTS에서 지원되지 않으므로 이 제공자에서는 숨겨집니다.';
+
+  @override
+  String get speechPitchHiddenForProvider =>
+      'Pitch is not supported by this TTS provider and is hidden.';
 
   @override
   String get speechTestVoice => '음성 테스트';
@@ -6013,6 +6041,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get speechProviderQuotaRateLimit => 'TTS 공급자가 할당량 또는 속도 제한에 도달했습니다.';
+
+  @override
+  String get speechReadAloudNoVoice => 'Select a voice for this TTS provider.';
+
+  @override
+  String get speechProviderTextTooLong =>
+      'The text is too long for this TTS model.';
+
+  @override
+  String get speechProviderInvalidAudio =>
+      'The TTS provider returned unrecognized audio.';
+
+  @override
+  String get speechNimBaseUrlRequired =>
+      'Enter the NVIDIA NIM deployment base URL in Settings > Speech.';
 
   @override
   String get speechProviderTemporarilyUnavailable =>

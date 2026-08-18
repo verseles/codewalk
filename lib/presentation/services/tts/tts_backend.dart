@@ -105,7 +105,11 @@ abstract class TtsBackend {
   ReadAloudProvider get provider;
   TtsPlaybackMode get playbackMode;
   Future<bool> get isAvailable;
-  Future<List<TtsVoiceOption>> getVoices();
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  });
   Future<List<String>> getLanguages();
   Future<TtsSynthesisResult> speakOrSynthesize(
     TtsSynthesisRequest request,

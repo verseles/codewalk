@@ -260,9 +260,16 @@ class ReadAloudService extends ChangeNotifier {
   }
 
   Future<List<Map<String, String>>> getVoicesForProvider(
-    ReadAloudProvider provider,
-  ) async {
-    final voices = await _backendFor(provider).getVoices();
+    ReadAloudProvider provider, {
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async {
+    final voices = await _backendFor(provider).getVoices(
+      apiKey: apiKey,
+      baseUrl: baseUrl,
+      model: model,
+    );
     return voices
         .map(
           (voice) => <String, String>{

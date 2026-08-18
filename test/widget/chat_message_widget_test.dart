@@ -47,7 +47,11 @@ class _ControlledTtsBackend implements TtsBackend {
   Future<bool> get isAvailable async => true;
 
   @override
-  Future<List<TtsVoiceOption>> getVoices() async => const <TtsVoiceOption>[];
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async => const <TtsVoiceOption>[];
 
   @override
   Future<List<String>> getLanguages() async => const <String>[];

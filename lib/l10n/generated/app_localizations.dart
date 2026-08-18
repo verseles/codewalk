@@ -9356,6 +9356,48 @@ abstract class AppLocalizations {
   /// **'OpenAI-compatible'**
   String get speechProviderOpenAiCompatible;
 
+  /// CodeWalk UI string — speechProviderElevenLabs
+  ///
+  /// In en, this message translates to:
+  /// **'ElevenLabs'**
+  String get speechProviderElevenLabs;
+
+  /// CodeWalk UI string — speechProviderNvidiaNim
+  ///
+  /// In en, this message translates to:
+  /// **'NVIDIA NIM'**
+  String get speechProviderNvidiaNim;
+
+  /// CodeWalk UI string — speechNimSpeedNotSupported
+  ///
+  /// In en, this message translates to:
+  /// **'Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.'**
+  String get speechNimSpeedNotSupported;
+
+  /// CodeWalk UI string — speechRemoteVoice
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get speechRemoteVoice;
+
+  /// CodeWalk UI string — speechRemoteVoiceUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The selected voice is no longer available in the provider catalog.'**
+  String get speechRemoteVoiceUnavailable;
+
+  /// CodeWalk UI string — speechRemoteVoiceListUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Using the default voice. The voice list could not be loaded right now.'**
+  String get speechRemoteVoiceListUnavailable;
+
+  /// CodeWalk UI string — speechRemoteVoicesLoaded
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded from the provider voices.'**
+  String get speechRemoteVoicesLoaded;
+
   /// CodeWalk UI string — speechEdgeExperimentalTitle
   ///
   /// In en, this message translates to:
@@ -9445,6 +9487,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pitch is not supported by OpenAI-compatible TTS and is hidden for this provider.'**
   String get speechPitchNotSupported;
+
+  /// CodeWalk UI string — speechPitchHiddenForProvider
+  ///
+  /// In en, this message translates to:
+  /// **'Pitch is not supported by this TTS provider and is hidden.'**
+  String get speechPitchHiddenForProvider;
 
   /// CodeWalk UI string — speechTestVoice
   ///
@@ -10764,6 +10812,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The TTS provider reported a quota or rate limit.'**
   String get speechProviderQuotaRateLimit;
+
+  /// CodeWalk UI string — speechReadAloudNoVoice
+  ///
+  /// In en, this message translates to:
+  /// **'Select a voice for this TTS provider.'**
+  String get speechReadAloudNoVoice;
+
+  /// CodeWalk UI string — speechProviderTextTooLong
+  ///
+  /// In en, this message translates to:
+  /// **'The text is too long for this TTS model.'**
+  String get speechProviderTextTooLong;
+
+  /// CodeWalk UI string — speechProviderInvalidAudio
+  ///
+  /// In en, this message translates to:
+  /// **'The TTS provider returned unrecognized audio.'**
+  String get speechProviderInvalidAudio;
+
+  /// CodeWalk UI string — speechNimBaseUrlRequired
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the NVIDIA NIM deployment base URL in Settings > Speech.'**
+  String get speechNimBaseUrlRequired;
 
   /// CodeWalk UI string — speechProviderTemporarilyUnavailable
   ///

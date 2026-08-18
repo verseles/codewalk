@@ -39,7 +39,11 @@ class _Backend implements TtsBackend {
   @override
   Future<List<String>> getLanguages() async => const <String>[];
   @override
-  Future<List<TtsVoiceOption>> getVoices() async => const <TtsVoiceOption>[];
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async => const <TtsVoiceOption>[];
   @override
   Future<void> pause() async {}
   @override
@@ -96,6 +100,58 @@ void main() {
     await executor.play(_job(configuration, 'a'), const TtsBackendCallbacks());
 
     expect(cloud.requests.single.apiKey, 'secret-key');
+  });
+
+  test('resolves keys for ElevenLabs and NIM but not for Edge', () async {
+    final keyBackend = _KeyBackend();
+    final keyStorage = TtsApiKeyStorage(backend: keyBackend);
+    await keyStorage.write(ReadAloudProvider.elevenLabs, 'xi-key');
+    await keyStorage.write(ReadAloudProvider.nim, 'nv-key');
+    final elevenLabs = _Backend(ReadAloudProvider.elevenLabs);
+    final nim = _Backend(ReadAloudProvider.nim);
+    final edge = _Backend(ReadAloudProvider.edgeExperimental);
+    final executor = TtsExecutor(
+      backends: <ReadAloudProvider, TtsBackend>{
+        ReadAloudProvider.elevenLabs: elevenLabs,
+        ReadAloudProvider.nim: nim,
+        ReadAloudProvider.edgeExperimental: edge,
+      },
+      apiKeyStorage: keyStorage,
+    );
+
+    const elevenLabsConfig = TtsConfiguration(
+      provider: ReadAloudProvider.elevenLabs,
+      rate: 0.5,
+      pitch: 1,
+      responseFormat: 'mp3',
+    );
+    const nimConfig = TtsConfiguration(
+      provider: ReadAloudProvider.nim,
+      rate: 0.5,
+      pitch: 1,
+      responseFormat: 'mp3',
+    );
+    const edgeConfig = TtsConfiguration(
+      provider: ReadAloudProvider.edgeExperimental,
+      rate: 0.5,
+      pitch: 1,
+      responseFormat: 'mp3',
+    );
+
+    await executor.play(
+      _job(elevenLabsConfig, 'xi'),
+      const TtsBackendCallbacks(),
+    );
+    expect(elevenLabs.requests.single.apiKey, 'xi-key');
+
+    await executor.play(_job(nimConfig, 'nv'), const TtsBackendCallbacks());
+    expect(nim.requests.single.apiKey, 'nv-key');
+
+    await executor.play(
+      _job(edgeConfig, 'edge'),
+      const TtsBackendCallbacks(),
+    );
+    expect(edge.requests.single.apiKey, isNull);
   });
 
   test('a new job stops the previous active backend', () async {
