@@ -614,6 +614,9 @@ class EdgeExperimentalTtsBackend implements TtsBackend {
   Future<void> pause() async {}
 
   @override
+  Future<void> resume() async {}
+
+  @override
   void dispose() {
     unawaited(stop());
     if (_ownsDio) {

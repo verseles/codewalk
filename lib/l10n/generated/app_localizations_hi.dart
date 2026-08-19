@@ -2219,6 +2219,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get msgStopReadAloud => 'पढ़ना बंद करें';
 
   @override
+  String get msgPauseReadAloud => 'पढ़ना रोकें';
+
+  @override
+  String get msgResumeReadAloud => 'पढ़ना जारी रखें';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'इस प्लेटफॉर्म पर सिस्टम ध्वनि पिकर उपलब्ध नहीं है।';
 

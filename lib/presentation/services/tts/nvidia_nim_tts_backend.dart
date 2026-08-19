@@ -195,6 +195,9 @@ class NvidiaNimTtsBackend implements TtsBackend, TtsModelDiscovery {
   Future<void> pause() async {}
 
   @override
+  Future<void> resume() async {}
+
+  @override
   void dispose() {
     if (_ownsDio) {
       _dio.close(force: true);

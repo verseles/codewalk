@@ -632,6 +632,8 @@
   "msgShareAsImageSubject": "رسالة CodeWalk",
   "msgShareAsImageTooTall": "الرسالة طويلة جداً لمشاركتها كصورة.",
   "msgStopReadAloud": "إيقاف القراءة",
+  "msgPauseReadAloud": "إيقاف القراءة مؤقتًا",
+  "msgResumeReadAloud": "استئناف القراءة",
   "msgSystemSoundPickerUnavailable": "منتقي أصوات النظام غير متوفر على هذه المنصة.",
   "msgUpdatedButRefreshFailed": "تم تحديث إعداد الخادم، ولكن تعذر تحديث مزودي الدردشة.",
   "msgVoiceInputUnavailable": "الإدخال الصوتي غير متوفر على هذا الجهاز",

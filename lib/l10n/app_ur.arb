@@ -760,6 +760,8 @@
   "msgShareAsImageTooTall": "پیغام تصویر کے بطور اشتراک کرنے کے لیے بہت لمبا ہے۔",
   "msgSomeSelectedFilesNotAttached": "کچھ منتخب فائلیں منسلک نہیں کی جا سکیں۔",
   "msgStopReadAloud": "پڑھنا بند کرو",
+  "msgPauseReadAloud": "پڑھنے کو عارضی طور پر روکیں",
+  "msgResumeReadAloud": "پڑھنا دوبارہ شروع کریں",
   "msgSystemSoundPickerUnavailable": "سسٹم ساؤنڈ چننے والا اس پلیٹ فارم پر دستیاب نہیں ہے۔",
   "msgUpdatedButRefreshFailed": "سرور کی ترتیب کو اپ ڈیٹ کیا، لیکن چیٹ فراہم کرنے والوں کو ریفریش نہیں کیا جا سکا۔",
   "msgVoiceInputUnavailable": "اس آلہ پر صوتی ان پٹ دستیاب نہیں ہے۔",

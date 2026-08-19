@@ -2180,6 +2180,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msgStopReadAloud => 'إيقاف القراءة';
 
   @override
+  String get msgPauseReadAloud => 'إيقاف القراءة مؤقتًا';
+
+  @override
+  String get msgResumeReadAloud => 'استئناف القراءة';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'منتقي أصوات النظام غير متوفر على هذه المنصة.';
 

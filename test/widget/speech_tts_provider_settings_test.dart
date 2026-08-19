@@ -92,6 +92,9 @@ class _FakeTtsBackend implements TtsBackend, TtsModelDiscovery {
   Future<void> pause() async {}
 
   @override
+  Future<void> resume() async {}
+
+  @override
   void dispose() {}
 }
 

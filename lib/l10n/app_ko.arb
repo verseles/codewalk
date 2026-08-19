@@ -640,6 +640,8 @@
   "msgShareAsImageSubject": "CodeWalk 메시지",
   "msgShareAsImageTooTall": "메시지가 너무 길어 이미지로 공유할 수 없습니다.",
   "msgStopReadAloud": "읽기 중단",
+  "msgPauseReadAloud": "읽기 일시정지",
+  "msgResumeReadAloud": "읽기 재개",
   "msgSystemSoundPickerUnavailable": "이 플랫폼에서는 시스템 소리 선택기를 사용할 수 없습니다.",
   "msgUpdatedButRefreshFailed": "서버 설정을 업데이트했으나 채팅 제공자를 새로고침하지 못했습니다.",
   "msgVoiceInputUnavailable": "이 기기에서는 음성 입력을 사용할 수 없습니다",

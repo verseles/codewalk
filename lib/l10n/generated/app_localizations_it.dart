@@ -2240,6 +2240,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get msgStopReadAloud => 'Interrompi lettura';
 
   @override
+  String get msgPauseReadAloud => 'Metti in pausa la lettura';
+
+  @override
+  String get msgResumeReadAloud => 'Riprendi la lettura';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'Il selettore del suono di sistema non è disponibile su questa piattaforma.';
 

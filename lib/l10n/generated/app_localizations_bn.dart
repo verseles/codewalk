@@ -2216,6 +2216,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get msgStopReadAloud => 'পড়া বন্ধ করুন';
 
   @override
+  String get msgPauseReadAloud => 'পড়া বিরতি দিন';
+
+  @override
+  String get msgResumeReadAloud => 'পড়া পুনরায় শুরু করুন';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'এই প্ল্যাটফর্মে সিস্টেম সাউন্ড পিকার উপলব্ধ নেই৷';
 

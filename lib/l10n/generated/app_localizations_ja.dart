@@ -2108,6 +2108,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get msgStopReadAloud => '読み上げを停止';
 
   @override
+  String get msgPauseReadAloud => '読み上げを一時停止';
+
+  @override
+  String get msgResumeReadAloud => '読み上げを再開';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'システムサウンドピッカーはこのプラットフォームで利用できません。';
 

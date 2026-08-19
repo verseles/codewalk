@@ -2111,6 +2111,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get msgStopReadAloud => '읽기 중단';
 
   @override
+  String get msgPauseReadAloud => '읽기 일시정지';
+
+  @override
+  String get msgResumeReadAloud => '읽기 재개';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       '이 플랫폼에서는 시스템 소리 선택기를 사용할 수 없습니다.';
 

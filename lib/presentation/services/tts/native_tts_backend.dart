@@ -8,6 +8,11 @@ class NativeTtsBackend implements TtsBackend {
 
   final FlutterTts _tts;
 
+  /// Active utterance text retained so a paused native engine can resume by
+  /// speaking the same text again (flutter_tts has no explicit resume API).
+  String? _activeSpeechText;
+  bool _paused = false;
+
   @override
   ReadAloudProvider get provider => ReadAloudProvider.native;
 
@@ -36,7 +41,11 @@ class NativeTtsBackend implements TtsBackend {
     TtsBackendCallbacks callbacks,
   ) async {
     _tts.setStartHandler(() => callbacks.onStart?.call());
-    _tts.setCompletionHandler(() => callbacks.onComplete?.call());
+    _tts.setCompletionHandler(() {
+      _activeSpeechText = null;
+      _paused = false;
+      callbacks.onComplete?.call();
+    });
     _tts.setErrorHandler((message) => callbacks.onError?.call(message));
     _tts.setCancelHandler(() => callbacks.onCancel?.call());
     _tts.setPauseHandler(() => callbacks.onPause?.call());
@@ -48,6 +57,8 @@ class NativeTtsBackend implements TtsBackend {
     if (voiceId != null && voiceId.isNotEmpty) {
       final voice = await _resolveVoice(voiceId, request.voiceLocale);
       if (voice == null) {
+        _activeSpeechText = request.text;
+        _paused = false;
         await _tts.speak(request.text);
         return const NativeTtsStarted();
       }
@@ -63,6 +74,8 @@ class NativeTtsBackend implements TtsBackend {
       }
     }
 
+    _activeSpeechText = request.text;
+    _paused = false;
     await _tts.speak(request.text);
     return const NativeTtsStarted();
   }
@@ -90,11 +103,23 @@ class NativeTtsBackend implements TtsBackend {
 
   @override
   Future<void> pause() async {
+    _paused = true;
     await _tts.pause();
   }
 
   @override
+  Future<void> resume() async {
+    if (!_paused || _activeSpeechText == null) {
+      return;
+    }
+    _paused = false;
+    await _tts.speak(_activeSpeechText!);
+  }
+
+  @override
   Future<void> stop() async {
+    _paused = false;
+    _activeSpeechText = null;
     await _tts.stop();
   }
 

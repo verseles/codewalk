@@ -146,5 +146,6 @@ abstract class TtsBackend {
   );
   Future<void> stop();
   Future<void> pause();
+  Future<void> resume();
   void dispose();
 }

@@ -72,6 +72,7 @@ class ReadAloudService extends ChangeNotifier {
   ReadAloudState get state => _state;
   String? get activeMessageId => _activeMessageId;
   bool get isSpeaking => _state == ReadAloudState.playing;
+  bool get isPaused => _state == ReadAloudState.paused;
   bool get isLoading => _state == ReadAloudState.loading;
   ReadAloudErrorKind? get lastErrorKind => _lastErrorKind;
   String? get lastErrorMessage => _lastErrorMessage;
@@ -209,6 +210,36 @@ class ReadAloudService extends ChangeNotifier {
       await _executor.pause();
     } catch (error, stackTrace) {
       AppLogger.warn('TTS pause failed', error: error, stackTrace: stackTrace);
+    }
+  }
+
+  /// Resume paused speech. No-op if not paused.
+  Future<void> resume() async {
+    if (_state != ReadAloudState.paused) {
+      return;
+    }
+    try {
+      final job = _executor.activeJob;
+      if (job != null &&
+          _executor.backendFor(job.configuration.provider).playbackMode ==
+              TtsPlaybackMode.generatedAudio) {
+        await _audioPlayer?.resume();
+        if (_state == ReadAloudState.paused) {
+          _state = ReadAloudState.playing;
+          notifyListeners();
+        }
+        return;
+      }
+      await _executor.resume();
+      // Native TTS reports continuation through the onContinue callback; fall
+      // back to playing so the UI reflects a successful resume even on
+      // platforms that do not emit it.
+      if (_state == ReadAloudState.paused) {
+        _state = ReadAloudState.playing;
+        notifyListeners();
+      }
+    } catch (error, stackTrace) {
+      AppLogger.warn('TTS resume failed', error: error, stackTrace: stackTrace);
     }
   }
 

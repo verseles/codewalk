@@ -722,6 +722,8 @@
   "msgShareAsImageSubject": "Сообщение CodeWalk",
   "msgShareAsImageTooTall": "Сообщение слишком длинное, чтобы делиться им как изображением.",
   "msgStopReadAloud": "Остановить чтение",
+  "msgPauseReadAloud": "Пауза чтения",
+  "msgResumeReadAloud": "Продолжить чтение",
   "msgSystemSoundPickerUnavailable": "Выбор системного звука недоступен на этой платформе.",
   "msgUpdatedButRefreshFailed": "Настройки сервера обновлены, но не удалось обновить провайдеров чата.",
   "msgVoiceInputUnavailable": "Голосовой ввод недоступен на этом устройстве",

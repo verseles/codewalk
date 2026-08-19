@@ -2076,6 +2076,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get msgStopReadAloud => '停止朗读';
 
   @override
+  String get msgPauseReadAloud => '暂停朗读';
+
+  @override
+  String get msgResumeReadAloud => '继续朗读';
+
+  @override
   String get msgSystemSoundPickerUnavailable => '此平台不支持系统声音选择器。';
 
   @override

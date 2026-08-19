@@ -46,6 +46,9 @@ class _Backend implements TtsBackend {
   }) async => const <TtsVoiceOption>[];
   @override
   Future<void> pause() async {}
+
+  @override
+  Future<void> resume() async {}
   @override
   Future<TtsSynthesisResult> speakOrSynthesize(
     TtsSynthesisRequest request,

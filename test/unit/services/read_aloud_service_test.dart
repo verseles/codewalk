@@ -194,6 +194,9 @@ class _FakeGeneratedBackend implements TtsBackend {
   }
 
   @override
+  Future<void> resume() async {}
+
+  @override
   Future<List<TtsVoiceOption>> getVoices({
     String? apiKey,
     String? baseUrl,
@@ -251,6 +254,9 @@ class _FakeModelDiscoveryBackend implements TtsBackend, TtsModelDiscovery {
 
   @override
   Future<void> pause() async {}
+
+  @override
+  Future<void> resume() async {}
 
   @override
   Future<List<TtsVoiceOption>> getVoices({
@@ -317,6 +323,7 @@ class _FakeTtsAudioPlayer implements TtsAudioPlayer {
   int playCount = 0;
   bool stopped = false;
   bool paused = false;
+  int resumeCount = 0;
 
   @override
   Stream<void> get onComplete => _completeController.stream;
@@ -337,6 +344,12 @@ class _FakeTtsAudioPlayer implements TtsAudioPlayer {
   @override
   Future<void> pause() async {
     paused = true;
+  }
+
+  @override
+  Future<void> resume() async {
+    resumeCount += 1;
+    paused = false;
   }
 
   @override
@@ -685,6 +698,52 @@ void main() {
       await service.pause();
 
       expect(tts.isPaused, isFalse);
+    });
+
+    test('resume is no-op when not paused', () async {
+      final backend = _FakeGeneratedBackend();
+      final player = _FakeTtsAudioPlayer();
+      final service = ReadAloudService(
+        backends: <ReadAloudProvider, TtsBackend>{
+          ReadAloudProvider.edgeExperimental: backend,
+        },
+        audioPlayer: player,
+      );
+
+      await service.resume();
+
+      expect(player.resumeCount, 0);
+      expect(service.state, ReadAloudState.idle);
+      await service.dispose();
+    });
+
+    test('resume generated audio resumes the player and playback state',
+        () async {
+      final backend = _FakeGeneratedBackend();
+      final player = _FakeTtsAudioPlayer();
+      final service = ReadAloudService(
+        backends: <ReadAloudProvider, TtsBackend>{
+          ReadAloudProvider.edgeExperimental: backend,
+        },
+        audioPlayer: player,
+      );
+
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Hello',
+        provider: ReadAloudProvider.edgeExperimental,
+      );
+      expect(service.state, ReadAloudState.playing);
+
+      await service.pause();
+      expect(service.state, ReadAloudState.paused);
+      expect(player.paused, isTrue);
+
+      await service.resume();
+      expect(player.resumeCount, 1);
+      expect(player.paused, isFalse);
+      expect(service.state, ReadAloudState.playing);
+      await service.dispose();
     });
 
     test('stopIfReading stops when message matches', () async {

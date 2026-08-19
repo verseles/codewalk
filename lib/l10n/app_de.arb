@@ -791,6 +791,8 @@
   "msgShareAsImageSubject": "CodeWalk-Nachricht",
   "msgShareAsImageTooTall": "Die Nachricht ist zu lang, um sie als Bild zu teilen.",
   "msgStopReadAloud": "Vorlesen stoppen",
+  "msgPauseReadAloud": "Vorlesen pausieren",
+  "msgResumeReadAloud": "Vorlesen fortsetzen",
   "msgSystemSoundPickerUnavailable": "Die Auswahl von Systemsounds ist auf dieser Plattform nicht verfügbar.",
   "msgUpdatedButRefreshFailed": "Servereinstellung aktualisiert, aber Chat-Anbieter konnten nicht neu geladen werden.",
   "msgVoiceInputUnavailable": "Spracheingabe ist auf diesem Gerät nicht verfügbar",

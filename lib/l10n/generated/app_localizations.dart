@@ -3969,6 +3969,18 @@ abstract class AppLocalizations {
   /// **'Stop reading'**
   String get msgStopReadAloud;
 
+  /// CodeWalk UI string — msgPauseReadAloud
+  ///
+  /// In en, this message translates to:
+  /// **'Pause reading'**
+  String get msgPauseReadAloud;
+
+  /// CodeWalk UI string — msgResumeReadAloud
+  ///
+  /// In en, this message translates to:
+  /// **'Resume reading'**
+  String get msgResumeReadAloud;
+
   /// CodeWalk UI string — msgSystemSoundPickerUnavailable
   ///
   /// In en, this message translates to:

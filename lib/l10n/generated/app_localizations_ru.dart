@@ -2239,6 +2239,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get msgStopReadAloud => 'Остановить чтение';
 
   @override
+  String get msgPauseReadAloud => 'Пауза чтения';
+
+  @override
+  String get msgResumeReadAloud => 'Продолжить чтение';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'Выбор системного звука недоступен на этой платформе.';
 

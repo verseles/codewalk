@@ -2212,6 +2212,12 @@ class AppLocalizationsUr extends AppLocalizations {
   String get msgStopReadAloud => 'پڑھنا بند کرو';
 
   @override
+  String get msgPauseReadAloud => 'پڑھنے کو عارضی طور پر روکیں';
+
+  @override
+  String get msgResumeReadAloud => 'پڑھنا دوبارہ شروع کریں';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'سسٹم ساؤنڈ چننے والا اس پلیٹ فارم پر دستیاب نہیں ہے۔';
 

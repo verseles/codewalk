@@ -658,6 +658,8 @@
   "msgShareAsImageSubject": "CodeWalk 消息",
   "msgShareAsImageTooTall": "消息太长，无法作为图片分享。",
   "msgStopReadAloud": "停止朗读",
+  "msgPauseReadAloud": "暂停朗读",
+  "msgResumeReadAloud": "继续朗读",
   "msgSystemSoundPickerUnavailable": "此平台不支持系统声音选择器。",
   "msgUpdatedButRefreshFailed": "已更新服务器设置，但无法刷新聊天提供商。",
   "msgVoiceInputUnavailable": "此设备上语音输入不可用",

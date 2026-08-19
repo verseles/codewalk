@@ -658,6 +658,8 @@
   "msgShareAsImageSubject": "CodeWalk メッセージ",
   "msgShareAsImageTooTall": "メッセージが長すぎるため、画像として共有できません。",
   "msgStopReadAloud": "読み上げを停止",
+  "msgPauseReadAloud": "読み上げを一時停止",
+  "msgResumeReadAloud": "読み上げを再開",
   "msgSystemSoundPickerUnavailable": "システムサウンドピッカーはこのプラットフォームで利用できません。",
   "msgUpdatedButRefreshFailed": "サーバー設定を更新しましたが、チャットプロバイダーを更新できませんでした。",
   "msgVoiceInputUnavailable": "このデバイスでは音声入力が利用できません",

@@ -658,6 +658,8 @@
   "msgShareAsImageSubject": "CodeWalk संदेश",
   "msgShareAsImageTooTall": "छवि के रूप में साझा करने के लिए संदेश बहुत लंबा है।",
   "msgStopReadAloud": "पढ़ना बंद करें",
+  "msgPauseReadAloud": "पढ़ना रोकें",
+  "msgResumeReadAloud": "पढ़ना जारी रखें",
   "msgSystemSoundPickerUnavailable": "इस प्लेटफॉर्म पर सिस्टम ध्वनि पिकर उपलब्ध नहीं है।",
   "msgUpdatedButRefreshFailed": "सर्वर सेटिंग अपडेट की गई, लेकिन चैट प्रदाताओं को रीफ़्रेश नहीं किया जा सका।",
   "msgVoiceInputUnavailable": "इस डिवाइस पर वॉयस इनपुट अनुपलब्ध है",

@@ -254,6 +254,9 @@ class _ControlledTtsBackend implements TtsBackend {
   Future<void> pause() async {}
 
   @override
+  Future<void> resume() async {}
+
+  @override
   void dispose() {}
 }
 

@@ -2244,6 +2244,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msgStopReadAloud => 'Detener lectura';
 
   @override
+  String get msgPauseReadAloud => 'Pausar lectura';
+
+  @override
+  String get msgResumeReadAloud => 'Reanudar lectura';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'El selector de sonido del sistema no está disponible en esta plataforma.';
 

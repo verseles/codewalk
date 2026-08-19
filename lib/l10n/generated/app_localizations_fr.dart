@@ -2258,6 +2258,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get msgStopReadAloud => 'Arrêter la lecture';
 
   @override
+  String get msgPauseReadAloud => 'Mettre la lecture en pause';
+
+  @override
+  String get msgResumeReadAloud => 'Reprendre la lecture';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'Le sélecteur de son système n\'est pas disponible sur cette plateforme.';
 

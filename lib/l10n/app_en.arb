@@ -2907,6 +2907,14 @@
   "@msgStopReadAloud": {
     "description": "CodeWalk UI string — msgStopReadAloud"
   },
+  "msgPauseReadAloud": "Pause reading",
+  "@msgPauseReadAloud": {
+    "description": "CodeWalk UI string — msgPauseReadAloud"
+  },
+  "msgResumeReadAloud": "Resume reading",
+  "@msgResumeReadAloud": {
+    "description": "CodeWalk UI string — msgResumeReadAloud"
+  },
   "msgSystemSoundPickerUnavailable": "System sound picker is not available on this platform.",
   "@msgSystemSoundPickerUnavailable": {
     "description": "CodeWalk UI string — msgSystemSoundPickerUnavailable"

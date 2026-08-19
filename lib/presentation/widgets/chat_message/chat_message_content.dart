@@ -448,74 +448,122 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
           return const SizedBox.shrink();
         }
 
-        // Evaluate state inside builder so icon/color/onPressed react to
+        // Evaluate state inside builder so the controls react to
         // ReadAloudService notifications.
         final isActive = readAloudService.activeMessageId == message.id;
         final isLoading = isActive && readAloudService.isLoading;
         final isPlaying = isActive && readAloudService.isSpeaking;
-        final icon = isPlaying ? Symbols.stop : Symbols.volume_up;
-        final tooltip = isPlaying
-            ? context.l10n.msgStopReadAloud
-            : context.l10n.msgReadAloud;
+        final isPaused = isActive && readAloudService.isPaused;
         _syncReadAloudErrorSnackBar(context, readAloudService, message.id);
 
-        final foregroundColor = isActive
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.onSurfaceVariant;
-        return Tooltip(
-          message: tooltip,
-          child: InkResponse(
-            onTap: () {
-              // Guard: respect the current setting even if the button was
-              // rendered before the user toggled readAloudEnabled off.
-              if (!settingsProvider.readAloudEnabled) {
-                return;
-              }
-              if (isLoading) {
-                unawaited(readAloudService.stop());
-                return;
-              }
-              if (isPlaying) {
-                unawaited(readAloudService.stop());
-                return;
-              }
-              final text = _extractReadableText(message);
-              if (text.isEmpty) {
-                return;
-              }
-              unawaited(
-                readAloudService.speak(
-                  messageId: message.id,
-                  text: text,
-                  provider: settingsProvider.readAloudProvider,
-                  rate: settingsProvider.readAloudRate,
-                  pitch: settingsProvider.readAloudPitch,
-                  voice: settingsProvider.readAloudVoice,
-                  voiceId: settingsProvider.readAloudVoiceId,
-                  voiceLocale: settingsProvider.readAloudVoiceLocale,
-                  model: settingsProvider.readAloudModel,
-                  baseUrl: settingsProvider.readAloudBaseUrl,
-                  responseFormat: settingsProvider.readAloudResponseFormat,
-                ),
-              );
-            },
-            onLongPress: () => _openReadAloudSettings(context),
-            radius: 18,
-            child: SizedBox.square(
-              dimension: 48,
-              child: Center(
-                child: isLoading
-                    ? SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
-                    : Icon(icon, size: 18, color: foregroundColor),
-              ),
+        final activeColor = Theme.of(context).colorScheme.primary;
+        final idleColor = Theme.of(context).colorScheme.onSurfaceVariant;
+
+        void startReadAloud() {
+          if (!settingsProvider.readAloudEnabled) {
+            return;
+          }
+          final text = _extractReadableText(message);
+          if (text.isEmpty) {
+            return;
+          }
+          unawaited(
+            readAloudService.speak(
+              messageId: message.id,
+              text: text,
+              provider: settingsProvider.readAloudProvider,
+              rate: settingsProvider.readAloudRate,
+              pitch: settingsProvider.readAloudPitch,
+              voice: settingsProvider.readAloudVoice,
+              voiceId: settingsProvider.readAloudVoiceId,
+              voiceLocale: settingsProvider.readAloudVoiceLocale,
+              model: settingsProvider.readAloudModel,
+              baseUrl: settingsProvider.readAloudBaseUrl,
+              responseFormat: settingsProvider.readAloudResponseFormat,
             ),
-          ),
+          );
+        }
+
+        Widget controlButton({
+          required Key key,
+          required IconData icon,
+          required String tooltip,
+          required VoidCallback onTap,
+          VoidCallback? onLongPress,
+          Color? color,
+        }) {
+          return IconButton(
+            key: key,
+            tooltip: tooltip,
+            onPressed: onTap,
+            onLongPress: onLongPress,
+            visualDensity: VisualDensity.compact,
+            style: IconButton.styleFrom(
+              minimumSize: const Size(36, 36),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: Icon(icon, size: 18, color: color),
+          );
+        }
+
+        if (isLoading) {
+          return controlButton(
+            key: ValueKey('read_aloud_loading_${message.id}'),
+            icon: Symbols.close_rounded,
+            tooltip: context.l10n.msgStopReadAloud,
+            onTap: () => unawaited(readAloudService.stop()),
+            color: activeColor,
+          );
+        }
+        if (isPlaying) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              controlButton(
+                key: ValueKey('read_aloud_pause_${message.id}'),
+                icon: Symbols.pause_rounded,
+                tooltip: context.l10n.msgPauseReadAloud,
+                onTap: () => unawaited(readAloudService.pause()),
+                color: activeColor,
+              ),
+              controlButton(
+                key: ValueKey('read_aloud_stop_${message.id}'),
+                icon: Symbols.stop_rounded,
+                tooltip: context.l10n.msgStopReadAloud,
+                onTap: () => unawaited(readAloudService.stop()),
+                color: activeColor,
+              ),
+            ],
+          );
+        }
+        if (isPaused) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              controlButton(
+                key: ValueKey('read_aloud_resume_${message.id}'),
+                icon: Symbols.play_arrow_rounded,
+                tooltip: context.l10n.msgResumeReadAloud,
+                onTap: () => unawaited(readAloudService.resume()),
+                color: activeColor,
+              ),
+              controlButton(
+                key: ValueKey('read_aloud_stop_${message.id}'),
+                icon: Symbols.stop_rounded,
+                tooltip: context.l10n.msgStopReadAloud,
+                onTap: () => unawaited(readAloudService.stop()),
+                color: activeColor,
+              ),
+            ],
+          );
+        }
+        return controlButton(
+          key: ValueKey('read_aloud_play_${message.id}'),
+          icon: Symbols.volume_up,
+          tooltip: context.l10n.msgReadAloud,
+          onTap: startReadAloud,
+          onLongPress: () => _openReadAloudSettings(context),
+          color: isActive ? activeColor : idleColor,
         );
       },
     );

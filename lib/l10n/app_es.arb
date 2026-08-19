@@ -658,6 +658,8 @@
   "msgShareAsImageSubject": "Mensaje de CodeWalk",
   "msgShareAsImageTooTall": "El mensaje es demasiado largo para ser compartido como imagen.",
   "msgStopReadAloud": "Detener lectura",
+  "msgPauseReadAloud": "Pausar lectura",
+  "msgResumeReadAloud": "Reanudar lectura",
   "msgSystemSoundPickerUnavailable": "El selector de sonido del sistema no está disponible en esta plataforma.",
   "msgUpdatedButRefreshFailed": "Configuración del servidor actualizada, pero no se pudieron actualizar los proveedores de chat.",
   "msgVoiceInputUnavailable": "Entrada de voz no disponible en este dispositivo",

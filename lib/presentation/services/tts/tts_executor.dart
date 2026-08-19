@@ -132,6 +132,8 @@ class TtsExecutor {
 
   Future<void> pause() => _activeBackend?.pause() ?? Future<void>.value();
 
+  Future<void> resume() => _activeBackend?.resume() ?? Future<void>.value();
+
   void complete(String jobId) {
     if (_activeJob?.jobId != jobId) {
       return;

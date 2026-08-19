@@ -18,6 +18,7 @@ import 'package:codewalk/presentation/services/sensevoice_model_manager.dart';
 import 'package:codewalk/presentation/services/sherpa_model_manager.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/tts/tts_backend.dart';
+import 'package:codewalk/presentation/services/tts/generated_tts_audio_player.dart';
 import 'package:codewalk/presentation/theme/opencode_theme_presets.dart';
 import 'package:codewalk/presentation/utils/chat_abort_message.dart';
 import 'package:codewalk/presentation/widgets/chat_message_widget.dart';
@@ -73,7 +74,101 @@ class _ControlledTtsBackend implements TtsBackend {
   Future<void> pause() async {}
 
   @override
+  Future<void> resume() async {}
+
+  @override
   void dispose() {}
+}
+
+class _InstantGeneratedBackend implements TtsBackend {
+  _InstantGeneratedBackend({List<String>? texts})
+    : texts = texts ?? <String>[];
+
+  final List<String> texts;
+
+  @override
+  ReadAloudProvider get provider => ReadAloudProvider.edgeExperimental;
+
+  @override
+  TtsPlaybackMode get playbackMode => TtsPlaybackMode.generatedAudio;
+
+  @override
+  Future<bool> get isAvailable async => true;
+
+  @override
+  Future<List<TtsVoiceOption>> getVoices({
+    String? apiKey,
+    String? baseUrl,
+    String? model,
+  }) async => const <TtsVoiceOption>[];
+
+  @override
+  Future<List<String>> getLanguages() async => const <String>[];
+
+  @override
+  Future<TtsSynthesisResult> speakOrSynthesize(
+    TtsSynthesisRequest request,
+    TtsBackendCallbacks callbacks,
+  ) async {
+    texts.add(request.text);
+    return GeneratedTtsAudio(bytes: Uint8List(0), mimeType: 'audio/mpeg');
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> pause() async {}
+
+  @override
+  Future<void> resume() async {}
+
+  @override
+  void dispose() {}
+}
+
+class _ChatFakeAudioPlayer implements TtsAudioPlayer {
+  final StreamController<void> _completeController =
+      StreamController<void>.broadcast(sync: true);
+  final StreamController<Duration> _durationController =
+      StreamController<Duration>.broadcast(sync: true);
+  final StreamController<Duration> _positionController =
+      StreamController<Duration>.broadcast(sync: true);
+
+  int playCount = 0;
+  int resumeCount = 0;
+  bool paused = false;
+
+  @override
+  Stream<void> get onComplete => _completeController.stream;
+
+  @override
+  Stream<Duration> get onDurationChanged => _durationController.stream;
+
+  @override
+  Stream<Duration> get onPositionChanged => _positionController.stream;
+
+  @override
+  Future<void> playBytes(Uint8List bytes, {String? mimeType}) async {
+    playCount += 1;
+  }
+
+  @override
+  Future<void> pause() async {
+    paused = true;
+  }
+
+  @override
+  Future<void> resume() async {
+    resumeCount += 1;
+    paused = false;
+  }
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> dispose() async {}
 }
 
 class _MemoryTtsApiKeyStorageBackend implements TtsApiKeyStorageBackend {
@@ -164,16 +259,87 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.byIcon(Symbols.volume_up), findsNothing);
+    expect(
+      find.byKey(const ValueKey('read_aloud_loading_msg_read_aloud_loading')),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.byType(CircularProgressIndicator));
+    await tester.tap(
+      find.byKey(const ValueKey('read_aloud_loading_msg_read_aloud_loading')),
+    );
     await tester.pump();
 
     expect(backend.stopped, isTrue);
     expect(readAloudService.state, ReadAloudState.idle);
 
     backend.completer.complete(const NativeTtsStarted());
+    await speakFuture;
+  });
+
+  testWidgets('read-aloud playing shows pause/stop and can resume and stop', (
+    WidgetTester tester,
+  ) async {
+    await di.sl.reset();
+    addTearDown(di.sl.reset);
+    final backend = _InstantGeneratedBackend();
+    final player = _ChatFakeAudioPlayer();
+    final readAloudService = ReadAloudService(
+      backends: <ReadAloudProvider, TtsBackend>{
+        ReadAloudProvider.edgeExperimental: backend,
+      },
+      audioPlayer: player,
+    );
+    di.sl.registerSingleton<ReadAloudService>(readAloudService);
+    addTearDown(readAloudService.dispose);
+    final settingsProvider = _buildSettingsProviderForReadAloud();
+    addTearDown(settingsProvider.dispose);
+    await settingsProvider.setReadAloudProvider(ReadAloudProvider.edgeExperimental);
+    final message = _readAloudAssistantMessage('msg_read_aloud_controls');
+
+    final speakFuture = readAloudService.speak(
+      messageId: message.id,
+      text: 'Read this message aloud.',
+      provider: ReadAloudProvider.edgeExperimental,
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: localizedMaterialApp(
+          home: Scaffold(body: ChatMessageWidget(message: message)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    const playKey = ValueKey('read_aloud_play_msg_read_aloud_controls');
+    const pauseKey = ValueKey('read_aloud_pause_msg_read_aloud_controls');
+    const resumeKey = ValueKey('read_aloud_resume_msg_read_aloud_controls');
+    const stopKey = ValueKey('read_aloud_stop_msg_read_aloud_controls');
+
+    expect(readAloudService.state, ReadAloudState.playing);
+    expect(find.byKey(pauseKey), findsOneWidget);
+    expect(find.byKey(stopKey), findsOneWidget);
+    expect(backend.texts, <String>['Read this message aloud.']);
+
+    await tester.tap(find.byKey(pauseKey));
+    await tester.pump();
+
+    expect(readAloudService.state, ReadAloudState.paused);
+    expect(find.byKey(resumeKey), findsOneWidget);
+
+    await tester.tap(find.byKey(resumeKey));
+    await tester.pump();
+
+    expect(readAloudService.state, ReadAloudState.playing);
+    expect(player.resumeCount, 1);
+
+    await tester.tap(find.byKey(stopKey));
+    await tester.pump();
+
+    expect(readAloudService.state, ReadAloudState.idle);
+    expect(find.byKey(playKey), findsOneWidget);
     await speakFuture;
   });
 

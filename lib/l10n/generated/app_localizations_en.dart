@@ -2209,6 +2209,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msgStopReadAloud => 'Stop reading';
 
   @override
+  String get msgPauseReadAloud => 'Pause reading';
+
+  @override
+  String get msgResumeReadAloud => 'Resume reading';
+
+  @override
   String get msgSystemSoundPickerUnavailable =>
       'System sound picker is not available on this platform.';
 

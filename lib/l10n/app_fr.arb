@@ -791,6 +791,8 @@
   "msgShareAsImageSubject": "Message CodeWalk",
   "msgShareAsImageTooTall": "Le message est trop long pour être partagé sous forme d''image.",
   "msgStopReadAloud": "Arrêter la lecture",
+  "msgPauseReadAloud": "Mettre la lecture en pause",
+  "msgResumeReadAloud": "Reprendre la lecture",
   "msgSystemSoundPickerUnavailable": "Le sélecteur de son système n''est pas disponible sur cette plateforme.",
   "msgUpdatedButRefreshFailed": "Paramètre du serveur mis à jour, mais impossible d''actualiser les fournisseurs de discussion.",
   "msgVoiceInputUnavailable": "La saisie vocale n''est pas disponible sur cet appareil",

@@ -9,6 +9,7 @@ abstract class TtsAudioPlayer {
   Stream<Duration> get onPositionChanged;
   Future<void> playBytes(Uint8List bytes, {String? mimeType});
   Future<void> pause();
+  Future<void> resume();
   Future<void> stop();
   Future<void> dispose();
 }
@@ -36,6 +37,11 @@ class AudioplayersTtsAudioPlayer implements TtsAudioPlayer {
   @override
   Future<void> pause() {
     return _player.pause();
+  }
+
+  @override
+  Future<void> resume() {
+    return _player.resume();
   }
 
   @override
