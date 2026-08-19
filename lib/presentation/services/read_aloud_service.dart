@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -39,6 +40,9 @@ class ReadAloudService extends ChangeNotifier {
     }
   }
 
+  static const int _maxCachedAudioEntries = 16;
+  static const int _maxCachedAudioBytes = 32 * 1024 * 1024;
+
   static Map<ReadAloudProvider, TtsBackend> _buildBackends({
     required FlutterTts? tts,
     required Map<ReadAloudProvider, TtsBackend>? backends,
@@ -63,6 +67,9 @@ class ReadAloudService extends ChangeNotifier {
   int? _audioPlaybackGeneration;
   Duration? _audioDuration;
   Duration? _audioPosition;
+  final LinkedHashMap<String, _CachedAudio> _audioCache =
+      LinkedHashMap<String, _CachedAudio>();
+  int _audioCacheBytes = 0;
   ReadAloudErrorKind? _lastErrorKind;
   String? _lastErrorMessage;
   String? _lastErrorMessageId;
@@ -150,6 +157,31 @@ class ReadAloudService extends ChangeNotifier {
         configurationRevision: configuration.revision,
         configuration: configuration,
       );
+      final isGenerated =
+          backend.playbackMode == TtsPlaybackMode.generatedAudio;
+      final cacheKey = isGenerated
+          ? _audioCacheKey(configuration, messageId, text)
+          : null;
+      if (cacheKey != null) {
+        final cached = _cachedAudioFor(cacheKey);
+        if (cached != null) {
+          _executor.activateCachedJob(job);
+          if (!_isCurrentGeneration(generation)) {
+            return;
+          }
+          _audioPlaybackGeneration = generation;
+          await _ensureAudioPlayer().playBytes(
+            cached.bytes,
+            mimeType: cached.mimeType,
+          );
+          if (!_isCurrentGeneration(generation)) {
+            return;
+          }
+          _state = ReadAloudState.playing;
+          notifyListeners();
+          return;
+        }
+      }
       final result = await _executor.play(
         job,
         _callbacksFor(generation, backend.playbackMode, job.jobId),
@@ -171,6 +203,9 @@ class ReadAloudService extends ChangeNotifier {
         );
         if (!_isCurrentGeneration(generation)) {
           return;
+        }
+        if (cacheKey != null) {
+          _storeCachedAudio(cacheKey, result.bytes, result.mimeType);
         }
         _state = ReadAloudState.playing;
         notifyListeners();
@@ -275,6 +310,8 @@ class ReadAloudService extends ChangeNotifier {
   @override
   Future<void> dispose() async {
     await stop();
+    _audioCache.clear();
+    _audioCacheBytes = 0;
     await _audioCompleteSubscription?.cancel();
     await _audioDurationSubscription?.cancel();
     await _audioPositionSubscription?.cancel();
@@ -347,6 +384,42 @@ class ReadAloudService extends ChangeNotifier {
 
   TtsBackend _backendFor(ReadAloudProvider provider) {
     return _backends[provider] ?? _backends[ReadAloudProvider.native]!;
+  }
+
+  String _audioCacheKey(
+    TtsConfiguration config,
+    String messageId,
+    String text,
+  ) {
+    return '${config.provider.name}|$messageId|$text|${config.rate}|'
+        '${config.pitch}|${config.voiceId}|${config.voiceLocale}|'
+        '${config.model}|${config.baseUrl}|${config.responseFormat}';
+  }
+
+  _CachedAudio? _cachedAudioFor(String key) {
+    final cached = _audioCache[key];
+    if (cached == null) {
+      return null;
+    }
+    // LRU touch: move the entry to the most-recent position.
+    _audioCache.remove(key);
+    _audioCache[key] = cached;
+    return cached;
+  }
+
+  void _storeCachedAudio(String key, Uint8List bytes, String mimeType) {
+    final existing = _audioCache.remove(key);
+    if (existing != null) {
+      _audioCacheBytes -= existing.bytes.length;
+    }
+    _audioCacheBytes += bytes.length;
+    _audioCache[key] = _CachedAudio(bytes: bytes, mimeType: mimeType);
+    while (_audioCache.length > _maxCachedAudioEntries ||
+        (_audioCacheBytes > _maxCachedAudioBytes && _audioCache.isNotEmpty)) {
+      final oldestKey = _audioCache.keys.first;
+      final oldest = _audioCache.remove(oldestKey)!;
+      _audioCacheBytes -= oldest.bytes.length;
+    }
   }
 
   TtsAudioPlayer _ensureAudioPlayer() {
@@ -496,4 +569,11 @@ class ReadAloudService extends ChangeNotifier {
       TtsBackendErrorKind.unknown => ReadAloudErrorKind.unknown,
     };
   }
+}
+
+class _CachedAudio {
+  const _CachedAudio({required this.bytes, required this.mimeType});
+
+  final Uint8List bytes;
+  final String mimeType;
 }

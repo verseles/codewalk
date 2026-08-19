@@ -630,6 +630,87 @@ void main() {
       },
     );
 
+    test('generated audio is synthesized once and replayed from cache', () async {
+      final backend = _FakeGeneratedBackend();
+      final player = _FakeTtsAudioPlayer();
+      final service = ReadAloudService(
+        backends: <ReadAloudProvider, TtsBackend>{
+          ReadAloudProvider.edgeExperimental: backend,
+        },
+        audioPlayer: player,
+      );
+
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Cache me',
+        provider: ReadAloudProvider.edgeExperimental,
+      );
+      expect(service.state, ReadAloudState.playing);
+      expect(backend.requests, hasLength(1));
+      expect(player.playCount, 1);
+
+      await service.stop();
+
+      // Replaying the same message+config hits the in-memory cache.
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Cache me',
+        provider: ReadAloudProvider.edgeExperimental,
+      );
+      expect(service.state, ReadAloudState.playing);
+      expect(backend.requests, hasLength(1));
+      expect(player.playCount, 2);
+      await service.dispose();
+    });
+
+    test('cache key changes when configuration changes', () async {
+      final backend = _FakeGeneratedBackend();
+      final player = _FakeTtsAudioPlayer();
+      final service = ReadAloudService(
+        backends: <ReadAloudProvider, TtsBackend>{
+          ReadAloudProvider.edgeExperimental: backend,
+        },
+        audioPlayer: player,
+      );
+
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Cache me',
+        provider: ReadAloudProvider.edgeExperimental,
+      );
+      await service.stop();
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Cache me',
+        provider: ReadAloudProvider.edgeExperimental,
+        rate: 0.8,
+      );
+
+      // A different rate produces a different cache key, so re-synthesis runs.
+      expect(backend.requests, hasLength(2));
+      await service.dispose();
+    });
+
+    test('native engine audio is never cached', () async {
+      final tts = _FakeFlutterTts();
+      final service = ReadAloudService(tts: tts);
+
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Cache me',
+        provider: ReadAloudProvider.native,
+      );
+      await service.speak(
+        messageId: 'msg_1',
+        text: 'Cache me',
+        provider: ReadAloudProvider.native,
+      );
+
+      // The cache is only used for generatedAudio; native speaks twice.
+      expect(tts.spokenTexts, hasLength(2));
+      await service.dispose();
+    });
+
     test('stop cancels slow generated audio before playback starts', () async {
       final completer = Completer<TtsSynthesisResult>();
       final backend = _FakeGeneratedBackend(

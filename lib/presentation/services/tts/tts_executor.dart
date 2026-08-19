@@ -132,6 +132,14 @@ class TtsExecutor {
 
   Future<void> pause() => _activeBackend?.pause() ?? Future<void>.value();
 
+  /// Activate a job whose audio was served from the in-memory cache, so
+  /// pause/resume/stop and completion bookkeeping work without re-synthesis.
+  void activateCachedJob(SpeechJob job) {
+    _generation += 1;
+    _activeBackend = backendFor(job.configuration.provider);
+    _activeJob = job;
+  }
+
   Future<void> resume() => _activeBackend?.resume() ?? Future<void>.value();
 
   void complete(String jobId) {
