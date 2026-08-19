@@ -103,16 +103,13 @@ extension _ChatRemoteDataSourceCommandAndErrorHelpers
           ? ''
           : normalized.substring(separatorMatch.start).trimLeft();
 
-      final payload = <String, dynamic>{'command': command};
-      if (arguments.isNotEmpty) {
-        payload['arguments'] = arguments;
-      }
+      final payload = <String, dynamic>{
+        'command': command,
+        'arguments': arguments,
+      };
       if (input.providerId.trim().isNotEmpty &&
           input.modelId.trim().isNotEmpty) {
-        payload['model'] = <String, dynamic>{
-          'providerID': input.providerId,
-          'modelID': input.modelId,
-        };
+        payload['model'] = '${input.providerId}/${input.modelId}';
       }
 
       final response = await dio.post(
