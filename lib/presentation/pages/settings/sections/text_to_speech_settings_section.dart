@@ -52,6 +52,9 @@ class _TextToSpeechSettingsSectionState
 
   @override
   void dispose() {
+    // Invalidate any in-flight selection so a persisted model/voice change
+    // cannot trigger a stale test or a setState after the section is gone.
+    _selectionGeneration += 1;
     _readAloudApiKeyController.dispose();
     super.dispose();
   }
@@ -252,8 +255,13 @@ class _TextToSpeechSettingsSectionState
   ) async {
     final generation = ++_selectionGeneration;
     await settingsProvider.setReadAloudModel(value);
+    if (!mounted) {
+      return;
+    }
     _requestRemoteVoiceReload();
-    if (!mounted || generation != _selectionGeneration) return;
+    if (generation != _selectionGeneration) {
+      return;
+    }
     await _testReadAloudVoice(settingsProvider);
   }
 
@@ -324,6 +332,10 @@ class _TextToSpeechSettingsSectionState
       ],
       onChanged: (value) {
         if (value == null) return;
+        // Changing the provider supersedes any in-flight selection test, so
+        // invalidate it to avoid auto-playing a test for a provider the user
+        // never selected.
+        _selectionGeneration += 1;
         unawaited(settingsProvider.setReadAloudProvider(value));
       },
     );

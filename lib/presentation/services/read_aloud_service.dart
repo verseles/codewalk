@@ -231,6 +231,7 @@ class ReadAloudService extends ChangeNotifier {
     if (_state != ReadAloudState.playing) {
       return;
     }
+    final generation = _generation;
     try {
       if (_executor.activeJob != null &&
           _executor
@@ -238,8 +239,13 @@ class ReadAloudService extends ChangeNotifier {
                   .playbackMode ==
               TtsPlaybackMode.generatedAudio) {
         await _audioPlayer?.pause();
-        _state = ReadAloudState.paused;
-        notifyListeners();
+        // A stop or new speak may have run while the player was pausing; only
+        // transition to paused if this pause is still the current action.
+        if (_isCurrentGeneration(generation) &&
+            _state == ReadAloudState.playing) {
+          _state = ReadAloudState.paused;
+          notifyListeners();
+        }
         return;
       }
       await _executor.pause();
