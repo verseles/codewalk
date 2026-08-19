@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.212.0 - 2026-08-19
+
+- fix(chat): align slash command payload with OpenCode
+
 ## v1.211.1 - 2026-08-19
 
 - fix(ci): use reliable Ubuntu mirror for Linux release build
