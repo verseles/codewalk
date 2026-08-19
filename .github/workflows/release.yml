@@ -46,7 +46,15 @@ jobs:
 
       - name: Install Linux dependencies
         run: |
-          sudo apt-get update
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i \
+                -e 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+                -e 's|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+                "$source"
+            fi
+          done
+          sudo apt-get -o Acquire::Retries=3 update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libayatana-appindicator3-dev libsecret-1-dev
 
       - name: Install dependencies
