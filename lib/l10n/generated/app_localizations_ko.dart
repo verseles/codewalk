@@ -5083,34 +5083,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get speechNimSpeedNotSupported =>
-      'Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.';
+      '속도는 NVIDIA NIM TTS에서 지원되지 않으며 이 공급자에서는 숨겨집니다.';
 
   @override
-  String get speechRemoteVoice => 'Voice';
+  String get speechRemoteVoice => '음성';
 
   @override
-  String get speechRemoteVoiceUnavailable =>
-      'The selected voice is no longer available in the provider catalog.';
+  String get speechRemoteVoiceUnavailable => '선택한 음성은 더 이상 공급자 카탈로그에 없습니다.';
 
   @override
   String get speechRemoteVoiceListUnavailable =>
-      'Using the default voice. The voice list could not be loaded right now.';
+      '기본 음성이 사용 중입니다. 현재 음성 목록을 불러올 수 없습니다.';
 
   @override
-  String get speechRemoteVoicesLoaded => 'Loaded from the provider voices.';
+  String get speechRemoteVoicesLoaded => '공급자 음성에서 불러왔습니다.';
 
   @override
-  String get speechRemoteModel => 'Model';
+  String get speechRemoteModel => '모델';
 
   @override
   String get speechRemoteModelListUnavailable =>
-      'The model list could not be loaded right now. You can type a custom model below.';
+      '현재 모델 목록을 불러올 수 없습니다. 아래에서 사용자 지정 모델을 입력할 수 있습니다.';
 
   @override
-  String get speechRemoteModelsLoaded => 'Loaded from the provider models.';
+  String get speechRemoteModelsLoaded => '공급자 모델에서 불러왔습니다.';
 
   @override
-  String get speechCustomModel => 'Custom model…';
+  String get speechRemoteModelUnavailable => '선택한 모델은 더 이상 공급자 카탈로그에 없습니다.';
+
+  @override
+  String get speechCustomModel => '사용자 지정 모델…';
 
   @override
   String get speechEdgeExperimentalTitle => 'Microsoft Edge Speech는 실험적입니다';
@@ -5164,8 +5166,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '피치는 OpenAI 호환 TTS에서 지원되지 않으므로 이 제공자에서는 숨겨집니다.';
 
   @override
-  String get speechPitchHiddenForProvider =>
-      'Pitch is not supported by this TTS provider and is hidden.';
+  String get speechPitchHiddenForProvider => '피치는 이 TTS 공급자에서 지원되지 않으며 숨겨집니다.';
 
   @override
   String get speechTestVoice => '음성 테스트';
@@ -6056,19 +6057,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechProviderQuotaRateLimit => 'TTS 공급자가 할당량 또는 속도 제한에 도달했습니다.';
 
   @override
-  String get speechReadAloudNoVoice => 'Select a voice for this TTS provider.';
+  String get speechReadAloudNoVoice => '이 TTS 공급자의 음성을 선택하세요.';
 
   @override
-  String get speechProviderTextTooLong =>
-      'The text is too long for this TTS model.';
+  String get speechProviderTextTooLong => '이 TTS 모델에는 텍스트가 너무 깁니다.';
 
   @override
-  String get speechProviderInvalidAudio =>
-      'The TTS provider returned unrecognized audio.';
+  String get speechProviderInvalidAudio => 'TTS 공급자가 인식할 수 없는 오디오를 반환했습니다.';
 
   @override
   String get speechNimBaseUrlRequired =>
-      'Enter the NVIDIA NIM deployment base URL in Settings > Speech.';
+      '설정 > 텍스트 음성 변환 (TTS)에 NVIDIA NIM 배포 기본 URL을 입력하세요.';
 
   @override
   String get speechProviderTemporarilyUnavailable =>

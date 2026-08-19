@@ -111,4 +111,54 @@ void main() {
       }
     }
   });
+
+  test('TTS provider strings are localized in every locale', () {
+    const ttsKeys = <String>[
+      'speechCustomModel',
+      'speechNimBaseUrlRequired',
+      'speechNimSpeedNotSupported',
+      'speechPitchHiddenForProvider',
+      'speechProviderElevenLabs',
+      'speechProviderInvalidAudio',
+      'speechProviderNvidiaNim',
+      'speechProviderTextTooLong',
+      'speechReadAloudNoVoice',
+      'speechRemoteModel',
+      'speechRemoteModelListUnavailable',
+      'speechRemoteModelUnavailable',
+      'speechRemoteModelsLoaded',
+      'speechRemoteVoice',
+      'speechRemoteVoiceListUnavailable',
+      'speechRemoteVoiceUnavailable',
+      'speechRemoteVoicesLoaded',
+    ];
+    const brandKeys = <String>{
+      'speechProviderElevenLabs',
+      'speechProviderNvidiaNim',
+    };
+    final english = _messages('en');
+    for (final locale in _locales) {
+      final localized = _messages(locale);
+      for (final key in ttsKeys) {
+        final value = localized[key];
+        expect(value, isNotNull, reason: '$locale:$key is missing');
+        expect(value, isNotEmpty, reason: '$locale:$key is empty');
+        final canonical = _canonicalArbValue(value!);
+        final englishCanonical = _canonicalArbValue(english[key]!);
+        if (brandKeys.contains(key)) {
+          expect(
+            canonical,
+            englishCanonical,
+            reason: '$locale:$key brand value changed',
+          );
+        } else {
+          expect(
+            canonical,
+            isNot(englishCanonical),
+            reason: '$locale:$key is still an English fallback',
+          );
+        }
+      }
+    }
+  });
 }

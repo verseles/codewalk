@@ -5271,34 +5271,39 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get speechNimSpeedNotSupported =>
-      'Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.';
+      'NVIDIA NIM TTS میں رفتار سپورٹ نہیں ہے اور اس فراہم کنندہ کے لیے چھپی ہوئی ہے۔';
 
   @override
-  String get speechRemoteVoice => 'Voice';
+  String get speechRemoteVoice => 'آواز';
 
   @override
   String get speechRemoteVoiceUnavailable =>
-      'The selected voice is no longer available in the provider catalog.';
+      'منتخب آواز فراہم کنندہ کے کیٹلاگ میں اب دستیاب نہیں ہے۔';
 
   @override
   String get speechRemoteVoiceListUnavailable =>
-      'Using the default voice. The voice list could not be loaded right now.';
+      'ڈیفالٹ آواز استعمال ہو رہی ہے۔ آوازوں کی فہرست ابھی لوڈ نہیں ہو سکی۔';
 
   @override
-  String get speechRemoteVoicesLoaded => 'Loaded from the provider voices.';
+  String get speechRemoteVoicesLoaded =>
+      'فراہم کنندہ کی آوازوں سے لوڈ کیا گیا۔';
 
   @override
-  String get speechRemoteModel => 'Model';
+  String get speechRemoteModel => 'ماڈل';
 
   @override
   String get speechRemoteModelListUnavailable =>
-      'The model list could not be loaded right now. You can type a custom model below.';
+      'ماڈلز کی فہرست ابھی لوڈ نہیں ہو سکی۔ آپ نیچے اپنی مرضی کا ماڈل ٹائپ کر سکتے ہیں۔';
 
   @override
-  String get speechRemoteModelsLoaded => 'Loaded from the provider models.';
+  String get speechRemoteModelsLoaded => 'فراہم کنندہ کے ماڈلز سے لوڈ کیا گیا۔';
 
   @override
-  String get speechCustomModel => 'Custom model…';
+  String get speechRemoteModelUnavailable =>
+      'منتخب ماڈل فراہم کنندہ کے کیٹلاگ میں اب دستیاب نہیں ہے۔';
+
+  @override
+  String get speechCustomModel => 'اپنی مرضی کا ماڈل…';
 
   @override
   String get speechEdgeExperimentalTitle => 'Microsoft Edge Speech تجرباتی ہے';
@@ -5354,7 +5359,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get speechPitchHiddenForProvider =>
-      'Pitch is not supported by this TTS provider and is hidden.';
+      'اس TTS فراہم کنندہ میں پچ سپورٹ نہیں ہے اور چھپی ہوئی ہے۔';
 
   @override
   String get speechTestVoice => 'آواز ٹیسٹ کریں';
@@ -6294,19 +6299,19 @@ class AppLocalizationsUr extends AppLocalizations {
       'TTS فراہم کنندہ نے کوٹہ یا شرح کی حد رپورٹ کی۔';
 
   @override
-  String get speechReadAloudNoVoice => 'Select a voice for this TTS provider.';
+  String get speechReadAloudNoVoice =>
+      'اس TTS فراہم کنندہ کے لیے ایک آواز منتخب کریں۔';
 
   @override
-  String get speechProviderTextTooLong =>
-      'The text is too long for this TTS model.';
+  String get speechProviderTextTooLong => 'اس TTS ماڈل کے لیے متن بہت لمبا ہے۔';
 
   @override
   String get speechProviderInvalidAudio =>
-      'The TTS provider returned unrecognized audio.';
+      'TTS فراہم کنندہ نے غیر تسلیم شدہ آڈیو واپس کیا۔';
 
   @override
   String get speechNimBaseUrlRequired =>
-      'Enter the NVIDIA NIM deployment base URL in Settings > Speech.';
+      'NVIDIA NIM ڈیپلائمنٹ کا بیس URL ترتیبات > متن سے تقریر میں درج کریں۔';
 
   @override
   String get speechProviderTemporarilyUnavailable =>

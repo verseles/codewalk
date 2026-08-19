@@ -560,6 +560,13 @@ void main() {
           'a custom model below.'),
       findsOneWidget,
     );
+    // An empty/unavailable catalog is not evidence that the saved model was
+    // removed, so the missing-model warning must not appear here.
+    expect(
+      find.text('The selected model is no longer available in the provider '
+          'catalog.'),
+      findsNothing,
+    );
     final customField = find.byKey(
       const ValueKey('read-aloud-custom-model-elevenLabs'),
     );
@@ -568,6 +575,92 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(provider.readAloudModel, 'my-custom-model');
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'model picker flags a saved model that is missing from the provider '
+      'list without a reset action', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    _registerDi(_TtsStorageBackend());
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Loaded from the provider models.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The default saved model is not in the fake catalog, so the
+    // informational tile appears and the custom field keeps the model.
+    expect(
+      find.text('The selected model is no longer available in the provider '
+          'catalog.'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey('read-aloud-model-unavailable-elevenLabs'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('read-aloud-custom-model-elevenLabs')),
+      findsOneWidget,
+    );
+    // Non-destructive: no reset button is offered.
+    expect(find.text('Reset'), findsNothing);
+    expect(provider.readAloudModel, kDefaultElevenLabsTtsModel);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'model picker does not flag a saved model present in the provider list',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    _registerDi(_TtsStorageBackend());
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+    await provider.setReadAloudModel('model-a');
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Loaded from the provider models.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.text('The selected model is no longer available in the provider '
+          'catalog.'),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

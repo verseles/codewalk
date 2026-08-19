@@ -2329,6 +2329,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** text over the selected model's character limit is rejected with a user-visible error instead of being truncated
 - **Then** voice discovery loads the provider voice catalog and warns when the saved voice is no longer available
 - **Then** voice discovery only runs after the provider is selected, the API key is saved, or the base URL/model field is submitted — never while typing
+- **Then** model discovery loads the provider model catalog, and when the saved model is not in it, CodeWalk shows an informational note without a reset action while keeping the saved model editable in the custom field
 - **Then** missing, invalid, rate-limited, network, or provider errors are mapped to user-visible read-aloud errors
 
 ### NVIDIA Speech NIM provider
@@ -2344,6 +2345,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** text over the model's character limit is rejected with a user-visible error instead of being truncated
 - **Then** voice discovery loads the provider voice catalog when a base URL is configured and warns when the saved voice is no longer available
 - **Then** voice discovery only runs after the provider is selected, the API key is saved, or the base URL/model field is submitted — never while typing
+- **Then** model discovery lists the known NIM models, and when the saved model is not among them, CodeWalk shows an informational note without a reset action while keeping the saved model editable in the custom field
 - **Then** missing, invalid, rate-limited, network, or provider errors are mapped to user-visible read-aloud errors
 
 - **Given** `Microsoft Edge Speech (experimental)` is selected

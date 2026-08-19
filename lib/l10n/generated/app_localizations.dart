@@ -9416,6 +9416,12 @@ abstract class AppLocalizations {
   /// **'Loaded from the provider models.'**
   String get speechRemoteModelsLoaded;
 
+  /// CodeWalk UI string — speechRemoteModelUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'The selected model is no longer available in the provider catalog.'**
+  String get speechRemoteModelUnavailable;
+
   /// CodeWalk UI string — speechCustomModel
   ///
   /// In en, this message translates to:

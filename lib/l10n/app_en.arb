@@ -6780,6 +6780,10 @@
   "@speechRemoteModelsLoaded": {
     "description": "CodeWalk UI string — speechRemoteModelsLoaded"
   },
+  "speechRemoteModelUnavailable": "The selected model is no longer available in the provider catalog.",
+  "@speechRemoteModelUnavailable": {
+    "description": "CodeWalk UI string — speechRemoteModelUnavailable"
+  },
   "speechCustomModel": "Custom model…",
   "@speechCustomModel": {
     "description": "CodeWalk UI string — speechCustomModel"

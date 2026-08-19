@@ -5279,6 +5279,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speechRemoteModelsLoaded => 'Loaded from the provider models.';
 
   @override
+  String get speechRemoteModelUnavailable =>
+      'The selected model is no longer available in the provider catalog.';
+
+  @override
   String get speechCustomModel => 'Custom model…';
 
   @override

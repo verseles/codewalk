@@ -2623,7 +2623,8 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             : kDefaultElevenLabsTtsModel;
         final saved = settingsProvider.readAloudModel.trim();
         final known = models.any((model) => model['name'] == saved);
-        final customMode = _editingCustomModel || (saved.isNotEmpty && !known);
+        final modelMissing = saved.isNotEmpty && !known;
+        final customMode = _editingCustomModel || modelMissing;
         final effective = saved.isNotEmpty ? saved : defaultModel;
         final selected = known
             ? saved
@@ -2635,6 +2636,14 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (modelMissing) ...[
+              ListTile(
+                key: ValueKey('read-aloud-model-unavailable-${provider.name}'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Symbols.warning_amber_rounded),
+                title: Text(context.l10n.speechRemoteModelUnavailable),
+              ),
+            ],
             SearchableDropdownFormField<String>(
               value: selected,
               decoration: InputDecoration(

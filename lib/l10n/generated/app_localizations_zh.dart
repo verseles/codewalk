@@ -4968,35 +4968,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechProviderNvidiaNim => 'NVIDIA NIM';
 
   @override
-  String get speechNimSpeedNotSupported =>
-      'Speed is not supported by NVIDIA NIM TTS and is hidden for this provider.';
+  String get speechNimSpeedNotSupported => '速度不受 NVIDIA NIM TTS 支持，因此对此提供商隐藏。';
 
   @override
-  String get speechRemoteVoice => 'Voice';
+  String get speechRemoteVoice => '语音';
 
   @override
-  String get speechRemoteVoiceUnavailable =>
-      'The selected voice is no longer available in the provider catalog.';
+  String get speechRemoteVoiceUnavailable => '所选语音在提供商的目录中不再可用。';
 
   @override
-  String get speechRemoteVoiceListUnavailable =>
-      'Using the default voice. The voice list could not be loaded right now.';
+  String get speechRemoteVoiceListUnavailable => '正在使用默认语音。当前无法加载语音列表。';
 
   @override
-  String get speechRemoteVoicesLoaded => 'Loaded from the provider voices.';
+  String get speechRemoteVoicesLoaded => '已从提供商的语音中加载。';
 
   @override
-  String get speechRemoteModel => 'Model';
+  String get speechRemoteModel => '模型';
 
   @override
-  String get speechRemoteModelListUnavailable =>
-      'The model list could not be loaded right now. You can type a custom model below.';
+  String get speechRemoteModelListUnavailable => '当前无法加载模型列表。你可以在下方输入自定义模型。';
 
   @override
-  String get speechRemoteModelsLoaded => 'Loaded from the provider models.';
+  String get speechRemoteModelsLoaded => '已从提供商的模型中加载。';
 
   @override
-  String get speechCustomModel => 'Custom model…';
+  String get speechRemoteModelUnavailable => '所选模型在提供商的目录中不再可用。';
+
+  @override
+  String get speechCustomModel => '自定义模型…';
 
   @override
   String get speechEdgeExperimentalTitle => 'Microsoft Edge 语音为实验功能';
@@ -5046,8 +5045,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechPitchNotSupported => 'OpenAI 兼容 TTS 不支持音高，因此该提供商已隐藏此选项。';
 
   @override
-  String get speechPitchHiddenForProvider =>
-      'Pitch is not supported by this TTS provider and is hidden.';
+  String get speechPitchHiddenForProvider => '音调不受此 TTS 提供商支持，因此被隐藏。';
 
   @override
   String get speechTestVoice => '测试语音';
@@ -5908,19 +5906,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechProviderQuotaRateLimit => 'TTS 提供商报告了配额或速率限制。';
 
   @override
-  String get speechReadAloudNoVoice => 'Select a voice for this TTS provider.';
+  String get speechReadAloudNoVoice => '为此 TTS 提供商选择语音。';
 
   @override
-  String get speechProviderTextTooLong =>
-      'The text is too long for this TTS model.';
+  String get speechProviderTextTooLong => '此 TTS 模型的文本过长。';
 
   @override
-  String get speechProviderInvalidAudio =>
-      'The TTS provider returned unrecognized audio.';
+  String get speechProviderInvalidAudio => 'TTS 提供商返回了无法识别的音频。';
 
   @override
   String get speechNimBaseUrlRequired =>
-      'Enter the NVIDIA NIM deployment base URL in Settings > Speech.';
+      '在 设置 > 文字转语音 中输入 NVIDIA NIM 部署的基本 URL。';
 
   @override
   String get speechProviderTemporarilyUnavailable => 'TTS 提供商暂时不可用。';
