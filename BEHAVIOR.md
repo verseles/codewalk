@@ -2256,18 +2256,23 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 ### Read-aloud button in assistant messages
 
 - **Given** the user is viewing an assistant message
-- **When** the read-aloud setting is enabled (Settings > Speech)
-- **Then** a read-aloud button (volume_up icon) appears in the assistant message header
-- **Then** tapping the button reads the sanitized assistant message text aloud using the selected TTS provider
-- **Then** while the selected provider is preparing or loading audio for that message, the read-aloud control shows an inline loading indicator instead of the play/stop icon
-- **Then** long-pressing the read-aloud control opens Settings > Speech
+- **When** the read-aloud setting is enabled (Settings > Text to speech)
+- **Then** a read-aloud control (volume_up icon) appears in the assistant message header
+- **Then** tapping the control reads the sanitized assistant message text aloud using the selected TTS provider
+- **Then** while the selected provider is preparing or loading audio for that message, the read-aloud control shows a close/stop affordance instead of the play icon
+- **Then** long-pressing the read-aloud control opens Settings > Text to speech
 - **Then** provider failures are shown to the user instead of silently falling back to a different provider
 
-### Toggle playback off
+### Playback controls (pause / resume / stop)
 
-- **Given** read-aloud is actively playing
-- **When** the user taps the read-aloud button on the playing message
-- **Then** playback stops
+- **Given** read-aloud is actively playing a message
+- **Then** the header control expands to show a pause button and a stop button
+- **When** the user taps pause
+- **Then** playback pauses and the control switches to a resume button and a stop button
+- **When** the user taps resume on a paused message
+- **Then** playback resumes from the paused position (native TTS re-speaks the retained utterance from the start because the platform exposes no explicit resume API)
+- **When** the user taps stop on a playing or paused message
+- **Then** playback stops and the control returns to the play button
 
 ### Auto-stop behavior
 
@@ -2277,12 +2282,15 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **When** the user switches app/window focus or the app enters a non-resumed lifecycle state
 - **Then** CodeWalk does not explicitly stop read-aloud playback
 
-### TTS settings
+### Text to speech settings
 
-- **Given** the user opens Settings > Speech
+- **Given** the user opens Settings > Text to speech
 - **When** the Text to speech section is visible
 - **Then** the user can select `System / Native`, `Microsoft Edge Speech (experimental)`, `OpenAI-compatible`, `ElevenLabs`, or `NVIDIA NIM`
-- **Then** the user can enable/disable read-aloud and test the selected voice
+- **Then** the user can enable/disable read-aloud, set a custom voice-test phrase, and test the selected voice
+- **Then** selecting a voice or model (discrete dropdown selection or model-field submission, never while typing) automatically plays a voice test for the selected configuration
+- **Then** the voice test uses the custom phrase when set, otherwise the localized default test phrase
+- **Then** selecting a provider, or leaving the section, invalidates any in-flight voice/model selection test
 - **Then** the user can adjust speaking speed (0.0–1.0) except for NVIDIA NIM, which hides the speed control
 - **Then** voice pitch (0.5–2.0) is shown only for the native provider
 
@@ -2304,14 +2312,14 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** `System / Native` is selected
 - **When** the platform exposes TTS voices
-- **Then** Settings > Speech shows a native voice picker
+- **Then** Settings > Text to speech shows a native voice picker
 - **Then** selected voice locale metadata is preserved when speaking instead of forcing a hard-coded locale
 
 ### OpenAI-compatible TTS provider
 
 - **Given** `OpenAI-compatible` is selected
 - **When** the user configures read-aloud settings
-- **Then** Settings > Speech exposes base URL, model, voice, and API key controls
+- **Then** Settings > Text to speech exposes base URL, model, voice, and API key controls
 - **Then** the API key is saved only in secure storage on the device
 - **Then** the API key is not persisted in `ExperienceSettings` JSON
 - **When** a message is read aloud with this provider
@@ -2322,7 +2330,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** `ElevenLabs` is selected
 - **When** the user configures read-aloud settings
-- **Then** Settings > Speech exposes base URL, model, voice, and API key controls
+- **Then** Settings > Text to speech exposes base URL, model, voice, and API key controls
 - **Then** the API key is saved only in secure storage on the device and sent as the `xi-api-key` header
 - **When** a message is read aloud with this provider
 - **Then** CodeWalk calls the configured `/text-to-speech/{voice_id}` endpoint with the message text, the selected model, MP3 output, and a speed derived from the read-aloud rate
@@ -2336,7 +2344,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** `NVIDIA NIM` is selected
 - **When** the user configures read-aloud settings
-- **Then** Settings > Speech exposes base URL, model, voice, and API key controls
+- **Then** Settings > Text to speech exposes base URL, model, voice, and API key controls
 - **Then** the base URL is required and has no default; CodeWalk requires the user's account-specific deployment URL
 - **Then** the API key is saved only in secure storage on the device and sent as a Bearer token
 - **Then** the speed control is hidden because NVIDIA NIM does not support a rate parameter
@@ -2349,15 +2357,15 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** missing, invalid, rate-limited, network, or provider errors are mapped to user-visible read-aloud errors
 
 - **Given** `Microsoft Edge Speech (experimental)` is selected
-- **When** Settings > Speech renders provider-specific options
+- **When** Settings > Text to speech renders provider-specific options
 - **Then** CodeWalk shows a warning that Edge Speech is experimental, uses an unofficial Edge Read Aloud protocol, and sends message text to Microsoft
-- **Then** Settings > Speech shows an Edge voice picker when Microsoft voice discovery is available
+- **Then** Settings > Text to speech shows an Edge voice picker when Microsoft voice discovery is available
 - **Then** CodeWalk can synthesize sanitized assistant text through the direct Edge/Bing Read Aloud websocket path and play the returned MP3 audio
 - **Then** text over the Edge request size limit is split into byte-safe chunks and each chunk is synthesized and concatenated into a single playback
 - **Then** CodeWalk reports the HTTP status when the Edge websocket handshake is rejected, and retries once with the server clock when a 403 includes a `Date` header
 - **Then** server error frames from Edge are reported instead of being silently ignored
 - **Then** when the configured Edge voice produces no audio (a voice no longer in Microsoft's catalog), CodeWalk retries once with the default voice for the locale
-- **Then** Settings > Speech warns when the saved Edge voice is not in the discovered catalog and offers a reset to the default voice
+- **Then** Settings > Text to speech warns when the saved Edge voice is not in the discovered catalog and offers a reset to the default voice
 - **When** direct Edge synthesis fails because Microsoft changes or rejects the private protocol
 - **Then** CodeWalk reports a user-visible read-aloud error and does not silently switch to native TTS
 
@@ -2367,6 +2375,16 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **When** the user reads an assistant message aloud
 - **Then** the selected assistant message text is sent to the configured third-party provider
 - **Then** API keys are never sent to OpenCode servers, stored in normal settings JSON, or shown in logs
+
+### Read-aloud audio cache
+
+- **Given** a message is read aloud with a generated-audio provider (OpenAI-compatible, ElevenLabs, NVIDIA NIM, or Edge)
+- **Then** CodeWalk caches the synthesized audio bytes in memory, keyed by message, text, and the active synthesis configuration
+- **When** the user replays the same message with the same configuration
+- **Then** CodeWalk plays the cached audio without re-synthesizing or contacting the provider
+- **Then** the cache is bounded (16 entries / 32 MiB), evicts least-recently-used entries, is never written to disk, and is cleared when the service is disposed
+- **Given** `System / Native` is selected
+- **Then** native engine audio is never cached
 
 ### Read-aloud disabled
 
