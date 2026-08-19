@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.211.0 - 2026-08-19
+
+- test: scroll to Logs in settings before tapping (new tts section pushed it off-screen)
+- docs: document Text to speech section, playback controls, and audio cache
+- fix(tts): harden async guards found in review
+- feat(tts): cache generated read-aloud audio in memory
+- feat(tts): add pause/resume/stop read-aloud controls
+- feat(tts): separate Text-to-Speech settings section with auto voice test
+- feat(tts): localize TTS strings and flag missing saved models
+
 ## v1.210.0 - 2026-08-19
 
 - feat(tts): add an ElevenLabs model picker with a dynamic `/v1/models` list and provider-reported character preflight
