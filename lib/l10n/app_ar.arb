@@ -1570,6 +1570,8 @@
   "speechModel": "النموذج",
   "speechPitchNotSupported": "نبرة الصوت غير مدعومة في TTS المتوافق مع OpenAI وتكون مخفية لهذا المزوّد.",
   "speechTestVoice": "اختبار الصوت",
+  "speechReadAloudTestPhraseLabel": "عبارة اختبار الصوت",
+  "speechReadAloudTestPhraseHint": "اتركه فارغًا لاستخدام عبارة الاختبار الافتراضية.",
   "dialogMoonshineVoiceSetupDescription": "يعمل Moonshine محليًا عبر sherpa_onnx. اختر نموذجًا مرة واحدة ونزّله لهذا الجهاز المكتبي فقط.",
   "dialogParakeetVoiceSetupDescription": "يعمل Parakeet محليًا عبر تعرّف sherpa_onnx دون اتصال. نزّله مرة واحدة لهذا الجهاز المكتبي لتفعيل التعرف على الكلام متعدد اللغات.",
   "dialogSenseVoiceSetupDescription": "يعمل SenseVoice محليًا عبر تعرّف sherpa_onnx دون اتصال. وهو أقوى ما يكون للصينية والكانتونية واليابانية والكورية والإنجليزية.",

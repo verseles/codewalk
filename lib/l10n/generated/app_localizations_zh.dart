@@ -5051,6 +5051,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechTestVoice => '测试语音';
 
   @override
+  String get speechReadAloudTestPhraseLabel => '语音测试短语';
+
+  @override
+  String get speechReadAloudTestPhraseHint => '留空则使用默认测试短语。';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'Moonshine 通过 sherpa_onnx 在设备端运行。只需选择一次模型，并仅为此桌面设备下载。';
 

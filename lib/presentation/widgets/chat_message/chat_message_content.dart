@@ -524,7 +524,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
   Future<void> _openReadAloudSettings(BuildContext context) async {
     await Navigator.of(context).push(
       AppPageRoute(
-        builder: (_) => const SettingsPage(initialSectionId: 'speech'),
+        builder: (_) => const SettingsPage(initialSectionId: 'tts'),
       ),
     );
   }

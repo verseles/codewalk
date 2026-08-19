@@ -4008,7 +4008,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ler respostas do assistente em voz alta. Configure velocidade, tom e voz.';
 
   @override
-  String get settingsReadAloudSectionTitle => 'Conversão de texto em fala';
+  String get settingsReadAloudSectionTitle => 'Texto para fala';
 
   @override
   String get settingsReadAloudSpeed => 'Velocidade';
@@ -5410,6 +5410,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get speechTestVoice => 'Testar voz';
+
+  @override
+  String get speechReadAloudTestPhraseLabel => 'Frase do teste de voz';
+
+  @override
+  String get speechReadAloudTestPhraseHint =>
+      'Deixe vazio para usar a frase padrão do teste.';
 
   @override
   String get dialogMoonshineVoiceSetupDescription =>

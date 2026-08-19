@@ -1764,6 +1764,8 @@
   "speechModel": "Modèle",
   "speechPitchNotSupported": "La tonalité n''est pas prise en charge par la synthèse vocale compatible OpenAI et est masquée pour ce fournisseur.",
   "speechTestVoice": "Tester la voix",
+  "speechReadAloudTestPhraseLabel": "Phrase de test vocal",
+  "speechReadAloudTestPhraseHint": "Laissez vide pour utiliser la phrase de test par défaut.",
   "dialogMoonshineVoiceSetupDescription": "Moonshine s''exécute sur l''appareil via sherpa_onnx. Choisissez un modèle une fois et téléchargez-le uniquement pour cet ordinateur.",
   "dialogParakeetVoiceSetupDescription": "Parakeet s''exécute sur l''appareil via la reconnaissance hors ligne sherpa_onnx. Téléchargez-le une fois sur cet ordinateur pour activer la transcription multilingue.",
   "dialogSenseVoiceSetupDescription": "SenseVoice s''exécute sur l''appareil via la reconnaissance hors ligne sherpa_onnx. Il est le plus performant pour le chinois, le cantonais, le japonais, le coréen et l''anglais.",

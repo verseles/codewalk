@@ -8,7 +8,7 @@ import 'package:codewalk/core/di/injection_container.dart' as di;
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
-import 'package:codewalk/presentation/pages/settings/sections/speech_settings_section.dart';
+import 'package:codewalk/presentation/pages/settings/sections/text_to_speech_settings_section.dart';
 import 'package:codewalk/presentation/pages/settings_page.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/moonshine_model_manager.dart';
@@ -212,7 +212,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SettingsPage), findsOneWidget);
-    expect(find.byType(SpeechSettingsSection), findsOneWidget);
+    expect(find.byType(TextToSpeechSettingsSection), findsOneWidget);
     debugDefaultTargetPlatformOverride = previousPlatform;
   });
 

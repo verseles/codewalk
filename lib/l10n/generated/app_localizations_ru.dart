@@ -5410,6 +5410,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get speechTestVoice => 'Проверить голос';
 
   @override
+  String get speechReadAloudTestPhraseLabel => 'Фраза для голосового теста';
+
+  @override
+  String get speechReadAloudTestPhraseHint =>
+      'Оставьте пустым, чтобы использовать стандартную тестовую фразу.';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'Moonshine работает на устройстве через sherpa_onnx. Выберите модель один раз — она загрузится только на это настольное устройство.';
 

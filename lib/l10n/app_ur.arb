@@ -1676,6 +1676,8 @@
   "speechSpeechText": "متن سے تقریر",
   "speechSystemDefaultLanguage": "سسٹم ڈیفالٹ ({language})",
   "speechTestVoice": "آواز ٹیسٹ کریں",
+  "speechReadAloudTestPhraseLabel": "آواز ٹیسٹ کا جملہ",
+  "speechReadAloudTestPhraseHint": "خالی چھوڑیں تو ڈیفالٹ ٹیسٹ جملہ استعمال ہوگا۔",
   "speechTextToSpeechProvider": "ٹیکسٹ ٹو اسپیچ فراہم کنندہ",
   "speechUnavailableOnPlatform": "اس پلیٹ فارم پر {service} اسپیچ دستیاب نہیں ہے۔",
   "speechWindowsSetupHint": "Windows وائس ان پٹ آن ڈیوائس ماڈلز کے ساتھ CodeWalk WASAPI کیپچر استعمال کرتا ہے۔ ڈیسک ٹاپ ایپس کے لیے مائیکروفون تک رسائی فعال رکھیں؛ نیچے دئے گئے بٹن مسئلہ حل کرنے کے لیے Windows سیٹنگز کھولتے ہیں۔",

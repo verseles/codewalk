@@ -5172,6 +5172,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechTestVoice => '음성 테스트';
 
   @override
+  String get speechReadAloudTestPhraseLabel => '음성 테스트 문구';
+
+  @override
+  String get speechReadAloudTestPhraseHint => '비워 두면 기본 테스트 문구가 사용됩니다.';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'Moonshine은 sherpa_onnx를 통해 기기에서 실행됩니다. 모델을 한 번 선택하고 이 데스크톱 기기에만 다운로드하세요.';
 

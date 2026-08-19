@@ -1571,6 +1571,8 @@
   "speechModel": "मॉडल",
   "speechPitchNotSupported": "पिच OpenAI-संगत TTS द्वारा समर्थित नहीं है और इस प्रदाता के लिए छिपाई गई है।",
   "speechTestVoice": "आवाज़ का परीक्षण करें",
+  "speechReadAloudTestPhraseLabel": "आवाज़ परीक्षण वाक्य",
+  "speechReadAloudTestPhraseHint": "खाली छोड़ने पर डिफ़ॉल्ट परीक्षण वाक्य उपयोग होगा।",
   "dialogMoonshineVoiceSetupDescription": "Moonshine sherpa_onnx के माध्यम से डिवाइस पर चलता है। एक बार मॉडल चुनें और इसे केवल इस डेस्कटॉप डिवाइस के लिए डाउनलोड करें।",
   "dialogParakeetVoiceSetupDescription": "Parakeet sherpa_onnx ऑफ़लाइन पहचान के माध्यम से डिवाइस पर चलता है। बहुभाषी STT सक्षम करने के लिए इसे इस डेस्कटॉप डिवाइस के लिए एक बार डाउनलोड करें।",
   "dialogSenseVoiceSetupDescription": "SenseVoice sherpa_onnx ऑफ़लाइन पहचान के माध्यम से डिवाइस पर चलता है। यह चीनी, कैंटोनीज़, जापानी, कोरियाई और अंग्रेज़ी के लिए सबसे मजबूत है।",

@@ -1764,6 +1764,8 @@
   "speechModel": "Modell",
   "speechPitchNotSupported": "Tonhöhe wird von OpenAI-kompatibler TTS nicht unterstützt und ist für diesen Anbieter ausgeblendet.",
   "speechTestVoice": "Stimme testen",
+  "speechReadAloudTestPhraseLabel": "Satz für den Spracheck",
+  "speechReadAloudTestPhraseHint": "Leer lassen, um den Standard-Sprachtest zu verwenden.",
   "dialogMoonshineVoiceSetupDescription": "Moonshine läuft über sherpa_onnx auf dem Gerät. Wählen Sie ein Modell einmal aus; es wird nur für dieses Desktop-Gerät heruntergeladen.",
   "dialogParakeetVoiceSetupDescription": "Parakeet läuft über sherpa_onnx-Offline-Erkennung auf dem Gerät. Laden Sie es einmal für dieses Desktop-Gerät herunter, um mehrsprachige STT zu aktivieren.",
   "dialogSenseVoiceSetupDescription": "SenseVoice läuft über sherpa_onnx-Offline-Erkennung auf dem Gerät. Am stärksten ist es bei Chinesisch, Kantonesisch, Japanisch, Koreanisch und Englisch.",

@@ -1553,6 +1553,8 @@
   "speechModel": "모델",
   "speechPitchNotSupported": "피치는 OpenAI 호환 TTS에서 지원되지 않으므로 이 제공자에서는 숨겨집니다.",
   "speechTestVoice": "음성 테스트",
+  "speechReadAloudTestPhraseLabel": "음성 테스트 문구",
+  "speechReadAloudTestPhraseHint": "비워 두면 기본 테스트 문구가 사용됩니다.",
   "dialogMoonshineVoiceSetupDescription": "Moonshine은 sherpa_onnx를 통해 기기에서 실행됩니다. 모델을 한 번 선택하고 이 데스크톱 기기에만 다운로드하세요.",
   "dialogParakeetVoiceSetupDescription": "Parakeet은 sherpa_onnx 오프라인 인식을 통해 기기에서 실행됩니다. 다국어 STT를 사용하려면 이 데스크톱 기기에 한 번 다운로드하세요.",
   "dialogSenseVoiceSetupDescription": "SenseVoice는 sherpa_onnx 오프라인 인식을 통해 기기에서 실행됩니다. 중국어, 광둥어, 일본어, 한국어, 영어에 가장 적합합니다.",

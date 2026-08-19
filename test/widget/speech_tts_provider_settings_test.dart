@@ -5,7 +5,7 @@ import 'package:codewalk/core/auth/tts_api_key_storage.dart';
 import 'package:codewalk/core/di/injection_container.dart' as di;
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
-import 'package:codewalk/presentation/pages/settings/sections/speech_settings_section.dart';
+import 'package:codewalk/presentation/pages/settings/sections/text_to_speech_settings_section.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/moonshine_model_manager.dart';
 import 'package:codewalk/presentation/services/parakeet_model_manager.dart';
@@ -30,6 +30,7 @@ class _FakeTtsBackend implements TtsBackend, TtsModelDiscovery {
   final Duration? voicesDelay;
   final List<TtsModelOption>? models;
   final List<String?> requestedBaseUrls = <String?>[];
+  final List<TtsSynthesisRequest> synthesisRequests = <TtsSynthesisRequest>[];
 
   @override
   ReadAloudProvider get provider => _provider;
@@ -77,6 +78,7 @@ class _FakeTtsBackend implements TtsBackend, TtsModelDiscovery {
     TtsSynthesisRequest request,
     TtsBackendCallbacks callbacks,
   ) async {
+    synthesisRequests.add(request);
     return GeneratedTtsAudio(
       bytes: Uint8List(0),
       mimeType: 'audio/mpeg',
@@ -124,6 +126,7 @@ class _TtsStorageBackend implements TtsApiKeyStorageBackend {
 void _registerDi(
   _TtsStorageBackend ttsBackend, {
   _FakeTtsBackend? elevenLabs,
+  _FakeTtsBackend? native,
 }) {
   di.sl.registerSingleton<SherpaModelManager>(SherpaModelManager());
   di.sl.registerSingleton<MoonshineModelManager>(MoonshineModelManager());
@@ -137,7 +140,7 @@ void _registerDi(
   );
   di.sl.registerSingleton<ReadAloudService>(
     ReadAloudService(backends: <ReadAloudProvider, TtsBackend>{
-      ReadAloudProvider.native: _FakeTtsBackend(ReadAloudProvider.native),
+      ReadAloudProvider.native: native ?? _FakeTtsBackend(ReadAloudProvider.native),
       ReadAloudProvider.edgeExperimental: _FakeTtsBackend(
         ReadAloudProvider.edgeExperimental,
       ),
@@ -192,7 +195,7 @@ Future<void> _pumpSection(
     ChangeNotifierProvider<SettingsProvider>.value(
       value: provider,
       child: localizedMaterialApp(
-        home: const Scaffold(body: SpeechSettingsSection()),
+        home: const Scaffold(body: TextToSpeechSettingsSection()),
       ),
     ),
   );
@@ -660,6 +663,133 @@ void main() {
       find.text('The selected model is no longer available in the provider '
           'catalog.'),
       findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets('custom test phrase field persists the entered phrase',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    _registerDi(_TtsStorageBackend());
+    final provider = await _buildProvider();
+    await provider.setReadAloudProvider(ReadAloudProvider.elevenLabs);
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('read-aloud-test-phrase')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('read-aloud-test-phrase')),
+      'Minha frase de teste',
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(provider.readAloudTestText, 'Minha frase de teste');
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets(
+      'selecting a voice auto-plays the configured test phrase',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    final nativeBackend = _FakeTtsBackend(ReadAloudProvider.native);
+    _registerDi(_TtsStorageBackend(), native: nativeBackend);
+    final provider = await _buildProvider();
+    await provider.setReadAloudTestText('Minha frase de teste');
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Voice'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.text('Voice'), warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(BottomSheet), matching: finder);
+
+    await tester.ensureVisible(inSheet(find.text('Voice A')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(inSheet(find.text('Voice A')), warnIfMissed: true);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(provider.readAloudVoiceId, 'voice-a');
+    expect(
+      nativeBackend.synthesisRequests.map((request) => request.text),
+      contains('Minha frase de teste'),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    debugDefaultTargetPlatformOverride = null;
+    provider.dispose();
+  });
+
+  testWidgets('auto voice test falls back to the default phrase when empty',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await di.sl.reset();
+    addTearDown(() async {
+      debugDefaultTargetPlatformOverride = null;
+      await di.sl.reset();
+    });
+    final nativeBackend = _FakeTtsBackend(ReadAloudProvider.native);
+    _registerDi(_TtsStorageBackend(), native: nativeBackend);
+    final provider = await _buildProvider();
+
+    await _pumpSection(tester, provider);
+    await _scrollToReadAloud(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Voice'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.text('Voice'), warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    Finder inSheet(Finder finder) =>
+        find.descendant(of: find.byType(BottomSheet), matching: finder);
+
+    await tester.ensureVisible(inSheet(find.text('Voice A')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(inSheet(find.text('Voice A')), warnIfMissed: true);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      nativeBackend.synthesisRequests.map((request) => request.text),
+      contains('This is a CodeWalk text-to-speech test.'),
     );
     expect(tester.takeException(), isNull);
 

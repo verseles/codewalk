@@ -3,7 +3,7 @@ import 'package:codewalk/core/auth/tts_api_key_storage.dart';
 import 'package:codewalk/core/di/injection_container.dart' as di;
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
-import 'package:codewalk/presentation/pages/settings/sections/speech_settings_section.dart';
+import 'package:codewalk/presentation/pages/settings/sections/text_to_speech_settings_section.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/moonshine_model_manager.dart';
 import 'package:codewalk/presentation/services/parakeet_model_manager.dart';
@@ -124,7 +124,7 @@ Future<void> _pumpSection(
     ChangeNotifierProvider<SettingsProvider>.value(
       value: provider,
       child: localizedMaterialApp(
-        home: const Scaffold(body: SpeechSettingsSection()),
+        home: const Scaffold(body: TextToSpeechSettingsSection()),
       ),
     ),
   );
@@ -176,13 +176,13 @@ void main() {
     Finder inSheet(Finder finder) =>
         find.descendant(of: find.byType(BottomSheet), matching: finder);
 
-    expect(find.byType(TextField), findsOneWidget);
+    expect(inSheet(find.byType(TextField)), findsOneWidget);
     expect(inSheet(find.text('Microsoft Antonio Online (Natural) - Portuguese (Brazil)')),
         findsOneWidget);
     expect(inSheet(find.text('Microsoft Emma Multilingual Online (Natural) - English (US)')),
         findsOneWidget);
 
-    await tester.enterText(find.byType(TextField), 'antonio');
+    await tester.enterText(inSheet(find.byType(TextField)), 'antonio');
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(inSheet(find.text('Microsoft Antonio Online (Natural) - Portuguese (Brazil)')),

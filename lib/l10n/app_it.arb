@@ -1883,6 +1883,8 @@
   "speechModel": "Modello",
   "speechPitchNotSupported": "La tonalità non è supportata dal TTS compatibile OpenAI ed è nascosta per questo provider.",
   "speechTestVoice": "Prova voce",
+  "speechReadAloudTestPhraseLabel": "Frase del test vocale",
+  "speechReadAloudTestPhraseHint": "Lascia vuoto per usare la frase di test predefinita.",
   "dialogMoonshineVoiceSetupDescription": "Moonshine gira sul dispositivo tramite sherpa_onnx. Scegli un modello una volta e scaricalo solo per questo dispositivo desktop.",
   "dialogParakeetVoiceSetupDescription": "Parakeet gira sul dispositivo tramite il riconoscimento offline sherpa_onnx. Scaricalo una volta per questo dispositivo desktop per abilitare la STT multilingue.",
   "dialogSenseVoiceSetupDescription": "SenseVoice gira sul dispositivo tramite il riconoscimento offline sherpa_onnx. È il più efficace per cinese, cantonese, giapponese, coreano e inglese.",

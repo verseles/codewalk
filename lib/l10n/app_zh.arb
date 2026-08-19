@@ -1571,6 +1571,8 @@
   "speechModel": "模型",
   "speechPitchNotSupported": "OpenAI 兼容 TTS 不支持音高，因此该提供商已隐藏此选项。",
   "speechTestVoice": "测试语音",
+  "speechReadAloudTestPhraseLabel": "语音测试短语",
+  "speechReadAloudTestPhraseHint": "留空则使用默认测试短语。",
   "dialogMoonshineVoiceSetupDescription": "Moonshine 通过 sherpa_onnx 在设备端运行。只需选择一次模型，并仅为此桌面设备下载。",
   "dialogParakeetVoiceSetupDescription": "Parakeet 通过 sherpa_onnx 离线识别在设备端运行。为此桌面设备下载一次，即可启用多语言语音转文字（STT）。",
   "dialogSenseVoiceSetupDescription": "SenseVoice 通过 sherpa_onnx 离线识别在设备端运行。对中文、粤语、日语、韩语和英语支持最佳。",

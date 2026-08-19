@@ -23,6 +23,7 @@ import 'settings/sections/notifications_settings_section.dart';
 import 'settings/sections/servers_settings_section.dart';
 import 'settings/sections/shortcuts_settings_section.dart';
 import 'settings/sections/speech_settings_section.dart';
+import 'settings/sections/text_to_speech_settings_section.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, this.initialSectionId = ''});
@@ -122,6 +123,14 @@ class _SettingsPageState extends State<SettingsPage> {
       description: context.l10n.settingsSpeechDescription,
       icon: Symbols.mic_none_rounded,
       builder: (_) => const SpeechSettingsSection(),
+    ),
+    _section(
+      id: 'tts',
+      group: _SettingsNavigationGroup.input,
+      title: context.l10n.settingsReadAloudSectionTitle,
+      description: context.l10n.settingsReadAloudSectionDescription,
+      icon: Symbols.volume_up_rounded,
+      builder: (_) => const TextToSpeechSettingsSection(),
     ),
     _section(
       id: 'logs',

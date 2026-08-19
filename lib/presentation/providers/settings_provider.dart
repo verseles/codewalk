@@ -1439,6 +1439,17 @@ class SettingsProvider extends ChangeNotifier {
     await _persist();
   }
 
+  String get readAloudTestText => _settings.readAloudTestText;
+
+  Future<void> setReadAloudTestText(String value) async {
+    if (_settings.readAloudTestText == value) {
+      return;
+    }
+    _settings = _settings.copyWith(readAloudTestText: value);
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> setSystemFontScale(double value) async {
     final clamped = clampSystemFontScale(value);
     if (_settings.systemFontScale == clamped) {

@@ -1571,6 +1571,8 @@
   "speechModel": "Modelo",
   "speechPitchNotSupported": "El tono no es compatible con el TTS compatible con OpenAI y está oculto para este proveedor.",
   "speechTestVoice": "Probar voz",
+  "speechReadAloudTestPhraseLabel": "Frase de la prueba de voz",
+  "speechReadAloudTestPhraseHint": "Déjalo vacío para usar la frase de prueba predeterminada.",
   "dialogMoonshineVoiceSetupDescription": "Moonshine se ejecuta en el dispositivo mediante sherpa_onnx. Elija un modelo una vez y descárguelo solo para este dispositivo de escritorio.",
   "dialogParakeetVoiceSetupDescription": "Parakeet se ejecuta en el dispositivo mediante el reconocimiento sin conexión de sherpa_onnx. Descárguelo una vez para este dispositivo de escritorio para habilitar el STT multilingüe.",
   "dialogSenseVoiceSetupDescription": "SenseVoice se ejecuta en el dispositivo mediante el reconocimiento sin conexión de sherpa_onnx. Es más fuerte para chino, cantonés, japonés, coreano e inglés.",

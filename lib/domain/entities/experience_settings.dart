@@ -918,6 +918,7 @@ class ExperienceSettings {
       readAloudModel: kDefaultOpenAiCompatibleTtsModel,
       readAloudBaseUrl: kDefaultOpenAiCompatibleTtsBaseUrl,
       readAloudResponseFormat: kDefaultReadAloudResponseFormat,
+      readAloudTestText: '',
       systemFontScale: 1.0,
       chatFontScale: 1.0,
       terminalFontSize: kDefaultTerminalFontSize,
@@ -995,6 +996,7 @@ class ExperienceSettings {
     this.readAloudModel = kDefaultOpenAiCompatibleTtsModel,
     this.readAloudBaseUrl = kDefaultOpenAiCompatibleTtsBaseUrl,
     this.readAloudResponseFormat = kDefaultReadAloudResponseFormat,
+    this.readAloudTestText = '',
     this.systemFontScale = 1.0,
     this.chatFontScale = 1.0,
     this.terminalFontSize = kDefaultTerminalFontSize,
@@ -1075,6 +1077,7 @@ class ExperienceSettings {
   final String readAloudModel;
   final String readAloudBaseUrl;
   final String readAloudResponseFormat;
+  final String readAloudTestText;
   final double systemFontScale;
   final double chatFontScale;
   final double terminalFontSize;
@@ -1151,6 +1154,7 @@ class ExperienceSettings {
     String? readAloudModel,
     String? readAloudBaseUrl,
     String? readAloudResponseFormat,
+    String? readAloudTestText,
     double? systemFontScale,
     double? chatFontScale,
     double? terminalFontSize,
@@ -1267,6 +1271,7 @@ class ExperienceSettings {
       readAloudBaseUrl: readAloudBaseUrl ?? this.readAloudBaseUrl,
       readAloudResponseFormat:
           readAloudResponseFormat ?? this.readAloudResponseFormat,
+      readAloudTestText: readAloudTestText ?? this.readAloudTestText,
       systemFontScale: systemFontScale ?? this.systemFontScale,
       chatFontScale: chatFontScale ?? this.chatFontScale,
       terminalFontSize: terminalFontSize ?? this.terminalFontSize,
@@ -1389,6 +1394,7 @@ class ExperienceSettings {
       'readAloudModel': readAloudModel,
       'readAloudBaseUrl': readAloudBaseUrl,
       'readAloudResponseFormat': readAloudResponseFormat,
+      'readAloudTestText': readAloudTestText,
       'systemFontScale': systemFontScale,
       'chatFontScale': chatFontScale,
       'terminalFontSize': terminalFontSize,
@@ -1473,6 +1479,7 @@ class ExperienceSettings {
     var readAloudModel = defaults.readAloudModel;
     var readAloudBaseUrl = defaults.readAloudBaseUrl;
     var readAloudResponseFormat = defaults.readAloudResponseFormat;
+    var readAloudTestText = defaults.readAloudTestText;
     var systemFontScale = defaults.systemFontScale;
     var chatFontScale = defaults.chatFontScale;
     var terminalFontSize = defaults.terminalFontSize;
@@ -1967,6 +1974,11 @@ class ExperienceSettings {
           .toLowerCase();
     }
 
+    final readAloudTestTextJson = json['readAloudTestText'];
+    if (readAloudTestTextJson is String) {
+      readAloudTestText = readAloudTestTextJson;
+    }
+
     final systemFontScaleJson = json['systemFontScale'];
     if (systemFontScaleJson is num) {
       systemFontScale = clampSystemFontScale(systemFontScaleJson.toDouble());
@@ -2054,6 +2066,7 @@ class ExperienceSettings {
       readAloudModel: readAloudModel,
       readAloudBaseUrl: readAloudBaseUrl,
       readAloudResponseFormat: readAloudResponseFormat,
+      readAloudTestText: readAloudTestText,
       systemFontScale: systemFontScale,
       chatFontScale: chatFontScale,
       terminalFontSize: terminalFontSize,

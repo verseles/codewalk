@@ -9530,6 +9530,18 @@ abstract class AppLocalizations {
   /// **'Test voice'**
   String get speechTestVoice;
 
+  /// CodeWalk UI string — speechReadAloudTestPhraseLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Voice test phrase'**
+  String get speechReadAloudTestPhraseLabel;
+
+  /// CodeWalk UI string — speechReadAloudTestPhraseHint
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to use the default test phrase.'**
+  String get speechReadAloudTestPhraseHint;
+
   /// CodeWalk UI string — dialogMoonshineVoiceSetupDescription
   ///
   /// In en, this message translates to:

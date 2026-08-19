@@ -1722,6 +1722,8 @@
   "speechModel": "Модель",
   "speechPitchNotSupported": "Высота тона не поддерживается TTS, совместимым с OpenAI, и скрыта для этого провайдера.",
   "speechTestVoice": "Проверить голос",
+  "speechReadAloudTestPhraseLabel": "Фраза для голосового теста",
+  "speechReadAloudTestPhraseHint": "Оставьте пустым, чтобы использовать стандартную тестовую фразу.",
   "dialogMoonshineVoiceSetupDescription": "Moonshine работает на устройстве через sherpa_onnx. Выберите модель один раз — она загрузится только на это настольное устройство.",
   "dialogParakeetVoiceSetupDescription": "Parakeet работает на устройстве через офлайн-распознавание sherpa_onnx. Загрузите модель один раз на это настольное устройство, чтобы включить многоязычное распознавание речи (STT).",
   "dialogSenseVoiceSetupDescription": "SenseVoice работает на устройстве через офлайн-распознавание sherpa_onnx. Он сильнее всего в китайском, кантонском, японском, корейском и английском языках.",

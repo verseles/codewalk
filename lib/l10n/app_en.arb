@@ -6856,6 +6856,14 @@
   "@speechTestVoice": {
     "description": "CodeWalk UI string — speechTestVoice"
   },
+  "speechReadAloudTestPhraseLabel": "Voice test phrase",
+  "@speechReadAloudTestPhraseLabel": {
+    "description": "CodeWalk UI string — speechReadAloudTestPhraseLabel"
+  },
+  "speechReadAloudTestPhraseHint": "Leave empty to use the default test phrase.",
+  "@speechReadAloudTestPhraseHint": {
+    "description": "CodeWalk UI string — speechReadAloudTestPhraseHint"
+  },
   "dialogMoonshineVoiceSetupDescription": "Moonshine runs on-device through sherpa_onnx. Pick a model once and download it only for this desktop device.",
   "@dialogMoonshineVoiceSetupDescription": {
     "description": "CodeWalk UI string — dialogMoonshineVoiceSetupDescription"

@@ -443,6 +443,24 @@ void main() {
       expect(restored.readAloudBaseUrl, 'https://tts.example.com/v1');
       expect(restored.readAloudResponseFormat, 'mp3');
     });
+
+    test('defaults, serializes, and parses the custom test phrase', () {
+      expect(ExperienceSettings.defaults().readAloudTestText, '');
+
+      final settings = ExperienceSettings.defaults().copyWith(
+        readAloudTestText: 'Minha frase',
+      );
+      final json = settings.toJson();
+      expect(json['readAloudTestText'], 'Minha frase');
+
+      final restored = ExperienceSettings.fromJson(json);
+      expect(restored.readAloudTestText, 'Minha frase');
+
+      final withFallback = ExperienceSettings.fromJson(<String, dynamic>{
+        'readAloudTestText': 42,
+      });
+      expect(withFallback.readAloudTestText, '');
+    });
   });
 
   group('speech API serialization', () {

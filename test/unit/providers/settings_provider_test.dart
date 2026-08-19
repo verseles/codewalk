@@ -1980,6 +1980,31 @@ void main() {
       },
     );
 
+    test('persists the custom read-aloud test phrase', () async {
+      final local = InMemoryAppLocalDataSource();
+      final first = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await first.initialize();
+      expect(first.readAloudTestText, '');
+
+      await first.setReadAloudTestText('Minha frase de teste');
+      expect(first.readAloudTestText, 'Minha frase de teste');
+
+      final second = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await second.initialize();
+      expect(second.readAloudTestText, 'Minha frase de teste');
+
+      await second.setReadAloudTestText('Minha frase de teste');
+      expect(second.readAloudTestText, 'Minha frase de teste');
+    });
+
     test(
       'clears provider-specific read-aloud voice when provider changes',
       () async {

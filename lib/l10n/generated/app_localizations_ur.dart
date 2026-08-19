@@ -5365,6 +5365,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get speechTestVoice => 'آواز ٹیسٹ کریں';
 
   @override
+  String get speechReadAloudTestPhraseLabel => 'آواز ٹیسٹ کا جملہ';
+
+  @override
+  String get speechReadAloudTestPhraseHint =>
+      'خالی چھوڑیں تو ڈیفالٹ ٹیسٹ جملہ استعمال ہوگا۔';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'Moonshine sherpa_onnx کے ذریعے ڈیوائس پر ہی چلتا ہے۔ ایک بار ماڈل منتخب کریں اور اسے صرف اس ڈیسک ٹاپ ڈیوائس کے لیے ڈاؤن لوڈ کریں۔';
 

@@ -5305,6 +5305,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get speechTestVoice => 'اختبار الصوت';
 
   @override
+  String get speechReadAloudTestPhraseLabel => 'عبارة اختبار الصوت';
+
+  @override
+  String get speechReadAloudTestPhraseHint =>
+      'اتركه فارغًا لاستخدام عبارة الاختبار الافتراضية.';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'يعمل Moonshine محليًا عبر sherpa_onnx. اختر نموذجًا مرة واحدة ونزّله لهذا الجهاز المكتبي فقط.';
 

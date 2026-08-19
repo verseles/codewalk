@@ -5377,6 +5377,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String get speechTestVoice => 'ভয়েস পরীক্ষা করুন';
 
   @override
+  String get speechReadAloudTestPhraseLabel => 'ভয়েস টেস্ট বাক্য';
+
+  @override
+  String get speechReadAloudTestPhraseHint =>
+      'খালি রাখলে ডিফল্ট টেস্ট বাক্য ব্যবহার হবে।';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'Moonshine sherpa_onnx-এর মাধ্যমে অন-ডিভাইসে চলে। একবার একটি মডেল বেছে নিন এবং এটি শুধুমাত্র এই ডেস্কটপ ডিভাইসের জন্য ডাউনলোড করুন।';
 

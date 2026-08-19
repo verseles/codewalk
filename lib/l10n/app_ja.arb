@@ -1571,6 +1571,8 @@
   "speechModel": "モデル",
   "speechPitchNotSupported": "OpenAI 互換 TTS ではピッチをサポートしていないため、このプロバイダーでは非表示です。",
   "speechTestVoice": "音声をテスト",
+  "speechReadAloudTestPhraseLabel": "音声テストのフレーズ",
+  "speechReadAloudTestPhraseHint": "空にするとデフォルトのテストフレーズが使われます。",
   "dialogMoonshineVoiceSetupDescription": "Moonshine は sherpa_onnx 経由でデバイス上で動作します。モデルを1つ選び、このデスクトップデバイスにのみダウンロードしてください。",
   "dialogParakeetVoiceSetupDescription": "Parakeet は sherpa_onnx のオフライン認識でデバイス上で動作します。多言語STTを有効にするには、このデスクトップデバイスに1回ダウンロードしてください。",
   "dialogSenseVoiceSetupDescription": "SenseVoice は sherpa_onnx のオフライン認識でデバイス上で動作します。中国語、広東語、日本語、韓国語、英語に最も強力です。",

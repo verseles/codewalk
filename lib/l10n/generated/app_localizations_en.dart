@@ -5346,6 +5346,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speechTestVoice => 'Test voice';
 
   @override
+  String get speechReadAloudTestPhraseLabel => 'Voice test phrase';
+
+  @override
+  String get speechReadAloudTestPhraseHint =>
+      'Leave empty to use the default test phrase.';
+
+  @override
   String get dialogMoonshineVoiceSetupDescription =>
       'Moonshine runs on-device through sherpa_onnx. Pick a model once and download it only for this desktop device.';
 
