@@ -5324,6 +5324,7 @@ class ChatProvider extends ChangeNotifier {
     );
     _sessionTabsPersistenceDebounceByServer.clear();
     _sessionTabsPendingPayloadByServer.clear();
+    _sessionTabsPersistenceGenerationByServer.clear();
     for (final entry in pendingSessionTabPayloads.entries) {
       unawaited(
         _enqueueSessionTabsPersistence(
