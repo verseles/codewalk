@@ -892,6 +892,9 @@ class _ChatPageState extends State<ChatPage>
     _isAppInForeground = state == AppLifecycleState.resumed;
     if (!_isAppInForeground) {
       _flushActiveFileEditorDrafts();
+      // Persist pending session-tab state before the process can be killed in
+      // the background; the debounced write may otherwise never run.
+      unawaited(_chatProvider?.flushAllSessionTabsPersistence());
     }
     final provider = _chatProvider;
     if (provider != null) {

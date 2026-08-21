@@ -670,15 +670,25 @@ extension _ChatPageLifecycle on _ChatPageState {
             return;
           }
           AppLogger.debug('foreground_policy mode=mobile-hold-expired');
-          syncAndroidForegroundMonitor(enabled: false, activeSessionCount: 0);
-          unawaited(provider.setForegroundActive(false));
+          // Re-run the policy instead of stopping the monitor outright: while
+          // background alerts stay enabled the foreground service must keep
+          // protecting the process, otherwise Android treats CodeWalk as a
+          // cached process and kills it shortly after the user switches away.
+          unawaited(_applyForegroundPolicy(reason: 'mobile-hold-expired'));
         },
       );
       return;
     }
 
     AppLogger.debug('foreground_policy reason=$reason mode=paused');
-    syncAndroidForegroundMonitor(enabled: false, activeSessionCount: 0);
+    // Keep the foreground service alive while backgrounded when background
+    // alerts are enabled. Stopping it turns the process into a cached process
+    // that aggressive Android ROMs kill within seconds, which surfaced as the
+    // app restarting whenever the user switched windows and came back.
+    syncAndroidForegroundMonitor(
+      enabled: backgroundAlertsEnabled,
+      activeSessionCount: activeSessionCount,
+    );
     await provider.setForegroundActive(false);
     if (hasActiveSession) {
       scheduleAndroidProbe(

@@ -653,6 +653,139 @@ void main() {
           reason: 'burst must collapse into a single latest-wins write');
     });
 
+    test(
+      'flushAllSessionTabsPersistence persists pending state without waiting for the debounce',
+      () async {
+        final localDataSource = _CountingTabsWriteLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final customFixtures = await buildDefaultTestFixtures(
+          localDataSourceOverride: localDataSource,
+        );
+        addTearDown(customFixtures.defaultSettingsProvider.dispose);
+        customFixtures.chatRepository.sessions
+          ..clear()
+          ..add(
+            ChatSession(
+              id: 'session-live',
+              workspaceId: 'default',
+              directory: '/work/project',
+              time: now,
+              title: 'Live session',
+            ),
+          );
+        final customProvider = buildChatProvider(
+          chatRepository: customFixtures.chatRepository,
+          appRepository: customFixtures.appRepository,
+          localDataSource: localDataSource,
+          defaultSettingsProvider: customFixtures.defaultSettingsProvider,
+          sessionTabsNow: () => now,
+        );
+        addTearDown(customProvider.dispose);
+
+        await customProvider.loadSessions();
+        await customProvider.debugWaitForSessionTabPersistence();
+        localDataSource.sessionTabsWriteCount = 0;
+
+        customFixtures.chatRepository.emitEvent(
+          ChatEvent(
+            type: 'session.updated',
+            properties: <String, dynamic>{
+              'directory': '/work/project',
+              'info': <String, dynamic>{
+                'id': 'session-live',
+                'workspaceId': 'default',
+                'title': 'Live session renamed',
+                'time': <String, dynamic>{
+                  'created': now.millisecondsSinceEpoch,
+                  'updated': now.millisecondsSinceEpoch + 1,
+                },
+              },
+            },
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(localDataSource.sessionTabsWriteCount, 0,
+            reason: 'write must still be debounced before the flush');
+
+        await customProvider.flushAllSessionTabsPersistence();
+        expect(localDataSource.sessionTabsWriteCount, 1,
+            reason: 'flush must persist pending tab state immediately');
+      },
+    );
+
+    test('retries a failed tab-state write instead of dropping it', () async {
+      final localDataSource = _FlakyTabsWriteLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final customFixtures = await buildDefaultTestFixtures(
+        localDataSourceOverride: localDataSource,
+      );
+      addTearDown(customFixtures.defaultSettingsProvider.dispose);
+      customFixtures.chatRepository.sessions
+        ..clear()
+        ..add(
+          ChatSession(
+            id: 'session-live',
+            workspaceId: 'default',
+            directory: '/work/project',
+            time: now,
+            title: 'Live session',
+          ),
+        );
+      final customProvider = buildChatProvider(
+        chatRepository: customFixtures.chatRepository,
+        appRepository: customFixtures.appRepository,
+        localDataSource: localDataSource,
+        defaultSettingsProvider: customFixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+        sessionTabsPersistenceDebounce: Duration.zero,
+      );
+      addTearDown(customProvider.dispose);
+
+      await customProvider.loadSessions();
+      await customProvider.debugWaitForSessionTabPersistence();
+      final baselineAttempts = localDataSource.attempts;
+      localDataSource.failuresRemaining = 1;
+
+      customFixtures.chatRepository.emitEvent(
+        ChatEvent(
+          type: 'session.updated',
+          properties: <String, dynamic>{
+            'directory': '/work/project',
+            'info': <String, dynamic>{
+              'id': 'session-live',
+              'workspaceId': 'default',
+              'title': 'Live session renamed',
+              'time': <String, dynamic>{
+                'created': now.millisecondsSinceEpoch,
+                'updated': now.millisecondsSinceEpoch + 1,
+              },
+            },
+          },
+        ),
+      );
+      // Let the event stream deliver, the zero-duration write fail, and the
+      // re-staged retry complete before draining the queues.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await customProvider.debugWaitForSessionTabPersistence();
+
+      expect(localDataSource.attempts, baselineAttempts + 2,
+          reason: 'initial write, failed write, and retried write');
+      final raw = await localDataSource.getSessionTabsStateJson(
+        serverId: 'srv_test',
+      );
+      expect(raw, isNotNull);
+      final persisted = PersistedSessionTabsState.decode(raw!);
+      final liveTabs = persisted.open
+          .where((tab) => tab.sessionId == 'session-live')
+          .toList(growable: false);
+      expect(liveTabs, isNotEmpty);
+      expect(
+        liveTabs.every((tab) => tab.title == 'Live session renamed'),
+        isTrue,
+        reason: 'the retried write must persist the latest payload',
+      );
+    });
+
     test('closing a tab persists its local tombstone', () async {
       await provider.loadSessions();
       final identity = provider.sessionTabs.single.identity;
@@ -1937,6 +2070,24 @@ class _CountingTabsWriteLocalDataSource extends InMemoryAppLocalDataSource {
     required String serverId,
   }) async {
     sessionTabsWriteCount += 1;
+    await super.saveSessionTabsStateJson(stateJson, serverId: serverId);
+  }
+}
+
+class _FlakyTabsWriteLocalDataSource extends InMemoryAppLocalDataSource {
+  int attempts = 0;
+  int failuresRemaining = 0;
+
+  @override
+  Future<void> saveSessionTabsStateJson(
+    String stateJson, {
+    required String serverId,
+  }) async {
+    attempts += 1;
+    if (failuresRemaining > 0) {
+      failuresRemaining -= 1;
+      throw StateError('transient tab write failure');
+    }
     await super.saveSessionTabsStateJson(stateJson, serverId: serverId);
   }
 }

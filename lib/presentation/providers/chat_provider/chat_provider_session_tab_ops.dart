@@ -1390,20 +1390,22 @@ extension ChatProviderSessionTabOps on ChatProvider {
     final serverId = _sessionTabsLoadedServerId;
     if (serverId == null || serverId.isEmpty) return;
     final encoded = payload ?? _sessionTabsPersistedState.encode();
+    _stageSessionTabsPersistence(
+      serverId: serverId,
+      encoded: encoded,
+      force: force,
+    );
+  }
+
+  void _stageSessionTabsPersistence({
+    required String serverId,
+    required String encoded,
+    bool force = false,
+  }) {
     _sessionTabsPendingPayloadByServer[serverId] = encoded;
     final debounce = _sessionTabsPersistenceDebounceByServer.remove(serverId);
     debounce?.cancel();
-    if (force) {
-      unawaited(
-        _enqueueSessionTabsPersistence(
-          serverId: serverId,
-          payload: _sessionTabsPendingPayloadByServer.remove(serverId) ??
-              encoded,
-        ),
-      );
-      return;
-    }
-    if (_sessionTabsPersistenceDebounceDuration == Duration.zero) {
+    if (force || _sessionTabsPersistenceDebounceDuration == Duration.zero) {
       unawaited(
         _enqueueSessionTabsPersistence(
           serverId: serverId,
@@ -1441,6 +1443,27 @@ extension ChatProviderSessionTabOps on ChatProvider {
     }
   }
 
+  /// Flushes pending debounced session-tab persistence for every server.
+  /// Called at lifecycle boundaries (e.g. app backgrounding) so a process
+  /// death cannot lose up to one debounce window of tab state. Errors are
+  /// logged and swallowed: flushing is best effort.
+  Future<void> flushAllSessionTabsPersistence() async {
+    final serverIds = _sessionTabsPendingPayloadByServer.keys.toList(
+      growable: false,
+    );
+    for (final serverId in serverIds) {
+      try {
+        await flushSessionTabsPersistence(serverId);
+      } catch (error, stackTrace) {
+        AppLogger.warn(
+          'Failed to flush session tabs for server=$serverId',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+  }
+
   Future<void> _enqueueSessionTabsPersistence({
     required String serverId,
     required String payload,
@@ -1459,6 +1482,12 @@ extension ChatProviderSessionTabOps on ChatProvider {
         error: error,
         stackTrace: stackTrace,
       );
+      // Re-stage the payload so a transient write failure retries after the
+      // debounce window instead of being lost. A newer staged payload wins.
+      if (!_sessionTabsDisposed &&
+          !_sessionTabsPendingPayloadByServer.containsKey(serverId)) {
+        _stageSessionTabsPersistence(serverId: serverId, encoded: payload);
+      }
     }
   }
 
@@ -1477,6 +1506,13 @@ extension ChatProviderSessionTabOps on ChatProvider {
       }
     });
     _sessionTabsWriteQueueByServer[serverId] = next;
+    unawaited(
+      next.whenComplete(() {
+        if (identical(_sessionTabsWriteQueueByServer[serverId], next)) {
+          _sessionTabsWriteQueueByServer.remove(serverId);
+        }
+      }),
+    );
     return result.future;
   }
 

@@ -2078,6 +2078,8 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** Android background network checks are suppressed entirely, including periodic probes, active-response probes, and tail probes
 - **When** the user disables Android background alerts in Settings
 - **Then** no Android background checks run and the persistent monitor notification is removed
+- **When** the app moves to the background
+- **Then** pending session-tab state is flushed to local persistence immediately instead of waiting for its debounce window, so a process death in the background cannot lose recent tab changes; a failed tab-state write is re-staged and retried after the debounce window instead of being dropped
 - **Then** notifications are intended to fire only while the app is in the background; while in foreground, the user receives real-time updates directly in the chat UI
 
 ### Background alerts (Desktop)
@@ -2114,9 +2116,11 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** the app is running on Android
 - **When** a known active response is being temporarily monitored after the app moves to background
-- **Then** a persistent notification is shown in the notification drawer for that temporary live-monitor window only
-- **When** Android background alerts are disabled or there is no active live-monitor window
-- **Then** the persistent monitor notification is not shown
+- **Then** a persistent notification is shown in the notification drawer for that temporary live-monitor window
+- **When** Android background alerts are enabled and the app is in the background
+- **Then** the persistent monitor notification remains after the live-monitor window ends so the process keeps foreground-service priority; without it Android treats CodeWalk as a cached process and may kill it within seconds, which made the app restart whenever the user switched windows and returned
+- **When** the app returns to the foreground, or Android background alerts are disabled
+- **Then** the persistent monitor notification is removed
 
 ### Android Auto messaging (release APK)
 

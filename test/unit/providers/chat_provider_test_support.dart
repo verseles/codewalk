@@ -213,11 +213,12 @@ ChatProvider buildChatProvider({
   Duration syncHealthCheckInterval = const Duration(seconds: 5),
   Duration abortSuppressionWindow = const Duration(milliseconds: 30),
   Duration shortcutCycleWindow = const Duration(seconds: 3),
-  DateTime Function()? sessionTabsNow,
+   DateTime Function()? sessionTabsNow,
   SettingsProvider? settingsProvider,
   CellularDataSaverService? cellularDataSaverService,
   EventFeedbackDispatcher? eventFeedbackDispatcher,
   ChatTitleGenerator? titleGenerator,
+  Duration sessionTabsPersistenceDebounce = const Duration(milliseconds: 750),
   Future<void> Function(SessionAttentionAggregate aggregate)?
   sessionAttentionAggregatePublisher,
   Future<void> Function(bool isForeground)?
@@ -273,6 +274,7 @@ ChatProvider buildChatProvider({
     shortcutCycleWindow: shortcutCycleWindow,
     sessionTabsNow: sessionTabsNow,
     sessionTabIconOverrideStore: sessionTabIconOverrideStore,
+    sessionTabsPersistenceDebounce: sessionTabsPersistenceDebounce,
   );
 }
 

@@ -89,7 +89,7 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
       return null;
     }
 
-    final image = _resolveAttachmentImageWidget(part.url);
+    final image = _resolveAttachmentImageWidget(part.url, context);
     if (image == null) {
       return null;
     }
@@ -111,7 +111,7 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
     );
   }
 
-  Widget? _resolveAttachmentImageWidget(String rawUrl) {
+  Widget? _resolveAttachmentImageWidget(String rawUrl, BuildContext context) {
     final trimmedUrl = rawUrl.trim();
     if (trimmedUrl.isEmpty) {
       return null;
@@ -132,12 +132,36 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
         bytes,
         fit: BoxFit.cover,
         filterQuality: FilterQuality.medium,
+        cacheWidth: _previewCacheWidth(context),
+        cacheHeight: _previewCacheHeight(context),
       );
     }
     if (scheme == 'http' || scheme == 'https') {
-      return Image.network(trimmedUrl, fit: BoxFit.cover);
+      return Image.network(
+        trimmedUrl,
+        fit: BoxFit.cover,
+        cacheWidth: _previewCacheWidth(context),
+        cacheHeight: _previewCacheHeight(context),
+      );
     }
     return null;
+  }
+
+  /// Decodes attachment previews at display resolution. Without these bounds
+  /// a full-size screenshot decodes at its native resolution on every rebuild,
+  /// churning the image cache and driving the process toward low-memory kills.
+  int? _previewCacheWidth(BuildContext context) =>
+      _previewCacheBound(context, MediaQuery.sizeOf(context).width);
+
+  int? _previewCacheHeight(BuildContext context) =>
+      _previewCacheBound(context, 220);
+
+  int? _previewCacheBound(BuildContext context, double logicalSize) {
+    final ratio = MediaQuery.devicePixelRatioOf(context);
+    if (logicalSize <= 0 || ratio <= 0) {
+      return null;
+    }
+    return (logicalSize * ratio).round();
   }
 
   Uint8List? _decodeDataUriBytes(String dataUrl) {
