@@ -864,6 +864,81 @@ void main() {
       );
     });
 
+    test('retries a failed flushed tab-state write', () async {
+      final localDataSource = _FlakyTabsWriteLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final customFixtures = await buildDefaultTestFixtures(
+        localDataSourceOverride: localDataSource,
+      );
+      addTearDown(customFixtures.defaultSettingsProvider.dispose);
+      customFixtures.chatRepository.sessions
+        ..clear()
+        ..add(
+          ChatSession(
+            id: 'session-live',
+            workspaceId: 'default',
+            directory: '/work/project',
+            time: now,
+            title: 'Live session',
+          ),
+        );
+      final customProvider = buildChatProvider(
+        chatRepository: customFixtures.chatRepository,
+        appRepository: customFixtures.appRepository,
+        localDataSource: localDataSource,
+        defaultSettingsProvider: customFixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+      );
+      addTearDown(customProvider.dispose);
+
+      await customProvider.loadSessions();
+      await customProvider.debugWaitForSessionTabPersistence();
+      final baselineAttempts = localDataSource.attempts;
+      localDataSource.failuresRemaining = 1;
+
+      customFixtures.chatRepository.emitEvent(
+        ChatEvent(
+          type: 'session.updated',
+          properties: <String, dynamic>{
+            'directory': '/work/project',
+            'info': <String, dynamic>{
+              'id': 'session-live',
+              'workspaceId': 'default',
+              'title': 'Renamed via flush',
+              'time': <String, dynamic>{
+                'created': now.millisecondsSinceEpoch,
+                'updated': now.millisecondsSinceEpoch + 1,
+              },
+            },
+          },
+        ),
+      );
+      // Let the reconcile stage the debounced payload, then flush it while it
+      // is still pending so the write runs with its staged generation.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await customProvider.flushAllSessionTabsPersistence();
+      // The failed flushed write re-stages and retries after the debounce.
+      await Future<void>.delayed(const Duration(milliseconds: 900));
+      await customProvider.debugWaitForSessionTabPersistence();
+
+      expect(localDataSource.attempts, baselineAttempts + 2,
+          reason: 'flushed write fails once, then the retried write succeeds');
+      final raw = await localDataSource.getSessionTabsStateJson(
+        serverId: 'srv_test',
+      );
+      expect(raw, isNotNull);
+      final persisted = PersistedSessionTabsState.decode(raw!);
+      final liveTabs = persisted.open
+          .where((tab) => tab.sessionId == 'session-live')
+          .toList(growable: false);
+      expect(liveTabs, isNotEmpty);
+      expect(
+        liveTabs.any((tab) => tab.title == 'Renamed via flush'),
+        isTrue,
+        reason: 'the generation-matched retry must persist the payload',
+      );
+    });
+
     test('closing a tab persists its local tombstone', () async {
       await provider.loadSessions();
       final identity = provider.sessionTabs.single.identity;

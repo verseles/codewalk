@@ -1444,7 +1444,11 @@ extension ChatProviderSessionTabOps on ChatProvider {
     debounce?.cancel();
     final pending = _sessionTabsPendingPayloadByServer.remove(serverId);
     if (pending != null) {
-      await _enqueueSessionTabsPersistence(serverId: serverId, payload: pending);
+      await _enqueueSessionTabsPersistence(
+        serverId: serverId,
+        payload: pending,
+        generation: _sessionTabsPersistenceGenerationByServer[serverId],
+      );
     }
   }
 
@@ -1470,6 +1474,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
           _enqueueSessionTabsPersistence(
             serverId: serverId,
             payload: pending,
+            generation: _sessionTabsPersistenceGenerationByServer[serverId],
           ),
         );
       }
