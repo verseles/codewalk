@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.213.0 - 2026-08-21
+
+- chore(chat): clear session-tab persistence generations on dispose
+- fix(chat): retry failed flushed tab writes via generation passthrough
+- fix(chat): address review findings on tab persistence and image decode
+- fix(android): keep process alive in background and harden tab persistence
+
 ## v1.212.0 - 2026-08-19
 
 - fix(chat): align slash command payload with OpenCode
