@@ -132,7 +132,6 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
         bytes,
         fit: BoxFit.cover,
         filterQuality: FilterQuality.medium,
-        cacheWidth: _previewCacheWidth(context),
         cacheHeight: _previewCacheHeight(context),
       );
     }
@@ -140,28 +139,24 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
       return Image.network(
         trimmedUrl,
         fit: BoxFit.cover,
-        cacheWidth: _previewCacheWidth(context),
         cacheHeight: _previewCacheHeight(context),
       );
     }
     return null;
   }
 
-  /// Decodes attachment previews at display resolution. Without these bounds
-  /// a full-size screenshot decodes at its native resolution on every rebuild,
-  /// churning the image cache and driving the process toward low-memory kills.
-  int? _previewCacheWidth(BuildContext context) =>
-      _previewCacheBound(context, MediaQuery.sizeOf(context).width);
-
-  int? _previewCacheHeight(BuildContext context) =>
-      _previewCacheBound(context, 220);
-
-  int? _previewCacheBound(BuildContext context, double logicalSize) {
+  /// Decodes attachment previews at display height. A single-dimension bound
+  /// keeps the aspect ratio intact during decode; without any bound a
+  /// full-size screenshot decodes at native resolution on every rebuild,
+  /// churning the image cache and driving the process toward low-memory
+  /// kills. Height is the safer bound here: phone screenshots (tall) are the
+  /// dominant attachment shape.
+  int? _previewCacheHeight(BuildContext context) {
     final ratio = MediaQuery.devicePixelRatioOf(context);
-    if (logicalSize <= 0 || ratio <= 0) {
+    if (ratio <= 0) {
       return null;
     }
-    return (logicalSize * ratio).round();
+    return (220 * ratio).round();
   }
 
   Uint8List? _decodeDataUriBytes(String dataUrl) {

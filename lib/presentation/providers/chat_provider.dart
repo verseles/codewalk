@@ -474,6 +474,8 @@ class ChatProvider extends ChangeNotifier {
       <String, String>{};
   final Map<String, Timer> _sessionTabsPersistenceDebounceByServer =
       <String, Timer>{};
+  final Map<String, int> _sessionTabsPersistenceGenerationByServer =
+      <String, int>{};
   late final SessionTabIconOverrideStore _sessionTabIconOverrideStore;
   final Map<String, Map<SessionTabIdentity, SessionTabIconOverride>>
   _sessionTabIconOverridesByServer =

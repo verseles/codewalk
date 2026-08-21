@@ -769,7 +769,7 @@ void main() {
       await customProvider.debugWaitForSessionTabPersistence();
 
       expect(localDataSource.attempts, baselineAttempts + 2,
-          reason: 'initial write, failed write, and retried write');
+          reason: 'one failing attempt plus one successful retry');
       final raw = await localDataSource.getSessionTabsStateJson(
         serverId: 'srv_test',
       );
@@ -783,6 +783,84 @@ void main() {
         liveTabs.every((tab) => tab.title == 'Live session renamed'),
         isTrue,
         reason: 'the retried write must persist the latest payload',
+      );
+    });
+
+    test('does not retry a failed write once a newer payload was staged',
+        () async {
+      final localDataSource = _FlakyTabsWriteLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final customFixtures = await buildDefaultTestFixtures(
+        localDataSourceOverride: localDataSource,
+      );
+      addTearDown(customFixtures.defaultSettingsProvider.dispose);
+      customFixtures.chatRepository.sessions
+        ..clear()
+        ..add(
+          ChatSession(
+            id: 'session-live',
+            workspaceId: 'default',
+            directory: '/work/project',
+            time: now,
+            title: 'Live session',
+          ),
+        );
+      final customProvider = buildChatProvider(
+        chatRepository: customFixtures.chatRepository,
+        appRepository: customFixtures.appRepository,
+        localDataSource: localDataSource,
+        defaultSettingsProvider: customFixtures.defaultSettingsProvider,
+        sessionTabsNow: () => now,
+        sessionTabsPersistenceDebounce: Duration.zero,
+      );
+      addTearDown(customProvider.dispose);
+
+      await customProvider.loadSessions();
+      await customProvider.debugWaitForSessionTabPersistence();
+      final baselineAttempts = localDataSource.attempts;
+      localDataSource.failuresRemaining = 1;
+
+      void emitRename(String title, int offset) {
+        customFixtures.chatRepository.emitEvent(
+          ChatEvent(
+            type: 'session.updated',
+            properties: <String, dynamic>{
+              'directory': '/work/project',
+              'info': <String, dynamic>{
+                'id': 'session-live',
+                'workspaceId': 'default',
+                'title': title,
+                'time': <String, dynamic>{
+                  'created': now.millisecondsSinceEpoch,
+                  'updated': now.millisecondsSinceEpoch + offset,
+                },
+              },
+            },
+          ),
+        );
+      }
+
+      emitRename('Older renamed', 1);
+      emitRename('Newer renamed', 2);
+      // Let both writes run: the older one fails, the newer one succeeds.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await customProvider.debugWaitForSessionTabPersistence();
+
+      expect(localDataSource.attempts, baselineAttempts + 2,
+          reason: 'the failed older write must not be retried');
+      final raw = await localDataSource.getSessionTabsStateJson(
+        serverId: 'srv_test',
+      );
+      expect(raw, isNotNull);
+      final persisted = PersistedSessionTabsState.decode(raw!);
+      final liveTabs = persisted.open
+          .where((tab) => tab.sessionId == 'session-live')
+          .toList(growable: false);
+      expect(liveTabs, isNotEmpty);
+      expect(
+        liveTabs.any((tab) => tab.title == 'Newer renamed'),
+        isTrue,
+        reason: 'newer queued state must win over the stale failed payload',
       );
     });
 

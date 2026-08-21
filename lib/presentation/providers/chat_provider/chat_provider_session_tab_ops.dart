@@ -1403,6 +1403,9 @@ extension ChatProviderSessionTabOps on ChatProvider {
     bool force = false,
   }) {
     _sessionTabsPendingPayloadByServer[serverId] = encoded;
+    final generation =
+        (_sessionTabsPersistenceGenerationByServer[serverId] ?? 0) + 1;
+    _sessionTabsPersistenceGenerationByServer[serverId] = generation;
     final debounce = _sessionTabsPersistenceDebounceByServer.remove(serverId);
     debounce?.cancel();
     if (force || _sessionTabsPersistenceDebounceDuration == Duration.zero) {
@@ -1411,6 +1414,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
           serverId: serverId,
           payload: _sessionTabsPendingPayloadByServer.remove(serverId) ??
               encoded,
+          generation: generation,
         ),
       );
       return;
@@ -1424,6 +1428,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
             serverId: serverId,
             payload: _sessionTabsPendingPayloadByServer.remove(serverId) ??
                 encoded,
+            generation: generation,
           ),
         );
       },
@@ -1443,30 +1448,39 @@ extension ChatProviderSessionTabOps on ChatProvider {
     }
   }
 
-  /// Flushes pending debounced session-tab persistence for every server.
-  /// Called at lifecycle boundaries (e.g. app backgrounding) so a process
-  /// death cannot lose up to one debounce window of tab state. Errors are
-  /// logged and swallowed: flushing is best effort.
+  /// Enqueues every pending per-server payload before awaiting completion so
+  /// a slow write for one server cannot leave the other servers' state
+  /// unpersisted at a lifecycle boundary. Write errors are logged and
+  /// swallowed by [_enqueueSessionTabsPersistence], so these futures cannot
+  /// throw.
   Future<void> flushAllSessionTabsPersistence() async {
     final serverIds = _sessionTabsPendingPayloadByServer.keys.toList(
       growable: false,
     );
+    if (serverIds.isEmpty) {
+      return;
+    }
+    final writes = <Future<void>>[];
     for (final serverId in serverIds) {
-      try {
-        await flushSessionTabsPersistence(serverId);
-      } catch (error, stackTrace) {
-        AppLogger.warn(
-          'Failed to flush session tabs for server=$serverId',
-          error: error,
-          stackTrace: stackTrace,
+      final debounce = _sessionTabsPersistenceDebounceByServer.remove(serverId);
+      debounce?.cancel();
+      final pending = _sessionTabsPendingPayloadByServer.remove(serverId);
+      if (pending != null) {
+        writes.add(
+          _enqueueSessionTabsPersistence(
+            serverId: serverId,
+            payload: pending,
+          ),
         );
       }
     }
+    await Future.wait(writes);
   }
 
   Future<void> _enqueueSessionTabsPersistence({
     required String serverId,
     required String payload,
+    int? generation,
   }) async {
     try {
       await _enqueueSessionTabsPersistenceOperation<void>(
@@ -1483,8 +1497,14 @@ extension ChatProviderSessionTabOps on ChatProvider {
         stackTrace: stackTrace,
       );
       // Re-stage the payload so a transient write failure retries after the
-      // debounce window instead of being lost. A newer staged payload wins.
+      // debounce window instead of being lost. The generation guard skips the
+      // retry once any newer payload was staged for this server, preventing a
+      // stale retry from overwriting newer queued state; a newer pending
+      // payload also wins over re-staging the failed one.
       if (!_sessionTabsDisposed &&
+          generation != null &&
+          (_sessionTabsPersistenceGenerationByServer[serverId] ?? 0) ==
+              generation &&
           !_sessionTabsPendingPayloadByServer.containsKey(serverId)) {
         _stageSessionTabsPersistence(serverId: serverId, encoded: payload);
       }
