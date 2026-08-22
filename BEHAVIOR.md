@@ -480,6 +480,17 @@
 - **Then** symbol suggestions show a distinct symbol badge/icon and the source path when available
 - **Then** if file or symbol search fails, local agent suggestions remain available
 
+### Composer drafts persist per session across app restarts
+
+- **Given** the user typed text (and/or attached files) in the composer of a session without sending
+- **When** the app is restarted or the process is killed and relaunched
+- **Then** selecting that session restores the exact draft text, attachments, and shell mode into the composer
+- **Then** the draft is keyed by session and server only — it does not depend on project-context hydration state at startup, so an offline or slow-server start still restores it
+- **When** the user sends the message or erases the composer content
+- **Then** the persisted draft for that session is removed; switching sessions keeps each session's own draft independent
+- **When** the app backgrounds or the page is disposed while a draft write is still debounced
+- **Then** the pending draft is flushed to local persistence immediately instead of waiting for the debounce window
+
 ### Conversations are grouped by project context
 
 - **Given** the user has conversations from multiple project directories

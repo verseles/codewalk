@@ -1170,6 +1170,10 @@ class ChatProvider extends ChangeNotifier {
   int get pendingHistoryComposerSyncToken =>
       _pendingHistoryComposerSync?.token ?? 0;
 
+  @visibleForTesting
+  ChatComposerDraft? get debugPendingHistoryComposerDraft =>
+      _pendingHistoryComposerSync?.draft;
+
   List<ChatMessage> _visibleMessagesForCurrentSession() {
     final session = _currentSession;
     final revertMessageId = session?.revert?.messageId.trim();
@@ -4012,7 +4016,6 @@ class ChatProvider extends ChangeNotifier {
         final restoredComposerDraft = await _loadPersistedComposerDraft(
           session.id,
           serverId: serverId,
-          scopeId: scopeId,
         );
         if (!userInitiated &&
             _cellularDataSaverService.shouldSuppressBackgroundWork) {

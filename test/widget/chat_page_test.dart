@@ -11083,13 +11083,77 @@ void main() {
 
       await provider.selectSession(
         provider.sessions
-            .where((session) => session.id == 'ses_draft_two')
-            .first,
+          .where((session) => session.id == 'ses_draft_two')
+          .first,
       );
       await tester.pumpAndSettle();
       expect(
         tester.widget<TextField>(inputFinder).controller?.text,
         'draft for second session',
+      );
+    },
+  );
+
+  testWidgets(
+    'flushes a still-debounced composer draft when the app backgrounds',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_draft_flush',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Draft Flush',
+          ),
+        ],
+      );
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(
+        provider.sessions
+          .where((session) => session.id == 'ses_draft_flush')
+          .first,
+      );
+      await tester.pumpAndSettle();
+
+      final inputFinder = find.descendant(
+        of: find.byKey(const ValueKey<String>('composer_input_row')),
+        matching: find.byType(TextField),
+      );
+
+      // Type and background immediately: the 250 ms debounce timer must not
+      // be required for the draft to reach storage.
+      await tester.enterText(inputFinder, 'draft flushed on background');
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      final stored = await localDataSource.getSessionComposerDraftJson(
+        sessionId: 'ses_draft_flush',
+        serverId: 'srv_test',
+      );
+      expect(stored, isNotNull);
+      expect(
+        (jsonDecode(stored!) as Map<String, dynamic>)['text'],
+        'draft flushed on background',
       );
     },
   );

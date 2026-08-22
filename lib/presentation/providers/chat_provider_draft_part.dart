@@ -4,12 +4,10 @@ extension _ChatProviderDraftState on ChatProvider {
   Future<ChatComposerDraft?> _loadPersistedComposerDraft(
     String sessionId, {
     required String serverId,
-    required String scopeId,
   }) async {
     final raw = await localDataSource.getSessionComposerDraftJson(
       sessionId: sessionId,
       serverId: serverId,
-      scopeId: scopeId,
     );
     if (raw == null || raw.trim().isEmpty) {
       return null;
@@ -86,7 +84,6 @@ extension _ChatProviderDraftState on ChatProvider {
       return;
     }
     final serverId = await _resolveServerScopeId();
-    final scopeId = _resolveContextScopeId();
     String? payload;
     if (draft != null && draft.hasContent) {
       payload = json.encode(<String, dynamic>{
@@ -118,7 +115,6 @@ extension _ChatProviderDraftState on ChatProvider {
       payload,
       sessionId: normalizedSessionId,
       serverId: serverId,
-      scopeId: scopeId,
     );
   }
 

@@ -123,14 +123,12 @@ abstract class AppLocalDataSource {
   Future<String?> getSessionComposerDraftJson({
     required String sessionId,
     String? serverId,
-    String? scopeId,
   });
 
   Future<void> saveSessionComposerDraftJson(
     String? draftJson, {
     required String sessionId,
     String? serverId,
-    String? scopeId,
   });
 
   /// Technical comment translated to English.
@@ -963,14 +961,12 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   Future<String?> getSessionComposerDraftJson({
     required String sessionId,
     String? serverId,
-    String? scopeId,
   }) async {
     return _sharedPreferences.getString(
       _sessionScopedKey(
         AppConstants.sessionComposerDraftKey,
         sessionId: sessionId,
         serverId: serverId,
-        scopeId: scopeId,
       ),
     );
   }
@@ -980,13 +976,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? draftJson, {
     required String sessionId,
     String? serverId,
-    String? scopeId,
   }) async {
     final key = _sessionScopedKey(
       AppConstants.sessionComposerDraftKey,
       sessionId: sessionId,
       serverId: serverId,
-      scopeId: scopeId,
     );
     if (draftJson == null || draftJson.trim().isEmpty) {
       await _sharedPreferences.remove(key);

@@ -597,6 +597,8 @@ class _ChatPageState extends State<ChatPage>
   Timer? _unhealthySnackbarDebounceTimer;
   Timer? _initialDataRecoveryTimer;
   Timer? _composerDraftPersistTimer;
+  String? _composerDraftStagedSessionId;
+  ChatComposerDraft? _composerDraftStagedDraft;
   Timer? _composerStatusShowTimer;
   Timer? _composerStatusHideTimer;
   Timer? _composerStopHintTimer;
@@ -859,7 +861,7 @@ class _ChatPageState extends State<ChatPage>
     _foregroundWarningSnackbarTimer?.cancel();
     _unhealthySnackbarDebounceTimer?.cancel();
     _initialDataRecoveryTimer?.cancel();
-    _composerDraftPersistTimer?.cancel();
+    _flushPendingComposerDraftPersistence();
     _composerStatusShowTimer?.cancel();
     _composerStatusHideTimer?.cancel();
     _composerStopHintTimer?.cancel();
@@ -895,6 +897,7 @@ class _ChatPageState extends State<ChatPage>
       // Persist pending session-tab state before the process can be killed in
       // the background; the debounced write may otherwise never run.
       unawaited(_chatProvider?.flushAllSessionTabsPersistence());
+      _flushPendingComposerDraftPersistence();
     }
     final provider = _chatProvider;
     if (provider != null) {
@@ -1427,6 +1430,8 @@ class _ChatPageState extends State<ChatPage>
       return;
     }
     _composerDraftPersistTimer?.cancel();
+    _composerDraftStagedSessionId = normalizedSessionId;
+    _composerDraftStagedDraft = draft;
     if (draft == null || !draft.hasContent) {
       unawaited(
         (_chatProvider ?? context.read<ChatProvider>())
@@ -1447,6 +1452,35 @@ class _ChatPageState extends State<ChatPage>
             ),
       );
     });
+  }
+
+  /// Writes a still-debounced composer draft immediately. Called when the app
+  /// backgrounds or the page disposes before the debounce timer fires;
+  /// without this a process death in that window loses the last keystrokes.
+  void _flushPendingComposerDraftPersistence() {
+    final timer = _composerDraftPersistTimer;
+    final stagedSessionId = _composerDraftStagedSessionId;
+    final stagedDraft = _composerDraftStagedDraft;
+    timer?.cancel();
+    _composerDraftPersistTimer = null;
+    _composerDraftStagedSessionId = null;
+    _composerDraftStagedDraft = null;
+    if (timer == null ||
+        stagedSessionId == null ||
+        stagedSessionId.isEmpty ||
+        stagedDraft == null) {
+      return;
+    }
+    final provider = _chatProvider;
+    if (provider == null) {
+      return;
+    }
+    unawaited(
+      provider.persistComposerDraftForSession(
+        sessionId: stagedSessionId,
+        draft: stagedDraft,
+      ),
+    );
   }
 
   void _cancelPendingServerUnhealthyNotice() {

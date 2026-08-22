@@ -507,13 +507,11 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   Future<String?> getSessionComposerDraftJson({
     required String sessionId,
     String? serverId,
-    String? scopeId,
   }) async {
     return scopedStrings[_sessionKey(
       'session_composer_draft',
       sessionId: sessionId,
       serverId: serverId,
-      scopeId: scopeId,
     )];
   }
 
@@ -1073,13 +1071,11 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     String? draftJson, {
     required String sessionId,
     String? serverId,
-    String? scopeId,
   }) async {
     final key = _sessionKey(
       'session_composer_draft',
       sessionId: sessionId,
       serverId: serverId,
-      scopeId: scopeId,
     );
     if (draftJson == null || draftJson.trim().isEmpty) {
       scopedStrings.remove(key);
