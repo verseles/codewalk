@@ -1431,21 +1431,23 @@ class _ChatPageState extends State<ChatPage>
       return;
     }
     final provider = _chatProvider ?? context.read<ChatProvider>();
-    // A draft event for a different session displaces the still-pending one:
-    // write it out under its own identity instead of cancelling it, so a
-    // rapid session switch cannot drop the outgoing session's draft.
+    final incomingServerId = _activeServerIdForComposerDraftPersistence(
+      provider,
+    );
+    // A draft event for a different session+server identity displaces the
+    // still-pending one: write it out under its own identity instead of
+    // cancelling it, so a rapid switch cannot drop the outgoing draft.
+    // Session ids are unique per server only, so both parts form identity.
     if (_composerDraftPersistTimer != null &&
-        _composerDraftStagedSessionId != null &&
-        _composerDraftStagedSessionId != normalizedSessionId) {
+        (_composerDraftStagedSessionId != normalizedSessionId ||
+            _composerDraftStagedServerId != incomingServerId)) {
       _flushPendingComposerDraftPersistence();
     } else {
       _composerDraftPersistTimer?.cancel();
       _composerDraftPersistTimer = null;
     }
     _composerDraftStagedSessionId = normalizedSessionId;
-    _composerDraftStagedServerId = _activeServerIdForComposerDraftPersistence(
-      provider,
-    );
+    _composerDraftStagedServerId = incomingServerId;
     _composerDraftStagedDraft = draft;
     if (draft == null || !draft.hasContent) {
       // The clear is written immediately; nothing stays staged for a flush.
@@ -1456,7 +1458,7 @@ class _ChatPageState extends State<ChatPage>
       unawaited(
         provider.persistComposerDraftForSession(
           sessionId: normalizedSessionId,
-          serverId: _activeServerIdForComposerDraftPersistence(provider),
+          serverId: incomingServerId,
           draft: null,
         ),
       );
@@ -1481,10 +1483,8 @@ class _ChatPageState extends State<ChatPage>
   }
 
   String? _activeServerIdForComposerDraftPersistence(ChatProvider provider) {
-    final activeServerId = provider.activeServerId?.trim();
-    return (activeServerId == null || activeServerId.isEmpty)
-        ? null
-        : activeServerId;
+    final activeServerId = provider.activeServerId.trim();
+    return activeServerId.isEmpty ? null : activeServerId;
   }
 
   /// Writes a still-debounced composer draft immediately. Called when the app
