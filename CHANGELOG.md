@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.214.0 - 2026-08-22
+
+- fix(chat): treat server+session as composer draft identity
+- fix(chat): pin composer draft identity across switches and clears
+- docs(adr): record Android FGS anti-regression boundary and persistence rules
+- feat(chat): persist composer drafts per session across restarts
+
 ## v1.213.0 - 2026-08-21
 
 - chore(chat): clear session-tab persistence generations on dispose
