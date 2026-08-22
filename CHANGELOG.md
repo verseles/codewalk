@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.215.0 - 2026-08-22
+
+- docs(chat): document bounded history window behavior and ADR-020 refinement (#160)
+- feat(chat): bounded history window with sentinel chunked pagination (#160)
+
 ## v1.214.0 - 2026-08-22
 
 - fix(chat): treat server+session as composer draft identity
