@@ -1338,9 +1338,10 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
         return;
       }
       _setScrollOwner(_ScrollOwner.newMessage);
+      final minExtent = _scrollController.position.minScrollExtent;
       _scrollController
           .animateTo(
-            _scrollController.position.minScrollExtent,
+            minExtent,
             duration: const Duration(milliseconds: 320),
             curve: Curves.easeOut,
           )
@@ -1353,6 +1354,27 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
               _setState(() {
                 _showScrollToFirstFab = false;
               });
+            }
+            // Issue #160: landing on the oldest resident message is not the
+            // real first message when older history is still archived; pull
+            // exactly one chunk so the jump reaches a stable top without
+            // recursively paging through the whole session.
+            final chatProvider = _chatProvider;
+            if (chatProvider != null &&
+                chatProvider.currentSession != null &&
+                chatProvider.hasMoreOldMessages &&
+                !chatProvider.isLoadingOlderMessages &&
+                !_olderMessagesAnchorRestoreInFlight) {
+              final maxExtentBefore = _scrollController.hasClients
+                  ? _scrollController.position.maxScrollExtent
+                  : 0.0;
+              unawaited(
+                _loadOlderMessagesAndRestoreAnchor(
+                  provider: chatProvider,
+                  maxExtentBefore: maxExtentBefore,
+                  restoreAnchor: false,
+                ),
+              );
             }
           });
     });

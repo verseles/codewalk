@@ -628,7 +628,21 @@ class ChatProvider extends ChangeNotifier {
   static const Duration _sessionMessagesSnapshotTtl = Duration(days: 7);
   static const int _maxSessionMessageCacheEntries = 20;
   static const int _maxPersistedSessionMessageSnapshots = 8;
-  static const int _defaultOlderMessagesChunkSize = 200;
+  // Issue #160: cold open loads only the newest window of messages; older
+  // history is pulled in fixed chunks when the user scrolls toward the top.
+  static const int _initialMessagesWindowSize = 50;
+  // Sentinel probe asks for one extra message so an exact-fit response proves
+  // no older history exists without a second roundtrip.
+  static const int _initialMessagesWindowProbeSize =
+      _initialMessagesWindowSize + 1;
+  // Delta-like SWR revalidation keeps a wider reconciliation tail than the
+  // pagination chunk (BEHAVIOR.md "Active session SWR prefers delta-like
+  // refresh"); shrinking it would change overlap/fallback semantics.
+  static const int _swrMessageTailLimit = 200;
+  static const int _defaultOlderMessagesChunkSize = 50;
+  // Safety valve applied after unbounded correctness-recovery fetches so a
+  // full-history fallback cannot inflate the resident list indefinitely.
+  static const int _maxResidentLoadedMessages = 500;
   static const int _maxRecentModels = 8;
   static const int _maxRecentAgents = 8;
   static const int _maxRecentVariantsPerModel = 8;
@@ -3549,7 +3563,7 @@ class ChatProvider extends ChangeNotifier {
         _threadPermissionsVersion++;
         _messages = <ChatMessage>[];
         _isLoadingOlderMessages = false;
-        _hasMoreOldMessages = messages.length >= _defaultOlderMessagesChunkSize;
+        _hasMoreOldMessages = messages.length >= _initialMessagesWindowSize;
         _messagesVersion++;
         _clearPendingReplacementBranch();
         await _clearLastSessionSnapshotBestEffort(
@@ -3650,7 +3664,7 @@ class ChatProvider extends ChangeNotifier {
           _messages = List<ChatMessage>.from(restoredCachedMessages);
           _cacheSessionMessages(targetSession.id, _messages);
           _hasMoreOldMessages =
-              restoredCachedMessages.length >= _defaultOlderMessagesChunkSize;
+              restoredCachedMessages.length >= _initialMessagesWindowSize;
           _messagesVersion++;
           _setState(ChatState.loaded);
           // Re-apply selection priority now that messages are available — the
@@ -3978,8 +3992,8 @@ class ChatProvider extends ChangeNotifier {
           _pendingCurrentSessionHydrationId = null;
           _messages = List<ChatMessage>.from(warmCachedMessages);
           _cacheSessionMessages(session.id, _messages);
-          _hasMoreOldMessages =
-              _messages.length >= _defaultOlderMessagesChunkSize;
+            _hasMoreOldMessages =
+                _messages.length >= _initialMessagesWindowSize;
           _messagesVersion++;
           _setState(ChatState.loaded);
         } else {
@@ -4046,7 +4060,7 @@ class ChatProvider extends ChangeNotifier {
             restoredCachedMessages,
           );
           _hasMoreOldMessages =
-              restoredCachedMessages.length >= _defaultOlderMessagesChunkSize;
+              restoredCachedMessages.length >= _initialMessagesWindowSize;
           if (!_areMessageListsSemanticallyEqual(_messages, restoredMessages)) {
             _messages = restoredMessages;
             _cacheSessionMessages(session.id, _messages);
@@ -4142,8 +4156,10 @@ class ChatProvider extends ChangeNotifier {
             sessionId: sessionId,
             directory: projectProvider.currentDirectory,
             limit: canKeepVisibleState && preferDelta
-                ? _defaultOlderMessagesChunkSize
-                : null,
+                ? _swrMessageTailLimit
+                : preferDelta
+                    ? _initialMessagesWindowProbeSize
+                    : null,
           ),
         );
 
@@ -4184,6 +4200,16 @@ class ChatProvider extends ChangeNotifier {
             var serverMessagesForMerge = messages;
             var requiresFullFetch = false;
             var usedGapRecovery = false;
+            // Cold open probes one message beyond the initial window so the
+            // sentinel response proves whether older history exists at all.
+            final coldWindowProbe = !canKeepVisibleState && preferDelta;
+            final unboundedRecoveryFetch = !preferDelta;
+            if (coldWindowProbe &&
+                serverMessagesForMerge.length > _initialMessagesWindowSize) {
+              serverMessagesForMerge = serverMessagesForMerge.sublist(
+                serverMessagesForMerge.length - _initialMessagesWindowSize,
+              );
+            }
             if (canKeepVisibleState &&
                 preferDelta &&
                 cachedMessages.isNotEmpty) {
@@ -4204,12 +4230,27 @@ class ChatProvider extends ChangeNotifier {
               serverMessagesForMerge,
               sessionId: sessionId,
             );
+            // Unbounded correctness-recovery fetches still commit a bounded
+            // resident window; dropped older history remains server-side and
+            // reachable through top-reach pagination.
+            var residentMessages = mergedMessages;
+            if (unboundedRecoveryFetch &&
+                mergedMessages.length > _maxResidentLoadedMessages) {
+              residentMessages = mergedMessages.sublist(
+                mergedMessages.length - _maxResidentLoadedMessages,
+              );
+            }
             final nextHasMoreOldMessages =
                 usedGapRecovery ||
-                serverMessagesForMerge.length >= _defaultOlderMessagesChunkSize;
+                (coldWindowProbe
+                    ? messages.length >= _initialMessagesWindowProbeSize
+                    : unboundedRecoveryFetch
+                        ? mergedMessages.length > _maxResidentLoadedMessages
+                        : serverMessagesForMerge.length >=
+                            _swrMessageTailLimit);
             final messagesChanged = !_areMessageListsSemanticallyEqual(
               previousVisibleMessages,
-              mergedMessages,
+              residentMessages,
             );
             final hasMoreOldMessagesChanged =
                 _hasMoreOldMessages != nextHasMoreOldMessages;
@@ -4230,7 +4271,7 @@ class ChatProvider extends ChangeNotifier {
             }
 
             final messagesApplied = _applyMessages(
-              mergedMessages,
+              residentMessages,
               origin: MessageUpdateOrigin.sessionRefresh,
               kind: MessageUpdateKind.fullSnapshot,
               sessionId: sessionId,
@@ -4292,6 +4333,13 @@ class ChatProvider extends ChangeNotifier {
     );
   }
 
+  /// Prepends the next fixed chunk of older history when the user reaches the
+  /// top of the timeline.
+  ///
+  /// Issue #160: the request carries a one-message sentinel so an exact-fit
+  /// response proves no older history exists, and only the slice strictly
+  /// older than the oldest resident message is applied — the overlapping tail
+  /// already on screen is never re-processed.
   Future<void> loadOlderMessages({
     int chunkSize = _defaultOlderMessagesChunkSize,
   }) async {
@@ -4303,9 +4351,15 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
+    // The resident list is contiguous from the newest message backwards, so
+    // its length is the server-tail depth already covered; matching the
+    // oldest resident id absorbs realtime additions that shift positions
+    // between consecutive page requests.
+    final oldestAnchorId = _messages.isEmpty ? null : _messages.first.id;
+    final requestedLimit = _messages.length + chunkSize + 1;
+
     _isLoadingOlderMessages = true;
     _notifyListeners();
-    final requestedLimit = _messages.length + chunkSize;
 
     try {
       final result = await getChatMessages(
@@ -4327,35 +4381,70 @@ class ChatProvider extends ChangeNotifier {
           if (_currentSession?.id != sessionId) {
             return;
           }
+          final exactFit = messages.length >= requestedLimit;
           final filteredMessages = _filterMessagesForPendingReplacementBranch(
             messages,
             sessionId: sessionId,
           );
-          final messagesApplied = _applyMessages(
-            _mergeServerMessagesWithActiveLocalTail(
-              filteredMessages,
+
+          var olderSlice = filteredMessages;
+          var anchorFound = oldestAnchorId == null;
+          if (oldestAnchorId != null) {
+            final matchIndex = filteredMessages.indexWhere(
+              (message) => message.id == oldestAnchorId,
+            );
+            if (matchIndex > 0) {
+              olderSlice = filteredMessages.sublist(0, matchIndex);
+            } else if (matchIndex == 0) {
+              olderSlice = const <ChatMessage>[];
+            } else {
+              anchorFound = false;
+            }
+          }
+
+          bool messagesApplied;
+          if (anchorFound && olderSlice.isNotEmpty) {
+            // partialDelta keeps newer resident content authoritative while
+            // the strictly-older slice is inserted in front of it.
+            messagesApplied = _applyMessages(
+              [...olderSlice, ..._messages],
+              origin: MessageUpdateOrigin.httpFallback,
+              kind: MessageUpdateKind.partialDelta,
               sessionId: sessionId,
-            ),
-            origin: MessageUpdateOrigin.httpFallback,
-            kind: MessageUpdateKind.fullSnapshot,
-            sessionId: sessionId,
-            reason: 'server-messages-merge',
-          );
+              reason: 'older-history-prepend',
+            );
+          } else if (!anchorFound) {
+            // The anchor vanished (server-side deletion/reorder): fall back
+            // to the reconciliation merge instead of prepending unanchored
+            // data.
+            messagesApplied = _applyMessages(
+              _mergeServerMessagesWithActiveLocalTail(
+                filteredMessages,
+                sessionId: sessionId,
+              ),
+              origin: MessageUpdateOrigin.httpFallback,
+              kind: MessageUpdateKind.fullSnapshot,
+              sessionId: sessionId,
+              reason: 'server-messages-merge',
+            );
+          } else {
+            messagesApplied = false;
+          }
           _cacheSessionMessages(sessionId, _messages);
           if (messagesApplied) {
             _messagesVersion++;
           }
-          final hasMoreOldMessagesChanged =
-              _hasMoreOldMessages !=
-              (filteredMessages.length >= requestedLimit);
-          _hasMoreOldMessages = filteredMessages.length >= requestedLimit;
+          final hasMoreOldMessagesChanged = _hasMoreOldMessages != exactFit;
+          _hasMoreOldMessages = exactFit;
           if (messagesApplied || hasMoreOldMessagesChanged) {
             _notifyListeners();
           }
-          unawaited(_persistLastSessionSnapshotBestEffort());
-          unawaited(
-            _persistSessionMessagesSnapshotBestEffort(sessionId, _messages),
-          );
+          if (messagesApplied) {
+            unawaited(_persistLastSessionSnapshotBestEffort());
+            unawaited(
+              _persistSessionMessagesSnapshotBestEffort(sessionId, _messages),
+            );
+          }
         },
       );
     } finally {

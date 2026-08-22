@@ -34,6 +34,8 @@ class MockOpenCodeServer {
   int sessionMessageListRequestCount = 0;
   int messageDetailRequestCount = 0;
   String? lastSessionMessageListLimit;
+  final List<int?> sessionMessageListRequestedLimits =
+      <int?>[];
   Map<String, String>? lastProviderQueryParameters;
   Map<String, String>? lastAgentQueryParameters;
   Map<String, String>? lastConfigQueryParameters;
@@ -151,6 +153,7 @@ class MockOpenCodeServer {
     sessionMessageListRequestCount = 0;
     messageDetailRequestCount = 0;
     lastSessionMessageListLimit = null;
+    sessionMessageListRequestedLimits.clear();
     lastProviderQueryParameters = null;
     lastAgentQueryParameters = null;
     lastConfigQueryParameters = null;
@@ -1255,6 +1258,10 @@ class MockOpenCodeServer {
 
       if (method == 'GET') {
         sessionMessageListRequestCount += 1;
+        final requestedLimit = int.tryParse(
+          request.uri.queryParameters['limit'] ?? '',
+        );
+        sessionMessageListRequestedLimits.add(requestedLimit);
         lastSessionMessageListLimit = request.uri.queryParameters['limit'];
         if (forceEmptySessionMessageListResponses > 0) {
           forceEmptySessionMessageListResponses -= 1;
@@ -1265,11 +1272,16 @@ class MockOpenCodeServer {
           );
           return;
         }
-        await _writeJson(
-          request.response,
-          200,
-          _messagesBySession[sessionId] ?? <Map<String, dynamic>>[],
-        );
+        // Official OpenCode contract: an optional `limit` returns the most
+        // recent tail of the session's messages (issue #160).
+        var payload =
+            _messagesBySession[sessionId] ?? <Map<String, dynamic>>[];
+        if (requestedLimit != null &&
+            requestedLimit > 0 &&
+            payload.length > requestedLimit) {
+          payload = payload.sublist(payload.length - requestedLimit);
+        }
+        await _writeJson(request.response, 200, payload);
         return;
       }
 

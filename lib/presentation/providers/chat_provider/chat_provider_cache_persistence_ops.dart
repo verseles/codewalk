@@ -31,7 +31,7 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     String sessionId,
     List<ChatMessage> messages,
   ) {
-    return messages
+    final filtered = messages
         .where(
           (message) =>
               message.sessionId == sessionId &&
@@ -39,6 +39,25 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
                   _pendingLocalUserMessageIds.contains(message.id)),
         )
         .toList(growable: false);
+    // Issue #160: cache entries and persisted snapshots only keep the newest
+    // initial window; deeper history stays server-side behind pagination.
+    if (filtered.length > ChatProvider._initialMessagesWindowSize) {
+      return filtered.sublist(
+        filtered.length - ChatProvider._initialMessagesWindowSize,
+      );
+    }
+    return filtered;
+  }
+
+  /// Legacy snapshots may predate the bounded-window policy; bound them on
+  /// read so restoring cannot re-inflate the resident list.
+  List<ChatMessage> _boundRestoredSessionMessages(List<ChatMessage> messages) {
+    if (messages.length <= ChatProvider._initialMessagesWindowSize) {
+      return messages;
+    }
+    return messages.sublist(
+      messages.length - ChatProvider._initialMessagesWindowSize,
+    );
   }
 
   void _cacheSessionMessages(String sessionId, List<ChatMessage> messages) {
@@ -359,7 +378,7 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
   }) async {
     final inMemory = _cachedSessionMessages(sessionId);
     if (inMemory != null && inMemory.isNotEmpty) {
-      return inMemory;
+      return _boundRestoredSessionMessages(inMemory);
     }
     final fromDisk = await _restoreSessionMessagesSnapshot(
       sessionId,
@@ -369,8 +388,9 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     if (fromDisk == null || fromDisk.isEmpty) {
       return null;
     }
-    _cacheSessionMessages(sessionId, fromDisk);
-    return fromDisk;
+    final boundedFromDisk = _boundRestoredSessionMessages(fromDisk);
+    _cacheSessionMessages(sessionId, boundedFromDisk);
+    return boundedFromDisk;
   }
 
   void _sortSessionsInPlace() {
@@ -517,12 +537,14 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
       final selectedSession =
           _sessions.where((item) => item.id == session.id).firstOrNull ??
           session;
-      final cachedMessages = _restoreableCachedMessages(
-        messagesJson
-            .whereType<Map<String, dynamic>>()
-            .map((item) => ChatMessageModel.fromJson(item).toDomain())
-            .where((message) => message.sessionId == selectedSession.id)
-            .toList(growable: false),
+      final cachedMessages = _boundRestoredSessionMessages(
+        _restoreableCachedMessages(
+          messagesJson
+              .whereType<Map<String, dynamic>>()
+              .map((item) => ChatMessageModel.fromJson(item).toDomain())
+              .where((message) => message.sessionId == selectedSession.id)
+              .toList(growable: false),
+        ),
       );
       if (cachedMessages.isEmpty) {
         return;
@@ -542,7 +564,7 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
       _cacheSessionMessages(selectedSession.id, cachedMessages);
       _messagesVersion++;
       _hasMoreOldMessages =
-          cachedMessages.length >= ChatProvider._defaultOlderMessagesChunkSize;
+          cachedMessages.length >= ChatProvider._initialMessagesWindowSize;
       _pendingLocalUserMessageIds.clear();
       _setState(ChatState.loaded);
 

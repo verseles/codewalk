@@ -190,6 +190,7 @@ extension _ChatPageScrollCoordinator on _ChatPageState {
   Future<void> _loadOlderMessagesAndRestoreAnchor({
     required ChatProvider provider,
     required double maxExtentBefore,
+    bool restoreAnchor = true,
   }) async {
     _setScrollOwner(_ScrollOwner.paginationRestore);
     try {
@@ -212,16 +213,26 @@ extension _ChatPageScrollCoordinator on _ChatPageState {
         return;
       }
       final maxAfter = _scrollController.position.maxScrollExtent;
-      final delta = maxAfter - maxExtentBefore;
-      if (delta <= 0) {
+      if (restoreAnchor) {
+        final delta = maxAfter - maxExtentBefore;
+        if (delta <= 0) {
+          return;
+        }
+
+        final nextPixels = (_scrollController.position.pixels + delta).clamp(
+          _scrollController.position.minScrollExtent,
+          _scrollController.position.maxScrollExtent,
+        );
+        _scrollController.jumpTo(nextPixels);
         return;
       }
 
-      final nextPixels = (_scrollController.position.pixels + delta).clamp(
-        _scrollController.position.minScrollExtent,
-        _scrollController.position.maxScrollExtent,
-      );
-      _scrollController.jumpTo(nextPixels);
+      // Programmatic jump-to-first lands on the newly loaded top instead of
+      // restoring the pre-load reading anchor.
+      final target = _scrollController.position.minScrollExtent;
+      if (_scrollController.position.pixels > target) {
+        _scrollController.jumpTo(target);
+      }
     } finally {
       if (_currentScrollOwner == _ScrollOwner.paginationRestore) {
         _setScrollOwner(_ScrollOwner.none);

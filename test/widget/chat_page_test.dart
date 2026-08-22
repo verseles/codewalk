@@ -19283,8 +19283,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(provider.messages.length, 250);
+      // Issue #160: cold open probes only the newest window (51) and the
+      // deferred loadSessions SWR revalidation then reconciles the documented
+      // delta tail (200) over the warm cache before these assertions run.
+      expect(provider.messages.length, 200);
+      expect(provider.messages.first.id, 'msg_cached_50');
       expect(provider.messages.last.id, 'msg_cached_249');
+      expect(provider.hasMoreOldMessages, isTrue);
 
       repository.messagesBySession[sessionId] = List<ChatMessage>.of(
         refreshedMessages,

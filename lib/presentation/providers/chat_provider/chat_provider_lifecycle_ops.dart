@@ -277,7 +277,7 @@ extension ChatProviderLifecycleOps on ChatProvider {
           sessionId: session.id,
           directory: projectProvider.currentDirectory,
           limit: canUseDelta
-              ? ChatProvider._defaultOlderMessagesChunkSize
+              ? ChatProvider._swrMessageTailLimit
               : null,
         ),
       );
@@ -321,13 +321,26 @@ extension ChatProviderLifecycleOps on ChatProvider {
             serverMessagesForMerge,
             sessionId: session.id,
           );
+          // Unbounded correctness-recovery fetches still commit a bounded
+          // resident window (issue #160).
+          var residentMessages = mergedMessages;
+          if (!canUseDelta &&
+              mergedMessages.length >
+                  ChatProvider._maxResidentLoadedMessages) {
+            residentMessages = mergedMessages.sublist(
+              mergedMessages.length - ChatProvider._maxResidentLoadedMessages,
+            );
+          }
           final nextHasMoreOldMessages =
               usedGapRecovery ||
+              (!canUseDelta &&
+                  mergedMessages.length >
+                      ChatProvider._maxResidentLoadedMessages) ||
               serverMessagesForMerge.length >=
-                  ChatProvider._defaultOlderMessagesChunkSize;
+                  ChatProvider._swrMessageTailLimit;
           final messagesChanged = !_areMessageListsSemanticallyEqual(
             cachedMessages,
-            mergedMessages,
+            residentMessages,
           );
           final hasMoreOldMessagesChanged =
               _hasMoreOldMessages != nextHasMoreOldMessages;
@@ -346,7 +359,7 @@ extension ChatProviderLifecycleOps on ChatProvider {
           }
 
           final messagesApplied = _applyMessages(
-            mergedMessages,
+            residentMessages,
             origin: MessageUpdateOrigin.sessionRefresh,
             kind: MessageUpdateKind.fullSnapshot,
             sessionId: session.id,

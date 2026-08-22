@@ -44,6 +44,43 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/fakes.dart';
 import 'chat_provider_test_support.dart';
 
+/// Generates an ascending user/assistant thread with stable ids
+/// (`msg_user_<i>` / `msg_assistant_<i>` by index parity).
+List<ChatMessage> _generateThreadMessages(String sessionId, int count) {
+  return List<ChatMessage>.generate(count, (index) {
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(1000 + index);
+    if (index.isEven) {
+      return UserMessage(
+        id: 'msg_user_$index',
+        sessionId: sessionId,
+        time: timestamp,
+        parts: <MessagePart>[
+          TextPart(
+            id: 'part_user_$index',
+            messageId: 'msg_user_$index',
+            sessionId: sessionId,
+            text: 'u$index',
+          ),
+        ],
+      );
+    }
+    return AssistantMessage(
+      id: 'msg_assistant_$index',
+      sessionId: sessionId,
+      time: timestamp,
+      completedTime: timestamp,
+      parts: <MessagePart>[
+        TextPart(
+          id: 'part_assistant_$index',
+          messageId: 'msg_assistant_$index',
+          sessionId: sessionId,
+          text: 'a$index',
+        ),
+      ],
+    );
+  });
+}
+
 void main() {
   group('ChatProvider - messaging', () {
     late FakeChatRepository chatRepository;
@@ -1265,7 +1302,7 @@ void main() {
     );
 
     test(
-      'loadOlderMessages requests incremental limit and updates hasMore',
+      'loadOlderMessages requests anchored sentinel limits and updates hasMore',
       () async {
         const sessionId = 'ses_1';
         final messages = List<ChatMessage>.generate(450, (index) {
@@ -1310,15 +1347,128 @@ void main() {
         await provider.selectSession(session);
         await Future<void>.delayed(const Duration(milliseconds: 20));
 
+        // Cold open probes window+1 and keeps only the newest window.
         expect(provider.hasMoreOldMessages, isTrue);
+        expect(provider.messages.length, 50);
+        expect(provider.messages.first.id, 'msg_user_400');
 
+        // Sentinel request: resident(50) + chunk(100) + 1.
         await provider.loadOlderMessages(chunkSize: 100);
         await Future<void>.delayed(const Duration(milliseconds: 20));
 
-        expect(chatRepository.lastGetMessagesLimit, 550);
+        expect(chatRepository.lastGetMessagesLimit, 151);
+        expect(provider.messages.length, 151);
+        expect(provider.messages.first.id, 'msg_assistant_299');
+        // Exact-fit sentinel response cannot rule out deeper history yet.
+        expect(provider.hasMoreOldMessages, isTrue);
+        expect(provider.isLoadingOlderMessages, isFalse);
+
+        // A larger second page exhausts the session: the sentinel response
+        // comes back short, proving no older history remains.
+        await provider.loadOlderMessages(chunkSize: 300);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(chatRepository.lastGetMessagesLimit, 452);
         expect(provider.messages.length, 450);
+        expect(provider.messages.first.id, 'msg_user_0');
         expect(provider.hasMoreOldMessages, isFalse);
         expect(provider.isLoadingOlderMessages, isFalse);
+      },
+    );
+
+    test(
+      'cold open of an exact-window session reports no older history without extra roundtrips',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 50);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        // The sentinel probe came back short: exactly 50 exist server-side.
+        expect(provider.messages.length, 50);
+        expect(provider.messages.last.id, 'msg_assistant_49');
+        expect(provider.hasMoreOldMessages, isFalse);
+
+        // A direct older-page request is a safe no-op: the anchor sits at
+        // position zero of the response and the sentinel stays short.
+        await provider.loadOlderMessages();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(provider.messages.length, 50);
+        expect(provider.hasMoreOldMessages, isFalse);
+      },
+    );
+
+    test(
+      'cold open of a short session loads everything and reports no older history',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 18);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(provider.messages.length, 18);
+        expect(provider.hasMoreOldMessages, isFalse);
+      },
+    );
+
+    test(
+      're-entering a deeply paged session restores a bounded window',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 450);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        // Page deep enough that the resident list far exceeds any window.
+        await provider.loadOlderMessages(chunkSize: 400);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(provider.messages.length, 450);
+        expect(provider.hasMoreOldMessages, isFalse);
+
+        // Leaving (draft reset) and re-entering hydrates from the bounded
+        // cache; the deferred SWR reconciliation may top up the delta tail
+        // (200), but the deep 450-message resident list must not return.
+        await provider.beginNewChatDraft();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(provider.messages, isEmpty);
+
+        await provider.selectSession(session);
+        await Future<void>.delayed(
+          const Duration(milliseconds: 60),
+        );
+        expect(provider.messages.length, lessThan(450));
+        expect(provider.messages.length, greaterThanOrEqualTo(50));
+        expect(provider.messages.last.id, 'msg_assistant_449');
+        final firstIndex = 450 - provider.messages.length;
+        expect(
+          provider.messages.first.id,
+          firstIndex.isEven
+              ? 'msg_user_$firstIndex'
+              : 'msg_assistant_$firstIndex',
+        );
+        expect(provider.hasMoreOldMessages, isTrue);
       },
     );
 
