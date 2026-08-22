@@ -598,6 +598,7 @@ class _ChatPageState extends State<ChatPage>
   Timer? _initialDataRecoveryTimer;
   Timer? _composerDraftPersistTimer;
   String? _composerDraftStagedSessionId;
+  String? _composerDraftStagedServerId;
   ChatComposerDraft? _composerDraftStagedDraft;
   Timer? _composerStatusShowTimer;
   Timer? _composerStatusHideTimer;
@@ -1429,41 +1430,76 @@ class _ChatPageState extends State<ChatPage>
     if (normalizedSessionId == null || normalizedSessionId.isEmpty) {
       return;
     }
-    _composerDraftPersistTimer?.cancel();
+    final provider = _chatProvider ?? context.read<ChatProvider>();
+    // A draft event for a different session displaces the still-pending one:
+    // write it out under its own identity instead of cancelling it, so a
+    // rapid session switch cannot drop the outgoing session's draft.
+    if (_composerDraftPersistTimer != null &&
+        _composerDraftStagedSessionId != null &&
+        _composerDraftStagedSessionId != normalizedSessionId) {
+      _flushPendingComposerDraftPersistence();
+    } else {
+      _composerDraftPersistTimer?.cancel();
+      _composerDraftPersistTimer = null;
+    }
     _composerDraftStagedSessionId = normalizedSessionId;
+    _composerDraftStagedServerId = _activeServerIdForComposerDraftPersistence(
+      provider,
+    );
     _composerDraftStagedDraft = draft;
     if (draft == null || !draft.hasContent) {
+      // The clear is written immediately; nothing stays staged for a flush.
+      _composerDraftPersistTimer = null;
+      _composerDraftStagedSessionId = null;
+      _composerDraftStagedServerId = null;
+      _composerDraftStagedDraft = null;
       unawaited(
-        (_chatProvider ?? context.read<ChatProvider>())
-            .persistComposerDraftForSession(
-              sessionId: normalizedSessionId,
-              draft: null,
-            ),
+        provider.persistComposerDraftForSession(
+          sessionId: normalizedSessionId,
+          serverId: _activeServerIdForComposerDraftPersistence(provider),
+          draft: null,
+        ),
       );
       return;
     }
+    final stagedServerId = _composerDraftStagedServerId;
     _composerDraftPersistTimer = Timer(const Duration(milliseconds: 250), () {
       _composerDraftPersistTimer = null;
       unawaited(
-        (_chatProvider ?? context.read<ChatProvider>())
-            .persistComposerDraftForSession(
-              sessionId: normalizedSessionId,
-              draft: draft,
-            ),
+        provider.persistComposerDraftForSession(
+          sessionId: normalizedSessionId,
+          serverId: stagedServerId,
+          draft: draft,
+        ),
       );
+      if (_composerDraftStagedSessionId == normalizedSessionId) {
+        _composerDraftStagedSessionId = null;
+        _composerDraftStagedServerId = null;
+        _composerDraftStagedDraft = null;
+      }
     });
   }
 
+  String? _activeServerIdForComposerDraftPersistence(ChatProvider provider) {
+    final activeServerId = provider.activeServerId?.trim();
+    return (activeServerId == null || activeServerId.isEmpty)
+        ? null
+        : activeServerId;
+  }
+
   /// Writes a still-debounced composer draft immediately. Called when the app
-  /// backgrounds or the page disposes before the debounce timer fires;
-  /// without this a process death in that window loses the last keystrokes.
+  /// backgrounds, the page disposes, or another session's draft event
+  /// displaces the pending one; without this the last keystrokes are lost to
+  /// process death or to the debounce window closing.
   void _flushPendingComposerDraftPersistence() {
     final timer = _composerDraftPersistTimer;
     final stagedSessionId = _composerDraftStagedSessionId;
+    final stagedServerId = _composerDraftStagedServerId;
     final stagedDraft = _composerDraftStagedDraft;
     timer?.cancel();
     _composerDraftPersistTimer = null;
     _composerDraftStagedSessionId = null;
+    _composerDraftStagedServerId = null;
     _composerDraftStagedDraft = null;
     if (timer == null ||
         stagedSessionId == null ||
@@ -1478,6 +1514,7 @@ class _ChatPageState extends State<ChatPage>
     unawaited(
       provider.persistComposerDraftForSession(
         sessionId: stagedSessionId,
+        serverId: stagedServerId,
         draft: stagedDraft,
       ),
     );

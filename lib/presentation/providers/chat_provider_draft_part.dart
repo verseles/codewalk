@@ -78,12 +78,17 @@ extension _ChatProviderDraftState on ChatProvider {
   Future<void> _persistComposerDraftForSessionInternal({
     required String sessionId,
     required ChatComposerDraft? draft,
+    String? serverId,
   }) async {
     final normalizedSessionId = sessionId.trim();
     if (normalizedSessionId.isEmpty) {
       return;
     }
-    final serverId = await _resolveServerScopeId();
+    final explicitServerId = serverId?.trim();
+    final effectiveServerId =
+        (explicitServerId == null || explicitServerId.isEmpty)
+        ? await _resolveServerScopeId()
+        : explicitServerId;
     String? payload;
     if (draft != null && draft.hasContent) {
       payload = json.encode(<String, dynamic>{
@@ -114,7 +119,7 @@ extension _ChatProviderDraftState on ChatProvider {
     await localDataSource.saveSessionComposerDraftJson(
       payload,
       sessionId: normalizedSessionId,
-      serverId: serverId,
+      serverId: effectiveServerId,
     );
   }
 
@@ -181,10 +186,12 @@ extension ChatProviderDraftPersistence on ChatProvider {
   Future<void> persistComposerDraftForSession({
     required String sessionId,
     required ChatComposerDraft? draft,
+    String? serverId,
   }) {
     return _persistComposerDraftForSessionInternal(
       sessionId: sessionId,
       draft: draft,
+      serverId: serverId,
     );
   }
 }

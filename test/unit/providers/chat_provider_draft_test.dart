@@ -109,5 +109,41 @@ void main() {
       expect(await storedJson(), isNull);
       await Future<void>.delayed(const Duration(milliseconds: 50));
     });
+
+    test('persists under an explicitly provided server id', () async {
+      final fixtures = await buildDefaultTestFixtures();
+      addTearDown(fixtures.defaultSettingsProvider.dispose);
+      final provider = buildChatProvider(
+        chatRepository: fixtures.chatRepository,
+        appRepository: fixtures.appRepository,
+        localDataSource: fixtures.localDataSource,
+        defaultSettingsProvider: fixtures.defaultSettingsProvider,
+      );
+      addTearDown(provider.dispose);
+
+      // The page captures the active server at staging time so a server
+      // switch during the debounce window cannot re-key the draft.
+      await provider.persistComposerDraftForSession(
+        sessionId: 'ses_1',
+        draft: const ChatComposerDraft(text: 'server pinned'),
+        serverId: 'srv_other',
+      );
+
+      expect(
+        await fixtures.localDataSource.getSessionComposerDraftJson(
+          sessionId: 'ses_1',
+          serverId: 'srv_other',
+        ),
+        isNotNull,
+      );
+      expect(
+        await fixtures.localDataSource.getSessionComposerDraftJson(
+          sessionId: 'ses_1',
+          serverId: 'srv_test',
+        ),
+        isNull,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
   });
 }

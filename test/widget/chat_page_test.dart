@@ -11159,6 +11159,91 @@ void main() {
   );
 
   testWidgets(
+    'keeps a still-debounced draft when switching sessions immediately',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_switch_one',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Switch One',
+          ),
+          ChatSession(
+            id: 'ses_switch_two',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(900),
+            title: 'Switch Two',
+          ),
+        ],
+      );
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(
+        provider.sessions
+          .where((session) => session.id == 'ses_switch_one')
+          .first,
+      );
+      await tester.pumpAndSettle();
+
+      final inputFinder = find.descendant(
+        of: find.byKey(const ValueKey<String>('composer_input_row')),
+        matching: find.byType(TextField),
+      );
+
+      // Type and switch within the debounce window: the outgoing session's
+      // draft must be flushed under its own identity, not cancelled.
+      await tester.enterText(inputFinder, 'rapid draft for switch one');
+      await tester.pump();
+      await provider.selectSession(
+        provider.sessions
+          .where((session) => session.id == 'ses_switch_two')
+          .first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(inputFinder).controller?.text ?? '',
+        isEmpty,
+      );
+
+      final stored = await localDataSource.getSessionComposerDraftJson(
+        sessionId: 'ses_switch_one',
+        serverId: 'srv_test',
+      );
+      expect(stored, isNotNull);
+      expect(
+        (jsonDecode(stored!) as Map<String, dynamic>)['text'],
+        'rapid draft for switch one',
+      );
+
+      await provider.selectSession(
+        provider.sessions
+          .where((session) => session.id == 'ses_switch_one')
+          .first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(inputFinder).controller?.text,
+        'rapid draft for switch one',
+      );
+    },
+  );
+
+  testWidgets(
     'keeps permission manual when composer auto-approve is persisted off',
     (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 900));
