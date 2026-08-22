@@ -179,6 +179,8 @@ Use realtime streams as the primary sync mechanism, automatically enter degraded
 
 **Note** (2026-08-17): Foreground reconciliation is now coalesced and visible-state-preserving. Android-only forced resume handles the mobile short-hold case; standard data-saver reconciliation skips stale last-session snapshot hydration; and disposal guards prevent subscription recreation. No OpenCode protocol or SSE contract semantics changed, and no ADR-023 exception is required.
 
+**Note** (2026-08-21): Android background lifecycle boundary — see ADR-017's anti-regression rule: while background alerts are enabled, `CodeWalkForegroundService` must keep running during backgrounding so the process retains foreground-service priority; paused mode and mobile-hold expiry re-run `_applyForegroundPolicy` instead of unconditionally disabling the monitor.
+
 ### Key Files
 
 - `lib/presentation/providers/chat_provider.dart`
@@ -683,7 +685,7 @@ Enforce runtime usage through platform services: Android notifications use `@dra
 
 ---
 
-## ADR-016: Hybrid File-Backed Cache for Large Chat Payloads (2026-02-20, updated 2026-08-17)
+## ADR-016: Hybrid File-Backed Cache for Large Chat Payloads (2026-02-20, updated 2026-08-21)
 
 **Status**: Accepted
 
@@ -709,6 +711,10 @@ Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, w
 6. **Guard hot-path metadata writes (issue #152)** — `AppLocalDataSource` routes `setString`, `setInt`, `setBool`, and `remove` through `_GuardedSharedPreferences`. Equality/existence checks return before calling the plugin for no-op operations. Any new metadata persistence must use the same guard or an equivalent guard at its storage boundary.
 7. **Coalesce bursty metadata with explicit ordering** — session-tab state remains server-scoped under `session_tabs_state::<serverId>`. `ChatProvider` uses a trailing 750 ms debounce with latest-wins pending payloads, serializes writes per server, explicitly flushes before awaited tab-load/context-cleanup paths, and drains pending state into the write queue during provider disposal. Any future debounced metadata persistence must preserve equivalent flush and ordering guarantees.
 8. **Keep write instrumentation opt-in and lazy** — the `shared_preferences_write` performance task is invoked through `AppLogger.runPerformanceTask`, and UTF-8 byte sizing is evaluated only while performance logging is enabled.
+9. **Lifecycle boundaries must flush coalesced state** — pending debounced payloads are dequeued and enqueued when the app backgrounds (`flushAllSessionTabsPersistence` from `didChangeAppLifecycleState`). Enqueue-all precedes awaiting completion so one slow server write cannot expose other servers' state to process death.
+10. **Retried writes require ordering guards** — failed coalesced writes are re-staged only under a per-server generation guard (retry allowed solely when no newer payload was staged or queued), preventing a stale retry from overwriting newer persisted state; completed queue entries are removed under an identity check.
+
+**Update** (2026-08-21, commits `249eea77..8e0f6140`, v1.213.0): Rules 9–10 harden debounced session-tab persistence against process death on backgrounding (rule 9) and stale-retry overwrites of newer persisted state (rule 10).
 
 This is an addendum to ADR-016, which owns the local persistence boundary. ADR-020 remains the related session-level SWR consumer of these helpers; it does not need a duplicate decision or a new ADR.
 
@@ -722,6 +728,8 @@ This is an addendum to ADR-016, which owns the local persistence boundary. ADR-0
 - Generic equality/existence guards prevent redundant whole-preferences-file rewrites on hot paths without changing the public local-data-source contract.
 - Trailing latest-wins coalescing bounds burst cost while per-server queues and explicit flushes prevent a delayed write from being overtaken by an awaited read or cleanup operation.
 - Lazy, opt-in instrumentation preserves the diagnostic signal when requested without computing payload sizes or creating performance-task overhead when logging is disabled.
+- Lifecycle-boundary flushes ensure coalesced state survives process death: enqueue-all before awaiting keeps per-server write latency from serializing exposure of other servers' persisted state.
+- Generation-guarded retries prevent a stale failed write from overwriting newer persisted state, preserving latest-wins semantics across failure paths.
 - Keeping this rule in ADR-016 avoids duplicating the persistence boundary in ADR-020 or creating a separate ADR for an implementation constraint that applies to the same storage decision.
 
 ### Consequences
@@ -732,6 +740,7 @@ This is an addendum to ADR-016, which owns the local persistence boundary. ADR-0
 - ✅ Web/test configurations without a file store keep the existing SharedPreferences fallback semantics.
 - ✅ No-op SharedPreferences metadata writes are skipped, and bursty session-tab updates are coalesced without losing the latest server-scoped state.
 - ✅ Explicit flushes and per-server ordering preserve persistence visibility across awaited load/cleanup paths; provider disposal drains pending state into the same ordered write queue.
+- ✅ App-backgrounding flushes coalesced session-tab state before process death can drop it, and generation-guarded retries prevent stale writes from overwriting newer persisted state (2026-08-21 hardening).
 - ✅ The change is client-local persistence only: it does not change the OpenCode wire protocol, server event semantics, documented visual behavior, or ADR-023 compatibility.
 - ⚠ Debouncing intentionally delays ordinary session-tab persistence by up to 750 ms; lifecycle boundaries must flush before relying on the durable value.
 - ⚠ Future metadata persistence must use the guarded/coalesced boundary rather than introducing an unguarded direct SharedPreferences hot path.
@@ -754,7 +763,7 @@ This is an addendum to ADR-016, which owns the local persistence boundary. ADR-0
 
 ---
 
-## ADR-017: Android Foreground Service for Reliable Background Monitoring (2026-02-20)
+## ADR-017: Android Foreground Service for Reliable Background Monitoring (2026-02-20, updated 2026-08-21)
 
 **Status**: Accepted
 
@@ -765,6 +774,16 @@ Android aggressively kills background processes and restricts background executi
 ### Decision
 
 Implement a native Kotlin foreground service (`CodeWalkForegroundService`) with `START_STICKY` restart policy, bridged to Dart via `MethodChannel('codewalk/system')`. The Dart-side orchestrator (`AndroidForegroundMonitorService`) provides idempotent `sync()` calls that always invoke the native bridge without count-based deduplication, ensuring the service is restarted if Android killed it while Dart statics were stale. The service uses a dedicated low-priority notification channel (`codewalk_background_monitor_v2`, `IMPORTANCE_MIN`) for the persistent monitoring notification, separate from the alert notification channel which uses default importance for audible alerts.
+
+**Update** (2026-08-21, commits `249eea77..8e0f6140`, v1.213.0) — anti-regression boundary: v1.199–v1.212 shipped a regression where the app stopped `CodeWalkForegroundService` on backgrounding (immediately in paused mode, or after the 3-minute mobile-hold expired). Without the FGS the process became a cached process and aggressive Android/OEM process management killed it within seconds-to-minutes; users saw the app restart from scratch every time they switched windows and returned.
+
+**Rule (anti-regression boundary)**: While Android background alerts are enabled and the app is backgrounded, the foreground monitor service MUST keep running so the process retains foreground-service priority. Do not stop the FGS as a battery optimization while alerts are enabled. Paused mode and mobile-hold expiry must re-run the foreground policy (`_applyForegroundPolicy`) instead of unconditionally disabling the monitor; the policy decides enabled/disabled from `shouldRunAndroidBackgroundAlerts`. The service stops only when:
+
+- The app returns to foreground (mode = active).
+- Background alerts are disabled (`_syncAndroidBackgroundAlertRuntime`).
+- Cellular Data Saver disables background network.
+
+The persistent `IMPORTANCE_MIN` notification staying visible during backgrounding with alerts enabled is intentional, documented UX (see BEHAVIOR.md), not a bug.
 
 ### Rationale
 
@@ -779,15 +798,19 @@ Implement a native Kotlin foreground service (`CodeWalkForegroundService`) with 
 - ✅ Background monitoring survives Android process management via `START_STICKY`.
 - ✅ Idempotent sync prevents stale-state gaps between Dart and native service lifecycle.
 - ✅ Silent monitor notification with separate alert channel preserves notification UX quality.
+- ✅ Foreground policy (`_applyForegroundPolicy`) keeps the FGS alive while background alerts are enabled, preserving foreground-service priority against OEM process management (2026-08-21 anti-regression rule).
 - ⚠ Requires maintaining native Kotlin code alongside the Dart implementation.
 - ⚠ `START_STICKY` restart is not guaranteed on all OEM Android variants with aggressive battery optimization.
-- ❌ The foreground notification is mandatory while monitoring is active (Android OS requirement).
+- ⚠ Lifecycle changes (paused mode, mobile-hold expiry) must route through the foreground policy, never unconditionally stop the monitor — see the anti-regression boundary in Decision.
+- ❌ The foreground notification is mandatory while monitoring is active (Android OS requirement); it remains visible while backgrounding with alerts enabled by design (documented in BEHAVIOR.md).
 
 ### Key Files
 
 - `android/app/src/main/kotlin/com/verseles/codewalk/CodeWalkForegroundService.kt`
 - `lib/presentation/services/android_foreground_monitor_service.dart`
 - `lib/presentation/services/android_background_alert_worker.dart`
+- `lib/presentation/pages/chat_page/chat_page_lifecycle.dart`
+- `lib/presentation/providers/settings_provider.dart`
 
 ---
 
