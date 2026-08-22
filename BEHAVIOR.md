@@ -840,6 +840,24 @@
 - **Then** the app loads older message batches incrementally
 - **Then** the viewport anchor is restored after prepend so reading position stays stable (no sudden jump)
 
+### Session history opens with a bounded initial window (issue #160)
+
+- **Given** any session of arbitrary length
+- **When** the session is opened without cached visible state
+- **Then** only a sentinel probe of the newest ~50 messages is fetched and exposed, so very long sessions never download their full history on open
+- **Then** the probe's extra message proves whether older history exists, so `hasMoreOldMessages` is exact for sessions at or below the window without a second roundtrip
+- **When** older history is requested at top reach or via jump-to-first
+- **Then** each request carries a one-message sentinel and only the slice strictly older than the oldest resident message is applied — the overlapping tail already loaded is never re-processed
+- **Then** if the oldest anchor vanished server-side (deletion/reorder), the page falls back to the full reconciliation merge instead of prepending unanchored data
+- **When** background SWR revalidation runs for a warm session
+- **Then** it still fetches the documented delta tail (200) first and merges non-regressively, which may top the resident window up to that tail; deeper history remains behind pagination
+- **When** an unbounded correctness-recovery fetch completes
+- **Then** at most the newest 500 messages are committed and `hasMoreOldMessages` becomes true when anything was dropped
+- **When** session messages are written to the LRU cache or persisted snapshots
+- **Then** only the newest initial window (~50) plus pending optimistic messages is stored; restoring legacy oversized snapshots bounds them to the same window on read
+- **When** jump-to-first lands on the oldest resident message while older history remains archived
+- **Then** exactly one older chunk is pulled and the view settles on the newly loaded top without recursively paging through the whole session
+
 ---
 
 ## Chat
