@@ -365,6 +365,42 @@ void main() {
     );
 
     test(
+      'stop during probing cancels the request and prevents acceptance',
+      () async {
+        await writeExecutable('parecord');
+        await writeExecutable('pw-record');
+        final calls = <_StartedCall>[];
+        final silentForever = _FakeProcess(); // never emits, never exits
+        final working = _FakeProcess()..emit([21]);
+        final capture = buildCapture(
+          processes: [silentForever, working],
+          calls: calls,
+          handshakeTimeout: const Duration(milliseconds: 60),
+        );
+
+        final pending = capture.startPcmStream();
+        // Cancel while the first candidate is still inside its handshake
+        // window; the probe must never publish or spawn afterwards.
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await capture.stop();
+
+        await expectLater(
+          pending,
+          throwsA(
+            isA<LinuxMicrophoneCaptureException>().having(
+              (error) => error.code,
+              'code',
+              'captureFailed',
+            ),
+          ),
+        );
+        expect(calls, hasLength(1));
+        expect(silentForever.killCount, greaterThanOrEqualTo(1));
+        expect(working.killCount, 0);
+      },
+    );
+
+    test(
       'stop kills the active capture exactly once and ends the stream',
       () async {
         await writeExecutable('parecord');

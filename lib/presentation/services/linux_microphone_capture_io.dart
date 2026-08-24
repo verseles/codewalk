@@ -43,8 +43,12 @@ class LinuxMicrophoneCapture implements LinuxMicrophoneCaptureService {
   final Duration _handshakeTimeout;
   final int _stderrTailLimit;
 
-  // Only one capture session may be active per instance.
+  // Only one capture session may be active per instance. The generation
+  // counter lets stop() cancel a startPcmStream call that is still probing
+  // candidates, so a backend accepted afterwards is killed instead of being
+  // published to nobody (orphaned process holding the microphone).
   _LinuxCaptureSession? _activeSession;
+  int _generation = 0;
 
   String get _pathEnv => _pathEnvOverride ?? Platform.environment['PATH'] ?? '';
 
@@ -62,6 +66,7 @@ class LinuxMicrophoneCapture implements LinuxMicrophoneCaptureService {
     int sampleRate = 16000,
     int numChannels = 1,
   }) async {
+    final requestGeneration = _generation;
     final candidates = _resolveCandidates();
     if (candidates.isEmpty) {
       throw const LinuxMicrophoneCaptureException(
@@ -73,7 +78,7 @@ class LinuxMicrophoneCapture implements LinuxMicrophoneCaptureService {
 
     _PreAudioFailure? lastFailure;
     for (final candidate in candidates) {
-      if (_activeSession != null) {
+      if (_generation != requestGeneration || _activeSession != null) {
         break;
       }
       final (backend, executable) = candidate;
@@ -114,6 +119,12 @@ class LinuxMicrophoneCapture implements LinuxMicrophoneCaptureService {
         await session.kill();
         throw const LinuxMicrophoneCaptureException(code: 'captureFailed');
       }
+      if (_generation != requestGeneration) {
+        // stop() superseded this request mid-probe; never publish the
+        // freshly accepted session.
+        await session.kill();
+        throw const LinuxMicrophoneCaptureException(code: 'captureFailed');
+      }
       if (timedOut || firstByte is! Uint8List) {
         lastFailure = timedOut
             ? _PreAudioFailure(
@@ -148,6 +159,9 @@ class LinuxMicrophoneCapture implements LinuxMicrophoneCaptureService {
 
   @override
   Future<void> stop() async {
+    // Bump first so an in-flight startPcmStream probe observes the cancel and
+    // never publishes a session after this call resolves.
+    _generation += 1;
     final session = _activeSession;
     _activeSession = null;
     await session?.kill();
