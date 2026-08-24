@@ -1553,6 +1553,8 @@
   "speechMicBackendUnavailable": "Il backend del microfono di Windows non è disponibile in questa build.",
   "speechMicDeviceBusy": "Il microfono predefinito è in uso da un''altra app.",
   "speechMicNoInputDevice": "Nessun dispositivo di ingresso microfono disponibile.",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicPermissionDisabled": "L''autorizzazione del microfono è disabilitata.",
   "speechMicSpeechPrivacy": "I servizi vocali di Windows potrebbero essere disabilitati (privacy vocale, riconoscimento vocale online o pacchetti di lingua).",
   "speechMicUnsupportedFormat": "Il formato del microfono predefinito non è supportato.",

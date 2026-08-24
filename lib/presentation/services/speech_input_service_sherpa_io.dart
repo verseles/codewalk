@@ -173,7 +173,10 @@ class SherpaSpeechInputService implements SpeechInputService {
     if (!hasPermission) {
       _capture = null;
       _applyCaptureFailure(
-        speechAudioCaptureFailureInfoForStatus(capture.lastWindowsAccessStatus),
+        capture.lastFailureInfo ??
+            speechAudioCaptureFailureInfoForStatus(
+              capture.lastWindowsAccessStatus,
+            ),
       );
       onError();
       return;

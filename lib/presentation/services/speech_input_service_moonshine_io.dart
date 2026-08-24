@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
 
@@ -157,7 +155,10 @@ class MoonshineSpeechInputService implements SpeechInputService {
     if (!hasPermission) {
       _capture = null;
       _applyCaptureFailure(
-        speechAudioCaptureFailureInfoForStatus(capture.lastWindowsAccessStatus),
+        capture.lastFailureInfo ??
+            speechAudioCaptureFailureInfoForStatus(
+              capture.lastWindowsAccessStatus,
+            ),
       );
       onError();
       return;

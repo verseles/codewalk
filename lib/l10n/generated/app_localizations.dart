@@ -10645,6 +10645,18 @@ abstract class AppLocalizations {
   /// **'No microphone input device is available.'**
   String get speechMicNoInputDevice;
 
+  /// CodeWalk UI string — speechLinuxAudioServerUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.'**
+  String get speechLinuxAudioServerUnavailable;
+
+  /// CodeWalk UI string — speechLinuxMicBackendMissing
+  ///
+  /// In en, this message translates to:
+  /// **'No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.'**
+  String get speechLinuxMicBackendMissing;
+
   /// CodeWalk UI string — speechMicDeviceBusy
   ///
   /// In en, this message translates to:

@@ -1611,6 +1611,8 @@
   "speechMicBackendUnavailable": "ونڈوز مائیکروفون بیک اینڈ اس بلڈ میں دستیاب نہیں ہے۔",
   "speechMicDeviceBusy": "ڈیفالٹ مائیکروفون فی الحال کسی دوسری ایپ استعمال میں ہے۔",
   "speechMicNoInputDevice": "کوئی مائیکروفون ان پٹ ڈیوائس دستیاب نہیں ہے۔",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicPermissionDisabled": "مائیکروفون کی اجازت غیر فعال ہے۔",
   "speechMicSpeechPrivacy": "ونڈوز اسپیچ سروسز غیر فعال ہو سکتی ہیں (اسپیچ پرائیویسی، آن لائن اسپیچ ریکگنیشن، یا لینگویج پیک)۔",
   "speechMicUnsupportedFormat": "ڈیفالٹ مائیکروفون فارمیٹ تعاون یافتہ نہیں ہے۔",

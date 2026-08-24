@@ -7980,6 +7980,14 @@
   "@speechMicNoInputDevice": {
     "description": "CodeWalk UI string — speechMicNoInputDevice"
   },
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "@speechLinuxAudioServerUnavailable": {
+    "description": "CodeWalk UI string — speechLinuxAudioServerUnavailable"
+  },
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
+  "@speechLinuxMicBackendMissing": {
+    "description": "CodeWalk UI string — speechLinuxMicBackendMissing"
+  },
   "speechMicDeviceBusy": "The default microphone is currently in use by another app.",
   "@speechMicDeviceBusy": {
     "description": "CodeWalk UI string — speechMicDeviceBusy"

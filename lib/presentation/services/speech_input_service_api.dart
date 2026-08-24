@@ -106,9 +106,11 @@ class ApiSpeechInputService implements SpeechInputService {
       return _fail('A speech API key is required.', 'apiKeyMissing');
     }
     if (!await _audioCapture.hasPermission()) {
-      final failure = speechAudioCaptureFailureInfoForStatus(
-        _audioCapture.lastWindowsAccessStatus,
-      );
+      final failure =
+          _audioCapture.lastFailureInfo ??
+          speechAudioCaptureFailureInfoForStatus(
+            _audioCapture.lastWindowsAccessStatus,
+          );
       return _fail(
         failure.reason ?? 'Microphone permission is disabled.',
         failure.reasonKey ?? 'microphoneDenied',

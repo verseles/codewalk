@@ -5936,6 +5936,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get speechMicNoInputDevice => 'マイク入力デバイスがありません。';
 
   @override
+  String get speechLinuxAudioServerUnavailable =>
+      'A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.';
+
+  @override
+  String get speechLinuxMicBackendMissing =>
+      'No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.';
+
+  @override
   String get speechMicDeviceBusy => 'デフォルトのマイクは別のアプリで使用中です。';
 
   @override

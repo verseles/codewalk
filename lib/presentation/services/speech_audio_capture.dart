@@ -1,33 +1,49 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:record/record.dart';
 
+import 'linux_microphone_capture.dart';
+import 'linux_microphone_capture_types.dart';
 import 'windows_microphone_service.dart';
 
 // Audio capture abstraction for the on-device STT engines.
 //
 // On Windows the legacy `record` plugin (record_windows 1.0.7) can crash the
 // host process with a MediaFoundation segfault (llfbandit/record#453), so this
-// wrapper uses CodeWalk's runner-owned WASAPI bridge there. Other platforms keep
-// using [AudioRecorder]. The wrapper owns the recorder lifecycle for the
-// duration of a single session so [startPcmStream] and [stop] always reference
-// the same instance.
+// wrapper uses CodeWalk's runner-owned WASAPI bridge there. On Linux the
+// record_linux plugin shells out to an external `parecord` binary and fails
+// with a raw ProcessException when it is missing (issue #158), so this wrapper
+// routes Linux through CodeWalk's process-backed multi-backend capture
+// (parecord -> pw-record -> arecord). Other platforms keep using
+// [AudioRecorder]. The wrapper owns the recorder lifecycle for the duration of
+// a single session so [startPcmStream] and [stop] always reference the same
+// instance.
 class SpeechAudioCapture {
-  SpeechAudioCapture({WindowsMicrophoneService? windowsMicrophoneService})
-    : _windowsMicrophoneService =
-          windowsMicrophoneService ?? const WindowsMicrophoneService();
+  SpeechAudioCapture({
+    WindowsMicrophoneService? windowsMicrophoneService,
+    LinuxMicrophoneCaptureService? linuxMicrophoneCapture,
+  }) : _windowsMicrophoneService =
+           windowsMicrophoneService ?? const WindowsMicrophoneService(),
+       _linuxMicrophoneCapture =
+           linuxMicrophoneCapture ?? LinuxMicrophoneCapture();
 
   final WindowsMicrophoneService _windowsMicrophoneService;
+  final LinuxMicrophoneCaptureService _linuxMicrophoneCapture;
 
   // On non-Windows, the wrapper owns the AudioRecorder for the duration of
   // a single capture session.
   AudioRecorder? _activeRecorder;
   WindowsMicrophoneAccessStatus? _lastWindowsAccessStatus;
+  SpeechAudioCaptureFailureInfo? _lastFailureInfo;
 
   WindowsMicrophoneAccessStatus? get lastWindowsAccessStatus =>
       _lastWindowsAccessStatus;
+
+  // Typed failure info for the most recent capture attempt on platforms that
+  // bypass AudioRecorder (Linux). Null unless that attempt failed, so callers
+  // can prefer it over the Windows-only status mapping.
+  SpeechAudioCaptureFailureInfo? get lastFailureInfo => _lastFailureInfo;
 
   bool get isWindowsTarget {
     if (kIsWeb) {
@@ -36,13 +52,38 @@ class SpeechAudioCapture {
     return defaultTargetPlatform == TargetPlatform.windows;
   }
 
+  bool get isLinuxTarget {
+    if (kIsWeb) {
+      return false;
+    }
+    return defaultTargetPlatform == TargetPlatform.linux;
+  }
+
   Future<bool> hasPermission() async {
     if (isWindowsTarget) {
       final status = await _windowsMicrophoneService.probe();
       _lastWindowsAccessStatus = status;
+      _lastFailureInfo = null;
       return status == WindowsMicrophoneAccessStatus.allowed;
     }
+    if (isLinuxTarget) {
+      final status = await _linuxMicrophoneCapture.probe();
+      if (status == LinuxMicrophoneProbeStatus.ready) {
+        _lastFailureInfo = null;
+        return true;
+      }
+      // No usable capture tool was found on PATH; surface the install hint
+      // instead of pretending permission was denied.
+      _lastFailureInfo = const SpeechAudioCaptureFailureInfo(
+        reason:
+            'No Linux audio capture tool was found (parecord, pw-record or '
+            'arecord).',
+        reasonKey: 'linuxMicBackendMissing',
+      );
+      return false;
+    }
     _lastWindowsAccessStatus = null;
+    _lastFailureInfo = null;
     final recorder = AudioRecorder();
     try {
       return await recorder.hasPermission();
@@ -70,6 +111,20 @@ class SpeechAudioCapture {
         );
       }
       return _windowsMicrophoneService.pcmStream();
+    }
+    if (isLinuxTarget) {
+      try {
+        return await _linuxMicrophoneCapture.startPcmStream(
+          sampleRate: sampleRate,
+          numChannels: numChannels,
+        );
+      } on LinuxMicrophoneCaptureException catch (error) {
+        _lastFailureInfo = speechAudioCaptureFailureInfoForError(error);
+        rethrow;
+      } catch (error) {
+        _lastFailureInfo = speechAudioCaptureFailureInfoForError(error);
+        rethrow;
+      }
     }
     final recorder = AudioRecorder();
     _activeRecorder = recorder;
@@ -103,6 +158,10 @@ class SpeechAudioCapture {
   Future<void> stop() async {
     if (isWindowsTarget) {
       await _windowsMicrophoneService.stopStream();
+      return;
+    }
+    if (isLinuxTarget) {
+      await _linuxMicrophoneCapture.stop();
       return;
     }
     final recorder = _activeRecorder;
@@ -209,8 +268,43 @@ SpeechAudioCaptureFailureInfo speechAudioCaptureFailureInfoForError(
         );
     }
   }
+  if (error is LinuxMicrophoneCaptureException) {
+    switch (error.code) {
+      case 'backendMissing':
+        return const SpeechAudioCaptureFailureInfo(
+          reason:
+              'No microphone recording tool was found on this system. Install '
+              'PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA '
+              'utilities (arecord), then try again.',
+          reasonKey: 'linuxMicBackendMissing',
+        );
+      case 'audioServerUnavailable':
+        return const SpeechAudioCaptureFailureInfo(
+          reason:
+              'A microphone tool was found, but the Linux audio server could '
+              'not be reached. Make sure PipeWire or PulseAudio is running.',
+          reasonKey: 'linuxAudioServerUnavailable',
+        );
+      case 'denied':
+        return const SpeechAudioCaptureFailureInfo(
+          reason: 'Microphone access was denied by the system.',
+          reasonKey: 'microphoneDenied',
+        );
+      case 'deviceBusy':
+        return speechAudioCaptureFailureInfoForStatus(
+          WindowsMicrophoneAccessStatus.deviceBusy,
+        );
+      case 'noInputDevice':
+        return speechAudioCaptureFailureInfoForStatus(
+          WindowsMicrophoneAccessStatus.noInputDevice,
+        );
+      case 'captureFailed':
+      default:
+        break;
+    }
+  }
   return const SpeechAudioCaptureFailureInfo(
-    reason: 'Windows microphone capture failed.',
+    reason: 'Microphone capture failed.',
     reasonKey: 'generic',
   );
 }

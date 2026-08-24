@@ -6182,6 +6182,14 @@ class AppLocalizationsBn extends AppLocalizations {
       'কোনো মাইক্রোফোন ইনপুট ডিভাইস উপলব্ধ নেই।';
 
   @override
+  String get speechLinuxAudioServerUnavailable =>
+      'A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.';
+
+  @override
+  String get speechLinuxMicBackendMissing =>
+      'No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.';
+
+  @override
   String get speechMicDeviceBusy =>
       'ডিফল্ট মাইক্রোফোনটি বর্তমানে অন্য একটি অ্যাপ ব্যবহার করছে।';
 

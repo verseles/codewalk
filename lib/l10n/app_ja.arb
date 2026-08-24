@@ -1756,6 +1756,8 @@
   "settingsBehaviorConfigFieldConversationUsername": "会話用ユーザー名",
   "settingsBehaviorConfigFieldSharingDefault": "共有デフォルト",
   "speechMicNoInputDevice": "マイク入力デバイスがありません。",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicDeviceBusy": "デフォルトのマイクは別のアプリで使用中です。",
   "speechMicUnsupportedFormat": "デフォルトのマイク形式がサポートされていません。",
   "speechMicSpeechPrivacy": "Windows の音声サービスが無効になっている可能性があります（音声プライバシー、オンライン音声認識、または言語パック）。",

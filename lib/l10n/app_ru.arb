@@ -1460,6 +1460,8 @@
   "speechMicBackendUnavailable": "Бэкенд микрофона Windows недоступен в этой сборке.",
   "speechMicDeviceBusy": "Микрофон по умолчанию сейчас используется другим приложением.",
   "speechMicNoInputDevice": "Устройство ввода микрофона недоступно.",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicPermissionDisabled": "Разрешение на использование микрофона отключено.",
   "speechMicSpeechPrivacy": "Возможно, отключены службы речи Windows (конфиденциальность речи, онлайн-распознавание речи или языковые пакеты).",
   "speechMicUnsupportedFormat": "Формат микрофона по умолчанию не поддерживается.",

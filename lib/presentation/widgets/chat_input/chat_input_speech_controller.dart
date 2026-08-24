@@ -145,6 +145,8 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       'noInputDevice' => l10n.speechMicNoInputDevice,
       'deviceBusy' => l10n.speechMicDeviceBusy,
       'unsupportedFormat' => l10n.speechMicUnsupportedFormat,
+      'linuxMicBackendMissing' => l10n.speechLinuxMicBackendMissing,
+      'linuxAudioServerUnavailable' => l10n.speechLinuxAudioServerUnavailable,
       'speechPrivacy' => l10n.speechMicSpeechPrivacy,
       'backendUnavailable' => l10n.speechMicBackendUnavailable,
       'apiConfigInvalid' => l10n.speechApiConfigInvalid,

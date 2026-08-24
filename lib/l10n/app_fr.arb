@@ -1974,6 +1974,8 @@
   "speechMicBackendUnavailable": "Le backend microphone de Windows n''est pas disponible dans cette version.",
   "speechMicDeviceBusy": "Le microphone par défaut est actuellement utilisé par une autre application.",
   "speechMicNoInputDevice": "Aucun périphérique d''entrée microphone n''est disponible.",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicSpeechPrivacy": "Les services de reconnaissance vocale de Windows peuvent être désactivés (confidentialité vocale, reconnaissance vocale en ligne ou packs de langues).",
   "speechMicUnsupportedFormat": "Le format du microphone par défaut n''est pas pris en charge.",
   "speechProviderEmptyAudio": "Le fournisseur TTS a renvoyé une réponse audio vide.",

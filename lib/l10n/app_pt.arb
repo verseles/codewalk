@@ -1756,6 +1756,8 @@
   "settingsBehaviorConfigFieldConversationUsername": "nome de usuário da conversa",
   "settingsBehaviorConfigFieldSharingDefault": "padrão de compartilhamento",
   "speechMicNoInputDevice": "Nenhum dispositivo de entrada de microfone está disponível.",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicDeviceBusy": "O microfone padrão está em uso por outro aplicativo no momento.",
   "speechMicUnsupportedFormat": "O formato do microfone padrão não é suportado.",
   "speechMicSpeechPrivacy": "Os serviços de fala do Windows podem estar desativados (privacidade de fala, reconhecimento de fala online ou pacotes de idiomas).",

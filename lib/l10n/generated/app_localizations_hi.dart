@@ -6181,6 +6181,14 @@ class AppLocalizationsHi extends AppLocalizations {
       'कोई माइक्रोफ़ोन इनपुट डिवाइस उपलब्ध नहीं है।';
 
   @override
+  String get speechLinuxAudioServerUnavailable =>
+      'A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.';
+
+  @override
+  String get speechLinuxMicBackendMissing =>
+      'No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.';
+
+  @override
   String get speechMicDeviceBusy =>
       'डिफ़ॉल्ट माइक्रोफ़ोन वर्तमान में किसी अन्य ऐप द्वारा उपयोग में है।';
 

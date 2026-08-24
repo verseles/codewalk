@@ -1756,6 +1756,8 @@
   "settingsBehaviorConfigFieldConversationUsername": "बातचीत उपयोगकर्ता नाम",
   "settingsBehaviorConfigFieldSharingDefault": "साझाकरण डिफ़ॉल्ट",
   "speechMicNoInputDevice": "कोई माइक्रोफ़ोन इनपुट डिवाइस उपलब्ध नहीं है।",
+  "speechLinuxAudioServerUnavailable": "A microphone tool was found, but the Linux audio server could not be reached. Make sure PipeWire or PulseAudio is running.",
+  "speechLinuxMicBackendMissing": "No microphone recording tool was found on this system. Install PulseAudio tools (parecord), PipeWire tools (pw-record) or ALSA utilities (arecord), then try again.",
   "speechMicDeviceBusy": "डिफ़ॉल्ट माइक्रोफ़ोन वर्तमान में किसी अन्य ऐप द्वारा उपयोग में है।",
   "speechMicUnsupportedFormat": "डिफ़ॉल्ट माइक्रोफ़ोन प्रारूप समर्थित नहीं है।",
   "speechMicSpeechPrivacy": "Windows स्पीच सेवाएँ अक्षम हो सकती हैं (स्पीच प्राइवेसी, ऑनलाइन स्पीच रिकग्निशन, या भाषा पैक)।",
