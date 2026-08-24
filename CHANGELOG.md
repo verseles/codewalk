@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.215.1 - 2026-08-24
+
+- fix(speech): cancel in-flight Linux mic probing when stop() arrives
+- fix(speech): add multi-backend Linux microphone capture for STT
+
 ## v1.215.0 - 2026-08-22
 
 - docs(chat): document bounded history window behavior and ADR-020 refinement (#160)
