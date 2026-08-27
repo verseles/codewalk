@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.216.0 - 2026-08-27
+
+- fix(settings): ensure final dispose drain and flush awaits in-flight encode (review #161)
+- fix(review): address reviewer findings for #161 (dispose, cross-scope flush, isolate)
+- perf(desktop): coalesce persistence and offload encode to fix jank (fixes #161)
+
 ## v1.215.1 - 2026-08-24
 
 - fix(speech): cancel in-flight Linux mic probing when stop() arrives
