@@ -974,6 +974,10 @@ class _ChatPageState extends State<ChatPage>
   void onWindowMinimize() {
     _isAppInForeground = false;
     _flushActiveFileEditorDrafts();
+    unawaited(_chatProvider?.flushAllSessionTabsPersistence());
+    unawaited(_chatProvider?.flushSelectionPersistence());
+    unawaited(_settingsProvider?.flushSettingsPersistence());
+    unawaited(_projectProvider?.flushProjectStatePersistence());
     _chatProvider?.setAppInForeground(false);
     unawaited(_applyForegroundPolicy(reason: 'window-minimize'));
   }

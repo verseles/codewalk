@@ -7,6 +7,11 @@ extension _ChatProviderSessionOps on ChatProvider {
     String? newlyOpenedDirectory,
   }) async {
     titleGenerator?.cancelPendingWaiters();
+    // Flush any pending debounced selection persistence for the old
+    // context before switching, otherwise the timer could capture the
+    // new context's server/scope and persist stale data under the
+    // wrong key (issue #161).
+    await flushSelectionPersistence();
     final useFastProjectTransition =
         reason == 'project' && !waitForRevalidation;
     _storeCurrentContextSnapshot();

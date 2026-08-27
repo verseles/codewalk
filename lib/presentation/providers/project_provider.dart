@@ -110,6 +110,14 @@ class ProjectProvider extends ChangeNotifier {
       return;
     }
 
+    // Flush any pending debounced project state for the current server
+    // before switching server or reloading, otherwise the timer could
+    // capture the new server's (or partially cleared) state under the
+    // wrong key (issue #161).
+    if (_hasPendingProjectPersist) {
+      await flushProjectStatePersistence();
+    }
+
     _setStatus(ProjectStatus.loading);
 
     try {
@@ -1311,6 +1319,38 @@ class ProjectProvider extends ChangeNotifier {
   @visibleForTesting
   Future<void> debugWaitForProjectStatePersistence() {
     return flushProjectStatePersistence();
+  }
+
+  @override
+  void dispose() {
+    _projectStateDebounce?.cancel();
+    _projectStateDebounce = null;
+    if (_hasPendingProjectPersist) {
+      _hasPendingProjectPersist = false;
+      final snapshot = _captureProjectStatePersistenceSnapshot();
+      final previous = _projectStatePersistenceQueue;
+      final operation = previous
+          .catchError((Object error, StackTrace stackTrace) {
+            AppLogger.warn(
+              'Previous project state persistence failed',
+              error: error,
+              stackTrace: stackTrace,
+            );
+          })
+          .then((_) => _persistProjectStateSnapshot(snapshot));
+      _projectStatePersistenceQueue = operation.catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        AppLogger.warn(
+          'Failed to persist project state in background',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      });
+      // Best-effort drain without awaiting in dispose.
+    }
+    super.dispose();
   }
 
   void _setStatus(ProjectStatus status) {

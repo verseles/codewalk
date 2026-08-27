@@ -1902,6 +1902,11 @@ class SettingsProvider extends ChangeNotifier {
       // For small payloads the isolate spawn cost exceeds the encode cost.
       final jsonMap = _settings.toJson();
       final encoded = await _encodeSettingsJson(jsonMap);
+      if (_settingsPersistDisposed ||
+          generation != _settingsPersistGeneration) {
+        task.end(status: 'error', error: StateError('superseded'));
+        return;
+      }
       await _enqueueSettingsPersistOperation(
         () => _localDataSource.saveExperienceSettingsJson(encoded),
       );
@@ -2381,15 +2386,16 @@ class SettingsProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _settingsPersistDisposed = true;
     _settingsPersistDebounce?.cancel();
     _settingsPersistDebounce = null;
     if (_hasPendingSettingsPersist) {
       _hasPendingSettingsPersist = false;
       final generation = _settingsPersistGeneration;
       // Drain pending into queue without awaiting, but keep queue alive.
+      // Must enqueue before marking disposed, otherwise _enqueue bails.
       unawaited(_enqueueSettingsPersist(generation));
     }
+    _settingsPersistDisposed = true;
     _cellularDataSaverService.removeListener(_handleCellularDataSaverChanged);
     _automaticUpdateCheckTimer?.cancel();
     _automaticUpdateCheckTimer = null;
