@@ -178,6 +178,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _hasPendingSettingsPersist = false;
   int _settingsPersistGeneration = 0;
   Future<void> _settingsPersistQueue = Future<void>.value();
+  Future<void>? _settingsPersistInFlight;
   bool _settingsPersistDisposed = false;
   static const Duration _settingsPersistDebounceDuration =
       Duration(milliseconds: 350);
@@ -1897,41 +1898,51 @@ class SettingsProvider extends ChangeNotifier {
         'performanceLoggingEnabled': _settings.performanceLoggingEnabled,
       },
     );
-    try {
-      // Encode off the UI isolate when payload is large enough to matter.
-      // For small payloads the isolate spawn cost exceeds the encode cost.
-      final jsonMap = _settings.toJson();
-      final encoded = await _encodeSettingsJson(jsonMap);
-      if (_settingsPersistDisposed ||
-          generation != _settingsPersistGeneration) {
-        task.end(status: 'error', error: StateError('superseded'));
-        return;
-      }
-      await _enqueueSettingsPersistOperation(
-        () => _localDataSource.saveExperienceSettingsJson(encoded),
-      );
-      task.end();
-    } catch (error, stackTrace) {
-      task.end(status: 'error', error: error, stackTrace: stackTrace);
-      AppLogger.warn(
-        'Failed to persist experience settings',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!_settingsPersistDisposed &&
-          generation == _settingsPersistGeneration &&
-          !_hasPendingSettingsPersist) {
-        _hasPendingSettingsPersist = true;
-        _settingsPersistDebounce?.cancel();
-        _settingsPersistDebounce = Timer(
-          _settingsPersistDebounceDuration,
-          () {
-            _settingsPersistDebounce = null;
-            if (!_hasPendingSettingsPersist) return;
-            _hasPendingSettingsPersist = false;
-            unawaited(_enqueueSettingsPersist(generation));
-          },
+    final inFlight = () async {
+      try {
+        // Encode off the UI isolate when payload is large enough to matter.
+        // For small payloads the isolate spawn cost exceeds the encode cost.
+        final jsonMap = _settings.toJson();
+        final encoded = await _encodeSettingsJson(jsonMap);
+        if (_settingsPersistDisposed ||
+            generation != _settingsPersistGeneration) {
+          task.end(status: 'error', error: StateError('superseded'));
+          return;
+        }
+        await _enqueueSettingsPersistOperation(
+          () => _localDataSource.saveExperienceSettingsJson(encoded),
         );
+        task.end();
+      } catch (error, stackTrace) {
+        task.end(status: 'error', error: error, stackTrace: stackTrace);
+        AppLogger.warn(
+          'Failed to persist experience settings',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (!_settingsPersistDisposed &&
+            generation == _settingsPersistGeneration &&
+            !_hasPendingSettingsPersist) {
+          _hasPendingSettingsPersist = true;
+          _settingsPersistDebounce?.cancel();
+          _settingsPersistDebounce = Timer(
+            _settingsPersistDebounceDuration,
+            () {
+              _settingsPersistDebounce = null;
+              if (!_hasPendingSettingsPersist) return;
+              _hasPendingSettingsPersist = false;
+              unawaited(_enqueueSettingsPersist(generation));
+            },
+          );
+        }
+      }
+    }();
+    _settingsPersistInFlight = inFlight;
+    try {
+      await inFlight;
+    } finally {
+      if (identical(_settingsPersistInFlight, inFlight)) {
+        _settingsPersistInFlight = null;
       }
     }
   }
@@ -1973,13 +1984,13 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> flushSettingsPersistence() async {
     _settingsPersistDebounce?.cancel();
     _settingsPersistDebounce = null;
-    if (!_hasPendingSettingsPersist) {
-      await _settingsPersistQueue;
-      return;
+    if (_hasPendingSettingsPersist) {
+      _hasPendingSettingsPersist = false;
+      final generation = _settingsPersistGeneration;
+      await _enqueueSettingsPersist(generation);
     }
-    _hasPendingSettingsPersist = false;
-    final generation = _settingsPersistGeneration;
-    await _enqueueSettingsPersist(generation);
+    final inFlight = _settingsPersistInFlight;
+    if (inFlight != null) await inFlight;
     await _settingsPersistQueue;
   }
 
@@ -2390,10 +2401,24 @@ class SettingsProvider extends ChangeNotifier {
     _settingsPersistDebounce = null;
     if (_hasPendingSettingsPersist) {
       _hasPendingSettingsPersist = false;
-      final generation = _settingsPersistGeneration;
-      // Drain pending into queue without awaiting, but keep queue alive.
-      // Must enqueue before marking disposed, otherwise _enqueue bails.
-      unawaited(_enqueueSettingsPersist(generation));
+      // Final drain must not be discarded by the disposed guard or
+      // generation check after async encode. Bypass _enqueueSettingsPersist
+      // and directly enqueue the current snapshot.
+      final jsonMap = _settings.toJson();
+      unawaited(() async {
+        try {
+          final encoded = await _encodeSettingsJson(jsonMap);
+          await _enqueueSettingsPersistOperation(
+            () => _localDataSource.saveExperienceSettingsJson(encoded),
+          );
+        } catch (error, stackTrace) {
+          AppLogger.warn(
+            'Failed to persist experience settings on dispose',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }());
     }
     _settingsPersistDisposed = true;
     _cellularDataSaverService.removeListener(_handleCellularDataSaverChanged);
