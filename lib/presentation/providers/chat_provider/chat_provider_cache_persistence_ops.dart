@@ -194,7 +194,21 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
                 .toList(growable: false),
           };
           final encodeStopwatch = Stopwatch()..start();
-          final encodedPayload = json.encode(payload);
+          String encodedPayload;
+          // Offload JSON encoding for larger snapshots to avoid UI jank
+          // on desktop where isolate spawn cost is lower than frame budget.
+          // Threshold: 10 messages or estimated >4KB.
+          if (filteredMessages.length > 10) {
+            try {
+              encodedPayload = await Isolate.run(
+                () => json.encode(payload),
+              );
+            } catch (_) {
+              encodedPayload = json.encode(payload);
+            }
+          } else {
+            encodedPayload = json.encode(payload);
+          }
           encodeStopwatch.stop();
           AppLogger.recordPerformanceTask(
             operation: 'session_snapshot_encode',

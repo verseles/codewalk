@@ -71,14 +71,22 @@ extension _ChatPageSessionTabs on _ChatPageState {
         if (selection.tabs.isEmpty && !selection.showDraft) {
           return const SizedBox.shrink();
         }
-        return Consumer<ProjectProvider>(
-          builder: (context, projectProvider, _) {
+        return Selector<
+          ProjectProvider,
+          ({List<Project> projects, List<String> openIds})
+        >(
+          selector: (_, p) =>
+              (projects: p.projects, openIds: p.openProjectIds),
+          shouldRebuild: (prev, next) =>
+              !identical(prev.projects, next.projects) ||
+              !identical(prev.openIds, next.openIds),
+          builder: (context, projectData, _) {
             final tabs = selection.showDraft
                 ? <SessionTabRecord>[
                     ...selection.tabs,
                     _newChatDraftTab(
                       chatProvider: context.read<ChatProvider>(),
-                      projectProvider: projectProvider,
+                      projectProvider: context.read<ProjectProvider>(),
                       title: context.l10n.chatNewChat,
                     ),
                   ]
@@ -88,8 +96,8 @@ extension _ChatPageSessionTabs on _ChatPageState {
             }
             return SessionTabStrip(
               tabs: tabs,
-              projects: projectProvider.projects,
-              openProjectIds: projectProvider.openProjectIds.toSet(),
+              projects: projectData.projects,
+              openProjectIds: projectData.openIds.toSet(),
               isCompact: isCompact,
               fillWidth: fillWidth,
               transparentBackground: transparentBackground,

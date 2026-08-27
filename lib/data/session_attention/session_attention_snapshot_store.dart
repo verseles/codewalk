@@ -80,6 +80,7 @@ class SessionAttentionSnapshotStore {
   final SessionAttentionSnapshotFileStore _fileStore;
   final Cipher _cipher;
   Future<void> _pending = Future<void>.value();
+  String? _cachedEncodedKey;
 
   Future<SessionAttentionSnapshotReadResult> read() {
     return _serialize(_readUnlocked);
@@ -285,6 +286,7 @@ class SessionAttentionSnapshotStore {
     return _serialize(() async {
       await _fileStore.delete();
       await _keyStorage.delete();
+      _cachedEncodedKey = null;
       _changesController.add(const SessionAttentionSnapshotPayload());
     });
   }
@@ -315,13 +317,20 @@ class SessionAttentionSnapshotStore {
       return _recoverFromCorruption();
     }
     late final String? encodedKey;
-    try {
-      encodedKey = await _keyStorage.read();
-    } catch (error) {
-      throw SessionAttentionSnapshotStoreException(
-        'Secure session snapshot key storage is unavailable.',
-        error,
-      );
+    if (_cachedEncodedKey != null && _cachedEncodedKey!.isNotEmpty) {
+      encodedKey = _cachedEncodedKey;
+    } else {
+      try {
+        encodedKey = await _keyStorage.read();
+        if (encodedKey != null && encodedKey.isNotEmpty) {
+          _cachedEncodedKey = encodedKey;
+        }
+      } catch (error) {
+        throw SessionAttentionSnapshotStoreException(
+          'Secure session snapshot key storage is unavailable.',
+          error,
+        );
+      }
     }
     try {
       if (encodedKey == null || encodedKey.isEmpty) {
@@ -356,11 +365,18 @@ class SessionAttentionSnapshotStore {
 
   Future<void> _writeUnlocked(SessionAttentionSnapshotPayload payload) async {
     try {
-      var encodedKey = await _keyStorage.read();
+      var encodedKey = _cachedEncodedKey;
+      if (encodedKey == null || encodedKey.isEmpty) {
+        encodedKey = await _keyStorage.read();
+        if (encodedKey != null && encodedKey.isNotEmpty) {
+          _cachedEncodedKey = encodedKey;
+        }
+      }
       if (encodedKey == null || encodedKey.isEmpty) {
         final generated = await _cipher.newSecretKey();
         encodedKey = base64Encode(await generated.extractBytes());
         await _keyStorage.write(encodedKey);
+        _cachedEncodedKey = encodedKey;
       }
       final box = await _cipher.encrypt(
         utf8.encode(jsonEncode(payload.toJson())),

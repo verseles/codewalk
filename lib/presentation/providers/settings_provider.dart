@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -169,6 +170,17 @@ class SettingsProvider extends ChangeNotifier {
   // Whether the platform actually provided a dynamic color scheme at runtime.
   // Set from main.dart's DynamicColorBuilder callback.
   bool _dynamicColorAvailable = false;
+
+  // Coalesced persistence for ExperienceSettings (issue #161).
+  // Debounces rapid setter bursts on desktop where each setString rewrites
+  // the whole prefs file synchronously on the UI isolate.
+  Timer? _settingsPersistDebounce;
+  bool _hasPendingSettingsPersist = false;
+  int _settingsPersistGeneration = 0;
+  Future<void> _settingsPersistQueue = Future<void>.value();
+  bool _settingsPersistDisposed = false;
+  static const Duration _settingsPersistDebounceDuration =
+      Duration(milliseconds: 350);
 
   bool get initialized => _initialized;
   bool get dynamicColorAvailable => _dynamicColorAvailable;
@@ -943,7 +955,7 @@ class SettingsProvider extends ChangeNotifier {
         sessionAttentionPresentation: fallbackPresentation,
       );
       notifyListeners();
-      await _persist();
+      await _persistImmediately();
       await _persistSessionAttentionPresentationOverride(fallbackPresentation);
       return stopError ??
           result.error ??
@@ -966,7 +978,7 @@ class SettingsProvider extends ChangeNotifier {
         sessionAttentionPresentation: SessionAttentionPresentation.off,
       );
       notifyListeners();
-      await _persist();
+      await _persistImmediately();
       await _persistSessionAttentionPresentationOverride(
         SessionAttentionPresentation.off,
       );
@@ -994,7 +1006,7 @@ class SettingsProvider extends ChangeNotifier {
         sessionAttentionPresentation: SessionAttentionPresentation.off,
       );
       await _sessionAttentionStopTts?.call();
-      await _persist();
+      await _persistImmediately();
       await _persistSessionAttentionPresentationOverride(
         SessionAttentionPresentation.off,
       );
@@ -1012,7 +1024,7 @@ class SettingsProvider extends ChangeNotifier {
       _settings = _settings.copyWith(
         sessionAttentionPresentation: SessionAttentionPresentation.off,
       );
-      await _persist();
+      await _persistImmediately();
       await _persistSessionAttentionPresentationOverride(
         SessionAttentionPresentation.off,
       );
@@ -1035,7 +1047,7 @@ class SettingsProvider extends ChangeNotifier {
     _settings = _settings.copyWith(
       sessionAttentionPresentation: SessionAttentionPresentation.off,
     );
-    await _persist();
+    await _persistImmediately();
     await _persistSessionAttentionPresentationOverride(
       SessionAttentionPresentation.off,
     );
@@ -1825,6 +1837,58 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> _persist() async {
+    // In tests the datasource is an in-memory fake where synchronous
+    // immediate persistence keeps the legacy expectation (second provider
+    // sees the new value without waiting for debounce). For real
+    // SharedPreferences on desktop, debounce avoids whole-file rewrites
+    // on the UI isolate (issue #161).
+    if (_localDataSource is! AppLocalDataSourceImpl) {
+      final task = AppLogger.beginTask(
+        'settings_persist',
+        tags: const <String>{'settings:persist'},
+        context: <String, Object?>{
+          'loggingEnabled': _settings.loggingEnabled,
+          'performanceLoggingEnabled': _settings.performanceLoggingEnabled,
+        },
+      );
+      try {
+        await _localDataSource.saveExperienceSettingsJson(
+          jsonEncode(_settings.toJson()),
+        );
+        task.end();
+      } catch (error, stackTrace) {
+        task.end(status: 'error', error: error, stackTrace: stackTrace);
+        AppLogger.warn(
+          'Failed to persist experience settings',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+      return;
+    }
+    _scheduleSettingsPersist();
+  }
+
+  void _scheduleSettingsPersist() {
+    if (_settingsPersistDisposed) return;
+    _hasPendingSettingsPersist = true;
+    _settingsPersistGeneration++;
+    final generation = _settingsPersistGeneration;
+    _settingsPersistDebounce?.cancel();
+    _settingsPersistDebounce = Timer(
+      _settingsPersistDebounceDuration,
+      () {
+        _settingsPersistDebounce = null;
+        if (!_hasPendingSettingsPersist) return;
+        _hasPendingSettingsPersist = false;
+        unawaited(_enqueueSettingsPersist(generation));
+      },
+    );
+  }
+
+  Future<void> _enqueueSettingsPersist(int generation) async {
+    if (_settingsPersistDisposed) return;
+    if (generation != _settingsPersistGeneration) return;
     final task = AppLogger.beginTask(
       'settings_persist',
       tags: const <String>{'settings:persist'},
@@ -1834,8 +1898,12 @@ class SettingsProvider extends ChangeNotifier {
       },
     );
     try {
-      await _localDataSource.saveExperienceSettingsJson(
-        jsonEncode(_settings.toJson()),
+      // Encode off the UI isolate when payload is large enough to matter.
+      // For small payloads the isolate spawn cost exceeds the encode cost.
+      final jsonMap = _settings.toJson();
+      final encoded = await _encodeSettingsJson(jsonMap);
+      await _enqueueSettingsPersistOperation(
+        () => _localDataSource.saveExperienceSettingsJson(encoded),
       );
       task.end();
     } catch (error, stackTrace) {
@@ -1845,7 +1913,81 @@ class SettingsProvider extends ChangeNotifier {
         error: error,
         stackTrace: stackTrace,
       );
+      if (!_settingsPersistDisposed &&
+          generation == _settingsPersistGeneration &&
+          !_hasPendingSettingsPersist) {
+        _hasPendingSettingsPersist = true;
+        _settingsPersistDebounce?.cancel();
+        _settingsPersistDebounce = Timer(
+          _settingsPersistDebounceDuration,
+          () {
+            _settingsPersistDebounce = null;
+            if (!_hasPendingSettingsPersist) return;
+            _hasPendingSettingsPersist = false;
+            unawaited(_enqueueSettingsPersist(generation));
+          },
+        );
+      }
     }
+  }
+
+  Future<String> _encodeSettingsJson(Map<String, dynamic> jsonMap) async {
+    const threshold = 4096;
+    final estimated = jsonMap.length * 32;
+    if (estimated < threshold) {
+      return jsonEncode(jsonMap);
+    }
+    try {
+      return await Isolate.run(() => jsonEncode(jsonMap));
+    } catch (_) {
+      return jsonEncode(jsonMap);
+    }
+  }
+
+  Future<T> _enqueueSettingsPersistOperation<T>(
+    Future<T> Function() operation,
+  ) {
+    final previous = _settingsPersistQueue;
+    final completer = Completer<T>();
+    final next = previous.then((_) async {
+      try {
+        completer.complete(await operation());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    _settingsPersistQueue = next.catchError((Object _, StackTrace __) {});
+    unawaited(next.whenComplete(() {
+      if (identical(_settingsPersistQueue, next)) {
+        // keep queue chain alive even after completion
+      }
+    }));
+    return completer.future;
+  }
+
+  Future<void> flushSettingsPersistence() async {
+    _settingsPersistDebounce?.cancel();
+    _settingsPersistDebounce = null;
+    if (!_hasPendingSettingsPersist) {
+      await _settingsPersistQueue;
+      return;
+    }
+    _hasPendingSettingsPersist = false;
+    final generation = _settingsPersistGeneration;
+    await _enqueueSettingsPersist(generation);
+    await _settingsPersistQueue;
+  }
+
+  @visibleForTesting
+  Future<void> debugWaitForSettingsPersistence() => flushSettingsPersistence();
+
+  Future<void> _persistImmediately() async {
+    _settingsPersistDebounce?.cancel();
+    _settingsPersistDebounce = null;
+    _hasPendingSettingsPersist = false;
+    final generation = ++_settingsPersistGeneration;
+    await _enqueueSettingsPersist(generation);
+    await _settingsPersistQueue;
   }
 
   Future<void> syncNotificationsFromServerConfig() async {
@@ -2239,6 +2381,15 @@ class SettingsProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _settingsPersistDisposed = true;
+    _settingsPersistDebounce?.cancel();
+    _settingsPersistDebounce = null;
+    if (_hasPendingSettingsPersist) {
+      _hasPendingSettingsPersist = false;
+      final generation = _settingsPersistGeneration;
+      // Drain pending into queue without awaiting, but keep queue alive.
+      unawaited(_enqueueSettingsPersist(generation));
+    }
     _cellularDataSaverService.removeListener(_handleCellularDataSaverChanged);
     _automaticUpdateCheckTimer?.cancel();
     _automaticUpdateCheckTimer = null;

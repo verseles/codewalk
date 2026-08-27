@@ -305,10 +305,12 @@ void main() {
     final encrypted = files.value;
     keys.failReads = true;
 
-    await expectLater(
-      store.read(),
-      throwsA(isA<SessionAttentionSnapshotStoreException>()),
-    );
+    // With in-memory key caching (issue #161 desktop perf), a temporary
+    // secure-storage read failure after a successful upsert can still be
+    // served from the cached key, preserving ciphertext and returning the
+    // payload instead of throwing.
+    final result = await store.read();
+    expect(result.payload.items, hasLength(1));
     expect(files.value, encrypted);
   });
 

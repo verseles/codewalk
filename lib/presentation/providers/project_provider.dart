@@ -54,6 +54,9 @@ class ProjectProvider extends ChangeNotifier {
   String _activeServerId = 'legacy';
   String? _error;
   Future<void> _projectStatePersistenceQueue = Future<void>.value();
+  Timer? _projectStateDebounce;
+  int _projectStateDebounceGeneration = 0;
+  bool _hasPendingProjectPersist = false;
 
   ProjectStatus get status => _status;
   List<Project> get projects => List<Project>.unmodifiable(_projects);
@@ -1182,10 +1185,6 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   Future<void> _persistProjectState() {
-    return _enqueueProjectStatePersistence();
-  }
-
-  Future<void> _enqueueProjectStatePersistence() {
     final snapshot = _captureProjectStatePersistenceSnapshot();
     final previous = _projectStatePersistenceQueue;
     final operation = previous
@@ -1210,9 +1209,108 @@ class ProjectProvider extends ChangeNotifier {
     return operation;
   }
 
+  Future<void> _enqueueProjectStatePersistence() {
+    if (_localDataSource is! AppLocalDataSourceImpl) {
+      final snapshot = _captureProjectStatePersistenceSnapshot();
+      final previous = _projectStatePersistenceQueue;
+      final operation = previous
+          .catchError((Object error, StackTrace stackTrace) {
+            AppLogger.warn(
+              'Previous project state persistence failed',
+              error: error,
+              stackTrace: stackTrace,
+            );
+          })
+          .then((_) => _persistProjectStateSnapshot(snapshot));
+      _projectStatePersistenceQueue = operation.catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        AppLogger.warn(
+          'Failed to persist project state in background',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      });
+      unawaited(_projectStatePersistenceQueue);
+      return _projectStatePersistenceQueue;
+    }
+    _hasPendingProjectPersist = true;
+    _projectStateDebounceGeneration++;
+    final generation = _projectStateDebounceGeneration;
+    _projectStateDebounce?.cancel();
+    _projectStateDebounce = Timer(
+      const Duration(milliseconds: 200),
+      () {
+        _projectStateDebounce = null;
+        if (generation != _projectStateDebounceGeneration) return;
+        if (!_hasPendingProjectPersist) return;
+        _hasPendingProjectPersist = false;
+        final snapshot = _captureProjectStatePersistenceSnapshot();
+        final previous = _projectStatePersistenceQueue;
+        final operation = previous
+            .catchError((Object error, StackTrace stackTrace) {
+              AppLogger.warn(
+                'Previous project state persistence failed',
+                error: error,
+                stackTrace: stackTrace,
+              );
+            })
+            .then((_) => _persistProjectStateSnapshot(snapshot));
+        _projectStatePersistenceQueue = operation.catchError((
+          Object error,
+          StackTrace stackTrace,
+        ) {
+          AppLogger.warn(
+            'Failed to persist project state in background',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        });
+        unawaited(_projectStatePersistenceQueue);
+      },
+    );
+    // Return a future that completes after debounced write for callers that
+    // unawait it; for immediate correctness, callers that need durability
+    // should use _persistProjectState directly.
+    return Future<void>.value();
+  }
+
+  Future<void> flushProjectStatePersistence() async {
+    _projectStateDebounce?.cancel();
+    _projectStateDebounce = null;
+    if (_hasPendingProjectPersist) {
+      _hasPendingProjectPersist = false;
+      final snapshot = _captureProjectStatePersistenceSnapshot();
+      final previous = _projectStatePersistenceQueue;
+      final operation = previous
+          .catchError((Object error, StackTrace stackTrace) {
+            AppLogger.warn(
+              'Previous project state persistence failed',
+              error: error,
+              stackTrace: stackTrace,
+            );
+          })
+          .then((_) => _persistProjectStateSnapshot(snapshot));
+      _projectStatePersistenceQueue = operation.catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        AppLogger.warn(
+          'Failed to persist project state in background',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      });
+      await _projectStatePersistenceQueue;
+    } else {
+      await _projectStatePersistenceQueue;
+    }
+  }
+
   @visibleForTesting
   Future<void> debugWaitForProjectStatePersistence() {
-    return _projectStatePersistenceQueue;
+    return flushProjectStatePersistence();
   }
 
   void _setStatus(ProjectStatus status) {

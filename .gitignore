@@ -77,3 +77,4 @@ ai-memory*
 
 # Local agent task checkpoint
 /TASK_MEMORY.md
+/.task-memory/

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:dartz/dartz.dart';
@@ -548,6 +549,8 @@ class ChatProvider extends ChangeNotifier {
   Future<void>? _selectionPersistenceTask;
   bool _selectionPersistenceDirty = false;
   bool _selectionPersistenceSyncRemote = false;
+  Timer? _selectionPersistenceDebounce;
+  int _selectionPersistenceGeneration = 0;
   String _activeContextKey = 'legacy::default';
   final Map<String, _ChatContextSnapshot> _contextSnapshots =
       <String, _ChatContextSnapshot>{};
@@ -2873,14 +2876,46 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceDirty = true;
     _selectionPersistenceSyncRemote =
         syncRemote || _selectionPersistenceSyncRemote;
-    final inFlight = _selectionPersistenceTask;
-    if (inFlight != null) {
+    if (localDataSource is! AppLocalDataSourceImpl) {
+      if (_selectionPersistenceTask != null) return;
+      final task = _flushScheduledSelectionPersistence();
+      _selectionPersistenceTask = task;
+      unawaited(task);
       return;
     }
-    final task = _flushScheduledSelectionPersistence();
-    _selectionPersistenceTask = task;
-    unawaited(task);
+    _selectionPersistenceGeneration++;
+    final generation = _selectionPersistenceGeneration;
+    _selectionPersistenceDebounce?.cancel();
+    _selectionPersistenceDebounce = Timer(
+      const Duration(milliseconds: 300),
+      () {
+        _selectionPersistenceDebounce = null;
+        if (generation != _selectionPersistenceGeneration) return;
+        if (_selectionPersistenceTask != null) return;
+        final task = _flushScheduledSelectionPersistence();
+        _selectionPersistenceTask = task;
+        unawaited(task);
+      },
+    );
   }
+
+  Future<void> flushSelectionPersistence() async {
+    _selectionPersistenceDebounce?.cancel();
+    _selectionPersistenceDebounce = null;
+    if (!_selectionPersistenceDirty && _selectionPersistenceTask == null) return;
+    if (_selectionPersistenceTask != null) {
+      await _selectionPersistenceTask;
+    }
+    if (_selectionPersistenceDirty) {
+      final task = _flushScheduledSelectionPersistence();
+      _selectionPersistenceTask = task;
+      await task;
+    }
+  }
+
+  @visibleForTesting
+  Future<void> debugWaitForSelectionPersistence() =>
+      flushSelectionPersistence();
 
   Future<void> _flushScheduledSelectionPersistence() {
     return AppLogger.runPerformanceTask<void>(
@@ -5424,6 +5459,14 @@ class ChatProvider extends ChangeNotifier {
           payload: entry.value,
         ),
       );
+    }
+    _selectionPersistenceDebounce?.cancel();
+    _selectionPersistenceDebounce = null;
+    if (_selectionPersistenceDirty) {
+      _selectionPersistenceDirty = false;
+      final snapshot = _captureSelectionPersistenceSnapshot(syncRemote: _selectionPersistenceSyncRemote);
+      _selectionPersistenceSyncRemote = false;
+      unawaited(_persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote));
     }
     _sessionAttentionPublishDebounce?.cancel();
     _sessionAttentionThresholdTimer?.cancel();

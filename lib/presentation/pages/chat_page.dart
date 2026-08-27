@@ -898,6 +898,9 @@ class _ChatPageState extends State<ChatPage>
       // Persist pending session-tab state before the process can be killed in
       // the background; the debounced write may otherwise never run.
       unawaited(_chatProvider?.flushAllSessionTabsPersistence());
+      unawaited(_chatProvider?.flushSelectionPersistence());
+      unawaited(_settingsProvider?.flushSettingsPersistence());
+      unawaited(_projectProvider?.flushProjectStatePersistence());
       _flushPendingComposerDraftPersistence();
     }
     final provider = _chatProvider;
