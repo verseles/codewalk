@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.219.0 - 2026-08-31
+
+- test(settings): add Selector-aware one-pump regression and align CI budget
+- fix(settings): restore immediate reactivity for toggles and dropdowns (fixes #153, #175)
+
 ## v1.218.0 - 2026-08-31
 
 - docs: update BEHAVIOR and CODEBASE for unified menus and Close project (#162, #163)
