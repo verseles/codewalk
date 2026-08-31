@@ -666,10 +666,9 @@
 - **Given** a session tab is visible
 - **When** the user double-clicks/double-taps or middle-clicks it
 - **Then** only that local tab closes; the OpenCode session is not archived, deleted, or otherwise mutated
-- **When** the user right-clicks or touch-and-holds it
-- **Then** the current session actions menu opens, including `Rename session`; an inactive tab is activated first
-- **When** the user invokes the semantic session-actions action, `Context Menu`, or `Shift+F10`
-- **Then** the same current session actions menu opens
+- **When** the user right-clicks, touch-and-holds, invokes `Context Menu` or `Shift+F10`, or uses the semantic session-actions action
+- **Then** a unified session menu opens at the pointer for mouse or at the row center for keyboard/semantics, with haptic feedback only for touch or semantic long-press, without activating an inactive tab merely to open the menu
+- **Then** the menu shows the same seven entity actions as the sidebar (pin/unpin, rename, share/unshare, copy link when available, archive/unarchive, fork, delete — with share, copy link and archive omitted when no exact session snapshot is available), plus `Change icon` for real tabs, plus active-only actions (export Markdown/JSON, view tasks, review changes, undo, redo, compact) and, when the tab belongs to an open project, `Close project` with destructive styling; active-only actions from an inactive tab activate that tab first and then execute after verification
 - **When** the user presses `Delete` or invokes the semantic dismiss action
 - **Then** only that local tab closes
 - **Then** there is no visible close button on a tab
@@ -702,6 +701,19 @@
 - **When** the user right-clicks the row on desktop, uses the keyboard context-menu action, or long-presses/touch-holds the row
 - **Then** the row exposes the same session actions and dispatch behavior as the main Conversations list
 - **Then** recent rows do not show a visible trailing three-dot menu
+
+### Close project is available from the project row and any of its tabs
+
+- **Given** an open project is visible in the Conversations sidebar
+- **When** the user opens its trailing menu, right-clicks the row, long-presses, or invokes `Context Menu`/`Shift+F10`/semantic action on the row
+- **Then** the project menu shows a single destructive `Close {project}` action using the display name; opening the menu never switches or expands the project, and the trailing close affordance is 32px on desktop and 40px on compact with count and expand controls preserved
+- **When** the project is the sole active open project
+- **Then** the same `Close {project}` entry appears in its tabs but is disabled, and selecting `Close project` from the project row shows the localized `At least one context must remain open` guard without removing tabs
+- **Given** any real session tab belonging to an open project
+- **When** the user opens its unified session menu
+- **Then** the menu includes the same destructive `Close {project}` entry for that project; draft tabs have no menu and no close entry
+- **When** the user selects `Close project` from the project row or from any of its tabs
+- **Then** CodeWalk removes all runtime and persisted open and closed tabs, context snapshots, pinned state and icon overrides for that exact `serverId` plus normalized project directory (with `project.id` as the canonical scope for root `/`, `-` or empty paths), then closes the project via the serialized `_runProjectScopeTransition`; if the project was active the fallback project is selected via `onProjectScopeChanged`, otherwise the current project and session remain unchanged; a second sweep ensures no tab reappears via the pending snapshot race; the action never deletes, archives or aborts a remote OpenCode session
 
 ### Project paths preserve the trailing folders in the sidebar
 
