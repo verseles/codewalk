@@ -1131,9 +1131,13 @@ extension _ChatPageScaffold on _ChatPageState {
       borderRadius: BorderRadius.circular(16),
       child: Column(
         children: [
-          SidebarSelectionIndicator(
-            selected: selected,
-            child: ListTile(
+          ProjectContextMenuRegion(
+            project: project,
+            displayName: displayName,
+            onCloseProject: () => _closeProjectContext(project.id),
+            child: SidebarSelectionIndicator(
+              selected: selected,
+              child: ListTile(
               key: ValueKey<String>('project_group_tile_${project.id}'),
               dense: _useDenseListTiles(context),
               visualDensity: isMobileLayout ? VisualDensity.compact : null,
@@ -1227,9 +1231,42 @@ extension _ChatPageScaffold on _ChatPageState {
                       selected: selected,
                     ),
                   ),
+                  PopupMenuButton<String>(
+                    key: ValueKey<String>('project_group_close_${project.id}'),
+                    tooltip: context.l10n.workspaceCloseProject(displayName),
+                    padding: EdgeInsets.zero,
+                    icon: Icon(Symbols.more_vert, size: 18, color: secondaryForeground),
+                    onSelected: (value) {
+                      if (value == 'close') {
+                        unawaited(_closeProjectContext(project.id));
+                      }
+                    },
+                    itemBuilder: (menuContext) {
+                      final errorColor = Theme.of(menuContext).colorScheme.error;
+                      return [
+                        PopupMenuItem<String>(
+                          value: 'close',
+                          child: Row(
+                            children: [
+                              Icon(Symbols.close, color: errorColor, size: 18),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  context.l10n.workspaceCloseProject(displayName),
+                                  style: TextStyle(color: errorColor),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
                 ],
               ),
             ),
+          ),
           ),
           if (expanded) ...[
             if (selected)

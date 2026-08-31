@@ -4809,7 +4809,7 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey<String>('project_group_close_proj_a')),
-      findsNothing,
+      findsOneWidget,
     );
   });
 

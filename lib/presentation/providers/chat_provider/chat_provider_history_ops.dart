@@ -447,13 +447,18 @@ extension ChatProviderHistoryOps on ChatProvider {
     ChatSession session, {
     String? messageId,
     bool selectForked = true,
+    SessionActionTarget? target,
   }) async {
+    if (target != null && !target.isValid) return null;
+    final isTargetActive = target == null || _isActiveTarget(target);
+    final effectiveProjectId = target != null ? _projectIdForTarget(target) : projectProvider.currentProjectId;
+    final effectiveDirectory = target != null ? _directoryForTarget(target) : projectProvider.currentDirectory;
     final result = await forkChatSession(
       ForkChatSessionParams(
-        projectId: projectProvider.currentProjectId,
+        projectId: effectiveProjectId,
         sessionId: session.id,
         messageId: messageId,
-        directory: projectProvider.currentDirectory,
+        directory: effectiveDirectory,
       ),
     );
 
@@ -463,11 +468,17 @@ extension ChatProviderHistoryOps on ChatProvider {
         return null;
       },
       (forked) async {
-        _applySessionLocally(forked);
-        unawaited(_persistSessionCacheBestEffort());
-        notifyListeners();
-        if (selectForked) {
-          await selectSession(forked);
+        if (target == null || isTargetActive) {
+          _applySessionLocally(forked);
+          unawaited(_persistSessionCacheBestEffort());
+          notifyListeners();
+          if (selectForked) {
+            await selectSession(forked);
+          }
+        } else {
+          _applySessionForTarget(target!, forked);
+          notifyListeners();
+          // Never auto-select when forking from inactive context menu.
         }
         return forked;
       },

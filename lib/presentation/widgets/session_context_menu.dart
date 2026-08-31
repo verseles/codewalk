@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/i18n/l10n_context.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_session.dart';
+import '../providers/chat_provider.dart' show SessionTabIdentity;
 import '../utils/session_title_formatter.dart';
 import 'modal_primary_action_shortcuts.dart';
 
@@ -17,6 +19,25 @@ const String sessionMenuCopyLink = 'copy-link';
 const String sessionMenuArchive = 'archive';
 const String sessionMenuFork = 'fork';
 const String sessionMenuDelete = 'delete';
+
+enum SessionMenuAction {
+  pin,
+  rename,
+  share,
+  copyLink,
+  archive,
+  fork,
+  delete,
+  changeIcon,
+  closeProject,
+  exportMarkdown,
+  exportJson,
+  viewTasks,
+  reviewChanges,
+  undo,
+  redo,
+  compact,
+}
 
 class SessionContextMenuActions {
   const SessionContextMenuActions({
@@ -107,30 +128,68 @@ class SessionContextMenuRegion extends StatelessWidget {
   final String surface;
   final Widget child;
 
+  Offset _centerPosition(BuildContext context) {
+    final renderObject = context.findRenderObject();
+    if (renderObject is RenderBox) {
+      return renderObject.localToGlobal(renderObject.size.center(Offset.zero));
+    }
+    return Offset.zero;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onSecondaryTapUp: (details) => unawaited(
-        showSessionContextMenu(
-          context,
-          session: session,
-          actions: actions,
-          surface: surface,
-          globalPosition: details.globalPosition,
-        ),
-      ),
-      onLongPressStart: (details) => unawaited(
-        showSessionContextMenu(
-          context,
-          session: session,
-          actions: actions,
-          surface: surface,
-          globalPosition: details.globalPosition,
-          haptic: true,
-        ),
-      ),
-      child: child,
+    return Builder(
+      builder: (innerContext) {
+        void openAtCenter({required bool haptic}) {
+          final pos = _centerPosition(innerContext);
+          unawaited(
+            showSessionContextMenu(
+              innerContext,
+              session: session,
+              actions: actions,
+              surface: surface,
+              globalPosition: pos,
+              haptic: haptic,
+            ),
+          );
+        }
+
+        return CallbackShortcuts(
+          bindings: <ShortcutActivator, VoidCallback>{
+            const SingleActivator(LogicalKeyboardKey.contextMenu): () => openAtCenter(haptic: false),
+            const SingleActivator(LogicalKeyboardKey.f10, shift: true): () => openAtCenter(haptic: false),
+          },
+          child: Semantics(
+            customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+              CustomSemanticsAction(label: innerContext.l10n.chatSessionActions): () => openAtCenter(haptic: false),
+            },
+            onLongPress: () => openAtCenter(haptic: true),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onSecondaryTapUp: (details) => unawaited(
+                showSessionContextMenu(
+                  innerContext,
+                  session: session,
+                  actions: actions,
+                  surface: surface,
+                  globalPosition: details.globalPosition,
+                ),
+              ),
+              onLongPressStart: (details) => unawaited(
+                showSessionContextMenu(
+                  innerContext,
+                  session: session,
+                  actions: actions,
+                  surface: surface,
+                  globalPosition: details.globalPosition,
+                  haptic: true,
+                ),
+              ),
+              child: child,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -222,6 +281,222 @@ List<PopupMenuEntry<String>> buildSessionContextMenuEntries(
       ),
     ),
   ];
+}
+
+List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
+  BuildContext context, {
+  ChatSession? session,
+  required bool isPinned,
+  SessionTabIdentity? tabIdentity,
+  bool includeTabLocal = false,
+  bool includeActiveOnly = false,
+  bool isActive = true,
+  bool canUndo = false,
+  bool canRedo = false,
+  bool canCompact = true,
+  bool canCloseProject = false,
+  String? closeProjectLabel,
+}) {
+  final errorColor = Theme.of(context).colorScheme.error;
+  final entries = <PopupMenuEntry<SessionMenuAction>>[];
+
+  PopupMenuItem<SessionMenuAction> item(
+    SessionMenuAction action, {
+    required IconData icon,
+    required String label,
+    Color? color,
+    bool enabled = true,
+  }) {
+    return PopupMenuItem<SessionMenuAction>(
+      value: action,
+      enabled: enabled,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: color != null ? TextStyle(color: color) : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Entity actions.
+  if (session != null) {
+    entries.add(
+      item(
+        SessionMenuAction.pin,
+        icon: Symbols.push_pin,
+        label: isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.rename,
+        icon: Symbols.edit,
+        label: tabIdentity != null ? context.l10n.sessionTabRenameAction : context.l10n.sessionRename,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.share,
+        icon: session.shared ? Symbols.link_off : Symbols.link,
+        label: tabIdentity != null
+            ? (session.shared ? context.l10n.sessionUnshare : context.l10n.sessionShare)
+            : (session.shared ? context.l10n.sessionUnshareAction : context.l10n.sessionShareAction),
+      ),
+    );
+    if (session.shareUrl != null && session.shareUrl!.isNotEmpty) {
+      entries.add(
+        item(
+          SessionMenuAction.copyLink,
+          icon: Symbols.content_copy,
+          label: context.l10n.sessionCopyLink,
+        ),
+      );
+    }
+    entries.add(
+      item(
+        SessionMenuAction.archive,
+        icon: session.archived ? Symbols.unarchive : Symbols.archive,
+        label: session.archived
+            ? context.l10n.sessionUnarchive
+            : context.l10n.sessionArchive,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.fork,
+        icon: Symbols.call_split,
+        label: context.l10n.sessionFork,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.delete,
+        icon: Symbols.delete,
+        label: context.l10n.sessionDelete,
+        color: errorColor,
+      ),
+    );
+  } else {
+    entries.add(
+      item(
+        SessionMenuAction.pin,
+        icon: Symbols.push_pin,
+        label: isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.rename,
+        icon: Symbols.edit,
+        label: context.l10n.sessionRename,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.fork,
+        icon: Symbols.call_split,
+        label: context.l10n.sessionFork,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.delete,
+        icon: Symbols.delete,
+        label: context.l10n.sessionDelete,
+        color: errorColor,
+      ),
+    );
+  }
+
+  if (includeTabLocal && tabIdentity != null) {
+    entries.add(
+      item(
+        SessionMenuAction.changeIcon,
+        icon: Symbols.category,
+        label: context.l10n.sessionTabChangeIconAction,
+      ),
+    );
+  }
+
+  if (includeActiveOnly) {
+    entries.add(const PopupMenuDivider());
+    entries.add(
+      item(
+        SessionMenuAction.exportMarkdown,
+        icon: Symbols.description,
+        label: context.l10n.sessionExportMarkdown,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.exportJson,
+        icon: Symbols.data_object,
+        label: context.l10n.sessionExportDebugJson,
+      ),
+    );
+    entries.add(const PopupMenuDivider());
+    entries.add(
+      item(
+        SessionMenuAction.viewTasks,
+        icon: Symbols.checklist,
+        label: context.l10n.sessionViewTasks,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.reviewChanges,
+        icon: Symbols.preview,
+        label: context.l10n.chatReviewChanges,
+      ),
+    );
+    entries.add(const PopupMenuDivider());
+    entries.add(
+      item(
+        SessionMenuAction.undo,
+        icon: Symbols.undo_rounded,
+        label: context.l10n.chatUndoLastTurn,
+        enabled: isActive ? canUndo : true,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.redo,
+        icon: Symbols.redo_rounded,
+        label: context.l10n.chatRedoLastTurn,
+        enabled: isActive ? canRedo : true,
+      ),
+    );
+    entries.add(
+      item(
+        SessionMenuAction.compact,
+        icon: Symbols.compress,
+        label: context.l10n.sessionCompactContext,
+        enabled: isActive ? canCompact : true,
+      ),
+    );
+  }
+
+  if (canCloseProject && closeProjectLabel != null) {
+    entries.add(const PopupMenuDivider());
+    entries.add(
+      item(
+        SessionMenuAction.closeProject,
+        icon: Symbols.close,
+        label: closeProjectLabel,
+        color: errorColor,
+      ),
+    );
+  }
+
+  return entries;
 }
 
 Future<void> showSessionContextMenu(

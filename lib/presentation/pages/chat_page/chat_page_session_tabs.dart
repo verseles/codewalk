@@ -129,15 +129,239 @@ extension _ChatPageSessionTabs on _ChatPageState {
     required bool haptic,
   }) async {
     if (_isNewChatDraftTab(tab)) return;
-    if (!tab.isSelected && !await _activateSessionTab(tab)) {
-      return;
-    }
     if (!mounted || !_isChatScreenActive()) return;
-    await _showCurrentSessionActionsMenu(
-      globalPosition: globalPosition,
-      haptic: haptic,
+    final chatProvider = context.read<ChatProvider>();
+    final projectProvider = context.read<ProjectProvider>();
+    final exactSession = chatProvider.sessionForSessionTab(tab.identity);
+    final hasExactSnapshot = exactSession != null;
+    final effectiveSession = exactSession ?? _placeholderSessionForTab(tab);
+    final isPinned = tab.isPinned || chatProvider.isSessionPinned(tab.identity.sessionId);
+    final project = _projectForSessionTab(projectProvider, tab);
+    final canClose = project != null && projectProvider.canCloseProject(project.id);
+    final closeLabel = project != null ? context.l10n.workspaceCloseProject(_projectDisplayLabel(project)) : null;
+    final isActive = tab.isSelected && chatProvider.currentSession?.id == tab.identity.sessionId;
+    final canUndo = chatProvider.canUndoCurrentSession;
+    final canRedo = chatProvider.canRedoCurrentSession;
+    final canCompact = !chatProvider.isCompactingContext && !chatProvider.canAbortActiveResponse;
+
+    final entries = buildUnifiedSessionMenuEntries(
+      context,
+      session: hasExactSnapshot ? exactSession : null,
+      isPinned: isPinned,
       tabIdentity: tab.identity,
+      includeTabLocal: true,
+      includeActiveOnly: true,
+      isActive: isActive,
+      canUndo: canUndo,
+      canRedo: canRedo,
+      canCompact: canCompact,
+      canCloseProject: canClose,
+      closeProjectLabel: closeLabel,
     );
+
+    if (haptic) {
+      unawaited(HapticFeedback.mediumImpact());
+    }
+    logSessionContextMenuOpen(surface: 'tab', sessionId: tab.identity.sessionId);
+    final overlay = Overlay.of(context).context.findRenderObject();
+    if (overlay is! RenderBox) return;
+    final selected = await showMenu<SessionMenuAction>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 1, 1),
+        Offset.zero & overlay.size,
+      ),
+      items: entries,
+    );
+    if (!mounted || !_isChatScreenActive() || selected == null) return;
+    await _handleUnifiedTabMenuSelection(
+      tab: tab,
+      hasExactSnapshot: hasExactSnapshot,
+      effectiveSession: effectiveSession,
+      exactSession: exactSession,
+      isActive: isActive,
+      action: selected,
+      project: project,
+    );
+  }
+
+  Future<void> _handleUnifiedTabMenuSelection({
+    required SessionTabRecord tab,
+    required bool hasExactSnapshot,
+    required ChatSession effectiveSession,
+    required ChatSession? exactSession,
+    required bool isActive,
+    required SessionMenuAction action,
+    required Project? project,
+  }) async {
+    final chatProvider = context.read<ChatProvider>();
+    final target = SessionActionTarget(identity: tab.identity, projectId: tab.projectId);
+    // Entity and tab-local actions never activate.
+    switch (action) {
+      case SessionMenuAction.pin:
+        final wasPinned = chatProvider.isSessionPinned(tab.identity.sessionId) || tab.isPinned;
+        await chatProvider.toggleSessionPinned(effectiveSession, target: target);
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          context.l10n.chatSessionConversationNextAction(
+            wasPinned ? context.l10n.sessionActionUnpinned : context.l10n.sessionActionPinned,
+          ),
+          hideCurrent: false,
+        );
+        return;
+      case SessionMenuAction.rename:
+        final sessionForDialog = hasExactSnapshot ? exactSession! : effectiveSession;
+        showSessionRenameDialog(
+          context,
+          sessionForDialog,
+          SessionContextMenuActions(
+            onSessionRenamed: (s, title) => chatProvider.renameSession(s, title, target: target),
+          ),
+        );
+        return;
+      case SessionMenuAction.share:
+        if (!hasExactSnapshot) {
+          if (!mounted) return;
+          _showChatPageMessageSnackBar(context.l10n.sessionNotAvailable, hideCurrent: false);
+          return;
+        }
+        final wasShared = exactSession!.shared;
+        final ok = await chatProvider.toggleSessionShare(exactSession, target: target);
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          ok
+              ? (wasShared ? context.l10n.sessionUnshared : context.l10n.sessionShared)
+              : (chatProvider.errorMessage ?? context.l10n.sessionFailedUpdateSharing),
+          hideCurrent: false,
+        );
+        return;
+      case SessionMenuAction.copyLink:
+        final link = exactSession?.shareUrl?.trim();
+        if (link == null || link.isEmpty) {
+          if (!mounted) return;
+          _showChatPageMessageSnackBar(context.l10n.sessionShareLinkUnavailable, hideCurrent: false);
+          return;
+        }
+        await Clipboard.setData(ClipboardData(text: link));
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(context.l10n.sessionShareLinkCopied, hideCurrent: false);
+        return;
+      case SessionMenuAction.archive:
+        if (!hasExactSnapshot) {
+          if (!mounted) return;
+          _showChatPageMessageSnackBar(context.l10n.sessionNotAvailable, hideCurrent: false);
+          return;
+        }
+        final shouldArchive = !exactSession!.archived;
+        final ok2 = await chatProvider.setSessionArchived(exactSession, shouldArchive, target: target);
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          ok2
+              ? context.l10n.chatSessionConversationNextAction(
+                  shouldArchive ? context.l10n.sessionActionArchived : context.l10n.sessionActionUnarchived,
+                )
+              : context.l10n.sessionFailedUpdateArchive,
+          hideCurrent: false,
+        );
+        return;
+      case SessionMenuAction.fork:
+        final created = await chatProvider.forkSession(effectiveSession, selectForked: false, target: target);
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          created != null ? context.l10n.sessionForked : context.l10n.sessionForkFailed,
+          hideCurrent: false,
+        );
+        return;
+      case SessionMenuAction.delete:
+        final sessionForDelete = hasExactSnapshot ? exactSession! : effectiveSession;
+        unawaited(
+          showDialog<void>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(context.l10n.sessionDeleteTitle),
+            content: Text(
+              context.l10n.sessionDeleteConfirm(
+                SessionTitleFormatter.displayTitle(time: sessionForDelete.time, title: sessionForDelete.title),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text(context.l10n.commonCancel)),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  unawaited(chatProvider.deleteSession(sessionForDelete.id, target: target));
+                },
+                style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                child: Text(context.l10n.sessionDelete),
+              ),
+            ],
+          ),
+        ),
+        );
+        return;
+      case SessionMenuAction.changeIcon:
+        final tabRecord = chatProvider.sessionTabs.where((c) => c.identity == tab.identity).firstOrNull;
+        if (tabRecord == null) return;
+        final projectProvider = context.read<ProjectProvider>();
+        final proj = projectProvider.projects.where((p) => p.id == tab.projectId).firstOrNull;
+        final selection = await showSessionTabIconPicker(context, currentPresetId: tabRecord.iconPresetId, project: proj);
+        if (!mounted || selection == null) return;
+        final saved = await chatProvider.setSessionTabIconPreset(tab.identity, selection.presetId);
+        if (!mounted) return;
+        _showChatPageMessageSnackBar(
+          saved ? context.l10n.sessionTabIconApplied : context.l10n.sessionTabIconSaveFailed,
+          hideCurrent: false,
+        );
+        return;
+      case SessionMenuAction.closeProject:
+        if (project == null) return;
+        await _closeProjectContext(project.id);
+        return;
+      case SessionMenuAction.exportMarkdown:
+      case SessionMenuAction.exportJson:
+      case SessionMenuAction.viewTasks:
+      case SessionMenuAction.reviewChanges:
+      case SessionMenuAction.undo:
+      case SessionMenuAction.redo:
+      case SessionMenuAction.compact:
+        // Active-only: activate if inactive.
+        if (!isActive) {
+          final activated = await _activateSessionTab(tab);
+          if (!activated || !mounted || !_isChatScreenActive()) return;
+          final current = context.read<ChatProvider>().currentSession;
+          if (current == null || current.id != tab.identity.sessionId) {
+            _showSessionTabNavigationError();
+            return;
+          }
+        }
+        final activeProvider = context.read<ChatProvider>();
+        switch (action) {
+          case SessionMenuAction.exportMarkdown:
+            await _exportCurrentSession(activeProvider, format: _SessionExportFormat.markdown);
+            break;
+          case SessionMenuAction.exportJson:
+            await _exportCurrentSession(activeProvider, format: _SessionExportFormat.json);
+            break;
+          case SessionMenuAction.viewTasks:
+            await _openCurrentSessionInsightsDialog(activeProvider, reviewFirst: false);
+            break;
+          case SessionMenuAction.reviewChanges:
+            await _openCurrentSessionInsightsDialog(activeProvider, reviewFirst: true);
+            break;
+          case SessionMenuAction.undo:
+            await _triggerHistoryAction(activeProvider, action: _HistoryToolbarAction.undo);
+            break;
+          case SessionMenuAction.redo:
+            await _triggerHistoryAction(activeProvider, action: _HistoryToolbarAction.redo);
+            break;
+          case SessionMenuAction.compact:
+            await _compactCurrentSession(activeProvider);
+            break;
+          default:
+            break;
+        }
+        return;
+    }
   }
 
   void _syncSessionTabsGestureHint(ChatProvider chatProvider) {

@@ -2113,7 +2113,7 @@ extension ChatProviderSessionTabOps on ChatProvider {
     return restored;
   }
 
-  Future<void> _removeSessionTabsForProjectHistory({
+  Future<void> _removeSessionTabsForDirectoryAsync({
     required String serverId,
     required String directory,
   }) async {
@@ -2252,6 +2252,109 @@ extension ChatProviderSessionTabOps on ChatProvider {
           identity.serverId == normalizedServerId &&
           identity.directory == normalizedDirectory,
     );
+    // Clear pinned state for the directory: by-scope map, active set, snapshots and persistence.
+    final scopedMap = _pinnedSessionIdsByServerScope[normalizedServerId];
+    if (scopedMap != null) {
+      scopedMap.remove(normalizedDirectory);
+      if (scopedMap.isEmpty) {
+        _pinnedSessionIdsByServerScope.remove(normalizedServerId);
+      }
+    }
+    final activeScopeMatches = _activeServerId == normalizedServerId &&
+        (_activePinnedSessionScopeId() == normalizedDirectory ||
+            normalizeOptionalFilePath(_resolveContextScopeId()) == normalizedDirectory);
+    if (activeScopeMatches) {
+      if (_pinnedSessionIds.isNotEmpty) {
+        _pinnedSessionIds = <String>{};
+        _loadedPinnedSessionContextKey = _activeContextKey;
+        _writeThroughPinnedSessionScope(
+          serverId: normalizedServerId,
+          scopeId: normalizedDirectory,
+          ids: const <String>{},
+        );
+        unawaited(
+          _persistPinnedSessionScope(
+            serverId: normalizedServerId,
+            scopeId: normalizedDirectory,
+            ids: const <String>{},
+          ),
+        );
+      } else {
+        _writeThroughPinnedSessionScope(
+          serverId: normalizedServerId,
+          scopeId: normalizedDirectory,
+          ids: const <String>{},
+        );
+        unawaited(
+          _persistPinnedSessionScope(
+            serverId: normalizedServerId,
+            scopeId: normalizedDirectory,
+            ids: const <String>{},
+          ),
+        );
+      }
+    } else {
+      for (final entry in _contextSnapshots.entries.toList()) {
+        if (_serverIdFromContextKey(entry.key) == normalizedServerId &&
+            normalizeOptionalFilePath(_scopeIdFromContextKey(entry.key)) == normalizedDirectory) {
+          if (entry.value.pinnedSessionIds.isNotEmpty) {
+            final old = entry.value;
+            _contextSnapshots[entry.key] = _ChatContextSnapshot(
+              sessions: old.sessions,
+              currentSession: old.currentSession,
+              messages: old.messages,
+              sessionStatusById: old.sessionStatusById,
+              pendingPermissionsBySession: old.pendingPermissionsBySession,
+              pendingQuestionsBySession: old.pendingQuestionsBySession,
+              sessionUnreadCompletionIds: old.sessionUnreadCompletionIds,
+              sessionUnreadCompletionTimestamps: old.sessionUnreadCompletionTimestamps,
+              sessionErrorAttentionIds: old.sessionErrorAttentionIds,
+              sessionChildrenById: old.sessionChildrenById,
+              sessionTodoById: old.sessionTodoById,
+              sessionDiffById: old.sessionDiffById,
+              sessionSearchQuery: old.sessionSearchQuery,
+              sessionListFilter: old.sessionListFilter,
+              sessionListSort: old.sessionListSort,
+              pinnedSessionIds: const <String>{},
+              sessionVisibleLimit: old.sessionVisibleLimit,
+              isNewChatDraftActive: old.isNewChatDraftActive,
+              activeSendDraft: old.activeSendDraft,
+              rejectedDraft: old.rejectedDraft,
+              questionSubmitFailedRequestIds: old.questionSubmitFailedRequestIds,
+              questionSubmitFailedAtById: old.questionSubmitFailedAtById,
+              providers: old.providers,
+              defaultModels: old.defaultModels,
+              connectedProviderIds: old.connectedProviderIds,
+              agents: old.agents,
+              selectedProviderId: old.selectedProviderId,
+              selectedModelId: old.selectedModelId,
+              selectedAgentName: old.selectedAgentName,
+              selectedVariantId: old.selectedVariantId,
+              recentModelKeys: old.recentModelKeys,
+              recentAgentNames: old.recentAgentNames,
+              recentVariantValuesByModel: old.recentVariantValuesByModel,
+              modelUsageCounts: old.modelUsageCounts,
+              selectedVariantByModel: old.selectedVariantByModel,
+              agentSelectionMemoryByAgent: old.agentSelectionMemoryByAgent,
+              providerCatalogFetchedAtEpochMs: old.providerCatalogFetchedAtEpochMs,
+              agentCatalogFetchedAtEpochMs: old.agentCatalogFetchedAtEpochMs,
+            );
+          }
+        }
+      }
+      _writeThroughPinnedSessionScope(
+        serverId: normalizedServerId,
+        scopeId: normalizedDirectory,
+        ids: const <String>{},
+      );
+      unawaited(
+        _persistPinnedSessionScope(
+          serverId: normalizedServerId,
+          scopeId: normalizedDirectory,
+          ids: const <String>{},
+        ),
+      );
+    }
     final nextStateJson = _sessionTabsPersistedState.encode();
     _sessionTabsPersistedStateEncoded = nextStateJson;
     if (_sessionTabsLoadedServerId == normalizedServerId &&

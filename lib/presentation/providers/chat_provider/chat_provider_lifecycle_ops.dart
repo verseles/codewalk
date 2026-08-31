@@ -429,92 +429,143 @@ extension ChatProviderLifecycleOps on ChatProvider {
   }
 
   /// Delete session
-  Future<void> deleteSession(String sessionId) async {
-    _currentProjectId = projectProvider.currentProjectId;
-    final previousSessions = List<ChatSession>.from(_sessions);
-    final previousCurrent = _currentSession;
-    final previousMessages = List<ChatMessage>.from(_messages);
-    final wasCurrent = previousCurrent?.id == sessionId;
-    final deletedSession = previousSessions
-        .where((session) => session.id == sessionId)
-        .firstOrNull;
-    final tabIdentity = deletedSession == null
-        ? null
-        : _sessionTabIdentityForSession(
-            deletedSession,
-            contextKey: _activeContextKey,
-          );
-    final attentionIdentity = _sessionAttentionIdentityFor(
-      contextKey: _activeContextKey,
-      sessionId: sessionId,
-    );
-
-    _removeSessionMessagesCache(sessionId);
-    unawaited(_clearSessionMessagesSnapshotBestEffort(sessionId));
-
-    _removeSessionById(sessionId, removePin: false);
-    _sortSessionsInPlace();
-
-    if (wasCurrent) {
-      _currentSession = _sessions.firstOrNull;
-      _dismissNotificationsForSession(_currentSession?.id);
-      _threadPermissionsVersion++;
-      _messages = <ChatMessage>[];
-      _isLoadingOlderMessages = false;
-      _hasMoreOldMessages = false;
-      _messagesVersion++;
-    }
-    notifyListeners();
-
-    final result = await deleteChatSession(
-      DeleteChatSessionParams(
-        projectId: projectProvider.currentProjectId,
+  Future<void> deleteSession(
+    String sessionId, {
+    SessionActionTarget? target,
+  }) async {
+    if (target != null && !target.isValid) return;
+    final isTargetActive = target == null || _isActiveTarget(target);
+    if (target == null || isTargetActive) {
+      _currentProjectId = projectProvider.currentProjectId;
+      final previousSessions = List<ChatSession>.from(_sessions);
+      final previousCurrent = _currentSession;
+      final previousMessages = List<ChatMessage>.from(_messages);
+      final wasCurrent = previousCurrent?.id == sessionId;
+      final deletedSession = previousSessions
+          .where((session) => session.id == sessionId)
+          .firstOrNull;
+      final tabIdentity = deletedSession == null
+          ? null
+          : _sessionTabIdentityForSession(
+              deletedSession,
+              contextKey: _activeContextKey,
+            );
+      final attentionIdentity = _sessionAttentionIdentityFor(
+        contextKey: _activeContextKey,
         sessionId: sessionId,
-        directory: projectProvider.currentDirectory,
-      ),
-    );
+      );
 
-    result.fold(
-      (failure) {
-        _sessions = previousSessions;
-        _currentSession = previousCurrent;
+      _removeSessionMessagesCache(sessionId);
+      unawaited(_clearSessionMessagesSnapshotBestEffort(sessionId));
+
+      _removeSessionById(sessionId, removePin: false);
+      _sortSessionsInPlace();
+
+      if (wasCurrent) {
+        _currentSession = _sessions.firstOrNull;
         _dismissNotificationsForSession(_currentSession?.id);
         _threadPermissionsVersion++;
-        _messages = List<ChatMessage>.from(previousMessages);
-        if (previousCurrent != null) {
-          _cacheSessionMessages(previousCurrent.id, previousMessages);
-          unawaited(
-            _persistSessionMessagesSnapshotBestEffort(
-              previousCurrent.id,
-              previousMessages,
-            ),
-          );
-        }
+        _messages = <ChatMessage>[];
+        _isLoadingOlderMessages = false;
+        _hasMoreOldMessages = false;
         _messagesVersion++;
-        _sortSessionsInPlace();
-        unawaited(_persistLastSessionSnapshotBestEffort());
+      }
+      notifyListeners();
+
+      final effectiveProjectId = target != null ? _projectIdForTarget(target) : projectProvider.currentProjectId;
+      final effectiveDirectory = target != null ? _directoryForTarget(target) : projectProvider.currentDirectory;
+      final result = await deleteChatSession(
+        DeleteChatSessionParams(
+          projectId: effectiveProjectId,
+          sessionId: sessionId,
+          directory: effectiveDirectory,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          _sessions = previousSessions;
+          _currentSession = previousCurrent;
+          _dismissNotificationsForSession(_currentSession?.id);
+          _threadPermissionsVersion++;
+          _messages = List<ChatMessage>.from(previousMessages);
+          if (previousCurrent != null) {
+            _cacheSessionMessages(previousCurrent.id, previousMessages);
+            unawaited(
+              _persistSessionMessagesSnapshotBestEffort(
+                previousCurrent.id,
+                previousMessages,
+              ),
+            );
+          }
+          _messagesVersion++;
+          _sortSessionsInPlace();
+          unawaited(_persistLastSessionSnapshotBestEffort());
+          _handleFailure(failure);
+        },
+        (_) async {
+          if (tabIdentity != null) {
+            _removeSessionTabAuthoritatively(
+              tabIdentity,
+              activeContext: true,
+              removeIconOverride: true,
+            );
+          }
+          if (attentionIdentity != null) {
+            _deleteSessionAttentionSnapshotIdentity(attentionIdentity);
+          }
+          if (wasCurrent && _currentSession != null) {
+            await loadMessages(_currentSession!.id);
+            await loadSessionInsights(_currentSession!.id, silent: true);
+          }
+          if (_currentSession == null) {
+            unawaited(_clearLastSessionSnapshotBestEffort());
+          } else {
+            unawaited(_persistLastSessionSnapshotBestEffort());
+          }
+          notifyListeners();
+        },
+      );
+      return;
+    }
+
+    // Inactive target path
+    final contextKey = _composeContextKey(target!.serverId, target.directory);
+    final existing = _contextSnapshots[contextKey];
+    final previousSnapshot = existing;
+    if (existing != null) {
+      _removeSessionForTarget(target, sessionId);
+      notifyListeners();
+    }
+    final effectiveProjectId = _projectIdForTarget(target);
+    final effectiveDirectory = _directoryForTarget(target);
+    final result = await deleteChatSession(
+      DeleteChatSessionParams(
+        projectId: effectiveProjectId,
+        sessionId: sessionId,
+        directory: effectiveDirectory,
+      ),
+    );
+    result.fold(
+      (failure) {
+        if (previousSnapshot != null) {
+          _contextSnapshots[contextKey] = previousSnapshot;
+          notifyListeners();
+        }
         _handleFailure(failure);
       },
       (_) async {
-        if (tabIdentity != null) {
-          _removeSessionTabAuthoritatively(
-            tabIdentity,
-            activeContext: true,
-            removeIconOverride: true,
-          );
-        }
-        if (attentionIdentity != null) {
-          _deleteSessionAttentionSnapshotIdentity(attentionIdentity);
-        }
-        if (wasCurrent && _currentSession != null) {
-          await loadMessages(_currentSession!.id);
-          await loadSessionInsights(_currentSession!.id, silent: true);
-        }
-        if (_currentSession == null) {
-          unawaited(_clearLastSessionSnapshotBestEffort());
-        } else {
-          unawaited(_persistLastSessionSnapshotBestEffort());
-        }
+        _removeSessionTabAuthoritatively(
+          target.identity,
+          activeContext: false,
+          removeIconOverride: true,
+        );
+        final attentionIdentity = SessionAttentionIdentity(
+          serverId: target.serverId,
+          directory: target.directory,
+          rootSessionId: sessionId,
+        );
+        _deleteSessionAttentionSnapshotIdentity(attentionIdentity);
         notifyListeners();
       },
     );

@@ -90,6 +90,7 @@ import '../widgets/forward_message_dialog.dart';
 import '../widgets/message_entrance_animation.dart';
 import '../widgets/modal_primary_action_shortcuts.dart';
 import '../widgets/permission_request_card.dart';
+import '../widgets/project_context_menu.dart';
 import '../widgets/project_icon.dart';
 import '../widgets/question_request_card.dart';
 import '../widgets/quota/quota_popup_section.dart';

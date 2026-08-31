@@ -75,8 +75,8 @@ class SessionTabIdentity {
     required String directory,
     required String sessionId,
   }) : serverId = serverId.trim(),
-       directory = normalizeFilePath(directory),
-       sessionId = sessionId.trim();
+        directory = normalizeFilePath(directory),
+        sessionId = sessionId.trim();
 
   final String serverId;
   final String directory;
@@ -95,6 +95,22 @@ class SessionTabIdentity {
 
   @override
   int get hashCode => Object.hash(serverId, directory, sessionId);
+}
+
+@immutable
+class SessionActionTarget {
+  const SessionActionTarget({required this.identity, this.projectId});
+
+  final SessionTabIdentity identity;
+  final String? projectId;
+
+  String get sessionId => identity.sessionId;
+
+  String get directory => identity.directory;
+
+  String get serverId => identity.serverId;
+
+  bool get isValid => identity.isValid;
 }
 
 @immutable

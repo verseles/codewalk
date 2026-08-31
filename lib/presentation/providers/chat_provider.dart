@@ -101,6 +101,7 @@ part 'chat_provider/chat_provider_shortcut_cycle_ops.dart';
 part 'chat_provider/chat_provider_history_ops.dart';
 part 'chat_provider/chat_provider_session_attention_ops.dart';
 part 'chat_provider/chat_provider_session_tab_ops.dart';
+part 'chat_provider/chat_provider_target_ops.dart';
 part 'chat_provider/chat_provider_lifecycle_ops.dart';
 
 /// What a diff refresh attempt should do to the loaded/error bookkeeping
@@ -1126,7 +1127,7 @@ class ChatProvider extends ChangeNotifier {
     return _restoreClosedSessionTab(tab, index: index);
   }
 
-  Future<void> removeSessionTabsForProjectHistory(
+  Future<void> removeSessionTabsForDirectory(
     String directory, {
     String? serverId,
   }) async {
@@ -1135,11 +1136,18 @@ class ChatProvider extends ChangeNotifier {
     final targetServerId = serverId?.trim().isNotEmpty ?? false
         ? serverId!.trim()
         : await _resolveServerScopeId();
-    await _removeSessionTabsForProjectHistory(
+    await _removeSessionTabsForDirectoryAsync(
       serverId: targetServerId,
       directory: normalizedDirectory,
     );
   }
+
+  @Deprecated('Use removeSessionTabsForDirectory')
+  Future<void> removeSessionTabsForProjectHistory(
+    String directory, {
+    String? serverId,
+  }) =>
+      removeSessionTabsForDirectory(directory, serverId: serverId);
 
   @visibleForTesting
   Future<void> debugWaitForSessionTabPersistence() async {
@@ -3300,9 +3308,17 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleSessionPinned(ChatSession session) async {
+  Future<void> toggleSessionPinned(
+    ChatSession session, {
+    SessionActionTarget? target,
+  }) async {
     final sessionId = session.id.trim();
     if (sessionId.isEmpty) {
+      return;
+    }
+    if (target != null) {
+      if (!target.isValid) return;
+      await _togglePinnedForTarget(target, sessionId);
       return;
     }
 
@@ -5222,13 +5238,29 @@ class ChatProvider extends ChangeNotifier {
 
   /// Handle failure
 
-  Future<bool> renameSession(ChatSession session, String title) async {
+  Future<bool> renameSession(
+    ChatSession session,
+    String title, {
+    SessionActionTarget? target,
+  }) async {
     final trimmed = title.trim();
     if (trimmed.isEmpty) {
       return false;
     }
+    if (target != null && !target.isValid) return false;
 
-    final previous = _sessionById(session.id);
+    ChatSession? previous;
+    bool isTargetActive = true;
+    if (target != null) {
+      previous = _sessionForTarget(target) ?? _sessionById(session.id);
+      isTargetActive = _isActiveTarget(target);
+      if (previous == null) {
+        // Fallback to supplied session if no cached copy exists.
+        previous = session;
+      }
+    } else {
+      previous = _sessionById(session.id);
+    }
     if (previous == null) {
       return false;
     }
@@ -5238,40 +5270,70 @@ class ChatProvider extends ChangeNotifier {
     }
 
     final optimistic = previous.copyWith(title: trimmed);
-    _pendingRenameTitleBySessionId[session.id] = trimmed;
-    _applySessionLocally(optimistic);
-    notifyListeners();
+    if (target == null || isTargetActive) {
+      _pendingRenameTitleBySessionId[session.id] = trimmed;
+      _applySessionLocally(optimistic);
+      notifyListeners();
+    } else {
+      _applySessionForTarget(target, optimistic);
+      notifyListeners();
+    }
 
+    final effectiveProjectId = target != null ? _projectIdForTarget(target) : projectProvider.currentProjectId;
+    final effectiveDirectory = target != null ? _directoryForTarget(target) : projectProvider.currentDirectory;
     final result = await updateChatSession(
       UpdateChatSessionParams(
-        projectId: projectProvider.currentProjectId,
+        projectId: effectiveProjectId,
         sessionId: session.id,
         input: SessionUpdateInput(title: trimmed),
-        directory: projectProvider.currentDirectory,
+        directory: effectiveDirectory,
       ),
     );
 
     return result.fold(
       (failure) {
         _pendingRenameTitleBySessionId.remove(session.id);
-        _applySessionLocally(previous);
+        if (target == null || isTargetActive) {
+          _applySessionLocally(previous!);
+        } else {
+          _applySessionForTarget(target!, previous!);
+        }
         _handleFailure(failure);
         notifyListeners();
         return false;
       },
       (updated) {
         _pendingRenameTitleBySessionId.remove(session.id);
-        _applySessionLocally(updated);
-        _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
-        unawaited(_persistSessionCacheBestEffort());
+        if (target == null || isTargetActive) {
+          _applySessionLocally(updated);
+        } else {
+          _applySessionForTarget(target!, updated);
+        }
+        if (target == null || isTargetActive) {
+          _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
+          unawaited(_persistSessionCacheBestEffort());
+        }
         notifyListeners();
         return true;
       },
     );
   }
 
-  Future<bool> setSessionArchived(ChatSession session, bool archived) async {
-    final previous = _sessionById(session.id);
+  Future<bool> setSessionArchived(
+    ChatSession session,
+    bool archived, {
+    SessionActionTarget? target,
+  }) async {
+    if (target != null && !target.isValid) return false;
+    ChatSession? previous;
+    bool isTargetActive = true;
+    if (target != null) {
+      previous = _sessionForTarget(target) ?? _sessionById(session.id);
+      isTargetActive = _isActiveTarget(target);
+      if (previous == null) previous = session;
+    } else {
+      previous = _sessionById(session.id);
+    }
     if (previous == null) {
       return false;
     }
@@ -5282,85 +5344,102 @@ class ChatProvider extends ChangeNotifier {
       archivedAt: archivedAt,
       title: previous.title,
     );
-    _applySessionLocally(optimistic);
-
-    if (archived && _sessionListFilter == SessionListFilter.active) {
-      final visibleSessionIds = _buildVisibleSessionsFrom(
-        _sessions,
-      ).map((item) => item.id).toSet();
-      final currentSessionId = _currentSession?.id;
-      if (currentSessionId != null &&
-          !visibleSessionIds.contains(currentSessionId)) {
-        _currentSession = _buildVisibleSessionsFrom(
+    if (target == null || isTargetActive) {
+      _applySessionLocally(optimistic);
+      if (archived && _sessionListFilter == SessionListFilter.active) {
+        final visibleSessionIds = _buildVisibleSessionsFrom(
           _sessions,
-        ).where((item) => item.id != currentSessionId).firstOrNull;
-        _dismissNotificationsForSession(_currentSession?.id);
-        _threadPermissionsVersion++;
+        ).map((item) => item.id).toSet();
+        final currentSessionId = _currentSession?.id;
+        if (currentSessionId != null &&
+            !visibleSessionIds.contains(currentSessionId)) {
+          _currentSession = _buildVisibleSessionsFrom(
+            _sessions,
+          ).where((item) => item.id != currentSessionId).firstOrNull;
+          _dismissNotificationsForSession(_currentSession?.id);
+          _threadPermissionsVersion++;
+        }
       }
+    } else {
+      _applySessionForTarget(target!, optimistic);
     }
     notifyListeners();
 
+    final effectiveProjectId = target != null ? _projectIdForTarget(target) : projectProvider.currentProjectId;
+    final effectiveDirectory = target != null ? _directoryForTarget(target) : projectProvider.currentDirectory;
     final result = await updateChatSession(
       UpdateChatSessionParams(
-        projectId: projectProvider.currentProjectId,
+        projectId: effectiveProjectId,
         sessionId: session.id,
         input: SessionUpdateInput(
           archivedAtEpochMs: archived ? archivedAt!.millisecondsSinceEpoch : 0,
         ),
-        directory: projectProvider.currentDirectory,
+        directory: effectiveDirectory,
       ),
     );
 
     final succeeded = result.fold(
       (failure) {
-        _applySessionLocally(previous);
-        if (previousCurrentSession != null) {
-          _currentSession =
-              _sessionById(previousCurrentSession.id) ?? previousCurrentSession;
-          _dismissNotificationsForSession(_currentSession?.id);
-          _threadPermissionsVersion++;
+        if (target == null || isTargetActive) {
+          _applySessionLocally(previous!);
+          if (previousCurrentSession != null) {
+            _currentSession =
+                _sessionById(previousCurrentSession.id) ?? previousCurrentSession;
+            _dismissNotificationsForSession(_currentSession?.id);
+            _threadPermissionsVersion++;
+          }
+        } else {
+          _applySessionForTarget(target!, previous!);
+          if (previousCurrentSession != null) {
+            _currentSession = previousCurrentSession;
+          }
         }
         _handleFailure(failure);
         notifyListeners();
         return false;
       },
       (updated) {
-        _applySessionLocally(updated);
-        if (_currentSession?.id == updated.id) {
-          _currentSession = updated;
-          _dismissNotificationsForSession(updated.id);
-        }
-        if (archived) {
-          final identity = _sessionTabIdentityForSession(
-            updated,
-            contextKey: _activeContextKey,
-          );
-          if (identity != null) {
-            _setSessionTabPin(
-              identity,
-              pinned: false,
-              pinScopeId:
-                  _activePinnedSessionScopeId() ?? _resolveContextScopeId(),
-              persist: true,
-            );
+        if (target == null || isTargetActive) {
+          _applySessionLocally(updated);
+          if (_currentSession?.id == updated.id) {
+            _currentSession = updated;
+            _dismissNotificationsForSession(updated.id);
           }
+          if (archived) {
+            final identity = _sessionTabIdentityForSession(
+              updated,
+              contextKey: _activeContextKey,
+            );
+            if (identity != null) {
+              _setSessionTabPin(
+                identity,
+                pinned: false,
+                pinScopeId:
+                    _activePinnedSessionScopeId() ?? _resolveContextScopeId(),
+                persist: true,
+              );
+            }
+          }
+          _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
+          unawaited(_persistSessionCacheBestEffort());
+        } else {
+          _applySessionForTarget(target!, updated);
         }
-        _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
-        unawaited(_persistSessionCacheBestEffort());
         notifyListeners();
         return true;
       },
     );
     if (succeeded && archived) {
-      final updated = _sessionById(session.id) ?? session;
+      final updated = target != null ? updatedOrPrevious(target, session) : (_sessionById(session.id) ?? session);
       final sessionDirectory = (updated.directory ?? '').trim();
+      final effectiveServerId = target?.serverId ?? _activeServerId;
       final directory = sessionDirectory.isNotEmpty
           ? sessionDirectory
-          : (projectProvider.currentDirectory ?? '').trim();
-      if (_activeServerId.isNotEmpty && directory.isNotEmpty) {
+          : (effectiveDirectory ?? '').trim();
+      if (effectiveServerId.isNotEmpty && directory.isNotEmpty) {
         await _sessionAttentionCompletionResolver?.removeIdentity(
           SessionAttentionIdentity(
-            serverId: _activeServerId,
+            serverId: effectiveServerId,
             directory: directory,
             rootSessionId: session.id,
           ),
@@ -5370,8 +5449,24 @@ class ChatProvider extends ChangeNotifier {
     return succeeded;
   }
 
-  Future<bool> toggleSessionShare(ChatSession session) async {
-    final previous = _sessionById(session.id);
+  ChatSession updatedOrPrevious(SessionActionTarget t, ChatSession fallback) {
+    return _sessionForTarget(t) ?? fallback;
+  }
+
+  Future<bool> toggleSessionShare(
+    ChatSession session, {
+    SessionActionTarget? target,
+  }) async {
+    if (target != null && !target.isValid) return false;
+    ChatSession? previous;
+    bool isTargetActive = true;
+    if (target != null) {
+      previous = _sessionForTarget(target) ?? _sessionById(session.id);
+      isTargetActive = _isActiveTarget(target);
+      if (previous == null) previous = session;
+    } else {
+      previous = _sessionById(session.id);
+    }
     if (previous == null) {
       return false;
     }
@@ -5380,35 +5475,51 @@ class ChatProvider extends ChangeNotifier {
       shareUrl: previous.shared ? null : previous.shareUrl,
       shared: !previous.shared,
     );
-    _applySessionLocally(optimistic);
+    if (target == null || isTargetActive) {
+      _applySessionLocally(optimistic);
+    } else {
+      _applySessionForTarget(target!, optimistic);
+    }
     notifyListeners();
 
+    final effectiveProjectId = target != null ? _projectIdForTarget(target) : projectProvider.currentProjectId;
+    final effectiveDirectory = target != null ? _directoryForTarget(target) : projectProvider.currentDirectory;
     final result = previous.shared
         ? await unshareChatSession(
             UnshareChatSessionParams(
-              projectId: projectProvider.currentProjectId,
+              projectId: effectiveProjectId,
               sessionId: session.id,
-              directory: projectProvider.currentDirectory,
+              directory: effectiveDirectory,
             ),
           )
         : await shareChatSession(
             ShareChatSessionParams(
-              projectId: projectProvider.currentProjectId,
+              projectId: effectiveProjectId,
               sessionId: session.id,
-              directory: projectProvider.currentDirectory,
+              directory: effectiveDirectory,
             ),
           );
 
     return result.fold(
       (failure) {
-        _applySessionLocally(previous);
+        if (target == null || isTargetActive) {
+          _applySessionLocally(previous!);
+        } else {
+          _applySessionForTarget(target!, previous!);
+        }
         _handleFailure(failure);
         notifyListeners();
         return false;
       },
       (updated) {
-        _applySessionLocally(updated);
-        unawaited(_persistSessionCacheBestEffort());
+        if (target == null || isTargetActive) {
+          _applySessionLocally(updated);
+        } else {
+          _applySessionForTarget(target!, updated);
+        }
+        if (target == null || isTargetActive) {
+          unawaited(_persistSessionCacheBestEffort());
+        }
         notifyListeners();
         return true;
       },

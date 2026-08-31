@@ -225,15 +225,92 @@ extension _ChatPageWorkspaceController on _ChatPageState {
   }
 
   Future<void> _closeProjectContext(String projectId) async {
+    final projectProvider = context.read<ProjectProvider>();
     final chatProvider = context.read<ChatProvider>();
+    // Capture target before transition to avoid stale reads.
+    final targetProject = projectProvider.projects.where((p) => p.id == projectId).firstOrNull;
+    if (targetProject == null) return;
+    if (!projectProvider.openProjectIds.contains(projectId)) return;
+    if (!projectProvider.canCloseProject(projectId)) {
+      if (mounted) {
+        final error = projectProvider.error;
+        if (error != null && error.trim().isNotEmpty) {
+          _showChatPageMessageSnackBar(error, hideCurrent: false);
+        } else {
+          _showChatPageMessageSnackBar(
+            L10nBridge.current?.projectProviderErrorAtLeastOneContext ?? 'At least one context must remain open',
+            hideCurrent: false,
+          );
+        }
+      }
+      return;
+    }
+    final targetDirectory = normalizeOptionalFilePath(targetProject.path);
+    final targetServerId = chatProvider.activeServerId;
+
     await _runProjectScopeTransition(() async {
-      final projectProvider = context.read<ProjectProvider>();
-      final wasActiveProject = projectProvider.currentProject?.id == projectId;
-      final changed = await projectProvider.closeProject(projectId);
-      if (!changed || !wasActiveProject) {
+      final pp = context.read<ProjectProvider>();
+      final cp = context.read<ChatProvider>();
+      // Re-resolve under lock.
+      final currentProject = pp.projects.where((p) => p.id == projectId).firstOrNull;
+      if (currentProject == null || !pp.openProjectIds.contains(projectId)) {
         return;
       }
-      await chatProvider.onProjectScopeChanged(waitForRevalidation: false);
+      if (!pp.canCloseProject(projectId)) {
+        if (mounted) {
+          final error = pp.error;
+          if (error != null && error.trim().isNotEmpty) {
+            _showChatPageMessageSnackBar(error, hideCurrent: false);
+          }
+        }
+        return;
+      }
+      final wasActive = pp.currentProject?.id == projectId;
+      final directory = normalizeOptionalFilePath(currentProject.path) ?? targetDirectory;
+      final serverId = cp.activeServerId.isNotEmpty ? cp.activeServerId : targetServerId;
+
+      // Pre-clean: remove tabs for the target directory before closing, so closing does not leave orphans.
+      if (directory != null && serverId.isNotEmpty) {
+        try {
+          await cp.removeSessionTabsForDirectory(directory, serverId: serverId);
+        } catch (error, stackTrace) {
+          AppLogger.warn('Close project pre-cleanup failed for $directory', error: error, stackTrace: stackTrace);
+        }
+      }
+
+      final changed = await pp.closeProject(projectId);
+      if (!changed) {
+        if (mounted) {
+          final error = pp.error;
+          if (error != null && error.trim().isNotEmpty) {
+            _showChatPageMessageSnackBar(error, hideCurrent: false);
+          }
+        }
+        return;
+      }
+
+      if (wasActive) {
+        try {
+          await cp.onProjectScopeChanged(waitForRevalidation: false);
+        } catch (error, stackTrace) {
+          AppLogger.warn('Close project scope refresh failed', error: error, stackTrace: stackTrace);
+        }
+      }
+
+      // Final sweep: ensure tabs do not reappear via _storeCurrentContextSnapshot race.
+      if (directory != null && serverId.isNotEmpty) {
+        try {
+          await cp.removeSessionTabsForDirectory(directory, serverId: serverId);
+        } catch (error, stackTrace) {
+          AppLogger.warn('Close project final cleanup failed for $directory', error: error, stackTrace: stackTrace);
+          if (mounted) {
+            _showChatPageMessageSnackBar(
+              'Failed to clean up tabs for closed project',
+              hideCurrent: false,
+            );
+          }
+        }
+      }
     });
   }
 
@@ -265,7 +342,7 @@ extension _ChatPageWorkspaceController on _ChatPageState {
     final serverId = chatProvider.activeServerId;
     final ok = await projectProvider.archiveClosedProject(projectId);
     if (ok && project != null) {
-      await chatProvider.removeSessionTabsForProjectHistory(
+      await chatProvider.removeSessionTabsForDirectory(
         project.path,
         serverId: serverId,
       );

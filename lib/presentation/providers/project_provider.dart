@@ -378,6 +378,14 @@ class ProjectProvider extends ChangeNotifier {
     return true;
   }
 
+  bool canCloseProject(String projectId) {
+    if (!_openProjectIds.contains(projectId)) return false;
+    if (_openProjectIds.length <= 1 && _currentProject?.id == projectId) {
+      return false;
+    }
+    return true;
+  }
+
   Future<bool> reopenProject(String projectId, {bool makeActive = true}) async {
     final project = _projects.where((item) => item.id == projectId).firstOrNull;
     if (project == null) {
