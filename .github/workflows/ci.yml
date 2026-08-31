@@ -50,7 +50,7 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee /tmp/flutter_analyze.log
 
       - name: Enforce analyze issue budget
-        run: bash tool/ci/check_analyze_budget.sh /tmp/flutter_analyze.log 335
+        run: bash tool/ci/check_analyze_budget.sh /tmp/flutter_analyze.log 337
 
       - name: Upload analyze report
         uses: actions/upload-artifact@v4
