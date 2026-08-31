@@ -245,7 +245,6 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       }
       return;
     }
-    final targetDirectory = normalizeOptionalFilePath(targetProject.path);
     final targetServerId = chatProvider.activeServerId;
 
     await _runProjectScopeTransition(() async {
@@ -266,11 +265,11 @@ extension _ChatPageWorkspaceController on _ChatPageState {
         return;
       }
       final wasActive = pp.currentProject?.id == projectId;
-      final directory = normalizeOptionalFilePath(currentProject.path) ?? targetDirectory;
-      final serverId = cp.activeServerId.isNotEmpty ? cp.activeServerId : targetServerId;
+      final directory = normalizeOptionalFilePath(currentProject.path) ?? currentProject.id;
+      final serverId = targetServerId;
 
       // Pre-clean: remove tabs for the target directory before closing, so closing does not leave orphans.
-      if (directory != null && serverId.isNotEmpty) {
+      if (serverId.isNotEmpty) {
         try {
           await cp.removeSessionTabsForDirectory(directory, serverId: serverId);
         } catch (error, stackTrace) {
@@ -298,7 +297,7 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       }
 
       // Final sweep: ensure tabs do not reappear via _storeCurrentContextSnapshot race.
-      if (directory != null && serverId.isNotEmpty) {
+      if (serverId.isNotEmpty) {
         try {
           await cp.removeSessionTabsForDirectory(directory, serverId: serverId);
         } catch (error, stackTrace) {

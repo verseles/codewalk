@@ -484,7 +484,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
     );
   }
 
-  if (canCloseProject && closeProjectLabel != null) {
+  if (closeProjectLabel != null) {
     entries.add(const PopupMenuDivider());
     entries.add(
       item(
@@ -492,6 +492,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
         icon: Symbols.close,
         label: closeProjectLabel,
         color: errorColor,
+        enabled: canCloseProject,
       ),
     );
   }

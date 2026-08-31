@@ -560,6 +560,13 @@ extension ChatProviderLifecycleOps on ChatProvider {
           activeContext: false,
           removeIconOverride: true,
         );
+        // Ensure pinned state is cleared even when authority is not loaded.
+        _setSessionTabPin(
+          target.identity,
+          pinned: false,
+          pinScopeId: target.directory,
+          persist: true,
+        );
         final attentionIdentity = SessionAttentionIdentity(
           serverId: target.serverId,
           directory: target.directory,

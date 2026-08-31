@@ -5252,10 +5252,9 @@ class ChatProvider extends ChangeNotifier {
     ChatSession? previous;
     bool isTargetActive = true;
     if (target != null) {
-      previous = _sessionForTarget(target) ?? _sessionById(session.id);
+      previous = _sessionForTarget(target);
       isTargetActive = _isActiveTarget(target);
       if (previous == null) {
-        // Fallback to supplied session if no cached copy exists.
         previous = session;
       }
     } else {
@@ -5306,12 +5305,11 @@ class ChatProvider extends ChangeNotifier {
         _pendingRenameTitleBySessionId.remove(session.id);
         if (target == null || isTargetActive) {
           _applySessionLocally(updated);
-        } else {
-          _applySessionForTarget(target!, updated);
-        }
-        if (target == null || isTargetActive) {
           _reconcileSessionTabs(markCurrentViewed: _isSessionTabRouteVisible);
           unawaited(_persistSessionCacheBestEffort());
+        } else {
+          _applySessionForTarget(target!, updated);
+          _reconcileSessionTabs(forcePersistence: false, notify: true);
         }
         notifyListeners();
         return true;
@@ -5328,7 +5326,7 @@ class ChatProvider extends ChangeNotifier {
     ChatSession? previous;
     bool isTargetActive = true;
     if (target != null) {
-      previous = _sessionForTarget(target) ?? _sessionById(session.id);
+      previous = _sessionForTarget(target);
       isTargetActive = _isActiveTarget(target);
       if (previous == null) previous = session;
     } else {
@@ -5362,6 +5360,7 @@ class ChatProvider extends ChangeNotifier {
       }
     } else {
       _applySessionForTarget(target!, optimistic);
+      _reconcileSessionTabs(forcePersistence: false, notify: true);
     }
     notifyListeners();
 
@@ -5424,6 +5423,15 @@ class ChatProvider extends ChangeNotifier {
           unawaited(_persistSessionCacheBestEffort());
         } else {
           _applySessionForTarget(target!, updated);
+          if (archived) {
+            _setSessionTabPin(
+              target!.identity,
+              pinned: false,
+              pinScopeId: target!.identity.directory,
+              persist: true,
+            );
+          }
+          _reconcileSessionTabs(forcePersistence: false, notify: true);
         }
         notifyListeners();
         return true;
@@ -5461,7 +5469,7 @@ class ChatProvider extends ChangeNotifier {
     ChatSession? previous;
     bool isTargetActive = true;
     if (target != null) {
-      previous = _sessionForTarget(target) ?? _sessionById(session.id);
+      previous = _sessionForTarget(target);
       isTargetActive = _isActiveTarget(target);
       if (previous == null) previous = session;
     } else {
@@ -5479,6 +5487,7 @@ class ChatProvider extends ChangeNotifier {
       _applySessionLocally(optimistic);
     } else {
       _applySessionForTarget(target!, optimistic);
+      _reconcileSessionTabs(forcePersistence: false, notify: true);
     }
     notifyListeners();
 
@@ -5514,11 +5523,10 @@ class ChatProvider extends ChangeNotifier {
       (updated) {
         if (target == null || isTargetActive) {
           _applySessionLocally(updated);
+          unawaited(_persistSessionCacheBestEffort());
         } else {
           _applySessionForTarget(target!, updated);
-        }
-        if (target == null || isTargetActive) {
-          unawaited(_persistSessionCacheBestEffort());
+          _reconcileSessionTabs(forcePersistence: false, notify: true);
         }
         notifyListeners();
         return true;
