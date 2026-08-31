@@ -1210,6 +1210,53 @@ void main() {
     expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
   });
 
+  testWidgets('settings switch under Selector still updates within one frame', (
+    WidgetTester tester,
+  ) async {
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: Selector<SettingsProvider, ThemeModeOption>(
+          selector: (context, sp) => sp.themeMode,
+          builder: (context, themeMode, _) {
+            return _localizedMaterialApp(home: const SettingsPage());
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Appearance').first);
+    await tester.pumpAndSettle();
+
+    final toggle = find.byKey(
+      const ValueKey<String>('settings_toggle_composer_tips'),
+    );
+    await tester.scrollUntilVisible(
+      toggle,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+    await tester.tap(toggle);
+    await tester.pump();
+
+    expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
+    expect(settingsProvider.showComposerTips, isFalse);
+  });
+
   testWidgets('About check shows spinner within one frame', (
     WidgetTester tester,
   ) async {
