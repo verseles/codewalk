@@ -38,8 +38,12 @@ void _sessionOverlayAndroidEntrypointAnchor() {
 }
 
 Future<void> main(List<String> args) async {
-  WidgetsFlutterBinding.ensureInitialized();
   await runZonedGuarded<Future<void>>(() async {
+    assert(() {
+      BindingBase.debugZoneErrorsAreFatal = true;
+      return true;
+    }());
+    WidgetsFlutterBinding.ensureInitialized();
     AppLogger.installGlobalHandlers();
     unawaited(AndroidProcessDiagnostics.recordStartup());
 
