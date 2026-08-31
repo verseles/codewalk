@@ -302,6 +302,21 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Route-local provider boundary ensures Settings controls rebuild
+    // even when the top-level Selector<SettingsProvider> in main.dart
+    // caches MaterialApp for unrelated fields (issue 153/175).
+    try {
+      final settingsProvider = context.read<SettingsProvider>();
+      return ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: Builder(builder: _buildContent),
+      );
+    } on ProviderNotFoundException {
+      return _buildContent(context);
+    }
+  }
+
+  Widget _buildContent(BuildContext context) {
     final visibleSections = _visibleSections;
     if (!visibleSections.any((item) => item.id == _selectedSectionId)) {
       _selectedSectionId = visibleSections.first.id;

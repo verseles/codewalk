@@ -726,7 +726,7 @@ class _NotificationsSettingsSectionState
     required SoundOption selected,
   }) {
     return SearchableDropdownFormField<SoundOption>(
-      initialValue: selected,
+      value: selected,
       searchHintText: context.l10n.settingsNotificationsSearchSoundType,
       searchTermsBuilder: (value) => <String>[_soundLabel(value)],
       items: _soundOptions

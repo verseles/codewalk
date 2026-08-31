@@ -1163,6 +1163,101 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     }
   });
+
+  testWidgets('settings controls update within one frame', (
+    WidgetTester tester,
+  ) async {
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: _localizedMaterialApp(home: const SettingsPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Appearance').first);
+    await tester.pumpAndSettle();
+
+    final toggle = find.byKey(
+      const ValueKey<String>('settings_toggle_composer_tips'),
+    );
+    await tester.scrollUntilVisible(
+      toggle,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+    await tester.tap(toggle);
+    await tester.pump();
+
+    expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
+    expect(settingsProvider.showComposerTips, isFalse);
+    expect(jsonDecode(local.experienceSettingsJson!)['showComposerTips'], isFalse);
+
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
+  });
+
+  testWidgets('About check shows spinner within one frame', (
+    WidgetTester tester,
+  ) async {
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final completer = Completer<UpdateCheckResult?>();
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+      updateCheckService: _CompleterUpdateCheckService(completer),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: _localizedMaterialApp(
+          home: const SettingsPage(initialSectionId: 'about'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Check for updates'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Check for updates'));
+    await tester.pump();
+
+    expect(settingsProvider.checkingForUpdate, isTrue);
+    expect(find.text('Checking...'), findsOneWidget);
+    expect(
+      find.byType(CircularProgressIndicator),
+      findsWidgets,
+    );
+
+    completer.complete(null);
+    await tester.pumpAndSettle();
+
+    expect(settingsProvider.checkingForUpdate, isFalse);
+    expect(find.text('Checking...'), findsNothing);
+  });
 }
 
 void _setPackageInfoVersion({
