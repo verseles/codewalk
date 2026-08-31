@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -227,6 +228,8 @@ class _ChatPageState extends State<ChatPage>
   static const int _maxFinalAssistantRevealAttempts = 8;
   static const double _returnLatestRevealAlignment = 0.0;
   static const int _maxReturnLatestRevealAttempts = 8;
+  static const int _maxSessionReturnRestoreAttempts = 4;
+  static const int _maxSessionViewportSnapshots = 20;
   static const Duration _userScrollIntentHoldDuration = Duration(
     milliseconds: 900,
   );
@@ -245,7 +248,7 @@ class _ChatPageState extends State<ChatPage>
   final FocusNode _timelineSearchFocusNode = FocusNode(
     debugLabel: 'timeline_search',
   );
-  final Map<String, GlobalKey> _timelineSearchMessageKeysByMessageId =
+  final Map<String, GlobalKey> _timelineMessageKeysByMessageId =
       <String, GlobalKey>{};
   // Scroll controller for the file viewer's vertical content area.
   // Used to scroll to a specific line when a file path is tapped in chat.
@@ -363,6 +366,12 @@ class _ChatPageState extends State<ChatPage>
   // Per-session collapse state cache (up to 20 sessions, LRU-evicted).
   // Stores the last expanded history group ID for each session ID.
   final Map<String, String?> _sessionCollapseHistoryCache = {};
+  final LinkedHashMap<String, _SessionViewportSnapshot>
+  _sessionViewportSnapshots = LinkedHashMap<String, _SessionViewportSnapshot>();
+  _PendingSessionReturnRestore? _pendingSessionReturnRestore;
+  _SessionReturnCompensation? _sessionReturnCompensation;
+  int _sessionReturnRestoreGeneration = 0;
+  bool _sessionReturnRestoreScheduled = false;
   final Map<String, bool> _projectGroupExpandedById = <String, bool>{};
   bool _isAppInForeground = true;
   bool _wasChatRouteCurrent = false;
@@ -389,12 +398,18 @@ class _ChatPageState extends State<ChatPage>
   int _lastProviderMessageTrackingCount = 0;
   int _lastProviderMessageTrackingVersion = -1;
 
+  @visibleForTesting
+  String debugSessionViewportTrace() =>
+      'snapshots=${_sessionViewportSnapshots.length} pending=${_pendingSessionReturnRestore?.snapshot.parentSessionId ?? "-"}:${_pendingSessionReturnRestore?.snapshot.expectedChildSessionId ?? "-"} owner=${_currentScrollOwner.name} gen=$_sessionReturnRestoreGeneration';
+
   void _setScrollOwner(_ScrollOwner owner) {
     final previousOwner = _currentScrollOwner;
     _currentScrollOwner = owner;
     _isProgrammaticScrollInFlight =
         owner != _ScrollOwner.none && owner != _ScrollOwner.userDrag;
-    _isReturnRevealInFlight = owner == _ScrollOwner.returnReveal;
+    _isReturnRevealInFlight =
+        owner == _ScrollOwner.returnReveal ||
+        owner == _ScrollOwner.sessionReturnRestore;
     _olderMessagesAnchorRestoreInFlight =
         owner == _ScrollOwner.paginationRestore;
     if (previousOwner != owner) {
@@ -841,6 +856,7 @@ class _ChatPageState extends State<ChatPage>
     unawaited(_chatProvider?.setForegroundActive(false));
     _chatProvider?.removeListener(_handleChatProviderChanged);
     _scrollToBottomRequestToken += 1;
+    _clearSessionViewportNavigationState(reason: 'dispose');
     _appProvider?.removeListener(_handleAppProviderChange);
     _projectProvider?.removeListener(_handleProjectProviderChange);
     _notificationTapSubscription?.cancel();
@@ -1117,6 +1133,7 @@ class _ChatPageState extends State<ChatPage>
     final serverChanged = currentServerId != _lastServerId;
 
     if (serverChanged) {
+      _clearSessionViewportNavigationState(reason: 'server-changed');
       _syncEditorAutosaveForActiveContext(enabled: false);
       _lastServerId = currentServerId;
       _lastServerConnectionState = currentConnected;
@@ -1178,6 +1195,7 @@ class _ChatPageState extends State<ChatPage>
   void _handleProjectProviderChange() {
     final contextKey = _projectProvider?.contextKey;
     if (contextKey != null && contextKey != _lastFileEditorAutosaveContextKey) {
+      _clearSessionViewportNavigationState(reason: 'project-context-changed');
       final previousContextKey = _lastFileEditorAutosaveContextKey;
       if (previousContextKey != null &&
           _settingsProvider?.editorAutosaveEnabled == true) {

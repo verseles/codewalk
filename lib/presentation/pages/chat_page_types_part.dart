@@ -617,11 +617,78 @@ enum _ScrollOwner {
   newMessage,
   streaming,
   returnReveal,
+  sessionReturnRestore,
   contentShrinkSnap,
   searchResult,
 }
 
 enum _CachedViewportRestoreTarget { none, bottom, latestResponse }
+
+enum _SessionSwitchViewportIntent { generic, drillIntoSubagent, returnToParent }
+
+class _SessionViewportAnchor {
+  const _SessionViewportAnchor({
+    required this.messageId,
+    required this.topOffset,
+  });
+
+  final String messageId;
+  final double topOffset;
+}
+
+class _SessionViewportSnapshot {
+  const _SessionViewportSnapshot({
+    required this.contextKey,
+    required this.parentSessionId,
+    required this.expectedChildSessionId,
+    required this.followMode,
+    required this.hadUnreadMessagesBelow,
+    required this.tailMessageId,
+    required this.messageCount,
+    required this.messagesVersion,
+    required this.pixels,
+    required this.maxScrollExtent,
+    required this.anchors,
+  });
+
+  final String contextKey;
+  final String parentSessionId;
+  final String expectedChildSessionId;
+  final _ScrollFollowMode followMode;
+  final bool hadUnreadMessagesBelow;
+  final String? tailMessageId;
+  final int messageCount;
+  final int messagesVersion;
+  final double pixels;
+  final double maxScrollExtent;
+  final List<_SessionViewportAnchor> anchors;
+}
+
+class _PendingSessionReturnRestore {
+  const _PendingSessionReturnRestore({
+    required this.snapshot,
+    required this.generation,
+  });
+
+  final _SessionViewportSnapshot snapshot;
+  final int generation;
+}
+
+class _SessionReturnCompensation {
+  const _SessionReturnCompensation({
+    required this.contextKey,
+    required this.sessionId,
+    required this.generation,
+    required this.anchor,
+    required this.baselineMessagesVersion,
+  });
+
+  final String contextKey;
+  final String sessionId;
+  final int generation;
+  final _SessionViewportAnchor anchor;
+  final int baselineMessagesVersion;
+}
 
 @visibleForTesting
 ({String title, String description}) postOnboardingSidebarTourCopy({
@@ -649,3 +716,6 @@ enum _CachedViewportRestoreTarget { none, bottom, latestResponse }
 
 // _ScrollFollowMode (was at the end of chat_page.dart, line 2646).
 enum _ScrollFollowMode { following, pausedByUser, reading }
+
+@visibleForTesting
+String? debugSessionViewportTraceForTest;

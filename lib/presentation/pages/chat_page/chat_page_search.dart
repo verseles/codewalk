@@ -29,16 +29,16 @@ extension _ChatPageSearch on _ChatPageState {
     );
   }
 
-  GlobalKey _timelineSearchMessageKey(String messageId) {
-    return _timelineSearchMessageKeysByMessageId.putIfAbsent(
+  GlobalKey _timelineMessageKey(String messageId) {
+    return _timelineMessageKeysByMessageId.putIfAbsent(
       messageId,
-      () => GlobalKey(debugLabel: 'timeline_search_message_$messageId'),
+      () => GlobalKey(debugLabel: 'timeline_message_$messageId'),
     );
   }
 
-  void _pruneTimelineSearchMessageKeys(List<ChatMessage> messages) {
+  void _pruneTimelineMessageKeys(List<ChatMessage> messages) {
     final visibleIds = messages.map((message) => message.id).toSet();
-    _timelineSearchMessageKeysByMessageId.removeWhere(
+    _timelineMessageKeysByMessageId.removeWhere(
       (messageId, _) => !visibleIds.contains(messageId),
     );
   }
@@ -179,14 +179,14 @@ extension _ChatPageSearch on _ChatPageState {
     _setScrollOwner(_ScrollOwner.searchResult);
     try {
       var targetContext =
-          _timelineSearchMessageKeysByMessageId[messageId]?.currentContext;
+          _timelineMessageKeysByMessageId[messageId]?.currentContext;
       if (targetContext == null) {
         await _materializeTimelineSearchTarget(messageId, opId: opId);
         if (!mounted || opId != _timelineSearchScrollOpId) {
           return;
         }
         targetContext =
-            _timelineSearchMessageKeysByMessageId[messageId]?.currentContext;
+            _timelineMessageKeysByMessageId[messageId]?.currentContext;
       }
       if (targetContext == null) {
         return;

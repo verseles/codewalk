@@ -2594,6 +2594,16 @@ When the association is ambiguous, nothing is opened and the user is told no
 sub-conversation was found. Opening some other subagent is worse than opening
 none.
 
+Returning from a subagent restores the parent viewport exactly when that
+parent was showing before the drill: a parent that was following at the bottom
+returns to the bottom, while a parent that was reading or paused returns to the
+same message anchor and viewport-relative offset. The restore is scoped to the
+immediate parent and expected child and is bounded by the newest-50 cache — if
+the anchor was evicted, the parent lands at the oldest retained boundary
+without auto-paging; deeper history stays behind top-scroll pagination. Warm
+revalidation does not change the generic session-reopen policy: unrelated
+session switches still use active→bottom and settled→latestResponse.
+
 ## Android Attention Overlay
 
 The external overlay exists to follow work while the user is away from

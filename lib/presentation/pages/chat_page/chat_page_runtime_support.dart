@@ -373,6 +373,530 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
     );
   }
 
+  String? _sessionViewportContextKey() => _projectProvider?.contextKey;
+
+  String _sessionViewportSnapshotKey(String contextKey, String sessionId) =>
+      '$contextKey\n$sessionId';
+
+  void _clearSessionViewportNavigationState({
+    required String reason,
+    bool clearSnapshots = true,
+  }) {
+    final hadWork =
+        _pendingSessionReturnRestore != null ||
+        _sessionReturnCompensation != null ||
+        _currentScrollOwner == _ScrollOwner.sessionReturnRestore;
+    _sessionReturnRestoreGeneration += 1;
+    _pendingSessionReturnRestore = null;
+    _sessionReturnCompensation = null;
+    _sessionReturnRestoreScheduled = false;
+    if (_currentScrollOwner == _ScrollOwner.sessionReturnRestore) {
+      _setScrollOwner(_ScrollOwner.none);
+    }
+    if (clearSnapshots) {
+      _sessionViewportSnapshots.clear();
+    }
+    if (hadWork || clearSnapshots) {
+      _traceFinalUi(
+        'session-return-restore-cancel',
+        details: 'reason=$reason clearSnapshots=$clearSnapshots',
+      );
+    }
+  }
+
+  double? _timelineMessageTopOffset(String messageId) {
+    if (!_scrollController.hasClients) {
+      return null;
+    }
+    final messageContext =
+        _timelineMessageKeysByMessageId[messageId]?.currentContext;
+    if (messageContext == null || !messageContext.mounted) {
+      return null;
+    }
+    final messageRenderObject = messageContext.findRenderObject();
+    final viewportRenderObject = _scrollController
+        .position
+        .context
+        .storageContext
+        .findRenderObject();
+    if (messageRenderObject is! RenderBox ||
+        viewportRenderObject is! RenderBox ||
+        !messageRenderObject.attached ||
+        !viewportRenderObject.attached ||
+        !messageRenderObject.hasSize ||
+        !viewportRenderObject.hasSize) {
+      return null;
+    }
+    return messageRenderObject.localToGlobal(Offset.zero).dy -
+        viewportRenderObject.localToGlobal(Offset.zero).dy;
+  }
+
+  List<_SessionViewportAnchor> _captureVisibleSessionViewportAnchors(
+    ChatProvider chatProvider,
+  ) {
+    if (!_scrollController.hasClients) {
+      return const <_SessionViewportAnchor>[];
+    }
+    final viewportHeight = _scrollController.position.viewportDimension;
+    final visible = <_SessionViewportAnchor>[];
+    for (final message in chatProvider.messages) {
+      final top = _timelineMessageTopOffset(message.id);
+      final messageContext =
+          _timelineMessageKeysByMessageId[message.id]?.currentContext;
+      final renderObject = messageContext != null && messageContext.mounted
+          ? messageContext.findRenderObject()
+          : null;
+      if (top == null || renderObject is! RenderBox || !renderObject.hasSize) {
+        continue;
+      }
+      final bottom = top + renderObject.size.height;
+      if (bottom <= 0 || top >= viewportHeight) {
+        continue;
+      }
+      visible.add(
+        _SessionViewportAnchor(messageId: message.id, topOffset: top),
+      );
+    }
+    visible.sort((left, right) => left.topOffset.compareTo(right.topOffset));
+    return List<_SessionViewportAnchor>.unmodifiable(visible.take(3));
+  }
+
+  _SessionViewportSnapshot? _captureSessionViewportSnapshot(
+    ChatProvider chatProvider, {
+    required ChatSession childSession,
+  }) {
+    final parentSession = chatProvider.currentSession;
+    final contextKey = _sessionViewportContextKey();
+    if (parentSession == null ||
+        contextKey == null ||
+        !_scrollController.hasClients ||
+        childSession.parentId?.trim() != parentSession.id) {
+      debugSessionViewportTraceForTest =
+          'capture-skip parent=${parentSession?.id ?? "-"} child=${childSession.id} context=$contextKey hasClients=${_scrollController.hasClients} parentMatch=${childSession.parentId?.trim() == parentSession?.id}';
+      _traceFinalUi(
+        'session-viewport-snapshot-capture-skip',
+        details:
+            'parent=${parentSession?.id ?? "-"} child=${childSession.id} context=$contextKey hasClients=${_scrollController.hasClients} parentMatch=${childSession.parentId?.trim() == parentSession?.id}',
+      );
+      return null;
+    }
+    final position = _scrollController.position;
+    return _SessionViewportSnapshot(
+      contextKey: contextKey,
+      parentSessionId: parentSession.id,
+      expectedChildSessionId: childSession.id,
+      followMode: _scrollFollowMode,
+      hadUnreadMessagesBelow: _hasUnreadMessagesBelow,
+      tailMessageId: chatProvider.messages.lastOrNull?.id,
+      messageCount: chatProvider.messages.length,
+      messagesVersion: chatProvider.messagesVersion,
+      pixels: position.pixels,
+      maxScrollExtent: position.maxScrollExtent,
+      anchors: _captureVisibleSessionViewportAnchors(chatProvider),
+    );
+  }
+
+  void _cacheSessionViewportBeforeDrillDown(
+    ChatProvider chatProvider, {
+    required ChatSession childSession,
+  }) {
+    final snapshot = _captureSessionViewportSnapshot(
+      chatProvider,
+      childSession: childSession,
+    );
+    if (snapshot == null) {
+      return;
+    }
+    final key = _sessionViewportSnapshotKey(
+      snapshot.contextKey,
+      snapshot.parentSessionId,
+    );
+    _sessionViewportSnapshots.remove(key);
+    _sessionViewportSnapshots[key] = snapshot;
+    while (_sessionViewportSnapshots.length >
+        _ChatPageState._maxSessionViewportSnapshots) {
+      _sessionViewportSnapshots.remove(_sessionViewportSnapshots.keys.first);
+    }
+    debugSessionViewportTraceForTest =
+        'capture parent=${snapshot.parentSessionId} child=${snapshot.expectedChildSessionId} mode=${snapshot.followMode.name} anchors=${snapshot.anchors.length} distance=${max(0, snapshot.maxScrollExtent - snapshot.pixels)} hasClients=${_scrollController.hasClients} pixels=${snapshot.pixels} max=${snapshot.maxScrollExtent}';
+    _traceFinalUi(
+      'session-viewport-snapshot-capture',
+      details:
+          'parent=${snapshot.parentSessionId} child=${snapshot.expectedChildSessionId} mode=${snapshot.followMode.name} anchors=${snapshot.anchors.length} distance=${max(0, snapshot.maxScrollExtent - snapshot.pixels)}',
+    );
+  }
+
+  void _prepareSessionViewportSwitch(
+    ChatProvider chatProvider, {
+    required ChatSession targetSession,
+    required _SessionSwitchViewportIntent intent,
+  }) {
+    final currentSession = chatProvider.currentSession;
+    switch (intent) {
+      case _SessionSwitchViewportIntent.generic:
+        _clearSessionViewportNavigationState(
+          reason: 'generic-session-switch',
+          clearSnapshots: false,
+        );
+        return;
+      case _SessionSwitchViewportIntent.drillIntoSubagent:
+        _clearSessionViewportNavigationState(
+          reason: 'subagent-drill-down',
+          clearSnapshots: false,
+        );
+        _cacheSessionViewportBeforeDrillDown(
+          chatProvider,
+          childSession: targetSession,
+        );
+        return;
+      case _SessionSwitchViewportIntent.returnToParent:
+        _clearSessionViewportNavigationState(
+          reason: 'subagent-parent-return',
+          clearSnapshots: false,
+        );
+        final contextKey = _sessionViewportContextKey();
+        if (currentSession == null ||
+            contextKey == null ||
+            currentSession.parentId?.trim() != targetSession.id) {
+          return;
+        }
+        final key = _sessionViewportSnapshotKey(contextKey, targetSession.id);
+        final snapshot = _sessionViewportSnapshots[key];
+        if (snapshot == null ||
+            snapshot.expectedChildSessionId != currentSession.id ||
+            snapshot.contextKey != contextKey) {
+          _sessionViewportSnapshots.remove(key);
+          _traceFinalUi(
+            'session-return-restore-miss',
+            details:
+                'parent=${targetSession.id} child=${currentSession.id} reason=snapshot-mismatch',
+          );
+          return;
+        }
+        _pendingSessionReturnRestore = _PendingSessionReturnRestore(
+          snapshot: snapshot,
+          generation: _sessionReturnRestoreGeneration,
+        );
+        _pendingInitialScrollSessionId = targetSession.id;
+        _pendingCachedViewportRestoreTarget = _CachedViewportRestoreTarget.none;
+        _scrollToBottomRequestToken += 1;
+        _returnRevealGeneration += 1;
+        _setScrollOwner(_ScrollOwner.sessionReturnRestore);
+        debugSessionViewportTraceForTest =
+            'queue parent=${targetSession.id} child=${currentSession.id} mode=${snapshot.followMode.name} gen=$_sessionReturnRestoreGeneration';
+        _traceFinalUi(
+          'session-return-restore-queue',
+          details:
+              'parent=${targetSession.id} child=${currentSession.id} mode=${snapshot.followMode.name}',
+        );
+        return;
+    }
+  }
+
+  bool _matchesPendingSessionReturnRestore(String? sessionId) {
+    final pending = _pendingSessionReturnRestore;
+    return pending != null &&
+        sessionId != null &&
+        pending.generation == _sessionReturnRestoreGeneration &&
+        pending.snapshot.parentSessionId == sessionId &&
+        pending.snapshot.contextKey == _sessionViewportContextKey();
+  }
+
+  void _schedulePendingSessionReturnRestore(
+    ChatProvider chatProvider, {
+    required String reason,
+  }) {
+    final sessionId = chatProvider.currentSession?.id;
+    if (_sessionReturnRestoreScheduled ||
+        !_matchesPendingSessionReturnRestore(sessionId) ||
+        chatProvider.state == ChatState.loading ||
+        chatProvider.messages.isEmpty) {
+      return;
+    }
+    _sessionReturnRestoreScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _sessionReturnRestoreScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      unawaited(_runPendingSessionReturnRestore(reason: reason));
+    });
+  }
+
+  bool _isSessionReturnRestoreCurrent(_PendingSessionReturnRestore pending) {
+    return mounted &&
+        pending.generation == _sessionReturnRestoreGeneration &&
+        identical(pending, _pendingSessionReturnRestore) &&
+        _chatProvider?.currentSession?.id == pending.snapshot.parentSessionId &&
+        pending.snapshot.contextKey == _sessionViewportContextKey();
+  }
+
+  Future<bool> _alignSessionReturnAnchor({
+    required _PendingSessionReturnRestore pending,
+    required _SessionViewportAnchor anchor,
+    int attempt = 0,
+  }) async {
+    if (!_isSessionReturnRestoreCurrent(pending) ||
+        !_scrollController.hasClients ||
+        _hasUserScrollPriority()) {
+      return false;
+    }
+    var currentTop = _timelineMessageTopOffset(anchor.messageId);
+    if (currentTop == null) {
+      final messages = _chatProvider?.messages ?? const <ChatMessage>[];
+      final messageIndex = messages.indexWhere(
+        (message) => message.id == anchor.messageId,
+      );
+      if (messageIndex == -1 ||
+          attempt >= _ChatPageState._maxSessionReturnRestoreAttempts) {
+        return false;
+      }
+      final position = _scrollController.position;
+      final target = messages.length <= 1
+          ? position.minScrollExtent
+          : position.maxScrollExtent * (messageIndex / (messages.length - 1));
+      position.jumpTo(
+        target.clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+      return _alignSessionReturnAnchor(
+        pending: pending,
+        anchor: anchor,
+        attempt: attempt + 1,
+      );
+    }
+
+    for (var pass = 0; pass < 2; pass += 1) {
+      if (!_isSessionReturnRestoreCurrent(pending) ||
+          !_scrollController.hasClients ||
+          _hasUserScrollPriority()) {
+        return false;
+      }
+      final delta = currentTop! - anchor.topOffset;
+      if (delta.abs() <= _ChatPageState._scrollToBottomEpsilon) {
+        return true;
+      }
+      final position = _scrollController.position;
+      position.jumpTo(
+        (position.pixels + delta).clamp(
+          position.minScrollExtent,
+          position.maxScrollExtent,
+        ),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+      currentTop = _timelineMessageTopOffset(anchor.messageId);
+      if (currentTop == null) {
+        return false;
+      }
+    }
+    return (currentTop! - anchor.topOffset).abs() <=
+        _ChatPageState._scrollToBottomEpsilon * 2;
+  }
+
+  void _finishSessionReturnRestore(
+    _PendingSessionReturnRestore pending, {
+    _SessionViewportAnchor? compensationAnchor,
+  }) {
+    if (!_isSessionReturnRestoreCurrent(pending)) {
+      return;
+    }
+    final snapshot = pending.snapshot;
+    final key = _sessionViewportSnapshotKey(
+      snapshot.contextKey,
+      snapshot.parentSessionId,
+    );
+    _sessionViewportSnapshots.remove(key);
+    _pendingSessionReturnRestore = null;
+    _pendingInitialScrollSessionId = null;
+    _pendingCachedViewportRestoreTarget = _CachedViewportRestoreTarget.none;
+    if (compensationAnchor != null) {
+      _sessionReturnCompensation = _SessionReturnCompensation(
+        contextKey: snapshot.contextKey,
+        sessionId: snapshot.parentSessionId,
+        generation: pending.generation,
+        anchor: compensationAnchor,
+        baselineMessagesVersion: _chatProvider?.messagesVersion ?? -1,
+      );
+    }
+    if (_currentScrollOwner == _ScrollOwner.sessionReturnRestore) {
+      _setScrollOwner(_ScrollOwner.none);
+    }
+  }
+
+  Future<void> _runPendingSessionReturnRestore({required String reason}) async {
+    final pending = _pendingSessionReturnRestore;
+    final chatProvider = _chatProvider;
+    if (pending == null ||
+        chatProvider == null ||
+        !_isSessionReturnRestoreCurrent(pending) ||
+        !_scrollController.hasClients ||
+        chatProvider.state == ChatState.loading ||
+        chatProvider.messages.isEmpty) {
+      return;
+    }
+    final snapshot = pending.snapshot;
+    if (snapshot.followMode == _ScrollFollowMode.following) {
+      _setState(() {
+        _scrollFollowMode = _ScrollFollowMode.following;
+        _hasUnreadMessagesBelow = false;
+        _showScrollToFirstFab = false;
+      });
+      _traceFinalUi(
+        'session-return-restore-bottom',
+        details: 'reason=$reason session=${snapshot.parentSessionId}',
+      );
+      debugSessionViewportTraceForTest =
+          'run-bottom before max=${_scrollController.hasClients ? _scrollController.position.maxScrollExtent : -1} pixels=${_scrollController.hasClients ? _scrollController.position.pixels : -1}';
+      // Keep pending until bottom is ensured, then finish.
+      unawaited(_runBottomRestoreAndFinish(pending, reason: reason));
+      return;
+    }
+
+    _setScrollOwner(_ScrollOwner.sessionReturnRestore);
+    _SessionViewportAnchor? restoredAnchor;
+    for (final anchor in snapshot.anchors) {
+      if (!chatProvider.messages.any(
+        (message) => message.id == anchor.messageId,
+      )) {
+        continue;
+      }
+      final restored = await _alignSessionReturnAnchor(
+        pending: pending,
+        anchor: anchor,
+      );
+      if (restored) {
+        restoredAnchor = anchor;
+        break;
+      }
+    }
+    if (!_isSessionReturnRestoreCurrent(pending) ||
+        !_scrollController.hasClients) {
+      return;
+    }
+
+    final tailChanged =
+        snapshot.tailMessageId != chatProvider.messages.lastOrNull?.id ||
+        snapshot.messageCount != chatProvider.messages.length;
+    if (restoredAnchor == null) {
+      final position = _scrollController.position;
+      final target = chatProvider.hasMoreOldMessages
+          ? position.minScrollExtent
+          : snapshot.pixels
+                .clamp(position.minScrollExtent, position.maxScrollExtent)
+                .toDouble();
+      position.jumpTo(target);
+      _setState(() {
+        _scrollFollowMode = _ScrollFollowMode.pausedByUser;
+        _hasUnreadMessagesBelow = true;
+        _showScrollToFirstFab = _shouldShowJumpToFirstFab();
+      });
+      _traceFinalUi(
+        'session-return-restore-degraded',
+        details:
+            'reason=$reason session=${snapshot.parentSessionId} hasMore=${chatProvider.hasMoreOldMessages}',
+      );
+      _finishSessionReturnRestore(pending);
+      return;
+    }
+
+    _setState(() {
+      _scrollFollowMode = snapshot.followMode;
+      _hasUnreadMessagesBelow = snapshot.hadUnreadMessagesBelow || tailChanged;
+      _showScrollToFirstFab = _shouldShowJumpToFirstFab();
+    });
+    _traceFinalUi(
+      'session-return-restore-anchor',
+      details:
+          'reason=$reason session=${snapshot.parentSessionId} anchor=${restoredAnchor.messageId} tailChanged=$tailChanged',
+    );
+    _finishSessionReturnRestore(pending, compensationAnchor: restoredAnchor);
+  }
+
+  Future<void> _runBottomRestoreAndFinish(
+    _PendingSessionReturnRestore pending, {
+    required String reason,
+  }) async {
+    if (!_scrollController.hasClients) {
+      if (_isSessionReturnRestoreCurrent(pending)) {
+        _finishSessionReturnRestore(pending);
+      }
+      return;
+    }
+    // Initial jump.
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    await WidgetsBinding.instance.endOfFrame;
+    for (var attempt = 0; attempt < 8; attempt += 1) {
+      if (!_isSessionReturnRestoreCurrent(pending) ||
+          !_scrollController.hasClients ||
+          _hasUserScrollPriority()) {
+        break;
+      }
+      final position = _scrollController.position;
+      if (position.maxScrollExtent - position.pixels <=
+          _ChatPageState._scrollToBottomEpsilon) {
+        break;
+      }
+      position.jumpTo(position.maxScrollExtent);
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    if (_isSessionReturnRestoreCurrent(pending)) {
+      _finishSessionReturnRestore(pending);
+      if (_scrollController.hasClients && !_hasUserScrollPriority()) {
+        final position = _scrollController.position;
+        if (position.maxScrollExtent - position.pixels >
+            _ChatPageState._scrollToBottomEpsilon) {
+          position.jumpTo(position.maxScrollExtent);
+        }
+      }
+    }
+  }
+
+  void _scheduleSessionReturnCompensation(ChatProvider chatProvider) {
+    final compensation = _sessionReturnCompensation;
+    if (compensation == null ||
+        compensation.generation != _sessionReturnRestoreGeneration ||
+        compensation.contextKey != _sessionViewportContextKey() ||
+        compensation.sessionId != chatProvider.currentSession?.id ||
+        compensation.baselineMessagesVersion == chatProvider.messagesVersion) {
+      return;
+    }
+    _sessionReturnCompensation = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          compensation.generation != _sessionReturnRestoreGeneration ||
+          compensation.contextKey != _sessionViewportContextKey() ||
+          compensation.sessionId != _chatProvider?.currentSession?.id ||
+          !_scrollController.hasClients ||
+          _hasUserScrollPriority()) {
+        return;
+      }
+      final currentTop = _timelineMessageTopOffset(
+        compensation.anchor.messageId,
+      );
+      if (currentTop == null) {
+        return;
+      }
+      final delta = currentTop - compensation.anchor.topOffset;
+      if (delta.abs() <= _ChatPageState._scrollToBottomEpsilon) {
+        return;
+      }
+      _setScrollOwner(_ScrollOwner.sessionReturnRestore);
+      final position = _scrollController.position;
+      position.jumpTo(
+        (position.pixels + delta).clamp(
+          position.minScrollExtent,
+          position.maxScrollExtent,
+        ),
+      );
+      _setScrollOwner(_ScrollOwner.none);
+      _traceFinalUi(
+        'session-return-restore-compensate',
+        details:
+            'session=${compensation.sessionId} anchor=${compensation.anchor.messageId} delta=$delta',
+      );
+    });
+  }
+
   _CachedViewportRestoreTarget _resolveCachedViewportRestoreTarget(
     ChatProvider chatProvider,
   ) {
@@ -503,6 +1027,9 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
   void _syncSessionScrollState(ChatProvider chatProvider) {
     final sessionId = chatProvider.currentSession?.id;
     if (sessionId != _trackedSessionId) {
+      final hasPendingSessionReturn = _matchesPendingSessionReturnRestore(
+        sessionId,
+      );
       // Persist collapse state of the outgoing session before clearing.
       final outgoing = _trackedSessionId;
       if (outgoing != null) {
@@ -522,9 +1049,24 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
           _notificationService?.clearNotificationsForSession(sessionId),
         );
       }
-      _queueCachedViewportRestore(chatProvider, reason: 'session-switch');
+      if (hasPendingSessionReturn) {
+        _pendingInitialScrollSessionId = sessionId;
+        _pendingCachedViewportRestoreTarget = _CachedViewportRestoreTarget.none;
+      } else {
+        if (_pendingSessionReturnRestore != null) {
+          _clearSessionViewportNavigationState(
+            reason: 'session-return-target-mismatch',
+            clearSnapshots: false,
+          );
+        }
+        _queueCachedViewportRestore(chatProvider, reason: 'session-switch');
+      }
       _olderMessagesLoadTriggerArmed = true;
-      _setScrollOwner(_ScrollOwner.none);
+      _setScrollOwner(
+        hasPendingSessionReturn
+            ? _ScrollOwner.sessionReturnRestore
+            : _ScrollOwner.none,
+      );
       // Restore collapse state for the incoming session (null if not cached).
       _expandedCollapsedHistoryGroupId = sessionId != null
           ? _sessionCollapseHistoryCache[sessionId]
@@ -545,9 +1087,13 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
       _pendingFinalAssistantRevealAttempts = 0;
       _messageRevealAnchorKeysByMessageId.clear();
       _lastRevealedAssistantMessageId = null;
-      _scrollFollowMode = _ScrollFollowMode.following;
+      _scrollFollowMode = hasPendingSessionReturn
+          ? _pendingSessionReturnRestore!.snapshot.followMode
+          : _ScrollFollowMode.following;
       _showScrollToFirstFab = false;
-      _hasUnreadMessagesBelow = false;
+      _hasUnreadMessagesBelow = hasPendingSessionReturn
+          ? _pendingSessionReturnRestore!.snapshot.hadUnreadMessagesBelow
+          : false;
       _rememberProviderMessageSignature(chatProvider);
     }
 
@@ -555,6 +1101,7 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
         _pendingInitialScrollSessionId == sessionId &&
         _pendingCachedViewportRestoreTarget ==
             _CachedViewportRestoreTarget.none &&
+        !_matchesPendingSessionReturnRestore(sessionId) &&
         chatProvider.messages.isNotEmpty) {
       _queueCachedViewportRestore(chatProvider, reason: 'messages-hydrated');
     }
@@ -583,6 +1130,14 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
       _pendingFinalAssistantRevealAttempts = 0;
       _messageRevealAnchorKeysByMessageId.clear();
       _rememberProviderMessageSignature(chatProvider);
+      return;
+    }
+
+    if (_matchesPendingSessionReturnRestore(sessionId)) {
+      _schedulePendingSessionReturnRestore(
+        chatProvider,
+        reason: 'session-ready',
+      );
       return;
     }
 
@@ -626,8 +1181,11 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
     _lastProviderMessageTrackingCount = count;
     _lastProviderMessageTrackingVersion = version;
 
+    if (changed) {
+      _scheduleSessionReturnCompensation(chatProvider);
+    }
+
     if (!changed ||
-        sessionId == null ||
         chatProvider.messages.isEmpty ||
         _scrollFollowMode == _ScrollFollowMode.following ||
         _resumeRefreshViewportRestorePending ||
@@ -673,6 +1231,10 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
   void _syncResponseViewportPolicyBody(ChatProvider chatProvider) {
     final sessionId = chatProvider.currentSession?.id;
     if (sessionId == null) {
+      return;
+    }
+    if (_matchesPendingSessionReturnRestore(sessionId) ||
+        _currentScrollOwner == _ScrollOwner.sessionReturnRestore) {
       return;
     }
 
@@ -1273,6 +1835,10 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
   }
 
   void _prepareForOutgoingUserMessage() {
+    _clearSessionViewportNavigationState(
+      reason: 'outgoing-user-message',
+      clearSnapshots: false,
+    );
     _deferAssistantWorkCollapse = true;
     _pendingInitialScrollSessionId = null;
     _pendingCachedViewportRestoreTarget = _CachedViewportRestoreTarget.none;
@@ -1299,6 +1865,10 @@ extension _ChatPageRuntimeSupport on _ChatPageState {
   }
 
   void _jumpToLatestAndResumeAutoFollow() {
+    _clearSessionViewportNavigationState(
+      reason: 'jump-to-latest',
+      clearSnapshots: false,
+    );
     _shouldRevealFinalAssistantOnCompletion = false;
     _pendingFinalAssistantRevealMessageId = null;
     _deferAssistantWorkCollapse = false;

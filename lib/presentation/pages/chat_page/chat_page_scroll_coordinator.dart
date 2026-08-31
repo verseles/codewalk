@@ -57,6 +57,10 @@ extension _ChatPageScrollCoordinator on _ChatPageState {
   }
 
   void _markUserScrollIntent() {
+    _clearSessionViewportNavigationState(
+      reason: 'user-scroll-intent',
+      clearSnapshots: false,
+    );
     final hadIntentLock =
         _currentScrollOwner == _ScrollOwner.userDrag ||
         _hasRecentUserScrollIntent();

@@ -964,7 +964,10 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
       );
       return;
     }
-    await _handleSessionSwitch(parentConversation);
+    await _handleSessionSwitch(
+      parentConversation,
+      viewportIntent: _SessionSwitchViewportIntent.returnToParent,
+    );
   }
 
   ChatSession? _resolveParentConversation(ChatProvider chatProvider) {
@@ -1043,7 +1046,10 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
     if (chatProvider.currentSession?.id == target.id) {
       return;
     }
-    await _handleSessionSwitch(target);
+    await _handleSessionSwitch(
+      target,
+      viewportIntent: _SessionSwitchViewportIntent.drillIntoSubagent,
+    );
   }
 
   ChatSession? _resolveSubConversationForSubtaskPart(

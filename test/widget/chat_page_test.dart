@@ -11083,8 +11083,8 @@ void main() {
 
       await provider.selectSession(
         provider.sessions
-          .where((session) => session.id == 'ses_draft_two')
-          .first,
+            .where((session) => session.id == 'ses_draft_two')
+            .first,
       );
       await tester.pumpAndSettle();
       expect(
@@ -11125,8 +11125,8 @@ void main() {
       await provider.loadSessions();
       await provider.selectSession(
         provider.sessions
-          .where((session) => session.id == 'ses_draft_flush')
-          .first,
+            .where((session) => session.id == 'ses_draft_flush')
+            .first,
       );
       await tester.pumpAndSettle();
 
@@ -11195,8 +11195,8 @@ void main() {
       await provider.loadSessions();
       await provider.selectSession(
         provider.sessions
-          .where((session) => session.id == 'ses_switch_one')
-          .first,
+            .where((session) => session.id == 'ses_switch_one')
+            .first,
       );
       await tester.pumpAndSettle();
 
@@ -11211,8 +11211,8 @@ void main() {
       await tester.pump();
       await provider.selectSession(
         provider.sessions
-          .where((session) => session.id == 'ses_switch_two')
-          .first,
+            .where((session) => session.id == 'ses_switch_two')
+            .first,
       );
       await tester.pumpAndSettle();
       expect(
@@ -11232,8 +11232,8 @@ void main() {
 
       await provider.selectSession(
         provider.sessions
-          .where((session) => session.id == 'ses_switch_one')
-          .first,
+            .where((session) => session.id == 'ses_switch_one')
+            .first,
       );
       await tester.pumpAndSettle();
       expect(
@@ -12726,6 +12726,207 @@ void main() {
       }
       await tester.pumpAndSettle();
       expect(provider.currentSession?.id, rootSession.id);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.linux,
+    }),
+  );
+
+  testWidgets(
+    'issue 172 returning from a sub-conversation preserves parent bottom',
+    (WidgetTester tester) async {
+      final isMobile = defaultTargetPlatform == TargetPlatform.android;
+      await tester.binding.setSurfaceSize(
+        isMobile ? const Size(390, 844) : const Size(1000, 900),
+      );
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final fixture = _issue172SubConversationFixture(
+        suffix: 'bottom',
+        readingAnchor: false,
+      );
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: fixture.repository,
+        localDataSource: localDataSource,
+      );
+      addTearDown(provider.dispose);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+      await provider.loadSessions();
+      await provider.selectSession(fixture.rootSession);
+      await provider.loadSessionInsights(fixture.rootSession.id, silent: true);
+      await tester.pumpAndSettle();
+
+      final listFinder = find.byKey(
+        const ValueKey<String>('chat_message_list'),
+      );
+      final scrollableFinder = find
+          .descendant(of: listFinder, matching: find.byType(Scrollable))
+          .first;
+      for (var attempt = 0; attempt < 5; attempt += 1) {
+        final position =
+            tester.state<ScrollableState>(scrollableFinder).position;
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pump(const Duration(milliseconds: 16));
+        await tester.pumpAndSettle();
+        if (position.maxScrollExtent - position.pixels <= 1) {
+          break;
+        }
+      }
+      final rootPosition =
+          tester.state<ScrollableState>(scrollableFinder).position;
+      expect(
+        rootPosition.maxScrollExtent - rootPosition.pixels,
+        lessThanOrEqualTo(1),
+      );
+
+      await tester.tap(
+        find.byKey(
+          ValueKey<String>('task_tool_open_session_${fixture.taskPartId}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, fixture.childSession.id);
+      final String? traceAfterDrill = debugSessionViewportTraceForTest;
+
+      if (isMobile) {
+        await tester.binding.handlePopRoute();
+      } else {
+        await tester.tap(
+          find.byKey(
+            const ValueKey<String>('subconversation_return_main_button'),
+          ),
+        );
+      }
+      await tester.pump();
+      final String? traceAfterReturn = debugSessionViewportTraceForTest;
+
+      final parentFrameDistances = <double>[];
+      for (var frame = 0; frame < 20; frame += 1) {
+        await tester.pump(const Duration(milliseconds: 16));
+        if (provider.currentSession?.id != fixture.rootSession.id) {
+          continue;
+        }
+        final position = tester
+            .state<ScrollableState>(scrollableFinder)
+            .position;
+        parentFrameDistances.add(position.maxScrollExtent - position.pixels);
+      }
+      await tester.pumpAndSettle();
+
+      final restoredPosition = tester
+          .state<ScrollableState>(scrollableFinder)
+          .position;
+      final String? traceFinalGlobal = debugSessionViewportTraceForTest;
+      final dynamic chatPageStateFinal =
+          tester.state(find.byType(ChatPage)) as dynamic;
+      final String traceFinal =
+          chatPageStateFinal.debugSessionViewportTrace() as String;
+      expect(provider.currentSession?.id, fixture.rootSession.id);
+      expect(parentFrameDistances, isNotEmpty);
+      expect(
+        parentFrameDistances,
+        everyElement(lessThanOrEqualTo(1)),
+        reason:
+            'every exposed parent frame must remain at the bottom traceAfterDrill=$traceAfterDrill traceAfterReturn=$traceAfterReturn traceFinal=$traceFinal traceGlobal=$traceFinalGlobal',
+      );
+      expect(
+        restoredPosition.maxScrollExtent - restoredPosition.pixels,
+        lessThanOrEqualTo(1),
+        reason:
+            'final bottom traceAfterDrill=$traceAfterDrill traceAfterReturn=$traceAfterReturn traceFinal=$traceFinal traceGlobal=$traceFinalGlobal',
+      );
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.linux,
+    }),
+  );
+
+  testWidgets(
+    'issue 172 returning from a sub-conversation preserves parent reading anchor',
+    (WidgetTester tester) async {
+      final isMobile = defaultTargetPlatform == TargetPlatform.android;
+      await tester.binding.setSurfaceSize(
+        isMobile ? const Size(390, 844) : const Size(1000, 900),
+      );
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final fixture = _issue172SubConversationFixture(
+        suffix: 'reading',
+        readingAnchor: true,
+      );
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: fixture.repository,
+        localDataSource: localDataSource,
+      );
+      addTearDown(provider.dispose);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+      await provider.loadSessions();
+      await provider.selectSession(fixture.rootSession);
+      await provider.loadSessionInsights(fixture.rootSession.id, silent: true);
+      await tester.pumpAndSettle();
+
+      final listFinder = find.byKey(
+        const ValueKey<String>('chat_message_list'),
+      );
+      final scrollableFinder = find
+          .descendant(of: listFinder, matching: find.byType(Scrollable))
+          .first;
+      final taskFinder = find.byKey(
+        ValueKey<String>('task_tool_open_session_${fixture.taskPartId}'),
+      );
+      await tester.scrollUntilVisible(
+        taskFinder,
+        300,
+        scrollable: scrollableFinder,
+      );
+      await tester.pumpAndSettle();
+
+      final anchorFinder = find.text(fixture.readingAnchorText!);
+      expect(taskFinder, findsOneWidget);
+      expect(anchorFinder, findsOneWidget);
+      final anchorTopBefore = tester.getTopLeft(anchorFinder).dy;
+      final readingPosition = tester
+          .state<ScrollableState>(scrollableFinder)
+          .position;
+      expect(
+        readingPosition.maxScrollExtent - readingPosition.pixels,
+        greaterThan(1),
+      );
+
+      await tester.tap(taskFinder);
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.id, fixture.childSession.id);
+
+      if (isMobile) {
+        await tester.binding.handlePopRoute();
+      } else {
+        await tester.tap(
+          find.byKey(
+            const ValueKey<String>('subconversation_return_main_button'),
+          ),
+        );
+      }
+      await tester.pumpAndSettle();
+
+      expect(provider.currentSession?.id, fixture.rootSession.id);
+      expect(anchorFinder, findsOneWidget);
+      expect(
+        tester.getTopLeft(anchorFinder).dy,
+        closeTo(anchorTopBefore, 2),
+        reason: 'the same parent message must keep its viewport offset',
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
@@ -22884,4 +23085,128 @@ List<ChatMessage> _threadMessages(String sessionId, int count) {
       ],
     );
   });
+}
+
+({
+  ChatSession rootSession,
+  ChatSession childSession,
+  FakeChatRepository repository,
+  String taskPartId,
+  String? readingAnchorText,
+})
+_issue172SubConversationFixture({
+  required String suffix,
+  required bool readingAnchor,
+}) {
+  final rootSession = ChatSession(
+    id: 'ses_issue_172_root_$suffix',
+    workspaceId: 'default',
+    time: DateTime.fromMillisecondsSinceEpoch(1000),
+    title: 'Issue 172 root $suffix',
+  );
+  final childSession = ChatSession(
+    id: 'ses_issue_172_child_$suffix',
+    workspaceId: 'default',
+    time: DateTime.fromMillisecondsSinceEpoch(1100),
+    title: 'Issue 172 child $suffix',
+    parentId: rootSession.id,
+  );
+  final taskPartId = 'part_issue_172_task_$suffix';
+  final anchorText = readingAnchor
+      ? 'Issue 172 parent reading anchor $suffix'
+      : null;
+  final taskMessage = AssistantMessage(
+    id: 'msg_issue_172_task_$suffix',
+    sessionId: rootSession.id,
+    time: DateTime.fromMillisecondsSinceEpoch(50000),
+    completedTime: DateTime.fromMillisecondsSinceEpoch(50100),
+    parts: <MessagePart>[
+      if (anchorText != null)
+        TextPart(
+          id: 'part_issue_172_anchor_$suffix',
+          messageId: 'msg_issue_172_task_$suffix',
+          sessionId: rootSession.id,
+          text: anchorText,
+        ),
+      ToolPart(
+        id: taskPartId,
+        messageId: 'msg_issue_172_task_$suffix',
+        sessionId: rootSession.id,
+        callId: 'call_issue_172_task_$suffix',
+        tool: 'task',
+        state: ToolStateCompleted(
+          input: const <String, dynamic>{},
+          output:
+              '<task id="${childSession.id}" state="completed">\n'
+              '<task_result>child</task_result>\n'
+              '</task>',
+          time: ToolTime(
+            start: DateTime.fromMillisecondsSinceEpoch(50000),
+            end: DateTime.fromMillisecondsSinceEpoch(50050),
+          ),
+        ),
+      ),
+    ],
+  );
+  final longTail = AssistantMessage(
+    id: 'msg_issue_172_tail_$suffix',
+    sessionId: rootSession.id,
+    time: DateTime.fromMillisecondsSinceEpoch(60000),
+    completedTime: DateTime.fromMillisecondsSinceEpoch(60100),
+    parts: <MessagePart>[
+      TextPart(
+        id: 'part_issue_172_tail_$suffix',
+        messageId: 'msg_issue_172_tail_$suffix',
+        sessionId: rootSession.id,
+        text: List<String>.filled(
+          120,
+          'Issue 172 long settled parent response $suffix',
+        ).join(' '),
+      ),
+    ],
+  );
+  final rootMessages = <ChatMessage>[
+    ..._threadMessages(rootSession.id, 24),
+  ];
+  if (readingAnchor) {
+    rootMessages.insert(18, taskMessage);
+    rootMessages.add(longTail);
+  } else {
+    rootMessages.add(
+      AssistantMessage(
+        id: taskMessage.id,
+        sessionId: taskMessage.sessionId,
+        time: taskMessage.time,
+        completedTime: taskMessage.completedTime,
+        parts: <MessagePart>[...longTail.parts, ...taskMessage.parts],
+      ),
+    );
+  }
+
+  final repository = FakeChatRepository(sessions: <ChatSession>[rootSession]);
+  repository.messagesBySession[rootSession.id] = rootMessages;
+  repository.messagesBySession[childSession.id] = <ChatMessage>[
+    UserMessage(
+      id: 'msg_issue_172_child_$suffix',
+      sessionId: childSession.id,
+      time: DateTime.fromMillisecondsSinceEpoch(70000),
+      parts: <MessagePart>[
+        TextPart(
+          id: 'part_issue_172_child_$suffix',
+          messageId: 'msg_issue_172_child_$suffix',
+          sessionId: childSession.id,
+          text: 'Issue 172 child content $suffix',
+        ),
+      ],
+    ),
+  ];
+  repository.sessionChildrenById[rootSession.id] = <ChatSession>[childSession];
+  repository.sessionChildrenById[childSession.id] = <ChatSession>[];
+  return (
+    rootSession: rootSession,
+    childSession: childSession,
+    repository: repository,
+    taskPartId: taskPartId,
+    readingAnchorText: anchorText,
+  );
 }

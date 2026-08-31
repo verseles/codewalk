@@ -1622,13 +1622,18 @@ extension _ChatPageScaffold on _ChatPageState {
   Future<void> _handleSessionSwitch(
     ChatSession session, {
     bool cacheFirst = false,
+    _SessionSwitchViewportIntent viewportIntent =
+        _SessionSwitchViewportIntent.generic,
   }) async {
     if (di.sl.isRegistered<ReadAloudService>()) {
       unawaited(di.sl<ReadAloudService>().stop());
     }
-    await context.read<ChatProvider>().selectSession(
-      session,
-      awaitNetwork: !cacheFirst,
+    final chatProvider = context.read<ChatProvider>();
+    _prepareSessionViewportSwitch(
+      chatProvider,
+      targetSession: session,
+      intent: viewportIntent,
     );
+    await chatProvider.selectSession(session, awaitNetwork: !cacheFirst);
   }
 }

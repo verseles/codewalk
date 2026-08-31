@@ -362,7 +362,7 @@ extension _ChatPageTimelineViewport on _ChatPageState {
         _resolveLatestRevealableAssistantMessageId(chatProvider.messages);
     final latestRevertibleMessageId = chatProvider.latestRevertibleMessageId;
     _pruneMessageRevealAnchorKeys(chatProvider.messages);
-    _pruneTimelineSearchMessageKeys(chatProvider.messages);
+    _pruneTimelineMessageKeys(chatProvider.messages);
 
     return Listener(
       onPointerSignal: _handlePointerSignal,
@@ -393,7 +393,7 @@ extension _ChatPageTimelineViewport on _ChatPageState {
                       child = KeyedSubtree(
                         key: ValueKey<String>(entry.key),
                         child: SizedBox(
-                          key: _timelineSearchMessageKey(message.id),
+                          key: _timelineMessageKey(message.id),
                           child: messageWidget,
                         ),
                       );
