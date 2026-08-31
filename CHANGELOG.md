@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.218.0 - 2026-08-31
+
+- docs: update BEHAVIOR and CODEBASE for unified menus and Close project (#162, #163)
+- fix: root scope close, no-snapshot rename, archive rollback and event race
+- fix: address reviewer findings for unified menus and Close project
+- feat: unify session context menus and add Close project (#162, #163)
+
 ## v1.217.0 - 2026-08-31
 
 - fix(chat): preserve parent viewport when returning from subagent (fixes #172)
