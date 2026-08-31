@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.217.0 - 2026-08-31
+
+- fix(chat): preserve parent viewport when returning from subagent (fixes #172)
+
 ## v1.216.0 - 2026-08-27
 
 - fix(settings): ensure final dispose drain and flush awaits in-flight encode (review #161)
