@@ -482,6 +482,7 @@ class ChatProvider extends ChangeNotifier {
   final Map<String, Map<SessionTabIdentity, SessionTabIconOverride>>
   _sessionTabIconOverridesByServer =
       <String, Map<SessionTabIdentity, SessionTabIconOverride>>{};
+  final Set<String> _recentlyClosedProjectScopes = <String>{};
   final Map<String, Future<void>> _pinnedSessionWriteQueueByScope =
       <String, Future<void>>{};
   final Map<String, Map<String, Set<String>>> _pinnedSessionIdsByServerScope =
@@ -5389,6 +5390,7 @@ class ChatProvider extends ChangeNotifier {
           }
         } else {
           _applySessionForTarget(target!, previous!);
+          _reconcileSessionTabs(forcePersistence: false, notify: true);
           if (previousCurrentSession != null) {
             _currentSession = previousCurrentSession;
           }

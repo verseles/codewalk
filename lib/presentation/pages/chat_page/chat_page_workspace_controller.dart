@@ -265,7 +265,10 @@ extension _ChatPageWorkspaceController on _ChatPageState {
         return;
       }
       final wasActive = pp.currentProject?.id == projectId;
-      final directory = normalizeOptionalFilePath(currentProject.path) ?? currentProject.id;
+      final trimmedPath = currentProject.path.trim();
+      final directory = (trimmedPath.isEmpty || trimmedPath == '/' || trimmedPath == '-')
+          ? currentProject.id
+          : (normalizeOptionalFilePath(trimmedPath) ?? currentProject.id);
       final serverId = targetServerId;
 
       // Pre-clean: remove tabs for the target directory before closing, so closing does not leave orphans.

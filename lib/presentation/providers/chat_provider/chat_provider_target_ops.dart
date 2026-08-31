@@ -29,8 +29,42 @@ extension ChatProviderTargetOps on ChatProvider {
     final contextKey = _composeContextKey(target.serverId, target.directory);
     final existing = _contextSnapshots[contextKey];
     if (existing == null) {
-      // No snapshot for this context; nothing to update locally.
-      // Keep active state untouched.
+      // No snapshot: update the tab directly so title changes are visible.
+      final tabIndex = _sessionTabs.indexWhere((t) => t.identity == target.identity);
+      if (tabIndex != -1) {
+        final oldTab = _sessionTabs[tabIndex];
+        final newTab = oldTab.copyWith(title: session.title ?? oldTab.title);
+        final newTabs = List<SessionTabRecord>.from(_sessionTabs);
+        newTabs[tabIndex] = newTab;
+        _sessionTabs = List<SessionTabRecord>.unmodifiable(newTabs);
+        if (_sessionTabsLoadedServerId == target.serverId) {
+          final persistedIndex = _sessionTabsPersistedState.open.indexWhere(
+            (p) => p.sessionId == target.sessionId && normalizeFilePath(p.directory) == target.directory,
+          );
+          if (persistedIndex != -1) {
+            final oldPersisted = _sessionTabsPersistedState.open[persistedIndex];
+            final newPersisted = PersistedSessionTab(
+              directory: oldPersisted.directory,
+              projectId: oldPersisted.projectId,
+              sessionId: oldPersisted.sessionId,
+              title: session.title ?? oldPersisted.title,
+              lastOpenedAtMs: oldPersisted.lastOpenedAtMs,
+              serverUpdatedAtMs: oldPersisted.serverUpdatedAtMs,
+              seenQuestionIds: oldPersisted.seenQuestionIds,
+              seenCompletionToken: oldPersisted.seenCompletionToken,
+              seenErrorToken: oldPersisted.seenErrorToken,
+            );
+            final newOpen = List<PersistedSessionTab>.from(_sessionTabsPersistedState.open);
+            newOpen[persistedIndex] = newPersisted;
+            _sessionTabsPersistedState = PersistedSessionTabsState(
+              open: newOpen,
+              closed: _sessionTabsPersistedState.closed,
+            );
+            _sessionTabsPersistedStateEncoded = _sessionTabsPersistedState.encode();
+            _scheduleSessionTabsPersistence();
+          }
+        }
+      }
       return;
     }
     final newSessions = List<ChatSession>.from(existing.sessions);
