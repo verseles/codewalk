@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.219.1 - 2026-08-31
+
+- fix(app): correct Zone for WidgetsBinding and remove palliative Settings route provider (fixes #153, #175)
+- chore(ci): raise analyze budget 335->337 to match current 337 infos
+
 ## v1.219.0 - 2026-08-31
 
 - test(settings): add Selector-aware one-pump regression and align CI budget
