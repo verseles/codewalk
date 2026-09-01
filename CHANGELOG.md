@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.219.2 - 2026-09-01
+
+- fix(android): ensure theme and update progress rebuild on Android (fixes #153, #175)
+
 ## v1.219.1 - 2026-08-31
 
 - fix(app): correct Zone for WidgetsBinding and remove palliative Settings route provider (fixes #153, #175)
