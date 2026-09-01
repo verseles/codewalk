@@ -55,12 +55,15 @@ When the user explicitly asks for `flow`, follow this order:
 
 1. Implement the change.
 2. Run focused validation while iterating, then run `make check` once when the code is stable.
-3. Commit if committing was requested or project policy requires it.
+3. Commit.
 4. Run the reviewer loop for the commit.
 5. Apply only judge-approved fixes, validate them with focused checks by default, and repeat review when warranted.
-6. Run `HEY_CAPTION="specific caption" make android` when an APK is useful and supported.
-7. Notify and send the final report.
-8. Suggest the next task from GitHub Issues when useful.
+6. Run `HEY_CAPTION="specific caption" make android` when an APK is useful and supported. Never for ARM64.
+7. Update docs
+8. Release a minor unless asked differently. Watch every 60s with cimonitor.
+9. Notify and send the final report.
+9.1. Ask to close issue any related. Suggest the next task from GitHub Issues when useful.
+9.2. If relevant ask to update rules is this file (./AGENTS.md) with changes or new rules
 
 ## Release
 
@@ -69,6 +72,7 @@ When the user explicitly asks for `flow`, follow this order:
 - Ensure all code changes are committed before release. `make release` only commits the version bump.
 - Plain `push` is not a release and must not invoke `releaser`.
 - After release push/tag, CI watch belongs to `cimonitor`; `releaser` does not monitor CI.
+
 
 ## Known Pitfalls
 
