@@ -142,6 +142,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
       final tmpDir = await getTemporaryDirectory();
       destPath = '${tmpDir.path}/codewalk-update.apk';
       // Use explicit timeouts; APK downloads can be large but should not hang forever.
+      final downloadZone = Zone.current;
       await Dio(
         BaseOptions(
           connectTimeout: const Duration(seconds: 15),
@@ -151,8 +152,12 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
         apkUrl,
         destPath,
         onReceiveProgress: (received, total) {
-          _installProgress = total > 0 ? received / total : 0.0;
-          notifyListeners();
+          final progress = total > 0
+              ? (received / total).clamp(0.0, 1.0)
+              : 0.0;
+          if (_installProgress == progress) return;
+          _installProgress = progress;
+          downloadZone.run(notifyListeners);
         },
       );
       _installState = UpdateInstallState.installing;

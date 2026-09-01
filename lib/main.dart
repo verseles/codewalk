@@ -243,20 +243,24 @@ class MyApp extends StatelessWidget {
                       L10nBridge.update(AppLocalizations.of(context));
                       final mediaQuery = MediaQuery.of(context);
                       final composedScaler = TextScaler.linear(systemFontScale);
-                      return Theme(
-                        data: AppTheme.withResponsiveSnackBars(
-                          Theme.of(context),
-                          mediaQuery,
-                          textDirection:
-                              Directionality.maybeOf(context) ??
-                              TextDirection.ltr,
-                        ),
-                        child: MediaQuery(
-                          data: mediaQuery.copyWith(textScaler: composedScaler),
-                          child: DesktopWindowChromeFrame(
-                            child: child ?? const SizedBox.shrink(),
-                          ),
-                        ),
+                      return Builder(
+                        builder: (themeContext) {
+                          return Theme(
+                            data: AppTheme.withResponsiveSnackBars(
+                              Theme.of(themeContext),
+                              mediaQuery,
+                              textDirection:
+                                  Directionality.maybeOf(themeContext) ??
+                                  TextDirection.ltr,
+                            ),
+                            child: MediaQuery(
+                              data: mediaQuery.copyWith(textScaler: composedScaler),
+                              child: DesktopWindowChromeFrame(
+                                child: child ?? const SizedBox.shrink(),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                     home: const AppShellPage(),
