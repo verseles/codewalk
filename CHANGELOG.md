@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.220.1 - 2026-09-03
+
+- chore: ignore Eclipse/Buildship metadata
+- feat: enable Impeller on Android and upgrade major dependencies
+- fix(ci): remove unnecessary foundation import to fit analyze budget
+
 ## v1.220.0 - 2026-09-02
 
 - fix(android): restore live UI updates in release builds
