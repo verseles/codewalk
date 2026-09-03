@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.220.0 - 2026-09-02
+
+- fix(android): restore live UI updates in release builds
+
 ## v1.219.3 - 2026-09-01
 
 - fix(android): disable Impeller to fix retained OpacityLayer ghosting (fixes #153, #175)
