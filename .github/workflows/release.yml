@@ -153,6 +153,11 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS
+        # CocoaPods path: Flutter 3.44 uses SPM by default, but
+        # speech_to_text 7.3.0 declares macOS 10.14 in its SPM manifest while
+        # using 10.15+ APIs (its podspec targets 11.0 and builds fine).
+        env:
+          FLUTTER_SWIFT_PACKAGE_MANAGER: "false"
         run: MACOSX_DEPLOYMENT_TARGET=11.0 flutter build macos --release
 
       - name: Package macOS artifact
