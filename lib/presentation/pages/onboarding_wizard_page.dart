@@ -1532,6 +1532,15 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                           icon: const Icon(Symbols.content_copy_rounded),
                           label: Text(context.l10n.onboardingCopyLoginURL),
                         ),
+                      if (!state.isConnected &&
+                          state.nodeState != TailscaleNodeState.unsupported)
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            await appProvider.retryTailscaleTransport();
+                          },
+                          icon: const Icon(Symbols.refresh_rounded),
+                          label: Text(context.l10n.terminalTryAgain),
+                        ),
                     ],
                   ),
                 ],

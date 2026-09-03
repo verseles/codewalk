@@ -402,12 +402,15 @@ class Tailscale implements TailscaleClient {
   /// [controlUrl]. Registers the node on first launch, reconnects from
   /// persisted credentials on subsequent launches.
   ///
-  /// [authKey] is required for first registration; get one from the
-  /// tailnet admin panel at
+  /// [authKey] is optional. Omit it for interactive enrollment: on first
+  /// launch with no persisted state the node enters `needsLogin` and
+  /// exposes [TailscaleStatus.authUrl] to complete in a browser.
+  /// Provide one from the tailnet admin panel at
   /// <https://login.tailscale.com/admin/settings/keys> (see
-  /// <https://tailscale.com/kb/1085/auth-keys>). Reusable keys let you
-  /// call [up] from multiple processes. Subsequent launches can omit it —
-  /// the persisted session state reconnects automatically.
+  /// <https://tailscale.com/kb/1085/auth-keys>) for unattended enrollment.
+  /// Reusable keys let you call [up] from multiple processes. Subsequent
+  /// launches can omit it — the persisted session state reconnects
+  /// automatically.
   ///
   /// Set [ephemeral] to register this process as a short-lived node. Ephemeral
   /// nodes are removed from the tailnet automatically after they go inactive
@@ -451,8 +454,7 @@ class Tailscale implements TailscaleClient {
   /// after the native runtime starts. Increase it for slow mobile networks or
   /// self-hosted control planes.
   ///
-  /// Throws [TailscaleUpException] if no [authKey] is provided and no
-  /// persisted session state exists, or if the node fails to reach a
+  /// Throws [TailscaleUpException] if the node fails to reach a
   /// stable state before [timeout] (e.g. control plane unreachable).
   @override
   Future<TailscaleStatus> up({

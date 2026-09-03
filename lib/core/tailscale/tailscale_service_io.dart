@@ -58,13 +58,20 @@ class TailscaleService {
     }
 
     if (_activeProfileId != null && _activeProfileId != profileId) {
+      // One shared device identity serves every profile: when the node is
+      // already connected, retarget without tearing it down. Restarting
+      // here used to flap the machine offline on every profile switch.
+      if (_state.isConnected) {
+        _activeProfileId = profileId;
+        return _state;
+      }
       await down();
     }
 
     _activeProfileId = profileId;
     _publish(const TailscaleState(nodeState: TailscaleNodeState.connecting));
 
-    final stateDir = await _stateDirForProfile(profileId);
+    final stateDir = await _sharedStateDir();
     ts.Tailscale.init(
       stateDir: stateDir.path,
       logLevel: kReleaseMode
@@ -75,7 +82,7 @@ class TailscaleService {
 
     try {
       final status = await _client.up(
-        hostname: _hostnameForProfile(profileLabel),
+        hostname: _deviceHostname(),
         timeout: const Duration(seconds: 30),
       );
       return _publish(_stateFromStatus(status));
@@ -124,6 +131,26 @@ class TailscaleService {
     _peers = const [];
     _peerController.add(const []);
     _publish(const TailscaleState.disconnected());
+  }
+
+  /// Re-reads the native node status without restarting the node.
+  ///
+  /// Used after the user returns from the browser login flow and by
+  /// periodic health polls: the IPN state stream can miss the
+  /// needsLogin → running transition while the app is backgrounded.
+  Future<TailscaleState> refreshStatus() async {
+    if (_activeProfileId == null) return _state;
+    try {
+      final status = await _client.status();
+      return _publish(_stateFromStatus(status));
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        '[Tailscale] Failed to refresh node status',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return _state;
+    }
   }
 
   /// Pulls a one-shot snapshot of current tailnet peers.
@@ -215,23 +242,87 @@ class TailscaleService {
     }
   }
 
-  Future<Directory> _stateDirForProfile(String profileId) async {
+  /// Single shared device identity for every server profile.
+  ///
+  /// Previously each profile owned its own state directory, so every login
+  /// registered a brand-new machine (codewalk-cool, codewalk-merc, …) and
+  /// profile switches flapped the node offline. One directory means one
+  /// machine: log in once, then every Tailscale profile reuses it.
+  Future<Directory> _sharedStateDir() async {
     final root = await getApplicationSupportDirectory();
-    final safeProfileId = profileId.replaceAll(RegExp('[^a-zA-Z0-9_.-]'), '_');
-    final dir = Directory('${root.path}/tailscale_profiles/$safeProfileId');
+    final dir = Directory('${root.path}/tailscale_node');
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
+      await _adoptLegacyProfileIdentity(root, dir);
     }
     return dir;
   }
 
-  String _hostnameForProfile(String profileLabel) {
-    final normalized = profileLabel
-        .toLowerCase()
-        .replaceAll(RegExp('[^a-z0-9-]+'), '-')
-        .replaceAll(RegExp('-+'), '-')
-        .replaceAll(RegExp('^-|-\$'), '');
-    return normalized.isEmpty ? 'codewalk' : 'codewalk-$normalized';
+  /// One-time adoption of a legacy per-profile identity
+  /// (`tailscale_profiles/<id>/`) so the user keeps the already-approved
+  /// machine instead of registering yet another one. Runs only when there
+  /// is exactly one legacy identity holding credentials; otherwise a
+  /// fresh interactive login is the honest path.
+  Future<void> _adoptLegacyProfileIdentity(
+    Directory root,
+    Directory target,
+  ) async {
+    try {
+      final legacyRoot = Directory('${root.path}/tailscale_profiles');
+      if (!legacyRoot.existsSync()) return;
+      final candidates = <Directory>[];
+      await for (final entity in legacyRoot.list()) {
+        if (entity is! Directory) continue;
+        final inner = Directory('${entity.path}/tailscale');
+        final source = inner.existsSync() ? inner : entity;
+        if (_dirHoldsFiles(source)) candidates.add(source);
+      }
+      if (candidates.length != 1) return;
+      await _copyDir(candidates.single, target);
+      AppLogger.info('[Tailscale] Adopted legacy per-profile identity.');
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        '[Tailscale] Legacy identity adoption skipped',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  bool _dirHoldsFiles(Directory dir) {
+    try {
+      return dir
+          .listSync(recursive: true, followLinks: false)
+          .any((entity) => entity is File);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _copyDir(Directory source, Directory target) async {
+    await for (final entity in source.list(recursive: false)) {
+      final name = entity.uri.pathSegments
+          .where((segment) => segment.isNotEmpty)
+          .last;
+      if (entity is Directory) {
+        final child = Directory('${target.path}/$name');
+        child.createSync(recursive: true);
+        await _copyDir(entity, child);
+      } else if (entity is File) {
+        await entity.copy('${target.path}/$name');
+      }
+    }
+  }
+
+  /// Stable device hostname shared by every profile, so the tailnet sees
+  /// a single CodeWalk machine instead of one per server profile.
+  String _deviceHostname() {
+    final os = Platform.operatingSystem.toLowerCase().replaceAll(
+      RegExp('[^a-z0-9-]+'),
+      '',
+    );
+    final safeOs = os.isEmpty ? 'device' : os;
+    return 'codewalk-$safeOs';
   }
 
   TailscaleState _stateFromStatus(ts.TailscaleStatus status) {

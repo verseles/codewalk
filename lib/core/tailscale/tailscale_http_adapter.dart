@@ -9,6 +9,16 @@ class TailscaleHttpAdapter implements HttpClientAdapter {
 
   final http.Client _client;
 
+  /// Fallback bound for time-to-response-head when the request carries no
+  /// explicit connect timeout. Dio enforces timeouts only in its default
+  /// IO adapter — custom adapters await `fetch()` unbounded — so without
+  /// this a stalled native call would hang health probes and API requests
+  /// forever (and wedge the shared health-check gate).
+  ///
+  /// Only the response head is bounded, never the body stream: SSE and
+  /// long assistant responses keep streaming once headers arrive.
+  static const Duration fallbackHeadTimeout = Duration(seconds: 15);
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -63,7 +73,17 @@ class TailscaleHttpAdapter implements HttpClientAdapter {
       cancelOnError: true,
     );
     if (requestStream == null) {
-      await closeSink();
+      // Bodyless request (e.g. GET): close the sink WITHOUT awaiting it,
+      // then mark the body complete so send() can run. Two traps avoided:
+      // 1. Awaiting close() here deadlocks — with no listener attached yet
+      //    (the native client only finalizes inside send(), below),
+      //    StreamedRequest.sink.close() never completes and send() never
+      //    runs.
+      // 2. Never closing starves the body — without request EOF the server
+      //    withholds response bytes after the head (observed: head 200
+      //    arrives, zero body events follow). The pending close resolves as
+      //    soon as the native finalizer drain attaches inside send().
+      unawaited(closeSink());
       bodyDone.complete();
     }
 
@@ -87,12 +107,36 @@ class TailscaleHttpAdapter implements HttpClientAdapter {
       }
       return response;
     });
-    final response = await (cancelFuture == null
+    final pending = cancelFuture == null
         ? sendFuture
         : Future.any<http.StreamedResponse>(<Future<http.StreamedResponse>>[
             sendFuture,
             cancelFuture.then<http.StreamedResponse>((_) => throw cancelled()),
-          ]));
+          ]);
+    final configured = options.connectTimeout;
+    final headTimeout =
+        configured != null && configured > Duration.zero
+        ? configured
+        : fallbackHeadTimeout;
+    late final http.StreamedResponse response;
+    try {
+      response = await pending.timeout(
+        headTimeout,
+        onTimeout: () => throw DioException.connectionTimeout(
+          timeout: headTimeout,
+          requestOptions: options,
+        ),
+      );
+    } catch (_) {
+      // Any failure (timeout, cancellation, native transport error) marks
+      // the request cancelled so a late native response stream is drained
+      // instead of lingering unconsumed, then best-effort cleanup runs
+      // before the original error propagates to Dio.
+      isCancelled = true;
+      unawaited(subscription?.cancel());
+      unawaited(closeSink());
+      rethrow;
+    }
     final headers = response.headers.map(
       (key, value) => MapEntry(key, <String>[value]),
     );

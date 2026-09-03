@@ -80,10 +80,32 @@ class AppProvider extends ChangeNotifier {
        _localDataSource = localDataSource,
        _dioClient = dioClient,
        _tailscaleService = tailscaleService ?? TailscaleService(),
-       _tailscaleAuthLauncher =
-           tailscaleAuthLauncher ??
-           ((authUrl) =>
-               launchUrl(authUrl, mode: LaunchMode.externalApplication)),
+        _tailscaleAuthLauncher =
+            tailscaleAuthLauncher ??
+            ((authUrl) async {
+              try {
+                final launched = await launchUrl(
+                  authUrl,
+                  mode: LaunchMode.externalApplication,
+                );
+                if (launched) return true;
+              } catch (_) {
+                // Fall through to platform-default launch below.
+              }
+              try {
+                return await launchUrl(
+                  authUrl,
+                  mode: LaunchMode.platformDefault,
+                );
+              } catch (error, stackTrace) {
+                AppLogger.warn(
+                  'Failed to launch Tailscale authentication URL with fallback',
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+                return false;
+              }
+            }),
        _cellularDataSaverService =
            cellularDataSaverService ?? CellularDataSaverService.disabled(),
        _sessionAttentionCompletionResolver = sessionAttentionCompletionResolver,
@@ -553,6 +575,11 @@ class AppProvider extends ChangeNotifier {
         _dioClient.applyTailscaleAdapter(
           TailscaleHttpAdapter(_tailscaleService.httpClient),
         );
+        final activeId = _activeServerId;
+        if (activeId != null) {
+          unawaited(refreshServerHealth(serverId: activeId));
+          unawaited(checkConnection());
+        }
       }
     });
     _tailscalePeerSubscription ??= _tailscaleService.peerChanges.listen((
@@ -567,7 +594,23 @@ class AppProvider extends ChangeNotifier {
 
   void _setTailscaleState(TailscaleState state) {
     if (_tailscaleState == state) return;
+    final previous = _tailscaleState;
     _tailscaleState = state;
+    if (previous.nodeState != state.nodeState) {
+      final details = <String>[state.nodeState.name];
+      final authHost = state.authUrl?.host.trim() ?? '';
+      if (authHost.isNotEmpty) details.add('authUrl host=$authHost');
+      final message = state.message?.trim() ?? '';
+      if (message.isNotEmpty) details.add(message);
+      _recordSetupDebugEvent(
+        source: 'Tailscale',
+        message: 'state ${previous.nodeState.name} -> ${details.join(' | ')}',
+        severity: state.nodeState == TailscaleNodeState.error
+            ? SetupDebugSeverity.error
+            : SetupDebugSeverity.info,
+        notify: false,
+      );
+    }
     notifyListeners();
   }
 
@@ -580,11 +623,18 @@ class AppProvider extends ChangeNotifier {
     await _tailscaleService.down();
     _setTailscaleState(const TailscaleState.disconnected());
   }
-
   Future<bool> authenticateTailscale() async {
     final authUrl = _tailscaleState.authUrl;
     if (authUrl != null) {
-      return _launchTailscaleAuthUrl(authUrl);
+      final ok = await _launchTailscaleAuthUrl(authUrl);
+      _recordSetupDebugEvent(
+        source: 'Tailscale',
+        message:
+            'auth launch host=${authUrl.host} result=${ok ? 'opened' : 'failed'}',
+        severity: ok ? SetupDebugSeverity.info : SetupDebugSeverity.error,
+        notify: false,
+      );
+      return ok;
     }
     final profile = activeServer;
     if (profile == null || !profile.tailscaleEnabled) {
@@ -593,15 +643,88 @@ class AppProvider extends ChangeNotifier {
     await _applyTailscaleTransport(profile);
     final refreshedUrl = _tailscaleState.authUrl;
     if (refreshedUrl != null) {
-      return _launchTailscaleAuthUrl(refreshedUrl);
+      final ok = await _launchTailscaleAuthUrl(refreshedUrl);
+      _recordSetupDebugEvent(
+        source: 'Tailscale',
+        message:
+            'auth launch host=${refreshedUrl.host} result=${ok ? 'opened' : 'failed'}',
+        severity: ok ? SetupDebugSeverity.info : SetupDebugSeverity.error,
+        notify: false,
+      );
+      return ok;
     }
     final awaitedUrl = await _waitForTailscaleAuthUrl();
-    if (awaitedUrl == null) return false;
-    return _launchTailscaleAuthUrl(awaitedUrl);
+    if (awaitedUrl == null) {
+      _recordSetupDebugEvent(
+        source: 'Tailscale',
+        message: 'auth URL never arrived (state ${_tailscaleState.nodeState.name})',
+        severity: SetupDebugSeverity.error,
+        notify: false,
+      );
+      return false;
+    }
+    final ok = await _launchTailscaleAuthUrl(awaitedUrl);
+    _recordSetupDebugEvent(
+      source: 'Tailscale',
+      message:
+          'auth launch host=${awaitedUrl.host} result=${ok ? 'opened' : 'failed'}',
+      severity: ok ? SetupDebugSeverity.info : SetupDebugSeverity.error,
+      notify: false,
+    );
+    return ok;
+  }
+
+  /// Re-reads the native Tailscale status without restarting the node.
+  ///
+  /// Heals the stale-state trap where the browser login completes while
+  /// the app is backgrounded and the IPN state event is missed: the next
+  /// health poll (or an explicit Retry) picks up running/needsMachineAuth
+  /// instead of staying on a stale needsLogin forever.
+  Future<TailscaleState> refreshTailscaleStatus() async {
+    final profile = activeServer;
+    if (profile == null ||
+        !profile.tailscaleEnabled ||
+        !supportsTailscale) {
+      return _tailscaleState;
+    }
+    _listenToTailscaleState();
+    final before = _tailscaleState;
+    late final TailscaleState next;
+    try {
+      next = await _tailscaleService.refreshStatus();
+    } catch (_) {
+      return _tailscaleState;
+    }
+    _setTailscaleState(next);
+    if (next.isConnected && !before.isConnected) {
+      _dioClient.applyTailscaleAdapter(
+        TailscaleHttpAdapter(_tailscaleService.httpClient),
+      );
+    } else if (!next.isConnected && before.isConnected) {
+      _dioClient.removeTailscaleAdapter();
+      _serverHealthById[profile.id] = ServerHealthStatus.unknown;
+      notifyListeners();
+    }
+    return next;
+  }
+
+  /// Restarts the embedded node for the active Tailscale profile and
+  /// re-probes health. Backs the Retry action in onboarding/settings.
+  Future<void> retryTailscaleTransport() async {
+    final profile = activeServer;
+    if (profile == null ||
+        !profile.tailscaleEnabled ||
+        !supportsTailscale) {
+      return;
+    }
+    await _applyTailscaleTransport(profile);
+    if (profile.id == _activeServerId) {
+      await refreshServerHealth(serverId: profile.id);
+    }
   }
 
   Future<Uri?> _waitForTailscaleAuthUrl({
-    Duration timeout = const Duration(seconds: 3),
+    Duration timeout = const Duration(seconds: 8),
   }) async {
     final currentUrl = _tailscaleState.authUrl;
     if (currentUrl != null) return currentUrl;
@@ -1712,8 +1835,38 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
+    // Heal stale Tailscale state before probing: if the user completed the
+    // browser login while the app was backgrounded, the running event may
+    // have been missed and _tailscaleState is still needsLogin. One cheap
+    // status re-read per poll unblocks connected + healthy without user action.
+    final active = activeServer;
+    if (active != null &&
+        active.tailscaleEnabled &&
+        supportsTailscale &&
+        !_tailscaleState.isConnected &&
+        (runAll || serverIds.contains(active.id))) {
+      try {
+        await refreshTailscaleStatus();
+      } catch (_) {
+        // Health probing below still applies the unknown-while-pending gate.
+      }
+    }
+
     for (final profile in targets) {
-      _serverHealthById[profile.id] = await _checkServerHealth(profile);
+      final previous = _serverHealthById[profile.id];
+      final next = await _checkServerHealth(profile);
+      _serverHealthById[profile.id] = next;
+      if (profile.tailscaleEnabled && previous != next) {
+        _recordSetupDebugEvent(
+          source: 'Tailscale',
+          message:
+              'health ${profile.displayName} ${previous?.name ?? 'none'} -> ${next.name} (transport ${_tailscaleState.nodeState.name})',
+          severity: next == ServerHealthStatus.unhealthy
+              ? SetupDebugSeverity.error
+              : SetupDebugSeverity.info,
+          notify: false,
+        );
+      }
     }
     notifyListeners();
   }
@@ -1726,6 +1879,15 @@ class AppProvider extends ChangeNotifier {
 
     final isActiveProfile = profile.id == _activeServerId;
     if (profile.tailscaleEnabled && (!isActiveProfile || !supportsTailscale)) {
+      return ServerHealthStatus.unknown;
+    }
+    // Tailscale-first: never probe the destination OpenCode server before
+    // the embedded transport is connected. Probing too early uses direct
+    // networking, fails, and flaps the profile to Unhealthy.
+    if (profile.tailscaleEnabled &&
+        isActiveProfile &&
+        supportsTailscale &&
+        !_tailscaleState.isConnected) {
       return ServerHealthStatus.unknown;
     }
 
@@ -1768,13 +1930,27 @@ class AppProvider extends ChangeNotifier {
       }
     }
 
+    DioException? firstError;
     try {
       final global = await dio.get('/global/health');
       if (global.statusCode == 200) {
         return ServerHealthStatus.healthy;
       }
+      final statusCode = global.statusCode;
+      firstError = statusCode == null
+          ? DioException(
+              requestOptions: global.requestOptions,
+              type: DioExceptionType.unknown,
+              error: 'Empty status code',
+            )
+          : DioException.badResponse(
+              statusCode: statusCode,
+              requestOptions: global.requestOptions,
+              response: global,
+            );
     } on DioException catch (e) {
       _recordOAuthChallengeFromHealth(profile, e);
+      firstError = e;
       // Fallback below.
     }
 
@@ -1783,11 +1959,52 @@ class AppProvider extends ChangeNotifier {
       if (fallback.statusCode == 200) {
         return ServerHealthStatus.healthy;
       }
+      _logTailscaleProbeFailure(
+        profile,
+        DioExceptionType.unknown,
+        'HTTP ${fallback.statusCode} (first: ${_probeErrorSummary(firstError)})',
+      );
       return ServerHealthStatus.unhealthy;
     } on DioException catch (e) {
       _recordOAuthChallengeFromHealth(profile, e);
+      _logTailscaleProbeFailure(profile, e.type, e);
       return ServerHealthStatus.unhealthy;
     }
+  }
+
+  /// Records why a Tailscale-profile probe failed. Tailscale transport only
+  /// owns the network path, so the concrete Dio failure (timeout type,
+  /// refused, TLS, unexpected status) is what distinguishes a tailnet
+  /// problem from a dead server. Secrets are redacted by the sanitize
+  /// step inside [_recordSetupDebugEvent].
+  void _logTailscaleProbeFailure(
+    ServerProfile profile,
+    DioExceptionType? type,
+    Object? error,
+  ) {
+    if (!profile.tailscaleEnabled) return;
+    _recordSetupDebugEvent(
+      source: 'Tailscale',
+      message:
+          'probe ${profile.displayName} failed '
+          'type=${type?.name ?? 'http'} '
+          'detail=${_probeErrorSummary(error)}',
+      severity: SetupDebugSeverity.error,
+      notify: false,
+    );
+  }
+
+  String _probeErrorSummary(Object? error) {
+    if (error is DioException) {
+      final message = error.message?.trim() ?? '';
+      final inner = error.error?.toString().trim() ?? '';
+      final combined = <String>[
+        if (message.isNotEmpty) message,
+        if (inner.isNotEmpty && inner != message) inner,
+      ].join(' | ');
+      return combined.isEmpty ? error.type.name : combined;
+    }
+    return error?.toString().trim() ?? 'unknown';
   }
 
   void _recordOAuthChallengeFromHealth(ServerProfile profile, DioException e) {

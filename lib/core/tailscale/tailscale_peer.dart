@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../constants/api_constants.dart';
+
 /// A discoverable Tailscale tailnet peer, exposed by [TailscaleService].
 ///
 /// This is a domain-level projection of the upstream [TailscaleNode] from
@@ -58,7 +60,7 @@ class TailscalePeer extends Equatable {
     final ip = ipv4 ?? (tailscaleIPs.isNotEmpty ? tailscaleIPs.first : '');
     // IPv6 addresses in URLs must be enclosed in brackets.
     final formattedIp = ip.contains(':') ? '[$ip]' : ip;
-    return 'http://$formattedIp:3000';
+    return 'http://$formattedIp:${ApiConstants.defaultPort}';
   }
 
   @override

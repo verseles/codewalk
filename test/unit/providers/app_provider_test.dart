@@ -47,6 +47,9 @@ class _FakeTailscaleService extends TailscaleService {
   Future<void> down() async {
     downCalled = true;
   }
+
+  @override
+  Future<TailscaleState> refreshStatus() async => nextState;
 }
 
 class _FakeOAuthService extends OAuthService {

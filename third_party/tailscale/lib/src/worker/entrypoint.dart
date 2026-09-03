@@ -70,19 +70,9 @@ void _workerEntrypoint(SendPort sendPort) {
               :stateDir,
             ) = request;
 
-            if (authKey.isEmpty) {
-              final stateDirPtr = stateDir.toNativeUtf8();
-              try {
-                if (native.duneHasState(stateDirPtr) == 0) {
-                  throw const TailscaleUpException(
-                    'No auth key provided and no existing session state. '
-                    'Pass an authKey to authenticate.',
-                  );
-                }
-              } finally {
-                calloc.free(stateDirPtr);
-              }
-            }
+            // Empty authKey with no persisted state means interactive login:
+            // let duneStart run so tsnet can enter NeedsLogin and expose
+            // an AuthURL instead of failing here before native startup.
 
             // Allocate inside the try so any partial-allocation failure
             // (hypothetically OOM mid-sequence) still hits the finally and
