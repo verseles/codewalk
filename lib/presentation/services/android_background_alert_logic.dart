@@ -207,7 +207,13 @@ class BackgroundAlertSnapshot {
     return BackgroundAlertSnapshot(
       sessionStatusById: statusMap,
       sessionUpdatedAtById: updatedMap,
-      sessionTitleById: titleMap,
+      // Bound legacy payloads: old snapshots may predate pruning and can
+      // otherwise resurrect an arbitrarily large title map on every read.
+      sessionTitleById: pruneBackgroundAlertSessionTitles(
+        titles: titleMap,
+        updatedAtById: updatedMap,
+        liveSessionIds: titleMap.keys.toSet(),
+      ),
       notifiedPermissionRequestIds: parseIds(permissionRaw),
       notifiedQuestionRequestIds: parseIds(questionRaw),
       lastPolledAtEpochMs: polledRaw is num ? polledRaw.toInt() : 0,
@@ -239,6 +245,45 @@ class BackgroundAlertSnapshot {
       'lastPolledAtEpochMs': lastPolledAtEpochMs,
     };
   }
+}
+
+/// Maximum session entries retained in any background-alert snapshot map.
+///
+/// Bounds the SharedPreferences payload so a platform `getAll` never
+/// serializes tens of megabytes in a single direct `ByteBuffer` (release
+/// OOM: ~36.7 MB `StandardMessageCodec.encodeMessage` on Android).
+const int kBackgroundAlertSnapshotMaxSessions = 1500;
+
+/// Returns [titles] pruned to sessions in [liveSessionIds], most-recent-first
+/// by [updatedAtById] and capped at [maxEntries].
+///
+/// Pruned sessions fall back to the generic notification title; completion
+/// detection state is unaffected because it compares status maps, not titles.
+Map<String, String> pruneBackgroundAlertSessionTitles({
+  required Map<String, String> titles,
+  required Map<String, int> updatedAtById,
+  required Set<String> liveSessionIds,
+  int maxEntries = kBackgroundAlertSnapshotMaxSessions,
+}) {
+  final retainedUpdatedAt = <String, int>{};
+  for (final entry in titles.entries) {
+    if (liveSessionIds.contains(entry.key)) {
+      retainedUpdatedAt[entry.key] = updatedAtById[entry.key] ?? 0;
+    }
+  }
+  if (retainedUpdatedAt.length <= maxEntries) {
+    return <String, String>{
+      for (final id in retainedUpdatedAt.keys) id: titles[id]!,
+    };
+  }
+  final ordered = retainedUpdatedAt.keys.toList()
+    ..sort((a, b) {
+      final byTime = retainedUpdatedAt[b]!.compareTo(retainedUpdatedAt[a]!);
+      return byTime != 0 ? byTime : a.compareTo(b);
+    });
+  return <String, String>{
+    for (final id in ordered.take(maxEntries)) id: titles[id]!,
+  };
 }
 
 enum BackgroundAlertKind { completion, error, permission, question }
@@ -297,10 +342,26 @@ class BackgroundAlertPlanner {
         .where((id) => id.isNotEmpty)
         .toSet();
 
+    final liveSessionIds = <String>{
+      ...normalizedStatuses.keys,
+      for (final request in current.permissionRequests)
+        if (request.sessionId.trim().isNotEmpty) request.sessionId.trim(),
+      for (final request in current.questionRequests)
+        if (request.sessionId.trim().isNotEmpty) request.sessionId.trim(),
+    };
     final nextSnapshot = BackgroundAlertSnapshot(
       sessionStatusById: normalizedStatuses,
-      sessionUpdatedAtById: Map<String, int>.from(current.sessionUpdatedAtById),
-      sessionTitleById: Map<String, String>.from(current.sessionTitleById),
+      // Drop timestamps for sessions the server no longer reports so the
+      // fallback path cannot persist a stale-big map across polls.
+      sessionUpdatedAtById: <String, int>{
+        for (final entry in current.sessionUpdatedAtById.entries)
+          if (liveSessionIds.contains(entry.key)) entry.key: entry.value,
+      },
+      sessionTitleById: pruneBackgroundAlertSessionTitles(
+        titles: current.sessionTitleById,
+        updatedAtById: current.sessionUpdatedAtById,
+        liveSessionIds: liveSessionIds,
+      ),
       notifiedPermissionRequestIds: _mergeSeenIds(
         previous.notifiedPermissionRequestIds,
         permissionIds,

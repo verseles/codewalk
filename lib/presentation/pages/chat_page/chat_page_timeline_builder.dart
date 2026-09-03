@@ -510,7 +510,6 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
                           return _buildInlineTodoCard(
                             context,
                             chatProvider,
-                            sp,
                             forceCollapsed: shouldForceCollapse,
                           );
                         },

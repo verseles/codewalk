@@ -1603,15 +1603,19 @@ extension _ChatPageScaffold on _ChatPageState {
                       ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    SessionTodoListWidget(
-                      todos: chatProvider.currentSessionTodo,
-                      collapsed: settingsProvider.taskListCollapsed,
-                      onToggleCollapsed: () => unawaited(
-                        settingsProvider.setTaskListCollapsed(
-                          !settingsProvider.taskListCollapsed,
-                        ),
-                      ),
-                      maxVisibleItems: 10,
+                    DirectConsumer<SettingsProvider>(
+                      builder: (context, settings, _) {
+                        return SessionTodoListWidget(
+                          todos: chatProvider.currentSessionTodo,
+                          collapsed: settings.taskListCollapsed,
+                          onToggleCollapsed: () => unawaited(
+                            settings.setTaskListCollapsed(
+                              !settings.taskListCollapsed,
+                            ),
+                          ),
+                          maxVisibleItems: 10,
+                        );
+                      },
                     ),
                     if (settingsProvider.showReviewChanges) ...[
                       if (chatProvider.currentSessionDiff.isNotEmpty) ...[

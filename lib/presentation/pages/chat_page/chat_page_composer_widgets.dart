@@ -44,11 +44,9 @@ extension _ChatPageComposerWidgets on _ChatPageState {
 
   Widget _buildInlineTodoCard(
     BuildContext context,
-    ChatProvider chatProvider,
-    SettingsProvider sp, {
+    ChatProvider chatProvider, {
     required bool forceCollapsed,
   }) {
-    final effectiveCollapsed = forceCollapsed || sp.taskListCollapsed;
     final visualTokens = Theme.of(context).visualStyleTokens;
     return Container(
       width: double.infinity,
@@ -61,14 +59,22 @@ extension _ChatPageComposerWidgets on _ChatPageState {
             : Theme.of(context).colorScheme.surfaceContainerLow,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: SessionTodoListWidget(
-            todos: chatProvider.currentSessionTodo,
-            collapsed: effectiveCollapsed,
-            onToggleCollapsed: () {
-              if (forceCollapsed) {
-                return;
-              }
-              unawaited(sp.setTaskListCollapsed(!sp.taskListCollapsed));
+          child: DirectConsumer<SettingsProvider>(
+            builder: (context, settings, _) {
+              return SessionTodoListWidget(
+                todos: chatProvider.currentSessionTodo,
+                collapsed: forceCollapsed || settings.taskListCollapsed,
+                onToggleCollapsed: () {
+                  if (forceCollapsed) {
+                    return;
+                  }
+                  unawaited(
+                    settings.setTaskListCollapsed(
+                      !settings.taskListCollapsed,
+                    ),
+                  );
+                },
+              );
             },
           ),
         ),

@@ -14,11 +14,17 @@ import android.provider.Settings
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import com.verseles.codewalk.overlay.SessionOverlayService
 
 class MainActivity : FlutterActivity() {
+    // A/B for release-only frame-presentation stall (theme/task/progress
+    // freeze): TextureView composes inside the Activity window instead of a
+    // dedicated SurfaceView/BLAST queue. Revert to default (surface) by
+    // deleting this override if it regresses.
+    override fun getRenderMode(): RenderMode = RenderMode.texture
     companion object {
         private const val SYSTEM_SOUNDS_CHANNEL = "codewalk/system_sounds"
         private const val SYSTEM_CHANNEL = "codewalk/system"

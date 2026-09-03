@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/i18n/l10n_context.dart';
@@ -13,6 +12,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/desktop_window_chrome_service.dart';
 import '../../../theme/brand_colors.dart';
 import '../../../theme/opencode_theme_presets.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
 
@@ -97,7 +97,7 @@ class AppearanceSettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         final isDarkModeActive =
             Theme.of(context).brightness == Brightness.dark;

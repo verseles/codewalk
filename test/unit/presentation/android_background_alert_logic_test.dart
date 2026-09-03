@@ -493,4 +493,83 @@ void main() {
 
     expect(plan.signals, isEmpty);
   });
+
+  group('snapshot title pruning', () {
+    test('drops titles for sessions absent from the live poll', () {
+      final pruned = pruneBackgroundAlertSessionTitles(
+        titles: const <String, String>{
+          'ses_live': 'Live title',
+          'ses_gone': 'Stale title',
+        },
+        updatedAtById: const <String, int>{'ses_live': 2, 'ses_gone': 1},
+        liveSessionIds: const <String>{'ses_live'},
+      );
+      expect(pruned, <String, String>{'ses_live': 'Live title'});
+    });
+
+    test('caps entries by recency when over budget', () {
+      final titles = <String, String>{
+        for (var i = 0; i < 10; i++) 'ses_$i': 'Title $i',
+      };
+      final updatedAt = <String, int>{
+        for (var i = 0; i < 10; i++) 'ses_$i': i,
+      };
+      final pruned = pruneBackgroundAlertSessionTitles(
+        titles: titles,
+        updatedAtById: updatedAt,
+        liveSessionIds: titles.keys.toSet(),
+        maxEntries: 3,
+      );
+      expect(pruned.keys, <String>['ses_9', 'ses_8', 'ses_7']);
+    });
+
+    test('fromJson bounds oversized legacy title maps', () {
+      final json = <String, dynamic>{
+        'sessionStatusById': <String, dynamic>{},
+        'sessionUpdatedAtById': <String, dynamic>{},
+        'sessionTitleById': <String, dynamic>{
+          for (var i = 0; i < kBackgroundAlertSnapshotMaxSessions + 100; i++)
+            'ses_$i': 'Title $i',
+        },
+        'notifiedPermissionRequestIds': <String>[],
+        'notifiedQuestionRequestIds': <String>[],
+        'lastPolledAtEpochMs': 1,
+      };
+      final snapshot = BackgroundAlertSnapshot.fromJson(json);
+      expect(
+        snapshot.sessionTitleById.length,
+        kBackgroundAlertSnapshotMaxSessions,
+      );
+    });
+
+    test('planner next snapshot keeps only live session titles', () {
+      const current = BackgroundPollingState(
+        sessionStatusById: <String, String>{'ses_live': 'busy'},
+        sessionUpdatedAtById: <String, int>{
+          'ses_live': 200,
+          'ses_gone': 100,
+        },
+        sessionTitleById: <String, String>{
+          'ses_live': 'Live title',
+          'ses_gone': 'Stale title',
+        },
+        permissionRequests: <BackgroundInteractionRequest>[],
+        questionRequests: <BackgroundInteractionRequest>[],
+      );
+      final plan = planner.plan(
+        previous: BackgroundAlertSnapshot.empty(),
+        current: current,
+        settings: ExperienceSettings.defaults(),
+        nowEpochMs: 300,
+      );
+      expect(
+        plan.nextSnapshot.sessionTitleById,
+        <String, String>{'ses_live': 'Live title'},
+      );
+      expect(
+        plan.nextSnapshot.sessionUpdatedAtById,
+        <String, int>{'ses_live': 200},
+      );
+    });
+  });
 }

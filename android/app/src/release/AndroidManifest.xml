@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release-only heap headroom (Android source-set overlay).
+        Release logcat shows ~36.7 MB single-message
+        StandardMessageCodec.encodeMessage allocations failing on the default
+        256 MB growth limit, starving frame composition until restart.
+        Scoped to release so debug keeps the default heap for comparison. -->
+    <application android:largeHeap="true" />
+</manifest>

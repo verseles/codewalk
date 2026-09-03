@@ -140,6 +140,7 @@ class SettingsProvider extends ChangeNotifier {
   bool _pendingStartupUpdateToast = false;
   UpdateInstallState _installState = UpdateInstallState.idle;
   double _installProgress = 0.0;
+  DateTime? _lastInstallProgressNotify;
   bool _initialized = false;
   Future<void>? _initFuture;
   Timer? _automaticUpdateCheckTimer;

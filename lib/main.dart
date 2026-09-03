@@ -30,6 +30,7 @@ import 'presentation/services/session_attention/session_overlay_entrypoint.dart'
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/opencode_theme_presets.dart';
 import 'presentation/widgets/desktop_window_title_bar.dart';
+import 'presentation/widgets/direct_provider.dart';
 
 // Keeps the native Android service entrypoint reachable in AOT builds.
 @pragma('vm:entry-point')
@@ -46,6 +47,9 @@ Future<void> main(List<String> args) async {
     WidgetsFlutterBinding.ensureInitialized();
     AppLogger.installGlobalHandlers();
     unawaited(AndroidProcessDiagnostics.recordStartup());
+    if (_isAndroidRuntime()) {
+      _configureAndroidMemoryBounds();
+    }
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
@@ -108,32 +112,17 @@ class MyApp extends StatelessWidget {
       ],
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          return Selector<
-            SettingsProvider,
-            ({
-              AppDensity appDensity,
-              bool useDynamicColor,
-              bool useAmoledDark,
-              int? customColorSeed,
-              double contrastLevel,
-              OpenCodeThemePreset? themePreset,
-              VisualStyle visualStyle,
-              ThemeModeOption themeMode,
-              double systemFontScale,
-              bool dynamicColorAvailable,
-            })
-          >(
-            selector: (context, settingsProvider) => (
-              appDensity: settingsProvider.appDensity,
-              useDynamicColor: settingsProvider.useDynamicColor,
-              useAmoledDark: settingsProvider.useAmoledDark,
-              customColorSeed: settingsProvider.customColorSeed,
-              contrastLevel: settingsProvider.contrastLevel,
-              themePreset: settingsProvider.themePreset,
-              visualStyle: settingsProvider.visualStyle,
-              themeMode: settingsProvider.themeMode,
-              systemFontScale: settingsProvider.systemFontScale,
-              dynamicColorAvailable: settingsProvider.dynamicColorAvailable,
+          return DirectSelector<SettingsProvider, _AppSettingsRecord>(
+            select: (provider) => (
+              appDensity: provider.appDensity,
+              useDynamicColor: provider.useDynamicColor,
+              useAmoledDark: provider.useAmoledDark,
+              customColorSeed: provider.customColorSeed,
+              contrastLevel: provider.contrastLevel,
+              themePreset: provider.themePreset,
+              visualStyle: provider.visualStyle,
+              themeMode: provider.themeMode,
+              systemFontScale: provider.systemFontScale,
             ),
             builder: (context, appSettings, _) {
               return Consumer<LocaleProvider>(
@@ -152,9 +141,16 @@ class MyApp extends StatelessWidget {
                   // heuristic).
                   // Consider dynamic color available when the platform provides
                   // at least one scheme (light or dark).
+                  // Read outside the Selector record: availability must not
+                  // rebuild the whole MaterialApp on its own flap (the
+                  // appearance section subscribes to it separately).
+                  // Non-listening read: only that section rebuilds on
+                  // availability-only changes.
                   final hasDynamic =
                       lightDynamic != null || darkDynamic != null;
-                  if (appSettings.dynamicColorAvailable != hasDynamic) {
+                  final dynamicAvailable =
+                      settingsProvider.dynamicColorAvailable;
+                  if (dynamicAvailable != hasDynamic) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       settingsProvider.updateDynamicColorAvailability(
                         available: hasDynamic,
@@ -295,6 +291,28 @@ bool _isAndroidRuntime() {
   return defaultTargetPlatform == TargetPlatform.android;
 }
 
+/// Bounds Android image caches and releases them on memory pressure.
+///
+/// The Android release heap is capped (256 MB without largeHeap) while a
+/// single platform message can transiently need tens of megabytes, so
+/// unbounded caches directly contribute to release-only frame starvation.
+/// Desktop keeps the default cache policy.
+void _configureAndroidMemoryBounds() {
+  final imageCache = PaintingBinding.instance.imageCache;
+  imageCache.maximumSize = 100;
+  imageCache.maximumSizeBytes = 32 << 20;
+  WidgetsBinding.instance.addObserver(_AndroidMemoryPressureObserver());
+}
+
+class _AndroidMemoryPressureObserver with WidgetsBindingObserver {
+  @override
+  void didHaveMemoryPressure() {
+    PaintingBinding.instance.imageCache
+      ..clear()
+      ..clearLiveImages();
+  }
+}
+
 ColorScheme _applyAmoledDarkScheme(ColorScheme base) {
   const black = Colors.black;
   return base.copyWith(
@@ -308,3 +326,22 @@ ColorScheme _applyAmoledDarkScheme(ColorScheme base) {
     surfaceContainerHighest: black,
   );
 }
+
+/// Direct-subscription replacement for the root Selector.
+///
+/// The provider package's InheritedWidget propagation does not rebuild
+/// dependents in Android release builds on this device (notify fires,
+/// direct listeners work, frames run, but Selector/Consumer builders never
+/// re-run). [DirectSelector] subscribes via addListener directly (proven
+/// path) and keeps Selector-equivalent filtering through record equality.
+typedef _AppSettingsRecord = ({
+  AppDensity appDensity,
+  bool useDynamicColor,
+  bool useAmoledDark,
+  int? customColorSeed,
+  double contrastLevel,
+  OpenCodeThemePreset? themePreset,
+  VisualStyle visualStyle,
+  ThemeModeOption themeMode,
+  double systemFontScale,
+});

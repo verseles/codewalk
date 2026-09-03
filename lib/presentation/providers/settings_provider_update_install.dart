@@ -18,6 +18,26 @@ String resolveDesktopRestartExecutable({
   return fileExists(installerLink) ? installerLink : resolvedExecutable;
 }
 
+/// Decides whether an Android APK download progress update should notify
+/// listeners. Dio emits `onReceiveProgress` per network chunk; notifying on
+/// every chunk rebuilds the whole app shell at network speed, churning the
+/// heap on memory-constrained Android release builds. Completion always
+/// notifies; otherwise [minDelta] progress and [minInterval] since the last
+/// notification are required.
+bool shouldNotifyInstallProgress({
+  required double previous,
+  required double next,
+  required DateTime? lastNotifiedAt,
+  required DateTime now,
+  double minDelta = 0.01,
+  Duration minInterval = const Duration(milliseconds: 100),
+}) {
+  if (next >= 1.0) return true;
+  if (next - previous < minDelta) return false;
+  if (lastNotifiedAt == null) return true;
+  return now.difference(lastNotifiedAt) >= minInterval;
+}
+
 extension SettingsProviderUpdateInstall on SettingsProvider {
   Future<void> checkForUpdate() async {
     _checkingForUpdate = true;
@@ -135,6 +155,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
 
     _installState = UpdateInstallState.downloading;
     _installProgress = 0.0;
+    _lastInstallProgressNotify = null;
     notifyListeners();
 
     String? destPath;
@@ -155,8 +176,17 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
           final progress = total > 0
               ? (received / total).clamp(0.0, 1.0)
               : 0.0;
-          if (_installProgress == progress) return;
+          final now = DateTime.now();
+          if (!shouldNotifyInstallProgress(
+            previous: _installProgress,
+            next: progress,
+            lastNotifiedAt: _lastInstallProgressNotify,
+            now: now,
+          )) {
+            return;
+          }
           _installProgress = progress;
+          _lastInstallProgressNotify = now;
           downloadZone.run(notifyListeners);
         },
       );

@@ -85,6 +85,7 @@ import '../widgets/chat_skeleton_shimmer.dart';
 import '../widgets/chat_tour_showcase.dart';
 import '../widgets/codewalk_terminal_panel.dart';
 import '../widgets/desktop_window_title_bar.dart';
+import '../widgets/direct_provider.dart';
 import '../widgets/file_tree_context_menu.dart';
 import '../widgets/forward_message_dialog.dart';
 import '../widgets/message_entrance_animation.dart';

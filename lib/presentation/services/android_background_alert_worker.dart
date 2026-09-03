@@ -322,10 +322,17 @@ class AndroidBackgroundAlertWorker {
     final primedSnapshot = BackgroundAlertSnapshot(
       sessionStatusById: normalizedStatusById,
       sessionUpdatedAtById: normalizedUpdatedAtById,
-      sessionTitleById: {
-        ...existingSnapshot.sessionTitleById,
-        ...normalizedTitleById,
-      },
+      sessionTitleById: pruneBackgroundAlertSessionTitles(
+        titles: {
+          ...existingSnapshot.sessionTitleById,
+          ...normalizedTitleById,
+        },
+        updatedAtById: {
+          ...existingSnapshot.sessionUpdatedAtById,
+          ...normalizedUpdatedAtById,
+        },
+        liveSessionIds: normalizedStatusById.keys.toSet(),
+      ),
       notifiedPermissionRequestIds:
           existingSnapshot.notifiedPermissionRequestIds,
       notifiedQuestionRequestIds: existingSnapshot.notifiedQuestionRequestIds,
