@@ -2909,6 +2909,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open the Tailscale login URL to add this device to your tailnet.';
 
   @override
+  String get serversTailscaleLogout => 'Log out';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'This device will leave the tailnet. You can log in again at any time.';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Log out of Tailscale?';
+
+  @override
+  String get serversTailscaleReconnect => 'Reconnect';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'OpenCode traffic for this active profile is routed through Tailscale.';
 

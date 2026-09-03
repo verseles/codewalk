@@ -2922,6 +2922,19 @@ class AppLocalizationsHi extends AppLocalizations {
       'इस डिवाइस को अपने tailnet में जोड़ने के लिए Tailscale लॉगिन URL खोलें।';
 
   @override
+  String get serversTailscaleLogout => 'लॉग आउट';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'यह डिवाइस tailnet छोड़ देगा। आप कभी भी दोबारा लॉग इन कर सकते हैं।';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Tailscale से लॉग आउट करें?';
+
+  @override
+  String get serversTailscaleReconnect => 'पुनः कनेक्ट करें';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'इस सक्रिय प्रोफ़ाइल के लिए OpenCode ट्रैफ़िक Tailscale के माध्यम से रूट किया जाता है।';
 

@@ -3787,6 +3787,22 @@
   "@serversTailscaleLoginExplanation": {
     "description": "CodeWalk UI string — serversTailscaleLoginExplanation"
   },
+  "serversTailscaleLogout": "Log out",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "This device will leave the tailnet. You can log in again at any time.",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "Log out of Tailscale?",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "Reconnect",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "OpenCode traffic for this active profile is routed through Tailscale.",
   "@serversTailscaleTrafficExplanation": {
     "description": "CodeWalk UI string — serversTailscaleTrafficExplanation"

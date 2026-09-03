@@ -2785,6 +2785,19 @@ class AppLocalizationsJa extends AppLocalizations {
       'Tailscale ログイン URL を開いて、このデバイスを tailnet に追加してください。';
 
   @override
+  String get serversTailscaleLogout => 'ログアウト';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'このデバイスはtailnetから退出します。いつでも再ログインできます。';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Tailscaleからログアウトしますか?';
+
+  @override
+  String get serversTailscaleReconnect => '再接続';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'このアクティブプロファイルの OpenCode トラフィックは Tailscale 経由でルーティングされます。';
 

@@ -2789,6 +2789,19 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 기기를 tailnet에 추가하려면 Tailscale 로그인 URL을 여세요.';
 
   @override
+  String get serversTailscaleLogout => '로그아웃';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      '이 기기가 tailnet에서 나가며 언제든지 다시 로그인할 수 있습니다.';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Tailscale에서 로그아웃하시겠습니까?';
+
+  @override
+  String get serversTailscaleReconnect => '다시 연결';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       '이 활성 프로필의 OpenCode 트래픽은 Tailscale을 통해 라우팅됩니다.';
 

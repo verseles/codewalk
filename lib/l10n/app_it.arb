@@ -1,3 +1,4 @@
+  
 {
   
   "speechReadAloudNoVoice": "Seleziona una voce per questo fornitore TTS.",
@@ -1034,6 +1035,22 @@
   "serversTailscaleConnectionFailed": "Connessione Tailscale fallita",
   "serversTailscaleDisconnected": "Tailscale disconnesso",
   "serversTailscaleLoginExplanation": "Apri l''URL di accesso Tailscale per aggiungere questo dispositivo al tuo tailnet.",
+  "serversTailscaleLogout": "Esci",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "Questo dispositivo uscirà dalla tailnet. Potrai accedere di nuovo in qualsiasi momento.",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "Uscire da Tailscale?",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "Riconnetti",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "Il traffico OpenCode per questo profilo attivo viene instradato attraverso Tailscale.",
   "serversTailscaleUnsupported": "Tailscale non supportato",
   "serversUnhealthyActivateError": "Questo server non è integro. Controlla lo stato o modifica le impostazioni prima di attivarlo.",

@@ -2955,6 +2955,19 @@ class AppLocalizationsDe extends AppLocalizations {
       'Öffnen Sie die Tailscale-Anmelde-URL, um dieses Gerät zu Ihrem Tailnet hinzuzufügen.';
 
   @override
+  String get serversTailscaleLogout => 'Abmelden';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'Dieses Gerät verlässt das Tailnet. Du kannst dich jederzeit erneut anmelden.';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Von Tailscale abmelden?';
+
+  @override
+  String get serversTailscaleReconnect => 'Erneut verbinden';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'Der OpenCode-Datenverkehr für dieses aktive Profil wird über Tailscale geleitet.';
 

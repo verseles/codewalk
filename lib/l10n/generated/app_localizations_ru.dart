@@ -2946,6 +2946,19 @@ class AppLocalizationsRu extends AppLocalizations {
       'Откройте URL входа в Tailscale, чтобы добавить это устройство в вашу сеть Tailscale.';
 
   @override
+  String get serversTailscaleLogout => 'Выйти';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'Это устройство покинет tailnet. Вы сможете войти снова в любое время.';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Выйти из Tailscale?';
+
+  @override
+  String get serversTailscaleReconnect => 'Переподключиться';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'Трафик OpenCode для этого активного профиля маршрутизируется через Tailscale.';
 

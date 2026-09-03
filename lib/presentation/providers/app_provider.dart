@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/auth/oauth_service.dart';
@@ -81,31 +82,7 @@ class AppProvider extends ChangeNotifier {
        _dioClient = dioClient,
        _tailscaleService = tailscaleService ?? TailscaleService(),
         _tailscaleAuthLauncher =
-            tailscaleAuthLauncher ??
-            ((authUrl) async {
-              try {
-                final launched = await launchUrl(
-                  authUrl,
-                  mode: LaunchMode.externalApplication,
-                );
-                if (launched) return true;
-              } catch (_) {
-                // Fall through to platform-default launch below.
-              }
-              try {
-                return await launchUrl(
-                  authUrl,
-                  mode: LaunchMode.platformDefault,
-                );
-              } catch (error, stackTrace) {
-                AppLogger.warn(
-                  'Failed to launch Tailscale authentication URL with fallback',
-                  error: error,
-                  stackTrace: stackTrace,
-                );
-                return false;
-              }
-            }),
+            tailscaleAuthLauncher ?? _defaultTailscaleAuthLauncher,
        _cellularDataSaverService =
            cellularDataSaverService ?? CellularDataSaverService.disabled(),
        _sessionAttentionCompletionResolver = sessionAttentionCompletionResolver,
@@ -537,7 +514,40 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _applyTailscaleTransport(ServerProfile profile) async {
+  Future<void>? _applyTransportInFlight;
+  String? _applyTransportProfileId;
+  Future<void>? _retryInFlight;
+
+  /// Whether any Tailscale action (authenticate, retry, logout) is running.
+  /// All three action buttons disable while busy to prevent interleavings
+  /// (e.g. logout tearing down while a restart is starting up).
+  bool get tailscaleBusy =>
+      tailscaleAuthBusy || tailscaleLogoutBusy || tailscaleRetryBusy;
+
+  /// Whether a transport retry is currently running.
+  bool get tailscaleRetryBusy => _retryInFlight != null;
+
+  /// Root-level single-flight for transport bring-up, keyed by profile:
+  /// concurrent starters for the same profile (manual tap + auto-trigger,
+  /// Authenticate + Retry) join instead of restarting the node mid-flight.
+  Future<void> _applyTailscaleTransport(ServerProfile profile) {
+    final inFlight = _applyTransportInFlight;
+    if (inFlight != null && _applyTransportProfileId == profile.id) {
+      return inFlight;
+    }
+    final future = _applyTailscaleTransportInner(profile);
+    _applyTransportInFlight = future;
+    _applyTransportProfileId = profile.id;
+    future.whenComplete(() {
+      if (identical(_applyTransportInFlight, future)) {
+        _applyTransportInFlight = null;
+        _applyTransportProfileId = null;
+      }
+    });
+    return future;
+  }
+
+  Future<void> _applyTailscaleTransportInner(ServerProfile profile) async {
     if (!profile.tailscaleEnabled || !supportsTailscale) {
       _dioClient.removeTailscaleAdapter();
       await _stopTailscaleTransport();
@@ -575,6 +585,7 @@ class AppProvider extends ChangeNotifier {
         _dioClient.applyTailscaleAdapter(
           TailscaleHttpAdapter(_tailscaleService.httpClient),
         );
+        _closeTailscaleTabIfOpen();
         final activeId = _activeServerId;
         if (activeId != null) {
           unawaited(refreshServerHealth(serverId: activeId));
@@ -590,6 +601,48 @@ class AppProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+
+  static DateTime? _tailscaleTabOpenedAt;
+
+  static const _tailscaleTabCloseWindow = Duration(minutes: 10);
+
+  @visibleForTesting
+  static void setTailscaleTabOpenedForTesting(DateTime? value) {
+    _tailscaleTabOpenedAt = value;
+  }
+
+  @visibleForTesting
+  static DateTime? get tailscaleTabOpenedForTesting => _tailscaleTabOpenedAt;
+
+  /// When the app opened the Tailscale login in a Custom Tab and the node
+  /// just connected, bring our own activity back to the front, which pops
+  /// the tab off this task so the user lands back in CodeWalk.
+  void _closeTailscaleTabIfOpen() {
+    final openedAt = _tailscaleTabOpenedAt;
+    if (openedAt == null) return;
+    _tailscaleTabOpenedAt = null;
+    if (DateTime.now().difference(openedAt) > _tailscaleTabCloseWindow) return;
+    _recordSetupDebugEvent(
+      source: 'Tailscale',
+      message: 'login tab open at connect; bringing app to front',
+      notify: false,
+    );
+    unawaited(_invokeTailscaleTabClose());
+  }
+
+  static Future<void> _invokeTailscaleTabClose() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    try {
+      const channel = MethodChannel('codewalk/system');
+      await channel.invokeMethod<bool>('closeTailscaleTab');
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to close Tailscale Custom Tab',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   void _setTailscaleState(TailscaleState state) {
@@ -623,7 +676,28 @@ class AppProvider extends ChangeNotifier {
     await _tailscaleService.down();
     _setTailscaleState(const TailscaleState.disconnected());
   }
-  Future<bool> authenticateTailscale() async {
+  Future<bool>? _tailscaleAuthInFlight;
+
+  /// Single-flight entry point for manual Tailscale authentication.
+  /// Concurrent taps join the in-flight attempt instead of restarting the
+  /// node (which would flap needsLogin/connecting and invalidate the
+  /// pending login URL).
+  Future<bool> authenticateTailscale() {
+    final inFlight = _tailscaleAuthInFlight;
+    if (inFlight != null) return inFlight;
+    final future = _authenticateTailscale();
+    _tailscaleAuthInFlight = future;
+    future.whenComplete(() {
+      if (identical(_tailscaleAuthInFlight, future)) {
+        _tailscaleAuthInFlight = null;
+      }
+      notifyListeners();
+    });
+    notifyListeners();
+    return future;
+  }
+
+  Future<bool> _authenticateTailscale() async {
     final authUrl = _tailscaleState.authUrl;
     if (authUrl != null) {
       final ok = await _launchTailscaleAuthUrl(authUrl);
@@ -700,6 +774,7 @@ class AppProvider extends ChangeNotifier {
       _dioClient.applyTailscaleAdapter(
         TailscaleHttpAdapter(_tailscaleService.httpClient),
       );
+      _closeTailscaleTabIfOpen();
     } else if (!next.isConnected && before.isConnected) {
       _dioClient.removeTailscaleAdapter();
       _serverHealthById[profile.id] = ServerHealthStatus.unknown;
@@ -708,9 +783,82 @@ class AppProvider extends ChangeNotifier {
     return next;
   }
 
+  /// Logs the shared Tailscale device out of the tailnet and clears its
+  /// persisted credentials, so the next use requires interactive login
+  /// again. Backs the explicit Logout action and full app reset.
+  /// Single-flight: concurrent taps join the running logout instead of
+  /// stacking duplicate teardowns (and duplicate timeline entries).
+  Future<void>? _logoutInFlight;
+
+  /// Whether an authentication attempt is currently running. Drives the
+  /// loading state of the Authenticate action.
+  bool get tailscaleAuthBusy => _tailscaleAuthInFlight != null;
+
+  /// Whether a logout is currently running. Drives the loading state of
+  /// the Logout action.
+  bool get tailscaleLogoutBusy => _logoutInFlight != null;
+
+  Future<void> logoutTailscale() {
+    final inFlight = _logoutInFlight;
+    if (inFlight != null) return inFlight;
+    final future = _logoutTailscale();
+    _logoutInFlight = future;
+    future.whenComplete(() {
+      if (identical(_logoutInFlight, future)) _logoutInFlight = null;
+      notifyListeners();
+    });
+    notifyListeners();
+    return future;
+  }
+
+  Future<void> _logoutTailscale() async {
+    await _tailscaleStateSubscription?.cancel();
+    _tailscaleStateSubscription = null;
+    await _tailscalePeerSubscription?.cancel();
+    _tailscalePeerSubscription = null;
+    _tailscalePeers = const [];
+    _dioClient.removeTailscaleAdapter();
+    try {
+      await _tailscaleService.logout();
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        '[Tailscale] Failed to log out',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    _setTailscaleState(const TailscaleState.disconnected());
+    for (final profile in _serverProfiles.where((p) => p.tailscaleEnabled)) {
+      _serverHealthById[profile.id] = ServerHealthStatus.unknown;
+    }
+    if (activeServer?.tailscaleEnabled == true) {
+      _isConnected = false;
+    }
+    _recordSetupDebugEvent(
+      source: 'Tailscale',
+      message: 'logged out; next use requires interactive login',
+      notify: false,
+    );
+    notifyListeners();
+  }
+
   /// Restarts the embedded node for the active Tailscale profile and
-  /// re-probes health. Backs the Retry action in onboarding/settings.
-  Future<void> retryTailscaleTransport() async {
+  /// re-probes health. Backs the Reconnect action in onboarding/settings.
+  /// Single-flight: concurrent taps join the running retry.
+  Future<void> retryTailscaleTransport() {
+    final inFlight = _retryInFlight;
+    if (inFlight != null) return inFlight;
+    final future = _retryTailscaleTransportInner();
+    _retryInFlight = future;
+    future.whenComplete(() {
+      if (identical(_retryInFlight, future)) _retryInFlight = null;
+      notifyListeners();
+    });
+    notifyListeners();
+    return future;
+  }
+
+  Future<void> _retryTailscaleTransportInner() async {
     final profile = activeServer;
     if (profile == null ||
         !profile.tailscaleEnabled ||
@@ -724,7 +872,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<Uri?> _waitForTailscaleAuthUrl({
-    Duration timeout = const Duration(seconds: 8),
+    Duration timeout = const Duration(seconds: 20),
   }) async {
     final currentUrl = _tailscaleState.authUrl;
     if (currentUrl != null) return currentUrl;
@@ -741,11 +889,13 @@ class AppProvider extends ChangeNotifier {
 
     final completer = Completer<Uri?>();
     Timer? timer;
+    Timer? pollTimer;
     StreamSubscription<TailscaleState>? subscription;
 
     void complete(Uri? value) {
       if (completer.isCompleted) return;
       timer?.cancel();
+      pollTimer?.cancel();
       unawaited(subscription?.cancel());
       completer.complete(value);
     }
@@ -777,6 +927,23 @@ class AppProvider extends ChangeNotifier {
       complete(null);
     }
     if (!completer.isCompleted) {
+      // The AuthURL often lags the first NeedsLogin event (and re-emissions
+      // are not guaranteed), so poll the native status instead of relying
+      // on the stream alone.
+      pollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+        if (completer.isCompleted) return;
+        try {
+          final refreshed = await _tailscaleService.refreshStatus();
+          final url = refreshed.authUrl;
+          if (url != null) {
+            complete(url);
+          } else if (isTerminal(refreshed)) {
+            complete(null);
+          }
+        } catch (_) {
+          // Next poll or the overall timeout settles the wait.
+        }
+      });
       timer = Timer(timeout, () => complete(null));
     }
     return completer.future;
@@ -788,6 +955,55 @@ class AppProvider extends ChangeNotifier {
     } catch (error, stackTrace) {
       AppLogger.warn(
         'Failed to launch Tailscale authentication URL',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  /// Default Tailscale login opener: on Android prefer the browser-owned
+  /// Custom Tab (same task, so Back returns to CodeWalk) via the native
+  /// channel, falling back to url_launcher elsewhere or on failure.
+  /// No embedded WebView: identity providers routinely block WebViews
+  /// and passkeys need a real browser.
+  static Future<bool> _defaultTailscaleAuthLauncher(Uri authUrl) async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        const channel = MethodChannel('codewalk/system');
+        final mode = await channel.invokeMethod<String>(
+          'launchTailscaleAuthorization',
+          {'url': authUrl.toString()},
+        );
+        if (mode == 'custom_tab' || mode == 'external_browser') {
+          AppLogger.debug('[Tailscale] Auth opened via $mode');
+          if (mode == 'custom_tab') {
+            _tailscaleTabOpenedAt = DateTime.now();
+          }
+          return true;
+        }
+      } catch (error, stackTrace) {
+        AppLogger.warn(
+          'Tailscale Custom Tab launch failed, falling back to url_launcher',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+    try {
+      final launched = await launchUrl(
+        authUrl,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) return true;
+    } catch (_) {
+      // Fall through to platform-default launch below.
+    }
+    try {
+      return await launchUrl(authUrl, mode: LaunchMode.platformDefault);
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        'Failed to launch Tailscale authentication URL with fallback',
         error: error,
         stackTrace: stackTrace,
       );

@@ -2910,6 +2910,19 @@ class AppLocalizationsUr extends AppLocalizations {
       'اس ڈیوائس کو اپنے tailnet میں شامل کرنے کے لیے Tailscale لاگ ان URL کھولیں۔';
 
   @override
+  String get serversTailscaleLogout => 'لاگ آؤٹ';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'یہ ڈیوائس tailnet چھوڑ دے گا۔ آپ کسی بھی وقت دوبارہ لاگ ان کر سکتے ہیں۔';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Tailscale سے لاگ آؤٹ کریں؟';
+
+  @override
+  String get serversTailscaleReconnect => 'دوبارہ منسلک کریں';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'اس فعال پروفائل کے لیے OpenCode ٹریفک Tailscale کے ذریعے روٹ کی جاتی ہے۔';
 

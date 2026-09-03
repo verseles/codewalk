@@ -327,37 +327,105 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
               ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
             ),
           ],
-          if (state.requiresUserLogin || authUrl != null) ...[
+          if (state.requiresUserLogin ||
+              authUrl != null ||
+              state.nodeState == TailscaleNodeState.disconnected ||
+              state.nodeState == TailscaleNodeState.error) ...[
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                FilledButton.icon(
-                  onPressed: () async {
-                    final ok = await appProvider.authenticateTailscale();
-                    if (!ok && mounted) {
-                      _showMessage(context.l10n.onboardingOpenTailscaleLogin);
-                    }
-                  },
-                  icon: const Icon(Symbols.open_in_browser_rounded),
-                  label: Text(context.l10n.onboardingAuthenticate),
-                ),
+                if (state.nodeState != TailscaleNodeState.connecting &&
+                    state.nodeState != TailscaleNodeState.error)
+                  FilledButton.icon(
+                    onPressed: appProvider.tailscaleBusy
+                        ? null
+                        : () async {
+                            final ok =
+                                await appProvider.authenticateTailscale();
+                            if (!ok && mounted) {
+                              _showMessage(
+                                context.l10n.onboardingOpenTailscaleLogin,
+                              );
+                            }
+                          },
+                    icon: appProvider.tailscaleAuthBusy
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Symbols.open_in_browser_rounded),
+                    label: Text(context.l10n.onboardingAuthenticate),
+                  ),
                 if (authUrl != null)
                   OutlinedButton.icon(
                     onPressed: () => _copyToClipboard(authUrl),
                     icon: const Icon(Symbols.content_copy_rounded),
                     label: Text(context.l10n.onboardingCopyLoginURL),
                   ),
-                if (!state.isConnected &&
-                    state.nodeState != TailscaleNodeState.unsupported)
+                if (state.nodeState == TailscaleNodeState.error)
                   OutlinedButton.icon(
-                    onPressed: () async {
-                      await appProvider.retryTailscaleTransport();
-                    },
-                    icon: const Icon(Symbols.refresh_rounded),
-                    label: Text(context.l10n.terminalTryAgain),
+                    onPressed: appProvider.tailscaleBusy
+                        ? null
+                        : () async {
+                            await appProvider.retryTailscaleTransport();
+                          },
+                    icon: appProvider.tailscaleRetryBusy
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Symbols.refresh_rounded),
+                    label: Text(context.l10n.serversTailscaleReconnect),
                   ),
+              ],
+            ),
+          ],
+          if (state.nodeState != TailscaleNodeState.disconnected &&
+              state.nodeState != TailscaleNodeState.unsupported) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed: appProvider.tailscaleBusy
+                      ? null
+                      : () async {
+                          final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text(
+                          context.l10n.serversTailscaleLogoutConfirmTitle,
+                        ),
+                        content: Text(
+                          context.l10n.serversTailscaleLogoutConfirmMessage,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(false),
+                            child: Text(context.l10n.commonCancel),
+                          ),
+                          FilledButton(
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(true),
+                            child: Text(
+                              context.l10n.serversTailscaleLogout,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed != true || !mounted) return;
+                    await appProvider.logoutTailscale();
+                  },
+                  icon: const Icon(Symbols.logout_rounded),
+                  label: Text(context.l10n.serversTailscaleLogout),
+                ),
               ],
             ),
           ],

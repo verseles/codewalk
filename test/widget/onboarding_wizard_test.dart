@@ -1039,14 +1039,25 @@ void main() {
           await tester.pumpAndSettle();
         }
 
-        final oauthSwitch = find.byType(Switch).at(1);
-        final basicSwitch = find.byType(Switch).at(0);
+        Finder authSwitch(String title) => find.descendant(
+          of: find.ancestor(
+            of: find.text(title),
+            matching: find.byType(SwitchListTile),
+          ),
+          matching: find.byType(Switch),
+        );
+        final oauthSwitch = authSwitch('Use OAuth (Cloudflare Access)');
+        final basicSwitch = authSwitch('Use Basic Auth');
 
+        await tester.ensureVisible(oauthSwitch);
+        await tester.pumpAndSettle();
         await tester.tap(oauthSwitch);
         await tester.pumpAndSettle();
 
         expect(find.text('Username'), findsNothing);
 
+        await tester.ensureVisible(basicSwitch);
+        await tester.pumpAndSettle();
         await tester.tap(basicSwitch);
         await tester.pumpAndSettle();
 

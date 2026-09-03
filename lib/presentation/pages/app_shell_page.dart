@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/i18n/l10n_context.dart';
 import '../../core/logging/app_logger.dart';
+import '../../core/tailscale/tailscale_state.dart';
 import '../providers/app_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/desktop_tray_service.dart';
@@ -14,6 +15,31 @@ import '../services/desktop_tray_service_types.dart';
 import '../services/update_check_service.dart';
 import 'chat_page.dart';
 import 'onboarding_wizard_page.dart';
+
+/// Cold-start loading hint for the Tailscale bring-up that gates provider
+/// initialization. Pure mapping so it stays unit-testable without pumping.
+enum ColdStartTailscaleHint {
+  connecting,
+  loginRequired,
+  adminApproval,
+}
+
+ColdStartTailscaleHint? coldStartTailscaleHint({
+  required bool tailscaleActive,
+  required TailscaleNodeState nodeState,
+}) {
+  if (!tailscaleActive) return null;
+  return switch (nodeState) {
+    TailscaleNodeState.connecting => ColdStartTailscaleHint.connecting,
+    TailscaleNodeState.needsLogin => ColdStartTailscaleHint.loginRequired,
+    TailscaleNodeState.needsMachineAuth =>
+      ColdStartTailscaleHint.adminApproval,
+    TailscaleNodeState.disconnected ||
+    TailscaleNodeState.connected ||
+    TailscaleNodeState.error ||
+    TailscaleNodeState.unsupported => null,
+  };
+}
 
 class AppShellPage extends StatefulWidget {
   const AppShellPage({super.key});
@@ -88,8 +114,39 @@ class _AppShellPageState extends State<AppShellPage> {
       builder: (context, appProvider, settingsProvider, _) {
         // Wait until both providers have loaded persisted state.
         if (!appProvider.initialized || !settingsProvider.initialized) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          final hint = coldStartTailscaleHint(
+            tailscaleActive:
+                appProvider.activeServer?.tailscaleEnabled ?? false,
+            nodeState: appProvider.tailscaleNodeState,
+          );
+          final hintText = switch (hint) {
+            ColdStartTailscaleHint.connecting =>
+              context.l10n.serversTailscaleConnecting,
+            ColdStartTailscaleHint.loginRequired =>
+              context.l10n.onboardingTailscaleLoginRequired,
+            ColdStartTailscaleHint.adminApproval =>
+              context.l10n.onboardingTailscaleAdminApproval,
+            null => null,
+          };
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  if (hintText != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      hintText,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
+              ),
+            ),
           );
         }
         // Show onboarding wizard when no server is configured, unless user

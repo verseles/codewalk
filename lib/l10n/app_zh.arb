@@ -1,3 +1,4 @@
+  
 {
   
   "speechReadAloudNoVoice": "为此 TTS 提供商选择语音。",
@@ -861,6 +862,22 @@
   "serversTailscaleConnectionFailed": "Tailscale 连接失败",
   "serversTailscaleDisconnected": "Tailscale 已断开",
   "serversTailscaleLoginExplanation": "打开 Tailscale 登录 URL 将此设备添加到您的 tailnet。",
+  "serversTailscaleLogout": "退出登录",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "此设备将退出 tailnet，可随时重新登录。",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "退出 Tailscale 登录吗?",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "重新连接",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "此活动配置文件的 OpenCode 流量通过 Tailscale 路由。",
   "serversTailscaleUnsupported": "不支持 Tailscale",
   "serversUnhealthyActivateError": "此服务器不健康。请在激活前检查运行状况或编辑设置。",

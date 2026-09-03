@@ -85,8 +85,19 @@ class TailscaleService {
         hostname: _deviceHostname(),
         timeout: const Duration(seconds: 30),
       );
+      if (_activeProfileId != profileId) {
+        // Logout (or a profile switch) happened while up() was in flight:
+        // do not resurrect a stale result over the newer disconnected state.
+        try {
+          await _client.down();
+        } catch (_) {
+          // Best effort; the Dart-side state already moved on.
+        }
+        return _state;
+      }
       return _publish(_stateFromStatus(status));
     } catch (error, stackTrace) {
+      if (_activeProfileId != profileId) return _state;
       try {
         final status = await _client.status();
         final state = _stateFromStatus(status);
@@ -151,6 +162,56 @@ class TailscaleService {
       );
       return _state;
     }
+  }
+
+  /// Logs out and clears persisted credentials.
+  ///
+  /// Unlike [down], the next [upForProfile] will require interactive login
+  /// again. Used by explicit user logout and by full app reset.
+  Future<void> logout() async {
+    await _nodeStateSubscription?.cancel();
+    _nodeStateSubscription = null;
+    await _peerSubscription?.cancel();
+    _peerSubscription = null;
+    try {
+      // init() is cheap and idempotent; without it _client.logout() throws
+      // TailscaleUsageException on a cold process (e.g. reset from Settings
+      // before Tailscale ever started) and credentials would survive.
+      final stateDir = await _sharedStateDir();
+      ts.Tailscale.init(
+        stateDir: stateDir.path,
+        logLevel: kReleaseMode
+            ? ts.TailscaleLogLevel.error
+            : ts.TailscaleLogLevel.info,
+      );
+      await _client.logout();
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        '[Tailscale] Failed to log out node',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    try {
+      // Belt and braces: the identity must not survive logout even if the
+      // native call above failed. Recreate the directory empty so the next
+      // up() skips legacy-identity adoption (which would otherwise silently
+      // resurrect the pre-logout account) and requires interactive login.
+      final root = await getApplicationSupportDirectory();
+      final dir = Directory('${root.path}/tailscale_node');
+      if (dir.existsSync()) dir.deleteSync(recursive: true);
+      dir.createSync(recursive: true);
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        '[Tailscale] Failed to delete node state directory',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    _activeProfileId = null;
+    _peers = const [];
+    _peerController.add(const []);
+    _publish(const TailscaleState.disconnected());
   }
 
   /// Pulls a one-shot snapshot of current tailnet peers.

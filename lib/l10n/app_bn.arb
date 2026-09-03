@@ -1,3 +1,4 @@
+  
 {
   
   "speechReadAloudNoVoice": "এই TTS প্রদানকারীর জন্য একটি ভয়েস নির্বাচন করুন।",
@@ -836,6 +837,22 @@
   "serversTailscaleConnectionFailed": "Tailscale সংযোগ ব্যর্থ হয়েছে",
   "serversTailscaleDisconnected": "Tailscale সংযোগ বিচ্ছিন্ন",
   "serversTailscaleLoginExplanation": "আপনার tailnet-এ এই ডিভাইসটি যোগ করতে Tailscale লগইন URL খুলুন।",
+  "serversTailscaleLogout": "লগ আউট",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "এই ডিভাইসটি tailnet ছেড়ে যাবে। আপনি যেকোনো সময় আবার লগ ইন করতে পারবেন।",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "Tailscale থেকে লগ আউট করবেন?",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "পুনরায় সংযোগ করুন",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "এই সক্রিয় প্রোফাইলের জন্য OpenCode ট্রাফিক Tailscale-এর মাধ্যমে রুট করা হয়।",
   "serversTailscaleUnsupported": "Tailscale সমর্থিত নয়",
   "serversUnhealthyActivateError": "এই সার্ভারটি অস্বাস্থ্যকর। সক্রিয় করার আগে স্বাস্থ্য পরীক্ষা করুন বা সেটিংস সম্পাদনা করুন।",

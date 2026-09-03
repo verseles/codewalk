@@ -33,15 +33,24 @@ class _FakeTailscaleService extends TailscaleService {
   Stream<TailscaleState> get stateChanges => controller.stream;
 
   @override
-  http.Client get httpClient => throw UnimplementedError();
+  http.Client get httpClient => _httpClient;
+
+  final http.Client _httpClient = http.Client();
 
   @override
   Future<TailscaleState> upForProfile({
     required String profileId,
     required String profileLabel,
   }) async {
+    upCalls++;
+    if (upDelay > Duration.zero) {
+      await Future<void>.delayed(upDelay);
+    }
     return nextState;
   }
+
+  Duration upDelay = Duration.zero;
+  int upCalls = 0;
 
   @override
   Future<void> down() async {
@@ -50,6 +59,13 @@ class _FakeTailscaleService extends TailscaleService {
 
   @override
   Future<TailscaleState> refreshStatus() async => nextState;
+
+  var logoutCalled = false;
+
+  @override
+  Future<void> logout() async {
+    logoutCalled = true;
+  }
 }
 
 class _FakeOAuthService extends OAuthService {
@@ -587,6 +603,174 @@ void main() {
         expect(provider.tailscaleMessage, 'Waiting for admin approval.');
       },
     );
+
+    test('logoutTailscale clears transport and marks profiles unknown', () async {
+      final tailscale = _FakeTailscaleService(
+        const TailscaleState(nodeState: TailscaleNodeState.connected),
+      );
+      addTearDown(tailscale.controller.close);
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        tailscaleService: tailscale,
+        localServerRuntime: localServerRuntime,
+        enableHealthPolling: false,
+      );
+
+      await provider.initialize();
+      final created = await provider.addServerProfile(
+        url: 'http://codewalk.tailnet.ts.net:4096',
+        tailscaleEnabled: true,
+        setAsActive: true,
+      );
+      expect(created, isTrue);
+      expect(
+        provider.tailscaleState.nodeState,
+        TailscaleNodeState.connected,
+      );
+
+      await provider.logoutTailscale();
+
+      expect(tailscale.logoutCalled, isTrue);
+      expect(
+        provider.tailscaleState.nodeState,
+        TailscaleNodeState.disconnected,
+      );
+      expect(
+        provider.healthFor(provider.activeServerId!),
+        ServerHealthStatus.unknown,
+      );
+    });
+
+    test('concurrent authenticateTailscale calls share one login attempt',
+        () async {
+      final tailscale = _FakeTailscaleService(
+        const TailscaleState(nodeState: TailscaleNodeState.connecting),
+      );
+      addTearDown(tailscale.controller.close);
+      final launched = <Uri>[];
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        tailscaleService: tailscale,
+        tailscaleAuthLauncher: (authUrl) async {
+          launched.add(authUrl);
+          return true;
+        },
+        localServerRuntime: localServerRuntime,
+        serverHealthProbe: (_) async => ServerHealthStatus.unknown,
+        enableHealthPolling: false,
+      );
+
+      await provider.initialize();
+      final created = await provider.addServerProfile(
+        url: 'http://codewalk.tailnet.ts.net:4096',
+        tailscaleEnabled: true,
+        setAsActive: true,
+      );
+      expect(created, isTrue);
+
+      final loginUrl = Uri.parse('https://login.tailscale.com/a/test');
+      final first = provider.authenticateTailscale();
+      final second = provider.authenticateTailscale();
+      await Future<void>.delayed(Duration.zero);
+      tailscale.controller.add(
+        TailscaleState(
+          nodeState: TailscaleNodeState.needsLogin,
+          authUrl: loginUrl,
+        ),
+      );
+
+      expect(await first, isTrue);
+      expect(await second, isTrue);
+      expect(launched, <Uri>[loginUrl]);
+    });
+
+    test('concurrent retries share one transport restart', () async {
+      final tailscale = _FakeTailscaleService(
+        const TailscaleState(nodeState: TailscaleNodeState.error),
+      );
+      tailscale.upDelay = const Duration(milliseconds: 100);
+      addTearDown(tailscale.controller.close);
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        tailscaleService: tailscale,
+        localServerRuntime: localServerRuntime,
+        serverHealthProbe: (_) async => ServerHealthStatus.unknown,
+        enableHealthPolling: false,
+      );
+
+      await provider.initialize();
+      final created = await provider.addServerProfile(
+        url: 'http://codewalk.tailnet.ts.net:4096',
+        tailscaleEnabled: true,
+        setAsActive: true,
+      );
+      expect(created, isTrue);
+      final callsAfterSetup = tailscale.upCalls;
+
+      final first = provider.retryTailscaleTransport();
+      final second = provider.retryTailscaleTransport();
+      expect(provider.tailscaleRetryBusy, isTrue);
+      expect(provider.tailscaleBusy, isTrue);
+      await first;
+      await second;
+
+      expect(tailscale.upCalls, callsAfterSetup + 1);
+      expect(provider.tailscaleRetryBusy, isFalse);
+    });
+
+    test('connected transition consumes the open-tab flag', () async {
+      final previous = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = previous;
+        AppProvider.setTailscaleTabOpenedForTesting(null);
+      });
+
+      final tailscale = _FakeTailscaleService(
+        const TailscaleState(nodeState: TailscaleNodeState.connecting),
+      );
+      addTearDown(tailscale.controller.close);
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        tailscaleService: tailscale,
+        localServerRuntime: localServerRuntime,
+        serverHealthProbe: (_) async => ServerHealthStatus.unknown,
+        enableHealthPolling: false,
+      );
+
+      await provider.initialize();
+      final created = await provider.addServerProfile(
+        url: 'http://codewalk.tailnet.ts.net:4096',
+        tailscaleEnabled: true,
+        setAsActive: true,
+      );
+      expect(created, isTrue);
+
+      AppProvider.setTailscaleTabOpenedForTesting(DateTime.now());
+      tailscale.controller.add(
+        const TailscaleState(nodeState: TailscaleNodeState.connected),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(AppProvider.tailscaleTabOpenedForTesting, isNull);
+      expect(
+        provider.tailscaleState.nodeState,
+        TailscaleNodeState.connected,
+      );
+    });
 
     test('waits for Tailscale auth URL before launching login', () async {
       final previous = debugDefaultTargetPlatformOverride;

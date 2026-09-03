@@ -2937,6 +2937,19 @@ class AppLocalizationsPt extends AppLocalizations {
       'Abra o URL de login do Tailscale para adicionar este dispositivo ao seu tailnet.';
 
   @override
+  String get serversTailscaleLogout => 'Sair';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'Este dispositivo sairá da tailnet. Você pode entrar de novo quando quiser.';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'Sair do Tailscale?';
+
+  @override
+  String get serversTailscaleReconnect => 'Reconectar';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'O tráfego do OpenCode para este perfil ativo é roteado através do Tailscale.';
 

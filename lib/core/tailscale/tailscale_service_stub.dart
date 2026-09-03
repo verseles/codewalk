@@ -35,6 +35,8 @@ class TailscaleService {
 
   Future<void> down() async {}
 
+  Future<void> logout() async {}
+
   Future<TailscaleState> refreshStatus() async => state;
 
   Future<List<TailscalePeer>> nodes() async => const [];

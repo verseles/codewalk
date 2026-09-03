@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:codewalk/core/di/injection_container.dart' as di;
 import 'package:codewalk/core/i18n/app_locales.dart';
 import 'package:codewalk/core/network/dio_client.dart';
+import 'package:codewalk/core/tailscale/tailscale_state.dart';
 import 'package:codewalk/data/datasources/app_local_datasource.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
@@ -56,6 +57,7 @@ import '../support/fakes.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  _coldStartHintTests();
 
   testWidgets('renders chat as the primary root screen', (
     WidgetTester tester,
@@ -650,4 +652,55 @@ Model _model(String id) {
     limit: const ModelLimit(context: 1000, output: 100),
     options: const <String, dynamic>{},
   );
+}
+
+void _coldStartHintTests() {
+  group('coldStartTailscaleHint', () {
+    test('maps pending transport states when Tailscale is active', () {
+      expect(
+        coldStartTailscaleHint(
+          tailscaleActive: true,
+          nodeState: TailscaleNodeState.connecting,
+        ),
+        ColdStartTailscaleHint.connecting,
+      );
+      expect(
+        coldStartTailscaleHint(
+          tailscaleActive: true,
+          nodeState: TailscaleNodeState.needsLogin,
+        ),
+        ColdStartTailscaleHint.loginRequired,
+      );
+      expect(
+        coldStartTailscaleHint(
+          tailscaleActive: true,
+          nodeState: TailscaleNodeState.needsMachineAuth,
+        ),
+        ColdStartTailscaleHint.adminApproval,
+      );
+    });
+
+    test('stays silent without Tailscale or in settled states', () {
+      for (final state in TailscaleNodeState.values) {
+        expect(
+          coldStartTailscaleHint(
+            tailscaleActive: false,
+            nodeState: state,
+          ),
+          isNull,
+        );
+      }
+      for (final state in <TailscaleNodeState>[
+        TailscaleNodeState.disconnected,
+        TailscaleNodeState.connected,
+        TailscaleNodeState.error,
+        TailscaleNodeState.unsupported,
+      ]) {
+        expect(
+          coldStartTailscaleHint(tailscaleActive: true, nodeState: state),
+          isNull,
+        );
+      }
+    });
+  });
 }

@@ -1,3 +1,4 @@
+  
 {
   
   "speechReadAloudNoVoice": "Выберите голос для этого TTS-поставщика.",
@@ -966,6 +967,22 @@
   "serversTailscaleConnectionFailed": "Не удалось подключиться к Tailscale",
   "serversTailscaleDisconnected": "Tailscale отключен",
   "serversTailscaleLoginExplanation": "Откройте URL входа в Tailscale, чтобы добавить это устройство в вашу сеть Tailscale.",
+  "serversTailscaleLogout": "Выйти",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "Это устройство покинет tailnet. Вы сможете войти снова в любое время.",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "Выйти из Tailscale?",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "Переподключиться",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "Трафик OpenCode для этого активного профиля маршрутизируется через Tailscale.",
   "serversTailscaleUnsupported": "Tailscale не поддерживается",
   "serversUnhealthyActivateError": "Этот сервер неисправен. Проверьте состояние или отредактируйте настройки перед активацией.",

@@ -1,3 +1,4 @@
+  
 {
   
   "speechReadAloudNoVoice": "この TTS プロバイダーの音声を選択してください。",
@@ -861,6 +862,22 @@
   "serversTailscaleConnectionFailed": "Tailscale 接続に失敗しました",
   "serversTailscaleDisconnected": "Tailscale 切断済み",
   "serversTailscaleLoginExplanation": "Tailscale ログイン URL を開いて、このデバイスを tailnet に追加してください。",
+  "serversTailscaleLogout": "ログアウト",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "このデバイスはtailnetから退出します。いつでも再ログインできます。",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "Tailscaleからログアウトしますか?",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "再接続",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "このアクティブプロファイルの OpenCode トラフィックは Tailscale 経由でルーティングされます。",
   "serversTailscaleUnsupported": "Tailscale はサポートされていません",
   "serversUnhealthyActivateError": "このサーバーは異常です。有効にする前にヘルスチェックを行うか、設定を編集してください。",

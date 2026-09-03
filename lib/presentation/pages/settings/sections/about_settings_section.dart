@@ -224,12 +224,14 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
       await di.sl<SessionAttentionCompletionResolver>().clear();
     }
     await localDataSource.clearAll();
-
     if (!context.mounted) return;
 
     // Reset in-memory provider state and re-initialize from (now empty) storage.
     final appProvider = context.read<AppProvider>();
     final settingsProvider = context.read<SettingsProvider>();
+    // A full reset also drops the Tailscale device identity, so the next
+    // Tailscale use requires interactive login again.
+    await appProvider.logoutTailscale();
     appProvider.resetToDefaults();
     await settingsProvider.resetToDefaults();
     await appProvider.initialize();

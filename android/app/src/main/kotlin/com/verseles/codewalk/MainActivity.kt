@@ -190,6 +190,17 @@ class MainActivity : FlutterActivity() {
                         ),
                     )
                 }
+                "launchTailscaleAuthorization" -> {
+                    result.success(
+                        launchTailscaleAuthorization(
+                            call.argument<String>("url"),
+                        ),
+                    )
+                }
+                "closeTailscaleTab" -> {
+                    closeTailscaleTab()
+                    result.success(true)
+                }
                 else -> result.notImplemented()
             }
         } }
@@ -253,9 +264,53 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /// Opens a Tailscale login URL in a browser-owned Custom Tab when
+    /// available, falling back to the external browser. Unlike OAuth there
+    /// is no redirect back to the app — login completion is detected by
+    /// polling the tailnet — so no flow tracking is needed. A plain
+    /// startActivity keeps the tab in this task, so Back returns to CodeWalk.
+    private fun launchTailscaleAuthorization(rawUrl: String?): String? {
+        val uri = rawUrl?.let(Uri::parse) ?: return null
+        if (!isTrustedOAuthAuthorizationUri(uri)) return null
+
+        val customTabsPackage = CustomTabsClient.getPackageName(this, null)
+        if (customTabsPackage != null) {
+            try {
+                startActivity(buildOAuthCustomTabIntent(uri, customTabsPackage))
+                return "custom_tab"
+            } catch (_: ActivityNotFoundException) {
+                // The selected browser disappeared; retry below externally.
+            } catch (_: SecurityException) {
+                // A restricted Custom Tabs provider must not trigger WebView use.
+            }
+        }
+
+        return try {
+            startActivity(buildOAuthExternalBrowserIntent(uri))
+            "external_browser"
+        } catch (_: ActivityNotFoundException) {
+            null
+        } catch (_: SecurityException) {
+            null
+        }
+    }
+
+    /// Brings our own activity to the front, popping any Custom Tab opened
+    /// above it in this task (e.g. the Tailscale login tab after the tailnet
+    /// reports connected). No-op when already foreground. Best effort: the
+    /// user can always navigate back manually.
+    private fun closeTailscaleTab() {
+        try {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            startActivity(intent)
+        } catch (_: Exception) {
+        }
+    }
+
     @Deprecated("Deprecated in Android; retained for the Custom Tab close signal.")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != OAUTH_AUTHORIZATION_REQUEST_CODE) return
         val flowId = activeOAuthFlowId ?: return
         activeOAuthFlowId = null

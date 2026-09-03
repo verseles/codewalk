@@ -2733,6 +2733,18 @@ class AppLocalizationsZh extends AppLocalizations {
       '打开 Tailscale 登录 URL 将此设备添加到您的 tailnet。';
 
   @override
+  String get serversTailscaleLogout => '退出登录';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage => '此设备将退出 tailnet，可随时重新登录。';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => '退出 Tailscale 登录吗?';
+
+  @override
+  String get serversTailscaleReconnect => '重新连接';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       '此活动配置文件的 OpenCode 流量通过 Tailscale 路由。';
 

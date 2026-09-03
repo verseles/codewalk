@@ -2871,6 +2871,19 @@ class AppLocalizationsAr extends AppLocalizations {
       'افتح رابط تسجيل الدخول إلى Tailscale لإضافة هذا الجهاز إلى شبكتك.';
 
   @override
+  String get serversTailscaleLogout => 'تسجيل الخروج';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'سيغادر هذا الجهاز tailnet. يمكنك تسجيل الدخول مرة أخرى في أي وقت.';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle => 'تسجيل الخروج من Tailscale؟';
+
+  @override
+  String get serversTailscaleReconnect => 'إعادة الاتصال';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'يتم توجيه حركة OpenCode لهذا الملف الشخصي النشط عبر Tailscale.';
 

@@ -1,3 +1,4 @@
+  
 {
   
   "speechReadAloudNoVoice": "اس TTS فراہم کنندہ کے لیے ایک آواز منتخب کریں۔",
@@ -1032,6 +1033,22 @@
   "serversTailscaleConnectionFailed": "Tailscale کنکشن ناکام",
   "serversTailscaleDisconnected": "Tailscale منقطع",
   "serversTailscaleLoginExplanation": "اس ڈیوائس کو اپنے tailnet میں شامل کرنے کے لیے Tailscale لاگ ان URL کھولیں۔",
+  "serversTailscaleLogout": "لاگ آؤٹ",
+  "@serversTailscaleLogout": {
+    "description": "CodeWalk UI string — serversTailscaleLogout"
+  },
+  "serversTailscaleLogoutConfirmMessage": "یہ ڈیوائس tailnet چھوڑ دے گا۔ آپ کسی بھی وقت دوبارہ لاگ ان کر سکتے ہیں۔",
+  "@serversTailscaleLogoutConfirmMessage": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmMessage"
+  },
+  "serversTailscaleLogoutConfirmTitle": "Tailscale سے لاگ آؤٹ کریں؟",
+  "@serversTailscaleLogoutConfirmTitle": {
+    "description": "CodeWalk UI string — serversTailscaleLogoutConfirmTitle"
+  },
+  "serversTailscaleReconnect": "دوبارہ منسلک کریں",
+  "@serversTailscaleReconnect": {
+    "description": "CodeWalk UI string — serversTailscaleReconnect"
+  },
   "serversTailscaleTrafficExplanation": "اس فعال پروفائل کے لیے OpenCode ٹریفک Tailscale کے ذریعے روٹ کی جاتی ہے۔",
   "serversTailscaleUnsupported": "Tailscale تعاون یافتہ نہیں",
   "serversUnhealthyActivateError": "یہ سرور غیر صحت مند ہے۔ فعال کرنے سے پہلے صحت چیک کریں یا ترتیبات میں ترمیم کریں۔",

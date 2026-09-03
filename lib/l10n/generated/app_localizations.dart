@@ -5189,6 +5189,30 @@ abstract class AppLocalizations {
   /// **'Open the Tailscale login URL to add this device to your tailnet.'**
   String get serversTailscaleLoginExplanation;
 
+  /// CodeWalk UI string — serversTailscaleLogout
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get serversTailscaleLogout;
+
+  /// CodeWalk UI string — serversTailscaleLogoutConfirmMessage
+  ///
+  /// In en, this message translates to:
+  /// **'This device will leave the tailnet. You can log in again at any time.'**
+  String get serversTailscaleLogoutConfirmMessage;
+
+  /// CodeWalk UI string — serversTailscaleLogoutConfirmTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Log out of Tailscale?'**
+  String get serversTailscaleLogoutConfirmTitle;
+
+  /// CodeWalk UI string — serversTailscaleReconnect
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get serversTailscaleReconnect;
+
   /// CodeWalk UI string — serversTailscaleTrafficExplanation
   ///
   /// In en, this message translates to:

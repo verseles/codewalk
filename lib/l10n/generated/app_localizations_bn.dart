@@ -2917,6 +2917,20 @@ class AppLocalizationsBn extends AppLocalizations {
       'আপনার tailnet-এ এই ডিভাইসটি যোগ করতে Tailscale লগইন URL খুলুন।';
 
   @override
+  String get serversTailscaleLogout => 'লগ আউট';
+
+  @override
+  String get serversTailscaleLogoutConfirmMessage =>
+      'এই ডিভাইসটি tailnet ছেড়ে যাবে। আপনি যেকোনো সময় আবার লগ ইন করতে পারবেন।';
+
+  @override
+  String get serversTailscaleLogoutConfirmTitle =>
+      'Tailscale থেকে লগ আউট করবেন?';
+
+  @override
+  String get serversTailscaleReconnect => 'পুনরায় সংযোগ করুন';
+
+  @override
   String get serversTailscaleTrafficExplanation =>
       'এই সক্রিয় প্রোফাইলের জন্য OpenCode ট্রাফিক Tailscale-এর মাধ্যমে রুট করা হয়।';
 

@@ -1257,10 +1257,90 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    SwitchListTile(
+                      value: _tailscaleEnabled,
+                      onChanged: _tailscaleSupported
+                          ? (value) {
+                              setState(() {
+                                _tailscaleEnabled = value;
+                              });
+                            }
+                          : null,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(context.l10n.useTailscale),
+                      subtitle: Text(
+                        _tailscaleSupported
+                            ? context.l10n.useTailscaleSubtitle
+                            : context.l10n.useTailscaleUnsupported,
+                      ),
+                    ),
                     if (_tailscaleEnabled) ...[
+                      const SizedBox(height: 8),
                       _buildTailscalePeerDropdown(),
                       const SizedBox(height: 12),
+                      _buildTailscaleAuthPanel(),
                     ],
+                    SwitchListTile(
+                      value: _oauthEnabled,
+                      onChanged: _oauthSupported
+                          ? (value) {
+                              setState(() {
+                                _oauthEnabled = value;
+                                if (value) _basicAuthEnabled = false;
+                              });
+                            }
+                          : null,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(context.l10n.useOAuthCloudflareAccess),
+                      subtitle: Text(
+                        _oauthSupported
+                            ? context.l10n.useOAuthCloudflareAccessSubtitle
+                            : context.l10n.useOAuthCloudflareAccessUnsupported,
+                      ),
+                    ),
+                    SwitchListTile(
+                      value: _basicAuthEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _basicAuthEnabled = value;
+                          if (value) _oauthEnabled = false;
+                        });
+                      },
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(context.l10n.onboardingUseBasicAuth),
+                    ),
+                    if (_basicAuthEnabled) ...[
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.onboardingUsername,
+                        ),
+                        validator: (value) {
+                          if (!_basicAuthEnabled) return null;
+                          if ((value ?? '').trim().isEmpty) {
+                            return context.l10n.onboardingUsernameRequired;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.onboardingPassword,
+                        ),
+                        obscureText: true,
+                        validator: (value) {
+                          if (!_basicAuthEnabled) return null;
+                          if ((value ?? '').trim().isEmpty) {
+                            return context.l10n.onboardingPasswordRequired;
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: 12),
                     TextFormField(
                       controller: _urlController,
                       decoration: InputDecoration(
@@ -1299,87 +1379,6 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                         hintText: context.l10n.onboardingLabelHint,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    SwitchListTile(
-                      value: _basicAuthEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _basicAuthEnabled = value;
-                          if (value) _oauthEnabled = false;
-                        });
-                      },
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.onboardingUseBasicAuth),
-                    ),
-                    SwitchListTile(
-                      value: _oauthEnabled,
-                      onChanged: _oauthSupported
-                          ? (value) {
-                              setState(() {
-                                _oauthEnabled = value;
-                                if (value) _basicAuthEnabled = false;
-                              });
-                            }
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.useOAuthCloudflareAccess),
-                      subtitle: Text(
-                        _oauthSupported
-                            ? context.l10n.useOAuthCloudflareAccessSubtitle
-                            : context.l10n.useOAuthCloudflareAccessUnsupported,
-                      ),
-                    ),
-                    SwitchListTile(
-                      value: _tailscaleEnabled,
-                      onChanged: _tailscaleSupported
-                          ? (value) {
-                              setState(() {
-                                _tailscaleEnabled = value;
-                              });
-                            }
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.useTailscale),
-                      subtitle: Text(
-                        _tailscaleSupported
-                            ? context.l10n.useTailscaleSubtitle
-                            : context.l10n.useTailscaleUnsupported,
-                      ),
-                    ),
-                    if (_tailscaleEnabled) ...[
-                      const SizedBox(height: 8),
-                      _buildTailscaleAuthPanel(),
-                    ],
-                    if (_basicAuthEnabled) ...[
-                      TextFormField(
-                        controller: _usernameController,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.onboardingUsername,
-                        ),
-                        validator: (value) {
-                          if (!_basicAuthEnabled) return null;
-                          if ((value ?? '').trim().isEmpty) {
-                            return context.l10n.onboardingUsernameRequired;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: context.l10n.onboardingPassword,
-                        ),
-                        obscureText: true,
-                        validator: (value) {
-                          if (!_basicAuthEnabled) return null;
-                          if ((value ?? '').trim().isEmpty) {
-                            return context.l10n.onboardingPasswordRequired;
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
                     const SizedBox(height: 8),
                     SwitchListTile(
                       value: _aiGeneratedTitlesEnabled,
@@ -1504,42 +1503,67 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                     ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                   ),
                 ],
-                if (state.requiresUserLogin || authUrl != null) ...[
+                if (state.requiresUserLogin ||
+                    authUrl != null ||
+                    state.nodeState == TailscaleNodeState.error) ...[
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      FilledButton.icon(
-                        onPressed: () async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          final openLoginMessage =
-                              context.l10n.onboardingOpenTailscaleLogin;
-                          final ok = await appProvider.authenticateTailscale();
-                          if (!mounted) return;
-                          if (!ok) {
-                            messenger.showSnackBar(
-                              SnackBar(content: Text(openLoginMessage)),
-                            );
-                          }
-                        },
-                        icon: const Icon(Symbols.open_in_browser_rounded),
-                        label: Text(context.l10n.onboardingAuthenticate),
-                      ),
+                      if (state.nodeState != TailscaleNodeState.connecting &&
+                          state.nodeState != TailscaleNodeState.error)
+                        FilledButton.icon(
+                          onPressed: appProvider.tailscaleBusy
+                              ? null
+                              : () async {
+                                  final messenger =
+                                      ScaffoldMessenger.of(context);
+                                  final openLoginMessage = context
+                                      .l10n.onboardingOpenTailscaleLogin;
+                                  final ok = await appProvider
+                                      .authenticateTailscale();
+                                  if (!mounted) return;
+                                  if (!ok) {
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                          content: Text(openLoginMessage)),
+                                    );
+                                  }
+                                },
+                          icon: appProvider.tailscaleAuthBusy
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                )
+                              : const Icon(Symbols.open_in_browser_rounded),
+                          label: Text(context.l10n.onboardingAuthenticate),
+                        ),
                       if (authUrl != null)
                         OutlinedButton.icon(
                           onPressed: () => _copyToClipboard(authUrl),
                           icon: const Icon(Symbols.content_copy_rounded),
                           label: Text(context.l10n.onboardingCopyLoginURL),
                         ),
-                      if (!state.isConnected &&
-                          state.nodeState != TailscaleNodeState.unsupported)
+                      if (state.nodeState == TailscaleNodeState.error)
                         OutlinedButton.icon(
-                          onPressed: () async {
-                            await appProvider.retryTailscaleTransport();
-                          },
-                          icon: const Icon(Symbols.refresh_rounded),
-                          label: Text(context.l10n.terminalTryAgain),
+                          onPressed: appProvider.tailscaleBusy
+                              ? null
+                              : () async {
+                                  await appProvider.retryTailscaleTransport();
+                                },
+                          icon: appProvider.tailscaleRetryBusy
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                )
+                              : const Icon(Symbols.refresh_rounded),
+                          label:
+                              Text(context.l10n.serversTailscaleReconnect),
                         ),
                     ],
                   ),
