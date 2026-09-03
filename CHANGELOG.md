@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.221.0 - 2026-09-03
+
+- feat(tailscale): setup reorder, Custom Tab login, logout, busy UX and cold-start hint
+- fix(tailscale): reliable embedded login, single device identity and working probes
+
 ## v1.220.4 - 2026-09-03
 
 - chore(android): accept Flutter migrator gradle flags
