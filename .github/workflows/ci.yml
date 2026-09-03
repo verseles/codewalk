@@ -142,7 +142,9 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Test (full) with coverage
-        run: flutter test --no-pub --coverage -j 8
+        # -j 4: the 4-vCPU runners oversubscribe at -j 8 and trip 30s test
+        # timeouts in I/O-heavy suites; halves contention, still <35min.
+        run: flutter test --no-pub --coverage -j 4
 
       - name: Install lcov
         run: |
