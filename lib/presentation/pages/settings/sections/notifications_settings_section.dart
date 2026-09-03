@@ -12,6 +12,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/android_battery_optimization_service.dart';
 import '../../../services/notification_sound_source_service.dart';
 import '../../../services/notification_sound_source_service_types.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../../widgets/settings_provenance_chip.dart';
 import '../widgets/settings_section_layout.dart';
@@ -83,7 +84,7 @@ class _NotificationsSettingsSectionState
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),

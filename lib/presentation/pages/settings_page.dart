@@ -13,6 +13,7 @@ import '../providers/settings_provider.dart';
 import '../theme/app_animations.dart';
 import '../utils/app_page_route.dart';
 import '../utils/window_size_class.dart';
+import '../widgets/direct_provider.dart';
 import '../widgets/settings_update_available_card.dart';
 import 'logs_page.dart';
 import 'onboarding_wizard_page.dart';
@@ -443,7 +444,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSectionList({required bool isSplit}) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settings, _) {
         final updateResult = settings.updateCheckResult;
         final filteredSections = _filteredSections;

@@ -12,6 +12,7 @@ import '../../../providers/chat_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_host_service.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../../widgets/settings_provenance_chip.dart';
 import '../widgets/settings_section_layout.dart';
@@ -78,7 +79,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),

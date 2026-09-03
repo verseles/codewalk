@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -10,6 +9,7 @@ import '../../../../domain/entities/experience_settings.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../utils/shortcut_binding_codec.dart';
 import '../../../utils/shortcut_l10n.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/settings_provenance_chip.dart';
 import '../widgets/settings_section_layout.dart';
 
@@ -32,7 +32,7 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         final query = _searchController.text.trim().toLowerCase();
         final visibleDefinitions = shortcutDefinitionsForRuntime(

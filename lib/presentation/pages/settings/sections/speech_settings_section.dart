@@ -19,6 +19,7 @@ import '../../../services/sensevoice_model_manager.dart';
 import '../../../services/sherpa_model_manager.dart';
 import '../../../utils/speech_engine_platform_support.dart';
 import '../../../utils/windows_settings_links.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
 
@@ -185,7 +186,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   }
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         final selectedEngine = settingsProvider.speechToTextEngine;
         final silenceValue =

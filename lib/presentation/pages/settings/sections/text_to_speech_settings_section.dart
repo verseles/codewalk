@@ -12,6 +12,7 @@ import '../../../../domain/entities/experience_settings.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/read_aloud_service.dart';
 import '../../../services/tts/openai_compatible_tts_backend.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
 
@@ -267,7 +268,7 @@ class _TextToSpeechSettingsSectionState
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         final readAloudProvider = settingsProvider.readAloudProvider;
         if (readAloudProvider != _lastSeenReadAloudProvider) {

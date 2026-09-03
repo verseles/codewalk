@@ -12,6 +12,7 @@ import '../../../../data/datasources/app_local_datasource.dart';
 import '../../../providers/app_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_completion_resolver.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/settings_update_available_card.dart';
 import '../../app_shell_page.dart';
 import '../widgets/settings_section_layout.dart';
@@ -44,7 +45,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
+    return DirectConsumer<SettingsProvider>(
       builder: (context, settings, _) {
         final updateResult = settings.updateCheckResult;
         final checking = settings.checkingForUpdate;

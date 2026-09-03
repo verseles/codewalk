@@ -12,6 +12,7 @@ import '../../../../core/tailscale/tailscale_service.dart';
 import '../../../../domain/entities/server_profile.dart';
 import '../../../providers/app_provider.dart';
 import '../../../utils/app_page_route.dart';
+import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../onboarding_wizard_page.dart';
 import '../../opencode_setup_debug_page.dart';
@@ -59,7 +60,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppProvider>(
+    return DirectConsumer<AppProvider>(
       builder: (context, appProvider, _) {
         final profiles = appProvider.serverProfiles;
         if (_loading && profiles.isEmpty) {
