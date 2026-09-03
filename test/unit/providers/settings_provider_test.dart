@@ -242,6 +242,10 @@ void main() {
   final previousWorkmanager = WorkmanagerPlatform.instance;
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
+    // Touch the singleton first: its constructor auto-selects the real
+    // Linux implementation (systemd) on first use and would clobber the
+    // fake below otherwise. After that the fake sticks for the whole file.
+    Workmanager();
     WorkmanagerPlatform.instance = _NoopWorkmanager();
     // Every provider initialize() fires a fire-and-forget update check to
     // api.github.com (~1s each). Unmocked they pile up per isolate and
