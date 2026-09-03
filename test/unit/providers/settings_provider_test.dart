@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
@@ -9,10 +10,135 @@ import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/update_check_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:workmanager/workmanager.dart';
 
 import '../../support/fakes.dart';
+
+/// Channel used by package_info_plus; mocked to fail fast (see below).
+const _packageInfoChannel = MethodChannel(
+  'dev.fluttercommunity.plus/package_info',
+);
+
+/// Blackholes all non-loopback HTTP to an instant-refused discard port.
+///
+/// Every provider initialize() fires a fire-and-forget update check to
+/// api.github.com (~1s each). Unmocked they pile up per isolate and starve
+/// later tests into 30s timeouts under parallel load. Loopback stays direct
+/// for the local server syncs. Per-isolate setting; other test files are
+/// unaffected.
+class _LoopbackOnlyHttpOverrides extends HttpOverrides {
+  @override
+  String findProxyFromEnvironment(Uri url, Map<String, String>? environment) {
+    final host = url.host;
+    if (host == 'localhost' || host == '127.0.0.1' || host == '::1') {
+      return 'DIRECT';
+    }
+    return 'PROXY 127.0.0.1:9';
+  }
+}
+
+/// Makes [PackageInfo.fromPlatform] throw, as it does without platform mocks.
+void _mockPackageInfoUnavailable() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(_packageInfoChannel, (call) async {
+        throw MissingPluginException();
+      });
+}
+
+/// No-op [WorkmanagerPlatform] for settings tests.
+///
+/// workmanager 0.10 ships a real Linux implementation (systemd units +
+/// systemctl processes). In unit tests the platform gate sees the android
+/// test-platform, so background-alert syncs would shell out to the real
+/// host on every toggle (~0.5s each, 30s timeouts under parallel load).
+/// The fake keeps these tests hermetic and instant.
+class _NoopWorkmanager extends WorkmanagerPlatform {
+  @override
+  Future<void> initialize(
+    Function callbackDispatcher, {
+    @Deprecated(
+      'Use WorkmanagerDebug handlers instead. This parameter has no effect.',
+    )
+    bool isInDebugMode = false,
+  }) async {}
+
+  @override
+  Future<void> registerOneOffTask(
+    String uniqueName,
+    String taskName, {
+    Map<String, dynamic>? inputData,
+    Duration? initialDelay,
+    Constraints? constraints,
+    ExistingWorkPolicy? existingWorkPolicy,
+    BackoffPolicy? backoffPolicy,
+    Duration? backoffPolicyDelay,
+    String? tag,
+    OutOfQuotaPolicy? outOfQuotaPolicy,
+    ForegroundServiceConfig? foregroundServiceConfig,
+    bool expedited = false,
+  }) async {}
+
+  @override
+  Future<void> registerPeriodicTask(
+    String uniqueName,
+    String taskName, {
+    Duration? frequency,
+    Duration? flexInterval,
+    Map<String, dynamic>? inputData,
+    Duration? initialDelay,
+    Constraints? constraints,
+    ExistingPeriodicWorkPolicy? existingWorkPolicy,
+    BackoffPolicy? backoffPolicy,
+    Duration? backoffPolicyDelay,
+    String? tag,
+    ForegroundServiceConfig? foregroundServiceConfig,
+  }) async {}
+
+  @override
+  Future<void> registerProcessingTask(
+    String uniqueName,
+    String taskName, {
+    Duration? initialDelay,
+    Map<String, dynamic>? inputData,
+    Constraints? constraints,
+  }) async {}
+
+  @override
+  Future<void> registerHealthResearchTask(
+    String uniqueName,
+    String taskName, {
+    Duration? initialDelay,
+    Map<String, dynamic>? inputData,
+    Constraints? constraints,
+  }) async {}
+
+  @override
+  Future<void> registerContinuedProcessingTask(
+    String uniqueName,
+    String taskName, {
+    String? title,
+    String? subtitle,
+    Map<String, dynamic>? inputData,
+  }) async {}
+
+  @override
+  Future<void> cancelByUniqueName(String uniqueName) async {}
+
+  @override
+  Future<void> cancelByTag(String tag) async {}
+
+  @override
+  Future<void> cancelAll() async {}
+
+  @override
+  Future<bool> isScheduledByUniqueName(String uniqueName) async => false;
+
+  @override
+  Future<String> printScheduledTasks() async => '';
+}
 
 class _FakeSoundService extends SoundService {
   int playCount = 0;
@@ -113,6 +239,29 @@ class _FakeSessionAttentionHostService implements SessionAttentionHostService {
 }
 
 void main() {
+  final previousWorkmanager = WorkmanagerPlatform.instance;
+  setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    WorkmanagerPlatform.instance = _NoopWorkmanager();
+    // Every provider initialize() fires a fire-and-forget update check to
+    // api.github.com (~1s each). Unmocked they pile up per isolate and
+    // starve later tests into 30s timeouts under parallel load, so fail
+    // PackageInfo fast by default; the single update-check test below
+    // installs (and then restores) its own mock values.
+    _mockPackageInfoUnavailable();
+    // Belt and braces: blackhole all non-loopback HTTP (e.g. the update
+    // check above, in case PackageInfo gets cached) to an instant-refused
+    // discard port. Loopback stays direct for the local server syncs.
+    // Per-isolate setting; other test files are unaffected.
+    HttpOverrides.global = _LoopbackOnlyHttpOverrides();
+  });
+  tearDownAll(() {
+    WorkmanagerPlatform.instance = previousWorkmanager;
+    HttpOverrides.global = null;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_packageInfoChannel, null);
+  });
+
   group('SettingsProvider', () {
     test(
       'persists session attention mode only after host activation',
@@ -152,6 +301,9 @@ void main() {
         buildNumber: '45',
         buildSignature: '',
       );
+      // Restore the file-wide fail-fast PackageInfo mock so later tests do
+      // not hit the real update-check network.
+      addTearDown(_mockPackageInfoUnavailable);
       final local = InMemoryAppLocalDataSource();
       final completer = Completer<UpdateCheckResult?>();
       final provider = SettingsProvider(
