@@ -3,6 +3,9 @@
 *.log
 *.pyc
 *.swp
+.classpath
+.project
+.settings/
 .DS_Store
 .atom/
 .build/
