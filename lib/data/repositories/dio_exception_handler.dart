@@ -11,6 +11,7 @@ mixin DioExceptionHandler {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
+      case DioExceptionType.transformTimeout:
         return NetworkFailure(
           L10nBridge.current?.errorConnectionTimeout ?? 'Connection timeout',
         );

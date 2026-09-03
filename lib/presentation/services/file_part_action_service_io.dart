@@ -170,17 +170,21 @@ Future<FilePartActionResult?> _saveWithSystemDialog({
   required String fileName,
 }) async {
   try {
-    final savedPath = await FilePicker.saveFile(
+    final savedUri = await FilePicker.saveFile(
       dialogTitle: L10nBridge.current?.attachmentSaveTitle ?? 'Save attachment',
       fileName: fileName,
       bytes: Uint8List.fromList(bytes),
     );
-    if (savedPath == null) {
+    if (savedUri == null) {
       return FilePartActionResult(
         success: false,
         message: L10nBridge.current?.attachmentSaveCanceled ?? 'Save canceled.',
       );
     }
+    // file_picker v12 reports the saved location as an Uri.
+    final savedPath = savedUri.scheme == 'file'
+        ? savedUri.toFilePath()
+        : savedUri.toString();
     return FilePartActionResult(
       success: true,
       message:

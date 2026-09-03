@@ -18,7 +18,7 @@ on:
       - "tool/ci/run_session_overlay_instrumentation.sh"
 
 env:
-  FLUTTER_VERSION: "3.41.5"
+  FLUTTER_VERSION: "3.44.0"
 
 jobs:
   android-compile:

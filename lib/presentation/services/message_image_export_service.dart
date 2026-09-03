@@ -138,9 +138,11 @@ class MessageImageExportService {
       // share_plus maps subject to Windows DataPackage text for file shares.
       // Suppress it so image-capable targets do not receive a text-only
       // fallback when they fail to consume the StorageItems payload.
-      await Share.shareXFiles([shareFile]);
+      await SharePlus.instance.share(ShareParams(files: <XFile>[shareFile]));
     } else {
-      await Share.shareXFiles([shareFile], subject: subject);
+      await SharePlus.instance.share(
+        ShareParams(files: <XFile>[shareFile], subject: subject),
+      );
     }
 
     return MessageImageExportResult.shared;

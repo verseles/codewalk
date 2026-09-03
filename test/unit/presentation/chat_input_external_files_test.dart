@@ -7,7 +7,7 @@ Uint8List _bytes(List<int> values) => Uint8List.fromList(values);
 
 void main() {
   group('composerFileFromBytes', () {
-    test('preserves supported names and client bytes', () {
+    test('preserves supported names and client bytes', () async {
       final file = composerFileFromBytes(
         _bytes(<int>[1, 2, 3]),
         name: 'photo.PNG',
@@ -16,12 +16,12 @@ void main() {
 
       expect(file, isNotNull);
       expect(file!.name, 'photo.PNG');
-      expect(file.size, 3);
-      expect(file.bytes, _bytes(<int>[1, 2, 3]));
+      expect(await file.length(), 3);
+      expect(await file.readAsBytes(), _bytes(<int>[1, 2, 3]));
       expect(file.path, isNull);
     });
 
-    test('uses MIME when a content URI has no usable name', () {
+    test('uses MIME when a content URI has no usable name', () async {
       final file = composerFileFromBytes(
         _bytes(<int>[1, 2]),
         name: '42',
@@ -30,7 +30,7 @@ void main() {
       );
 
       expect(file?.name, '42.pdf');
-      expect(file?.bytes, _bytes(<int>[1, 2]));
+      expect(await file?.readAsBytes(), _bytes(<int>[1, 2]));
     });
 
     test('rejects unsupported names and MIME types', () {
@@ -93,7 +93,7 @@ void main() {
   });
 
   group('composerFileFromImageBytes', () {
-    test('names a pasted screenshot with the detected extension', () {
+    test('names a pasted screenshot with the detected extension', () async {
       final file = composerFileFromImageBytes(
         _bytes([0xFF, 0xD8, 0xFF, 0xE0]),
         baseName: 'Pasted image',
@@ -101,8 +101,8 @@ void main() {
 
       expect(file, isNotNull);
       expect(file!.name, 'Pasted image.jpg');
-      expect(file.size, 4);
-      expect(file.bytes, isNotNull);
+      expect(await file.length(), 4);
+      expect(await file.readAsBytes(), isNotEmpty);
     });
 
     test('ignores empty clipboard payloads', () {

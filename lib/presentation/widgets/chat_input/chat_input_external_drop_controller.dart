@@ -114,7 +114,7 @@ extension _ChatInputExternalDropController on _ChatInputWidgetState {
       _showAttachmentSnack(context.l10n.msgNoValidFilesSelected);
       return;
     }
-    _appendAttachments(files, allowImageMimeFallback: false);
+    await _appendAttachments(files, allowImageMimeFallback: false);
     if (skipped > 0 && mounted) {
       _showAttachmentSnack(context.l10n.msgSomeSelectedFilesNotAttached);
     }
@@ -296,7 +296,7 @@ extension _ChatInputExternalDropController on _ChatInputWidgetState {
       }
       return;
     }
-    _appendAttachments(collected, allowImageMimeFallback: false);
+    await _appendAttachments(collected, allowImageMimeFallback: false);
     if (skipped > 0 && mounted) {
       _showAttachmentSnack(context.l10n.msgSomeSelectedFilesNotAttached);
     }

@@ -58,13 +58,11 @@ class _NotificationSoundSourceServiceIo
       return null;
     }
 
-    final result = await FilePicker.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: _audioExtensions,
-      withData: true,
     );
-    final files = result?.files;
-    final picked = (files == null || files.isEmpty) ? null : files.first;
+    final picked = files.isEmpty ? null : files.first;
     if (picked == null) {
       return null;
     }
@@ -203,9 +201,13 @@ class _NotificationSoundSourceServiceIo
   }
 
   Future<List<int>?> _resolveFileBytes(PlatformFile file) async {
-    final bytes = file.bytes;
-    if (bytes != null && bytes.isNotEmpty) {
-      return bytes;
+    try {
+      final bytes = await file.readAsBytes();
+      if (bytes.isNotEmpty) {
+        return bytes;
+      }
+    } on Exception {
+      // Fall through to the local-path fallback below.
     }
 
     final path = file.path;

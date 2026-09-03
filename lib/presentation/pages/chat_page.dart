@@ -297,8 +297,6 @@ class _ChatPageState extends State<ChatPage>
   final GlobalKey _sendButtonTourTargetKey = GlobalKey(
     debugLabel: 'tour_send_target',
   );
-  final GlobalKey<ShowCaseWidgetState> _showcaseWidgetKey =
-      GlobalKey<ShowCaseWidgetState>();
   final TextEditingController _sessionSearchController =
       TextEditingController();
   final FocusNode _sessionSearchFocusNode = FocusNode();
@@ -719,6 +717,13 @@ class _ChatPageState extends State<ChatPage>
       unawaited(_loadPinnedMobileActionsFromPrefs());
       unawaited(_refreshBackgroundPermissionAutoApproveContextState());
     });
+    // showcaseview 5.x manages the tour through a registered controller
+    // instead of a ShowCaseWidget ancestor.
+    ShowcaseView.register(
+      onDismiss: _handlePostOnboardingTourDismiss,
+      onFinish: _handlePostOnboardingTourFinish,
+      enableAutoScroll: false,
+    );
   }
 
   @override
@@ -891,6 +896,7 @@ class _ChatPageState extends State<ChatPage>
     _timelineSearchFocusNode.dispose();
     _scrollController.removeListener(_handleScrollChanged);
     HardwareKeyboard.instance.removeHandler(_handleGlobalShortcutKeyEvent);
+    ShowcaseView.get().unregister();
     if (_isDesktopRuntime) {
       windowManager.removeListener(this);
     }
@@ -2070,8 +2076,8 @@ class _ChatPageState extends State<ChatPage>
     final allMounted = targets.every(
       (target) => _isTourTargetReady(target.target),
     );
-    final showcaseState = _showcaseWidgetKey.currentState;
-    if (showcaseState == null || !allMounted) {
+    final showcaseState = ShowcaseView.get();
+    if (!allMounted) {
       return false;
     }
     showcaseState.startShowCase(
@@ -2451,12 +2457,7 @@ class _ChatPageState extends State<ChatPage>
           }
         }
 
-        return ShowCaseWidget(
-          key: _showcaseWidgetKey,
-          onDismiss: _handlePostOnboardingTourDismiss,
-          onFinish: _handlePostOnboardingTourFinish,
-          enableAutoScroll: false,
-          builder: (context) => Shortcuts(
+        return Shortcuts(
             shortcuts: shortcutMap,
             child: Actions(
               actions: actionMap,
@@ -2695,7 +2696,6 @@ class _ChatPageState extends State<ChatPage>
                 ),
               ),
             ),
-          ),
         );
       },
     );

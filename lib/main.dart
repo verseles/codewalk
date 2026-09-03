@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart' as mui;
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -36,6 +37,60 @@ import 'presentation/widgets/direct_provider.dart';
 @pragma('vm:entry-point')
 void _sessionOverlayAndroidEntrypointAnchor() {
   sessionOverlayAndroidMain();
+}
+
+/// Converts a material_ui [ColorScheme] (reported by dynamic_color 2.x)
+/// into Flutter's [ColorScheme]. Both carry the same Material 3 roles.
+ColorScheme _muiSchemeToFlutter(mui.ColorScheme scheme) {
+  return ColorScheme(
+    brightness: scheme.brightness,
+    primary: scheme.primary,
+    onPrimary: scheme.onPrimary,
+    primaryContainer: scheme.primaryContainer,
+    onPrimaryContainer: scheme.onPrimaryContainer,
+    primaryFixed: scheme.primaryFixed,
+    primaryFixedDim: scheme.primaryFixedDim,
+    onPrimaryFixed: scheme.onPrimaryFixed,
+    onPrimaryFixedVariant: scheme.onPrimaryFixedVariant,
+    secondary: scheme.secondary,
+    onSecondary: scheme.onSecondary,
+    secondaryContainer: scheme.secondaryContainer,
+    onSecondaryContainer: scheme.onSecondaryContainer,
+    secondaryFixed: scheme.secondaryFixed,
+    secondaryFixedDim: scheme.secondaryFixedDim,
+    onSecondaryFixed: scheme.onSecondaryFixed,
+    onSecondaryFixedVariant: scheme.onSecondaryFixedVariant,
+    tertiary: scheme.tertiary,
+    onTertiary: scheme.onTertiary,
+    tertiaryContainer: scheme.tertiaryContainer,
+    onTertiaryContainer: scheme.onTertiaryContainer,
+    tertiaryFixed: scheme.tertiaryFixed,
+    tertiaryFixedDim: scheme.tertiaryFixedDim,
+    onTertiaryFixed: scheme.onTertiaryFixed,
+    onTertiaryFixedVariant: scheme.onTertiaryFixedVariant,
+    error: scheme.error,
+    onError: scheme.onError,
+    errorContainer: scheme.errorContainer,
+    onErrorContainer: scheme.onErrorContainer,
+    surface: scheme.surface,
+    onSurface: scheme.onSurface,
+    surfaceDim: scheme.surfaceDim,
+    surfaceBright: scheme.surfaceBright,
+    surfaceContainerLowest: scheme.surfaceContainerLowest,
+    surfaceContainerLow: scheme.surfaceContainerLow,
+    surfaceContainer: scheme.surfaceContainer,
+    surfaceContainerHigh: scheme.surfaceContainerHigh,
+    surfaceContainerHighest: scheme.surfaceContainerHighest,
+    onSurfaceVariant: scheme.onSurfaceVariant,
+    outline: scheme.outline,
+    outlineVariant: scheme.outlineVariant,
+    shadow: scheme.shadow,
+    scrim: scheme.scrim,
+    inverseSurface: scheme.inverseSurface,
+    onInverseSurface: scheme.onInverseSurface,
+    inversePrimary: scheme.inversePrimary,
+    surfaceTint: scheme.surfaceTint,
+  );
 }
 
 Future<void> main(List<String> args) async {
@@ -111,7 +166,16 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: DynamicColorBuilder(
-        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        builder: (mui.ColorScheme? lightDynamicMui, mui.ColorScheme? darkDynamicMui) {
+          // dynamic_color 2.x reports schemes in material_ui's ColorScheme
+          // type (a different class from Flutter's). Convert once at the
+          // boundary so the theme pipeline keeps using Flutter's type.
+          final lightDynamic = lightDynamicMui == null
+              ? null
+              : _muiSchemeToFlutter(lightDynamicMui);
+          final darkDynamic = darkDynamicMui == null
+              ? null
+              : _muiSchemeToFlutter(darkDynamicMui);
           return DirectSelector<SettingsProvider, _AppSettingsRecord>(
             select: (provider) => (
               appDensity: provider.appDensity,

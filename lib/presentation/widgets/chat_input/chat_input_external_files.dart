@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 
 /// Extensions the composer already accepts through the file picker.
@@ -62,7 +63,40 @@ PlatformFile? composerFileFromBytes(
     extension = inferredExtension;
     normalizedName = '$normalizedName.$extension';
   }
-  return PlatformFile(name: normalizedName, size: bytes.length, bytes: bytes);
+  return ComposerMemoryFile(name: normalizedName, bytes: bytes);
+}
+
+/// In-memory [PlatformFile] for client-local bytes (dropped/pasted files).
+///
+/// file_picker v12 models picked files as an abstract type with async byte
+/// access, so bytes that never touch disk get this tiny memory-backed
+/// implementation instead of a fake path.
+base class ComposerMemoryFile extends PlatformFile {
+  ComposerMemoryFile({required this.name, required Uint8List bytes})
+    : _bytes = bytes;
+
+  final Uint8List _bytes;
+
+  @override
+  final String name;
+
+  @override
+  Uri get uri => Uri(scheme: 'composer-memory', path: name);
+
+  @override
+  XFile get xFile => XFile.fromData(_bytes, name: name, length: _bytes.length);
+
+  @override
+  int? lengthSync() => _bytes.length;
+
+  @override
+  Future<int> length() async => _bytes.length;
+
+  @override
+  Future<Uint8List> readAsBytes() async => _bytes;
+
+  @override
+  Stream<Uint8List> readAsByteStream() => Stream.value(_bytes);
 }
 
 String? composerAttachmentExtensionForMime(String? mimeType) {

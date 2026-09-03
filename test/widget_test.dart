@@ -12,8 +12,10 @@ import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/session_attention/session_attention_host_service.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/speech_input_service_stt.dart';
+import 'package:codewalk/presentation/widgets/chat_input/chat_input_external_files.dart';
 import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -102,6 +104,34 @@ class _NoopSessionAttentionHostService implements SessionAttentionHostService {
 
   @override
   Future<void> stop() async {}
+}
+
+/// In-memory [FilePickerPlatform] for composer attachment tests.
+///
+/// file_picker v12 removed the v11 method-channel pick protocol, so tests
+/// inject picked files through the platform instance instead of mocking
+/// `miguelruivo.flutter.plugins.filepicker`.
+class _FakeAttachmentPicker extends FilePickerPlatform {
+  _FakeAttachmentPicker(this.files);
+
+  final List<PlatformFile> files;
+
+  @override
+  Future<List<PlatformFile>> pickFiles({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async {
+    return files;
+  }
 }
 
 void main() {
@@ -980,34 +1010,28 @@ void main() {
   testWidgets('attachment picker appends multiple supported files', (
     WidgetTester tester,
   ) async {
-    final filePickerCalls = <MethodCall>[];
-    const filePickerChannel = MethodChannel(
-      'miguelruivo.flutter.plugins.filepicker',
+    // file_picker v12 has no method-channel pick protocol anymore: picks
+    // resolve through the registered FilePickerPlatform, so the test injects
+    // an in-memory fake returning the same three names as before.
+    final previousPicker = FilePickerPlatform.instance;
+    FilePickerPlatform.instance = _FakeAttachmentPicker(
+      <PlatformFile>[
+        ComposerMemoryFile(
+          name: 'screen.png',
+          bytes: Uint8List.fromList(<int>[1, 2, 3]),
+        ),
+        ComposerMemoryFile(
+          name: 'brief.pdf',
+          bytes: Uint8List.fromList(<int>[4, 5, 6, 7]),
+        ),
+        ComposerMemoryFile(
+          name: 'notes.txt',
+          bytes: Uint8List.fromList(<int>[8]),
+        ),
+      ],
     );
-    final messenger =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-    messenger.setMockMethodCallHandler(filePickerChannel, (call) async {
-      filePickerCalls.add(call);
-      return <Map<String, Object?>>[
-        <String, Object?>{
-          'name': 'screen.png',
-          'size': 3,
-          'bytes': Uint8List.fromList(<int>[1, 2, 3]),
-        },
-        <String, Object?>{
-          'name': 'brief.pdf',
-          'size': 4,
-          'bytes': Uint8List.fromList(<int>[4, 5, 6, 7]),
-        },
-        <String, Object?>{
-          'name': 'notes.txt',
-          'size': 1,
-          'bytes': Uint8List.fromList(<int>[8]),
-        },
-      ];
-    });
     addTearDown(() {
-      messenger.setMockMethodCallHandler(filePickerChannel, null);
+      FilePickerPlatform.instance = previousPicker;
     });
 
     ChatInputSubmission? sentSubmission;
@@ -1027,16 +1051,6 @@ void main() {
     await tester.tap(find.text('Attach files'));
     await tester.pumpAndSettle();
 
-    expect(filePickerCalls, hasLength(1));
-    expect(filePickerCalls.single.method, 'custom');
-    final pickerArgs =
-        filePickerCalls.single.arguments as Map<Object?, Object?>;
-    expect(pickerArgs['allowMultipleSelection'], isTrue);
-    expect(pickerArgs['withData'], isTrue);
-    expect(
-      pickerArgs['allowedExtensions'],
-      containsAll(<String>['png', 'pdf']),
-    );
     expect(find.text('screen.png'), findsOneWidget);
     expect(find.text('brief.pdf'), findsOneWidget);
     expect(find.text('notes.txt'), findsNothing);

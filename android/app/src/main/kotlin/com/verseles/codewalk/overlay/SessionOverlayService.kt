@@ -39,7 +39,6 @@ import io.flutter.embedding.android.FlutterView
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugins.pathprovider.PathProviderPlugin
 import io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin
 import kotlin.math.roundToInt
 import xyz.luan.audioplayers.AudioplayersPlugin
@@ -279,7 +278,9 @@ class SessionOverlayService : Service() {
         flutterEngine.plugins.add(AudioplayersPlugin())
         flutterEngine.plugins.add(FlutterSecureStoragePlugin())
         flutterEngine.plugins.add(FlutterTtsPlugin())
-        flutterEngine.plugins.add(PathProviderPlugin())
+        // NOTE: path_provider_android 2.3+ is Dart/JNI-only (no registrant
+        // class); it self-registers through the Dart plugin registrant that
+        // the engine runs for this isolate.
         flutterEngine.plugins.add(SharedPreferencesPlugin())
         flutterEngine.serviceControlSurface.attachToService(this, null, true)
         val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SERVICE_CHANNEL)

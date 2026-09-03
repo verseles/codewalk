@@ -157,6 +157,8 @@ class SttSpeechInputService implements SpeechInputService {
           onResult(result.recognizedWords, result.finalResult),
       // Wait for the specified silence window before auto-stopping.
       // Android enforces a system minimum of ~1-3s regardless of this value.
+      // NOTE: kept as top-level args (not SpeechListenOptions) because 7.4.0
+      // ships broken Android sources; revisit when unpinning speech_to_text.
       pauseFor: pauseFor ?? const Duration(seconds: 5),
       listenOptions: stt.SpeechListenOptions(
         partialResults: true,

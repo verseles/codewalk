@@ -9,7 +9,7 @@ import audioplayers_darwin
 import connectivity_plus
 import desktop_drop
 import dynamic_color
-import file_picker
+import file_picker_darwin
 import flutter_local_notifications
 import flutter_secure_storage_darwin
 import flutter_tts
@@ -23,6 +23,7 @@ import speech_to_text
 import tray_manager
 import url_launcher_macos
 import window_manager
+import workmanager_apple
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AudioplayersDarwinPlugin.register(with: registry.registrar(forPlugin: "AudioplayersDarwinPlugin"))
@@ -43,4 +44,5 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   TrayManagerPlugin.register(with: registry.registrar(forPlugin: "TrayManagerPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
   WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))
+  WorkmanagerPlugin.register(with: registry.registrar(forPlugin: "WorkmanagerPlugin"))
 }

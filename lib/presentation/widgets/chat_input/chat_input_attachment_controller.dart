@@ -60,18 +60,18 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
         'pdf',
       ],
     );
-    if (result == null || result.files.isEmpty || !mounted) {
+    if (result == null || result.isEmpty || !mounted) {
       return;
     }
-    _appendAttachments(result.files, allowImageMimeFallback: false);
+    await _appendAttachments(result, allowImageMimeFallback: false);
   }
 
   Future<void> _pickImages() async {
     final result = await _pickAttachmentFiles(type: FileType.image);
-    if (result == null || result.files.isEmpty || !mounted) {
+    if (result == null || result.isEmpty || !mounted) {
       return;
     }
-    _appendAttachments(result.files);
+    await _appendAttachments(result);
   }
 
   Future<void> _pickPdf() async {
@@ -79,22 +79,23 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
       type: FileType.custom,
       allowedExtensions: const <String>['pdf'],
     );
-    if (result == null || result.files.isEmpty || !mounted) {
+    if (result == null || result.isEmpty || !mounted) {
       return;
     }
-    _appendAttachments(result.files, forceMime: 'application/pdf');
+    await _appendAttachments(result, forceMime: 'application/pdf');
   }
 
-  Future<FilePickerResult?> _pickAttachmentFiles({
+  Future<List<PlatformFile>?> _pickAttachmentFiles({
     required FileType type,
     List<String>? allowedExtensions,
   }) async {
     try {
+      // file_picker v12 returns the picked files directly (empty on
+      // cancel, multiple allowed by default); bytes are read on demand
+      // via readAsBytes().
       return await FilePicker.pickFiles(
         type: type,
         allowedExtensions: allowedExtensions,
-        allowMultiple: true,
-        withData: true,
       );
     } on PlatformException {
       if (mounted) {
@@ -112,11 +113,11 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
     return null;
   }
 
-  void _appendAttachments(
+  Future<void> _appendAttachments(
     List<PlatformFile> files, {
     String? forceMime,
     bool allowImageMimeFallback = true,
-  }) {
+  }) async {
     final nextAttachments = <FileInputPart>[];
     var skippedCount = 0;
     for (final file in files) {
@@ -130,7 +131,7 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
         skippedCount += 1;
         continue;
       }
-      final url = _resolveAttachmentUrl(file, mime: mime);
+      final url = await _resolveAttachmentUrl(file, mime: mime);
       if (url == null) {
         skippedCount += 1;
         continue;
@@ -149,11 +150,19 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
     }
 
     if (nextAttachments.isEmpty) {
+      if (!mounted) {
+        return;
+      }
       _showAttachmentSnack(context.l10n.msgNoValidFilesSelected);
       return;
     }
 
     var addedCount = 0;
+    // The per-file byte reads above await platform I/O; the composer may
+    // have been disposed while waiting (unawaited sheet fire-and-forget).
+    if (!mounted) {
+      return;
+    }
     _setState(() {
       final dedupe = <(String, String, String?)>{
         for (final existing in _attachments)
@@ -170,7 +179,7 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
     if (addedCount > 0) {
       _notifyDraftChanged();
     }
-    if (skippedCount > 0) {
+    if (skippedCount > 0 && mounted) {
       _showAttachmentSnack(context.l10n.msgSomeSelectedFilesNotAttached);
     }
   }
@@ -185,18 +194,22 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
     return false;
   }
 
-  String? _resolveAttachmentUrl(PlatformFile file, {required String mime}) {
-    if (file.bytes case final bytes?) {
+  Future<String?> _resolveAttachmentUrl(
+    PlatformFile file, {
+    required String mime,
+  }) async {
+    // Client-local paths are meaningless (and potentially unsafe) on a
+    // remote OpenCode server. Server-side paths enter as FileInputPart values
+    // elsewhere; composer picks, drops and pastes must always carry bytes.
+    try {
+      final bytes = await file.readAsBytes();
       if (bytes.isEmpty) {
         return null;
       }
       return 'data:$mime;base64,${base64Encode(bytes)}';
+    } on Exception {
+      return null;
     }
-
-    // Client-local paths are meaningless (and potentially unsafe) on a
-    // remote OpenCode server. Server-side paths enter as FileInputPart values
-    // elsewhere; composer picks, drops and pastes must always carry bytes.
-    return null;
   }
 
   String? _resolveAttachmentMime(

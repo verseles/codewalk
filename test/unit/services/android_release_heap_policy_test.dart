@@ -30,7 +30,16 @@ void main() {
       expect(manifest, isNot(contains('largeHeap')));
     }
 
-    // The Impeller opt-out stays a main-manifest concern, not release-only.
-    expect(mainManifest, contains('EnableImpeller'));
+    // The Impeller opt-out was removed: Impeller stays enabled in the main
+    // manifest (validated on-device, TM decision), so no manifest may carry
+    // the legacy EnableImpeller flag anymore.
+    for (final manifest in <String>[
+      mainManifest,
+      debugManifest,
+      profileManifest,
+      releaseManifest,
+    ]) {
+      expect(manifest, isNot(contains('EnableImpeller')));
+    }
   });
 }

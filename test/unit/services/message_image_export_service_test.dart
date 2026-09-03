@@ -46,7 +46,7 @@ void main() {
 
     expect(result, MessageImageExportResult.shared);
     expect(methodCalls, hasLength(1));
-    expect(methodCalls.single.method, 'shareFiles');
+    expect(methodCalls.single.method, 'share');
 
     final arguments = methodCalls.single.arguments as Map<dynamic, dynamic>;
     expect(arguments.containsKey('subject'), isFalse);
