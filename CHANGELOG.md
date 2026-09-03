@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.220.3 - 2026-09-03
+
+- fix(ci): build prototype macOS with CocoaPods too
+- fix(ci): build macOS with CocoaPods instead of SPM
+- fix(tests): install workmanager fake after singleton auto-select
+
 ## v1.220.2 - 2026-09-03
 
 - ci: run coverage at -j 4
