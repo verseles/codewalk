@@ -140,4 +140,8 @@ jobs:
       - if: matrix.target != 'macos'
         run: flutter build ${{ matrix.target }} --debug
       - if: matrix.target == 'macos'
+        # CocoaPods path (same reason as release.yml): speech_to_text 7.3.0
+        # declares macOS 10.14 in its SPM manifest while using 10.15+ APIs.
+        env:
+          FLUTTER_SWIFT_PACKAGE_MANAGER: "false"
         run: MACOSX_DEPLOYMENT_TARGET=11.0 flutter build macos --debug
