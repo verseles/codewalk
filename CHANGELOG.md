@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.220.2 - 2026-09-03
+
+- ci: run coverage at -j 4
+- fix(tests): keep settings tests hermetic under parallel load
+- fix(macos): downgrade connectivity_plus to ^6.1.5
+
 ## v1.220.1 - 2026-09-03
 
 - chore: ignore Eclipse/Buildship metadata
