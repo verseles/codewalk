@@ -726,6 +726,21 @@ extension _ChatPageFileRuntime on _ChatPageState {
               setDialogState(() {});
             }
 
+            // Dialog close shared by both variants: same row as the tab
+            // strip (right side) instead of a header of its own (issue #167).
+            // Single builder so the two branches cannot diverge.
+            Widget buildDialogCloseButton() {
+              return IconButton(
+                tooltip: context.l10n.chatClose,
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(40, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                icon: const Icon(Symbols.close),
+              );
+            }
+
             if (fullscreen) {
               return Dialog.fullscreen(
                 key: const ValueKey<String>('open_files_dialog_fullscreen'),
@@ -741,17 +756,8 @@ extension _ChatPageFileRuntime on _ChatPageState {
                       height: double.infinity,
                       margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
                       onStateChanged: refreshDialog,
-                      headerTrailing: IconButton(
-                        tooltip: context.l10n.chatClose,
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(),
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(40, 40),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        icon: const Icon(Symbols.close),
-                      ),
-                    onContextAdded: () {
+                      headerTrailing: buildDialogCloseButton(),
+                      onContextAdded: () {
                       // Pop the viewer. A second pop only happens when the
                       // mobile Files dialog is genuinely underneath (issue
                       // #167): direct entries (chat links, quick-open, tree)
@@ -795,17 +801,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                           onStateChanged: refreshDialog,
                           // Dialog close shares the tab-strip row (right
                           // side); no header row of its own (issue #167).
-                          headerTrailing: IconButton(
-                            tooltip: context.l10n.chatClose,
-                            onPressed: () =>
-                                Navigator.of(dialogContext).pop(),
-                            style: IconButton.styleFrom(
-                              minimumSize: const Size(40, 40),
-                              tapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            icon: const Icon(Symbols.close),
-                          ),
+                          headerTrailing: buildDialogCloseButton(),
                           onContextAdded: () {
                             Navigator.of(dialogContext).pop();
                             _inputFocusNode.requestFocus();
