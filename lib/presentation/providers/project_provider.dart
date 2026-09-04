@@ -142,7 +142,9 @@ class ProjectProvider extends ChangeNotifier {
       final savedProjectId = await _localDataSource.getCurrentProjectId(
         serverId: _activeServerId,
       );
-      if (savedProjectId != null && savedProjectId.trim().isNotEmpty) {
+      if (savedProjectId != null &&
+          savedProjectId.trim().isNotEmpty &&
+          !_isPlaceholderRootId(savedProjectId)) {
         _rehydrateSyntheticProjects(<String>[savedProjectId]);
         _currentProject = _projects
             .where((p) => p.id == savedProjectId)
@@ -1066,6 +1068,7 @@ class ProjectProvider extends ChangeNotifier {
           _rehydrateSyntheticProjects(savedIds);
           _openProjectIds = savedIds
               .where((id) {
+                if (_isPlaceholderRootId(id)) return false;
                 final project = _projects
                     .where((candidate) => candidate.id == id)
                     .firstOrNull;
@@ -1166,10 +1169,19 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   _ProjectStatePersistenceSnapshot _captureProjectStatePersistenceSnapshot() {
+    // Never persist the placeholder root ("Global") as the last project:
+    // once saved it would restore itself forever. A null current id keeps
+    // the previously persisted value instead.
+    final current = _currentProject;
+    final currentId = current != null && !_isPlaceholderRootProject(current)
+        ? current.id
+        : null;
     return _ProjectStatePersistenceSnapshot(
       serverId: _activeServerId,
-      currentProjectId: _currentProject?.id,
-      openProjectIdsJson: jsonEncode(_openProjectIds),
+      currentProjectId: currentId,
+      openProjectIdsJson: jsonEncode(
+        _openProjectIds.where((id) => !_isPlaceholderRootId(id)).toList(),
+      ),
       archivedProjectIdsJson: jsonEncode(_archivedProjectIds),
       hiddenProjectPathsJson: jsonEncode(_hiddenProjectPaths),
     );
@@ -1392,6 +1404,13 @@ class ProjectProvider extends ChangeNotifier {
         name == path ||
         normalizedName == 'global';
     return idLooksSynthetic && nameLooksSynthetic;
+  }
+
+  /// Bare placeholder-root identifiers as persisted. A stale `global`
+  /// current/open id must never be treated as a real last project.
+  bool _isPlaceholderRootId(String id) {
+    final normalized = id.trim();
+    return normalized.isEmpty || normalized == '/' || normalized == 'global';
   }
 
   List<Project> _sanitizeProjects(List<Project> projects) {

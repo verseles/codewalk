@@ -969,6 +969,58 @@ void main() {
     );
 
     test(
+      'never persists the placeholder root as the last project',
+      () async {
+        final globalProject = Project(
+          id: 'global',
+          name: 'Global',
+          path: '/',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        projectRepository = FakeProjectRepository(
+          currentProject: globalProject,
+          projects: <Project>[globalProject],
+        );
+        provider = ProjectProvider(
+          projectRepository: projectRepository,
+          localDataSource: localDataSource,
+        );
+
+        await provider.initializeProject();
+        await provider.debugWaitForProjectStatePersistence();
+
+        expect(
+          localDataSource.scopedStrings['current_project_id::srv_test'],
+          isNull,
+        );
+        expect(
+          localDataSource.scopedStrings['open_project_ids::srv_test'],
+          '[]',
+        );
+      },
+    );
+
+    test(
+      'treats a persisted global id as missing on restore',
+      () async {
+        await localDataSource.saveCurrentProjectId(
+          'global',
+          serverId: 'srv_test',
+        );
+        await localDataSource.saveOpenProjectIdsJson(
+          jsonEncode(<String>['global']),
+          serverId: 'srv_test',
+        );
+
+        await provider.initializeProject();
+
+        expect(provider.status, ProjectStatus.loaded);
+        expect(provider.currentProject?.id, 'proj_a');
+        expect(provider.openProjectIds, isNot(contains('global')));
+      },
+    );
+
+    test(
       'root path uses project id as scope and no directory filter',
       () async {
         projectRepository = FakeProjectRepository(
