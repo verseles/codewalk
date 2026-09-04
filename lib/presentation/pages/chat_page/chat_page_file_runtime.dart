@@ -519,6 +519,12 @@ extension _ChatPageFileRuntime on _ChatPageState {
     VoidCallback? onUpdated,
   }) {
     final normalizedPath = _normalizeFilePath(path);
+    if (!fileState.tabSelection.openPaths.contains(normalizedPath)) {
+      // Already closed (for example an overlapping autosave close won the
+      // race); stay idempotent instead of emitting a spurious update that
+      // could dismiss the dialog a second time.
+      return;
+    }
     final draft = fileState.editorDraftsByPath[normalizedPath];
     if (draft != null &&
         draft.isDirty &&
@@ -655,6 +661,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
     final dialogHeight = (mediaQuery.size.height * 0.7).clamp(420.0, 900.0);
     var capabilityRefreshAttached = false;
     var revalidationScheduled = false;
+    var autoDismissed = false;
 
     await showDialog<void>(
       context: context,
@@ -701,13 +708,19 @@ extension _ChatPageFileRuntime on _ChatPageState {
             }
             // Refreshes the dialog after tab switches, saves and closes. When
             // the last tab is gone the dialog dismisses itself instead of
-            // lingering on an empty panel (issue #167).
+            // lingering on an empty panel (issue #167). autoDismissed lives
+            // in the outer dialog scope so rebuilds cannot reset it.
             void refreshDialog() {
-              if (!dialogContext.mounted || !mounted) {
+              if (!dialogContext.mounted || !mounted || autoDismissed) {
                 return;
               }
               if (!fileState.tabSelection.hasOpenTabs) {
-                Navigator.of(dialogContext).pop();
+                autoDismissed = true;
+                // The route stays mounted during its reverse transition, so a
+                // second overlapping callback must not pop the page beneath.
+                if (ModalRoute.of(dialogContext)?.isCurrent ?? true) {
+                  Navigator.of(dialogContext).pop();
+                }
                 return;
               }
               setDialogState(() {});
@@ -731,11 +744,16 @@ extension _ChatPageFileRuntime on _ChatPageState {
                     margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     onStateChanged: refreshDialog,
                     onContextAdded: () {
-                      // Pop both the file viewer dialog and the mobile
-                      // Files dialog behind it (two stacked routes).
+                      // Pop the viewer. A second pop only happens when the
+                      // mobile Files dialog is genuinely underneath (issue
+                      // #167): direct entries (chat links, quick-open, tree)
+                      // sit straight above chat, so an unconditional second
+                      // pop would eject the ChatPage route.
                       final navigator = Navigator.of(dialogContext);
                       navigator.pop();
-                      navigator.pop();
+                      if (navigator.canPop()) {
+                        navigator.pop();
+                      }
                       _inputFocusNode.requestFocus();
                     },
                   ),

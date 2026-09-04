@@ -159,20 +159,27 @@ extension _ChatPageFileViewer on _ChatPageState {
       leadingBuilder: (context, tab) => Center(
         child: Icon(_fileIconForPath(tab.value), size: 14),
       ),
-      trailingBuilder: (context, tab) => IconButton(
-        key: ValueKey<String>('file_viewer_tab_close_${tab.id}'),
-        visualDensity: Theme.of(context).visualDensity,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
-        icon: const Icon(Symbols.close, size: 14),
-        onPressed: () {
-          _closeFileTab(
-            fileState: fileState,
-            path: tab.value,
-            projectProvider: projectProvider,
-            onUpdated: onStateChanged,
-          );
-        },
+      trailingBuilder: (context, tab) => Semantics(
+        // Spoken label without a Tooltip: the dialog already exposes a
+        // 'Close' tooltip and the two finders must stay unambiguous.
+        label: context.l10n.chatClose,
+        button: true,
+        excludeSemantics: true,
+        child: IconButton(
+          key: ValueKey<String>('file_viewer_tab_close_${tab.id}'),
+          visualDensity: Theme.of(context).visualDensity,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          icon: const Icon(Symbols.close, size: 14),
+          onPressed: () {
+            _closeFileTab(
+              fileState: fileState,
+              path: tab.value,
+              projectProvider: projectProvider,
+              onUpdated: onStateChanged,
+            );
+          },
+        ),
       ),
       onActivate: (tab) {
         _activateFileTab(

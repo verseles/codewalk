@@ -7658,6 +7658,110 @@ void main() {
     );
   });
 
+  testWidgets('mobile direct viewer dismisses once when the last tab closes', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(500, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_tabs_mobile_close',
+        name: 'Project Tabs Mobile Close',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_tabs_mobile_close',
+          name: 'Project Tabs Mobile Close',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/mobile.dart',
+        name: 'mobile.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.searchResultsByQuery['mobile'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/mobile.dart',
+        name: 'mobile.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/mobile.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/mobile.dart',
+          content: 'void mobileTabs() {}',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('mobile_appbar_overflow_button')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('mobile_overflow_item_quickOpen')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('quick_open_input')),
+      'mobile',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('quick_open_result_/repo/a/lib/mobile.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dialog = find.byKey(
+      const ValueKey<String>('open_files_dialog_fullscreen'),
+    );
+    expect(dialog, findsOneWidget);
+
+    // Closing the last tab pops exactly one route: the viewer goes away and
+    // the chat page underneath stays alive (issue #167 review).
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>(
+          'file_viewer_tab_close_/repo/a/lib/mobile.dart',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    expect(
+      find.byKey(const ValueKey<String>('mobile_appbar_overflow_button')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('file editor saves dirty content from open files dialog', (
     WidgetTester tester,
   ) async {

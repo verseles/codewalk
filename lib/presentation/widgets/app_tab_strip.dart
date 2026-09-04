@@ -250,9 +250,16 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
     if (_hoveredId != null && !ids.contains(_hoveredId)) {
       _hoveredId = null;
     }
-    if (_hoveredTrailingId != null &&
-        (!ids.contains(_hoveredTrailingId) ||
-            !selectedIds.contains(_hoveredTrailingId))) {
+    // Tabs showing trailing controls while unselected (file tabs) keep their
+    // hover tracking across rebuilds; only clear it when the tab is gone or
+    // when unselected tabs cannot show trailing controls.
+    final trailingGone =
+        _hoveredTrailingId != null && !ids.contains(_hoveredTrailingId);
+    final trailingDeselected =
+        _hoveredTrailingId != null &&
+        !selectedIds.contains(_hoveredTrailingId) &&
+        !widget.showTrailingOnUnselected;
+    if (trailingGone || trailingDeselected) {
       _hoveredTrailingId = null;
     }
     if (_lastPointerId != null && !ids.contains(_lastPointerId)) {
@@ -442,11 +449,12 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                                       ? math.min(selectedPinnedContentWidth, selectedPinnedWidth)
                                       : kAppTabPinnedWidth,
                                   compactPinned: !tab.isSelected,
+                                  // Unselected pinned tabs never show trailing
+                                  // controls: they render at the fixed 36px
+                                  // icon width where nothing else fits.
                                   trailing: tab.isSelected
                                       ? selectedPinnedTrailing
-                                      : (widget.showTrailingOnUnselected
-                                          ? _trailingFor(context, tab)
-                                          : null),
+                                      : null,
                                 ),
                             ],
                           ),
@@ -747,38 +755,57 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                                                 if (!compactPinned) ...[
                                                   const SizedBox(width: 7),
                                                   Expanded(
-                                                    child: Text.rich(
-                                                      TextSpan(
-                                                        text: title,
-                                                        children: [
-                                                          if (tab.titleSuffix != null)
-                                                            WidgetSpan(
-                                                              alignment: PlaceholderAlignment.middle,
-                                                              child: Text(
-                                                                tab.titleSuffix!,
-                                                                key: tab.titleSuffixKey,
-                                                                style: Theme.of(context)
-                                                                    .textTheme
-                                                                    .labelLarge
-                                                                    ?.copyWith(
-                                                                      color: foreground,
-                                                                      fontWeight: selected
-                                                                          ? FontWeight.w700
-                                                                          : FontWeight.w600,
-                                                                    ),
-                                                              ),
+                                                    child: Row(
+                                                      children: [
+                                                        Flexible(
+                                                          child: Text(
+                                                            title,
+                                                            key: ValueKey<String>(
+                                                              '${widget.keyPrefix}title_$id',
                                                             ),
-                                                        ],
-                                                      ),
-                                                      key: ValueKey<String>('${widget.keyPrefix}title_$id'),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                                            color: foreground,
-                                                            fontWeight: selected
-                                                                ? FontWeight.w700
-                                                                : FontWeight.w600,
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: Theme.of(context)
+                                                                .textTheme
+                                                                .labelLarge
+                                                                ?.copyWith(
+                                                                  color:
+                                                                      foreground,
+                                                                  fontWeight: selected
+                                                                      ? FontWeight
+                                                                          .w700
+                                                                      : FontWeight
+                                                                          .w600,
+                                                                ),
                                                           ),
+                                                        ),
+                                                        // The suffix (for example
+                                                        // the dirty `*`) sits
+                                                        // outside the ellipsized
+                                                        // title so long names
+                                                        // truncate before it.
+                                                        if (tab.titleSuffix !=
+                                                            null)
+                                                          Text(
+                                                            tab.titleSuffix!,
+                                                            key: tab
+                                                                .titleSuffixKey,
+                                                            style: Theme.of(context)
+                                                                .textTheme
+                                                                .labelLarge
+                                                                ?.copyWith(
+                                                                  color:
+                                                                      foreground,
+                                                                  fontWeight: selected
+                                                                      ? FontWeight
+                                                                          .w700
+                                                                      : FontWeight
+                                                                          .w600,
+                                                                ),
+                                                          ),
+                                                      ],
                                                     ),
                                                   ),
                                                   const SizedBox(width: 2),
