@@ -444,7 +444,9 @@
 
 - **Given** a connected server, an active project context, and shell-gated file operations supported for the project root
 - **When** the user opens a non-binary text file from the file tree, Quick Open, or a tapped assistant file path
-- **Then** the open-files surface renders a focused code editor with line numbers, syntax highlighting, tabbed open files, and the same desktop/mobile dialog behavior as the file viewer
+- **Then** the open-files surface renders a focused code editor with line numbers, syntax highlighting, a unified tab strip shared with session tabs (same Chrome visuals, gestures, overflow, and semantics; file tabs always show a close button and never pin), and the same desktop/mobile dialog behavior as the file viewer
+- **Then** the open-files surface shows no `Open files (n)` title; the tab strip itself communicates the open files, and editor actions (`Save`, `Undo`, `Redo`, autosave toggle, `Retry`, line-selection actions) live in a bottom action bar below the editor instead of the header row
+- **Then** closing the last open file tab dismisses the open-files dialog instead of leaving an empty panel
 - **Then** editing a file marks its tab dirty with `*` and enables the viewer `Save` action
 - **Then** pressing the `Save` action or `Ctrl+S` / `Cmd+S` writes the active dirty file through the shell-gated workspace file operation service scoped to the active project directory, using one negotiated single-pipeline shell transport rather than a local client filesystem write
 - **Then** global autosave is off by default and can be toggled by the user
