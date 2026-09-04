@@ -192,6 +192,17 @@ void main() {
 
           await Future<void>.delayed(const Duration(milliseconds: 400));
 
+          // Poll with a wall-clock budget instead of asserting on a fixed
+          // delay: under CI load the async reconciliation chain can take
+          // longer than 400ms to issue its first fetch.
+          final reconcileDeadline = DateTime.now().add(
+            const Duration(seconds: 10),
+          );
+          while (chatRepository.getSessionsCallCount == 0 &&
+              DateTime.now().isBefore(reconcileDeadline)) {
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+          }
+
           expect(chatRepository.getSessionsCallCount, greaterThan(0));
           expect(chatRepository.getMessagesCallCount, greaterThan(0));
           expect(chatRepository.getSessionStatusCallCount, greaterThan(0));

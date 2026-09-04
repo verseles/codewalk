@@ -2740,6 +2740,7 @@ class ChatProvider extends ChangeNotifier {
       serverId: serverId,
       scopeId: scopeId,
       contextKey: _activeContextKey,
+      directory: projectProvider.currentDirectory,
       remoteSyncGeneration: _remoteSelectionSyncGeneration,
       selectedProviderId: _selectedProviderId,
       selectedModelId: _selectedModelId,
@@ -2876,7 +2877,10 @@ class ChatProvider extends ChangeNotifier {
           _SelectionSyncTransactionPhase.pendingRemote,
           reason: 'immediate-sync',
         );
-        await _runSelectionSyncTransaction(reason: 'immediate-sync');
+        await _runSelectionSyncTransaction(
+          reason: 'immediate-sync',
+          directory: snapshot.directory,
+        );
       }
     }
   }

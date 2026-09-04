@@ -1591,7 +1591,10 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     await _persist();
     await _syncAndroidBackgroundAlertRuntime();
-    await _syncNotificationToServer(category, value);
+    // Best-effort server push that must never block the toggle: awaiting it
+    // hangs the UI (and tests) up to the HTTP timeout whenever the server is
+    // unreachable. Failures are already swallowed inside.
+    unawaited(_syncNotificationToServer(category, value));
   }
 
   Future<void> setNotifyOnlyWhenBackground(

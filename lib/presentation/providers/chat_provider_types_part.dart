@@ -722,6 +722,7 @@ class _SelectionPersistenceSnapshot {
     required this.serverId,
     required this.scopeId,
     required this.contextKey,
+    required this.directory,
     required this.remoteSyncGeneration,
     required this.selectedProviderId,
     required this.selectedModelId,
@@ -737,6 +738,13 @@ class _SelectionPersistenceSnapshot {
   final String serverId;
   final String scopeId;
   final String contextKey;
+
+  /// Project directory owning this snapshot, captured with it. The remote
+  /// sync must target this directory — never the live current directory,
+  /// which may already point at the next project when a slow persistence
+  /// flush finishes mid-switch (otherwise the previous project's selection
+  /// patches the next project's config).
+  final String? directory;
   final int remoteSyncGeneration;
   final String? selectedProviderId;
   final String? selectedModelId;
@@ -753,6 +761,7 @@ class _SelectionPersistenceSnapshot {
       serverId: serverId,
       scopeId: scopeId,
       contextKey: contextKey,
+      directory: directory,
       remoteSyncGeneration: remoteSyncGeneration,
       selectedProviderId: selectedProviderId,
       selectedModelId: selectedModelId,

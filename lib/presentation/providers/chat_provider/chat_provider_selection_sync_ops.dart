@@ -221,10 +221,17 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
     return payload;
   }
 
-  Future<void> _runSelectionSyncTransaction({required String reason}) async {
+  Future<void> _runSelectionSyncTransaction({
+    required String reason,
+    String? directory,
+  }) async {
     final contextKey = _activeContextKey;
     final generation = _remoteSelectionSyncGeneration;
-    final directory = projectProvider.currentDirectory;
+    // Prefer the snapshot-owned directory: the live current directory may
+    // already point at the next project when a slow flush finishes mid-switch.
+    // Callers without a snapshot (deferred flush for the current context) pass
+    // null and keep the live read.
+    final targetDirectory = directory ?? projectProvider.currentDirectory;
     final previous = _selectionSyncTransactionQueue;
     final task = previous
         .catchError((Object error, StackTrace stackTrace) {
@@ -238,7 +245,7 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
           (_) => _runSelectionSyncTransactionBody(
             reason: reason,
             contextKey: contextKey,
-            directory: directory,
+            directory: targetDirectory,
             generation: generation,
           ),
         );
