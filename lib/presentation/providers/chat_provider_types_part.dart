@@ -774,6 +774,56 @@ class _SelectionPersistenceSnapshot {
       syncRemote: syncRemote ?? this.syncRemote,
     );
   }
+
+  /// Returns a copy keeping this snapshot's selection values but adopting the
+  /// scheduling [origin]'s scope identity. Used by the flush so a batch
+  /// scheduled under one project never persists under another, while the
+  /// persisted values are always the latest in-memory ones (direct
+  /// persistence paths mutate values without scheduling, so frozen
+  /// schedule-time values could otherwise overwrite newer state).
+  _SelectionPersistenceSnapshot applyingOrigin(
+    _SelectionPersistenceOrigin origin,
+  ) {
+    return _SelectionPersistenceSnapshot(
+      serverId: origin.serverId,
+      scopeId: origin.scopeId,
+      contextKey: origin.contextKey,
+      directory: origin.directory,
+      remoteSyncGeneration: origin.remoteSyncGeneration,
+      selectedProviderId: selectedProviderId,
+      selectedModelId: selectedModelId,
+      selectedAgentName: selectedAgentName,
+      recentModelsJson: recentModelsJson,
+      modelUsageCountsJson: modelUsageCountsJson,
+      selectedVariantMapJson: selectedVariantMapJson,
+      agentSelectionMemoryJson: agentSelectionMemoryJson,
+      sessionSelectionOverridesJson: sessionSelectionOverridesJson,
+      syncRemote: origin.syncRemote,
+    );
+  }
+}
+
+/// Scheduling origin of a selection-persistence batch: the scope identity the
+/// batch must persist under, captured when the batch is scheduled. Selection
+/// VALUES are intentionally not part of the origin — the flush re-reads the
+/// latest in-memory values so newer direct mutations are never overwritten by
+/// older scheduled state.
+class _SelectionPersistenceOrigin {
+  const _SelectionPersistenceOrigin({
+    required this.serverId,
+    required this.scopeId,
+    required this.contextKey,
+    required this.directory,
+    required this.remoteSyncGeneration,
+    required this.syncRemote,
+  });
+
+  final String serverId;
+  final String scopeId;
+  final String contextKey;
+  final String? directory;
+  final int remoteSyncGeneration;
+  final bool syncRemote;
 }
 
 enum SessionListFilter { active, archived, all }

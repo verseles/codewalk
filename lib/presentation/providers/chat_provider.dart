@@ -552,11 +552,13 @@ class ChatProvider extends ChangeNotifier {
   bool _selectionPersistenceDirty = false;
   bool _selectionPersistenceSyncRemote = false;
 
-  /// Snapshot captured at schedule time. The debounced/mid-switch flush must
+  /// Origin captured at schedule time. The debounced/mid-switch flush must
   /// persist under the scheduling scope: capturing at flush time would pick
   /// up the next project's scope/directory when the 300ms debounce (or a
-  /// slow write) straddles a project switch.
-  _SelectionPersistenceSnapshot? _scheduledSelectionSnapshot;
+  /// slow write) straddles a project switch. Selection VALUES are re-read
+  /// fresh at flush (see applyingOrigin) so newer direct mutations are never
+  /// overwritten by older scheduled state.
+  _SelectionPersistenceOrigin? _scheduledSelectionOrigin;
   Timer? _selectionPersistenceDebounce;
   int _selectionPersistenceGeneration = 0;
   String _activeContextKey = 'legacy::default';
@@ -2897,8 +2899,16 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceSyncRemote =
         syncRemote || _selectionPersistenceSyncRemote;
     // Capture the originating scope now (see field docs): the flush may run
-    // after a project switch.
-    _scheduledSelectionSnapshot = _captureSelectionPersistenceSnapshot(
+    // after a project switch. Values stay live and are re-read at flush.
+    final serverId = _activeServerId.trim().isEmpty
+        ? 'legacy'
+        : _activeServerId;
+    _scheduledSelectionOrigin = _SelectionPersistenceOrigin(
+      serverId: serverId,
+      scopeId: _resolveContextScopeId(),
+      contextKey: _activeContextKey,
+      directory: projectProvider.currentDirectory,
+      remoteSyncGeneration: _remoteSelectionSyncGeneration,
       syncRemote: _selectionPersistenceSyncRemote,
     );
     if (localDataSource is! AppLocalDataSourceImpl) {
@@ -2960,10 +2970,14 @@ class ChatProvider extends ChangeNotifier {
         _selectionPersistenceDirty = false;
         final syncRemote = _selectionPersistenceSyncRemote;
         _selectionPersistenceSyncRemote = false;
-        final snapshot =
-            _scheduledSelectionSnapshot ??
-            _captureSelectionPersistenceSnapshot(syncRemote: syncRemote);
-        _scheduledSelectionSnapshot = null;
+        // Rebase fresh values onto the scheduling origin: scope identity is
+        // pinned at schedule time, values are always current.
+        final origin = _scheduledSelectionOrigin;
+        _scheduledSelectionOrigin = null;
+        final fresh = _captureSelectionPersistenceSnapshot(
+          syncRemote: origin?.syncRemote ?? syncRemote,
+        );
+        final snapshot = origin == null ? fresh : fresh.applyingOrigin(origin);
         await _persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote);
       }
     } catch (error, stackTrace) {
@@ -5602,12 +5616,13 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceDebounce = null;
     if (_selectionPersistenceDirty) {
       _selectionPersistenceDirty = false;
-      final snapshot =
-          _scheduledSelectionSnapshot ??
-          _captureSelectionPersistenceSnapshot(
-            syncRemote: _selectionPersistenceSyncRemote,
-          );
-      _scheduledSelectionSnapshot = null;
+      final origin = _scheduledSelectionOrigin;
+      _scheduledSelectionOrigin = null;
+      final fresh = _captureSelectionPersistenceSnapshot(
+        syncRemote:
+            origin?.syncRemote ?? _selectionPersistenceSyncRemote,
+      );
+      final snapshot = origin == null ? fresh : fresh.applyingOrigin(origin);
       _selectionPersistenceSyncRemote = false;
       unawaited(_persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote));
     }
