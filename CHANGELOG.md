@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.222.0 - 2026-09-04
+
+- fix(terminal): route embedded terminal through Tailscale transport
+- docs
+
 ## v1.221.1 - 2026-09-03
 
 - fix(projects): never persist placeholder root as last project
