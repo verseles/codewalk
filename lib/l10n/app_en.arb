@@ -2316,15 +2316,6 @@
   "@filesNames": {
     "description": "CodeWalk UI string — filesNames"
   },
-  "filesOpenFilesFileState": "Open files ({length})",
-  "@filesOpenFilesFileState": {
-    "description": "CodeWalk UI string — filesOpenFilesFileState",
-    "placeholders": {
-      "length": {
-        "type": "int"
-      }
-    }
-  },
   "filesQuickOpen": "Quick Open",
   "@filesQuickOpen": {
     "description": "CodeWalk UI string — filesQuickOpen"
@@ -7392,15 +7383,6 @@
   "filesNoContentMatches": "No content matches found",
   "@filesNoContentMatches": {
     "description": "CodeWalk UI string — filesNoContentMatches"
-  },
-  "filesOpenFilesCount": "{count, plural, =1{1 open file} other{{count} open files}}",
-  "@filesOpenFilesCount": {
-    "description": "CodeWalk UI string — filesOpenFilesCount",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "filesLinesSelectedCount": "{count, plural, =1{1 line selected} other{{count} lines selected}}",
   "@filesLinesSelectedCount": {

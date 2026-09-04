@@ -518,7 +518,6 @@
   "filesNewFile": "새 파일",
   "filesNewFolder": "새 폴더",
   "filesNames": "이름",
-  "filesOpenFilesFileState": "열린 파일 ({length})",
   "filesQuickOpen": "빠른 열기",
   "filesQuickOpenFile": "빠른 파일 열기",
   "filesOperationFailed": "파일 작업에 실패했습니다.",
@@ -1645,15 +1644,6 @@
   "filesNoContentMatches": "일치하는 내용이 없습니다",
   "@filesNoContentMatches": {
     "description": "CodeWalk UI string — filesNoContentMatches"
-  },
-  "filesOpenFilesCount": "{count, plural, =1{열린 파일 1개} other{열린 파일 {count}개}}",
-  "@filesOpenFilesCount": {
-    "description": "CodeWalk UI string — filesOpenFilesCount",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "filesLinesSelectedCount": "{count, plural, =1{1줄 선택됨} other{{count}줄 선택됨}}",
   "@filesLinesSelectedCount": {

@@ -1701,11 +1701,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get filesNames => '이름';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return '열린 파일 ($length)';
-  }
-
-  @override
   String get filesQuickOpen => '빠른 열기';
 
   @override
@@ -5529,17 +5524,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => '일치하는 내용이 없습니다';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '열린 파일 $count개',
-      one: '열린 파일 1개',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {

@@ -7401,6 +7401,263 @@ void main() {
     );
   });
 
+  testWidgets('file tabs share the session strip chrome with a bottom action bar', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_tabs_shared',
+        name: 'Project Tabs Shared',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_tabs_shared',
+          name: 'Project Tabs Shared',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/main.dart',
+        name: 'main.dart',
+        type: FileNodeType.file,
+      ),
+      FileNode(
+        path: '/repo/a/lib/second.dart',
+        name: 'second.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/main.dart',
+          content: 'void first() {}',
+          isBinary: false,
+        );
+    projectRepository.fileContentsByPath['/repo/a/lib/second.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/second.dart',
+          content: 'void second() {}',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+        matching: find.byTooltip('Close'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('file_tree_item_/repo/a/lib/second.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dialog = find.byKey(
+      const ValueKey<String>('open_files_dialog_centered'),
+    );
+    expect(dialog, findsOneWidget);
+    // The "Open files (n)" title is gone; the strip itself communicates tabs.
+    expect(find.text('Open files (2)'), findsNothing);
+    // Both tabs render through the shared strip (issue #167).
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_tab_/repo/a/lib/main.dart'),
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_tab_/repo/a/lib/second.dart'),
+        ),
+      ),
+      findsOneWidget,
+    );
+    // Editor commands live in the bottom bar, not in the header row.
+    final bottomBar = find.byKey(
+      const ValueKey<String>('file_viewer_bottom_bar'),
+    );
+    expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
+    expect(
+      find.descendant(
+        of: bottomBar,
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_save_button'),
+        ),
+      ),
+      findsOneWidget,
+    );
+    // Activating the first tab swaps the editor to its content. The shared
+    // strip delays single taps by the double-tap timeout, like session tabs.
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>(
+          'file_viewer_tab_activate_/repo/a/lib/main.dart',
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    final editorFinder = find.byKey(
+      const ValueKey<String>('file_editor_/repo/a/lib/main.dart'),
+    );
+    expect(editorFinder, findsOneWidget);
+    tester.widget<CodeEditor>(editorFinder).controller!.text =
+        'void edited() {}';
+    await tester.pump();
+    expect(
+      find.byKey(
+        const ValueKey<String>(
+          'file_viewer_tab_dirty_/repo/a/lib/main.dart',
+        ),
+      ),
+      findsOneWidget,
+    );
+    // Closing the inactive tab keeps the dialog on the remaining tab.
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>(
+          'file_viewer_tab_close_/repo/a/lib/second.dart',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(dialog, findsOneWidget);
+    expect(editorFinder, findsOneWidget);
+  });
+
+  testWidgets('mobile open files dialog hides the title and keeps a bottom bar', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(500, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final projectRepository = FakeProjectRepository(
+      currentProject: Project(
+        id: 'proj_tabs_mobile',
+        name: 'Project Tabs Mobile',
+        path: '/repo/a',
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      ),
+      projects: <Project>[
+        Project(
+          id: 'proj_tabs_mobile',
+          name: 'Project Tabs Mobile',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      ],
+    );
+    projectRepository.filesByPath['.'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/mobile.dart',
+        name: 'mobile.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.searchResultsByQuery['mobile'] = const <FileNode>[
+      FileNode(
+        path: '/repo/a/lib/mobile.dart',
+        name: 'mobile.dart',
+        type: FileNodeType.file,
+      ),
+    ];
+    projectRepository.fileContentsByPath['/repo/a/lib/mobile.dart'] =
+        const FileContent(
+          path: '/repo/a/lib/mobile.dart',
+          content: 'void mobileTabs() {}',
+          isBinary: false,
+        );
+
+    final provider = _buildChatProvider(
+      localDataSource: localDataSource,
+      projectRepository: projectRepository,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('mobile_appbar_overflow_button')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('mobile_overflow_item_quickOpen')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('quick_open_input')),
+      'mobile',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('quick_open_result_/repo/a/lib/mobile.dart'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dialog = find.byKey(
+      const ValueKey<String>('open_files_dialog_fullscreen'),
+    );
+    expect(dialog, findsOneWidget);
+    expect(find.text('Open files (1)'), findsNothing);
+    final bottomBar = find.byKey(
+      const ValueKey<String>('file_viewer_bottom_bar'),
+    );
+    expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
+    expect(
+      find.descendant(
+        of: bottomBar,
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_save_button'),
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('file editor saves dirty content from open files dialog', (
     WidgetTester tester,
   ) async {
@@ -7519,13 +7776,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
-        matching: find.byTooltip('Close'),
-      ),
+    // Closing the last tab dismisses the dialog (issue #167); there is no
+    // empty dialog left behind to close manually.
+    expect(
+      find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+      findsNothing,
     );
-    await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(
         const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
@@ -8259,14 +8515,12 @@ void main() {
     firstSave.complete();
     await tester.pumpAndSettle();
     expect(editorFinder, findsNothing);
-
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
-        matching: find.byTooltip('Close'),
-      ),
+    // The last tab dismisses the dialog (issue #167).
+    expect(
+      find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+      findsNothing,
     );
-    await tester.pumpAndSettle();
+
     await tester.tap(fileItem);
     await tester.pumpAndSettle();
     tester.widget<CodeEditor>(editorFinder).controller!.text =

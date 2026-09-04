@@ -50,153 +50,13 @@ extension _ChatPageFileViewer on _ChatPageState {
       child: Card(
         child: Column(
           children: [
-            SizedBox(
-              height: 44,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
-                      children: [
-                        for (final path in fileState.tabSelection.openPaths)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            child: Container(
-                              key: ValueKey<String>(
-                                'file_viewer_tab_${_normalizeFilePath(path)}',
-                              ),
-                              decoration: BoxDecoration(
-                                color: path == activePath
-                                    ? Theme.of(context).colorScheme.primary
-                                          .withValues(alpha: 0.14)
-                                    : Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainer,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      _activateFileTab(
-                                        fileState: fileState,
-                                        path: path,
-                                        onUpdated: onStateChanged,
-                                      );
-                                    },
-                                    borderRadius: BorderRadius.circular(999),
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        10,
-                                        6,
-                                        8,
-                                        6,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            _fileIconForPath(path),
-                                            size: 14,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            _fileBasename(path),
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.labelSmall,
-                                          ),
-                                          if (_fileDraftIsDirty(
-                                            fileState,
-                                            path,
-                                          ))
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                left: 4,
-                                              ),
-                                              child: Text(
-                                                '*',
-                                                key: ValueKey<String>(
-                                                  'file_viewer_tab_dirty_${_normalizeFilePath(path)}',
-                                                ),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelSmall
-                                                    ?.copyWith(
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).colorScheme.primary,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    key: ValueKey<String>(
-                                      'file_viewer_tab_close_${_normalizeFilePath(path)}',
-                                    ),
-                                    visualDensity: Theme.of(
-                                      context,
-                                    ).visualDensity,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 22,
-                                      minHeight: 22,
-                                    ),
-                                    icon: const Icon(Symbols.close, size: 14),
-                                    onPressed: () {
-                                      _closeFileTab(
-                                        fileState: fileState,
-                                        path: path,
-                                        projectProvider: projectProvider,
-                                        onUpdated: onStateChanged,
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 4),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  _buildFileViewerSaveAction(
-                    fileState: fileState,
-                    projectProvider: projectProvider,
-                    activePath: activePath,
-                    active: active,
-                    onStateChanged: onStateChanged,
-                  ),
-                  const SizedBox(width: 6),
-                ],
-              ),
+            _buildFileTabStrip(
+              fileState: fileState,
+              projectProvider: projectProvider,
+              activePath: activePath,
+              onStateChanged: onStateChanged,
             ),
             const Divider(height: 1),
-            // Selection action bar when lines are selected.
-            if (selectedLines.isNotEmpty &&
-                active.status == _FileTabLoadStatus.ready)
-              _buildSelectionActionBar(
-                fileState: fileState,
-                path: activePath,
-                content: _currentFileEditorText(
-                  fileState: fileState,
-                  path: activePath,
-                  fallback: active.content,
-                ),
-                selectedCount: selectedLines.length,
-                onStateChanged: onStateChanged,
-                onContextAdded: onContextAdded,
-              ),
             Expanded(
               child: Builder(
                 builder: (_) {
@@ -214,23 +74,6 @@ extension _ChatPageFileViewer on _ChatPageState {
                                 active.errorMessage ??
                                     context.l10n.chatFailedToLoadFile,
                                 textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              OutlinedButton(
-                                key: const ValueKey<String>(
-                                  'file_viewer_retry_button',
-                                ),
-                                onPressed: () {
-                                  unawaited(
-                                    _reloadFileTab(
-                                      fileState: fileState,
-                                      projectProvider: projectProvider,
-                                      path: activePath,
-                                      onUpdated: onStateChanged,
-                                    ),
-                                  );
-                                },
-                                child: Text(context.l10n.chatRetry2),
                               ),
                             ],
                           ),
@@ -253,7 +96,155 @@ extension _ChatPageFileViewer on _ChatPageState {
                 },
               ),
             ),
+            // Selection actions and editor commands live below the editor so
+            // the tab strip keeps the full header width (issue #167).
+            if (selectedLines.isNotEmpty &&
+                active.status == _FileTabLoadStatus.ready)
+              _buildSelectionActionBar(
+                fileState: fileState,
+                path: activePath,
+                content: _currentFileEditorText(
+                  fileState: fileState,
+                  path: activePath,
+                  fallback: active.content,
+                ),
+                selectedCount: selectedLines.length,
+                onStateChanged: onStateChanged,
+                onContextAdded: onContextAdded,
+              ),
+            _buildFileViewerBottomBar(
+              fileState: fileState,
+              projectProvider: projectProvider,
+              activePath: activePath,
+              active: active,
+              onStateChanged: onStateChanged,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// File tabs rendered with the shared [AppTabStrip] chrome used by session
+  /// tabs (issue #167). Selection state stays owned by [FileTabSelectionState];
+  /// this only maps open paths to [AppTab] view models.
+  Widget _buildFileTabStrip({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required String activePath,
+    VoidCallback? onStateChanged,
+  }) {
+    final tabs = <AppTab<String>>[
+      for (final path in fileState.tabSelection.openPaths)
+        AppTab<String>(
+          id: _normalizeFilePath(path),
+          value: path,
+          title: _fileBasename(path),
+          tooltip: _normalizeFilePath(path),
+          titleSuffix: _fileDraftIsDirty(fileState, path) ? '*' : null,
+          titleSuffixKey: ValueKey<String>(
+            'file_viewer_tab_dirty_${_normalizeFilePath(path)}',
+          ),
+          isSelected: path == activePath,
+          canClose: true,
+          canOpenContextMenu: false,
+        ),
+    ];
+    return AppTabStrip<String>(
+      tabs: tabs,
+      isCompact: context.windowSizeClass.isCompact,
+      keyPrefix: 'file_viewer_tab_',
+      showTrailingOnUnselected: true,
+      trailingExtentBuilder: (context, tab) => 28.0,
+      leadingBuilder: (context, tab) => Center(
+        child: Icon(_fileIconForPath(tab.value), size: 14),
+      ),
+      trailingBuilder: (context, tab) => IconButton(
+        key: ValueKey<String>('file_viewer_tab_close_${tab.id}'),
+        visualDensity: Theme.of(context).visualDensity,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
+        icon: const Icon(Symbols.close, size: 14),
+        onPressed: () {
+          _closeFileTab(
+            fileState: fileState,
+            path: tab.value,
+            projectProvider: projectProvider,
+            onUpdated: onStateChanged,
+          );
+        },
+      ),
+      onActivate: (tab) {
+        _activateFileTab(
+          fileState: fileState,
+          path: tab.value,
+          onUpdated: onStateChanged,
+        );
+      },
+      onClose: (tab) {
+        _closeFileTab(
+          fileState: fileState,
+          path: tab.value,
+          projectProvider: projectProvider,
+          onUpdated: onStateChanged,
+        );
+      },
+    );
+  }
+
+  /// Editor commands below the content so the tab strip keeps the full header
+  /// width on small screens (issue #167). Reuses [_buildFileViewerSaveAction]
+  /// unchanged: same keys, same save/autosave/undo/redo gates.
+  Widget _buildFileViewerBottomBar({
+    required _FileExplorerContextState fileState,
+    required ProjectProvider projectProvider,
+    required String activePath,
+    required _FileTabViewState active,
+    VoidCallback? onStateChanged,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      top: false,
+      child: Container(
+        key: const ValueKey<String>('file_viewer_bottom_bar'),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHigh,
+          border: Border(
+            top: BorderSide(color: colorScheme.outlineVariant),
+          ),
+        ),
+        padding: const EdgeInsetsDirectional.fromSTEB(8, 4, 8, 8),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              if (active.status == _FileTabLoadStatus.error)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  child: OutlinedButton(
+                    key: const ValueKey<String>('file_viewer_retry_button'),
+                    onPressed: () {
+                      unawaited(
+                        _reloadFileTab(
+                          fileState: fileState,
+                          projectProvider: projectProvider,
+                          path: activePath,
+                          onUpdated: onStateChanged,
+                        ),
+                      );
+                    },
+                    child: Text(context.l10n.chatRetry2),
+                  ),
+                ),
+              _buildFileViewerSaveAction(
+                fileState: fileState,
+                projectProvider: projectProvider,
+                activePath: activePath,
+                active: active,
+                onStateChanged: onStateChanged,
+              ),
+            ],
+          ),
         ),
       ),
     );

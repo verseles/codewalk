@@ -1790,11 +1790,6 @@ class AppLocalizationsUr extends AppLocalizations {
   String get filesNames => 'نام';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return 'کھلی فائلیں ($length)';
-  }
-
-  @override
   String get filesQuickOpen => 'فوری کھولیں۔';
 
   @override
@@ -5733,17 +5728,6 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => 'کوئی مماثل مواد نہیں ملا';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count کھلی فائلیں',
-      one: '1 کھلی فائل',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {

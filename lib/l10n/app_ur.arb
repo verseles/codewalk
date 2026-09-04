@@ -616,8 +616,6 @@
   "filesNewFolder": "نیا فولڈر",
   "filesNoContentMatches": "کوئی مماثل مواد نہیں ملا",
   "filesNoOpenFilesHint": "ابھی کوئی فائل کھلی نہیں ہے۔ تلاش کرنے کے لیے ٹائپ کریں۔",
-  "filesOpenFilesCount": "{count, plural, =1{1 کھلی فائل} other{{count} کھلی فائلیں}}",
-  "filesOpenFilesFileState": "کھلی فائلیں ({length})",
   "filesOperationFailed": "فائل کا عمل ناکام ہو گیا۔",
   "filesOperationUnavailable": "اس سرور کے لیے فائل کے اعمال دستیاب نہیں ہیں۔",
   "filesOutsideRoot": "راستہ پروجیکٹ کی جڑ سے باہر ہے۔",

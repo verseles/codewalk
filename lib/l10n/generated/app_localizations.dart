@@ -3233,12 +3233,6 @@ abstract class AppLocalizations {
   /// **'Names'**
   String get filesNames;
 
-  /// CodeWalk UI string — filesOpenFilesFileState
-  ///
-  /// In en, this message translates to:
-  /// **'Open files ({length})'**
-  String filesOpenFilesFileState(int length);
-
   /// CodeWalk UI string — filesQuickOpen
   ///
   /// In en, this message translates to:
@@ -10020,12 +10014,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No content matches found'**
   String get filesNoContentMatches;
-
-  /// CodeWalk UI string — filesOpenFilesCount
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 open file} other{{count} open files}}'**
-  String filesOpenFilesCount(int count);
 
   /// CodeWalk UI string — filesLinesSelectedCount
   ///

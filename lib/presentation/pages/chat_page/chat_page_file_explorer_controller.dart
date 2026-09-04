@@ -567,15 +567,15 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                 ),
                 if (fileState.tabSelection.hasOpenTabs)
                   Flexible(
-                    child: TextButton(
+                    child: IconButton(
                       key: const ValueKey<String>(
                         'file_tree_open_files_button',
                       ),
-                      style: TextButton.styleFrom(
-                        visualDensity: Theme.of(context).visualDensity,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        minimumSize: const Size(0, 32),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      tooltip: context.l10n.chatOpenFiles,
+                      visualDensity: Theme.of(context).visualDensity,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
                       ),
                       onPressed: () {
                         unawaited(
@@ -586,13 +586,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                           ),
                         );
                       },
-                      child: Text(
-                        context.l10n.filesOpenFilesCount(
-                          fileState.tabSelection.openPaths.length,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      icon: const Icon(Symbols.folder_open),
                     ),
                   ),
                 IconButton(

@@ -699,16 +699,25 @@ extension _ChatPageFileRuntime on _ChatPageState {
                 );
               }
             }
+            // Refreshes the dialog after tab switches, saves and closes. When
+            // the last tab is gone the dialog dismisses itself instead of
+            // lingering on an empty panel (issue #167).
+            void refreshDialog() {
+              if (!dialogContext.mounted || !mounted) {
+                return;
+              }
+              if (!fileState.tabSelection.hasOpenTabs) {
+                Navigator.of(dialogContext).pop();
+                return;
+              }
+              setDialogState(() {});
+            }
+
             if (fullscreen) {
               return Dialog.fullscreen(
                 key: const ValueKey<String>('open_files_dialog_fullscreen'),
                 child: Scaffold(
                   appBar: AppBar(
-                    title: Text(
-                      context.l10n.filesOpenFilesFileState(
-                        fileState.tabSelection.openPaths.length,
-                      ),
-                    ),
                     leading: IconButton(
                       icon: const Icon(Symbols.close),
                       tooltip: context.l10n.chatClose,
@@ -720,12 +729,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                     projectProvider: projectProvider,
                     height: double.infinity,
                     margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    onStateChanged: () {
-                      if (!dialogContext.mounted) {
-                        return;
-                      }
-                      setDialogState(() {});
-                    },
+                    onStateChanged: refreshDialog,
                     onContextAdded: () {
                       // Pop both the file viewer dialog and the mobile
                       // Files dialog behind it (two stacked routes).
@@ -759,14 +763,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                         padding: const EdgeInsets.fromLTRB(16, 10, 8, 8),
                         child: Row(
                           children: [
-                            Expanded(
-                              child: Text(
-                                context.l10n.filesOpenFilesFileState(
-                                  fileState.tabSelection.openPaths.length,
-                                ),
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                            ),
+                            const Spacer(),
                             IconButton(
                               tooltip: context.l10n.chatClose,
                               onPressed: () =>
@@ -782,12 +779,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                           projectProvider: projectProvider,
                           height: double.infinity,
                           margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                          onStateChanged: () {
-                            if (!dialogContext.mounted) {
-                              return;
-                            }
-                            setDialogState(() {});
-                          },
+                          onStateChanged: refreshDialog,
                           onContextAdded: () {
                             Navigator.of(dialogContext).pop();
                             _inputFocusNode.requestFocus();

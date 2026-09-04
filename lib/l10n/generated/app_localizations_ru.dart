@@ -1814,11 +1814,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get filesNames => 'Имена';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return 'Открытые файлы ($length)';
-  }
-
-  @override
   String get filesQuickOpen => 'Быстрое открытие';
 
   @override
@@ -5786,19 +5781,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => 'Совпадений по содержимому не найдено';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count открытых файлов',
-      many: '$count открытых файлов',
-      few: '$count открытых файла',
-      one: '1 открытый файл',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {

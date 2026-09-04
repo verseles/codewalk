@@ -1670,11 +1670,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get filesNames => '名称';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return '打开的文件 ($length)';
-  }
-
-  @override
   String get filesQuickOpen => '快速打开';
 
   @override
@@ -5404,17 +5399,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => '未找到匹配的内容';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 个打开的文件',
-      one: '1 个打开的文件',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {

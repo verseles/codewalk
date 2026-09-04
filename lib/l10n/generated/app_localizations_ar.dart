@@ -1763,11 +1763,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get filesNames => 'الأسماء';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return 'الملفات المفتوحة ($length)';
-  }
-
-  @override
   String get filesQuickOpen => 'فتح سريع';
 
   @override
@@ -5670,17 +5665,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => 'لم يتم العثور على تطابقات في المحتوى';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ملفات مفتوحة',
-      one: 'ملف واحد مفتوح',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {

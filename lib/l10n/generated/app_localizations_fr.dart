@@ -1829,11 +1829,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get filesNames => 'Noms';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return 'Fichiers ouverts ($length)';
-  }
-
-  @override
   String get filesQuickOpen => 'Ouverture rapide';
 
   @override
@@ -5851,17 +5846,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => 'Aucun résultat de contenu trouvé';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count fichiers ouverts',
-      one: '1 fichier ouvert',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {

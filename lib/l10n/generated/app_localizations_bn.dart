@@ -1793,11 +1793,6 @@ class AppLocalizationsBn extends AppLocalizations {
   String get filesNames => 'নাম';
 
   @override
-  String filesOpenFilesFileState(int length) {
-    return 'খোলা ফাইল ($length)';
-  }
-
-  @override
   String get filesQuickOpen => 'দ্রুত খুলুন';
 
   @override
@@ -5747,17 +5742,6 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get filesNoContentMatches => 'কোনো বিষয়বস্তু মিল পাওয়া যায়নি';
-
-  @override
-  String filesOpenFilesCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count টি খোলা ফাইল',
-      one: '১টি খোলা ফাইল',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filesLinesSelectedCount(int count) {
