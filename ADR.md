@@ -2117,6 +2117,14 @@ Embed a `package:tailscale` userspace Tailscale node directly in the app process
 - ❌ Cannot coexist with a system-level `tailscaled` on the same machine (port/auth conflicts) — the user must choose one or the other.
 - ⚠️ Re-authentication requires explicit user action via the auth panel (onboarding or settings); the app no longer auto-redirects to the browser, so a disconnected Tailscale node will stay disconnected until the user initiates auth.
 
+**Addendum** (as-implemented, device-validated):
+
+- Single shared device identity: all profiles share one state directory (`tailscale_node`) and one stable hostname (`codewalk-<os>`); login once covers every profile and switching profiles never restarts a connected node. A sole legacy per-profile identity is adopted once when it is the only credential holder.
+- Interactive login without auth keys: the preflight rejection blocking `NeedsLogin` was removed; explicit user-action auth is preserved with no auto-launch.
+- Transport-first health: health is unknown (never unhealthy) while not connected; the custom Dio adapter applies a bounded head timeout (Dio does not time out custom adapters) and handles bodyless-request EOF.
+- Android login via Custom Tab with external fallback (no WebView), auto-return to foreground on connect, and explicit logout clearing credentials (reset also drops identity).
+- No ADR-023 exception needed: transport-only, no OpenCode contract changes.
+
 ### Key Files
 
 - `lib/data/services/tailscale_service.dart` — `TailscaleNode` singleton, lifecycle, and health check

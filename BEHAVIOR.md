@@ -310,17 +310,30 @@
 - **Then** the profile records the challenge and the user can re-authenticate from server settings
 - **Then** successful re-authentication updates only the matching profile and does not leak tokens to other profiles or hosts
 
-### Tailscale transport is profile-scoped
+### Tailscale transport uses one shared device identity
 
 - **Given** a user configures a server profile on Android, iOS, Linux, or macOS
 - **When** the user enables Tailscale for that profile
 - **Then** CodeWalk routes OpenCode API and SSE traffic through the embedded userspace Tailscale node instead of requiring a system VPN
+- **Then** all Tailscale profiles share a single device identity (one tailnet machine); logging in once covers every profile and switching profiles never restarts an already-connected node
 - **Then** Basic Auth or Cloudflare Access OAuth can still own authentication because Tailscale only owns transport
-- **Then** inactive Tailscale profiles report unknown health instead of starting additional Tailscale nodes
+- **Then** OpenCode health checks wait for the transport: while it is connecting, waiting for login, or waiting for admin approval, the profile reports unknown health instead of unhealthy
+- **Then** request timeouts are bounded so a stalled transport surfaces an error instead of hanging health checks forever
 - **Then** when Tailscale requires login or machine approval, onboarding and server settings show the Tailscale authentication URL and let the user copy it
-- **Then** tapping the Tailscale authenticate action opens that URL in the external browser when the platform can launch it
+- **Then** on Android the authenticate action opens that URL in a browser-owned Custom Tab in the app task (Back returns to CodeWalk), falling back to the external browser; other platforms use the external browser
+- **Then** when login completes while the login tab was opened by the app, CodeWalk returns to the foreground automatically
 - **Then** if the authentication URL cannot be opened, the app keeps the URL visible and shows an actionable failure message instead of silently blocking the flow
+- **Then** concurrent authenticate, retry, and logout taps join the running attempt instead of restarting the node; busy actions show loading and stay disabled until the attempt settles, and each transport state offers only the actions that make sense for it
+- **Then** the user can log the device out explicitly from server settings (with confirmation); full app reset also drops the device identity, so the next Tailscale use requires interactive login again
+- **Then** cold start shows a localized Tailscale status line (connecting, login required, admin approval) while the transport gates startup
 - **Then** Windows and web users do not get a broken Tailscale toggle
+
+### Last project recovery ignores the placeholder root
+
+- **Given** the app persisted a last project or open contexts for a server
+- **When** a saved identifier is the placeholder root (`global`, `/`, or empty)
+- **Then** it is treated as missing: never restored as the current context and never re-persisted over a previously saved real project
+- **Then** persisting state while the current context is the placeholder keeps the last saved real project instead of overwriting it with the placeholder
 
 ### Offline startup reloads initial data automatically after recovery
 
