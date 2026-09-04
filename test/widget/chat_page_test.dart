@@ -7510,6 +7510,25 @@ void main() {
       const ValueKey<String>('file_viewer_bottom_bar'),
     );
     expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
+    // The dialog close shares the tab-strip row: right side, same height —
+    // no header row of its own.
+    final dialogClose = find.descendant(
+      of: dialog,
+      matching: find.byTooltip('Close'),
+    );
+    expect(dialogClose, findsOneWidget);
+    final stripRect = tester.getRect(
+      find.descendant(
+        of: dialog,
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_tab_strip'),
+        ),
+      ),
+    );
+    final closeRect = tester.getRect(dialogClose);
+    expect(closeRect.center.dx, greaterThan(stripRect.center.dx));
+    expect(closeRect.center.dy, greaterThanOrEqualTo(stripRect.top));
+    expect(closeRect.center.dy, lessThanOrEqualTo(stripRect.bottom));
     expect(
       find.descendant(
         of: bottomBar,
@@ -7667,6 +7686,24 @@ void main() {
     );
     expect(dialog, findsOneWidget);
     expect(find.text('Open files (1)'), findsNothing);
+    // The dialog close shares the tab-strip row (right side, same height).
+    final dialogClose = find.descendant(
+      of: dialog,
+      matching: find.byTooltip('Close'),
+    );
+    expect(dialogClose, findsOneWidget);
+    final stripRect = tester.getRect(
+      find.descendant(
+        of: dialog,
+        matching: find.byKey(
+          const ValueKey<String>('file_viewer_tab_strip'),
+        ),
+      ),
+    );
+    final closeRect = tester.getRect(dialogClose);
+    expect(closeRect.center.dx, greaterThan(stripRect.center.dx));
+    expect(closeRect.center.dy, greaterThanOrEqualTo(stripRect.top));
+    expect(closeRect.center.dy, lessThanOrEqualTo(stripRect.bottom));
     final bottomBar = find.byKey(
       const ValueKey<String>('file_viewer_bottom_bar'),
     );

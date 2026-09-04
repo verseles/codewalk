@@ -25,6 +25,10 @@ extension _ChatPageFileViewer on _ChatPageState {
     EdgeInsetsGeometry margin = const EdgeInsets.fromLTRB(8, 0, 8, 8),
     VoidCallback? onStateChanged,
     VoidCallback? onContextAdded,
+    // Dialog-level trailing control (for example the dialog close button).
+    // Rendered in the same row as the tab strip so it shares the strip
+    // height instead of occupying a header row of its own (issue #167).
+    Widget? headerTrailing,
   }) {
     if (!fileState.tabSelection.hasOpenTabs) {
       return const SizedBox.shrink();
@@ -50,11 +54,19 @@ extension _ChatPageFileViewer on _ChatPageState {
       child: Card(
         child: Column(
           children: [
-            _buildFileTabStrip(
-              fileState: fileState,
-              projectProvider: projectProvider,
-              activePath: activePath,
-              onStateChanged: onStateChanged,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: _buildFileTabStrip(
+                    fileState: fileState,
+                    projectProvider: projectProvider,
+                    activePath: activePath,
+                    onStateChanged: onStateChanged,
+                  ),
+                ),
+                if (headerTrailing case final Widget trailing) trailing,
+              ],
             ),
             const Divider(height: 1),
             Expanded(

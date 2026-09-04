@@ -730,19 +730,27 @@ extension _ChatPageFileRuntime on _ChatPageState {
               return Dialog.fullscreen(
                 key: const ValueKey<String>('open_files_dialog_fullscreen'),
                 child: Scaffold(
-                  appBar: AppBar(
-                    leading: IconButton(
-                      icon: const Icon(Symbols.close),
-                      tooltip: context.l10n.chatClose,
-                      onPressed: () => Navigator.of(dialogContext).pop(),
-                    ),
-                  ),
-                  body: _buildFileViewerPanel(
-                    fileState: fileState,
-                    projectProvider: projectProvider,
-                    height: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    onStateChanged: refreshDialog,
+                  // No AppBar: the dialog close shares the tab-strip row
+                  // (right side) instead of owning a header bar (issue #167).
+                  body: SafeArea(
+                    top: true,
+                    bottom: false,
+                    child: _buildFileViewerPanel(
+                      fileState: fileState,
+                      projectProvider: projectProvider,
+                      height: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                      onStateChanged: refreshDialog,
+                      headerTrailing: IconButton(
+                        tooltip: context.l10n.chatClose,
+                        onPressed: () =>
+                            Navigator.of(dialogContext).pop(),
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(40, 40),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(Symbols.close),
+                      ),
                     onContextAdded: () {
                       // Pop the viewer. A second pop only happens when the
                       // mobile Files dialog is genuinely underneath (issue
@@ -758,12 +766,13 @@ extension _ChatPageFileRuntime on _ChatPageState {
                     },
                   ),
                 ),
-              );
+              ),
+            );
             }
             return Dialog(
               key: const ValueKey<String>('open_files_dialog_centered'),
               insetPadding: const EdgeInsets.symmetric(
-                horizontal: 24,
+                horizontal: 8,
                 vertical: 24,
               ),
               clipBehavior: Clip.antiAlias,
@@ -777,27 +786,26 @@ extension _ChatPageFileRuntime on _ChatPageState {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 10, 8, 8),
-                        child: Row(
-                          children: [
-                            const Spacer(),
-                            IconButton(
-                              tooltip: context.l10n.chatClose,
-                              onPressed: () =>
-                                  Navigator.of(dialogContext).pop(),
-                              icon: const Icon(Symbols.close),
-                            ),
-                          ],
-                        ),
-                      ),
                       Expanded(
                         child: _buildFileViewerPanel(
                           fileState: fileState,
                           projectProvider: projectProvider,
                           height: double.infinity,
-                          margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                          margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
                           onStateChanged: refreshDialog,
+                          // Dialog close shares the tab-strip row (right
+                          // side); no header row of its own (issue #167).
+                          headerTrailing: IconButton(
+                            tooltip: context.l10n.chatClose,
+                            onPressed: () =>
+                                Navigator.of(dialogContext).pop(),
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(40, 40),
+                              tapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            icon: const Icon(Symbols.close),
+                          ),
                           onContextAdded: () {
                             Navigator.of(dialogContext).pop();
                             _inputFocusNode.requestFocus();
