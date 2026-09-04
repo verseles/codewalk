@@ -76,6 +76,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7401,9 +7402,9 @@ void main() {
     );
   });
 
-  testWidgets('file tabs share the session strip chrome with a bottom action bar', (
-    WidgetTester tester,
-  ) async {
+  testWidgets(
+    'file tabs share the session strip chrome with a bottom action bar',
+    (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1300, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -7544,8 +7545,29 @@ void main() {
       ),
       findsOneWidget,
     );
-    // The file close control exposes a labeled button for AT (a11y review).
-    expect(find.bySemanticsLabel('Close'), findsWidgets);
+    // The file close control itself is labeled AND tappable for AT (a11y
+    // review): assert on the merged semantics node of the wrapper around
+    // the keyed button. A global label lookup would also match the dialog's
+    // own Close, and a widget-tree lookup would miss excludeSemantics
+    // regressions that drop the tap action from the merged node.
+    final closeFinder = find.byKey(
+      const ValueKey<String>(
+        'file_viewer_tab_close_/repo/a/lib/main.dart',
+      ),
+    );
+    final closeWrapperFinder = find.ancestor(
+      of: closeFinder,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == 'Close',
+      ),
+    );
+    expect(closeWrapperFinder, findsOneWidget);
+    final closeNode = tester.getSemantics(closeFinder);
+    expect(
+      closeNode.getSemanticsData().hasAction(SemanticsAction.tap),
+      isTrue,
+    );
+    expect(tester.widget<IconButton>(closeFinder).onPressed, isNotNull);
     // Closing the inactive tab keeps the dialog on the remaining tab.
     await tester.tap(
       find.byKey(
@@ -7557,7 +7579,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(dialog, findsOneWidget);
     expect(editorFinder, findsOneWidget);
-  });
+  }, semanticsEnabled: true);
 
   testWidgets('mobile open files dialog hides the title and keeps a bottom bar', (
     WidgetTester tester,
