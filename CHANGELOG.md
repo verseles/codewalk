@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.223.1 - 2026-09-04
+
+- docs(tabs): dialog close shares the tab-strip row (issue 167)
+- refactor(tabs): hoist shared dialog close builder (issue 167)
+- fix(tabs): dialog close shares the tab-strip row, slim side margins (issue 167)
+
 ## v1.223.0 - 2026-09-04
 
 - docs(tabs): unify file editor tabs behavior and code map (issue 167)
