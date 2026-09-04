@@ -22,6 +22,7 @@ import '../../domain/usecases/check_connection.dart';
 import '../../domain/usecases/get_app_info.dart';
 import '../services/car_messaging/car_messaging_runtime.dart';
 import '../services/cellular_data_saver_service.dart';
+import '../services/codewalk_terminal_socket.dart';
 import '../services/local_opencode_server_runtime.dart';
 import '../services/local_opencode_server_runtime_types.dart';
 import '../services/session_attention/session_attention_completion_resolver.dart';
@@ -781,6 +782,75 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     }
     return next;
+  }
+
+  /// Builds the Authorization header for raw transports that bypass Dio
+  /// interceptors — currently the terminal WebSocket.
+  ///
+  /// Mirrors REST credential ownership: explicit per-profile Basic Auth
+  /// wins, else the cached OAuth Bearer when the profile uses Cloudflare
+  /// Access OAuth. Returns null when the profile needs no Authorization
+  /// header. Never throws: credential-store failures yield null so the
+  /// terminal surfaces the server's own 401 instead of a client crash.
+  Future<Map<String, String>?> terminalAuthHeaders(
+    ServerProfile profile,
+  ) async {
+    if (profile.basicAuthEnabled &&
+        profile.basicAuthUsername.trim().isNotEmpty &&
+        profile.basicAuthPassword.trim().isNotEmpty) {
+      final auth = base64Encode(
+        utf8.encode(
+          '${profile.basicAuthUsername.trim()}:${profile.basicAuthPassword.trim()}',
+        ),
+      );
+      return <String, String>{ApiConstants.authorization: 'Basic $auth'};
+    }
+    if (profile.oauthEnabled) {
+      try {
+        final credential = await _oauthServiceFactory(
+          profileId: profile.id,
+          serverUrl: profile.url,
+        ).getCachedCredential();
+        final token = credential?.accessToken.trim() ?? '';
+        if (token.isNotEmpty) {
+          return <String, String>{
+            ApiConstants.authorization: 'Bearer $token',
+          };
+        }
+      } catch (error, stackTrace) {
+        AppLogger.warn(
+          'Failed to load OAuth credential for terminal',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+    return null;
+  }
+
+  /// Opens a terminal WebSocket routed through the embedded Tailscale node.
+  ///
+  /// Throws [UnsupportedError] on platforms without Tailscale support and
+  /// [StateError] while the transport is not connected, so the terminal
+  /// reports an actionable status instead of a raw network failure.
+  Future<CodewalkTerminalSocketConnection> openTerminalSocketOverTailscale({
+    required Uri url,
+    Map<String, String>? headers,
+  }) {
+    if (!supportsTailscale) {
+      throw UnsupportedError('Tailscale is not supported on this platform.');
+    }
+    if (!_tailscaleState.isConnected) {
+      throw StateError(
+        'Tailscale transport is not connected '
+        '(state: ${_tailscaleState.nodeState.name}).',
+      );
+    }
+    return openCodewalkTerminalSocketViaTailscale(
+      url: url,
+      headers: headers,
+      dial: _tailscaleService.dialTcp,
+    );
   }
 
   /// Logs the shared Tailscale device out of the tailnet and clears its

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../i18n/l10n_bridge.dart';
 import 'tailscale_peer.dart';
 import 'tailscale_state.dart';
+import 'tailscale_tcp_connection.dart';
 
 class TailscaleService {
   TailscaleService();
@@ -40,4 +41,14 @@ class TailscaleService {
   Future<TailscaleState> refreshStatus() async => state;
 
   Future<List<TailscalePeer>> nodes() async => const [];
+
+  Future<TailscaleTcpConnection> dialTcp(
+    String host,
+    int port, {
+    Duration? timeout,
+  }) async {
+    throw UnsupportedError(
+      'Tailscale transport is not supported on this platform.',
+    );
+  }
 }

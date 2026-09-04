@@ -6,6 +6,7 @@ import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/core/tailscale/tailscale_service.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
+import 'package:codewalk/domain/entities/server_profile.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
@@ -92,6 +93,42 @@ class _FakeOAuthService extends OAuthService {
   @override
   Future<void> clearCredential() async {
     await clearCredentialHandler?.call();
+  }
+}
+
+class _CachedCredentialOAuthService extends OAuthService {
+  _CachedCredentialOAuthService({required this.credential})
+    : super(profileId: 'terminal', serverUrl: 'https://code.example.com');
+
+  final OAuthCredential? credential;
+
+  @override
+  Future<OAuthFlowResult> authenticate({bool skipCache = false}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<OAuthCredential?> getCachedCredential() async => credential;
+
+  @override
+  Future<void> clearCredential() async {}
+}
+
+class _DialRecordingTailscaleService extends _FakeTailscaleService {
+  _DialRecordingTailscaleService(super.nextState);
+
+  String? dialHost;
+  int? dialPort;
+
+  @override
+  Future<TailscaleTcpConnection> dialTcp(
+    String host,
+    int port, {
+    Duration? timeout,
+  }) async {
+    dialHost = host;
+    dialPort = port;
+    throw StateError('sentinel-dial');
   }
 }
 
@@ -989,5 +1026,154 @@ void main() {
       expect(export, isNot(contains('secret-token')));
       expect(export, isNot(contains('hunter2')));
     });
+
+    test('terminalAuthHeaders prefers explicit basic auth', () async {
+      await provider.initialize();
+
+      const profile = ServerProfile(
+        id: 'srv',
+        url: 'http://100.64.0.5:4096',
+        basicAuthEnabled: true,
+        basicAuthUsername: 'user',
+        basicAuthPassword: 'pass',
+        createdAt: 0,
+        updatedAt: 0,
+      );
+
+      final headers = await provider.terminalAuthHeaders(profile);
+
+      expect(headers?['Authorization'], startsWith('Basic '));
+    });
+
+    test('terminalAuthHeaders uses the cached oauth bearer', () async {
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        localServerRuntime: localServerRuntime,
+        enableHealthPolling: false,
+        oauthServiceFactory:
+            ({
+              required profileId,
+              required serverUrl,
+              challengeHeaders,
+              challengeBody,
+              shouldPersistCredential,
+            }) => _CachedCredentialOAuthService(
+              credential: const OAuthCredential(
+                profileId: 'terminal',
+                accessToken: 'oauth-token',
+                serverUrl: 'https://code.example.com',
+              ),
+            ),
+      );
+      await provider.initialize();
+
+      const profile = ServerProfile(
+        id: 'srv',
+        url: 'https://code.example.com',
+        oauthEnabled: true,
+        createdAt: 0,
+        updatedAt: 0,
+      );
+
+      final headers = await provider.terminalAuthHeaders(profile);
+
+      expect(headers?['Authorization'], 'Bearer oauth-token');
+    });
+
+    test('terminalAuthHeaders returns null without credentials', () async {
+      await provider.initialize();
+
+      const profile = ServerProfile(
+        id: 'srv',
+        url: 'http://100.64.0.5:4096',
+        createdAt: 0,
+        updatedAt: 0,
+      );
+
+      expect(await provider.terminalAuthHeaders(profile), isNull);
+    });
+
+    test(
+      'openTerminalSocketOverTailscale fails fast while disconnected',
+      () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        final tailscale = _FakeTailscaleService(
+          const TailscaleState(nodeState: TailscaleNodeState.disconnected),
+        );
+        addTearDown(tailscale.controller.close);
+        provider = AppProvider(
+          getAppInfo: GetAppInfo(repository),
+          checkConnection: CheckConnection(repository),
+          localDataSource: localDataSource,
+          dioClient: DioClient(),
+          tailscaleService: tailscale,
+          localServerRuntime: localServerRuntime,
+          enableHealthPolling: false,
+        );
+        await provider.initialize();
+
+        expect(
+          () => provider.openTerminalSocketOverTailscale(
+            url: Uri.parse(
+              'ws://100.64.0.5:4096/pty/x/connect?directory=%2Fa',
+            ),
+          ),
+          throwsA(isA<StateError>()),
+        );
+      },
+    );
+
+    test(
+      'openTerminalSocketOverTailscale dials the tailnet when connected',
+      () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        final tailscale = _DialRecordingTailscaleService(
+          const TailscaleState(nodeState: TailscaleNodeState.connected),
+        );
+        addTearDown(tailscale.controller.close);
+        provider = AppProvider(
+          getAppInfo: GetAppInfo(repository),
+          checkConnection: CheckConnection(repository),
+          localDataSource: localDataSource,
+          dioClient: DioClient(),
+          tailscaleService: tailscale,
+          localServerRuntime: localServerRuntime,
+          enableHealthPolling: false,
+        );
+        await provider.initialize();
+        final created = await provider.addServerProfile(
+          url: 'http://codewalk.tailnet.ts.net:4096',
+          tailscaleEnabled: true,
+          setAsActive: true,
+        );
+        expect(created, isTrue);
+        expect(
+          provider.tailscaleState.nodeState,
+          TailscaleNodeState.connected,
+        );
+
+        await expectLater(
+          provider.openTerminalSocketOverTailscale(
+            url: Uri.parse(
+              'ws://100.64.0.5:4096/pty/x/connect?directory=%2Fa',
+            ),
+          ),
+          throwsA(
+            isA<StateError>().having(
+              (error) => error.message,
+              'message',
+              contains('sentinel-dial'),
+            ),
+          ),
+        );
+        expect(tailscale.dialHost, '100.64.0.5');
+        expect(tailscale.dialPort, 4096);
+      },
+    );
   });
 }

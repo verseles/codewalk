@@ -10,6 +10,7 @@ import '../i18n/l10n_bridge.dart';
 import '../logging/app_logger.dart';
 import 'tailscale_peer.dart';
 import 'tailscale_state.dart';
+import 'tailscale_tcp_connection.dart';
 
 class TailscaleService {
   TailscaleService({ts.TailscaleClient? client})
@@ -235,6 +236,20 @@ class TailscaleService {
     }
   }
 
+  /// Dials `host:port` on the tailnet and returns the raw byte stream.
+  ///
+  /// Used by transports that `package:http` cannot express — notably the
+  /// terminal WebSocket, whose handshake and framing run directly over the
+  /// dialed connection. Throws when the node is not running.
+  Future<TailscaleTcpConnection> dialTcp(
+    String host,
+    int port, {
+    Duration? timeout,
+  }) async {
+    final connection = await _client.tcp.dial(host, port, timeout: timeout);
+    return _TailscaleTcpConnectionAdapter(connection);
+  }
+
   void _listenToNodeState() {
     _nodeStateSubscription ??= _client.onStateChange.listen((state) {
       _lastStreamedNodeState = state;
@@ -439,4 +454,24 @@ class TailscaleService {
     _stateController.add(next);
     return next;
   }
+}
+
+/// Adapts the vendored tailnet connection to [TailscaleTcpConnection] so
+/// upper layers never import `package:tailscale` directly.
+final class _TailscaleTcpConnectionAdapter implements TailscaleTcpConnection {
+  _TailscaleTcpConnectionAdapter(this._connection);
+
+  final ts.TailscaleConnection _connection;
+
+  @override
+  Stream<Uint8List> get input => _connection.input;
+
+  @override
+  Future<void> write(List<int> bytes) => _connection.output.write(bytes);
+
+  @override
+  Future<void> close() => _connection.close();
+
+  @override
+  Future<void> get done => _connection.done;
 }

@@ -27,18 +27,43 @@ typedef CodewalkTerminalSocketOpener =
       Map<String, String>? headers,
     });
 
+/// Resolves Authorization headers for transports that bypass Dio
+/// interceptors (the terminal WebSocket). Implemented by AppProvider so the
+/// socket carries the same credentials as REST traffic: explicit Basic Auth
+/// first, else the cached OAuth Bearer. Null/absent means "no extra headers".
+typedef CodewalkTerminalAuthHeaderProvider =
+    Future<Map<String, String>?> Function(ServerProfile profile);
+
 class CodewalkTerminalController extends ChangeNotifier {
   CodewalkTerminalController({
     TerminalRemoteDataSource? remoteDataSource,
     CodewalkTerminalSocketOpener? socketOpener,
+    CodewalkTerminalAuthHeaderProvider? authHeaderProvider,
+    CodewalkTerminalSocketOpener? tailscaleSocketOpener,
   }) : _remoteDataSource =
            remoteDataSource ?? _UnavailableTerminalRemoteDataSource(),
-       _socketOpener = socketOpener ?? openCodewalkTerminalSocket {
+       _socketOpener = socketOpener ?? openCodewalkTerminalSocket,
+       _authHeaderProvider = authHeaderProvider,
+       _tailscaleSocketOpener = tailscaleSocketOpener {
     _terminal = _createTerminal();
   }
 
   final TerminalRemoteDataSource _remoteDataSource;
   final CodewalkTerminalSocketOpener _socketOpener;
+  CodewalkTerminalAuthHeaderProvider? _authHeaderProvider;
+  CodewalkTerminalSocketOpener? _tailscaleSocketOpener;
+
+  /// Wires transport delegates after construction. The controller is a
+  /// long-lived page field while AppProvider arrives via dependencies, so
+  /// the tailscale opener and auth provider are attached once the page
+  /// resolves them (closures must read the current provider lazily).
+  void configureTransport({
+    CodewalkTerminalAuthHeaderProvider? authHeaderProvider,
+    CodewalkTerminalSocketOpener? tailscaleSocketOpener,
+  }) {
+    _authHeaderProvider = authHeaderProvider;
+    _tailscaleSocketOpener = tailscaleSocketOpener;
+  }
 
   late Terminal _terminal;
   CodewalkTerminalSocketConnection? _socket;
@@ -135,14 +160,17 @@ class CodewalkTerminalController extends ChangeNotifier {
         _cursor = -1;
       }
 
-      final socket = await _socketOpener(
+      final socket = await _openSocket(
         url: buildCodewalkTerminalSocketUrl(
           baseUrl: serverProfile.url,
           ptyId: createdPtyId,
           directory: normalizedDirectory,
           cursor: _cursor,
         ),
-        headers: _authorizationHeaders(serverProfile),
+        profile: serverProfile,
+        headers:
+            await _authHeaderProvider?.call(serverProfile) ??
+            _authorizationHeaders(serverProfile),
       );
       _socket = socket;
 
@@ -318,8 +346,21 @@ class CodewalkTerminalController extends ChangeNotifier {
     }
   }
 
-  Map<String, String>? _authorizationHeaders(ServerProfile profile) {
-    if (!profile.basicAuthEnabled) {
+  /// Opens the PTY WebSocket, routing through the embedded Tailscale node
+  /// when the profile requires it. Other profiles keep the direct path.
+  Future<CodewalkTerminalSocketConnection> _openSocket({
+    required Uri url,
+    required ServerProfile profile,
+    Map<String, String>? headers,
+  }) {
+    final tailscaleOpener = _tailscaleSocketOpener;
+    if (profile.tailscaleEnabled && tailscaleOpener != null) {
+      return tailscaleOpener(url: url, headers: headers);
+    }
+    return _socketOpener(url: url, headers: headers);
+  }
+
+  Map<String, String>? _authorizationHeaders(ServerProfile profile) {    if (!profile.basicAuthEnabled) {
       return null;
     }
     final username = profile.basicAuthUsername.trim();

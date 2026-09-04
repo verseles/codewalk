@@ -759,6 +759,23 @@ class _ChatPageState extends State<ChatPage>
           ? ServerHealthStatus.unknown
           : nextAppProvider.healthFor(initialActiveServer.id);
       _appProvider?.addListener(_handleAppProviderChange);
+      // Route the embedded terminal through the same transport/auth the
+      // REST layer uses: Tailscale profiles dial via the embedded node and
+      // the socket carries Basic or cached-OAuth credentials. Closures read
+      // the current provider lazily so later swaps stay correct.
+      _terminalController.configureTransport(
+        authHeaderProvider: (profile) =>
+            _appProvider?.terminalAuthHeaders(profile) ??
+            Future<Map<String, String>?>.value(),
+        tailscaleSocketOpener: ({required Uri url, Map<String, String>? headers}) {
+          final app = _appProvider;
+          if (app == null) throw StateError('No active server.');
+          return app.openTerminalSocketOverTailscale(
+            url: url,
+            headers: headers,
+          );
+        },
+      );
     }
     final nextProjectProvider = context.read<ProjectProvider>();
     if (!identical(_projectProvider, nextProjectProvider)) {

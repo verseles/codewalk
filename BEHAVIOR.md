@@ -315,6 +315,7 @@
 - **Given** a user configures a server profile on Android, iOS, Linux, or macOS
 - **When** the user enables Tailscale for that profile
 - **Then** CodeWalk routes OpenCode API and SSE traffic through the embedded userspace Tailscale node instead of requiring a system VPN
+- **Then** the embedded terminal also routes through the Tailscale transport: PTY session calls and the PTY WebSocket dial through the embedded node, carrying the same Basic Auth or OAuth credentials as the API traffic
 - **Then** all Tailscale profiles share a single device identity (one tailnet machine); logging in once covers every profile and switching profiles never restarts an already-connected node
 - **Then** Basic Auth or Cloudflare Access OAuth can still own authentication because Tailscale only owns transport
 - **Then** OpenCode health checks wait for the transport: while it is connecting, waiting for login, or waiting for admin approval, the profile reports unknown health instead of unhealthy

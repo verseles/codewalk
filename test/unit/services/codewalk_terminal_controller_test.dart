@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:codewalk/data/datasources/terminal_remote_datasource.dart';
 import 'package:codewalk/data/models/pty_session_model.dart';
@@ -287,5 +288,161 @@ void main() {
         // If we got here without throwing an unhandled async error, the exception was swallowed correctly.
       },
     );
+
+    test('uses the tailscale opener for tailscale-enabled profiles', () async {
+      var directCalls = 0;
+      var tailscaleCalls = 0;
+      Uri? tailscaleUrl;
+      Map<String, String>? tailscaleHeaders;
+      Future<CodewalkTerminalSocketConnection> direct({
+        required Uri url,
+        Map<String, String>? headers,
+      }) async {
+        directCalls++;
+        latestSocketConnection = FakeCodewalkTerminalSocketConnection();
+        return latestSocketConnection;
+      }
+
+      Future<CodewalkTerminalSocketConnection> viaTailscale({
+        required Uri url,
+        Map<String, String>? headers,
+      }) async {
+        tailscaleCalls++;
+        tailscaleUrl = url;
+        tailscaleHeaders = headers;
+        latestSocketConnection = FakeCodewalkTerminalSocketConnection();
+        return latestSocketConnection;
+      }
+
+      final controller = CodewalkTerminalController(
+        remoteDataSource: remoteDataSource,
+        socketOpener: direct,
+        tailscaleSocketOpener: viaTailscale,
+      );
+
+      const tailscaleProfile = ServerProfile(
+        id: 'srv_ts',
+        url: 'http://100.64.0.5:4096',
+        tailscaleEnabled: true,
+        createdAt: 0,
+        updatedAt: 0,
+      );
+      await controller.startShell(
+        serverProfile: tailscaleProfile,
+        workingDirectory: '/home/project',
+      );
+
+      expect(tailscaleCalls, 1);
+      expect(directCalls, 0);
+      expect(tailscaleUrl?.scheme, 'ws');
+      expect(tailscaleHeaders, isNull);
+    });
+
+    test('uses the direct opener when tailscale is disabled', () async {
+      var directCalls = 0;
+      var tailscaleCalls = 0;
+      Future<CodewalkTerminalSocketConnection> direct({
+        required Uri url,
+        Map<String, String>? headers,
+      }) async {
+        directCalls++;
+        latestSocketConnection = FakeCodewalkTerminalSocketConnection();
+        return latestSocketConnection;
+      }
+
+      Future<CodewalkTerminalSocketConnection> viaTailscale({
+        required Uri url,
+        Map<String, String>? headers,
+      }) async {
+        tailscaleCalls++;
+        latestSocketConnection = FakeCodewalkTerminalSocketConnection();
+        return latestSocketConnection;
+      }
+
+      final controller = CodewalkTerminalController(
+        remoteDataSource: remoteDataSource,
+        socketOpener: direct,
+        tailscaleSocketOpener: viaTailscale,
+      );
+
+      await controller.startShell(
+        serverProfile: serverProfile,
+        workingDirectory: '/home/project',
+      );
+
+      expect(directCalls, 1);
+      expect(tailscaleCalls, 0);
+    });
+
+    test('auth provider headers win over profile basic auth', () async {
+      Map<String, String>? seenHeaders;
+      Future<CodewalkTerminalSocketConnection> opener({
+        required Uri url,
+        Map<String, String>? headers,
+      }) async {
+        seenHeaders = headers;
+        latestSocketConnection = FakeCodewalkTerminalSocketConnection();
+        return latestSocketConnection;
+      }
+
+      final controller = CodewalkTerminalController(
+        remoteDataSource: remoteDataSource,
+        socketOpener: opener,
+        authHeaderProvider: (profile) async =>
+            <String, String>{'Authorization': 'Bearer oauth-token'},
+      );
+
+      const basicProfile = ServerProfile(
+        id: 'srv_basic',
+        url: 'http://localhost:4096',
+        basicAuthEnabled: true,
+        basicAuthUsername: 'user',
+        basicAuthPassword: 'pass',
+        createdAt: 0,
+        updatedAt: 0,
+      );
+      await controller.startShell(
+        serverProfile: basicProfile,
+        workingDirectory: '/home/project',
+      );
+
+      expect(seenHeaders?['Authorization'], 'Bearer oauth-token');
+    });
+
+    test('falls back to profile basic auth without a provider', () async {
+      Map<String, String>? seenHeaders;
+      Future<CodewalkTerminalSocketConnection> opener({
+        required Uri url,
+        Map<String, String>? headers,
+      }) async {
+        seenHeaders = headers;
+        latestSocketConnection = FakeCodewalkTerminalSocketConnection();
+        return latestSocketConnection;
+      }
+
+      final controller = CodewalkTerminalController(
+        remoteDataSource: remoteDataSource,
+        socketOpener: opener,
+      );
+
+      const basicProfile = ServerProfile(
+        id: 'srv_basic',
+        url: 'http://localhost:4096',
+        basicAuthEnabled: true,
+        basicAuthUsername: 'user',
+        basicAuthPassword: 'pass',
+        createdAt: 0,
+        updatedAt: 0,
+      );
+      await controller.startShell(
+        serverProfile: basicProfile,
+        workingDirectory: '/home/project',
+      );
+
+      expect(
+        seenHeaders?['Authorization'],
+        'Basic ${base64Encode(utf8.encode('user:pass'))}',
+      );
+    });
   });
 }
