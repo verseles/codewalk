@@ -7544,6 +7544,8 @@ void main() {
       ),
       findsOneWidget,
     );
+    // The file close control exposes a labeled button for AT (a11y review).
+    expect(find.bySemanticsLabel('Close'), findsWidgets);
     // Closing the inactive tab keeps the dialog on the remaining tab.
     await tester.tap(
       find.byKey(

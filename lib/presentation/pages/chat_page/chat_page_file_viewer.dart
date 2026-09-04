@@ -161,15 +161,18 @@ extension _ChatPageFileViewer on _ChatPageState {
       ),
       trailingBuilder: (context, tab) => Semantics(
         // Spoken label without a Tooltip: the dialog already exposes a
-        // 'Close' tooltip and the two finders must stay unambiguous.
+        // 'Close' tooltip and the two finders must stay unambiguous. No
+        // excludeSemantics: the inner IconButton keeps its tap action.
         label: context.l10n.chatClose,
         button: true,
-        excludeSemantics: true,
         child: IconButton(
           key: ValueKey<String>('file_viewer_tab_close_${tab.id}'),
           visualDensity: Theme.of(context).visualDensity,
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          style: IconButton.styleFrom(
+            minimumSize: const Size(28, 28),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
           icon: const Icon(Symbols.close, size: 14),
           onPressed: () {
             _closeFileTab(
