@@ -198,7 +198,9 @@ void main() {
           final reconcileDeadline = DateTime.now().add(
             const Duration(seconds: 10),
           );
-          while (chatRepository.getSessionsCallCount == 0 &&
+          while ((chatRepository.getSessionsCallCount == 0 ||
+                  chatRepository.getMessagesCallCount == 0 ||
+                  chatRepository.getSessionStatusCallCount == 0) &&
               DateTime.now().isBefore(reconcileDeadline)) {
             await Future<void>.delayed(const Duration(milliseconds: 50));
           }

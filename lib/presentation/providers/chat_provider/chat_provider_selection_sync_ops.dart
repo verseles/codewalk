@@ -224,14 +224,22 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
   Future<void> _runSelectionSyncTransaction({
     required String reason,
     String? directory,
+    // True when [directory] was captured in the originating snapshot: a null
+    // then means "unscoped" and must NOT fall back to the live directory
+    // (which may already point at the next project). False keeps the live
+    // read for the snapshot-less deferred path targeting the current context.
+    bool directoryExplicit = false,
   }) async {
     final contextKey = _activeContextKey;
     final generation = _remoteSelectionSyncGeneration;
     // Prefer the snapshot-owned directory: the live current directory may
     // already point at the next project when a slow flush finishes mid-switch.
     // Callers without a snapshot (deferred flush for the current context) pass
-    // null and keep the live read.
-    final targetDirectory = directory ?? projectProvider.currentDirectory;
+    // nothing and keep the live read.
+    final targetDirectory = directoryExplicit
+        ? directory
+        : (directory ?? projectProvider.currentDirectory);
+    final targetDirectoryExplicit = directoryExplicit;
     final previous = _selectionSyncTransactionQueue;
     final task = previous
         .catchError((Object error, StackTrace stackTrace) {
@@ -246,6 +254,7 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
             reason: reason,
             contextKey: contextKey,
             directory: targetDirectory,
+            directoryExplicit: targetDirectoryExplicit,
             generation: generation,
           ),
         );
@@ -266,6 +275,7 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
     required String reason,
     required String contextKey,
     required String? directory,
+    required bool directoryExplicit,
     required int generation,
   }) async {
     if (contextKey != _activeContextKey ||
@@ -279,6 +289,7 @@ extension _ChatProviderSelectionSyncOps on ChatProvider {
     final success = await _syncSelectionToRemoteConfig(
       contextKey: contextKey,
       directory: directory,
+      directoryExplicit: directoryExplicit,
       generation: generation,
     );
     if (contextKey != _activeContextKey ||

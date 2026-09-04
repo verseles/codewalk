@@ -551,6 +551,12 @@ class ChatProvider extends ChangeNotifier {
   Future<void>? _selectionPersistenceTask;
   bool _selectionPersistenceDirty = false;
   bool _selectionPersistenceSyncRemote = false;
+
+  /// Snapshot captured at schedule time. The debounced/mid-switch flush must
+  /// persist under the scheduling scope: capturing at flush time would pick
+  /// up the next project's scope/directory when the 300ms debounce (or a
+  /// slow write) straddles a project switch.
+  _SelectionPersistenceSnapshot? _scheduledSelectionSnapshot;
   Timer? _selectionPersistenceDebounce;
   int _selectionPersistenceGeneration = 0;
   String _activeContextKey = 'legacy::default';
@@ -2880,6 +2886,7 @@ class ChatProvider extends ChangeNotifier {
         await _runSelectionSyncTransaction(
           reason: 'immediate-sync',
           directory: snapshot.directory,
+          directoryExplicit: true,
         );
       }
     }
@@ -2889,6 +2896,11 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceDirty = true;
     _selectionPersistenceSyncRemote =
         syncRemote || _selectionPersistenceSyncRemote;
+    // Capture the originating scope now (see field docs): the flush may run
+    // after a project switch.
+    _scheduledSelectionSnapshot = _captureSelectionPersistenceSnapshot(
+      syncRemote: _selectionPersistenceSyncRemote,
+    );
     if (localDataSource is! AppLocalDataSourceImpl) {
       if (_selectionPersistenceTask != null) return;
       final task = _flushScheduledSelectionPersistence();
@@ -2948,10 +2960,11 @@ class ChatProvider extends ChangeNotifier {
         _selectionPersistenceDirty = false;
         final syncRemote = _selectionPersistenceSyncRemote;
         _selectionPersistenceSyncRemote = false;
-        final snapshot = _captureSelectionPersistenceSnapshot(
-          syncRemote: syncRemote,
-        );
-        await _persistSelectionSnapshot(snapshot, syncRemote: syncRemote);
+        final snapshot =
+            _scheduledSelectionSnapshot ??
+            _captureSelectionPersistenceSnapshot(syncRemote: syncRemote);
+        _scheduledSelectionSnapshot = null;
+        await _persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote);
       }
     } catch (error, stackTrace) {
       AppLogger.warn(
@@ -5589,7 +5602,12 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceDebounce = null;
     if (_selectionPersistenceDirty) {
       _selectionPersistenceDirty = false;
-      final snapshot = _captureSelectionPersistenceSnapshot(syncRemote: _selectionPersistenceSyncRemote);
+      final snapshot =
+          _scheduledSelectionSnapshot ??
+          _captureSelectionPersistenceSnapshot(
+            syncRemote: _selectionPersistenceSyncRemote,
+          );
+      _scheduledSelectionSnapshot = null;
       _selectionPersistenceSyncRemote = false;
       unawaited(_persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote));
     }

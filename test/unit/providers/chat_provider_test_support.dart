@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:codewalk/core/network/dio_client.dart';
+import 'package:codewalk/data/datasources/app_local_datasource.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/domain/entities/provider.dart';
@@ -206,7 +207,7 @@ Model testModel(
 ChatProvider buildChatProvider({
   required FakeChatRepository chatRepository,
   required FakeAppRepository appRepository,
-  required InMemoryAppLocalDataSource localDataSource,
+  required AppLocalDataSource localDataSource,
   required SettingsProvider defaultSettingsProvider,
   DioClient? dioClient,
   Duration syncSignalStaleThreshold = const Duration(seconds: 20),

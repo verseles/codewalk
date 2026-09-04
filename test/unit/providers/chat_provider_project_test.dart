@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/core/network/dio_client.dart';
+import 'package:codewalk/data/datasources/app_local_datasource.dart';
 import 'package:codewalk/domain/entities/agent.dart';
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
@@ -46,6 +47,7 @@ import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/fakes.dart';
 import 'chat_provider_test_support.dart';
@@ -103,9 +105,134 @@ class _ScopedGatedConfigDioClient extends DioClient {
   }
 }
 
+/// Production-style local datasource double: an [AppLocalDataSourceImpl]
+/// (hence the debounced persistence path) recording every scopeId that the
+/// selection flush persists under.
+class _DebouncedRecordingDataSource extends AppLocalDataSourceImpl {
+  _DebouncedRecordingDataSource({required super.sharedPreferences});
+
+  final List<String?> savedSelectionScopeIds = <String?>[];
+
+  Future<void> _record(String? scopeId, Future<void> Function() action) {
+    savedSelectionScopeIds.add(scopeId);
+    return action();
+  }
+
+  @override
+  Future<void> saveSelectedProvider(
+    String providerId, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveSelectedProvider(
+      providerId,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveSelectedModel(
+    String modelId, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveSelectedModel(
+      modelId,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveSelectedAgent(
+    String? agentName, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveSelectedAgent(
+      agentName,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveRecentModelsJson(
+    String recentModelsJson, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveRecentModelsJson(
+      recentModelsJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveModelUsageCountsJson(
+    String usageCountsJson, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveModelUsageCountsJson(
+      usageCountsJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveSelectedVariantMap(
+    String variantMapJson, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveSelectedVariantMap(
+      variantMapJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveAgentSelectionMemoryJson(
+    String agentSelectionMemoryJson, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveAgentSelectionMemoryJson(
+      agentSelectionMemoryJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+
+  @override
+  Future<void> saveSessionSelectionOverridesJson(
+    String overridesJson, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveSessionSelectionOverridesJson(
+      overridesJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
+}
+
 void main() {
-  group('ChatProvider - project', () {
-    late FakeChatRepository chatRepository;
+  group('ChatProvider - project', () {    late FakeChatRepository chatRepository;
     late FakeAppRepository appRepository;
     late InMemoryAppLocalDataSource localDataSource;
     late ChatProvider provider;
@@ -2924,6 +3051,101 @@ void main() {
             (query) => query?['directory'] == projectB.path,
           ),
           isEmpty,
+        );
+      },
+    );
+
+    test(
+      'debounced schedule persists under scheduling scope after switch',
+      () async {
+        SharedPreferences.setMockInitialValues(<String, Object>{});
+        final prefs = await SharedPreferences.getInstance();
+        final debouncedDataSource = _DebouncedRecordingDataSource(
+          sharedPreferences: prefs,
+        );
+        await debouncedDataSource.saveActiveServerId('srv_test');
+        final projectA = Project(
+          id: 'proj_a',
+          name: 'Project A',
+          path: '/repo/a',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        );
+        final projectB = Project(
+          id: 'proj_b',
+          name: 'Project B',
+          path: '/repo/b',
+          createdAt: DateTime.fromMillisecondsSinceEpoch(1),
+        );
+        final scopedProjectProvider = ProjectProvider(
+          projectRepository: FakeProjectRepository(
+            currentProject: projectA,
+            projects: <Project>[projectA, projectB],
+          ),
+          localDataSource: debouncedDataSource,
+        );
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_a': testModel('model_a'),
+                  'model_b': testModel('model_b'),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+        final dioClient = RecordingDioClient(
+          configResponse: <String, dynamic>{'model': 'provider_a/model_a'},
+        );
+        final scopedProvider = buildChatProvider(
+          chatRepository: chatRepository,
+          appRepository: appRepository,
+          localDataSource: debouncedDataSource,
+          defaultSettingsProvider: defaultSettingsProvider,
+          dioClient: dioClient,
+          projectProvider: scopedProjectProvider,
+        );
+        addTearDown(scopedProvider.dispose);
+
+        await scopedProjectProvider.initializeProject();
+        await scopedProvider.initializeProviders();
+        dioClient.patchQueries.clear();
+        debouncedDataSource.savedSelectionScopeIds.clear();
+        final scopeA = scopedProjectProvider.currentDirectory;
+
+        await scopedProvider.setSelectedModelByProvider(
+          providerId: 'provider_a',
+          modelId: 'model_b',
+        );
+        // Switch before the 300ms production debounce fires: the pending
+        // schedule must still persist under project A afterwards.
+        await scopedProjectProvider.switchProject(projectB.id);
+        await scopedProvider.onProjectScopeChanged(waitForRevalidation: false);
+        await scopedProvider.initializeProviders();
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+
+        expect(
+          dioClient.patchQueries.where(
+            (query) => query?['directory'] == projectB.path,
+          ),
+          isEmpty,
+        );
+        expect(
+          debouncedDataSource.savedSelectionScopeIds,
+          isNotEmpty,
+        );
+        // The debounced flush persisted under project A. (B's own init
+        // writes its resolved selection under B legitimately and without
+        // any remote PATCH — covered by the empty-patch assertion above.)
+        expect(
+          debouncedDataSource.savedSelectionScopeIds.contains(scopeA),
+          isTrue,
         );
       },
     );

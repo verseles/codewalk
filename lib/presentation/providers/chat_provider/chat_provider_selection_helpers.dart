@@ -61,9 +61,13 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
     return provider;
   }
 
-  Map<String, dynamic>? _configQueryParameters({String? directory}) {
-    final resolvedDirectory = (directory ?? projectProvider.currentDirectory)
-        ?.trim();
+  Map<String, dynamic>? _configQueryParameters({
+    String? directory,
+    bool directoryExplicit = false,
+  }) {
+    final resolvedDirectory =
+        (directoryExplicit ? directory : directory ?? projectProvider.currentDirectory)
+            ?.trim();
     if (resolvedDirectory == null || resolvedDirectory.isEmpty) {
       return null;
     }
@@ -327,6 +331,7 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
   Future<bool> _syncSelectionToRemoteConfig({
     required String contextKey,
     required String? directory,
+    bool directoryExplicit = false,
     required int generation,
   }) async {
     final client = dioClient;
@@ -385,7 +390,10 @@ extension _ChatProviderSelectionHelpers on ChatProvider {
             },
           },
         },
-        queryParameters: _configQueryParameters(directory: directory),
+        queryParameters: _configQueryParameters(
+          directory: directory,
+          directoryExplicit: directoryExplicit,
+        ),
       );
       if (contextKey != _activeContextKey ||
           generation != _remoteSelectionSyncGeneration) {
