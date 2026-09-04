@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.223.0 - 2026-09-04
+
+- docs(tabs): unify file editor tabs behavior and code map (issue 167)
+- test(tabs): isolate file-tab close semantics assertion (issue 167)
+- fix(tabs): keep close-button tap semantics and shrinkWrap hit area (issue 167)
+- fix(tabs): harden dialog exits and tab a11y after review (issue 167)
+- feat(tabs): unify file editor tabs with session tab strip (issue 167)
+
 ## v1.222.0 - 2026-09-04
 
 - fix(terminal): route embedded terminal through Tailscale transport
