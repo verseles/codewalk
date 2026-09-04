@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.221.1 - 2026-09-03
+
+- fix(projects): never persist placeholder root as last project
+
 ## v1.221.0 - 2026-09-03
 
 - feat(tailscale): setup reorder, Custom Tab login, logout, busy UX and cold-start hint
