@@ -2,6 +2,18 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.224.0 - 2026-09-05
+
+- fix(review): flush staged draft on server scope change (issue #176)
+- fix(review): flush draft before scope transitions in notification-tap (issue #176)
+- fix(review): flush staged composer draft on notification-tap switch (issue #176)
+- fix(review): R1 corrections for desktop jank mitigations (issue #176)
+- perf(desktop): mitigate generalized jank on Linux/Windows (issue #176)
+- flow update
+- fix(sync): rebase fresh values onto scheduling origin (review follow-up)
+- fix(sync): capture persistence origin at schedule time, explicit directory (issue follow-up)
+- fix(sync): scope remote selection sync and settings push to originating context
+
 ## v1.223.1 - 2026-09-04
 
 - docs(tabs): dialog close shares the tab-strip row (issue 167)
