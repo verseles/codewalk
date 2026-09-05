@@ -585,6 +585,12 @@ class ChatProvider extends ChangeNotifier {
   ChatSyncState _syncState = ChatSyncState.reconnecting;
   bool _isForegroundActive = true;
 
+  /// Whether the provider is treating the app as foreground-active
+  /// (render gate open, sync monitors running). Used by window-event
+  /// throttles that must never suppress the background→foreground
+  /// transition (issue #176).
+  bool get isForegroundActive => _isForegroundActive;
+
   bool _degradedMode = false;
   bool _isInResumeGrace = false;
   bool _isForegroundResumeSyncing = false;

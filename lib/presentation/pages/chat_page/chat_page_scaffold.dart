@@ -1669,6 +1669,10 @@ extension _ChatPageScaffold on _ChatPageState {
     if (di.sl.isRegistered<ReadAloudService>()) {
       unawaited(di.sl<ReadAloudService>().stop());
     }
+    // Review R1: flush a still-debounced composer draft before leaving the
+    // session, otherwise a rapid switch + process death inside the (longer
+    // desktop) debounce window would lose the outgoing draft.
+    _flushPendingComposerDraftPersistence();
     final chatProvider = context.read<ChatProvider>();
     _prepareSessionViewportSwitch(
       chatProvider,

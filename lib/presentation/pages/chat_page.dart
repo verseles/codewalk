@@ -1025,6 +1025,7 @@ class _ChatPageState extends State<ChatPage>
   void onWindowMinimize() {
     _isAppInForeground = false;
     _flushActiveFileEditorDrafts();
+    _flushPendingComposerDraftPersistence();
     unawaited(_chatProvider?.flushAllSessionTabsPersistence());
     unawaited(_chatProvider?.flushSelectionPersistence());
     unawaited(_settingsProvider?.flushSettingsPersistence());
@@ -1069,7 +1070,14 @@ class _ChatPageState extends State<ChatPage>
 
   /// Rate-limits foreground policy evaluation during window-event storms.
   /// Returns true at most once per 500ms; state updates above still run.
+  /// The background→foreground transition is never gated: the provider
+  /// render gate and sync resume depend on this path running (review R1).
   bool _shouldApplyForegroundPolicy() {
+    final provider = _chatProvider;
+    if (provider != null && !provider.isForegroundActive) {
+      _lastForegroundPolicyAt = DateTime.now();
+      return true;
+    }
     final now = DateTime.now();
     final last = _lastForegroundPolicyAt;
     if (last != null && now.difference(last).inMilliseconds < 500) {

@@ -441,6 +441,10 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
         if (sessionId == null) {
           break;
         }
+        // Review R1: terminal signal — flush any pending realtime batch
+        // first so the error UI isn't followed by a redundant delayed
+        // rebuild (mirrors session.idle above).
+        _flushDeltaNotification(reason: 'event-session.error');
         _traceFinal('event-session-error', sessionId: sessionId);
 
         if (sessionId != _currentSession?.id) {

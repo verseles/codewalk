@@ -260,6 +260,7 @@ typedef _DesktopUtilityPaneBuildKey = ({
   int sessionSignature,
   int sessionStatusSignature,
   int shortcutBindingsSignature,
+  bool showReviewChanges,
   int todoSignature,
 });
 
@@ -575,6 +576,7 @@ _DesktopUtilityPaneBuildKey _desktopUtilityPaneBuildKey(
     isLoadingSessionInsights: chatProvider.isLoadingSessionInsights,
     sessionInsightsError: chatProvider.sessionInsightsError,
     shortcutBindingsSignature: _shortcutBindingsSignature(settingsProvider),
+    showReviewChanges: settingsProvider.showReviewChanges,
   );
 }
 
