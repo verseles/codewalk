@@ -701,6 +701,9 @@ extension _ChatPageLifecycle on _ChatPageState {
     if (!mounted) {
       return;
     }
+    // Review R4: flush a still-debounced composer draft before the server
+    // scope change (last boundary of the class; idempotent).
+    _flushPendingComposerDraftPersistence();
     if (previousServerId != null && previousServerId.trim().isNotEmpty) {
       try {
         final mutationGeneration =
