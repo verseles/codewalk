@@ -51,20 +51,24 @@
 
 ## Explicit `flow` Request
 
-When the user explicitly asks for `flow`, follow this order:
+When the user explicitly asks for `flow`, follow this order, but adapting the user order:
 
-1. Implement the change.
-2. Run focused validation while iterating, then run `make check` once when the code is stable.
-3. Commit.
-4. Run the reviewer loop for the commit.
-5. Apply only judge-approved fixes, validate them with focused checks by default, and repeat review when warranted.
-6. Run `HEY_CAPTION="specific caption" make android` when an APK is useful and supported. Never for ARM64.
-7. Update docs
-8. Release a minor unless asked differently. Watch every 60s with cimonitor.
-9. Notify and send the final report.
-9.1. Ask to close issue any related. Suggest the next task from GitHub Issues when useful.
-9.2. If relevant ask to update rules is this file (./AGENTS.md) with changes or new rules
-
+1. If needed, ask the user clarifying questions. (Optional.)
+2. Plan the changes using the available planning tools.
+3. Ask at least one decision question. Present options such as A, B, or C and make the answers easy to provide—for example: `1C, 2D, 3A`. (Mandatory.)
+4. Implement the changes.
+5. Run focused validation while iterating. Once the code is stable, run `make check` once.
+6. Commit the changes.
+7. Run the reviewer loop on the commit.
+8. Apply only judge-approved fixes. Validate them with focused checks by default, and repeat the review when warranted.
+9. Evaluate the helpers used, identifying the best and worst, the essential and dispensable ones, the top two and bottom two, and any honorable mentions. Also send a full paragraph about, via hey.
+10. Run `HEY_CAPTION="specific caption" make android` when an APK is useful and supported. Do not run it for ARM64 targets.
+11. Update the documentation.
+12. Create a minor release unless instructed otherwise. Monitor it every 60 seconds with `cimonitor`.
+13. Notify the user and provide the final report, including the helper evaluation.
+    13.1. Ask whether any related issue should be closed. When useful, suggest the next task from GitHub Issues.
+    13.2. When relevant, ask whether the rules in `./AGENTS.md` should be updated to reflect the changes or introduce new rules.
+    
 ## Release
 
 - New versions use `make release V=patch|minor|major`.
