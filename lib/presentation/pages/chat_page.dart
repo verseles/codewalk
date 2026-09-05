@@ -1966,6 +1966,9 @@ class _ChatPageState extends State<ChatPage>
     final chatProvider = _chatProvider ?? context.read<ChatProvider>();
     var reloadAttempts = 0;
 
+    // Review R2: flush a still-debounced composer draft before leaving the
+    // session (same hole as _handleSessionSwitch).
+    _flushPendingComposerDraftPersistence();
     for (var attempt = 0; attempt < _notificationTapMaxAttempts; attempt += 1) {
       final targetSession = chatProvider.sessions
           .where((item) => item.id == sessionId)
