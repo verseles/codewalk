@@ -4,6 +4,10 @@ extension _ChatPageWorkspaceController on _ChatPageState {
   Future<void> _runProjectScopeTransition(
     Future<void> Function() operation,
   ) async {
+    // Review R3: flush a still-debounced composer draft before any
+    // project/directory scope switch, so the outgoing draft cannot be
+    // stranded inside the desktop debounce window (idempotent).
+    _flushPendingComposerDraftPersistence();
     while (true) {
       final inFlight = _projectScopeTransitionTask;
       if (inFlight == null) {
