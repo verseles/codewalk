@@ -803,7 +803,14 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       }
     }
 
-    _notifyListeners();
+    // Issue #176: authoritative assistant updates can arrive at streaming
+    // frequency; batch them. User messages stay immediate (composer/send
+    // latency is user-facing).
+    if (message is UserMessage) {
+      _notifyListeners();
+    } else {
+      _scheduleRealtimeNotification(reason: 'event-message-updated');
+    }
     if (optimisticEchoRemoved) {
       _persistOptimisticReconciliation(message.sessionId);
     }

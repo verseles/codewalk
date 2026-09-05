@@ -688,6 +688,20 @@ class ChatProvider extends ChangeNotifier {
   Timer? _sessionAttentionThresholdTimer;
   bool _deltaNotifyPending = false;
 
+  /// Issue #176: desktop rasterizes wider viewports with more panes, so the
+  /// streaming batch window is longer there (mobile keeps 16ms ≈ 1 frame).
+  Duration get _realtimeNotifyBatchDuration {
+    if (kIsWeb) {
+      return const Duration(milliseconds: 16);
+    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => const Duration(milliseconds: 64),
+      _ => const Duration(milliseconds: 16),
+    };
+  }
+
   // Render gate: suppress UI rebuilds while app is in background.
   // SSE data keeps accumulating in internal fields, but widgets won't rebuild
   // until the app returns to foreground and flushes the pending notification.
@@ -810,6 +824,16 @@ class ChatProvider extends ChangeNotifier {
   }
 
   void _scheduleDeltaNotification({String reason = 'message.part.delta'}) {
+    _scheduleRealtimeNotification(reason: reason);
+  }
+
+  /// Coalesces high-frequency realtime notifications (streaming deltas,
+  /// session/tool/todo updates) into at most one [notifyListeners] per
+  /// batch window. Terminal signals (idle/error/permission/session switch)
+  /// must bypass this via [_notifyListeners] + [_flushDeltaNotification].
+  void _scheduleRealtimeNotification({
+    String reason = 'message.part.delta',
+  }) {
     if (!_isForegroundActive) {
       _notifyListeners(reason: reason);
       return;
@@ -821,7 +845,7 @@ class ChatProvider extends ChangeNotifier {
     if (_deltaNotifyDebounce?.isActive == true) {
       return;
     }
-    _deltaNotifyDebounce = Timer(const Duration(milliseconds: 16), () {
+    _deltaNotifyDebounce = Timer(_realtimeNotifyBatchDuration, () {
       _deltaNotifyDebounce = null;
       if (!_deltaNotifyPending) {
         return;

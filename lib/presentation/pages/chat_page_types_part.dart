@@ -259,7 +259,7 @@ typedef _DesktopUtilityPaneBuildKey = ({
   String? sessionInsightsError,
   int sessionSignature,
   int sessionStatusSignature,
-  int settingsSignature,
+  int shortcutBindingsSignature,
   int todoSignature,
 });
 
@@ -542,6 +542,23 @@ _SessionPanelBuildKey _sessionPanelBuildKey(
   );
 }
 
+int _shortcutBindingsSignature(SettingsProvider settingsProvider) {
+  // Issue #176: the utility pane only renders shortcut hints, so it must
+  // not depend on ExperienceSettings.hashCode (full toJson + deep hash).
+  final bindings = settingsProvider.settings.shortcuts;
+  final actions = bindings.keys.toList(growable: false)
+    ..sort((left, right) => left.index.compareTo(right.index));
+  var signature = bindings.length;
+  for (final action in actions) {
+    signature = Object.hash(
+      signature,
+      action,
+      settingsProvider.bindingFor(action),
+    );
+  }
+  return signature;
+}
+
 _DesktopUtilityPaneBuildKey _desktopUtilityPaneBuildKey(
   ChatProvider chatProvider,
   SettingsProvider settingsProvider,
@@ -557,7 +574,7 @@ _DesktopUtilityPaneBuildKey _desktopUtilityPaneBuildKey(
     isCurrentSessionDiffLoaded: chatProvider.isCurrentSessionDiffLoaded,
     isLoadingSessionInsights: chatProvider.isLoadingSessionInsights,
     sessionInsightsError: chatProvider.sessionInsightsError,
-    settingsSignature: settingsProvider.settings.hashCode,
+    shortcutBindingsSignature: _shortcutBindingsSignature(settingsProvider),
   );
 }
 

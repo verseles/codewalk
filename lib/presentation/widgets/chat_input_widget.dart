@@ -1612,7 +1612,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       ),
     );
 
-    return _wrapComposerWithExternalFiles(composerRoot);
+    // Issue #176: isolate composer repaints (cursor blink, typing) from
+    // the timeline and vice-versa. Transparent to layout/hit-testing.
+    return _wrapComposerWithExternalFiles(RepaintBoundary(child: composerRoot));
   }
 
   bool get _canOpenAttachmentOptions =>

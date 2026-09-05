@@ -22,8 +22,69 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
       style: Theme.of(context).textTheme.bodyMedium,
     );
 
-    final mathRenderingEnabled =
-        context.watch<SettingsProvider?>()?.showMathRendering ?? true;
+    final mathRenderingEnabled = context.select<SettingsProvider?, bool>(
+      (s) => s?.showMathRendering ?? true,
+    );
+
+    Widget buildMarkdown(String text) {
+      return MarkdownBody(
+        data: text,
+        softLineBreak: true,
+        styleSheet: _resolveMarkdownStyleSheet(context),
+        inlineSyntaxes: [
+          if (widget.onFileTap != null) FilePathSyntax(),
+          if (mathRenderingEnabled) InlineMathSyntax(),
+          if (mathRenderingEnabled) SingleLineBlockMathSyntax(),
+        ],
+        blockSyntaxes: mathRenderingEnabled
+            ? const [BlockMathSyntax()]
+            : null,
+        builders: <String, MarkdownElementBuilder>{
+          'pre': _MarkdownCodeBlockTapBuilder(
+            themeTokens: themeTokens,
+            onTapCode: (code) => _copyTextToClipboard(context, code),
+            onMermaidCode: (code) => MermaidDiagramWidget(
+              code: code,
+              onCopySource: () => _copyTextToClipboard(context, code),
+            ),
+          ),
+          'code': _MarkdownInlineCodeTapBuilder(
+            themeTokens: themeTokens,
+            onTapCode: (code) => _copyTextToClipboard(context, code),
+            onTapFilePath: widget.onFileTap,
+          ),
+          if (widget.onFileTap != null)
+            'filepath': FilePathBuilder(onFileTap: widget.onFileTap!),
+          if (mathRenderingEnabled) 'inlineMath': InlineMathBuilder(),
+          if (mathRenderingEnabled) 'blockMath': BlockMathBuilder(),
+        },
+        onTapLink: (text, href, title) {
+          final normalizedHref = href?.trim();
+          if (normalizedHref == null || normalizedHref.isEmpty) {
+            return;
+          }
+          unawaited(_openMarkdownLink(context, normalizedHref));
+        },
+      );
+    }
+
+    // Issue #176: while an assistant message streams, its MarkdownBody
+    // re-parses + re-highlights the whole text on every batch. Throttle
+    // rich re-renders (trailing edge, flush on completion below); settled
+    // messages keep the exact current path.
+    final message = widget.message;
+    final isStreamingMarkdown =
+        !usePlainText &&
+        searchHighlightedText == null &&
+        message is AssistantMessage &&
+        !message.isCompleted &&
+        isSessionActivelyResponding;
+    final markdownChild = isStreamingMarkdown
+        ? _StreamingMarkdownThrottle(
+            text: textForRender,
+            builder: buildMarkdown,
+          )
+        : buildMarkdown(textForRender);
 
     return SizedBox(
       width: double.infinity,
@@ -34,47 +95,8 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
             searchHighlightedText
           else if (usePlainText)
             Text(textForRender, style: Theme.of(context).textTheme.bodyMedium)
-          else ...[
-            MarkdownBody(
-              data: textForRender,
-              softLineBreak: true,
-              styleSheet: _resolveMarkdownStyleSheet(context),
-              inlineSyntaxes: [
-                if (widget.onFileTap != null) FilePathSyntax(),
-                if (mathRenderingEnabled) InlineMathSyntax(),
-                if (mathRenderingEnabled) SingleLineBlockMathSyntax(),
-              ],
-              blockSyntaxes: mathRenderingEnabled
-                  ? const [BlockMathSyntax()]
-                  : null,
-              builders: <String, MarkdownElementBuilder>{
-                'pre': _MarkdownCodeBlockTapBuilder(
-                  themeTokens: themeTokens,
-                  onTapCode: (code) => _copyTextToClipboard(context, code),
-                  onMermaidCode: (code) => MermaidDiagramWidget(
-                    code: code,
-                    onCopySource: () => _copyTextToClipboard(context, code),
-                  ),
-                ),
-                'code': _MarkdownInlineCodeTapBuilder(
-                  themeTokens: themeTokens,
-                  onTapCode: (code) => _copyTextToClipboard(context, code),
-                  onTapFilePath: widget.onFileTap,
-                ),
-                if (widget.onFileTap != null)
-                  'filepath': FilePathBuilder(onFileTap: widget.onFileTap!),
-                if (mathRenderingEnabled) 'inlineMath': InlineMathBuilder(),
-                if (mathRenderingEnabled) 'blockMath': BlockMathBuilder(),
-              },
-              onTapLink: (text, href, title) {
-                final normalizedHref = href?.trim();
-                if (normalizedHref == null || normalizedHref.isEmpty) {
-                  return;
-                }
-                unawaited(_openMarkdownLink(context, normalizedHref));
-              },
-            ),
-          ],
+          else
+            markdownChild,
           const SizedBox(height: 8),
         ],
       ),
@@ -206,6 +228,61 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
     }
     messenger.showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+/// Issue #176: trailing-edge throttle for streaming rich-markdown renders.
+///
+/// While an assistant message streams, the parent rebuilds on every event
+/// batch with slightly longer text. Re-rendering Markdown + code highlight
+/// per batch re-parses the whole text; this widget caps expensive renders
+/// to one per throttle window showing the latest text. Completion
+/// switches the parent back to the direct path, so the final paint is
+/// always immediate and complete. Plain-text/search paths are unaffected.
+class _StreamingMarkdownThrottle extends StatefulWidget {
+  const _StreamingMarkdownThrottle({
+    required this.text,
+    required this.builder,
+  });
+
+  static const Duration throttleWindow = Duration(milliseconds: 48);
+
+  final String text;
+  final Widget Function(String text) builder;
+
+  @override
+  State<_StreamingMarkdownThrottle> createState() =>
+      _StreamingMarkdownThrottleState();
+}
+
+class _StreamingMarkdownThrottleState
+    extends State<_StreamingMarkdownThrottle> {
+  late String _renderedText = widget.text;
+  Timer? _timer;
+
+  @override
+  void didUpdateWidget(covariant _StreamingMarkdownThrottle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text == _renderedText) {
+      return;
+    }
+    _timer ??= Timer(_StreamingMarkdownThrottle.throttleWindow, () {
+      _timer = null;
+      if (!mounted || widget.text == _renderedText) {
+        return;
+      }
+      setState(() => _renderedText = widget.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(_renderedText);
 }
 
 class _MarkdownCodeBlockTapBuilder extends MarkdownElementBuilder {

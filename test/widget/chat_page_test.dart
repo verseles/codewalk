@@ -17809,6 +17809,9 @@ void main() {
       expect(find.text('Final assistant response'), findsOneWidget);
       expect(find.widgetWithText(TextButton, 'Expand'), findsOneWidget);
       expect(find.widgetWithText(TextButton, 'Hide'), findsNothing);
+      // Issue #176: flush the realtime batch window so no provider timer
+      // outlives the test.
+      await tester.pump(const Duration(milliseconds: 200));
     },
   );
 
@@ -21108,8 +21111,8 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
-      await tester.pump();
+      // Issue #176: realtime updates render within the batch window.
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Same tip icon and text persist across the stage transition.
       expect(
@@ -21255,7 +21258,9 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      // Issue #176: realtime updates render within the batch window;
+      // the trailing pump renders the post-frame status sync.
+      await tester.pump(const Duration(milliseconds: 100));
       await tester.pump();
 
       expect(
@@ -21457,7 +21462,9 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      // Issue #176: realtime updates render within the batch window;
+      // the trailing pump renders the post-frame status sync.
+      await tester.pump(const Duration(milliseconds: 100));
       await tester.pump();
 
       expect(

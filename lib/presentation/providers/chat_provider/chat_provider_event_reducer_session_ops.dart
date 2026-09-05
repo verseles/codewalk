@@ -201,7 +201,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
               _messagesVersion++;
             }
           }
-          _notifyListeners();
+          _scheduleRealtimeNotification(reason: 'event-session.updated');
         }
         break;
       case 'session.deleted':
@@ -259,7 +259,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
           if (isVisibleCurrentSession) {
             _clearSessionAttentionForSession(sessionId);
           }
-          _notifyListeners();
+          _scheduleRealtimeNotification(reason: 'event-session.status');
           if (!isNonCurrent || _pendingRemoteSelectionSync) {
             _attemptPendingRemoteSelectionSync(reason: 'event-session.status');
           }
@@ -316,7 +316,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
           } else {
             _sessionDiffById[sessionId] = parsed;
           }
-          _notifyListeners();
+          _scheduleRealtimeNotification(reason: 'event-session.diff');
         }
         break;
       case 'todo.updated':
@@ -338,7 +338,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
               )
               .toList(growable: false);
           _sessionTodoById[sessionId] = parsed;
-          _notifyListeners();
+          _scheduleRealtimeNotification(reason: 'event-todo.updated');
         }
         break;
       case 'session.idle':
@@ -726,7 +726,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
             delta.isNotEmpty) {
           _scheduleDeltaNotification(reason: 'event-message-part-delta');
         } else {
-          _notifyListeners(reason: 'event-message-part-updated');
+          _scheduleRealtimeNotification(reason: 'event-message-part-updated');
         }
         final shouldAutoScroll =
             existingPartIndex == -1 ||
@@ -775,7 +775,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
         }
         _messages[messageIndex] = _copyMessageWithParts(message, nextParts);
         _messagesVersion++;
-        _notifyListeners();
+        _scheduleRealtimeNotification(reason: 'event-message-part-removed');
         break;
       case 'message.removed':
         final sessionId = properties['sessionID'] as String?;
@@ -794,7 +794,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
         }
         _messages.removeAt(removedIndex);
         _messagesVersion++;
-        _notifyListeners();
+        _scheduleRealtimeNotification(reason: 'event-message-removed');
         break;
       case 'permission.asked':
       case 'permission.updated':

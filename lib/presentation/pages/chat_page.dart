@@ -616,6 +616,12 @@ class _ChatPageState extends State<ChatPage>
   String? _composerDraftStagedSessionId;
   String? _composerDraftStagedServerId;
   ChatComposerDraft? _composerDraftStagedDraft;
+  // Last draft handed to persistence (fire-and-forget). Used to skip
+  // re-scheduling byte-identical payloads (issue #176: every desktop write
+  // rewrites the whole preferences file on the UI isolate).
+  String? _composerDraftLastFiredSessionId;
+  String? _composerDraftLastFiredServerId;
+  ChatComposerDraft? _composerDraftLastFiredDraft;
   Timer? _composerStatusShowTimer;
   Timer? _composerStatusHideTimer;
   Timer? _composerStopHintTimer;
@@ -631,6 +637,9 @@ class _ChatPageState extends State<ChatPage>
   List<String> _pinnedMobileAppBarActionIds = <String>[];
   DateTime? _lastResumeRefreshAt;
   DateTime? _lastReturnToChatAt;
+  // Issue #176: coalesces rapid window focus/restore storms (drag, maximize)
+  // so they don't refetch/rebuild repeatedly on desktop.
+  DateTime? _lastForegroundPolicyAt;
   String? _lastReturnToChatSignature;
   String? _lastConsumedCachedViewportRestoreSignature;
   DateTime? _lastConsumedCachedViewportRestoreAt;
@@ -1029,7 +1038,9 @@ class _ChatPageState extends State<ChatPage>
     _isAppInForeground = true;
     _chatProvider?.setAppInForeground(true);
     _returnRevealGeneration += 1;
-    unawaited(_applyForegroundPolicy(reason: 'window-restore'));
+    if (_shouldApplyForegroundPolicy()) {
+      unawaited(_applyForegroundPolicy(reason: 'window-restore'));
+    }
     _startForegroundWarningGrace();
     final provider = _chatProvider;
     if (provider != null) {
@@ -1044,7 +1055,9 @@ class _ChatPageState extends State<ChatPage>
       _isAppInForeground = true;
       _chatProvider?.setAppInForeground(true);
       _returnRevealGeneration += 1;
-      unawaited(_applyForegroundPolicy(reason: 'window-focus'));
+      if (_shouldApplyForegroundPolicy()) {
+        unawaited(_applyForegroundPolicy(reason: 'window-focus'));
+      }
       _startForegroundWarningGrace();
       final provider = _chatProvider;
       if (provider != null) {
@@ -1052,6 +1065,18 @@ class _ChatPageState extends State<ChatPage>
         _scheduleQueuedDesktopViewportRestore(provider, reason: 'window-focus');
       }
     }
+  }
+
+  /// Rate-limits foreground policy evaluation during window-event storms.
+  /// Returns true at most once per 500ms; state updates above still run.
+  bool _shouldApplyForegroundPolicy() {
+    final now = DateTime.now();
+    final last = _lastForegroundPolicyAt;
+    if (last != null && now.difference(last).inMilliseconds < 500) {
+      return false;
+    }
+    _lastForegroundPolicyAt = now;
+    return true;
   }
 
   bool get _isDesktopRuntime {
@@ -1506,6 +1531,9 @@ class _ChatPageState extends State<ChatPage>
       _composerDraftStagedSessionId = null;
       _composerDraftStagedServerId = null;
       _composerDraftStagedDraft = null;
+      _composerDraftLastFiredSessionId = null;
+      _composerDraftLastFiredServerId = null;
+      _composerDraftLastFiredDraft = null;
       unawaited(
         provider.persistComposerDraftForSession(
           sessionId: normalizedSessionId,
@@ -1516,8 +1544,30 @@ class _ChatPageState extends State<ChatPage>
       return;
     }
     final stagedServerId = _composerDraftStagedServerId;
-    _composerDraftPersistTimer = Timer(const Duration(milliseconds: 250), () {
+    // Skip byte-identical payloads: an already-fired identical payload
+    // needs no rewrite. (A pending timer for the same staged content keeps
+    // running below.) Clears (empty drafts) always write immediately above.
+    if (_composerDraftPersistTimer == null &&
+        normalizedSessionId == _composerDraftLastFiredSessionId &&
+        stagedServerId == _composerDraftLastFiredServerId &&
+        draft == _composerDraftLastFiredDraft) {
+      _composerDraftStagedSessionId = null;
+      _composerDraftStagedServerId = null;
+      _composerDraftStagedDraft = null;
+      return;
+    }
+    // Issue #176: on Linux/Windows every SharedPreferences write rewrites
+    // the whole preferences file synchronously on the UI isolate, so the
+    // desktop debounce is longer (mobile keeps 250ms: writes are async
+    // native apply() there and the loss window must stay short).
+    final debounce = _isDesktopRuntime
+        ? const Duration(milliseconds: 800)
+        : const Duration(milliseconds: 250);
+    _composerDraftPersistTimer = Timer(debounce, () {
       _composerDraftPersistTimer = null;
+      _composerDraftLastFiredSessionId = normalizedSessionId;
+      _composerDraftLastFiredServerId = stagedServerId;
+      _composerDraftLastFiredDraft = draft;
       unawaited(
         provider.persistComposerDraftForSession(
           sessionId: normalizedSessionId,
@@ -1562,6 +1612,9 @@ class _ChatPageState extends State<ChatPage>
     if (provider == null) {
       return;
     }
+    _composerDraftLastFiredSessionId = stagedSessionId;
+    _composerDraftLastFiredServerId = stagedServerId;
+    _composerDraftLastFiredDraft = stagedDraft;
     unawaited(
       provider.persistComposerDraftForSession(
         sessionId: stagedSessionId,
@@ -2302,10 +2355,28 @@ class _ChatPageState extends State<ChatPage>
         final keyboardOpen =
             MediaQuery.viewInsetsOf(context).bottom > 0 ||
             View.of(context).viewInsets.bottom > 0;
-        final settingsProvider = context.watch<SettingsProvider>();
+        final settingsReader = context.read<SettingsProvider>();
+        // Issue #176: narrow selects instead of watch<SettingsProvider>() so
+        // unrelated settings changes don't rebuild the whole chat page.
+        // Subscribes to shortcut-binding changes (shortcutMap below reads
+        // via settingsReader, which alone would not rebuild).
+        context.select<SettingsProvider, int>(_shortcutBindingsSignature);
+        // Layout-relevant settings below: each select keeps this builder
+        // subscribed only to the fields it renders.
+        final usesIntegratedWindowChrome =
+            context.select<SettingsProvider, bool>(
+              (s) =>
+                  _isDesktopRuntime &&
+                  s.desktopWindowChrome == DesktopWindowChrome.integratedTabs,
+            );
+        final showSessionTabsStrip = context.select<SettingsProvider, bool>(
+          (s) => s.showSessionTabs,
+        );
         final attentionController = _sessionAttentionOverlayController;
-        final attentionPresentation =
-            settingsProvider.settings.sessionAttentionPresentation;
+        final attentionPresentation = context.select<
+          SettingsProvider,
+          SessionAttentionPresentation
+        >((s) => s.settings.sessionAttentionPresentation);
         final showInAppAttention =
             defaultTargetPlatform == TargetPlatform.iOS &&
             attentionController != null &&
@@ -2329,9 +2400,10 @@ class _ChatPageState extends State<ChatPage>
             });
           }
         }
-        final conversationsPaneEnabled = settingsProvider.isDesktopPaneVisible(
-          DesktopPane.conversations,
-        );
+        final conversationsPaneEnabled =
+            context.select<SettingsProvider, bool>(
+              (s) => s.isDesktopPaneVisible(DesktopPane.conversations),
+            );
         // Medium: narrow conversation pane; expanded+: full pane
         final showConversationPane =
             !isMobile &&
@@ -2341,18 +2413,25 @@ class _ChatPageState extends State<ChatPage>
             !isMobile &&
             !isMedium &&
             width >= _filePaneBreakpoint &&
-            settingsProvider.isDesktopPaneVisible(DesktopPane.files);
+            context.select<SettingsProvider, bool>(
+              (s) => s.isDesktopPaneVisible(DesktopPane.files),
+            );
         final showDesktopUtilityPane =
             isLargeDesktop &&
-            settingsProvider.isDesktopPaneVisible(DesktopPane.utility);
+            context.select<SettingsProvider, bool>(
+              (s) => s.isDesktopPaneVisible(DesktopPane.utility),
+            );
         final showFullscreenTerminalPanel =
-            settingsProvider.terminalPanelVisible &&
-            settingsProvider.terminalPanelMaximized;
+            context.select<SettingsProvider, bool>(
+              (s) => s.terminalPanelVisible && s.terminalPanelMaximized,
+            );
         // Medium breakpoint stays fixed (compact layout); expanded+ uses
         // the persisted/resizable width from settings.
         final sessionPaneWidth = isMedium
             ? _mediumSessionPaneWidth
-            : settingsProvider.desktopPaneWidth(DesktopPane.conversations);
+            : context.select<SettingsProvider, double>(
+                (s) => s.desktopPaneWidth(DesktopPane.conversations),
+              );
         final mainContentWidth = isLargeDesktop ? 960.0 : double.infinity;
         const refreshlessEnabled = FeatureFlags.refreshlessRealtime;
         final availableShortcutActions = shortcutActionsForRuntime(
@@ -2362,7 +2441,7 @@ class _ChatPageState extends State<ChatPage>
         );
         final shortcutMap = <ShortcutActivator, Intent>{};
         void addShortcut(ShortcutAction action, Intent intent) {
-          final binding = settingsProvider.bindingFor(action);
+          final binding = settingsReader.bindingFor(action);
           final activator = ShortcutBindingCodec.parse(binding);
           if (activator != null) {
             shortcutMap[activator] = intent;
@@ -2498,11 +2577,34 @@ class _ChatPageState extends State<ChatPage>
                             context,
                           ).colorScheme.surface,
                           resizeToAvoidBottomInset: true,
-                          appBar: _buildAppBar(
-                            isMobile:
-                                isMobile || (isMedium && !showConversationPane),
-                            isLargeDesktop: isLargeDesktop,
-                            settingsProvider: settingsProvider,
+                          appBar: PreferredSize(
+                            preferredSize: Size.fromHeight(
+                              _toolbarHeightForDensity(
+                                isMobile:
+                                    isMobile ||
+                                    (isMedium && !showConversationPane),
+                                density:
+                                    context.select<SettingsProvider, AppDensity>(
+                                      (s) => s.appDensity,
+                                    ),
+                              ),
+                            ),
+                            child: Builder(
+                              builder: (appBarContext) {
+                                // Issue #176: scope the settings watch to the
+                                // AppBar subtree (toolbar toggles) instead of
+                                // rebuilding the whole chat page.
+                                final appBarSettings = appBarContext
+                                    .watch<SettingsProvider>();
+                                return _buildAppBar(
+                                  isMobile:
+                                      isMobile ||
+                                      (isMedium && !showConversationPane),
+                                  isLargeDesktop: isLargeDesktop,
+                                  settingsProvider: appBarSettings,
+                                );
+                              },
+                            ),
                           ),
                           drawer:
                               (isMobile || (isMedium && !showConversationPane))
@@ -2519,10 +2621,18 @@ class _ChatPageState extends State<ChatPage>
                                   verticalPadding: 0,
                                 );
                               } else {
-                                final filePaneWidth = settingsProvider
-                                    .desktopPaneWidth(DesktopPane.files);
-                                final utilityPaneWidth = settingsProvider
-                                    .desktopPaneWidth(DesktopPane.utility);
+                                final filePaneWidth =
+                                    context.select<SettingsProvider, double>(
+                                      (s) => s.desktopPaneWidth(
+                                        DesktopPane.files,
+                                      ),
+                                    );
+                                final utilityPaneWidth =
+                                    context.select<SettingsProvider, double>(
+                                      (s) => s.desktopPaneWidth(
+                                        DesktopPane.utility,
+                                      ),
+                                    );
                                 final rowChildren = <Widget>[
                                   if (showConversationPane) ...[
                                     SizedBox(
@@ -2532,7 +2642,7 @@ class _ChatPageState extends State<ChatPage>
                                         isMobileLayout: false,
                                         onCollapseRequested: () {
                                           unawaited(
-                                            settingsProvider
+                                            settingsReader
                                                 .setDesktopPaneVisible(
                                                   DesktopPane.conversations,
                                                   false,
@@ -2546,7 +2656,7 @@ class _ChatPageState extends State<ChatPage>
                                     else
                                       _buildResizableHandle(
                                         pane: DesktopPane.conversations,
-                                        settingsProvider: settingsProvider,
+                                        settingsProvider: settingsReader,
                                         paneOnLeft: true,
                                       ),
                                   ],
@@ -2556,7 +2666,7 @@ class _ChatPageState extends State<ChatPage>
                                       child: _buildDesktopFilePane(
                                         onCollapseRequested: () {
                                           unawaited(
-                                            settingsProvider
+                                            settingsReader
                                                 .setDesktopPaneVisible(
                                                   DesktopPane.files,
                                                   false,
@@ -2567,7 +2677,7 @@ class _ChatPageState extends State<ChatPage>
                                     ),
                                     _buildResizableHandle(
                                       pane: DesktopPane.files,
-                                      settingsProvider: settingsProvider,
+                                      settingsProvider: settingsReader,
                                       paneOnLeft: true,
                                     ),
                                   ],
@@ -2582,7 +2692,7 @@ class _ChatPageState extends State<ChatPage>
                                   if (showDesktopUtilityPane) ...[
                                     _buildResizableHandle(
                                       pane: DesktopPane.utility,
-                                      settingsProvider: settingsProvider,
+                                      settingsProvider: settingsReader,
                                       paneOnLeft: false,
                                     ),
                                     SizedBox(
@@ -2590,7 +2700,7 @@ class _ChatPageState extends State<ChatPage>
                                       child: _buildDesktopUtilityPane(
                                         onCollapseRequested: () {
                                           unawaited(
-                                            settingsProvider
+                                            settingsReader
                                                 .setDesktopPaneVisible(
                                                   DesktopPane.utility,
                                                   false,
@@ -2613,12 +2723,11 @@ class _ChatPageState extends State<ChatPage>
                                 children: [
                                   // In the integrated chrome the strip is drawn
                                   // in the window title bar instead.
-                                  if (!_usesIntegratedWindowChrome(
-                                    settingsProvider,
-                                  ))
+                                  if (!usesIntegratedWindowChrome &&
+                                      showSessionTabsStrip)
                                     _buildSessionTabStrip(
                                       isCompact: isMobile,
-                                      settingsProvider: settingsProvider,
+                                      settingsProvider: settingsReader,
                                     ),
                                   Expanded(
                                     child: Stack(
@@ -2653,7 +2762,7 @@ class _ChatPageState extends State<ChatPage>
                       if (showFullscreenTerminalPanel)
                         Positioned.fill(
                           child: _buildFullscreenTerminalOverlay(
-                            settingsProvider,
+                            settingsReader,
                           ),
                         ),
                       if (showInAppAttention &&
@@ -2695,7 +2804,7 @@ class _ChatPageState extends State<ChatPage>
                             onDismiss: (item) =>
                                 unawaited(attentionController.dismiss(item)),
                             onToggleExpanded: () => unawaited(
-                              settingsProvider.setSessionAttentionPresentation(
+                              settingsReader.setSessionAttentionPresentation(
                                 attentionPresentation ==
                                         SessionAttentionPresentation.panel
                                     ? SessionAttentionPresentation.bubble
@@ -2703,7 +2812,7 @@ class _ChatPageState extends State<ChatPage>
                               ),
                             ),
                             onStopOverlay: () => unawaited(
-                              settingsProvider.setSessionAttentionPresentation(
+                              settingsReader.setSessionAttentionPresentation(
                                 SessionAttentionPresentation.off,
                               ),
                             ),

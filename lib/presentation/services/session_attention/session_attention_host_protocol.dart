@@ -1,7 +1,22 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../../../domain/entities/experience_settings.dart';
 import '../../../domain/entities/session_attention_overlay/session_attention_models.dart';
+
+/// Whether [platform] needs the durable SharedPreferences snapshot path
+/// (heartbeat epoch, persisted settings re-read, snapshot-store read).
+///
+/// Only Android (external overlay channel) and iOS (in-app overlay) consume
+/// the durable state. Desktop (Linux/Windows/macOS) and web only need the
+/// in-memory bus emit, so they skip the disk I/O entirely (issue #176:
+///
+/// on Linux/Windows every `reload()` + `setInt()` rewrites the whole
+/// preferences file synchronously on the UI isolate).
+bool sessionAttentionHostNeedsDurableSnapshot(TargetPlatform platform) {
+  return platform == TargetPlatform.android || platform == TargetPlatform.iOS;
+}
 
 class SessionAttentionHostSnapshot {
   const SessionAttentionHostSnapshot({

@@ -1,6 +1,7 @@
 import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/domain/entities/session_attention_overlay/session_attention_models.dart';
 import 'package:codewalk/presentation/services/session_attention/session_attention_host_protocol.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 SessionAttentionItem _item() => const SessionAttentionItem(
@@ -92,4 +93,27 @@ void main() {
       expect(resync.supersedes(current), isTrue);
     },
   );
+
+  test('durable snapshot path is mobile-only (issue #176)', () {
+    expect(
+      sessionAttentionHostNeedsDurableSnapshot(TargetPlatform.android),
+      isTrue,
+    );
+    expect(
+      sessionAttentionHostNeedsDurableSnapshot(TargetPlatform.iOS),
+      isTrue,
+    );
+    expect(
+      sessionAttentionHostNeedsDurableSnapshot(TargetPlatform.linux),
+      isFalse,
+    );
+    expect(
+      sessionAttentionHostNeedsDurableSnapshot(TargetPlatform.windows),
+      isFalse,
+    );
+    expect(
+      sessionAttentionHostNeedsDurableSnapshot(TargetPlatform.macOS),
+      isFalse,
+    );
+  });
 }

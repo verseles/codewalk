@@ -206,7 +206,9 @@ class _DesktopWindowTitleBarState extends State<DesktopWindowTitleBar>
                   Positioned.fill(child: _buildDragRegion()),
                   Align(
                     alignment: AlignmentDirectional.centerStart,
-                    child: widget.child,
+                    // Issue #176: isolate tab-strip repaints from window
+                    // button hover/highlight repaints (and vice-versa).
+                    child: RepaintBoundary(child: widget.child),
                   ),
                 ],
               ),

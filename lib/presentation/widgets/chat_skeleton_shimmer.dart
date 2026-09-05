@@ -58,8 +58,10 @@ class _ChatSkeletonShimmerState extends State<ChatSkeletonShimmer>
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        // Issue #176: isolate the shimmer animation repaints.
+        child: RepaintBoundary(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -104,6 +106,7 @@ class _ChatSkeletonShimmerState extends State<ChatSkeletonShimmer>
               ],
             ],
           ),
+        ),
         ),
       ),
     );

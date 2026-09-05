@@ -148,6 +148,7 @@ Future<void> init() async {
   var sessionAttentionPublishTail = Future<void>.value();
   SessionAttentionAggregate? liveAttention;
   var sessionAttentionAppInForeground = true;
+  String? sessionAttentionLastPublishDigest;
 
   Future<void> publishSessionAttention() async {
     final revision = ++sessionAttentionHostRevision;
@@ -158,43 +159,60 @@ Future<void> init() async {
           !sl.isRegistered<SettingsProvider>()) {
         return;
       }
-      final preferences = sl<SharedPreferences>();
-      await preferences.reload();
+      // Issue #176: the durable snapshot path (reload + heartbeat write +
+      // store read + persisted-settings re-parse) rewrites the whole
+      // SharedPreferences file synchronously on the UI isolate on
+      // Linux/Windows. Desktop has no durable consumer (in-app overlay is
+      // iOS-only, external overlay channel is Android-only), so it skips
+      // the disk I/O and only emits the in-memory bus snapshot.
+      final needsDurable = sessionAttentionHostNeedsDurableSnapshot(
+        defaultTargetPlatform,
+      );
+      // getActiveServerId is a RAM-cache read; the expensive part is
+      // reload() + setInt() + file-store reads, all skipped below when
+      // there is no durable consumer.
       final activeServerId = await sl<AppLocalDataSource>().getActiveServerId();
-      final durableSnapshot =
-          (await sl<SessionAttentionSnapshotStore>().read()).payload;
+      final SessionAttentionSnapshotPayload durableSnapshot;
       var presentation =
           sl<SettingsProvider>().settings.sessionAttentionPresentation;
       var bubbleSize =
           sl<SettingsProvider>().settings.sessionAttentionBubbleSize;
-      final persistedSettings = await sl<AppLocalDataSource>()
-          .getExperienceSettingsJson();
-      if (persistedSettings != null && persistedSettings.isNotEmpty) {
-        try {
-          final restored = ExperienceSettings.fromJson(
-            Map<String, dynamic>.from(jsonDecode(persistedSettings) as Map),
-          );
-          presentation = restored.sessionAttentionPresentation;
-          bubbleSize = restored.sessionAttentionBubbleSize;
-        } catch (_) {
-          // Keep the initialized provider value if persisted data is malformed.
-        }
-      }
-      final presentationOverride = preferences.getString(
-        AppConstants.sessionAttentionPresentationOverrideKey,
-      );
-      if (presentationOverride != null) {
-        for (final value in SessionAttentionPresentation.values) {
-          if (value.name == presentationOverride) {
-            presentation = value;
-            break;
+      if (needsDurable) {
+        final preferences = sl<SharedPreferences>();
+        await preferences.reload();
+        durableSnapshot =
+            (await sl<SessionAttentionSnapshotStore>().read()).payload;
+        final persistedSettings = await sl<AppLocalDataSource>()
+            .getExperienceSettingsJson();
+        if (persistedSettings != null && persistedSettings.isNotEmpty) {
+          try {
+            final restored = ExperienceSettings.fromJson(
+              Map<String, dynamic>.from(jsonDecode(persistedSettings) as Map),
+            );
+            presentation = restored.sessionAttentionPresentation;
+            bubbleSize = restored.sessionAttentionBubbleSize;
+          } catch (_) {
+            // Keep the initialized provider value if persisted data is malformed.
           }
         }
+        final presentationOverride = preferences.getString(
+          AppConstants.sessionAttentionPresentationOverrideKey,
+        );
+        if (presentationOverride != null) {
+          for (final value in SessionAttentionPresentation.values) {
+            if (value.name == presentationOverride) {
+              presentation = value;
+              break;
+            }
+          }
+        }
+        await preferences.setInt(
+          AppConstants.sessionAttentionMainHeartbeatEpochMsKey,
+          DateTime.now().millisecondsSinceEpoch,
+        );
+      } else {
+        durableSnapshot = const SessionAttentionSnapshotPayload();
       }
-      await preferences.setInt(
-        AppConstants.sessionAttentionMainHeartbeatEpochMsKey,
-        DateTime.now().millisecondsSinceEpoch,
-      );
       final byIdentity = <SessionAttentionIdentity, SessionAttentionItem>{
         for (final item in durableSnapshot.items)
           if (item.identity.serverId == activeServerId) item.identity: item,
@@ -261,6 +279,35 @@ Future<void> init() async {
                   left.lastObservedAtEpochMs,
                 );
         });
+      // Non-durable path: skip the bus emit when nothing observable
+      // changed (first revision always publishes). The Android heartbeat
+      // is the only consumer of per-publish freshness and stays on the
+      // durable path above.
+      if (!needsDurable && revision != 1) {
+        final digestBuffer = StringBuffer()
+          ..write(activeServerId)
+          ..write('|')
+          ..write(presentation.name)
+          ..write('|')
+          ..write(sessionAttentionAppInForeground)
+          ..write('|');
+        for (final item in items) {
+          digestBuffer
+            ..write(item.identity.key)
+            ..write(':')
+            ..write(item.kind.name)
+            ..write(':')
+            ..write(item.contentDigest)
+            ..write(';');
+        }
+        final digest = digestBuffer.toString();
+        if (digest == sessionAttentionLastPublishDigest) {
+          return;
+        }
+        sessionAttentionLastPublishDigest = digest;
+      } else if (!needsDurable) {
+        sessionAttentionLastPublishDigest = null;
+      }
       await (host as SessionAttentionSnapshotHostService).publishSnapshot(
         SessionAttentionHostSnapshot(
           generation: sessionAttentionHostGeneration,
