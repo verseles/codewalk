@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.225.0 - 2026-09-06
+
+- docs: map snapshot persistence test in CODEBASE (issue #180)
+- docs(comments): reference issue #180 for generic perf follow-up (was #177)
+- fix(review): route snapshot-ids clear through per-scope queue (perf R2)
+- fix(review): R1 perf corrections (rejected-draft guard, scope touch queue, mirror ordering)
+- perf: generic cuts in I/O, CPU and RAM (health storm, snapshots, attachments, contexts)
+- docs: update CODEBASE for realtime batch + attention fast-path (issue #176)
+
 ## v1.224.0 - 2026-09-05
 
 - fix(review): flush staged draft on server scope change (issue #176)
