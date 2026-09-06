@@ -328,6 +328,8 @@
 - **Then** the user can log the device out explicitly from server settings (with confirmation); full app reset also drops the device identity, so the next Tailscale use requires interactive login again
 - **Then** cold start shows a localized Tailscale status line (connecting, login required, admin approval) while the transport gates startup
 - **Then** Windows and web users do not get a broken Tailscale toggle
+- **Then** while Tailscale is enabled but the transport is not connected, the server form keeps the Server URL field disabled with a login-first hint, disables the save/test action, and offers a manual URL override for custom ports, DNS names, and existing profiles; selecting a tailnet peer fills the URL from that node
+- **Then** while a server save/test is running, the form offers a Cancel action and any form edit aborts the run immediately, so a typo never locks the form; a cancelled probe reports unknown health without logging out the shared Tailscale identity
 
 ### Last project recovery ignores the placeholder root
 
