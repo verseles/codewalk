@@ -307,7 +307,7 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     required String serverId,
     required String scopeId,
   }) async {
-    // Issue #177: keep the ids LRU in memory and persist only when
+    // Issue #180: keep the ids LRU in memory and persist only when
     // membership or order actually changed. The previous code re-read,
     // re-decoded, re-encoded and re-saved the ids JSON on every snapshot
     // write, even when the touch was a no-op reorder.

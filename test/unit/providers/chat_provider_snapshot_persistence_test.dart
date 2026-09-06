@@ -30,7 +30,7 @@ class _CountingLocalDataSource extends InMemoryAppLocalDataSource {
 }
 
 void main() {
-  group('ChatProvider - snapshot ids persistence (issue #177)', () {
+  group('ChatProvider - snapshot ids persistence (issue #180)', () {
     late FakeChatRepository chatRepository;
     late FakeAppRepository appRepository;
     late _CountingLocalDataSource localDataSource;

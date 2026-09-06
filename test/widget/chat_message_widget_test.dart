@@ -1146,7 +1146,7 @@ void main() {
     );
   });
 
-  testWidgets('file part data-uri preview survives rebuilds (issue #177)', (
+  testWidgets('file part data-uri preview survives rebuilds (issue #180)', (
     WidgetTester tester,
   ) async {
     Widget buildFrame() {

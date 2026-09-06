@@ -2143,7 +2143,7 @@ class AppProvider extends ChangeNotifier {
       final previous = _serverHealthById[profile.id];
       final next = await _checkServerHealth(profile);
       _serverHealthById[profile.id] = next;
-      // Issue #177: only notify when at least one status actually changed.
+      // Issue #180: only notify when at least one status actually changed.
       // The unconditional notify rebuilt every AppProvider listener on each
       // 10s sweep, even fully idle mid-streaming.
       if (previous != next) {

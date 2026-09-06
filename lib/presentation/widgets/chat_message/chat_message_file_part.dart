@@ -1,6 +1,6 @@
 part of '../chat_message_widget.dart';
 
-/// Issue #177: byte-bounded LRU of decoded data-URI attachment bytes.
+/// Issue #180: byte-bounded LRU of decoded data-URI attachment bytes.
 /// Screenshots decode from multi-MB base64 on every timeline rebuild
 /// (including every streaming batch); decoding once and reusing removes
 /// the largest per-frame CPU/RAM spike in the render path.

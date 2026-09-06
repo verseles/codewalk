@@ -1177,7 +1177,7 @@ void main() {
     );
   });
 
-  group('health sweep notifications (issue #177)', () {
+  group('health sweep notifications (issue #180)', () {
     Future<AppProvider> buildProbeProvider(
       ServerHealthStatus Function() current,
     ) async {

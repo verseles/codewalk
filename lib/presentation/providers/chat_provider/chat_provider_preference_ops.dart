@@ -84,7 +84,7 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     _evictOldestContextSnapshots();
   }
 
-  /// Issue #177: LRU bound for retained per-context snapshots (see
+  /// Issue #180: LRU bound for retained per-context snapshots (see
   /// `_maxRetainedContextSnapshots`). Evicted contexts restore from the
   /// server through the snapshot-miss path in `_restoreContextSnapshot`.
   void _evictOldestContextSnapshots() {

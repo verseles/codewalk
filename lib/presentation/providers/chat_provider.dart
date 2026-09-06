@@ -454,7 +454,7 @@ class ChatProvider extends ChangeNotifier {
   bool _historyRevertInFlight = false;
   final LinkedHashMap<String, List<ChatMessage>> _sessionMessagesLruCache =
       LinkedHashMap<String, List<ChatMessage>>();
-  // Issue #177: in-memory mirror of the persisted per-scope snapshot-ids
+  // Issue #180: in-memory mirror of the persisted per-scope snapshot-ids
   // LRU, so the touch path below doesn't re-read/rewrite the ids JSON on
   // every snapshot write. Keyed by `serverId::scopeId`.
   final Map<String, List<String>> _persistedSnapshotIdsByScope =
@@ -655,7 +655,7 @@ class ChatProvider extends ChangeNotifier {
   static const Duration _lastSessionSnapshotTtl = Duration(days: 7);
   static const Duration _sessionMessagesSnapshotTtl = Duration(days: 7);
 
-  /// Issue #177: cap retained per-context snapshots. Each entry holds a
+  /// Issue #180: cap retained per-context snapshots. Each entry holds a
   /// full message list; without a bound, opening many projects retains
   /// them all. Evicted contexts restore from the server through the
   /// existing snapshot-miss path; contexts holding unsent drafts or an
