@@ -542,12 +542,13 @@ test/unit/auth/stt_api_key_storage_test.dart # STT API-key storage tests: per-pr
 test/unit/network/dio_client_auth_test.dart # Dio auth ownership tests: setOAuthToken/clearOAuthToken interaction with exact-origin Basic Auth, clearAuth clears both, header restoration on OAuth clear preserves Basic Auth only for the configured origin, sticky OpenCode `X-Session-Id` echo (echoed on later requests, cleared on base URL change, cleared on `clearAuth`)
 test/unit/core/tailscale/tailscale_http_adapter_test.dart # Tailscale Dio adapter: head-only timeout (configured + 15s fallback), bodyless EOF handling, cancel/error propagation
 test/unit/core/tailscale/tailscale_peer_test.dart # TailscalePeer defaultUrl: default OpenCode port mapping and IPv6 bracketing
-test/unit/providers/                   # ChatProvider split tests (9 files, parallelized with -j 12); `settings_provider_test.dart` covers visual style, provider-aware read-aloud preference persistence, and fresh-install read-aloud default/probe preservation behavior
+test/unit/providers/                   # ChatProvider split tests (10 files, parallelized with -j 12); `settings_provider_test.dart` covers visual style, provider-aware read-aloud preference persistence, and fresh-install read-aloud default/probe preservation behavior
   chat_provider_init_test.dart         #   12 tests — initialization, config sync, model/agent selection
   chat_provider_sync_test.dart         #   17 tests — deferred sync, cycle, scope, overrides, variant sync
   chat_provider_messaging_test.dart    #   15 tests — sessions, sendMessage, draft restore; delta-like SWR fallback coverage
   chat_provider_realtime_test.dart     #   21 tests — title gen (main sessions only), SSE, abort, reconciliation
   chat_provider_realtime_batch_test.dart #   Batch coalescing + idle-flush regression tests for the realtime notification batch (issue #176)
+  chat_provider_snapshot_persistence_test.dart #   Snapshot-ids skip-on-noop regression test (issue #180; fails without the in-memory LRU)
   chat_provider_session_ops_test.dart  #   27 tests — rename/share/fork/delete, insights, undo/redo/revertToTurn parity (regression coverage), idle
   chat_provider_project_test.dart      #   13 tests — permissions, questions, project scope, favorites; project-switch SWR behavior + draft isolation + dirty-context cache retention
   chat_provider_concurrency_test.dart  #   26 tests — render gate, multi-session, abort suppression
