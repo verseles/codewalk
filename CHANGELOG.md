@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.226.0 - 2026-09-06
+
+- docs(behavior): document Tailscale login-first URL gating and cancellable save/test (issue #177)
+- fix(review): scope cancel token to caller pass, guard failed-add latch, invalidate alt step-1 exits (issue #177)
+- fix(server-setup): Tailscale login-first URL gating + cancellable save/test (issue #177)
+
 ## v1.225.0 - 2026-09-06
 
 - docs: map snapshot persistence test in CODEBASE (issue #180)
