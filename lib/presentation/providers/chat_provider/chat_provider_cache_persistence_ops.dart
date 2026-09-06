@@ -269,17 +269,31 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
   }) {
     // Review R1 perf: serialize touches per scope; per-session drains run
     // concurrently and would otherwise last-write-wins each other's ids.
-    final scopeKey = '$serverId\u0000$scopeId';
-    final previous =
-        _snapshotIdsTouchQueueByScope[scopeKey] ?? Future<void>.value();
-    final settled = previous.then<void>((_) {}, onError: (_) {});
-    final next = settled.then(
-      (_) => _touchPersistedSessionMessagesSnapshotIdsLocked(
+    return _enqueueSnapshotIdsOp(
+      serverId: serverId,
+      scopeId: scopeId,
+      operation: () => _touchPersistedSessionMessagesSnapshotIdsLocked(
         sessionId,
         serverId: serverId,
         scopeId: scopeId,
       ),
     );
+  }
+
+  /// Serializes snapshot-ids read-modify-write cycles per scope so touch
+  /// and clear paths cannot interleave (review R2 perf). Errors inside
+  /// [operation] propagate to its caller; the queue itself never stalls
+  /// because chaining swallows prior errors.
+  Future<void> _enqueueSnapshotIdsOp({
+    required String serverId,
+    required String scopeId,
+    required Future<void> Function() operation,
+  }) {
+    final scopeKey = '$serverId\u0000$scopeId';
+    final previous =
+        _snapshotIdsTouchQueueByScope[scopeKey] ?? Future<void>.value();
+    final settled = previous.then<void>((_) {}, onError: (_) {});
+    final next = settled.then((_) => operation());
     _snapshotIdsTouchQueueByScope[scopeKey] = next;
     return next.whenComplete(() {
       if (identical(_snapshotIdsTouchQueueByScope[scopeKey], next)) {
@@ -823,33 +837,33 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
         scopeId: resolvedScopeId,
       );
 
-      final snapshotIdsRaw = await localDataSource
-          .getSessionMessagesSnapshotIds(
+      // Review R2 perf: route the ids rewrite through the same per-scope
+      // queue as touches so clear and touch cannot interleave. Operates
+      // on the mirror (loading once when cold) instead of re-reading disk.
+      await _enqueueSnapshotIdsOp(
+        serverId: resolvedServerId,
+        scopeId: resolvedScopeId,
+        operation: () async {
+          final scopeKey = '$resolvedServerId\u0000$resolvedScopeId';
+          final known =
+              _persistedSnapshotIdsByScope[scopeKey] ??
+              await _loadPersistedSnapshotIds(
+                serverId: resolvedServerId,
+                scopeId: resolvedScopeId,
+              );
+          final nextIds = known
+              .where((id) => id.isNotEmpty && id != normalizedSessionId)
+              .toList(growable: false);
+          await localDataSource.saveSessionMessagesSnapshotIds(
+            json.encode(nextIds),
             serverId: resolvedServerId,
             scopeId: resolvedScopeId,
           );
-      if (snapshotIdsRaw != null && snapshotIdsRaw.trim().isNotEmpty) {
-        try {
-          final decoded = json.decode(snapshotIdsRaw);
-          if (decoded is List) {
-            final nextIds = decoded
-                .whereType<String>()
-                .map((id) => id.trim())
-                .where((id) => id.isNotEmpty && id != normalizedSessionId)
-                .toList(growable: false);
-            await localDataSource.saveSessionMessagesSnapshotIds(
-              json.encode(nextIds),
-              serverId: resolvedServerId,
-              scopeId: resolvedScopeId,
-            );
-            // Keep the in-memory LRU mirror consistent with the rewrite.
-            _persistedSnapshotIdsByScope['$resolvedServerId\u0000$resolvedScopeId'] =
-                nextIds.toList(growable: true);
-          }
-        } catch (_) {
-          // Ignore malformed snapshot ID payloads during cleanup.
-        }
-      }
+          _persistedSnapshotIdsByScope[scopeKey] = nextIds.toList(
+            growable: true,
+          );
+        },
+      );
     } catch (e, stackTrace) {
       AppLogger.warn(
         'Failed to clear per-session message snapshot session=$normalizedSessionId',
