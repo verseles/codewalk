@@ -459,6 +459,10 @@ class ChatProvider extends ChangeNotifier {
   // every snapshot write. Keyed by `serverId::scopeId`.
   final Map<String, List<String>> _persistedSnapshotIdsByScope =
       <String, List<String>>{};
+  // Serializes snapshot-ids touches per scope so concurrent per-session
+  // drains cannot last-write-wins each other's ids (review R1 perf).
+  final Map<String, Future<void>> _snapshotIdsTouchQueueByScope =
+      <String, Future<void>>{};
   final Map<String, _SessionMessagesSnapshotWriteRequest>
   _pendingSessionMessagesSnapshotWrites =
       <String, _SessionMessagesSnapshotWriteRequest>{};

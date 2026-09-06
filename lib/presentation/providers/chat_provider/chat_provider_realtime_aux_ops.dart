@@ -948,5 +948,8 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       serverId: serverId,
       scopeId: scopeId,
     );
+    // Review R1 perf: keep the ids mirror consistent with the wipe so a
+    // later touch doesn't re-persist resurrected ids.
+    _persistedSnapshotIdsByScope.remove('$serverId\u0000$scopeId');
   }
 }

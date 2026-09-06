@@ -266,6 +266,32 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     String sessionId, {
     required String serverId,
     required String scopeId,
+  }) {
+    // Review R1 perf: serialize touches per scope; per-session drains run
+    // concurrently and would otherwise last-write-wins each other's ids.
+    final scopeKey = '$serverId\u0000$scopeId';
+    final previous =
+        _snapshotIdsTouchQueueByScope[scopeKey] ?? Future<void>.value();
+    final settled = previous.then<void>((_) {}, onError: (_) {});
+    final next = settled.then(
+      (_) => _touchPersistedSessionMessagesSnapshotIdsLocked(
+        sessionId,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+    _snapshotIdsTouchQueueByScope[scopeKey] = next;
+    return next.whenComplete(() {
+      if (identical(_snapshotIdsTouchQueueByScope[scopeKey], next)) {
+        _snapshotIdsTouchQueueByScope.remove(scopeKey);
+      }
+    });
+  }
+
+  Future<void> _touchPersistedSessionMessagesSnapshotIdsLocked(
+    String sessionId, {
+    required String serverId,
+    required String scopeId,
   }) async {
     // Issue #177: keep the ids LRU in memory and persist only when
     // membership or order actually changed. The previous code re-read,
@@ -295,12 +321,14 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     if (listEquals(next, known)) {
       return;
     }
-    _persistedSnapshotIdsByScope[scopeKey] = next;
+    // Review R1 perf: mirror only after the save succeeds, so a failed
+    // write cannot leave memory newer than disk.
     await localDataSource.saveSessionMessagesSnapshotIds(
       json.encode(next),
       serverId: serverId,
       scopeId: scopeId,
     );
+    _persistedSnapshotIdsByScope[scopeKey] = next;
   }
 
   Future<List<String>> _loadPersistedSnapshotIds({

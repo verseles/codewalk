@@ -116,6 +116,11 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     if (snapshot.isNewChatDraftActive || snapshot.activeSendDraft != null) {
       return true;
     }
+    // Review R1 perf: a stashed rejected draft is also unsent user text;
+    // without this, eviction would drop it via the snapshot-miss clear.
+    if (snapshot.rejectedDraft?.draft.hasContent ?? false) {
+      return true;
+    }
     return snapshot.sessionStatusById.values.any(
       (status) =>
           status.type == SessionStatusType.busy ||
