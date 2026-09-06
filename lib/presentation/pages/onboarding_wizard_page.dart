@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,6 +65,12 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
   String? _connectionError;
   bool _testing = false;
   bool _completingWithSavedServer = false;
+  // Generation guard for issue #177: every save/test run captures an ID and
+  // stale completions (after Cancel/edit/dispose) must not touch UI state.
+  int _testGeneration = 0;
+  CancelToken? _testCancelToken;
+  // Manual URL override while Tailscale gating is active (issue #177 1B).
+  bool _tailscaleUrlManualOverride = false;
   // ID of the server profile added during this wizard session, so "Try again"
   // re-tests health instead of attempting a duplicate addServerProfile.
   String? _addedServerId;
@@ -138,6 +145,10 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
   @override
   void dispose() {
+    // Issue #177: invalidate any in-flight test so late completions stay inert.
+    _testGeneration++;
+    _testCancelToken?.cancel('Disposed');
+    _testCancelToken = null;
     _urlController.dispose();
     _labelController.dispose();
     _usernameController.dispose();
@@ -145,9 +156,56 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
     super.dispose();
   }
 
+  /// Whether the Server URL field is gated by pending Tailscale transport.
+  /// Decision 1B: disabled while Tailscale is enabled but not connected,
+  /// unless the user opted into manual override. Decision 3B keeps auth
+  /// explicit: toggling never auto-starts the node.
+  bool _isTailscaleUrlGated(AppProvider appProvider) {
+    return _tailscaleEnabled &&
+        _tailscaleSupported &&
+        !appProvider.tailscaleState.isConnected &&
+        !_tailscaleUrlManualOverride;
+  }
+
+  bool _isStaleTestRun(int generation) {
+    return generation != _testGeneration;
+  }
+
+  /// Issue #177: Cancel button + abort-on-edit. Releases the form instantly;
+  /// the in-flight health probe is aborted via CancelToken and its late
+  /// result is ignored through the generation guard. Never logs out or
+  /// disconnects the shared Tailscale identity.
+  void _cancelRunningTest() {
+    if (!_testing) {
+      // Still bump so a just-finished future cannot apply stale state.
+      _testGeneration++;
+      _testCancelToken?.cancel('Cancelled by user');
+      _testCancelToken = null;
+      return;
+    }
+    _testGeneration++;
+    _testCancelToken?.cancel('Cancelled by user');
+    _testCancelToken = null;
+    setState(() {
+      _testing = false;
+      _connectionError = null;
+    });
+  }
+
+  void _onServerFormFieldChanged() {
+    if (_testing) {
+      _cancelRunningTest();
+    } else {
+      setState(() {});
+    }
+  }
+
   void _handleBack() {
     if (_completing) {
       return;
+    }
+    if (_testing) {
+      _cancelRunningTest();
     }
     if (_step == 0) {
       if (widget.showSkipAction) {
@@ -460,9 +518,14 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
       source: context.l10n.setupDebugSourceOnboarding,
       message: context.l10n.setupDebugMessageOnboardingAddAnotherServer,
     );
+    _testGeneration++;
+    _testCancelToken?.cancel('Reset form');
+    _testCancelToken = null;
     setState(() {
       _addedServerId = null;
       _editingServerId = null;
+      _testing = false;
+      _tailscaleUrlManualOverride = false;
       _urlController.text = _suggestedServerUrl;
       _labelController.clear();
       _usernameController.clear();
@@ -480,7 +543,17 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
   }
 
   Future<void> _testConnection() async {
+    final gateProvider = context.read<AppProvider>();
+    // Defensive: Test is disabled while Tailscale-gated, but never probe
+    // a gated empty state even if triggered programmatically.
+    if (_isTailscaleUrlGated(gateProvider)) return;
     if (_formKey.currentState?.validate() != true) return;
+
+    final generation = ++_testGeneration;
+    final cancelToken = CancelToken();
+    // Cancel any previous token before adopting the new one.
+    _testCancelToken?.cancel('Superseded by retry');
+    _testCancelToken = cancelToken;
 
     setState(() {
       _testing = true;
@@ -498,6 +571,12 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
     final password = _passwordController.text.trim();
     final oauthEnabled = _oauthEnabled && _oauthSupported;
     final tailscaleEnabled = _tailscaleEnabled && _tailscaleSupported;
+
+    void clearTokenIfCurrent() {
+      if (identical(_testCancelToken, cancelToken)) {
+        _testCancelToken = null;
+      }
+    }
 
     final trackedServerId = _editingServerId ?? _addedServerId;
     final hasTrackedServer =
@@ -519,14 +598,16 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
         oauthEnabled: oauthEnabled,
         tailscaleEnabled: tailscaleEnabled,
         aiGeneratedTitlesEnabled: _aiGeneratedTitlesEnabled,
+        healthCancelToken: cancelToken,
       );
-      if (!mounted) return;
+      if (!mounted || _isStaleTestRun(generation)) return;
       if (!updated) {
         appProvider.recordSetupDebugEvent(
           source: context.l10n.setupDebugSourceManualConnection,
           message: appProvider.errorMessage,
           severity: SetupDebugSeverity.error,
         );
+        clearTokenIfCurrent();
         setState(() {
           _testing = false;
           _connectionError = appProvider.errorMessage;
@@ -538,9 +619,10 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
         final authenticated = await appProvider.handleOAuthChallenge(
           serverUrl: adjustedUrl,
         );
-        if (!mounted) return;
+        if (!mounted || _isStaleTestRun(generation)) return;
         if (!authenticated) {
           final detail = appProvider.errorMessage.trim();
+          clearTokenIfCurrent();
           setState(() {
             _testing = false;
             _connectionError = detail.isNotEmpty
@@ -562,6 +644,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
             ? SetupDebugSeverity.error
             : SetupDebugSeverity.info,
       );
+      clearTokenIfCurrent();
       setState(() {
         _testing = false;
         _connectionSuccess = health != ServerHealthStatus.unhealthy;
@@ -587,34 +670,37 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
       tailscaleEnabled: tailscaleEnabled,
       aiGeneratedTitlesEnabled: _aiGeneratedTitlesEnabled,
       setAsActive: true,
+      healthCancelToken: cancelToken,
     );
 
-    if (!mounted) return;
+    String? serverId;
+    for (final profile in appProvider.serverProfiles.reversed) {
+      if (!existingServerIds.contains(profile.id)) {
+        serverId = profile.id;
+        break;
+      }
+    }
+    serverId ??= appProvider.activeServerId;
+    serverId ??= appProvider.serverProfiles.isNotEmpty
+        ? appProvider.serverProfiles.last.id
+        : null;
+
+    // Record the new profile even on a stale run so a retry after Cancel
+    // updates the same profile instead of creating a duplicate.
+    if (_editingServerId == null && serverId != null) {
+      _addedServerId = serverId;
+    }
+    if (!mounted || _isStaleTestRun(generation)) return;
 
     if (success) {
-      String? serverId;
-      for (final profile in appProvider.serverProfiles.reversed) {
-        if (!existingServerIds.contains(profile.id)) {
-          serverId = profile.id;
-          break;
-        }
-      }
-      serverId ??= appProvider.activeServerId;
-      serverId ??= appProvider.serverProfiles.isNotEmpty
-          ? appProvider.serverProfiles.last.id
-          : null;
-
-      if (_editingServerId == null && serverId != null) {
-        _addedServerId = serverId;
-      }
-
       if (oauthEnabled) {
         final authenticated = await appProvider.handleOAuthChallenge(
           serverUrl: adjustedUrl,
         );
-        if (!mounted) return;
+        if (!mounted || _isStaleTestRun(generation)) return;
         if (!authenticated) {
           final detail = appProvider.errorMessage.trim();
+          clearTokenIfCurrent();
           setState(() {
             _testing = false;
             _connectionError = detail.isNotEmpty
@@ -638,6 +724,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
             ? SetupDebugSeverity.error
             : SetupDebugSeverity.info,
       );
+      clearTokenIfCurrent();
       setState(() {
         _testing = false;
         _connectionSuccess = health != ServerHealthStatus.unhealthy;
@@ -653,6 +740,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
         message: appProvider.errorMessage,
         severity: SetupDebugSeverity.error,
       );
+      clearTokenIfCurrent();
       setState(() {
         _testing = false;
         _connectionError = appProvider.errorMessage;
@@ -1261,8 +1349,12 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                       value: _tailscaleEnabled,
                       onChanged: _tailscaleSupported
                           ? (value) {
+                              if (_testing) {
+                                _cancelRunningTest();
+                              }
                               setState(() {
                                 _tailscaleEnabled = value;
+                                _tailscaleUrlManualOverride = false;
                               });
                             }
                           : null,
@@ -1284,6 +1376,9 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                       value: _oauthEnabled,
                       onChanged: _oauthSupported
                           ? (value) {
+                              if (_testing) {
+                                _cancelRunningTest();
+                              }
                               setState(() {
                                 _oauthEnabled = value;
                                 if (value) _basicAuthEnabled = false;
@@ -1301,6 +1396,9 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                     SwitchListTile(
                       value: _basicAuthEnabled,
                       onChanged: (value) {
+                        if (_testing) {
+                          _cancelRunningTest();
+                        }
                         setState(() {
                           _basicAuthEnabled = value;
                           if (value) _oauthEnabled = false;
@@ -1316,6 +1414,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                         decoration: InputDecoration(
                           labelText: context.l10n.onboardingUsername,
                         ),
+                        onChanged: (_) => _onServerFormFieldChanged(),
                         validator: (value) {
                           if (!_basicAuthEnabled) return null;
                           if ((value ?? '').trim().isEmpty) {
@@ -1331,6 +1430,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                           labelText: context.l10n.onboardingPassword,
                         ),
                         obscureText: true,
+                        onChanged: (_) => _onServerFormFieldChanged(),
                         validator: (value) {
                           if (!_basicAuthEnabled) return null;
                           if ((value ?? '').trim().isEmpty) {
@@ -1341,36 +1441,88 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _urlController,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.onboardingServerUrl,
-                        hintText: _suggestedServerUrl,
-                        suffixIcon: _urlController.text.trim().isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: context.l10n.onboardingClear,
-                                icon: const Icon(Symbols.clear),
-                                onPressed: () {
-                                  _urlController.clear();
-                                  setState(() {});
-                                },
+                    Consumer<AppProvider>(
+                      builder: (context, tailscaleProvider, _) {
+                        final urlGated = _isTailscaleUrlGated(
+                          tailscaleProvider,
+                        );
+                        final urlEnabled = !_testing && !urlGated;
+                        Widget? suffixIcon;
+                        if (!urlGated &&
+                            _urlController.text.trim().isNotEmpty) {
+                          suffixIcon = IconButton(
+                            tooltip: context.l10n.onboardingClear,
+                            icon: const Icon(Symbols.clear),
+                            onPressed: () {
+                              _urlController.clear();
+                              _onServerFormFieldChanged();
+                            },
+                          );
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              key: const ValueKey('server_url_field'),
+                              controller: _urlController,
+                              enabled: urlEnabled,
+                          decoration: InputDecoration(
+                            labelText: context.l10n.onboardingServerUrl,
+                            hintText: urlGated
+                                ? context.l10n.tailscaleSelectPeer
+                                : _suggestedServerUrl,
+                            helperText: urlGated
+                                ? context
+                                      .l10n
+                                      .onboardingTailscaleLoginRequired
+                                : null,
+                            suffixIcon: suffixIcon,
+                          ),
+                          onChanged: (_) => _onServerFormFieldChanged(),
+                          validator: (value) {
+                            // While gated, Test is disabled; skip required-URL
+                            // validation so the login-first hint stands out.
+                            if (_isTailscaleUrlGated(
+                              context.read<AppProvider>(),
+                            )) {
+                              return null;
+                            }
+                            final raw = value?.trim() ?? '';
+                            if (raw.isEmpty) {
+                              return context.l10n.onboardingEnterServerUrl;
+                            }
+                            try {
+                              AppProvider.normalizeServerUrl(raw);
+                              return null;
+                            } catch (_) {
+                              return context.l10n.onboardingInvalidUrl;
+                            }
+                          },
+                        ),
+                        if (urlGated)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              key: const ValueKey(
+                                'server_url_manual_override_button',
                               ),
-                      ),
-                      onChanged: (_) => setState(() {}),
-                      validator: (value) {
-                        final raw = value?.trim() ?? '';
-                        if (raw.isEmpty) {
-                          return context.l10n.onboardingEnterServerUrl;
-                        }
-                        try {
-                          AppProvider.normalizeServerUrl(raw);
-                          return null;
-                        } catch (_) {
-                          return context.l10n.onboardingInvalidUrl;
-                        }
-                      },
-                    ),
+                              onPressed: () {
+                                if (_testing) {
+                                  _cancelRunningTest();
+                                }
+                                setState(() {
+                                  _tailscaleUrlManualOverride = true;
+                                });
+                              },
+                              icon: const Icon(Symbols.edit_rounded),
+                              label: Text(context.l10n.serversEdit),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _labelController,
@@ -1378,11 +1530,15 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                         labelText: context.l10n.onboardingLabel,
                         hintText: context.l10n.onboardingLabelHint,
                       ),
+                      onChanged: (_) => _onServerFormFieldChanged(),
                     ),
                     const SizedBox(height: 8),
                     SwitchListTile(
                       value: _aiGeneratedTitlesEnabled,
                       onChanged: (value) {
+                        if (_testing) {
+                          _cancelRunningTest();
+                        }
                         setState(() {
                           _aiGeneratedTitlesEnabled = value;
                         });
@@ -1422,22 +1578,46 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    FilledButton.icon(
-                      onPressed: _testing ? null : _testConnection,
-                      icon: _testing
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Symbols.link_rounded),
-                      label: Text(
-                        _testing
-                            ? context.l10n.onboardingTesting
-                            : hasTrackedServer
-                            ? context.l10n.onboardingSaveAndTest
-                            : context.l10n.onboardingTestConnection,
-                      ),
+                    Consumer<AppProvider>(
+                      builder: (context, testGateProvider, _) {
+                        final urlGated = _isTailscaleUrlGated(
+                          testGateProvider,
+                        );
+                        final canTest = !_testing && !urlGated;
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            FilledButton.icon(
+                              key: const ValueKey('server_test_button'),
+                              onPressed: canTest ? _testConnection : null,
+                              icon: _testing
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Symbols.link_rounded),
+                              label: Text(
+                                _testing
+                                    ? context.l10n.onboardingTesting
+                                    : hasTrackedServer
+                                    ? context.l10n.onboardingSaveAndTest
+                                    : context.l10n.onboardingTestConnection,
+                              ),
+                            ),
+                            if (_testing)
+                              OutlinedButton.icon(
+                                key: const ValueKey('server_test_cancel_button'),
+                                onPressed: _cancelRunningTest,
+                                icon: const Icon(Symbols.stop_rounded),
+                                label: Text(context.l10n.commonCancel),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -1629,6 +1809,9 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
           }).toList(),
           onSelected: (peer) {
             if (peer != null) {
+              if (_testing) {
+                _cancelRunningTest();
+              }
               _urlController.text = peer.defaultUrl;
               setState(() {});
             }

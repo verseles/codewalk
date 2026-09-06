@@ -1138,6 +1138,110 @@ void main() {
     });
   });
 
+  group('issue 177 tailscale gating and cancel', () {
+    testWidgets('enabling tailscale while disconnected gates url and test', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildWizard());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Connect to a running server'));
+      await tester.pumpAndSettle();
+
+      final tailscaleTile = find.widgetWithText(
+        SwitchListTile,
+        'Use Tailscale',
+      );
+      expect(tailscaleTile, findsOneWidget);
+      await tester.ensureVisible(tailscaleTile);
+      await tester.tap(tailscaleTile);
+      await tester.pumpAndSettle();
+
+      // URL field is gated (disabled) with login-first helper.
+      final urlField = find.byKey(const ValueKey('server_url_field'));
+      expect(urlField, findsOneWidget);
+      expect(tester.widget<TextFormField>(urlField).enabled, isFalse);
+      expect(find.text('Tailscale login required'), findsOneWidget);
+
+      // Test action is gated while Tailscale is pending.
+      final testButton = find.byKey(const ValueKey('server_test_button'));
+      expect(testButton, findsOneWidget);
+      expect(tester.widget<FilledButton>(testButton).onPressed, isNull);
+
+      // Manual override re-enables the URL field without new l10n keys.
+      final overrideButton = find.byKey(
+        const ValueKey('server_url_manual_override_button'),
+      );
+      expect(overrideButton, findsOneWidget);
+      await tester.ensureVisible(overrideButton);
+      await tester.pumpAndSettle();
+      await tester.tap(overrideButton);
+      await tester.pumpAndSettle();
+      expect(tester.widget<TextFormField>(urlField).enabled, isTrue);
+    });
+
+    testWidgets('cancel unlocks form and stale probe does not advance', (
+      WidgetTester tester,
+    ) async {
+      final probeGate = Completer<ServerHealthStatus>();
+      final cancelProvider = AppProvider(
+        getAppInfo: GetAppInfo(FakeAppRepository()),
+        checkConnection: CheckConnection(FakeAppRepository()),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        tailscaleService: _NoopTailscaleService(),
+        serverHealthProbe: (_) => probeGate.future,
+        serverHealthRequestTimeout: const Duration(milliseconds: 5),
+        enableHealthPolling: false,
+      );
+      await cancelProvider.initialize();
+
+      await tester.pumpWidget(
+        buildWizard(providerOverride: cancelProvider),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Connect to a running server'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Test connection'));
+      await tester.tap(find.text('Test connection'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Cancel affordance appears while the probe is pending.
+      expect(
+        find.byKey(const ValueKey('server_test_cancel_button')),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(const ValueKey('server_test_cancel_button')),
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('server_test_cancel_button')),
+        findsNothing,
+      );
+      expect(find.text('Test connection'), findsOneWidget);
+      expect(find.text('Server connection'), findsOneWidget);
+
+      // Late probe completion must not advance the wizard.
+      probeGate.complete(ServerHealthStatus.unhealthy);
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      });
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Server connection'), findsOneWidget);
+      expect(find.text('Connection issue'), findsNothing);
+      // Profile may persist from the cancelled add; retry must not duplicate.
+      expect(cancelProvider.serverProfiles.length, lessThanOrEqualTo(1));
+    });
+  });
+
   group('back navigation', () {
     testWidgets('back from step 1 returns to welcome', (
       WidgetTester tester,

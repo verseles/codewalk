@@ -13,6 +13,7 @@ import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/services/cellular_data_saver_service.dart';
 import 'package:codewalk/presentation/services/local_opencode_server_runtime_types.dart';
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -584,6 +585,28 @@ void main() {
           .first;
       expect(refreshed.aiGeneratedTitlesEnabled, isFalse);
     });
+
+    test(
+      'refreshServerHealth with pre-cancelled token leaves health unknown (issue #177)',
+      () async {
+        await provider.initialize();
+        final created = await provider.addServerProfile(
+          url: 'http://127.0.0.1:5099',
+        );
+        expect(created, isTrue);
+        final target = provider.serverProfiles
+            .where((item) => item.url == 'http://127.0.0.1:5099')
+            .first;
+
+        final token = CancelToken()..cancel('test cancel');
+        await provider.refreshServerHealth(
+          serverId: target.id,
+          cancelToken: token,
+        );
+
+        expect(provider.healthFor(target.id), ServerHealthStatus.unknown);
+      },
+    );
 
     test('inactive Tailscale profile health remains unknown', () async {
       await provider.initialize();

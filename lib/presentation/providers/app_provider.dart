@@ -1195,6 +1195,7 @@ class AppProvider extends ChangeNotifier {
     bool tailscaleEnabled = false,
     bool aiGeneratedTitlesEnabled = true,
     bool setAsActive = false,
+    CancelToken? healthCancelToken,
   }) async {
     await initialize();
     final normalized = _safeNormalize(url);
@@ -1255,7 +1256,10 @@ class AppProvider extends ChangeNotifier {
       unawaited(authenticateTailscale());
     }
     _syncHealthPollingLifecycle();
-    await refreshServerHealth(serverId: profile.id);
+    await refreshServerHealth(
+      serverId: profile.id,
+      cancelToken: healthCancelToken,
+    );
     _errorMessage = '';
     notifyListeners();
     return true;
@@ -1271,6 +1275,7 @@ class AppProvider extends ChangeNotifier {
     required bool oauthEnabled,
     required bool tailscaleEnabled,
     required bool aiGeneratedTitlesEnabled,
+    CancelToken? healthCancelToken,
   }) async {
     await initialize();
     final index = _serverProfiles.indexWhere((p) => p.id == id);
@@ -1350,7 +1355,10 @@ class AppProvider extends ChangeNotifier {
       }
       await checkConnection();
     }
-    await refreshServerHealth(serverId: updated.id);
+    await refreshServerHealth(
+      serverId: updated.id,
+      cancelToken: healthCancelToken,
+    );
     _errorMessage = '';
     notifyListeners();
     return true;
@@ -2050,7 +2058,10 @@ class AppProvider extends ChangeNotifier {
     await setActiveServer(existing.id, blockUnhealthy: false);
   }
 
-  Future<void> refreshServerHealth({String? serverId}) async {
+  Future<void> refreshServerHealth({
+    String? serverId,
+    CancelToken? cancelToken,
+  }) async {
     await initialize();
     final normalizedServerId = serverId?.trim();
 
@@ -2071,6 +2082,7 @@ class AppProvider extends ChangeNotifier {
         await _refreshServerHealthTargets(
           runAll: runAll,
           serverIds: runServerIds,
+          cancelToken: cancelToken,
         );
 
         if (_queuedHealthRefreshAll) {
@@ -2113,6 +2125,7 @@ class AppProvider extends ChangeNotifier {
   Future<void> _refreshServerHealthTargets({
     required bool runAll,
     required Set<String> serverIds,
+    CancelToken? cancelToken,
   }) async {
     final targets = runAll
         ? List<ServerProfile>.from(_serverProfiles)
@@ -2141,7 +2154,7 @@ class AppProvider extends ChangeNotifier {
     var changed = false;
     for (final profile in targets) {
       final previous = _serverHealthById[profile.id];
-      final next = await _checkServerHealth(profile);
+      final next = await _checkServerHealth(profile, cancelToken: cancelToken);
       _serverHealthById[profile.id] = next;
       // Issue #180: only notify when at least one status actually changed.
       // The unconditional notify rebuilt every AppProvider listener on each
@@ -2166,7 +2179,13 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  Future<ServerHealthStatus> _checkServerHealth(ServerProfile profile) async {
+  Future<ServerHealthStatus> _checkServerHealth(
+    ServerProfile profile, {
+    CancelToken? cancelToken,
+  }) async {
+    if (cancelToken?.isCancelled == true) {
+      return ServerHealthStatus.unknown;
+    }
     final serverHealthProbe = _serverHealthProbe;
     if (serverHealthProbe != null) {
       return serverHealthProbe(profile);
@@ -2227,7 +2246,10 @@ class AppProvider extends ChangeNotifier {
 
     DioException? firstError;
     try {
-      final global = await dio.get('/global/health');
+      final global = await dio.get('/global/health', cancelToken: cancelToken);
+      if (cancelToken?.isCancelled == true) {
+        return ServerHealthStatus.unknown;
+      }
       if (global.statusCode == 200) {
         return ServerHealthStatus.healthy;
       }
@@ -2244,13 +2266,19 @@ class AppProvider extends ChangeNotifier {
               response: global,
             );
     } on DioException catch (e) {
+      if (CancelToken.isCancel(e) || cancelToken?.isCancelled == true) {
+        return ServerHealthStatus.unknown;
+      }
       _recordOAuthChallengeFromHealth(profile, e);
       firstError = e;
       // Fallback below.
     }
 
     try {
-      final fallback = await dio.get('/path');
+      final fallback = await dio.get('/path', cancelToken: cancelToken);
+      if (cancelToken?.isCancelled == true) {
+        return ServerHealthStatus.unknown;
+      }
       if (fallback.statusCode == 200) {
         return ServerHealthStatus.healthy;
       }
@@ -2261,6 +2289,9 @@ class AppProvider extends ChangeNotifier {
       );
       return ServerHealthStatus.unhealthy;
     } on DioException catch (e) {
+      if (CancelToken.isCancel(e) || cancelToken?.isCancelled == true) {
+        return ServerHealthStatus.unknown;
+      }
       _recordOAuthChallengeFromHealth(profile, e);
       _logTailscaleProbeFailure(profile, e.type, e);
       return ServerHealthStatus.unhealthy;
