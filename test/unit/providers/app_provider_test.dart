@@ -1176,4 +1176,62 @@ void main() {
       },
     );
   });
+
+  group('health sweep notifications (issue #177)', () {
+    Future<AppProvider> buildProbeProvider(
+      ServerHealthStatus Function() current,
+    ) async {
+      final repo = FakeAppRepository();
+      final dataSource = InMemoryAppLocalDataSource();
+      final runtime = FakeLocalOpencodeServerRuntime();
+      final probeProvider = AppProvider(
+        getAppInfo: GetAppInfo(repo),
+        checkConnection: CheckConnection(repo),
+        localDataSource: dataSource,
+        dioClient: DioClient(),
+        localServerRuntime: runtime,
+        serverHealthProbe: (_) async => current(),
+        enableHealthPolling: false,
+      );
+      await probeProvider.initialize();
+      await probeProvider.addServerProfile(url: 'https://a.example.com');
+      return probeProvider;
+    }
+
+    test('identical sweep does not notify', () async {
+      final probeProvider = await buildProbeProvider(
+        () => ServerHealthStatus.healthy,
+      );
+      final profileId = probeProvider.serverProfiles.single.id;
+      await probeProvider.refreshServerHealth();
+
+      var notifications = 0;
+      probeProvider.addListener(() => notifications += 1);
+      await probeProvider.refreshServerHealth();
+
+      expect(notifications, 0);
+      expect(
+        probeProvider.healthFor(profileId),
+        ServerHealthStatus.healthy,
+      );
+    });
+
+    test('changed sweep notifies once per sweep', () async {
+      var probeResult = ServerHealthStatus.healthy;
+      final probeProvider = await buildProbeProvider(() => probeResult);
+      final profileId = probeProvider.serverProfiles.single.id;
+      await probeProvider.refreshServerHealth();
+
+      probeResult = ServerHealthStatus.unhealthy;
+      var notifications = 0;
+      probeProvider.addListener(() => notifications += 1);
+      await probeProvider.refreshServerHealth();
+
+      expect(notifications, 1);
+      expect(
+        probeProvider.healthFor(profileId),
+        ServerHealthStatus.unhealthy,
+      );
+    });
+  });
 }

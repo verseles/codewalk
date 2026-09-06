@@ -1146,6 +1146,46 @@ void main() {
     );
   });
 
+  testWidgets('file part data-uri preview survives rebuilds (issue #177)', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame() {
+      return localizedMaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: UserMessage(
+              id: 'msg_file_cache',
+              sessionId: 'ses_file_cache',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                FilePart(
+                  id: 'part_file_cache',
+                  messageId: 'msg_file_cache',
+                  sessionId: 'ses_file_cache',
+                  url:
+                      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX7sAAAAASUVORK5CYII=',
+                  mime: 'image/png',
+                  filename: 'cached.png',
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpWidget(buildFrame());
+
+    // Second and third builds hit the decoded-bytes cache instead of
+    // re-decoding base64 on the UI isolate.
+    expect(
+      find.byKey(const ValueKey<String>('file_image_preview_part_file_cache')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('file part with source path renders open action', (
     WidgetTester tester,
   ) async {

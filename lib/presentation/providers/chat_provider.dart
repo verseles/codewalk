@@ -454,6 +454,11 @@ class ChatProvider extends ChangeNotifier {
   bool _historyRevertInFlight = false;
   final LinkedHashMap<String, List<ChatMessage>> _sessionMessagesLruCache =
       LinkedHashMap<String, List<ChatMessage>>();
+  // Issue #177: in-memory mirror of the persisted per-scope snapshot-ids
+  // LRU, so the touch path below doesn't re-read/rewrite the ids JSON on
+  // every snapshot write. Keyed by `serverId::scopeId`.
+  final Map<String, List<String>> _persistedSnapshotIdsByScope =
+      <String, List<String>>{};
   final Map<String, _SessionMessagesSnapshotWriteRequest>
   _pendingSessionMessagesSnapshotWrites =
       <String, _SessionMessagesSnapshotWriteRequest>{};
@@ -645,6 +650,13 @@ class ChatProvider extends ChangeNotifier {
   static const Duration _sessionsCacheTtl = Duration(days: 3);
   static const Duration _lastSessionSnapshotTtl = Duration(days: 7);
   static const Duration _sessionMessagesSnapshotTtl = Duration(days: 7);
+
+  /// Issue #177: cap retained per-context snapshots. Each entry holds a
+  /// full message list; without a bound, opening many projects retains
+  /// them all. Evicted contexts restore from the server through the
+  /// existing snapshot-miss path; contexts holding unsent drafts or an
+  /// actively-responding session are never evicted.
+  static const int _maxRetainedContextSnapshots = 8;
   static const int _maxSessionMessageCacheEntries = 20;
   static const int _maxPersistedSessionMessageSnapshots = 8;
   // Issue #160: cold open loads only the newest window of messages; older

@@ -1,5 +1,57 @@
 part of '../chat_message_widget.dart';
 
+/// Issue #177: byte-bounded LRU of decoded data-URI attachment bytes.
+/// Screenshots decode from multi-MB base64 on every timeline rebuild
+/// (including every streaming batch); decoding once and reusing removes
+/// the largest per-frame CPU/RAM spike in the render path.
+const int _maxDataUriBytesCached = 32 * 1024 * 1024;
+
+class _CachedDataUriBytes {
+  const _CachedDataUriBytes({required this.url, required this.bytes});
+
+  final String url;
+  final Uint8List bytes;
+}
+
+final LinkedHashMap<String, _CachedDataUriBytes> _dataUriBytesCache =
+    LinkedHashMap<String, _CachedDataUriBytes>();
+int _dataUriBytesCached = 0;
+
+Uint8List? _cachedDataUriBytes(String partId, String dataUrl) {
+  // Cheap composite key; the full URL equality check on hits rules out
+  // hash collisions ever showing the wrong image.
+  final key = '$partId:${dataUrl.length}:${dataUrl.hashCode}';
+  final hit = _dataUriBytesCache.remove(key);
+  if (hit != null) {
+    if (hit.url == dataUrl) {
+      _dataUriBytesCache[key] = hit;
+      return hit.bytes;
+    }
+    _dataUriBytesCached -= hit.bytes.length;
+  }
+  Uint8List? bytes;
+  try {
+    bytes = Uint8List.fromList(UriData.parse(dataUrl).contentAsBytes());
+  } catch (_) {
+    return null;
+  }
+  if (bytes.isEmpty) {
+    return null;
+  }
+  _dataUriBytesCache[key] = _CachedDataUriBytes(url: dataUrl, bytes: bytes);
+  _dataUriBytesCached += bytes.length;
+  while (_dataUriBytesCached > _maxDataUriBytesCached &&
+      _dataUriBytesCache.length > 1) {
+    final oldestKey = _dataUriBytesCache.keys.first;
+    final evicted = _dataUriBytesCache.remove(oldestKey);
+    if (evicted == null) {
+      break;
+    }
+    _dataUriBytesCached -= evicted.bytes.length;
+  }
+  return bytes;
+}
+
 /// File attachment rendering with image preview and action handling.
 extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
   Widget _buildFilePart(BuildContext context, FilePart part) {
@@ -89,7 +141,7 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
       return null;
     }
 
-    final image = _resolveAttachmentImageWidget(part.url, context);
+    final image = _resolveAttachmentImageWidget(part.url, context, part.id);
     if (image == null) {
       return null;
     }
@@ -111,7 +163,11 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
     );
   }
 
-  Widget? _resolveAttachmentImageWidget(String rawUrl, BuildContext context) {
+  Widget? _resolveAttachmentImageWidget(
+    String rawUrl,
+    BuildContext context,
+    String partId,
+  ) {
     final trimmedUrl = rawUrl.trim();
     if (trimmedUrl.isEmpty) {
       return null;
@@ -124,7 +180,7 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
 
     final scheme = parsed.scheme.toLowerCase();
     if (scheme == 'data') {
-      final bytes = _decodeDataUriBytes(trimmedUrl);
+      final bytes = _cachedDataUriBytes(partId, trimmedUrl);
       if (bytes == null || bytes.isEmpty) {
         return null;
       }
@@ -157,14 +213,6 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
       return null;
     }
     return (220 * ratio).round();
-  }
-
-  Uint8List? _decodeDataUriBytes(String dataUrl) {
-    try {
-      return Uint8List.fromList(UriData.parse(dataUrl).contentAsBytes());
-    } catch (_) {
-      return null;
-    }
   }
 
   Future<void> _handleFilePartAction(

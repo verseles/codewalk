@@ -267,31 +267,24 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     required String serverId,
     required String scopeId,
   }) async {
-    final existingRaw = await localDataSource.getSessionMessagesSnapshotIds(
-      serverId: serverId,
-      scopeId: scopeId,
-    );
-    var existing = <String>[];
-    if (existingRaw != null && existingRaw.trim().isNotEmpty) {
-      try {
-        final decoded = json.decode(existingRaw);
-        if (decoded is List) {
-          existing = decoded
-              .whereType<String>()
-              .map((id) => id.trim())
-              .where((id) => id.isNotEmpty)
-              .toList(growable: true);
-        }
-      } catch (_) {
-        existing = <String>[];
-      }
-    }
+    // Issue #177: keep the ids LRU in memory and persist only when
+    // membership or order actually changed. The previous code re-read,
+    // re-decoded, re-encoded and re-saved the ids JSON on every snapshot
+    // write, even when the touch was a no-op reorder.
+    final scopeKey = '$serverId\u0000$scopeId';
+    final known =
+        _persistedSnapshotIdsByScope[scopeKey] ??
+        await _loadPersistedSnapshotIds(
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+    _persistedSnapshotIdsByScope[scopeKey] = known;
 
-    existing.remove(sessionId);
-    existing.add(sessionId);
-    while (existing.length >
-        ChatProvider._maxPersistedSessionMessageSnapshots) {
-      final removed = existing.removeAt(0);
+    final next = List<String>.from(known)
+      ..remove(sessionId)
+      ..add(sessionId);
+    while (next.length > ChatProvider._maxPersistedSessionMessageSnapshots) {
+      final removed = next.removeAt(0);
       await localDataSource.clearSessionMessagesSnapshot(
         sessionId: removed,
         serverId: serverId,
@@ -299,11 +292,40 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
       );
     }
 
+    if (listEquals(next, known)) {
+      return;
+    }
+    _persistedSnapshotIdsByScope[scopeKey] = next;
     await localDataSource.saveSessionMessagesSnapshotIds(
-      json.encode(existing),
+      json.encode(next),
       serverId: serverId,
       scopeId: scopeId,
     );
+  }
+
+  Future<List<String>> _loadPersistedSnapshotIds({
+    required String serverId,
+    required String scopeId,
+  }) async {
+    try {
+      final existingRaw = await localDataSource.getSessionMessagesSnapshotIds(
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+      if (existingRaw != null && existingRaw.trim().isNotEmpty) {
+        final decoded = json.decode(existingRaw);
+        if (decoded is List) {
+          return decoded
+              .whereType<String>()
+              .map((id) => id.trim())
+              .where((id) => id.isNotEmpty)
+              .toList(growable: true);
+        }
+      }
+    } catch (_) {
+      // Fall through to an empty list on malformed payloads.
+    }
+    return <String>[];
   }
 
   Future<List<ChatMessage>?> _restoreSessionMessagesSnapshot(
@@ -792,6 +814,9 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
               serverId: resolvedServerId,
               scopeId: resolvedScopeId,
             );
+            // Keep the in-memory LRU mirror consistent with the rewrite.
+            _persistedSnapshotIdsByScope['$resolvedServerId\u0000$resolvedScopeId'] =
+                nextIds.toList(growable: true);
           }
         } catch (_) {
           // Ignore malformed snapshot ID payloads during cleanup.

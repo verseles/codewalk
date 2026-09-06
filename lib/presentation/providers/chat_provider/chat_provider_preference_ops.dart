@@ -81,6 +81,46 @@ extension _ChatProviderPreferenceOps on ChatProvider {
         ids: _pinnedSessionIds,
       );
     }
+    _evictOldestContextSnapshots();
+  }
+
+  /// Issue #177: LRU bound for retained per-context snapshots (see
+  /// `_maxRetainedContextSnapshots`). Evicted contexts restore from the
+  /// server through the snapshot-miss path in `_restoreContextSnapshot`.
+  void _evictOldestContextSnapshots() {
+    final stored = _contextSnapshots.remove(_activeContextKey);
+    if (stored != null) {
+      _contextSnapshots[_activeContextKey] = stored;
+    }
+    while (_contextSnapshots.length >
+        ChatProvider._maxRetainedContextSnapshots) {
+      final oldestKey = _contextSnapshots.keys
+          .where(
+            (key) =>
+                key != _activeContextKey &&
+                !_isEvictionProtectedContext(key),
+          )
+          .firstOrNull;
+      if (oldestKey == null) {
+        break;
+      }
+      _contextSnapshots.remove(oldestKey);
+    }
+  }
+
+  bool _isEvictionProtectedContext(String contextKey) {
+    final snapshot = _contextSnapshots[contextKey];
+    if (snapshot == null) {
+      return false;
+    }
+    if (snapshot.isNewChatDraftActive || snapshot.activeSendDraft != null) {
+      return true;
+    }
+    return snapshot.sessionStatusById.values.any(
+      (status) =>
+          status.type == SessionStatusType.busy ||
+          status.type == SessionStatusType.retry,
+    );
   }
 
   void _restoreContextSnapshot(String contextKey) {
