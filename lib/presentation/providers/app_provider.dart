@@ -2076,14 +2076,20 @@ class AppProvider extends ChangeNotifier {
     if (!runAll) {
       runServerIds = <String>{normalizedServerId};
     }
+    // The caller's cancel token scopes only its own requested pass. Queued
+    // background sweeps draining below must probe normally: reusing a
+    // cancelled interactive token would flip unrelated profiles to unknown
+    // without probing and consume the pending sweep.
+    var effectiveToken = cancelToken;
 
     try {
       while (true) {
         await _refreshServerHealthTargets(
           runAll: runAll,
           serverIds: runServerIds,
-          cancelToken: cancelToken,
+          cancelToken: effectiveToken,
         );
+        effectiveToken = null;
 
         if (_queuedHealthRefreshAll) {
           _queuedHealthRefreshAll = false;

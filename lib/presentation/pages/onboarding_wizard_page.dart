@@ -233,6 +233,11 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
   }
 
   Future<void> _handleSkip() async {
+    // Invalidate any pending save/test so its late completion cannot
+    // advance the wizard after skipping (issue #177).
+    if (_testing) {
+      _cancelRunningTest();
+    }
     if (!widget.showSkipAction) {
       unawaited(_complete());
       return;
@@ -680,15 +685,20 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
         break;
       }
     }
-    serverId ??= appProvider.activeServerId;
-    serverId ??= appProvider.serverProfiles.isNotEmpty
-        ? appProvider.serverProfiles.last.id
-        : null;
+    if (success) {
+      serverId ??= appProvider.activeServerId;
+      serverId ??= appProvider.serverProfiles.isNotEmpty
+          ? appProvider.serverProfiles.last.id
+          : null;
 
-    // Record the new profile even on a stale run so a retry after Cancel
-    // updates the same profile instead of creating a duplicate.
-    if (_editingServerId == null && serverId != null) {
-      _addedServerId = serverId;
+      // Record the new profile even on a stale run so a retry after Cancel
+      // updates the same profile instead of creating a duplicate. Only on
+      // success: a failed add persists nothing, so falling back to the
+      // active/last profile here would latch an unrelated existing profile
+      // and silently rewrite it on the next attempt.
+      if (_editingServerId == null && serverId != null) {
+        _addedServerId = serverId;
+      }
     }
     if (!mounted || _isStaleTestRun(generation)) return;
 
@@ -1231,6 +1241,11 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: () {
+                // Invalidate any pending save/test so its late completion
+                // cannot advance the wizard after navigating away (issue #177).
+                if (_testing) {
+                  _cancelRunningTest();
+                }
                 setState(() {
                   _step = 0;
                   _connectionError = null;

@@ -1180,6 +1180,67 @@ void main() {
       expect(tester.widget<TextFormField>(urlField).enabled, isTrue);
     });
 
+    testWidgets('failed add never latches an existing profile id', (
+      WidgetTester tester,
+    ) async {
+      // NOTE: widget tests run with an Android test platform, where the
+      // wizard maps loopback hosts to 10.0.2.2. Use 10.0.2.2 URLs directly
+      // so duplicates collide on every platform.
+      const existingUrl = 'http://10.0.2.2:5051';
+      const retryUrl = 'http://10.0.2.2:5052';
+      // NOTE: direct provider awaits need runAsync in widget tests.
+      await tester.runAsync(() async {
+        expect(await appProvider.addServerProfile(url: existingUrl), isTrue);
+      });
+      expect(appProvider.serverProfiles.length, 1);
+
+      await tester.pumpWidget(buildWizard());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Connect to a running server'));
+      await tester.pumpAndSettle();
+
+      final urlField = find.byKey(const ValueKey('server_url_field'));
+      await tester.enterText(urlField, existingUrl);
+      await tester.pump();
+      await tester.ensureVisible(find.text('Test connection'));
+      await tester.tap(find.text('Test connection'));
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 180));
+      });
+      await tester.pump();
+      expect(appProvider.serverProfiles.length, 1);
+      expect(find.text('Server connection'), findsOneWidget);
+
+      // Duplicate add fails on step 1 without adopting the existing profile.
+      expect(appProvider.serverProfiles.length, 1);
+      expect(find.text('Server connection'), findsOneWidget);
+
+      await tester.enterText(urlField, retryUrl);
+      await tester.pump();
+      await tester.ensureVisible(find.text('Test connection'));
+      await tester.tap(find.text('Test connection'));
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 180));
+      });
+      await tester.pump();
+
+      // Retry must add a new profile, not rewrite the existing one.
+      expect(appProvider.serverProfiles.length, 2);
+      expect(
+        appProvider.serverProfiles
+            .where((profile) => profile.url == existingUrl)
+            .length,
+        1,
+      );
+      expect(
+        appProvider.serverProfiles
+            .where((profile) => profile.url == retryUrl)
+            .length,
+        1,
+      );
+    });
+
     testWidgets('cancel unlocks form and stale probe does not advance', (
       WidgetTester tester,
     ) async {
