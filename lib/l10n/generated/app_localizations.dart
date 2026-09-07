@@ -8702,6 +8702,12 @@ abstract class AppLocalizations {
   /// **'Tailscale is not supported on this platform.'**
   String get useTailscaleUnsupported;
 
+  /// CodeWalk UI string — useTailscaleWebOsLevel
+  ///
+  /// In en, this message translates to:
+  /// **'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.'**
+  String get useTailscaleWebOsLevel;
+
   /// CodeWalk UI string — utilityTitle
   ///
   /// In en, this message translates to:

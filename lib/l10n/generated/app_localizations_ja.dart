@@ -4712,6 +4712,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get useTailscaleUnsupported => 'Tailscale はこのプラットフォームでサポートされていません。';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+
+  @override
   String get utilityTitle => 'ユーティリティ';
 
   @override

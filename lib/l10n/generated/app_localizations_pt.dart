@@ -4932,6 +4932,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'O Tailscale não é suportado nesta plataforma.';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'Na web, o Tailscale funciona em nível de sistema operacional — ative-o no app do Tailscale e adicione a URL do servidor aqui.';
+
+  @override
   String get utilityTitle => 'Utilitário';
 
   @override

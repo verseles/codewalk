@@ -6274,6 +6274,10 @@
   "@useTailscaleUnsupported": {
     "description": "CodeWalk UI string — useTailscaleUnsupported"
   },
+  "useTailscaleWebOsLevel": "On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.",
+  "@useTailscaleWebOsLevel": {
+    "description": "CodeWalk UI string — useTailscaleWebOsLevel"
+  },
   "utilityTitle": "Utility",
   "@utilityTitle": {
     "description": "CodeWalk UI string — utilityTitle"

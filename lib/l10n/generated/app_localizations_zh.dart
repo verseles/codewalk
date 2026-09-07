@@ -4613,6 +4613,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get useTailscaleUnsupported => '此平台不支持 Tailscale。';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+
+  @override
   String get utilityTitle => '实用工具';
 
   @override

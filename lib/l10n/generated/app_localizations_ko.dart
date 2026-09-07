@@ -4712,6 +4712,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get useTailscaleUnsupported => '이 플랫폼에서는 Tailscale이 지원되지 않습니다.';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+
+  @override
   String get utilityTitle => '유틸리티';
 
   @override

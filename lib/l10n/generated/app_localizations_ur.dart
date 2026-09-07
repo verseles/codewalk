@@ -4892,6 +4892,10 @@ class AppLocalizationsUr extends AppLocalizations {
       'ٹیل اسکیل اس پلیٹ فارم پر تعاون یافتہ نہیں ہے۔';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+
+  @override
   String get utilityTitle => 'افادیت';
 
   @override

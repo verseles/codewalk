@@ -4835,6 +4835,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'شبكة Tailscale غير مدعومة على هذه المنصة.';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+
+  @override
   String get utilityTitle => 'أداة';
 
   @override

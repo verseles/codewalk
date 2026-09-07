@@ -4936,6 +4936,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Tailscale не поддерживается на этой платформе.';
 
   @override
+  String get useTailscaleWebOsLevel =>
+      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+
+  @override
   String get utilityTitle => 'Утилиты';
 
   @override

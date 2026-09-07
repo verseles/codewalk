@@ -1360,54 +1360,64 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SwitchListTile(
-                      value: _tailscaleEnabled,
-                      onChanged: _tailscaleSupported
-                          ? (value) {
-                              if (_testing) {
-                                _cancelRunningTest();
-                              }
-                              setState(() {
-                                _tailscaleEnabled = value;
-                                _tailscaleUrlManualOverride = false;
-                              });
-                            }
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.useTailscale),
-                      subtitle: Text(
-                        _tailscaleSupported
-                            ? context.l10n.useTailscaleSubtitle
-                            : context.l10n.useTailscaleUnsupported,
+                    // Web has no in-app Tailscale: point to OS-level setup
+                    // instead of a toggle. OAuth is unsupported on web, so
+                    // the toggle is hidden entirely there.
+                    if (kIsWeb)
+                      _buildSetupHintRow(
+                        icon: Symbols.vpn_key_rounded,
+                        text: context.l10n.useTailscaleWebOsLevel,
                       ),
-                    ),
+                    if (!kIsWeb)
+                      SwitchListTile(
+                        value: _tailscaleEnabled,
+                        onChanged: _tailscaleSupported
+                            ? (value) {
+                                if (_testing) {
+                                  _cancelRunningTest();
+                                }
+                                setState(() {
+                                  _tailscaleEnabled = value;
+                                  _tailscaleUrlManualOverride = false;
+                                });
+                              }
+                            : null,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(context.l10n.useTailscale),
+                        subtitle: Text(
+                          _tailscaleSupported
+                              ? context.l10n.useTailscaleSubtitle
+                              : context.l10n.useTailscaleUnsupported,
+                        ),
+                      ),
                     if (_tailscaleEnabled) ...[
                       const SizedBox(height: 8),
                       _buildTailscalePeerDropdown(),
                       const SizedBox(height: 12),
                       _buildTailscaleAuthPanel(),
                     ],
-                    SwitchListTile(
-                      value: _oauthEnabled,
-                      onChanged: _oauthSupported
-                          ? (value) {
-                              if (_testing) {
-                                _cancelRunningTest();
+                    if (!kIsWeb)
+                      SwitchListTile(
+                        value: _oauthEnabled,
+                        onChanged: _oauthSupported
+                            ? (value) {
+                                if (_testing) {
+                                  _cancelRunningTest();
+                                }
+                                setState(() {
+                                  _oauthEnabled = value;
+                                  if (value) _basicAuthEnabled = false;
+                                });
                               }
-                              setState(() {
-                                _oauthEnabled = value;
-                                if (value) _basicAuthEnabled = false;
-                              });
-                            }
-                          : null,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.useOAuthCloudflareAccess),
-                      subtitle: Text(
-                        _oauthSupported
-                            ? context.l10n.useOAuthCloudflareAccessSubtitle
-                            : context.l10n.useOAuthCloudflareAccessUnsupported,
+                            : null,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(context.l10n.useOAuthCloudflareAccess),
+                        subtitle: Text(
+                          _oauthSupported
+                              ? context.l10n.useOAuthCloudflareAccessSubtitle
+                              : context.l10n.useOAuthCloudflareAccessUnsupported,
+                        ),
                       ),
-                    ),
                     SwitchListTile(
                       value: _basicAuthEnabled,
                       onChanged: (value) {
