@@ -1377,6 +1377,124 @@ void main() {
     );
 
     test(
+      'loadOlderMessages exposes loading flag while pending and clears on success',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 450);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(provider.messages.length, 50);
+
+        final gate = Completer<void>();
+        chatRepository.getMessagesDelay = () => gate.future;
+        final observed = <bool>[];
+        void record() => observed.add(provider.isLoadingOlderMessages);
+        provider.addListener(record);
+        try {
+          final pending = provider.loadOlderMessages(chunkSize: 100);
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+
+          expect(provider.isLoadingOlderMessages, isTrue);
+          expect(observed, contains(true));
+
+          gate.complete();
+          await pending;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        } finally {
+          provider.removeListener(record);
+          chatRepository.getMessagesDelay = null;
+        }
+
+        expect(provider.isLoadingOlderMessages, isFalse);
+        expect(observed.last, isFalse);
+        expect(provider.messages.length, 151);
+      },
+    );
+
+    test(
+      'loadOlderMessages clears loading flag on repository failure',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 450);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        final gate = Completer<void>();
+        chatRepository.getMessagesDelay = () => gate.future;
+        chatRepository.getMessagesFailure = const NetworkFailure(
+          'offline',
+          503,
+        );
+        try {
+          final pending = provider.loadOlderMessages(chunkSize: 100);
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          expect(provider.isLoadingOlderMessages, isTrue);
+
+          gate.complete();
+          await pending;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        } finally {
+          chatRepository.getMessagesDelay = null;
+          chatRepository.getMessagesFailure = null;
+        }
+
+        expect(provider.isLoadingOlderMessages, isFalse);
+        expect(provider.messages.length, 50);
+      },
+    );
+
+    test(
+      'concurrent loadOlderMessages is a no-op and keeps the first load token',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 450);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        final gate = Completer<void>();
+        chatRepository.getMessagesDelay = () => gate.future;
+        try {
+          final first = provider.loadOlderMessages(chunkSize: 100);
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          expect(provider.isLoadingOlderMessages, isTrue);
+
+          await provider.loadOlderMessages(chunkSize: 100);
+          expect(provider.isLoadingOlderMessages, isTrue);
+
+          gate.complete();
+          await first;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        } finally {
+          chatRepository.getMessagesDelay = null;
+        }
+
+        expect(provider.isLoadingOlderMessages, isFalse);
+        expect(provider.messages.length, 151);
+      },
+    );
+
+    test(
       'cold open of an exact-window session reports no older history without extra roundtrips',
       () async {
         const sessionId = 'ses_1';

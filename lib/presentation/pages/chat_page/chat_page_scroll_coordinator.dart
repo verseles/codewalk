@@ -197,15 +197,20 @@ extension _ChatPageScrollCoordinator on _ChatPageState {
     bool restoreAnchor = true,
   }) async {
     _setScrollOwner(_ScrollOwner.paginationRestore);
+    final expectedSessionId = provider.currentSession?.id;
     try {
       await provider.loadOlderMessages();
-      if (!mounted || !_scrollController.hasClients) {
+      if (!mounted ||
+          !_scrollController.hasClients ||
+          provider.currentSession?.id != expectedSessionId) {
         return;
       }
 
       await Future<void>.microtask(() {});
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted || !_scrollController.hasClients) {
+      if (!mounted ||
+          !_scrollController.hasClients ||
+          provider.currentSession?.id != expectedSessionId) {
         return;
       }
 
@@ -213,7 +218,9 @@ extension _ChatPageScrollCoordinator on _ChatPageState {
       // Use the final extent immediately before restoring the anchor so older
       // message prepends do not under-correct and create a second visible jump.
       await Future<void>.microtask(() {});
-      if (!mounted || !_scrollController.hasClients) {
+      if (!mounted ||
+          !_scrollController.hasClients ||
+          provider.currentSession?.id != expectedSessionId) {
         return;
       }
       final maxAfter = _scrollController.position.maxScrollExtent;

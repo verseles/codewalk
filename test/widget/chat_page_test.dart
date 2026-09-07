@@ -23186,6 +23186,90 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'shows top older-history loading pill while paginating (#178)',
+    (tester) async {
+      const sessionId = 'ses_older_loading';
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: sessionId,
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Older loading',
+          ),
+        ],
+      );
+      repository.messagesBySession[sessionId] = _threadMessages(
+        sessionId,
+        450,
+      );
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test'
+        ..defaultServerId = 'srv_test'
+        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+          <String, dynamic>{
+            'id': 'srv_test',
+            'url': 'http://127.0.0.1:4096',
+            'label': 'Test Server',
+            'basicAuthEnabled': false,
+            'basicAuthUsername': '',
+            'basicAuthPassword': '',
+            'createdAt': 0,
+            'updatedAt': 0,
+          },
+        ]);
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await tester.pumpAndSettle();
+
+      expect(provider.messages.isNotEmpty, isTrue);
+      expect(provider.hasMoreOldMessages, isTrue);
+      final residentCount = provider.messages.length;
+      final residentFirstId = provider.messages.first.id;
+      expect(
+        find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
+        findsNothing,
+      );
+
+      final gate = Completer<void>();
+      repository.getMessagesDelay = () => gate.future;
+      final pending = provider.loadOlderMessages(chunkSize: 100);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(provider.isLoadingOlderMessages, isTrue);
+      expect(
+        find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
+        findsOneWidget,
+      );
+
+      gate.complete();
+      await pending;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(provider.isLoadingOlderMessages, isFalse);
+      expect(
+        find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
+        findsNothing,
+      );
+      expect(provider.messages.length, greaterThan(residentCount));
+      expect(provider.messages.first.id, isNot(residentFirstId));
+    },
+  );
 }
 
 Future<void> _pumpUiFrames(WidgetTester tester) async {

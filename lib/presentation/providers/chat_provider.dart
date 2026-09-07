@@ -428,6 +428,8 @@ class ChatProvider extends ChangeNotifier {
   Future<void>? _foregroundResumeTask;
   bool _isLoadingOlderMessages = false;
   bool _hasMoreOldMessages = false;
+  int _olderMessagesLoadToken = 0;
+  int? _activeOlderMessagesLoadToken;
   // Tracks an existing selected session whose timeline is still hydrating.
   String? _pendingCurrentSessionHydrationId;
   bool _isAbortingResponse = false;
@@ -4488,6 +4490,9 @@ class ChatProvider extends ChangeNotifier {
     final requestedLimit = _messages.length + chunkSize + 1;
 
     _isLoadingOlderMessages = true;
+    _olderMessagesLoadToken += 1;
+    final olderMessagesLoadToken = _olderMessagesLoadToken;
+    _activeOlderMessagesLoadToken = olderMessagesLoadToken;
     _notifyListeners();
 
     try {
@@ -4507,7 +4512,8 @@ class ChatProvider extends ChangeNotifier {
           );
         },
         (messages) {
-          if (_currentSession?.id != sessionId) {
+          if (_currentSession?.id != sessionId ||
+              _activeOlderMessagesLoadToken != olderMessagesLoadToken) {
             return;
           }
           final exactFit = messages.length >= requestedLimit;
@@ -4577,8 +4583,11 @@ class ChatProvider extends ChangeNotifier {
         },
       );
     } finally {
-      _isLoadingOlderMessages = false;
-      _notifyListeners();
+      if (_activeOlderMessagesLoadToken == olderMessagesLoadToken) {
+        _activeOlderMessagesLoadToken = null;
+        _isLoadingOlderMessages = false;
+        _notifyListeners();
+      }
     }
   }
 

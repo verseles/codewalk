@@ -13,6 +13,58 @@ extension _ChatPageTimelineViewport on _ChatPageState {
       children: [
         Positioned.fill(child: _buildMessageList(chatProvider)),
         Positioned(
+          top: 8,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: Center(
+              child: Selector<ChatProvider, bool>(
+                selector: (_, p) =>
+                    p.isLoadingOlderMessages &&
+                    p.currentSession != null &&
+                    p.messages.isNotEmpty,
+                builder: (context, visible, _) => AnimatedSwitcher(
+                  duration: AppAnimations.fabScale,
+                  switchInCurve: AppAnimations.fabCurve,
+                  switchOutCurve: AppAnimations.accelerateCurve,
+                  transitionBuilder: (child, animation) => ScaleTransition(
+                    scale: animation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  ),
+                  child: visible
+                      ? Container(
+                          key: const ValueKey<String>(
+                            'older_messages_loading_indicator',
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator.adaptive(
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(
+                          key: ValueKey<String>(
+                            'older_messages_loading_indicator_hidden',
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
           right: 16,
           bottom: 16,
           child: AnimatedSwitcher(
