@@ -430,6 +430,13 @@ class ChatProvider extends ChangeNotifier {
   bool _hasMoreOldMessages = false;
   int _olderMessagesLoadToken = 0;
   int? _activeOlderMessagesLoadToken;
+
+  /// Invalidates any in-flight [loadOlderMessages] so its stale response and
+  /// finally cleanup cannot affect the new session state (A→B→A races).
+  void _invalidateOlderMessagesLoad() {
+    _olderMessagesLoadToken += 1;
+    _activeOlderMessagesLoadToken = null;
+  }
   // Tracks an existing selected session whose timeline is still hydrating.
   String? _pendingCurrentSessionHydrationId;
   bool _isAbortingResponse = false;
@@ -3694,6 +3701,7 @@ class ChatProvider extends ChangeNotifier {
         _threadPermissionsVersion++;
         _messages = <ChatMessage>[];
         _isLoadingOlderMessages = false;
+        _invalidateOlderMessagesLoad();
         _hasMoreOldMessages = messages.length >= _initialMessagesWindowSize;
         _messagesVersion++;
         _clearPendingReplacementBranch();
@@ -3722,6 +3730,7 @@ class ChatProvider extends ChangeNotifier {
         _threadPermissionsVersion++;
         _messages = <ChatMessage>[];
         _isLoadingOlderMessages = false;
+        _invalidateOlderMessagesLoad();
         _hasMoreOldMessages = false;
         _messagesVersion++;
         _clearPendingReplacementBranch();
@@ -3872,6 +3881,7 @@ class ChatProvider extends ChangeNotifier {
     _threadPermissionsVersion++;
     _messages = <ChatMessage>[];
     _isLoadingOlderMessages = false;
+    _invalidateOlderMessagesLoad();
     _hasMoreOldMessages = false;
     _messagesVersion++;
     _clearPendingReplacementBranch();
@@ -3961,6 +3971,7 @@ class ChatProvider extends ChangeNotifier {
     _threadPermissionsVersion++;
     _messages = <ChatMessage>[];
     _isLoadingOlderMessages = false;
+    _invalidateOlderMessagesLoad();
     _hasMoreOldMessages = false;
     _messagesVersion++;
     _clearPendingReplacementBranch();
@@ -4089,6 +4100,7 @@ class ChatProvider extends ChangeNotifier {
         _messageStreamGeneration += 1;
         _currentSession = session;
         _isLoadingOlderMessages = false;
+        _invalidateOlderMessagesLoad();
         _hasMoreOldMessages = false;
         _dismissNotificationsForSession(session.id);
         _clearSessionAttentionForSession(session.id);

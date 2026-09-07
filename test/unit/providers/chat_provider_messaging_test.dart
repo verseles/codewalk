@@ -1495,6 +1495,43 @@ void main() {
     );
 
     test(
+      'stale loadOlderMessages invalidated by draft does not apply or strand flag',
+      () async {
+        const sessionId = 'ses_1';
+        chatRepository.messagesBySession[sessionId] =
+            _generateThreadMessages(sessionId, 450);
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        final session = provider.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        await provider.selectSession(session);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        final gate = Completer<void>();
+        chatRepository.getMessagesDelay = () => gate.future;
+        try {
+          final pending = provider.loadOlderMessages(chunkSize: 100);
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          expect(provider.isLoadingOlderMessages, isTrue);
+
+          await provider.beginNewChatDraft();
+          expect(provider.isLoadingOlderMessages, isFalse);
+
+          gate.complete();
+          await pending;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        } finally {
+          chatRepository.getMessagesDelay = null;
+        }
+
+        expect(provider.isLoadingOlderMessages, isFalse);
+        expect(provider.messages, isEmpty);
+      },
+    );
+
+    test(
       'cold open of an exact-window session reports no older history without extra roundtrips',
       () async {
         const sessionId = 'ses_1';

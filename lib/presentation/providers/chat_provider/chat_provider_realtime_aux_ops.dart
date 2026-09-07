@@ -747,6 +747,7 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       _dismissNotificationsForSession(_currentSession?.id);
       _messages = <ChatMessage>[];
       _isLoadingOlderMessages = false;
+      _invalidateOlderMessagesLoad();
       _hasMoreOldMessages = false;
       _messagesVersion++;
       _pendingLocalUserMessageIds.clear();

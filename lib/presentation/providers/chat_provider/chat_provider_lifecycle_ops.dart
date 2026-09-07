@@ -467,6 +467,7 @@ extension ChatProviderLifecycleOps on ChatProvider {
         _threadPermissionsVersion++;
         _messages = <ChatMessage>[];
         _isLoadingOlderMessages = false;
+        _invalidateOlderMessagesLoad();
         _hasMoreOldMessages = false;
         _messagesVersion++;
       }
