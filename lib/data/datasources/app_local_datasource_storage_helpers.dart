@@ -369,6 +369,8 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
   /// Decode and cache the coalesced selection blob for a scope. Returns null
   /// when no blob exists (caller falls back to legacy per-field prefs keys).
   /// When a blob exists it is the source of truth, even for empty fields.
+  /// The returned map is the live cached reference: mutate then persist it
+  /// via [saveSelectionBlob] only.
   Future<Map<String, dynamic>?> _readSelectionBlobMap({
     String? serverId,
     String? scopeId,
@@ -401,5 +403,31 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     }
   }
 
-
+  /// Writes one selection field, patching the coalesced blob when it exists
+  /// for the scope (the blob is source of truth then) or the legacy prefs key
+  /// otherwise. Keeps provider-init corrections and similar direct writers
+  /// visible to blob-first getters without reintroducing hot-path prefs
+  /// rewrites once a scope has migrated.
+  Future<void> _writeSelectionField({
+    String? serverId,
+    String? scopeId,
+    required String blobField,
+    required dynamic rawValue,
+    required Future<void> Function() writeLegacy,
+  }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob == null) {
+      await writeLegacy();
+      return;
+    }
+    blob[blobField] = rawValue;
+    await saveSelectionBlob(
+      jsonEncode(blob),
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+  }
 }

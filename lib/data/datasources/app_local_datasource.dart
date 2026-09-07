@@ -824,13 +824,19 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.selectedProviderKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'provider',
+      rawValue: providerId,
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.selectedProviderKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        providerId,
       ),
-      providerId,
     );
   }
 
@@ -859,13 +865,19 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.selectedModelKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'model',
+      rawValue: modelId,
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.selectedModelKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        modelId,
       ),
-      modelId,
     );
   }
 
@@ -894,16 +906,25 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    final key = _scopedKey(
-      AppConstants.selectedAgentKey,
+    final normalized = agentName?.trim();
+    await _writeSelectionField(
       serverId: serverId,
       scopeId: scopeId,
+      blobField: 'agent',
+      rawValue: (normalized == null || normalized.isEmpty) ? null : agentName,
+      writeLegacy: () async {
+        final key = _scopedKey(
+          AppConstants.selectedAgentKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        );
+        if (agentName == null || agentName.trim().isEmpty) {
+          await _sharedPreferences.remove(key);
+          return;
+        }
+        await _sharedPreferences.setString(key, agentName);
+      },
     );
-    if (agentName == null || agentName.trim().isEmpty) {
-      await _sharedPreferences.remove(key);
-      return;
-    }
-    await _sharedPreferences.setString(key, agentName);
   }
 
   @override
@@ -937,13 +958,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.selectedVariantMapKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    dynamic raw;
+    try {
+      raw = jsonDecode(variantMapJson);
+    } catch (_) {
+      raw = null;
+    }
+    if (raw is! Map) {
+      await _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.selectedVariantMapKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        variantMapJson,
+      );
+      return;
+    }
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'variantMap',
+      rawValue: Map<String, dynamic>.from(raw),
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.selectedVariantMapKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        variantMapJson,
       ),
-      variantMapJson,
     );
   }
 
@@ -978,13 +1022,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.sessionSelectionOverridesKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    dynamic raw;
+    try {
+      raw = jsonDecode(overridesJson);
+    } catch (_) {
+      raw = null;
+    }
+    if (raw is! Map) {
+      await _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.sessionSelectionOverridesKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        overridesJson,
+      );
+      return;
+    }
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'overrides',
+      rawValue: Map<String, dynamic>.from(raw),
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.sessionSelectionOverridesKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        overridesJson,
       ),
-      overridesJson,
     );
   }
 
@@ -1019,13 +1086,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.agentSelectionMemoryKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    dynamic raw;
+    try {
+      raw = jsonDecode(agentSelectionMemoryJson);
+    } catch (_) {
+      raw = null;
+    }
+    if (raw is! Map) {
+      await _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.agentSelectionMemoryKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        agentSelectionMemoryJson,
+      );
+      return;
+    }
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'agentMemory',
+      rawValue: Map<String, dynamic>.from(raw),
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.agentSelectionMemoryKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        agentSelectionMemoryJson,
       ),
-      agentSelectionMemoryJson,
     );
   }
 
@@ -1092,13 +1182,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.recentModelsKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    dynamic raw;
+    try {
+      raw = jsonDecode(recentModelsJson);
+    } catch (_) {
+      raw = null;
+    }
+    if (raw is! List) {
+      await _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.recentModelsKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        recentModelsJson,
+      );
+      return;
+    }
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'recent',
+      rawValue: List<dynamic>.from(raw),
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.recentModelsKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        recentModelsJson,
       ),
-      recentModelsJson,
     );
   }
 
@@ -1330,13 +1443,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
-      _scopedKey(
-        AppConstants.modelUsageCountsKey,
-        serverId: serverId,
-        scopeId: scopeId,
+    dynamic raw;
+    try {
+      raw = jsonDecode(usageCountsJson);
+    } catch (_) {
+      raw = null;
+    }
+    if (raw is! Map) {
+      await _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.modelUsageCountsKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        usageCountsJson,
+      );
+      return;
+    }
+    await _writeSelectionField(
+      serverId: serverId,
+      scopeId: scopeId,
+      blobField: 'usage',
+      rawValue: Map<String, dynamic>.from(raw),
+      writeLegacy: () => _sharedPreferences.setString(
+        _scopedKey(
+          AppConstants.modelUsageCountsKey,
+          serverId: serverId,
+          scopeId: scopeId,
+        ),
+        usageCountsJson,
       ),
-      usageCountsJson,
     );
   }
 

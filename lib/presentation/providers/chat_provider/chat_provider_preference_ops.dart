@@ -432,11 +432,10 @@ extension _ChatProviderPreferenceOps on ChatProvider {
     required String serverId,
     required String scopeId,
   }) async {
-    await localDataSource.saveRecentModelsJson(
-      json.encode(_recentModelKeys),
-      serverId: serverId,
-      scopeId: scopeId,
-    );
+    // Favorite toggles only mutate favorites (plus pins). The remaining
+    // selection collections (recent/usage/variant/agent-memory) are owned by
+    // the coalesced blob flush and are unchanged here; writing them again
+    // would redo desktop prefs rewrites for no new values.
     await localDataSource.saveFavoriteModelsJson(
       json.encode(_favoriteModelKeys),
       serverId: serverId,
@@ -446,21 +445,6 @@ extension _ChatProviderPreferenceOps on ChatProvider {
       serverId: serverId,
       scopeId: scopeId,
       ids: pinnedSessionIds,
-    );
-    await localDataSource.saveModelUsageCountsJson(
-      json.encode(_modelUsageCounts),
-      serverId: serverId,
-      scopeId: scopeId,
-    );
-    await localDataSource.saveSelectedVariantMap(
-      json.encode(_selectedVariantByModel),
-      serverId: serverId,
-      scopeId: scopeId,
-    );
-    await localDataSource.saveAgentSelectionMemoryJson(
-      json.encode(_encodeAgentSelectionMemory()),
-      serverId: serverId,
-      scopeId: scopeId,
     );
   }
 

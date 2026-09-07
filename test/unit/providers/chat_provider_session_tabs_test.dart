@@ -2272,15 +2272,15 @@ class _DelayedPreferenceSaveLocalDataSource extends InMemoryAppLocalDataSource {
   final Completer<void> releaseRecentWrite = Completer<void>();
 
   @override
-  Future<void> saveRecentModelsJson(
-    String recentModelsJson, {
+  Future<void> saveFavoriteModelsJson(
+    String favoriteModelsJson, {
     String? serverId,
     String? scopeId,
   }) async {
     if (!recentWriteStarted.isCompleted) recentWriteStarted.complete();
     await releaseRecentWrite.future;
-    await super.saveRecentModelsJson(
-      recentModelsJson,
+    await super.saveFavoriteModelsJson(
+      favoriteModelsJson,
       serverId: serverId,
       scopeId: scopeId,
     );

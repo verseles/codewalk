@@ -66,22 +66,6 @@ extension _ChatProviderContextStateOps on ChatProvider {
     return parsed;
   }
 
-  Future<void> _persistSessionSelectionOverridesState({
-    required String serverId,
-    required String scopeId,
-  }) async {
-    final overrides = _sessionOverridesForContext(_activeContextKey);
-    final serialized = <String, dynamic>{};
-    for (final entry in overrides.entries) {
-      serialized[entry.key] = _sessionOverrideToJson(entry.value);
-    }
-    await localDataSource.saveSessionSelectionOverridesJson(
-      json.encode(serialized),
-      serverId: serverId,
-      scopeId: scopeId,
-    );
-  }
-
   bool _applySessionSelectionOverride(String? sessionId) {
     if (sessionId == null || sessionId.trim().isEmpty) {
       return false;

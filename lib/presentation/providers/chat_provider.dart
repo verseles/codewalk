@@ -3005,6 +3005,10 @@ class ChatProvider extends ChangeNotifier {
         await _persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote);
       }
     } catch (error, stackTrace) {
+      // Retain the dirty flag so the post-finally retry re-persists
+      // latest-wins state instead of dropping the change until the next
+      // selection interaction (ADR-016 rule 10).
+      _selectionPersistenceDirty = true;
       AppLogger.warn(
         'Selection persistence flush failed',
         error: error,
@@ -3042,6 +3046,18 @@ class ChatProvider extends ChangeNotifier {
     final snapshot = _captureSelectionPersistenceSnapshot(
       syncRemote: syncRemote,
     );
+    // Supersede a pending debounced snapshot for the same scope: it holds
+    // older frozen values that would otherwise overwrite these newer ones
+    // when the debounce fires. A pending snapshot for another scope is left
+    // untouched so the old context still persists under its own key.
+    final pending = _scheduledSelectionSnapshot;
+    if (pending != null &&
+        pending.serverId == snapshot.serverId &&
+        pending.scopeId == snapshot.scopeId) {
+      _scheduledSelectionSnapshot = snapshot.copyWith(
+        syncRemote: pending.syncRemote || snapshot.syncRemote,
+      );
+    }
     await _persistSelectionSnapshot(snapshot, syncRemote: syncRemote);
   }
 
@@ -5671,7 +5687,18 @@ class ChatProvider extends ChangeNotifier {
           );
       _scheduledSelectionSnapshot = null;
       _selectionPersistenceSyncRemote = false;
-      unawaited(_persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote));
+      unawaited(
+        _persistSelectionSnapshot(
+          snapshot,
+          syncRemote: snapshot.syncRemote,
+        ).catchError((Object error, StackTrace stackTrace) {
+          AppLogger.warn(
+            'Selection persistence flush failed at dispose',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }),
+      );
     }
     _sessionAttentionPublishDebounce?.cancel();
     _sessionAttentionThresholdTimer?.cancel();
