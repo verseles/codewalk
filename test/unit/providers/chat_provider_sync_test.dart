@@ -1747,5 +1747,49 @@ void main() {
         expect(variantMapJson, contains('high'));
       },
     );
+
+    test(
+      'rapid variant changes persist only the latest value',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': testModel(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'medium': ModelVariant(id: 'medium', name: 'Medium'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.setSelectedVariant('high');
+        await provider.setSelectedVariant('medium');
+        await provider.debugWaitForSelectionPersistence();
+
+        final blob = await localDataSource.getSelectionBlob(
+          serverId: 'srv_test',
+          scopeId: provider.projectProvider.currentProject?.path ??
+              provider.projectProvider.currentProjectId,
+        );
+        expect(blob, isNotNull);
+        expect(blob, contains('"medium"'));
+        expect(blob, isNot(contains('"high"')));
+      },
+    );
   });
 }

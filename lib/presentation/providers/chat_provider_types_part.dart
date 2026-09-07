@@ -724,6 +724,7 @@ class _SelectionPersistenceSnapshot {
     required this.contextKey,
     required this.directory,
     required this.remoteSyncGeneration,
+    required this.persistenceVersion,
     required this.selectedProviderId,
     required this.selectedModelId,
     required this.selectedAgentName,
@@ -746,6 +747,10 @@ class _SelectionPersistenceSnapshot {
   /// patches the next project's config).
   final String? directory;
   final int remoteSyncGeneration;
+  // Per-scope monotonic version assigned at capture; the flush skips a stale
+  // in-flight snapshot when a newer capture bumped the scope version during
+  // the encode/file-IO await window.
+  final int persistenceVersion;
   final String? selectedProviderId;
   final String? selectedModelId;
   final String? selectedAgentName;
@@ -766,6 +771,7 @@ class _SelectionPersistenceSnapshot {
       contextKey: contextKey,
       directory: directory,
       remoteSyncGeneration: remoteSyncGeneration,
+      persistenceVersion: persistenceVersion,
       selectedProviderId: selectedProviderId,
       selectedModelId: selectedModelId,
       selectedAgentName: selectedAgentName,

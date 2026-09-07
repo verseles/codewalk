@@ -584,6 +584,16 @@ class ChatProvider extends ChangeNotifier {
   // without touching disk at all.
   final Map<String, String> _lastPersistedSelectionBlobByScope =
       <String, String>{};
+  // Monotonic per-scope versions: every capture (scheduled or direct) bumps
+  // its scope version. The flush compares after the encode await and skips a
+  // stale in-flight snapshot when a newer one was captured meanwhile.
+  final Map<String, int> _selectionPersistenceVersionByScope =
+      <String, int>{};
+  int _selectionPersistenceVersionCounter = 0;
+  // Bounded immediate retries for a failing flush; the change itself stays
+  // dirty so the next schedule/explicit/lifecycle flush retries again.
+  int _selectionPersistenceConsecutiveFailures = 0;
+  static const int _maxSelectionPersistenceImmediateRetries = 3;
   Timer? _selectionPersistenceDebounce;
   int _selectionPersistenceGeneration = 0;
   String _activeContextKey = 'legacy::default';
@@ -2808,6 +2818,9 @@ class ChatProvider extends ChangeNotifier {
         ? 'legacy'
         : _activeServerId;
     final scopeId = _resolveContextScopeId();
+    final scopeKey = '$serverId::$scopeId';
+    final persistenceVersion = ++_selectionPersistenceVersionCounter;
+    _selectionPersistenceVersionByScope[scopeKey] = persistenceVersion;
     final overrides = _sessionOverridesForContext(_activeContextKey);
     final serializedOverrides = <String, dynamic>{};
     for (final entry in overrides.entries) {
@@ -2821,6 +2834,7 @@ class ChatProvider extends ChangeNotifier {
       contextKey: _activeContextKey,
       directory: projectProvider.currentDirectory,
       remoteSyncGeneration: _remoteSelectionSyncGeneration,
+      persistenceVersion: persistenceVersion,
       selectedProviderId: _selectedProviderId,
       selectedModelId: _selectedModelId,
       selectedAgentName: _selectedAgentName,
@@ -2873,9 +2887,16 @@ class ChatProvider extends ChangeNotifier {
   }) async {
     // Single coalesced blob write (file-backed on native targets) instead of
     // 8 sequential prefs writes. Identical payloads skip disk entirely.
+    // Stale in-flight snapshots (superseded by a newer capture during the
+    // encode await) are skipped: the newer path already wrote or holds its
+    // own pending flush.
     final scopeKey = '${snapshot.serverId}::${snapshot.scopeId}';
     final blob = _selectionBlobFromSnapshot(snapshot);
     final blobJson = await _encodeSelectionBlobAsync(blob);
+    if (_selectionPersistenceVersionByScope[scopeKey] !=
+        snapshot.persistenceVersion) {
+      return;
+    }
     if (_lastPersistedSelectionBlobByScope[scopeKey] != blobJson) {
       await AppLogger.runPerformanceTask<void>(
         'selection_persist_blob',
@@ -2891,6 +2912,7 @@ class ChatProvider extends ChangeNotifier {
       );
       _lastPersistedSelectionBlobByScope[scopeKey] = blobJson;
     }
+    _selectionPersistenceConsecutiveFailures = 0;
     if (syncRemote) {
       if (snapshot.remoteSyncGeneration != _remoteSelectionSyncGeneration) {
         return;
@@ -3005,10 +3027,11 @@ class ChatProvider extends ChangeNotifier {
         await _persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote);
       }
     } catch (error, stackTrace) {
-      // Retain the dirty flag so the post-finally retry re-persists
-      // latest-wins state instead of dropping the change until the next
-      // selection interaction (ADR-016 rule 10).
+      // Retain the dirty flag so the change is preserved for the next
+      // schedule/explicit/lifecycle flush instead of being dropped, and count
+      // the failure to bound immediate retries below (ADR-016 rule 10).
       _selectionPersistenceDirty = true;
+      _selectionPersistenceConsecutiveFailures++;
       AppLogger.warn(
         'Selection persistence flush failed',
         error: error,
@@ -3017,7 +3040,14 @@ class ChatProvider extends ChangeNotifier {
     } finally {
       _selectionPersistenceTask = null;
     }
-    if (_selectionPersistenceDirty) {
+    // Bounded immediate retry: a persistently failing store (disk-full, quota)
+    // must not spin the event loop forever. Beyond the cap the change stays
+    // dirty for the next schedule/explicit/lifecycle flush. Never retry after
+    // disposal.
+    if (_selectionPersistenceDirty &&
+        !_sessionTabsDisposed &&
+        _selectionPersistenceConsecutiveFailures <=
+            _maxSelectionPersistenceImmediateRetries) {
       final retryTask = _flushScheduledSelectionPersistence();
       _selectionPersistenceTask = retryTask;
       unawaited(retryTask);
