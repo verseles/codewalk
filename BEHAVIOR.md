@@ -1848,6 +1848,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Given** the selected model supports variants (e.g., reasoning effort levels)
 - **When** the user opens the variant selector
 - **Then** the available variants are listed and one can be selected for the session
+- **Then** dismissing the selector without choosing (barrier tap or Escape) keeps the current variant; only an explicit `Auto` choice clears it
 
 ### Favorite models
 

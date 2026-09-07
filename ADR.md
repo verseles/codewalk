@@ -716,6 +716,8 @@ Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, w
 
 **Update** (2026-08-21, commits `249eea77..8e0f6140`, v1.213.0): Rules 9–10 harden debounced session-tab persistence against process death on backgrounding (rule 9) and stale-retry overwrites of newer persisted state (rule 10).
 
+**Update** (2026-09-07, commits `1678f033..a49d2556`): composer selection state (provider/model/agent, recent models, usage counts, per-model variant map, per-agent memory, session overrides) is persisted as one coalesced `selection_blob_v1` payload through the same hybrid file-backed store instead of 8 sequential `SharedPreferences` writes, eliminating whole-prefs-file rewrite storms on the desktop interaction frame. Frozen schedule-time snapshots preserve scope identity across context switches, per-scope versions plus latest-wins supersede/skip rules prevent stale overwrites, immediate retries are bounded with disposal guard, and the remote `/config` sync runs write-behind. Legacy per-field keys are drained best-effort after the first blob write and remain read fallbacks until then.
+
 This is an addendum to ADR-016, which owns the local persistence boundary. ADR-020 remains the related session-level SWR consumer of these helpers; it does not need a duplicate decision or a new ADR.
 
 ### Rationale
