@@ -1003,6 +1003,9 @@ class _ChatPageState extends State<ChatPage>
           unawaited(foregroundPolicyTask);
         }
         _handleReturnToChat(provider, reason: 'app-resumed');
+        // Hidden-tab network stalls (web) can wedge health probing; re-probe
+        // on every return so a stuck offline pill recovers without reload.
+        unawaited(_appProvider?.refreshServerHealth());
       } else {
         unawaited(foregroundPolicyTask);
       }

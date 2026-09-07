@@ -167,6 +167,11 @@ class AppProvider extends ChangeNotifier {
   final Map<String, ServerHealthStatus> _serverHealthById =
       <String, ServerHealthStatus>{};
   bool _healthCheckInFlight = false;
+  DateTime? _healthCheckStartedAt;
+
+  /// A probe holding the gate longer than this is provably wedged (a
+  /// legitimate pass always finishes within a few request timeouts).
+  Duration get _staleHealthGateTimeout => _serverHealthRequestTimeout * 4;
   bool _queuedHealthRefreshAll = false;
   final Set<String> _queuedHealthServerIds = <String>{};
   StreamSubscription<TailscaleState>? _tailscaleStateSubscription;
@@ -2066,11 +2071,22 @@ class AppProvider extends ChangeNotifier {
     final normalizedServerId = serverId?.trim();
 
     if (_healthCheckInFlight) {
-      _queueHealthRefresh(serverId: normalizedServerId);
-      return;
+      // A hidden-tab XHR on web can hang past the Dio timeouts
+      // (connectTimeout is unsupported on web), wedging the gate forever
+      // and freezing the offline pill until a full reload. Break gates that
+      // outlived any legitimate probe by a wide margin.
+      final startedAt = _healthCheckStartedAt;
+      if (startedAt == null ||
+          DateTime.now().difference(startedAt) <=
+              _staleHealthGateTimeout) {
+        _queueHealthRefresh(serverId: normalizedServerId);
+        return;
+      }
+      _healthCheckInFlight = false;
     }
 
     _healthCheckInFlight = true;
+    _healthCheckStartedAt = DateTime.now();
     var runAll = normalizedServerId == null || normalizedServerId.isEmpty;
     var runServerIds = <String>{};
     if (!runAll) {
@@ -2110,6 +2126,7 @@ class AppProvider extends ChangeNotifier {
       }
     } finally {
       _healthCheckInFlight = false;
+      _healthCheckStartedAt = null;
       _queuedHealthRefreshAll = false;
       _queuedHealthServerIds.clear();
     }
