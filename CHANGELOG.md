@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.227.0 - 2026-09-07
+
+- docs(behavior): document top older-history loading pill (issue #178)
+- fix(review): invalidate older-history load token on session churn (issue #178)
+- feat(chat): show top older-history loading pill during pagination (issue #178)
+
 ## v1.226.0 - 2026-09-06
 
 - docs(behavior): document Tailscale login-first URL gating and cancellable save/test (issue #177)
