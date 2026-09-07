@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.228.0 - 2026-09-07
+
+- docs: record variant dismiss no-op and selection blob persistence
+- fix(review): close check-to-queue window and guard direct persists
+- fix(review): harden blob persist ordering and retry bounds
+- fix(review): close selection persistence races flagged on 1678f033
+- perf(desktop): root-cause jank fixes for composer menus, tabs and context switches
+
 ## v1.227.0 - 2026-09-07
 
 - docs(behavior): document top older-history loading pill (issue #178)
