@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 /// Detected file path with optional line and column numbers.
 class FilePathMatch {
   const FilePathMatch({
@@ -164,8 +166,9 @@ class FilePathDetector {
       ));
     }
 
-    // Also detect Windows paths on Windows platforms only.
-    if (Platform.isWindows) {
+    // Also detect Windows paths on Windows platforms only. Guarded by
+    // kIsWeb because dart:io Platform getters throw UnsupportedError on web.
+    if (!kIsWeb && Platform.isWindows) {
       final winMatches = _windowsPathRe.allMatches(text);
       for (final match in winMatches) {
         if (_isExcludedByCodeBlock(match.start, match.end, codeBlockRanges)) {
