@@ -389,11 +389,13 @@ int _modelAttachmentSignature(Model? model) {
 }
 
 int _quickReplySelectionSignature(ChatProvider chatProvider) {
+  // Root jank fix: the outer chat-content selector must not invalidate on
+  // mere selection changes (provider/model/agent/variant). Quick replies
+  // depend only on the available catalogs; the selected values are owned by
+  // the narrow `_ComposerSelectionBuildKey` selector. Keeping selected ids
+  // here rebuilt the whole timeline/composer on every variant select and
+  // stalled the menu pop/ripple on desktop.
   return Object.hash(
-    chatProvider.selectedAgentName,
-    chatProvider.selectedProviderId,
-    chatProvider.selectedModelId,
-    chatProvider.selectedVariantId,
     _agentListSignature(chatProvider.selectableAgents),
     _quickReplyModelListSignature(chatProvider),
     _variantListSignature(chatProvider.availableVariants),

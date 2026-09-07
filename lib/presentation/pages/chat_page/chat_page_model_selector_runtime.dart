@@ -1327,18 +1327,15 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                                           Navigator.of(
                                             bottomSheetContext,
                                           ).pop();
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                                if (!mounted) return;
-                                                unawaited(
-                                                  chatProvider
-                                                      .setSelectedModelByProvider(
-                                                        providerId:
-                                                            entry.providerId,
-                                                        modelId: entry.modelId,
-                                                      ),
-                                                );
-                                              });
+                                          if (!mounted) return;
+                                          unawaited(
+                                            chatProvider
+                                                .setSelectedModelByProvider(
+                                                  providerId:
+                                                      entry.providerId,
+                                                  modelId: entry.modelId,
+                                                ),
+                                          );
                                         },
                                       ),
                                   ],
@@ -1404,18 +1401,15 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                                           Navigator.of(
                                             bottomSheetContext,
                                           ).pop();
-                                          WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                                if (!mounted) return;
-                                                unawaited(
-                                                  chatProvider
-                                                      .setSelectedModelByProvider(
-                                                        providerId:
-                                                            entry.providerId,
-                                                        modelId: entry.modelId,
-                                                      ),
-                                                );
-                                              });
+                                          if (!mounted) return;
+                                          unawaited(
+                                            chatProvider
+                                                .setSelectedModelByProvider(
+                                                  providerId:
+                                                      entry.providerId,
+                                                  modelId: entry.modelId,
+                                                ),
+                                          );
                                         },
                                       ),
                                   ],
@@ -1522,6 +1516,11 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
     if (variants.isEmpty) {
       return;
     }
+    // Snapshot selection before the menu opens: menu items must not read the
+    // live provider (which would rebuild/animate against overlay ripples) and
+    // dismissal (null) must stay distinct from explicit Auto selection.
+    final snapshotVariantId = chatProvider.selectedVariantId;
+    const autoSentinel = '__codewalk_variant_auto__';
 
     final buttonBox = anchorContext.findRenderObject() as RenderBox?;
     final overlayBox =
@@ -1554,7 +1553,7 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
         .toDouble();
     final top = (buttonRect.top - 4).clamp(margin, overlayBox.size.height - 48);
 
-    final selected = await showMenu<String?>(
+    final selected = await showMenu<String>(
       context: context,
       constraints: BoxConstraints(minWidth: menuWidth, maxWidth: menuWidth),
       position: RelativeRect.fromLTRB(
@@ -1564,9 +1563,9 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
         overlayBox.size.height - top.toDouble(),
       ),
       items: [
-        PopupMenuItem<String?>(
+        PopupMenuItem<String>(
           key: const ValueKey<String>('variant_selector_option_auto'),
-          value: null,
+          value: autoSentinel,
           child: Row(
             children: [
               Expanded(
@@ -1576,13 +1575,13 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                   maxLines: 1,
                 ),
               ),
-              if (chatProvider.selectedVariantId == null)
+              if (snapshotVariantId == null)
                 const Icon(Symbols.check_rounded, size: 18),
             ],
           ),
         ),
         for (final variant in variants)
-          PopupMenuItem<String?>(
+          PopupMenuItem<String>(
             key: ValueKey<String>('variant_selector_option_${variant.id}'),
             value: variant.id,
             child: Row(
@@ -1594,20 +1593,26 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                     maxLines: 1,
                   ),
                 ),
-                if (chatProvider.selectedVariantId == variant.id)
+                if (snapshotVariantId == variant.id)
                   const Icon(Symbols.check_rounded, size: 18),
               ],
             ),
           ),
       ],
     );
-    if (selected == null && chatProvider.selectedVariantId == null) {
+    // Null means dismissed via barrier/Escape: strict no-op, never reset to Auto.
+    if (selected == null) {
       return;
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(chatProvider.setSelectedVariant(selected));
-    });
+    final targetVariantId = selected == autoSentinel ? null : selected;
+    if (targetVariantId == snapshotVariantId) {
+      return;
+    }
+    if (!mounted) return;
+    // Immediate apply after pop: rebuild scope is already narrowed to the
+    // composer selector, so the update lands without stalling the exit
+    // animation or the ripple. No postFrame delay.
+    unawaited(chatProvider.setSelectedVariant(targetVariantId));
   }
 
   Future<void> _createNewSession({bool closeDrawerOnCreate = false}) async {

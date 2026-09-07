@@ -205,6 +205,19 @@ abstract class AppLocalDataSource {
     String? scopeId,
   });
 
+  /// Coalesced composer selection blob (v1) scoped by server/scope.
+  /// Steady-state selection persistence writes this single file-backed key
+  /// instead of 8 sequential SharedPreferences writes (which rewrite the
+  /// whole prefs file synchronously per write on Linux/Windows).
+  Future<String?> getSelectionBlob({String? serverId, String? scopeId});
+
+  /// Save coalesced selection blob.
+  Future<void> saveSelectionBlob(
+    String blobJson, {
+    String? serverId,
+    String? scopeId,
+  });
+
   /// Technical comment translated to English.
   Future<String?> getThemeMode();
 
@@ -520,6 +533,8 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   final Set<String> _pendingLargeCacheMigrationKeys = <String>{};
   final Map<String, Future<void>> _largeCacheMutations =
       <String, Future<void>>{};
+  final Map<String, Map<String, dynamic>?> _selectionBlobCache =
+      <String, Map<String, dynamic>?>{};
 
   @override
   Future<String?> getServerHost() async {
@@ -786,6 +801,14 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final value = blob['provider']?.toString().trim();
+      return (value == null || value.isEmpty) ? null : value;
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedProviderKey,
@@ -813,6 +836,14 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getSelectedModel({String? serverId, String? scopeId}) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final value = blob['model']?.toString().trim();
+      return (value == null || value.isEmpty) ? null : value;
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedModelKey,
@@ -840,6 +871,14 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
 
   @override
   Future<String?> getSelectedAgent({String? serverId, String? scopeId}) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final value = blob['agent']?.toString().trim();
+      return (value == null || value.isEmpty) ? null : value;
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedAgentKey,
@@ -872,6 +911,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final raw = blob['variantMap'];
+      if (raw is Map) {
+        return jsonEncode(Map<String, dynamic>.from(raw));
+      }
+      return jsonEncode(<String, dynamic>{});
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.selectedVariantMapKey,
@@ -902,6 +952,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final raw = blob['overrides'];
+      if (raw is Map) {
+        return jsonEncode(Map<String, dynamic>.from(raw));
+      }
+      return jsonEncode(<String, dynamic>{});
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.sessionSelectionOverridesKey,
@@ -932,6 +993,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final raw = blob['agentMemory'];
+      if (raw is Map) {
+        return jsonEncode(Map<String, dynamic>.from(raw));
+      }
+      return jsonEncode(<String, dynamic>{});
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.agentSelectionMemoryKey,
@@ -994,6 +1066,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final raw = blob['recent'];
+      if (raw is List) {
+        return jsonEncode(List<dynamic>.from(raw));
+      }
+      return jsonEncode(<dynamic>[]);
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.recentModelsKey,
@@ -1221,6 +1304,17 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
+    final blob = await _readSelectionBlobMap(
+      serverId: serverId,
+      scopeId: scopeId,
+    );
+    if (blob != null) {
+      final raw = blob['usage'];
+      if (raw is Map) {
+        return jsonEncode(Map<String, dynamic>.from(raw));
+      }
+      return jsonEncode(<String, dynamic>{});
+    }
     return _sharedPreferences.getString(
       _scopedKey(
         AppConstants.modelUsageCountsKey,
@@ -1244,6 +1338,57 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       ),
       usageCountsJson,
     );
+  }
+
+  String _selectionBlobKey({String? serverId, String? scopeId}) =>
+      _scopedKey(
+        AppConstants.selectionBlobKey,
+        serverId: serverId,
+        scopeId: scopeId,
+      );
+
+  @override
+  Future<String?> getSelectionBlob({String? serverId, String? scopeId}) {
+    return _readLargeCachePayload(
+      _selectionBlobKey(serverId: serverId, scopeId: scopeId),
+    );
+  }
+
+  @override
+  Future<void> saveSelectionBlob(
+    String blobJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    final key = _selectionBlobKey(serverId: serverId, scopeId: scopeId);
+    await _writeLargeCachePayload(key, blobJson);
+    try {
+      final decoded = jsonDecode(blobJson);
+      _selectionBlobCache[key] = decoded is Map<String, dynamic>
+          ? decoded
+          : null;
+    } catch (_) {
+      _selectionBlobCache.remove(key);
+    }
+    // One-time best-effort drain of legacy per-field prefs keys so the prefs
+    // file does not stay bloated after the blob becomes source of truth.
+    // Reads prefer the blob when present, so stale legacy values are ignored.
+    for (final base in const <String>[
+      AppConstants.selectedProviderKey,
+      AppConstants.selectedModelKey,
+      AppConstants.selectedAgentKey,
+      AppConstants.recentModelsKey,
+      AppConstants.modelUsageCountsKey,
+      AppConstants.selectedVariantMapKey,
+      AppConstants.agentSelectionMemoryKey,
+      AppConstants.sessionSelectionOverridesKey,
+    ]) {
+      try {
+        await _sharedPreferences.remove(
+          _scopedKey(base, serverId: serverId, scopeId: scopeId),
+        );
+      } catch (_) {}
+    }
   }
 
   @override

@@ -229,6 +229,20 @@ class _DebouncedRecordingDataSource extends AppLocalDataSourceImpl {
       scopeId: scopeId,
     ),
   );
+
+  @override
+  Future<void> saveSelectionBlob(
+    String blobJson, {
+    String? serverId,
+    String? scopeId,
+  }) => _record(
+    scopeId,
+    () => super.saveSelectionBlob(
+      blobJson,
+      serverId: serverId,
+      scopeId: scopeId,
+    ),
+  );
 }
 
 void main() {

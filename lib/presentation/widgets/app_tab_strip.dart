@@ -442,19 +442,21 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                           child: Row(
                             children: [
                               for (final tab in pinnedTabs)
-                                _buildTab(
-                                  context,
-                                  tab,
-                                  tab.isSelected
-                                      ? math.min(selectedPinnedContentWidth, selectedPinnedWidth)
-                                      : kAppTabPinnedWidth,
-                                  compactPinned: !tab.isSelected,
-                                  // Unselected pinned tabs never show trailing
-                                  // controls: they render at the fixed 36px
-                                  // icon width where nothing else fits.
-                                  trailing: tab.isSelected
-                                      ? selectedPinnedTrailing
-                                      : null,
+                                RepaintBoundary(
+                                  child: _buildTab(
+                                    context,
+                                    tab,
+                                    tab.isSelected
+                                        ? math.min(selectedPinnedContentWidth, selectedPinnedWidth)
+                                        : kAppTabPinnedWidth,
+                                    compactPinned: !tab.isSelected,
+                                    // Unselected pinned tabs never show trailing
+                                    // controls: they render at the fixed 36px
+                                    // icon width where nothing else fits.
+                                    trailing: tab.isSelected
+                                        ? selectedPinnedTrailing
+                                        : null,
+                                  ),
                                 ),
                             ],
                           ),
@@ -479,11 +481,13 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                           child: Row(
                             children: [
                               for (final entry in regularLayout)
-                                _buildTab(
-                                  context,
-                                  entry.tab,
-                                  entry.width,
-                                  trailing: entry.trailing,
+                                RepaintBoundary(
+                                  child: _buildTab(
+                                    context,
+                                    entry.tab,
+                                    entry.width,
+                                    trailing: entry.trailing,
+                                  ),
                                 ),
                             ],
                           ),

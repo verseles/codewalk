@@ -901,16 +901,17 @@ extension _ChatPageChrome on _ChatPageState {
                     icon: const Icon(Symbols.view_sidebar),
                   ),
                 ),
-              Consumer<ChatProvider>(
-                builder: (context, chatProvider, _) {
+              Selector<ChatProvider, bool>(
+                selector: (_, p) => p.canUndoCurrentSession,
+                builder: (context, canUndo, _) {
                   return IconButton(
                     key: const ValueKey<String>('appbar_undo_button'),
                     icon: const Icon(Symbols.undo_rounded),
                     tooltip: context.l10n.chatUndoLastTurn,
-                    onPressed: chatProvider.canUndoCurrentSession
+                    onPressed: canUndo
                         ? () => unawaited(
                             _triggerHistoryAction(
-                              chatProvider,
+                              context.read<ChatProvider>(),
                               action: _HistoryToolbarAction.undo,
                             ),
                           )
@@ -918,9 +919,10 @@ extension _ChatPageChrome on _ChatPageState {
                   );
                 },
               ),
-              Consumer<ChatProvider>(
-                builder: (context, chatProvider, _) {
-                  if (!chatProvider.canRedoCurrentSession) {
+              Selector<ChatProvider, bool>(
+                selector: (_, p) => p.canRedoCurrentSession,
+                builder: (context, canRedo, _) {
+                  if (!canRedo) {
                     return const SizedBox.shrink();
                   }
                   return IconButton(
@@ -929,7 +931,7 @@ extension _ChatPageChrome on _ChatPageState {
                     tooltip: context.l10n.chatRedoLastTurn,
                     onPressed: () => unawaited(
                       _triggerHistoryAction(
-                        chatProvider,
+                        context.read<ChatProvider>(),
                         action: _HistoryToolbarAction.redo,
                       ),
                     ),

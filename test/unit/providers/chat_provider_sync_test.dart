@@ -1606,5 +1606,146 @@ void main() {
         expect(provider.modelUsageCounts['provider_b/model_hot'], 7);
       },
     );
+
+    test(
+      'setSelectedVariant with identical value emits no notification',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': testModel(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'medium': ModelVariant(id: 'medium', name: 'Medium'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.setSelectedVariant('high');
+        await provider.debugWaitForSelectionPersistence();
+
+        var notifications = 0;
+        provider.addListener(() {
+          notifications += 1;
+        });
+
+        // Identical reselect must be a strict no-op: no notify, so the menu
+        // pop/ripple animation never contends with a rebuild.
+        await provider.setSelectedVariant('high');
+        await Future<void>.delayed(Duration.zero);
+
+        expect(provider.selectedVariantId, 'high');
+        expect(notifications, 0);
+      },
+    );
+
+    test(
+      'setSelectedModelByProvider with identical value emits no notification',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_a': testModel('model_a'),
+                  'model_b': testModel('model_b'),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{'provider_a': 'model_a'},
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_a',
+          modelId: 'model_b',
+        );
+        await provider.debugWaitForSelectionPersistence();
+
+        var notifications = 0;
+        provider.addListener(() {
+          notifications += 1;
+        });
+
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_a',
+          modelId: 'model_b',
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(provider.selectedModelId, 'model_b');
+        expect(notifications, 0);
+      },
+    );
+
+    test(
+      'selection flush persists a single blob readable via legacy getters',
+      () async {
+        appRepository.providersResult = Right(
+          ProvidersResponse(
+            providers: <Provider>[
+              Provider(
+                id: 'provider_a',
+                name: 'Provider A',
+                env: const <String>[],
+                models: <String, Model>{
+                  'model_reasoning': testModel(
+                    'model_reasoning',
+                    variants: const <String, ModelVariant>{
+                      'medium': ModelVariant(id: 'medium', name: 'Medium'),
+                      'high': ModelVariant(id: 'high', name: 'High'),
+                    },
+                  ),
+                },
+              ),
+            ],
+            defaultModels: const <String, String>{
+              'provider_a': 'model_reasoning',
+            },
+            connected: const <String>['provider_a'],
+          ),
+        );
+
+        await provider.initializeProviders();
+        await provider.setSelectedVariant('high');
+        await provider.debugWaitForSelectionPersistence();
+
+        final blob = await localDataSource.getSelectionBlob(
+          serverId: 'srv_test',
+          scopeId: provider.projectProvider.currentProject?.path ??
+              provider.projectProvider.currentProjectId,
+        );
+        expect(blob, isNotNull);
+        expect(blob, contains('high'));
+
+        // Legacy getters stay source-compatible through the blob.
+        final variantMapJson = await localDataSource.getSelectedVariantMap(
+          serverId: 'srv_test',
+          scopeId: provider.projectProvider.currentProject?.path ??
+              provider.projectProvider.currentProjectId,
+        );
+        expect(variantMapJson, contains('high'));
+      },
+    );
   });
 }

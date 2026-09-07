@@ -276,10 +276,15 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
         )) {
       return true;
     }
-    return _isScopedLargeCachePayloadKey(
+    if (_isScopedLargeCachePayloadKey(
       key,
       AppConstants.sessionMessagesSnapshotKey,
-    );
+    )) {
+      return true;
+    }
+    // Coalesced selection blob lives in the same hybrid file store so
+    // steady-state selection writes never touch the sync prefs file.
+    return _isScopedLargeCachePayloadKey(key, AppConstants.selectionBlobKey);
   }
 
   bool _isScopedLargeCachePayloadKey(String key, String base) {
@@ -358,5 +363,43 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     }
     _migratedLargeCacheKeys.clear();
     _pendingLargeCacheMigrationKeys.clear();
+    _selectionBlobCache.clear();
   }
+
+  /// Decode and cache the coalesced selection blob for a scope. Returns null
+  /// when no blob exists (caller falls back to legacy per-field prefs keys).
+  /// When a blob exists it is the source of truth, even for empty fields.
+  Future<Map<String, dynamic>?> _readSelectionBlobMap({
+    String? serverId,
+    String? scopeId,
+  }) async {
+    final key = _selectionBlobKey(serverId: serverId, scopeId: scopeId);
+    if (_selectionBlobCache.containsKey(key)) {
+      return _selectionBlobCache[key];
+    }
+    String? raw;
+    try {
+      raw = await _readLargeCachePayload(key);
+    } catch (_) {
+      raw = null;
+    }
+    if (raw == null || raw.trim().isEmpty) {
+      _selectionBlobCache[key] = null;
+      return null;
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) {
+        _selectionBlobCache[key] = null;
+        return null;
+      }
+      _selectionBlobCache[key] = decoded;
+      return decoded;
+    } catch (_) {
+      _selectionBlobCache[key] = null;
+      return null;
+    }
+  }
+
+
 }

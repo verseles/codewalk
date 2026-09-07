@@ -7,10 +7,11 @@ extension _ChatProviderSessionOps on ChatProvider {
     String? newlyOpenedDirectory,
   }) async {
     titleGenerator?.cancelPendingWaiters();
-    // Flush any pending debounced selection persistence for the old
-    // context before switching, otherwise the timer could capture the
-    // new context's server/scope and persist stale data under the
-    // wrong key (issue #161).
+    // The flush is now a single cheap file-backed blob write with frozen
+    // scope values (no sync prefs rewrites, no network — remote PATCH is
+    // write-behind). Keep the await: downstream loads rely on persistence
+    // ordering, and the awaited cost is one async file write, not UI-thread
+    // blocking work.
     await flushSelectionPersistence();
     final useFastProjectTransition =
         reason == 'project' && !waitForRevalidation;

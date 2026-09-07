@@ -1207,6 +1207,130 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   }
 
   @override
+  Future<String?> getSelectionBlob({String? serverId, String? scopeId}) async {
+    return scopedStrings[_key(
+      'selection_blob_v1',
+      serverId: serverId,
+      scopeId: scopeId,
+    )];
+  }
+
+  @override
+  Future<void> saveSelectionBlob(
+    String blobJson, {
+    String? serverId,
+    String? scopeId,
+  }) async {
+    scopedStrings[_key(
+      'selection_blob_v1',
+      serverId: serverId,
+      scopeId: scopeId,
+    )] = blobJson;
+    // Decompose into legacy per-field keys so existing per-field getters and
+    // tests keep working without modification.
+    try {
+      final decoded = jsonDecode(blobJson);
+      if (decoded is Map<String, dynamic>) {
+        final provider = decoded['provider']?.toString();
+        final model = decoded['model']?.toString();
+        final agent = decoded['agent']?.toString();
+        if (provider != null && provider.trim().isNotEmpty) {
+          scopedStrings[_key(
+            'selected_provider',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = provider;
+          if (serverId == null && scopeId == null) {
+            selectedProvider = provider;
+          }
+        }
+        if (model != null && model.trim().isNotEmpty) {
+          scopedStrings[_key(
+            'selected_model',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = model;
+          if (serverId == null && scopeId == null) selectedModel = model;
+        }
+        if (agent != null && agent.trim().isNotEmpty) {
+          scopedStrings[_key(
+            'selected_agent',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = agent;
+          if (serverId == null && scopeId == null) selectedAgent = agent;
+        }
+        final recent = decoded['recent'];
+        if (recent is List) {
+          final recentJson = jsonEncode(List<dynamic>.from(recent));
+          scopedStrings[_key(
+            'recent_models',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = recentJson;
+          if (serverId == null && scopeId == null) {
+            recentModelsJson = recentJson;
+          }
+        }
+        final usage = decoded['usage'];
+        if (usage is Map) {
+          final usageJson = jsonEncode(Map<String, dynamic>.from(usage));
+          scopedStrings[_key(
+            'model_usage_counts',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = usageJson;
+          if (serverId == null && scopeId == null) {
+            modelUsageCountsJson = usageJson;
+          }
+        }
+        final variantMap = decoded['variantMap'];
+        if (variantMap is Map) {
+          final variantJson = jsonEncode(
+            Map<String, dynamic>.from(variantMap),
+          );
+          scopedStrings[_key(
+            'selected_variant_map',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = variantJson;
+          if (serverId == null && scopeId == null) {
+            selectedVariantMapJson = variantJson;
+          }
+        }
+        final agentMemory = decoded['agentMemory'];
+        if (agentMemory is Map) {
+          final memoryJson = jsonEncode(
+            Map<String, dynamic>.from(agentMemory),
+          );
+          scopedStrings[_key(
+            'agent_selection_memory',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = memoryJson;
+          if (serverId == null && scopeId == null) {
+            agentSelectionMemoryJson = memoryJson;
+          }
+        }
+        final overrides = decoded['overrides'];
+        if (overrides is Map) {
+          final overridesJson = jsonEncode(
+            Map<String, dynamic>.from(overrides),
+          );
+          scopedStrings[_key(
+            'session_selection_overrides',
+            serverId: serverId,
+            scopeId: scopeId,
+          )] = overridesJson;
+          if (serverId == null && scopeId == null) {
+            sessionSelectionOverridesJson = overridesJson;
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
   Future<void> saveServerProfilesJson(String profilesJson) async {
     serverProfilesJson = profilesJson;
   }
@@ -1533,6 +1657,21 @@ class DelayedSelectionPersistenceLocalDataSource
     return _afterDelay(
       () => super.saveSessionSelectionOverridesJson(
         overridesJson,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveSelectionBlob(
+    String blobJson, {
+    String? serverId,
+    String? scopeId,
+  }) {
+    return _afterDelay(
+      () => super.saveSelectionBlob(
+        blobJson,
         serverId: serverId,
         scopeId: scopeId,
       ),

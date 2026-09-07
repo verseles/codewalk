@@ -20,6 +20,7 @@ class AppConstants {
   static const String selectedModelKey = 'selected_model';
   static const String selectedAgentKey = 'selected_agent';
   static const String selectedVariantMapKey = 'selected_variant_map';
+  static const String selectionBlobKey = 'selection_blob_v1';
   static const String sessionSelectionOverridesKey =
       'session_selection_overrides';
   static const String agentSelectionMemoryKey = 'agent_selection_memory';

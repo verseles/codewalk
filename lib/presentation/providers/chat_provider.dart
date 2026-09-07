@@ -138,6 +138,11 @@ class _SessionDiffResolution {
   final String? error;
 }
 
+/// Top-level blob encoder for Isolate.run: single json.encode of the
+/// coalesced selection map. Must stay top-level (no closures) to be
+/// transferable to the worker isolate.
+String _encodeSelectionBlob(Map<String, dynamic> blob) => json.encode(blob);
+
 /// Chat provider
 class ChatProvider extends ChangeNotifier {
   ChatProvider({
@@ -570,13 +575,15 @@ class ChatProvider extends ChangeNotifier {
   bool _selectionPersistenceDirty = false;
   bool _selectionPersistenceSyncRemote = false;
 
-  /// Origin captured at schedule time. The debounced/mid-switch flush must
-  /// persist under the scheduling scope: capturing at flush time would pick
-  /// up the next project's scope/directory when the 300ms debounce (or a
-  /// slow write) straddles a project switch. Selection VALUES are re-read
-  /// fresh at flush (see applyingOrigin) so newer direct mutations are never
-  /// overwritten by older scheduled state.
-  _SelectionPersistenceOrigin? _scheduledSelectionOrigin;
+  /// Frozen snapshot captured at schedule time. The debounced/mid-switch flush
+  /// persists these frozen values under the scheduling scope, so a slow write
+  /// straddling a project switch never writes the next project's values under
+  /// the old scope key (issue #161) and the visible switch never awaits disk.
+  _SelectionPersistenceSnapshot? _scheduledSelectionSnapshot;
+  // Last successfully persisted blob per scope key, to skip identical writes
+  // without touching disk at all.
+  final Map<String, String> _lastPersistedSelectionBlobByScope =
+      <String, String>{};
   Timer? _selectionPersistenceDebounce;
   int _selectionPersistenceGeneration = 0;
   String _activeContextKey = 'legacy::default';
@@ -742,7 +749,14 @@ class ChatProvider extends ChangeNotifier {
     if (_sessionTabsDisposed) {
       return;
     }
-    _scheduleSessionAttentionPublish();
+    // Selection-only updates must not pay the attention-aggregate cost on the
+    // interaction frame: attention candidates never depend on the selected
+    // provider/model/agent/variant alone. Other paths still publish.
+    final isSelectionOnly =
+        reason.startsWith('selection_') || reason.startsWith('composer_');
+    if (!isSelectionOnly) {
+      _scheduleSessionAttentionPublish();
+    }
     if (!_isForegroundActive) {
       if (AppLogger.performanceLoggingEnabled) {
         _pendingNotifyReasons.add(reason);
@@ -2799,6 +2813,8 @@ class ChatProvider extends ChangeNotifier {
     for (final entry in overrides.entries) {
       serializedOverrides[entry.key] = _sessionOverrideToJson(entry.value);
     }
+    // Freeze cheap copies now; single encode happens once at flush (isolated
+    // when large), not 5x on the interaction frame.
     return _SelectionPersistenceSnapshot(
       serverId: serverId,
       scopeId: scopeId,
@@ -2808,118 +2824,75 @@ class ChatProvider extends ChangeNotifier {
       selectedProviderId: _selectedProviderId,
       selectedModelId: _selectedModelId,
       selectedAgentName: _selectedAgentName,
-      recentModelsJson: json.encode(_recentModelKeys),
-      modelUsageCountsJson: json.encode(_modelUsageCounts),
-      selectedVariantMapJson: json.encode(_selectedVariantByModel),
-      agentSelectionMemoryJson: json.encode(_encodeAgentSelectionMemory()),
-      sessionSelectionOverridesJson: json.encode(serializedOverrides),
+      recentModels: List<String>.from(_recentModelKeys),
+      modelUsageCounts: Map<String, int>.from(_modelUsageCounts),
+      selectedVariantByModel: Map<String, String>.from(_selectedVariantByModel),
+      agentSelectionMemory: _encodeAgentSelectionMemory().map(
+        (key, value) => MapEntry(key, Map<String, String?>.from(value)),
+      ),
+      sessionSelectionOverrides: serializedOverrides,
       syncRemote: syncRemote,
     );
   }
 
-  Future<void> _persistSelectionStep(
-    String field,
-    Future<void> Function() action, {
-    Object? value,
-    int? sizeBytes,
-  }) {
-    return AppLogger.runPerformanceTask<void>(
-      'selection_persist_$field',
-      action,
-      tags: const <String>{'chat:selection', 'persistence'},
-      context: AppLogger.performanceLoggingEnabled
-          ? <String, Object?>{
-              'field': field,
-              if (value != null) 'valueHash': AppLogger.safeContextId(value),
-              if (sizeBytes != null) 'sizeBytes': sizeBytes,
-            }
-          : null,
-    );
+  Map<String, dynamic> _selectionBlobFromSnapshot(
+    _SelectionPersistenceSnapshot snapshot,
+  ) {
+    return <String, dynamic>{
+      'v': 1,
+      'provider': snapshot.selectedProviderId,
+      'model': snapshot.selectedModelId,
+      'agent': snapshot.selectedAgentName,
+      'recent': snapshot.recentModels,
+      'usage': snapshot.modelUsageCounts,
+      'variantMap': snapshot.selectedVariantByModel,
+      'agentMemory': snapshot.agentSelectionMemory,
+      'overrides': snapshot.sessionSelectionOverrides,
+    };
+  }
+
+  Future<String> _encodeSelectionBlobAsync(Map<String, dynamic> blob) async {
+    // Isolate large encodes off the UI thread; small payloads encode directly
+    // to avoid isolate spin-up cost.
+    final overrideCount = blob['overrides'] is Map
+        ? (blob['overrides'] as Map).length
+        : 0;
+    if (overrideCount > 20) {
+      try {
+        return await Isolate.run(() => _encodeSelectionBlob(blob));
+      } catch (_) {
+        // Fall through to direct encode on isolate failure.
+      }
+    }
+    return _encodeSelectionBlob(blob);
   }
 
   Future<void> _persistSelectionSnapshot(
     _SelectionPersistenceSnapshot snapshot, {
     required bool syncRemote,
   }) async {
-    if (snapshot.selectedProviderId != null) {
-      await _persistSelectionStep(
-        'selected_provider',
-        () => localDataSource.saveSelectedProvider(
-          snapshot.selectedProviderId!,
+    // Single coalesced blob write (file-backed on native targets) instead of
+    // 8 sequential prefs writes. Identical payloads skip disk entirely.
+    final scopeKey = '${snapshot.serverId}::${snapshot.scopeId}';
+    final blob = _selectionBlobFromSnapshot(snapshot);
+    final blobJson = await _encodeSelectionBlobAsync(blob);
+    if (_lastPersistedSelectionBlobByScope[scopeKey] != blobJson) {
+      await AppLogger.runPerformanceTask<void>(
+        'selection_persist_blob',
+        () => localDataSource.saveSelectionBlob(
+          blobJson,
           serverId: snapshot.serverId,
           scopeId: snapshot.scopeId,
         ),
-        value: snapshot.selectedProviderId,
+        tags: const <String>{'chat:selection', 'persistence'},
+        context: AppLogger.performanceLoggingEnabled
+            ? <String, Object?>{'sizeBytes': blobJson.length}
+            : null,
       );
+      _lastPersistedSelectionBlobByScope[scopeKey] = blobJson;
     }
-    if (snapshot.selectedModelId != null) {
-      await _persistSelectionStep(
-        'selected_model',
-        () => localDataSource.saveSelectedModel(
-          snapshot.selectedModelId!,
-          serverId: snapshot.serverId,
-          scopeId: snapshot.scopeId,
-        ),
-        value: snapshot.selectedModelId,
-      );
-    }
-    await _persistSelectionStep(
-      'selected_agent',
-      () => localDataSource.saveSelectedAgent(
-        snapshot.selectedAgentName,
-        serverId: snapshot.serverId,
-        scopeId: snapshot.scopeId,
-      ),
-      value: snapshot.selectedAgentName,
-    );
-    await _persistSelectionStep(
-      'recent_models',
-      () => localDataSource.saveRecentModelsJson(
-        snapshot.recentModelsJson,
-        serverId: snapshot.serverId,
-        scopeId: snapshot.scopeId,
-      ),
-      sizeBytes: snapshot.recentModelsJson.length,
-    );
-    await _persistSelectionStep(
-      'model_usage_counts',
-      () => localDataSource.saveModelUsageCountsJson(
-        snapshot.modelUsageCountsJson,
-        serverId: snapshot.serverId,
-        scopeId: snapshot.scopeId,
-      ),
-      sizeBytes: snapshot.modelUsageCountsJson.length,
-    );
-    await _persistSelectionStep(
-      'selected_variant_map',
-      () => localDataSource.saveSelectedVariantMap(
-        snapshot.selectedVariantMapJson,
-        serverId: snapshot.serverId,
-        scopeId: snapshot.scopeId,
-      ),
-      sizeBytes: snapshot.selectedVariantMapJson.length,
-    );
-    await _persistSelectionStep(
-      'agent_selection_memory',
-      () => localDataSource.saveAgentSelectionMemoryJson(
-        snapshot.agentSelectionMemoryJson,
-        serverId: snapshot.serverId,
-        scopeId: snapshot.scopeId,
-      ),
-      sizeBytes: snapshot.agentSelectionMemoryJson.length,
-    );
-    await _persistSelectionStep(
-      'session_selection_overrides',
-      () => localDataSource.saveSessionSelectionOverridesJson(
-        snapshot.sessionSelectionOverridesJson,
-        serverId: snapshot.serverId,
-        scopeId: snapshot.scopeId,
-      ),
-      sizeBytes: snapshot.sessionSelectionOverridesJson.length,
-    );
     if (syncRemote) {
-      if (snapshot.contextKey != _activeContextKey ||
-          snapshot.remoteSyncGeneration != _remoteSelectionSyncGeneration) {
+      if (snapshot.remoteSyncGeneration != _remoteSelectionSyncGeneration) {
         return;
       }
       if (!_isExperimentalMultiDeviceSyncEnabled) {
@@ -2940,10 +2913,15 @@ class ChatProvider extends ChangeNotifier {
           _SelectionSyncTransactionPhase.pendingRemote,
           reason: 'immediate-sync',
         );
-        await _runSelectionSyncTransaction(
-          reason: 'immediate-sync',
-          directory: snapshot.directory,
-          directoryExplicit: true,
+        // Best-effort write-behind: never block the interaction/switch frame
+        // on a network round trip. The sync queue serializes and captures
+        // errors; generation guards prevent stale scope writes.
+        unawaited(
+          _runSelectionSyncTransaction(
+            reason: 'immediate-sync',
+            directory: snapshot.directory,
+            directoryExplicit: true,
+          ),
         );
       }
     }
@@ -2953,17 +2931,10 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceDirty = true;
     _selectionPersistenceSyncRemote =
         syncRemote || _selectionPersistenceSyncRemote;
-    // Capture the originating scope now (see field docs): the flush may run
-    // after a project switch. Values stay live and are re-read at flush.
-    final serverId = _activeServerId.trim().isEmpty
-        ? 'legacy'
-        : _activeServerId;
-    _scheduledSelectionOrigin = _SelectionPersistenceOrigin(
-      serverId: serverId,
-      scopeId: _resolveContextScopeId(),
-      contextKey: _activeContextKey,
-      directory: projectProvider.currentDirectory,
-      remoteSyncGeneration: _remoteSelectionSyncGeneration,
+    // Freeze scope + values now: the flush may run after a project switch and
+    // must persist the old scope's values under the old key without awaiting
+    // disk on the switch frame.
+    _scheduledSelectionSnapshot = _captureSelectionPersistenceSnapshot(
       syncRemote: _selectionPersistenceSyncRemote,
     );
     if (localDataSource is! AppLocalDataSourceImpl) {
@@ -3023,16 +2994,14 @@ class ChatProvider extends ChangeNotifier {
           break;
         }
         _selectionPersistenceDirty = false;
-        final syncRemote = _selectionPersistenceSyncRemote;
         _selectionPersistenceSyncRemote = false;
-        // Rebase fresh values onto the scheduling origin: scope identity is
-        // pinned at schedule time, values are always current.
-        final origin = _scheduledSelectionOrigin;
-        _scheduledSelectionOrigin = null;
-        final fresh = _captureSelectionPersistenceSnapshot(
-          syncRemote: origin?.syncRemote ?? syncRemote,
-        );
-        final snapshot = origin == null ? fresh : fresh.applyingOrigin(origin);
+        // Write-behind with frozen values: never re-read live state here, so
+        // a flush completing after a switch cannot mix new values into the
+        // old scope. New schedules after the switch create a new frozen entry.
+        final snapshot =
+            _scheduledSelectionSnapshot ??
+            _captureSelectionPersistenceSnapshot(syncRemote: false);
+        _scheduledSelectionSnapshot = null;
         await _persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote);
       }
     } catch (error, stackTrace) {
@@ -3161,6 +3130,10 @@ class ChatProvider extends ChangeNotifier {
     if (provider == null || !_isUserSelectableModelId(provider, modelId)) {
       return;
     }
+    // No-op guard: identical provider+model must not notify or persist.
+    if (_selectedProviderId == providerId && _selectedModelId == modelId) {
+      return;
+    }
     final previousModelKey = _currentModelKey();
     _selectedProviderId = providerId;
     _selectedModelId = modelId;
@@ -3268,17 +3241,23 @@ class ChatProvider extends ChangeNotifier {
       return;
     }
 
+    final normalized = variantId?.trim();
+    final nextId = (normalized == null || normalized.isEmpty)
+        ? null
+        : (model.variants.containsKey(normalized) ? normalized : null);
+    // No-op guard: same effective selection must not notify, dirty persistence,
+    // or contend with the menu pop/ripple animation.
     final modelKey = _modelKey(providerId, modelId);
+    final storedForModel = _selectedVariantByModel[modelKey];
+    if (_selectedVariantId == nextId && storedForModel == nextId) {
+      return;
+    }
     final previousVariantId = _selectedVariantId;
-    if (variantId == null || variantId.trim().isEmpty) {
-      _selectedVariantId = null;
+    _selectedVariantId = nextId;
+    if (nextId == null) {
       _selectedVariantByModel.remove(modelKey);
-    } else if (model.variants.containsKey(variantId)) {
-      _selectedVariantId = variantId;
-      _selectedVariantByModel[modelKey] = variantId;
     } else {
-      _selectedVariantId = null;
-      _selectedVariantByModel.remove(modelKey);
+      _selectedVariantByModel[modelKey] = nextId;
     }
 
     _recordVariantSelectionRecencyForCurrentModel(
@@ -4221,6 +4200,8 @@ class ChatProvider extends ChangeNotifier {
           _pendingCurrentSessionHydrationId = session.id;
         }
 
+        // Ordering guarantee: session-id persistence is queued per scope and
+        // subsequent loads may read it; keep the await (single cheap write).
         await _saveCurrentSessionId(
           session.id,
           serverId: serverId,
@@ -5683,13 +5664,12 @@ class ChatProvider extends ChangeNotifier {
     _selectionPersistenceDebounce = null;
     if (_selectionPersistenceDirty) {
       _selectionPersistenceDirty = false;
-      final origin = _scheduledSelectionOrigin;
-      _scheduledSelectionOrigin = null;
-      final fresh = _captureSelectionPersistenceSnapshot(
-        syncRemote:
-            origin?.syncRemote ?? _selectionPersistenceSyncRemote,
-      );
-      final snapshot = origin == null ? fresh : fresh.applyingOrigin(origin);
+      final snapshot =
+          _scheduledSelectionSnapshot ??
+          _captureSelectionPersistenceSnapshot(
+            syncRemote: _selectionPersistenceSyncRemote,
+          );
+      _scheduledSelectionSnapshot = null;
       _selectionPersistenceSyncRemote = false;
       unawaited(_persistSelectionSnapshot(snapshot, syncRemote: snapshot.syncRemote));
     }

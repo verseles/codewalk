@@ -106,14 +106,31 @@ extension _ChatPageSessionTabs on _ChatPageState {
               onContextMenu: _openSessionTabContextMenu,
               trailingBuilder: (context, tab) {
                 if (!tab.isSelected || _isNewChatDraftTab(tab)) return null;
-                return Consumer<ChatProvider>(
-                  builder: (context, chatProvider, _) =>
-                      _buildSessionContextUsageButton(
-                        context,
-                        chatProvider,
-                        targetSize: isCompact ? 40 : 32,
-                        menuNavigatorContext: menuNavigatorContext,
-                      ),
+                return Selector<
+                  ChatProvider,
+                  ({
+                    int messagesVersion,
+                    String? providerId,
+                    String? modelId,
+                    String? sessionId,
+                    bool isCompacting,
+                    bool canAbort,
+                  })
+                >(
+                  selector: (_, p) => (
+                    messagesVersion: p.messagesVersion,
+                    providerId: p.selectedProviderId,
+                    modelId: p.selectedModelId,
+                    sessionId: p.currentSession?.id,
+                    isCompacting: p.isCompactingContext,
+                    canAbort: p.canAbortActiveResponse,
+                  ),
+                  builder: (context, _, _) => _buildSessionContextUsageButton(
+                    context,
+                    context.read<ChatProvider>(),
+                    targetSize: isCompact ? 40 : 32,
+                    menuNavigatorContext: menuNavigatorContext,
+                  ),
                 );
               },
             );

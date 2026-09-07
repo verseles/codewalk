@@ -547,8 +547,10 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
                             isActivelyResponding:
                                 p.isCurrentSessionActivelyResponding,
                           ),
-                          builder: (context, _, _) => _buildMessageViewport(
-                            context.read<ChatProvider>(),
+                          builder: (context, _, _) => RepaintBoundary(
+                            child: _buildMessageViewport(
+                              context.read<ChatProvider>(),
+                            ),
                           ),
                         ),
                       ),
@@ -565,9 +567,11 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
                       if (!hideComposerForTerminal)
                         Selector<ChatProvider, _ComposerSelectionBuildKey>(
                           selector: (_, p) => _composerSelectionBuildKey(p),
-                          builder: (context, _, _) => _buildModelControls(
-                            context.read<ChatProvider>(),
-                            isSubConversation: isSubConversation,
+                          builder: (context, _, _) => RepaintBoundary(
+                            child: _buildModelControls(
+                              context.read<ChatProvider>(),
+                              isSubConversation: isSubConversation,
+                            ),
                           ),
                         ),
 
