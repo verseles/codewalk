@@ -870,6 +870,8 @@
 - **When** the user scrolls to the top threshold of the chat timeline
 - **Then** the app loads older message batches incrementally
 - **Then** the viewport anchor is restored after prepend so reading position stays stable (no sudden jump)
+- **When** an older-history page is in flight for the visible session
+- **Then** a compact loading pill appears floating at the top-center of the timeline and disappears on success, failure, exhausted history, or session switch (issue #178)
 
 ### Session history opens with a bounded initial window (issue #160)
 
