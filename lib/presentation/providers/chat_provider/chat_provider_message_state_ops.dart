@@ -898,7 +898,18 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       'Adopted assistant selection reason=$reason agent=${_selectedAgentName ?? "-"} provider=${_selectedProviderId ?? "-"} model=${_selectedModelId ?? "-"}',
     );
     _storeCurrentSessionSelectionOverride();
-    unawaited(_persistSelection(syncRemote: false));
+    unawaited(
+      _persistSelection(syncRemote: false).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        AppLogger.warn(
+          'Direct selection persist failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
   }
 
   bool _isSelectionNeutralAssistantMessage(AssistantMessage message) {

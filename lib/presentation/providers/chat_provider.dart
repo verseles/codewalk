@@ -2911,6 +2911,13 @@ class ChatProvider extends ChangeNotifier {
             : null,
       );
       _lastPersistedSelectionBlobByScope[scopeKey] = blobJson;
+      if (_selectionPersistenceVersionByScope[scopeKey] !=
+          snapshot.persistenceVersion) {
+        // A newer capture landed during the write await (check-to-queue
+        // window): re-arm so the newest values are rewritten by the next
+        // flush instead of waiting for another interaction.
+        _selectionPersistenceDirty = true;
+      }
     }
     _selectionPersistenceConsecutiveFailures = 0;
     if (syncRemote) {
