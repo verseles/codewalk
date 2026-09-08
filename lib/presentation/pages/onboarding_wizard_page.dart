@@ -1390,7 +1390,10 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                               : context.l10n.useTailscaleUnsupported,
                         ),
                       ),
-                    if (_tailscaleEnabled) ...[
+                    // The peer/auth panel follows the toggle: hidden on web
+                    // (edit flow can seed _tailscaleEnabled from a desktop
+                    // profile; save still coerces it off via _tailscaleSupported).
+                    if (_tailscaleEnabled && !kIsWeb) ...[
                       const SizedBox(height: 8),
                       _buildTailscalePeerDropdown(),
                       const SizedBox(height: 12),
