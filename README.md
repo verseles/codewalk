@@ -7,6 +7,14 @@
 
 A native (really fast!!) cross-platform client for [OpenCode](https://github.com/anomalyco/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
+> 📰 **New:** CodeWalk now runs right in your browser — open https://codewalk.verseles.com, add your OpenCode server profile, and start chatting. No install needed.
+>
+> Your OpenCode server must allow the web origin, otherwise the browser blocks the connection:
+>
+> ```bash
+> opencode serve --cors "https://codewalk.verseles.com"
+> ```
+
 ## Features
 
 - 🌐 Fully translated into 14 languages: English, Português (Brasil), Español, Deutsch, Français, Italiano, Русский, 中文, 日本語, 한국어, हिन्दी, বাংলা, العربية, اردو — with instant switching, system-default detection, and RTL layout for Arabic and Urdu
