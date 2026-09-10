@@ -37,6 +37,7 @@ codewalk/
   │   │   ├── tailscale/                    # Tailscale transport: shared-identity service (IO/stub with logout/refresh parity), node state, peer model, Dio adapter with head timeout
 │   │   └── utils/                       # Core utilities (path, timeline search)
 │   ├── data/                           # Data layer: datasources, API/storage models, repositories
+│   │   ├── cache/                          # ChatCachePayloadStore conditional IO/stub file-backed large-payload cache plus ChatCachePayloadLimits shared size policy (ADR-016)
 │   │   ├── datasources/                # Remote/local IO boundaries
 │   │   │   └── app_local_datasource.dart # SharedPreferences-backed local state, including server-scoped session tabs and session-tab icon overrides
 │   │   ├── session_attention/          # Encrypted completion snapshot store and conditional atomic file storage
@@ -102,6 +103,7 @@ codewalk/
 │   ├── android/app/build.gradle.kts      # Android build config and AndroidX Browser Custom Tabs dependency
 │   ├── android/app/src/main/AndroidManifest.xml # Android package-visibility query for Custom Tabs; `com.google.android.gms.car.application` meta-data referencing `@xml/automotive_app_desc` (issue #99)
 │   ├── android/app/src/main/kotlin/com/verseles/codewalk/
+│       ├── CodeWalkApplication.kt         # Custom Application purging oversized legacy chat-cache prefs keys natively pre-engine (ADR-016 startup-OOM hardening; wired via manifest android:name)
 │       ├── MainActivity.kt              # Android session-overlay/system channel host, Android process-diagnostic method-channel query, composer clipboard content-URI resolver, native CustomTabs OAuth + Tailscale authorization launcher (`launchTailscaleAuthorization`/`closeTailscaleTab`), and activation forwarding
 │       └── overlay/SessionOverlayService.kt # Android foreground overlay host and service-owned Flutter engine
 │   ├── android/app/src/debug/           # Debug/test source-set used by session-overlay prototype instrumentation (issue #99 automotive descriptor moved to main source set)

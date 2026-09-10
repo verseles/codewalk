@@ -718,6 +718,8 @@ Adopt a **hybrid file-backed cache** for chat payloads on native IO platforms, w
 
 **Update** (2026-09-07, commits `1678f033..a49d2556`): composer selection state (provider/model/agent, recent models, usage counts, per-model variant map, per-agent memory, session overrides) is persisted as one coalesced `selection_blob_v1` payload through the same hybrid file-backed store instead of 8 sequential `SharedPreferences` writes, eliminating whole-prefs-file rewrite storms on the desktop interaction frame. Frozen schedule-time snapshots preserve scope identity across context switches, per-scope versions plus latest-wins supersede/skip rules prevent stale overwrites, immediate retries are bounded with disposal guard, and the remote `/config` sync runs write-behind. Legacy per-field keys are drained best-effort after the first blob write and remain read fallbacks until then.
 
+**Update** (2026-09-10, commits `dbb37f4f`, `76b8c959`, `140f41f1`): startup-OOM hardening. A ~140MB string in SharedPreferences crossed `StandardMessageCodec.encodeMessage` on every launch (foreground + WorkManager), OOMing the engine where Dart cannot catch; proven by on-device forensics (dropbox stacks, dexdump IDs codec + shared_preferences plugin). Decisions: (1) `CodeWalkApplication` purges oversized legacy cache keys natively in `Application.onCreate` before any Flutter engine (covers all processes); manifest `android:name=.CodeWalkApplication`. (2) Shared size policy `ChatCachePayloadLimits`: 2MB payload ceiling, 1MB prefs-fallback ceiling, 2M-char (~4MB) aggregate memory budget with 512K-char per-entry bypass; oversized snapshots dropped and regenerated via SWR; selection blobs preserve legacy fallback on refusal. (3) Provider preflights skip oversized snapshot/blob writes (BEHAVIOR window intact). (4) 10MB bounded clipboard reads in `MainActivity`. Poisoned installs self-heal on next update with no wipe; no server/ADR-023 impact.
+
 This is an addendum to ADR-016, which owns the local persistence boundary. ADR-020 remains the related session-level SWR consumer of these helpers; it does not need a duplicate decision or a new ADR.
 
 ### Rationale
@@ -747,7 +749,7 @@ This is an addendum to ADR-016, which owns the local persistence boundary. ADR-0
 - ⚠ Debouncing intentionally delays ordinary session-tab persistence by up to 750 ms; lifecycle boundaries must flush before relying on the durable value.
 - ⚠ Future metadata persistence must use the guarded/coalesced boundary rather than introducing an unguarded direct SharedPreferences hot path.
 - ⚠ Requires the conditional import boundary (`ChatCachePayloadStore` IO vs. stub) to keep web builds green — same pattern already used by the Tailscale adapter (ADR-036) and the SSE adapter (ADR-018).
-- ⚠ The migration key list is explicit; adding a new large-payload key family requires updating `_isLargeCachePayloadPreferenceKey` so the sweep stays complete.
+- ⚠ The migration key list is explicit; adding a new large-payload key family requires updating BOTH `_isLargeCachePayloadPreferenceKey` and the Kotlin `LARGE_KEY_BASES` list so the Dart sweep and the native pre-engine purge stay complete.
 - ❌ Web can still persist large chat snapshots through its preference fallback; a true web no-store or IndexedDB-backed cache is a separate decision.
 - ❌ Direct SharedPreferences consumers outside this boundary are not automatically coalesced; if they become hot-path metadata persistence, they must adopt an equivalent guard and ordering policy.
 
@@ -757,11 +759,14 @@ This is an addendum to ADR-016, which owns the local persistence boundary. ADR-0
 - `lib/data/datasources/app_local_datasource_storage_helpers.dart` — large-payload file-store/fallback helpers
 - `lib/data/cache/chat_cache_payload_store_io.dart` — file-backed store implementation for native IO targets
 - `lib/data/cache/chat_cache_payload_store_stub.dart` — no-file-store fallback for web/tests
+- `lib/data/cache/chat_cache_payload_store_base.dart` — `ChatCachePayloadLimits` shared size policy
 - `lib/presentation/providers/chat_provider.dart` — per-server debounce state and `dispose`
 - `lib/presentation/providers/chat_provider/chat_provider_session_tab_ops.dart` — `_scheduleSessionTabsPersistence`, `flushSessionTabsPersistence`, `_enqueueSessionTabsPersistenceOperation`
 - `lib/core/logging/app_logger.dart` — `runPerformanceTask`
 - `test/unit/datasources/app_local_datasource_impl_test.dart`
 - `test/unit/providers/chat_provider_session_tabs_test.dart` — burst coalescing coverage
+- `android/app/src/main/kotlin/com/verseles/codewalk/CodeWalkApplication.kt` — native pre-engine purge of oversized cache keys
+- `android/app/src/main/kotlin/com/verseles/codewalk/MainActivity.kt` — bounded clipboard reads
 
 ---
 

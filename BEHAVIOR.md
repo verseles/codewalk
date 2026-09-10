@@ -771,7 +771,7 @@
 - **Then** if that cached session is still actively processing, the viewport lands directly at the bottom immediately, with no visible reopen animation
 - **Then** if that cached session is already settled, the viewport restores directly to the latest assistant response instead of replaying a reopen bottom-snap or reveal thrash
 - **Then** the app revalidates the session in background (SWR) and merges newer server state when available
-- **Then** native builds store large cached chat payloads in the file-backed cache, not in `SharedPreferences`; legacy large payloads left in `SharedPreferences` are returned immediately when read and drained to the file-backed cache in the background
+- **Then** native builds store large cached chat payloads in the file-backed cache, not in `SharedPreferences`; legacy large payloads left in `SharedPreferences` are sanitized natively before any engine starts (oversized keys quarantined without crossing the platform channel) and valid bounded entries are drained to the file-backed cache in the background
 
 ### Project switching is cache-first and non-blocking
 
@@ -887,7 +887,7 @@
 - **When** an unbounded correctness-recovery fetch completes
 - **Then** at most the newest 500 messages are committed and `hasMoreOldMessages` becomes true when anything was dropped
 - **When** session messages are written to the LRU cache or persisted snapshots
-- **Then** only the newest initial window (~50) plus pending optimistic messages is stored; restoring legacy oversized snapshots bounds them to the same window on read
+- **Then** only the newest initial window (~50) plus pending optimistic messages is stored, payloads above the shared size ceiling are dropped and regenerated via SWR instead of persisting; restoring legacy oversized snapshots bounds them to the same window on read
 - **When** jump-to-first lands on the oldest resident message while older history remains archived
 - **Then** exactly one older chunk is pulled and the view settles on the newly loaded top without recursively paging through the whole session
 
