@@ -21,6 +21,27 @@ AssistantMessage _assistant(String id, int millis) {
   );
 }
 
+UserMessage _textUser(
+  String id,
+  int millis,
+  String text, {
+  String sessionId = _sessionId,
+}) {
+  return UserMessage(
+    id: id,
+    sessionId: sessionId,
+    time: DateTime.fromMillisecondsSinceEpoch(millis),
+    parts: <MessagePart>[
+      TextPart(
+        id: 'prt_$id',
+        messageId: id,
+        sessionId: sessionId,
+        text: text,
+      ),
+    ],
+  );
+}
+
 List<String> _ids(List<ChatMessage> messages) =>
     messages.map((message) => message.id).toList();
 
@@ -274,6 +295,84 @@ void main() {
 
         expect(outcome.decision, MessageUpdateDecision.applied);
         expect(_ids(outcome.messages), <String>['msg_user_2', 'msg_assistant_2']);
+      },
+    );
+
+    test(
+      'a shell-mode echo without the bang prefix reconciles the optimistic',
+      () {
+        final previous = <ChatMessage>[
+          _textUser('local_user_3_0', 3000, '!ls -la'),
+          _assistant('msg_assistant_3', 3100),
+        ];
+        final next = <ChatMessage>[
+          _textUser('msg_user_3', 2900, 'ls -la'),
+          _assistant('msg_assistant_3', 3100),
+        ];
+
+        final outcome = reconcileMessages(
+          previous: previous,
+          next: next,
+          kind: MessageUpdateKind.fullSnapshot,
+          sessionId: _sessionId,
+        );
+
+        expect(outcome.decision, MessageUpdateDecision.applied);
+        expect(
+          _ids(outcome.messages),
+          <String>['msg_user_3', 'msg_assistant_3'],
+        );
+      },
+    );
+
+    test(
+      'a stale snapshot cannot drop a newer server message beside a '
+      'clock-skewed optimistic',
+      () {
+        // Device clock ahead: newestInNext must ignore the optimistic bubble
+        // or the live server message looks stale and is discarded (#111).
+        final previous = <ChatMessage>[
+          _msg('server_user', 1000),
+          _msg('server_new', 5000),
+          _msg('local_user_4_0', 999999),
+        ];
+        final next = <ChatMessage>[
+          _msg('server_user', 1000),
+          _msg('local_user_4_0', 999999),
+        ];
+
+        final outcome = reconcileMessages(
+          previous: previous,
+          next: next,
+          kind: MessageUpdateKind.fullSnapshot,
+          sessionId: _sessionId,
+        );
+
+        expect(outcome.decision, MessageUpdateDecision.mergedNonRegressive);
+        expect(
+          _ids(outcome.messages),
+          <String>['server_user', 'server_new', 'local_user_4_0'],
+        );
+      },
+    );
+
+    test(
+      'an anchorless optimistic prompt splices before a prompt-less reply',
+      () {
+        final previous = <ChatMessage>[_msg('local_user_5_0', 9000)];
+        final next = <ChatMessage>[_assistant('msg_assistant_5', 1000)];
+
+        final outcome = reconcileMessages(
+          previous: previous,
+          next: next,
+          kind: MessageUpdateKind.fullSnapshot,
+          sessionId: _sessionId,
+        );
+
+        expect(
+          _ids(outcome.messages),
+          <String>['local_user_5_0', 'msg_assistant_5'],
+        );
       },
     );
 

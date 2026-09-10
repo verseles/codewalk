@@ -760,7 +760,8 @@ extension _ChatProviderMessageStateOps on ChatProvider {
           ? _mergeAssistantMessageUpdate(existing, message)
           : message;
       if (replacement == existing &&
-          _hasSameOrderedParts(existing, replacement)) {
+          _hasSameOrderedParts(existing, replacement) &&
+          optimisticEchoRemovedIndex == -1) {
         AppLogger.debug('Skipped unchanged message update: ${message.id}');
         return;
       }
@@ -1106,7 +1107,11 @@ extension _ChatProviderMessageStateOps on ChatProvider {
         continue;
       }
       if (currentSignature == incomingSignature) {
-        earliestExactSignatureMatchIndex = index;
+        // FIFO: the earliest pending identical prompt owns the first echo,
+        // so repeated intentional prompts reconcile in send order.
+        earliestExactSignatureMatchIndex = earliestExactSignatureMatchIndex == -1
+            ? index
+            : earliestExactSignatureMatchIndex;
         continue;
       }
       if (!_isLikelyPendingLocalUserMatch(

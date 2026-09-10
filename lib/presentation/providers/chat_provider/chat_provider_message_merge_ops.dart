@@ -250,7 +250,9 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
     // miss while text + file count + mime still identify the send. Unlike the
     // fuzzy prefix path below this needs no in-progress assistant (the turn
     // may long be completed) but stays within ±10 minutes so repeated
-    // intentional prompts remain distinct.
+    // intentional prompts remain distinct. One-to-one: only the earliest
+    // visible optimistic claimant yields, so a second identical image-only
+    // prompt is never drained by its predecessor's echo.
     for (final serverMessage in mergedMessages) {
       if (serverMessage is! UserMessage) {
         continue;
@@ -271,6 +273,32 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
           .difference(localMessage.time)
           .abs();
       if (delta > const Duration(minutes: 10)) {
+        continue;
+      }
+      var earlierClaimant = false;
+      for (final visible in _messages) {
+        if (visible.id == localMessage.id) {
+          break;
+        }
+        if (visible is! UserMessage ||
+            !_isOptimisticLocalUserMessageId(visible.id) ||
+            visible.sessionId != localMessage.sessionId) {
+          continue;
+        }
+        if (!_isLikelyPendingLocalUserMatch(
+          pending: visible,
+          incoming: serverMessage,
+        )) {
+          continue;
+        }
+        if (serverMessage.time.difference(visible.time).abs() >
+            const Duration(minutes: 10)) {
+          continue;
+        }
+        earlierClaimant = true;
+        break;
+      }
+      if (earlierClaimant) {
         continue;
       }
       return true;

@@ -40,10 +40,17 @@ bool isOptimisticLocalUserTimelineId(String id) {
 
 /// Joined trimmed text of a user message, used only to recognise a
 /// canonical echo of an optimistic bubble (never as a display value).
+///
+/// Mirrors `_normalizedUserTextSignature`: a leading shell-mode `!` is
+/// stripped so local `!cmd` matches server-echoed `cmd`, keeping merge and
+/// reconciliation echo detection in agreement.
 String timelineUserTextSignature(UserMessage message) {
   return message.parts
       .whereType<TextPart>()
-      .map((part) => part.text.trim())
+      .map((part) {
+        final text = part.text.trim();
+        return text.startsWith('!') ? text.substring(1).trim() : text;
+      })
       .where((text) => text.isNotEmpty)
       .join('\n');
 }
@@ -110,9 +117,10 @@ bool timelineIsServerUserEchoFor({
 ///   2. else immediately before the nearest *following* local message that is
 ///      already present in [target];
 ///   3. else, for a user message, immediately before the first assistant run
-///      in [target] — a prompt precedes a response that carries no known
-///      prompt (the #179 stall shape: an assistant-only partial snapshot);
-///      any other message appends.
+///      in [target] that carries no prompting user above it — a prompt
+///      precedes a response that carries no known prompt (the #179 stall
+///      shape: an assistant-only partial snapshot). When every assistant run
+///      already has its prompt, the message appends as genuinely newest.
 /// Step 3 deliberately avoids comparing the optimistic device clock against
 /// server clocks, which can disagree by minutes under skew. There is no
 /// timestamp fallback: without ID evidence there is no safe time evidence.
@@ -144,11 +152,20 @@ int timelineInsertIndexForLocalMessage({
     }
   }
   if (localSnapshot[localIndex] is UserMessage) {
-    final firstAssistant = target.indexWhere(
-      (message) => message is AssistantMessage,
-    );
-    if (firstAssistant != -1) {
-      return firstAssistant;
+    for (var index = 0; index < target.length; index += 1) {
+      if (target[index] is! AssistantMessage) {
+        continue;
+      }
+      var hasPromptAbove = false;
+      for (var scan = 0; scan < index; scan += 1) {
+        if (target[scan] is UserMessage) {
+          hasPromptAbove = true;
+          break;
+        }
+      }
+      if (!hasPromptAbove) {
+        return index;
+      }
     }
   }
   return target.length;
@@ -157,12 +174,13 @@ int timelineInsertIndexForLocalMessage({
 /// Repairs inversions persisted before this fix (issue #179 family).
 ///
 /// Moves an optimistic `local_user_*` user message that sits directly after
-/// an assistant run back to the head of that run, but only when no confirmed
-/// user message precedes the run. That shape — an assistant reply with no
-/// prompting user above it — cannot be a valid conversation turn, while
-/// patterns like `[serverUser, localUser2, assistant2]` (in-flight second
-/// turn) are left untouched. Returns the input list unchanged when no repair
-/// applies, so callers can skip downstream writes on identical output.
+/// an assistant run back to the head of that run, but only when NO user
+/// message of any ownership precedes the run: an assistant reply with no
+/// prompting user above it cannot be a valid turn. Any preceding prompt —
+/// confirmed or still optimistic (a valid in-flight second turn such as
+/// `[local1, assistant1, local2]`) — vetoes the repair. Returns the input
+/// list unchanged when no repair applies, so callers can skip downstream
+/// writes on identical output.
 List<ChatMessage> healPersistedTimelineInversions(List<ChatMessage> messages) {
   if (messages.length < 2) {
     return messages;
@@ -180,16 +198,14 @@ List<ChatMessage> healPersistedTimelineInversions(List<ChatMessage> messages) {
       }
       runStart += 1;
       if (runStart < index && runStart >= 0) {
-        var hasConfirmedUserBefore = false;
+        var hasPromptAbove = false;
         for (var scan = 0; scan < runStart; scan += 1) {
-          final candidate = working[scan];
-          if (candidate is UserMessage &&
-              !isOptimisticLocalUserTimelineId(candidate.id)) {
-            hasConfirmedUserBefore = true;
+          if (working[scan] is UserMessage) {
+            hasPromptAbove = true;
             break;
           }
         }
-        if (!hasConfirmedUserBefore) {
+        if (!hasPromptAbove) {
           repaired ??= List<ChatMessage>.from(working);
           repaired.removeAt(index);
           repaired.insert(runStart, current);

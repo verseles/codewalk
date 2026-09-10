@@ -213,6 +213,17 @@ MessageReconciliation reconcileMessages({
       return false;
     }
     for (final candidate in next) {
+      if (candidate is! UserMessage) {
+        continue;
+      }
+      // Captionless turns carry no text identity: require attachment-shape
+      // equality too, so two distinct captionless images never collapse.
+      if (timelineUserTextSignature(message).isEmpty &&
+          timelineUserTextSignature(candidate).isEmpty &&
+          timelineUserFileMimeSignature(message) !=
+              timelineUserFileMimeSignature(candidate)) {
+        continue;
+      }
       if (!isFuzzyEchoCandidate(candidate, message)) {
         continue;
       }
@@ -267,6 +278,28 @@ MessageReconciliation reconcileMessages({
         break;
       }
     }
+    if (insertAt == preserved.length &&
+        message is UserMessage &&
+        isOptimisticLocalUserTimelineId(message.id)) {
+      // No surviving neighbour: an anchorless optimistic prompt belongs
+      // before a prompt-less assistant run (the stall shape), else at tail.
+      for (var index = 0; index < preserved.length; index += 1) {
+        if (preserved[index] is! AssistantMessage) {
+          continue;
+        }
+        var hasPromptAbove = false;
+        for (var scan = 0; scan < index; scan += 1) {
+          if (preserved[scan] is UserMessage) {
+            hasPromptAbove = true;
+            break;
+          }
+        }
+        if (!hasPromptAbove) {
+          insertAt = index;
+          break;
+        }
+      }
+    }
     preserved.insert(insertAt, message);
   }
 
@@ -281,8 +314,13 @@ MessageReconciliation reconcileMessages({
 }
 
 DateTime? _newestTime(List<ChatMessage> messages) {
+  // Server clocks only: client-timed bubbles (`local_user_*`, `msg_inline_*`)
+  // must never make a stale payload look authoritative (issue #179 direction).
   DateTime? newest;
   for (final message in messages) {
+    if (isClientTimedTimelineId(message.id)) {
+      continue;
+    }
     if (newest == null || message.time.isAfter(newest)) {
       newest = message.time;
     }

@@ -783,6 +783,121 @@ void main() {
     );
 
     test(
+      'twin identical image-only prompts converge without duplicates',
+      () async {
+        const sessionId = 'ses_1';
+        final firstStream = StreamController<Either<Failure, ChatMessage>>();
+        final secondStream = StreamController<Either<Failure, ChatMessage>>();
+        addTearDown(() async {
+          await firstStream.close();
+          await secondStream.close();
+        });
+        var sendCalls = 0;
+        chatRepository.sendMessageHandler = (_, _, _, _) {
+          sendCalls += 1;
+          return sendCalls == 1 ? firstStream.stream : secondStream.stream;
+        };
+        chatRepository.messagesBySession[sessionId] = const <ChatMessage>[];
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(
+          provider.sessions.firstWhere((item) => item.id == sessionId),
+        );
+
+        const firstUrl = 'data:image/png;base64,AAAAfirst';
+        const secondUrl = 'data:image/png;base64,BBBBsecond';
+        await provider.sendMessage(
+          '',
+          attachments: const <FileInputPart>[
+            FileInputPart(mime: 'image/png', url: firstUrl),
+          ],
+        );
+        await provider.sendMessage(
+          '',
+          attachments: const <FileInputPart>[
+            FileInputPart(mime: 'image/png', url: secondUrl),
+          ],
+        );
+        await waitForCondition(
+          () =>
+              provider.messages.whereType<UserMessage>().length == 2 &&
+              provider.messages.every(
+                (message) => message.id.startsWith('local_user_'),
+              ),
+        );
+        final localTime = provider.messages.first.time;
+
+        UserMessage imageEcho(String id, int secondsAfter, String url) {
+          return UserMessage(
+            id: id,
+            sessionId: sessionId,
+            time: localTime.add(Duration(seconds: secondsAfter)),
+            parts: <MessagePart>[
+              FilePart(
+                id: 'prt_$id',
+                messageId: id,
+                sessionId: sessionId,
+                url: url,
+                mime: 'image/png',
+              ),
+            ],
+          );
+        }
+
+        // One server echo (rewritten URL, same mime) for the twin sends:
+        // the echo appears exactly once and no optimistic is duplicated.
+        final firstEcho = imageEcho(
+          'msg_img_1',
+          5,
+          'file:///tmp/uploads/first.png',
+        );
+        chatRepository.messagesBySession[sessionId] = <ChatMessage>[
+          firstEcho,
+        ];
+        await provider.refreshActiveSessionView(
+          reason: 'test-twin-images-one-echo',
+          includeStatus: false,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        final midIds = provider.messages
+            .whereType<UserMessage>()
+            .map((message) => message.id)
+            .toList();
+        expect(
+          midIds.where((id) => id == 'msg_img_1'),
+          hasLength(1),
+        );
+        expect(midIds.length, inInclusiveRange(1, 2));
+
+        // Both echoes present: exactly the two canonical bubbles remain.
+        final secondEcho = imageEcho(
+          'msg_img_2',
+          6,
+          'file:///tmp/uploads/second.png',
+        );
+        chatRepository.messagesBySession[sessionId] = <ChatMessage>[
+          firstEcho,
+          secondEcho,
+        ];
+        await provider.refreshActiveSessionView(
+          reason: 'test-twin-images-both-echoes',
+          includeStatus: false,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          provider.messages
+              .whereType<UserMessage>()
+              .map((message) => message.id)
+              .toList(),
+          <String>['msg_img_1', 'msg_img_2'],
+        );
+      },
+    );
+
+    test(
       'stalled refresh keeps optimistic prompt above its assistant (issue #179)',
       () async {
         const sessionId = 'ses_1';

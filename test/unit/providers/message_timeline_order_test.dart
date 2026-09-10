@@ -92,6 +92,24 @@ void main() {
       // A user with no assistant ahead appends (genuinely newest send).
       expect(index, 1);
     });
+
+    test('appends when every assistant run already has its prompt', () {
+      // Disjoint refresh: the visible prompt shares no IDs with a server
+      // tail whose assistants are all prompted. It is newest: append.
+      final local = <ChatMessage>[_user('local_user_4_0', 9000)];
+      final target = <ChatMessage>[
+        _user('msg_u7', 1000),
+        _assistant('msg_a7', 2000),
+      ];
+
+      final index = timelineInsertIndexForLocalMessage(
+        target: target,
+        localSnapshot: local,
+        localIndex: 0,
+      );
+
+      expect(index, 2);
+    });
   });
 
   group('healPersistedTimelineInversions', () {
@@ -120,6 +138,20 @@ void main() {
         _ids(healed),
         <String>['msg_u1', 'msg_a1', 'local_user_2_0'],
       );
+    });
+
+    test('leaves an all-optimistic two-turn snapshot untouched', () {
+      // Both prompts still await their echoes: the second prompt must not
+      // be hoisted above the first assistant reply.
+      final messages = <ChatMessage>[
+        _user('local_user_1_0', 1000),
+        _assistant('msg_a1', 2000),
+        _user('local_user_2_0', 3000),
+      ];
+
+      final healed = healPersistedTimelineInversions(messages);
+
+      expect(identical(healed, messages), isTrue);
     });
 
     test('leaves confirmed-only order untouched', () {
