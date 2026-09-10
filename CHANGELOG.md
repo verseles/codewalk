@@ -2,6 +2,21 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.229.0 - 2026-09-10
+
+- docs: record OOM cure in ADR-016, BEHAVIOR and CODEBASE
+- fix(review): keep legacy selection fallback when blob write is refused
+- fix(review): close prefs-bypass, stale-memory and UTF-8 gaps in OOM cure
+- fix(android): cure startup OOM from oversized prefs payloads with size ceilings
+- Announce browser availability via codewalk.verseles.com (+ --cors note)
+- Deploy web contínuo na main via Wrangler (Cloudflare Pages)
+- Hide Tailscale peer/auth panel on web edit flow (reviewer loop)
+- Revert ineffective web auto-reconnect (reviewer loop)
+- Attempt web auto-reconnect on return from background
+- Web add-server: OS-level Tailscale note instead of toggle, hide OAuth
+- Add web startup loader (spinner removed on flutter-first-frame)
+- Fix web gray messages: guard Platform.isWindows with kIsWeb in FilePathDetector
+
 ## v1.228.0 - 2026-09-07
 
 - docs: record variant dismiss no-op and selection blob persistence
