@@ -2594,6 +2594,16 @@ Reconciliation decisions are logged permanently at debug level, and at warning
 level when a regression is actually blocked. Only identifiers and counts are
 recorded, never message content.
 
+### Timeline order is anchor-stable across stalls and restarts
+
+- **Given** a user prompt was sent and its optimistic `local_user_*` bubble is visible
+- **When** a stream stall, delayed echo, snapshot refresh, session switch, or app restart delivers the surrounding messages out of order
+- **Then** the prompt keeps its causal slot: it is never appended after newer messages, and its canonical server echo replaces it in place without duplicating the bubble
+- **Then** placement derives from neighbouring message IDs, never from comparing the device clock against server timestamps
+- **Then** attachment echoes reconcile despite server-rewritten file URLs/filenames (matched by text, file count, and MIME within a bounded window, one-to-one, earliest send first)
+- **Then** repeated identical prompts stay distinct turns, and ambiguous restores preserve rather than prune
+- **Then** a snapshot persisted in inverted order by an older version is healed once on restore when an assistant run carries no prompting user above it
+
 ## Subagent Event Scope
 
 Subagents finish silently from the point of view of the session being read.
