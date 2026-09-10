@@ -111,7 +111,11 @@ extension _ChatInputExternalDropController on _ChatInputWidgetState {
       return;
     }
     if (files.isEmpty) {
-      _showAttachmentSnack(context.l10n.msgNoValidFilesSelected);
+      _showAttachmentSnack(
+        skipped > 0
+            ? context.l10n.msgSomeSelectedFilesNotAttached
+            : context.l10n.msgNoValidFilesSelected,
+      );
       return;
     }
     await _appendAttachments(files, allowImageMimeFallback: false);
@@ -299,7 +303,7 @@ extension _ChatInputExternalDropController on _ChatInputWidgetState {
     }
     if (collected.isEmpty) {
       if (fileCandidates > 0) {
-        _showAttachmentSnack(context.l10n.msgNoValidFilesSelected);
+        _showAttachmentSnack(context.l10n.msgSomeSelectedFilesNotAttached);
       }
       return;
     }
