@@ -220,6 +220,16 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
               'messageCount': filteredMessages.length,
             },
           );
+          if (encodedPayload.length > ChatCachePayloadLimits.maxPayloadChars) {
+            // Oversized snapshots are dropped and regenerated via SWR: a
+            // ~140MB payload once killed the app on every launch inside the
+            // platform-channel codec (engine code Dart cannot catch).
+            AppLogger.warn(
+              'Dropping oversized per-session message snapshot '
+              'session=$normalizedSessionId',
+            );
+            return;
+          }
           final wrotePayload = await localDataSource
               .saveSessionMessagesSnapshot(
                 encodedPayload,
@@ -533,6 +543,12 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
           .map((session) => ChatSessionModel.fromDomain(session).toJson())
           .toList();
       final jsonString = json.encode(jsonList);
+      if (jsonString.length > ChatCachePayloadLimits.maxPayloadChars) {
+        // Same oversized-payload guard as the message snapshots: drop and
+        // let SWR refetch instead of persisting an un-restorable cache.
+        AppLogger.warn('Dropping oversized cached-sessions snapshot');
+        return;
+      }
       await localDataSource.saveCachedSessions(
         jsonString,
         serverId: serverId,
@@ -696,6 +712,14 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
         'lastSession': true,
       },
     );
+    if (encodedPayload.length > ChatCachePayloadLimits.maxPayloadChars) {
+      // See _writeSessionMessagesSnapshotBestEffort: oversized snapshots are
+      // dropped and regenerated via SWR instead of risking a channel OOM.
+      AppLogger.warn(
+        'Dropping oversized last-session snapshot session=${session.id}',
+      );
+      return;
+    }
     await localDataSource.saveLastSessionSnapshot(
       encodedPayload,
       serverId: serverId,

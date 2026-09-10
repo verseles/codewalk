@@ -530,4 +530,43 @@ void main() {
       isNotNull,
     );
   });
+
+  test(
+    'refuses oversized large cache payloads without touching preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      // Proxy for the ~140MB prefs string that killed the app on every
+      // launch inside StandardMessageCodec.encodeMessage.
+      final giant = 'x' * (ChatCachePayloadLimits.maxPayloadChars + 1);
+
+      await dataSource.saveCachedSessions(giant);
+      await dataSource.saveLastSessionSnapshot(giant);
+      await dataSource.saveSelectionBlob(giant);
+
+      expect(cacheStore.values, isEmpty);
+      expect(prefs.getString(AppConstants.cachedSessionsKey), isNull);
+      expect(prefs.getString(AppConstants.lastSessionSnapshotKey), isNull);
+    },
+  );
+
+  test(
+    'does not fall back to SharedPreferences for oversized payloads when the cache store fails',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: _ThrowingChatCachePayloadStore(),
+      );
+      final giant = 'x' * (ChatCachePayloadLimits.maxPayloadChars + 1);
+
+      await dataSource.saveCachedSessions(giant);
+
+      expect(prefs.getString(AppConstants.cachedSessionsKey), isNull);
+    },
+  );
 }

@@ -15,6 +15,7 @@ import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.RenderMode
+import java.io.ByteArrayOutputStream
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import com.verseles.codewalk.overlay.SessionOverlayService
@@ -33,6 +34,9 @@ class MainActivity : FlutterActivity() {
         private const val SESSION_OVERLAY_ACTIVATION_CHANNEL = "codewalk/session_overlay_activation"
         private const val OAUTH_AUTHORIZATION_REQUEST_CODE = 47021
         private const val OAUTH_FLOW_ID_STATE = "codewalk.oauth.flow_id"
+        // Composer clipboard attachments above this are refused instead of
+        // being read fully into memory (same OOM class as giant payloads).
+        private const val MAX_CLIPBOARD_BYTES = 10 * 1024 * 1024
 
         fun isTrustedOAuthAuthorizationUri(uri: Uri): Boolean =
             uri.scheme == "https" && !uri.host.isNullOrBlank()
@@ -61,6 +65,9 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Defense in depth: the Application cure already ran, but a worker or
+        // edge-case process could theoretically reach here first.
+        CodeWalkApplication.curePoisonedLargeCachePreferences(this)
         activityWasRecreated = savedInstanceState != null
         activeOAuthFlowId = savedInstanceState?.getString(OAUTH_FLOW_ID_STATE)
     }
@@ -366,13 +373,39 @@ class MainActivity : FlutterActivity() {
         )
         if (!supportedByName && !supportedByMime) return null
 
-        val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
-            ?: return null
+        // Bounded read: an unbounded readBytes() on a huge content URI OOMs
+        // the same way the poisoned prefs payload did. Oversized pastes are
+        // refused (the composer surfaces them as unsupported) instead.
+        val bytes = contentResolver.openInputStream(uri)?.use { stream ->
+            readBoundedBytes(stream, MAX_CLIPBOARD_BYTES)
+        } ?: return null
+        if (bytes.size > MAX_CLIPBOARD_BYTES) return null
         return mapOf(
             "name" to displayName,
             "mimeType" to mimeType,
             "bytes" to bytes,
         )
+    }
+
+    private fun readBoundedBytes(
+        stream: java.io.InputStream,
+        limitBytes: Int,
+    ): ByteArray {
+        val out = ByteArrayOutputStream(minOf(8192, limitBytes))
+        val chunk = ByteArray(8192)
+        var total = 0L
+        while (true) {
+            val read = stream.read(chunk)
+            if (read <= 0) break
+            total += read
+            if (total > limitBytes) {
+                // Signal overflow; the caller refuses the payload. The
+                // partial buffer is discarded with this frame.
+                return ByteArray(limitBytes + 1)
+            }
+            out.write(chunk, 0, read)
+        }
+        return out.toByteArray()
     }
 
     private fun dispatchSessionOverlayActivation(intent: Intent?) {

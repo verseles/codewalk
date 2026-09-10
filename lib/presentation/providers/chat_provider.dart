@@ -14,6 +14,7 @@ import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/utils/path_utils.dart';
+import '../../data/cache/chat_cache_payload_store_base.dart';
 import '../../data/datasources/app_local_datasource.dart';
 import '../../data/models/chat_message_model.dart';
 import '../../data/models/chat_realtime_model.dart';
@@ -2897,7 +2898,12 @@ class ChatProvider extends ChangeNotifier {
         snapshot.persistenceVersion) {
       return;
     }
-    if (_lastPersistedSelectionBlobByScope[scopeKey] != blobJson) {
+    if (blobJson.length > ChatCachePayloadLimits.maxPayloadChars) {
+      // Oversized selection blobs are never persisted (same channel-OOM
+      // guard as the message snapshots); remote sync below still runs and
+      // legacy per-field keys remain the read fallback.
+      AppLogger.warn('Dropping oversized selection blob scope=$scopeKey');
+    } else if (_lastPersistedSelectionBlobByScope[scopeKey] != blobJson) {
       await AppLogger.runPerformanceTask<void>(
         'selection_persist_blob',
         () => localDataSource.saveSelectionBlob(

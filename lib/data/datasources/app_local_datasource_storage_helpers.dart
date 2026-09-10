@@ -295,6 +295,16 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     return AppLogger.runPerformanceTask<bool>(
       'cache_write',
       () async {
+        // Hard ceiling: payloads above this must never reach the file store
+        // or SharedPreferences. A ~140MB prefs string kills the app on every
+        // launch inside StandardMessageCodec.encodeMessage (engine code that
+        // Dart cannot catch); snapshots are regenerable via SWR.
+        if (value.length > ChatCachePayloadLimits.maxPayloadChars) {
+          AppLogger.warn(
+            'Dropping oversized large-cache payload instead of persisting it',
+          );
+          return false;
+        }
         final store = _chatCachePayloadStore;
         if (store == null) {
           if (_sharedPreferences.getString(key) == value) return false;

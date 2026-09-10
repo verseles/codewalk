@@ -108,5 +108,37 @@ void main() {
       );
       expect(storedIds, isNotEmpty);
     });
+
+    test('oversized snapshots are dropped instead of persisted', () async {
+      await provider.projectProvider.initializeProject();
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(
+        provider.sessions.firstWhere((session) => session.id == 'ses_1'),
+      );
+      await provider.refresh();
+
+      // Proxy for the ~140MB payload that killed the app on every launch
+      // inside StandardMessageCodec.encodeMessage: it must never land in
+      // any persisted snapshot, which then regenerates via SWR.
+      final giantMarker = 'GIANTMARKER${'G' * (2 * 1024 * 1024)}';
+      await sendCompleted(giantMarker, 'msg_giant');
+
+      final snapshotValues = localDataSource.scopedStrings.entries
+          .where(
+            (entry) =>
+                entry.key.contains('session_messages_snapshot::') ||
+                entry.key.contains('last_session_snapshot'),
+          )
+          .map((entry) => entry.value)
+          .toList(growable: false);
+      expect(
+        snapshotValues.any((value) => value.contains('GIANTMARKER')),
+        isFalse,
+      );
+      for (final value in snapshotValues) {
+        expect(value.length, lessThanOrEqualTo(2 * 1024 * 1024));
+      }
+    });
   });
 }
