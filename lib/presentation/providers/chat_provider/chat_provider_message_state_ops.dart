@@ -688,7 +688,7 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       return;
     }
 
-    var optimisticEchoRemoved = false;
+    var optimisticEchoRemovedIndex = -1;
     if (message is UserMessage) {
       final pendingLocalIndex = _findPendingLocalUserMessageIndex(message);
       if (pendingLocalIndex != -1) {
@@ -727,7 +727,9 @@ extension _ChatProviderMessageStateOps on ChatProvider {
         _scheduleScrollToBottom(reason: 'message-state-user-replaced');
         return;
       }
-      optimisticEchoRemoved = _removeDuplicateOptimisticLocalUserEcho(message);
+      optimisticEchoRemovedIndex = _removeDuplicateOptimisticLocalUserEcho(
+        message,
+      );
     }
 
     final index = _messages.indexWhere((m) => m.id == message.id);
@@ -771,8 +773,21 @@ extension _ChatProviderMessageStateOps on ChatProvider {
         'Updated message: ${message.id}, parts=${message.parts.length}',
       );
     } else {
-      // Add new message
-      _messages.add(message);
+      // Add new message in arrival order: realtime/fallback events already
+      // arrive chronologically, and timestamps across client/server clocks
+      // are incomparable (issue #179, direction: anchor-based). The one
+      // exception is a canonical echo whose optimistic slot was just
+      // drained: it goes back exactly there instead of the tail, so a late
+      // user echo never lands below its own assistant reply.
+      if (optimisticEchoRemovedIndex != -1 &&
+          !isClientTimedTimelineId(message.id)) {
+        _messages.insert(
+          optimisticEchoRemovedIndex.clamp(0, _messages.length),
+          message,
+        );
+      } else {
+        _messages.add(message);
+      }
       _messagesVersion++;
       AppLogger.debug('Added new message: ${message.id}, role=${message.role}');
     }
@@ -811,7 +826,7 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     } else {
       _scheduleRealtimeNotification(reason: 'event-message-updated');
     }
-    if (optimisticEchoRemoved) {
+    if (optimisticEchoRemovedIndex != -1) {
       _persistOptimisticReconciliation(message.sessionId);
     }
     _attemptPendingRemoteSelectionSync(reason: 'message-update');
@@ -1111,43 +1126,69 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     return bestLikelyMatchIndex;
   }
 
-  bool _removeDuplicateOptimisticLocalUserEcho(UserMessage incoming) {
+  /// Removes the nearest optimistic `local_user_*` echo matching [incoming]
+  /// and returns its index so the canonical echo can be re-inserted at the
+  /// same slot (issue #179). Returns -1 when there is no match.
+  ///
+  /// Matching is exact-signature first, then the tolerant file/text fallback
+  /// ([_isLikelyPendingLocalUserMatch]) so server-rewritten attachment URLs
+  /// still reconcile instead of leaving an orphan bubble that later jumps to
+  /// the timeline tail as if it were the newest message.
+  int _removeDuplicateOptimisticLocalUserEcho(UserMessage incoming) {
     if (_isOptimisticLocalUserMessageId(incoming.id)) {
-      return false;
+      return -1;
     }
     final incomingSignature = _normalizedUserMessageSignature(incoming);
-    if (incomingSignature.isEmpty) {
-      return false;
+
+    int nearestIndex(
+      bool Function(UserMessage candidate) matches,
+    ) {
+      var bestIndex = -1;
+      Duration? bestDelta;
+      for (var index = 0; index < _messages.length; index += 1) {
+        final current = _messages[index];
+        if (current is! UserMessage) {
+          continue;
+        }
+        if (!_isOptimisticLocalUserMessageId(current.id)) {
+          continue;
+        }
+        if (current.sessionId != incoming.sessionId) {
+          continue;
+        }
+        if (!matches(current)) {
+          continue;
+        }
+        final delta = incoming.time.difference(current.time).abs();
+        if (delta > const Duration(minutes: 10)) {
+          continue;
+        }
+        if (bestDelta == null || delta < bestDelta) {
+          bestDelta = delta;
+          bestIndex = index;
+        }
+      }
+      return bestIndex;
     }
 
     var bestIndex = -1;
-    Duration? bestDelta;
-    for (var index = 0; index < _messages.length; index += 1) {
-      final current = _messages[index];
-      if (current is! UserMessage) {
-        continue;
-      }
-      if (!_isOptimisticLocalUserMessageId(current.id)) {
-        continue;
-      }
-      if (current.sessionId != incoming.sessionId) {
-        continue;
-      }
-      if (_normalizedUserMessageSignature(current) != incomingSignature) {
-        continue;
-      }
-      final delta = incoming.time.difference(current.time).abs();
-      if (delta > const Duration(minutes: 10)) {
-        continue;
-      }
-      if (bestDelta == null || delta < bestDelta) {
-        bestDelta = delta;
-        bestIndex = index;
-      }
+    if (incomingSignature.isNotEmpty) {
+      bestIndex = nearestIndex(
+        (candidate) =>
+            _normalizedUserMessageSignature(candidate) == incomingSignature,
+      );
     }
+    bestIndex = bestIndex != -1
+        ? bestIndex
+        : nearestIndex(
+            (candidate) => _isLikelyPendingLocalUserMatch(
+              pending: candidate,
+              incoming: incoming,
+            ),
+          );
 
     if (bestIndex == -1) {
-      return false;
+      return -1;
     }
     // Realtime fallback can sometimes deliver the canonical server user after
     // the pending-local set has already been drained by another merge path.
@@ -1156,7 +1197,7 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     final removedId = _messages[bestIndex].id;
     _messages.removeAt(bestIndex);
     _pendingLocalUserMessageIds.remove(removedId);
-    return true;
+    return bestIndex;
   }
 
   /// Matches a server [UserMessage] (with empty content signature) to a pending

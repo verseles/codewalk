@@ -75,6 +75,7 @@ import '../utils/chat_event_property_extractors.dart';
 import '../utils/chat_server_error_formatter.dart';
 import '../utils/session_title_formatter.dart';
 import 'chat_provider/message_reconciliation.dart';
+import 'chat_provider/message_timeline_order.dart';
 import 'project_provider.dart';
 import 'settings_provider.dart';
 
@@ -720,7 +721,8 @@ class ChatProvider extends ChangeNotifier {
   static const String _remoteAutoVariantValue = '__auto__';
   static const String _remoteAbortNoticeMessage = kChatAbortNoticeMessage;
   static const String _remoteAbortInlineErrorName = 'MessageAborted';
-  static const String _optimisticLocalUserMessageIdPrefix = 'local_user_';
+  static const String _optimisticLocalUserMessageIdPrefix =
+      optimisticLocalUserTimelineIdPrefix;
   static const String _traceFinalPrefix = 'CW_TRACE_FINAL';
   // ADR-023: upstream SessionSummary.diff returns [] when messageID is omitted,
   // so any unscoped /session/{id}/diff call reports an empty list. Cap the

@@ -1,4 +1,5 @@
 import '../../../domain/entities/chat_message.dart';
+import 'message_timeline_order.dart';
 
 /// Where a message-collection update came from.
 ///
@@ -106,8 +107,17 @@ MessageReconciliation reconcileMessages({
       if (incomingById.remove(message.id) == null) {
         continue;
       }
+      // Anchor-first insertion (issue #179): never compare a client-timed
+      // bubble against server clocks. Client-timed newcomers append; new
+      // canonical messages slot among canonical neighbours by server time.
+      if (isClientTimedTimelineId(message.id)) {
+        merged.add(message);
+        continue;
+      }
       final insertionIndex = merged.indexWhere(
-        (existing) => existing.time.isAfter(message.time),
+        (existing) =>
+            !isClientTimedTimelineId(existing.id) &&
+            existing.time.isAfter(message.time),
       );
       if (insertionIndex == -1) {
         merged.add(message);
@@ -136,11 +146,90 @@ MessageReconciliation reconcileMessages({
   // The payload drops messages. That is only legitimate when none of them is
   // newer than what the payload itself knows about; otherwise it is stale or
   // partial and is describing an older world than the one already on screen.
+  //
+  // Client-only optimistic bubbles (`local_user_*`) are always preservable:
+  // their device clock is incomparable with server clocks, so a time
+  // comparison could mistake an in-flight prompt for a stale entry and drop
+  // it right before its echo arrives (issue #179). The one exception is a
+  // reconciled bubble: when `next` already carries its canonical echo, the
+  // optimistic entry is dropped instead of being resurrected as a duplicate.
+  // Echo pairing is one-to-one so repeated intentional prompts stay distinct.
+  //
+  // Two echo shapes are recognised, mirroring
+  // `_shouldSkipLocalUserAppendAsDuplicateEcho` in the merge layer (which
+  // suppresses the same bubbles one step earlier):
+  // (a) strict echo — equal text and attachment shape within ±10 minutes;
+  // (b) fuzzy partial echo — prefix-shared text within the asymmetric
+  //     [send-2s, send+45s] window while `next` still carries an incomplete
+  //     assistant, i.e. the turn the echo belongs to is still streaming.
   final newestInNext = _newestTime(next);
+  final consumedEchoIds = <String>{};
+  bool isFuzzyEchoCandidate(ChatMessage candidate, UserMessage local) {
+    if (candidate is! UserMessage ||
+        isClientTimedTimelineId(candidate.id) ||
+        candidate.sessionId != local.sessionId ||
+        consumedEchoIds.contains(candidate.id)) {
+      return false;
+    }
+    final localSignature = timelineUserTextSignature(local);
+    final candidateSignature = timelineUserTextSignature(candidate);
+    if (localSignature.isNotEmpty && candidateSignature.isNotEmpty) {
+      final sharesPrefix = localSignature.startsWith(candidateSignature) ||
+          candidateSignature.startsWith(localSignature);
+      if (!sharesPrefix) {
+        return false;
+      }
+    }
+    if (candidate.time.isBefore(
+          local.time.subtract(const Duration(seconds: 2)),
+        ) ||
+        candidate.time.isAfter(local.time.add(const Duration(seconds: 45)))) {
+      return false;
+    }
+    return true;
+  }
+
+  final hasInProgressAssistant = next.any(
+    (message) => message is AssistantMessage && !message.isCompleted,
+  );
+  bool isReconciledOptimistic(ChatMessage message) {
+    if (message is! UserMessage ||
+        !isOptimisticLocalUserTimelineId(message.id)) {
+      return false;
+    }
+    for (final candidate in next) {
+      if (consumedEchoIds.contains(candidate.id)) {
+        continue;
+      }
+      if (timelineIsServerUserEchoFor(
+        local: message,
+        candidate: candidate,
+      )) {
+        consumedEchoIds.add(candidate.id);
+        return true;
+      }
+    }
+    if (!hasInProgressAssistant) {
+      return false;
+    }
+    for (final candidate in next) {
+      if (!isFuzzyEchoCandidate(candidate, message)) {
+        continue;
+      }
+      consumedEchoIds.add(candidate.id);
+      return true;
+    }
+    return false;
+  }
+
   final regressive = dropped
       .where(
         (message) =>
-            newestInNext == null || !message.time.isBefore(newestInNext),
+            (!isOptimisticLocalUserTimelineId(message.id) &&
+                (newestInNext == null ||
+                    !message.time.isBefore(newestInNext))) ||
+            (isOptimisticLocalUserTimelineId(message.id) &&
+                !isReconciledOptimistic(message)),
       )
       .toList(growable: false);
 
@@ -152,9 +241,34 @@ MessageReconciliation reconcileMessages({
     );
   }
 
-  // Keep the newer tail the payload failed to mention, in timeline order.
-  final preserved = <ChatMessage>[...next, ...regressive]
-    ..sort((a, b) => a.time.compareTo(b.time));
+  // Keep the newer tail the payload failed to mention, spliced back at the
+  // anchor positions it held before (issue #179). A wall-clock sort across
+  // client-timed bubbles and server messages could invert a turn under
+  // clock skew, so previous relative order wins over timestamps here.
+  final previousIndexById = <String, int>{};
+  for (var index = 0; index < scopedPrevious.length; index += 1) {
+    previousIndexById.putIfAbsent(scopedPrevious[index].id, () => index);
+  }
+  final preserved = List<ChatMessage>.from(next);
+  final preservedInPreviousOrder = List<ChatMessage>.from(regressive)
+    ..sort(
+      (a, b) => previousIndexById[a.id]!.compareTo(previousIndexById[b.id]!),
+    );
+  for (final message in preservedInPreviousOrder) {
+    if (preserved.any((existing) => existing.id == message.id)) {
+      continue;
+    }
+    final ownIndex = previousIndexById[message.id]!;
+    var insertAt = preserved.length;
+    for (var index = 0; index < preserved.length; index += 1) {
+      final neighbourIndex = previousIndexById[preserved[index].id];
+      if (neighbourIndex != null && neighbourIndex > ownIndex) {
+        insertAt = index;
+        break;
+      }
+    }
+    preserved.insert(insertAt, message);
+  }
 
   return MessageReconciliation(
     messages: preserved,

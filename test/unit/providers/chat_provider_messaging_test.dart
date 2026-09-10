@@ -280,8 +280,7 @@ void main() {
       );
     });
 
-    test('duplicate echo suppression rejects very stale local_user echoes', () {
-      final time = DateTime.fromMillisecondsSinceEpoch(4000);
+    test('duplicate echo suppression rejects very stale local_user echoes', () {      final time = DateTime.fromMillisecondsSinceEpoch(4000);
       final localOptimistic = UserMessage(
         id: 'local_user_4000_1',
         sessionId: 'ses_1',
@@ -317,6 +316,79 @@ void main() {
         isFalse,
       );
     });
+
+    test(
+      'duplicate echo suppression matches rewritten image URLs after the '
+      'turn completed (issue #179 image variant)',
+      () {
+        final time = DateTime.fromMillisecondsSinceEpoch(5000);
+        final localImage = UserMessage(
+          id: 'local_user_5000_1',
+          sessionId: 'ses_1',
+          time: time,
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_local_image_text',
+              messageId: 'local_user_5000_1',
+              sessionId: 'ses_1',
+              text: 'look at this',
+            ),
+            FilePart(
+              id: 'prt_local_image_file',
+              messageId: 'local_user_5000_1',
+              sessionId: 'ses_1',
+              url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg',
+              mime: 'image/png',
+              filename: 'pasted.png',
+            ),
+          ],
+        );
+        // Server rewrote the attachment URL and dropped the filename, and
+        // the turn already completed (no in-progress assistant).
+        final serverEcho = UserMessage(
+          id: 'msg_server_image_echo',
+          sessionId: 'ses_1',
+          time: time.add(const Duration(seconds: 30)),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_server_image_text',
+              messageId: 'msg_server_image_echo',
+              sessionId: 'ses_1',
+              text: 'look at this',
+            ),
+            FilePart(
+              id: 'prt_server_image_file',
+              messageId: 'msg_server_image_echo',
+              sessionId: 'ses_1',
+              url: 'file:///tmp/opencode-uploads/abc123.png',
+              mime: 'image/png',
+            ),
+          ],
+        );
+        final completedAssistant = AssistantMessage(
+          id: 'msg_server_answer',
+          sessionId: 'ses_1',
+          time: time.add(const Duration(seconds: 40)),
+          completedTime: time.add(const Duration(seconds: 45)),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_server_answer',
+              messageId: 'msg_server_answer',
+              sessionId: 'ses_1',
+              text: 'I see it',
+            ),
+          ],
+        );
+
+        expect(
+          provider.debugShouldSkipLocalUserAppendAsDuplicateEcho(
+            localMessage: localImage,
+            mergedMessages: <ChatMessage>[serverEcho, completedAssistant],
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test('loadSessions merges cache startup with remote refresh', () async {
       await provider.projectProvider.initializeProject();
@@ -706,6 +778,106 @@ void main() {
         expect(
           chatRepository.lastSendDirectory,
           provider.projectProvider.currentProject?.path,
+        );
+      },
+    );
+
+    test(
+      'stalled refresh keeps optimistic prompt above its assistant (issue #179)',
+      () async {
+        const sessionId = 'ses_1';
+        // The stream stalls: nothing arrives until the test drives it, while
+        // server snapshots already carry the assistant without its user echo.
+        final sendStream = StreamController<Either<Failure, ChatMessage>>();
+        addTearDown(() async {
+          await sendStream.close();
+        });
+        chatRepository.sendMessageHandler = (_, _, _, _) => sendStream.stream;
+        chatRepository.messagesBySession[sessionId] = const <ChatMessage>[];
+
+        await provider.projectProvider.initializeProject();
+        await provider.loadSessions();
+        await provider.selectSession(
+          provider.sessions.firstWhere((item) => item.id == sessionId),
+        );
+
+        await provider.sendMessage('stall prompt');
+        await waitForCondition(
+          () =>
+              provider.messages.length == 1 &&
+              provider.messages.single.id.startsWith('local_user_'),
+        );
+        // Server clock runs behind the device clock: every server timestamp
+        // predates the optimistic bubble, so only anchor-based ordering can
+        // keep the turn intact (a wall-clock sort would invert it).
+        final localTime = provider.messages.single.time;
+        final assistant = AssistantMessage(
+          id: 'msg_a1',
+          sessionId: sessionId,
+          time: localTime.subtract(const Duration(seconds: 30)),
+          completedTime: localTime.subtract(const Duration(seconds: 25)),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_a1',
+              messageId: 'msg_a1',
+              sessionId: sessionId,
+              text: 'answer',
+            ),
+          ],
+        );
+
+        // Stall: a refresh returns the assistant-only snapshot.
+        chatRepository.messagesBySession[sessionId] = <ChatMessage>[
+          assistant,
+        ];
+        await provider.refreshActiveSessionView(
+          reason: 'test-179-stall',
+          includeStatus: false,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          provider.messages.map((message) => message.id).toList(),
+          <String>[provider.messages.first.id, 'msg_a1'],
+        );
+        expect(provider.messages.first.id.startsWith('local_user_'), isTrue);
+
+        // The stalled stream finally delivers the reply: order must hold.
+        sendStream.add(Right<Failure, ChatMessage>(assistant));
+        await waitForCondition(
+          () => provider.messages.length == 2,
+        );
+
+        expect(provider.messages.first.id.startsWith('local_user_'), isTrue);
+        expect(provider.messages[1].id, 'msg_a1');
+
+        // The late user echo replaces the optimistic slot without moving it.
+        final serverUser = UserMessage(
+          id: 'msg_u1',
+          sessionId: sessionId,
+          time: localTime.subtract(const Duration(seconds: 60)),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_u1',
+              messageId: 'msg_u1',
+              sessionId: sessionId,
+              text: 'stall prompt',
+            ),
+          ],
+        );
+        chatRepository.messagesBySession[sessionId] = <ChatMessage>[
+          serverUser,
+          assistant,
+        ];
+        await provider.refreshActiveSessionView(
+          reason: 'test-179-late-echo',
+          includeStatus: false,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          provider.messages.map((message) => message.id).toList(),
+          <String>['msg_u1', 'msg_a1'],
         );
       },
     );

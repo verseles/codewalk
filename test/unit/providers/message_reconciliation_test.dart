@@ -13,6 +13,14 @@ ChatMessage _msg(String id, int millis, {String sessionId = _sessionId}) {
   );
 }
 
+AssistantMessage _assistant(String id, int millis) {
+  return AssistantMessage(
+    id: id,
+    sessionId: _sessionId,
+    time: DateTime.fromMillisecondsSinceEpoch(millis),
+  );
+}
+
 List<String> _ids(List<ChatMessage> messages) =>
     messages.map((message) => message.id).toList();
 
@@ -175,8 +183,7 @@ void main() {
       expect(second.decision, MessageUpdateDecision.applied);
     });
 
-    test('out-of-order arrivals converge to the union, in order', () {
-      // Simulates: fresh state on screen, then a late fallback, then a refresh.
+    test('out-of-order arrivals converge to the union, in order', () {      // Simulates: fresh state on screen, then a late fallback, then a refresh.
       var state = <ChatMessage>[_msg('a', 1000), _msg('newest', 4000)];
 
       state = reconcileMessages(
@@ -195,5 +202,102 @@ void main() {
 
       expect(_ids(state), <String>['a', 'b', 'newest']);
     });
+
+    test(
+      'an optimistic local survives an assistant-only snapshot '
+      'regardless of clock skew (issue #179)',
+      () {
+        // Device clock ahead of the server clock: the local bubble looks
+        // "newer" than everything the payload carries.
+        final previous = <ChatMessage>[
+          _msg('local_user_1_0', 999999),
+          _assistant('msg_assistant_1', 2000),
+        ];
+        final next = <ChatMessage>[_assistant('msg_assistant_1', 2000)];
+
+        final outcome = reconcileMessages(
+          previous: previous,
+          next: next,
+          kind: MessageUpdateKind.fullSnapshot,
+          sessionId: _sessionId,
+        );
+
+        expect(outcome.decision, MessageUpdateDecision.mergedNonRegressive);
+        expect(
+          _ids(outcome.messages),
+          <String>['local_user_1_0', 'msg_assistant_1'],
+        );
+        expect(outcome.preservedIds, <String>['local_user_1_0']);
+      },
+    );
+
+    test(
+      'a reconciled optimistic is not resurrected when its echo is present',
+      () {
+        final echo = UserMessage(
+          id: 'msg_user_2',
+          sessionId: _sessionId,
+          time: DateTime.fromMillisecondsSinceEpoch(2900),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_echo',
+              messageId: 'msg_user_2',
+              sessionId: _sessionId,
+              text: 'hello',
+            ),
+          ],
+        );
+        final local = UserMessage(
+          id: 'local_user_2_0',
+          sessionId: _sessionId,
+          time: DateTime.fromMillisecondsSinceEpoch(3000),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'prt_local',
+              messageId: 'local_user_2_0',
+              sessionId: _sessionId,
+              text: 'hello',
+            ),
+          ],
+        );
+        final next = <ChatMessage>[
+          echo,
+          _assistant('msg_assistant_2', 3100),
+        ];
+
+        final outcome = reconcileMessages(
+          previous: <ChatMessage>[local, _assistant('msg_assistant_2', 3100)],
+          next: next,
+          kind: MessageUpdateKind.fullSnapshot,
+          sessionId: _sessionId,
+        );
+
+        expect(outcome.decision, MessageUpdateDecision.applied);
+        expect(_ids(outcome.messages), <String>['msg_user_2', 'msg_assistant_2']);
+      },
+    );
+
+    test(
+      'preserved messages keep previous relative order even when '
+      'timestamps disagree',
+      () {
+        final previous = <ChatMessage>[
+          _msg('a', 1000),
+          _msg('mid', 5000),
+          _msg('new', 2000),
+        ];
+        final next = <ChatMessage>[_msg('a', 1000)];
+
+        final outcome = reconcileMessages(
+          previous: previous,
+          next: next,
+          kind: MessageUpdateKind.fullSnapshot,
+          sessionId: _sessionId,
+        );
+
+        // Previous relative order wins over wall-clock sorting.
+        expect(_ids(outcome.messages), <String>['a', 'mid', 'new']);
+      },
+    );
   });
 }

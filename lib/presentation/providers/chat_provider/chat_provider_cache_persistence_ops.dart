@@ -466,7 +466,11 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
   }) async {
     final inMemory = _cachedSessionMessages(sessionId);
     if (inMemory != null && inMemory.isNotEmpty) {
-      return _boundRestoredSessionMessages(inMemory);
+      // Heal pre-fix inversions (issue #179) before first render; order-only,
+      // membership and pending state are untouched.
+      return healPersistedTimelineInversions(
+        _boundRestoredSessionMessages(inMemory),
+      );
     }
     final fromDisk = await _restoreSessionMessagesSnapshot(
       sessionId,
@@ -476,7 +480,9 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     if (fromDisk == null || fromDisk.isEmpty) {
       return null;
     }
-    final boundedFromDisk = _boundRestoredSessionMessages(fromDisk);
+    final boundedFromDisk = healPersistedTimelineInversions(
+      _boundRestoredSessionMessages(fromDisk),
+    );
     _cacheSessionMessages(sessionId, boundedFromDisk);
     return boundedFromDisk;
   }
@@ -631,13 +637,15 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
       final selectedSession =
           _sessions.where((item) => item.id == session.id).firstOrNull ??
           session;
-      final cachedMessages = _boundRestoredSessionMessages(
-        _restoreableCachedMessages(
-          messagesJson
-              .whereType<Map<String, dynamic>>()
-              .map((item) => ChatMessageModel.fromJson(item).toDomain())
-              .where((message) => message.sessionId == selectedSession.id)
-              .toList(growable: false),
+      final cachedMessages = healPersistedTimelineInversions(
+        _boundRestoredSessionMessages(
+          _restoreableCachedMessages(
+            messagesJson
+                .whereType<Map<String, dynamic>>()
+                .map((item) => ChatMessageModel.fromJson(item).toDomain())
+                .where((message) => message.sessionId == selectedSession.id)
+                .toList(growable: false),
+          ),
         ),
       );
       if (cachedMessages.isEmpty) {

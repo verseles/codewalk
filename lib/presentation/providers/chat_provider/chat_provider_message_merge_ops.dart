@@ -245,6 +245,37 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
       }
     }
 
+    // Attachment-tolerant echo match (issue #179 image variant): the server
+    // may rewrite FilePart URLs/filenames, so the exact signature above can
+    // miss while text + file count + mime still identify the send. Unlike the
+    // fuzzy prefix path below this needs no in-progress assistant (the turn
+    // may long be completed) but stays within ±10 minutes so repeated
+    // intentional prompts remain distinct.
+    for (final serverMessage in mergedMessages) {
+      if (serverMessage is! UserMessage) {
+        continue;
+      }
+      if (_isOptimisticLocalUserMessageId(serverMessage.id)) {
+        continue;
+      }
+      if (serverMessage.sessionId != localMessage.sessionId) {
+        continue;
+      }
+      if (!_isLikelyPendingLocalUserMatch(
+        pending: localMessage,
+        incoming: serverMessage,
+      )) {
+        continue;
+      }
+      final delta = serverMessage.time
+          .difference(localMessage.time)
+          .abs();
+      if (delta > const Duration(minutes: 10)) {
+        continue;
+      }
+      return true;
+    }
+
     if (!hasInProgressAssistant || latestServerUserMessage == null) {
       return false;
     }
@@ -272,6 +303,34 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
     }
 
     return true;
+  }
+
+  /// Inserts an unresolved optimistic user bubble into [merged] at the slot
+  /// it holds in the visible [_messages] list instead of appending it after
+  /// newer server content (issue #179: tail-appending is what rendered an old
+  /// prompt — or an old image message — as the most recent bubble).
+  void _insertPendingLocalPreservingAnchor(
+    List<ChatMessage> merged,
+    UserMessage message,
+  ) {
+    if (merged.any((existing) => existing.id == message.id)) {
+      return;
+    }
+    final localIndex = _messages.indexWhere(
+      (existing) => existing.id == message.id,
+    );
+    if (localIndex == -1) {
+      merged.add(message);
+      return;
+    }
+    merged.insert(
+      timelineInsertIndexForLocalMessage(
+        target: merged,
+        localSnapshot: _messages,
+        localIndex: localIndex,
+      ),
+      message,
+    );
   }
 
   /// Merges server messages with any pending local user messages that haven't
@@ -349,7 +408,7 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
           localSignature.isNotEmpty &&
           (reconciledLocalSignatureCounts[localSignature] ?? 0) > 0;
       if (signatureAlreadyReconciledThisPass) {
-        merged.add(message);
+        _insertPendingLocalPreservingAnchor(merged, message);
         continue;
       }
       if (_shouldSkipLocalUserAppendAsDuplicateEcho(
@@ -363,7 +422,7 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
       if (existingIds.contains(message.id)) {
         continue;
       }
-      merged.add(message);
+      _insertPendingLocalPreservingAnchor(merged, message);
     }
 
     return (messages: merged, reconciledLocalIds: reconciledLocalIds);
@@ -480,9 +539,46 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
       );
     }
 
-    final prefix = cachedForSession
-        .take(overlapCachedIndex)
-        .toList(growable: false);
+    // Drop cached optimistic bubbles whose canonical echo is present in the
+    // server list (issue #179): without this, the prefix below keeps the
+    // stale `local_user_*` entry while the server list contributes its echo,
+    // rendering the same turn twice. Matching is one-to-one (consumed echo
+    // IDs) so repeated intentional prompts stay distinct.
+    final consumedEchoIds = <String>{};
+    final prefix = cachedForSession.take(overlapCachedIndex).where((message) {
+      if (message is! UserMessage ||
+          !_isOptimisticLocalUserMessageId(message.id)) {
+        return true;
+      }
+      for (final serverMessage in serverForSession) {
+        if (serverMessage is! UserMessage ||
+            _isOptimisticLocalUserMessageId(serverMessage.id) ||
+            consumedEchoIds.contains(serverMessage.id)) {
+          continue;
+        }
+        final localSignature = _normalizedUserMessageSignature(message);
+        final serverSignature = _normalizedUserMessageSignature(serverMessage);
+        final signatureMatches = localSignature.isNotEmpty &&
+            localSignature == serverSignature;
+        final likelyMatches =
+            !signatureMatches &&
+            _isLikelyPendingLocalUserMatch(
+              pending: message,
+              incoming: serverMessage,
+            );
+        if (!signatureMatches && !likelyMatches) {
+          continue;
+        }
+        final delta = serverMessage.time.difference(message.time).abs();
+        if (delta > const Duration(minutes: 10)) {
+          continue;
+        }
+        consumedEchoIds.add(serverMessage.id);
+        _pendingLocalUserMessageIds.remove(message.id);
+        return false;
+      }
+      return true;
+    }).toList(growable: false);
     final merged = <ChatMessage>[...prefix, ...serverForSession];
     final deduplicated = <ChatMessage>[];
     final seen = <String>{};
@@ -676,7 +772,17 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
         _pendingLocalUserMessageIds.remove(message.id);
         continue;
       }
-      merged.add(message);
+      if (message is UserMessage &&
+          isOptimisticLocalUserTimelineId(message.id)) {
+        final insertAt = timelineInsertIndexForLocalMessage(
+          target: merged,
+          localSnapshot: localMessages,
+          localIndex: index,
+        );
+        merged.insert(insertAt.clamp(0, merged.length), message);
+      } else {
+        merged.add(message);
+      }
       existingIds.add(message.id);
     }
 
