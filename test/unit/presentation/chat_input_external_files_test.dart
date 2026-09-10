@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:codewalk/core/constants/app_constants.dart';
 import 'package:codewalk/presentation/widgets/chat_input/chat_input_external_files.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -54,6 +55,29 @@ void main() {
         composerAttachmentNameOrMimeSupported('opaque', 'application/pdf'),
         isTrue,
       );
+    });
+
+    test('rejects files above the designed size ceiling', () {
+      final oversized = Uint8List(AppConstants.maxFileSize + 1);
+      expect(
+        composerFileFromBytes(
+          oversized,
+          name: 'huge.png',
+          fallbackName: 'fallback',
+        ),
+        isNull,
+      );
+    });
+
+    test('accepts files exactly at the size ceiling', () {
+      final atLimit = Uint8List(AppConstants.maxFileSize);
+      final file = composerFileFromBytes(
+        atLimit,
+        name: 'limit.png',
+        fallbackName: 'fallback',
+      );
+      expect(file, isNotNull);
+      expect(file!.lengthSync(), AppConstants.maxFileSize);
     });
   });
 

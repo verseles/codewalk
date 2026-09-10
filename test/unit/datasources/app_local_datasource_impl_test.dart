@@ -340,6 +340,8 @@ void main() {
         '${AppConstants.sessionMessagesSnapshotUpdatedAtKey}::$encodedSession::$encodedServer::$encodedScope';
     final sessionSnapshotIdsKey =
         '${AppConstants.sessionMessagesSnapshotIdsKey}::$encodedServer::$encodedScope';
+    final composerDraftKey =
+        '${AppConstants.sessionComposerDraftKey}::$encodedSession::$encodedServer::$encodedScope';
 
     SharedPreferences.setMockInitialValues(<String, Object>{
       cachedSessionsKey: '[{"id":"s1"}]',
@@ -347,6 +349,7 @@ void main() {
       sessionSnapshotKey: '{"messages":[]}',
       sessionSnapshotUpdatedAtKey: 123,
       sessionSnapshotIdsKey: '["$sessionId"]',
+      composerDraftKey: '{"text":"legacy draft"}',
     });
     final prefs = await SharedPreferences.getInstance();
     final cacheStore = _InMemoryChatCachePayloadStore();
@@ -360,9 +363,11 @@ void main() {
     expect(cacheStore.values[cachedSessionsKey], '[{"id":"s1"}]');
     expect(cacheStore.values[lastSessionKey], '{"session":"s1"}');
     expect(cacheStore.values[sessionSnapshotKey], '{"messages":[]}');
+    expect(cacheStore.values[composerDraftKey], '{"text":"legacy draft"}');
     expect(prefs.getString(cachedSessionsKey), isNull);
     expect(prefs.getString(lastSessionKey), isNull);
     expect(prefs.getString(sessionSnapshotKey), isNull);
+    expect(prefs.getString(composerDraftKey), isNull);
     expect(prefs.getInt(sessionSnapshotUpdatedAtKey), 123);
     expect(prefs.getString(sessionSnapshotIdsKey), '["$sessionId"]');
   });
@@ -610,6 +615,62 @@ void main() {
       expect(prefs.getString(AppConstants.selectedProviderKey),
           'legacy-provider');
       expect(prefs.getString(AppConstants.selectionBlobKey), isNull);
+    },
+  );
+
+  test(
+    'stores composer draft in the cache store instead of preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      const key = '${AppConstants.sessionComposerDraftKey}::ses_1::srv-1';
+
+      await dataSource.saveSessionComposerDraftJson(
+        '{"text":"hi","attachments":[]}',
+        sessionId: 'ses_1',
+        serverId: 'srv-1',
+      );
+
+      expect(cacheStore.values[key], '{"text":"hi","attachments":[]}');
+      expect(prefs.getString(key), isNull);
+      expect(
+        await dataSource.getSessionComposerDraftJson(
+          sessionId: 'ses_1',
+          serverId: 'srv-1',
+        ),
+        '{"text":"hi","attachments":[]}',
+      );
+    },
+  );
+
+  test(
+    'refuses oversized composer drafts without touching preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      // Proxy for the ~76MB base64 attachment draft that kept killing
+      // startup after v1.229.0.
+      final giant = 'x' * (ChatCachePayloadLimits.maxPayloadChars + 1);
+
+      await dataSource.saveSessionComposerDraftJson(
+        giant,
+        sessionId: 'ses_1',
+        serverId: 'srv-1',
+      );
+
+      expect(cacheStore.values, isEmpty);
+      expect(
+        prefs.getString('${AppConstants.sessionComposerDraftKey}::ses_1::srv-1'),
+        isNull,
+      );
     },
   );
 }

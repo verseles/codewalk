@@ -12,6 +12,7 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:showcaseview/showcaseview.dart' show TooltipPosition;
 
+import '../../core/constants/app_constants.dart';
 import '../../core/di/injection_container.dart' as di;
 import '../../core/i18n/l10n_context.dart';
 import '../../core/logging/app_logger.dart';

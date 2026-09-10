@@ -976,6 +976,7 @@
 - **Given** the user types an unsent composer draft in a session
 - **When** the user switches to another session in the same server/project context and later returns
 - **Then** the original session restores its own locally persisted draft text, shell mode, and supported attachments
+- **Then** drafts persist through the same file-backed cache as other large payloads, so a large attachment can never poison `SharedPreferences`; drafts above the shared payload ceiling are not persisted and fall back to in-memory state
 - **Then** sessions with no saved draft reopen with an empty composer
 - **Then** transient drafts restored after a rejected send or undo/redo history action keep priority over the persisted session draft until that transient state is consumed
 
@@ -1480,6 +1481,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** every valid selected file is shown as its own composer chip before send
 - **Then** if the platform only returns one selected file, that file is still attached safely
 - **Then** if a mixed selection includes unsupported or unreadable files, valid files stay attached and the composer shows feedback that some files could not be attached
+- **Then** files above the 10MB attachment ceiling are rejected through the same "some files could not be attached" feedback instead of being read into memory
 
 ### Model capability gating
 

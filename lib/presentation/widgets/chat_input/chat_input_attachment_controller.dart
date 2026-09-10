@@ -202,8 +202,12 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
     // remote OpenCode server. Server-side paths enter as FileInputPart values
     // elsewhere; composer picks, drops and pastes must always carry bytes.
     try {
+      final knownSize = file.lengthSync();
+      if (knownSize != null && knownSize > AppConstants.maxFileSize) {
+        return null;
+      }
       final bytes = await file.readAsBytes();
-      if (bytes.isEmpty) {
+      if (bytes.isEmpty || bytes.length > AppConstants.maxFileSize) {
         return null;
       }
       return 'data:$mime;base64,${base64Encode(bytes)}';

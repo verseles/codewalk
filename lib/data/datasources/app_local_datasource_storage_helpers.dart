@@ -284,7 +284,16 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     }
     // Coalesced selection blob lives in the same hybrid file store so
     // steady-state selection writes never touch the sync prefs file.
-    return _isScopedLargeCachePayloadKey(key, AppConstants.selectionBlobKey);
+    if (_isScopedLargeCachePayloadKey(key, AppConstants.selectionBlobKey)) {
+      return true;
+    }
+    // Composer drafts embed attachments as base64 data URLs (bounded at the
+    // attachment pipeline) and use the same hybrid store so a large draft
+    // never lands in the preferences file.
+    return _isScopedLargeCachePayloadKey(
+      key,
+      AppConstants.sessionComposerDraftKey,
+    );
   }
 
   bool _isScopedLargeCachePayloadKey(String key, String base) {

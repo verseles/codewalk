@@ -21,6 +21,10 @@ import android.util.Log
 class CodeWalkApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        // MainActivity is not the only entry point: WorkManager's background
+        // engine, the overlay service and the foreground service all start
+        // Dart without an Activity. Application.onCreate covers every one of
+        // them before the first channel call.
         curePoisonedLargeCachePreferences(this)
     }
 
@@ -37,6 +41,7 @@ class CodeWalkApplication : Application() {
             "last_session_snapshot",
             "session_messages_snapshot",
             "selection_blob_v1",
+            "session_composer_draft",
         )
 
         private fun isLargeCacheKey(rawKey: String): Boolean {
@@ -60,25 +65,38 @@ class CodeWalkApplication : Application() {
                     FLUTTER_PREFS,
                     Context.MODE_PRIVATE,
                 )
-                val doomed = prefs.all.mapNotNull { (key, value) ->
-                    if (isLargeCacheKey(key) &&
-                        value is String &&
-                        value.length > MAX_PREFS_VALUE_CHARS
-                    ) {
+                val all = prefs.all
+                val candidates = all.filterKeys { isLargeCacheKey(it) }
+                val doomed = candidates.mapNotNull { (key, value) ->
+                    if (value is String && value.length > MAX_PREFS_VALUE_CHARS) {
                         key
                     } else {
                         null
                     }
                 }
                 if (doomed.isEmpty()) {
+                    Log.i(
+                        TAG,
+                        "scan complete: entries=${all.size} " +
+                            "candidates=${candidates.size} quarantined=0",
+                    )
                     return
                 }
                 val editor = prefs.edit()
-                doomed.forEach { editor.remove(it) }
+                doomed.forEach { key ->
+                    val chars = (all[key] as? String)?.length ?: -1
+                    Log.w(TAG, "quarantined key=$key chars=$chars")
+                    editor.remove(key)
+                }
                 // Synchronous commit: the file must be clean before any
                 // plugin calls getAll(). Only small entries are rewritten.
                 val committed = editor.commit()
-                Log.w(TAG, "Quarantined ${doomed.size} oversized cache keys (commit=$committed)")
+                Log.i(
+                    TAG,
+                    "scan complete: entries=${all.size} " +
+                        "candidates=${candidates.size} " +
+                        "quarantined=${doomed.size} commit=$committed",
+                )
             } catch (t: Throwable) {
                 try {
                     Log.w(TAG, "Prefs cure failed: ${t.message}")

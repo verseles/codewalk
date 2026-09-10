@@ -1124,7 +1124,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     required String sessionId,
     String? serverId,
   }) async {
-    return _sharedPreferences.getString(
+    return _readLargeCachePayload(
       _sessionScopedKey(
         AppConstants.sessionComposerDraftKey,
         sessionId: sessionId,
@@ -1145,10 +1145,13 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
       serverId: serverId,
     );
     if (draftJson == null || draftJson.trim().isEmpty) {
-      await _sharedPreferences.remove(key);
+      await _removeLargeCachePayload(key);
       return;
     }
-    await _sharedPreferences.setString(key, draftJson);
+    // Drafts can embed attachments as base64 data URLs; route them through
+    // the capped hybrid store so a huge draft can never poison
+    // SharedPreferences and kill startup (ADR-016).
+    await _writeLargeCachePayload(key, draftJson);
   }
 
   @override

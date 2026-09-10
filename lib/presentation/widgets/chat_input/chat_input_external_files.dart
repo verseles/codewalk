@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 
+import '../../../core/constants/app_constants.dart';
+
 /// Extensions the composer already accepts through the file picker.
 ///
 /// Kept here so dropped (#118) and pasted (#119) files are judged by exactly
@@ -48,6 +50,13 @@ PlatformFile? composerFileFromBytes(
   String? mimeType,
 }) {
   if (bytes.isEmpty) {
+    return null;
+  }
+  // Attachments become base64 data URLs in the draft and in the request
+  // body; unbounded files once produced a ~76MB draft that killed the app
+  // on every launch. Enforce the designed per-file ceiling here so all
+  // memory-backed entry points (paste, drop) share one rule.
+  if (bytes.length > AppConstants.maxFileSize) {
     return null;
   }
   var normalizedName = name.trim();
