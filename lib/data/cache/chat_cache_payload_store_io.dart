@@ -16,7 +16,8 @@ ChatCachePayloadStore? createChatCachePayloadStore() {
 
 class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
   FileBackedChatCachePayloadStore({
-    this.maxReadableBytes = ChatCachePayloadLimits.maxPayloadChars,
+    this.maxWritableChars = ChatCachePayloadLimits.maxPayloadChars,
+    this.maxReadableBytes = ChatCachePayloadLimits.maxPayloadChars * 4,
     this.maxMemoryCharsTotal = ChatCachePayloadLimits.maxMemoryCharsTotal,
     this.maxMemoryEntryChars = ChatCachePayloadLimits.maxMemoryEntryChars,
     Directory? testDirectory,
@@ -24,8 +25,15 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
 
   static const int _maxInMemoryEntries = 24;
 
-  /// Absolute ceiling for a payload file read into memory. Files above it
-  /// are deleted (regenerable via SWR) instead of being read.
+  /// Absolute ceiling, in characters, for an accepted payload write.
+  final int maxWritableChars;
+
+  /// Absolute ceiling, in on-disk bytes, for a payload file read into
+  /// memory. Carries headroom over [maxWritableChars] because UTF-8
+  /// expansion (up to 3x per BMP char) means a legitimately written payload
+  /// can exceed its character count on disk; without headroom, valid
+  /// non-ASCII snapshots would be wrongfully deleted on read. Files above
+  /// it are deleted (regenerable via SWR) instead of being read.
   final int maxReadableBytes;
 
   /// Aggregate budget for the in-memory LRU, in string characters.
@@ -73,7 +81,7 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
 
   @override
   Future<bool> write(String key, String value) async {
-    if (value.length > maxReadableBytes) {
+    if (value.length > maxWritableChars) {
       return false;
     }
     final inMemory = _touchMemory(key);
@@ -129,10 +137,12 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
   }
 
   void _storeMemory(String key, String value) {
+    // Evict first: replacing an entry with one above the per-entry cap must
+    // drop the stale smaller value instead of serving it forever.
+    _evictMemory(key);
     if (value.length > maxMemoryEntryChars) {
       return;
     }
-    _evictMemory(key);
     _memoryCache[key] = value;
     _currentMemoryChars += value.length;
     while (_memoryCache.length > _maxInMemoryEntries ||

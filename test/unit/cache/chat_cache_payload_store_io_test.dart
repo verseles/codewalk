@@ -17,12 +17,14 @@ void main() {
   });
 
   FileBackedChatCachePayloadStore newStore({
+    int? maxWritableChars,
     int? maxReadableBytes,
     int? maxMemoryCharsTotal,
     int? maxMemoryEntryChars,
   }) {
     return FileBackedChatCachePayloadStore(
       testDirectory: tempDir,
+      maxWritableChars: maxWritableChars ?? 64,
       maxReadableBytes: maxReadableBytes ?? 64,
       maxMemoryCharsTotal: maxMemoryCharsTotal ?? 64,
       maxMemoryEntryChars: maxMemoryEntryChars ?? 64,
@@ -42,7 +44,7 @@ void main() {
   });
 
   test('rejects oversized writes without creating files', () async {
-    final store = newStore(maxReadableBytes: 16);
+    final store = newStore(maxWritableChars: 16);
 
     expect(await store.write('big', 'x' * 17), isFalse);
     expect(tempDir.listSync(), isEmpty);
@@ -90,6 +92,7 @@ void main() {
 
   test('skips oversized single entries in memory but persists them', () async {
     final store = newStore(
+      maxWritableChars: 1024,
       maxReadableBytes: 1024,
       maxMemoryCharsTotal: 1024,
       maxMemoryEntryChars: 8,
@@ -98,5 +101,22 @@ void main() {
     expect(await store.write('big-single', 'z' * 16), isTrue);
     expect(store.debugMemoryChars, 0);
     expect(await store.read('big-single'), 'z' * 16);
+  });
+
+  test('updating an entry beyond the memory cap serves the new value',
+      () async {
+    final store = newStore(
+      maxWritableChars: 1024,
+      maxReadableBytes: 1024,
+      maxMemoryCharsTotal: 1024,
+      maxMemoryEntryChars: 8,
+    );
+
+    expect(await store.write('k', '12345678'), isTrue);
+    expect(await store.read('k'), '12345678');
+    // 16 chars exceeds the 8-char memory cap: the stale smaller value must
+    // be evicted so the read below serves the updated disk payload.
+    expect(await store.write('k', 'Z' * 16), isTrue);
+    expect(await store.read('k'), 'Z' * 16);
   });
 }

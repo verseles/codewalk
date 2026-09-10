@@ -307,6 +307,12 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
         }
         final store = _chatCachePayloadStore;
         if (store == null) {
+          if (value.length > ChatCachePayloadLimits.maxPrefsChars) {
+            AppLogger.warn(
+              'Dropping large-cache payload above the preferences ceiling',
+            );
+            return false;
+          }
           if (_sharedPreferences.getString(key) == value) return false;
           await _sharedPreferences.setString(key, value);
           return true;
@@ -322,6 +328,13 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
             try {
               await store.remove(key);
             } catch (_) {}
+            if (value.length > ChatCachePayloadLimits.maxPrefsChars) {
+              AppLogger.warn(
+                'Dropping large-cache payload after store failure instead of re-poisoning preferences',
+              );
+              wrote = false;
+              return;
+            }
             await _sharedPreferences.setString(key, value);
             wrote = true;
           }

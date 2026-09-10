@@ -569,4 +569,23 @@ void main() {
       expect(prefs.getString(AppConstants.cachedSessionsKey), isNull);
     },
   );
+
+  test(
+    'does not fall back to SharedPreferences above the prefs ceiling when the cache store fails',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: _ThrowingChatCachePayloadStore(),
+      );
+      // Between maxPrefsChars and maxPayloadChars: too big for the
+      // preferences fallback, which the native cure would purge anyway.
+      final between =
+          'x' * (ChatCachePayloadLimits.maxPrefsChars + 1024);
+
+      await dataSource.saveCachedSessions(between);
+
+      expect(prefs.getString(AppConstants.cachedSessionsKey), isNull);
+    },
+  );
 }

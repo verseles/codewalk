@@ -379,7 +379,6 @@ class MainActivity : FlutterActivity() {
         val bytes = contentResolver.openInputStream(uri)?.use { stream ->
             readBoundedBytes(stream, MAX_CLIPBOARD_BYTES)
         } ?: return null
-        if (bytes.size > MAX_CLIPBOARD_BYTES) return null
         return mapOf(
             "name" to displayName,
             "mimeType" to mimeType,
@@ -390,7 +389,7 @@ class MainActivity : FlutterActivity() {
     private fun readBoundedBytes(
         stream: java.io.InputStream,
         limitBytes: Int,
-    ): ByteArray {
+    ): ByteArray? {
         val out = ByteArrayOutputStream(minOf(8192, limitBytes))
         val chunk = ByteArray(8192)
         var total = 0L
@@ -398,11 +397,7 @@ class MainActivity : FlutterActivity() {
             val read = stream.read(chunk)
             if (read <= 0) break
             total += read
-            if (total > limitBytes) {
-                // Signal overflow; the caller refuses the payload. The
-                // partial buffer is discarded with this frame.
-                return ByteArray(limitBytes + 1)
-            }
+            if (total > limitBytes) return null
             out.write(chunk, 0, read)
         }
         return out.toByteArray()
