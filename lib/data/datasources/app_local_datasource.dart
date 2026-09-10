@@ -1497,7 +1497,13 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? scopeId,
   }) async {
     final key = _selectionBlobKey(serverId: serverId, scopeId: scopeId);
-    await _writeLargeCachePayload(key, blobJson);
+    // A refused write (oversized payload) must not drain the legacy
+    // per-field keys: unlike snapshots, selection state is user data that
+    // SWR cannot regenerate, so the legacy fields stay the read fallback.
+    final wrote = await _writeLargeCachePayload(key, blobJson);
+    if (!wrote) {
+      return;
+    }
     try {
       final decoded = jsonDecode(blobJson);
       _selectionBlobCache[key] = decoded is Map<String, dynamic>

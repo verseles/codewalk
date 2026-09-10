@@ -588,4 +588,28 @@ void main() {
       expect(prefs.getString(AppConstants.cachedSessionsKey), isNull);
     },
   );
+
+  test(
+    'refused selection blob keeps legacy per-field keys as fallback',
+    () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppConstants.selectedProviderKey: 'legacy-provider',
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: _ThrowingChatCachePayloadStore(),
+      );
+      // Between maxPrefsChars and maxPayloadChars: refused by the prefs
+      // ceiling. Unlike snapshots, selection state is user data that SWR
+      // cannot regenerate, so the legacy fields must survive the refusal.
+      final giant = 'x' * (ChatCachePayloadLimits.maxPrefsChars + 1024);
+
+      await dataSource.saveSelectionBlob(giant);
+
+      expect(prefs.getString(AppConstants.selectedProviderKey),
+          'legacy-provider');
+      expect(prefs.getString(AppConstants.selectionBlobKey), isNull);
+    },
+  );
 }
