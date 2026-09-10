@@ -33,27 +33,42 @@ class CodeWalkApplication : Application() {
         private const val FLUTTER_PREFS = "FlutterSharedPreferences"
         private const val FLUTTER_KEY_PREFIX = "flutter."
 
-        // Mirrors the Dart ChatCachePayloadLimits.maxPrefsChars policy.
+        // Mirrors the Dart ChatCachePayloadLimits policy. Generic
+        // large-payload families use the preferences ceiling; the composer
+        // draft family uses the higher payload ceiling so a 1-2MB legacy
+        // draft can still be migrated to the file-backed store by Dart
+        // instead of being destroyed here (draft text is user data that SWR
+        // cannot regenerate).
         private const val MAX_PREFS_VALUE_CHARS = 1024 * 1024
+        private const val MAX_DRAFT_VALUE_CHARS = 2 * 1024 * 1024
+
+        private const val DRAFT_KEY_BASE = "session_composer_draft"
 
         private val LARGE_KEY_BASES = listOf(
             "cached_sessions",
             "last_session_snapshot",
             "session_messages_snapshot",
             "selection_blob_v1",
-            "session_composer_draft",
+            DRAFT_KEY_BASE,
         )
 
-        private fun isLargeCacheKey(rawKey: String): Boolean {
+        private fun matchedLargeKeyBase(rawKey: String): String? {
             val key = if (rawKey.startsWith(FLUTTER_KEY_PREFIX)) {
                 rawKey.substring(FLUTTER_KEY_PREFIX.length)
             } else {
                 rawKey
             }
-            return LARGE_KEY_BASES.any { base ->
+            return LARGE_KEY_BASES.firstOrNull { base ->
                 key == base || key.startsWith("$base::")
             }
         }
+
+        private fun maxCharsForBase(base: String): Int =
+            if (base == DRAFT_KEY_BASE) {
+                MAX_DRAFT_VALUE_CHARS
+            } else {
+                MAX_PREFS_VALUE_CHARS
+            }
 
         fun curePoisonedLargeCachePreferences(context: Context) {
             try {
@@ -66,25 +81,27 @@ class CodeWalkApplication : Application() {
                     Context.MODE_PRIVATE,
                 )
                 val all = prefs.all
-                val candidates = all.filterKeys { isLargeCacheKey(it) }
-                val doomed = candidates.mapNotNull { (key, value) ->
-                    if (value is String && value.length > MAX_PREFS_VALUE_CHARS) {
-                        key
-                    } else {
-                        null
+                var candidates = 0
+                val doomed = mutableListOf<Pair<String, Int>>()
+                for ((key, value) in all) {
+                    val base = matchedLargeKeyBase(key) ?: continue
+                    candidates += 1
+                    if (value is String &&
+                        value.length > maxCharsForBase(base)
+                    ) {
+                        doomed.add(key to value.length)
                     }
                 }
                 if (doomed.isEmpty()) {
                     Log.i(
                         TAG,
                         "scan complete: entries=${all.size} " +
-                            "candidates=${candidates.size} quarantined=0",
+                            "candidates=$candidates quarantined=0",
                     )
                     return
                 }
                 val editor = prefs.edit()
-                doomed.forEach { key ->
-                    val chars = (all[key] as? String)?.length ?: -1
+                for ((key, chars) in doomed) {
                     Log.w(TAG, "quarantined key=$key chars=$chars")
                     editor.remove(key)
                 }
@@ -94,7 +111,7 @@ class CodeWalkApplication : Application() {
                 Log.i(
                     TAG,
                     "scan complete: entries=${all.size} " +
-                        "candidates=${candidates.size} " +
+                        "candidates=$candidates " +
                         "quarantined=${doomed.size} commit=$committed",
                 )
             } catch (t: Throwable) {

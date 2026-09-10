@@ -140,6 +140,13 @@ extension _ChatInputExternalDropController on _ChatInputWidgetState {
         scopedAccessStarted = await DesktopDrop.instance
             .startAccessingSecurityScopedResource(bookmark: bookmark);
       }
+      // Preflight the size before buffering: a dropped multi-hundred-MB
+      // file must be refused, not read into memory (same OOM class as the
+      // giant draft payload).
+      final knownLength = await dropped.length();
+      if (knownLength > AppConstants.maxFileSize) {
+        return null;
+      }
       final bytes = await dropped.readAsBytes();
       return composerFileFromBytes(
         bytes,

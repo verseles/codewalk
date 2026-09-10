@@ -153,7 +153,11 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
       if (!mounted) {
         return;
       }
-      _showAttachmentSnack(context.l10n.msgNoValidFilesSelected);
+      _showAttachmentSnack(
+        skippedCount > 0
+            ? context.l10n.msgSomeSelectedFilesNotAttached
+            : context.l10n.msgNoValidFilesSelected,
+      );
       return;
     }
 
@@ -202,8 +206,8 @@ extension _ChatInputAttachmentController on _ChatInputWidgetState {
     // remote OpenCode server. Server-side paths enter as FileInputPart values
     // elsewhere; composer picks, drops and pastes must always carry bytes.
     try {
-      final knownSize = file.lengthSync();
-      if (knownSize != null && knownSize > AppConstants.maxFileSize) {
+      final knownSize = file.lengthSync() ?? await file.length();
+      if (knownSize > AppConstants.maxFileSize) {
         return null;
       }
       final bytes = await file.readAsBytes();
