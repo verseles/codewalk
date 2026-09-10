@@ -870,6 +870,16 @@ void main() {
           hasLength(1),
         );
         expect(midIds.length, inInclusiveRange(1, 2));
+        // FIFO: the first echo pairs with the first send, so any surviving
+        // optimistic bubble is the second image, never a duplicate.
+        final midSurvivors = provider.messages
+            .whereType<UserMessage>()
+            .where((message) => message.id.startsWith('local_user_'))
+            .toList();
+        for (final survivor in midSurvivors) {
+          final file = survivor.parts.whereType<FilePart>().single;
+          expect(file.url, secondUrl);
+        }
 
         // Both echoes present: exactly the two canonical bubbles remain.
         final secondEcho = imageEcho(
@@ -893,6 +903,93 @@ void main() {
               .map((message) => message.id)
               .toList(),
           <String>['msg_img_1', 'msg_img_2'],
+        );
+      },
+    );
+
+    test(
+      'restore keeps a pending image prompt beside an older same-mime echo',
+      () async {
+        // Snapshot shape: an earlier canonical image echo plus a distinct
+        // pending image-only prompt whose URL was rewritten server-side.
+        // Restore must fail open (exact matches only) instead of pruning
+        // the pending bubble as a duplicate of the older echo.
+        const sessionId = 'ses_1';
+        await provider.projectProvider.initializeProject();
+        final session = chatRepository.sessions.firstWhere(
+          (item) => item.id == sessionId,
+        );
+        final now = DateTime.now();
+        UserMessage imageMessage({
+          required String id,
+          required String url,
+          required DateTime time,
+        }) {
+          return UserMessage(
+            id: id,
+            sessionId: sessionId,
+            time: time,
+            parts: <MessagePart>[
+              FilePart(
+                id: 'prt_$id',
+                messageId: id,
+                sessionId: sessionId,
+                url: url,
+                mime: 'image/png',
+              ),
+            ],
+          );
+        }
+
+        await localDataSource.saveLastSessionSnapshot(
+          jsonEncode(<String, dynamic>{
+            'session': ChatSessionModel.fromDomain(session).toJson(),
+            'messages': <Map<String, dynamic>>[
+              ChatMessageModel.fromDomain(
+                imageMessage(
+                  id: 'msg_img_a',
+                  url: 'file:///tmp/uploads/a.png',
+                  time: now,
+                ),
+              ).toJson(),
+              ChatMessageModel.fromDomain(
+                imageMessage(
+                  id: 'local_user_9_0',
+                  url: 'data:image/png;base64,BBBBb',
+                  time: now.add(const Duration(seconds: 10)),
+                ),
+              ).toJson(),
+            ],
+          }),
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+        await localDataSource.saveLastSessionSnapshotUpdatedAt(
+          DateTime.now().millisecondsSinceEpoch,
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+        await localDataSource.saveCurrentSessionId(
+          sessionId,
+          serverId: 'srv_test',
+          scopeId: '/tmp',
+        );
+
+        // Offline: restoration must stand on the snapshot alone.
+        chatRepository.getMessagesFailure = const NetworkFailure(
+          'offline',
+          503,
+        );
+
+        await provider.loadSessions();
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(
+          provider.messages
+              .whereType<UserMessage>()
+              .map((message) => message.id)
+              .toList(),
+          <String>['msg_img_a', 'local_user_9_0'],
         );
       },
     );

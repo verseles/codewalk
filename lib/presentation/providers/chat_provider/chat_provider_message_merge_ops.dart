@@ -206,33 +206,96 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
   bool _shouldSkipLocalUserAppendAsDuplicateEcho({
     required UserMessage localMessage,
     required List<ChatMessage> mergedMessages,
+    bool includeTolerantEcho = true,
   }) {
     if (!_isOptimisticLocalUserMessageId(localMessage.id)) {
       return false;
     }
-    final localSignature = _normalizedUserMessageSignature(localMessage);
-    if (localSignature.isNotEmpty) {
-      for (final serverMessage in mergedMessages) {
-        if (serverMessage is! UserMessage) {
+    // One-to-one: only the earliest visible optimistic claimant yields to a
+    // given echo, so repeated identical prompts stay distinct.
+    bool hasEarlierClaimant(
+      UserMessage serverMessage, {
+      required bool exactShape,
+    }) {
+      for (final visible in _messages) {
+        if (visible.id == localMessage.id) {
+          return false;
+        }
+        if (visible is! UserMessage ||
+            !_isOptimisticLocalUserMessageId(visible.id) ||
+            visible.sessionId != localMessage.sessionId) {
           continue;
         }
-        final serverSignature = _normalizedUserMessageSignature(serverMessage);
-        if (serverSignature.isNotEmpty && serverSignature == localSignature) {
-          // Exact content echoes can arrive after long model turns or under
-          // mobile/server clock skew. Keep this broader than the fuzzy-prefix
-          // fallback below, but still bounded so intentional repeated prompts do
-          // not reconcile against very old server messages.
-          final earliestEchoTime = localMessage.time.subtract(
-            const Duration(minutes: 10),
-          );
-          final latestEchoTime = localMessage.time.add(
-            const Duration(minutes: 10),
-          );
-          final serverTime = serverMessage.time;
-          return !serverTime.isBefore(earliestEchoTime) &&
-              !serverTime.isAfter(latestEchoTime);
+        final matches = exactShape
+            ? _normalizedUserMessageSignature(visible) ==
+                  _normalizedUserMessageSignature(serverMessage)
+            : _isLikelyPendingLocalUserMatch(
+                pending: visible,
+                incoming: serverMessage,
+              );
+        if (!matches) {
+          continue;
         }
+        if (serverMessage.time.difference(visible.time).abs() >
+            const Duration(minutes: 10)) {
+          continue;
+        }
+        return true;
       }
+      return false;
+    }
+
+    bool withinEchoWindow(DateTime serverTime) {
+      final earliestEchoTime = localMessage.time.subtract(
+        const Duration(minutes: 10),
+      );
+      final latestEchoTime = localMessage.time.add(
+        const Duration(minutes: 10),
+      );
+      return !serverTime.isBefore(earliestEchoTime) &&
+          !serverTime.isAfter(latestEchoTime);
+    }
+
+    final localSignature = _normalizedUserMessageSignature(localMessage);
+    for (final serverMessage in mergedMessages) {
+      if (serverMessage is! UserMessage) {
+        continue;
+      }
+      // Only canonical same-session echoes can consume an optimistic bubble:
+      // another optimistic entry (e.g. an earlier identical pending just
+      // spliced into the merge) or a cross-session message must never drain
+      // this prompt.
+      if (_isOptimisticLocalUserMessageId(serverMessage.id)) {
+        continue;
+      }
+      if (serverMessage.sessionId != localMessage.sessionId) {
+        continue;
+      }
+      final serverSignature = _normalizedUserMessageSignature(serverMessage);
+      final isExact =
+          serverSignature.isNotEmpty && serverSignature == localSignature;
+      final isTolerant = !isExact &&
+          includeTolerantEcho &&
+          _isLikelyPendingLocalUserMatch(
+            pending: localMessage,
+            incoming: serverMessage,
+          );
+      if (!isExact && !isTolerant) {
+        continue;
+      }
+      // Exact content echoes can arrive after long model turns or under
+      // mobile/server clock skew. Keep this broader than the fuzzy-prefix
+      // fallback below, but still bounded so intentional repeated prompts do
+      // not reconcile against very old server messages. The tolerant shape
+      // additionally covers server-rewritten attachment URLs/filenames on
+      // completed turns (issue #179 image variant).
+      if (!withinEchoWindow(serverMessage.time)) {
+        continue;
+      }
+      if (hasEarlierClaimant(serverMessage, exactShape: isExact)) {
+        continue;
+      }
+      return true;
     }
 
     UserMessage? latestServerUserMessage;
@@ -243,65 +306,6 @@ extension _ChatProviderMessageMergeOps on ChatProvider {
       } else if (message is AssistantMessage && !message.isCompleted) {
         hasInProgressAssistant = true;
       }
-    }
-
-    // Attachment-tolerant echo match (issue #179 image variant): the server
-    // may rewrite FilePart URLs/filenames, so the exact signature above can
-    // miss while text + file count + mime still identify the send. Unlike the
-    // fuzzy prefix path below this needs no in-progress assistant (the turn
-    // may long be completed) but stays within ±10 minutes so repeated
-    // intentional prompts remain distinct. One-to-one: only the earliest
-    // visible optimistic claimant yields, so a second identical image-only
-    // prompt is never drained by its predecessor's echo.
-    for (final serverMessage in mergedMessages) {
-      if (serverMessage is! UserMessage) {
-        continue;
-      }
-      if (_isOptimisticLocalUserMessageId(serverMessage.id)) {
-        continue;
-      }
-      if (serverMessage.sessionId != localMessage.sessionId) {
-        continue;
-      }
-      if (!_isLikelyPendingLocalUserMatch(
-        pending: localMessage,
-        incoming: serverMessage,
-      )) {
-        continue;
-      }
-      final delta = serverMessage.time
-          .difference(localMessage.time)
-          .abs();
-      if (delta > const Duration(minutes: 10)) {
-        continue;
-      }
-      var earlierClaimant = false;
-      for (final visible in _messages) {
-        if (visible.id == localMessage.id) {
-          break;
-        }
-        if (visible is! UserMessage ||
-            !_isOptimisticLocalUserMessageId(visible.id) ||
-            visible.sessionId != localMessage.sessionId) {
-          continue;
-        }
-        if (!_isLikelyPendingLocalUserMatch(
-          pending: visible,
-          incoming: serverMessage,
-        )) {
-          continue;
-        }
-        if (serverMessage.time.difference(visible.time).abs() >
-            const Duration(minutes: 10)) {
-          continue;
-        }
-        earlierClaimant = true;
-        break;
-      }
-      if (earlierClaimant) {
-        continue;
-      }
-      return true;
     }
 
     if (!hasInProgressAssistant || latestServerUserMessage == null) {

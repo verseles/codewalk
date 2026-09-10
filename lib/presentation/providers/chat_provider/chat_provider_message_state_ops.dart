@@ -1088,8 +1088,7 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     }
 
     var earliestExactSignatureMatchIndex = -1;
-    var bestLikelyMatchIndex = -1;
-    Duration? bestLikelyMatchDelta;
+    var earliestLikelyMatchIndex = -1;
     for (var index = 0; index < _messages.length; index += 1) {
       final current = _messages[index];
       if (current is! UserMessage) {
@@ -1120,36 +1119,38 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       )) {
         continue;
       }
-      if (bestLikelyMatchDelta == null || delta < bestLikelyMatchDelta) {
-        bestLikelyMatchDelta = delta;
-        bestLikelyMatchIndex = index;
+      // FIFO here too: echoes arrive in send order, so the earliest
+      // compatible pending owns the echo (nearest-delta would pair a late
+      // echo with the newest twin and strand the older prompt).
+      if (earliestLikelyMatchIndex == -1) {
+        earliestLikelyMatchIndex = index;
       }
     }
     if (earliestExactSignatureMatchIndex != -1) {
       return earliestExactSignatureMatchIndex;
     }
-    return bestLikelyMatchIndex;
+    return earliestLikelyMatchIndex;
   }
 
-  /// Removes the nearest optimistic `local_user_*` echo matching [incoming]
+  /// Removes the earliest optimistic `local_user_*` echo matching [incoming]
   /// and returns its index so the canonical echo can be re-inserted at the
   /// same slot (issue #179). Returns -1 when there is no match.
   ///
   /// Matching is exact-signature first, then the tolerant file/text fallback
   /// ([_isLikelyPendingLocalUserMatch]) so server-rewritten attachment URLs
   /// still reconcile instead of leaving an orphan bubble that later jumps to
-  /// the timeline tail as if it were the newest message.
+  /// the timeline tail as if it were the newest message. Both passes are
+  /// FIFO: echoes arrive in send order, so the earliest compatible pending
+  /// owns the echo and repeated identical prompts reconcile in send order.
   int _removeDuplicateOptimisticLocalUserEcho(UserMessage incoming) {
     if (_isOptimisticLocalUserMessageId(incoming.id)) {
       return -1;
     }
     final incomingSignature = _normalizedUserMessageSignature(incoming);
 
-    int nearestIndex(
+    int earliestIndex(
       bool Function(UserMessage candidate) matches,
     ) {
-      var bestIndex = -1;
-      Duration? bestDelta;
       for (var index = 0; index < _messages.length; index += 1) {
         final current = _messages[index];
         if (current is! UserMessage) {
@@ -1168,24 +1169,21 @@ extension _ChatProviderMessageStateOps on ChatProvider {
         if (delta > const Duration(minutes: 10)) {
           continue;
         }
-        if (bestDelta == null || delta < bestDelta) {
-          bestDelta = delta;
-          bestIndex = index;
-        }
+        return index;
       }
-      return bestIndex;
+      return -1;
     }
 
     var bestIndex = -1;
     if (incomingSignature.isNotEmpty) {
-      bestIndex = nearestIndex(
+      bestIndex = earliestIndex(
         (candidate) =>
             _normalizedUserMessageSignature(candidate) == incomingSignature,
       );
     }
     bestIndex = bestIndex != -1
         ? bestIndex
-        : nearestIndex(
+        : earliestIndex(
             (candidate) => _isLikelyPendingLocalUserMatch(
               pending: candidate,
               incoming: incoming,
@@ -1197,8 +1195,8 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     }
     // Realtime fallback can sometimes deliver the canonical server user after
     // the pending-local set has already been drained by another merge path.
-    // Remove only the nearest exact local_user_* echo so repeated intentional
-    // prompts remain distinct.
+    // Remove only the earliest matching local_user_* echo so repeated
+    // intentional prompts remain distinct.
     final removedId = _messages[bestIndex].id;
     _messages.removeAt(bestIndex);
     _pendingLocalUserMessageIds.remove(removedId);

@@ -173,6 +173,11 @@ MessageReconciliation reconcileMessages({
     }
     final localSignature = timelineUserTextSignature(local);
     final candidateSignature = timelineUserTextSignature(candidate);
+    // A captionless image turn must never reconcile against an unrelated
+    // text turn on time proximity alone.
+    if (localSignature.isEmpty && candidateSignature.isNotEmpty) {
+      return false;
+    }
     if (localSignature.isNotEmpty && candidateSignature.isNotEmpty) {
       final sharesPrefix = localSignature.startsWith(candidateSignature) ||
           candidateSignature.startsWith(localSignature);
@@ -216,13 +221,19 @@ MessageReconciliation reconcileMessages({
       if (candidate is! UserMessage) {
         continue;
       }
-      // Captionless turns carry no text identity: require attachment-shape
-      // equality too, so two distinct captionless images never collapse.
+      // Captionless turns carry no text identity: require the full
+      // attachment shape — mime multiset AND file count, so an empty-MIME
+      // slot cannot make two different attachments look equal.
       if (timelineUserTextSignature(message).isEmpty &&
-          timelineUserTextSignature(candidate).isEmpty &&
-          timelineUserFileMimeSignature(message) !=
-              timelineUserFileMimeSignature(candidate)) {
-        continue;
+          timelineUserTextSignature(candidate).isEmpty) {
+        if (timelineUserFileMimeSignature(message) !=
+            timelineUserFileMimeSignature(candidate)) {
+          continue;
+        }
+        if (message.parts.whereType<FilePart>().length !=
+            candidate.parts.whereType<FilePart>().length) {
+          continue;
+        }
       }
       if (!isFuzzyEchoCandidate(candidate, message)) {
         continue;

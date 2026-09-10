@@ -15,6 +15,12 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
               !_shouldSkipLocalUserAppendAsDuplicateEcho(
                 localMessage: message,
                 mergedMessages: canonicalUserMessages,
+                // Restore fail-open (issue #179): the tolerant shape cannot
+                // tell twin identical sends apart, and the live `_messages`
+                // claimant scope is unavailable pre-hydration. Ambiguous
+                // twins stay preserved here; the live merge reconciles them
+                // one-to-one once pending state is rebuilt.
+                includeTolerantEcho: false,
               ),
         )
         .toList(growable: false);
