@@ -1294,7 +1294,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return _sharedPreferences.getString(
+    return _readLargeCachePayload(
       _scopedKey(
         AppConstants.providerCatalogCacheKey,
         serverId: serverId,
@@ -1309,7 +1309,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
+    // Provider catalogs can reach several MB and are regenerable from the
+    // server. Route them through the capped hybrid store so they never
+    // accumulate in SharedPreferences: 16 catalog scopes once held ~75MB
+    // there and OOM'ed every getAll at startup.
+    await _writeLargeCachePayload(
       _scopedKey(
         AppConstants.providerCatalogCacheKey,
         serverId: serverId,

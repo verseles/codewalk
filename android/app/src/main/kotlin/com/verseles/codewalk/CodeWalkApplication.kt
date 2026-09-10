@@ -42,6 +42,11 @@ class CodeWalkApplication : Application() {
         private const val MAX_PREFS_VALUE_CHARS = 1024 * 1024
         private const val MAX_DRAFT_VALUE_CHARS = 2 * 1024 * 1024
 
+        // Any string at or above this size is quarantined even when its key
+        // is not a known large-payload family: a value this large can OOM
+        // the platform-channel codec at startup no matter who wrote it.
+        private const val GENERIC_QUARANTINE_CHARS = 2 * 1024 * 1024
+
         private const val DRAFT_KEY_BASE = "session_composer_draft"
 
         private val LARGE_KEY_BASES = listOf(
@@ -49,7 +54,8 @@ class CodeWalkApplication : Application() {
             "last_session_snapshot",
             "session_messages_snapshot",
             "selection_blob_v1",
-            DRAFT_KEY_BASE,
+            "session_composer_draft",
+            "provider_catalog_cache",
         )
 
         private fun matchedLargeKeyBase(rawKey: String): String? {
@@ -84,12 +90,31 @@ class CodeWalkApplication : Application() {
                 var candidates = 0
                 val doomed = mutableListOf<Pair<String, Int>>()
                 for ((key, value) in all) {
-                    val base = matchedLargeKeyBase(key) ?: continue
-                    candidates += 1
-                    if (value is String &&
-                        value.length > maxCharsForBase(base)
-                    ) {
+                    if (value !is String) continue
+                    val base = matchedLargeKeyBase(key)
+                    if (base != null) {
+                        candidates += 1
+                        if (value.length > maxCharsForBase(base)) {
+                            doomed.add(key to value.length)
+                        }
+                        continue
+                    }
+                    // Generic safety net: any oversized string in the
+                    // Flutter preferences file can cross the platform
+                    // channel and OOM the engine, regardless of which key
+                    // family wrote it. Never delete anything here without
+                    // logging key and length first.
+                    if (value.length > GENERIC_QUARANTINE_CHARS) {
+                        Log.w(
+                            TAG,
+                            "unrecognized oversized key=$key chars=${value.length}",
+                        )
                         doomed.add(key to value.length)
+                    } else if (value.length > MAX_PREFS_VALUE_CHARS) {
+                        Log.w(
+                            TAG,
+                            "unrecognized large key=$key chars=${value.length}",
+                        )
                     }
                 }
                 if (doomed.isEmpty()) {

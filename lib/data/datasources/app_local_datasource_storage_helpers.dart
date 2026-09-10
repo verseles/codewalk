@@ -290,9 +290,18 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     // Composer drafts embed attachments as base64 data URLs (bounded at the
     // attachment pipeline) and use the same hybrid store so a large draft
     // never lands in the preferences file.
-    return _isScopedLargeCachePayloadKey(
+    if (_isScopedLargeCachePayloadKey(
       key,
       AppConstants.sessionComposerDraftKey,
+    )) {
+      return true;
+    }
+    // Provider catalogs are multi-MB and regenerable; they used to be the
+    // dominant SharedPreferences payload (~75MB across scopes on one
+    // install) and now live in the file-backed store.
+    return _isScopedLargeCachePayloadKey(
+      key,
+      AppConstants.providerCatalogCacheKey,
     );
   }
 

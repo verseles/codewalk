@@ -342,6 +342,8 @@ void main() {
         '${AppConstants.sessionMessagesSnapshotIdsKey}::$encodedServer::$encodedScope';
     final composerDraftKey =
         '${AppConstants.sessionComposerDraftKey}::$encodedSession::$encodedServer::$encodedScope';
+    final providerCatalogKey =
+        '${AppConstants.providerCatalogCacheKey}::$encodedServer::$encodedScope';
 
     SharedPreferences.setMockInitialValues(<String, Object>{
       cachedSessionsKey: '[{"id":"s1"}]',
@@ -350,6 +352,7 @@ void main() {
       sessionSnapshotUpdatedAtKey: 123,
       sessionSnapshotIdsKey: '["$sessionId"]',
       composerDraftKey: '{"text":"legacy draft"}',
+      providerCatalogKey: '{"providers":[]}',
     });
     final prefs = await SharedPreferences.getInstance();
     final cacheStore = _InMemoryChatCachePayloadStore();
@@ -364,10 +367,12 @@ void main() {
     expect(cacheStore.values[lastSessionKey], '{"session":"s1"}');
     expect(cacheStore.values[sessionSnapshotKey], '{"messages":[]}');
     expect(cacheStore.values[composerDraftKey], '{"text":"legacy draft"}');
+    expect(cacheStore.values[providerCatalogKey], '{"providers":[]}');
     expect(prefs.getString(cachedSessionsKey), isNull);
     expect(prefs.getString(lastSessionKey), isNull);
     expect(prefs.getString(sessionSnapshotKey), isNull);
     expect(prefs.getString(composerDraftKey), isNull);
+    expect(prefs.getString(providerCatalogKey), isNull);
     expect(prefs.getInt(sessionSnapshotUpdatedAtKey), 123);
     expect(prefs.getString(sessionSnapshotIdsKey), '["$sessionId"]');
   });
@@ -643,6 +648,68 @@ void main() {
           serverId: 'srv-1',
         ),
         '{"text":"hi","attachments":[]}',
+      );
+    },
+  );
+
+  test(
+    'stores provider catalog in the cache store instead of preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      const key =
+          '${AppConstants.providerCatalogCacheKey}::srv-1::%2Frepo%2Fdemo';
+
+      await dataSource.saveProviderCatalogCacheJson(
+        '{"providers":[{"id":"anthropic"}]}',
+        serverId: 'srv-1',
+        scopeId: '/repo/demo',
+      );
+
+      expect(
+        cacheStore.values[key],
+        '{"providers":[{"id":"anthropic"}]}',
+      );
+      expect(prefs.getString(key), isNull);
+      expect(
+        await dataSource.getProviderCatalogCacheJson(
+          serverId: 'srv-1',
+          scopeId: '/repo/demo',
+        ),
+        '{"providers":[{"id":"anthropic"}]}',
+      );
+    },
+  );
+
+  test(
+    'refuses oversized provider catalogs without touching preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      // Proxy for the multi-MB catalog scopes that accumulated ~75MB in
+      // SharedPreferences and OOM'ed every startup getAll.
+      final giant = 'x' * (ChatCachePayloadLimits.maxPayloadChars + 1);
+
+      await dataSource.saveProviderCatalogCacheJson(
+        giant,
+        serverId: 'srv-1',
+        scopeId: '/repo/demo',
+      );
+
+      expect(cacheStore.values, isEmpty);
+      expect(
+        prefs.getString(
+          '${AppConstants.providerCatalogCacheKey}::srv-1::%2Frepo%2Fdemo',
+        ),
+        isNull,
       );
     },
   );
