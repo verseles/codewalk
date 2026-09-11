@@ -262,6 +262,7 @@ typedef _DesktopUtilityPaneBuildKey = ({
   int shortcutBindingsSignature,
   bool showReviewChanges,
   int todoSignature,
+  bool utilityShortcutsCollapsed,
 });
 
 typedef _FilePaneBuildKey = ({String? sessionId, int diffSignature});
@@ -579,6 +580,7 @@ _DesktopUtilityPaneBuildKey _desktopUtilityPaneBuildKey(
     sessionInsightsError: chatProvider.sessionInsightsError,
     shortcutBindingsSignature: _shortcutBindingsSignature(settingsProvider),
     showReviewChanges: settingsProvider.showReviewChanges,
+    utilityShortcutsCollapsed: settingsProvider.utilityShortcutsCollapsed,
   );
 }
 

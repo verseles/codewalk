@@ -40,6 +40,7 @@ import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/locale_provider.dart';
 import 'package:codewalk/presentation/providers/project_provider.dart';
+import 'package:codewalk/presentation/providers/quota_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/update_check_service.dart';
@@ -408,6 +409,11 @@ void main() {
           ChangeNotifierProvider<SettingsProvider>.value(
             value: settingsProvider,
           ),
+          ChangeNotifierProvider<QuotaProvider>.value(
+            value: QuotaProvider(
+              remoteDataSource: FakeQuotaRemoteDataSource(),
+            ),
+          ),
           ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
         ],
         child: MaterialApp(
@@ -513,7 +519,12 @@ Widget _testApp(ChatProvider chatProvider, AppProvider appProvider) {
       ChangeNotifierProvider<ProjectProvider>.value(
         value: chatProvider.projectProvider,
       ),
-      ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+          ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+          ChangeNotifierProvider<QuotaProvider>.value(
+            value: QuotaProvider(
+              remoteDataSource: FakeQuotaRemoteDataSource(),
+            ),
+          ),
     ],
     child: MaterialApp(
       locale: const Locale('en'),
@@ -549,7 +560,12 @@ Widget _testAppWithSettings(
       ChangeNotifierProvider<ProjectProvider>.value(
         value: chatProvider.projectProvider,
       ),
-      ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+          ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+          ChangeNotifierProvider<QuotaProvider>.value(
+            value: QuotaProvider(
+              remoteDataSource: FakeQuotaRemoteDataSource(),
+            ),
+          ),
     ],
     child: MaterialApp(
       locale: const Locale('en'),

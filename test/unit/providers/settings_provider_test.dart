@@ -979,6 +979,29 @@ void main() {
       expect(second.taskListCollapsed, isTrue);
     });
 
+    test('persists utility shortcuts collapsed state', () async {
+      final local = InMemoryAppLocalDataSource();
+      final first = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await first.initialize();
+
+      expect(first.utilityShortcutsCollapsed, isFalse);
+
+      await first.setUtilityShortcutsCollapsed(true);
+
+      final second = SettingsProvider(
+        localDataSource: local,
+        dioClient: DioClient(),
+        soundService: _FakeSoundService(),
+      );
+      await second.initialize();
+
+      expect(second.utilityShortcutsCollapsed, isTrue);
+    });
+
     test('persists review changes visibility toggle', () async {
       final local = InMemoryAppLocalDataSource();
       final first = SettingsProvider(

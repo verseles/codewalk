@@ -892,6 +892,7 @@ class ExperienceSettings {
       showSessionTabsOverride: null,
       sessionTabsGestureHintDismissed: false,
       taskListCollapsed: false,
+      utilityShortcutsCollapsed: false,
       showComposerTips: true,
       showMathRendering: true,
       composerSpellCheckEnabled: true,
@@ -969,6 +970,7 @@ class ExperienceSettings {
     this.showSessionTabsOverride,
     this.sessionTabsGestureHintDismissed = false,
     required this.taskListCollapsed,
+    required this.utilityShortcutsCollapsed,
     required this.showComposerTips,
     required this.showMathRendering,
     this.composerSpellCheckEnabled = true,
@@ -1046,6 +1048,7 @@ class ExperienceSettings {
   final bool? showSessionTabsOverride;
   final bool sessionTabsGestureHintDismissed;
   final bool taskListCollapsed;
+  final bool utilityShortcutsCollapsed;
   final bool showComposerTips;
   final bool showMathRendering;
   final bool composerSpellCheckEnabled;
@@ -1127,6 +1130,7 @@ class ExperienceSettings {
     bool? Function()? showSessionTabsOverride,
     bool? sessionTabsGestureHintDismissed,
     bool? taskListCollapsed,
+    bool? utilityShortcutsCollapsed,
     bool? showComposerTips,
     bool? showMathRendering,
     bool? composerSpellCheckEnabled,
@@ -1220,6 +1224,8 @@ class ExperienceSettings {
           sessionTabsGestureHintDismissed ??
           this.sessionTabsGestureHintDismissed,
       taskListCollapsed: taskListCollapsed ?? this.taskListCollapsed,
+      utilityShortcutsCollapsed:
+          utilityShortcutsCollapsed ?? this.utilityShortcutsCollapsed,
       showComposerTips: showComposerTips ?? this.showComposerTips,
       showMathRendering: showMathRendering ?? this.showMathRendering,
       composerSpellCheckEnabled:
@@ -1359,6 +1365,7 @@ class ExperienceSettings {
         'showSessionTabsOverride': showSessionTabsOverride,
       'sessionTabsGestureHintDismissed': sessionTabsGestureHintDismissed,
       'taskListCollapsed': taskListCollapsed,
+      'utilityShortcutsCollapsed': utilityShortcutsCollapsed,
       'showComposerTips': showComposerTips,
       'showMathRendering': showMathRendering,
       'composerSpellCheckEnabled': composerSpellCheckEnabled,
@@ -1459,6 +1466,7 @@ class ExperienceSettings {
     var sessionTabsGestureHintDismissed =
         defaults.sessionTabsGestureHintDismissed;
     var taskListCollapsed = defaults.taskListCollapsed;
+    var utilityShortcutsCollapsed = defaults.utilityShortcutsCollapsed;
     var showComposerTips = defaults.showComposerTips;
     var showMathRendering = defaults.showMathRendering;
     var composerSpellCheckEnabled = defaults.composerSpellCheckEnabled;
@@ -1681,6 +1689,11 @@ class ExperienceSettings {
     final taskListCollapsedJson = json['taskListCollapsed'];
     if (taskListCollapsedJson is bool) {
       taskListCollapsed = taskListCollapsedJson;
+    }
+
+    final utilityShortcutsCollapsedJson = json['utilityShortcutsCollapsed'];
+    if (utilityShortcutsCollapsedJson is bool) {
+      utilityShortcutsCollapsed = utilityShortcutsCollapsedJson;
     }
 
     final showComposerTipsJson = json['showComposerTips'];
@@ -2039,6 +2052,7 @@ class ExperienceSettings {
       showSessionTabsOverride: showSessionTabsOverride,
       sessionTabsGestureHintDismissed: sessionTabsGestureHintDismissed,
       taskListCollapsed: taskListCollapsed,
+      utilityShortcutsCollapsed: utilityShortcutsCollapsed,
       showComposerTips: showComposerTips,
       showMathRendering: showMathRendering,
       composerSpellCheckEnabled: composerSpellCheckEnabled,

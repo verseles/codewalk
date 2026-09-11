@@ -72,6 +72,32 @@ void main() {
         isFalse,
       );
     });
+
+    test('round-trips the utility shortcuts collapsed flag', () {
+      final defaults = ExperienceSettings.defaults();
+      expect(defaults.utilityShortcutsCollapsed, isFalse);
+
+      final collapsed = defaults.copyWith(utilityShortcutsCollapsed: true);
+      expect(collapsed.toJson()['utilityShortcutsCollapsed'], isTrue);
+      expect(
+        ExperienceSettings.fromJson(
+          collapsed.toJson(),
+        ).utilityShortcutsCollapsed,
+        isTrue,
+      );
+      expect(
+        ExperienceSettings.fromJson(
+          const <String, dynamic>{},
+        ).utilityShortcutsCollapsed,
+        isFalse,
+      );
+      expect(
+        ExperienceSettings.fromJson(const <String, dynamic>{
+          'utilityShortcutsCollapsed': 'yes',
+        }).utilityShortcutsCollapsed,
+        isFalse,
+      );
+    });
   });
 
   group('session attention presentation serialization', () {

@@ -228,6 +228,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get sessionTabsGestureHintDismissed =>
       _settings.sessionTabsGestureHintDismissed;
   bool get taskListCollapsed => _settings.taskListCollapsed;
+  bool get utilityShortcutsCollapsed => _settings.utilityShortcutsCollapsed;
   bool get showComposerTips => _settings.showComposerTips;
   bool get showMathRendering => _settings.showMathRendering;
   bool get composerSpellCheckEnabled => _settings.composerSpellCheckEnabled;
@@ -792,6 +793,15 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(taskListCollapsed: collapsed);
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setUtilityShortcutsCollapsed(bool collapsed) async {
+    if (_settings.utilityShortcutsCollapsed == collapsed) {
+      return;
+    }
+    _settings = _settings.copyWith(utilityShortcutsCollapsed: collapsed);
     notifyListeners();
     await _persist();
   }
