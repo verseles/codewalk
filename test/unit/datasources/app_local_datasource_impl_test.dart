@@ -471,7 +471,11 @@ void main() {
 
   test('stores canned answers separately for global and project scope', () async {
     final prefs = await SharedPreferences.getInstance();
-    final dataSource = AppLocalDataSourceImpl(sharedPreferences: prefs);
+    final cacheStore = _InMemoryChatCachePayloadStore();
+    final dataSource = AppLocalDataSourceImpl(
+      sharedPreferences: prefs,
+      chatCachePayloadStore: cacheStore,
+    );
 
     await dataSource.saveCannedAnswersJson('[{"id":"g"}]');
     await dataSource.saveCannedAnswersJson(
@@ -488,13 +492,13 @@ void main() {
 
     expect(global, '[{"id":"g"}]');
     expect(scoped, '[{"id":"p"}]');
-    expect(prefs.getString(AppConstants.cannedAnswersKey), '[{"id":"g"}]');
+    expect(cacheStore.values[AppConstants.cannedAnswersKey], '[{"id":"g"}]');
     expect(
-      prefs.getString(
-        '${AppConstants.cannedAnswersKey}::${Uri.encodeComponent('srv-1')}::${Uri.encodeComponent('/repo/demo')}',
-      ),
+      cacheStore.values[
+          '${AppConstants.cannedAnswersKey}::${Uri.encodeComponent('srv-1')}::${Uri.encodeComponent('/repo/demo')}'],
       '[{"id":"p"}]',
     );
+    expect(prefs.getString(AppConstants.cannedAnswersKey), isNull);
   });
 
   test('stores session tab state separately for each server', () async {

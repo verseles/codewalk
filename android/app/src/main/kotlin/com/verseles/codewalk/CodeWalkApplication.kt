@@ -34,13 +34,13 @@ class CodeWalkApplication : Application() {
         private const val FLUTTER_KEY_PREFIX = "flutter."
 
         // Mirrors the Dart ChatCachePayloadLimits policy. Generic
-        // large-payload families use the preferences ceiling; the composer
-        // draft family uses the higher payload ceiling so a 1-2MB legacy
-        // draft can still be migrated to the file-backed store by Dart
-        // instead of being destroyed here (draft text is user data that SWR
-        // cannot regenerate).
+        // large-payload families use the preferences ceiling; user-data
+        // families (composer drafts, canned answers) use the higher payload
+        // ceiling so a 1-2MB legacy value can still be migrated to the
+        // file-backed store by Dart instead of being destroyed here (that
+        // text is user data SWR cannot regenerate).
         private const val MAX_PREFS_VALUE_CHARS = 1024 * 1024
-        private const val MAX_DRAFT_VALUE_CHARS = 2 * 1024 * 1024
+        private const val MAX_USER_DATA_VALUE_CHARS = 2 * 1024 * 1024
 
         // Any string above this size is quarantined even when its key
         // is not a known large-payload family: a value this large can OOM
@@ -73,7 +73,7 @@ class CodeWalkApplication : Application() {
 
         private fun maxCharsForBase(base: String): Int =
             if (base == DRAFT_KEY_BASE || base == CANNED_ANSWERS_KEY_BASE) {
-                MAX_DRAFT_VALUE_CHARS
+                MAX_USER_DATA_VALUE_CHARS
             } else {
                 MAX_PREFS_VALUE_CHARS
             }

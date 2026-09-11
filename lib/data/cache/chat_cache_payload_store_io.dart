@@ -70,17 +70,29 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
         await file.delete();
         return null;
       }
-      final value = await file.readAsString();
+    } catch (_) {
+      // Transient stat failure: report a miss without destroying the file.
+      return null;
+    }
+
+    try {
+      final bytes = await file.readAsBytes();
+      final value = utf8.decode(bytes);
       _storeMemory(key, value);
       return value;
-    } catch (_) {
-      // A corrupt or partially written cache file must read as a cache
-      // miss, never break the caller's restore path. Regenerable via SWR.
+    } on FormatException {
+      // Confirmed corruption (invalid encoding, e.g. a torn write): remove
+      // it so every later read does not fail the same way. Regenerable
+      // via SWR for cache families.
       try {
         if (await file.exists()) {
           await file.delete();
         }
       } catch (_) {}
+      return null;
+    } catch (_) {
+      // Other I/O errors (sharing violations, transient failures) must not
+      // destroy a possibly valid file: report a miss and retry later.
       return null;
     }
   }
@@ -98,9 +110,25 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
     }
     _storeMemory(key, value);
     final file = await _fileForKey(key);
-    await file.parent.create(recursive: true);
-    await file.writeAsString(value, flush: true);
-    return true;
+    try {
+      await file.parent.create(recursive: true);
+      // Atomic-ish replace: write a sibling temp file and rename it over
+      // the target so readers never observe a torn payload and a failed
+      // write cannot leave a partly written file at the canonical path.
+      final temp = File('${file.path}.tmp');
+      await temp.writeAsString(value, flush: true);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      await temp.rename(file.path);
+      return true;
+    } catch (_) {
+      // A failed disk write must not leave the value readable from the
+      // in-memory LIFO: a later migration/read would mistake it for a
+      // persisted payload. Roll back memory, then surface the failure.
+      _evictMemory(key);
+      rethrow;
+    }
   }
 
   @override
