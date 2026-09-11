@@ -64,6 +64,19 @@ void main() {
       );
     });
 
+    test('no selection orders all by recency with no anchor', () {
+      final tabs = <SessionTabRecord>[
+        tab('a', lastOpenedAtMs: 10),
+        tab('b', lastOpenedAtMs: 30),
+        tab('c', lastOpenedAtMs: 20),
+      ];
+      final ordered = orderTabsForSwitcher(tabs);
+      expect(
+        ordered.map((t) => t.identity.sessionId).toList(),
+        <String>['ses_b', 'ses_c', 'ses_a'],
+      );
+    });
+
     test('fewer than 2 valid tabs returns as-is', () {
       final ordered = orderTabsForSwitcher(<SessionTabRecord>[
         tab('a', isSelected: true),

@@ -3,8 +3,10 @@ import '../providers/chat_provider.dart';
 /// Pure MRU ordering for the browser-style session tab switcher (issue #171).
 ///
 /// MRU contract (decision 1B):
-/// - The currently selected tab anchors index 0.
-/// - Remaining tabs follow by [SessionTabRecord.lastOpenedAtMs] descending.
+/// - When a tab is selected, it anchors index 0 and the rest follow by
+///   [SessionTabRecord.lastOpenedAtMs] descending.
+/// - With no selection (e.g. New Chat draft active), every candidate is
+///   ordered by recency with no anchor.
 /// - Ties preserve the incoming visual order (stable sort).
 /// - Tabs with invalid identities (e.g. local `New Chat` draft with an empty
 ///   session id) are excluded; the switcher only cycles real sessions.
@@ -19,6 +21,14 @@ List<SessionTabRecord> orderTabsForSwitcher(List<SessionTabRecord> tabs) {
   }
   if (valid.length < 2) return List<SessionTabRecord>.unmodifiable(valid);
 
+  int recencyThenVisual(SessionTabRecord a, SessionTabRecord b) {
+    final recency = b.lastOpenedAtMs.compareTo(a.lastOpenedAtMs);
+    if (recency != 0) return recency;
+    return visualIndexByIdentity[a.identity]!.compareTo(
+      visualIndexByIdentity[b.identity]!,
+    );
+  }
+
   SessionTabRecord? current;
   for (final tab in valid) {
     if (tab.isSelected) {
@@ -26,19 +36,13 @@ List<SessionTabRecord> orderTabsForSwitcher(List<SessionTabRecord> tabs) {
       break;
     }
   }
-  current ??= valid.firstWhere(
-    (tab) => tab.isSelected,
-    orElse: () => valid.first,
-  );
+  if (current == null) {
+    final ordered = List<SessionTabRecord>.of(valid)..sort(recencyThenVisual);
+    return List<SessionTabRecord>.unmodifiable(ordered);
+  }
 
   final rest = valid.where((tab) => tab.identity != current!.identity).toList();
-  rest.sort((a, b) {
-    final recency = b.lastOpenedAtMs.compareTo(a.lastOpenedAtMs);
-    if (recency != 0) return recency;
-    return visualIndexByIdentity[a.identity]!.compareTo(
-      visualIndexByIdentity[b.identity]!,
-    );
-  });
+  rest.sort(recencyThenVisual);
   return List<SessionTabRecord>.unmodifiable(<SessionTabRecord>[current, ...rest]);
 }
 

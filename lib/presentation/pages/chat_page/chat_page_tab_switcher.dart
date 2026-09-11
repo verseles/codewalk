@@ -90,8 +90,12 @@ extension _ChatPageTabSwitcher on _ChatPageState {
     final tabs = _tabSwitcherCandidates(chatProvider);
     if (tabs.length < 2) return false;
     _tabSwitcherTabs = tabs;
-    _tabSwitcherPreview.value =
-        switcherInitialIndex(tabs.length, reverse: reverse);
+    // No valid tab selected (e.g. New Chat draft active): the MRU list has
+    // no anchor, so forward starts at the most recent candidate (index 0).
+    final hasCurrent = tabs.any((tab) => tab.isSelected);
+    _tabSwitcherPreview.value = hasCurrent
+        ? switcherInitialIndex(tabs.length, reverse: reverse)
+        : (reverse ? tabs.length - 1 : 0);
     return true;
   }
 
@@ -138,8 +142,9 @@ extension _ChatPageTabSwitcher on _ChatPageState {
   }
 
   /// Remapped bindings that no longer use the built-in Ctrl+Tab shape.
-  /// Ctrl-based customs join the hold-to-cycle overlay; modifier-free customs
-  /// commit a single MRU step immediately.
+  /// Ctrl-based customs join the hold-to-cycle overlay; anything else
+  /// (Meta/Alt/modifier-free) commits a single MRU step immediately so the
+  /// overlay never waits for a Ctrl release that will not come.
   bool _matchCustomTabSwitcherBinding(KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
     final settingsProvider = context.read<SettingsProvider>();
@@ -158,9 +163,12 @@ extension _ChatPageTabSwitcher on _ChatPageState {
           activator.trigger == LogicalKeyboardKey.tab) {
         continue;
       }
-      if (activator.control || activator.meta || activator.alt) {
+      if (activator.control && !activator.meta && !activator.alt) {
         return _openOrAdvanceTabSwitcher(reverse: reverse);
       }
+      // Meta/Alt/modifier-free customs: single MRU step, KeyDown only so
+      // auto-repeat cannot thrash the current session.
+      if (event is! KeyDownEvent) return false;
       _commitSingleMruStep(reverse: reverse);
       return true;
     }
@@ -195,8 +203,6 @@ extension _ChatPageTabSwitcher on _ChatPageState {
             tabs: _tabSwitcherTabs,
             previewIndex: clamped,
             projects: context.read<ProjectProvider>().projects,
-            openProjectIds:
-                context.read<ProjectProvider>().openProjectIds.toSet(),
             onSelect: (index) {
               if (index == clamped) {
                 _commitTabSwitcher();

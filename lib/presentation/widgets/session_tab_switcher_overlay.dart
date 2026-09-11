@@ -5,6 +5,7 @@ import '../../core/i18n/l10n_context.dart';
 import '../../core/utils/path_utils.dart';
 import '../../domain/entities/project.dart';
 import '../providers/chat_provider.dart';
+import '../utils/window_size_class.dart';
 import 'session_tab_strip.dart';
 
 /// Browser-style tab switcher overlay (issue #171, decision 2B completo).
@@ -18,7 +19,6 @@ class SessionTabSwitcherOverlay extends StatefulWidget {
     required this.tabs,
     required this.previewIndex,
     required this.projects,
-    required this.openProjectIds,
     required this.onSelect,
     required this.onDismiss,
   });
@@ -26,7 +26,6 @@ class SessionTabSwitcherOverlay extends StatefulWidget {
   final List<SessionTabRecord> tabs;
   final int previewIndex;
   final List<Project> projects;
-  final Set<String> openProjectIds;
   final ValueChanged<int> onSelect;
   final VoidCallback onDismiss;
 
@@ -78,7 +77,9 @@ class _SessionTabSwitcherOverlayState
   Project? _projectFor(SessionTabRecord tab) {
     for (final project in widget.projects) {
       if (tab.projectId != null && project.id == tab.projectId) return project;
-      if (project.path == tab.identity.directory) return project;
+      if (areEquivalentFilePaths(project.path, tab.identity.directory)) {
+        return project;
+      }
     }
     return null;
   }
@@ -91,17 +92,21 @@ class _SessionTabSwitcherOverlayState
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final previewTab = widget.tabs[widget.previewIndex];
+    if (widget.tabs.isEmpty) return const SizedBox.shrink();
+    final safeIndex =
+        widget.previewIndex.clamp(0, widget.tabs.length - 1);
+    final previewTab = widget.tabs[safeIndex];
     final previewTitle = _title(context, previewTab);
     final width = MediaQuery.sizeOf(context).width;
     final height = MediaQuery.sizeOf(context).height;
+    final isCompact = WindowSizeClass.fromWidth(width).isCompact;
 
     return Semantics(
       container: true,
       liveRegion: true,
       label:
           '${context.l10n.sessionTabSwitcherTitle}: $previewTitle '
-          '(${widget.previewIndex + 1} of ${widget.tabs.length})',
+          '(${safeIndex + 1} of ${widget.tabs.length})',
       child: Stack(
         key: const ValueKey<String>('session_tab_switcher_overlay'),
         children: [
@@ -116,7 +121,7 @@ class _SessionTabSwitcherOverlayState
           Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: width < 600 ? width - 32 : 420,
+                maxWidth: isCompact ? width - 32 : 420,
                 maxHeight: height * 0.6,
               ),
               child: Card(
@@ -140,12 +145,13 @@ class _SessionTabSwitcherOverlayState
                       child: ListView.builder(
                         controller: _scrollController,
                         shrinkWrap: true,
+                        padding: EdgeInsets.zero,
                         itemExtent: _kSwitcherItemExtent,
                         itemCount: widget.tabs.length,
                         itemBuilder: (context, index) {
                           final tab = widget.tabs[index];
                           final key = sessionTabIdentityKey(tab.identity);
-                          final isPreview = index == widget.previewIndex;
+                          final isPreview = index == safeIndex;
                           final isCurrent = tab.isSelected;
                           final project = _projectFor(tab);
                           final subtitle = (project?.name.trim().isNotEmpty ?? false)

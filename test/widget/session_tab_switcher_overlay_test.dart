@@ -37,7 +37,6 @@ void main() {
         tabs: tabs,
         previewIndex: 1,
         projects: const [],
-        openProjectIds: const {},
         onSelect: (index) => selected = index,
         onDismiss: () {},
       ),
@@ -70,16 +69,15 @@ void main() {
         tabs: <SessionTabRecord>[tab('a', isSelected: true), tab('b')],
         previewIndex: 1,
         projects: const [],
-        openProjectIds: const {},
         onSelect: (_) {},
         onDismiss: () => dismissed = true,
       ),
     );
     await tester.pump();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('session_tab_switcher_barrier')),
-    );
+    // Tap a corner outside the centered card so the barrier (not a list
+    // row) receives the pointer.
+    await tester.tapAt(const Offset(8, 8));
     await tester.pump();
     expect(dismissed, isTrue);
   });
