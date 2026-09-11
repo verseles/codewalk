@@ -69,6 +69,22 @@ void main() {
     expect(tempDir.listSync(), isEmpty);
   });
 
+  test('treats a corrupt cache file as a miss and deletes it', () async {
+    final writer = newStore(maxReadableBytes: 1024);
+    expect(await writer.write('k', 'payload'), isTrue);
+
+    final cachedFile = tempDir
+        .listSync()
+        .whereType<File>()
+        .firstWhere((file) => file.path.endsWith('.json'));
+    // A NUL byte is invalid UTF-8: readAsString throws FormatException.
+    await cachedFile.writeAsBytes(<int>[0x00, 0x00, 0xFF], flush: true);
+
+    final reader = newStore(maxReadableBytes: 1024);
+    expect(await reader.read('k'), isNull);
+    expect(tempDir.listSync(), isEmpty);
+  });
+
   test('evicts memory entries by byte budget while keeping disk copies',
       () async {
     final store = newStore(

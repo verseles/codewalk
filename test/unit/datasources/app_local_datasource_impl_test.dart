@@ -64,6 +64,20 @@ class _WriteAlwaysFailsChatCachePayloadStore
   }
 }
 
+class _RefusingChatCachePayloadStore implements ChatCachePayloadStore {
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<String?> read(String key) async => null;
+
+  @override
+  Future<void> remove(String key) async {}
+
+  @override
+  Future<bool> write(String key, String value) async => false;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -344,6 +358,8 @@ void main() {
         '${AppConstants.sessionComposerDraftKey}::$encodedSession::$encodedServer::$encodedScope';
     final providerCatalogKey =
         '${AppConstants.providerCatalogCacheKey}::$encodedServer::$encodedScope';
+    final cannedAnswersKey =
+        '${AppConstants.cannedAnswersKey}::$encodedServer::$encodedScope';
 
     SharedPreferences.setMockInitialValues(<String, Object>{
       cachedSessionsKey: '[{"id":"s1"}]',
@@ -353,6 +369,7 @@ void main() {
       sessionSnapshotIdsKey: '["$sessionId"]',
       composerDraftKey: '{"text":"legacy draft"}',
       providerCatalogKey: '{"providers":[]}',
+      cannedAnswersKey: '[{"id":"answer"}]',
     });
     final prefs = await SharedPreferences.getInstance();
     final cacheStore = _InMemoryChatCachePayloadStore();
@@ -368,11 +385,13 @@ void main() {
     expect(cacheStore.values[sessionSnapshotKey], '{"messages":[]}');
     expect(cacheStore.values[composerDraftKey], '{"text":"legacy draft"}');
     expect(cacheStore.values[providerCatalogKey], '{"providers":[]}');
+    expect(cacheStore.values[cannedAnswersKey], '[{"id":"answer"}]');
     expect(prefs.getString(cachedSessionsKey), isNull);
     expect(prefs.getString(lastSessionKey), isNull);
     expect(prefs.getString(sessionSnapshotKey), isNull);
     expect(prefs.getString(composerDraftKey), isNull);
     expect(prefs.getString(providerCatalogKey), isNull);
+    expect(prefs.getString(cannedAnswersKey), isNull);
     expect(prefs.getInt(sessionSnapshotUpdatedAtKey), 123);
     expect(prefs.getString(sessionSnapshotIdsKey), '["$sessionId"]');
   });
@@ -708,6 +727,101 @@ void main() {
       expect(
         prefs.getString(
           '${AppConstants.providerCatalogCacheKey}::srv-1::%2Frepo%2Fdemo',
+        ),
+        isNull,
+      );
+    },
+  );
+
+  test(
+    'keeps legacy preference when the cache store refuses the write',
+    () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppConstants.cachedSessionsKey: '[{"id":"legacy"}]',
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: _RefusingChatCachePayloadStore(),
+      );
+
+      final payload = await dataSource.getCachedSessions();
+      expect(payload, '[{"id":"legacy"}]');
+
+      await dataSource.migrateLegacyLargeCachePayloads();
+
+      // Refused write (false, nothing stored) must not drop the legacy
+      // copy: oversized drafts and other user data would be lost.
+      expect(
+        prefs.getString(AppConstants.cachedSessionsKey),
+        '[{"id":"legacy"}]',
+      );
+    },
+  );
+
+  test(
+    'refuses oversized direct SharedPreferences writes above the payload ceiling',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(sharedPreferences: prefs);
+      final giant = 'x' * (ChatCachePayloadLimits.maxPayloadChars + 1);
+
+      await dataSource.saveExperienceSettingsJson(giant);
+
+      expect(prefs.getString(AppConstants.experienceSettingsKey), isNull);
+    },
+  );
+
+  test(
+    'stores canned answers in the cache store instead of preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      const key = '${AppConstants.cannedAnswersKey}::srv-1::%2Frepo%2Fdemo';
+
+      await dataSource.saveCannedAnswersJson(
+        '[{"id":"a1"}]',
+        serverId: 'srv-1',
+        scopeId: '/repo/demo',
+      );
+
+      expect(cacheStore.values[key], '[{"id":"a1"}]');
+      expect(prefs.getString(key), isNull);
+      expect(
+        await dataSource.getCannedAnswersJson(
+          serverId: 'srv-1',
+          scopeId: '/repo/demo',
+        ),
+        '[{"id":"a1"}]',
+      );
+    },
+  );
+
+  test(
+    'refuses oversized canned answers without touching preferences',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheStore = _InMemoryChatCachePayloadStore();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: cacheStore,
+      );
+      final giant = 'x' * (ChatCachePayloadLimits.maxPayloadChars + 1);
+
+      await dataSource.saveCannedAnswersJson(
+        giant,
+        serverId: 'srv-1',
+        scopeId: '/repo/demo',
+      );
+
+      expect(cacheStore.values, isEmpty);
+      expect(
+        prefs.getString(
+          '${AppConstants.cannedAnswersKey}::srv-1::%2Frepo%2Fdemo',
         ),
         isNull,
       );

@@ -447,6 +447,17 @@ class _GuardedSharedPreferences {
   Set<String> getKeys() => _inner.getKeys();
 
   Future<bool> setString(String key, String value) {
+    if (value.length > ChatCachePayloadLimits.maxPayloadChars) {
+      // Platform-independent ceiling: no SharedPreferences value may grow
+      // into a payload that would OOM the channel codec at startup. Large
+      // payloads belong in the file-backed store; user-data callers route
+      // through it explicitly.
+      AppLogger.warn(
+        'Refusing oversized SharedPreferences value for key=$key '
+        'chars=${value.length}',
+      );
+      return Future<bool>.value(false);
+    }
     if (_inner.getString(key) == value) {
       return Future<bool>.value(true);
     }
@@ -1394,7 +1405,7 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    return _sharedPreferences.getString(
+    return _readLargeCachePayload(
       _scopedKey(
         AppConstants.cannedAnswersKey,
         serverId: serverId,
@@ -1409,7 +1420,11 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
     String? serverId,
     String? scopeId,
   }) async {
-    await _sharedPreferences.setString(
+    // Canned answers are user data: route them through the capped hybrid
+    // store (file-backed, bounded) so they can never grow the preferences
+    // file into a startup OOM payload, while oversized writes are refused
+    // instead of silently deleted.
+    await _writeLargeCachePayload(
       _scopedKey(
         AppConstants.cannedAnswersKey,
         serverId: serverId,

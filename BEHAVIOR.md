@@ -976,6 +976,7 @@
 - **Given** the user types an unsent composer draft in a session
 - **When** the user switches to another session in the same server/project context and later returns
 - **Then** the original session restores its own locally persisted draft text, shell mode, and supported attachments
+- **Then** drafts, canned answers, catalogs and other large payloads persist through the file-backed cache; any `SharedPreferences` write above the payload ceiling is refused, and legacy oversized values are quarantined natively before the engine starts
 - **Then** drafts persist through the same file-backed cache as other large payloads, so a large attachment can never poison `SharedPreferences`; drafts above the shared payload ceiling are not persisted and fall back to in-memory state
 - **Then** sessions with no saved draft reopen with an empty composer
 - **Then** transient drafts restored after a rejected send or undo/redo history action keep priority over the persisted session draft until that transient state is consumed
@@ -1843,6 +1844,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** dynamic free OpenCode Zen models from provider `opencode` with zero input cost are also listed even when no provider credentials are configured, and they are marked as free
 - **Then** similarly named providers such as `opencode-go` are listed only when the server reports them as connected
 - **Then** the app restores the last successful provider/model catalog snapshot for the active server immediately and revalidates it in the background, so same-server project switches avoid showing an empty selector whenever possible
+- **Then** catalog snapshots persist through the file-backed cache under the shared payload ceiling, and oversized catalogs are dropped and refetched instead of growing `SharedPreferences`
 - **Then** the user can select any listed model to use for the current session; stale persisted, favorite, recent, remote, or message-derived selections outside this rule are ignored
 
 ### Model variants and reasoning effort

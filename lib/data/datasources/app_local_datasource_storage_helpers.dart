@@ -230,7 +230,12 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
           'cache_migrate_legacy_payload',
           () async {
             if (_sharedPreferences.getString(key) != value) return;
-            await store.write(key, value);
+            final wrote = await store.write(key, value);
+            // Only drop the preference copy once the value is actually
+            // persisted: a refused oversized write (false without storing)
+            // must keep the legacy copy, especially for user data such as
+            // composer drafts.
+            if (!wrote && await store.read(key) != value) return;
             if (_sharedPreferences.getString(key) == value) {
               await _sharedPreferences.remove(key);
             }
@@ -299,9 +304,17 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
     // Provider catalogs are multi-MB and regenerable; they used to be the
     // dominant SharedPreferences payload (~75MB across scopes on one
     // install) and now live in the file-backed store.
-    return _isScopedLargeCachePayloadKey(
+    if (_isScopedLargeCachePayloadKey(
       key,
       AppConstants.providerCatalogCacheKey,
+    )) {
+      return true;
+    }
+    // Canned answers are user data; the hybrid store bounds them and
+    // refuses oversized writes instead of risking prefs poisoning.
+    return _isScopedLargeCachePayloadKey(
+      key,
+      AppConstants.cannedAnswersKey,
     );
   }
 

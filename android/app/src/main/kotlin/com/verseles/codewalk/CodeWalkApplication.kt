@@ -42,20 +42,22 @@ class CodeWalkApplication : Application() {
         private const val MAX_PREFS_VALUE_CHARS = 1024 * 1024
         private const val MAX_DRAFT_VALUE_CHARS = 2 * 1024 * 1024
 
-        // Any string at or above this size is quarantined even when its key
+        // Any string above this size is quarantined even when its key
         // is not a known large-payload family: a value this large can OOM
         // the platform-channel codec at startup no matter who wrote it.
         private const val GENERIC_QUARANTINE_CHARS = 2 * 1024 * 1024
 
         private const val DRAFT_KEY_BASE = "session_composer_draft"
+        private const val CANNED_ANSWERS_KEY_BASE = "canned_answers"
 
         private val LARGE_KEY_BASES = listOf(
             "cached_sessions",
             "last_session_snapshot",
             "session_messages_snapshot",
             "selection_blob_v1",
-            "session_composer_draft",
+            DRAFT_KEY_BASE,
             "provider_catalog_cache",
+            CANNED_ANSWERS_KEY_BASE,
         )
 
         private fun matchedLargeKeyBase(rawKey: String): String? {
@@ -70,7 +72,7 @@ class CodeWalkApplication : Application() {
         }
 
         private fun maxCharsForBase(base: String): Int =
-            if (base == DRAFT_KEY_BASE) {
+            if (base == DRAFT_KEY_BASE || base == CANNED_ANSWERS_KEY_BASE) {
                 MAX_DRAFT_VALUE_CHARS
             } else {
                 MAX_PREFS_VALUE_CHARS

@@ -70,13 +70,19 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
         await file.delete();
         return null;
       }
+      final value = await file.readAsString();
+      _storeMemory(key, value);
+      return value;
     } catch (_) {
+      // A corrupt or partially written cache file must read as a cache
+      // miss, never break the caller's restore path. Regenerable via SWR.
+      try {
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (_) {}
       return null;
     }
-
-    final value = await file.readAsString();
-    _storeMemory(key, value);
-    return value;
   }
 
   @override
