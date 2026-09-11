@@ -1477,6 +1477,10 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** `ollama-cloud` parses HTML scraping safely, falling back to a descriptive error if the HTML format changes
 - **Then** newer provider aliases for Snowflake Cortex, Grok/xAI, and Cohere North are recognized by the shell fallback diagnostics so they are not shown as unknown configuration
 - **Then** those newer providers only produce visible quota rows through REST until a dedicated shell probe is implemented
+- **Given** the desktop utility sidebar is open on a large desktop
+- **When** the utility pane is rendered
+- **Then** the same `Rate limits` section is mirrored at the end of the sidebar from the same provider snapshot (no second fetch; refresh in either surface updates both), while the `Context usage` popup keeps its own copy unchanged
+- **Then** switching servers discards any in-flight quota payload from the previous server and reloads once for the current server instead of showing misattributed data
 
 ---
 
@@ -1814,6 +1818,9 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** dialogs and other routes keep priority and block the chat shortcut
 - **When** tabs are disabled, no valid current tab exists, or the current context does not match the selected tab
 - **Then** `mod+w` keeps the existing platform close/minimize/tray behavior; custom bindings apply to both paths, while `mod+q` remains an independent force-exit action
+- **Given** the desktop utility sidebar is open on a large desktop
+- **When** the keyboard-shortcuts block is rendered
+- **Then** tapping its header collapses/expands the hint list (header stays visible with button + expanded semantics); the collapsed state persists locally and defaults to expanded
 
 ### Enter confirms safe modal primary actions
 
