@@ -6330,4 +6330,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get carMessagingDeliveryFailedBody => '无法发送您的语音回复。打开 CodeWalk 重试。';
+
+  @override
+  String get shortcutNextTab => 'Next tab';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Show the tab switcher and cycle to the next tab';
+
+  @override
+  String get shortcutPreviousTab => 'Previous tab';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Show the tab switcher and cycle to the previous tab';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Switch tab';
+
+  @override
+  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
 }

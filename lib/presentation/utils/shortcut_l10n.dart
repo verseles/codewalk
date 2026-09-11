@@ -4,6 +4,8 @@ import '../../l10n/generated/app_localizations.dart';
 extension ShortcutDefinitionL10n on ShortcutDefinition {
   String localizedGroup(AppLocalizations l10n) => switch (action) {
         ShortcutAction.newChat => l10n.shortcutGroupSession,
+        ShortcutAction.cycleTabsForward ||
+        ShortcutAction.cycleTabsBackward => l10n.shortcutGroupSession,
         ShortcutAction.refresh => l10n.shortcutGroupGeneral,
         ShortcutAction.focusInput ||
         ShortcutAction.toggleVoiceInput =>
@@ -34,6 +36,8 @@ extension ShortcutDefinitionL10n on ShortcutDefinition {
         ShortcutAction.escape => l10n.shortcutFocusCloseDrawer,
         ShortcutAction.cycleAgentForward => l10n.shortcutNextAgent,
         ShortcutAction.cycleAgentBackward => l10n.shortcutPreviousAgent,
+        ShortcutAction.cycleTabsForward => l10n.shortcutNextTab,
+        ShortcutAction.cycleTabsBackward => l10n.shortcutPreviousTab,
         ShortcutAction.closeApp => l10n.shortcutCloseApp,
         ShortcutAction.quitApp => l10n.shortcutQuitApp,
       };
@@ -53,6 +57,8 @@ extension ShortcutDefinitionL10n on ShortcutDefinition {
         ShortcutAction.cycleAgentForward => l10n.shortcutNextAgentDesc,
         ShortcutAction.cycleAgentBackward =>
           l10n.shortcutPreviousAgentDesc,
+        ShortcutAction.cycleTabsForward => l10n.shortcutNextTabDesc,
+        ShortcutAction.cycleTabsBackward => l10n.shortcutPreviousTabDesc,
         ShortcutAction.closeApp => l10n.shortcutCloseAppDesc,
         ShortcutAction.quitApp => l10n.shortcutQuitAppDesc,
       };

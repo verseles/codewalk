@@ -6871,4 +6871,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get carMessagingDeliveryFailedBody =>
       'Tu respuesta de voz no se pudo entregar. Abre CodeWalk para volver a intentarlo.';
+
+  @override
+  String get shortcutNextTab => 'Next tab';
+
+  @override
+  String get shortcutNextTabDesc =>
+      'Show the tab switcher and cycle to the next tab';
+
+  @override
+  String get shortcutPreviousTab => 'Previous tab';
+
+  @override
+  String get shortcutPreviousTabDesc =>
+      'Show the tab switcher and cycle to the previous tab';
+
+  @override
+  String get sessionTabSwitcherTitle => 'Switch tab';
+
+  @override
+  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
 }

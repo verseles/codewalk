@@ -1,6 +1,4 @@
-  
 {
-  
   "speechReadAloudNoVoice": "この TTS プロバイダーの音声を選択してください。",
   "speechProviderTextTooLong": "この TTS モデルにはテキストが長すぎます。",
   "speechProviderInvalidAudio": "TTS プロバイダーが認識できない音声を返しました。",
@@ -18,7 +16,7 @@
   "speechRemoteModelUnavailable": "選択したモデルはプロバイダーのカタログで利用できなくなりました。",
   "speechCustomModel": "カスタムモデル…",
   "speechPitchHiddenForProvider": "ピッチはこの TTS プロバイダーでサポートされておらず、非表示になります。",
-"@@locale": "ja",
+  "@@locale": "ja",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "異常なサーバーを有効化できません",
   "appProviderDesktopOnly": "管理対象ローカルサーバーはデスクトップでのみ利用可能です。",
@@ -2270,5 +2268,29 @@
   "carMessagingReply": "返信",
   "carMessagingMarkRead": "既読にする",
   "carMessagingDeliveryFailedTitle": "返信を送信できませんでした",
-  "carMessagingDeliveryFailedBody": "音声での返信を配信できませんでした。再試行するにはCodeWalkを開いてください。"
+  "carMessagingDeliveryFailedBody": "音声での返信を配信できませんでした。再試行するにはCodeWalkを開いてください。",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  }
 }

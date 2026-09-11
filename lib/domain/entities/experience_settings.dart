@@ -18,6 +18,8 @@ enum ShortcutAction {
   escape,
   cycleAgentForward,
   cycleAgentBackward,
+  cycleTabsForward,
+  cycleTabsBackward,
   closeApp,
   quitApp,
 }
@@ -264,6 +266,20 @@ const List<ShortcutDefinition> kShortcutDefinitions = <ShortcutDefinition>[
     defaultBinding: 'alt+shift+k',
   ),
   ShortcutDefinition(
+    action: ShortcutAction.cycleTabsForward,
+    group: 'Session',
+    label: 'Next tab',
+    description: 'Show the tab switcher and cycle to the next tab',
+    defaultBinding: 'ctrl+tab',
+  ),
+  ShortcutDefinition(
+    action: ShortcutAction.cycleTabsBackward,
+    group: 'Session',
+    label: 'Previous tab',
+    description: 'Show the tab switcher and cycle to the previous tab',
+    defaultBinding: 'ctrl+shift+tab',
+  ),
+  ShortcutDefinition(
     action: ShortcutAction.closeApp,
     group: 'Application',
     label: 'Close tab/application',
@@ -498,6 +514,8 @@ String shortcutActionKey(ShortcutAction action) {
     ShortcutAction.escape => 'escape',
     ShortcutAction.cycleAgentForward => 'cycle_agent_forward',
     ShortcutAction.cycleAgentBackward => 'cycle_agent_backward',
+    ShortcutAction.cycleTabsForward => 'cycle_tabs_forward',
+    ShortcutAction.cycleTabsBackward => 'cycle_tabs_backward',
     ShortcutAction.closeApp => 'close_app',
     ShortcutAction.quitApp => 'quit_app',
   };
@@ -516,6 +534,8 @@ ShortcutAction? shortcutActionFromKey(String value) {
     'escape' => ShortcutAction.escape,
     'cycle_agent_forward' => ShortcutAction.cycleAgentForward,
     'cycle_agent_backward' => ShortcutAction.cycleAgentBackward,
+    'cycle_tabs_forward' => ShortcutAction.cycleTabsForward,
+    'cycle_tabs_backward' => ShortcutAction.cycleTabsBackward,
     'close_app' => ShortcutAction.closeApp,
     'quit_app' => ShortcutAction.quitApp,
     _ => null,

@@ -2421,7 +2421,6 @@
   "speechRemoteModelUnavailable": "선택한 모델은 더 이상 공급자 카탈로그에 없습니다.",
   "speechCustomModel": "사용자 지정 모델…",
   "speechPitchHiddenForProvider": "피치는 이 TTS 공급자에서 지원되지 않으며 숨겨집니다.",
-
   "speechProviderTemporarilyUnavailable": "TTS 공급자를 일시적으로 사용할 수 없습니다.",
   "@speechProviderTemporarilyUnavailable": {
     "description": "CodeWalk UI string — speechProviderTemporarilyUnavailable"
@@ -2888,5 +2887,29 @@
   "carMessagingReply": "답장",
   "carMessagingMarkRead": "읽음으로 표시",
   "carMessagingDeliveryFailedTitle": "답장을 보내지 못했습니다",
-  "carMessagingDeliveryFailedBody": "음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요."
+  "carMessagingDeliveryFailedBody": "음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요.",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  }
 }

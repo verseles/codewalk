@@ -1,6 +1,4 @@
-  
 {
-  
   "speechReadAloudNoVoice": "इस TTS प्रदाता के लिए एक आवाज़ चुनें।",
   "speechProviderTextTooLong": "यह टेक्स्ट इस TTS मॉडल के लिए बहुत लंबा है।",
   "speechProviderInvalidAudio": "TTS प्रदाता ने अपरिचित ऑडियो लौटाया।",
@@ -18,7 +16,7 @@
   "speechRemoteModelUnavailable": "चयनित मॉडल प्रदाता की सूची में अब उपलब्ध नहीं है।",
   "speechCustomModel": "कस्टम मॉडल…",
   "speechPitchHiddenForProvider": "पिच इस TTS प्रदाता द्वारा समर्थित नहीं है और छिपी हुई है।",
-"@@locale": "hi",
+  "@@locale": "hi",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "एक अस्वस्थ सर्वर को सक्रिय नहीं किया जा सकता",
   "appProviderDesktopOnly": "प्रबंधित स्थानीय सर्वर केवल डेस्कटॉप पर उपलब्ध है।",
@@ -2270,5 +2268,29 @@
   "carMessagingReply": "जवाब दें",
   "carMessagingMarkRead": "पढ़ा हुआ चिह्नित करें",
   "carMessagingDeliveryFailedTitle": "जवाब भेजा नहीं जा सका",
-  "carMessagingDeliveryFailedBody": "आपका वॉइस जवाब डिलीवर नहीं किया जा सका। फिर से कोशिश करने के लिए CodeWalk खोलें।"
+  "carMessagingDeliveryFailedBody": "आपका वॉइस जवाब डिलीवर नहीं किया जा सका। फिर से कोशिश करने के लिए CodeWalk खोलें।",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  }
 }

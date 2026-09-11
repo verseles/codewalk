@@ -74,6 +74,7 @@ import '../utils/duplicate_file_name.dart';
 import '../utils/file_highlight_language.dart';
 import '../utils/file_explorer_logic.dart';
 import '../utils/reasoning_status_parser.dart';
+import '../utils/session_tab_switcher_logic.dart';
 import '../utils/session_title_formatter.dart';
 import '../utils/shortcut_binding_codec.dart';
 import '../utils/tool_presentation.dart';
@@ -102,6 +103,7 @@ import '../widgets/session_context_menu.dart';
 import '../widgets/session_diff_viewer.dart';
 import '../widgets/session_tab_icon_picker.dart';
 import '../widgets/session_tab_strip.dart';
+import '../widgets/session_tab_switcher_overlay.dart';
 import '../widgets/session_title_inline_editor.dart';
 import '../widgets/session_todo_list_widget.dart';
 import '../widgets/sidebar_selection_indicator.dart';
@@ -115,6 +117,7 @@ part 'chat_page/chat_page_scroll_coordinator.dart';
 part 'chat_page/chat_page_workspace_controller.dart';
 part 'chat_page/chat_page_session_tabs.dart';
 part 'chat_page/chat_page_shortcuts.dart';
+part 'chat_page/chat_page_tab_switcher.dart';
 part 'chat_page/chat_page_status_presenter.dart';
 part 'chat_page/chat_page_selector_flow.dart';
 part 'chat_page/chat_page_scaffold.dart';
@@ -356,6 +359,11 @@ class _ChatPageState extends State<ChatPage>
   Future<bool>? _sessionTabActivationTask;
   int _sessionTabActivationGeneration = 0;
   bool _sessionTabActivationCloseGuard = false;
+  // Browser-style tab switcher (issue #171): MRU snapshot frozen at open
+  // plus a local preview index. Only the overlay rebuilds while cycling;
+  // no ChatProvider notification happens until commit.
+  List<SessionTabRecord> _tabSwitcherTabs = const <SessionTabRecord>[];
+  final ValueNotifier<int?> _tabSwitcherPreview = ValueNotifier<int?>(null);
   Set<SessionTabIdentity> _knownSessionTabIdentities = <SessionTabIdentity>{};
   final Set<SessionTabIdentity> _pendingSessionTabHintIdentities =
       <SessionTabIdentity>{};
@@ -921,6 +929,7 @@ class _ChatPageState extends State<ChatPage>
     _timelineSearchDebounceTimer?.cancel();
     _timelineSearchController.dispose();
     _timelineSearchFocusNode.dispose();
+    _tabSwitcherPreview.dispose();
     _scrollController.removeListener(_handleScrollChanged);
     HardwareKeyboard.instance.removeHandler(_handleGlobalShortcutKeyEvent);
     ShowcaseView.get().unregister();
@@ -945,6 +954,7 @@ class _ChatPageState extends State<ChatPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _isAppInForeground = state == AppLifecycleState.resumed;
     if (!_isAppInForeground) {
+      _cancelTabSwitcher();
       _flushActiveFileEditorDrafts();
       // Persist pending session-tab state before the process can be killed in
       // the background; the debounced write may otherwise never run.
@@ -1024,6 +1034,7 @@ class _ChatPageState extends State<ChatPage>
   @override
   void onWindowMinimize() {
     _isAppInForeground = false;
+    _cancelTabSwitcher();
     _flushActiveFileEditorDrafts();
     _flushPendingComposerDraftPersistence();
     unawaited(_chatProvider?.flushAllSessionTabsPersistence());
@@ -2558,6 +2569,11 @@ class _ChatPageState extends State<ChatPage>
               // Handled by the global key-event loop to keep direction-specific
               // behavior centralized with the other chat actions.
               break;
+            case ShortcutAction.cycleTabsForward:
+            case ShortcutAction.cycleTabsBackward:
+              // Global-only hold-to-cycle switcher (needs KeyUp); never via
+              // Shortcuts/Actions to avoid double handling.
+              break;
             case ShortcutAction.closeApp:
               // Global-only because the action is contextual and one physical
               // key event must never close both a tab and the app.
@@ -2832,6 +2848,7 @@ class _ChatPageState extends State<ChatPage>
                             ),
                           ),
                         ),
+                      _buildTabSwitcherOverlay(),
                     ],
                   ),
                 ),
@@ -2897,6 +2914,14 @@ class _ChatPageState extends State<ChatPage>
           ShortcutAction.cycleAgentBackward => (
             action: action,
             description: context.l10n.chatShortcutsPreviousAgent,
+          ),
+          ShortcutAction.cycleTabsForward => (
+            action: action,
+            description: context.l10n.shortcutNextTabDesc,
+          ),
+          ShortcutAction.cycleTabsBackward => (
+            action: action,
+            description: context.l10n.shortcutPreviousTabDesc,
           ),
           ShortcutAction.closeApp => (
             action: action,

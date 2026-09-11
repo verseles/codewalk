@@ -1,6 +1,4 @@
-  
 {
-  
   "speechReadAloudNoVoice": "为此 TTS 提供商选择语音。",
   "speechProviderTextTooLong": "此 TTS 模型的文本过长。",
   "speechProviderInvalidAudio": "TTS 提供商返回了无法识别的音频。",
@@ -18,7 +16,7 @@
   "speechRemoteModelUnavailable": "所选模型在提供商的目录中不再可用。",
   "speechCustomModel": "自定义模型…",
   "speechPitchHiddenForProvider": "音调不受此 TTS 提供商支持，因此被隐藏。",
-"@@locale": "zh",
+  "@@locale": "zh",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "无法激活不健康的服务器",
   "appProviderDesktopOnly": "托管本地服务器仅在桌面端可用。",
@@ -2270,5 +2268,29 @@
   "carMessagingReply": "回复",
   "carMessagingMarkRead": "标记为已读",
   "carMessagingDeliveryFailedTitle": "无法发送回复",
-  "carMessagingDeliveryFailedBody": "无法发送您的语音回复。打开 CodeWalk 重试。"
+  "carMessagingDeliveryFailedBody": "无法发送您的语音回复。打开 CodeWalk 重试。",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  }
 }

@@ -1,5 +1,4 @@
 {
-  
   "speechReadAloudNoVoice": "حدد صوتًا لمزود TTS هذا.",
   "speechProviderTextTooLong": "النص طويل جدًا لنموذج TTS هذا.",
   "speechProviderInvalidAudio": "أعاد مزود TTS صوتًا غير معروف.",
@@ -17,7 +16,7 @@
   "speechRemoteModelUnavailable": "النموذج المحدد لم يعد متاحًا في كتالوج المزود.",
   "speechCustomModel": "نموذج مخصص…",
   "speechPitchHiddenForProvider": "درجة الصوت غير مدعومة بواسطة مزود TTS هذا وهي مخفية.",
-"aboutGitHub": "GitHub",
+  "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "لا يمكن تنشيط خادم غير سليم",
   "appProviderDesktopOnly": "الخادم المحلي المدار متاح فقط على سطح المكتب.",
   "appProviderDetectingCommand": "جاري اكتشاف أمر OpenCode...",
@@ -2256,5 +2255,29 @@
   "carMessagingReply": "رد",
   "carMessagingMarkRead": "تحديد كمقروء",
   "carMessagingDeliveryFailedTitle": "تعذّر إرسال الرد",
-  "carMessagingDeliveryFailedBody": "تعذّر تسليم ردّك الصوتي. افتح CodeWalk لإعادة المحاولة."
+  "carMessagingDeliveryFailedBody": "تعذّر تسليم ردّك الصوتي. افتح CodeWalk لإعادة المحاولة.",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  }
 }

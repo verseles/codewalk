@@ -1,6 +1,4 @@
-  
 {
-  
   "speechReadAloudNoVoice": "Selecione uma voz para este provedor de TTS.",
   "speechProviderTextTooLong": "O texto é longo demais para este modelo de TTS.",
   "speechProviderInvalidAudio": "O provedor de TTS retornou um áudio não reconhecido.",
@@ -18,7 +16,7 @@
   "speechRemoteModelUnavailable": "O modelo selecionado não está mais disponível no catálogo do provedor.",
   "speechCustomModel": "Modelo personalizado…",
   "speechPitchHiddenForProvider": "O tom não é suportado por este provedor de TTS e fica oculto.",
-"@@locale": "pt",
+  "@@locale": "pt",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "Não é possível ativar um servidor não saudável",
   "appProviderDesktopOnly": "O servidor local gerenciado está disponível apenas no desktop.",
@@ -2271,5 +2269,29 @@
   "carMessagingReply": "Responder",
   "carMessagingMarkRead": "Marcar como lida",
   "carMessagingDeliveryFailedTitle": "Não foi possível enviar a resposta",
-  "carMessagingDeliveryFailedBody": "Sua resposta por voz não pôde ser entregue. Abra o CodeWalk para tentar novamente."
+  "carMessagingDeliveryFailedBody": "Sua resposta por voz não pôde ser entregue. Abra o CodeWalk para tentar novamente.",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string - shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string - shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string - shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string - shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string - sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  }
 }

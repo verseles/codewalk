@@ -16,11 +16,39 @@ extension _ChatPageShortcuts on _ChatPageState {
   }
 
   bool _handleGlobalShortcutKeyEvent(KeyEvent event) {
-    if (event is! KeyDownEvent || !mounted || !_isChatScreenActive()) {
+    if (!mounted) {
+      return false;
+    }
+    if (_isTabSwitcherOpen) {
+      if (_handleTabSwitcherKeyEvent(event)) {
+        return true;
+      }
+      if (event is KeyUpEvent) {
+        return false;
+      }
+    }
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return false;
+    }
+    if (!_isChatScreenActive()) {
       return false;
     }
 
     final hardwareKeyboard = HardwareKeyboard.instance;
+    // Browser-parity built-in: explicit Ctrl+Tab / Ctrl+Shift+Tab holds
+    // across all platforms (macOS uses Ctrl, never Cmd+Tab).
+    if (event.logicalKey == LogicalKeyboardKey.tab &&
+        hardwareKeyboard.isControlPressed &&
+        !hardwareKeyboard.isMetaPressed &&
+        !hardwareKeyboard.isAltPressed) {
+      if (_openOrAdvanceTabSwitcher(
+        reverse: hardwareKeyboard.isShiftPressed,
+      )) {
+        return true;
+      }
+    } else if (_matchCustomTabSwitcherBinding(event)) {
+      return true;
+    }
     // Disambiguate the two F-key shortcuts by requiring !isShiftPressed
     // for the find path. Without this guard, Ctrl/Cmd+Shift+F would be
     // intercepted by the find shortcut and the forward shortcut would be
@@ -48,6 +76,11 @@ extension _ChatPageShortcuts on _ChatPageState {
 
     final settingsProvider = context.read<SettingsProvider>();
     for (final action in _activeShortcutActions()) {
+      if (action == ShortcutAction.cycleTabsForward ||
+          action == ShortcutAction.cycleTabsBackward) {
+        // Owned by the hold-to-cycle switcher above, never instant-fire.
+        continue;
+      }
       final activator = ShortcutBindingCodec.parse(
         settingsProvider.bindingFor(action),
       );
@@ -120,6 +153,10 @@ extension _ChatPageShortcuts on _ChatPageState {
           return;
         }
         unawaited(chatProvider.cycleAgent(reverse: true));
+        return;
+      case ShortcutAction.cycleTabsForward:
+      case ShortcutAction.cycleTabsBackward:
+        // Intercepted by the hold-to-cycle switcher; no instant fallback.
         return;
       case ShortcutAction.closeApp:
         unawaited(_closeAppShortcut());

@@ -8709,5 +8709,29 @@
   "carMessagingReply": "Reply",
   "carMessagingMarkRead": "Mark as read",
   "carMessagingDeliveryFailedTitle": "Couldn''t send reply",
-  "carMessagingDeliveryFailedBody": "Your voice reply could not be delivered. Open CodeWalk to retry."
+  "carMessagingDeliveryFailedBody": "Your voice reply could not be delivered. Open CodeWalk to retry.",
+  "shortcutNextTab": "Next tab",
+  "@shortcutNextTab": {
+    "description": "CodeWalk UI string — shortcutNextTab"
+  },
+  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "@shortcutNextTabDesc": {
+    "description": "CodeWalk UI string — shortcutNextTabDesc"
+  },
+  "shortcutPreviousTab": "Previous tab",
+  "@shortcutPreviousTab": {
+    "description": "CodeWalk UI string — shortcutPreviousTab"
+  },
+  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "@shortcutPreviousTabDesc": {
+    "description": "CodeWalk UI string — shortcutPreviousTabDesc"
+  },
+  "sessionTabSwitcherTitle": "Switch tab",
+  "@sessionTabSwitcherTitle": {
+    "description": "CodeWalk UI string — sessionTabSwitcherTitle"
+  },
+  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "@sessionTabSwitcherHint": {
+    "description": "CodeWalk UI string — sessionTabSwitcherHint"
+  }
 }

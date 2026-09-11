@@ -11596,6 +11596,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your voice reply could not be delivered. Open CodeWalk to retry.'**
   String get carMessagingDeliveryFailedBody;
+
+  /// CodeWalk UI string — shortcutNextTab
+  ///
+  /// In en, this message translates to:
+  /// **'Next tab'**
+  String get shortcutNextTab;
+
+  /// CodeWalk UI string — shortcutNextTabDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Show the tab switcher and cycle to the next tab'**
+  String get shortcutNextTabDesc;
+
+  /// CodeWalk UI string — shortcutPreviousTab
+  ///
+  /// In en, this message translates to:
+  /// **'Previous tab'**
+  String get shortcutPreviousTab;
+
+  /// CodeWalk UI string — shortcutPreviousTabDesc
+  ///
+  /// In en, this message translates to:
+  /// **'Show the tab switcher and cycle to the previous tab'**
+  String get shortcutPreviousTabDesc;
+
+  /// CodeWalk UI string — sessionTabSwitcherTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Switch tab'**
+  String get sessionTabSwitcherTitle;
+
+  /// CodeWalk UI string — sessionTabSwitcherHint
+  ///
+  /// In en, this message translates to:
+  /// **'Release Ctrl to switch, Esc to cancel'**
+  String get sessionTabSwitcherHint;
 }
 
 class _AppLocalizationsDelegate
