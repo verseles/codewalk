@@ -12,6 +12,7 @@
 - LaTeX math rendering (`$...$` and `$$...$$`) supported in chat messages via `flutter_math_fork` with custom markdown syntaxes and styled fallback on parse failure.
 - Session attention adds encrypted completion snapshots, root-session aggregation, and Android, desktop, and iOS presentation hosts.
 - Session tabs persist server-scoped open/closed session state and provide cross-project chat navigation with attention and busy indicators; per-session icon overrides (issue #138) replace the project icon with a Material Symbols preset per tab.
+- Browser-style session tab switcher (issue #171): hold-to-cycle MRU overlay (`Ctrl+Tab` / `Ctrl+Shift+Tab`) with commit-on-release orchestration in ChatPage.
 
 ## Folder Structure
 
@@ -59,7 +60,8 @@ codewalk/
 │       │   ├── chat_page_types_part.dart # Shared intents, configurations, and keys (incl. scoped Selector/Selector2 build keys used by desktop chat body to avoid full shell rebuilds on composer selection changes)
 │       │   ├── chat_page_local_models_part.dart # Local UI state classes (part of chat_page.dart; see commit 8759defc)
 │       │   ├── chat_page/              # ChatPage decomposed clusters (26 modules)
-│       │   │   └── chat_page_session_tabs.dart # Cross-project session-tab activation, rollback, and close fallback
+│         │       │   └── chat_page_session_tabs.dart # Cross-project session-tab activation, rollback, and close fallback
+  │       │   └── chat_page_tab_switcher.dart # Browser-style MRU tab-switcher orchestration: hold-to-cycle, commit-on-release, custom-binding match (issue #171)
 │       │   └── settings/               # Settings section pages plus shared section layout widgets
 │       ├── providers/                  # App/Chat/Project/Settings state orchestration
 │       │   ├── chat_provider.dart      # Chat provider orchestrator/facade with SessionActionTarget support for inactive-tab mutations
@@ -76,7 +78,8 @@ codewalk/
 │       │   ├── session_attention_overlay/ # Shared bubble/panel overlay widget and controller
 │       │   ├── project_context_menu.dart # ProjectContextMenuRegion with right-click, long-press, ContextMenu key, Shift+F10, semantics and destructive Close project
 │       │   ├── session_context_menu.dart # Shared session popup/context menu with SessionMenuAction enum and buildUnifiedSessionMenuEntries
-│   │       ├── session_tab_icon_picker.dart # Session-tab icon preset picker dialog (project icon or 12 Material Symbols presets)
+  │   │       ├── session_tab_icon_picker.dart # Session-tab icon preset picker dialog (project icon or 12 Material Symbols presets)
+  │   │       └── session_tab_switcher_overlay.dart # SessionTabSwitcherOverlay Material You MRU tab-switcher overlay (issue #171)
 │   │       ├── app_tab_strip.dart      # Generic browser-style tab engine with responsive sizing, scrolling, gestures, menus, focus, and semantics
 │   │       └── session_tab_strip.dart  # SessionTabRecord adapter over AppTabStrip with project/icon-preset, attention, busy, and session-specific semantics
 │       ├── services/                   # Platform/runtime services (tray, notifications, STT, read-aloud/TTS, terminal, etc.)
@@ -92,7 +95,7 @@ codewalk/
 │       │       ├── edge_tts_websocket_stub.dart # `web_socket_channel` transport for non-IO targets
 │       │       ├── elevenlabs_tts_backend.dart # ElevenLabs cloud TTS voice discovery and generated MP3 synthesis
 │       │       └── nvidia_nim_tts_backend.dart # NVIDIA Speech NIM cloud TTS voice discovery and generated WAV synthesis
-│       ├── utils/ # Presentation helpers (incl. WindowSizeClass MD3 breakpoints, diff parser, file path detector, file path markdown, math markdown)
+│       ├── utils/ # Presentation helpers (incl. WindowSizeClass MD3 breakpoints, diff parser, file path detector, file path markdown, math markdown, session_tab_switcher_logic.dart pure MRU ordering + index math — issue #171)
 │       └── theme/                      # Material You theme: AppTheme, AppShapes, BrandColor seeds, AppSemanticColors, AppVisualStyleTokens (issue #86)
 ├── test/                               # Unit, widget, integration, presentation, support tests
 ├── tool/ci/                            # Analyzer budget, coverage gate, and session-overlay Android instrumentation scripts
@@ -289,6 +292,7 @@ lib/presentation/pages/settings/widgets/settings_section_layout.dart # Shared se
 lib/presentation/pages/chat_page.dart             # Chat UI orchestration facade; WindowListener for desktop lifecycle; app/window lifecycle changes keep ReadAloudService playback untouched; guards startup (checkConnection/loadSessions) against no-active-server; holds scroll state (follow mode, current scroll owner, viewport restore targets); holds tool-chain expanded state map; _isSessionSwitchInFlight guard, _sessionCollapseHistoryCache / _sessionCollapseWorkCache per-session collapse maps; top-reach history loading is coordinated with anchor-preserving restore; workspace controller uses fast project-scope switch path; desktop chat body uses scoped Selector/Selector2 build keys (chat content, session panel, file pane, utility pane, composer controls) so composer selection changes skip full shell rebuilds; `_ChatPageState` constants gate scroll/FAB/final-reveal behavior — `_olderMessagesTopLoadThreshold` (72), `_olderMessagesTopLoadArmThreshold` (220), `_jumpToFirstFabThreshold` (360), `_scrollToBottomEpsilon` (1 px), `_maxScrollToBottomPasses` (3), `_scrollToBottomFirstPassDuration`/`_scrollToBottomNextPassDuration` (both `Duration.zero` for instant layout-anchor follow); final-assistant reveal constants `_finalAssistantRevealDuration` (220 ms), `_finalAssistantRevealAlignment` (0.4), `_maxFinalAssistantRevealAttempts` (8), `_returnLatestRevealAlignment` (0.0), `_maxReturnLatestRevealAttempts` (8); viewport helper `_isLatestAssistantMessageVisibleInViewport` resolves latest revealable assistant via reveal measurement/anchor keys and viewport geometry
   └── chat_page_local_models_part.dart # Local UI state classes (part of chat_page.dart; see commit 8759defc)
   └── chat_page/chat_page_session_tabs.dart # ChatPage extension for cross-project activation, rollback after failed navigation, and close fallback handling
+  └── chat_page/chat_page_tab_switcher.dart # Hold-to-cycle/commit-on-release MRU switcher orchestration: _handleTabSwitcherKeyEvent, _openOrAdvanceTabSwitcher, _commitTabSwitcher, _cancelTabSwitcher, _matchCustomTabSwitcherBinding, _commitSingleMruStep (issue #171)
   └── chat_page/chat_page_widgets.dart # UI components part of chat_page.dart: _ComposerStatusLanternText, _ComposerStatusLanternTextState, _DirectoryPickerSheet, _DirectoryPickerSheetState
 lib/presentation/widgets/chat_input_widget.dart   # Composer/input orchestration facade; accepts appDensity parameter for density-aware spacing; speech controller resolves Native, Sherpa, Moonshine, Parakeet, SenseVoice, and cloud API backends and routes model-required setup dialogs accordingly; the API backend resolves its own lazy `ApiSpeechInputService` instance from the DI factory (per-composer isolation, issue #97) and disposes it via `cancelSession()`; consumes `theme.visualStyleTokens` (issue #86) for composer surface/control radius/border tokens
 lib/presentation/widgets/chat_message_widget.dart # Message bubble with build-skip cache, cached MarkdownStyleSheet, provider-aware sanitized read-aloud controls with loading and pause/resume/stop states and Settings > Text to speech long-press routing, compact collapsed-copy variants, task navigation callbacks, inline undo/revert, clickable file paths, and Mermaid routing; consumes `theme.visualStyleTokens` (issue #86)
@@ -302,6 +306,11 @@ lib/presentation/widgets/project_context_menu.dart # ProjectContextMenuRegion wi
 lib/presentation/widgets/app_tab_strip.dart     # Generic browser-style tab engine: AppTab<T>, responsive sizing, pinned/regular viewports, gestures, context menus, focus, and semantics
 lib/presentation/widgets/session_tab_strip.dart # Thin SessionTabRecord adapter over AppTabStrip with project icons, attention/busy visuals, focus restoration, and per-tab icon presets (issue #138)
 lib/presentation/widgets/session_tab_icon_picker.dart # `showSessionTabIconPicker` dialog (fullscreen on compact layouts, AlertDialog on wide) returning `SessionTabIconSelection`; grid offers the project icon (via `ProjectIcon`, `autoDiscover: false`) plus the 12 `SessionTabIconPreset` tiles
+lib/presentation/utils/session_tab_switcher_logic.dart # Pure MRU ordering + index math: orderTabsForSwitcher, switcherInitialIndex, switcherStepIndex (issue #171)
+lib/presentation/widgets/session_tab_switcher_overlay.dart # SessionTabSwitcherOverlay Material You overlay widget (issue #171)
+lib/domain/entities/experience_settings.dart # Also extends ShortcutAction enum + kShortcutDefinitions with cycleTabsForward (ctrl+tab) / cycleTabsBackward (ctrl+shift+tab); l10n keys shortcutNextTab/Desc, shortcutPreviousTab/Desc, sessionTabSwitcherTitle/Hint (issue #171)
+test/unit/presentation/session_tab_switcher_logic_test.dart # Unit tests for MRU ordering + index math (issue #171)
+test/widget/session_tab_switcher_overlay_test.dart # Widget tests for the tab-switcher overlay (issue #171)
 lib/presentation/widgets/sidebar_selection_indicator.dart # Thin primary accent indicator reused by selected sidebar rows without painting row-wide backgrounds
 lib/presentation/widgets/file_tree_context_menu.dart # Desktop secondary-click / mobile long-press context menu region (`FileTreeContextMenuActionType` newFile/newFolder/rename/delete/copyPath/refresh) wrapping `showMenu` with overlay-relative positioning; `fileTreeActionIcon` maps actions to Material Symbols (note_add/create_new_folder/drive_file_rename_outline/delete/content_copy/refresh_rounded); destructive styling on `delete`
 lib/presentation/widgets/chat_session_list.dart    # Chat session list widget; responsive vertical tile padding, shared session context menu, transparent selected-row accent affordance; consumes `Theme.of(context).visualStyleTokens` (issue #86) for refined surfaces and rounded tile radius

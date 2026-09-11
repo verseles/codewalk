@@ -709,6 +709,16 @@
 - **Then** unknown or corrupt stored entries fall back to the default project icon
 - **Then** authoritatively deleting a session or removing a project context or server profile removes the matching stored overrides
 
+### Browser-style session tab switcher
+
+- **Given** at least two real session tabs exist and the chat screen is active
+- **When** the user holds `Ctrl` and presses `Tab` (`Ctrl+Shift+Tab` for reverse)
+- **Then** a small centered overlay lists the tabs in most-recently-used order (current tab first, then `lastOpenedAtMs` descending with visual-order tiebreak; the local `New Chat` draft is excluded)
+- **Then** each repeated `Tab` moves only the local highlight; no session is activated and no provider notification fires while `Ctrl` is held
+- **Then** releasing `Ctrl` activates the highlighted tab exactly once through the existing tab-activation path (project switch, cache-first load, rollback on error); `Esc`, tapping outside, backgrounding, or minimizing cancels without switching
+- **Then** the bindings are explicit `Ctrl+Tab` / `Ctrl+Shift+Tab` on every platform including macOS (`Cmd+Tab` stays with the OS app switcher); Android, iOS, and Web use the same handler when a physical keyboard delivers the events (browsers may reserve `Ctrl+Tab` for their own tabs)
+- **Then** remapped Ctrl-based bindings join the same hold-to-cycle overlay, while Meta/Alt/modifier-free remaps switch one MRU step immediately; the actions are configurable under `Settings > Shortcuts`
+
 ### Sidebar session actions are available from row gestures
 
 - **Given** a session row is visible in the main Conversations list
