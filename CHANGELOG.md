@@ -2,6 +2,20 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.230.0 - 2026-09-10
+
+- fix(review): rename-over-replace cache writes with unique temps and rollback tests
+- fix(review): atomic cache writes, corruption-only deletion and user-data ceiling naming
+- fix(review): platform-wide prefs ceiling, robust cache reads and user-data routing
+- fix(android): cure any oversized prefs value and route provider catalogs to the file store
+- fix(review): align drop and clipboard rejection feedback
+- fix(review): bound unknown-size attachment reads and per-family draft purge
+- fix(android): contain composer-draft attachment giants and extend startup cure
+- docs: record anchor-stable timeline ordering behavior (#179)
+- fix(review): round-2 corrections for anchor ordering (#179)
+- fix(review): judge-approved corrections for anchor ordering (#179)
+- fix(chat): stable anchor-based timeline ordering for late echoes (#179)
+
 ## v1.229.0 - 2026-09-10
 
 - docs: record OOM cure in ADR-016, BEHAVIOR and CODEBASE
