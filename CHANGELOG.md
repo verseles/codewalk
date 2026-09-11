@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.232.0 - 2026-09-11
+
+- docs: utility-pane quota mirror and collapsible shortcuts (#166, #165)
+- fix(test): assert post-reload state in quota race test (#166)
+- fix(review): quota server-switch generation guard, toggle semantics, ADR-029 mirror (#166, #165)
+- feat(chat): mirror quota in desktop utility pane and collapsible shortcuts (#166, #165)
+
 ## v1.231.0 - 2026-09-11
 
 - docs: document browser-style Ctrl+Tab session tab switcher (#171)
