@@ -167,8 +167,9 @@ extension _ChatPageTabSwitcher on _ChatPageState {
         return _openOrAdvanceTabSwitcher(reverse: reverse);
       }
       // Meta/Alt/modifier-free customs: single MRU step, KeyDown only so
-      // auto-repeat cannot thrash the current session.
-      if (event is! KeyDownEvent) return false;
+      // auto-repeat cannot thrash the current session. Consume matching
+      // repeats so they do not leak into the composer.
+      if (event is! KeyDownEvent) return true;
       _commitSingleMruStep(reverse: reverse);
       return true;
     }
@@ -180,8 +181,13 @@ extension _ChatPageTabSwitcher on _ChatPageState {
     final chatProvider = _chatProvider ?? context.read<ChatProvider>();
     final tabs = _tabSwitcherCandidates(chatProvider);
     if (tabs.length < 2) return;
-    final target =
-        tabs[switcherInitialIndex(tabs.length, reverse: reverse)];
+    // Mirror the overlay opener: with no selection (e.g. New Chat draft
+    // active) the MRU list has no anchor, so forward starts at index 0.
+    final hasCurrent = tabs.any((tab) => tab.isSelected);
+    final index = hasCurrent
+        ? switcherInitialIndex(tabs.length, reverse: reverse)
+        : (reverse ? tabs.length - 1 : 0);
+    final target = tabs[index];
     if (target.isSelected &&
         _isSessionTabContextActive(target) &&
         chatProvider.currentSession?.id == target.identity.sessionId) {
