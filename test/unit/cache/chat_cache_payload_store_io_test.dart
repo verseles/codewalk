@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:codewalk/data/cache/chat_cache_payload_store_io.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -134,5 +136,32 @@ void main() {
     // be evicted so the read below serves the updated disk payload.
     expect(await store.write('k', 'Z' * 16), isTrue);
     expect(await store.read('k'), 'Z' * 16);
+  });
+
+  test('leaves no temp files behind after a successful write', () async {
+    final store = newStore(maxWritableChars: 1024, maxReadableBytes: 1024);
+    expect(await store.write('k', 'value'), isTrue);
+
+    final names = tempDir.listSync().map((e) => e.path).toList();
+    expect(names.where((p) => p.endsWith('.json')), hasLength(1));
+    expect(names.where((p) => p.contains('.tmp')), isEmpty);
+  });
+
+  test('failed write rolls back memory and cleans the temp file', () async {
+    final store = newStore(maxWritableChars: 1024, maxReadableBytes: 1024);
+    // Place a directory at the canonical hashed path so the atomic rename
+    // cannot replace it: the write must fail, roll back the LRU entry and
+    // leave no temp sibling behind.
+    final digest = sha1.convert(utf8.encode('k')).toString();
+    Directory('${tempDir.path}/$digest.json').createSync(recursive: true);
+
+    await expectLater(store.write('k', 'never-persisted'), throwsA(anything));
+
+    expect(store.debugMemoryChars, 0);
+    expect(
+      tempDir.listSync().where((e) => e.path.contains('.tmp')),
+      isEmpty,
+    );
+    expect(await store.read('k'), isNull);
   });
 }

@@ -3,6 +3,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -108,26 +109,37 @@ class FileBackedChatCachePayloadStore implements ChatCachePayloadStore {
       // write entirely to avoid jank from redundant file I/O (issue #152).
       return false;
     }
-    _storeMemory(key, value);
+    // Resolve the destination before touching memory: a directory-resolution
+    // failure must not leave an unpersisted value served from the LRU.
     final file = await _fileForKey(key);
+    _storeMemory(key, value);
+    // Atomic replace (same pattern as the other file stores): write a unique
+    // sibling temp, then rename over the target. rename replaces the
+    // destination, so the previous payload stays intact until the new one is
+    // fully on disk.
+    final suffix = List<int>.generate(
+      12,
+      (_) => Random.secure().nextInt(256),
+      growable: false,
+    ).map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+    final temp = File('${file.path}.tmp.$suffix');
     try {
       await file.parent.create(recursive: true);
-      // Atomic-ish replace: write a sibling temp file and rename it over
-      // the target so readers never observe a torn payload and a failed
-      // write cannot leave a partly written file at the canonical path.
-      final temp = File('${file.path}.tmp');
       await temp.writeAsString(value, flush: true);
-      if (await file.exists()) {
-        await file.delete();
-      }
       await temp.rename(file.path);
       return true;
     } catch (_) {
       // A failed disk write must not leave the value readable from the
-      // in-memory LIFO: a later migration/read would mistake it for a
+      // in-memory LRU: a later migration/read would mistake it for a
       // persisted payload. Roll back memory, then surface the failure.
       _evictMemory(key);
       rethrow;
+    } finally {
+      try {
+        if (await temp.exists()) {
+          await temp.delete();
+        }
+      } catch (_) {}
     }
   }
 
