@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.231.0 - 2026-09-11
+
+- docs: document browser-style Ctrl+Tab session tab switcher (#171)
+- fix(review): single-step no-selection anchor and repeat consume (#171)
+- fix(review): scope custom bindings to Ctrl overlay, draft MRU anchor, overlay guards (#171)
+- feat(tabs): browser-style Ctrl+Tab session tab switcher (MRU overlay, #171)
+
 ## v1.230.0 - 2026-09-10
 
 - fix(review): rename-over-replace cache writes with unique temps and rollback tests
