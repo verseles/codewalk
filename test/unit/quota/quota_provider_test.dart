@@ -396,9 +396,8 @@ void main() {
       firstFetch.complete([_buildOpenRouterResult()]);
       await loadA;
       expect(provider.results, isEmpty);
-      expect(provider.isLoading, isFalse);
-
-      // Exactly one follow-up load for the current server is queued.
+      // The queued microtask reload for srv_b runs before the test
+      // resumes, so assert the post-reload state (not the transient one).
       await Future<void>.delayed(Duration.zero);
       expect(dataSource.callCount, 2);
       expect(provider.isLoading, isTrue);
