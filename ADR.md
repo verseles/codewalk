@@ -1579,12 +1579,14 @@ CodeWalk requires visibility into model quotas and rate-limits to prevent silent
 2. **Strategy-Chain Transport** — Quota data is fetched using a tiered discovery strategy:
     - **OpenChamber REST** — Use `GET /api/quota/providers` and then `GET /api/quota/{providerId}` when those endpoints are available.
     - **Hidden Shell Fallback** — Create a hidden ephemeral OpenCode session, execute a Base64-encoded Node.js probe through `POST /session/:id/shell`, parse the final `CW_QUOTA_JSON:` line, and delete the probe session after completion.
-3. **Popup-Only UI (Compact-First)** — The monitoring interface is restricted to the "Context usage" popup. It is hidden by default in compact/mobile layouts to preserve composer real-estate, appearing only on explicit user invocation.
+3. **Popup-Only UI (Compact-First), Large-Desktop Mirror** — Compact/mobile layouts stay popup-only: the monitoring interface is restricted to the "Context usage" popup, hidden by default to preserve composer real-estate, appearing only on explicit user invocation. On large-desktop only, the desktop utility pane (`_buildDesktopUtilityPane`) is permitted to mirror the same read-only quota/rate-limit section by reusing `QuotaPopupSection` with the same `QuotaProvider`/TTL as the Context usage popover (auto-fetch on mount via the existing provider TTL). The popover itself is unchanged.
 4. **Grouped Providers with Pace/Progress Semantics** — UI displays providers grouped by parent organization (OpenAI, Anthropic, etc.) using progress bars that reflect both absolute remaining quota and "Pace" (usage rate over time) to warn of imminent rate-limiting.
 5. **Auth Key Register** — `_supportedAuthKeys` is the single Dart-side register for shell fallback provider aliases and the `unsupportedConfigured` diagnostic filter. Adding a new shell probe requires updating both the dispatcher and this register.
 6. **Explicit Feature-by-Feature Parity Opt-in** — Future OpenChamber features will not be auto-adopted. Each parity addition must be explicitly evaluated, documented via ADR, and gated behind feature-specific capability checks.
 7. **Host-Owned OpenCode Go Usage Probe** — OpenCode Go quota is fetched inside the host-side shell probe using the host's `auth.json` `opencode-go` entry (accepting `key`, `access`, or `token` fields) against `GET https://opencode.ai/zen/go/v1/usage` with an `Authorization: Bearer` header, `Accept: application/json`, and a 15-second timeout. The probe parses the `usage` object's `rolling`, `weekly`, and `monthly` windows (`percent` used, optional `resetsAt`). No client workspace ID, no dashboard auth cookie, and no HTML scraping. Failures are classified as `authentication` (HTTP 401/403), `request_failed` (other non-OK HTTP status or transport errors), or `invalid_response` (unparseable payload or zero usable windows). Partial windows are tolerated: unparseable window entries are skipped, `resetsAt` is applied only when parseable, and only a payload with no usable windows is classified `invalid_response`. The Context usage popup shows a failure card keyed by this classification.
 8. **One-Time Best-Effort Legacy Credential Purge** — At the start of quota loading, purge all legacy OpenCode Go dashboard credential keys (`opencode_go_workspace_id`, `opencode_go_auth_cookie`) from secure storage once per `QuotaProvider` instance. Matching covers exact keys and prefix matches (`<namespace>::<key>` and `<namespace>::<key>::...`), so serverId-scoped and orphaned profile keys are removed as well. The purge is best-effort (secure-storage errors are swallowed), gated by an in-memory instance flag, and never blocks quota fetching.
+
+**Amendment** (issues #166/#165, commit `dde3d05`): decision 3 large-desktop mirror and `chat_page_scaffold.dart` key file constitute the documented parity addition required by decision 6.
 
 ### Rationale
 
@@ -1622,6 +1624,7 @@ CodeWalk requires visibility into model quotas and rate-limits to prevent silent
 - `lib/presentation/widgets/quota/quota_entry_row.dart` — Individual quota entry with severity color progress bar
 - `lib/presentation/widgets/quota/pace_label.dart` — Desktop tooltip / mobile snackbar pace explanation
 - `lib/presentation/pages/chat_page/chat_page_status_presenter.dart` — Hosts `_buildContextUsagePopover` which includes `QuotaPopupSection`
+- `lib/presentation/pages/chat_page/chat_page_scaffold.dart` — Hosts `_buildDesktopUtilityPane` (large-desktop only) mirroring the same read-only `QuotaPopupSection`
 - `lib/core/di/injection_container.dart` — DI wiring for `QuotaRemoteDataSource` and `QuotaProvider`
 
 ### Provider Register

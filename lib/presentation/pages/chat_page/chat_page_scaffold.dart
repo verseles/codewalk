@@ -1511,39 +1511,42 @@ extension _ChatPageScaffold on _ChatPageState {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InkWell(
-                    key: const ValueKey<String>(
-                      'utility_shortcuts_toggle',
-                    ),
-                    borderRadius: BorderRadius.circular(6),
-                    onTap: () => unawaited(
-                      settingsProvider.setUtilityShortcutsCollapsed(
-                        !settingsProvider.utilityShortcutsCollapsed,
+                  Semantics(
+                    button: true,
+                    expanded: !settingsProvider.utilityShortcutsCollapsed,
+                    label: context.l10n.sessionKeyboardShortcuts,
+                    child: InkWell(
+                      key: const ValueKey<String>('utility_shortcuts_toggle'),
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: () => unawaited(
+                        settingsProvider.setUtilityShortcutsCollapsed(
+                          !settingsProvider.utilityShortcutsCollapsed,
+                        ),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              context.l10n.sessionKeyboardShortcuts,
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ExcludeSemantics(
+                                child: Text(
+                                  context.l10n.sessionKeyboardShortcuts,
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ),
                             ),
-                          ),
-                          Icon(
-                            settingsProvider.utilityShortcutsCollapsed
-                                ? Symbols.expand_more_rounded
-                                : Symbols.expand_less_rounded,
-                            size: 18,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                        ],
+                            Icon(
+                              settingsProvider.utilityShortcutsCollapsed
+                                  ? Symbols.expand_more_rounded
+                                  : Symbols.expand_less_rounded,
+                              size: 18,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1689,12 +1692,9 @@ extension _ChatPageScaffold on _ChatPageState {
               // context-usage popover. Scoped to server id so switches
               // reload; the shared QuotaProvider TTL dedupes fetches.
               Selector<AppProvider, String?>(
-                selector: (_, appProvider) =>
-                    appProvider.activeServer?.id,
+                selector: (_, appProvider) => appProvider.activeServer?.id,
                 builder: (context, serverId, _) => QuotaPopupSection(
-                  key: const ValueKey<String>(
-                    'desktop_utility_quota_section',
-                  ),
+                  key: const ValueKey<String>('desktop_utility_quota_section'),
                   serverId: serverId,
                 ),
               ),

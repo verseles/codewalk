@@ -375,6 +375,42 @@ void main() {
     },
   );
 
+  test(
+    'QuotaProvider discards stale results when the server changes mid-flight',
+    () async {
+      final firstFetch = Completer<List<QuotaProviderResult>>();
+      final secondFetch = Completer<List<QuotaProviderResult>>();
+      final dataSource = _QueuedQuotaRemoteDataSource([
+        firstFetch.future,
+        secondFetch.future,
+      ]);
+      final provider = QuotaProvider(remoteDataSource: dataSource);
+
+      final loadA = provider.ensureLoaded(serverId: 'srv_a');
+      // Server switch while the first fetch is in flight: clears state and
+      // returns early because a load is already running.
+      await provider.ensureLoaded(serverId: 'srv_b');
+      expect(provider.results, isEmpty);
+
+      // The stale srv_a payload must not be attributed to srv_b.
+      firstFetch.complete([_buildOpenRouterResult()]);
+      await loadA;
+      expect(provider.results, isEmpty);
+      expect(provider.isLoading, isFalse);
+
+      // Exactly one follow-up load for the current server is queued.
+      await Future<void>.delayed(Duration.zero);
+      expect(dataSource.callCount, 2);
+      expect(provider.isLoading, isTrue);
+
+      secondFetch.complete(const <QuotaProviderResult>[]);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(provider.isLoading, isFalse);
+      expect(provider.results, isEmpty);
+    },
+  );
+
   testWidgets('QuotaEntryRow shows determinate full bar for zero remaining', (
     tester,
   ) async {

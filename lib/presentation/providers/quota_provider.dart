@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../core/logging/app_logger.dart';
@@ -112,7 +114,22 @@ class QuotaProvider extends ChangeNotifier {
     try {
       AppLogger.info('[Quota] ensureLoaded: starting fetch...');
       await _clearLegacyOpenCodeGoCredentials();
-      _results = await _remoteDataSource.fetchQuotaResults();
+      final fetched = await _remoteDataSource.fetchQuotaResults();
+      if (normalizedServerId != _serverId) {
+        // The active server changed mid-flight: discard the stale payload
+        // instead of attributing it to the new server, then queue exactly
+        // one load for the current server. The reload runs on a microtask
+        // so it observes _isLoading released by the finally block below.
+        AppLogger.info(
+          '[Quota] ensureLoaded: discarding stale results after server change',
+        );
+        final currentServerId = _serverId;
+        scheduleMicrotask(() {
+          unawaited(ensureLoaded(serverId: currentServerId));
+        });
+        return;
+      }
+      _results = fetched;
       _lastFetchedAt = DateTime.now();
       final groupSummaries = groups
           .map(

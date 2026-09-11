@@ -410,9 +410,7 @@ void main() {
             value: settingsProvider,
           ),
           ChangeNotifierProvider<QuotaProvider>.value(
-            value: QuotaProvider(
-              remoteDataSource: FakeQuotaRemoteDataSource(),
-            ),
+            value: QuotaProvider(remoteDataSource: FakeQuotaRemoteDataSource()),
           ),
           ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
         ],
@@ -519,12 +517,10 @@ Widget _testApp(ChatProvider chatProvider, AppProvider appProvider) {
       ChangeNotifierProvider<ProjectProvider>.value(
         value: chatProvider.projectProvider,
       ),
-          ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
-          ChangeNotifierProvider<QuotaProvider>.value(
-            value: QuotaProvider(
-              remoteDataSource: FakeQuotaRemoteDataSource(),
-            ),
-          ),
+      ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+      ChangeNotifierProvider<QuotaProvider>.value(
+        value: QuotaProvider(remoteDataSource: FakeQuotaRemoteDataSource()),
+      ),
     ],
     child: MaterialApp(
       locale: const Locale('en'),
@@ -560,12 +556,10 @@ Widget _testAppWithSettings(
       ChangeNotifierProvider<ProjectProvider>.value(
         value: chatProvider.projectProvider,
       ),
-          ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
-          ChangeNotifierProvider<QuotaProvider>.value(
-            value: QuotaProvider(
-              remoteDataSource: FakeQuotaRemoteDataSource(),
-            ),
-          ),
+      ChangeNotifierProvider<SettingsProvider>.value(value: settingsProvider),
+      ChangeNotifierProvider<QuotaProvider>.value(
+        value: QuotaProvider(remoteDataSource: FakeQuotaRemoteDataSource()),
+      ),
     ],
     child: MaterialApp(
       locale: const Locale('en'),
