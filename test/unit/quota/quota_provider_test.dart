@@ -8,6 +8,7 @@ import 'package:codewalk/presentation/widgets/quota/quota_entry_row.dart';
 import 'package:codewalk/presentation/widgets/quota/quota_popup_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../support/fakes.dart' as support;
@@ -267,8 +268,8 @@ void main() {
       expect(find.text('Codex'), findsOneWidget);
       expect(find.text('5-Hour'), findsOneWidget);
       expect(find.text('Weekly Limit'), findsOneWidget);
-      expect(find.byIcon(Icons.expand_more), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsNothing);
+      expect(find.byIcon(Symbols.expand_more), findsOneWidget);
+      expect(find.byIcon(Symbols.chevron_right), findsNothing);
     },
   );
 
