@@ -1473,7 +1473,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** legacy client-stored workspace ID and auth cookie values are purged best-effort from secure storage on quota load, and the client never collects or stores a new dashboard credential
 - **Then** if no provider returns visible data and no failure card applies, the `Provider Quotas` section is omitted from the popup
 - **Then** the client never stores, manages, or forwards provider credentials; quota ownership stays on the server host
-- **Given** the host has configured credentials for `NanoGPT`, `Wafer.ai`, `GitHub Copilot Add-on`, `Kimi for Coding`, `Zhipu AI Coding Plan`, `MiniMax Coding Plan`, `z.ai`, `Cursor`, or `Ollama Cloud`
+- **Given** the host has configured credentials for `NanoGPT`, `Wafer.ai`, `GitHub Copilot Add-on`, `Kimi for Coding`, `Zhipu AI Coding Plan`, `MiniMax Coding Plan`, `z.ai`, `Cursor`, `Ollama Cloud`, `xAI`, `DeepSeek`, or `ClinePass`
 - **When** the `Provider Quotas` popup is opened
 - **Then** CodeWalk displays their respective usage windows, rate limits, and remaining credits
 - **Then** `minimax-cn-coding-plan` uses inverted remains semantics to calculate utilized percentage (`used = total - remaining`)
@@ -1481,7 +1481,10 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** the fallback computes `usedPercent = max(0, min(100, 100 - remainingPercent))` to keep the value in the standard 0–100 range
 - **Then** `cursor` falls back to querying the local Cursor SQLite database on macOS hosts if environment tokens are missing
 - **Then** `ollama-cloud` parses HTML scraping safely, falling back to a descriptive error if the HTML format changes
-- **Then** newer provider aliases for Snowflake Cortex, Grok/xAI, and Cohere North are recognized by the shell fallback diagnostics so they are not shown as unknown configuration
+- **Then** `xai` / `grok` / `x-ai` host OAuth entries (`type=oauth` in `auth.json`) produce an `xAI` billing-cycle usage bar from `https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig`; API-key entries are skipped
+- **Then** `deepseek` host API keys produce a DeepSeek credits-balance label from `https://api.deepseek.com/user/balance`, preferring USD then CNY
+- **Then** `cline-pass` host API keys produce ClinePass `5h`, weekly, and monthly usage bars from `https://api.cline.bot/api/v1/users/me/plan/usage-limits`
+- **Then** newer provider aliases for Snowflake Cortex and Cohere North are recognized by the shell fallback diagnostics so they are not shown as unknown configuration
 - **Then** those newer providers only produce visible quota rows through REST until a dedicated shell probe is implemented
 - **Given** the desktop utility sidebar is open on a large desktop
 - **When** the utility pane is rendered

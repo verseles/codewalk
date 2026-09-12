@@ -1614,7 +1614,7 @@ CodeWalk requires visibility into model quotas and rate-limits to prevent silent
 ### Key Files
 
 - `lib/data/datasources/quota_remote_datasource.dart` — Strategy-chain implementation (OpenChamber REST → shell fallback)
-- `lib/data/datasources/quota_remote_datasource.part.js.dart` — Base64-encoded Node.js one-liner payload for shell-fallback quota probing (minified multi-provider JS encoded at compile time, decoded at runtime via `node -e "eval(Buffer.from('BASE64_PAYLOAD','base64').toString())"`); includes the host-owned OpenCode Go probe against `GET https://opencode.ai/zen/go/v1/usage`
+- `lib/data/datasources/quota_remote_datasource.part.js.dart` — Base64-encoded Node.js one-liner payload for shell-fallback quota probing (minified multi-provider JS encoded at compile time, decoded at runtime via `node -e "eval(Buffer.from('BASE64_PAYLOAD','base64').toString())"`); includes the host-owned OpenCode Go probe against `GET https://opencode.ai/zen/go/v1/usage`, the xAI probe (`parseXaiUsage` + `fXai`), the DeepSeek probe (`fDeepseek`), and the ClinePass probe (`fClinePass`)
 - `lib/data/datasources/app_local_datasource.dart` — `clearOpenCodeGoDashboardCredentials()` legacy credential purge (exact + prefix matching)
 - `lib/domain/entities/quota.dart` — Domain entities: `QuotaSnapshot`, `UsageWindow`, `PaceInfo`, `QuotaEntry`, `QuotaProviderGroup`
 - `lib/presentation/providers/quota_provider.dart` — Polling, TTL cache, server-scoped state, provider grouping, Codex `providerId` guard that prevents single-window label collapse for Codex entries by preserving per-window granularity in grouped display, and the one-time legacy purge gate (`_clearLegacyOpenCodeGoCredentials`)
@@ -1649,8 +1649,11 @@ The following shell fallback probes are implemented by the strategy-chain. REST 
 | 14 | `zai-coding-plan` | ZAI coding plan quota | ZAI |
 | 15 | `cursor` | Cursor usage, plan limits, and credits | Cursor |
 | 16 | `ollama-cloud` | Ollama Cloud hosted model usage | Ollama |
+| 17 | `xai` / `grok` / `x-ai` | xAI Grok billing-cycle usage via host OAuth against grok.com GetGrokCreditsConfig (API-key entries skipped) | xAI |
+| 18 | `deepseek` | DeepSeek credits balance via GET https://api.deepseek.com/user/balance (USD then CNY) | DeepSeek |
+| 19 | `cline-pass` | ClinePass 5h/weekly/monthly usage via GET https://api.cline.bot/api/v1/users/me/plan/usage-limits | Cline |
 
-`_supportedAuthKeys` also recognizes aliases for recent OpenCode provider additions (`snowflake-cortex`, `grok`/`xai`, and `cohere-north`) so they are not misreported as unknown configuration. Dedicated shell probes for those providers are not yet implemented; they become visible through REST only when the connected host supplies them.
+`_supportedAuthKeys` also recognizes aliases for recent OpenCode provider additions (`snowflake-cortex` and `cohere-north`) so they are not misreported as unknown configuration. Dedicated shell probes for those providers are not yet implemented; they become visible through REST only when the connected host supplies them. xAI now has a dedicated shell probe: host-owned OAuth in `auth.json` against grok.com gRPC-web `GetGrokCreditsConfig` (billing-cycle `usedPercent`/`resetAt`); API-key xAI entries are skipped, and OAuth refresh may persist tokens back to host `auth.json` (same class as Cursor persist).
 
 ### OpenCode Go Usage Probe (issue #96) — Host-Owned, Not Client Dashboard Credentials
 

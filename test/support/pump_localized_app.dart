@@ -28,9 +28,10 @@ Future<void> pumpLocalizedApp(
   );
 
   await tester.pumpWidget(app);
+  await tester.pump();
 
   // Update with the actual localized instance from the tree.
-  final context = tester.element(find.byType(MaterialApp));
+  final context = tester.element(find.byWidget(child));
   L10nBridge.update(AppLocalizations.of(context));
 }
 

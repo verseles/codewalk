@@ -1271,6 +1271,399 @@ async function fOllamaCloud(a) {
 }
 ''';
 
+String _jsXaiProvider() => r'''
+function parseXaiUsage(bytes) {
+  const samePath = (left, right) => left.length === right.length && left.every((value, index) => value === right[index]);
+  const usagePercentPaths = [[1], [1, 1]];
+  const hasPath = (paths, candidate) => paths.some((path) => samePath(path, candidate));
+  const readVarint = (buf, state) => {
+    let value = 0n;
+    for (let shift = 0n; state.index < buf.length && shift < 64n; shift += 7n) {
+      const byte = buf[state.index++];
+      if (shift === 63n && (byte & 0x7e) !== 0) return null;
+      value |= BigInt(byte & 0x7f) << shift;
+      if ((byte & 0x80) === 0) return value;
+    }
+    return null;
+  };
+  const scanProtobuf = (buf, path, depth, state) => {
+    const fieldPathBase = path || [];
+    const nestDepth = depth || 0;
+    const cursor = state || { index: 0, order: 0 };
+    const fixed32Fields = [];
+    const varintFields = [];
+    while (cursor.index < buf.length) {
+      const key = readVarint(buf, cursor);
+      if (key === null || key === 0n) return false;
+      const fieldNumber = Number(key >> 3n);
+      const wireType = Number(key & 0x07n);
+      if (!fieldNumber || fieldNumber > 0x1fffffff) return false;
+      const fieldPath = fieldPathBase.concat(fieldNumber);
+      if (wireType === 0) {
+        const value = readVarint(buf, cursor);
+        if (value === null) return false;
+        varintFields.push({ path: fieldPath, value: value });
+        continue;
+      }
+      if (wireType === 1) {
+        if (cursor.index + 8 > buf.length) return false;
+        cursor.index += 8;
+        continue;
+      }
+      if (wireType === 2) {
+        const length = readVarint(buf, cursor);
+        if (length === null || length > BigInt(buf.length - cursor.index)) return false;
+        const end = cursor.index + Number(length);
+        if (nestDepth >= 4 && length !== 0n) return false;
+        if (nestDepth < 4) {
+          const nestedState = { index: 0, order: cursor.order };
+          const nested = scanProtobuf(buf.slice(cursor.index, end), fieldPath, nestDepth + 1, nestedState);
+          if (nested === false) return false;
+          fixed32Fields.push.apply(fixed32Fields, nested.fixed32Fields);
+          varintFields.push.apply(varintFields, nested.varintFields);
+          cursor.order = nestedState.order;
+        }
+        cursor.index = end;
+        continue;
+      }
+      if (wireType === 5) {
+        if (cursor.index + 4 > buf.length) return false;
+        const value = Buffer.from(buf.slice(cursor.index, cursor.index + 4)).readFloatLE(0);
+        fixed32Fields.push({ path: fieldPath, value: value, order: cursor.order++ });
+        cursor.index += 4;
+        continue;
+      }
+      return false;
+    }
+    return { fixed32Fields: fixed32Fields, varintFields: varintFields };
+  };
+  const parseGrpcTrailerStatus = (buf) => {
+    let text;
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(buf);
+    } catch (err) {
+      return null;
+    }
+    let status = null;
+    const lines = text.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) continue;
+      const separator = line.indexOf(':');
+      if (separator <= 0) return null;
+      const key = line.slice(0, separator).trim().toLowerCase();
+      if (!key) return null;
+      if (key !== 'grpc-status') continue;
+      if (status !== null) return null;
+      const rawStatus = line.slice(separator + 1).trim();
+      if (!/^\d+$/.test(rawStatus)) return null;
+      status = Number(rawStatus);
+      if (!Number.isSafeInteger(status)) return null;
+    }
+    return status;
+  };
+  const parseFrames = (buf) => {
+    if (buf.length < 5 || (buf[0] & 0x7f) !== 0) return null;
+    const messages = [];
+    const trailerStatuses = [];
+    let trailerStarted = false;
+    let index = 0;
+    while (index < buf.length) {
+      if (index + 5 > buf.length) return false;
+      const flags = buf[index++];
+      if ((flags & 0x7f) !== 0) return false;
+      const isTrailer = (flags & 0x80) !== 0;
+      if (trailerStarted && !isTrailer) return false;
+      const length = (buf[index] * 0x1000000) + (buf[index + 1] << 16) + (buf[index + 2] << 8) + buf[index + 3];
+      index += 4;
+      const end = index + length;
+      if (end > buf.length) return false;
+      const payload = buf.slice(index, end);
+      if (isTrailer) {
+        trailerStarted = true;
+        const status = parseGrpcTrailerStatus(payload);
+        if (status === null) return false;
+        trailerStatuses.push(status);
+      } else {
+        messages.push(payload);
+      }
+      index = end;
+    }
+    return { messages: messages, trailerStatuses: trailerStatuses };
+  };
+  const looksLikeProtobuf = (buf) => {
+    if (!buf.length) return false;
+    const fieldNumber = buf[0] >> 3;
+    const wireType = buf[0] & 0x07;
+    return fieldNumber > 0 && [0, 1, 2, 5].indexOf(wireType) !== -1;
+  };
+  const framed = parseFrames(bytes);
+  if (framed === false) throw new Error('xAI billing returned malformed gRPC-web framing');
+  const payloads = framed ? framed.messages : (looksLikeProtobuf(bytes) ? [bytes] : []);
+  if (framed) {
+    for (let i = 0; i < framed.trailerStatuses.length; i++) {
+      if (framed.trailerStatuses[i] !== 0) throw new Error('xAI billing RPC failed with status ' + framed.trailerStatuses[i]);
+    }
+  }
+  if (payloads.length === 0) throw new Error('xAI billing returned an empty protobuf response');
+  const scan = { fixed32Fields: [], varintFields: [] };
+  for (let i = 0; i < payloads.length; i++) {
+    const result = scanProtobuf(payloads[i]);
+    if (result === false) throw new Error('xAI billing returned malformed protobuf');
+    scan.fixed32Fields.push.apply(scan.fixed32Fields, result.fixed32Fields);
+    scan.varintFields.push.apply(scan.varintFields, result.varintFields);
+  }
+  const percentages = scan.fixed32Fields.filter((field) => (
+    hasPath(usagePercentPaths, field.path)
+      && Number.isFinite(field.value)
+      && field.value >= 0
+      && field.value <= 100
+  )).sort((left, right) => left.path.length - right.path.length || left.order - right.order);
+  const usedPercent = percentages.length > 0 ? percentages[0].value : null;
+  const resetCandidates = scan.varintFields.filter((field) => field.value >= 1700000000n && field.value <= 2100000000n).map((field) => {
+    const seconds = Number(field.value);
+    return { path: field.path, resetAt: seconds * 1000 };
+  }).filter((field) => field.resetAt > Date.now());
+  const preferredReset = resetCandidates.filter((field) => samePath(field.path, [1, 5, 1]));
+  const resetPool = preferredReset.length > 0 ? preferredReset : resetCandidates;
+  resetPool.sort((left, right) => left.resetAt - right.resetAt);
+  const resetAt = resetPool.length > 0 ? resetPool[0].resetAt : null;
+  const hasUsagePeriod = scan.varintFields.some((field) => (
+    (field.path.length >= 2 && field.path[0] === 1 && field.path[1] === 6)
+      || (samePath(field.path, [1, 8, 1]) && (field.value === 1n || field.value === 2n))
+  ));
+  if (usedPercent === null && scan.fixed32Fields.length === 0 && resetAt !== null && hasUsagePeriod) {
+    return { usedPercent: 0, resetAt: resetAt };
+  }
+  if (usedPercent === null) throw new Error('xAI billing response had no usable current-period usage');
+  return { usedPercent: usedPercent, resetAt: resetAt };
+}
+
+async function fXai(a) {
+  const key = ['xai', 'grok', 'x-ai'].find((id) => a && a[id]) || 'xai';
+  const e = nE(getE(a, ['xai', 'grok', 'x-ai']));
+  if (!e || e.type !== 'oauth') return null;
+  const access = asS(e.access) || asS(e.token);
+  const refresh = asS(e.refresh);
+  if (!access && !refresh) return null;
+  const USAGE_URL = 'https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig';
+  const TOKEN_URL = 'https://auth.x.ai/oauth2/token';
+  const CLIENT_ID = 'b1a00492-073a-47ea-816f-4c329264a828';
+  const REFRESH_SKEW_MS = 120000;
+  const decodeJwtClaims = (token) => {
+    try {
+      const payload = String(token).split('.')[1];
+      if (!payload) return null;
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(Buffer.from(normalized, 'base64').toString('utf8'));
+    } catch (err) {
+      return null;
+    }
+  };
+  const tokenNeedsRefresh = (entry) => {
+    const current = asS(entry.access) || asS(entry.token);
+    if (!current) return true;
+    const refreshDeadline = Date.now() + REFRESH_SKEW_MS;
+    const storedExpiry = Number(entry.expires);
+    if (Number.isFinite(storedExpiry) && storedExpiry <= refreshDeadline) return true;
+    const claims = decodeJwtClaims(current);
+    const jwtExpiry = claims && typeof claims.exp === 'number' ? claims.exp * 1000 : NaN;
+    return Number.isFinite(jwtExpiry) && jwtExpiry <= refreshDeadline;
+  };
+  const persistXai = (entry) => {
+    try {
+      const f = p.join(DATA, 'auth.json');
+      if (!fs.existsSync(f)) return;
+      const raw = fs.readFileSync(f, 'utf8').trim();
+      const cur = JSON.parse(raw);
+      if (!cur || typeof cur !== 'object') return;
+      cur[key] = entry;
+      fs.writeFileSync(f, JSON.stringify(cur, null, 2), { encoding: 'utf8', mode: 0o600 });
+    } catch (err) {}
+  };
+  const refreshXaiOauth = async (entry) => {
+    const refreshToken = asS(entry.refresh);
+    if (!refreshToken) throw new Error('xAI OAuth entry has no usable refresh token');
+    const response = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'client_id=' + encodeURIComponent(CLIENT_ID) + '&refresh_token=' + encodeURIComponent(refreshToken) + '&grant_type=refresh_token',
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!response.ok) throw new Error('xAI OAuth refresh failed with HTTP ' + response.status);
+    let payload;
+    try {
+      payload = await response.json();
+    } catch (err) {
+      throw new Error('xAI OAuth refresh returned invalid JSON');
+    }
+    const nextAccess = asS(payload && payload.access_token);
+    if (!nextAccess) throw new Error('xAI OAuth refresh returned no access token');
+    const expiresIn = payload && payload.expires_in;
+    if (typeof expiresIn !== 'number' || !Number.isFinite(expiresIn)) throw new Error('xAI OAuth refresh returned an invalid expiry');
+    const refreshed = Object.assign({}, entry, {
+      type: 'oauth',
+      access: nextAccess,
+      refresh: asS(payload && payload.refresh_token) || refreshToken,
+      expires: Date.now() + expiresIn * 1000
+    });
+    persistXai(refreshed);
+    return refreshed;
+  };
+  try {
+    let fresh = e;
+    if (tokenNeedsRefresh(e)) fresh = await refreshXaiOauth(e);
+    const accessToken = asS(fresh.access) || asS(fresh.token);
+    if (!accessToken) throw new Error('xAI OAuth entry has no usable access token');
+    const response = await fetch(USAGE_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + accessToken,
+        Origin: 'https://grok.com',
+        Referer: 'https://grok.com/?_s=usage',
+        Accept: '*/*',
+        'Content-Type': 'application/grpc-web+proto',
+        'x-grpc-web': '1',
+        'x-user-agent': 'connect-es/2.1.1',
+        'User-Agent': 'CodeWalk'
+      },
+      body: Buffer.from([0, 0, 0, 0, 0]),
+      signal: AbortSignal.timeout(15000)
+    });
+    const headerStatus = response.headers && response.headers.get ? response.headers.get('grpc-status') : null;
+    if (headerStatus !== null) {
+      if (!/^\d+$/.test(String(headerStatus).trim())) throw new Error('xAI billing returned malformed gRPC status');
+      const status = Number(String(headerStatus).trim());
+      if (!Number.isSafeInteger(status)) throw new Error('xAI billing returned malformed gRPC status');
+      if (status !== 0) throw new Error('xAI billing RPC failed with status ' + status);
+    }
+    if (!response.ok) throw new Error('xAI billing request failed with HTTP ' + response.status);
+    const usage = parseXaiUsage(new Uint8Array(await response.arrayBuffer()));
+    return bR({
+      pId: 'xai',
+      pName: 'xAI',
+      ok: true,
+      use: { windows: { billing_cycle: tUW({ uP: usage.usedPercent, wS: null, rA: usage.resetAt }) } }
+    });
+  } catch (err) {
+    return bR({ pId: 'xai', pName: 'xAI', ok: false, err: err && err.message ? err.message : 'Request failed' });
+  }
+}
+''';
+
+String _jsDeepseekProvider() => r'''
+async function fDeepseek(a) {
+  const e = nE(getE(a, ['deepseek']));
+  const k = e && (e.key || e.token);
+  if (!k) return null;
+  let timeoutSignal = null;
+  try {
+    timeoutSignal = AbortSignal.timeout(15000);
+    const res = await fetch('https://api.deepseek.com/user/balance', {
+      headers: { Authorization: 'Bearer ' + k, 'Accept-Encoding': 'identity' },
+      signal: timeoutSignal
+    });
+    if (!res.ok) {
+      return bR({
+        pId: 'deepseek',
+        pName: 'DeepSeek',
+        ok: false,
+        err: (res.status === 401 || res.status === 403)
+          ? 'Session expired — please re-authenticate with DeepSeek'
+          : ('API error: ' + res.status)
+      });
+    }
+    const d = await res.json();
+    const infos = Array.isArray(d.balance_infos) ? d.balance_infos : [];
+    let info = null;
+    for (let i = 0; i < infos.length; i++) {
+      if (infos[i] && infos[i].currency === 'USD') { info = infos[i]; break; }
+    }
+    if (!info) {
+      for (let i = 0; i < infos.length; i++) {
+        if (infos[i] && infos[i].currency === 'CNY') { info = infos[i]; break; }
+      }
+    }
+    const raw = info && info.total_balance;
+    const total = (typeof raw === 'number' || (typeof raw === 'string' && raw.trim() !== '')) ? toN(raw) : null;
+    if (total === null) return bR({ pId: 'deepseek', pName: 'DeepSeek', ok: false, err: 'No quota data in response' });
+    const symbol = info && info.currency === 'CNY' ? '\u00a5' : '$';
+    return bR({
+      pId: 'deepseek',
+      pName: 'DeepSeek',
+      ok: true,
+      use: { windows: { credits_balance: tUW({ uP: null, wS: null, rA: null, vL: symbol + total.toFixed(2) }) } }
+    });
+  } catch (err) {
+    const isTimeout = err && (err.name === 'TimeoutError' || (err.name === 'AbortError' && timeoutSignal && timeoutSignal.aborted));
+    const isParseError = err instanceof SyntaxError;
+    return bR({
+      pId: 'deepseek',
+      pName: 'DeepSeek',
+      ok: false,
+      err: isTimeout ? 'Request timed out' : (isParseError ? 'Invalid response from provider' : (err && err.message ? err.message : 'Request failed'))
+    });
+  }
+}
+''';
+
+String _jsClinePassProvider() => r'''
+async function fClinePass(a) {
+  const e = nE(getE(a, ['cline-pass']));
+  const k = e && (e.key || e.token);
+  if (!k) return null;
+  const kinds = {
+    five_hour: { key: '5h', wS: 5 * 60 * 60 },
+    weekly: { key: 'weekly', wS: 7 * 24 * 60 * 60 },
+    monthly: { key: 'monthly', wS: null }
+  };
+  let timeoutSignal = null;
+  try {
+    timeoutSignal = AbortSignal.timeout(15000);
+    const res = await fetch('https://api.cline.bot/api/v1/users/me/plan/usage-limits', {
+      headers: { Authorization: 'Bearer ' + k, 'Accept-Encoding': 'identity' },
+      signal: timeoutSignal
+    });
+    if (!res.ok) {
+      return bR({
+        pId: 'cline-pass',
+        pName: 'ClinePass',
+        ok: false,
+        err: res.status === 401
+          ? 'Session expired — please re-authenticate with ClinePass'
+          : ('API error: ' + res.status)
+      });
+    }
+    const payload = asO(await res.json());
+    const data = asO(payload && payload.data);
+    const limits = data && Array.isArray(data.limits) ? data.limits : [];
+    const windows = {};
+    for (let i = 0; i < limits.length; i++) {
+      const limit = asO(limits[i]);
+      if (!limit) continue;
+      const kind = kinds[asS(limit.type)];
+      if (!kind) continue;
+      const usedPercent = toN(limit.percentUsed);
+      if (usedPercent === null) continue;
+      windows[kind.key] = tUW({ uP: usedPercent, wS: kind.wS, rA: toTs(limit.resetsAt) });
+    }
+    if (Object.keys(windows).length === 0) {
+      return bR({ pId: 'cline-pass', pName: 'ClinePass', ok: false, err: 'No quota data in response' });
+    }
+    return bR({ pId: 'cline-pass', pName: 'ClinePass', ok: true, use: { windows: windows } });
+  } catch (err) {
+    const isTimeout = err && (err.name === 'TimeoutError' || (err.name === 'AbortError' && timeoutSignal && timeoutSignal.aborted));
+    const isParseError = err instanceof SyntaxError;
+    return bR({
+      pId: 'cline-pass',
+      pName: 'ClinePass',
+      ok: false,
+      err: isTimeout ? 'Request timed out' : (isParseError ? 'Invalid response from provider' : (err && err.message ? err.message : 'Request failed'))
+    });
+  }
+}
+''';
+
 String _jsDispatcher({required String supportedKeysLiteral}) {
   return r'''
 (async () => {
@@ -1293,6 +1686,9 @@ String _jsDispatcher({required String supportedKeysLiteral}) {
   const za = await fZai(a); if (za) R.push(za);
   const cu = await fCursor(a); if (cu) R.push(cu);
   const oc = await fOllamaCloud(a); if (oc) R.push(oc);
+  const xa = await fXai(a); if (xa) R.push(xa);
+  const ds = await fDeepseek(a); if (ds) R.push(ds);
+  const cp = await fClinePass(a); if (cp) R.push(cp);
 
   const unsupported = authKeys.filter(
     (k) => !__SUPPORTED_KEYS_LITERAL__.includes(k),

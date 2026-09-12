@@ -53,6 +53,8 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
     'cursor',
     'ollama-cloud',
     'ollamacloud',
+    'deepseek',
+    'cline-pass',
     // OpenCode v1.16.2 (Snowflake Cortex) and v1.17.x (Grok/xAI, Cohere North).
     'snowflake-cortex',
     'snowflake',
@@ -356,6 +358,9 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
       ..write(_jsZaiCodingPlanProvider())
       ..write(_jsCursorProvider())
       ..write(_jsOllamaCloudProvider())
+      ..write(_jsXaiProvider())
+      ..write(_jsDeepseekProvider())
+      ..write(_jsClinePassProvider())
       ..write(_jsDispatcher(supportedKeysLiteral: supportedKeysLiteral));
 
     final b64 = base64Encode(utf8.encode(payload.toString()));
