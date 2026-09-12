@@ -6833,22 +6833,23 @@ class AppLocalizationsPt extends AppLocalizations {
       'Sua resposta por voz não pôde ser entregue. Abra o CodeWalk para tentar novamente.';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'Próxima aba';
 
   @override
   String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+      'Mostrar o seletor de abas e ir para a próxima';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'Aba anterior';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'Mostrar o seletor de abas e ir para a aba anterior';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'Trocar aba';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'Solte Ctrl para trocar, Esc para cancelar';
 }

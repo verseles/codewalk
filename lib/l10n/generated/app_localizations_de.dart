@@ -6862,22 +6862,23 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ihre Sprachantwort konnte nicht zugestellt werden. Öffnen Sie CodeWalk, um es erneut zu versuchen.';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'Nächster Tab';
 
   @override
   String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+      'Tab-Umschalter anzeigen und zum nächsten Tab wechseln';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'Vorheriger Tab';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'Tab-Umschalter anzeigen und zum vorherigen Tab wechseln';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'Tab wechseln';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'Strg loslassen zum Wechseln, Esc zum Abbrechen';
 }

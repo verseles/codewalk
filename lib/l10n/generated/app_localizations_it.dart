@@ -6867,22 +6867,23 @@ class AppLocalizationsIt extends AppLocalizations {
       'La tua risposta vocale non è stata consegnata. Apri CodeWalk per riprovare.';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'Scheda successiva';
 
   @override
   String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+      'Mostra il selettore schede e passa alla successiva';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'Scheda precedente';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'Mostra il selettore schede e passa alla precedente';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'Cambia scheda';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'Rilascia Ctrl per cambiare, Esc per annullare';
 }

@@ -6785,22 +6785,22 @@ class AppLocalizationsBn extends AppLocalizations {
       'আপনার ভয়েস উত্তরটি পৌঁছে দেওয়া যায়নি। আবার চেষ্টা করতে CodeWalk খুলুন।';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'পরবর্তী ট্যাব';
 
   @override
-  String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+  String get shortcutNextTabDesc => 'ট্যাব সুইচার দেখান এবং পরবর্তী ট্যাবে যান';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'পূর্ববর্তী ট্যাব';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'ট্যাব সুইচার দেখান এবং পূর্ববর্তী ট্যাবে যান';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'ট্যাব পরিবর্তন';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'Ctrl ছেড়ে পরিবর্তন করুন, Esc দিয়ে বাতিল';
 }

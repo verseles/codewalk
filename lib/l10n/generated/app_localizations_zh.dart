@@ -6332,22 +6332,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get carMessagingDeliveryFailedBody => '无法发送您的语音回复。打开 CodeWalk 重试。';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => '下一个标签页';
 
   @override
-  String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+  String get shortcutNextTabDesc => '显示标签页切换器并切换到下一个';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => '上一个标签页';
 
   @override
-  String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+  String get shortcutPreviousTabDesc => '显示标签页切换器并切换到上一个';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => '切换标签页';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint => '松开 Ctrl 切换，Esc 取消';
 }

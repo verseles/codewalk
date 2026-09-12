@@ -6504,22 +6504,20 @@ class AppLocalizationsJa extends AppLocalizations {
       '音声での返信を配信できませんでした。再試行するにはCodeWalkを開いてください。';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => '次のタブ';
 
   @override
-  String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+  String get shortcutNextTabDesc => 'タブ切り替えを表示して次のタブへ';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => '前のタブ';
 
   @override
-  String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+  String get shortcutPreviousTabDesc => 'タブ切り替えを表示して前のタブへ';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'タブを切り替え';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint => 'Ctrlを離して切り替え、Escでキャンセル';
 }

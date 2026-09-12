@@ -2888,27 +2888,27 @@
   "carMessagingMarkRead": "읽음으로 표시",
   "carMessagingDeliveryFailedTitle": "답장을 보내지 못했습니다",
   "carMessagingDeliveryFailedBody": "음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "다음 탭",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "탭 전환기를 표시하고 다음 탭으로 이동",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "이전 탭",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "탭 전환기를 표시하고 이전 탭으로 이동",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "탭 전환",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Ctrl을 놓으면 전환, Esc로 취소",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

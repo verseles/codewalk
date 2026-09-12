@@ -2256,27 +2256,27 @@
   "carMessagingMarkRead": "تحديد كمقروء",
   "carMessagingDeliveryFailedTitle": "تعذّر إرسال الرد",
   "carMessagingDeliveryFailedBody": "تعذّر تسليم ردّك الصوتي. افتح CodeWalk لإعادة المحاولة.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "علامة التبويب التالية",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "إظهار مبدّل علامات التبويب والانتقال إلى التالية",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "علامة التبويب السابقة",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "إظهار مبدّل علامات التبويب والانتقال إلى السابقة",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "تبديل علامة التبويب",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "أفلت Ctrl للتبديل، Esc للإلغاء",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

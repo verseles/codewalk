@@ -2270,27 +2270,27 @@
   "carMessagingMarkRead": "Marcar como lida",
   "carMessagingDeliveryFailedTitle": "Não foi possível enviar a resposta",
   "carMessagingDeliveryFailedBody": "Sua resposta por voz não pôde ser entregue. Abra o CodeWalk para tentar novamente.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "Próxima aba",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "Mostrar o seletor de abas e ir para a próxima",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "Aba anterior",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "Mostrar o seletor de abas e ir para a aba anterior",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "Trocar aba",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Solte Ctrl para trocar, Esc para cancelar",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

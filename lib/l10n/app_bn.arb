@@ -2269,27 +2269,27 @@
   "carMessagingMarkRead": "পঠিত হিসেবে চিহ্নিত করুন",
   "carMessagingDeliveryFailedTitle": "উত্তর পাঠানো যায়নি",
   "carMessagingDeliveryFailedBody": "আপনার ভয়েস উত্তরটি পৌঁছে দেওয়া যায়নি। আবার চেষ্টা করতে CodeWalk খুলুন।",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "পরবর্তী ট্যাব",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "ট্যাব সুইচার দেখান এবং পরবর্তী ট্যাবে যান",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "পূর্ববর্তী ট্যাব",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "ট্যাব সুইচার দেখান এবং পূর্ববর্তী ট্যাবে যান",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "ট্যাব পরিবর্তন",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Ctrl ছেড়ে পরিবর্তন করুন, Esc দিয়ে বাতিল",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

@@ -2151,27 +2151,27 @@
   "carMessagingMarkRead": "Segna come letto",
   "carMessagingDeliveryFailedTitle": "Impossibile inviare la risposta",
   "carMessagingDeliveryFailedBody": "La tua risposta vocale non è stata consegnata. Apri CodeWalk per riprovare.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "Scheda successiva",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "Mostra il selettore schede e passa alla successiva",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "Scheda precedente",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "Mostra il selettore schede e passa alla precedente",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "Cambia scheda",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Rilascia Ctrl per cambiare, Esc per annullare",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

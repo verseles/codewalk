@@ -2269,27 +2269,27 @@
   "carMessagingMarkRead": "पढ़ा हुआ चिह्नित करें",
   "carMessagingDeliveryFailedTitle": "जवाब भेजा नहीं जा सका",
   "carMessagingDeliveryFailedBody": "आपका वॉइस जवाब डिलीवर नहीं किया जा सका। फिर से कोशिश करने के लिए CodeWalk खोलें।",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "अगला टैब",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "टैब स्विचर दिखाएँ और अगले टैब पर जाएँ",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "पिछला टैब",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "टैब स्विचर दिखाएँ और पिछले टैब पर जाएँ",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "टैब बदलें",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "स्विच करने के लिए Ctrl छोड़ें, रद्द करने के लिए Esc",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

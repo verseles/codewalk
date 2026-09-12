@@ -6767,22 +6767,22 @@ class AppLocalizationsUr extends AppLocalizations {
       'آپ کا وائس جواب ڈیلیور نہیں ہو سکا۔ دوبارہ کوشش کرنے کے لیے CodeWalk کھولیں۔';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'اگلی ٹیب';
 
   @override
-  String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+  String get shortcutNextTabDesc => 'ٹیب سوئچر دکھائیں اور اگلی ٹیب پر جائیں';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'پچھلی ٹیب';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'ٹیب سوئچر دکھائیں اور پچھلی ٹیب پر جائیں';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'ٹیب تبدیل کریں';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'سوئچ کے لیے Ctrl چھوڑیں، منسوخ کے لیے Esc';
 }

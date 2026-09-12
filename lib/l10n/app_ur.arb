@@ -2269,27 +2269,27 @@
   "carMessagingMarkRead": "پڑھا ہوا نشان زد کریں",
   "carMessagingDeliveryFailedTitle": "جواب بھیجا نہیں جا سکا",
   "carMessagingDeliveryFailedBody": "آپ کا وائس جواب ڈیلیور نہیں ہو سکا۔ دوبارہ کوشش کرنے کے لیے CodeWalk کھولیں۔",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "اگلی ٹیب",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "ٹیب سوئچر دکھائیں اور اگلی ٹیب پر جائیں",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "پچھلی ٹیب",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "ٹیب سوئچر دکھائیں اور پچھلی ٹیب پر جائیں",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "ٹیب تبدیل کریں",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "سوئچ کے لیے Ctrl چھوڑیں، منسوخ کے لیے Esc",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

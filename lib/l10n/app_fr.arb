@@ -2116,27 +2116,27 @@
   "carMessagingMarkRead": "Marquer comme lu",
   "carMessagingDeliveryFailedTitle": "Réponse non envoyée",
   "carMessagingDeliveryFailedBody": "Votre réponse vocale n''a pas pu être remise. Ouvrez CodeWalk pour réessayer.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "Onglet suivant",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "Afficher le sélecteur d''onglets et passer au suivant",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "Onglet précédent",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "Afficher le sélecteur d''onglets et passer au précédent",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "Changer d''onglet",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Relâchez Ctrl pour changer, Échap pour annuler",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

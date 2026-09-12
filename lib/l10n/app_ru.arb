@@ -2269,27 +2269,27 @@
   "carMessagingMarkRead": "Отметить как прочитанное",
   "carMessagingDeliveryFailedTitle": "Не удалось отправить ответ",
   "carMessagingDeliveryFailedBody": "Не удалось доставить ваш голосовой ответ. Откройте CodeWalk, чтобы повторить попытку.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "Следующая вкладка",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "Показать переключатель вкладок и перейти к следующей",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "Предыдущая вкладка",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "Показать переключатель вкладок и перейти к предыдущей",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "Переключить вкладку",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Отпустите Ctrl для переключения, Esc для отмены",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

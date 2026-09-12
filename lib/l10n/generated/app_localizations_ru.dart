@@ -6837,22 +6837,23 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось доставить ваш голосовой ответ. Откройте CodeWalk, чтобы повторить попытку.';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'Следующая вкладка';
 
   @override
   String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+      'Показать переключатель вкладок и перейти к следующей';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'Предыдущая вкладка';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'Показать переключатель вкладок и перейти к предыдущей';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'Переключить вкладку';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'Отпустите Ctrl для переключения, Esc для отмены';
 }

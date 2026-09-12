@@ -6682,22 +6682,22 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر تسليم ردّك الصوتي. افتح CodeWalk لإعادة المحاولة.';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'علامة التبويب التالية';
 
   @override
   String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+      'إظهار مبدّل علامات التبويب والانتقال إلى التالية';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'علامة التبويب السابقة';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'إظهار مبدّل علامات التبويب والانتقال إلى السابقة';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'تبديل علامة التبويب';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint => 'أفلت Ctrl للتبديل، Esc للإلغاء';
 }

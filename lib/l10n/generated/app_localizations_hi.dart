@@ -6783,22 +6783,22 @@ class AppLocalizationsHi extends AppLocalizations {
       'आपका वॉइस जवाब डिलीवर नहीं किया जा सका। फिर से कोशिश करने के लिए CodeWalk खोलें।';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => 'अगला टैब';
 
   @override
-  String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+  String get shortcutNextTabDesc => 'टैब स्विचर दिखाएँ और अगले टैब पर जाएँ';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => 'पिछला टैब';
 
   @override
   String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+      'टैब स्विचर दिखाएँ और पिछले टैब पर जाएँ';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => 'टैब बदलें';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint =>
+      'स्विच करने के लिए Ctrl छोड़ें, रद्द करने के लिए Esc';
 }

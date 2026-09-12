@@ -2116,27 +2116,27 @@
   "carMessagingMarkRead": "Als gelesen markieren",
   "carMessagingDeliveryFailedTitle": "Antwort konnte nicht gesendet werden",
   "carMessagingDeliveryFailedBody": "Ihre Sprachantwort konnte nicht zugestellt werden. Öffnen Sie CodeWalk, um es erneut zu versuchen.",
-  "shortcutNextTab": "Next tab",
+  "shortcutNextTab": "Nächster Tab",
   "@shortcutNextTab": {
     "description": "CodeWalk UI string - shortcutNextTab"
   },
-  "shortcutNextTabDesc": "Show the tab switcher and cycle to the next tab",
+  "shortcutNextTabDesc": "Tab-Umschalter anzeigen und zum nächsten Tab wechseln",
   "@shortcutNextTabDesc": {
     "description": "CodeWalk UI string - shortcutNextTabDesc"
   },
-  "shortcutPreviousTab": "Previous tab",
+  "shortcutPreviousTab": "Vorheriger Tab",
   "@shortcutPreviousTab": {
     "description": "CodeWalk UI string - shortcutPreviousTab"
   },
-  "shortcutPreviousTabDesc": "Show the tab switcher and cycle to the previous tab",
+  "shortcutPreviousTabDesc": "Tab-Umschalter anzeigen und zum vorherigen Tab wechseln",
   "@shortcutPreviousTabDesc": {
     "description": "CodeWalk UI string - shortcutPreviousTabDesc"
   },
-  "sessionTabSwitcherTitle": "Switch tab",
+  "sessionTabSwitcherTitle": "Tab wechseln",
   "@sessionTabSwitcherTitle": {
     "description": "CodeWalk UI string - sessionTabSwitcherTitle"
   },
-  "sessionTabSwitcherHint": "Release Ctrl to switch, Esc to cancel",
+  "sessionTabSwitcherHint": "Strg loslassen zum Wechseln, Esc zum Abbrechen",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
   }

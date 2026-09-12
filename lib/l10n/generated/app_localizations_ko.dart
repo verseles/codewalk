@@ -6502,22 +6502,20 @@ class AppLocalizationsKo extends AppLocalizations {
       '음성 답장을 전달하지 못했습니다. 다시 시도하려면 CodeWalk를 여세요.';
 
   @override
-  String get shortcutNextTab => 'Next tab';
+  String get shortcutNextTab => '다음 탭';
 
   @override
-  String get shortcutNextTabDesc =>
-      'Show the tab switcher and cycle to the next tab';
+  String get shortcutNextTabDesc => '탭 전환기를 표시하고 다음 탭으로 이동';
 
   @override
-  String get shortcutPreviousTab => 'Previous tab';
+  String get shortcutPreviousTab => '이전 탭';
 
   @override
-  String get shortcutPreviousTabDesc =>
-      'Show the tab switcher and cycle to the previous tab';
+  String get shortcutPreviousTabDesc => '탭 전환기를 표시하고 이전 탭으로 이동';
 
   @override
-  String get sessionTabSwitcherTitle => 'Switch tab';
+  String get sessionTabSwitcherTitle => '탭 전환';
 
   @override
-  String get sessionTabSwitcherHint => 'Release Ctrl to switch, Esc to cancel';
+  String get sessionTabSwitcherHint => 'Ctrl을 놓으면 전환, Esc로 취소';
 }
