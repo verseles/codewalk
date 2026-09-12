@@ -1226,6 +1226,9 @@ extension _ChatPageChrome on _ChatPageState {
         hintText: context.l10n.chatSearchTimeline,
       ),
       onChanged: _onTimelineSearchChanged,
+      onSubmitted: (_) {
+        unawaited(_goToTimelineSearchResult(1));
+      },
     );
   }
 

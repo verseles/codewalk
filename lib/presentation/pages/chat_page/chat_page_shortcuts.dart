@@ -35,15 +35,19 @@ extension _ChatPageShortcuts on _ChatPageState {
     }
 
     final hardwareKeyboard = HardwareKeyboard.instance;
+    if (_timelineSearchActive && event.logicalKey == LogicalKeyboardKey.f3) {
+      unawaited(
+        _goToTimelineSearchResult(hardwareKeyboard.isShiftPressed ? -1 : 1),
+      );
+      return true;
+    }
     // Browser-parity built-in: explicit Ctrl+Tab / Ctrl+Shift+Tab holds
     // across all platforms (macOS uses Ctrl, never Cmd+Tab).
     if (event.logicalKey == LogicalKeyboardKey.tab &&
         hardwareKeyboard.isControlPressed &&
         !hardwareKeyboard.isMetaPressed &&
         !hardwareKeyboard.isAltPressed) {
-      if (_openOrAdvanceTabSwitcher(
-        reverse: hardwareKeyboard.isShiftPressed,
-      )) {
+      if (_openOrAdvanceTabSwitcher(reverse: hardwareKeyboard.isShiftPressed)) {
         return true;
       }
     } else if (_matchCustomTabSwitcherBinding(event)) {
@@ -177,6 +181,13 @@ extension _ChatPageShortcuts on _ChatPageState {
     if (scaffoldState?.isDrawerOpen ?? false) {
       _lastGlobalEscapeAt = null;
       Navigator.of(context).pop();
+      return;
+    }
+
+    if (_timelineSearchActive) {
+      _lastGlobalEscapeAt = null;
+      _closeTimelineSearch();
+      _focusInput();
       return;
     }
 
