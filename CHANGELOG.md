@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.234.0 - 2026-09-12
+
+- fix(files): dispose Quick Open controller on dialog unmount
+- feat(quota): add xAI, DeepSeek, and ClinePass OpenCode shell probes
+- fix(i18n): add missing useTailscaleWebOsLevel to 12 locales
+
 ## v1.233.0 - 2026-09-12
 
 - docs: record solid UX fixes for search, quota, export, and tabs
