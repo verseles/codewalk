@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../core/i18n/l10n_bridge.dart';
 
 class SessionTitleFormatter {
@@ -67,6 +69,11 @@ class SessionTitleFormatter {
   }
 
   static String _absoluteDateLabel(DateTime time) {
-    return '${time.month}/${time.day}/${time.year}';
+    final localeName = L10nBridge.current?.localeName ?? 'en';
+    try {
+      return DateFormat.yMd(localeName).format(time);
+    } catch (_) {
+      return '${time.month}/${time.day}/${time.year}';
+    }
   }
 }

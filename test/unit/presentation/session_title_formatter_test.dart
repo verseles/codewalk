@@ -1,7 +1,10 @@
 import 'package:codewalk/core/i18n/l10n_bridge.dart';
 import 'package:codewalk/l10n/generated/app_localizations_en.dart';
+import 'package:codewalk/l10n/generated/app_localizations_pt.dart';
 import 'package:codewalk/presentation/utils/session_title_formatter.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   tearDown(() => L10nBridge.update(null));
@@ -86,6 +89,22 @@ void main() {
       );
 
       expect(title, '12/31/2025 23:45');
+    });
+
+    test('formats absolute date with the active locale', () async {
+      await initializeDateFormatting('pt');
+      L10nBridge.update(AppLocalizationsPt());
+      final expected = DateFormat.yMd(
+        'pt',
+      ).format(DateTime(2026, 2, 11, 10, 30));
+
+      final title = SessionTitleFormatter.displayTitle(
+        time: DateTime(2026, 2, 11, 10, 30),
+        title: null,
+        now: DateTime(2026, 2, 11, 12, 0),
+      );
+
+      expect(title, contains(expected));
     });
   });
 }
