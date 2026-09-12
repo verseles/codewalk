@@ -441,6 +441,7 @@
 - **Then** `Names` searches file and directory names through the OpenCode file search endpoint
 - **Then** `Contents` searches file text through the OpenCode content search endpoint and shows path, line number, and matching line preview
 - **Then** selecting a content result opens the matched file path while preserving the visible line context in the result subtitle
+- **Then** closing the dialog disposes the search field and ignores late search results
 
 ### File viewer edits and saves text files
 
@@ -714,6 +715,7 @@
 - **Given** at least two real session tabs exist and the chat screen is active
 - **When** the user holds `Ctrl` and presses `Tab` (`Ctrl+Shift+Tab` for reverse)
 - **Then** a small centered overlay lists the tabs in most-recently-used order (current tab first, then `lastOpenedAtMs` descending with visual-order tiebreak; the local `New Chat` draft is excluded)
+- **Then** each overlay row uses the same custom icon preset or project icon as the tab strip when no attention badge is showing
 - **Then** each repeated `Tab` moves only the local highlight; no session is activated and no provider notification fires while `Ctrl` is held
 - **Then** releasing `Ctrl` activates the highlighted tab exactly once through the existing tab-activation path (project switch, cache-first load, rollback on error); `Esc`, tapping outside, backgrounding, or minimizing cancels without switching
 - **Then** the bindings are explicit `Ctrl+Tab` / `Ctrl+Shift+Tab` on every platform including macOS (`Cmd+Tab` stays with the OS app switcher); Android, iOS, and Web use the same handler when a physical keyboard delivers the events (browsers may reserve `Ctrl+Tab` for their own tabs)
@@ -764,6 +766,7 @@
 - **When** each new message is added to the conversation
 - **Then** the app automatically generates (or re-generates) a title based on the conversation content
 - **Then** title generation stops once the session has accumulated 3 or more user messages **and** 3 or more assistant messages — sufficient context has been established by that point
+- **Then** untitled fallback titles format the absolute date with the active locale instead of always using US `M/D/Y`
 - **Then** dynamic title generation runs only for main/root sessions; subsessions (child sessions with `parentId`) do not trigger auto-title updates
 - **Then** generation runs in an internal ephemeral OpenCode `title` session created in the active directory, kept separate from the visible conversation
 - **Then** completion is triggered by the official `session.idle` SSE event, followed by exactly one authoritative message snapshot GET
@@ -1044,6 +1047,7 @@
 - **Given** an assistant message contains a whole inline-code file path such as `lib/main.dart:42`
 - **When** the user taps that inline-code span
 - **Then** the app opens the file viewer for that path and scrolls to the referenced line instead of copying the text
+- **Then** Windows absolute paths such as `C:\repo\lib\main.dart:42` are tappable on every client OS, not only when CodeWalk itself is running on Windows
 - **Then** ordinary inline code snippets and fenced code blocks remain copyable
 
 ### Message image sharing exports PNG files
@@ -1086,6 +1090,7 @@
 - **Then** the inline math renders in text style (baseline-aligned, smaller) inside a subtle background chip
 - **Given** an assistant message contains a block math expression `$$...$$` on separate lines or on a single line
 - **Then** the expression is rendered as a centered display-style equation inside a card with a `Math` header, matching the Mermaid diagram card pattern
+- **Then** the block math header includes a copy action for the raw LaTeX source
 - **Then** horizontal scrolling is available when the equation is wider than the viewport
 
 ### LaTeX math rendering avoids false positives
@@ -1450,6 +1455,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** CodeWalk shows a `Provider Quotas` section at the bottom of that popup after the `Compact now` action
 - **Then** providers are grouped by parent organisation; each group shows a severity-colored progress bar for the most constrained sub-quota and a `Pace` chip that shows the predicted percentage of the window that will be consumed at the current usage rate
 - **Then** tapping a provider group row expands it to reveal individual quota entries (requests, tokens, cost, etc.) each with its own bar and remaining figure
+- **Then** healthy quota bars use the theme success color rather than a hardcoded green, and expandable group headers expose button/expanded semantics
 - **Then** on desktop, hovering the `Pace` chip shows a tooltip explaining the prediction; on mobile, tapping it shows a dismissible snackbar
 - **Given** the host exposes OpenChamber-compatible REST endpoints (`GET /api/quota/providers`)
 - **When** the popup is opened (or every 60 seconds in background)
