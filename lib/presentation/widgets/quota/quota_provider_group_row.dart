@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../domain/entities/quota.dart';
 import 'quota_entry_row.dart';
@@ -61,27 +62,33 @@ class _QuotaProviderGroupRowState extends State<QuotaProviderGroupRow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => setState(() => _expanded = !_expanded),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Icon(
-                    _expanded ? Icons.expand_more : Icons.chevron_right,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      widget.group.providerName,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+          Semantics(
+            button: true,
+            expanded: _expanded,
+            label: widget.group.providerName,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      _expanded ? Symbols.expand_more : Symbols.chevron_right,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: ExcludeSemantics(
+                        child: Text(
+                          widget.group.providerName,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
