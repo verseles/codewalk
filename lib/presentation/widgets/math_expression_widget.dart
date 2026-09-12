@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -93,18 +94,33 @@ class MathExpressionWidget extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 8, 4),
       child: Row(
         children: [
-          Icon(
-            Symbols.function,
-            size: 18,
-            color: colorScheme.primary,
-          ),
+          Icon(Symbols.function, size: 18, color: colorScheme.primary),
           const SizedBox(width: 6),
-          Text(
-            l10n.mathExpressionLabel,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+          Expanded(
+            child: Text(
+              l10n.mathExpressionLabel,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          IconButton(
+            key: const ValueKey<String>('math_expression_copy_button'),
+            icon: const Icon(Symbols.content_copy, size: 18),
+            tooltip: l10n.msgCopiedToClipboard,
+            visualDensity: VisualDensity.compact,
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: expression));
+              if (Theme.of(context).platform == TargetPlatform.android) {
+                return;
+              }
+              final messenger = ScaffoldMessenger.maybeOf(context);
+              messenger?.hideCurrentSnackBar();
+              messenger?.showSnackBar(
+                SnackBar(content: Text(l10n.msgCopiedToClipboard)),
+              );
+            },
           ),
         ],
       ),
@@ -163,20 +179,19 @@ class MathExpressionWidget extends StatelessWidget {
       child: SelectableText(
         expression,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
-              color: colorScheme.onSurfaceVariant,
-              height: 1.5,
-            ),
+          fontFamily: 'monospace',
+          color: colorScheme.onSurfaceVariant,
+          height: 1.5,
+        ),
       ),
     );
   }
 
   TextStyle _resolveStyle(ThemeData theme) {
-    final base = textStyle ??
+    final base =
+        textStyle ??
         theme.textTheme.bodyMedium ??
         const TextStyle(fontSize: 14);
-    return base.copyWith(
-      color: theme.colorScheme.onSurface,
-    );
+    return base.copyWith(color: theme.colorScheme.onSurface);
   }
 }
