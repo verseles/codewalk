@@ -237,7 +237,11 @@ extension _ChatPageFileExplorerController on _ChatPageState {
         )
         .toList(growable: false);
 
-    Future<void> runSearch(StateSetter setModalState, String query) async {
+    Future<void> runSearch(
+      StateSetter setModalState,
+      String query, {
+      required BuildContext dialogContext,
+    }) async {
       final normalized = query.trim();
       final requestId = ++searchRequestId;
 
@@ -251,7 +255,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
               ),
             )
             .toList(growable: false);
-        if (!dialogActive) {
+        if (!dialogActive || !dialogContext.mounted) {
           return;
         }
         setModalState(() {
@@ -262,7 +266,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
         return;
       }
 
-      if (!dialogActive) {
+      if (!dialogActive || !dialogContext.mounted) {
         return;
       }
       setModalState(() {
@@ -279,7 +283,10 @@ extension _ChatPageFileExplorerController on _ChatPageState {
               limit: 50,
             )
           : null;
-      if (!mounted || requestId != searchRequestId || !dialogActive) {
+      if (!mounted ||
+          requestId != searchRequestId ||
+          !dialogActive ||
+          !dialogContext.mounted) {
         return;
       }
       if (found == null && contentMatches == null) {
@@ -343,140 +350,155 @@ extension _ChatPageFileExplorerController on _ChatPageState {
       });
     }
 
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setModalState) {
-            return CallbackShortcuts(
-              bindings: <ShortcutActivator, VoidCallback>{
-                const SingleActivator(LogicalKeyboardKey.enter): () =>
-                    unawaited(openFirstQuickOpenResult(dialogContext)),
-                const SingleActivator(LogicalKeyboardKey.numpadEnter): () =>
-                    unawaited(openFirstQuickOpenResult(dialogContext)),
-              },
-              child: AlertDialog(
-                title: Text(context.l10n.filesQuickOpenFile),
-                content: SizedBox(
-                  width: 520,
-                  height: 420,
-                  child: Column(
-                    children: [
-                      TextField(
-                        key: const ValueKey<String>('quick_open_input'),
-                        controller: queryController,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                          hintText: context.l10n.filesSearchHint,
-                          prefixIcon: const Icon(Symbols.search),
-                        ),
-                        onChanged: (value) {
-                          unawaited(runSearch(setModalState, value));
-                        },
-                        onSubmitted: (value) async {
-                          await openFirstQuickOpenResult(dialogContext);
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      SegmentedButton<_QuickOpenSearchMode>(
-                        segments: <ButtonSegment<_QuickOpenSearchMode>>[
-                          ButtonSegment<_QuickOpenSearchMode>(
-                            value: _QuickOpenSearchMode.names,
-                            label: Text(context.l10n.filesNames),
-                            icon: const Icon(Symbols.description),
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          return StatefulBuilder(
+            builder: (dialogContext, setModalState) {
+              return CallbackShortcuts(
+                bindings: <ShortcutActivator, VoidCallback>{
+                  const SingleActivator(LogicalKeyboardKey.enter): () =>
+                      unawaited(openFirstQuickOpenResult(dialogContext)),
+                  const SingleActivator(LogicalKeyboardKey.numpadEnter): () =>
+                      unawaited(openFirstQuickOpenResult(dialogContext)),
+                },
+                child: AlertDialog(
+                  title: Text(context.l10n.filesQuickOpenFile),
+                  content: SizedBox(
+                    width: 520,
+                    height: 420,
+                    child: Column(
+                      children: [
+                        TextField(
+                          key: const ValueKey<String>('quick_open_input'),
+                          controller: queryController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: context.l10n.filesSearchHint,
+                            prefixIcon: const Icon(Symbols.search),
                           ),
-                          ButtonSegment<_QuickOpenSearchMode>(
-                            value: _QuickOpenSearchMode.contents,
-                            label: Text(context.l10n.filesContents),
-                            icon: const Icon(Symbols.manage_search),
-                          ),
-                        ],
-                        selected: <_QuickOpenSearchMode>{searchMode},
-                        onSelectionChanged: (selected) {
-                          setModalState(() {
-                            searchMode = selected.single;
-                          });
-                          unawaited(
-                            runSearch(setModalState, queryController.text),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(
-                        child: loading
-                            ? const Center(child: CircularProgressIndicator())
-                            : errorMessage.isNotEmpty
-                            ? Center(
-                                child: Text(
-                                  errorMessage,
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            : resultNodes.isEmpty
-                            ? Center(
-                                child: Text(
-                                  queryController.text.trim().isEmpty
-                                      ? context.l10n.filesNoOpenFilesHint
-                                      : searchMode == _QuickOpenSearchMode.names
-                                      ? context.l10n.filesFilesFound
-                                      : context.l10n.filesNoContentMatches,
-                                ),
-                              )
-                            : ListView.builder(
-                                itemCount: resultNodes.length,
-                                itemBuilder: (context, index) {
-                                  final node = resultNodes[index];
-                                  final normalizedPath = _normalizeFilePath(
-                                    node.path,
-                                  );
-                                  return ListTile(
-                                    key: ValueKey<String>(
-                                      'quick_open_result_$normalizedPath',
-                                    ),
-                                    dense: _useDenseListTiles(context),
-                                    leading: Icon(
-                                      node.lineNumber == null
-                                          ? Symbols.description
-                                          : Symbols.manage_search,
-                                      size: 18,
-                                    ),
-                                    title: Text(
-                                      node.title,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    subtitle: Text(
-                                      node.subtitle,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    onTap: () async {
-                                      await openQuickOpenResult(
-                                        dialogContext,
-                                        normalizedPath,
-                                      );
-                                    },
-                                  );
-                                },
+                          onChanged: (value) {
+                            unawaited(
+                              runSearch(
+                                setModalState,
+                                value,
+                                dialogContext: dialogContext,
                               ),
-                      ),
-                    ],
+                            );
+                          },
+                          onSubmitted: (value) async {
+                            await openFirstQuickOpenResult(dialogContext);
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        SegmentedButton<_QuickOpenSearchMode>(
+                          segments: <ButtonSegment<_QuickOpenSearchMode>>[
+                            ButtonSegment<_QuickOpenSearchMode>(
+                              value: _QuickOpenSearchMode.names,
+                              label: Text(context.l10n.filesNames),
+                              icon: const Icon(Symbols.description),
+                            ),
+                            ButtonSegment<_QuickOpenSearchMode>(
+                              value: _QuickOpenSearchMode.contents,
+                              label: Text(context.l10n.filesContents),
+                              icon: const Icon(Symbols.manage_search),
+                            ),
+                          ],
+                          selected: <_QuickOpenSearchMode>{searchMode},
+                          onSelectionChanged: (selected) {
+                            setModalState(() {
+                              searchMode = selected.single;
+                            });
+                            unawaited(
+                              runSearch(
+                                setModalState,
+                                queryController.text,
+                                dialogContext: dialogContext,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: loading
+                              ? const Center(child: CircularProgressIndicator())
+                              : errorMessage.isNotEmpty
+                              ? Center(
+                                  child: Text(
+                                    errorMessage,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              : resultNodes.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    queryController.text.trim().isEmpty
+                                        ? context.l10n.filesNoOpenFilesHint
+                                        : searchMode ==
+                                              _QuickOpenSearchMode.names
+                                        ? context.l10n.filesFilesFound
+                                        : context.l10n.filesNoContentMatches,
+                                  ),
+                                )
+                              : ListView.builder(
+                                  itemCount: resultNodes.length,
+                                  itemBuilder: (context, index) {
+                                    final node = resultNodes[index];
+                                    final normalizedPath = _normalizeFilePath(
+                                      node.path,
+                                    );
+                                    return ListTile(
+                                      key: ValueKey<String>(
+                                        'quick_open_result_$normalizedPath',
+                                      ),
+                                      dense: _useDenseListTiles(context),
+                                      leading: Icon(
+                                        node.lineNumber == null
+                                            ? Symbols.description
+                                            : Symbols.manage_search,
+                                        size: 18,
+                                      ),
+                                      title: Text(
+                                        node.title,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      subtitle: Text(
+                                        node.subtitle,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      onTap: () async {
+                                        await openQuickOpenResult(
+                                          dialogContext,
+                                          normalizedPath,
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        dialogActive = false;
+                        Navigator.of(dialogContext).pop();
+                      },
+                      child: Text(context.l10n.chatClose),
+                    ),
+                  ],
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      dialogActive = false;
-                      Navigator.of(dialogContext).pop();
-                    },
-                    child: Text(context.l10n.chatClose),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-    dialogActive = false;
+              );
+            },
+          );
+        },
+      );
+    } finally {
+      dialogActive = false;
+      queryController.dispose();
+    }
   }
 
   Future<void> _openFileInTab({
