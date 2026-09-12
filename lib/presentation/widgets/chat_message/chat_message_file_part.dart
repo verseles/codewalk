@@ -141,7 +141,7 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
       return null;
     }
 
-    final image = _resolveAttachmentImageWidget(part.url, context, part.id);
+    final image = _resolveAttachmentImageWidget(part, context);
     if (image == null) {
       return null;
     }
@@ -163,12 +163,8 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
     );
   }
 
-  Widget? _resolveAttachmentImageWidget(
-    String rawUrl,
-    BuildContext context,
-    String partId,
-  ) {
-    final trimmedUrl = rawUrl.trim();
+  Widget? _resolveAttachmentImageWidget(FilePart part, BuildContext context) {
+    final trimmedUrl = part.url.trim();
     if (trimmedUrl.isEmpty) {
       return null;
     }
@@ -180,7 +176,7 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
 
     final scheme = parsed.scheme.toLowerCase();
     if (scheme == 'data') {
-      final bytes = _cachedDataUriBytes(partId, trimmedUrl);
+      final bytes = _cachedDataUriBytes(part.id, trimmedUrl);
       if (bytes == null || bytes.isEmpty) {
         return null;
       }
@@ -189,6 +185,8 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
         fit: BoxFit.cover,
         filterQuality: FilterQuality.medium,
         cacheHeight: _previewCacheHeight(context),
+        errorBuilder: (context, error, stackTrace) =>
+            _buildImageAttachmentError(context, part),
       );
     }
     if (scheme == 'http' || scheme == 'https') {
@@ -196,9 +194,42 @@ extension _ChatMessageFilePartBuilder on _ChatMessageWidgetState {
         trimmedUrl,
         fit: BoxFit.cover,
         cacheHeight: _previewCacheHeight(context),
+        errorBuilder: (context, error, stackTrace) =>
+            _buildImageAttachmentError(context, part),
       );
     }
     return null;
+  }
+
+  Widget _buildImageAttachmentError(BuildContext context, FilePart part) {
+    final theme = Theme.of(context);
+    final filename = part.filename?.trim();
+    return ColoredBox(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Symbols.broken_image,
+              size: 32,
+              color: theme.colorScheme.outline,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              (filename != null && filename.isNotEmpty)
+                  ? filename
+                  : context.l10n.commonFile,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Decodes attachment previews at display height. A single-dimension bound
