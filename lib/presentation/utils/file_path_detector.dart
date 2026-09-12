@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 /// Detected file path with optional line and column numbers.
 class FilePathMatch {
   const FilePathMatch({
@@ -40,7 +36,6 @@ class FilePathMatch {
 /// Does NOT match:
 /// - URLs (`https://...`, `http://...`, `ftp://...`)
 /// - Paths without a file extension (reduces false positives)
-/// - Windows absolute paths on non-Windows platforms
 /// - Paths inside markdown fenced code blocks (handled by the caller
 ///   splitting text on code-block boundaries before calling detect)
 class FilePathDetector {
@@ -158,35 +153,35 @@ class FilePathDetector {
       final path = match[1]!;
       final line = match[2] != null ? int.tryParse(match[2]!) : null;
       final col = match[3] != null ? int.tryParse(match[3]!) : null;
-      results.add(FilePathMatch(
-        fullText: match[0]!,
-        path: path,
-        lineNumber: line,
-        columnNumber: col,
-      ));
-    }
-
-    // Also detect Windows paths on Windows platforms only. Guarded by
-    // kIsWeb because dart:io Platform getters throw UnsupportedError on web.
-    if (!kIsWeb && Platform.isWindows) {
-      final winMatches = _windowsPathRe.allMatches(text);
-      for (final match in winMatches) {
-        if (_isExcludedByCodeBlock(match.start, match.end, codeBlockRanges)) {
-          continue;
-        }
-        if (_isPartOfUrl(text, match.start)) {
-          continue;
-        }
-        final path = match[1]!;
-        final line = match[2] != null ? int.tryParse(match[2]!) : null;
-        final col = match[3] != null ? int.tryParse(match[3]!) : null;
-        results.add(FilePathMatch(
+      results.add(
+        FilePathMatch(
           fullText: match[0]!,
           path: path,
           lineNumber: line,
           columnNumber: col,
-        ));
+        ),
+      );
+    }
+
+    final winMatches = _windowsPathRe.allMatches(text);
+    for (final match in winMatches) {
+      if (_isExcludedByCodeBlock(match.start, match.end, codeBlockRanges)) {
+        continue;
       }
+      if (_isPartOfUrl(text, match.start)) {
+        continue;
+      }
+      final path = match[1]!;
+      final line = match[2] != null ? int.tryParse(match[2]!) : null;
+      final col = match[3] != null ? int.tryParse(match[3]!) : null;
+      results.add(
+        FilePathMatch(
+          fullText: match[0]!,
+          path: path,
+          lineNumber: line,
+          columnNumber: col,
+        ),
+      );
     }
 
     return results;

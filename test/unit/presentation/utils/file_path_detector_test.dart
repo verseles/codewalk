@@ -173,6 +173,13 @@ void main() {
         final ranges = FilePathDetector.extractCodeBlockRanges('no code here');
         expect(ranges, isEmpty);
       });
+
+      test('matches Windows absolute paths on any client', () {
+        final results = detector.detect(r'see C:\repo\lib\main.dart:42');
+        expect(results, hasLength(1));
+        expect(results.first.path, r'C:\repo\lib\main.dart');
+        expect(results.first.lineNumber, 42);
+      });
     });
 
     group('FilePathMatch', () {
