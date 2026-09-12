@@ -127,4 +127,17 @@ void main() {
   test('builds safe file names from session title', () {
     expect(exporter.fileName(session, 'md'), 'export-test_ses_123.md');
   });
+
+  test('preserves non-latin letters in export file names', () {
+    final named = ChatSession(
+      id: session.id,
+      workspaceId: session.workspaceId,
+      time: session.time,
+      title: '分析测试',
+      directory: session.directory,
+      summary: session.summary,
+      path: session.path,
+    );
+    expect(exporter.fileName(named, 'md'), '分析测试_ses_123.md');
+  });
 }

@@ -102,12 +102,23 @@ class SessionExportService {
   Uint8List bytes(String content) => Uint8List.fromList(utf8.encode(content));
 
   String fileName(ChatSession session, String extension) {
-    final title = _sessionTitle(session)
-        .toLowerCase()
-        .replaceAll(RegExp('[^a-z0-9]+'), '-')
-        .replaceAll(RegExp('^-+|-+\$'), '');
-    final safeTitle = title.isEmpty ? 'session' : title;
-    return '${safeTitle}_${session.id}.$extension';
+    final safeExt = extension
+        .trim()
+        .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')
+        .toLowerCase();
+    final ext = safeExt.isEmpty ? 'md' : safeExt;
+    var slug = _sessionTitle(session)
+        .trim()
+        .replaceAll(RegExp(r'[<>:"/\\|?*\x00-\x1F]+'), '-')
+        .replaceAll(RegExp(r'\s+', unicode: true), '-')
+        .replaceAll(RegExp(r'[^\p{L}\p{N}-]+', unicode: true), '-')
+        .replaceAll(RegExp(r'-{2,}'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    if (slug.length > 60) {
+      slug = slug.substring(0, 60).replaceAll(RegExp(r'-+$'), '');
+    }
+    final safeTitle = slug.isEmpty ? 'session' : slug.toLowerCase();
+    return '${safeTitle}_${session.id}.$ext';
   }
 
   void _writePartMarkdown(StringBuffer buffer, MessagePart part) {
