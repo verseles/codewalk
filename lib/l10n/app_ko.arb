@@ -1428,6 +1428,7 @@
   "useTailscale": "Tailscale 사용",
   "useTailscaleSubtitle": "시스템 VPN 없이 Tailscale 네트워크를 통해 트래픽을 라우팅합니다.",
   "useTailscaleUnsupported": "이 플랫폼에서는 Tailscale이 지원되지 않습니다.",
+  "useTailscaleWebOsLevel": "웹에서는 Tailscale이 OS 수준에서 동작합니다. Tailscale 앱에서 켠 다음 여기에 서버 URL을 추가하세요.",
   "utilityTitle": "유틸리티",
   "workspaceBrowseDirs": "디렉토리 찾아보기",
   "workspaceChooseFolderOpen": "프로젝트 컨텍스트로 열 폴더를 선택하세요.",

@@ -4937,7 +4937,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get useTailscaleWebOsLevel =>
-      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+      'В вебе Tailscale работает на уровне ОС — включите его в приложении Tailscale, затем добавьте URL сервера здесь.';
 
   @override
   String get utilityTitle => 'Утилиты';

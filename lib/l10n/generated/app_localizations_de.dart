@@ -4950,7 +4950,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get useTailscaleWebOsLevel =>
-      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+      'Im Web funktioniert Tailscale auf Betriebssystemebene — aktivieren Sie es in der Tailscale-App und fügen Sie hier die Server-URL hinzu.';
 
   @override
   String get utilityTitle => 'Dienstprogramm';

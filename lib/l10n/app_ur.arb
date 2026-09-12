@@ -1792,6 +1792,7 @@
   "useTailscale": "ٹیل اسکیل کا استعمال کریں۔",
   "useTailscaleSubtitle": "بغیر سسٹم VPN کے ٹیل اسکیل نیٹ ورک کے ذریعے ٹریفک کو روٹ کرتا ہے۔",
   "useTailscaleUnsupported": "ٹیل اسکیل اس پلیٹ فارم پر تعاون یافتہ نہیں ہے۔",
+  "useTailscaleWebOsLevel": "ویب پر Tailscale OS سطح پر کام کرتا ہے — اسے Tailscale ایپ میں آن کریں، پھر یہاں سرور URL شامل کریں۔",
   "utilityTitle": "افادیت",
   "workspaceBrowseDirs": "ڈائریکٹریز کو براؤز کریں۔",
   "workspaceChooseFolderOpen": "پروجیکٹ سیاق و سباق کے طور پر کھولنے کے لیے کوئی بھی فولڈر منتخب کریں۔",

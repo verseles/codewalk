@@ -1457,6 +1457,7 @@
   "useTailscale": "Usar Tailscale",
   "useTailscaleSubtitle": "Enruta el tráfico a través de la red Tailscale sin una VPN del sistema.",
   "useTailscaleUnsupported": "Tailscale no es compatible en esta plataforma.",
+  "useTailscaleWebOsLevel": "En la web, Tailscale funciona a nivel del sistema operativo: actívelo en la app de Tailscale y luego añada la URL del servidor aquí.",
   "utilityTitle": "Utilidad",
   "workspaceBrowseDirs": "Explorar directorios",
   "workspaceChooseFolderOpen": "Elija cualquier carpeta para abrir como contexto del proyecto.",

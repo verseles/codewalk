@@ -1457,6 +1457,7 @@
   "useTailscale": "Tailscale का उपयोग करें",
   "useTailscaleSubtitle": "सिस्टम VPN के बिना Tailscale नेटवर्क के माध्यम से ट्रैफ़िक को निर्देशित करता है।",
   "useTailscaleUnsupported": "इस प्लेटफ़ॉर्म पर Tailscale समर्थित नहीं है।",
+  "useTailscaleWebOsLevel": "वेब पर Tailscale OS स्तर पर काम करता है — इसे Tailscale ऐप में चालू करें, फिर यहाँ सर्वर URL जोड़ें।",
   "utilityTitle": "उपयोगिता",
   "workspaceBrowseDirs": "निर्देशिकाएं ब्राउज़ करें",
   "workspaceChooseFolderOpen": "परियोजना संदर्भ के रूप में खोलने के लिए कोई भी फ़ोल्डर चुनें।",

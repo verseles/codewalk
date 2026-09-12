@@ -4905,7 +4905,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get useTailscaleWebOsLevel =>
-      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+      'ওয়েবে Tailscale OS স্তরে কাজ করে — Tailscale অ্যাপে চালু করুন, তারপর এখানে সার্ভার URL যোগ করুন।';
 
   @override
   String get utilityTitle => 'ইউটিলিটি';

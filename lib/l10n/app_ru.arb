@@ -1606,6 +1606,7 @@
   "useTailscale": "Использовать Tailscale",
   "useTailscaleSubtitle": "Маршрутизирует трафик через сеть Tailscale без общесистемного VPN.",
   "useTailscaleUnsupported": "Tailscale не поддерживается на этой платформе.",
+  "useTailscaleWebOsLevel": "В вебе Tailscale работает на уровне ОС — включите его в приложении Tailscale, затем добавьте URL сервера здесь.",
   "utilityTitle": "Утилиты",
   "workspaceBrowseDirs": "Обзор каталогов",
   "workspaceChooseFolderOpen": "Выберите любую папку, чтобы открыть в качестве контекста проекта.",

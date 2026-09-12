@@ -1457,6 +1457,7 @@
   "useTailscale": "使用 Tailscale",
   "useTailscaleSubtitle": "在没有系统 VPN 的情况下通过 Tailscale 网络路由流量。",
   "useTailscaleUnsupported": "此平台不支持 Tailscale。",
+  "useTailscaleWebOsLevel": "在 Web 上，Tailscale 在操作系统层面工作 — 请先在 Tailscale 应用中开启，然后在此添加服务器 URL。",
   "utilityTitle": "实用工具",
   "workspaceBrowseDirs": "浏览目录",
   "workspaceChooseFolderOpen": "选择任意文件夹作为项目上下文打开。",

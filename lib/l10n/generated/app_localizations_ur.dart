@@ -4893,7 +4893,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get useTailscaleWebOsLevel =>
-      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+      'ویب پر Tailscale OS سطح پر کام کرتا ہے — اسے Tailscale ایپ میں آن کریں، پھر یہاں سرور URL شامل کریں۔';
 
   @override
   String get utilityTitle => 'افادیت';

@@ -4713,7 +4713,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get useTailscaleWebOsLevel =>
-      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+      '웹에서는 Tailscale이 OS 수준에서 동작합니다. Tailscale 앱에서 켠 다음 여기에 서버 URL을 추가하세요.';
 
   @override
   String get utilityTitle => '유틸리티';

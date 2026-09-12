@@ -4614,7 +4614,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get useTailscaleWebOsLevel =>
-      'On web, Tailscale works at the OS level — turn it on in the Tailscale app, then add the server URL here.';
+      '在 Web 上，Tailscale 在操作系统层面工作 — 请先在 Tailscale 应用中开启，然后在此添加服务器 URL。';
 
   @override
   String get utilityTitle => '实用工具';

@@ -1457,6 +1457,7 @@
   "useTailscale": "Tailscaleを使用",
   "useTailscaleSubtitle": "システム VPN なしで Tailscale ネットワーク経由でトラフィックをルーティングします。",
   "useTailscaleUnsupported": "Tailscale はこのプラットフォームでサポートされていません。",
+  "useTailscaleWebOsLevel": "Web では Tailscale は OS レベルで動作します。Tailscale アプリで有効にしてから、ここにサーバー URL を追加してください。",
   "utilityTitle": "ユーティリティ",
   "workspaceBrowseDirs": "ディレクトリを参照",
   "workspaceChooseFolderOpen": "プロジェクトコンテキストとして開くフォルダーを選択してください。",

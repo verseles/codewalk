@@ -1408,6 +1408,7 @@
   "useTailscale": "টেলস্কেল ব্যবহার করুন",
   "useTailscaleSubtitle": "একটি সিস্টেম VPN ছাড়া টেলস্কেল নেটওয়ার্কের মাধ্যমে ট্র্যাফিককে রুট করে।",
   "useTailscaleUnsupported": "এই প্ল্যাটফর্মে টেলস্কেল সমর্থিত নয়।",
+  "useTailscaleWebOsLevel": "ওয়েবে Tailscale OS স্তরে কাজ করে — Tailscale অ্যাপে চালু করুন, তারপর এখানে সার্ভার URL যোগ করুন।",
   "utilityTitle": "ইউটিলিটি",
   "workspaceBrowseDirs": "ডিরেক্টরি ব্রাউজ করুন",
   "workspaceChooseFolderOpen": "প্রকল্পের প্রসঙ্গ হিসাবে খুলতে যেকোনো ফোল্ডার বেছে নিন।",

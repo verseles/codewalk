@@ -1395,6 +1395,7 @@
   "useTailscale": "استخدام Tailscale",
   "useTailscaleSubtitle": "توجيه حركة المرور عبر شبكة Tailscale بدون شبكة VPN للنظام.",
   "useTailscaleUnsupported": "شبكة Tailscale غير مدعومة على هذه المنصة.",
+  "useTailscaleWebOsLevel": "على الويب، يعمل Tailscale على مستوى نظام التشغيل — فعّله في تطبيق Tailscale ثم أضف عنوان URL للخادم هنا.",
   "utilityTitle": "أداة",
   "workspaceBrowseDirs": "تصفح الأدلة",
   "workspaceChooseFolderOpen": "اختر أي مجلد لفتحه كسياق للمشروع.",
