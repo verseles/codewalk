@@ -2,6 +2,29 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.233.0 - 2026-09-12
+
+- docs: record solid UX fixes for search, quota, export, and tabs
+- fix(export): keep indic combining marks and truncate filenames on runes
+- chore(i18n): sync arb_strings with translated tab-switcher copy
+- fix(test): allow extra time for event-feedback independence case
+- fix(test): look up Material Symbols expand icons in quota group row
+- fix(i18n): translate session tab switcher strings in 13 locales
+- fix(chat): restart completed-todo hide timer and clamp in-progress scroll
+- fix(quota): expose expand/collapse semantics and use Symbols icons
+- feat(chat): add copy action to block LaTeX math headers
+- fix(tabs): show preset and project icons in the Ctrl+Tab switcher
+- fix(i18n): format untitled session dates with the active locale
+- fix(chat): detect Windows file paths on every client OS
+- fix(export): keep non-latin letters in session export filenames
+- fix(chat): close timeline search on Escape and step results with Enter/F3
+- fix(files): dispose Quick Open controller and ignore late search updates
+- fix(quota): stop logging from popup rebuilds and eager fetch summaries
+- fix(quota): use semantic success color for healthy usage bars
+- fix(chat): show fallback when attachment image decode or load fails
+- fix(chat): do not treat incidental 429 digits as rate limit
+- docs: tmp-full and format-churn pitfalls
+
 ## v1.232.0 - 2026-09-11
 
 - docs: utility-pane quota mirror and collapsible shortcuts (#166, #165)
