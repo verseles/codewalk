@@ -62,6 +62,21 @@ void main() {
       );
     });
 
+    test('maps numeric 429 code without statusCode', () {
+      final display = formatServerErrorForDisplay(code: '429');
+
+      expect(display.name, 'Rate limit exceeded');
+    });
+
+    test('does not treat incidental 429 digits as rate limit', () {
+      final display = formatServerErrorForDisplay(
+        rawMessage: 'reset at 4290 seconds',
+      );
+
+      expect(display.name, 'Server error');
+      expect(display.message, 'reset at 4290 seconds');
+    });
+
     test('maps authentication failures', () {
       final display = formatServerErrorForDisplay(
         rawMessage: 'Unauthorized',

@@ -81,11 +81,11 @@ ChatServerErrorDisplay formatServerErrorForDisplay({
 
   final hasRateLimitSignal =
       statusCode == 429 ||
+      normalizedCode == '429' ||
       combined.contains('rate limit') ||
       combined.contains('too many requests') ||
       combined.contains('status: 429') ||
-      combined.contains('status code 429') ||
-      combined.contains('429');
+      combined.contains('status code 429');
   if (hasRateLimitSignal) {
     return ChatServerErrorDisplay(
       name: l10n?.errorRateLimitExceeded ?? 'Rate limit exceeded',
