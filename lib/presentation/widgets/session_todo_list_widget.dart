@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -40,7 +41,7 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
   @override
   void initState() {
     super.initState();
-    _syncHideTimer();
+    _syncHideTimer(previousTodos: const []);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToInProgress();
     });
@@ -49,7 +50,7 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
   @override
   void didUpdateWidget(SessionTodoListWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncHideTimer();
+    _syncHideTimer(previousTodos: oldWidget.todos);
     if (!widget.collapsed) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToInProgress();
@@ -69,8 +70,16 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
         widget.todos.every((t) => t.status == 'completed');
   }
 
-  void _syncHideTimer() {
+  void _syncHideTimer({required List<SessionTodo> previousTodos}) {
     if (_allCompleted) {
+      final payloadChanged = !listEquals(previousTodos, widget.todos);
+      if (payloadChanged) {
+        _hideTimer?.cancel();
+        _hideTimer = null;
+        if (_hidden) {
+          _hidden = false;
+        }
+      }
       if (_hideTimer == null) {
         _hideTimer = Timer(_allCompletedHideDelay, () {
           if (!mounted) return;
@@ -87,18 +96,19 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
   }
 
   void _scrollToInProgress() {
-    if (!_scrollController.hasClients) return;
+    if (!_scrollController.hasClients ||
+        !_scrollController.position.hasContentDimensions) {
+      return;
+    }
     final index = widget.todos.indexWhere((t) => t.status == 'in_progress');
     if (index < 0) return;
-    final target = index * _itemHeight;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    if (target <= maxScroll) {
-      _scrollController.animateTo(
-        target,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    }
+    final target = (index * _itemHeight).clamp(0.0, maxScroll);
+    _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
   }
 
   bool _isCompactLayout(BuildContext context) {
