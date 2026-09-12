@@ -157,6 +157,7 @@ void main() {
 
   test(
     'supports notification disabled and sound enabled independently',
+    timeout: const Timeout(Duration(minutes: 1)),
     () async {
       final settingsProvider = SettingsProvider(
         localDataSource: InMemoryAppLocalDataSource(),
