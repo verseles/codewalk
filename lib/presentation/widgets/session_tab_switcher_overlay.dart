@@ -5,7 +5,9 @@ import '../../core/i18n/l10n_context.dart';
 import '../../core/utils/path_utils.dart';
 import '../../domain/entities/project.dart';
 import '../providers/chat_provider.dart';
+import '../services/session_tab_icon_presets.dart';
 import '../utils/window_size_class.dart';
+import 'project_icon.dart';
 import 'session_tab_strip.dart';
 
 /// Browser-style tab switcher overlay (issue #171, decision 2B completo).
@@ -34,8 +36,7 @@ class SessionTabSwitcherOverlay extends StatefulWidget {
       _SessionTabSwitcherOverlayState();
 }
 
-class _SessionTabSwitcherOverlayState
-    extends State<SessionTabSwitcherOverlay> {
+class _SessionTabSwitcherOverlayState extends State<SessionTabSwitcherOverlay> {
   late final ScrollController _scrollController;
 
   @override
@@ -66,10 +67,15 @@ class _SessionTabSwitcherOverlayState
     final viewport = _scrollController.position.viewportDimension;
     final current = _scrollController.offset;
     if (offset < current) {
-      _scrollController.jumpTo(offset.clamp(0.0, _scrollController.position.maxScrollExtent));
+      _scrollController.jumpTo(
+        offset.clamp(0.0, _scrollController.position.maxScrollExtent),
+      );
     } else if (offset + itemExtent > current + viewport) {
       _scrollController.jumpTo(
-        (offset + itemExtent - viewport).clamp(0.0, _scrollController.position.maxScrollExtent),
+        (offset + itemExtent - viewport).clamp(
+          0.0,
+          _scrollController.position.maxScrollExtent,
+        ),
       );
     }
   }
@@ -93,8 +99,7 @@ class _SessionTabSwitcherOverlayState
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     if (widget.tabs.isEmpty) return const SizedBox.shrink();
-    final safeIndex =
-        widget.previewIndex.clamp(0, widget.tabs.length - 1);
+    final safeIndex = widget.previewIndex.clamp(0, widget.tabs.length - 1);
     final previewTab = widget.tabs[safeIndex];
     final previewTitle = _title(context, previewTab);
     final width = MediaQuery.sizeOf(context).width;
@@ -154,7 +159,8 @@ class _SessionTabSwitcherOverlayState
                           final isPreview = index == safeIndex;
                           final isCurrent = tab.isSelected;
                           final project = _projectFor(tab);
-                          final subtitle = (project?.name.trim().isNotEmpty ?? false)
+                          final subtitle =
+                              (project?.name.trim().isNotEmpty ?? false)
                               ? project!.name.trim()
                               : fileBasename(tab.identity.directory);
                           return Semantics(
@@ -177,12 +183,14 @@ class _SessionTabSwitcherOverlayState
                                 leading: _SwitcherLeading(
                                   tab: tab,
                                   identityKey: key,
+                                  project: project,
                                 ),
                                 title: Text(
                                   _title(context, tab),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
                                         color: isPreview
                                             ? colorScheme.onPrimaryContainer
                                             : null,
@@ -195,7 +203,8 @@ class _SessionTabSwitcherOverlayState
                                   subtitle,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
                                         color: isPreview
                                             ? colorScheme.onPrimaryContainer
                                             : colorScheme.onSurfaceVariant,
@@ -237,8 +246,8 @@ class _SessionTabSwitcherOverlayState
                       child: Text(
                         context.l10n.sessionTabSwitcherHint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
@@ -255,10 +264,15 @@ class _SessionTabSwitcherOverlayState
 const double _kSwitcherItemExtent = 56;
 
 class _SwitcherLeading extends StatelessWidget {
-  const _SwitcherLeading({required this.tab, required this.identityKey});
+  const _SwitcherLeading({
+    required this.tab,
+    required this.identityKey,
+    this.project,
+  });
 
   final SessionTabRecord tab;
   final String identityKey;
+  final Project? project;
 
   @override
   Widget build(BuildContext context) {
@@ -286,12 +300,33 @@ class _SwitcherLeading extends StatelessWidget {
         foreground: colorScheme.onPrimaryContainer,
       );
     } else {
-      leading = Icon(
-        key: ValueKey<String>('session_tab_switcher_default_$identityKey'),
-        Symbols.chat_bubble_outline,
-        size: 20,
-        color: colorScheme.onSurfaceVariant,
-      );
+      final preset = SessionTabIconPreset.fromId(tab.iconPresetId);
+      if (preset != null) {
+        leading = Icon(
+          preset.icon,
+          key: ValueKey<String>(
+            'session_tab_switcher_custom_icon_$identityKey',
+          ),
+          size: 20,
+          color: colorScheme.onSurfaceVariant,
+        );
+      } else if (project != null) {
+        leading = ProjectIcon(
+          key: ValueKey<String>(
+            'session_tab_switcher_project_icon_$identityKey',
+          ),
+          project: project!,
+          size: 20,
+          autoDiscover: false,
+        );
+      } else {
+        leading = Icon(
+          key: ValueKey<String>('session_tab_switcher_default_$identityKey'),
+          Symbols.chat_bubble_outline,
+          size: 20,
+          color: colorScheme.onSurfaceVariant,
+        );
+      }
     }
     return Stack(
       alignment: Alignment.center,
