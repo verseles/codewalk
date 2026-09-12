@@ -131,18 +131,20 @@ class QuotaProvider extends ChangeNotifier {
       }
       _results = fetched;
       _lastFetchedAt = DateTime.now();
-      final groupSummaries = groups
-          .map(
-            (group) =>
-                '${group.providerId}['
-                '${group.entries.map((entry) => '${entry.label}:used=${entry.usedPercent?.round() ?? '-'} value=${entry.valueLabel ?? '-'} pace=${entry.paceInfo?.predictedFinalPercent.round() ?? '-'}').join(', ')}]',
-          )
-          .toList(growable: false);
-      AppLogger.info(
-        '[Quota] ensureLoaded: fetch complete — '
-        '${_results.length} results, ${groups.length} visible groups',
-      );
-      AppLogger.info('[Quota] ensureLoaded groups: $groupSummaries');
+      if (AppLogger.loggingEnabled) {
+        final groupSummaries = groups
+            .map(
+              (group) =>
+                  '${group.providerId}['
+                  '${group.entries.map((entry) => '${entry.label}:used=${entry.usedPercent?.round() ?? '-'} value=${entry.valueLabel ?? '-'} pace=${entry.paceInfo?.predictedFinalPercent.round() ?? '-'}').join(', ')}]',
+            )
+            .toList(growable: false);
+        AppLogger.info(
+          '[Quota] ensureLoaded: fetch complete — '
+          '${_results.length} results, ${groups.length} visible groups',
+        );
+        AppLogger.info('[Quota] ensureLoaded groups: $groupSummaries');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

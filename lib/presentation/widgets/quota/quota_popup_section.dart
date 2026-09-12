@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/i18n/l10n_context.dart';
-import '../../../core/logging/app_logger.dart';
 import '../../providers/quota_provider.dart';
 import '../../theme/app_animations.dart';
 import 'quota_provider_group_row.dart';
@@ -53,16 +52,8 @@ class _QuotaPopupSectionState extends State<QuotaPopupSection> {
         final isInitialLoading =
             quotaProvider.isLoading && quotaProvider.lastFetchedAt == null;
         if (groups.isEmpty && !isInitialLoading && !showOpenCodeGoFailure) {
-          AppLogger.info(
-            '[QuotaUI] popup section hidden '
-            '(loading=${quotaProvider.isLoading}, serverId=${widget.serverId})',
-          );
           return const SizedBox.shrink();
         }
-        AppLogger.info(
-          '[QuotaUI] popup section render groups='
-          '${groups.map((group) => '${group.providerId}:${group.entries.length}').toList()}',
-        );
         final textTheme = Theme.of(context).textTheme;
         final colorScheme = Theme.of(context).colorScheme;
         return Column(
