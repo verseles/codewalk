@@ -16,6 +16,33 @@ class _QuickOpenResult {
   final int? lineNumber;
 }
 
+/// Runs [onDispose] when this subtree is removed from the tree.
+///
+/// A popped dialog route completes its future before the reverse transition
+/// finishes, so disposing a dialog-owned controller in the `finally` after
+/// `showDialog` races exiting-widget rebuilds against the disposed
+/// controller. Scoping disposal to unmount avoids that race.
+class _DisposeOnUnmount extends StatefulWidget {
+  const _DisposeOnUnmount({required this.onDispose, required this.child});
+
+  final VoidCallback onDispose;
+  final Widget child;
+
+  @override
+  State<_DisposeOnUnmount> createState() => _DisposeOnUnmountState();
+}
+
+class _DisposeOnUnmountState extends State<_DisposeOnUnmount> {
+  @override
+  void dispose() {
+    widget.onDispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 const _fileExplorerMinimumLoaderDuration = Duration(milliseconds: 120);
 
 extension _ChatPageFileExplorerController on _ChatPageState {
@@ -363,132 +390,137 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                   const SingleActivator(LogicalKeyboardKey.numpadEnter): () =>
                       unawaited(openFirstQuickOpenResult(dialogContext)),
                 },
-                child: AlertDialog(
-                  title: Text(context.l10n.filesQuickOpenFile),
-                  content: SizedBox(
-                    width: 520,
-                    height: 420,
-                    child: Column(
-                      children: [
-                        TextField(
-                          key: const ValueKey<String>('quick_open_input'),
-                          controller: queryController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: context.l10n.filesSearchHint,
-                            prefixIcon: const Icon(Symbols.search),
-                          ),
-                          onChanged: (value) {
-                            unawaited(
-                              runSearch(
-                                setModalState,
-                                value,
-                                dialogContext: dialogContext,
-                              ),
-                            );
-                          },
-                          onSubmitted: (value) async {
-                            await openFirstQuickOpenResult(dialogContext);
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        SegmentedButton<_QuickOpenSearchMode>(
-                          segments: <ButtonSegment<_QuickOpenSearchMode>>[
-                            ButtonSegment<_QuickOpenSearchMode>(
-                              value: _QuickOpenSearchMode.names,
-                              label: Text(context.l10n.filesNames),
-                              icon: const Icon(Symbols.description),
+                child: _DisposeOnUnmount(
+                  onDispose: queryController.dispose,
+                  child: AlertDialog(
+                    title: Text(context.l10n.filesQuickOpenFile),
+                    content: SizedBox(
+                      width: 520,
+                      height: 420,
+                      child: Column(
+                        children: [
+                          TextField(
+                            key: const ValueKey<String>('quick_open_input'),
+                            controller: queryController,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: context.l10n.filesSearchHint,
+                              prefixIcon: const Icon(Symbols.search),
                             ),
-                            ButtonSegment<_QuickOpenSearchMode>(
-                              value: _QuickOpenSearchMode.contents,
-                              label: Text(context.l10n.filesContents),
-                              icon: const Icon(Symbols.manage_search),
-                            ),
-                          ],
-                          selected: <_QuickOpenSearchMode>{searchMode},
-                          onSelectionChanged: (selected) {
-                            setModalState(() {
-                              searchMode = selected.single;
-                            });
-                            unawaited(
-                              runSearch(
-                                setModalState,
-                                queryController.text,
-                                dialogContext: dialogContext,
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: loading
-                              ? const Center(child: CircularProgressIndicator())
-                              : errorMessage.isNotEmpty
-                              ? Center(
-                                  child: Text(
-                                    errorMessage,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                )
-                              : resultNodes.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    queryController.text.trim().isEmpty
-                                        ? context.l10n.filesNoOpenFilesHint
-                                        : searchMode ==
-                                              _QuickOpenSearchMode.names
-                                        ? context.l10n.filesFilesFound
-                                        : context.l10n.filesNoContentMatches,
-                                  ),
-                                )
-                              : ListView.builder(
-                                  itemCount: resultNodes.length,
-                                  itemBuilder: (context, index) {
-                                    final node = resultNodes[index];
-                                    final normalizedPath = _normalizeFilePath(
-                                      node.path,
-                                    );
-                                    return ListTile(
-                                      key: ValueKey<String>(
-                                        'quick_open_result_$normalizedPath',
-                                      ),
-                                      dense: _useDenseListTiles(context),
-                                      leading: Icon(
-                                        node.lineNumber == null
-                                            ? Symbols.description
-                                            : Symbols.manage_search,
-                                        size: 18,
-                                      ),
-                                      title: Text(
-                                        node.title,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      subtitle: Text(
-                                        node.subtitle,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      onTap: () async {
-                                        await openQuickOpenResult(
-                                          dialogContext,
-                                          normalizedPath,
-                                        );
-                                      },
-                                    );
-                                  },
+                            onChanged: (value) {
+                              unawaited(
+                                runSearch(
+                                  setModalState,
+                                  value,
+                                  dialogContext: dialogContext,
                                 ),
-                        ),
-                      ],
+                              );
+                            },
+                            onSubmitted: (value) async {
+                              await openFirstQuickOpenResult(dialogContext);
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          SegmentedButton<_QuickOpenSearchMode>(
+                            segments: <ButtonSegment<_QuickOpenSearchMode>>[
+                              ButtonSegment<_QuickOpenSearchMode>(
+                                value: _QuickOpenSearchMode.names,
+                                label: Text(context.l10n.filesNames),
+                                icon: const Icon(Symbols.description),
+                              ),
+                              ButtonSegment<_QuickOpenSearchMode>(
+                                value: _QuickOpenSearchMode.contents,
+                                label: Text(context.l10n.filesContents),
+                                icon: const Icon(Symbols.manage_search),
+                              ),
+                            ],
+                            selected: <_QuickOpenSearchMode>{searchMode},
+                            onSelectionChanged: (selected) {
+                              setModalState(() {
+                                searchMode = selected.single;
+                              });
+                              unawaited(
+                                runSearch(
+                                  setModalState,
+                                  queryController.text,
+                                  dialogContext: dialogContext,
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          Expanded(
+                            child: loading
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : errorMessage.isNotEmpty
+                                ? Center(
+                                    child: Text(
+                                      errorMessage,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : resultNodes.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      queryController.text.trim().isEmpty
+                                          ? context.l10n.filesNoOpenFilesHint
+                                          : searchMode ==
+                                                _QuickOpenSearchMode.names
+                                          ? context.l10n.filesFilesFound
+                                          : context.l10n.filesNoContentMatches,
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    itemCount: resultNodes.length,
+                                    itemBuilder: (context, index) {
+                                      final node = resultNodes[index];
+                                      final normalizedPath = _normalizeFilePath(
+                                        node.path,
+                                      );
+                                      return ListTile(
+                                        key: ValueKey<String>(
+                                          'quick_open_result_$normalizedPath',
+                                        ),
+                                        dense: _useDenseListTiles(context),
+                                        leading: Icon(
+                                          node.lineNumber == null
+                                              ? Symbols.description
+                                              : Symbols.manage_search,
+                                          size: 18,
+                                        ),
+                                        title: Text(
+                                          node.title,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        subtitle: Text(
+                                          node.subtitle,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        onTap: () async {
+                                          await openQuickOpenResult(
+                                            dialogContext,
+                                            normalizedPath,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
                     ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          dialogActive = false;
+                          Navigator.of(dialogContext).pop();
+                        },
+                        child: Text(context.l10n.chatClose),
+                      ),
+                    ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        dialogActive = false;
-                        Navigator.of(dialogContext).pop();
-                      },
-                      child: Text(context.l10n.chatClose),
-                    ),
-                  ],
                 ),
               );
             },
@@ -496,8 +528,9 @@ extension _ChatPageFileExplorerController on _ChatPageState {
         },
       );
     } finally {
+      // The query controller is disposed by _DisposeOnUnmount when the
+      // dialog subtree actually unmounts (after the reverse transition).
       dialogActive = false;
-      queryController.dispose();
     }
   }
 
