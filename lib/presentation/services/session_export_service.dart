@@ -111,11 +111,13 @@ class SessionExportService {
         .trim()
         .replaceAll(RegExp(r'[<>:"/\\|?*\x00-\x1F]+'), '-')
         .replaceAll(RegExp(r'\s+', unicode: true), '-')
-        .replaceAll(RegExp(r'[^\p{L}\p{N}-]+', unicode: true), '-')
+        .replaceAll(RegExp(r'[^\p{L}\p{M}\p{N}-]+', unicode: true), '-')
         .replaceAll(RegExp(r'-{2,}'), '-')
         .replaceAll(RegExp(r'^-+|-+$'), '');
-    if (slug.length > 60) {
-      slug = slug.substring(0, 60).replaceAll(RegExp(r'-+$'), '');
+    if (slug.runes.length > 60) {
+      slug = String.fromCharCodes(
+        slug.runes.take(60),
+      ).replaceAll(RegExp(r'-+$'), '');
     }
     final safeTitle = slug.isEmpty ? 'session' : slug.toLowerCase();
     return '${safeTitle}_${session.id}.$ext';

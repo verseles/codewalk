@@ -140,4 +140,17 @@ void main() {
     );
     expect(exporter.fileName(named, 'md'), '分析测试_ses_123.md');
   });
+
+  test('preserves indic combining marks in export file names', () {
+    final named = ChatSession(
+      id: session.id,
+      workspaceId: session.workspaceId,
+      time: session.time,
+      title: 'विश्लेषण',
+      directory: session.directory,
+      summary: session.summary,
+      path: session.path,
+    );
+    expect(exporter.fileName(named, 'md'), 'विश्लेषण_ses_123.md');
+  });
 }
