@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/i18n/l10n_context.dart';
 import '../../../domain/entities/quota.dart';
+import '../../theme/app_semantic_colors.dart';
 import '../../utils/quota_pace_utils.dart';
 import 'pace_label.dart';
 
@@ -20,7 +21,7 @@ class QuotaEntryRow extends StatelessWidget {
     final barColor = switch (tone) {
       'critical' => colorScheme.error,
       'warn' => colorScheme.tertiary,
-      _ => Colors.green,
+      _ => AppSemanticColors.success(context),
     };
     final displayedValue = entry.valueLabel ?? formatPercent(entry.usedPercent);
     final progress = ((effectiveUsedPercent ?? 0) / 100).clamp(0.0, 1.0);
