@@ -25,6 +25,14 @@ extension _ChatPageMobileOverflow on _ChatPageState {
       'codewalk.mobile_appbar_pinned_actions';
   static const int _maxPinnedMobileActions = 3;
 
+  /// Default pins for fresh installs (no saved preference yet): terminal
+  /// farthest from the overflow menu, new chat adjacent to it.
+  static const List<String> _defaultPinnedMobileActionIds = <String>[
+    'terminal',
+    'quickOpen',
+    'newChat',
+  ];
+
   List<String> _normalizePinnedMobileActionIds(Iterable<String> ids) {
     final normalized = <String>[];
     for (final rawId in ids) {
@@ -45,10 +53,23 @@ extension _ChatPageMobileOverflow on _ChatPageState {
     try {
       final prefs = await SharedPreferences.getInstance();
       final ids = prefs.getStringList(_pinnedActionsPrefKey);
-      if (ids != null && mounted) {
+      if (!mounted) {
+        return;
+      }
+      if (ids != null) {
         final normalizedIds = _normalizePinnedMobileActionIds(ids);
         _setState(() {
           _pinnedMobileAppBarActionIds = normalizedIds;
+        });
+        unawaited(_savePinnedMobileActionsToPrefs());
+      } else {
+        // Fresh install: seed the default pins and persist them so the
+        // choice survives restarts. Existing users (key present, even if
+        // empty) keep their own configuration untouched.
+        _setState(() {
+          _pinnedMobileAppBarActionIds = _normalizePinnedMobileActionIds(
+            _defaultPinnedMobileActionIds,
+          );
         });
         unawaited(_savePinnedMobileActionsToPrefs());
       }

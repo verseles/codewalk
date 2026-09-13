@@ -1763,6 +1763,7 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **Given** the app is running on a mobile device (compact screen)
 - **When** the user has app-bar actions pinned
 - **Then** up to three pinned action icons are shown before the overflow menu
+- **Then** fresh installs start with terminal, files, and new chat pinned in that order (new chat adjacent to the overflow menu)
 - **Then** persisted two-action pin lists remain unchanged after upgrade
 - **Then** persisted oversized pin lists are normalized to the latest three actions
 - **Then** pinning a fourth action drops the oldest pinned action and keeps the latest three visible

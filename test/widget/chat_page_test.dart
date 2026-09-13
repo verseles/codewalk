@@ -2861,16 +2861,11 @@ void main() {
 
       expect(
         find.byKey(const ValueKey<String>('mobile_appbar_pinned_slot_0')),
-        findsNothing,
+        findsOneWidget,
       );
 
       await tester.tap(
-        find.byKey(const ValueKey<String>('mobile_appbar_overflow_button')),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('mobile_overflow_item_quickOpen')),
+        find.byKey(const ValueKey<String>('appbar_pinned_quickOpen_button')),
       );
       await tester.pumpAndSettle();
 
@@ -2881,6 +2876,92 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
         findsOneWidget,
+      );
+    });
+
+    testWidgets('mobile app bar seeds default pins on fresh install', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      addTearDown(() => SharedPreferences.setMockInitialValues({}));
+      await tester.binding.setSurfaceSize(const Size(500, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      // Terminal farthest from the overflow menu, new chat adjacent to it.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('mobile_appbar_pinned_slot_0')),
+          matching: find.byKey(
+            const ValueKey<String>('appbar_pinned_terminal_button'),
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('mobile_appbar_pinned_slot_1')),
+          matching: find.byKey(
+            const ValueKey<String>('appbar_pinned_quickOpen_button'),
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('mobile_appbar_pinned_slot_2')),
+          matching: find.byKey(
+            const ValueKey<String>('appbar_pinned_newChat_button'),
+          ),
+        ),
+        findsOneWidget,
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getStringList('codewalk.mobile_appbar_pinned_actions'),
+        <String>['terminal', 'quickOpen', 'newChat'],
+      );
+    });
+
+    testWidgets('mobile app bar keeps empty pins on explicit empty list', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'codewalk.mobile_appbar_pinned_actions': <String>[],
+      });
+      addTearDown(() => SharedPreferences.setMockInitialValues({}));
+      await tester.binding.setSurfaceSize(const Size(500, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(localDataSource: localDataSource);
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey<String>('mobile_appbar_pinned_slot_0')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('appbar_pinned_newChat_button')),
+        findsNothing,
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getStringList('codewalk.mobile_appbar_pinned_actions'),
+        <String>[],
       );
     });
 
@@ -3074,6 +3155,10 @@ void main() {
         addTearDown(() {
           tester.binding.setSurfaceSize(null);
         });
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'codewalk.mobile_appbar_pinned_actions': <String>[],
+        });
+        addTearDown(() => SharedPreferences.setMockInitialValues({}));
 
         final localDataSource = InMemoryAppLocalDataSource()
           ..activeServerId = 'srv_test';
@@ -3143,6 +3228,10 @@ void main() {
       (WidgetTester tester) async {
         await tester.binding.setSurfaceSize(const Size(390, 844));
         addTearDown(() => tester.binding.setSurfaceSize(null));
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'codewalk.mobile_appbar_pinned_actions': <String>[],
+        });
+        addTearDown(() => SharedPreferences.setMockInitialValues({}));
         const baseMediaQueryData = MediaQueryData(size: Size(390, 844));
         final keyboardMediaQueryData = baseMediaQueryData.copyWith(
           viewInsets: const EdgeInsets.only(bottom: 280),
@@ -7630,6 +7719,10 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(500, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'codewalk.mobile_appbar_pinned_actions': <String>[],
+    });
+    addTearDown(() => SharedPreferences.setMockInitialValues({}));
 
     final localDataSource = InMemoryAppLocalDataSource()
       ..activeServerId = 'srv_test';
@@ -7749,6 +7842,10 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(500, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'codewalk.mobile_appbar_pinned_actions': <String>[],
+    });
+    addTearDown(() => SharedPreferences.setMockInitialValues({}));
 
     final localDataSource = InMemoryAppLocalDataSource()
       ..activeServerId = 'srv_test';
@@ -10172,6 +10269,10 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(500, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'codewalk.mobile_appbar_pinned_actions': <String>[],
+    });
+    addTearDown(() => SharedPreferences.setMockInitialValues({}));
 
     final localDataSource = InMemoryAppLocalDataSource()
       ..activeServerId = 'srv_test';
@@ -14655,6 +14756,10 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'codewalk.mobile_appbar_pinned_actions': <String>[],
+    });
+    addTearDown(() => SharedPreferences.setMockInitialValues({}));
 
     final repository = FakeChatRepository(
       sessions: <ChatSession>[
