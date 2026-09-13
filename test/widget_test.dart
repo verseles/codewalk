@@ -872,6 +872,56 @@ void main() {
     expect(decoded.where((item) => item['id'] == 'delete-me-1'), isEmpty);
   });
 
+  testWidgets('edit quick reply save keeps item and persists', (
+    WidgetTester tester,
+  ) async {
+    final localDataSource = InMemoryAppLocalDataSource();
+    await localDataSource.saveCannedAnswersJson(
+      jsonEncode([
+        {
+          'id': 'edit-save-1',
+          'label': 'Seeded reply',
+          'text': 'Seeded text',
+          'insertMode': 'append',
+          'sendAutomatically': false,
+          'scopeMode': 'global',
+          'updatedAtEpochMs': 1,
+        },
+      ]),
+    );
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: localDataSource,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+    await tester.longPress(find.text('Seeded reply'));
+    await tester.pumpAndSettle();
+    // Prefilled editor: label doubles as the visible row text.
+    expect(find.text('Seeded reply'), findsWidgets);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('canned_answer_save_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_editor_dialog')),
+      findsNothing,
+    );
+    final raw = await localDataSource.getCannedAnswersJson();
+    final decoded = jsonDecode(raw ?? '[]') as List<dynamic>;
+    expect(decoded, hasLength(1));
+    expect(decoded.single['id'], 'edit-save-1');
+    expect(decoded.single['text'], 'Seeded text');
+  });
+
   testWidgets('canned override applies before auto-send', (
     WidgetTester tester,
   ) async {

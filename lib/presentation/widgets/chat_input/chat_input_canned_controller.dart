@@ -271,7 +271,10 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
       return;
     }
     final result = await _showCannedAnswerDialog(initial: answer);
-    if (!mounted || result == null) {
+    if (!mounted) {
+      return;
+    }
+    if (result == null) {
       _ensureInputFocus();
       return;
     }
@@ -286,8 +289,17 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
               .where((item) => item.id != answer.id)
               .toList(growable: false);
         }
+        if (_popoverType == ChatComposerPopoverType.canned &&
+            _activeSuggestionIndex >= _visibleCannedAnswers.length) {
+          _activeSuggestionIndex = _visibleCannedAnswers.isEmpty
+              ? 0
+              : _visibleCannedAnswers.length - 1;
+        }
       });
       await _persistCannedAnswers(scope: answer.scopeMode);
+      if (!mounted) {
+        return;
+      }
       _ensureInputFocus();
       return;
     }
@@ -314,6 +326,9 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
     });
     await _persistCannedAnswers(scope: CannedAnswerScopeMode.global);
     await _persistCannedAnswers(scope: CannedAnswerScopeMode.projectOnly);
+    if (!mounted) {
+      return;
+    }
     _ensureInputFocus();
   }
 
