@@ -4662,7 +4662,7 @@ void main() {
     expect(find.byTooltip('Extras'), findsOneWidget);
     await tester.tap(find.byTooltip('Extras'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Attach files'));
+    await tester.tap(find.text('Attach'));
     await tester.pumpAndSettle();
     expect(find.text('Select Images'), findsOneWidget);
     expect(find.text('Select PDF'), findsNothing);
@@ -4721,7 +4721,7 @@ void main() {
       expect(find.byTooltip('Extras'), findsOneWidget);
       await tester.tap(find.byTooltip('Extras'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Attach files'));
+      await tester.tap(find.text('Attach'));
       await tester.pumpAndSettle();
       expect(find.text('Select Images'), findsOneWidget);
       expect(find.text('Select PDF'), findsOneWidget);
@@ -11349,6 +11349,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // #185: the toggle left the composer row for the agent menu footer.
+      expect(
+        find.byKey(
+          const ValueKey<String>('composer_permission_auto_approve_toggle'),
+        ),
+        findsNothing,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('agent_selector_button')),
+      );
+      await tester.pumpAndSettle();
       expect(
         find.byKey(
           const ValueKey<String>('composer_permission_auto_approve_toggle'),
@@ -11763,6 +11774,12 @@ void main() {
         findsOneWidget,
       );
 
+      // #185: the toggle lives in the agent menu footer now.
+      await tester.tap(
+        find.byKey(const ValueKey<String>('agent_selector_button')),
+      );
+      await tester.pumpAndSettle();
+
       await tester.tap(
         find.byKey(
           const ValueKey<String>('composer_permission_auto_approve_toggle'),
@@ -12060,6 +12077,13 @@ void main() {
 
       expect(find.text('older user marker'), findsNothing);
 
+      // #185: the toggle lives in the agent menu footer, which stays open
+      // across toggles.
+      await tester.tap(
+        find.byKey(const ValueKey<String>('agent_selector_button')),
+      );
+      await tester.pumpAndSettle();
+
       final toggleFinder = find.byKey(
         const ValueKey<String>('composer_permission_auto_approve_toggle'),
       );
@@ -12221,6 +12245,12 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      // #185: the toggle lives in the agent menu footer now.
+      await tester.tap(
+        find.byKey(const ValueKey<String>('agent_selector_button')),
+      );
+      await tester.pumpAndSettle();
 
       await tester.tap(
         find.byKey(

@@ -402,9 +402,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cannedAppendAtCursorSubtitle => 'オフ = 現在のテキストを置き換え';
 
   @override
-  String get cannedAttachFiles => 'ファイルを添付';
-
-  @override
   String get cannedEditTitle => '定型文を編集';
 
   @override
@@ -1390,7 +1387,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get composerAddAttachment => '添付ファイルを追加';
 
   @override
-  String get composerAttachFiles => 'ファイルを添付';
+  String get composerAttachFiles => '添付';
 
   @override
   String get composerCannedAppendAtCursor => 'カーソル位置に追加';

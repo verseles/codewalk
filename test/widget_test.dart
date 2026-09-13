@@ -823,8 +823,47 @@ void main() {
     expect(find.text('Extras'), findsNothing);
     expect(find.text('Quick replies'), findsNothing);
     expect(find.text('New quick reply'), findsOneWidget);
-    expect(find.text('Attach files'), findsOneWidget);
+    expect(find.text('Attach'), findsOneWidget);
     expect(find.text('No quick replies yet.'), findsOneWidget);
+  });
+
+  testWidgets('extras popover floats without pushing the composer', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: InMemoryAppLocalDataSource(),
+          showAttachmentButton: true,
+          showInlineAttachmentButton: false,
+        ),
+      ),
+    );
+
+    final composerSize = tester.getSize(
+      find.byKey(const ValueKey<String>('composer_root_container')),
+    );
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+
+    // #184: the panel floats in the overlay — the inline popover row stays
+    // out of the composer Column and the composer size does not change.
+    expect(
+      find.byKey(const ValueKey<String>('composer_popover_row')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('composer_popover_panel_extras')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getSize(
+        find.byKey(const ValueKey<String>('composer_root_container')),
+      ),
+      composerSize,
+    );
   });
 
   testWidgets('global canned answer shows one-line globe plus label only', (
@@ -1048,7 +1087,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Add attachment'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Attach files'));
+    await tester.tap(find.text('Attach'));
     await tester.pumpAndSettle();
 
     expect(find.text('screen.png'), findsOneWidget);

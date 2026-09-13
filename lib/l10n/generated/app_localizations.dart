@@ -812,12 +812,6 @@ abstract class AppLocalizations {
   /// **'Off means replace current composer text'**
   String get cannedAppendAtCursorSubtitle;
 
-  /// CodeWalk UI string — cannedAttachFiles
-  ///
-  /// In en, this message translates to:
-  /// **'Attach files'**
-  String get cannedAttachFiles;
-
   /// CodeWalk UI string — cannedEditTitle
   ///
   /// In en, this message translates to:
@@ -2654,7 +2648,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — composerAttachFiles
   ///
   /// In en, this message translates to:
-  /// **'Attach files'**
+  /// **'Attach'**
   String get composerAttachFiles;
 
   /// CodeWalk UI string — composerCannedAppendAtCursor

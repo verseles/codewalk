@@ -435,9 +435,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Desligado = substituir texto atual';
 
   @override
-  String get cannedAttachFiles => 'Anexar arquivos';
-
-  @override
   String get cannedEditTitle => 'Editar resposta rápida';
 
   @override
@@ -1485,7 +1482,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get composerAddAttachment => 'Adicionar anexo';
 
   @override
-  String get composerAttachFiles => 'Anexar arquivos';
+  String get composerAttachFiles => 'Anexar';
 
   @override
   String get composerCannedAppendAtCursor => 'Anexar no cursor';

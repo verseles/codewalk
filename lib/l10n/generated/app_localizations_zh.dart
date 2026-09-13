@@ -390,9 +390,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cannedAppendAtCursorSubtitle => '关闭 = 替换当前编辑器文本';
 
   @override
-  String get cannedAttachFiles => '附加文件';
-
-  @override
   String get cannedEditTitle => '编辑快捷回复';
 
   @override
@@ -1368,7 +1365,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get composerAddAttachment => '添加附件';
 
   @override
-  String get composerAttachFiles => '附加文件';
+  String get composerAttachFiles => '附加';
 
   @override
   String get composerCannedAppendAtCursor => '在光标处追加';

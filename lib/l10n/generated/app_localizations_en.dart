@@ -433,9 +433,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Off means replace current composer text';
 
   @override
-  String get cannedAttachFiles => 'Attach files';
-
-  @override
   String get cannedEditTitle => 'Edit canned answer';
 
   @override
@@ -1471,7 +1468,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get composerAddAttachment => 'Add attachment';
 
   @override
-  String get composerAttachFiles => 'Attach files';
+  String get composerAttachFiles => 'Attach';
 
   @override
   String get composerCannedAppendAtCursor => 'Append at cursor';

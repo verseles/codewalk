@@ -440,9 +440,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Выключено означает замену текущего текста в редакторе';
 
   @override
-  String get cannedAttachFiles => 'Прикрепить файлы';
-
-  @override
   String get cannedEditTitle => 'Редактировать быстрый ответ';
 
   @override
@@ -1490,7 +1487,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get composerAddAttachment => 'Добавить вложение';
 
   @override
-  String get composerAttachFiles => 'Прикрепить файлы';
+  String get composerAttachFiles => 'Прикрепить';
 
   @override
   String get composerCannedAppendAtCursor => 'Добавить в позицию курсора';

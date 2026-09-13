@@ -439,9 +439,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Désactivé = remplacer le texte actuel';
 
   @override
-  String get cannedAttachFiles => 'Joindre des fichiers';
-
-  @override
   String get cannedEditTitle => 'Modifier la réponse rapide';
 
   @override
@@ -1505,7 +1502,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get composerAddAttachment => 'Ajouter une pièce jointe';
 
   @override
-  String get composerAttachFiles => 'Joindre des fichiers';
+  String get composerAttachFiles => 'Joindre';
 
   @override
   String get composerCannedAppendAtCursor => 'Ajouter au curseur';

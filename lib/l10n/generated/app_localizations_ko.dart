@@ -403,9 +403,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cannedAppendAtCursorSubtitle => '끄기 = 현재 작성기 텍스트 바꾸기';
 
   @override
-  String get cannedAttachFiles => '파일 첨부';
-
-  @override
   String get cannedEditTitle => '빠른 답변 편집';
 
   @override
@@ -1390,7 +1387,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get composerAddAttachment => '첨부파일 추가';
 
   @override
-  String get composerAttachFiles => '파일 첨부';
+  String get composerAttachFiles => '첨부';
 
   @override
   String get composerCannedAppendAtCursor => '커서 위치에 추가';

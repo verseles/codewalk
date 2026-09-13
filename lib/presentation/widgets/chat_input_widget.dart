@@ -377,6 +377,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   ChatComposerMode _mode = ChatComposerMode.normal;
   ChatComposerPopoverType _popoverType = ChatComposerPopoverType.none;
 
+  /// #184: anchor + controller for the floating extras overlay. Visibility is
+  /// reconciled in [_syncExtrasOverlay], which runs after every [_setState],
+  /// so all popover state transitions stay in sync with the overlay.
+  final OverlayPortalController _extrasPopoverController =
+      OverlayPortalController();
+  final Object _extrasPopoverTapRegionGroup = Object();
+  final GlobalKey _extrasButtonAnchorKey = GlobalKey(
+    debugLabel: 'composer_extras_button_anchor',
+  );
+
   /// True while an external file drag hovers the composer (#118).
   bool _isDropHighlighted = false;
   List<ChatComposerMentionSuggestion> _mentionSuggestions =
@@ -607,6 +617,24 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
   void _setState(VoidCallback fn) {
     setState(fn);
+    _syncExtrasOverlay();
+  }
+
+  /// #184: keeps the floating extras overlay in sync with [_popoverType].
+  /// Idempotent: only shows/hides when the visibility actually changed.
+  void _syncExtrasOverlay() {
+    if (!mounted) {
+      return;
+    }
+    final shouldShow = _popoverType == ChatComposerPopoverType.canned;
+    if (shouldShow == _extrasPopoverController.isShowing) {
+      return;
+    }
+    if (shouldShow) {
+      _extrasPopoverController.show();
+    } else {
+      _extrasPopoverController.hide();
+    }
   }
 
   void _clearDraftFromExternal({bool ensureFocus = true}) {
@@ -668,7 +696,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     if (loader == null) {
       return;
     }
-    setState(() {
+    // #184: route through _setState so opening extras while typing @
+    // hides any stale overlay state consistently.
+    _setState(() {
       _isLoadingSuggestions = true;
       _popoverType = ChatComposerPopoverType.mention;
     });
@@ -677,7 +707,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       if (!mounted || query != _activeMentionQuery) {
         return;
       }
-      setState(() {
+      _setState(() {
         _mentionSuggestions = suggestions;
         _activeSuggestionIndex = 0;
         _popoverType = suggestions.isEmpty
@@ -700,7 +730,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     if (loader == null) {
       return;
     }
-    setState(() {
+    // #184: same overlay sync as the mention loader above.
+    _setState(() {
       _isLoadingSuggestions = true;
       _popoverType = ChatComposerPopoverType.slash;
     });
@@ -709,7 +740,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       if (!mounted || query != _activeSlashQuery) {
         return;
       }
-      setState(() {
+      _setState(() {
         _slashSuggestions = suggestions;
         _activeSuggestionIndex = 0;
         _popoverType = suggestions.isEmpty
@@ -910,7 +941,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _closePopover() {
-    setState(() {
+    // #184: route through _setState so the extras overlay sync runs.
+    _setState(() {
       _popoverType = ChatComposerPopoverType.none;
       _mentionSuggestions = <ChatComposerMentionSuggestion>[];
       _slashSuggestions = <ChatComposerSlashCommandSuggestion>[];
@@ -918,16 +950,66 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     });
   }
 
+  /// #184: builds the floating extras overlay anchored to the extras button.
+  /// Positioned manually from the anchor [RenderBox] (same pattern as the
+  /// agent quick selector). Returns an empty box when closed; visibility is
+  /// driven by [_syncExtrasOverlay], this guard only covers stale frames.
+  Widget _buildExtrasOverlay(BuildContext overlayContext) {
+    if (_popoverType != ChatComposerPopoverType.canned) {
+      return const SizedBox.shrink();
+    }
+    final media = MediaQuery.of(overlayContext);
+    final screen = media.size;
+    final anchorBox =
+        _extrasButtonAnchorKey.currentContext?.findRenderObject()
+            as RenderBox?;
+    final anchorTopLeft = anchorBox != null && anchorBox.attached
+        ? anchorBox.localToGlobal(Offset.zero)
+        : Offset(16, screen.height - 100);
+    final anchorSize = anchorBox != null && anchorBox.attached
+        ? anchorBox.size
+        : const Size(40, 40);
+    final maxHeight = _popoverMaxHeight(overlayContext);
+    final width = math.min(360.0, math.max(0.0, screen.width - 16));
+    final left = anchorTopLeft.dx
+        .clamp(8.0, math.max(8.0, screen.width - width - 8))
+        .toDouble();
+    // Flip below the button when there is not enough room above (short
+    // timelines, compact harnesses). The inline popover never clipped; the
+    // overlay must not either.
+    final spaceAbove = anchorTopLeft.dy - 8;
+    final top = spaceAbove >= maxHeight
+        ? anchorTopLeft.dy - 8 - maxHeight
+        : anchorTopLeft.dy + anchorSize.height + 8;
+    return Positioned(
+      left: left,
+      top: math.max(8.0, top),
+      width: width,
+      child: Focus(
+        canRequestFocus: false,
+        descendantsAreFocusable: false,
+        skipTraversal: true,
+        child: TapRegion(
+          groupId: _extrasPopoverTapRegionGroup,
+          onTapOutside: (_) => _closePopover(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: _buildExtrasPopover(
+              colorScheme: Theme.of(overlayContext).colorScheme,
+              maxHeight: maxHeight,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildComposerPopover({
     required ColorScheme colorScheme,
     required double maxHeight,
   }) {
-    if (_popoverType == ChatComposerPopoverType.canned) {
-      return _buildExtrasPopover(
-        colorScheme: colorScheme,
-        maxHeight: maxHeight,
-      );
-    }
+    // #184: extras (canned) render in the floating overlay anchored to the
+    // extras button. The inline row only serves mention/slash suggestions.
     return _buildSuggestionPopover(
       colorScheme: colorScheme,
       maxHeight: maxHeight,
@@ -975,7 +1057,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         : (widget.isResponding
               ? context.l10n.composerSendMessageWhileResponding
               : context.l10n.composerSendMessage);
-    final showPopover = _popoverType != ChatComposerPopoverType.none;
+    // #184: only mention/slash suggestions render inline. Extras (canned)
+    // float in the overlay anchored to the extras button.
+    final showPopover =
+        _popoverType == ChatComposerPopoverType.mention ||
+        _popoverType == ChatComposerPopoverType.slash;
     final blockReason = widget.blockReason?.trim();
     final hasBlockReason = blockReason != null && blockReason.isNotEmpty;
     const composerBackgroundColor = Colors.transparent;
@@ -1320,38 +1406,59 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                         final extrasOpen =
                                             _popoverType ==
                                             ChatComposerPopoverType.canned;
-                                        return IconButton(
-                                          key: const ValueKey<String>(
-                                            'composer_extras_button',
-                                          ),
-                                          onPressed: widget.enabled
-                                              ? _toggleExtrasPopover
-                                              : null,
-                                          tooltip: extrasOpen
-                                              ? context.l10n.composerExtrasHide
-                                              : context.l10n.composerExtras,
-                                          style: IconButton.styleFrom(
-                                            minimumSize: const Size(40, 40),
-                                            maximumSize: const Size(40, 40),
-                                            padding: EdgeInsets.zero,
-                                            tapTargetSize: MaterialTapTargetSize
-                                                .shrinkWrap,
-                                            visualDensity: Theme.of(
-                                              context,
-                                            ).visualDensity,
-                                            backgroundColor: extrasOpen
-                                                ? colorScheme.secondaryContainer
-                                                : Colors.transparent,
-                                            foregroundColor: colorScheme
-                                                .onSecondaryContainer,
-                                          ),
-                                          icon: Icon(
-                                            extrasOpen
-                                                ? Symbols
-                                                      .keyboard_arrow_down_rounded
-                                                : Symbols.add_rounded,
-                                            size: 20,
-                                          ),
+                                        // #184: anchor for the floating extras
+                                        // overlay. The shared TapRegion group
+                                        // keeps button taps from firing the
+                                        // panel's onTapOutside (no double
+                                        // toggle when closing via button).
+                                        return TapRegion(
+                                          key: _extrasButtonAnchorKey,
+                                          groupId: _extrasPopoverTapRegionGroup,
+                                          child: IconButton(
+                                              key: const ValueKey<String>(
+                                                'composer_extras_button',
+                                              ),
+                                              onPressed: widget.enabled
+                                                  ? _toggleExtrasPopover
+                                                  : null,
+                                              tooltip: extrasOpen
+                                                  ? context
+                                                        .l10n
+                                                        .composerExtrasHide
+                                                  : context
+                                                        .l10n
+                                                        .composerExtras,
+                                              style: IconButton.styleFrom(
+                                                minimumSize: const Size(
+                                                  40,
+                                                  40,
+                                                ),
+                                                maximumSize: const Size(
+                                                  40,
+                                                  40,
+                                                ),
+                                                padding: EdgeInsets.zero,
+                                                tapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                                visualDensity: Theme.of(
+                                                  context,
+                                                ).visualDensity,
+                                                backgroundColor: extrasOpen
+                                                    ? colorScheme
+                                                          .secondaryContainer
+                                                    : Colors.transparent,
+                                                foregroundColor: colorScheme
+                                                    .onSecondaryContainer,
+                                              ),
+                                              icon: Icon(
+                                                extrasOpen
+                                                    ? Symbols
+                                                          .keyboard_arrow_down_rounded
+                                                    : Symbols.add_rounded,
+                                                size: 20,
+                                              ),
+                                            ),
                                         );
                                       },
                                     ),
@@ -1615,7 +1722,17 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     // Issue #176: isolate composer repaints (cursor blink, typing) from
     // the timeline and vice-versa. Transparent to layout/hit-testing.
-    return _wrapComposerWithExternalFiles(RepaintBoundary(child: composerRoot));
+    // Issue #184: the extras popover floats in an overlay anchored to the
+    // extras button instead of pushing the composer Column.
+    return _wrapComposerWithExternalFiles(
+      RepaintBoundary(
+        child: OverlayPortal(
+          controller: _extrasPopoverController,
+          overlayChildBuilder: _buildExtrasOverlay,
+          child: composerRoot,
+        ),
+      ),
+    );
   }
 
   bool get _canOpenAttachmentOptions =>

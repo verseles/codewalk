@@ -433,9 +433,6 @@ class AppLocalizationsIt extends AppLocalizations {
       'Off = sostituisce il testo corrente';
 
   @override
-  String get cannedAttachFiles => 'Allega file';
-
-  @override
   String get cannedEditTitle => 'Modifica risposta rapida';
 
   @override
@@ -1492,7 +1489,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get composerAddAttachment => 'Aggiungi allegato';
 
   @override
-  String get composerAttachFiles => 'Allega file';
+  String get composerAttachFiles => 'Allega';
 
   @override
   String get composerCannedAppendAtCursor => 'Accoda al cursore';

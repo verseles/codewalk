@@ -428,9 +428,6 @@ class AppLocalizationsUr extends AppLocalizations {
       'بند = موجودہ کمپوزر متن تبدیل کریں';
 
   @override
-  String get cannedAttachFiles => 'فائلیں منسلک کریں۔';
-
-  @override
   String get cannedEditTitle => 'فوری جواب میں ترمیم کریں';
 
   @override
@@ -1468,7 +1465,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get composerAddAttachment => 'منسلکہ شامل کریں۔';
 
   @override
-  String get composerAttachFiles => 'فائلیں منسلک کریں۔';
+  String get composerAttachFiles => 'منسلک کریں';
 
   @override
   String get composerCannedAppendAtCursor => 'کرسر پر شامل کریں۔';

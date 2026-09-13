@@ -1049,6 +1049,7 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
     return Material(
       key: const ValueKey<String>('composer_popover_panel_extras'),
       color: colorScheme.surfaceContainerHighest,
+      elevation: 8,
       borderRadius: BorderRadius.circular(20),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxHeight),

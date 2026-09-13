@@ -530,10 +530,6 @@
   "@cannedAppendAtCursorSubtitle": {
     "description": "CodeWalk UI string — cannedAppendAtCursorSubtitle"
   },
-  "cannedAttachFiles": "Attach files",
-  "@cannedAttachFiles": {
-    "description": "CodeWalk UI string — cannedAttachFiles"
-  },
   "cannedEditTitle": "Edit canned answer",
   "@cannedEditTitle": {
     "description": "CodeWalk UI string — cannedEditTitle"
@@ -1903,7 +1899,7 @@
   "@composerAddAttachment": {
     "description": "CodeWalk UI string — composerAddAttachment"
   },
-  "composerAttachFiles": "Attach files",
+  "composerAttachFiles": "Attach",
   "@composerAttachFiles": {
     "description": "CodeWalk UI string — composerAttachFiles"
   },

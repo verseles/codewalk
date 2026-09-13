@@ -419,9 +419,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cannedAppendAtCursorSubtitle => 'إيقاف = استبدال نص المحرر الحالي';
 
   @override
-  String get cannedAttachFiles => 'إرفاق ملفات';
-
-  @override
   String get cannedEditTitle => 'تعديل الرد الجاهز';
 
   @override
@@ -1446,7 +1443,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get composerAddAttachment => 'إضافة مرفق';
 
   @override
-  String get composerAttachFiles => 'إرفاق ملفات';
+  String get composerAttachFiles => 'إرفاق';
 
   @override
   String get composerCannedAppendAtCursor => 'إلحاق عند المؤشر';

@@ -430,9 +430,6 @@ class AppLocalizationsHi extends AppLocalizations {
       'बंद = वर्तमान कंपोज़र टेक्स्ट बदलें';
 
   @override
-  String get cannedAttachFiles => 'फ़ाइलें संलग्न करें';
-
-  @override
   String get cannedEditTitle => 'त्वरित उत्तर संपादित करें';
 
   @override
@@ -1476,7 +1473,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get composerAddAttachment => 'अनुलग्नक (attachment) जोड़ें';
 
   @override
-  String get composerAttachFiles => 'फ़ाइलें संलग्न करें';
+  String get composerAttachFiles => 'संलग्न करें';
 
   @override
   String get composerCannedAppendAtCursor => 'कर्सर पर जोड़ें';

@@ -7,9 +7,6 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final settingsProvider = _settingsProvider;
-    final autoApproveEnabled =
-        settingsProvider?.composerAutoApprovePermissions ?? true;
-    final autoApproveColor = Colors.green.shade600;
     final selectedModel = chatProvider.selectedModel;
     final lockedSubConversationSelection = isSubConversation
         ? _resolveLockedSubConversationSelection(chatProvider)
@@ -53,81 +50,8 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (!isSubConversation) ...[
-              Tooltip(
-                message: autoApproveEnabled
-                    ? context.l10n.chatPermissionAutoApproveOn
-                    : context.l10n.chatPermissionAutoApproveOff,
-                child: Badge.count(
-                  isLabelVisible:
-                      chatProvider.currentThreadPermissionRequests.isNotEmpty,
-                  count:
-                      chatProvider.currentThreadPermissionRequests.length > 99
-                      ? 99
-                      : chatProvider.currentThreadPermissionRequests.length,
-                  child: IconButton(
-                    key: const ValueKey<String>(
-                      'composer_permission_auto_approve_toggle',
-                    ),
-                    isSelected: autoApproveEnabled,
-                    icon: const Icon(Symbols.keyboard_double_arrow_right),
-                    selectedIcon: const Icon(
-                      Symbols.keyboard_double_arrow_right,
-                    ),
-                    style: ButtonStyle(
-                      shape: const WidgetStatePropertyAll<OutlinedBorder>(
-                        CircleBorder(),
-                      ),
-                      padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
-                        AppDensitySpacing.composerModelControlButtonPadding(
-                          density,
-                        ),
-                      ),
-                      minimumSize: WidgetStatePropertyAll<Size>(
-                        AppDensitySpacing.composerModelControlButtonSize(
-                          density,
-                        ),
-                      ),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      foregroundColor: WidgetStateProperty.resolveWith<Color?>((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.selected)) {
-                          return autoApproveColor;
-                        }
-                        return colorScheme.onSurfaceVariant;
-                      }),
-                      backgroundColor: WidgetStateProperty.resolveWith<Color?>((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.pressed)) {
-                          return autoApproveColor.withValues(alpha: 0.18);
-                        }
-                        return Colors.transparent;
-                      }),
-                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.pressed) ||
-                            states.contains(WidgetState.hovered) ||
-                            states.contains(WidgetState.focused)) {
-                          return autoApproveColor.withValues(alpha: 0.12);
-                        }
-                        return null;
-                      }),
-                    ),
-                    onPressed: settingsProvider == null
-                        ? null
-                        : () => unawaited(
-                            settingsProvider.setComposerAutoApprovePermissions(
-                              !autoApproveEnabled,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-              SizedBox(width: controlGap),
-            ],
+            // #185: the auto-approve toggle left this row and lives as a
+            // fixed footer inside the agent menu (_openAgentQuickSelector).
             if (!isSubConversation) ...[
               Tooltip(
                 message: context.l10n.modelChooseAgent,
@@ -139,7 +63,22 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                   ),
                   child: Builder(
                     key: _agentSelectorChipKey,
-                    builder: (chipContext) => ActionChip(
+                    // #185: the pending-permission badge moved here from the
+                    // removed auto-approve toggle so it stays visible.
+                    builder: (chipContext) => Badge.count(
+                      isLabelVisible: chatProvider
+                          .currentThreadPermissionRequests
+                          .isNotEmpty,
+                      count:
+                          chatProvider
+                                  .currentThreadPermissionRequests
+                                  .length >
+                              99
+                          ? 99
+                          : chatProvider
+                                .currentThreadPermissionRequests
+                                .length,
+                      child: ActionChip(
                       key: const ValueKey<String>('agent_selector_button'),
                       side: BorderSide.none,
                       shape: const StadiumBorder(),
@@ -159,7 +98,10 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                             ? null
                             : TextStyle(color: selectedAgentColor),
                       ),
-                      onPressed: selectableAgents.isEmpty
+                      // #185: the menu also hosts the auto-approve footer, so
+                      // it stays reachable (footer-only) with no agents loaded.
+                      onPressed:
+                          selectableAgents.isEmpty && settingsProvider == null
                           ? null
                           : () => unawaited(
                               _openAgentQuickSelector(
@@ -167,11 +109,11 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                                 anchorContext: chipContext,
                               ),
                             ),
+                      ),
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: controlGap),
             ],
             Tooltip(
               message: isSubConversation
@@ -819,7 +761,10 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
     required BuildContext anchorContext,
   }) async {
     final entries = chatProvider.selectableAgents;
-    if (entries.isEmpty) {
+    // #185: the menu also hosts the auto-approve footer, so it can open
+    // (footer-only) even with no agents as long as settings exist.
+    final settingsProvider = _settingsProvider;
+    if (entries.isEmpty && settingsProvider == null) {
       return;
     }
     final buttonBox = anchorContext.findRenderObject() as RenderBox?;
@@ -835,56 +780,126 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
     final buttonRect = buttonTopLeft & buttonBox.size;
     const margin = 8.0;
     const menuWidth = 260.0;
-    final left = (buttonRect.center.dx - (menuWidth / 2))
-        .clamp(margin, overlayBox.size.width - menuWidth - margin)
+    final width = min(menuWidth, overlayBox.size.width - margin * 2);
+    final left = (buttonRect.center.dx - (width / 2))
+        .clamp(margin, max(margin, overlayBox.size.width - width - margin))
         .toDouble();
-    final top = (buttonRect.top - 4).clamp(margin, overlayBox.size.height - 48);
+    // #185: the menu opens upward from the agent chip. The agent list scrolls
+    // inside a bounded area while the auto-approve footer stays pinned.
+    final bottom = overlayBox.size.height - buttonRect.top + 4;
+    final maxHeight = (buttonRect.top - margin - 8)
+        .clamp(200.0, overlayBox.size.height)
+        .toDouble();
 
-    final selected = await showMenu<String>(
+    final selected = await showGeneralDialog<String>(
       context: context,
-      constraints: const BoxConstraints(
-        minWidth: menuWidth,
-        maxWidth: menuWidth,
-      ),
-      position: RelativeRect.fromLTRB(
-        left,
-        top.toDouble(),
-        overlayBox.size.width - left - menuWidth,
-        overlayBox.size.height - top.toDouble(),
-      ),
-      items: [
-        for (final entry in entries)
-          PopupMenuItem<String>(
-            key: ValueKey<String>(
-              'agent_selector_item_${_agentKey(entry.name)}',
-            ),
-            value: entry.name,
-            child: Row(
-              children: [
-                if (_parseAgentColor(entry.color) case final color?)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                Expanded(
-                  child: Text(
-                    _formatAgentLabel(entry.name),
-                    overflow: TextOverflow.ellipsis,
+      barrierDismissible: true,
+      barrierColor: Colors.transparent,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      transitionDuration: const Duration(milliseconds: 150),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return Stack(
+          children: [
+            Positioned(
+              left: left,
+              width: width,
+              bottom: bottom,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: Material(
+                  borderRadius: BorderRadius.circular(12),
+                  clipBehavior: Clip.antiAlias,
+                  child: StatefulBuilder(
+                    builder: (menuContext, setMenuState) {
+                      final autoApproveEnabled =
+                          settingsProvider?.composerAutoApprovePermissions ??
+                          true;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: ListView(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              children: [
+                                for (final entry in entries)
+                                  ListTile(
+                                    key: ValueKey<String>(
+                                      'agent_selector_item_${_agentKey(entry.name)}',
+                                    ),
+                                    leading:
+                                        switch (_parseAgentColor(
+                                          entry.color,
+                                        )) {
+                                          final color? => Container(
+                                            width: 9,
+                                            height: 9,
+                                            decoration: BoxDecoration(
+                                              color: color,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          _ => null,
+                                        },
+                                    title: Text(
+                                      _formatAgentLabel(entry.name),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    trailing:
+                                        chatProvider.selectedAgentName ==
+                                            entry.name
+                                        ? const Icon(
+                                            Symbols.check_rounded,
+                                            size: 18,
+                                          )
+                                        : null,
+                                    onTap: () => Navigator.of(
+                                      menuContext,
+                                    ).pop(entry.name),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const Divider(height: 1),
+                          // #185: fixed auto-approve footer. Toggling updates
+                          // the same setting and keeps the menu open so the
+                          // user can still pick an agent afterwards.
+                          SwitchListTile(
+                            key: const ValueKey<String>(
+                              'composer_permission_auto_approve_toggle',
+                            ),
+                            title: Text(
+                              autoApproveEnabled
+                                  ? context
+                                        .l10n
+                                        .chatPermissionAutoApproveOn
+                                  : context
+                                        .l10n
+                                        .chatPermissionAutoApproveOff,
+                            ),
+                            value: autoApproveEnabled,
+                            onChanged: settingsProvider == null
+                                ? null
+                                : (value) {
+                                    unawaited(
+                                      settingsProvider
+                                          .setComposerAutoApprovePermissions(
+                                            value,
+                                          ),
+                                    );
+                                    setMenuState(() {});
+                                  },
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
-                if (chatProvider.selectedAgentName == entry.name)
-                  const Icon(Symbols.check_rounded, size: 18),
-              ],
+              ),
             ),
-          ),
-      ],
+          ],
+        );
+      },
     );
     if (selected == null) {
       return;

@@ -431,9 +431,6 @@ class AppLocalizationsBn extends AppLocalizations {
       'বন্ধ = বর্তমান কম্পোজার টেক্সট প্রতিস্থাপন করুন';
 
   @override
-  String get cannedAttachFiles => 'ফাইল সংযুক্ত করুন';
-
-  @override
   String get cannedEditTitle => 'ক্যানড উত্তর সম্পাদনা করুন';
 
   @override
@@ -1473,7 +1470,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get composerAddAttachment => 'সংযুক্তি যোগ করুন';
 
   @override
-  String get composerAttachFiles => 'ফাইল সংযুক্ত করুন';
+  String get composerAttachFiles => 'সংযুক্ত করুন';
 
   @override
   String get composerCannedAppendAtCursor => 'কার্সারে যোগ করুন';

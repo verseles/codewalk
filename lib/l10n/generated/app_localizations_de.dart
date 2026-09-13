@@ -435,9 +435,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cannedAppendAtCursorSubtitle => 'Aus = aktuellen Text ersetzen';
 
   @override
-  String get cannedAttachFiles => 'Dateien anhängen';
-
-  @override
   String get cannedEditTitle => 'Schnellantwort bearbeiten';
 
   @override
@@ -1497,7 +1494,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get composerAddAttachment => 'Anhang hinzufügen';
 
   @override
-  String get composerAttachFiles => 'Dateien anhängen';
+  String get composerAttachFiles => 'Anhängen';
 
   @override
   String get composerCannedAppendAtCursor => 'Am Cursor anhängen';
