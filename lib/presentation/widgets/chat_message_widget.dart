@@ -147,6 +147,8 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   String? _lastThemeKey;
   bool? _lastIsRefined;
   Brightness? _lastBrightness;
+  TextScaler? _lastTextScaler;
+  ColorScheme? _lastColorScheme;
   double _lastViewportWidth = 0;
   final Set<String> _seenPartIds = <String>{};
   final Set<String> _newlyArrivedPartIds = <String>{};
@@ -329,6 +331,8 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     // themeId is the OpenCode preset id: it does not cover classic/refined,
     // brightness, or compact status layout, all of which affect rendering.
     final isRefined = theme.visualStyleTokens.isRefined;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final colorScheme = theme.colorScheme;
     final taskToolSummaryHash = _computeTaskToolSummaryHash();
     return msg.hashCode == _lastMessageHash &&
         partCount == _lastPartCount &&
@@ -351,6 +355,8 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
         themeTokens.themeId == _lastThemeKey &&
         isRefined == _lastIsRefined &&
         theme.brightness == _lastBrightness &&
+        textScaler == _lastTextScaler &&
+        colorScheme == _lastColorScheme &&
         MediaQuery.sizeOf(context).width == _lastViewportWidth;
   }
 
@@ -382,6 +388,8 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     _lastThemeKey = themeTokens.themeId;
     _lastIsRefined = theme.visualStyleTokens.isRefined;
     _lastBrightness = theme.brightness;
+    _lastTextScaler = MediaQuery.textScalerOf(context);
+    _lastColorScheme = theme.colorScheme;
     _lastViewportWidth = MediaQuery.sizeOf(context).width;
   }
 

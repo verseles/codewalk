@@ -253,7 +253,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
                           'tool_details_dialog_close_${part.id}',
                         ),
                         icon: const Icon(Symbols.close),
-                        tooltip: context.l10n.chatClose,
+                        tooltip: dialogContext.l10n.chatClose,
                         onPressed: () => Navigator.of(dialogContext).pop(),
                       ),
                     ],
@@ -835,10 +835,8 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    // Open at the top: dialogs show a snapshot, so the initial force-jump
-    // to the latest output used by live timeline streaming is skipped.
-    // didUpdateWidget still follows the tail while the user stays at it.
-    _scheduleAutoScrollToLatest(forceJump: false);
+    // No initial jump: dialogs open at the top. didUpdateWidget still
+    // follows the tail while the user stays near it.
   }
 
   @override

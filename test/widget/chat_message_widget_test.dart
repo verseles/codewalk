@@ -4764,7 +4764,11 @@ index abc123..def456 100644
 
     expect(find.text('…'), findsOneWidget);
     await tester.tap(
-      find.byKey(const ValueKey<String>('assistant_elapsed_chip_msg_elapsed')),
+      find.byKey(
+        const ValueKey<String>(
+          'assistant_elapsed_chip_msg_streaming_elapsed',
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 

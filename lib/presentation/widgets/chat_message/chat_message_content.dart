@@ -711,7 +711,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                     children: [
                       Expanded(
                         child: Text(
-                          context.l10n.msgInfoMessageInfo,
+                          dialogContext.l10n.msgInfoMessageInfo,
                           style: Theme.of(dialogContext).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
@@ -721,7 +721,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                           'assistant_info_dialog_close_${message.id}',
                         ),
                         icon: const Icon(Symbols.close),
-                        tooltip: context.l10n.chatClose,
+                        tooltip: dialogContext.l10n.chatClose,
                         onPressed: () => Navigator.of(dialogContext).pop(),
                       ),
                     ],
