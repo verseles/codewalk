@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.236.1 - 2026-09-13
+
+- test(terminal): cover ignored resize under the keyboard
+- fix(terminal): preserve persisted height while the IME owns the panel
+- fix(terminal): keep extra keys above the IME on the inline panel
+- Docs: close flow issues only after release CI is green
+
 ## v1.236.0 - 2026-09-13
 
 - Docs: AMOLED tab indicator + terminal extra keys shrink-first row
