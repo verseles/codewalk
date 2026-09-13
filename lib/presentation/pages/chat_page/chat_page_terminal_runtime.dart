@@ -135,17 +135,22 @@ extension _ChatPageTerminalRuntime on _ChatPageState {
     // cap the rendered height to part of the real column so both the chat and
     // the strip stay visible; the persisted height is restored afterwards.
     final keyboardOpen = keyboardInset > 0;
-    final effectiveMaxPanelHeight = keyboardOpen
-        ? min(
-            normalMaxPanelHeight,
-            max(
-              kTerminalPanelMinHeight,
-              availableHeight * kTerminalPanelKeyboardMaxFraction,
-            ),
-          )
-        : normalMaxPanelHeight;
+    final double effectiveMaxPanelHeight;
+    if (keyboardOpen) {
+      // Never exceed the column that actually exists: on very short columns
+      // (landscape phones) the 180 floor would otherwise overflow again.
+      final fractionCap = availableHeight * kTerminalPanelKeyboardMaxFraction;
+      final floorCap = min(kTerminalPanelMinHeight, availableHeight);
+      effectiveMaxPanelHeight = min(
+        normalMaxPanelHeight,
+        max(fractionCap, floorCap),
+      );
+    } else {
+      effectiveMaxPanelHeight = normalMaxPanelHeight;
+    }
+    final panelFloor = min(kTerminalPanelMinHeight, effectiveMaxPanelHeight);
     final panelHeight = settingsProvider.terminalPanelHeight.clamp(
-      kTerminalPanelMinHeight,
+      panelFloor,
       effectiveMaxPanelHeight,
     );
     return SizedBox(
@@ -153,8 +158,14 @@ extension _ChatPageTerminalRuntime on _ChatPageState {
       child: _buildTerminalPanelSurface(
         settingsProvider: settingsProvider,
         onHeightDelta: (delta) {
+          // While the keyboard owns the rendered height, a drag would be based
+          // on the temporary cap and silently overwrite the user's persisted
+          // height, so it is ignored until the keyboard closes.
+          if (keyboardOpen) {
+            return;
+          }
           settingsProvider.updateTerminalPanelHeightInMemory(
-            (panelHeight + delta).clamp(
+            (settingsProvider.terminalPanelHeight + delta).clamp(
               kTerminalPanelMinHeight,
               normalMaxPanelHeight,
             ),

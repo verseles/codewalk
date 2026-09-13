@@ -2780,9 +2780,7 @@ void main() {
         expect(find.text('Thinking Process'), findsOneWidget);
         expect(
           find.byKey(
-            const ValueKey<String>(
-              'tool_part_open_details_part_display_tool',
-            ),
+            const ValueKey<String>('tool_part_open_details_part_display_tool'),
           ),
           findsOneWidget,
         );
@@ -2812,9 +2810,7 @@ void main() {
         expect(find.text('Thinking Process'), findsNothing);
         expect(
           find.byKey(
-            const ValueKey<String>(
-              'tool_part_open_details_part_display_tool',
-            ),
+            const ValueKey<String>('tool_part_open_details_part_display_tool'),
           ),
           findsOneWidget,
         );
@@ -2830,9 +2826,7 @@ void main() {
 
         expect(
           find.byKey(
-            const ValueKey<String>(
-              'tool_part_open_details_part_display_tool',
-            ),
+            const ValueKey<String>('tool_part_open_details_part_display_tool'),
           ),
           findsNothing,
         );
@@ -3236,6 +3230,15 @@ void main() {
         );
         expect(stripRect.bottom, lessThanOrEqualTo(564.5));
         expect(tester.takeException(), isNull);
+
+        // Dragging the resize handle under the keyboard must not overwrite the
+        // persisted height with the temporary keyboard cap.
+        await tester.drag(
+          find.byKey(const ValueKey<String>('terminal_panel_resize_handle')),
+          const Offset(0, -80),
+        );
+        await _pumpUiFrames(tester);
+        expect(settingsProvider.terminalPanelHeight, 480);
 
         if (defaultTargetPlatform == TargetPlatform.android) {
           final maximizeButton = find.byKey(
@@ -7421,319 +7424,314 @@ void main() {
   testWidgets(
     'file tabs share the session strip chrome with a bottom action bar',
     (WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(1300, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.binding.setSurfaceSize(const Size(1300, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    final localDataSource = InMemoryAppLocalDataSource()
-      ..activeServerId = 'srv_test';
-    final projectRepository = FakeProjectRepository(
-      currentProject: Project(
-        id: 'proj_tabs_shared',
-        name: 'Project Tabs Shared',
-        path: '/repo/a',
-        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-      ),
-      projects: <Project>[
-        Project(
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final projectRepository = FakeProjectRepository(
+        currentProject: Project(
           id: 'proj_tabs_shared',
           name: 'Project Tabs Shared',
           path: '/repo/a',
           createdAt: DateTime.fromMillisecondsSinceEpoch(0),
         ),
-      ],
-    );
-    projectRepository.filesByPath['.'] = const <FileNode>[
-      FileNode(
-        path: '/repo/a/lib/main.dart',
-        name: 'main.dart',
-        type: FileNodeType.file,
-      ),
-      FileNode(
-        path: '/repo/a/lib/second.dart',
-        name: 'second.dart',
-        type: FileNodeType.file,
-      ),
-    ];
-    projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
-        const FileContent(
+        projects: <Project>[
+          Project(
+            id: 'proj_tabs_shared',
+            name: 'Project Tabs Shared',
+            path: '/repo/a',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      );
+      projectRepository.filesByPath['.'] = const <FileNode>[
+        FileNode(
           path: '/repo/a/lib/main.dart',
-          content: 'void first() {}',
-          isBinary: false,
-        );
-    projectRepository.fileContentsByPath['/repo/a/lib/second.dart'] =
-        const FileContent(
+          name: 'main.dart',
+          type: FileNodeType.file,
+        ),
+        FileNode(
           path: '/repo/a/lib/second.dart',
-          content: 'void second() {}',
-          isBinary: false,
-        );
+          name: 'second.dart',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.fileContentsByPath['/repo/a/lib/main.dart'] =
+          const FileContent(
+            path: '/repo/a/lib/main.dart',
+            content: 'void first() {}',
+            isBinary: false,
+          );
+      projectRepository.fileContentsByPath['/repo/a/lib/second.dart'] =
+          const FileContent(
+            path: '/repo/a/lib/second.dart',
+            content: 'void second() {}',
+            isBinary: false,
+          );
 
-    final provider = _buildChatProvider(
-      localDataSource: localDataSource,
-      projectRepository: projectRepository,
-    );
-    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        projectRepository: projectRepository,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-    await tester.pumpWidget(_testApp(provider, appProvider));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('file_tree_item_/repo/a/lib/main.dart'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey<String>('open_files_dialog_centered')),
+          matching: find.byTooltip('Close'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('file_tree_item_/repo/a/lib/second.dart'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final dialog = find.byKey(
+        const ValueKey<String>('open_files_dialog_centered'),
+      );
+      expect(dialog, findsOneWidget);
+      // The "Open files (n)" title is gone; the strip itself communicates tabs.
+      expect(find.text('Open files (2)'), findsNothing);
+      // Both tabs render through the shared strip (issue #167).
+      expect(
+        find.descendant(
+          of: dialog,
+          matching: find.byKey(
+            const ValueKey<String>('file_viewer_tab_/repo/a/lib/main.dart'),
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: dialog,
+          matching: find.byKey(
+            const ValueKey<String>('file_viewer_tab_/repo/a/lib/second.dart'),
+          ),
+        ),
+        findsOneWidget,
+      );
+      // Editor commands live in the bottom bar, not in the header row.
+      final bottomBar = find.byKey(
+        const ValueKey<String>('file_viewer_bottom_bar'),
+      );
+      expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
+      // The dialog close shares the tab-strip row: right side, same height —
+      // no header row of its own.
+      final dialogClose = find.descendant(
+        of: dialog,
         matching: find.byTooltip('Close'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('file_tree_item_/repo/a/lib/second.dart'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      expect(dialogClose, findsOneWidget);
+      final stripRect = tester.getRect(
+        find.descendant(
+          of: dialog,
+          matching: find.byKey(const ValueKey<String>('file_viewer_tab_strip')),
+        ),
+      );
+      final closeRect = tester.getRect(dialogClose);
+      expect(closeRect.center.dx, greaterThan(stripRect.center.dx));
+      expect(closeRect.center.dy, greaterThanOrEqualTo(stripRect.top));
+      expect(closeRect.center.dy, lessThanOrEqualTo(stripRect.bottom));
+      expect(
+        find.descendant(
+          of: bottomBar,
+          matching: find.byKey(
+            const ValueKey<String>('file_viewer_save_button'),
+          ),
+        ),
+        findsOneWidget,
+      );
+      // Activating the first tab swaps the editor to its content. The shared
+      // strip delays single taps by the double-tap timeout, like session tabs.
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'file_viewer_tab_activate_/repo/a/lib/main.dart',
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      final editorFinder = find.byKey(
+        const ValueKey<String>('file_editor_/repo/a/lib/main.dart'),
+      );
+      expect(editorFinder, findsOneWidget);
+      tester.widget<CodeEditor>(editorFinder).controller!.text =
+          'void edited() {}';
+      await tester.pump();
+      expect(
+        find.byKey(
+          const ValueKey<String>('file_viewer_tab_dirty_/repo/a/lib/main.dart'),
+        ),
+        findsOneWidget,
+      );
+      // The file close control itself is labeled AND tappable for AT (a11y
+      // review): assert on the merged semantics node of the wrapper around
+      // the keyed button. A global label lookup would also match the dialog's
+      // own Close, and a widget-tree lookup would miss excludeSemantics
+      // regressions that drop the tap action from the merged node.
+      final closeFinder = find.byKey(
+        const ValueKey<String>('file_viewer_tab_close_/repo/a/lib/main.dart'),
+      );
+      final closeWrapperFinder = find.ancestor(
+        of: closeFinder,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.label == 'Close',
+        ),
+      );
+      expect(closeWrapperFinder, findsOneWidget);
+      final closeNode = tester.getSemantics(closeFinder);
+      expect(
+        closeNode.getSemanticsData().hasAction(SemanticsAction.tap),
+        isTrue,
+      );
+      expect(tester.widget<IconButton>(closeFinder).onPressed, isNotNull);
+      // Closing the inactive tab keeps the dialog on the remaining tab.
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'file_viewer_tab_close_/repo/a/lib/second.dart',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(dialog, findsOneWidget);
+      expect(editorFinder, findsOneWidget);
+    },
+    semanticsEnabled: true,
+  );
 
-    final dialog = find.byKey(
-      const ValueKey<String>('open_files_dialog_centered'),
-    );
-    expect(dialog, findsOneWidget);
-    // The "Open files (n)" title is gone; the strip itself communicates tabs.
-    expect(find.text('Open files (2)'), findsNothing);
-    // Both tabs render through the shared strip (issue #167).
-    expect(
-      find.descendant(
-        of: dialog,
-        matching: find.byKey(
-          const ValueKey<String>('file_viewer_tab_/repo/a/lib/main.dart'),
-        ),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: dialog,
-        matching: find.byKey(
-          const ValueKey<String>('file_viewer_tab_/repo/a/lib/second.dart'),
-        ),
-      ),
-      findsOneWidget,
-    );
-    // Editor commands live in the bottom bar, not in the header row.
-    final bottomBar = find.byKey(
-      const ValueKey<String>('file_viewer_bottom_bar'),
-    );
-    expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
-    // The dialog close shares the tab-strip row: right side, same height —
-    // no header row of its own.
-    final dialogClose = find.descendant(
-      of: dialog,
-      matching: find.byTooltip('Close'),
-    );
-    expect(dialogClose, findsOneWidget);
-    final stripRect = tester.getRect(
-      find.descendant(
-        of: dialog,
-        matching: find.byKey(
-          const ValueKey<String>('file_viewer_tab_strip'),
-        ),
-      ),
-    );
-    final closeRect = tester.getRect(dialogClose);
-    expect(closeRect.center.dx, greaterThan(stripRect.center.dx));
-    expect(closeRect.center.dy, greaterThanOrEqualTo(stripRect.top));
-    expect(closeRect.center.dy, lessThanOrEqualTo(stripRect.bottom));
-    expect(
-      find.descendant(
-        of: bottomBar,
-        matching: find.byKey(
-          const ValueKey<String>('file_viewer_save_button'),
-        ),
-      ),
-      findsOneWidget,
-    );
-    // Activating the first tab swaps the editor to its content. The shared
-    // strip delays single taps by the double-tap timeout, like session tabs.
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>(
-          'file_viewer_tab_activate_/repo/a/lib/main.dart',
-        ),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pumpAndSettle();
-    final editorFinder = find.byKey(
-      const ValueKey<String>('file_editor_/repo/a/lib/main.dart'),
-    );
-    expect(editorFinder, findsOneWidget);
-    tester.widget<CodeEditor>(editorFinder).controller!.text =
-        'void edited() {}';
-    await tester.pump();
-    expect(
-      find.byKey(
-        const ValueKey<String>(
-          'file_viewer_tab_dirty_/repo/a/lib/main.dart',
-        ),
-      ),
-      findsOneWidget,
-    );
-    // The file close control itself is labeled AND tappable for AT (a11y
-    // review): assert on the merged semantics node of the wrapper around
-    // the keyed button. A global label lookup would also match the dialog's
-    // own Close, and a widget-tree lookup would miss excludeSemantics
-    // regressions that drop the tap action from the merged node.
-    final closeFinder = find.byKey(
-      const ValueKey<String>(
-        'file_viewer_tab_close_/repo/a/lib/main.dart',
-      ),
-    );
-    final closeWrapperFinder = find.ancestor(
-      of: closeFinder,
-      matching: find.byWidgetPredicate(
-        (widget) => widget is Semantics && widget.properties.label == 'Close',
-      ),
-    );
-    expect(closeWrapperFinder, findsOneWidget);
-    final closeNode = tester.getSemantics(closeFinder);
-    expect(
-      closeNode.getSemanticsData().hasAction(SemanticsAction.tap),
-      isTrue,
-    );
-    expect(tester.widget<IconButton>(closeFinder).onPressed, isNotNull);
-    // Closing the inactive tab keeps the dialog on the remaining tab.
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>(
-          'file_viewer_tab_close_/repo/a/lib/second.dart',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(dialog, findsOneWidget);
-    expect(editorFinder, findsOneWidget);
-  }, semanticsEnabled: true);
+  testWidgets(
+    'mobile open files dialog hides the title and keeps a bottom bar',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(500, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-  testWidgets('mobile open files dialog hides the title and keeps a bottom bar', (
-    WidgetTester tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(500, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    final localDataSource = InMemoryAppLocalDataSource()
-      ..activeServerId = 'srv_test';
-    final projectRepository = FakeProjectRepository(
-      currentProject: Project(
-        id: 'proj_tabs_mobile',
-        name: 'Project Tabs Mobile',
-        path: '/repo/a',
-        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-      ),
-      projects: <Project>[
-        Project(
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final projectRepository = FakeProjectRepository(
+        currentProject: Project(
           id: 'proj_tabs_mobile',
           name: 'Project Tabs Mobile',
           path: '/repo/a',
           createdAt: DateTime.fromMillisecondsSinceEpoch(0),
         ),
-      ],
-    );
-    projectRepository.filesByPath['.'] = const <FileNode>[
-      FileNode(
-        path: '/repo/a/lib/mobile.dart',
-        name: 'mobile.dart',
-        type: FileNodeType.file,
-      ),
-    ];
-    projectRepository.searchResultsByQuery['mobile'] = const <FileNode>[
-      FileNode(
-        path: '/repo/a/lib/mobile.dart',
-        name: 'mobile.dart',
-        type: FileNodeType.file,
-      ),
-    ];
-    projectRepository.fileContentsByPath['/repo/a/lib/mobile.dart'] =
-        const FileContent(
+        projects: <Project>[
+          Project(
+            id: 'proj_tabs_mobile',
+            name: 'Project Tabs Mobile',
+            path: '/repo/a',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ],
+      );
+      projectRepository.filesByPath['.'] = const <FileNode>[
+        FileNode(
           path: '/repo/a/lib/mobile.dart',
-          content: 'void mobileTabs() {}',
-          isBinary: false,
-        );
+          name: 'mobile.dart',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.searchResultsByQuery['mobile'] = const <FileNode>[
+        FileNode(
+          path: '/repo/a/lib/mobile.dart',
+          name: 'mobile.dart',
+          type: FileNodeType.file,
+        ),
+      ];
+      projectRepository.fileContentsByPath['/repo/a/lib/mobile.dart'] =
+          const FileContent(
+            path: '/repo/a/lib/mobile.dart',
+            content: 'void mobileTabs() {}',
+            isBinary: false,
+          );
 
-    final provider = _buildChatProvider(
-      localDataSource: localDataSource,
-      projectRepository: projectRepository,
-    );
-    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+      final provider = _buildChatProvider(
+        localDataSource: localDataSource,
+        projectRepository: projectRepository,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-    await tester.pumpWidget(_testApp(provider, appProvider));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('mobile_appbar_overflow_button')),
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('mobile_appbar_overflow_button')),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('mobile_overflow_item_quickOpen')),
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('mobile_overflow_item_quickOpen')),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
-    );
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey<String>('quick_open_input')),
-      'mobile',
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey<String>('file_tree_quick_open_button')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('quick_open_input')),
+        'mobile',
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('quick_open_result_/repo/a/lib/mobile.dart'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>('quick_open_result_/repo/a/lib/mobile.dart'),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    final dialog = find.byKey(
-      const ValueKey<String>('open_files_dialog_fullscreen'),
-    );
-    expect(dialog, findsOneWidget);
-    expect(find.text('Open files (1)'), findsNothing);
-    // The dialog close shares the tab-strip row (right side, same height).
-    final dialogClose = find.descendant(
-      of: dialog,
-      matching: find.byTooltip('Close'),
-    );
-    expect(dialogClose, findsOneWidget);
-    final stripRect = tester.getRect(
-      find.descendant(
+      final dialog = find.byKey(
+        const ValueKey<String>('open_files_dialog_fullscreen'),
+      );
+      expect(dialog, findsOneWidget);
+      expect(find.text('Open files (1)'), findsNothing);
+      // The dialog close shares the tab-strip row (right side, same height).
+      final dialogClose = find.descendant(
         of: dialog,
-        matching: find.byKey(
-          const ValueKey<String>('file_viewer_tab_strip'),
+        matching: find.byTooltip('Close'),
+      );
+      expect(dialogClose, findsOneWidget);
+      final stripRect = tester.getRect(
+        find.descendant(
+          of: dialog,
+          matching: find.byKey(const ValueKey<String>('file_viewer_tab_strip')),
         ),
-      ),
-    );
-    final closeRect = tester.getRect(dialogClose);
-    expect(closeRect.center.dx, greaterThan(stripRect.center.dx));
-    expect(closeRect.center.dy, greaterThanOrEqualTo(stripRect.top));
-    expect(closeRect.center.dy, lessThanOrEqualTo(stripRect.bottom));
-    final bottomBar = find.byKey(
-      const ValueKey<String>('file_viewer_bottom_bar'),
-    );
-    expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
-    expect(
-      find.descendant(
-        of: bottomBar,
-        matching: find.byKey(
-          const ValueKey<String>('file_viewer_save_button'),
+      );
+      final closeRect = tester.getRect(dialogClose);
+      expect(closeRect.center.dx, greaterThan(stripRect.center.dx));
+      expect(closeRect.center.dy, greaterThanOrEqualTo(stripRect.top));
+      expect(closeRect.center.dy, lessThanOrEqualTo(stripRect.bottom));
+      final bottomBar = find.byKey(
+        const ValueKey<String>('file_viewer_bottom_bar'),
+      );
+      expect(find.descendant(of: dialog, matching: bottomBar), findsOneWidget);
+      expect(
+        find.descendant(
+          of: bottomBar,
+          matching: find.byKey(
+            const ValueKey<String>('file_viewer_save_button'),
+          ),
         ),
-      ),
-      findsOneWidget,
-    );
-  });
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('mobile direct viewer dismisses once when the last tab closes', (
     WidgetTester tester,
@@ -7825,9 +7823,7 @@ void main() {
     // the chat page underneath stays alive (issue #167 review).
     await tester.tap(
       find.byKey(
-        const ValueKey<String>(
-          'file_viewer_tab_close_/repo/a/lib/mobile.dart',
-        ),
+        const ValueKey<String>('file_viewer_tab_close_/repo/a/lib/mobile.dart'),
       ),
     );
     await tester.pumpAndSettle();
@@ -13204,8 +13200,9 @@ void main() {
           .descendant(of: listFinder, matching: find.byType(Scrollable))
           .first;
       for (var attempt = 0; attempt < 5; attempt += 1) {
-        final position =
-            tester.state<ScrollableState>(scrollableFinder).position;
+        final position = tester
+            .state<ScrollableState>(scrollableFinder)
+            .position;
         position.jumpTo(position.maxScrollExtent);
         await tester.pump(const Duration(milliseconds: 16));
         await tester.pumpAndSettle();
@@ -13213,8 +13210,9 @@ void main() {
           break;
         }
       }
-      final rootPosition =
-          tester.state<ScrollableState>(scrollableFinder).position;
+      final rootPosition = tester
+          .state<ScrollableState>(scrollableFinder)
+          .position;
       expect(
         rootPosition.maxScrollExtent - rootPosition.pixels,
         lessThanOrEqualTo(1),
@@ -18994,17 +18992,13 @@ void main() {
       expect(find.text('Details'), findsNothing);
       expect(
         find.byKey(
-          const ValueKey<String>(
-            'tool_part_open_details_part_no_final_tool_1',
-          ),
+          const ValueKey<String>('tool_part_open_details_part_no_final_tool_1'),
         ),
         findsOneWidget,
       );
       expect(
         find.byKey(
-          const ValueKey<String>(
-            'tool_part_open_details_part_no_final_tool_2',
-          ),
+          const ValueKey<String>('tool_part_open_details_part_no_final_tool_2'),
         ),
         findsOneWidget,
       );
@@ -19778,9 +19772,7 @@ void main() {
       expect(find.text('Details'), findsOneWidget);
       expect(
         find.byKey(
-          const ValueKey<String>(
-            'tool_part_open_details_part_block_tool_1',
-          ),
+          const ValueKey<String>('tool_part_open_details_part_block_tool_1'),
         ),
         findsOneWidget,
       );
@@ -23259,89 +23251,85 @@ void main() {
     },
   );
 
-  testWidgets(
-    'shows top older-history loading pill while paginating (#178)',
-    (tester) async {
-      const sessionId = 'ses_older_loading';
-      final repository = FakeChatRepository(
-        sessions: <ChatSession>[
-          ChatSession(
-            id: sessionId,
-            workspaceId: 'default',
-            time: DateTime.fromMillisecondsSinceEpoch(1000),
-            title: 'Older loading',
-          ),
-        ],
-      );
-      repository.messagesBySession[sessionId] = _threadMessages(
-        sessionId,
-        450,
-      );
+  testWidgets('shows top older-history loading pill while paginating (#178)', (
+    tester,
+  ) async {
+    const sessionId = 'ses_older_loading';
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: sessionId,
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Older loading',
+        ),
+      ],
+    );
+    repository.messagesBySession[sessionId] = _threadMessages(sessionId, 450);
 
-      final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test'
-        ..defaultServerId = 'srv_test'
-        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
-          <String, dynamic>{
-            'id': 'srv_test',
-            'url': 'http://127.0.0.1:4096',
-            'label': 'Test Server',
-            'basicAuthEnabled': false,
-            'basicAuthUsername': '',
-            'basicAuthPassword': '',
-            'createdAt': 0,
-            'updatedAt': 0,
-          },
-        ]);
-      final provider = _buildChatProvider(
-        chatRepository: repository,
-        localDataSource: localDataSource,
-      );
-      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test'
+      ..defaultServerId = 'srv_test'
+      ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 'srv_test',
+          'url': 'http://127.0.0.1:4096',
+          'label': 'Test Server',
+          'basicAuthEnabled': false,
+          'basicAuthUsername': '',
+          'basicAuthPassword': '',
+          'createdAt': 0,
+          'updatedAt': 0,
+        },
+      ]);
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
 
-      await tester.pumpWidget(_testApp(provider, appProvider));
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
 
-      await provider.initializeProviders();
-      await provider.loadSessions();
-      await provider.selectSession(provider.sessions.first);
-      await tester.pumpAndSettle();
+    await provider.initializeProviders();
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
 
-      expect(provider.messages.isNotEmpty, isTrue);
-      expect(provider.hasMoreOldMessages, isTrue);
-      final residentCount = provider.messages.length;
-      final residentFirstId = provider.messages.first.id;
-      expect(
-        find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
-        findsNothing,
-      );
+    expect(provider.messages.isNotEmpty, isTrue);
+    expect(provider.hasMoreOldMessages, isTrue);
+    final residentCount = provider.messages.length;
+    final residentFirstId = provider.messages.first.id;
+    expect(
+      find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
+      findsNothing,
+    );
 
-      final gate = Completer<void>();
-      repository.getMessagesDelay = () => gate.future;
-      final pending = provider.loadOlderMessages(chunkSize: 100);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+    final gate = Completer<void>();
+    repository.getMessagesDelay = () => gate.future;
+    final pending = provider.loadOlderMessages(chunkSize: 100);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
-      expect(provider.isLoadingOlderMessages, isTrue);
-      expect(
-        find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
-        findsOneWidget,
-      );
+    expect(provider.isLoadingOlderMessages, isTrue);
+    expect(
+      find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
+      findsOneWidget,
+    );
 
-      gate.complete();
-      await pending;
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+    gate.complete();
+    await pending;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-      expect(provider.isLoadingOlderMessages, isFalse);
-      expect(
-        find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
-        findsNothing,
-      );
-      expect(provider.messages.length, greaterThan(residentCount));
-      expect(provider.messages.first.id, isNot(residentFirstId));
-    },
-  );
+    expect(provider.isLoadingOlderMessages, isFalse);
+    expect(
+      find.byKey(const ValueKey<String>('older_messages_loading_indicator')),
+      findsNothing,
+    );
+    expect(provider.messages.length, greaterThan(residentCount));
+    expect(provider.messages.first.id, isNot(residentFirstId));
+  });
 }
 
 Future<void> _pumpUiFrames(WidgetTester tester) async {
@@ -23747,9 +23735,7 @@ _issue172SubConversationFixture({
       ),
     ],
   );
-  final rootMessages = <ChatMessage>[
-    ..._threadMessages(rootSession.id, 24),
-  ];
+  final rootMessages = <ChatMessage>[..._threadMessages(rootSession.id, 24)];
   if (readingAnchor) {
     rootMessages.insert(18, taskMessage);
     rootMessages.add(longTail);
