@@ -35,6 +35,14 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (state.directoryChildren.containsKey(_ChatPageState._rootTreeCacheKey)) {
       return;
     }
+    // Stop auto-loading after a failed root load: without this, every
+    // failure rebuild (provider error notify or dialog onUpdated) would
+    // reschedule another load, looping indefinitely. Manual recovery is
+    // unaffected: refresh/retry call the loaders directly, which clear
+    // treeError synchronously before starting.
+    if (state.treeError != null) {
+      return;
+    }
     state.rootLoadScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       state.rootLoadScheduled = false;
@@ -47,6 +55,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
       if (state.directoryChildren.containsKey(
         _ChatPageState._rootTreeCacheKey,
       )) {
+        return;
+      }
+      if (state.treeError != null) {
         return;
       }
       unawaited(
