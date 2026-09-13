@@ -401,6 +401,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   MarkdownStyleSheet? _cachedMarkdownStyleSheet;
   Brightness? _cachedMarkdownBrightness;
   String? _cachedMarkdownThemeKey;
+  ColorScheme? _cachedMarkdownColorScheme;
 
   OpenCodeThemeTokens _resolveThemeTokens(BuildContext context) {
     return Theme.of(context).extension<OpenCodeThemeTokens>() ??
@@ -408,11 +409,13 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   }
 
   MarkdownStyleSheet _resolveMarkdownStyleSheet(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
     final themeTokens = _resolveThemeTokens(context);
     if (_cachedMarkdownStyleSheet != null &&
         _cachedMarkdownBrightness == brightness &&
-        _cachedMarkdownThemeKey == themeTokens.themeId) {
+        _cachedMarkdownThemeKey == themeTokens.themeId &&
+        _cachedMarkdownColorScheme == theme.colorScheme) {
       return _cachedMarkdownStyleSheet!;
     }
     final sheet = MarkdownStyleSheet(
@@ -481,6 +484,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     );
     _cachedMarkdownBrightness = brightness;
     _cachedMarkdownThemeKey = themeTokens.themeId;
+    _cachedMarkdownColorScheme = theme.colorScheme;
     _cachedMarkdownStyleSheet = sheet;
     return sheet;
   }
