@@ -1461,6 +1461,9 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** on Android, reconnect, maximize/restore, close, and minimize respond to the first quick, stationary touch even if the IME cancels the normal tap sequence; holds past the long-press threshold, drags, background transitions, and a normally completed tap never trigger a recovery action
 - **Then** `Ctrl` and `Alt` can be armed independently, apply together when both are selected, and clear after the next terminal input that produces output; empty IME updates and physical modifier keys do not consume them
 - **Then** tapping an arrow sends one movement, while holding it repeats the same resolved movement until release or cancellation
+- **Given** the inline (non-maximized) terminal panel is open on a compact layout
+- **When** the software keyboard opens
+- **Then** the panel shrinks to keep the extra-key strip above the keyboard, including its suggestion bar, and returns to its persisted height once the keyboard closes (the persisted height itself is not overwritten)
 - **Then** the controls shrink to fit a single row down to a 24px width floor (48px height kept) and wrap onto additional rows only below that floor, respect the platform safe area, and disappear when the keyboard closes, the terminal becomes inactive, or the terminal surface is replaced
 - **Then** desktop and web terminal input remain unchanged and never show the mobile extra-key strip
 - **Given** the user is on an unsupported platform

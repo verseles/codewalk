@@ -3202,6 +3202,11 @@ void main() {
           findsNothing,
         );
 
+        // Simulate a tall persisted panel; under the IME the rendered height
+        // must shrink so the strip is not pushed behind the keyboard.
+        settingsProvider.updateTerminalPanelHeightInMemory(480);
+        expect(settingsProvider.terminalPanelHeight, 480);
+
         await tester.pumpWidget(
           _testApp(
             provider,
@@ -3225,6 +3230,11 @@ void main() {
           find.byKey(const ValueKey<String>('terminal_extra_key_control')),
           findsOneWidget,
         );
+        // The strip must stay above the IME. Keyboard top is 844 - 280 = 564.
+        final stripRect = tester.getRect(
+          find.byKey(const ValueKey<String>('terminal_extra_keys')),
+        );
+        expect(stripRect.bottom, lessThanOrEqualTo(564.5));
         expect(tester.takeException(), isNull);
 
         if (defaultTargetPlatform == TargetPlatform.android) {
@@ -3336,6 +3346,12 @@ void main() {
           find.byKey(const ValueKey<String>('terminal_extra_keys')),
           findsNothing,
         );
+        // Keyboard closed: the keyboard-only cap is removed and the persisted
+        // panel height renders again in full.
+        final restoredPanelRect = tester.getRect(
+          find.byKey(const ValueKey<String>('terminal_panel')),
+        );
+        expect(restoredPanelRect.height, moreOrLessEquals(480, epsilon: 1));
         expect(terminalRemoteDataSource.createPtyCount, 1);
 
         await tester.pumpWidget(

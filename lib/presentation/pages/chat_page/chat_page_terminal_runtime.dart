@@ -1,5 +1,12 @@
 part of '../chat_page.dart';
 
+/// Smallest rendered height for the inline terminal panel.
+const double kTerminalPanelMinHeight = 180;
+
+/// Maximum fraction of the keyboard-shrunk chat column the inline terminal
+/// panel may occupy, so the chat keeps usable room above the extra-key strip.
+const double kTerminalPanelKeyboardMaxFraction = 0.55;
+
 extension _ChatPageTerminalRuntime on _ChatPageState {
   Future<void> _toggleTerminalPanel() async {
     final settingsProvider = _settingsProvider;
@@ -112,15 +119,34 @@ extension _ChatPageTerminalRuntime on _ChatPageState {
     return true;
   }
 
-  Widget _buildTerminalPanel(SettingsProvider settingsProvider) {
+  Widget _buildTerminalPanel(
+    SettingsProvider settingsProvider, {
+    required double availableHeight,
+  }) {
     final mediaHeight = MediaQuery.sizeOf(context).height;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final isCompact = context.windowSizeClass.isCompact;
     final normalMaxPanelHeight = isCompact
         ? max(320.0, mediaHeight * 0.72)
         : min(480.0, mediaHeight * 0.55);
+    // The scaffold shrinks the chat column by the IME. A fixed-height panel
+    // taller than that column overflows, pushing its bottom extra-key strip
+    // behind the keyboard (and its suggestion bar). While the keyboard is open
+    // cap the rendered height to part of the real column so both the chat and
+    // the strip stay visible; the persisted height is restored afterwards.
+    final keyboardOpen = keyboardInset > 0;
+    final effectiveMaxPanelHeight = keyboardOpen
+        ? min(
+            normalMaxPanelHeight,
+            max(
+              kTerminalPanelMinHeight,
+              availableHeight * kTerminalPanelKeyboardMaxFraction,
+            ),
+          )
+        : normalMaxPanelHeight;
     final panelHeight = settingsProvider.terminalPanelHeight.clamp(
-      180.0,
-      normalMaxPanelHeight,
+      kTerminalPanelMinHeight,
+      effectiveMaxPanelHeight,
     );
     return SizedBox(
       height: panelHeight,
@@ -128,7 +154,10 @@ extension _ChatPageTerminalRuntime on _ChatPageState {
         settingsProvider: settingsProvider,
         onHeightDelta: (delta) {
           settingsProvider.updateTerminalPanelHeightInMemory(
-            (panelHeight + delta).clamp(180.0, normalMaxPanelHeight),
+            (panelHeight + delta).clamp(
+              kTerminalPanelMinHeight,
+              normalMaxPanelHeight,
+            ),
           );
           unawaited(settingsProvider.persistTerminalPanelHeight());
         },

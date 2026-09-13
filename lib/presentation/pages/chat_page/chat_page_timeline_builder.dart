@@ -298,12 +298,15 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
   }) {
     return Selector<ChatProvider, _ChatContentBuildKey>(
       selector: (_, p) => _chatContentBuildKey(p),
-      builder: (context, _, _) => _buildChatContent(
-        chatProvider: context.read<ChatProvider>(),
-        isKeyboardOpen: isKeyboardOpen,
-        maxContentWidth: maxContentWidth,
-        horizontalPadding: horizontalPadding,
-        verticalPadding: verticalPadding,
+      builder: (context, _, _) => LayoutBuilder(
+        builder: (context, constraints) => _buildChatContent(
+          chatProvider: context.read<ChatProvider>(),
+          isKeyboardOpen: isKeyboardOpen,
+          maxContentWidth: maxContentWidth,
+          horizontalPadding: horizontalPadding,
+          verticalPadding: verticalPadding,
+          availableHeight: constraints.maxHeight,
+        ),
       ),
     );
   }
@@ -314,6 +317,7 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
     required double maxContentWidth,
     required double horizontalPadding,
     required double verticalPadding,
+    required double availableHeight,
   }) {
     final currentSession = chatProvider.currentSession;
     final isSubConversation = _isSubConversationSession(currentSession);
@@ -846,7 +850,11 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
               ),
             ),
           ),
-          if (showTerminalPanel) _buildTerminalPanel(settingsProvider),
+          if (showTerminalPanel)
+            _buildTerminalPanel(
+              settingsProvider,
+              availableHeight: availableHeight,
+            ),
         ],
       ),
     );
