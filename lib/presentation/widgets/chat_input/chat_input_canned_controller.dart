@@ -6,6 +6,18 @@ const String _cannedModelSelectionSeparator = '\t';
 const String _cannedThinkingInheritValue = '__cw_inherit_thinking__';
 const String _cannedThinkingAutoValue = '__cw_auto_thinking__';
 
+enum _CannedAnswerEditorOutcome { saved, deleted }
+
+class _CannedAnswerEditorResult {
+  const _CannedAnswerEditorResult.saved(this.answer)
+    : outcome = _CannedAnswerEditorOutcome.saved;
+  const _CannedAnswerEditorResult.deleted()
+    : outcome = _CannedAnswerEditorOutcome.deleted,
+      answer = null;
+  final _CannedAnswerEditorOutcome outcome;
+  final CannedAnswer? answer;
+}
+
 extension _ChatInputCannedController on _ChatInputWidgetState {
   List<CannedAnswer> get _visibleCannedAnswers {
     final merged = <CannedAnswer>[
@@ -231,8 +243,10 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
   }
 
   Future<void> _promptCreateCannedAnswer() async {
-    final created = await _showCannedAnswerDialog();
-    if (created == null) {
+    final result = await _showCannedAnswerDialog();
+    final created = result?.answer;
+    if (created == null ||
+        result?.outcome != _CannedAnswerEditorOutcome.saved) {
       return;
     }
     if (!mounted) {
@@ -252,37 +266,16 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
     _ensureInputFocus();
   }
 
-  Future<void> _promptEditOrDeleteCannedAnswer(CannedAnswer answer) async {
+  Future<void> _promptEditCannedAnswer(CannedAnswer answer) async {
     if (!mounted) {
       return;
     }
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Symbols.edit_rounded),
-                title: Text(context.l10n.composerEdit),
-                onTap: () => Navigator.of(context).pop('edit'),
-              ),
-              ListTile(
-                leading: const Icon(Symbols.delete_rounded),
-                title: Text(context.l10n.sessionDelete),
-                onTap: () => Navigator.of(context).pop('delete'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    if (!mounted || action == null) {
+    final result = await _showCannedAnswerDialog(initial: answer);
+    if (!mounted || result == null) {
+      _ensureInputFocus();
       return;
     }
-    if (action == 'delete') {
+    if (result.outcome == _CannedAnswerEditorOutcome.deleted) {
       _setState(() {
         if (answer.scopeMode == CannedAnswerScopeMode.global) {
           _globalCannedAnswers = _globalCannedAnswers
@@ -298,8 +291,8 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
       _ensureInputFocus();
       return;
     }
-    final edited = await _showCannedAnswerDialog(initial: answer);
-    if (!mounted || edited == null) {
+    final edited = result.answer;
+    if (edited == null) {
       _ensureInputFocus();
       return;
     }
@@ -324,7 +317,9 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
     _ensureInputFocus();
   }
 
-  Future<CannedAnswer?> _showCannedAnswerDialog({CannedAnswer? initial}) async {
+  Future<_CannedAnswerEditorResult?> _showCannedAnswerDialog({
+    CannedAnswer? initial,
+  }) async {
     final labelController = TextEditingController(
       text: initial?.normalizedLabel,
     );
@@ -345,12 +340,13 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
         scopeMode == CannedAnswerScopeMode.projectOnly) {
       scopeMode = CannedAnswerScopeMode.global;
     }
-    final result = await showDialog<CannedAnswer>(
+    final result = await showDialog<_CannedAnswerEditorResult>(
       context: context,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             final mediaQuery = MediaQuery.of(dialogContext);
+            final colorScheme = Theme.of(dialogContext).colorScheme;
             final isCompact = mediaQuery.size.width < 600;
             final title = initial == null
                 ? context.l10n.cannedAddTitle
@@ -366,23 +362,34 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
               );
               final modelOverride = _modelOverrideFromSelection(modelSelection);
               Navigator.of(dialogContext).pop(
-                CannedAnswer(
-                  id: initial?.id ?? _nextCannedAnswerId(),
-                  label: labelController.text.trim().isEmpty
-                      ? null
-                      : labelController.text.trim(),
-                  text: text,
-                  insertMode: insertMode,
-                  sendAutomatically: sendAutomatically,
-                  scopeMode: scopeMode,
-                  agentName: _agentNameFromSelection(agentSelection),
-                  providerId: modelOverride.providerId,
-                  modelId: modelOverride.modelId,
-                  thinkingMode: thinkingOverride.mode,
-                  thinkingVariantId: thinkingOverride.variantId,
-                  updatedAtEpochMs: DateTime.now().millisecondsSinceEpoch,
+                _CannedAnswerEditorResult.saved(
+                  CannedAnswer(
+                    id: initial?.id ?? _nextCannedAnswerId(),
+                    label: labelController.text.trim().isEmpty
+                        ? null
+                        : labelController.text.trim(),
+                    text: text,
+                    insertMode: insertMode,
+                    sendAutomatically: sendAutomatically,
+                    scopeMode: scopeMode,
+                    agentName: _agentNameFromSelection(agentSelection),
+                    providerId: modelOverride.providerId,
+                    modelId: modelOverride.modelId,
+                    thinkingMode: thinkingOverride.mode,
+                    thinkingVariantId: thinkingOverride.variantId,
+                    updatedAtEpochMs: DateTime.now().millisecondsSinceEpoch,
+                  ),
                 ),
               );
+            }
+
+            void delete() {
+              if (initial == null) {
+                return;
+              }
+              Navigator.of(
+                dialogContext,
+              ).pop(const _CannedAnswerEditorResult.deleted());
             }
 
             final body = _buildCannedEditorBody(
@@ -448,6 +455,16 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
                       onPressed: () => Navigator.of(dialogContext).pop(),
                     ),
                     actions: [
+                      if (initial != null)
+                        IconButton(
+                          key: const ValueKey<String>(
+                            'canned_answer_delete_action',
+                          ),
+                          icon: const Icon(Symbols.delete_rounded),
+                          tooltip: context.l10n.commonDelete,
+                          color: colorScheme.error,
+                          onPressed: delete,
+                        ),
                       TextButton(
                         key: const ValueKey<String>(
                           'canned_answer_save_button',
@@ -500,8 +517,19 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          if (initial != null)
+                            TextButton(
+                              key: const ValueKey<String>(
+                                'canned_answer_delete_button',
+                              ),
+                              onPressed: delete,
+                              style: TextButton.styleFrom(
+                                foregroundColor: colorScheme.error,
+                              ),
+                              child: Text(context.l10n.commonDelete),
+                            ),
+                          const Spacer(),
                           TextButton(
                             onPressed: () => Navigator.of(dialogContext).pop(),
                             child: Text(context.l10n.commonCancel),
@@ -1119,7 +1147,7 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
                         unawaited(_applyCannedAnswer(item));
                       },
                       onLongPress: () =>
-                          unawaited(_promptEditOrDeleteCannedAnswer(item)),
+                          unawaited(_promptEditCannedAnswer(item)),
                     );
                   },
                 ),

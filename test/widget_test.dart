@@ -703,6 +703,175 @@ void main() {
     );
   });
 
+  testWidgets('long-press quick reply opens editor directly on wide screens', (
+    WidgetTester tester,
+  ) async {
+    final localDataSource = InMemoryAppLocalDataSource();
+    await localDataSource.saveCannedAnswersJson(
+      jsonEncode([
+        {
+          'id': 'edit-direct-1',
+          'label': 'Seeded reply',
+          'text': 'Seeded text',
+          'insertMode': 'append',
+          'sendAutomatically': false,
+          'scopeMode': 'global',
+          'updatedAtEpochMs': 1,
+        },
+      ]),
+    );
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: localDataSource,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+    await tester.longPress(find.text('Seeded reply'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_editor_dialog')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_delete_button')),
+      findsOneWidget,
+    );
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+  });
+
+  testWidgets('edit quick reply shows delete on compact fullscreen', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(390, 800);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final localDataSource = InMemoryAppLocalDataSource();
+    await localDataSource.saveCannedAnswersJson(
+      jsonEncode([
+        {
+          'id': 'edit-compact-1',
+          'label': 'Seeded reply',
+          'text': 'Seeded text',
+          'insertMode': 'append',
+          'sendAutomatically': false,
+          'scopeMode': 'global',
+          'updatedAtEpochMs': 1,
+        },
+      ]),
+    );
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: localDataSource,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+    await tester.longPress(find.text('Seeded reply'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_editor_fullscreen')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_delete_action')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('new quick reply editor has no delete control', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: InMemoryAppLocalDataSource(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New quick reply'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_delete_button')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_delete_action')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('delete quick reply removes item and persists', (
+    WidgetTester tester,
+  ) async {
+    final localDataSource = InMemoryAppLocalDataSource();
+    await localDataSource.saveCannedAnswersJson(
+      jsonEncode([
+        {
+          'id': 'delete-me-1',
+          'label': 'Seeded reply',
+          'text': 'Seeded text',
+          'insertMode': 'append',
+          'sendAutomatically': false,
+          'scopeMode': 'global',
+          'updatedAtEpochMs': 1,
+        },
+      ]),
+    );
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: localDataSource,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+    await tester.longPress(find.text('Seeded reply'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('canned_answer_delete_button')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('canned_answer_editor_dialog')),
+      findsNothing,
+    );
+    final raw = await localDataSource.getCannedAnswersJson();
+    final decoded = jsonDecode(raw ?? '[]') as List<dynamic>;
+    expect(decoded.where((item) => item['id'] == 'delete-me-1'), isEmpty);
+  });
+
   testWidgets('canned override applies before auto-send', (
     WidgetTester tester,
   ) async {
@@ -1053,21 +1222,20 @@ void main() {
     // resolve through the registered FilePickerPlatform, so the test injects
     // an in-memory fake returning the same three names as before.
     final previousPicker = FilePickerPlatform.instance;
-    FilePickerPlatform.instance = _FakeAttachmentPicker(
-      <PlatformFile>[
-        ComposerMemoryFile(
-          name: 'screen.png',
-          bytes: Uint8List.fromList(<int>[1, 2, 3]),
-        ),
-        ComposerMemoryFile(
-          name: 'brief.pdf',
-          bytes: Uint8List.fromList(<int>[4, 5, 6, 7]),
-        ),
-        ComposerMemoryFile(
-          name: 'notes.txt',
-          bytes: Uint8List.fromList(<int>[8]),
-        ),
-      ],
+    FilePickerPlatform.instance = _FakeAttachmentPicker(<PlatformFile>[
+      ComposerMemoryFile(
+        name: 'screen.png',
+        bytes: Uint8List.fromList(<int>[1, 2, 3]),
+      ),
+      ComposerMemoryFile(
+        name: 'brief.pdf',
+        bytes: Uint8List.fromList(<int>[4, 5, 6, 7]),
+      ),
+      ComposerMemoryFile(
+        name: 'notes.txt',
+        bytes: Uint8List.fromList(<int>[8]),
+      ),
+    ],
     );
     addTearDown(() {
       FilePickerPlatform.instance = previousPicker;
