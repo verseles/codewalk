@@ -1131,7 +1131,8 @@
 - **Then** a running `task` tool bubble prefers the latest internal child-session tool label inline when task metadata or cached child-session messages expose it; otherwise it falls back to the latest extracted command, and finally to `Running task`
 - **Then** a completed `task` tool bubble shows `N tool calls` when child-session totals are available, so finished work stays compact while still hinting at the amount of internal activity
 - **When** the assistant finishes the complete response
-- **Then** tool-call chains and tool-detail sections start collapsed by default
+- **Then** tool-call chains start collapsed by default
+- **Then** per-tool technical details are not rendered inline; tapping a tool balloon opens a compact details dialog with a close action, scrollable content, and Escape dismissal
 - **Then** collapse never happens while the assistant is still streaming
 - **Then** content shrink from active tool/work regrouping, collapse deferral, or status-marker filtering must not trigger outer chat snap-back while that same response is still active
 - **Then** manual expansion is temporary and is not restored after return/revalidation
@@ -1142,8 +1143,26 @@
 - **Then** once a completed turn has settled, transient realtime status pulses do not auto re-open or rapidly re-collapse that same work group
 - **Then** the rendered identity of a settled assistant-work group is anchored to the final completed assistant turn, not to volatile intermediate work message ids, so same-turn passive refreshes reuse the existing grouped surface instead of remounting it
 - **Then** passive status-only or background refresh pulses must not re-enter active-response collapse deferral for an already settled turn unless a newer revealable assistant message actually exists
-- **Then** long tool output is rendered inside a bounded inner viewport with its own scrollbar so tool growth does not keep stretching the outer chat timeline while the user is reading
-- **Then** when tool output continues updating inside that bounded viewport, the inner scroll may follow the latest tail only while the user is already near the bottom of that tool output; it must not yank the main chat viewport
+- **Then** long tool output is rendered inside the details dialog in a bounded viewport with its own scrollbar so tool growth does not keep stretching the outer chat timeline while the user is reading
+- **Then** the details dialog opens at the top of the output; when tool output continues updating inside that bounded viewport, the inner scroll may follow the latest tail only while the user is already near the bottom of that tool output; it must not yank the main chat viewport
+
+### Assistant bubbles are borderless with compact spacing
+
+- **Given** the user is viewing the chat timeline
+- **When** assistant messages are rendered
+- **Then** assistant bubbles have no border in the refined visual style (user bubbles keep the hairline border) and spacing between messages is compact without sticking
+- **When** the user changes density, theme brightness, color seed, text scale, or viewport width
+- **Then** completed messages rebuild instead of reusing a stale cached bubble
+
+### Assistant header shows elapsed response time
+
+- **Given** an assistant message is rendered in the timeline
+- **When** the official `time.completed` timestamp is available
+- **Then** the header shows a compact elapsed chip (for example `200ms`, `3s`) instead of the info icon
+- **When** the response is still streaming or timestamps are inconsistent
+- **Then** the chip shows a placeholder and still opens the details
+- **When** the user taps the elapsed chip
+- **Then** an organized info dialog opens with model, provider, tokens, cost, and step details, with a close action, scrollable content, and Escape dismissal
 
 ### Empty assistant-work groups disappear after display filtering
 
@@ -1647,7 +1666,7 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **Then** the resolved question request is removed from the local pending state immediately
 - **When** the user opens or reopens a session while the app was closed, backgrounded, or the realtime stream was down
 - **Then** the app revalidates pending questions from the server (`GET /question`) on session entry, cold-start restore, project switch, and degraded polling, so a question that arrived during the gap still appears as an interactive card without requiring a new server event
-- **Then** a pending-question tool call in the timeline offers a "View question" action that reveals the card as the primary affordance, with the raw technical details kept as a secondary toggle
+- **Then** a pending-question tool call in the timeline offers a "View question" action that reveals the card as the primary affordance, with the raw technical details available in a dialog opened by tapping the tool balloon
 - **Then** the question card stays visible even when the terminal panel hides the composer on compact layouts
 - **When** the pending-question fetch fails transiently
 - **Then** the app retries it with a bounded backoff (two retries) instead of leaving questions hidden until the next session action
