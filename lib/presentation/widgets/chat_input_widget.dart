@@ -963,27 +963,43 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     final anchorBox =
         _extrasButtonAnchorKey.currentContext?.findRenderObject()
             as RenderBox?;
+    // Review r1: position in the target overlay's coordinate space, not the
+    // window-global one. On desktop the nearest Overlay sits below the
+    // integrated title bar (DesktopWindowChromeFrame), so global coordinates
+    // would shift the panel down by the title-bar height.
+    final overlayBox =
+        Overlay.of(overlayContext).context.findRenderObject() as RenderBox?;
+    final bounds = overlayBox?.size ?? screen;
     final anchorTopLeft = anchorBox != null && anchorBox.attached
-        ? anchorBox.localToGlobal(Offset.zero)
-        : Offset(16, screen.height - 100);
+        ? anchorBox.localToGlobal(Offset.zero, ancestor: overlayBox)
+        : Offset(16, bounds.height - 100);
     final anchorSize = anchorBox != null && anchorBox.attached
         ? anchorBox.size
         : const Size(40, 40);
     final maxHeight = _popoverMaxHeight(overlayContext);
-    final width = math.min(360.0, math.max(0.0, screen.width - 16));
+    final width = math.min(360.0, math.max(0.0, bounds.width - 16));
     final left = anchorTopLeft.dx
-        .clamp(8.0, math.max(8.0, screen.width - width - 8))
+        .clamp(8.0, math.max(8.0, bounds.width - width - 8))
         .toDouble();
     // Flip below the button when there is not enough room above (short
-    // timelines, compact harnesses). The inline popover never clipped; the
-    // overlay must not either.
+    // timelines, compact harnesses). Clamp to the overlay bounds on both
+    // sides so the panel never clips.
     final spaceAbove = anchorTopLeft.dy - 8;
-    final top = spaceAbove >= maxHeight
-        ? anchorTopLeft.dy - 8 - maxHeight
-        : anchorTopLeft.dy + anchorSize.height + 8;
+    double top;
+    var panelMaxHeight = maxHeight;
+    if (spaceAbove >= maxHeight) {
+      top = anchorTopLeft.dy - 8 - maxHeight;
+    } else {
+      top = anchorTopLeft.dy + anchorSize.height + 8;
+      panelMaxHeight = math.min(
+        maxHeight,
+        math.max(0.0, bounds.height - top - 8),
+      );
+    }
+    top = math.max(8.0, top);
     return Positioned(
       left: left,
-      top: math.max(8.0, top),
+      top: top,
       width: width,
       child: Focus(
         canRequestFocus: false,
@@ -993,10 +1009,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           groupId: _extrasPopoverTapRegionGroup,
           onTapOutside: (_) => _closePopover(),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxHeight),
+            constraints: BoxConstraints(maxHeight: panelMaxHeight),
             child: _buildExtrasPopover(
               colorScheme: Theme.of(overlayContext).colorScheme,
-              maxHeight: maxHeight,
+              maxHeight: panelMaxHeight,
             ),
           ),
         ),

@@ -786,9 +786,11 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
         .toDouble();
     // #185: the menu opens upward from the agent chip. The agent list scrolls
     // inside a bounded area while the auto-approve footer stays pinned.
+    // Review r1: bound the lower limit by the available height so the clamp
+    // stays valid on very short viewports (freely resized desktop windows).
     final bottom = overlayBox.size.height - buttonRect.top + 4;
     final maxHeight = (buttonRect.top - margin - 8)
-        .clamp(200.0, overlayBox.size.height)
+        .clamp(min(200.0, overlayBox.size.height), overlayBox.size.height)
         .toDouble();
 
     final selected = await showGeneralDialog<String>(
@@ -809,6 +811,8 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                 child: Material(
                   borderRadius: BorderRadius.circular(12),
                   clipBehavior: Clip.antiAlias,
+                  // Review r1: explicit elevation like other floating panels.
+                  elevation: 8,
                   child: StatefulBuilder(
                     builder: (menuContext, setMenuState) {
                       final autoApproveEnabled =

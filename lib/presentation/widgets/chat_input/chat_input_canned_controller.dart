@@ -124,6 +124,11 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
       }
       _popoverType = ChatComposerPopoverType.canned;
       _activeSuggestionIndex = 0;
+      // Review r1: stale in-flight mention/slash loads must not clobber the
+      // overlay. Their post-await guards compare against these queries.
+      _suggestionDebounce?.cancel();
+      _activeMentionQuery = '';
+      _activeSlashQuery = '';
     });
   }
 
