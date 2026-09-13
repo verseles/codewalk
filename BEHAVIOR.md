@@ -654,6 +654,9 @@
 - **When** the chat surface is rendered
 - **Then** the selected tab shows the session title and context-usage control, and the duplicate compact session header is hidden
 - **Then** the compact session header remains visible when tabs are disabled or no selected tab represents the current session
+- **Given** AMOLED dark mode collapses the surface roles onto pure black
+- **When** the tab strip is rendered
+- **Then** the selected session and file tabs keep their pure-black fill and gain a minimal top selection indicator, while inactive tabs stay unchanged
 
 - **Given** the tab strip is rendered
 - **When** the user swipes, uses the wheel or trackpad, or the app scrolls programmatically
@@ -1458,7 +1461,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** on Android, reconnect, maximize/restore, close, and minimize respond to the first quick, stationary touch even if the IME cancels the normal tap sequence; holds past the long-press threshold, drags, background transitions, and a normally completed tap never trigger a recovery action
 - **Then** `Ctrl` and `Alt` can be armed independently, apply together when both are selected, and clear after the next terminal input that produces output; empty IME updates and physical modifier keys do not consume them
 - **Then** tapping an arrow sends one movement, while holding it repeats the same resolved movement until release or cancellation
-- **Then** the controls scroll horizontally on narrow screens, respect the platform safe area, and disappear when the keyboard closes, the terminal becomes inactive, or the terminal surface is replaced
+- **Then** the controls shrink to fit a single row down to a 24px width floor (48px height kept) and wrap onto additional rows only below that floor, respect the platform safe area, and disappear when the keyboard closes, the terminal becomes inactive, or the terminal surface is replaced
 - **Then** desktop and web terminal input remain unchanged and never show the mobile extra-key strip
 - **Given** the user is on an unsupported platform
 - **When** the user taps the same terminal button
