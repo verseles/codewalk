@@ -704,7 +704,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     });
     try {
       final suggestions = await loader(query);
-      if (!mounted || query != _activeMentionQuery) {
+      // Review r2: stale loads (including empty-query ones whose guard
+      // passes after the tracker was cleared) must not clobber an open
+      // extras overlay. Fresh typing moves _popoverType away from canned
+      // before its load starts, so it still applies normally.
+      if (!mounted ||
+          query != _activeMentionQuery ||
+          _popoverType == ChatComposerPopoverType.canned) {
         return;
       }
       _setState(() {
@@ -737,7 +743,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     });
     try {
       final suggestions = await loader(query);
-      if (!mounted || query != _activeSlashQuery) {
+      // Review r2: same stale-load guard as the mention loader above.
+      if (!mounted ||
+          query != _activeSlashQuery ||
+          _popoverType == ChatComposerPopoverType.canned) {
         return;
       }
       _setState(() {
