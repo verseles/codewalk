@@ -2,6 +2,17 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.238.0 - 2026-09-13
+
+- docs(behavior): long-press quick reply opens editor directly with footer delete
+- fix(composer): recheck mounted before focus after create persist
+- fix(composer): guard quick-reply edit focus and clamp index after delete
+- feat(composer): long-press quick reply opens editor directly with footer delete
+- fix(files): stop root auto-load after failure to avoid retry loop
+- fix(files): notify Files dialog on cold root load and show tree skeleton
+- fix(files): refresh mobile Files dialog on expand, collapse and retry
+- feat(composer): raise extras popover cap to 6 rows
+
 ## v1.237.0 - 2026-09-13
 
 - docs: Lote A behavior (floating extras, agent-menu auto-approve, Attach)
