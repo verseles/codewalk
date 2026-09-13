@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.235.0 - 2026-09-13
+
+- Docs: timeline visuals use dialog details, borderless bubbles, elapsed chip
+- Review fix: markdown stylesheet cache tracks color scheme
+- Review fixes round 2: test key, cache axes, dialog context, scroll
+- Review fixes: chip touch target, dialog ripple and insets, cache keys
+- Chat timeline visuals: borderless assistant bubbles, tool details dialog, elapsed chip
+
 ## v1.234.0 - 2026-09-12
 
 - fix(files): dispose Quick Open controller on dialog unmount
