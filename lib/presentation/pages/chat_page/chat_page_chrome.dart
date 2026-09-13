@@ -1315,9 +1315,20 @@ extension _ChatPageChrome on _ChatPageState {
                           chatProvider,
                           _,
                         ) {
+                          void refreshFilesDialog() {
+                            if (!statefulContext.mounted) {
+                              return;
+                            }
+                            setDialogState(() {});
+                          }
+
                           final fileState = _resolveFileContextState(
                             projectProvider: projectProvider,
                             appProvider: appProvider,
+                            // Cold-cache first open loads the root
+                            // post-frame; without this the dialog would stay
+                            // on its empty state after a successful load.
+                            onStateChanged: refreshFilesDialog,
                           );
                           _reconcileFileContextWithSessionDiff(
                             contextKey: projectProvider.contextKey,
@@ -1330,12 +1341,7 @@ extension _ChatPageChrome on _ChatPageState {
                               fileState: fileState,
                               projectProvider: projectProvider,
                               isMobileLayout: true,
-                              onStateChanged: () {
-                                if (!statefulContext.mounted) {
-                                  return;
-                                }
-                                setDialogState(() {});
-                              },
+                              onStateChanged: refreshFilesDialog,
                             ),
                           );
                         },

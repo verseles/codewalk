@@ -24,6 +24,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
   void _ensureFileRootLoaded({
     required _FileExplorerContextState state,
     required ProjectProvider projectProvider,
+    VoidCallback? onUpdated,
   }) {
     if (state.rootLoadScheduled) {
       return;
@@ -49,8 +50,17 @@ extension _ChatPageFileRuntime on _ChatPageState {
         return;
       }
       unawaited(
-        _loadRootDirectoryNodes(state: state, projectProvider: projectProvider),
+        _loadRootDirectoryNodes(
+          state: state,
+          projectProvider: projectProvider,
+        ).whenComplete(() {
+          onUpdated?.call();
+        }),
       );
+      // The loader sets its loading flag synchronously before its first
+      // await, so notify now to surface the skeleton in dialog hosts whose
+      // rebuilds depend on onUpdated (same contract as directory expand).
+      onUpdated?.call();
     });
   }
 
@@ -1985,6 +1995,10 @@ extension _ChatPageFileRuntime on _ChatPageState {
                     onStateChanged?.call();
                   }),
                 );
+                // The loader flags loading synchronously before its first
+                // await; notify again so dialog hosts show the skeleton rows
+                // instead of an empty expanded folder on slow loads.
+                onStateChanged?.call();
                 return;
               }
               unawaited(
@@ -2230,6 +2244,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                     onStateChanged?.call();
                   }),
                 );
+                onStateChanged?.call();
                 return;
               }
               unawaited(
@@ -2243,6 +2258,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                   onStateChanged?.call();
                 }),
               );
+              onStateChanged?.call();
             },
             child: Text(context.l10n.chatRetry),
           ),

@@ -80,6 +80,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
   _FileExplorerContextState _resolveFileContextState({
     required ProjectProvider projectProvider,
     required AppProvider appProvider,
+    VoidCallback? onStateChanged,
   }) {
     final contextKey = projectProvider.contextKey;
     final rootDirectory = _resolveFileRootDirectory(
@@ -100,7 +101,11 @@ extension _ChatPageFileExplorerController on _ChatPageState {
       }
       state.resetForRoot(rootDirectory);
     }
-    _ensureFileRootLoaded(state: state, projectProvider: projectProvider);
+    _ensureFileRootLoaded(
+      state: state,
+      projectProvider: projectProvider,
+      onUpdated: onStateChanged,
+    );
     unawaited(
       _ensureFileOperationCapabilities(
         state: state,
@@ -736,6 +741,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                         onStateChanged?.call();
                       }),
                     );
+                    onStateChanged?.call();
                   },
                   icon: const Icon(Symbols.refresh_rounded),
                 ),
