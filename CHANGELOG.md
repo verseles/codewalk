@@ -2,6 +2,10 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.239.0 - 2026-09-13
+
+- fix(composer): pin extras popover bottom edge to the button
+
 ## v1.238.0 - 2026-09-13
 
 - docs(behavior): long-press quick reply opens editor directly with footer delete
