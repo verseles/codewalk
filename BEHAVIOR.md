@@ -1011,10 +1011,10 @@
 
 - **Given** the user is composing a message
 - **When** the user taps the `+` extras button on the left side of the composer bubble
-- **Then** the app opens or closes the inline extras popover above the input without changing the current keyboard/focus state
+- **Then** the app opens or closes a floating extras popover anchored to the extras button, without pushing the composer or changing the current keyboard/focus state
 - **Then** if the keyboard is already open, tapping `+` keeps it open; if the keyboard is already closed, tapping `+` keeps it closed
 - **Then** the extras popover stays compact, starts directly with the action row, and avoids redundant title lines above the actions or canned-answer list
-- **Then** the extras popover shows a top action row with quick actions such as `New quick reply` and `Attach files`, leaving room for future actions
+- **Then** the extras popover shows a top action row with quick actions such as `New quick reply` and `Attach`, leaving room for future actions
 - **Then** attachment entry is opened from that extras popover instead of a separate attachment button near the model controls
 - **Then** selecting an item inserts canned text according to item mode: `Append at cursor` inserts at current selection, `Replace` overwrites composer text
 - **Then** if that canned answer has an agent, model, or variant override, the app applies the override to the visible composer selection after insertion and before any automatic send
@@ -1525,7 +1525,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Given** the user is composing a message
 - **When** the user attaches an image or PDF
 - **Then** the file is attached to the message and sent along with the text
-- **Then** when the selected model supports both image and PDF inputs, `Attach files` opens a single multi-select picker for supported image/PDF files
+- **Then** when the selected model supports both image and PDF inputs, `Attach` opens a single multi-select picker for supported image/PDF files
 - **Then** the type-specific image and PDF pickers remain available as direct fallbacks
 - **Then** every valid selected file is shown as its own composer chip before send
 - **Then** if the platform only returns one selected file, that file is still attached safely
@@ -1648,7 +1648,7 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 
 - **Given** the user is in a main/root conversation with the composer controls visible
 - **When** the composer is rendered
-- **Then** a permission auto-approve toggle is shown to the left of the agent selector
+- **Then** a permission auto-approve toggle is shown as a fixed footer item inside the agent selector menu (opened from the agent chip), and the pending-permission badge is shown on the agent chip itself
 - **Then** the toggle defaults to enabled and persists when the user turns it off
 - **When** the toggle is enabled and the current thread receives a permission request
 - **Then** the app automatically replies with `Always` when that permission request exposes remembered approval, otherwise it falls back to `Allow Once`

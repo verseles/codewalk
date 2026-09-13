@@ -1187,7 +1187,7 @@ This contract is a direct application of the ADR-023 contract-first policy: the 
 
 **Status**: Approved ADR-023 exception.
 
-**Summary**: CodeWalk exposes a composer-level toggle to the left of the agent selector that defaults to enabled, persists user opt-out, and auto-approves permission requests with `always` semantics unconditionally, sending `remember: true` to create durable session-scoped grants. Question prompts remain manual. The auto-approve behavior extends to the Android background worker continuity path, enabling pending permission resolution when the app resumes from background.
+**Summary**: CodeWalk exposes a fixed footer item inside the agent selector menu (opened from the agent chip), with the pending-permission badge on the agent chip that defaults to enabled, persists user opt-out, and auto-approves permission requests with `always` semantics unconditionally, sending `remember: true` to create durable session-scoped grants. Question prompts remain manual. The auto-approve behavior extends to the Android background worker continuity path, enabling pending permission resolution when the app resumes from background.
 
 **Deviation from official behavior**: Official OpenCode currently keeps runtime permission-mode controls outside the composer and does not inherit permissive behavior across subagents/subsessions. CodeWalk intentionally extends auto-approval to the visible thread, including mirrored descendant/subsession permission requests surfaced in the root session, and always replies `always` to create durable session-scoped grants. The Android background worker continuity path further extends this to background-collected permission requests when the app is resumed.
 
