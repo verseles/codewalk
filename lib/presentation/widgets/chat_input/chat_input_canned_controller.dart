@@ -263,6 +263,9 @@ extension _ChatInputCannedController on _ChatInputWidgetState {
       }
     });
     await _persistCannedAnswers(scope: created.scopeMode);
+    if (!mounted) {
+      return;
+    }
     _ensureInputFocus();
   }
 
