@@ -76,6 +76,7 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 - Ensure all code changes are committed before release. `make release` only commits the version bump.
 - Plain `push` is not a release and must not invoke `releaser`.
 - After release push/tag, CI watch belongs to `cimonitor`; `releaser` does not monitor CI.
+- Close flow issues only after the release CI is green, commenting version + commit.
 
 
 ## Known Pitfalls
