@@ -141,42 +141,134 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
                     ),
             ],
           ),
-          if (!isTaskTool) ...[
-            const SizedBox(height: 8),
-            _ToolPartDetailsToggle(
-              key: ValueKey<String>(
-                'tool_part_details_toggle_$toolIdentityToken',
+          if (!isTaskTool &&
+              hasPendingQuestion &&
+              widget.onShowQuestion != null) ...[
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                key: ValueKey<String>('tool_part_question_action_${part.id}'),
+                onPressed: () => widget.onShowQuestion!(part),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
+                ),
+                icon: const Icon(Symbols.help_outline_rounded, size: 14),
+                label: Text(context.l10n.chatMessageShowQuestion),
               ),
-              expanded: _isToolDetailsExpanded(toolIdentityToken),
-              onExpandedChanged: (expanded) =>
-                  _setToolDetailsExpanded(toolIdentityToken, expanded),
-              partId: part.id,
-              hasDetails: hasDetails,
-              details: _buildToolStateDetails(context, part.state, part.tool),
-              pendingQuestionAction: hasPendingQuestion &&
-                      widget.onShowQuestion != null
-                  ? () => widget.onShowQuestion!(part)
-                  : null,
             ),
           ],
         ],
       ),
     );
 
-    if (!isTaskTool || onNavigateToSubConversation == null) {
+    final VoidCallback? primaryAction;
+    if (isTaskTool && onNavigateToSubConversation != null) {
+      primaryAction = onNavigateToSubConversation;
+    } else if (!isTaskTool && hasDetails) {
+      primaryAction = () => _showToolDetailsDialog(context, part);
+    } else {
+      primaryAction = null;
+    }
+    if (primaryAction == null) {
       return content;
     }
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        key: ValueKey<String>('task_tool_open_session_${part.id}'),
-        onTap: onNavigateToSubConversation,
+        key: ValueKey<String>(
+          isTaskTool
+              ? 'task_tool_open_session_${part.id}'
+              : 'tool_part_open_details_${part.id}',
+        ),
+        onTap: primaryAction,
         borderRadius: visualTokens.isRefined
             ? visualTokens.cardRadius
             : AppShapes.borderSmall,
         child: content,
       ),
+    );
+  }
+
+  Future<void> _showToolDetailsDialog(BuildContext context, ToolPart part) {
+    return showAppDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final visualTokens = theme.visualStyleTokens;
+        final presentation = _toolPresentation(part.tool);
+        return Dialog(
+          key: ValueKey<String>('tool_details_dialog_${part.id}'),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: visualTokens.isRefined
+                ? visualTokens.dialogRadius
+                : AppShapes.borderLarge,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 560,
+              maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        presentation.icon,
+                        size: 18,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _resolveToolDescriptionLabel(part),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(dialogContext).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      IconButton(
+                        key: ValueKey<String>(
+                          'tool_details_dialog_close_${part.id}',
+                        ),
+                        icon: const Icon(Symbols.close),
+                        tooltip: context.l10n.chatClose,
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: _buildToolStateDetails(
+                      dialogContext,
+                      part.state,
+                      part.tool,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -699,90 +791,6 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
     final beforeLines = before.split('\n').map((line) => '-$line').join('\n');
     final afterLines = after.split('\n').map((line) => '+$line').join('\n');
     return '--- $path\n+++ $path\n@@\n$beforeLines\n$afterLines';
-  }
-}
-
-class _ToolPartDetailsToggle extends StatelessWidget {
-  const _ToolPartDetailsToggle({
-    super.key,
-    required this.expanded,
-    required this.onExpandedChanged,
-    required this.partId,
-    required this.hasDetails,
-    required this.details,
-    this.pendingQuestionAction,
-  });
-
-  final bool expanded;
-  final ValueChanged<bool> onExpandedChanged;
-  final String partId;
-  final bool hasDetails;
-  final Widget details;
-  final VoidCallback? pendingQuestionAction;
-  @override
-  Widget build(BuildContext context) {
-    final hasQuestionAction = pendingQuestionAction != null;
-    if (!hasDetails && !hasQuestionAction) {
-      return const SizedBox.shrink();
-    }
-    final compactLayout = MediaQuery.sizeOf(context).width < 600;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (expanded) details,
-        Align(
-          alignment: Alignment.centerRight,
-          child: Wrap(
-            spacing: 8,
-            runAlignment: WrapAlignment.end,
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (hasQuestionAction)
-                TextButton.icon(
-                  key: ValueKey<String>(
-                    'tool_part_question_action_$partId',
-                  ),
-                  onPressed: pendingQuestionAction,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.primary,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                  ),
-                  icon: const Icon(Symbols.help_outline_rounded, size: 14),
-                  label: Text(context.l10n.chatMessageShowQuestion),
-                ),
-              if (hasDetails)
-                TextButton(
-                  key: ValueKey<String>('tool_part_details_button_$partId'),
-                  onPressed: () => onExpandedChanged(!expanded),
-                  style: TextButton.styleFrom(
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                  ),
-                  child: Text(
-                    expanded
-                        ? context.l10n.chatMessageHide
-                        : (compactLayout
-                              ? context.l10n.chatMessageShow
-                              : context.l10n.chatMessageDetails),
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
 

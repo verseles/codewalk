@@ -21,10 +21,12 @@ import 'package:codewalk/presentation/services/tts/tts_backend.dart';
 import 'package:codewalk/presentation/services/tts/generated_tts_audio_player.dart';
 import 'package:codewalk/presentation/theme/opencode_theme_presets.dart';
 import 'package:codewalk/presentation/utils/chat_abort_message.dart';
+import 'package:codewalk/presentation/theme/app_visual_style_tokens.dart';
 import 'package:codewalk/presentation/widgets/chat_message_widget.dart';
 import 'package:codewalk/presentation/widgets/message_entrance_animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -81,8 +83,7 @@ class _ControlledTtsBackend implements TtsBackend {
 }
 
 class _InstantGeneratedBackend implements TtsBackend {
-  _InstantGeneratedBackend({List<String>? texts})
-    : texts = texts ?? <String>[];
+  _InstantGeneratedBackend({List<String>? texts}) : texts = texts ?? <String>[];
 
   final List<String> texts;
 
@@ -214,6 +215,20 @@ SettingsProvider _buildSettingsProviderForReadAloud() {
   );
 }
 
+Future<void> openToolDetailsDialog(WidgetTester tester, String partId) async {
+  await tester.tap(
+    find.byKey(ValueKey<String>('tool_part_open_details_$partId')),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> closeToolDetailsDialog(WidgetTester tester, String partId) async {
+  await tester.tap(
+    find.byKey(ValueKey<String>('tool_details_dialog_close_$partId')),
+  );
+  await tester.pumpAndSettle();
+}
+
 void _registerSpeechSettingsDependencies() {
   di.sl.registerSingleton<SherpaModelManager>(SherpaModelManager());
   di.sl.registerSingleton<MoonshineModelManager>(MoonshineModelManager());
@@ -294,7 +309,9 @@ void main() {
     addTearDown(readAloudService.dispose);
     final settingsProvider = _buildSettingsProviderForReadAloud();
     addTearDown(settingsProvider.dispose);
-    await settingsProvider.setReadAloudProvider(ReadAloudProvider.edgeExperimental);
+    await settingsProvider.setReadAloudProvider(
+      ReadAloudProvider.edgeExperimental,
+    );
     final message = _readAloudAssistantMessage('msg_read_aloud_controls');
 
     final speakFuture = readAloudService.speak(
@@ -543,7 +560,7 @@ void main() {
   });
 
   testWidgets(
-    'preserves expanded tool details when message instance is replaced with same part id',
+    'shows updated tool details in dialog after message instance is replaced with same part id',
     (WidgetTester tester) async {
       AssistantMessage messageWithTool(String output) {
         return AssistantMessage(
@@ -586,29 +603,38 @@ void main() {
         ),
       );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('tool_part_details_button_tool_persist'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await openToolDetailsDialog(tester, 'tool_persist');
 
       expect(find.text('/workspace'), findsOneWidget);
-      expect(find.text('Hide'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey<String>('tool_details_dialog_close_tool_persist'),
+        ),
+        findsOneWidget,
+      );
+
+      await closeToolDetailsDialog(tester, 'tool_persist');
+      expect(find.text('/workspace'), findsNothing);
 
       setHostState(() {
         message = messageWithTool('/workspace/updated');
       });
       await tester.pumpAndSettle();
 
+      await openToolDetailsDialog(tester, 'tool_persist');
       expect(find.text('/workspace/updated'), findsOneWidget);
-      expect(find.text('Hide'), findsOneWidget);
-      expect(find.text('Details'), findsNothing);
+      expect(
+        find.byKey(
+          const ValueKey<String>('tool_details_dialog_close_tool_persist'),
+        ),
+        findsOneWidget,
+      );
+      await closeToolDetailsDialog(tester, 'tool_persist');
     },
   );
 
   testWidgets(
-    'preserves expanded tool details when stream replacement keeps call id but changes part id',
+    'shows updated tool details in dialog when stream replacement keeps call id but changes part id',
     (WidgetTester tester) async {
       AssistantMessage messageWithTool({
         required String partId,
@@ -657,17 +683,12 @@ void main() {
         ),
       );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'tool_part_details_button_tool_callid_persist_1',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await openToolDetailsDialog(tester, 'tool_callid_persist_1');
 
       expect(find.text('/workspace'), findsOneWidget);
-      expect(find.text('Hide'), findsOneWidget);
+
+      await closeToolDetailsDialog(tester, 'tool_callid_persist_1');
+      expect(find.text('/workspace'), findsNothing);
 
       setHostState(() {
         message = messageWithTool(
@@ -677,14 +698,14 @@ void main() {
       });
       await tester.pumpAndSettle();
 
+      await openToolDetailsDialog(tester, 'tool_callid_persist_2');
       expect(find.text('/workspace/updated'), findsOneWidget);
-      expect(find.text('Hide'), findsOneWidget);
-      expect(find.text('Details'), findsNothing);
+      await closeToolDetailsDialog(tester, 'tool_callid_persist_2');
     },
   );
 
   testWidgets(
-    'preserves expanded tool details when call id appears after first render',
+    'shows updated tool details in dialog when call id appears after first render',
     (WidgetTester tester) async {
       AssistantMessage messageWithTool({
         required String callId,
@@ -730,15 +751,11 @@ void main() {
         ),
       );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('tool_part_details_button_tool_late_callid'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await openToolDetailsDialog(tester, 'tool_late_callid');
 
       expect(find.text('/workspace'), findsOneWidget);
-      expect(find.text('Hide'), findsOneWidget);
+      await closeToolDetailsDialog(tester, 'tool_late_callid');
+      expect(find.text('/workspace'), findsNothing);
 
       setHostState(() {
         message = messageWithTool(
@@ -748,9 +765,9 @@ void main() {
       });
       await tester.pumpAndSettle();
 
+      await openToolDetailsDialog(tester, 'tool_late_callid');
       expect(find.text('/workspace/updated'), findsOneWidget);
-      expect(find.text('Hide'), findsOneWidget);
-      expect(find.text('Details'), findsNothing);
+      await closeToolDetailsDialog(tester, 'tool_late_callid');
     },
   );
 
@@ -843,16 +860,17 @@ void main() {
         ),
         findsOneWidget,
       );
-      final detailsToggle = find.byKey(
+      final detailsBalloon = find.byKey(
         const ValueKey<String>(
-          'tool_part_details_button_part_question_action_details',
+          'tool_part_open_details_part_question_action_details',
         ),
       );
-      expect(detailsToggle, findsOneWidget);
+      expect(detailsBalloon, findsOneWidget);
 
-      await tester.tap(detailsToggle);
+      await tester.tap(detailsBalloon);
       await tester.pumpAndSettle();
-      expect(find.text('Hide'), findsOneWidget);
+      expect(find.text('{"answers": []}'), findsOneWidget);
+      await closeToolDetailsDialog(tester, 'part_question_action_details');
     },
   );
 
@@ -1806,7 +1824,7 @@ void main() {
     expect(assistantLongPressCount, 0);
   });
 
-  testWidgets('tool completed output starts collapsed and can expand', (
+  testWidgets('tool completed output opens in dialog on balloon tap', (
     WidgetTester tester,
   ) async {
     tester.view.devicePixelRatio = 1.0;
@@ -1854,12 +1872,12 @@ void main() {
       Colors.green.shade700,
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_completed'),
-      ),
+    expect(
+      find.byKey(const ValueKey<String>('tool_content_text')),
+      findsNothing,
     );
-    await tester.pumpAndSettle();
+
+    await openToolDetailsDialog(tester, 'part_tool_completed');
 
     expect(
       find.byWidgetPredicate(
@@ -1881,9 +1899,10 @@ void main() {
       ),
       findsOneWidget,
     );
+    await closeToolDetailsDialog(tester, 'part_tool_completed');
   });
 
-  testWidgets('tool error output starts collapsed and can expand', (
+  testWidgets('tool error output opens in dialog on balloon tap', (
     WidgetTester tester,
   ) async {
     tester.view.devicePixelRatio = 1.0;
@@ -1925,12 +1944,7 @@ void main() {
     expect(find.text('Running command'), findsOneWidget);
     expect(find.text('Needs attention'), findsOneWidget);
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_error'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'part_tool_error');
 
     expect(
       find.byWidgetPredicate(
@@ -1950,6 +1964,7 @@ void main() {
       find.byKey(const ValueKey<String>('tool_content_scroll_tool_error_diff')),
       findsOneWidget,
     );
+    await closeToolDetailsDialog(tester, 'part_tool_error');
   });
 
   testWidgets('mobile tool status chip shows icon without label text', (
@@ -1999,14 +2014,7 @@ void main() {
       Colors.green.shade700,
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>(
-          'tool_part_details_button_part_tool_mobile_status',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'part_tool_mobile_status');
 
     expect(
       find.byWidgetPredicate(
@@ -2017,6 +2025,7 @@ void main() {
       ),
       findsOneWidget,
     );
+    await closeToolDetailsDialog(tester, 'part_tool_mobile_status');
   });
 
   testWidgets('completed tool status chip stays green in dark theme', (
@@ -2131,34 +2140,30 @@ void main() {
     expect(find.text('Hide'), findsNWidgets(2));
     expect(
       find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_chain_1'),
+        const ValueKey<String>('tool_part_open_details_part_tool_chain_1'),
       ),
       findsOneWidget,
     );
     expect(
       find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_chain_2'),
+        const ValueKey<String>('tool_part_open_details_part_tool_chain_2'),
       ),
       findsOneWidget,
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_chain_1'),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_chain_2'),
-      ),
-    );
-    await tester.pumpAndSettle();
-
+    await openToolDetailsDialog(tester, 'part_tool_chain_1');
     expect(
       find.byKey(const ValueKey<String>('tool_command_text')),
-      findsNWidgets(2),
+      findsOneWidget,
     );
+    await closeToolDetailsDialog(tester, 'part_tool_chain_1');
+
+    await openToolDetailsDialog(tester, 'part_tool_chain_2');
+    expect(
+      find.byKey(const ValueKey<String>('tool_command_text')),
+      findsOneWidget,
+    );
+    await closeToolDetailsDialog(tester, 'part_tool_chain_2');
 
     await tester.tap(
       find.byKey(
@@ -2307,7 +2312,7 @@ void main() {
       expect(
         find.byKey(
           const ValueKey<String>(
-            'tool_part_details_button_part_tool_chain_streaming_1',
+            'tool_part_open_details_part_tool_chain_streaming_1',
           ),
         ),
         findsNothing,
@@ -2332,27 +2337,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'tool_part_details_button_part_tool_chain_streaming_1',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'tool_part_details_button_part_tool_chain_streaming_2',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
+      await openToolDetailsDialog(tester, 'part_tool_chain_streaming_1');
       expect(
         find.byKey(const ValueKey<String>('tool_command_text')),
-        findsNWidgets(2),
+        findsOneWidget,
       );
+      await closeToolDetailsDialog(tester, 'part_tool_chain_streaming_1');
+
+      await openToolDetailsDialog(tester, 'part_tool_chain_streaming_2');
+      expect(
+        find.byKey(const ValueKey<String>('tool_command_text')),
+        findsOneWidget,
+      );
+      await closeToolDetailsDialog(tester, 'part_tool_chain_streaming_2');
 
       await tester.pumpWidget(
         localizedMaterialApp(
@@ -2374,11 +2371,11 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('Hide'), findsNWidgets(4));
+      expect(find.text('Hide'), findsNWidgets(2));
       expect(
         find.byKey(
           const ValueKey<String>(
-            'tool_part_details_button_part_tool_chain_streaming_1',
+            'tool_part_open_details_part_tool_chain_streaming_1',
           ),
         ),
         findsOneWidget,
@@ -2449,14 +2446,7 @@ void main() {
         ),
       );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>(
-            'tool_part_details_button_part_tool_chain_transition_1',
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await openToolDetailsDialog(tester, 'part_tool_chain_transition_1');
 
       expect(
         find.byKey(const ValueKey<String>('tool_command_text')),
@@ -2476,19 +2466,11 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('Hide'), findsNWidgets(3));
       expect(
         find.byKey(const ValueKey<String>('tool_command_text')),
         findsOneWidget,
       );
-      expect(
-        find.byKey(
-          const ValueKey<String>(
-            'tool_part_details_button_part_tool_chain_transition_1',
-          ),
-        ),
-        findsOneWidget,
-      );
+      await closeToolDetailsDialog(tester, 'part_tool_chain_transition_1');
     },
   );
 
@@ -2550,7 +2532,7 @@ void main() {
     expect(
       find.byKey(
         const ValueKey<String>(
-          'tool_part_details_button_part_tool_chain_rebuild_1',
+          'tool_part_open_details_part_tool_chain_rebuild_1',
         ),
       ),
       findsNothing,
@@ -2568,7 +2550,7 @@ void main() {
     expect(
       find.byKey(
         const ValueKey<String>(
-          'tool_part_details_button_part_tool_chain_rebuild_1',
+          'tool_part_open_details_part_tool_chain_rebuild_1',
         ),
       ),
       findsOneWidget,
@@ -2580,7 +2562,7 @@ void main() {
     expect(
       find.byKey(
         const ValueKey<String>(
-          'tool_part_details_button_part_tool_chain_rebuild_1',
+          'tool_part_open_details_part_tool_chain_rebuild_1',
         ),
       ),
       findsOneWidget,
@@ -2625,24 +2607,18 @@ void main() {
 
     expect(find.text('Checking project status in real time'), findsOneWidget);
 
+    // Running tools show a live progress indicator, so settle would time
+    // out: pump explicitly instead.
     await tester.tap(
       find.byKey(
         const ValueKey<String>(
-          'tool_part_details_button_part_tool_running_description',
+          'tool_part_open_details_part_tool_running_description',
         ),
       ),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(
-        const ValueKey<String>(
-          'tool_part_details_button_part_tool_running_description',
-        ),
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('Hide'), findsOneWidget);
     expect(
       find.byWidgetPredicate(
         (widget) =>
@@ -2652,6 +2628,15 @@ void main() {
       ),
       findsOneWidget,
     );
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>(
+          'tool_details_dialog_close_part_tool_running_description',
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
   });
 
   testWidgets('shows tool call descriptions in collapsed summary', (
@@ -2757,7 +2742,7 @@ void main() {
     expect(
       find.byKey(
         const ValueKey<String>(
-          'tool_part_details_button_part_tool_summary_progress_1',
+          'tool_part_open_details_part_tool_summary_progress_1',
         ),
       ),
       findsNothing,
@@ -3411,12 +3396,7 @@ void main() {
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_diff_1'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_1');
 
     // Linhas de diff colorizadas devem estar presentes
     expect(
@@ -3468,12 +3448,7 @@ void main() {
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_diff_styled_1'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_styled_1');
 
     final addContainer = tester.widget<Container>(
       find.byKey(const ValueKey<String>('tool_output_diff_container_5')),
@@ -3548,12 +3523,7 @@ void main() {
         ),
       );
 
-      await tester.tap(
-        find.byKey(
-          const ValueKey<String>('tool_part_details_button_tool_diff_input_1'),
-        ),
-      );
-      await tester.pumpAndSettle();
+      await openToolDetailsDialog(tester, 'tool_diff_input_1');
 
       expect(
         find.byKey(const ValueKey<String>('diff_line_container_0')),
@@ -3607,14 +3577,7 @@ void main() {
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>(
-          'tool_part_details_button_tool_diff_input_success_1',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_input_success_1');
 
     expect(
       find.byKey(const ValueKey<String>('tool_input_diff_container_0')),
@@ -3689,11 +3652,7 @@ void main() {
     );
 
     Future<void> ensureToolDetailsExpanded() async {
-      final detailsFinder = find.text('Details');
-      if (detailsFinder.evaluate().isNotEmpty) {
-        await tester.tap(detailsFinder.first);
-        await tester.pumpAndSettle();
-      }
+      await openToolDetailsDialog(tester, 'tool_diff_scaler');
     }
 
     await ensureToolDetailsExpanded();
@@ -3746,8 +3705,8 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Details').first);
-    await tester.pumpAndSettle();
+    await closeToolDetailsDialog(tester, 'tool_diff_scaler');
+    await openToolDetailsDialog(tester, 'tool_diff_scaler_default');
     await expandToolOutputIfCollapsed();
 
     final defaultHeight = tester
@@ -3798,12 +3757,7 @@ void main() {
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_diff_2'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_2');
 
     // Deve colorizar mesmo sendo bash
     expect(
@@ -3850,12 +3804,7 @@ void main() {
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_diff_3'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_3');
 
     // Texto plano curto permanece sem viewport interno dedicado.
     expect(find.text(plainOutput), findsOneWidget);
@@ -3867,9 +3816,7 @@ void main() {
     );
   });
 
-  testWidgets('preserves content when collapsing and expanding diff', (
-    tester,
-  ) async {
+  testWidgets('shows diff content scrolled in details dialog', (tester) async {
     const diff = '@@ -1,1 +1,2 @@\n-old\n+new';
 
     await tester.pumpWidget(
@@ -3903,12 +3850,7 @@ void main() {
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_diff_4'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_4');
 
     expect(
       find.byKey(
@@ -3964,12 +3906,7 @@ index abc123..def456 100644
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_diff_5'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_diff_5');
 
     // Diff por linha deve estar presente
     expect(
@@ -4020,12 +3957,7 @@ index abc123..def456 100644
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_tool_edit_input'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'tool_edit_input');
 
     expect(
       find.byKey(const ValueKey<String>('diff_line_container_0')),
@@ -4239,12 +4171,7 @@ index abc123..def456 100644
       ),
     );
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_tool_height_cap'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'part_tool_height_cap');
 
     final viewportSize = tester.getSize(
       find.byKey(
@@ -4292,12 +4219,7 @@ index abc123..def456 100644
 
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(
-        const ValueKey<String>('tool_part_details_button_part_huge_tool'),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await openToolDetailsDialog(tester, 'part_huge_tool');
 
     expect(
       find.textContaining('Large tool output preview truncated'),
@@ -4673,5 +4595,228 @@ index abc123..def456 100644
     expect(middleDy, lessThan(completedTwoDy));
     expect(completedTwoDy, lessThan(runningTwoDy));
     expect(runningTwoDy, lessThan(outroDy));
+  });
+
+  testWidgets('assistant bubble has no refined border while user keeps it', (
+    WidgetTester tester,
+  ) async {
+    Widget withRefined(Widget child) {
+      return Builder(
+        builder: (context) {
+          final base = Theme.of(context);
+          return Theme(
+            data: base.copyWith(
+              extensions: <ThemeExtension<dynamic>>[
+                AppVisualStyleTokens.refined(base.colorScheme, base.brightness),
+              ],
+            ),
+            child: child,
+          );
+        },
+      );
+    }
+
+    BoxDecoration bubbleDecoration(String messageId) {
+      final container = tester.widget<Container>(
+        find.byKey(ValueKey<String>('message_bubble_decoration_$messageId')),
+      );
+      return container.decoration! as BoxDecoration;
+    }
+
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              withRefined(
+                ChatMessageWidget(
+                  message: AssistantMessage(
+                    id: 'msg_noborder',
+                    sessionId: 'ses_noborder',
+                    time: DateTime.fromMillisecondsSinceEpoch(1000),
+                    completedTime: DateTime.fromMillisecondsSinceEpoch(4000),
+                    parts: const <MessagePart>[
+                      TextPart(
+                        id: 'part_noborder',
+                        messageId: 'msg_noborder',
+                        sessionId: 'ses_noborder',
+                        text: 'Hello',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              withRefined(
+                ChatMessageWidget(
+                  message: UserMessage(
+                    id: 'msg_userborder',
+                    sessionId: 'ses_noborder',
+                    time: DateTime.fromMillisecondsSinceEpoch(1000),
+                    parts: const <MessagePart>[
+                      TextPart(
+                        id: 'part_userborder',
+                        messageId: 'msg_userborder',
+                        sessionId: 'ses_noborder',
+                        text: 'Hi',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(bubbleDecoration('msg_noborder').border, isNull);
+    expect(bubbleDecoration('msg_userborder').border, isNotNull);
+
+    final outer = tester.widget<Padding>(
+      find.byKey(const ValueKey<String>('message_outer_padding_msg_noborder')),
+    );
+    expect((outer.padding as EdgeInsets).vertical, 8.0);
+  });
+
+  testWidgets('elapsed chip shows duration and opens info dialog', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_elapsed',
+              sessionId: 'ses_elapsed',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              completedTime: DateTime.fromMillisecondsSinceEpoch(4000),
+              modelId: 'model-x',
+              providerId: 'prov-y',
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_elapsed',
+                  messageId: 'msg_elapsed',
+                  sessionId: 'ses_elapsed',
+                  text: 'Done',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('3s'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('assistant_elapsed_chip_msg_elapsed')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('assistant_info_dialog_msg_elapsed')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('model-x'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('assistant_info_dialog_msg_elapsed')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('elapsed chip shows placeholder while streaming', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_streaming_elapsed',
+              sessionId: 'ses_streaming_elapsed',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: const <MessagePart>[
+                TextPart(
+                  id: 'part_streaming_elapsed',
+                  messageId: 'msg_streaming_elapsed',
+                  sessionId: 'ses_streaming_elapsed',
+                  text: 'Thinking',
+                ),
+              ],
+            ),
+            isSessionActivelyResponding: true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('…'), findsOneWidget);
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('assistant_elapsed_chip_msg_streaming_elapsed'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(
+        const ValueKey<String>('assistant_info_dialog_msg_streaming_elapsed'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('No metadata available'), findsOneWidget);
+  });
+
+  testWidgets('tool details dialog closes with Escape', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Scaffold(
+          body: ChatMessageWidget(
+            message: AssistantMessage(
+              id: 'msg_esc_tool',
+              sessionId: 'ses_esc_tool',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              parts: <MessagePart>[
+                ToolPart(
+                  id: 'part_esc_tool',
+                  messageId: 'msg_esc_tool',
+                  sessionId: 'ses_esc_tool',
+                  callId: 'call_esc_tool',
+                  tool: 'bash',
+                  state: ToolStateCompleted(
+                    input: const <String, dynamic>{'command': 'pwd'},
+                    output: '/tmp',
+                    time: ToolTime(
+                      start: DateTime.fromMillisecondsSinceEpoch(1000),
+                      end: DateTime.fromMillisecondsSinceEpoch(1100),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await openToolDetailsDialog(tester, 'part_esc_tool');
+    expect(
+      find.byKey(const ValueKey<String>('tool_details_dialog_part_esc_tool')),
+      findsOneWidget,
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('tool_details_dialog_part_esc_tool')),
+      findsNothing,
+    );
   });
 }

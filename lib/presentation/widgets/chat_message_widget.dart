@@ -28,6 +28,7 @@ import '../theme/app_shapes.dart';
 import '../theme/app_visual_style_tokens.dart';
 import '../theme/opencode_highlight_theme.dart';
 import '../theme/opencode_theme_presets.dart';
+import '../utils/app_dialogs.dart';
 import '../utils/app_page_route.dart';
 import '../utils/chat_abort_message.dart';
 import '../utils/diff_parser.dart';
@@ -152,7 +153,6 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   final Map<String, String> _stableIdentityByCallKey = <String, String>{};
   final Map<String, String> _stableIdentityByHashKey = <String, String>{};
   final Map<String, bool> _toolChainExpandedById = <String, bool>{};
-  final Map<String, bool> _toolDetailsExpandedById = <String, bool>{};
   int _stableIdentitySequence = 0;
   int _localUiStateVersion = 0;
 
@@ -509,7 +509,6 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     _stableIdentityByCallKey.clear();
     _stableIdentityByHashKey.clear();
     _toolChainExpandedById.clear();
-    _toolDetailsExpandedById.clear();
     _stableIdentitySequence = 0;
     _localUiStateVersion = 0;
     _seenPartIds
@@ -569,21 +568,6 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     return _newlyArrivedPartIds.contains(_partIdentityToken(part));
   }
 
-  bool _isToolDetailsExpanded(String toolIdentityToken) {
-    return _toolDetailsExpandedById[toolIdentityToken] ?? false;
-  }
-
-  void _setToolDetailsExpanded(String toolIdentityToken, bool expanded) {
-    final previous = _toolDetailsExpandedById[toolIdentityToken];
-    if (previous == expanded) {
-      return;
-    }
-    setState(() {
-      _toolDetailsExpandedById[toolIdentityToken] = expanded;
-      _localUiStateVersion += 1;
-    });
-  }
-
   bool _resolveToolChainExpanded(
     String chainIdentityToken,
     List<MessagePart> parts,
@@ -591,11 +575,6 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     final explicit = _toolChainExpandedById[chainIdentityToken];
     if (explicit != null) {
       return explicit;
-    }
-    for (final toolPart in parts.whereType<ToolPart>()) {
-      if (_isToolDetailsExpanded(_partIdentityToken(toolPart))) {
-        return true;
-      }
     }
     return false;
   }

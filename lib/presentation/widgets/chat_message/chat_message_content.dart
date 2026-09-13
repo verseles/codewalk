@@ -16,7 +16,8 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
     final visualTokens = theme.visualStyleTokens;
     final bubblePadding = isUser
         ? const EdgeInsets.fromLTRB(14, 10, 14, 12)
-        : const EdgeInsets.fromLTRB(12, 8, 12, 10);
+        : const EdgeInsets.fromLTRB(12, 6, 12, 8);
+    final outerVerticalGap = _resolveOuterVerticalGap(context);
     final headerContentSpacing = _resolveHeaderContentSpacing(
       context,
       isUser: isUser,
@@ -56,7 +57,8 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      key: ValueKey<String>('message_outer_padding_${message.id}'),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: outerVerticalGap),
       child: Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: LayoutBuilder(
@@ -99,6 +101,9 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                         ? context.l10n.chatMessageYourMessage
                         : context.l10n.chatMessageAssistantMessage,
                     child: Container(
+                      key: ValueKey<String>(
+                        'message_bubble_decoration_${message.id}',
+                      ),
                       padding: bubblePadding,
                       decoration: BoxDecoration(
                         color: visualTokens.isRefined
@@ -111,7 +116,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                                     )
                                   : colorScheme.surfaceContainerHigh),
                         borderRadius: bubbleBorderRadius,
-                        border: visualTokens.isRefined
+                        border: visualTokens.isRefined && isUser
                             ? Border.all(
                                 color: visualTokens.separator,
                                 width: visualTokens.enabledBorderWidth,
@@ -172,7 +177,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
                                   message as AssistantMessage,
                                 ),
                                 const SizedBox(width: 8),
-                                _buildAssistantInfo(
+                                _buildAssistantElapsedChip(
                                   context,
                                   message as AssistantMessage,
                                 ),
@@ -280,6 +285,11 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
         ),
       ),
     );
+  }
+
+  double _resolveOuterVerticalGap(BuildContext context) {
+    final density = Theme.of(context).visualDensity.vertical;
+    return (4.0 + density).clamp(2.0, 8.0);
   }
 
   double _resolveHeaderContentSpacing(
@@ -571,9 +581,7 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
 
   Future<void> _openReadAloudSettings(BuildContext context) async {
     await Navigator.of(context).push(
-      AppPageRoute(
-        builder: (_) => const SettingsPage(initialSectionId: 'tts'),
-      ),
+      AppPageRoute(builder: (_) => const SettingsPage(initialSectionId: 'tts')),
     );
   }
 
@@ -581,89 +589,260 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
     return ReadAloudTextExtractor.extract(message);
   }
 
-  Widget _buildAssistantInfo(BuildContext context, AssistantMessage message) {
+  /// Compact elapsed time since the user turn, derived exclusively from the
+  /// official `time.created` / `time.completed` pair (`AssistantMessage.time`
+  /// and `AssistantMessage.completedTime`). Null when still streaming or when
+  /// the timestamps are inconsistent — the chip then shows a placeholder.
+  String? _formatAssistantElapsed(AssistantMessage message) {
+    final completed = message.completedTime;
+    if (completed == null) {
+      return null;
+    }
+    final elapsed = completed.difference(message.time);
+    if (elapsed.isNegative) {
+      return null;
+    }
+    if (elapsed.inMilliseconds < 1000) {
+      return '${elapsed.inMilliseconds}ms';
+    }
+    if (elapsed.inSeconds < 60) {
+      return '${elapsed.inSeconds}s';
+    }
+    if (elapsed.inMinutes < 60) {
+      final minutes = elapsed.inMinutes;
+      final seconds = elapsed.inSeconds % 60;
+      return seconds == 0 ? '${minutes}m' : '${minutes}m ${seconds}s';
+    }
+    final hours = elapsed.inHours;
+    final minutes = elapsed.inMinutes % 60;
+    return minutes == 0 ? '${hours}h' : '${hours}h ${minutes}m';
+  }
+
+  Widget _buildAssistantElapsedChip(
+    BuildContext context,
+    AssistantMessage message,
+  ) {
+    final elapsed = _formatAssistantElapsed(message);
+    final label = elapsed ?? '…';
+    final colorScheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: context.l10n.msgInfoMessageInfo,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: ValueKey<String>('assistant_elapsed_chip_${message.id}'),
+          onTap: () => _showAssistantInfoDialog(context, message),
+          borderRadius: BorderRadius.circular(12),
+          child: Semantics(
+            button: true,
+            label: context.l10n.msgInfoMessageInfo,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Symbols.schedule,
+                    size: 14,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAssistantInfoDialog(
+    BuildContext context,
+    AssistantMessage message,
+  ) {
+    final elapsed = _formatAssistantElapsed(message);
+    return showAppDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final visualTokens = theme.visualStyleTokens;
+        return Dialog(
+          key: ValueKey<String>('assistant_info_dialog_${message.id}'),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: visualTokens.isRefined
+                ? visualTokens.dialogRadius
+                : AppShapes.borderLarge,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 480,
+              maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.msgInfoMessageInfo,
+                          style: Theme.of(dialogContext).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      IconButton(
+                        key: ValueKey<String>(
+                          'assistant_info_dialog_close_${message.id}',
+                        ),
+                        icon: const Icon(Symbols.close),
+                        tooltip: context.l10n.chatClose,
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: _buildAssistantInfoRows(
+                      dialogContext,
+                      message,
+                      elapsed,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Organized info rows (model, provider, tokens, cost, steps) as an
+  /// extensible row list so future fields can be appended as new sections.
+  Widget _buildAssistantInfoRows(
+    BuildContext context,
+    AssistantMessage message,
+    String? elapsed,
+  ) {
     final stepStarts = message.parts.whereType<StepStartPart>().toList();
     final stepFinishes = message.parts.whereType<StepFinishPart>().toList();
+    final rows = <Widget>[
+      if (elapsed != null)
+        _buildAssistantInfoRow(context, Symbols.schedule, elapsed),
+      if (message.modelId != null)
+        _buildAssistantInfoRow(
+          context,
+          Symbols.psychology,
+          context.l10n.chatMessageModelMessageModelId(message.modelId!),
+        ),
+      if (message.providerId != null)
+        _buildAssistantInfoRow(
+          context,
+          Symbols.cloud,
+          context.l10n.chatMessageProviderMessageProviderId(
+            message.providerId!,
+          ),
+        ),
+      if (message.tokens != null)
+        _buildAssistantInfoRow(
+          context,
+          Symbols.token_rounded,
+          context.l10n.msgInfoTokens(message.tokens!.total),
+        ),
+      if (message.cost != null)
+        _buildAssistantInfoRow(
+          context,
+          Symbols.attach_money,
+          context.l10n.msgInfoCost(message.cost!.toStringAsFixed(6)),
+        ),
+    ];
 
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Symbols.info,
-        size: 16,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+    final hasStepMetadata = stepStarts.isNotEmpty || stepFinishes.isNotEmpty;
+    if (rows.isNotEmpty && hasStepMetadata) {
+      rows.add(const Divider(height: 16));
+    }
+
+    for (var index = 0; index < stepStarts.length; index += 1) {
+      final stepStart = stepStarts[index];
+      final snapshot = stepStart.snapshot?.trim();
+      final details = snapshot == null || snapshot.isEmpty
+          ? context.l10n.chatMessageStepStarted(index + 1)
+          : context.l10n.chatMessageStepStartedWithSnapshot(
+              snapshot,
+              index + 1,
+            );
+      rows.add(_buildAssistantInfoRow(context, Symbols.play_arrow, details));
+    }
+
+    for (var index = 0; index < stepFinishes.length; index += 1) {
+      final stepFinish = stepFinishes[index];
+      final details = context.l10n.chatMessageStepFinished(
+        stepFinish.cost.toStringAsFixed(6),
+        stepFinish.reason,
+        index + 1,
+        stepFinish.tokens.total,
+      );
+      rows.add(
+        _buildAssistantInfoRow(
+          context,
+          Symbols.check_circle_outline_rounded,
+          details,
+        ),
+      );
+    }
+
+    if (rows.isEmpty) {
+      rows.add(
+        _buildAssistantInfoRow(
+          context,
+          Symbols.info,
+          context.l10n.chatMessageMetadataAvailable,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: rows,
+    );
+  }
+
+  Widget _buildAssistantInfoRow(
+    BuildContext context,
+    IconData icon,
+    String text,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
       ),
-      tooltip: context.l10n.msgInfoMessageInfo,
-      itemBuilder: (context) {
-        final items = <PopupMenuEntry<String>>[
-          if (message.modelId != null)
-            PopupMenuItem(
-              enabled: false,
-              child: Text(
-                context.l10n.chatMessageModelMessageModelId(message.modelId!),
-              ),
-            ),
-          if (message.providerId != null)
-            PopupMenuItem(
-              enabled: false,
-              child: Text(
-                context.l10n.chatMessageProviderMessageProviderId(
-                  message.providerId!,
-                ),
-              ),
-            ),
-          if (message.tokens != null)
-            PopupMenuItem(
-              enabled: false,
-              child: Text(context.l10n.msgInfoTokens(message.tokens!.total)),
-            ),
-          if (message.cost != null)
-            PopupMenuItem(
-              enabled: false,
-              child: Text(
-                context.l10n.msgInfoCost(message.cost!.toStringAsFixed(6)),
-              ),
-            ),
-        ];
-
-        final hasStepMetadata =
-            stepStarts.isNotEmpty || stepFinishes.isNotEmpty;
-        if (items.isNotEmpty && hasStepMetadata) {
-          items.add(const PopupMenuDivider());
-        }
-
-        for (var index = 0; index < stepStarts.length; index += 1) {
-          final stepStart = stepStarts[index];
-          final snapshot = stepStart.snapshot?.trim();
-          final details = snapshot == null || snapshot.isEmpty
-              ? context.l10n.chatMessageStepStarted(index + 1)
-              : context.l10n.chatMessageStepStartedWithSnapshot(
-                  snapshot,
-                  index + 1,
-                );
-          items.add(PopupMenuItem(enabled: false, child: Text(details)));
-        }
-
-        for (var index = 0; index < stepFinishes.length; index += 1) {
-          final stepFinish = stepFinishes[index];
-          final details = context.l10n.chatMessageStepFinished(
-            stepFinish.cost.toStringAsFixed(6),
-            stepFinish.reason,
-            index + 1,
-            stepFinish.tokens.total,
-          );
-          items.add(PopupMenuItem(enabled: false, child: Text(details)));
-        }
-
-        if (items.isEmpty) {
-          items.add(
-            PopupMenuItem(
-              enabled: false,
-              child: Text(context.l10n.chatMessageMetadataAvailable),
-            ),
-          );
-        }
-
-        return items;
-      },
     );
   }
 }

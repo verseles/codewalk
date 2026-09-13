@@ -2781,7 +2781,7 @@ void main() {
         expect(
           find.byKey(
             const ValueKey<String>(
-              'tool_part_details_button_part_display_tool',
+              'tool_part_open_details_part_display_tool',
             ),
           ),
           findsOneWidget,
@@ -2813,7 +2813,7 @@ void main() {
         expect(
           find.byKey(
             const ValueKey<String>(
-              'tool_part_details_button_part_display_tool',
+              'tool_part_open_details_part_display_tool',
             ),
           ),
           findsOneWidget,
@@ -2831,7 +2831,7 @@ void main() {
         expect(
           find.byKey(
             const ValueKey<String>(
-              'tool_part_details_button_part_display_tool',
+              'tool_part_open_details_part_display_tool',
             ),
           ),
           findsNothing,
@@ -18975,7 +18975,23 @@ void main() {
         ),
         findsNothing,
       );
-      expect(find.text('Details'), findsNWidgets(2));
+      expect(find.text('Details'), findsNothing);
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_open_details_part_no_final_tool_1',
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_open_details_part_no_final_tool_2',
+          ),
+        ),
+        findsOneWidget,
+      );
     },
   );
 
@@ -19267,10 +19283,42 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 40));
 
-      expect(find.text('Details'), findsOneWidget);
-      await tester.tap(find.text('Details'));
+      expect(find.text('Details'), findsNothing);
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_open_details_part_widget_tool_refresh_stream',
+          ),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_open_details_part_widget_tool_refresh_stream',
+          ),
+        ),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is RichText &&
+              widget.key == const ValueKey<String>('tool_command_text') &&
+              widget.text.toPlainText().contains('Command: ls'),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_details_dialog_close_part_widget_tool_refresh_stream',
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Running command'), findsOneWidget);
 
       final serverUserEcho = UserMessage(
@@ -19711,7 +19759,15 @@ void main() {
             key.value.startsWith('tool_chain_container_');
       });
       expect(find.text('Generating response'), findsOneWidget);
-      expect(find.text('Details'), findsNWidgets(2));
+      expect(find.text('Details'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey<String>(
+            'tool_part_open_details_part_block_tool_1',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(visibleToolChains, findsOneWidget);
       expect(find.text('1 needs attention'), findsOneWidget);
       expect(find.text('1 running • 1 needs attention'), findsNothing);
