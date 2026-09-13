@@ -379,10 +379,28 @@ void main() {
       });
     }
 
-    testWidgets('narrow widths wrap instead of shrinking the touch target', (
+    testWidgets('narrow widths shrink to fit a single row at 320', (
       tester,
     ) async {
       await pumpAtWidth(tester, 320);
+
+      expect(
+        find.byKey(const ValueKey<String>('terminal_extra_keys_row')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('terminal_extra_keys_wrap')),
+        findsNothing,
+      );
+      final escape = tester.getRect(
+        find.byKey(const ValueKey<String>('terminal_extra_key_escape')),
+      );
+      expect(escape.width, moreOrLessEquals(34.5, epsilon: 0.5));
+      expect(escape.height, moreOrLessEquals(48, epsilon: 0.5));
+    });
+
+    testWidgets('very narrow widths wrap as a safety fallback', (tester) async {
+      await pumpAtWidth(tester, 220);
 
       expect(
         find.byKey(const ValueKey<String>('terminal_extra_keys_wrap')),
@@ -391,7 +409,7 @@ void main() {
       final escape = tester.getRect(
         find.byKey(const ValueKey<String>('terminal_extra_key_escape')),
       );
-      expect(escape.width, greaterThanOrEqualTo(40));
+      expect(escape.width, moreOrLessEquals(48, epsilon: 0.5));
     });
 
     testWidgets('roomy widths keep a single row', (tester) async {
@@ -541,7 +559,9 @@ void main() {
           const ValueKey<String>('terminal_extra_key_arrow_right'),
         );
         await tester.ensureVisible(rightArrowFinder);
-        expect(tester.getSize(rightArrowFinder), const Size.square(48));
+        final rightArrowSize = tester.getSize(rightArrowFinder);
+        expect(rightArrowSize.width, moreOrLessEquals(34.5, epsilon: 0.5));
+        expect(rightArrowSize.height, moreOrLessEquals(48, epsilon: 0.5));
         expect(tester.takeException(), isNull);
       },
     );

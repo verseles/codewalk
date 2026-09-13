@@ -8,6 +8,13 @@ import '../../core/i18n/l10n_context.dart';
 
 const codewalkTerminalArrowRepeatInterval = Duration(milliseconds: 80);
 
+/// Largest extra-key edge. Keys never grow past the standard target (#183).
+const double kTerminalExtraKeyMaxSize = kMinInteractiveDimension;
+
+/// Smallest key width before the strip wraps to a second row (#183).
+/// Intentionally very low: wrapping becomes the rare safety fallback.
+const double kTerminalExtraKeyMinSize = 24;
+
 bool shouldShowCodewalkTerminalExtraKeys({
   required bool isWeb,
   required TargetPlatform platform,
@@ -53,16 +60,18 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                   constraints.maxWidth -
                   horizontalPadding * 2 -
                   gap * (keyCount - 1);
-              final singleRowSize = (available / keyCount).clamp(
-                0.0,
-                kMinInteractiveDimension,
-              );
-              // Keys never shrink below the platform's minimum touch target:
-              // when a single row cannot hold them all at that size they wrap
-              // onto a second row instead, rather than hiding behind a
-              // horizontal scroll (#123).
-              final wraps = singleRowSize < kMinInteractiveDimension;
-              const dimension = kMinInteractiveDimension;
+              // Shrink-first (#183): keys scale down to fit one row and wrap
+              // only when even the very-low floor cannot fit. No scroll (#123).
+              final naturalSize = available / keyCount;
+              final wraps = naturalSize < kTerminalExtraKeyMinSize;
+              final keyWidth = wraps
+                  ? kTerminalExtraKeyMaxSize
+                  : naturalSize
+                        .clamp(
+                          kTerminalExtraKeyMinSize,
+                          kTerminalExtraKeyMaxSize,
+                        )
+                        .toDouble();
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: horizontalPadding,
@@ -79,7 +88,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         visibleLabel: 'Esc',
                         semanticLabel: context.l10n.terminalExtraKeyEscape,
                         tooltip: context.l10n.terminalExtraKeyEscape,
-                        dimension: dimension,
+                        dimension: keyWidth,
                         onTap: () => _dispatchKey(TerminalKey.escape),
                       ),
                       _TerminalExtraKeyButton(
@@ -87,7 +96,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         visibleLabel: 'Tab',
                         semanticLabel: context.l10n.terminalExtraKeyTab,
                         tooltip: context.l10n.terminalExtraKeyTab,
-                        dimension: dimension,
+                        dimension: keyWidth,
                         onTap: () => _dispatchKey(TerminalKey.tab),
                       ),
                       _TerminalExtraKeyButton(
@@ -97,7 +106,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         visibleLabel: 'Ctrl',
                         semanticLabel: context.l10n.terminalExtraKeyControl,
                         tooltip: context.l10n.terminalExtraKeyControl,
-                        dimension: dimension,
+                        dimension: keyWidth,
                         toggled: controller.controlEnabled,
                         onTap: () {
                           controller.toggleControl();
@@ -109,7 +118,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         visibleLabel: 'Alt',
                         semanticLabel: context.l10n.terminalExtraKeyAlt,
                         tooltip: context.l10n.terminalExtraKeyAlt,
-                        dimension: dimension,
+                        dimension: keyWidth,
                         toggled: controller.altEnabled,
                         onTap: () {
                           controller.toggleAlt();
@@ -123,7 +132,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         terminalKey: TerminalKey.arrowLeft,
                         icon: Symbols.arrow_left_alt_rounded,
                         semanticLabel: context.l10n.terminalExtraKeyArrowLeft,
-                        dimension: dimension,
+                        dimension: keyWidth,
                       ),
                       _arrowButton(
                         key: const ValueKey<String>(
@@ -132,7 +141,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         terminalKey: TerminalKey.arrowUp,
                         icon: Symbols.arrow_upward_alt_rounded,
                         semanticLabel: context.l10n.terminalExtraKeyArrowUp,
-                        dimension: dimension,
+                        dimension: keyWidth,
                       ),
                       _arrowButton(
                         key: const ValueKey<String>(
@@ -141,7 +150,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         terminalKey: TerminalKey.arrowDown,
                         icon: Symbols.arrow_downward_alt_rounded,
                         semanticLabel: context.l10n.terminalExtraKeyArrowDown,
-                        dimension: dimension,
+                        dimension: keyWidth,
                       ),
                       _arrowButton(
                         key: const ValueKey<String>(
@@ -150,7 +159,7 @@ class CodewalkTerminalExtraKeys extends StatelessWidget {
                         terminalKey: TerminalKey.arrowRight,
                         icon: Symbols.arrow_right_alt_rounded,
                         semanticLabel: context.l10n.terminalExtraKeyArrowRight,
-                        dimension: dimension,
+                        dimension: keyWidth,
                       ),
                     ];
                     if (wraps) {
@@ -222,7 +231,8 @@ class _TerminalExtraKeyButton extends StatelessWidget {
   final String? visibleLabel;
   final IconData? icon;
 
-  /// Edge length of the key. Null keeps the standard interactive size.
+  /// Key width. Null keeps the standard interactive size. Height is always
+  /// the standard interactive size so the touch target stays tappable (#183).
   final double? dimension;
   final String? tooltip;
   final bool? toggled;
@@ -234,10 +244,19 @@ class _TerminalExtraKeyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isActive = toggled ?? false;
+    final keyWidth = dimension ?? kMinInteractiveDimension;
+    final compact = keyWidth < 40;
     Widget content = Center(
       child: icon != null
-          ? Icon(icon, size: 22)
-          : Text(visibleLabel!, style: Theme.of(context).textTheme.labelLarge),
+          ? Icon(icon, size: compact ? 18 : 22)
+          : FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                visibleLabel!,
+                style: Theme.of(context).textTheme.labelLarge,
+                maxLines: 1,
+              ),
+            ),
     );
     if (tooltip != null) {
       content = Tooltip(
@@ -256,8 +275,9 @@ class _TerminalExtraKeyButton extends StatelessWidget {
         toggled: toggled,
         onTap: onTap,
         excludeSemantics: true,
-        child: SizedBox.square(
-          dimension: dimension ?? kMinInteractiveDimension,
+        child: SizedBox(
+          width: keyWidth,
+          height: kMinInteractiveDimension,
           child: Material(
             color: isActive
                 ? colorScheme.primaryContainer

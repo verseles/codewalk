@@ -37,6 +37,35 @@ const double kAppTabPinnedSelectedMinWidth = 100;
 const double kAppTabPinnedRegionMaxFraction = 0.5;
 const double kAppTabMinimumRegularRegionWidth = 96;
 
+/// Height of the selected-tab indicator shown only when the scheme collapses
+/// `surface` and `surfaceContainerHigh` onto the same color (#182 AMOLED).
+const double kAppTabSelectionIndicatorHeight = 2;
+
+/// True when the scheme flattens the strip band and the selected fill onto
+/// the same color (AMOLED toggle). Other themes keep the browser-style merge.
+bool _isTabSelectionCollapsed(ColorScheme colorScheme) {
+  return colorScheme.brightness == Brightness.dark &&
+      colorScheme.surface == colorScheme.surfaceContainerHigh;
+}
+
+/// WCAG contrast ratio between two colors.
+double _contrastRatio(Color a, Color b) {
+  final lumA = a.computeLuminance();
+  final lumB = b.computeLuminance();
+  final lighter = lumA > lumB ? lumA : lumB;
+  final darker = lumA > lumB ? lumB : lumA;
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/// Indicator color for the collapsed case: primary, falling back to onSurface
+/// when the primary is too close to the selected fill.
+Color _selectionIndicatorColor(ColorScheme colorScheme) {
+  if (_contrastRatio(colorScheme.primary, colorScheme.surface) >= 3.0) {
+    return colorScheme.primary;
+  }
+  return colorScheme.onSurface;
+}
+
 /// Domain-agnostic tab view model. The strip never interprets [value]; it only
 /// routes it back through callbacks. [id] must be stable and unique within the
 /// tab list and is used for keys, focus nodes, hover state and reveal.
@@ -658,6 +687,13 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                         : hovered
                             ? colorScheme.primary.withValues(alpha: 0.09)
                             : Colors.transparent;
+                // #182: when AMOLED flattens surface roles, the selected tab
+                // would vanish into the strip band. Keep every fill pure
+                // black and add a minimal top indicator on the selected tab.
+                final showSelectionIndicator =
+                    selected && _isTabSelectionCollapsed(colorScheme);
+                final selectionIndicatorColor =
+                    _selectionIndicatorColor(colorScheme);
                 return Material(
                   key: ValueKey<String>('${widget.keyPrefix}$id'),
                   // The selected tab shares the content surface colour, which is what
@@ -841,6 +877,26 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                           ],
                         ),
                       ),
+                      if (showSelectionIndicator)
+                        Positioned(
+                          top: 3,
+                          left: kAppTabShoulder + 4,
+                          right: kAppTabShoulder + 4,
+                          height: kAppTabSelectionIndicatorHeight,
+                          child: IgnorePointer(
+                            child: DecoratedBox(
+                              key: ValueKey<String>(
+                                '${widget.keyPrefix}selection_indicator_$id',
+                              ),
+                              decoration: BoxDecoration(
+                                color: selectionIndicatorColor,
+                                borderRadius: BorderRadius.circular(
+                                  kAppTabSelectionIndicatorHeight / 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 );
