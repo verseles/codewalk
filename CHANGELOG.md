@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.237.0 - 2026-09-13
+
+- docs: Lote A behavior (floating extras, agent-menu auto-approve, Attach)
+- fix(composer): stale empty-query loads no longer clobber extras overlay
+- fix(composer): review r1 findings on Lote A overlays
+- feat(composer): floating extras overlay, auto-approve in agent menu, short Attach label
+
 ## v1.236.1 - 2026-09-13
 
 - test(terminal): cover ignored resize under the keyboard
