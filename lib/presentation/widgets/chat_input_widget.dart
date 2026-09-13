@@ -995,21 +995,29 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     // timelines, compact harnesses). Clamp to the overlay bounds on both
     // sides so the panel never clips.
     final spaceAbove = anchorTopLeft.dy - 8;
-    double top;
+    double? top;
+    double? bottom;
     var panelMaxHeight = maxHeight;
     if (spaceAbove >= maxHeight) {
-      top = anchorTopLeft.dy - 8 - maxHeight;
+      // Pin the panel's bottom edge 8px above the button. The panel is
+      // content-adaptive (ConstrainedBox maxHeight + shrinkWrap ListView),
+      // so deriving top from the cap left a gap of cap - contentHeight.
+      // Panel height <= maxHeight <= spaceAbove guarantees top >= 0.
+      bottom = bounds.height - anchorTopLeft.dy + 8;
     } else {
       top = anchorTopLeft.dy + anchorSize.height + 8;
       panelMaxHeight = math.min(
         maxHeight,
         math.max(0.0, bounds.height - top - 8),
       );
+      // Below-placement grows downward from an exact top; keep the defensive
+      // clamp (moves the panel toward the anchor, never detaches it).
+      top = math.max(8.0, top);
     }
-    top = math.max(8.0, top);
     return Positioned(
       left: left,
       top: top,
+      bottom: bottom,
       width: width,
       child: Focus(
         canRequestFocus: false,

@@ -1085,6 +1085,163 @@ void main() {
     );
   });
 
+  testWidgets('extras popover stays attached for short content', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: InMemoryAppLocalDataSource(),
+          showAttachmentButton: true,
+          showInlineAttachmentButton: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+
+    final panelRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_popover_panel_extras')),
+    );
+    final buttonRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_extras_button')),
+    );
+
+    // Regression: the 6-row cap must not push a short panel away from the
+    // button; the bottom edge stays 8px above it and the height adapts.
+    expect(
+      buttonRect.top - panelRect.bottom,
+      moreOrLessEquals(8.0, epsilon: 1.0),
+    );
+    expect(panelRect.height, lessThan(300.0));
+  });
+
+  testWidgets('extras popover stays attached with many quick replies', (
+    WidgetTester tester,
+  ) async {
+    final localDataSource = InMemoryAppLocalDataSource();
+    await localDataSource.saveCannedAnswersJson(
+      jsonEncode([
+        for (var index = 0; index < 8; index++)
+          {
+            'id': 'many-$index',
+            'label': 'Reply $index',
+            'text': 'Text $index',
+            'insertMode': 'append',
+            'scopeMode': 'global',
+            'updatedAtEpochMs': index + 1,
+          },
+      ]),
+    );
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: localDataSource,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+
+    final panel = find.byKey(
+      const ValueKey<String>('composer_popover_panel_extras'),
+    );
+    final panelRect = tester.getRect(panel);
+    final buttonRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_extras_button')),
+    );
+
+    expect(
+      buttonRect.top - panelRect.bottom,
+      moreOrLessEquals(8.0, epsilon: 1.0),
+    );
+    // 6 x 52px rows cap the panel; overflow scrolls instead of growing.
+    expect(panelRect.height, lessThanOrEqualTo(312.5));
+    expect(
+      find.descendant(of: panel, matching: find.byType(Scrollable)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('extras popover flips below when space above is tight', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 360));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: InMemoryAppLocalDataSource(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+
+    final panelRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_popover_panel_extras')),
+    );
+    final buttonRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_extras_button')),
+    );
+
+    // Below-placement grows downward from an exact top, still attached.
+    expect(
+      panelRect.top,
+      moreOrLessEquals(buttonRect.bottom + 8.0, epsilon: 1.0),
+    );
+    expect(panelRect.top, greaterThanOrEqualTo(8.0));
+  });
+
+  testWidgets('extras popover stays attached with keyboard insets', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(() => tester.view.resetViewInsets());
+    tester.binding.handleMetricsChanged();
+
+    await tester.pumpWidget(
+      _buildChatInputHarness(
+        child: ChatInputWidget(
+          onSendMessage: (_) {},
+          cannedAnswersDataSource: InMemoryAppLocalDataSource(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Extras'));
+    await tester.pumpAndSettle();
+
+    final panelRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_popover_panel_extras')),
+    );
+    final buttonRect = tester.getRect(
+      find.byKey(const ValueKey<String>('composer_extras_button')),
+    );
+
+    // Attachment holds with insets present (the cap path already subtracts
+    // viewInsets.bottom). The harness does not emulate Scaffold keyboard
+    // avoidance, so region placement stays a manual check.
+    expect(
+      buttonRect.top - panelRect.bottom,
+      moreOrLessEquals(8.0, epsilon: 1.0),
+    );
+  });
+
   testWidgets('global canned answer shows one-line globe plus label only', (
     WidgetTester tester,
   ) async {
