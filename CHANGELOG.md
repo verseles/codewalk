@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.236.0 - 2026-09-13
+
+- Docs: AMOLED tab indicator + terminal extra keys shrink-first row
+- Fix AMOLED tab selection + terminal extra keys single row
+
 ## v1.235.0 - 2026-09-13
 
 - Docs: timeline visuals use dialog details, borderless bubbles, elapsed chip
