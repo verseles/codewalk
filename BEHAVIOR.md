@@ -1021,7 +1021,8 @@
 - **Then** if that canned answer has `Send automatically` enabled, the app sends the resulting composer message immediately after insertion and after any saved agent/model/variant override is successfully applied
 - **Then** if an explicit saved agent, model, or variant override cannot be applied in the current server/model context, the app keeps the inserted text in the composer, shows a warning, and blocks automatic send so the user can review manually
 - **Then** in sub-conversations where model/agent controls are locked, canned-answer agent/model/variant overrides are also locked; text insertion still works, but automatic send is blocked when the saved quick reply depends on a locked override
-- **Then** long-pressing a canned item opens edit/delete actions
+- **Then** long-pressing a canned item opens the editor directly with no intermediate action sheet
+- **Then** editing an existing canned item exposes a destructive `Delete` action (footer start on wide dialogs, AppBar action on compact fullscreen) that removes the item immediately and silently; the add-new editor never shows `Delete`
 - **Then** add/edit supports an optional label, required text, insertion mode, optional `Send automatically`, scope mode (`Global` or `Project-only`), optional agent override, optional model override, and optional variant override
 - **Then** the add/edit surface uses a fullscreen editor on compact screens and a large scrollable dialog on wider screens so all options remain reachable
 - **Then** global items are available across all contexts, while project-only items are restricted to the active `serverId::scopeId` context
