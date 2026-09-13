@@ -1965,18 +1965,25 @@ extension _ChatPageFileRuntime on _ChatPageState {
                   _setState(() {
                     fileState.expandedDirectories.remove(node.path);
                   });
+                  // The mobile Files dialog lives in a separate route whose
+                  // StatefulBuilder only rebuilds via onStateChanged; the
+                  // parent _setState above does not refresh the dialog.
+                  onStateChanged?.call();
                   return;
                 }
                 _setState(() {
                   fileState.expandedDirectories.add(node.path);
                 });
+                onStateChanged?.call();
                 unawaited(
                   _loadDirectoryNodes(
                     state: fileState,
                     projectProvider: projectProvider,
                     cacheKey: node.path,
                     requestPath: node.path,
-                  ),
+                  ).whenComplete(() {
+                    onStateChanged?.call();
+                  }),
                 );
                 return;
               }
@@ -2054,6 +2061,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                 requestPath: node.path,
                 message: errorMessage,
                 depth: depth + 1,
+                onStateChanged: onStateChanged,
               ),
             );
           }
@@ -2170,6 +2178,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
     required String requestPath,
     required String message,
     required int depth,
+    VoidCallback? onStateChanged,
   }) {
     final density = _settingsProvider?.appDensity ?? AppDensity.normal;
     final gap = AppDensitySpacing.itemGap(density);
@@ -2207,13 +2216,19 @@ extension _ChatPageFileRuntime on _ChatPageState {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             onPressed: () {
+              // Same dialog-refresh contract as directory expand: parent
+              // _setState inside the loaders does not rebuild the mobile
+              // Files dialog, so notify the dialog host as well.
+              onStateChanged?.call();
               if (cacheKey == _ChatPageState._rootTreeCacheKey) {
                 unawaited(
                   _loadRootDirectoryNodes(
                     state: fileState,
                     projectProvider: projectProvider,
                     force: true,
-                  ),
+                  ).whenComplete(() {
+                    onStateChanged?.call();
+                  }),
                 );
                 return;
               }
@@ -2224,7 +2239,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
                   cacheKey: cacheKey,
                   requestPath: requestPath,
                   force: true,
-                ),
+                ).whenComplete(() {
+                  onStateChanged?.call();
+                }),
               );
             },
             child: Text(context.l10n.chatRetry),

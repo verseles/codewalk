@@ -726,12 +726,15 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                     minHeight: 36,
                   ),
                   onPressed: () {
+                    onStateChanged?.call();
                     unawaited(
                       _loadRootDirectoryNodes(
                         state: fileState,
                         projectProvider: projectProvider,
                         force: true,
-                      ),
+                      ).whenComplete(() {
+                        onStateChanged?.call();
+                      }),
                     );
                   },
                   icon: const Icon(Symbols.refresh_rounded),
@@ -789,6 +792,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                         requestPath: '.',
                         message: fileState.treeError!,
                         depth: 0,
+                        onStateChanged: onStateChanged,
                       ),
                     ],
                   );
@@ -807,6 +811,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                         requestPath: '.',
                         message: fileState.treeError!,
                         depth: 0,
+                        onStateChanged: onStateChanged,
                       ),
                     ..._buildFileTreeChildren(
                       fileState: fileState,
