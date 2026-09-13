@@ -635,28 +635,36 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
           borderRadius: BorderRadius.circular(12),
           child: Semantics(
             button: true,
-            label: context.l10n.msgInfoMessageInfo,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Symbols.schedule,
-                    size: 14,
-                    color: colorScheme.onSurfaceVariant,
+            label: '${context.l10n.msgInfoMessageInfo}: $label',
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 8,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Symbols.schedule,
+                        size: 14,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -670,7 +678,9 @@ extension _ChatMessageContentBuilder on _ChatMessageWidgetState {
     AssistantMessage message,
   ) {
     final elapsed = _formatAssistantElapsed(message);
-    return showAppDialog<void>(
+    // showDialog (not showAppDialog): the compact Dialog.insetPadding below
+    // is only honored by the dialog route, keeping the sheet succinct.
+    return showDialog<void>(
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);

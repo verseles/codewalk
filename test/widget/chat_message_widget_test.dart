@@ -4709,6 +4709,13 @@ index abc123..def456 100644
     await tester.pumpAndSettle();
 
     expect(find.text('3s'), findsOneWidget);
+    final chipSize = tester.getSize(
+      find.byKey(
+        const ValueKey<String>('assistant_elapsed_chip_msg_elapsed'),
+      ),
+    );
+    expect(chipSize.width, greaterThanOrEqualTo(48));
+    expect(chipSize.height, greaterThanOrEqualTo(48));
     await tester.tap(
       find.byKey(const ValueKey<String>('assistant_elapsed_chip_msg_elapsed')),
     );
@@ -4757,9 +4764,7 @@ index abc123..def456 100644
 
     expect(find.text('…'), findsOneWidget);
     await tester.tap(
-      find.byKey(
-        const ValueKey<String>('assistant_elapsed_chip_msg_streaming_elapsed'),
-      ),
+      find.byKey(const ValueKey<String>('assistant_elapsed_chip_msg_elapsed')),
     );
     await tester.pumpAndSettle();
 

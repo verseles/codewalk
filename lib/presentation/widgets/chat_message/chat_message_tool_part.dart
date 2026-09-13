@@ -1,7 +1,7 @@
 part of '../chat_message_widget.dart';
 
-/// Tool part rendering: status chip, details toggle, command/output sections,
-/// and diff visualization.
+/// Tool part rendering: status chip, tap-to-open details dialog,
+/// command/output sections, and diff visualization.
 extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
   Color _resolveCompletedToolStatusColor(BuildContext context) {
     return AppSemanticColors.success(context);
@@ -43,129 +43,120 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
           )
         : null;
 
-    final content = Container(
-      key: ValueKey<String>('tool_part_container_$toolIdentityToken'),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: isTaskTool ? 8 : 12,
-      ),
-      decoration: BoxDecoration(
-        color: visualTokens.isRefined
-            ? visualTokens.mutedControlSurface
-            : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: visualTokens.isRefined
-            ? visualTokens.cardRadius
-            : AppShapes.borderSmall,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(presentation.icon, size: 16, color: colorScheme.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+    final bubblePadding = EdgeInsets.symmetric(
+      horizontal: 12,
+      vertical: isTaskTool ? 8 : 12,
+    );
+    final bubbleRadius = visualTokens.isRefined
+        ? visualTokens.cardRadius
+        : AppShapes.borderSmall;
+    final bubbleColor = visualTokens.isRefined
+        ? visualTokens.mutedControlSurface
+        : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+    // Ink paints on the Material below opaque content: keep the background
+    // on the Material in the tappable path so press feedback stays visible.
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(presentation.icon, size: 16, color: colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    descriptionLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (!isTaskTool &&
+                      typeLabel.toLowerCase() !=
+                          descriptionLabel.toLowerCase()) ...[
+                    const SizedBox(height: 2),
                     Text(
-                      descriptionLabel,
+                      typeLabel,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    if (!isTaskTool &&
-                        typeLabel.toLowerCase() !=
-                            descriptionLabel.toLowerCase()) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        typeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                    if (taskSecondaryLabel != null &&
-                        taskSecondaryLabel.trim().isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        taskSecondaryLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ] else if (latestTaskCommand != null &&
-                        latestTaskCommand.trim().isNotEmpty &&
-                        latestTaskCommand.toLowerCase() !=
-                            descriptionLabel.toLowerCase()) ...[
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Icon(
-                            Symbols.terminal_rounded,
-                            size: 12,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              latestTaskCommand,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              isTaskTool
-                  ? _buildTaskToolStatusIcon(context, part.state.status)
-                  : _buildToolStatusChip(
-                      context,
-                      part.state.status,
-                      showLabel: !isCompactToolStatus,
+                  if (taskSecondaryLabel != null &&
+                      taskSecondaryLabel.trim().isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      taskSecondaryLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-            ],
-          ),
-          if (!isTaskTool &&
-              hasPendingQuestion &&
-              widget.onShowQuestion != null) ...[
-            const SizedBox(height: 4),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                key: ValueKey<String>('tool_part_question_action_${part.id}'),
-                onPressed: () => widget.onShowQuestion!(part),
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 2,
-                  ),
-                ),
-                icon: const Icon(Symbols.help_outline_rounded, size: 14),
-                label: Text(context.l10n.chatMessageShowQuestion),
+                  ] else if (latestTaskCommand != null &&
+                      latestTaskCommand.trim().isNotEmpty &&
+                      latestTaskCommand.toLowerCase() !=
+                          descriptionLabel.toLowerCase()) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(
+                          Symbols.terminal_rounded,
+                          size: 12,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            latestTaskCommand,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
+            const SizedBox(width: 6),
+            isTaskTool
+                ? _buildTaskToolStatusIcon(context, part.state.status)
+                : _buildToolStatusChip(
+                    context,
+                    part.state.status,
+                    showLabel: !isCompactToolStatus,
+                  ),
           ],
+        ),
+        if (!isTaskTool &&
+            hasPendingQuestion &&
+            widget.onShowQuestion != null) ...[
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: ValueKey<String>('tool_part_question_action_${part.id}'),
+              onPressed: () => widget.onShowQuestion!(part),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              ),
+              icon: const Icon(Symbols.help_outline_rounded, size: 14),
+              label: Text(context.l10n.chatMessageShowQuestion),
+            ),
+          ),
         ],
-      ),
+      ],
     );
 
     final VoidCallback? primaryAction;
@@ -177,28 +168,42 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
       primaryAction = null;
     }
     if (primaryAction == null) {
-      return content;
+      return Container(
+        key: ValueKey<String>('tool_part_container_$toolIdentityToken'),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: bubblePadding,
+        decoration: BoxDecoration(
+          color: bubbleColor,
+          borderRadius: bubbleRadius,
+        ),
+        child: body,
+      );
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: ValueKey<String>(
-          isTaskTool
-              ? 'task_tool_open_session_${part.id}'
-              : 'tool_part_open_details_${part.id}',
+    return Container(
+      key: ValueKey<String>('tool_part_container_$toolIdentityToken'),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: bubbleColor,
+        borderRadius: bubbleRadius,
+        child: InkWell(
+          key: ValueKey<String>(
+            isTaskTool
+                ? 'task_tool_open_session_${part.id}'
+                : 'tool_part_open_details_${part.id}',
+          ),
+          onTap: primaryAction,
+          borderRadius: bubbleRadius,
+          child: Padding(padding: bubblePadding, child: body),
         ),
-        onTap: primaryAction,
-        borderRadius: visualTokens.isRefined
-            ? visualTokens.cardRadius
-            : AppShapes.borderSmall,
-        child: content,
       ),
     );
   }
 
   Future<void> _showToolDetailsDialog(BuildContext context, ToolPart part) {
-    return showAppDialog<void>(
+    // showDialog (not showAppDialog): the compact Dialog.insetPadding below
+    // is only honored by the dialog route, keeping the sheet succinct.
+    return showDialog<void>(
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
@@ -830,7 +835,10 @@ class _CollapsibleToolContentState extends State<_CollapsibleToolContent> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _scheduleAutoScrollToLatest(forceJump: true);
+    // Open at the top: dialogs show a snapshot, so the initial force-jump
+    // to the latest output used by live timeline streaming is skipped.
+    // didUpdateWidget still follows the tail while the user stays at it.
+    _scheduleAutoScrollToLatest(forceJump: false);
   }
 
   @override

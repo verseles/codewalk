@@ -28,7 +28,6 @@ import '../theme/app_shapes.dart';
 import '../theme/app_visual_style_tokens.dart';
 import '../theme/opencode_highlight_theme.dart';
 import '../theme/opencode_theme_presets.dart';
-import '../utils/app_dialogs.dart';
 import '../utils/app_page_route.dart';
 import '../utils/chat_abort_message.dart';
 import '../utils/diff_parser.dart';
@@ -146,6 +145,9 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
   double _lastVisualDensityVertical = 0;
   double _lastVisualDensityHorizontal = 0;
   String? _lastThemeKey;
+  bool? _lastIsRefined;
+  Brightness? _lastBrightness;
+  double _lastViewportWidth = 0;
   final Set<String> _seenPartIds = <String>{};
   final Set<String> _newlyArrivedPartIds = <String>{};
   final Map<String, Timer> _partAnimationTimers = <String, Timer>{};
@@ -321,8 +323,12 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
 
     final partCount = msg.parts.length;
     final lastPartId = msg.parts.isNotEmpty ? msg.parts.last.id : null;
-    final density = Theme.of(context).visualDensity;
+    final theme = Theme.of(context);
+    final density = theme.visualDensity;
     final themeTokens = _resolveThemeTokens(context);
+    // themeId is the OpenCode preset id: it does not cover classic/refined,
+    // brightness, or compact status layout, all of which affect rendering.
+    final isRefined = theme.visualStyleTokens.isRefined;
     final taskToolSummaryHash = _computeTaskToolSummaryHash();
     return msg.hashCode == _lastMessageHash &&
         partCount == _lastPartCount &&
@@ -342,12 +348,16 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
             _lastPendingQuestionCallIdsHash &&
         density.vertical == _lastVisualDensityVertical &&
         density.horizontal == _lastVisualDensityHorizontal &&
-        themeTokens.themeId == _lastThemeKey;
+        themeTokens.themeId == _lastThemeKey &&
+        isRefined == _lastIsRefined &&
+        theme.brightness == _lastBrightness &&
+        MediaQuery.sizeOf(context).width == _lastViewportWidth;
   }
 
   void _updateBuildSnapshot(BuildContext context) {
     final msg = widget.message;
-    final density = Theme.of(context).visualDensity;
+    final theme = Theme.of(context);
+    final density = theme.visualDensity;
     final themeTokens = _resolveThemeTokens(context);
     final taskToolSummaryHash = _computeTaskToolSummaryHash();
     _lastMessageHash = msg.hashCode;
@@ -370,6 +380,9 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
     _lastVisualDensityVertical = density.vertical;
     _lastVisualDensityHorizontal = density.horizontal;
     _lastThemeKey = themeTokens.themeId;
+    _lastIsRefined = theme.visualStyleTokens.isRefined;
+    _lastBrightness = theme.brightness;
+    _lastViewportWidth = MediaQuery.sizeOf(context).width;
   }
 
   // Cached build result to return when rebuild is skipped.
