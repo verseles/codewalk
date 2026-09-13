@@ -1,15 +1,17 @@
 part of '../chat_input_widget.dart';
 
 extension _ChatInputSuggestionPopover on _ChatInputWidgetState {
-  double _popoverMaxHeight(BuildContext context) {
+  /// Max overlay height for [maxRows] input rows. Mention/slash suggestions
+  /// use the default 3; the extras panel passes more so quick replies fit
+  /// without scrolling. Always clamped to the visible space above the input.
+  double _popoverMaxHeight(BuildContext context, [int maxRows = 3]) {
     final media = MediaQuery.of(context);
     final visibleHeight = media.size.height - media.viewInsets.bottom;
     final reservedInputSpace =
         _ChatInputWidgetState._inputRowHeight + 18 + media.viewPadding.bottom;
     final availableForPopover = visibleHeight - reservedInputSpace;
-    const maxByInput =
-        _ChatInputWidgetState._inputRowHeight *
-        _ChatInputWidgetState._popoverInputHeightMultiplier;
+    final maxByInput =
+        _ChatInputWidgetState._inputRowHeight * maxRows;
     return math.max(0, math.min(maxByInput, availableForPopover));
   }
 

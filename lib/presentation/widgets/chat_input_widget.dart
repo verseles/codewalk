@@ -347,7 +347,6 @@ class ChatInputWidget extends StatefulWidget {
 
 class _ChatInputWidgetState extends State<ChatInputWidget> {
   static const double _inputRowHeight = 52;
-  static const double _popoverInputHeightMultiplier = 3;
   static const int _composerMaxLines = 6;
   static const double _composerActionButtonSize = 42;
   static const Duration _doubleEscapeStopThreshold = Duration(
@@ -985,7 +984,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     final anchorSize = anchorBox != null && anchorBox.attached
         ? anchorBox.size
         : const Size(40, 40);
-    final maxHeight = _popoverMaxHeight(overlayContext);
+    // 6 rows (~312px): header + ~4 quick replies visible without scrolling.
+    // Still clamped to the visible space, so small/keyboard screens shrink.
+    final maxHeight = _popoverMaxHeight(overlayContext, 6);
     final width = math.min(360.0, math.max(0.0, bounds.width - 16));
     final left = anchorTopLeft.dx
         .clamp(8.0, math.max(8.0, bounds.width - width - 8))
