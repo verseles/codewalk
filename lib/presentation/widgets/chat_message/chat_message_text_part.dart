@@ -244,7 +244,9 @@ class _StreamingMarkdownThrottle extends StatefulWidget {
     required this.builder,
   });
 
-  static const Duration throttleWindow = Duration(milliseconds: 48);
+  // Aligned with the desktop realtime batch (120ms): markdown never
+  // re-parses more often than notifies arrive; completion still flushes.
+  static const Duration throttleWindow = Duration(milliseconds: 120);
 
   final String text;
   final Widget Function(String text) builder;

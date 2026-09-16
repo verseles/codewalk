@@ -741,6 +741,8 @@ class ChatProvider extends ChangeNotifier {
 
   /// Issue #176: desktop rasterizes wider viewports with more panes, so the
   /// streaming batch window is longer there (mobile keeps 16ms ≈ 1 frame).
+  /// Streaming follow-up: 120ms halves notify/rebuild rate during token
+  /// streams with imperceptible text latency; flush on completion is immediate.
   Duration get _realtimeNotifyBatchDuration {
     if (kIsWeb) {
       return const Duration(milliseconds: 16);
@@ -748,7 +750,7 @@ class ChatProvider extends ChangeNotifier {
     return switch (defaultTargetPlatform) {
       TargetPlatform.linux ||
       TargetPlatform.macOS ||
-      TargetPlatform.windows => const Duration(milliseconds: 64),
+      TargetPlatform.windows => const Duration(milliseconds: 120),
       _ => const Duration(milliseconds: 16),
     };
   }

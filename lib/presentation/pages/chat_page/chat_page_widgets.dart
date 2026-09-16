@@ -25,6 +25,11 @@ class _ComposerStatusLanternTextState extends State<_ComposerStatusLanternText>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  /// Rest between sweep cycles: the ticker stays stopped while the status
+  /// text is static, cutting GPU duty cycle during long busy waits.
+  static const _sweepRest = Duration(milliseconds: 2500);
+  Timer? _restTimer;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +37,29 @@ class _ComposerStatusLanternTextState extends State<_ComposerStatusLanternText>
       vsync: this,
       duration: const Duration(milliseconds: 2100),
     );
+    _controller.addStatusListener(_handleAnimationStatus);
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) {
+      return;
+    }
+    // One-shot path (repeat: false) must not loop; the completed frame stays.
+    if (!widget.repeat || !mounted) {
+      return;
+    }
+    _cancelRest();
+    _restTimer = Timer(_sweepRest, () {
+      _restTimer = null;
+      if (mounted) {
+        _syncAnimationState();
+      }
+    });
+  }
+
+  void _cancelRest() {
+    _restTimer?.cancel();
+    _restTimer = null;
   }
 
   @override
@@ -50,6 +78,8 @@ class _ComposerStatusLanternTextState extends State<_ComposerStatusLanternText>
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_handleAnimationStatus);
+    _cancelRest();
     _controller.dispose();
     super.dispose();
   }
@@ -68,6 +98,7 @@ class _ComposerStatusLanternTextState extends State<_ComposerStatusLanternText>
 
   void _syncAnimationState({bool restart = false}) {
     if (!_animationsEnabled(context)) {
+      _cancelRest();
       if (_controller.isAnimating) {
         _controller.stop();
       }
@@ -77,11 +108,19 @@ class _ComposerStatusLanternTextState extends State<_ComposerStatusLanternText>
       return;
     }
     if (widget.repeat) {
-      if (!_controller.isAnimating) {
-        _controller.repeat();
+      if (restart) {
+        _cancelRest();
+        _controller.forward(from: 0);
+        return;
+      }
+      if (!_controller.isAnimating && _restTimer?.isActive != true) {
+        _controller.forward(
+          from: _controller.value >= 1.0 ? 0.0 : _controller.value,
+        );
       }
       return;
     }
+    _cancelRest();
     if (restart || _controller.status == AnimationStatus.completed) {
       _controller.stop();
       _controller.forward(from: 0);
@@ -121,38 +160,42 @@ class _ComposerStatusLanternTextState extends State<_ComposerStatusLanternText>
       baseColor,
     );
 
-    return AnimatedBuilder(
-      animation: _controller,
-      child: textWidget,
-      builder: (context, child) {
-        final rawCenter = (_controller.value * 1.8) - 0.4;
-        final left = (rawCenter - 0.16).clamp(0.0, 1.0);
-        final innerLeft = (rawCenter - 0.06).clamp(0.0, 1.0);
-        final center = rawCenter.clamp(0.0, 1.0);
-        final innerRight = (rawCenter + 0.06).clamp(0.0, 1.0);
-        final right = (rawCenter + 0.16).clamp(0.0, 1.0);
+    // Isolate the per-frame shader repaints to this text's own layer so the
+    // sweep never dirties the parent composer/sidebar on animation ticks.
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        child: textWidget,
+        builder: (context, child) {
+          final rawCenter = (_controller.value * 1.8) - 0.4;
+          final left = (rawCenter - 0.16).clamp(0.0, 1.0);
+          final innerLeft = (rawCenter - 0.06).clamp(0.0, 1.0);
+          final center = rawCenter.clamp(0.0, 1.0);
+          final innerRight = (rawCenter + 0.06).clamp(0.0, 1.0);
+          final right = (rawCenter + 0.16).clamp(0.0, 1.0);
 
-        return ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) {
-            return LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                dimColor,
-                dimColor,
-                baseColor,
-                highlightColor,
-                baseColor,
-                dimColor,
-                dimColor,
-              ],
-              stops: [0.0, left, innerLeft, center, innerRight, right, 1.0],
-            ).createShader(bounds);
-          },
-          child: child,
-        );
-      },
+          return ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (bounds) {
+              return LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  dimColor,
+                  dimColor,
+                  baseColor,
+                  highlightColor,
+                  baseColor,
+                  dimColor,
+                  dimColor,
+                ],
+                stops: [0.0, left, innerLeft, center, innerRight, right, 1.0],
+              ).createShader(bounds);
+            },
+            child: child,
+          );
+        },
+      ),
     );
   }
 }

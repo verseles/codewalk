@@ -915,14 +915,16 @@ extension _ChatPageScaffold on _ChatPageState {
                                 'recent_session_title_${session.id}',
                               ),
                               child: showBusySweep
-                                  ? _ComposerStatusLanternText(
-                                      key: ValueKey<String>(
-                                        'recent_session_busy_title_${session.id}',
+                                  ? RepaintBoundary(
+                                      child: _ComposerStatusLanternText(
+                                        key: ValueKey<String>(
+                                          'recent_session_busy_title_${session.id}',
+                                        ),
+                                        text: _sessionDisplayTitle(session),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: titleStyle,
                                       ),
-                                      text: _sessionDisplayTitle(session),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: titleStyle,
                                     )
                                   : Text(
                                       _sessionDisplayTitle(session),

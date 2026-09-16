@@ -295,7 +295,9 @@ class _CollapsibleReasoningContentState
 
     if (oldWidget.text != widget.text ||
         oldWidget.isLatestReasoningPart != widget.isLatestReasoningPart) {
-      _scheduleLatestReasoningAutoScroll(forceJump: false);
+      // Streaming deltas arrive per batch: follow is a layout anchor, not a
+      // visual transition — jump avoids overlapping 180ms tickers per delta.
+      _scheduleLatestReasoningAutoScroll(forceJump: true);
     }
   }
 
