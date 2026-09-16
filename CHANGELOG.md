@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.240.0 - 2026-09-16
+
+- fix(review): gate markdown throttle per platform and sync perf docs
+- perf(chat): coalesce streaming rebuilds and duty-cycle busy sweep
+- feat(mobile): seed default pinned app bar actions on fresh install
+
 ## v1.239.0 - 2026-09-13
 
 - fix(composer): pin extras popover bottom edge to the button
