@@ -1323,12 +1323,12 @@
 - **Then** only completion flags and authoritative metadata such as completion timestamp, model/provider, cost, tokens, mode, summary, or error are merged
 - **Then** earlier text or tool content is not overwritten by the stale fallback
 
-### Streaming deltas are batched around one frame
+### Streaming deltas are batched per platform
 
 - **Given** the assistant is streaming text, reasoning, or tool deltas
-- **When** multiple delta notifications arrive within the same frame window
-- **Then** the client coalesces them so only one rebuild per frame is performed
-- **Then** the batching window is approximately one frame (~16 ms) so the UI stays smooth without per-delta rebuild churn
+- **When** multiple delta notifications arrive within the same batch window
+- **Then** the client coalesces them so only one rebuild per window is performed
+- **Then** the batching window is approximately one frame (~16 ms) on mobile/web and ~120 ms on desktop, so the UI stays smooth without per-delta rebuild churn
 
 ### Session idle flushes pending deltas and ends active composer state
 

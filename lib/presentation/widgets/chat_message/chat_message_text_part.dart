@@ -244,9 +244,20 @@ class _StreamingMarkdownThrottle extends StatefulWidget {
     required this.builder,
   });
 
-  // Aligned with the desktop realtime batch (120ms): markdown never
-  // re-parses more often than notifies arrive; completion still flushes.
-  static const Duration throttleWindow = Duration(milliseconds: 120);
+  // Aligned with the realtime batch per platform (120ms desktop, 16ms
+  // mobile/web): markdown never re-parses more often than notifies arrive;
+  // completion still flushes. Desktop-only CPU savings must not slow mobile.
+  static Duration get throttleWindow {
+    if (kIsWeb) {
+      return const Duration(milliseconds: 48);
+    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => const Duration(milliseconds: 120),
+      _ => const Duration(milliseconds: 48),
+    };
+  }
 
   final String text;
   final Widget Function(String text) builder;

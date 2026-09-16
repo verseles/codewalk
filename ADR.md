@@ -2420,7 +2420,7 @@ Adopt the following client-side invariants for chat stability. All rules operate
 
 2. **Stale fallback completion / metadata-only merge.** A stale fallback may still merge completion and metadata from a completed assistant snapshot, but it must preserve the currently-visible text/tool parts. The monotonic completion guard from ADR-023 Pitfall P-002 is preserved and extended: late incomplete events from draining fallback streams may never demote an already-completed message, and metadata-only merges may only add fields (never replace text or tool parts).
 
-3. **16ms delta notification batching.** The chat provider applies each `message.part.delta` to in-memory state immediately, but coalesces listener notification with a 16ms timer. `session.idle` flushes any pending delta notification before terminal turn handling so the final state is visible before the composer leaves active-send state.
+3. **Platform-conditional delta notification batching.** The chat provider applies each `message.part.delta` to in-memory state immediately, but coalesces listener notification with a platform-conditional timer: ~16ms (one frame) on mobile/web, 120ms on desktop where wider viewports make per-frame rebuilds disproportionately expensive. `session.idle` flushes any pending delta notification before terminal turn handling so the final state is visible before the composer leaves active-send state.
 
 4. **Server-authoritative completed snapshots may reorder parts non-regressively.** When a non-stale server-authoritative completed snapshot arrives, the provider adopts the server's part order while preserving locally-visible non-regressive content: completed text is not shortened, completed/error tool calls are not reopened by late running snapshots, and already-represented text/reasoning parts are not appended as duplicates.
 
@@ -2436,7 +2436,7 @@ Adopt the following client-side invariants for chat stability. All rules operate
 
 - A monotonic local delta version is the simplest correct tiebreaker that survives concurrent streams, fallbacks, and reorderings without inventing a new protocol.
 - The completion/metadata-only guard is a direct continuation of the ADR-023 Pitfall P-002 guard, extended to fallback paths where late completes were the regression source.
-- 16ms is one frame at 60Hz and is the smallest batching window that meaningfully amortizes notify churn without becoming user-perceptible; bounded in-flight batches prevent starvation.
+- 16ms is one frame at 60Hz and is the smallest batching window that meaningfully amortizes notify churn without becoming user-perceptible; desktop uses 120ms because wider multi-pane viewports make per-frame markdown re-parse/re-layout disproportionately expensive, still below the perception threshold for streaming text; bounded in-flight batches prevent starvation.
 - Sticky terminal part state is necessary because users perceive "the tool result reverted" as a correctness bug even when the server is authoritative for a newer snapshot; preserving terminal state non-regressively is the lowest-risk compatibility policy.
 - The 220ms / 3-pass final reveal keeps the animation responsive while preventing runaway reveal loops that have been a recurring source of viewport jitter (ADR-028, ADR-037). Separating completed/settled from active incomplete in the FAB policy removes the false-positive suppression that pinned the FAB unnecessarily during streaming.
 - Double extent restore handles the recurring cause of scroll-anchor drift under older-message prepend: the first measurement happens before async image decode and the second corrects the offset without re-running pagination restore.
@@ -2447,7 +2447,7 @@ Adopt the following client-side invariants for chat stability. All rules operate
 
 - ✅ Assistant message reconciliation is monotonic across fallback, streaming, and authoritative snapshot paths.
 - ✅ Completed/settled assistant messages no longer flicker when stale fallback completions or metadata-only merges arrive late.
-- ✅ Delta notifications produce ≤1 listener notify per message id per 16ms window, reducing streaming-frame churn.
+- ✅ Delta notifications produce ≤1 listener notify per message id per batch window (16ms mobile/web, 120ms desktop), reducing streaming-frame churn.
 - ✅ Server-authoritative completed snapshots may reorder parts while preserving the user's terminal text/tool state.
 - ✅ Final reveal animates within 220ms, capped at 3 scroll passes, with no runaway reveal loops.
 - ✅ FAB hides only when the latest completed/settled assistant message is fully visible; an active incomplete assistant does not falsely suppress the FAB.
@@ -2465,7 +2465,7 @@ This ADR is fully compliant with ADR-023. No OpenCode server contract is changed
 ### Key Files
 
 - `lib/presentation/providers/chat_provider/chat_provider_message_merge_ops.dart` — monotonic delta-version tiebreaker, completion guard, non-regressive part reorder
-- `lib/presentation/providers/chat_provider/chat_provider_event_reducer_session_ops.dart` — 16ms delta batching window, in-flight batch bound
+- `lib/presentation/providers/chat_provider/chat_provider_event_reducer_session_ops.dart` — platform-conditional delta batching window, in-flight batch bound
 - `lib/presentation/providers/chat_provider/chat_provider_message_state_ops.dart` — sticky terminal part state, local delta-version counters
 - `lib/presentation/providers/chat_provider/chat_provider_compaction_ops.dart` — value-equality compaction decision `==`/`hashCode`
 - `lib/presentation/pages/chat_page/chat_page_runtime_support.dart` — 220ms final reveal, 3-pass cap, viewport-measured FAB hiding

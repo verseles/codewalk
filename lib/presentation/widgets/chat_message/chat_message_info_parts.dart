@@ -336,6 +336,9 @@ class _CollapsibleReasoningContentState
         _scrollController.jumpTo(maxScrollExtent);
         return;
       }
+      // Intentionally retained: all current callers pass forceJump: true so
+      // streaming deltas jump (a layout anchor, not a transition). This branch
+      // stays as the fallback for a future non-streaming animated follow.
       unawaited(
         _scrollController
             .animateTo(
