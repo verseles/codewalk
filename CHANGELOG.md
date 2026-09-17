@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.243.0 - 2026-09-17
+
+- fix(review): superseded switch bails before mutating selection state
+- fix(review): capture same-session decision before policy await
+- fix(review): same-session reentry keeps in-flight switch, add latest-wins test
+- fix(review): guard stale switches, drop dead mirror, freeze scope
+- perf(switch): write-behind session select without storage awaits
+- fix(tasks): hourglass glyph for the in-progress todo
+
 ## v1.242.0 - 2026-09-17
 
 - fix(review): exclude fake percent on static bars
