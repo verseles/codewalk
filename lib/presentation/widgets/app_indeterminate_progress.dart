@@ -260,11 +260,13 @@ class _AppIndeterminateBarState extends State<AppIndeterminateBar> {
       if (!AppAnimations.enabled(context)) {
         return Semantics(
           label: label,
-          child: LinearProgressIndicator(
-            value: 0.35,
-            minHeight: widget.minHeight,
-            color: color,
-            backgroundColor: widget.backgroundColor,
+          child: ExcludeSemantics(
+            child: LinearProgressIndicator(
+              value: 0.35,
+              minHeight: widget.minHeight,
+              color: color,
+              backgroundColor: widget.backgroundColor,
+            ),
           ),
         );
       }
@@ -280,11 +282,13 @@ class _AppIndeterminateBarState extends State<AppIndeterminateBar> {
     if (!TickerMode.valuesOf(context).enabled) {
       return Semantics(
         label: label,
-        child: LinearProgressIndicator(
-          value: 0.35,
-          minHeight: widget.minHeight,
-          color: color,
-          backgroundColor: widget.backgroundColor,
+        child: ExcludeSemantics(
+          child: LinearProgressIndicator(
+            value: 0.35,
+            minHeight: widget.minHeight,
+            color: color,
+            backgroundColor: widget.backgroundColor,
+          ),
         ),
       );
     }
