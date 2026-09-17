@@ -235,7 +235,23 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
             // persisted: a refused oversized write (false without storing)
             // must keep the legacy copy, especially for user data such as
             // composer drafts.
-            if (!wrote && await store.read(key) != value) return;
+            if (!wrote && await store.read(key) != value) {
+              // Exception: provider catalogs are regenerable from the server
+              // (the caller refetches on a cache miss) and at ~5MB each they
+              // can never fit the store cap — keeping them poisons every
+              // SharedPreferences rewrite, so drain them instead.
+              if (_isScopedLargeCachePayloadKey(
+                key,
+                AppConstants.providerCatalogCacheKey,
+              )) {
+                AppLogger.warn(
+                  'Draining oversized legacy provider catalog from preferences; will refetch from server',
+                );
+                await _sharedPreferences.remove(key);
+                _migratedLargeCacheKeys.add(key);
+              }
+              return;
+            }
             if (_sharedPreferences.getString(key) == value) {
               await _sharedPreferences.remove(key);
             }
@@ -334,6 +350,14 @@ extension _AppLocalDataSourceStorageHelpers on AppLocalDataSourceImpl {
           AppLogger.warn(
             'Dropping oversized large-cache payload instead of persisting it',
           );
+          // Regenerable provider catalogs must not re-accumulate in prefs:
+          // drop any legacy copy so one fetch cannot re-poison the file.
+          if (_isScopedLargeCachePayloadKey(
+            key,
+            AppConstants.providerCatalogCacheKey,
+          )) {
+            await _sharedPreferences.remove(key);
+          }
           return false;
         }
         final store = _chatCachePayloadStore;

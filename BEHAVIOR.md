@@ -787,6 +787,7 @@
 - **Then** if that cached session is still actively processing, the viewport lands directly at the bottom immediately, with no visible reopen animation
 - **Then** if that cached session is already settled, the viewport restores directly to the latest assistant response instead of replaying a reopen bottom-snap or reveal thrash
 - **Then** the app revalidates the session in background (SWR) and merges newer server state when available
+- **Then** session selection persistence is write-behind: the newly selected session is authoritative in memory immediately and its id reaches disk asynchronously (flushed on backgrounding), so the tap never waits on storage
 - **Then** native builds store large cached chat payloads in the file-backed cache, not in `SharedPreferences`; legacy large payloads left in `SharedPreferences` are sanitized natively before any engine starts (oversized keys quarantined without crossing the platform channel) and valid bounded entries are drained to the file-backed cache in the background
 
 ### Project switching is cache-first and non-blocking

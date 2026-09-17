@@ -944,12 +944,41 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     return 'legacy';
   }
 
+  /// Write-behind session-id persistence for the interaction path: the
+  /// in-memory mirror is updated synchronously so readers observe the latest
+  /// selection immediately, while the disk write flows through the existing
+  /// per-scope ordered queue without blocking the caller.
+  void _scheduleCurrentSessionIdPersist(
+    String sessionId, {
+    required String serverId,
+    required String scopeId,
+  }) {
+    final queueKey = '$serverId::$scopeId';
+    _currentSessionIdMemoryByScope[queueKey] = sessionId;
+    unawaited(
+      _saveCurrentSessionId(
+        sessionId,
+        serverId: serverId,
+        scopeId: scopeId,
+      ),
+    );
+  }
+
+  /// Drains pending session-id writes (lifecycle/background flush).
+  Future<void> flushCurrentSessionIdPersistence() async {
+    final pending = _currentSessionIdWriteQueueByScope.values.toList(
+      growable: false,
+    );
+    if (pending.isNotEmpty) {
+      await Future.wait(pending);
+    }
+  }
+
   Future<void> _saveCurrentSessionId(
     String sessionId, {
     required String serverId,
     required String scopeId,
-  }) async {
-    final queueKey = '$serverId::$scopeId';
+  }) async {    final queueKey = '$serverId::$scopeId';
     final previous =
         _currentSessionIdWriteQueueByScope[queueKey] ?? Future<void>.value();
     final next = previous.then((_) async {

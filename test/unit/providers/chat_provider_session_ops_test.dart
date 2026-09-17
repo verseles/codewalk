@@ -2173,5 +2173,43 @@ void main() {
         },
       );
     });
+
+    group('session switch persistence', () {
+      test(
+        'selectSession returns before a slow session-id write completes',
+        () async {
+          await provider.projectProvider.initializeProject();
+          await provider.initializeProviders();
+          final now = DateTime.fromMillisecondsSinceEpoch(1);
+          final sessionA = ChatSession(
+            id: 'session-a',
+            workspaceId: 'default',
+            directory: '/work/project',
+            time: now,
+            title: 'Session A',
+          );
+          final sessionB = sessionA.copyWith(
+            id: 'session-b',
+            title: 'Session B',
+          );
+          chatRepository.sessions
+            ..clear()
+            ..addAll(<ChatSession>[sessionA, sessionB]);
+          await provider.loadSessions();
+          await provider.selectSession(sessionA);
+
+          localDataSource.saveCurrentSessionIdDelay = (_) =>
+              Future<void>.delayed(const Duration(seconds: 5));
+
+          final stopwatch = Stopwatch()..start();
+          await provider.selectSession(sessionB, awaitNetwork: false);
+          stopwatch.stop();
+
+          expect(stopwatch.elapsed, lessThan(const Duration(seconds: 5)));
+          expect(provider.currentSession?.id, sessionB.id);
+          await provider.flushSelectionPersistence();
+        },
+      );
+    });
   });
 }

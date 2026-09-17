@@ -197,8 +197,20 @@ extension ChatProviderSessionAttentionOps on ChatProvider {
           final parent = parentBySessionId[current];
           if (parent == null || parent.isEmpty) return current;
           current = parent;
-        }
-        return sessionId;
+        }        return sessionId;
+      }
+
+      // Pre-index once per publish so the per-session loop below stays
+      // linear instead of scanning the pending maps per root session.
+      final pendingRootSessionIds = <String>{
+        for (final entry in permissionsBySession.entries)
+          if (entry.value.isNotEmpty) rootSessionIdFor(entry.key),
+        for (final entry in questionsBySession.entries)
+          if (entry.value.isNotEmpty) rootSessionIdFor(entry.key),
+      };
+      final latestMessageBySessionId = <String, ChatMessage>{};
+      for (final message in messages) {
+        latestMessageBySessionId[message.sessionId] = message;
       }
 
       for (final session in sessions) {
@@ -226,16 +238,7 @@ extension ChatProviderSessionAttentionOps on ChatProvider {
           continue;
         }
         final hasPending =
-            permissionsBySession.entries.any(
-              (entry) =>
-                  entry.value.isNotEmpty &&
-                  rootSessionIdFor(entry.key) == sessionId,
-            ) ||
-            questionsBySession.entries.any(
-              (entry) =>
-                  entry.value.isNotEmpty &&
-                  rootSessionIdFor(entry.key) == sessionId,
-            );
+            pendingRootSessionIds.contains(sessionId);
         final hasError = errorIds.contains(sessionId);
         final hasCompletion = unreadCompletionIds.contains(sessionId);
         final status = statusById[sessionId]?.type;
@@ -251,12 +254,7 @@ extension ChatProviderSessionAttentionOps on ChatProvider {
           rootSessionId: sessionId,
         );
         knownIdentities.add(identity);
-        final sessionMessages = messages
-            .where((message) => message.sessionId == sessionId)
-            .toList(growable: false);
-        final latestMessage = sessionMessages.isEmpty
-            ? null
-            : sessionMessages.last;
+        final latestMessage = latestMessageBySessionId[sessionId];
         final fingerprint = <Object?>[
           status?.name,
           statusById[sessionId]?.attempt,

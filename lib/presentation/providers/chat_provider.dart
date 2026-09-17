@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../core/config/feature_flags.dart';
 import '../../core/di/injection_container.dart' as di;
@@ -463,6 +464,10 @@ class ChatProvider extends ChangeNotifier {
   Future<void>? _lazySessionBootstrapTask;
   final Map<String, Future<void>> _currentSessionIdWriteQueueByScope =
       <String, Future<void>>{};
+  // In-memory mirror of the in-flight persisted session id per scope: lets
+  // readers observe the latest selection without awaiting the disk write.
+  final Map<String, String> _currentSessionIdMemoryByScope =
+      <String, String>{};
   _RejectedDraftEnvelope? _rejectedDraft;
   _HistoryComposerSync? _pendingHistoryComposerSync;
   _PendingReplacementBranch? _pendingReplacementBranch;
@@ -3002,7 +3007,6 @@ class ChatProvider extends ChangeNotifier {
   Future<void> flushSelectionPersistence() async {
     _selectionPersistenceDebounce?.cancel();
     _selectionPersistenceDebounce = null;
-    if (!_selectionPersistenceDirty && _selectionPersistenceTask == null) return;
     if (_selectionPersistenceTask != null) {
       await _selectionPersistenceTask;
     }
@@ -3011,6 +3015,7 @@ class ChatProvider extends ChangeNotifier {
       _selectionPersistenceTask = task;
       await task;
     }
+    await flushCurrentSessionIdPersistence();
   }
 
   @visibleForTesting
@@ -4051,13 +4056,28 @@ class ChatProvider extends ChangeNotifier {
   /// Generate time-based session title
 
   /// Select session
+  /// Runs [fn] after the current frame when a binding exists, or
+  /// immediately in contexts without one (unit tests). Never gates paint.
+  void _postSwitchFrame(void Function() fn) {
+    SchedulerBinding? binding;
+    try {
+      binding = SchedulerBinding.instance;
+    } catch (_) {
+      binding = null;
+    }
+    if (binding == null) {
+      fn();
+      return;
+    }
+    binding.addPostFrameCallback((_) => fn());
+  }
+
   Future<void> selectSession(
     ChatSession session, {
     bool userInitiated = true,
     bool awaitNetwork = true,
   }) async {
-    _sessionSelectionGeneration += 1;
-    if (userInitiated && _isNewChatDraftActive) {
+    _sessionSelectionGeneration += 1;    if (userInitiated && _isNewChatDraftActive) {
       _newChatDraftGeneration++;
     }
     final previousSessionId = _currentSession?.id;
@@ -4120,12 +4140,17 @@ class ChatProvider extends ChangeNotifier {
         final outgoingSessionId = _currentSession?.id;
         if (outgoingSessionId != null && _messages.isNotEmpty) {
           _cacheSessionMessages(outgoingSessionId, _messages);
-          unawaited(
-            _persistSessionMessagesSnapshotBestEffort(
-              outgoingSessionId,
-              _messages,
-            ),
-          );
+          // Persist past the first frame: an ~900KB fsync must never run on
+          // the tap turn even though it is already fire-and-forget.
+          final outgoingMessages = List<ChatMessage>.unmodifiable(_messages);
+          _postSwitchFrame(() {
+            unawaited(
+              _persistSessionMessagesSnapshotBestEffort(
+                outgoingSessionId,
+                outgoingMessages,
+              ),
+            );
+          });
         }
 
         // Invalidate any concurrent loadSessions() that captured a stale
@@ -4192,34 +4217,35 @@ class ChatProvider extends ChangeNotifier {
             _cancelActiveMessageSubscription(
               reason: 'session-switch',
               invalidateGeneration: false,
-              timeout: awaitNetwork
-                  ? const Duration(seconds: 2)
-                  : const Duration(milliseconds: 100),
+              timeout: const Duration(milliseconds: 100),
             );
-        if (awaitNetwork) {
-          await messageSubscriptionCancellation;
-        } else {
-          unawaited(messageSubscriptionCancellation);
-        }
+        // Stale events are already discarded by the generation bump above,
+        // so teardown must never gate paint.
+        unawaited(messageSubscriptionCancellation);
         AppLogger.info(
           'selectSession generation=$_messageStreamGeneration target=${session.id}',
         );
 
         // Save current session ID and try cache-first restore (SWR).
-        final serverId = await _resolveServerScopeId();
+        // Independent reads run concurrently and must never gate first
+        // paint; the warm cache was already committed above.
         final scopeId = _resolveContextScopeId();
-        await _ensureSessionTabsLoaded(serverId: serverId);
+        final serverId = _activeServerId.trim().isNotEmpty
+            ? _activeServerId.trim()
+            : await _resolveServerScopeId();
+        final pendingReads = Future.wait(<Future<Object?>>[
+          _ensureSessionTabsLoaded(serverId: serverId),
+          _loadPersistedComposerDraft(session.id, serverId: serverId),
+        ]);
         if (_currentSession?.id == session.id) {
           _recordVisibleSessionTab(session);
         }
-        final restoredComposerDraft = await _loadPersistedComposerDraft(
-          session.id,
-          serverId: serverId,
-        );
         if (!userInitiated &&
             _cellularDataSaverService.shouldSuppressBackgroundWork) {
           return;
         }
+        final readResults = await pendingReads;
+        final restoredComposerDraft = readResults[1] as ChatComposerDraft?;
         _queueHistoryComposerSync(
           sessionId: session.id,
           draft: restoredComposerDraft,
@@ -4264,8 +4290,11 @@ class ChatProvider extends ChangeNotifier {
         }
 
         // Ordering guarantee: session-id persistence is queued per scope and
-        // subsequent loads may read it; keep the await (single cheap write).
-        await _saveCurrentSessionId(
+        // subsequent loads may read it. The write itself is write-behind:
+        // the in-memory mirror is authoritative immediately and the disk
+        // write must never block the interaction frame (on Linux the prefs
+        // file rewrite costs ~1s).
+        _scheduleCurrentSessionIdPersist(
           session.id,
           serverId: serverId,
           scopeId: scopeId,
@@ -4287,15 +4316,24 @@ class ChatProvider extends ChangeNotifier {
           await loadMessages(session.id, automatic: !userInitiated);
         }
 
-        // Insights are non-critical and run fire-and-forget.
+        // Insights are non-critical and run fire-and-forget after first
+        // paint so their GET fan-out never contends with it.
         if (userInitiated) {
-          unawaited(
-            loadSessionInsights(
-              session.id,
-              silent: true,
-              userInitiated: userInitiated,
-            ),
-          );
+          final insightsSessionId = session.id;
+          final insightsGeneration = _messageStreamGeneration;
+          _postSwitchFrame(() {
+            if (_currentSession?.id != insightsSessionId ||
+                _messageStreamGeneration != insightsGeneration) {
+              return;
+            }
+            unawaited(
+              loadSessionInsights(
+                insightsSessionId,
+                silent: true,
+                userInitiated: userInitiated,
+              ),
+            );
+          });
         }
       },
       tags: const <String>{'chat:session'},

@@ -569,8 +569,7 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
 
     final restrictToVisible =
         visibleSessionOnly ||
-        _cellularDataSaverService.isAggressiveDataSaverActive;
-    if (restrictToVisible && !_hasVisibleAggressiveDataSaverSession) {
+        _cellularDataSaverService.isAggressiveDataSaverActive;    if (restrictToVisible && !_hasVisibleAggressiveDataSaverSession) {
       _pendingPermissionsBySession = <String, List<ChatPermissionRequest>>{};
       _pendingQuestionsBySession = <String, List<ChatQuestionRequest>>{};
       _threadPermissionsVersion++;
@@ -582,9 +581,11 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
       return;
     }
 
-    final permissionsResult = await listPendingPermissions(
+    final permissionsFuture = listPendingPermissions(
       directory: directory,
     );
+    final questionsFuture = listPendingQuestions(directory: directory);
+    final permissionsResult = await permissionsFuture;
     if (!isCurrentFetch()) {
       return;
     }
@@ -618,7 +619,7 @@ extension _ChatProviderRealtimeAuxOps on ChatProvider {
     if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
       return;
     }
-    final questionsResult = await listPendingQuestions(directory: directory);
+    final questionsResult = await questionsFuture;
     if (!isCurrentFetch()) {
       return;
     }

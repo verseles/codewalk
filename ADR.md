@@ -752,6 +752,8 @@ This is an addendum to ADR-016, which owns the local persistence boundary. ADR-0
 - ✅ App-backgrounding flushes coalesced session-tab state before process death can drop it, and generation-guarded retries prevent stale writes from overwriting newer persisted state (2026-08-21 hardening).
 - ✅ The change is client-local persistence only: it does not change the OpenCode wire protocol, server event semantics, documented visual behavior, or ADR-023 compatibility.
 - ⚠ Debouncing intentionally delays ordinary session-tab persistence by up to 750 ms; lifecycle boundaries must flush before relying on the durable value.
+- ✅ Session-id persistence on session switch is write-behind with an in-memory mirror and lifecycle flush (same rule as project switching above): the tap never awaits storage.
+- ✅ Oversized regenerable provider-catalog legacies that the file store refuses are drained from SharedPreferences instead of kept: the server refetches them on next miss, and keeping multi-MB strings poisons every prefs rewrite.
 - ⚠ Future metadata persistence must use the guarded/coalesced boundary rather than introducing an unguarded direct SharedPreferences hot path.
 - ⚠ Requires the conditional import boundary (`ChatCachePayloadStore` IO vs. stub) to keep web builds green — same pattern already used by the Tailscale adapter (ADR-036) and the SSE adapter (ADR-018).
 - ⚠ The migration key list is explicit; adding a new large-payload key family requires updating BOTH `_isLargeCachePayloadPreferenceKey` and the Kotlin `LARGE_KEY_BASES` list so the Dart sweep and the native pre-engine purge stay complete.
