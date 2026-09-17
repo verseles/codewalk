@@ -86,6 +86,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('production HTML bold and italic styles compose', (tester) async {
+    await tester.pumpWidget(app(message('<b><i>styled</i></b>')));
+    TextSpan? findSpan(InlineSpan span) {
+      if (span is! TextSpan) return null;
+      if (span.text == 'styled') return span;
+      for (final child in span.children ?? <InlineSpan>[]) {
+        final found = findSpan(child);
+        if (found != null) return found;
+      }
+      return null;
+    }
+
+    final span = tester
+        .widgetList<RichText>(find.byType(RichText))
+        .map((widget) => findSpan(widget.text))
+        .whereType<TextSpan>()
+        .first;
+    expect(span.style?.fontWeight, FontWeight.bold);
+    expect(span.style?.fontStyle, FontStyle.italic);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('assistant HTML streaming completion flushes final formatting', (
     tester,
   ) async {

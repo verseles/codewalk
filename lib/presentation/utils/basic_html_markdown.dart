@@ -7,6 +7,7 @@ import 'math_markdown.dart';
 
 const basicHtmlTextTag = 'cwHtmlText';
 const basicHtmlProgressTag = 'cwHtmlProgress';
+const basicHtmlMathTag = 'cwHtmlMath';
 const _tags = {'b', 'i', 'u', 'br', 'sub', 'sup', 'progress'};
 
 /// Keep supported tag-only lines in the normal Markdown paragraph pipeline.
@@ -21,7 +22,8 @@ class BasicHtmlBlockSyntax extends md.ParagraphSyntax {
 
   @override
   bool canParse(md.BlockParser parser) =>
-      _start.hasMatch(parser.current.content);
+      _start.hasMatch(parser.current.content) &&
+      !const md.TableSyntax().canParse(parser);
 }
 
 /// A bounded, presentation-only subset of HTML; source text is never rewritten.
@@ -59,7 +61,7 @@ class BasicHtmlInlineSyntax extends md.InlineSyntax {
     _depth++;
     late final List<md.Node> children;
     try {
-      children = parser.document.parseInline(inner);
+      children = _inlineHtmlMath(parser.document.parseInline(inner));
     } finally {
       _depth--;
     }
@@ -76,12 +78,7 @@ class BasicHtmlInlineSyntax extends md.InlineSyntax {
           .join();
       parser.addNode(element);
     } else if (tag.name == 'b' || tag.name == 'i') {
-      for (final node in _emphasize(
-        children,
-        tag.name == 'b' ? 'strong' : 'em',
-      )) {
-        parser.addNode(node);
-      }
+      parser.addNode(md.Element(tag.name == 'b' ? 'strong' : 'em', children));
     } else {
       for (final node in _decorate(children, tag.name)) {
         parser.addNode(node);
@@ -96,87 +93,74 @@ class BasicHtmlInlineSyntax extends md.InlineSyntax {
 
   // Pair once per inline parser, avoiding repeated scans of unmatched openers.
   Map<int, _HtmlTag> _matchPairs(md.InlineParser parser) {
-    final source = parser.source;
     final pairs = <int, _HtmlTag>{};
     final stack = <_HtmlTag>[];
-    final math = parser.document.inlineSyntaxes.where(
-      (s) => s is InlineMathSyntax || s is SingleLineBlockMathSyntax,
-    );
-    var pos = 0;
-    while (pos < source.length) {
-      if (source.codeUnitAt(pos) == 92) {
-        pos += 2;
-        continue;
-      }
-      if (source.codeUnitAt(pos) == 96) {
-        final run = RegExp('`+').matchAsPrefix(source, pos)!;
-        final length = run.end - pos;
-        var end = run.end;
-        for (final next in RegExp('`+').allMatches(source, end)) {
-          if (next.end - next.start == length) {
-            end = next.end;
-            break;
+    // Let the same lexer mask code, math, raw HTML and link destinations/titles.
+    final document = md.Document(
+      inlineSyntaxes: [
+        _HtmlPairSyntax((tag) {
+          if (tag.name == 'br' || tag.selfClosing) return;
+          if (!tag.closing) {
+            stack.add(tag);
+          } else if (stack.isNotEmpty && stack.last.name == tag.name) {
+            pairs[stack.removeLast().start] = tag;
+          } else {
+            stack.clear();
           }
-        }
-        pos = end;
-        continue;
-      }
-      if (source.codeUnitAt(pos) == 36) {
-        Match? match;
-        for (final syntax in math) {
-          match = syntax.pattern.matchAsPrefix(source, pos);
-          if (match != null) break;
-        }
-        if (match != null) {
-          pos = match.end;
-          continue;
-        }
-      }
-      final tag = source.codeUnitAt(pos) == 60
-          ? _HtmlTag.read(source, pos)
-          : null;
-      if (tag == null) {
-        pos++;
-        continue;
-      }
-      pos = tag.end;
-      if (!_tags.contains(tag.name) || tag.name == 'br' || tag.selfClosing) {
-        continue;
-      }
-      if (!tag.closing) {
-        stack.add(tag);
-      } else if (stack.isNotEmpty && stack.last.name == tag.name) {
-        pairs[stack.removeLast().start] = tag;
-      } else {
-        stack.clear();
-      }
-    }
+        }),
+        ...parser.document.inlineSyntaxes.where(
+          (syntax) => syntax is! BasicHtmlInlineSyntax,
+        ),
+      ],
+      extensionSet: md.ExtensionSet(const [], const []),
+      encodeHtml: false,
+    )..linkReferences.addAll(parser.document.linkReferences);
+    document.parseInline(parser.source);
     return pairs;
   }
 }
 
-// Existing math builders are block elements. Keep them outside newly-created
-// inline emphasis ancestors, which MarkdownBody cannot lay out around a block.
-List<md.Node> _emphasize(List<md.Node> nodes, String tag) {
-  final result = <md.Node>[];
-  var run = <md.Node>[];
-  void flush() {
-    if (run.isNotEmpty) result.add(md.Element(tag, run));
-    run = <md.Node>[];
+class _HtmlPairSyntax extends md.InlineSyntax {
+  _HtmlPairSyntax(this.onTag) : super('<', startCharacter: 60);
+
+  final void Function(_HtmlTag) onTag;
+
+  @override
+  bool tryMatch(md.InlineParser parser, [int? startMatchPos]) {
+    final start = startMatchPos ?? parser.pos;
+    if (parser.source.codeUnitAt(start) != 60) return false;
+    final tag = _HtmlTag.read(parser.source, start);
+    if (tag == null || !_tags.contains(tag.name)) return false;
+    onTag(tag);
+    parser.writeText();
+    parser.addNode(md.Text(parser.source.substring(start, tag.end)));
+    parser.consume(tag.end - start);
+    return true;
   }
 
-  for (final node in nodes) {
-    if (node is md.Element &&
-        (node.tag == 'inlineMath' || node.tag == 'blockMath')) {
-      flush();
-      result.add(node);
-    } else {
-      run.add(node);
+  @override
+  bool onMatch(md.InlineParser parser, Match match) => false;
+}
+
+// Reparsed math may acquire outer Markdown emphasis later. Private inline tags
+// keep it safe there without changing the existing global block math builders.
+List<md.Node> _inlineHtmlMath(List<md.Node> nodes) => nodes.map((node) {
+  if (node is md.Element) {
+    if (node.tag == 'inlineMath' || node.tag == 'blockMath') {
+      final math = md.Element(basicHtmlMathTag, node.children);
+      math.attributes.addAll(node.attributes);
+      math.attributes['display'] = '${node.tag == 'blockMath'}';
+      return math;
+    }
+    if (node.children != null) {
+      final children = _inlineHtmlMath(node.children!);
+      node.children!
+        ..clear()
+        ..addAll(children);
     }
   }
-  flush();
-  return result;
-}
+  return node;
+}).toList();
 
 List<md.Node> _decorate(List<md.Node> nodes, String style) {
   return nodes.map((node) {
@@ -224,8 +208,8 @@ class _HtmlTag {
   final bool selfClosing;
   final Map<String, String> attributes;
 
-  static final _token = RegExp(
-    r'''</?([a-z][a-z0-9]*)(\s+(?:[^<>"']|"[^"]*"|'[^']*')*)?\s*/?>''',
+  static final _name = RegExp(
+    r'</?([a-z][a-z0-9]*)(?=[\s/>])',
     caseSensitive: false,
   );
   static final _attribute = RegExp(
@@ -238,11 +222,28 @@ class _HtmlTag {
   );
 
   static _HtmlTag? read(String source, int start) {
-    final match = _token.matchAsPrefix(source, start);
+    final match = _name.matchAsPrefix(source, start);
     if (match == null) return null;
+    var end = match.end;
+    int? quote;
+    while (end < source.length) {
+      final char = source.codeUnitAt(end++);
+      if (quote != null) {
+        if (char == quote) quote = null;
+      } else if (char == 34 || char == 39) {
+        quote = char;
+      } else if (char == 60) {
+        return null;
+      } else if (char == 62) {
+        break;
+      }
+    }
+    if (quote != null || source.codeUnitAt(end - 1) != 62) return null;
     final closing = source.startsWith('</', start);
     final attrs = <String, String>{};
-    for (final attr in _attribute.allMatches(match[2] ?? '')) {
+    for (final attr in _attribute.allMatches(
+      source.substring(match.end, end - 1),
+    )) {
       attrs.putIfAbsent(attr[1]!.toLowerCase(), () {
         final value = attr[2] ?? attr[3] ?? attr[4] ?? '';
         return value.contains('&')
@@ -255,10 +256,10 @@ class _HtmlTag {
     }
     return _HtmlTag(
       start,
-      match.end,
+      end,
       match[1]!.toLowerCase(),
       closing,
-      match[0]!.endsWith('/>'),
+      source.codeUnitAt(end - 2) == 47,
       attrs,
     );
   }
@@ -290,7 +291,11 @@ class BasicHtmlTextBuilder extends MarkdownElementBuilder {
     TextStyle? preferredStyle,
     TextStyle? parentStyle,
   ) {
-    var style = parentStyle ?? Theme.of(context).textTheme.bodyMedium!;
+    var style =
+        parentStyle ??
+        preferredStyle ??
+        Theme.of(context).textTheme.bodyMedium ??
+        const TextStyle();
     if (element.attributes.containsKey('underline')) {
       style = style.copyWith(
         decoration: TextDecoration.combine([
@@ -327,6 +332,46 @@ class BasicHtmlTextBuilder extends MarkdownElementBuilder {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Keep the package's link recognizers when HTML appears inside a link label.
+class BasicHtmlLinkPaddingBuilder extends MarkdownPaddingBuilder {
+  @override
+  void visitElementBefore(md.Element element) {
+    void unwrap(List<md.Node> nodes) {
+      for (var i = 0; i < nodes.length; i++) {
+        final node = nodes[i];
+        if (node is! md.Element) continue;
+        if (node.tag == basicHtmlTextTag) {
+          nodes[i] = md.Text(node.textContent);
+        } else if (node.children != null) {
+          unwrap(node.children!);
+        }
+      }
+    }
+
+    unwrap(element.children ?? []);
+  }
+}
+
+class BasicHtmlMathBuilder extends MarkdownElementBuilder {
+  @override
+  Widget? visitElementAfterWithContext(
+    BuildContext context,
+    md.Element element,
+    TextStyle? preferredStyle,
+    TextStyle? parentStyle,
+  ) {
+    final builder = element.attributes['display'] == 'true'
+        ? BlockMathBuilder()
+        : InlineMathBuilder();
+    return builder.visitElementAfterWithContext(
+      context,
+      element,
+      preferredStyle,
+      parentStyle,
     );
   }
 }

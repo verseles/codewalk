@@ -46,6 +46,7 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
           if (supportsHtml) ...{
             basicHtmlTextTag: BasicHtmlTextBuilder(),
             basicHtmlProgressTag: BasicHtmlProgressBuilder(),
+            basicHtmlMathTag: BasicHtmlMathBuilder(),
           },
           'pre': _MarkdownCodeBlockTapBuilder(
             themeTokens: themeTokens,
@@ -64,6 +65,9 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
             'filepath': FilePathBuilder(onFileTap: widget.onFileTap!),
           if (mathRenderingEnabled) 'inlineMath': InlineMathBuilder(),
           if (mathRenderingEnabled) 'blockMath': BlockMathBuilder(),
+        },
+        paddingBuilders: {
+          if (supportsHtml) 'a': BasicHtmlLinkPaddingBuilder(),
         },
         onTapLink: (text, href, title) {
           final normalizedHref = href?.trim();

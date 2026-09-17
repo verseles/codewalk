@@ -7,6 +7,8 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 
+import 'support/pump_localized_app.dart';
+
 List<md.Node> parse(String text) => md.Document(
   inlineSyntaxes: [BasicHtmlInlineSyntax(), InlineMathSyntax()],
   blockSyntaxes: const [BasicHtmlBlockSyntax()],
@@ -29,7 +31,7 @@ Widget body(
   double width = 320,
   double scale = 1,
   ValueChanged<String>? onLink,
-}) => MaterialApp(
+}) => localizedMaterialApp(
   theme: ThemeData(brightness: brightness),
   home: Scaffold(
     body: MediaQuery(
@@ -39,13 +41,19 @@ Widget body(
         child: MarkdownBody(
           data: text,
           softLineBreak: true,
-          inlineSyntaxes: [BasicHtmlInlineSyntax(), InlineMathSyntax()],
+          inlineSyntaxes: [
+            BasicHtmlInlineSyntax(),
+            InlineMathSyntax(),
+            SingleLineBlockMathSyntax(),
+          ],
           blockSyntaxes: const [BasicHtmlBlockSyntax()],
           builders: {
             basicHtmlTextTag: BasicHtmlTextBuilder(),
             basicHtmlProgressTag: BasicHtmlProgressBuilder(),
+            basicHtmlMathTag: BasicHtmlMathBuilder(),
             'inlineMath': InlineMathBuilder(),
           },
+          paddingBuilders: {'a': BasicHtmlLinkPaddingBuilder()},
           onTapLink: (text, href, title) => onLink?.call(href!),
         ),
       ),
@@ -69,6 +77,79 @@ Iterable<TextSpan> spans(WidgetTester tester) sync* {
 }
 
 void main() {
+  test('HTML-starting GFM tables retain table parsing', () {
+    final nodes = elements(parse('<b>Tool</b> | Status\n--- | ---\nTest | OK'));
+    expect(nodes.where((e) => e.tag == 'table'), hasLength(1));
+    expect(nodes.where((e) => e.tag == 'strong'), hasLength(1));
+  });
+
+  test('opaque Markdown regions cannot close HTML wrappers', () {
+    for (final inner in [
+      '<!-- </b> -->',
+      '<?test </b> ?>',
+      '<![CDATA[ </b> ]]>',
+      '<custom-tag title="</b>">',
+      '[link](https://example.com "</b>")',
+      '[link](https://example.com "title <i>")',
+    ]) {
+      final strong = elements(
+        parse('<b>before $inner after</b>'),
+      ).singleWhere((e) => e.tag == 'strong');
+      expect(strong.textContent, endsWith(' after'), reason: inner);
+    }
+  });
+
+  test('long incomplete tag scanning remains bounded', () {
+    final source = '<b ${List.filled(6000, ' ').join()}x';
+    final watch = Stopwatch()..start();
+    final nodes = parse(source);
+    expect(nodes.map((node) => node.textContent).join(), source);
+    expect(watch.elapsed, lessThan(const Duration(seconds: 3)));
+  });
+
+  for (final tag in ['u', 'sub', 'sup']) {
+    testWidgets('HTML $tag inside a link label remains tappable', (
+      tester,
+    ) async {
+      String? tapped;
+      await tester.pumpWidget(
+        body(
+          '[<$tag>label</$tag>](https://example.com)',
+          onLink: (value) => tapped = value,
+        ),
+      );
+      await tester.tap(find.text('label'));
+      expect(tapped, 'https://example.com');
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('wrapped link with closing-tag title remains tappable', (
+    tester,
+  ) async {
+    String? tapped;
+    await tester.pumpWidget(
+      body(
+        '<u>[label](https://example.com "</u>")</u>',
+        onLink: (value) => tapped = value,
+      ),
+    );
+    await tester.tap(find.text('label'));
+    expect(tapped, 'https://example.com');
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final source in [
+    r'**<b>$x^2$</b>**',
+    r'*<i>$x^2$</i>*',
+    r'<b>$$ x^2 $$</b>',
+  ]) {
+    testWidgets('HTML math is safe beneath Markdown: $source', (tester) async {
+      await tester.pumpWidget(body(source));
+      expect(find.byType(MathExpressionWidget), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
   test('balanced nesting, same tag and private script leaves', () {
     final nodes = elements(parse('<u><b>one <b><i>two</i></b></b></u>'));
     expect(nodes.where((e) => e.tag == 'strong'), hasLength(2));
@@ -105,7 +186,7 @@ void main() {
     final nodes = elements(parse(r'<b>`</b>` and $x^{</b>}$ end</b>'));
     final strong = nodes.where((e) => e.tag == 'strong');
     expect(strong.map((e) => e.textContent).join(), contains('end'));
-    expect(nodes.any((e) => e.tag == 'inlineMath'), isTrue);
+    expect(nodes.any((e) => e.tag == basicHtmlMathTag), isTrue);
   });
 
   test('standalone tags preserve surrounding Markdown and multiline pairs', () {
@@ -237,6 +318,10 @@ void main() {
       expect(bar.value, .5);
       expect(bar.color, colors.primary);
       expect(bar.semanticsLabel, 'half');
+      expect(
+        tester.getSize(find.byType(LinearProgressIndicator)).width,
+        lessThanOrEqualTo(100),
+      );
       expect(find.byType(Transform), findsAtLeastNWidgets(2));
       expect(tester.takeException(), isNull);
     });

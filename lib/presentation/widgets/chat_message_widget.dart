@@ -465,12 +465,14 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
           left: BorderSide(color: themeTokens.markdownBlockQuote, width: 4.0),
         ),
       ),
-      em: Theme.of(
-        context,
-      ).textTheme.bodyMedium?.copyWith(color: themeTokens.markdownEmphasis),
-      strong: Theme.of(
-        context,
-      ).textTheme.bodyMedium?.copyWith(color: themeTokens.markdownStrong),
+      em: TextStyle(
+        color: themeTokens.markdownEmphasis,
+        fontStyle: FontStyle.italic,
+      ),
+      strong: TextStyle(
+        color: themeTokens.markdownStrong,
+        fontWeight: FontWeight.bold,
+      ),
       listBullet: Theme.of(
         context,
       ).textTheme.bodyMedium?.copyWith(color: themeTokens.markdownListItem),
