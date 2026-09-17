@@ -70,12 +70,17 @@ class AppIndeterminateRing extends StatefulWidget {
     this.strokeWidth = 2,
     this.color,
     this.semanticsLabel,
+    this.staticIcon = Symbols.progress_activity,
   });
 
   final double size;
   final double strokeWidth;
   final Color? color;
   final String? semanticsLabel;
+
+  /// Glyph shown when the ring is static (reduced motion or compact
+  /// desktop slot). Callers may pass a domain-specific icon.
+  final IconData staticIcon;
 
   @override
   State<AppIndeterminateRing> createState() => _AppIndeterminateRingState();
@@ -187,7 +192,7 @@ class _AppIndeterminateRingState extends State<AppIndeterminateRing> {
   Widget _staticRing(Color color, String label) {
     return Semantics(
       label: label,
-      child: Icon(Symbols.progress_activity, size: widget.size, color: color),
+      child: Icon(widget.staticIcon, size: widget.size, color: color),
     );
   }
 }

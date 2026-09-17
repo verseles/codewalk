@@ -302,6 +302,7 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
             size: 16,
             strokeWidth: 1.5,
             color: colorScheme.primary,
+            staticIcon: Symbols.hourglass_top_rounded,
           )
         : Icon(
             Symbols.check_box_outline_blank,

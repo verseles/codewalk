@@ -244,6 +244,6 @@ void main() {
     await tester.pumpWidget(buildWidget(disableAnimations: true));
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.byIcon(Symbols.progress_activity), findsOneWidget);
+    expect(find.byIcon(Symbols.hourglass_top_rounded), findsOneWidget);
   });
 }
