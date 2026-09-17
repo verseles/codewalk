@@ -322,11 +322,11 @@ class _AppShellPageState extends State<AppShellPage> {
             children: [
               Text(context.l10n.appShellDownloadingUpdate),
               const SizedBox(height: 4),
-              LinearProgressIndicator(
-                value: settingsProvider.installProgress > 0
-                    ? settingsProvider.installProgress
-                    : null,
-              ),
+              settingsProvider.installProgress > 0
+                  ? LinearProgressIndicator(
+                      value: settingsProvider.installProgress,
+                    )
+                  : const AppIndeterminateBar(),
             ],
           ),
         ),

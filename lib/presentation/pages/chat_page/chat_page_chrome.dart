@@ -1112,7 +1112,10 @@ extension _ChatPageChrome on _ChatPageState {
                         key: ValueKey<String>('appbar_terminal_button_loading'),
                         width: 18,
                         height: 18,
-                        child: AppIndeterminateRing(strokeWidth: 2),
+                        child: AppIndeterminateRing(
+                          size: 18,
+                          strokeWidth: 2,
+                        ),
                       )
                     : const Icon(Symbols.terminal_rounded),
                 tooltip: settingsProvider.terminalPanelVisible

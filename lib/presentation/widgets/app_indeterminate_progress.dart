@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_animations.dart';
 
 /// Shared stepped clock for bounded desktop indeterminate indicators.
@@ -46,18 +47,26 @@ class AppIndeterminateClock {
   }
 }
 
+String _progressLabel(BuildContext context) =>
+    Localizations.of<AppLocalizations>(
+      context,
+      AppLocalizations,
+    )?.chatMessageToolStatusInProgress ??
+    'In progress';
+
 /// App-global indeterminate progress indicator.
 ///
 /// Behavior matrix:
 /// - Reduced motion: static icon (ring) or static bar (linear), zero ticks.
-/// - Desktop + motion on: slots <= [AppAnimations.compactIndicatorSize]
-///   render the static glyph; larger slots render a stepped determinate
-///   ring/bar driven by [AppIndeterminateClock] (~8 Hz, no vsync ticker).
+/// - Desktop + motion on: slots at or below
+///   [AppAnimations.compactIndicatorSize] render the static glyph; larger
+///   slots render a stepped determinate ring driven by
+///   [AppIndeterminateClock] (~8 Hz, no vsync ticker).
 /// - Mobile/web + motion on: native indeterminate Material indicators.
 class AppIndeterminateRing extends StatefulWidget {
   const AppIndeterminateRing({
     super.key,
-    this.size = 16,
+    this.size = 36,
     this.strokeWidth = 2,
     this.color,
     this.semanticsLabel,
@@ -113,40 +122,71 @@ class _AppIndeterminateRingState extends State<AppIndeterminateRing> {
   @override
   Widget build(BuildContext context) {
     final color = widget.color ?? Theme.of(context).colorScheme.primary;
+    final label = widget.semanticsLabel ?? _progressLabel(context);
     if (!AppAnimations.enabled(context)) {
-      return _staticRing(color);
-    }    if (!AppAnimations.boundedIndeterminate(context)) {
+      return _staticRing(color, label);
+    }
+    if (!AppAnimations.boundedIndeterminate(context)) {
       return Semantics(
-        label: widget.semanticsLabel ?? 'In progress',
-        child: CircularProgressIndicator(
-          strokeWidth: widget.strokeWidth,
-          color: color,
+        label: label,
+        child: SizedBox.square(
+          dimension: widget.size,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: widget.strokeWidth,
+              color: color,
+            ),
+          ),
         ),
       );
     }
     if (widget.size <= AppAnimations.compactIndicatorSize) {
-      return _staticRing(color);
+      return _staticRing(color, label);
+    }
+    if (!TickerMode.valuesOf(context).enabled) {
+      return Semantics(
+        label: label,
+        child: SizedBox.square(
+          dimension: widget.size,
+          child: Center(
+            child: ExcludeSemantics(
+              child: CircularProgressIndicator(
+                value: 1 / AppAnimations.indeterminateSteps,
+                strokeWidth: widget.strokeWidth,
+                color: color,
+              ),
+            ),
+          ),
+        ),
+      );
     }
     return Semantics(
-      label: widget.semanticsLabel ?? 'In progress',
-      child: ValueListenableBuilder<int>(
-        valueListenable: AppIndeterminateClock.instance.tick,
-        builder: (context, tick, _) {
-          return CircularProgressIndicator(
-            value:
-                (tick % AppAnimations.indeterminateSteps) /
-                AppAnimations.indeterminateSteps,
-            strokeWidth: widget.strokeWidth,
-            color: color,
-          );
-        },
+      label: label,
+      child: SizedBox.square(
+        dimension: widget.size,
+        child: Center(
+          child: ValueListenableBuilder<int>(
+            valueListenable: AppIndeterminateClock.instance.tick,
+            builder: (context, tick, _) {
+              return ExcludeSemantics(
+                child: CircularProgressIndicator(
+                  value:
+                      ((tick % AppAnimations.indeterminateSteps) + 1) /
+                      AppAnimations.indeterminateSteps,
+                  strokeWidth: widget.strokeWidth,
+                  color: color,
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _staticRing(Color color) {
+  Widget _staticRing(Color color, String label) {
     return Semantics(
-      label: widget.semanticsLabel ?? 'In progress',
+      label: label,
       child: Icon(Symbols.progress_activity, size: widget.size, color: color),
     );
   }
@@ -192,7 +232,8 @@ class _AppIndeterminateBarState extends State<AppIndeterminateBar> {
 
   void _syncSubscription() {
     final want =
-        AppAnimations.boundedIndeterminate(context) && TickerMode.valuesOf(context).enabled;
+        AppAnimations.boundedIndeterminate(context) &&
+        TickerMode.valuesOf(context).enabled;
     if (want && !_subscribed) {
       AppIndeterminateClock.instance.acquire();
       _subscribed = true;
@@ -214,10 +255,11 @@ class _AppIndeterminateBarState extends State<AppIndeterminateBar> {
   @override
   Widget build(BuildContext context) {
     final color = widget.color ?? Theme.of(context).colorScheme.primary;
+    final label = widget.semanticsLabel ?? _progressLabel(context);
     if (!AppAnimations.boundedIndeterminate(context)) {
       if (!AppAnimations.enabled(context)) {
         return Semantics(
-          label: widget.semanticsLabel ?? 'In progress',
+          label: label,
           child: LinearProgressIndicator(
             value: 0.35,
             minHeight: widget.minHeight,
@@ -226,24 +268,40 @@ class _AppIndeterminateBarState extends State<AppIndeterminateBar> {
           ),
         );
       }
-      return LinearProgressIndicator(
-        minHeight: widget.minHeight,
-        color: color,
-        backgroundColor: widget.backgroundColor,
+      return Semantics(
+        label: label,
+        child: LinearProgressIndicator(
+          minHeight: widget.minHeight,
+          color: color,
+          backgroundColor: widget.backgroundColor,
+        ),
+      );
+    }
+    if (!TickerMode.valuesOf(context).enabled) {
+      return Semantics(
+        label: label,
+        child: LinearProgressIndicator(
+          value: 0.35,
+          minHeight: widget.minHeight,
+          color: color,
+          backgroundColor: widget.backgroundColor,
+        ),
       );
     }
     return Semantics(
-      label: widget.semanticsLabel ?? 'In progress',
+      label: label,
       child: ValueListenableBuilder<int>(
         valueListenable: AppIndeterminateClock.instance.tick,
         builder: (context, tick, _) {
-          return LinearProgressIndicator(
-            value:
-                (tick % AppAnimations.indeterminateSteps) /
-                AppAnimations.indeterminateSteps,
-            minHeight: widget.minHeight,
-            color: color,
-            backgroundColor: widget.backgroundColor,
+          return ExcludeSemantics(
+            child: LinearProgressIndicator(
+              value:
+                  ((tick % AppAnimations.indeterminateSteps) + 1) /
+                  AppAnimations.indeterminateSteps,
+              minHeight: widget.minHeight,
+              color: color,
+              backgroundColor: widget.backgroundColor,
+            ),
           );
         },
       ),

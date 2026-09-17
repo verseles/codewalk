@@ -358,7 +358,7 @@ extension _ChatPageTimelineViewport on _ChatPageState {
         child: SizedBox.square(
           key: ValueKey<String>('session_hydration_loading_indicator'),
           dimension: 28,
-          child: AppIndeterminateRing(strokeWidth: 2.5),
+          child: AppIndeterminateRing(size: 28, strokeWidth: 2.5),
         ),
       );
     }

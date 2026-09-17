@@ -4,6 +4,7 @@ import '../../../core/i18n/l10n_context.dart';
 import '../../../domain/entities/quota.dart';
 import '../../theme/app_semantic_colors.dart';
 import '../../utils/quota_pace_utils.dart';
+import '../app_indeterminate_progress.dart';
 import 'pace_label.dart';
 
 class QuotaEntryRow extends StatelessWidget {
@@ -58,12 +59,18 @@ class QuotaEntryRow extends StatelessWidget {
           const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              minHeight: 3,
-              value: effectiveUsedPercent == null ? null : progress,
-              backgroundColor: colorScheme.outlineVariant,
-              valueColor: AlwaysStoppedAnimation<Color>(barColor),
-            ),
+            child: effectiveUsedPercent == null
+                ? AppIndeterminateBar(
+                    minHeight: 3,
+                    color: barColor,
+                    backgroundColor: colorScheme.outlineVariant,
+                  )
+                : LinearProgressIndicator(
+                    minHeight: 3,
+                    value: progress,
+                    backgroundColor: colorScheme.outlineVariant,
+                    valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                  ),
           ),
           if (entry.resetAfterSeconds != null) ...[
             const SizedBox(height: 4),

@@ -105,11 +105,9 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LinearProgressIndicator(
-            value: settings.installProgress > 0
-                ? settings.installProgress
-                : null,
-          ),
+          settings.installProgress > 0
+              ? LinearProgressIndicator(value: settings.installProgress)
+              : const AppIndeterminateBar(),
           const SizedBox(height: 4),
           Text(
             context.l10n.settingsAboutDownloading(

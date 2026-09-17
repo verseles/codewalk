@@ -838,11 +838,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               ),
               if (_isMutatingMoonshineModel) ...[
                 const SizedBox(height: 10),
-                LinearProgressIndicator(
-                  value: _moonshineDownloadProgress > 0
-                      ? _moonshineDownloadProgress
-                      : null,
-                ),
+                _moonshineDownloadProgress > 0
+                    ? LinearProgressIndicator(
+                        value: _moonshineDownloadProgress,
+                      )
+                    : const AppIndeterminateBar(),
               ],
               if (_moonshineModelError != null) ...[
                 const SizedBox(height: 8),
@@ -975,11 +975,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               ),
               if (_isMutatingParakeetModel) ...[
                 const SizedBox(height: 10),
-                LinearProgressIndicator(
-                  value: _parakeetDownloadProgress > 0
-                      ? _parakeetDownloadProgress
-                      : null,
-                ),
+                _parakeetDownloadProgress > 0
+                    ? LinearProgressIndicator(
+                        value: _parakeetDownloadProgress,
+                      )
+                    : const AppIndeterminateBar(),
               ],
               if (_parakeetModelError != null) ...[
                 const SizedBox(height: 8),
@@ -1112,11 +1112,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               ),
               if (_isMutatingSenseVoiceModel) ...[
                 const SizedBox(height: 10),
-                LinearProgressIndicator(
-                  value: _senseVoiceDownloadProgress > 0
-                      ? _senseVoiceDownloadProgress
-                      : null,
-                ),
+                _senseVoiceDownloadProgress > 0
+                    ? LinearProgressIndicator(
+                        value: _senseVoiceDownloadProgress,
+                      )
+                    : const AppIndeterminateBar(),
               ],
               if (_senseVoiceModelError != null) ...[
                 const SizedBox(height: 8),
@@ -1280,9 +1280,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               ),
               if (_isMutatingModel) ...[
                 const SizedBox(height: 10),
-                LinearProgressIndicator(
-                  value: _downloadProgress > 0 ? _downloadProgress : null,
-                ),
+                _downloadProgress > 0
+                    ? LinearProgressIndicator(
+                        value: _downloadProgress,
+                      )
+                    : const AppIndeterminateBar(),
               ],
               if (_modelError != null) ...[
                 const SizedBox(height: 8),
