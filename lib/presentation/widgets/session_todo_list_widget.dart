@@ -288,18 +288,27 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
     final textTheme = Theme.of(context).textTheme;
     final isCompleted = todo.status == 'completed';
     final isInProgress = todo.status == 'in_progress';
+    // An indeterminate spinner ticks every vsync for as long as the task
+    // runs: isolate it so it never repaints the parent, and render a static
+    // icon when the user asked for reduced motion.
+    final animate = AppAnimations.enabled(context);
 
     final statusIcon = isCompleted
         ? Icon(Symbols.check_box, size: 16, color: colorScheme.primary)
         : isInProgress
-        ? SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 1.5,
-              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-            ),
-          )
+        ? animate
+            ? const RepaintBoundary(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
+                ),
+              )
+            : Icon(
+                Symbols.progress_activity,
+                size: 16,
+                color: colorScheme.primary,
+              )
         : Icon(
             Symbols.check_box_outline_blank,
             size: 16,
