@@ -30,6 +30,7 @@ import '../theme/app_visual_style_tokens.dart';
 import '../theme/opencode_highlight_theme.dart';
 import '../theme/opencode_theme_presets.dart';
 import '../utils/app_page_route.dart';
+import '../utils/basic_html_markdown.dart';
 import '../utils/chat_abort_message.dart';
 import '../utils/diff_parser.dart';
 import '../utils/file_path_detector.dart';

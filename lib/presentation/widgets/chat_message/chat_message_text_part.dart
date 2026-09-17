@@ -27,19 +27,26 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
     );
 
     Widget buildMarkdown(String text) {
+      final supportsHtml = widget.message is AssistantMessage;
       return MarkdownBody(
         data: text,
         softLineBreak: true,
         styleSheet: _resolveMarkdownStyleSheet(context),
         inlineSyntaxes: [
+          if (supportsHtml) BasicHtmlInlineSyntax(),
           if (widget.onFileTap != null) FilePathSyntax(),
           if (mathRenderingEnabled) InlineMathSyntax(),
           if (mathRenderingEnabled) SingleLineBlockMathSyntax(),
         ],
-        blockSyntaxes: mathRenderingEnabled
-            ? const [BlockMathSyntax()]
-            : null,
+        blockSyntaxes: [
+          if (supportsHtml) const BasicHtmlBlockSyntax(),
+          if (mathRenderingEnabled) const BlockMathSyntax(),
+        ],
         builders: <String, MarkdownElementBuilder>{
+          if (supportsHtml) ...{
+            basicHtmlTextTag: BasicHtmlTextBuilder(),
+            basicHtmlProgressTag: BasicHtmlProgressBuilder(),
+          },
           'pre': _MarkdownCodeBlockTapBuilder(
             themeTokens: themeTokens,
             onTapCode: (code) => _copyTextToClipboard(context, code),
