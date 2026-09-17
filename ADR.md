@@ -58,6 +58,7 @@ This document contains only active architectural decisions that represent the cu
 - ADR-054: Experimental Test-Only Android Auto Notification Messaging ⚠️ SUPERSEDED by ADR-055
 - ADR-055: Production Android Auto Notification Messaging for Sideloaded APK Distribution
 - ADR-056: Bounded Desktop Indeterminate Motion Policy
+- ADR-057: Interaction-Frame Budget for Session Switching
 
 ---
 
@@ -3707,3 +3708,39 @@ Fully compliant, not an exception. Presentation-only: no endpoint, schema, event
 - `lib/presentation/widgets/app_indeterminate_progress.dart` — clock, ring, bar.
 - `lib/presentation/theme/app_animations.dart` — `indeterminateStep`, `indeterminateSteps`, `compactIndicatorSize`, `boundedIndeterminate`.
 - `test/widget/app_indeterminate_progress_test.dart` — platform matrix + clock lifecycle tests.
+
+## ADR-057: Interaction-Frame Budget for Session Switching (2026-09-17)
+
+### Decision
+
+Switching tabs/sessions of the same project must never await storage, network, or subscription teardown on the tap path:
+
+- Session-id persistence is write-behind through the existing per-scope ordered queue, with in-memory `_currentSession` as the read authority and a lifecycle/dispose flush for durability.
+- Subscription teardown, pre-paint reads, composer-draft hydration, session insights, and outgoing snapshots all run unawaited or past the first frame, guarded by the selection generation so a superseded switch commits nothing.
+- Calls that re-enter the already-current session must not invalidate its in-flight hydration or persistence.
+- Oversized regenerable caches (notably provider catalogs above the file-store cap) are drained from SharedPreferences instead of kept: a multi-MB prefs file makes every write cost ~1s on Linux.
+- Future work on this path must keep the tap free of awaits; the timing test below is the executable guard for this rule.
+
+### Rationale
+
+- Measured on-device: `select_session` ~1010ms ≈ one awaited whole-file prefs rewrite (~990ms for any payload size, file was 45.8MB), plus ~2s of serial revalidation and ~2-3s of snapshot fsync contention, for ~3s of desktop jank per switch.
+- The cost is scheduling, not pixels: provider notifies measured 0-2ms throughout. Render work (markdown/highlight of up to 200 messages) is secondary and stays lazy/virtualized.
+- Crash-durability loss is bounded to the write-behind window and self-heals via SWR on next launch; lifecycle flush covers backgrounding/dispose.
+
+### Consequences
+
+- ✅ Warm switches paint from cache on the tap frame; cold switches show hydration immediately and revalidate in background.
+- ✅ The `selectSession returns before a slow session-id write completes` and `rapid switches persist only the final selected session id` tests fail if anyone reintroduces an await on the path.
+- ⚠ A kill inside the write-behind window restores the previously persisted session; acceptable per SWR recovery.
+- ⚠ InsightsBadges/todos/diffs may land one frame after paint; non-critical by design.
+
+### ADR-023 Compatibility
+
+Fully compliant, not an exception. No endpoint, schema, event, or lifecycle semantic changes; same requests, only rescheduled.
+
+### Key Files
+
+- `lib/presentation/providers/chat_provider.dart` — `selectSession` (no storage/network awaits on tap), `_isCurrentSelectSession`, `_postSwitchFrame`, `flushSelectionPersistence`.
+- `lib/presentation/providers/chat_provider/chat_provider_cache_persistence_ops.dart` — `_scheduleCurrentSessionIdPersist`, ordered per-scope queue.
+- `lib/data/datasources/app_local_datasource_storage_helpers.dart` — oversized regenerable catalog drain.
+- `test/unit/providers/chat_provider_session_ops_test.dart` — switch persistence timing + latest-wins tests.
