@@ -37,7 +37,7 @@ class _FakeEdgeTtsConnection implements EdgeTtsWebSocketConnection {
       // Not awaited: StreamController.close() only completes once an active
       // listener consumes the done event, so awaiting it here would hang for
       // the 2s timeout whenever the backend closes before listening.
-      _controller.close();
+      unawaited(_controller.close());
     }
   }
 

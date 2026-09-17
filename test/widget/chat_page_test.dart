@@ -13367,7 +13367,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(provider.currentSession?.id, fixture.childSession.id);
-      final String? traceAfterDrill = debugSessionViewportTraceForTest;
+      final traceAfterDrill = debugSessionViewportTraceForTest;
 
       if (isMobile) {
         await tester.binding.handlePopRoute();
@@ -13379,7 +13379,7 @@ void main() {
         );
       }
       await tester.pump();
-      final String? traceAfterReturn = debugSessionViewportTraceForTest;
+      final traceAfterReturn = debugSessionViewportTraceForTest;
 
       final parentFrameDistances = <double>[];
       for (var frame = 0; frame < 20; frame += 1) {
@@ -13397,10 +13397,10 @@ void main() {
       final restoredPosition = tester
           .state<ScrollableState>(scrollableFinder)
           .position;
-      final String? traceFinalGlobal = debugSessionViewportTraceForTest;
+      final traceFinalGlobal = debugSessionViewportTraceForTest;
       final dynamic chatPageStateFinal =
           tester.state(find.byType(ChatPage)) as dynamic;
-      final String traceFinal =
+      final traceFinal =
           chatPageStateFinal.debugSessionViewportTrace() as String;
       expect(provider.currentSession?.id, fixture.rootSession.id);
       expect(parentFrameDistances, isNotEmpty);

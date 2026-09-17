@@ -1,8 +1,6 @@
 @Tags(<String>['slow'])
 library;
 
-import 'dart:async';
-
 import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:dartz/dartz.dart';

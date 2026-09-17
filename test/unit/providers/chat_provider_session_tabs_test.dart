@@ -1326,7 +1326,7 @@ void main() {
         scopeId: 'default',
       );
       await delayedLocalDataSource.saveSessionTabsStateJson(
-        PersistedSessionTabsState(
+        const PersistedSessionTabsState(
           open: <PersistedSessionTab>[
             PersistedSessionTab(
               directory: '/work/project',
