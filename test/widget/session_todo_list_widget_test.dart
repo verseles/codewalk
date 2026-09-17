@@ -2,6 +2,7 @@ import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/presentation/widgets/session_todo_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 void main() {
   const todos = <SessionTodo>[
@@ -30,15 +31,23 @@ void main() {
     bool collapsed = false,
     VoidCallback? onToggle,
     int maxVisibleItems = 5,
+    bool disableAnimations = false,
   }) {
     return MaterialApp(
       theme: ThemeData(splashFactory: InkRipple.splashFactory),
       home: Scaffold(
-        body: SessionTodoListWidget(
-          todos: items,
-          collapsed: collapsed,
-          onToggleCollapsed: onToggle ?? () {},
-          maxVisibleItems: maxVisibleItems,
+        body: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(disableAnimations: disableAnimations),
+            child: SessionTodoListWidget(
+              todos: items,
+              collapsed: collapsed,
+              onToggleCollapsed: onToggle ?? () {},
+              maxVisibleItems: maxVisibleItems,
+            ),
+          ),
         ),
       ),
     );
@@ -218,5 +227,23 @@ void main() {
     await tester.pumpWidget(buildWidget(items: manyTodos, maxVisibleItems: 10));
 
     expect(find.byType(Scrollbar), findsOneWidget);
+  });
+
+  testWidgets('animations enabled keeps the in-progress spinner', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildWidget());
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byIcon(Symbols.progress_activity), findsNothing);
+  });
+
+  testWidgets('reduced motion renders a static in-progress indicator', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildWidget(disableAnimations: true));
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byIcon(Symbols.progress_activity), findsOneWidget);
   });
 }

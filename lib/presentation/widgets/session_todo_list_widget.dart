@@ -166,6 +166,9 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
     final needsScroll = widget.todos.length > widget.maxVisibleItems;
     final compactLayout = _isCompactLayout(context);
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    // Reduced motion: implicit animations are not gated by the framework, so
+    // collapse them to an immediate state change here as well.
+    final animate = AppAnimations.enabled(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -215,7 +218,9 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: TweenAnimationBuilder<double>(
-                      duration: _progressAnimationDuration,
+                      duration: animate
+                          ? _progressAnimationDuration
+                          : Duration.zero,
                       curve: _progressAnimationCurve,
                       tween: Tween<double>(end: _completionProgress),
                       builder: (context, animatedValue, child) {
@@ -240,7 +245,7 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
           ),
         ),
         AnimatedSize(
-          duration: AppAnimations.standard,
+          duration: animate ? AppAnimations.standard : Duration.zero,
           curve: AppAnimations.standardCurve,
           alignment: Alignment.topCenter,
           child: !widget.collapsed
