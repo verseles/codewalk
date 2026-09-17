@@ -4150,6 +4150,12 @@ class ChatProvider extends ChangeNotifier {
           }
           return;
         }
+        // A superseded call must not mutate selection, messages, or the
+        // stream subscription even though it fell through the shortcut:
+        // only the latest generation may own the full switch.
+        if (selectionGeneration != _sessionSelectionGeneration) {
+          return;
+        }
 
         final outgoingSessionId = _currentSession?.id;
         final List<ChatMessage>? outgoingMessages =
