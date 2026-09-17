@@ -944,17 +944,15 @@ extension _ChatProviderCachePersistenceOps on ChatProvider {
     return 'legacy';
   }
 
-  /// Write-behind session-id persistence for the interaction path: the
-  /// in-memory mirror is updated synchronously so readers observe the latest
-  /// selection immediately, while the disk write flows through the existing
-  /// per-scope ordered queue without blocking the caller.
+  /// Write-behind session-id persistence for the interaction path: the disk
+  /// write flows through the existing per-scope ordered queue without
+  /// blocking the caller. In-memory `_currentSession` stays the authority
+  /// for readers (see `loadLastSession`); the queue preserves order.
   void _scheduleCurrentSessionIdPersist(
     String sessionId, {
     required String serverId,
     required String scopeId,
   }) {
-    final queueKey = '$serverId::$scopeId';
-    _currentSessionIdMemoryByScope[queueKey] = sessionId;
     unawaited(
       _saveCurrentSessionId(
         sessionId,

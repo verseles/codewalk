@@ -464,10 +464,6 @@ class ChatProvider extends ChangeNotifier {
   Future<void>? _lazySessionBootstrapTask;
   final Map<String, Future<void>> _currentSessionIdWriteQueueByScope =
       <String, Future<void>>{};
-  // In-memory mirror of the in-flight persisted session id per scope: lets
-  // readers observe the latest selection without awaiting the disk write.
-  final Map<String, String> _currentSessionIdMemoryByScope =
-      <String, String>{};
   _RejectedDraftEnvelope? _rejectedDraft;
   _HistoryComposerSync? _pendingHistoryComposerSync;
   _PendingReplacementBranch? _pendingReplacementBranch;
@@ -4058,8 +4054,7 @@ class ChatProvider extends ChangeNotifier {
   /// Select session
   /// Runs [fn] after the current frame when a binding exists, or
   /// immediately in contexts without one (unit tests). Never gates paint.
-  void _postSwitchFrame(void Function() fn) {
-    SchedulerBinding? binding;
+  void _postSwitchFrame(void Function() fn) {    SchedulerBinding? binding;
     try {
       binding = SchedulerBinding.instance;
     } catch (_) {
@@ -4072,12 +4067,22 @@ class ChatProvider extends ChangeNotifier {
     binding.addPostFrameCallback((_) => fn());
   }
 
+  /// True while [sessionId] is still the selected session of the
+  /// [selectionGeneration] that started the current switch. Post-await
+  /// continuations must bail out when false so a superseded switch can
+  /// never commit another session's timeline, draft, or persisted id.
+  bool _isCurrentSelectSession(String sessionId, int selectionGeneration) =>
+      _currentSession?.id == sessionId &&
+      _sessionSelectionGeneration == selectionGeneration;
+
   Future<void> selectSession(
     ChatSession session, {
     bool userInitiated = true,
     bool awaitNetwork = true,
   }) async {
-    _sessionSelectionGeneration += 1;    if (userInitiated && _isNewChatDraftActive) {
+    _sessionSelectionGeneration += 1;
+    final selectionGeneration = _sessionSelectionGeneration;
+    if (userInitiated && _isNewChatDraftActive) {
       _newChatDraftGeneration++;
     }
     final previousSessionId = _currentSession?.id;
@@ -4138,19 +4143,12 @@ class ChatProvider extends ChangeNotifier {
         }
 
         final outgoingSessionId = _currentSession?.id;
-        if (outgoingSessionId != null && _messages.isNotEmpty) {
+        final List<ChatMessage>? outgoingMessages =
+            (outgoingSessionId != null && _messages.isNotEmpty)
+                ? List<ChatMessage>.unmodifiable(_messages)
+                : null;
+        if (outgoingSessionId != null && outgoingMessages != null) {
           _cacheSessionMessages(outgoingSessionId, _messages);
-          // Persist past the first frame: an ~900KB fsync must never run on
-          // the tap turn even though it is already fire-and-forget.
-          final outgoingMessages = List<ChatMessage>.unmodifiable(_messages);
-          _postSwitchFrame(() {
-            unawaited(
-              _persistSessionMessagesSnapshotBestEffort(
-                outgoingSessionId,
-                outgoingMessages,
-              ),
-            );
-          });
         }
 
         // Invalidate any concurrent loadSessions() that captured a stale
@@ -4237,14 +4235,37 @@ class ChatProvider extends ChangeNotifier {
           _ensureSessionTabsLoaded(serverId: serverId),
           _loadPersistedComposerDraft(session.id, serverId: serverId),
         ]);
-        if (_currentSession?.id == session.id) {
-          _recordVisibleSessionTab(session);
-        }
         if (!userInitiated &&
             _cellularDataSaverService.shouldSuppressBackgroundWork) {
+          // Sink errors: this path abandons the wait by returning early.
+          unawaited(pendingReads.then((_) {}, onError: (_) {}));
           return;
         }
         final readResults = await pendingReads;
+        if (!_isCurrentSelectSession(session.id, selectionGeneration)) {
+          return;
+        }
+        // Persist the outgoing snapshot past the first frame with the scope
+        // frozen now: an ~900KB fsync must never run on the tap turn, and a
+        // fast session-plus-project switch must not persist it under the
+        // incoming scope.
+        if (outgoingSessionId != null && outgoingMessages != null) {
+          final outgoingServerId = serverId;
+          final outgoingScopeId = scopeId;
+          _postSwitchFrame(() {
+            unawaited(
+              _persistSessionMessagesSnapshotBestEffort(
+                outgoingSessionId,
+                outgoingMessages,
+                serverId: outgoingServerId,
+                scopeId: outgoingScopeId,
+              ),
+            );
+          });
+        }
+        if (_currentSession?.id == session.id) {
+          _recordVisibleSessionTab(session);
+        }
         final restoredComposerDraft = readResults[1] as ChatComposerDraft?;
         _queueHistoryComposerSync(
           sessionId: session.id,
@@ -4261,6 +4282,9 @@ class ChatProvider extends ChangeNotifier {
               );
         if (!userInitiated &&
             _cellularDataSaverService.shouldSuppressBackgroundWork) {
+          return;
+        }
+        if (!_isCurrentSelectSession(session.id, selectionGeneration)) {
           return;
         }
 
@@ -4290,10 +4314,12 @@ class ChatProvider extends ChangeNotifier {
         }
 
         // Ordering guarantee: session-id persistence is queued per scope and
-        // subsequent loads may read it. The write itself is write-behind:
-        // the in-memory mirror is authoritative immediately and the disk
-        // write must never block the interaction frame (on Linux the prefs
-        // file rewrite costs ~1s).
+        // subsequent loads may read it. The write itself is write-behind and
+        // must never block the interaction frame (on Linux the prefs file
+        // rewrite costs ~1s). A superseded switch must not persist either.
+        if (!_isCurrentSelectSession(session.id, selectionGeneration)) {
+          return;
+        }
         _scheduleCurrentSessionIdPersist(
           session.id,
           serverId: serverId,
@@ -5787,6 +5813,7 @@ class ChatProvider extends ChangeNotifier {
     }
     _sessionAttentionPublishDebounce?.cancel();
     _sessionAttentionThresholdTimer?.cancel();
+    unawaited(flushCurrentSessionIdPersistence());
     for (final timer in _messageFallbackDebounceById.values) {
       timer.cancel();
     }
