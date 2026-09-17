@@ -4083,7 +4083,11 @@ class ChatProvider extends ChangeNotifier {
     // Only a real target change invalidates an in-flight switch. A same-id
     // re-entry (list tap, notification, hamburger) must not cancel the
     // hydration/persist work the first call already started for that session.
-    if (_currentSession?.id != session.id) {
+    // The decision is captured once so an overlapping call that commits the
+    // same target while we await cannot make this call take the "already
+    // current" shortcut and skip hydration.
+    final targetAlreadyCurrent = _currentSession?.id == session.id;
+    if (!targetAlreadyCurrent) {
       _sessionSelectionGeneration += 1;
     }
     final selectionGeneration = _sessionSelectionGeneration;
@@ -4121,7 +4125,7 @@ class ChatProvider extends ChangeNotifier {
           }
         }
         _isNewChatDraftActive = false;
-        if (_currentSession?.id == session.id) {
+        if (targetAlreadyCurrent && _currentSession?.id == session.id) {
           _dismissNotificationsForSession(session.id);
           _recordVisibleSessionTab(session);
           if (userInitiated) {
