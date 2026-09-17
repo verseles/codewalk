@@ -6,6 +6,12 @@ analyzer:
     - "**/generated_plugin_registrant.dart"
     - "third_party/**"
     - "tool/**"
+    - build/**
+    - android/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
