@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.242.0 - 2026-09-17
+
+- fix(review): exclude fake percent on static bars
+- fix(review): size-aware rings, semantics, muted freeze, remaining bars
+- perf(motion): bound desktop indeterminate indicators globally (ADR-056)
+
 ## v1.241.0 - 2026-09-17
 
 - test: clear analyzer budget drift
