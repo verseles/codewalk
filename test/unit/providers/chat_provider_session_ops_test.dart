@@ -2210,6 +2210,43 @@ void main() {
           await provider.flushSelectionPersistence();
         },
       );
+
+      test('rapid switches persist only the final selected session id', () async {
+        await provider.projectProvider.initializeProject();
+        await provider.initializeProviders();
+        final now = DateTime.fromMillisecondsSinceEpoch(1);
+        ChatSession sessionOf(String id) => ChatSession(
+          id: id,
+          workspaceId: 'default',
+          directory: '/work/project',
+          time: now,
+          title: id,
+        );
+        final sessionA = sessionOf('session-a');
+        final sessionB = sessionOf('session-b');
+        final sessionC = sessionOf('session-c');
+        chatRepository.sessions
+          ..clear()
+          ..addAll(<ChatSession>[sessionA, sessionB, sessionC]);
+        await provider.loadSessions();
+        await provider.selectSession(sessionA);
+        await provider.flushSelectionPersistence();
+
+        await Future.wait<void>(<Future<void>>[
+          provider.selectSession(sessionB, awaitNetwork: false),
+          provider.selectSession(sessionC, awaitNetwork: false),
+        ]);
+        await provider.flushSelectionPersistence();
+
+        // Latest-wins: only the final selection may be the persisted id.
+        expect(provider.currentSession?.id, sessionC.id);
+        final persistedIds = localDataSource.scopedStrings.entries
+            .where((entry) => entry.key.contains('current_session_id'))
+            .map((entry) => entry.value)
+            .toList(growable: false);
+        expect(persistedIds, contains(sessionC.id));
+        expect(persistedIds, isNot(contains(sessionB.id)));
+      });
     });
   });
 }

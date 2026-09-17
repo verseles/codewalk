@@ -4080,7 +4080,12 @@ class ChatProvider extends ChangeNotifier {
     bool userInitiated = true,
     bool awaitNetwork = true,
   }) async {
-    _sessionSelectionGeneration += 1;
+    // Only a real target change invalidates an in-flight switch. A same-id
+    // re-entry (list tap, notification, hamburger) must not cancel the
+    // hydration/persist work the first call already started for that session.
+    if (_currentSession?.id != session.id) {
+      _sessionSelectionGeneration += 1;
+    }
     final selectionGeneration = _sessionSelectionGeneration;
     if (userInitiated && _isNewChatDraftActive) {
       _newChatDraftGeneration++;
@@ -4242,13 +4247,10 @@ class ChatProvider extends ChangeNotifier {
           return;
         }
         final readResults = await pendingReads;
-        if (!_isCurrentSelectSession(session.id, selectionGeneration)) {
-          return;
-        }
         // Persist the outgoing snapshot past the first frame with the scope
         // frozen now: an ~900KB fsync must never run on the tap turn, and a
         // fast session-plus-project switch must not persist it under the
-        // incoming scope.
+        // incoming scope. Best-effort even when this switch was superseded.
         if (outgoingSessionId != null && outgoingMessages != null) {
           final outgoingServerId = serverId;
           final outgoingScopeId = scopeId;
@@ -4262,6 +4264,9 @@ class ChatProvider extends ChangeNotifier {
               ),
             );
           });
+        }
+        if (!_isCurrentSelectSession(session.id, selectionGeneration)) {
+          return;
         }
         if (_currentSession?.id == session.id) {
           _recordVisibleSessionTab(session);
