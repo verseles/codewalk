@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.241.0 - 2026-09-17
+
+- test: clear analyzer budget drift
+- chore: refresh lockfile and analyzer excludes
+- fix(tasks): honor reduced motion in implicit animations and cover it
+- fix(tasks): restore pixel-identical spinner rendering
+- perf(tasks): isolate in-progress spinner and respect reduced motion
+
 ## v1.240.0 - 2026-09-16
 
 - fix(review): gate markdown throttle per platform and sync perf docs
