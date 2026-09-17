@@ -149,7 +149,8 @@ extension _ChatPageModelSelectorRuntime on _ChatPageState {
                 avatar: SizedBox(
                   width: 14,
                   height: 14,
-                  child: CircularProgressIndicator(
+                  child: AppIndeterminateRing(
+                    size: 14,
                     strokeWidth: 2,
                     color: colorScheme.primary,
                   ),

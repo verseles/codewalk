@@ -75,7 +75,7 @@ extension _ChatInputSuggestionPopover on _ChatInputWidgetState {
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: AppIndeterminateRing(size: 20, strokeWidth: 2),
                     ),
                   ),
                 )

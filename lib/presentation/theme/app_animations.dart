@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Centralized animation constants aligned with MD3 motion guidelines.
@@ -41,5 +42,28 @@ class AppAnimations {
         .instance
         .accessibilityFeatures
         .disableAnimations;
+  }
+
+  /// Step interval for bounded desktop indeterminate indicators (~8 Hz).
+  static const Duration indeterminateStep = Duration(milliseconds: 125);
+
+  /// Discrete phases per revolution of a stepped desktop indicator.
+  static const int indeterminateSteps = 12;
+
+  /// Slots at or below this size render a static glyph on desktop instead
+  /// of a stepped ring (thin arcs alias at tiny sizes).
+  static const double compactIndicatorSize = 20.0;
+
+  /// True when indeterminate indicators should use the bounded stepped path
+  /// instead of the native vsync ticker. Reduced motion always wins.
+  static bool boundedIndeterminate(BuildContext context) {
+    if (!enabled(context)) return false;
+    if (kIsWeb) return false;
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => true,
+      _ => false,
+    };
   }
 }

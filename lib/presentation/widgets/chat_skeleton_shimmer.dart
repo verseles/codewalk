@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_animations.dart';
@@ -17,6 +19,9 @@ class _ChatSkeletonShimmerState extends State<ChatSkeletonShimmer>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  static const _sweepRest = Duration(milliseconds: 1800);
+  Timer? _restTimer;
+
   // Placeholder row specs: (alignLeft, widthFraction)
   static const _rows = <(bool, double)>[
     (false, 0.65),
@@ -32,20 +37,46 @@ class _ChatSkeletonShimmerState extends State<ChatSkeletonShimmer>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
+    _controller.addStatusListener(_handleAnimationStatus);
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed || !mounted) {
+      return;
+    }
+    _cancelRest();
+    _restTimer = Timer(_sweepRest, () {
+      _restTimer = null;
+      if (mounted && AppAnimations.enabled(context)) {
+        _controller.forward(from: 0);
+      }
+    });
+  }
+
+  void _cancelRest() {
+    _restTimer?.cancel();
+    _restTimer = null;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (AppAnimations.enabled(context)) {
-      _controller.repeat();
+      if (!_controller.isAnimating && _restTimer?.isActive != true) {
+        _controller.forward(
+          from: _controller.value >= 1.0 ? 0.0 : _controller.value,
+        );
+      }
     } else {
+      _cancelRest();
       _controller.stop();
     }
   }
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_handleAnimationStatus);
+    _cancelRest();
     _controller.dispose();
     super.dispose();
   }

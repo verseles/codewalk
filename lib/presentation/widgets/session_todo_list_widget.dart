@@ -7,6 +7,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../theme/app_animations.dart';
+import 'app_indeterminate_progress.dart';
 
 class SessionTodoListWidget extends StatefulWidget {
   const SessionTodoListWidget({
@@ -293,31 +294,15 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
     final textTheme = Theme.of(context).textTheme;
     final isCompleted = todo.status == 'completed';
     final isInProgress = todo.status == 'in_progress';
-    // The indeterminate spinner repaints every vsync for as long as the task
-    // runs. Keep its original rendering (adding a RepaintBoundary here made
-    // the thin 16px ring rasterize into its own layer and look aliased), and
-    // render a static icon when the user asked for reduced motion.
-    final animate = AppAnimations.enabled(context);
 
     final statusIcon = isCompleted
         ? Icon(Symbols.check_box, size: 16, color: colorScheme.primary)
         : isInProgress
-        ? animate
-            ? SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 1.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.primary,
-                  ),
-                ),
-              )
-            : Icon(
-                Symbols.progress_activity,
-                size: 16,
-                color: colorScheme.primary,
-              )
+        ? AppIndeterminateRing(
+            size: 16,
+            strokeWidth: 1.5,
+            color: colorScheme.primary,
+          )
         : Icon(
             Symbols.check_box_outline_blank,
             size: 16,

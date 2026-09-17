@@ -13,6 +13,7 @@ import '../providers/settings_provider.dart';
 import '../services/desktop_tray_service.dart';
 import '../services/desktop_tray_service_types.dart';
 import '../services/update_check_service.dart';
+import '../widgets/app_indeterminate_progress.dart';
 import 'chat_page.dart';
 import 'onboarding_wizard_page.dart';
 
@@ -133,7 +134,7 @@ class _AppShellPageState extends State<AppShellPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CircularProgressIndicator(),
+                  const AppIndeterminateRing(),
                   if (hintText != null) ...[
                     const SizedBox(height: 12),
                     Text(
@@ -293,7 +294,7 @@ class _AppShellPageState extends State<AppShellPage> {
             const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: AppIndeterminateRing(size: 16, strokeWidth: 2),
             ),
             const SizedBox(width: 12),
             Text(context.l10n.appShellInstallingUpdate),

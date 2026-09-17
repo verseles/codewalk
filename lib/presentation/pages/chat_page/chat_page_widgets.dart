@@ -400,7 +400,7 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
           const Divider(height: 1),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: AppIndeterminateRing())
                 : _error != null
                 ? Center(
                     child: Padding(

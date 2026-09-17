@@ -12,6 +12,7 @@ import '../../../../core/tailscale/tailscale_service.dart';
 import '../../../../domain/entities/server_profile.dart';
 import '../../../providers/app_provider.dart';
 import '../../../utils/app_page_route.dart';
+import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../onboarding_wizard_page.dart';
@@ -64,7 +65,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
       builder: (context, appProvider, _) {
         final profiles = appProvider.serverProfiles;
         if (_loading && profiles.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: AppIndeterminateRing());
         }
 
         const padding = AppConstants.defaultPadding;
@@ -354,7 +355,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: AppIndeterminateRing(size: 18, strokeWidth: 2),
                           )
                         : const Icon(Symbols.open_in_browser_rounded),
                     label: Text(context.l10n.onboardingAuthenticate),
@@ -376,7 +377,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: AppIndeterminateRing(size: 18, strokeWidth: 2),
                           )
                         : const Icon(Symbols.refresh_rounded),
                     label: Text(context.l10n.serversTailscaleReconnect),
@@ -584,7 +585,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
               ),
             if (appProvider.localSetupInProgress) ...[
               const SizedBox(height: 10),
-              const LinearProgressIndicator(minHeight: 3),
+              const AppIndeterminateBar(minHeight: 3),
             ],
             if (appProvider.localSetupMessage.trim().isNotEmpty) ...[
               const SizedBox(height: 8),

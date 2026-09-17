@@ -35,6 +35,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_visual_style_tokens.dart';
 import '../utils/speech_engine_platform_support.dart';
 import '../utils/windows_settings_links.dart';
+import 'app_indeterminate_progress.dart';
 import 'chat_input/chat_input_external_files.dart';
 import 'chat_tour_showcase.dart';
 import 'moonshine_model_download_dialog.dart';
@@ -1671,9 +1672,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                                       child: SizedBox(
                                         width: 18,
                                         height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: AppIndeterminateRing(size: 18, strokeWidth: 2,),
                                       ),
                                     ),
                                   )

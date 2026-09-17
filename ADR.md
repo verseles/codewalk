@@ -57,6 +57,7 @@ This document contains only active architectural decisions that represent the cu
 - ADR-053: Client-Owned Configurable API Speech-to-Text (OpenAI / Groq / Custom OpenAI-Compatible)
 - ADR-054: Experimental Test-Only Android Auto Notification Messaging ⚠️ SUPERSEDED by ADR-055
 - ADR-055: Production Android Auto Notification Messaging for Sideloaded APK Distribution
+- ADR-056: Bounded Desktop Indeterminate Motion Policy
 
 ---
 
@@ -3668,3 +3669,39 @@ This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception —
 - `lib/domain/entities/experience_settings.dart` + settings UI — `androidAutoMessagingEnabled` preference and toggle removed; the obsolete persisted key is ignored on load and dropped from the settings JSON on the next persist/save.
 - `test/unit/` — updated tests: descriptor/manifest presence in main source set, release activation without flag/toggle, encrypted store (process-death restore), notification/action shape, auth gating, dispatch worker, obsolete-preference ignored-on-load/dropped-on-persist, and `codewalk_agent` notification-channel reuse — same default importance/priority as standard completions, standard fallback retained unless a new car message is actually published.
 - Ref: issue #99
+
+## ADR-056: Bounded Desktop Indeterminate Motion Policy (2026-09-17)
+
+### Decision
+
+Indeterminate progress indicators (`CircularProgressIndicator`/`LinearProgressIndicator` with `value: null`, shimmer sweeps) must not hold a 60 Hz vsync ticker on desktop. All such indicators route through `AppIndeterminateRing`/`AppIndeterminateBar`:
+
+- Reduced motion (`AppAnimations.enabled == false`): static icon/bar, zero ticks, every platform.
+- Desktop (Linux/macOS/Windows) + motion on: slots at or below 20px render the static glyph; larger slots advance a determinate paint in ~125 ms steps driven by one shared ref-counted clock (~8 Hz, no vsync ticker).
+- Mobile/web + motion on: native indeterminate Material indicators, unchanged.
+- Continuous sweeps (lantern, skeleton, quota) use sweep-plus-rest duty cycles instead of `repeat()`.
+- Never wrap a ring smaller than 24px in its own `RepaintBoundary` (it rasterizes into an isolated layer and aliases).
+
+### Rationale
+
+- A single visible 16px indeterminate ring sustained ~34% UI thread, ~9% raster, and a pinned ~700 MHz iGPU on Linux/Mesa with zero network activity; collapsing its host widget returned CPU/GPU to near zero. The cost is frame production, not pixels — isolation alone cannot fix it.
+- Determinate painters register no vsync ticker, so stepping a determinate value at 8 Hz bounds cost while keeping a visibly alive indicator.
+- The 20px threshold and the `RepaintBoundary` ban encode a verified regression: isolating the thin 16px ring aliased it and had to be reverted.
+
+### Consequences
+
+- ✅ Visible desktop indicators cost ~8 wakeups/s instead of ~60/s; hidden/collapsed/empty indicators cost zero (clock ref-count reaches zero, timer cancelled).
+- ✅ Mobile and web rendering is byte-identical to before.
+- ✅ Reduced-motion users get fully static UI with no timers.
+- ⚠ Desktop motion is visibly stepped rather than smooth; accepted as the price of idle GPU.
+- ⚠ New indeterminate call sites must use the shared widgets; raw indeterminate Material indicators on desktop are a review-time violation.
+
+### ADR-023 Compatibility
+
+Fully compliant, not an exception. Presentation-only: no endpoint, schema, event, or lifecycle semantic changes.
+
+### Key Files
+
+- `lib/presentation/widgets/app_indeterminate_progress.dart` — clock, ring, bar.
+- `lib/presentation/theme/app_animations.dart` — `indeterminateStep`, `indeterminateSteps`, `compactIndicatorSize`, `boundedIndeterminate`.
+- `test/widget/app_indeterminate_progress_test.dart` — platform matrix + clock lifecycle tests.

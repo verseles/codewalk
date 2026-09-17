@@ -1675,7 +1675,7 @@ extension _ChatPageScaffold on _ChatPageState {
                     if (chatProvider.isLoadingSessionInsights)
                       const Padding(
                         padding: EdgeInsets.only(top: 8),
-                        child: LinearProgressIndicator(minHeight: 2),
+                        child: AppIndeterminateBar(minHeight: 2),
                       ),
                     if (chatProvider.sessionInsightsError != null)
                       Padding(

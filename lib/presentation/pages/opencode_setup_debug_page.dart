@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../providers/app_provider.dart';
 import '../services/local_opencode_server_runtime_types.dart';
+import '../widgets/app_indeterminate_progress.dart';
 
 class OpenCodeSetupDebugPage extends StatelessWidget {
   const OpenCodeSetupDebugPage({super.key});
@@ -91,7 +92,7 @@ class OpenCodeSetupDebugPage extends StatelessWidget {
                             ],
                             if (appProvider.localSetupInProgress) ...[
                               const SizedBox(height: 12),
-                              const LinearProgressIndicator(minHeight: 3),
+                              const AppIndeterminateBar(minHeight: 3),
                             ],
                           ],
                         ),

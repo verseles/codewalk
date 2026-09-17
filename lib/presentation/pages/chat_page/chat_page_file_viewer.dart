@@ -74,7 +74,7 @@ extension _ChatPageFileViewer on _ChatPageState {
                 builder: (_) {
                   switch (active.status) {
                     case _FileTabLoadStatus.loading:
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: AppIndeterminateRing());
                     case _FileTabLoadStatus.error:
                       return Center(
                         child: Padding(
@@ -689,7 +689,7 @@ extension _ChatPageFileViewer on _ChatPageState {
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: AppIndeterminateRing(size: 16, strokeWidth: 2),
             )
           : const Icon(Symbols.save, size: 18),
       label: Text(context.l10n.commonSave),

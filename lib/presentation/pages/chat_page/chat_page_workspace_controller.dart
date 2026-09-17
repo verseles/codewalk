@@ -551,11 +551,9 @@ extension _ChatPageWorkspaceController on _ChatPageState {
                         ),
                         if (loadingSuggestions) ...[
                           const SizedBox(height: 8),
-                          const LinearProgressIndicator(
-                            key: ValueKey<String>(
+                          const AppIndeterminateBar(key: ValueKey<String>(
                               'workspace_directory_suggestions_loading',
-                            ),
-                          ),
+                            ),),
                         ],
                         if (directorySuggestions.isNotEmpty) ...[
                           const SizedBox(height: 12),

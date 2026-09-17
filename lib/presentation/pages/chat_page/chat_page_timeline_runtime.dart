@@ -130,11 +130,10 @@ extension _ChatPageTimelineRuntime on _ChatPageState {
               children: [
                 SizedBox.square(
                   dimension: 18,
-                  child: CircularProgressIndicator.adaptive(
+                  child: AppIndeterminateRing(
+                    size: 18,
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      colorScheme.primary,
-                    ),
+                    color: colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -559,7 +558,7 @@ extension _ChatPageTimelineRuntime on _ChatPageState {
           const SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: AppIndeterminateRing(size: 16, strokeWidth: 2),
           ),
           const SizedBox(width: 8),
           Text(

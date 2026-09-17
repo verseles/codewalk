@@ -2,6 +2,7 @@ import '../../core/i18n/l10n_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'app_indeterminate_progress.dart';
 
 class SessionTitleInlineEditor extends StatefulWidget {
   const SessionTitleInlineEditor({
@@ -181,7 +182,7 @@ class _SessionTitleInlineEditorState extends State<SessionTitleInlineEditor> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: AppIndeterminateRing(size: 18, strokeWidth: 2),
                         )
                       : const Icon(Symbols.check, size: 18),
                   visualDensity: Theme.of(context).visualDensity,

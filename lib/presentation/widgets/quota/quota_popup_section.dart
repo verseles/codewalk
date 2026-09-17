@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -208,6 +210,9 @@ class _QuotaInitialLoadingStateState extends State<_QuotaInitialLoadingState>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  static const _sweepRest = Duration(milliseconds: 1800);
+  Timer? _restTimer;
+
   static const _rowSpecs = <(double, double)>[
     (0.56, 0.22),
     (0.74, 0.32),
@@ -221,14 +226,38 @@ class _QuotaInitialLoadingStateState extends State<_QuotaInitialLoadingState>
       vsync: this,
       duration: const Duration(milliseconds: 1350),
     );
+    _controller.addStatusListener(_handleAnimationStatus);
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed || !mounted) {
+      return;
+    }
+    _cancelRest();
+    _restTimer = Timer(_sweepRest, () {
+      _restTimer = null;
+      if (mounted && AppAnimations.enabled(context)) {
+        _controller.forward(from: 0);
+      }
+    });
+  }
+
+  void _cancelRest() {
+    _restTimer?.cancel();
+    _restTimer = null;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (AppAnimations.enabled(context)) {
-      _controller.repeat();
+      if (!_controller.isAnimating && _restTimer?.isActive != true) {
+        _controller.forward(
+          from: _controller.value >= 1.0 ? 0.0 : _controller.value,
+        );
+      }
     } else {
+      _cancelRest();
       _controller.stop();
       _controller.value = 0;
     }
@@ -236,6 +265,8 @@ class _QuotaInitialLoadingStateState extends State<_QuotaInitialLoadingState>
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_handleAnimationStatus);
+    _cancelRest();
     _controller.dispose();
     super.dispose();
   }
@@ -353,18 +384,45 @@ class _QuotaSweepTextState extends State<_QuotaSweepText>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  static const _sweepRest = Duration(milliseconds: 1800);
+  Timer? _restTimer;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: widget.duration);
+    _controller.addStatusListener(_handleAnimationStatus);
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed || !mounted) {
+      return;
+    }
+    _cancelRest();
+    _restTimer = Timer(_sweepRest, () {
+      _restTimer = null;
+      if (mounted && AppAnimations.enabled(context)) {
+        _controller.forward(from: 0);
+      }
+    });
+  }
+
+  void _cancelRest() {
+    _restTimer?.cancel();
+    _restTimer = null;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (AppAnimations.enabled(context)) {
-      _controller.repeat();
+      if (!_controller.isAnimating && _restTimer?.isActive != true) {
+        _controller.forward(
+          from: _controller.value >= 1.0 ? 0.0 : _controller.value,
+        );
+      }
     } else {
+      _cancelRest();
       _controller.stop();
       _controller.value = 0;
     }
@@ -376,15 +434,16 @@ class _QuotaSweepTextState extends State<_QuotaSweepText>
     if (oldWidget.duration != widget.duration) {
       _controller.duration = widget.duration;
       if (AppAnimations.enabled(context)) {
-        _controller
-          ..stop()
-          ..repeat();
+        _cancelRest();
+        _controller.forward(from: 0);
       }
     }
   }
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_handleAnimationStatus);
+    _cancelRest();
     _controller.dispose();
     super.dispose();
   }

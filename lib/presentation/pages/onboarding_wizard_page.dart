@@ -16,6 +16,7 @@ import '../providers/settings_provider.dart';
 import '../services/local_opencode_server_runtime_types.dart';
 import '../theme/app_animations.dart';
 import '../utils/app_page_route.dart';
+import '../widgets/app_indeterminate_progress.dart';
 import '../widgets/modal_primary_action_shortcuts.dart';
 import 'opencode_setup_debug_page.dart';
 import 'server_settings_page.dart';
@@ -1623,9 +1624,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: AppIndeterminateRing(size: 18, strokeWidth: 2,),
                                     )
                                   : const Icon(Symbols.link_rounded),
                               label: Text(
@@ -1743,8 +1742,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                               ? const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2),
+                                  child: AppIndeterminateRing(size: 18, strokeWidth: 2),
                                 )
                               : const Icon(Symbols.open_in_browser_rounded),
                           label: Text(context.l10n.onboardingAuthenticate),
@@ -1766,8 +1764,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                               ? const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2),
+                                  child: AppIndeterminateRing(size: 18, strokeWidth: 2),
                                 )
                               : const Icon(Symbols.refresh_rounded),
                           label:
@@ -1968,7 +1965,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
                 if (report == null)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: AppIndeterminateRing()),
                   )
                 else ...[
                   _buildDiagnosticRow(
@@ -2146,7 +2143,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
               ],
               if (appProvider.localSetupInProgress) ...[
                 const SizedBox(height: 12),
-                const LinearProgressIndicator(minHeight: 3),
+                const AppIndeterminateBar(minHeight: 3),
               ],
               if (appProvider.localSetupMessage.trim().isNotEmpty) ...[
                 const SizedBox(height: 8),

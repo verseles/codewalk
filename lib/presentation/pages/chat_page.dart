@@ -79,6 +79,7 @@ import '../utils/session_title_formatter.dart';
 import '../utils/shortcut_binding_codec.dart';
 import '../utils/tool_presentation.dart';
 import '../utils/window_size_class.dart';
+import '../widgets/app_indeterminate_progress.dart';
 import '../widgets/app_tab_strip.dart';
 import '../widgets/chat_input_widget.dart';
 import '../widgets/chat_message_widget.dart';

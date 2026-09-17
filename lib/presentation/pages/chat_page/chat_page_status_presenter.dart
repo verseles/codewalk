@@ -255,11 +255,14 @@ extension _ChatPageStatusPresenter on _ChatPageState {
               color.withValues(alpha: 0.22),
             ),
           ),
-          CircularProgressIndicator(
-            value: isCompacting ? null : progress,
-            strokeWidth: 1.5,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
+          if (isCompacting)
+            AppIndeterminateRing(size: 20, strokeWidth: 1.5, color: color)
+          else
+            CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 1.5,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
           Text(
             context.l10n.chatPageStatusUsagePercent(usagePercent),
             style: Theme.of(context).textTheme.labelSmall?.copyWith(

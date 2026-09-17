@@ -7,6 +7,7 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/project.dart';
 import '../services/forward_message_service.dart';
 import '../theme/app_shapes.dart';
+import 'app_indeterminate_progress.dart';
 
 /// Modal dialog that lists the user's recent sessions grouped by project
 /// and lets them forward a single message to one or more destinations.
@@ -580,7 +581,7 @@ class _FooterBar extends StatelessWidget {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: AppIndeterminateRing(size: 16, strokeWidth: 2),
                   )
                 : Text(context.l10n.forwardSend),
           ),
@@ -603,7 +604,7 @@ class _LoadingState extends StatelessWidget {
           const SizedBox(
             width: 18,
             height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: AppIndeterminateRing(size: 18, strokeWidth: 2),
           ),
           const SizedBox(width: 12),
           Text(label),

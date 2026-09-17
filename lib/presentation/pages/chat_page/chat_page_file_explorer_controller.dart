@@ -457,7 +457,7 @@ extension _ChatPageFileExplorerController on _ChatPageState {
                           Expanded(
                             child: loading
                                 ? const Center(
-                                    child: CircularProgressIndicator(),
+                                    child: AppIndeterminateRing(),
                                   )
                                 : errorMessage.isNotEmpty
                                 ? Center(

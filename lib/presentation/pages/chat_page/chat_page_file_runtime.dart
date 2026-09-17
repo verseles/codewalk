@@ -2059,7 +2059,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
                     const SizedBox(
                       width: 12,
                       height: 12,
-                      child: CircularProgressIndicator(strokeWidth: 1.6),
+                      child: AppIndeterminateRing(size: 12, strokeWidth: 1.6),
                     ),
                 ],
               ),
@@ -2120,7 +2120,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
           top: 4,
           bottom: 2,
         ),
-        child: const LinearProgressIndicator(minHeight: 2),
+        child: const AppIndeterminateBar(minHeight: 2),
       ),
       for (var index = 0; index < rowCount; index += 1)
         _buildFileTreeSkeletonRow(

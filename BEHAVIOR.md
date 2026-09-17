@@ -1246,6 +1246,14 @@
 - **When** new messages or streamed parts are rendered
 - **Then** entrance motion is skipped and content appears immediately without slide transitions
 
+### Desktop indeterminate indicators are bounded
+
+- **Given** an indeterminate progress indicator is visible on desktop (Linux/macOS/Windows)
+- **When** it would otherwise tick every vsync frame indefinitely
+- **Then** slots at or below 20px render a static activity glyph and larger slots advance in discrete ~125ms steps, so the GPU is not held awake
+- **Then** mobile and web keep the native smooth indeterminate animation
+- **Then** reduced motion always renders the static form on every platform
+
 ### Main timeline messages appear without motion
 
 - **Given** the user is viewing the main chat timeline

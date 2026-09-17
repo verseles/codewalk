@@ -12,6 +12,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/android_battery_optimization_service.dart';
 import '../../../services/notification_sound_source_service.dart';
 import '../../../services/notification_sound_source_service_types.dart';
+import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../../widgets/settings_provenance_chip.dart';
@@ -403,7 +404,7 @@ class _NotificationsSettingsSectionState
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: AppIndeterminateRing(size: 14, strokeWidth: 2),
                     )
                   : const Icon(Symbols.settings),
               label: Text(
@@ -420,7 +421,7 @@ class _NotificationsSettingsSectionState
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: AppIndeterminateRing(size: 14, strokeWidth: 2),
                     )
                   : const Icon(Symbols.refresh),
               label: Text(context.l10n.settingsSpeechRefreshStatus),

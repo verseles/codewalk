@@ -405,7 +405,7 @@ extension _ChatMessageToolPartBuilder on _ChatMessageWidgetState {
                 runningState.title!,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-            const LinearProgressIndicator(),
+            const AppIndeterminateBar(),
           ],
         );
       case ToolStatus.completed:

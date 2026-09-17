@@ -37,6 +37,7 @@ import '../utils/file_path_markdown.dart';
 import '../utils/math_markdown.dart';
 import '../utils/reasoning_status_parser.dart';
 import '../utils/tool_presentation.dart';
+import 'app_indeterminate_progress.dart';
 import 'mermaid_diagram_widget.dart';
 import 'message_entrance_animation.dart';
 

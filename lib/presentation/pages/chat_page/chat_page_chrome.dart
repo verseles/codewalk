@@ -451,7 +451,7 @@ extension _ChatPageChrome on _ChatPageState {
       if (chatProvider.isLoadingSessionInsights)
         const Padding(
           padding: EdgeInsets.only(bottom: 12),
-          child: LinearProgressIndicator(minHeight: 2),
+          child: AppIndeterminateBar(minHeight: 2),
         ),
       if (chatProvider.sessionInsightsError != null)
         Padding(
@@ -609,7 +609,7 @@ extension _ChatPageChrome on _ChatPageState {
                   const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2.2),
+                    child: AppIndeterminateRing(size: 18, strokeWidth: 2.2),
                   ),
                   SizedBox(
                     width: AppDensitySpacing.mediumGap(
@@ -721,11 +721,12 @@ extension _ChatPageChrome on _ChatPageState {
                                   ),
                                   width: 9,
                                   height: 9,
-                                  child: CircularProgressIndicator(
+                                  child: AppIndeterminateRing(
+                                    size: 9,
                                     strokeWidth: 1.4,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).colorScheme.primary,
-                                    ),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                 ),
                               ),
@@ -1111,7 +1112,7 @@ extension _ChatPageChrome on _ChatPageState {
                         key: ValueKey<String>('appbar_terminal_button_loading'),
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: AppIndeterminateRing(strokeWidth: 2),
                       )
                     : const Icon(Symbols.terminal_rounded),
                 tooltip: settingsProvider.terminalPanelVisible

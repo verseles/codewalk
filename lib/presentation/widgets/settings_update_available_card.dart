@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../providers/settings_provider.dart';
 import '../services/update_check_service.dart';
+import 'app_indeterminate_progress.dart';
 
 class SettingsUpdateAvailableCard extends StatelessWidget {
   const SettingsUpdateAvailableCard({
@@ -128,7 +129,7 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
           const SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: AppIndeterminateRing(size: 16, strokeWidth: 2),
           ),
           const SizedBox(width: 8),
           Text(

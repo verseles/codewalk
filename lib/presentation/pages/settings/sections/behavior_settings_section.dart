@@ -12,6 +12,7 @@ import '../../../providers/chat_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_host_service.dart';
+import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../../widgets/settings_provenance_chip.dart';
@@ -476,7 +477,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
             const SizedBox(height: 12),
             if (settingsProvider.openCodeDefaultsLoading &&
                 !settingsProvider.openCodeDefaultsLoaded)
-              const Center(child: CircularProgressIndicator())
+              const Center(child: AppIndeterminateRing())
             else ...[
               if (settingsProvider.openCodeDefaultsError != null) ...[
                 Text(

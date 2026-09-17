@@ -19,6 +19,7 @@ import '../../../services/sensevoice_model_manager.dart';
 import '../../../services/sherpa_model_manager.dart';
 import '../../../utils/speech_engine_platform_support.dart';
 import '../../../utils/windows_settings_links.dart';
+import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
@@ -750,7 +751,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             const SizedBox(height: 12),
             if (_loadingMoonshineModels)
-              const Center(child: CircularProgressIndicator())
+              const Center(child: AppIndeterminateRing())
             else ...[
               DropdownButtonFormField<String>(
                 initialValue: selectedId,
@@ -887,7 +888,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             const SizedBox(height: 12),
             if (_loadingParakeetModels)
-              const Center(child: CircularProgressIndicator())
+              const Center(child: AppIndeterminateRing())
             else ...[
               DropdownButtonFormField<String>(
                 initialValue: selectedId,
@@ -1024,7 +1025,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             const SizedBox(height: 12),
             if (_loadingSenseVoiceModels)
-              const Center(child: CircularProgressIndicator())
+              const Center(child: AppIndeterminateRing())
             else ...[
               DropdownButtonFormField<String>(
                 initialValue: selectedId,
@@ -1166,7 +1167,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             const SizedBox(height: 12),
             if (_loadingModels)
-              const Center(child: CircularProgressIndicator())
+              const Center(child: AppIndeterminateRing())
             else ...[
               SearchableDropdownFormField<String>(
                 value: selectedCode,

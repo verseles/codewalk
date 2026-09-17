@@ -12,6 +12,7 @@ import '../../../../data/datasources/app_local_datasource.dart';
 import '../../../providers/app_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_completion_resolver.dart';
+import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/settings_update_available_card.dart';
 import '../../app_shell_page.dart';
@@ -138,7 +139,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
           ? const SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: AppIndeterminateRing(size: 24, strokeWidth: 2),
             )
           : const Icon(Symbols.refresh),
       title: Text(context.l10n.settingsAboutCheckForUpdates),

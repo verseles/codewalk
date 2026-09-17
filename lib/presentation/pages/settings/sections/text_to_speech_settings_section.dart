@@ -12,6 +12,7 @@ import '../../../../domain/entities/experience_settings.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/read_aloud_service.dart';
 import '../../../services/tts/openai_compatible_tts_backend.dart';
+import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
@@ -625,7 +626,7 @@ class _TextToSpeechSettingsSectionState
                     child: SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: AppIndeterminateRing(size: 18, strokeWidth: 2),
                     ),
                   )
                 : IconButton(

@@ -9,6 +9,7 @@ import '../../core/di/injection_container.dart' as di;
 import '../../domain/entities/experience_settings.dart';
 import '../services/parakeet_model_manager.dart';
 import 'modal_primary_action_shortcuts.dart';
+import 'app_indeterminate_progress.dart';
 
 class _ParakeetModelEntry {
   const _ParakeetModelEntry({
@@ -138,7 +139,7 @@ class _ParakeetModelDownloadDialogState
         content: SizedBox(
           width: 380,
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: AppIndeterminateRing())
               : _buildContent(selected),
         ),
         actions: _isDownloading
