@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.244.0 - 2026-09-18
+
+- docs(chat): describe basic HTML replies and native progress bars
+- fix(review): retain invalid table content and nested progress rendering
+- fix(review): preserve Markdown tables links and nested HTML math
+- feat(chat): render basic HTML formatting and progress in assistant replies
+- docs(adr): record interaction-frame budget for session switching (ADR-057)
+
 ## v1.243.0 - 2026-09-17
 
 - fix(review): superseded switch bails before mutating selection state
