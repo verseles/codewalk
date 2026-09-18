@@ -3479,6 +3479,46 @@ void main() {
       }),
     );
 
+    testWidgets('terminal and utility update without inherited settings forwarding', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1300, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+      _disableAutomaticUpdateChecksForTest(local);
+      final provider = _buildChatProvider(localDataSource: local);
+      final appProvider = _buildAppProvider(localDataSource: local);
+      final settings = SettingsProvider(localDataSource: local, dioClient: DioClient(), soundService: SoundService());
+      addTearDown(settings.dispose);
+      await settings.initialize();
+      await tester.pumpWidget(_testApp(provider, appProvider, settingsProvider: settings, forwardSettingsNotifications: false));
+      await tester.pumpAndSettle();
+      final sidebar = find.byKey(const ValueKey('sidebar_new_chat_button'));
+      expect(find.descendant(of: sidebar, matching: find.byIcon(Symbols.add_comment)), findsOneWidget);
+      expect(find.text('Ctrl+N'), findsOneWidget);
+      await settings.setUtilityShortcutsCollapsed(true);
+      await tester.pump();
+      expect(find.text('Ctrl+N'), findsNothing);
+      await settings.setUtilityShortcutsCollapsed(false);
+      await tester.pump();
+      expect(find.text('Ctrl+N'), findsOneWidget);
+      final panel = find.byKey(const ValueKey('terminal_panel'));
+      await settings.setTerminalPanelVisible(true);
+      await tester.pump();
+      expect(panel, findsOneWidget);
+      final height = tester.getSize(panel).height;
+      await settings.setTerminalPanelMaximized(true);
+      await tester.pump();
+      expect(panel, findsOneWidget);
+      expect(tester.getTopLeft(panel), Offset.zero);
+      expect(tester.getSize(panel), const Size(1300, 900));
+      await settings.setTerminalPanelMaximized(false);
+      await tester.pump();
+      expect(panel, findsOneWidget);
+      expect(tester.getSize(panel).height, height);
+      await settings.setTerminalPanelVisible(false);
+      await tester.pump();
+      expect(panel, findsNothing);
+    });
+
     testWidgets('terminal maximize button opens full-screen overlay', (
       WidgetTester tester,
     ) async {
@@ -23557,6 +23597,7 @@ Widget _testApp(
   WorkspaceFileOperationsService? fileOperationsService,
   MediaQueryData? mediaQueryData,
   bool integratedWindowChrome = false,
+  bool forwardSettingsNotifications = true,
 }) {
   if (di.sl.isRegistered<AppLocalDataSource>()) {
     di.sl.unregister<AppLocalDataSource>();
@@ -23609,7 +23650,9 @@ Widget _testApp(
       ChangeNotifierProvider<ProjectProvider>.value(
         value: provider.projectProvider,
       ),
-      ChangeNotifierProvider<SettingsProvider>.value(
+      if (forwardSettingsNotifications) ChangeNotifierProvider<SettingsProvider>.value(
+        value: effectiveSettingsProvider,
+      ) else InheritedProvider<SettingsProvider>.value(
         value: effectiveSettingsProvider,
       ),
       ChangeNotifierProvider<QuotaProvider>.value(

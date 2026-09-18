@@ -52,7 +52,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
         final checking = settings.checkingForUpdate;
         final upToDate = settings.lastCheckFoundNoUpdate;
 
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(
@@ -121,6 +121,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
     SettingsProvider settings,
   ) {
     return SwitchListTile(
+      key: const ValueKey('settings_about_check_on_open'),
       secondary: const Icon(Symbols.update),
       title: Text(context.l10n.settingsAboutCheckOnOpen),
       subtitle: Text(context.l10n.settingsAboutCheckOnOpenDescription),
@@ -135,6 +136,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
     bool checking,
   ) {
     return ListTile(
+      key: const ValueKey('settings_about_check_now'),
       leading: checking
           ? const SizedBox(
               width: 24,
@@ -155,6 +157,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
   Widget _buildResetAppTile(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
+      key: const ValueKey('settings_about_reset'),
       leading: Icon(Symbols.restart_alt_rounded, color: colorScheme.error),
       title: Text(
         context.l10n.settingsAboutResetApp,
@@ -249,6 +252,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
 
   Widget _buildGitHubTile(BuildContext context) {
     return ListTile(
+      key: const ValueKey('settings_about_github'),
       leading: const Icon(Symbols.code),
       title: Text(context.l10n.aboutGitHub),
       subtitle: const Text('verseles/codewalk'),

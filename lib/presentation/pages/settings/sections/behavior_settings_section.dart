@@ -30,6 +30,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     with WidgetsBindingObserver {
   late final TextEditingController _usernameController;
   late final FocusNode _usernameFocusNode;
+  bool _usernameDirty = false;
   final Map<String, int> _deferredConfigMutationGenerationByKey =
       <String, int>{};
   bool _sessionAttentionUpdating = false;
@@ -82,7 +83,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
   Widget build(BuildContext context) {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(
@@ -344,13 +345,23 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
   }
 
   Widget _buildLanguageCard(BuildContext context) {
-    const systemLocaleValue = 'system';
     late final LocaleProvider localeProvider;
     try {
-      localeProvider = Provider.of<LocaleProvider>(context);
+      localeProvider = context.read<LocaleProvider>();
     } on ProviderNotFoundException {
       return const SizedBox.shrink();
     }
+    return ListenableBuilder(
+      listenable: localeProvider,
+      builder: (context, _) => _buildLanguageControl(context, localeProvider),
+    );
+  }
+
+  Widget _buildLanguageControl(
+    BuildContext context,
+    LocaleProvider localeProvider,
+  ) {
+    const systemLocaleValue = 'system';
     final currentValue = localeProvider.localeCode ?? systemLocaleValue;
     final l10n = context.l10n;
 
@@ -425,7 +436,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
     final autoupdateMode = settingsProvider.openCodeAutoupdateMode;
     final shareMode = settingsProvider.openCodeShareMode;
 
-    if (!_usernameFocusNode.hasFocus) {
+    if (!_usernameDirty && !_usernameFocusNode.hasFocus) {
       final targetValue = username ?? '';
       if (_usernameController.text != targetValue) {
         _usernameController.value = TextEditingValue(
@@ -567,6 +578,7 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
                 key: const ValueKey<String>('settings_opencode_username'),
                 controller: _usernameController,
                 focusNode: _usernameFocusNode,
+                onChanged: (_) => _usernameDirty = true,
                 textInputAction: TextInputAction.done,
                 decoration: InputDecoration(
                   labelText: context.l10n.settingsConversationUsername,
@@ -1155,6 +1167,8 @@ class _BehaviorSettingsSectionState extends State<BehaviorSettingsSection>
           context.l10n.settingsBehaviorConfigFieldConversationUsername,
         ),
       );
+    } else if (_usernameController.text.trim() == normalizedUsername) {
+      setState(() => _usernameDirty = false);
     }
   }
 

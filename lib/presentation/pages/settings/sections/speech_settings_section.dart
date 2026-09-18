@@ -185,6 +185,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return DirectConsumer<SettingsProvider>(
@@ -203,7 +204,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                 selectedEngine == SpeechToTextEngine.parakeet ||
             _supportsSenseVoice &&
                 selectedEngine == SpeechToTextEngine.sensevoice;
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(
@@ -305,6 +306,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             const SizedBox(height: 10),
             RadioGroup<SpeechToTextEngine>(
+              key: const ValueKey('settings_speech_engine'),
               groupValue: selectedEngine,
               onChanged: (value) {
                 if (value == null) return;
@@ -689,6 +691,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             ),
             const SizedBox(height: 8),
             Slider.adaptive(
+              key: const ValueKey('settings_speech_silence'),
               min: 2,
               max: 10,
               divisions: 8,

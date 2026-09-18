@@ -141,7 +141,7 @@ class AppearanceSettingsSection extends StatelessWidget {
         const systemFontDivisions = 8;
         const chatFontDivisions = 8;
         const terminalFontDivisions = 13;
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(

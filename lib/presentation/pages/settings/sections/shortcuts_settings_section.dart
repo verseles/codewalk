@@ -23,6 +23,7 @@ class ShortcutsSettingsSection extends StatefulWidget {
 
 class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
   final TextEditingController _searchController = TextEditingController();
+  int? _lastRevealSerial;
 
   @override
   void dispose() {
@@ -34,6 +35,11 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
   Widget build(BuildContext context) {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
+        final request = SettingsSearchDestination.requestOf(context);
+        if (request != null && request.serial != _lastRevealSerial) {
+          _lastRevealSerial = request.serial;
+          _searchController.clear();
+        }
         final query = _searchController.text.trim().toLowerCase();
         final visibleDefinitions = shortcutDefinitionsForRuntime(
           isWeb: kIsWeb,
@@ -62,7 +68,7 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
               .add(definition);
         }
 
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(
@@ -80,6 +86,7 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const ValueKey('settings_shortcuts_search'),
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: context.l10n.settingsShortcutsSearch,
@@ -100,6 +107,7 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
+                key: const ValueKey('settings_shortcuts_reset'),
                 onPressed: () => settingsProvider.resetAllShortcuts(),
                 icon: const Icon(Symbols.restart_alt),
                 label: Text(context.l10n.shortcutsReset),
@@ -174,6 +182,7 @@ class _ShortcutTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Card(
+      key: ValueKey('settings_shortcut_${definition.action.name}'),
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(definition.localizedLabel(l10n)),

@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/i18n/l10n_context.dart';
+import '../providers/app_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_animations.dart';
 import '../utils/app_page_route.dart';
@@ -25,6 +27,8 @@ import 'settings/sections/servers_settings_section.dart';
 import 'settings/sections/shortcuts_settings_section.dart';
 import 'settings/sections/speech_settings_section.dart';
 import 'settings/sections/text_to_speech_settings_section.dart';
+import 'settings/settings_search_catalog.dart';
+import 'settings/widgets/settings_search_navigation.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, this.initialSectionId = ''});
@@ -182,6 +186,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   String? _selectedSectionId;
   bool _showMobileDetail = false;
+  bool _detailOpened = false;
+  bool _listOpened = false;
+  SettingsSearchRequest? _searchRequest;
+  int _searchSerial = 0;
   final TextEditingController _settingsSearchController =
       TextEditingController();
   String _settingsQuery = '';
@@ -200,6 +208,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ? 'servers'
         : initialSectionId;
     _showMobileDetail = initialSectionId.isNotEmpty;
+    _detailOpened = _showMobileDetail;
+    _listOpened = !_showMobileDetail;
     if (widget.initialSectionId == 'logs') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
@@ -321,6 +331,7 @@ class _SettingsPageState extends State<SettingsPage> {
             return;
           }
           setState(() {
+            _listOpened = true;
             _showMobileDetail = false;
           });
         },
@@ -336,6 +347,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     tooltip: context.l10n.permissionBack,
                     onPressed: () {
                       setState(() {
+                        _listOpened = true;
                         _showMobileDetail = false;
                       });
                     },
@@ -343,31 +355,24 @@ class _SettingsPageState extends State<SettingsPage> {
                   )
                 : null,
           ),
-          body: AnimatedSwitcher(
-            duration: AppAnimations.emphasized,
-            switchInCurve: AppAnimations.emphasizedCurve,
-            switchOutCurve: AppAnimations.accelerateCurve,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.04, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              );
-            },
-            child: _showMobileDetail && section != null
-                ? KeyedSubtree(
-                    key: ValueKey<String>('section_${section.id}'),
-                    child: section.builder(context),
-                  )
-                : KeyedSubtree(
-                    key: const ValueKey<String>('section_list'),
-                    child: _buildSectionList(isSplit: false),
-                  ),
+          body: IndexedStack(
+            index: _showMobileDetail ? 1 : 0,
+            children: [
+              if (_listOpened)
+                KeyedSubtree(
+                  key: const ValueKey<String>('section_list'),
+                  child: _buildSectionList(isSplit: false),
+                )
+              else
+                const SizedBox.shrink(),
+              if (_detailOpened && section != null)
+                TickerMode(
+                  enabled: _showMobileDetail,
+                  child: _buildDetail(section, active: _showMobileDetail),
+                )
+              else
+                const SizedBox.shrink(),
+            ],
           ),
         ),
       );
@@ -400,10 +405,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ? const SizedBox.shrink(
                       key: ValueKey<String>('section_empty'),
                     )
-                  : KeyedSubtree(
-                      key: ValueKey<String>('section_${section.id}'),
-                      child: section.builder(context),
-                    ),
+                  : _buildDetail(section, active: true),
             ),
           ),
         ],
@@ -422,10 +424,38 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _openLogsPage() async {
+  Widget _buildDetail(_SettingsSection section, {required bool active}) {
+    return SettingsSearchDestination(
+      key: ValueKey<String>('section_${section.id}'),
+      request: _searchRequest,
+      active: active,
+      child: section.builder(context),
+    );
+  }
+
+  void _openOption(SettingsSearchOption option) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final request = SettingsSearchRequest(
+      option.targetKey,
+      option.label,
+      ++_searchSerial,
+    );
+    if (option.sectionId == 'logs') {
+      unawaited(_openLogsPage(request: request));
+      return;
+    }
+    setState(() {
+      _searchRequest = request;
+      _selectedSectionId = option.sectionId;
+      _detailOpened = true;
+      _showMobileDetail = true;
+    });
+  }
+
+  Future<void> _openLogsPage({SettingsSearchRequest? request}) async {
     await Navigator.of(
       context,
-    ).push(AppPageRoute(builder: (_) => const LogsPage()));
+    ).push(AppPageRoute(builder: (_) => LogsPage(searchRequest: request)));
   }
 
   Future<void> _replayChatTour() async {
@@ -444,10 +474,43 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSectionList({required bool isSplit}) {
+    final app = context.read<AppProvider?>();
+    return app == null
+        ? _buildSectionListContent(isSplit: isSplit)
+        : ListenableBuilder(
+            listenable: app,
+            builder: (_, _) => _buildSectionListContent(isSplit: isSplit),
+          );
+  }
+
+  Widget _buildSectionListContent({required bool isSplit}) {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settings, _) {
         final updateResult = settings.updateCheckResult;
         final filteredSections = _filteredSections;
+        final visibleSections = _visibleSections;
+        final query = _settingsQuery.trim();
+        final options = query.isEmpty
+            ? const <SettingsSearchOption>[]
+            : settingsSearchOptions(
+                    context.l10n,
+                    settings,
+                    hasLocaleProvider: context.read<LocaleProvider?>() != null,
+                    hasServerProfiles:
+                        context
+                            .read<AppProvider?>()
+                            ?.serverProfiles
+                            .isNotEmpty ??
+                        false,
+                  )
+                  .where(
+                    (option) =>
+                        visibleSections.any(
+                          (section) => section.id == option.sectionId,
+                        ) &&
+                        option.matches(query),
+                  )
+                  .toList();
         return ListView(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
@@ -483,7 +546,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (value) => setState(() => _settingsQuery = value),
             ),
             const SizedBox(height: 12),
-            if (_settingsQuery.isEmpty) ...[
+            if (query.isEmpty) ...[
               FilledButton.icon(
                 onPressed: _openSetupWizard,
                 icon: const Icon(Symbols.auto_fix_high_rounded),
@@ -498,7 +561,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 16),
             ],
-            if (filteredSections.isEmpty)
+            if (filteredSections.isEmpty && options.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Center(
@@ -525,6 +588,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   (section) => section.group == group,
                 ))
                   Card(
+                    key: ValueKey('settings_search_section_${section.id}'),
                     margin: const EdgeInsets.only(bottom: 10),
                     child: ListTile(
                       selected: section.id == _selectedSectionId,
@@ -538,13 +602,35 @@ class _SettingsPageState extends State<SettingsPage> {
                           return;
                         }
                         setState(() {
+                          _searchRequest = null;
                           _selectedSectionId = section.id;
+                          _detailOpened = true;
                           _showMobileDetail = true;
                         });
                       },
                     ),
                   ),
               ],
+            for (final option in options)
+              Card(
+                key: ValueKey('settings_search_option_${option.targetKey}'),
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: Icon(
+                    visibleSections
+                        .firstWhere((s) => s.id == option.sectionId)
+                        .icon,
+                  ),
+                  title: Text(option.label),
+                  subtitle: Text(
+                    visibleSections
+                        .firstWhere((s) => s.id == option.sectionId)
+                        .title,
+                  ),
+                  trailing: const Icon(Symbols.chevron_right),
+                  onTap: () => _openOption(option),
+                ),
+              ),
           ],
         );
       },

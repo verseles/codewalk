@@ -87,7 +87,7 @@ class _NotificationsSettingsSectionState
   Widget build(BuildContext context) {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(
@@ -547,6 +547,7 @@ class _NotificationsSettingsSectionState
             if (notifyEnabled) ...[
               const SizedBox(height: 10),
               _buildOnlyWhenChips(
+                targetKey: 'settings_notify_when_${category.name}',
                 title: context.l10n.settingsNotificationsNotifyOnlyWhen,
                 backgroundEnabled: settingsProvider.notifyOnlyWhenBackground(
                   category,
@@ -562,6 +563,7 @@ class _NotificationsSettingsSectionState
             if (soundEnabled) ...[
               const SizedBox(height: 10),
               _buildOnlyWhenChips(
+                targetKey: 'settings_sound_when_${category.name}',
                 title: context.l10n.settingsNotificationsSoundOnlyWhen,
                 backgroundEnabled: settingsProvider.soundOnlyWhenBackground(
                   category,
@@ -594,6 +596,7 @@ class _NotificationsSettingsSectionState
                 children: [
                   if (soundOption == SoundOption.systemChoice)
                     OutlinedButton.icon(
+                      key: ValueKey('settings_system_sound_${category.name}'),
                       onPressed: () => unawaited(
                         _pickSystemSound(
                           settingsProvider: settingsProvider,
@@ -607,6 +610,7 @@ class _NotificationsSettingsSectionState
                     ),
                   if (soundOption == SoundOption.customFile)
                     OutlinedButton.icon(
+                      key: ValueKey('settings_custom_sound_${category.name}'),
                       onPressed: () => unawaited(
                         _pickCustomFile(
                           settingsProvider: settingsProvider,
@@ -619,6 +623,7 @@ class _NotificationsSettingsSectionState
                       ),
                     ),
                   FilledButton.tonalIcon(
+                    key: ValueKey('settings_preview_sound_${category.name}'),
                     onPressed: () =>
                         settingsProvider.previewSound(soundCategory),
                     icon: const Icon(Symbols.play_arrow_rounded),
@@ -659,6 +664,7 @@ class _NotificationsSettingsSectionState
       children: [
         Expanded(
           child: SwitchListTile.adaptive(
+            key: ValueKey('settings_notify_${category.name}'),
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text(context.l10n.settingsNotificationsNotify),
@@ -670,6 +676,7 @@ class _NotificationsSettingsSectionState
         const SizedBox(width: 12),
         Expanded(
           child: SwitchListTile.adaptive(
+            key: ValueKey('settings_sound_${category.name}'),
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text(context.l10n.settingsNotificationsSound),
@@ -683,6 +690,7 @@ class _NotificationsSettingsSectionState
   }
 
   Widget _buildOnlyWhenChips({
+    required String targetKey,
     required String title,
     required bool backgroundEnabled,
     required bool anotherSessionEnabled,
@@ -690,6 +698,7 @@ class _NotificationsSettingsSectionState
     required ValueChanged<bool> onAnotherSessionChanged,
   }) {
     return Column(
+      key: ValueKey(targetKey),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: Theme.of(context).textTheme.labelLarge),
@@ -728,6 +737,7 @@ class _NotificationsSettingsSectionState
     required SoundOption selected,
   }) {
     return SearchableDropdownFormField<SoundOption>(
+      key: ValueKey('settings_sound_type_${category.name}'),
       value: selected,
       searchHintText: context.l10n.settingsNotificationsSearchSoundType,
       searchTermsBuilder: (value) => <String>[_soundLabel(value)],

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codewalk/core/logging/app_logger.dart';
@@ -12,7 +13,72 @@ import 'package:provider/provider.dart';
 import '../support/fakes.dart';
 import '../support/pump_localized_app.dart';
 
+class _GatedLoggingStore extends InMemoryAppLocalDataSource {
+  final gate = Completer<void>();
+  @override
+  Future<void> saveExperienceSettingsJson(String settingsJson) async {
+    await gate.future;
+    await super.saveExperienceSettingsJson(settingsJson);
+  }
+}
+
 void main() {
+  testWidgets(
+    'logging flags repaint before persistence without inherited forwarding',
+    (tester) async {
+      final store = _GatedLoggingStore();
+      final settings = SettingsProvider(
+        localDataSource: store,
+        dioClient: DioClient(),
+        soundService: SoundService(),
+      );
+      addTearDown(settings.dispose);
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: InheritedProvider<SettingsProvider>.value(
+            value: settings,
+            child: const LogsPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final enable = settings.setLoggingEnabled(true);
+      await tester.pump();
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const ValueKey('settings_logs_enabled')),
+            )
+            .value,
+        isTrue,
+      );
+      expect(find.text('Logging is disabled'), findsNothing);
+      expect(store.experienceSettingsJson, isNull);
+      final perf = settings.setPerformanceLoggingEnabled(true);
+      await tester.pump();
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const ValueKey('settings_logs_performance')),
+            )
+            .value,
+        isTrue,
+      );
+      store.gate.complete();
+      await Future.wait([enable, perf]);
+      await settings.setLoggingEnabled(false);
+      await tester.pump();
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const ValueKey('settings_logs_enabled')),
+            )
+            .value,
+        isFalse,
+      );
+      expect(find.text('Logging is disabled'), findsOneWidget);
+    },
+  );
   setUp(() {
     AppLogger.clearEntries();
     AppLogger.setLoggingEnabled(false);

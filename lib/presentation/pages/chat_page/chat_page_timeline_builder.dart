@@ -299,19 +299,35 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
     return Selector<ChatProvider, _ChatContentBuildKey>(
       selector: (_, p) => _chatContentBuildKey(p),
       builder: (context, _, _) => LayoutBuilder(
-        builder: (context, constraints) => _buildChatContent(
-          chatProvider: context.read<ChatProvider>(),
-          isKeyboardOpen: isKeyboardOpen,
-          maxContentWidth: maxContentWidth,
-          horizontalPadding: horizontalPadding,
-          verticalPadding: verticalPadding,
-          availableHeight: constraints.maxHeight,
-        ),
+        builder: (context, constraints) =>
+            DirectSelector<SettingsProvider, _ChatContentSettingsKey>(
+              select: (settings) => (
+                terminalVisible: settings.terminalPanelVisible,
+                terminalMaximized: settings.terminalPanelMaximized,
+                terminalHeight: settings.terminalPanelHeight,
+                showSessionTabs: settings.showSessionTabs,
+                density: settings.appDensity,
+                fontScale: settings.chatFontScale,
+                spellCheck: settings.composerSpellCheckEnabled,
+              ),
+              builder: (context, _, _) => _buildChatContent(
+                context: context,
+                settingsProvider: context.read<SettingsProvider>(),
+                chatProvider: context.read<ChatProvider>(),
+                isKeyboardOpen: isKeyboardOpen,
+                maxContentWidth: maxContentWidth,
+                horizontalPadding: horizontalPadding,
+                verticalPadding: verticalPadding,
+                availableHeight: constraints.maxHeight,
+              ),
+            ),
       ),
     );
   }
 
   Widget _buildChatContent({
+    required BuildContext context,
+    required SettingsProvider settingsProvider,
     required ChatProvider chatProvider,
     required bool isKeyboardOpen,
     required double maxContentWidth,
@@ -335,7 +351,6 @@ extension _ChatPageTimelineBuilder on _ChatPageState {
         (chatProvider.currentSession != null ||
             chatProvider.isDraftingNewChat) &&
         composerBlockReason == null;
-    final settingsProvider = context.watch<SettingsProvider>();
     final isCompactLayout =
         context.windowSizeClass.isCompact || _isMobileRuntime;
     final terminalPanelVisible = settingsProvider.terminalPanelVisible;

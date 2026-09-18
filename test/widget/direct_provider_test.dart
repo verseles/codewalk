@@ -21,6 +21,36 @@ class _Counter extends ChangeNotifier {
 }
 
 void main() {
+  testWidgets(
+    'direct selection works without inherited notification forwarding',
+    (tester) async {
+      final counter = _Counter(0);
+      addTearDown(counter.dispose);
+      await tester.pumpWidget(
+        InheritedProvider<_Counter>.value(
+          value: counter,
+          child: MaterialApp(
+            home: Column(
+              children: [
+                Consumer<_Counter>(
+                  builder: (_, value, _) => Text('inherited=${value.value}'),
+                ),
+                DirectSelector<_Counter, int>(
+                  select: (value) => value.value,
+                  builder: (_, value, _) => Text('direct=$value'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      counter.bump();
+      await tester.pump();
+      expect(find.text('inherited=0'), findsOneWidget);
+      expect(find.text('direct=1'), findsOneWidget);
+    },
+  );
+
   Widget harness(Widget child, _Counter counter) {
     return ChangeNotifierProvider<_Counter>.value(
       value: counter,

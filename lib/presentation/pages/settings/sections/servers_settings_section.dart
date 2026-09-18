@@ -38,6 +38,8 @@ enum _ServerAction {
 }
 
 class _ServersSettingsSectionState extends State<ServersSettingsSection> {
+  final _scrollController = ScrollController();
+  int? _lastSearchSerial;
   final _activeServerDropdownKey = GlobalKey<FormFieldState<String>>();
   bool _loading = true;
 
@@ -60,9 +62,25 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DirectConsumer<AppProvider>(
       builder: (context, appProvider, _) {
+        SettingsSearchDestination.contentReady(context);
+        final request = SettingsSearchDestination.requestOf(context);
+        if (request != null && request.serial != _lastSearchSerial) {
+          _lastSearchSerial = request.serial;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            if (_scrollController.hasClients) _scrollController.jumpTo(0);
+            SettingsSearchDestination.contentReady(context);
+          });
+        }
         final profiles = appProvider.serverProfiles;
         if (_loading && profiles.isEmpty) {
           return const Center(child: AppIndeterminateRing());
@@ -70,60 +88,70 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
 
         const padding = AppConstants.defaultPadding;
         return CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(padding, padding, padding, 0),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  SettingsSectionIntro(
-                    title: context.l10n.settingsServersTitle,
-                    description: context.l10n.settingsServersDescription,
-                    hideTitleOnCompact: true,
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _openSetupWizard,
-                        icon: const Icon(Symbols.auto_fix_high_rounded),
-                        label: Text(context.l10n.serversSetupWizard),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            context.read<AppProvider>().refreshServerHealth(),
-                        icon: const Icon(Symbols.health_and_safety),
-                        label: Text(context.l10n.serversRefreshHealth),
-                      ),
-                      FilledButton.icon(
-                        onPressed: () => _openSetupWizard(
-                          initialFlow: SetupWizardInitialFlow.connectServer,
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SettingsSectionIntro(
+                      title: context.l10n.settingsServersTitle,
+                      description: context.l10n.settingsServersDescription,
+                      hideTitleOnCompact: true,
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          key: const ValueKey('settings_servers_setup'),
+                          onPressed: _openSetupWizard,
+                          icon: const Icon(Symbols.auto_fix_high_rounded),
+                          label: Text(context.l10n.serversSetupWizard),
                         ),
-                        icon: const Icon(Symbols.add),
-                        label: Text(context.l10n.serversAddServer),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  SettingsGroupHeader(
-                    title: context.l10n.settingsGroupCurrentConnection,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildActiveServerCard(appProvider),
-                  const SizedBox(height: 20),
-                  SettingsGroupHeader(
-                    title: context.l10n.settingsGroupThisDevice,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildLocalServerCard(appProvider),
-                  const SizedBox(height: 20),
-                  SettingsGroupHeader(
-                    title: context.l10n.settingsGroupSavedServers,
-                  ),
-                  const SizedBox(height: 8),
-                ]),
+                        OutlinedButton.icon(
+                          key: const ValueKey('settings_servers_health'),
+                          onPressed: () =>
+                              context.read<AppProvider>().refreshServerHealth(),
+                          icon: const Icon(Symbols.health_and_safety),
+                          label: Text(context.l10n.serversRefreshHealth),
+                        ),
+                        FilledButton.icon(
+                          key: const ValueKey('settings_servers_add'),
+                          onPressed: () => _openSetupWizard(
+                            initialFlow: SetupWizardInitialFlow.connectServer,
+                          ),
+                          icon: const Icon(Symbols.add),
+                          label: Text(context.l10n.serversAddServer),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    SettingsGroupHeader(
+                      title: context.l10n.settingsGroupCurrentConnection,
+                    ),
+                    const SizedBox(height: 8),
+                    KeyedSubtree(
+                      key: const ValueKey('settings_servers_active'),
+                      child: _buildActiveServerCard(appProvider),
+                    ),
+                    const SizedBox(height: 20),
+                    SettingsGroupHeader(
+                      title: context.l10n.settingsGroupThisDevice,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildLocalServerCard(appProvider),
+                    const SizedBox(height: 20),
+                    SettingsGroupHeader(
+                      title: context.l10n.settingsGroupSavedServers,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
             SliverPadding(
@@ -343,8 +371,8 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                     onPressed: appProvider.tailscaleBusy
                         ? null
                         : () async {
-                            final ok =
-                                await appProvider.authenticateTailscale();
+                            final ok = await appProvider
+                                .authenticateTailscale();
                             if (!ok && mounted) {
                               _showMessage(
                                 context.l10n.onboardingOpenTailscaleLogin,
@@ -355,7 +383,10 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: AppIndeterminateRing(size: 18, strokeWidth: 2),
+                            child: AppIndeterminateRing(
+                              size: 18,
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Icon(Symbols.open_in_browser_rounded),
                     label: Text(context.l10n.onboardingAuthenticate),
@@ -377,7 +408,10 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: AppIndeterminateRing(size: 18, strokeWidth: 2),
+                            child: AppIndeterminateRing(
+                              size: 18,
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Icon(Symbols.refresh_rounded),
                     label: Text(context.l10n.serversTailscaleReconnect),
@@ -397,33 +431,35 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                       ? null
                       : () async {
                           final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (dialogContext) => AlertDialog(
-                        title: Text(
-                          context.l10n.serversTailscaleLogoutConfirmTitle,
-                        ),
-                        content: Text(
-                          context.l10n.serversTailscaleLogoutConfirmMessage,
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.of(dialogContext).pop(false),
-                            child: Text(context.l10n.commonCancel),
-                          ),
-                          FilledButton(
-                            onPressed: () =>
-                                Navigator.of(dialogContext).pop(true),
-                            child: Text(
-                              context.l10n.serversTailscaleLogout,
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: Text(
+                                context.l10n.serversTailscaleLogoutConfirmTitle,
+                              ),
+                              content: Text(
+                                context
+                                    .l10n
+                                    .serversTailscaleLogoutConfirmMessage,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(false),
+                                  child: Text(context.l10n.commonCancel),
+                                ),
+                                FilledButton(
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(true),
+                                  child: Text(
+                                    context.l10n.serversTailscaleLogout,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirmed != true || !mounted) return;
-                    await appProvider.logoutTailscale();
-                  },
+                          );
+                          if (confirmed != true || !mounted) return;
+                          await appProvider.logoutTailscale();
+                        },
                   icon: const Icon(Symbols.logout_rounded),
                   label: Text(context.l10n.serversTailscaleLogout),
                 ),

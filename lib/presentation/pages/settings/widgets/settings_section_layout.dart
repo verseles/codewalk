@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../utils/window_size_class.dart';
 
+export 'settings_search_navigation.dart';
+
 class SettingsSectionIntro extends StatelessWidget {
   const SettingsSectionIntro({
     super.key,

@@ -259,10 +259,18 @@ typedef _DesktopUtilityPaneBuildKey = ({
   String? sessionInsightsError,
   int sessionSignature,
   int sessionStatusSignature,
-  int shortcutBindingsSignature,
   bool showReviewChanges,
   int todoSignature,
-  bool utilityShortcutsCollapsed,
+});
+
+typedef _ChatContentSettingsKey = ({
+  bool terminalVisible,
+  bool terminalMaximized,
+  double terminalHeight,
+  bool showSessionTabs,
+  AppDensity density,
+  double fontScale,
+  bool spellCheck,
 });
 
 typedef _FilePaneBuildKey = ({String? sessionId, int diffSignature});
@@ -578,9 +586,7 @@ _DesktopUtilityPaneBuildKey _desktopUtilityPaneBuildKey(
     isCurrentSessionDiffLoaded: chatProvider.isCurrentSessionDiffLoaded,
     isLoadingSessionInsights: chatProvider.isLoadingSessionInsights,
     sessionInsightsError: chatProvider.sessionInsightsError,
-    shortcutBindingsSignature: _shortcutBindingsSignature(settingsProvider),
     showReviewChanges: settingsProvider.showReviewChanges,
-    utilityShortcutsCollapsed: settingsProvider.utilityShortcutsCollapsed,
   );
 }
 

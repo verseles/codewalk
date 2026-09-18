@@ -290,7 +290,7 @@ extension _ChatPageScaffold on _ChatPageState {
                                       key: const ValueKey<String>(
                                         'sidebar_new_chat_button',
                                       ),
-                                      icon: const Icon(Symbols.add),
+                                      icon: const Icon(Symbols.add_comment),
                                       onPressed: () => unawaited(
                                         _createNewSession(
                                           closeDrawerOnCreate: closeOnSelect,
@@ -1510,54 +1510,67 @@ extension _ChatPageScaffold on _ChatPageState {
                     icon: const Icon(Symbols.right_panel_close_rounded),
                   ),
                 ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Semantics(
-                    button: true,
-                    expanded: !settingsProvider.utilityShortcutsCollapsed,
-                    label: context.l10n.sessionKeyboardShortcuts,
-                    child: InkWell(
-                      key: const ValueKey<String>('utility_shortcuts_toggle'),
-                      borderRadius: BorderRadius.circular(6),
-                      onTap: () => unawaited(
-                        settingsProvider.setUtilityShortcutsCollapsed(
-                          !settingsProvider.utilityShortcutsCollapsed,
+              DirectSelector<
+                SettingsProvider,
+                ({bool collapsed, int bindings})
+              >(
+                select: (settings) => (
+                  collapsed: settings.utilityShortcutsCollapsed,
+                  bindings: _shortcutBindingsSignature(settings),
+                ),
+                builder: (context, shortcuts, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Semantics(
+                      button: true,
+                      expanded: !shortcuts.collapsed,
+                      label: context.l10n.sessionKeyboardShortcuts,
+                      child: InkWell(
+                        key: const ValueKey<String>('utility_shortcuts_toggle'),
+                        borderRadius: BorderRadius.circular(6),
+                        onTap: () => unawaited(
+                          settingsProvider.setUtilityShortcutsCollapsed(
+                            !settingsProvider.utilityShortcutsCollapsed,
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ExcludeSemantics(
-                                child: Text(
-                                  context.l10n.sessionKeyboardShortcuts,
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w600),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ExcludeSemantics(
+                                  child: Text(
+                                    context.l10n.sessionKeyboardShortcuts,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Icon(
-                              settingsProvider.utilityShortcutsCollapsed
-                                  ? Symbols.expand_more_rounded
-                                  : Symbols.expand_less_rounded,
-                              size: 18,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ],
+                              Icon(
+                                shortcuts.collapsed
+                                    ? Symbols.expand_more_rounded
+                                    : Symbols.expand_less_rounded,
+                                size: 18,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (!settingsProvider.utilityShortcutsCollapsed) ...[
-                    const SizedBox(height: 12),
-                    for (final hint in _keyboardShortcutHints(settingsProvider))
-                      _buildShortcutHint(hint.shortcut, hint.description),
+                    if (!shortcuts.collapsed) ...[
+                      const SizedBox(height: 12),
+                      for (final hint in _keyboardShortcutHints(
+                        settingsProvider,
+                      ))
+                        _buildShortcutHint(hint.shortcut, hint.description),
+                    ],
                   ],
-                ],
+                ),
               ),
               const SizedBox(height: 12),
               FilledButton.icon(

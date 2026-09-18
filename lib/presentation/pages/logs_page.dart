@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../../core/logging/app_logger.dart';
 import '../providers/settings_provider.dart';
+import '../widgets/direct_provider.dart';
+import 'settings/widgets/settings_search_navigation.dart';
 
 enum _LogTimeRange {
   oneMinute(Duration(minutes: 1), '1m'),
@@ -44,7 +46,8 @@ String _taskStatusLabel(BuildContext context, String? status) {
 }
 
 class LogsPage extends StatefulWidget {
-  const LogsPage({super.key});
+  const LogsPage({super.key, this.searchRequest});
+  final SettingsSearchRequest? searchRequest;
 
   @override
   State<LogsPage> createState() => _LogsPageState();
@@ -304,8 +307,20 @@ class _LogsPageState extends State<LogsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final settingsProvider = context.watch<SettingsProvider>();
-    final loggingEnabled = settingsProvider.loggingEnabled;
+    return DirectSelector<SettingsProvider, ({bool logging, bool performance})>(
+      select: (settings) => (
+        logging: settings.loggingEnabled,
+        performance: settings.performanceLoggingEnabled,
+      ),
+      builder: (context, flags, _) => _buildLogs(context, flags),
+    );
+  }
+
+  Widget _buildLogs(
+    BuildContext context,
+    ({bool logging, bool performance}) flags,
+  ) {
+    final loggingEnabled = flags.logging;
     return Scaffold(
       appBar: AppBar(
         title: _searchEnabled
@@ -399,63 +414,65 @@ class _LogsPageState extends State<LogsPage> {
             children: [
               SizedBox(
                 height: toolbarMaxHeight,
-                child: SingleChildScrollView(
-                  child: _LogsToolbar(
-                    loggingEnabled: loggingEnabled,
-                    selectedRange: _timeRange,
-                    selectedLevels: _levels,
-                    selectedTags: _tags,
-                    performanceLoggingEnabled:
-                        settingsProvider.performanceLoggingEnabled,
-                    performanceFilterOnly: _performanceOnly,
-                    onRangeChanged: (value) {
-                      setState(() {
-                        _timeRange = value;
-                      });
-                    },
-                    onLevelToggled: (level) {
-                      setState(() {
-                        if (_levels.contains(level)) {
-                          if (_levels.length > 1) {
-                            _levels = Set<LogLevel>.from(_levels)
-                              ..remove(level);
+                child: SettingsSearchDestination(
+                  request: widget.searchRequest,
+                  child: SingleChildScrollView(
+                    child: _LogsToolbar(
+                      loggingEnabled: loggingEnabled,
+                      selectedRange: _timeRange,
+                      selectedLevels: _levels,
+                      selectedTags: _tags,
+                      performanceLoggingEnabled: flags.performance,
+                      performanceFilterOnly: _performanceOnly,
+                      onRangeChanged: (value) {
+                        setState(() {
+                          _timeRange = value;
+                        });
+                      },
+                      onLevelToggled: (level) {
+                        setState(() {
+                          if (_levels.contains(level)) {
+                            if (_levels.length > 1) {
+                              _levels = Set<LogLevel>.from(_levels)
+                                ..remove(level);
+                            }
+                          } else {
+                            _levels = Set<LogLevel>.from(_levels)..add(level);
                           }
-                        } else {
-                          _levels = Set<LogLevel>.from(_levels)..add(level);
-                        }
-                      });
-                    },
-                    onTagToggled: (tag) {
-                      setState(() {
-                        final next = Set<String>.from(_tags);
-                        if (next.contains(tag)) {
-                          next.remove(tag);
-                        } else {
-                          next.add(tag);
-                        }
-                        _tags = next;
-                      });
-                    },
-                    onCustomTagRequested: () => _showCustomTagDialog(context),
-                    onLoggingChanged: (enabled) {
-                      unawaited(
-                        context.read<SettingsProvider>().setLoggingEnabled(
-                          enabled,
-                        ),
-                      );
-                    },
-                    onPerformanceLoggingChanged: (enabled) {
-                      unawaited(
-                        context
-                            .read<SettingsProvider>()
-                            .setPerformanceLoggingEnabled(enabled),
-                      );
-                    },
-                    onPerformanceFilterToggled: () {
-                      setState(() {
-                        _performanceOnly = !_performanceOnly;
-                      });
-                    },
+                        });
+                      },
+                      onTagToggled: (tag) {
+                        setState(() {
+                          final next = Set<String>.from(_tags);
+                          if (next.contains(tag)) {
+                            next.remove(tag);
+                          } else {
+                            next.add(tag);
+                          }
+                          _tags = next;
+                        });
+                      },
+                      onCustomTagRequested: () => _showCustomTagDialog(context),
+                      onLoggingChanged: (enabled) {
+                        unawaited(
+                          context.read<SettingsProvider>().setLoggingEnabled(
+                            enabled,
+                          ),
+                        );
+                      },
+                      onPerformanceLoggingChanged: (enabled) {
+                        unawaited(
+                          context
+                              .read<SettingsProvider>()
+                              .setPerformanceLoggingEnabled(enabled),
+                        );
+                      },
+                      onPerformanceFilterToggled: () {
+                        setState(() {
+                          _performanceOnly = !_performanceOnly;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -561,6 +578,7 @@ class _LogsToolbar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SwitchListTile(
+            key: const ValueKey('settings_logs_enabled'),
             contentPadding: EdgeInsets.zero,
             title: Text(context.l10n.logsEnableLogging),
             subtitle: Text(context.l10n.logsEnableLoggingDescription),
@@ -569,6 +587,7 @@ class _LogsToolbar extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           SwitchListTile(
+            key: const ValueKey('settings_logs_performance'),
             contentPadding: EdgeInsets.zero,
             title: Text(context.l10n.logsMeasurePerformance),
             subtitle: Text(context.l10n.logsMeasurePerformanceDescription),
@@ -582,6 +601,7 @@ class _LogsToolbar extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Wrap(
+            key: const ValueKey('settings_logs_range'),
             spacing: 8,
             runSpacing: 8,
             children: _LogTimeRange.values
@@ -601,6 +621,7 @@ class _LogsToolbar extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Wrap(
+            key: const ValueKey('settings_logs_level'),
             spacing: 8,
             runSpacing: 8,
             children: LogLevel.values
@@ -620,6 +641,7 @@ class _LogsToolbar extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Wrap(
+            key: const ValueKey('settings_logs_tags'),
             spacing: 8,
             runSpacing: 8,
             children: [
@@ -639,6 +661,7 @@ class _LogsToolbar extends StatelessWidget {
                   onSelected: loggingEnabled ? (_) => onTagToggled(tag) : null,
                 ),
               ActionChip(
+                key: const ValueKey('settings_logs_custom_tag'),
                 avatar: const Icon(Symbols.add, size: 18),
                 label: Text(context.l10n.logsTagCustomAction),
                 onPressed: loggingEnabled ? onCustomTagRequested : null,
@@ -651,6 +674,7 @@ class _LogsToolbar extends StatelessWidget {
             runSpacing: 8,
             children: [
               FilterChip(
+                key: const ValueKey('settings_logs_filter_performance'),
                 label: Text(context.l10n.logsPerformanceFilter),
                 selected: performanceFilterOnly,
                 onSelected: loggingEnabled

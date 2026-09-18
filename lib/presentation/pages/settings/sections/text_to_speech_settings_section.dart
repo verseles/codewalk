@@ -288,7 +288,7 @@ class _TextToSpeechSettingsSectionState
             }
           });
         }
-        return ListView(
+        return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
             SettingsSectionIntro(
@@ -305,6 +305,7 @@ class _TextToSpeechSettingsSectionState
 
   Widget _buildReadAloudProviderSelector(SettingsProvider settingsProvider) {
     return DropdownButtonFormField<ReadAloudProvider>(
+      key: const ValueKey('settings_tts_provider'),
       initialValue: settingsProvider.readAloudProvider,
       decoration: InputDecoration(
         labelText: context.l10n.speechTextToSpeechProvider,
@@ -348,6 +349,7 @@ class _TextToSpeechSettingsSectionState
       return const SizedBox.shrink();
     }
     return FutureBuilder<List<Map<String, String>>>(
+      key: const ValueKey('settings_tts_voice'),
       future: di.sl<ReadAloudService>().getVoicesForProvider(
         ReadAloudProvider.native,
       ),
@@ -429,6 +431,7 @@ class _TextToSpeechSettingsSectionState
       return const SizedBox.shrink();
     }
     return FutureBuilder<List<Map<String, String>>>(
+      key: const ValueKey('settings_tts_voice'),
       future: _edgeReadAloudVoicesFuture ??= di
           .sl<ReadAloudService>()
           .getVoicesForProvider(ReadAloudProvider.edgeExperimental),
@@ -578,6 +581,7 @@ class _TextToSpeechSettingsSectionState
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
+          key: const ValueKey('settings_tts_voice'),
           initialValue: selectedVoice,
           decoration: InputDecoration(
             labelText: context.l10n.settingsReadAloudVoice,
@@ -698,6 +702,7 @@ class _TextToSpeechSettingsSectionState
           );
     }
     return FutureBuilder<List<Map<String, String>>>(
+      key: const ValueKey('settings_tts_voice'),
       future: future,
       builder: (context, snapshot) {
         final voices = snapshot.data ?? const <Map<String, String>>[];
@@ -1001,7 +1006,10 @@ class _TextToSpeechSettingsSectionState
         ),
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
-        _buildRemoteModelPicker(ReadAloudProvider.elevenLabs, settingsProvider),
+        KeyedSubtree(
+          key: const ValueKey('settings_tts_model'),
+          child: _buildRemoteModelPicker(ReadAloudProvider.elevenLabs, settingsProvider),
+        ),
         const SizedBox(height: 12),
         _buildRemoteVoicePicker(
           ReadAloudProvider.elevenLabs,
@@ -1042,7 +1050,10 @@ class _TextToSpeechSettingsSectionState
         ),
         _buildReadAloudApiKeyField(),
         const SizedBox(height: 12),
-        _buildRemoteModelPicker(ReadAloudProvider.nim, settingsProvider),
+        KeyedSubtree(
+          key: const ValueKey('settings_tts_model'),
+          child: _buildRemoteModelPicker(ReadAloudProvider.nim, settingsProvider),
+        ),
         const SizedBox(height: 12),
         _buildRemoteVoicePicker(ReadAloudProvider.nim, settingsProvider),
         const SizedBox(height: 8),
@@ -1086,6 +1097,7 @@ class _TextToSpeechSettingsSectionState
             ],
             const SizedBox(height: 8),
             SwitchListTile.adaptive(
+              key: const ValueKey('settings_tts_enabled'),
               contentPadding: EdgeInsets.zero,
               title: Text(context.l10n.settingsReadAloudEnabled),
               subtitle: Text(context.l10n.settingsReadAloudEnabledDescription),
@@ -1120,6 +1132,7 @@ class _TextToSpeechSettingsSectionState
             Align(
               alignment: Alignment.centerLeft,
               child: OutlinedButton.icon(
+                key: const ValueKey('settings_tts_test'),
                 icon: const Icon(Symbols.play_arrow),
                 label: Text(context.l10n.speechTestVoice),
                 onPressed: () =>
@@ -1135,6 +1148,7 @@ class _TextToSpeechSettingsSectionState
               ),
             ] else ...[
               ListTile(
+                key: const ValueKey('settings_tts_speed'),
                 contentPadding: EdgeInsets.zero,
                 title: Text(context.l10n.settingsReadAloudSpeed),
                 subtitle: Text(context.l10n.settingsReadAloudSpeedDescription),
@@ -1155,6 +1169,7 @@ class _TextToSpeechSettingsSectionState
             if (readAloudProvider == ReadAloudProvider.native) ...[
               const Divider(height: 1),
               ListTile(
+                key: const ValueKey('settings_tts_pitch'),
                 contentPadding: EdgeInsets.zero,
                 title: Text(context.l10n.settingsReadAloudPitch),
                 subtitle: Text(context.l10n.settingsReadAloudPitchDescription),

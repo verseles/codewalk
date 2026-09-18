@@ -449,6 +449,9 @@ class _TerminalHeaderIconButtonState extends State<_TerminalHeaderIconButton> {
       );
       widget.onPressed();
     });
+    // A cancelled IME tap can arrive while idle; post-frame work alone
+    // does not request the frame needed to deliver the recovery.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   void _clearPointerTracking() {
