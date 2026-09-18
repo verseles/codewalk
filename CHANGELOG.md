@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.245.0 - 2026-09-18
+
+- docs(settings): describe direct option search with exact control reveal
+- fix(review): order servers reveal and avoid build-time controller clear
+- fix(ui): refresh terminal and settings controls and add direct option search
+- docs(readme): highlight HTML replies with collapsible tag reference
+
 ## v1.244.0 - 2026-09-18
 
 - docs(chat): describe basic HTML replies and native progress bars
