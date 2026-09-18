@@ -7,6 +7,8 @@
 
 A native (really fast!!) cross-platform client for [OpenCode](https://github.com/anomalyco/opencode) server mode. Built with Flutter, it provides a conversational interface for session-based AI coding interactions over HTTP APIs and streaming events.
 
+> 🏷️ **New in v1.244.0:** Assistant replies now render basic HTML formatting and native progress bars. [See supported tags and examples](#basic-html-in-assistant-replies).
+
 > 📰 **New:** CodeWalk now runs right in your browser — open https://codewalk.verseles.com, add your OpenCode server profile, and start chatting. No install needed.
 >
 > Your OpenCode server must allow the web origin, otherwise the browser blocks the connection:
@@ -35,7 +37,7 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 - 🔊 Text-to-speech read-aloud for assistant messages, with adjustable speed and pitch
 - 📊 Host quota monitoring for Claude, OpenRouter, Codex/OpenAI, Gemini, GitHub Copilot, OpenCode Go, NanoGPT, Wafer, Kimi, ZhipuAI, MiniMax, z.ai, Cursor, and Ollama Cloud
 - 📈 Mermaid diagrams and LaTeX math rendered inline, straight from the conversation
-- 🏷️ Basic HTML in assistant replies — bold, italic, underline, line breaks, subscript/superscript, and native `<progress>` bars that follow the app theme
+- 🏷️ [Basic HTML in assistant replies](#basic-html-in-assistant-replies) — bold, italic, underline, line breaks, subscript/superscript, and native `<progress>` bars that follow the app theme
 - 📤 Share any message as a themed image, or export a whole session as Markdown or JSON
 - ↩️ Revert to any earlier turn, with your draft restored
 - 💬 Canned answers with global or per-project scope
@@ -44,6 +46,29 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 - 🔔 Interactive permission and question prompts, with notifications that clear themselves when the answer arrives
 - 🔄 In-app updates with auto-check and direct install
 - 📱 Responsive Material 3 across Linux, Windows, macOS, Web, and Android, with five density tiers
+
+## Basic HTML in Assistant Replies
+
+<details>
+<summary>Supported tags and examples</summary>
+
+Assistant replies can mix these case-insensitive HTML tags with Markdown. Formatting and progress bars follow the app theme on mobile and desktop.
+
+| Tag | Effect | Example |
+| --- | --- | --- |
+| `<b>` | Bold | `<b>Important</b>` |
+| `<i>` | Italic | `<i>Note</i>` |
+| `<u>` | Underline | `<u>Highlighted</u>` |
+| `<br>` | Line break; `<br/>` and `<br />` also work | `First line<br>Second line` |
+| `<sub>` | Subscript | `H<sub>2</sub>O` |
+| `<sup>` | Superscript | `x<sup>2</sup>` |
+| `<progress>` | Native progress bar | `<progress value="25" max="100">Loading</progress>` |
+
+Formatting tags can nest, for example `<b><i>Bold and italic</i></b>`. Progress defaults to `max="1"`; omit `value` for an indeterminate bar, such as `<progress></progress>`. Explicitly self-closing progress tags also work.
+
+Tags inside code examples stay literal, and copying the whole message preserves its source markup. Underline/subscript/superscript decoration is omitted in Markdown link labels to keep links clickable. Support is limited to the tags above; arbitrary HTML and CSS are not rendered.
+
+</details>
 
 ## Install in One Command
 
