@@ -83,6 +83,40 @@ void main() {
     expect(nodes.where((e) => e.tag == 'strong'), hasLength(1));
   });
 
+  testWidgets('rejected table headers keep supported tag content visible', (
+    tester,
+  ) async {
+    await tester.pumpWidget(body('<b>\n--- | ---\nrest'));
+    expect(
+      spans(tester).map((span) => span.text ?? '').join(),
+      contains('rest'),
+    );
+    expect(
+      spans(tester).map((span) => span.text ?? '').join(),
+      contains('<b>'),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final source in [
+    '<b>Loading <progress value=".5"></progress></b>',
+    '<u><progress value=".5" /></u>',
+    '<sup><progress value=".5" /></sup>',
+  ]) {
+    testWidgets('nested progress renders: $source', (tester) async {
+      await tester.pumpWidget(body(source));
+      expect(
+        tester
+            .widget<LinearProgressIndicator>(
+              find.byType(LinearProgressIndicator),
+            )
+            .value,
+        .5,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   test('opaque Markdown regions cannot close HTML wrappers', () {
     for (final inner in [
       '<!-- </b> -->',

@@ -22,8 +22,19 @@ class BasicHtmlBlockSyntax extends md.ParagraphSyntax {
 
   @override
   bool canParse(md.BlockParser parser) =>
-      _start.hasMatch(parser.current.content) &&
-      !const md.TableSyntax().canParse(parser);
+      _start.hasMatch(parser.current.content);
+
+  @override
+  md.Node? parse(md.BlockParser parser) {
+    const table = md.TableSyntax();
+    if (table.canParse(parser)) {
+      final result = table.parse(parser);
+      if (result != null) return result;
+      // A delimiter alone is only a hint. A rejected table restores its cursor;
+      // keep the paragraph fallback here so HtmlBlockSyntax cannot hide it.
+    }
+    return super.parse(parser);
+  }
 }
 
 /// A bounded, presentation-only subset of HTML; source text is never rewritten.
@@ -153,10 +164,8 @@ List<md.Node> _inlineHtmlMath(List<md.Node> nodes) => nodes.map((node) {
       return math;
     }
     if (node.children != null) {
-      final children = _inlineHtmlMath(node.children!);
-      node.children!
-        ..clear()
-        ..addAll(children);
+      return md.Element(node.tag, _inlineHtmlMath(node.children!))
+        ..attributes.addAll(node.attributes);
     }
   }
   return node;

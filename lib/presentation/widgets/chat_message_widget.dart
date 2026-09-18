@@ -443,9 +443,7 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
       h6: Theme.of(
         context,
       ).textTheme.labelLarge?.copyWith(color: themeTokens.markdownHeading),
-      a: Theme.of(
-        context,
-      ).textTheme.bodyMedium?.copyWith(color: themeTokens.markdownLink),
+      a: TextStyle(color: themeTokens.markdownLink),
       code: Theme.of(context).textTheme.bodyMedium?.copyWith(
         fontFamily: 'monospace',
         color: themeTokens.markdownInlineCode,

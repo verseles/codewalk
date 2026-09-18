@@ -87,7 +87,9 @@ void main() {
   });
 
   testWidgets('production HTML bold and italic styles compose', (tester) async {
-    await tester.pumpWidget(app(message('<b><i>styled</i></b>')));
+    await tester.pumpWidget(
+      app(message('<b><i>[styled](https://example.com)</i></b>')),
+    );
     TextSpan? findSpan(InlineSpan span) {
       if (span is! TextSpan) return null;
       if (span.text == 'styled') return span;
