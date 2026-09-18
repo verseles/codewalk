@@ -1121,6 +1121,28 @@
 - **Given** the user re-enables `Math rendering`
 - **Then** math expressions in all messages are rendered as typeset equations on next rebuild
 
+### Basic HTML in assistant replies renders natively
+
+- **Given** an assistant text part contains case-insensitive `<b>`, `<i>`, `<u>`, `<br>`, `<sub>`, or `<sup>` tags
+- **When** the message uses rich Markdown rendering
+- **Then** complete paired formatting tags render bold, italic, underline, or lowered/raised smaller text; `<br>`, `<br/>`, and `<br />` render line breaks
+- **Then** nested text formatting composes with Markdown and follows the active theme; Markdown tables whose headers start with supported HTML still render as tables
+- **Then** tags inside inline/fenced/indented code or escaped/encoded tags remain literal; incomplete pairs remain visible as source during streaming, and completion renders the final text immediately
+- **Then** user messages, search-highlight rendering, and oversized-message plain-text fallbacks retain their existing behavior
+- **Then** supported HTML is presentation-only: it does not change server data or the existing whole-message copy/export source; arbitrary HTML, CSS, and event handlers are not interpreted
+- **Then** underline/subscript/superscript leave links, code, file paths, and math widgets opaque; these decorations are also omitted inside Markdown link labels to preserve link taps
+- **Then** math parsed inside supported HTML uses a private inline-compatible builder, preserving math rendering under surrounding Markdown emphasis without changing the global math path
+
+### HTML progress indicators use the app theme and motion policy
+
+- **Given** an assistant reply contains `<progress value="25" max="100">Loading</progress>` or an explicitly self-closing `<progress value="25" max="100" />`
+- **Then** the app renders a native determinate bar at 25%, constrained to its available width and using the active theme colors
+- **Given** the `value` attribute is absent
+- **Then** the indicator uses the shared app indeterminate bar, including bounded desktop animation and reduced-motion behavior
+- **Then** missing, invalid, or nonpositive `max` defaults to 1; a present invalid or negative `value` becomes zero, and values above the maximum clamp to full progress
+- **Then** numeric prefixes and finite exponent values are accepted; duplicate attributes use the first occurrence, and non-finite numbers use the invalid-value fallback
+- **Then** `aria-label`, or otherwise inner fallback text, supplies an optional accessibility label; that fallback text is not duplicated beside the bar
+
 ### Tool call work groups collapse after completion
 
 - **Given** the assistant executes tool calls during a response (file reads, commands, etc.)

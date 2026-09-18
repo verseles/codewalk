@@ -35,6 +35,7 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 - 🔊 Text-to-speech read-aloud for assistant messages, with adjustable speed and pitch
 - 📊 Host quota monitoring for Claude, OpenRouter, Codex/OpenAI, Gemini, GitHub Copilot, OpenCode Go, NanoGPT, Wafer, Kimi, ZhipuAI, MiniMax, z.ai, Cursor, and Ollama Cloud
 - 📈 Mermaid diagrams and LaTeX math rendered inline, straight from the conversation
+- 🏷️ Basic HTML in assistant replies — bold, italic, underline, line breaks, subscript/superscript, and native `<progress>` bars that follow the app theme
 - 📤 Share any message as a themed image, or export a whole session as Markdown or JSON
 - ↩️ Revert to any earlier turn, with your draft restored
 - 💬 Canned answers with global or per-project scope
