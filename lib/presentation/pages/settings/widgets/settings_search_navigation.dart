@@ -173,9 +173,10 @@ class _SettingsSearchDestinationState extends State<SettingsSearchDestination> {
             _deadline?.cancel();
             _handled = widget.request?.serial;
           }
-          if (_highlight != null &&
-              (notification is ScrollUpdateNotification ||
-                  notification is ScrollStartNotification)) {
+          final isUserDrag =
+              notification is ScrollStartNotification &&
+              notification.dragDetails != null;
+          if (_highlight != null && isUserDrag) {
             // Notifications arrive after layout; clear on the next frame.
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted && _highlight != null) {

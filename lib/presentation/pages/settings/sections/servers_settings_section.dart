@@ -71,7 +71,6 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
   Widget build(BuildContext context) {
     return DirectConsumer<AppProvider>(
       builder: (context, appProvider, _) {
-        SettingsSearchDestination.contentReady(context);
         final request = SettingsSearchDestination.requestOf(context);
         if (request != null && request.serial != _lastSearchSerial) {
           _lastSearchSerial = request.serial;
@@ -80,6 +79,8 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
             if (_scrollController.hasClients) _scrollController.jumpTo(0);
             SettingsSearchDestination.contentReady(context);
           });
+        } else {
+          SettingsSearchDestination.contentReady(context);
         }
         final profiles = appProvider.serverProfiles;
         if (_loading && profiles.isEmpty) {

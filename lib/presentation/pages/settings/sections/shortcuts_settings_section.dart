@@ -36,11 +36,21 @@ class _ShortcutsSettingsSectionState extends State<ShortcutsSettingsSection> {
     return DirectConsumer<SettingsProvider>(
       builder: (context, settingsProvider, _) {
         final request = SettingsSearchDestination.requestOf(context);
-        if (request != null && request.serial != _lastRevealSerial) {
+        final isNewReveal =
+            request != null && request.serial != _lastRevealSerial;
+        if (isNewReveal) {
           _lastRevealSerial = request.serial;
-          _searchController.clear();
+          if (_searchController.text.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() => _searchController.clear());
+              }
+            });
+          }
         }
-        final query = _searchController.text.trim().toLowerCase();
+        final query = isNewReveal
+            ? ''
+            : _searchController.text.trim().toLowerCase();
         final visibleDefinitions = shortcutDefinitionsForRuntime(
           isWeb: kIsWeb,
           targetPlatform: defaultTargetPlatform,
