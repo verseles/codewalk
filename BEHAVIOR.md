@@ -1985,8 +1985,9 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** the user opens the `Settings` landing (master list, also rendered as the rail in split layouts)
 - **When** the user types in the destination search field
-- **Then** CodeWalk filters destinations locally by matching the localized title, description, or group label
-- **Then** while the query is non-empty, quick actions (setup wizard and replay chat tour) are hidden and only matching destinations are listed
+- **Then** CodeWalk filters destinations locally by matching the localized title, description, or group label, and also lists matching localized option controls (for example `AMOLED dark mode` under Appearance)
+- **Then** selecting an option result opens its owning section, scrolls to the exact control, and highlights it; unavailable controls report they are unavailable instead of navigating
+- **Then** while the query is non-empty, quick actions (setup wizard and replay chat tour) are hidden and only matching destinations and options are listed
 - **Then** when nothing matches, a localized empty state is shown
 - **Then** on desktop, filtering the rail does not change the currently open detail section
 - **Then** on mobile, opening a detail screen and going back preserves the query within the page
