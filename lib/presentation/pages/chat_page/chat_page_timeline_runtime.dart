@@ -654,24 +654,42 @@ extension _ChatPageTimelineRuntime on _ChatPageState {
     ChatProvider chatProvider,
   ) {
     final messages = chatProvider.messages;
-    final lastId = messages.isNotEmpty ? messages.last.id : null;
+    final lastMessage = messages.isNotEmpty ? messages.last : null;
+    final lastId = lastMessage?.id;
+    final lastCompleted =
+        lastMessage is AssistantMessage && lastMessage.isCompleted;
+    final lastPartsLength = lastMessage is AssistantMessage
+        ? lastMessage.parts.length
+        : -1;
+    final statusType = chatProvider.currentSessionStatus?.type;
     final isResponding = chatProvider.isCurrentSessionActivelyResponding;
+    final messagesVersion = chatProvider.messagesVersion;
 
-    // Cache: skip O(N) scan when messages and responding state haven't changed.
+    // Cache: skip O(N) scan when cheap scalars haven't changed. In-place
+    // completion (same id/length while parts/completion/status settle)
+    // must invalidate, or a stale thinking stage sticks until navigation.
     if (_cachedProgressStageComputed &&
         messages.length == _cachedProgressStageMsgCount &&
         lastId == _cachedProgressStageLastMsgId &&
-        isResponding == _cachedProgressStageResponding) {
+        isResponding == _cachedProgressStageResponding &&
+        messagesVersion == _cachedProgressStageMessagesVersion &&
+        statusType == _cachedProgressStageStatusType &&
+        lastCompleted == _cachedProgressStageLastCompleted &&
+        lastPartsLength == _cachedProgressStageLastPartsLength) {
       return _cachedProgressStageResult;
     }
 
-    final statusType = chatProvider.currentSessionStatus?.type;
     final hasStreamingAssistantParts = messages
         .whereType<AssistantMessage>()
         .any((message) => !message.isCompleted && message.parts.isNotEmpty);
 
+    final currentSessionId = chatProvider.currentSession?.id;
+    final isSettled =
+        currentSessionId != null &&
+        isLatestTailSettledRevealable(messages, currentSessionId);
+
     _AssistantProgressStage? result;
-    if (!isResponding) {
+    if (!isResponding || isSettled) {
       result = null;
     } else if (statusType == SessionStatusType.retry) {
       result = _AssistantProgressStage.retrying;
@@ -684,6 +702,10 @@ extension _ChatPageTimelineRuntime on _ChatPageState {
     _cachedProgressStageMsgCount = messages.length;
     _cachedProgressStageLastMsgId = lastId;
     _cachedProgressStageResponding = isResponding;
+    _cachedProgressStageMessagesVersion = messagesVersion;
+    _cachedProgressStageStatusType = statusType;
+    _cachedProgressStageLastCompleted = lastCompleted;
+    _cachedProgressStageLastPartsLength = lastPartsLength;
     _cachedProgressStageResult = result;
     _cachedProgressStageComputed = true;
     return result;

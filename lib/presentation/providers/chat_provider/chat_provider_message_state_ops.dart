@@ -733,6 +733,7 @@ extension _ChatProviderMessageStateOps on ChatProvider {
     }
 
     final index = _messages.indexWhere((m) => m.id == message.id);
+    var becameCompletedAssistant = false;
     if (index != -1) {
       // Monotonic completion guard (ADR-023): once an AssistantMessage has
       // been marked completed (by session.idle →
@@ -767,6 +768,11 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       }
       _messages[index] = replacement;
       _messagesVersion++;
+      becameCompletedAssistant =
+          existing is AssistantMessage &&
+          !existing.isCompleted &&
+          replacement is AssistantMessage &&
+          replacement.isCompleted;
       if (message is UserMessage) {
         _pendingLocalUserMessageIds.remove(message.id);
       }
@@ -790,6 +796,8 @@ extension _ChatProviderMessageStateOps on ChatProvider {
         _messages.add(message);
       }
       _messagesVersion++;
+      becameCompletedAssistant =
+          message is AssistantMessage && message.isCompleted;
       AppLogger.debug('Added new message: ${message.id}, role=${message.role}');
     }
 
@@ -821,9 +829,14 @@ extension _ChatProviderMessageStateOps on ChatProvider {
 
     // Issue #176: authoritative assistant updates can arrive at streaming
     // frequency; batch them. User messages stay immediate (composer/send
-    // latency is user-facing).
+    // latency is user-facing). Terminal completion flushes immediately
+    // (microtask-coalesced with any pending batch) so the settled frame
+    // never waits for the batch window.
     if (message is UserMessage) {
       _notifyListeners();
+    } else if (becameCompletedAssistant) {
+      _flushDeltaNotification(reason: 'event-message-completed');
+      _notifyListeners(reason: 'event-message-completed');
     } else {
       _scheduleRealtimeNotification(reason: 'event-message-updated');
     }

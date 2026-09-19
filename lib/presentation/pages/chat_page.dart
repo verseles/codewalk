@@ -69,6 +69,7 @@ import '../theme/opencode_highlight_theme.dart';
 import '../theme/opencode_theme_presets.dart';
 import '../utils/app_page_route.dart';
 import '../utils/chat_abort_message.dart';
+import '../utils/chat_assistant_settlement.dart';
 import '../utils/chat_server_error_formatter.dart';
 import '../utils/duplicate_file_name.dart';
 import '../utils/file_highlight_language.dart';
@@ -698,9 +699,16 @@ class _ChatPageState extends State<ChatPage>
   bool _cachedReasoningKeyComputed = false;
 
   // Cache for _resolveAssistantProgressStage (O(N) scan for streaming parts).
+  // The key must include cheap scalars that change on in-place completion
+  // (same id/length while parts/completion/status settle); otherwise a
+  // stale thinking/receiving stage survives until navigation drops the page.
   int _cachedProgressStageMsgCount = -1;
   String? _cachedProgressStageLastMsgId;
   bool _cachedProgressStageResponding = false;
+  int _cachedProgressStageMessagesVersion = -1;
+  SessionStatusType? _cachedProgressStageStatusType;
+  bool _cachedProgressStageLastCompleted = false;
+  int _cachedProgressStageLastPartsLength = -1;
   _AssistantProgressStage? _cachedProgressStageResult;
   bool _cachedProgressStageComputed = false;
 

@@ -251,6 +251,9 @@ class ChatProvider extends ChangeNotifier {
   bool get debugHasRealtimeEventSubscription => _eventSubscription != null;
 
   @visibleForTesting
+  bool get debugHasPendingDeltaNotify => _deltaNotifyPending;
+
+  @visibleForTesting
   bool get debugHasGlobalEventSubscription => _globalEventSubscription != null;
 
   @visibleForTesting
@@ -5166,6 +5169,10 @@ class ChatProvider extends ChangeNotifier {
                 }
                 // Stream finished draining — finalize any incomplete messages
                 // that were deferred by the event reducer preserved-stream guard.
+                // Flush first so a pending batch cannot paint after settlement.
+                _flushDeltaNotification(
+                  reason: 'send-stream-ondone-stale-flush',
+                );
                 _markIncompleteAssistantMessagesAsCompleted(
                   sessionId: streamSessionId,
                 );
@@ -5210,6 +5217,11 @@ class ChatProvider extends ChangeNotifier {
                   streamSessionId;
               if (preserveBusyStatusOnDone) {
                 _preserveBusyStatusOnNextStreamDoneSessionId = null;
+                // Flush-only: deliver the terminal frame without synthesizing
+                // idle/completion on the preserved-busy path.
+                _flushDeltaNotification(
+                  reason: 'send-stream-ondone-preserve-busy-flush',
+                );
                 if (_currentSession?.id == streamSessionId) {
                   _setState(ChatState.loaded);
                 } else {

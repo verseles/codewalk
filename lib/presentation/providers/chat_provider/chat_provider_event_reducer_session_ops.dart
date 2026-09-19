@@ -259,7 +259,20 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
           if (isVisibleCurrentSession) {
             _clearSessionAttentionForSession(sessionId);
           }
-          _scheduleRealtimeNotification(reason: 'event-session.status');
+          // Terminal idle on the current session must flush immediately
+          // instead of waiting for the batch window; otherwise the settled
+          // frame only appears after navigation. Never mark messages
+          // completed here: transient idle pulses must not stamp
+          // completedTime (flush-only).
+          if (isCurrentSession &&
+              status.type == SessionStatusType.idle &&
+              (previousStatusType == SessionStatusType.busy ||
+                  previousStatusType == SessionStatusType.retry)) {
+            _flushDeltaNotification(reason: 'event-session.status.idle');
+            _notifyListeners(reason: 'event-session.status.idle');
+          } else {
+            _scheduleRealtimeNotification(reason: 'event-session.status');
+          }
           if (!isNonCurrent || _pendingRemoteSelectionSync) {
             _attemptPendingRemoteSelectionSync(reason: 'event-session.status');
           }

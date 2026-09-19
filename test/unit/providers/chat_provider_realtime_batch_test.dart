@@ -4,6 +4,7 @@ library;
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
@@ -124,6 +125,78 @@ void main() {
       await pumpEventQueue();
 
       expect(provider.sessionStatusById['ses_1']?.type.name, 'idle');
+    });
+
+    test('session.status idle flushes the pending batch immediately', () async {
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      try {
+        await provider.projectProvider.initializeProject();
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(
+          provider.sessions.firstWhere((session) => session.id == 'ses_1'),
+        );
+        await provider.refresh();
+        await settleUntil(
+          () => provider.debugHasRealtimeEventSubscription,
+          reason: 'Expected realtime subscription before status flush.',
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        // Arm a pending batch, then end the turn via session.status idle
+        // (no session.idle): the terminal frame must flush immediately
+        // instead of waiting for the 120ms desktop batch window.
+        for (var index = 0; index < 3; index += 1) {
+          chatRepository.emitEvent(
+            ChatEvent(
+              type: 'todo.updated',
+              properties: <String, dynamic>{
+                'sessionID': 'ses_1',
+                'todos': <Map<String, dynamic>>[
+                  <String, dynamic>{
+                    'id': 'todo_flush_$index',
+                    'content': 'content_$index',
+                    'status': 'pending',
+                    'priority': 'medium',
+                  },
+                ],
+              },
+            ),
+          );
+        }
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'busy'},
+            },
+          ),
+        );
+        await pumpEventQueue();
+        await pumpEventQueue();
+        expect(provider.debugHasPendingDeltaNotify, isTrue);
+
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'idle'},
+            },
+          ),
+        );
+
+        // No batch-window wait: terminal idle must already be delivered.
+        await pumpEventQueue();
+        await pumpEventQueue();
+
+        expect(provider.sessionStatusById['ses_1']?.type.name, 'idle');
+        expect(provider.debugHasPendingDeltaNotify, isFalse);
+      } finally {
+        debugDefaultTargetPlatformOverride = previousPlatform;
+      }
     });
   });
 }

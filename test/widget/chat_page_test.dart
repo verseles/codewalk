@@ -21589,6 +21589,122 @@ void main() {
   );
 
   testWidgets(
+    'settles composer status without waiting for the desktop batch window',
+    (WidgetTester tester) async {
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      try {
+        final repository = FakeChatRepository(
+          sessions: <ChatSession>[
+            ChatSession(
+              id: 'ses_flush',
+              workspaceId: 'default',
+              time: DateTime.fromMillisecondsSinceEpoch(1000),
+              title: 'Flush Session',
+            ),
+          ],
+        );
+        repository.messagesBySession['ses_flush'] = <ChatMessage>[
+          AssistantMessage(
+            id: 'msg_assistant_flush',
+            sessionId: 'ses_flush',
+            time: DateTime.fromMillisecondsSinceEpoch(2000),
+            parts: const <MessagePart>[
+              ReasoningPart(
+                id: 'part_assistant_flush',
+                messageId: 'msg_assistant_flush',
+                sessionId: 'ses_flush',
+                text: '**Working**\nloading nodes...',
+              ),
+            ],
+          ),
+        ];
+
+        final localDataSource = InMemoryAppLocalDataSource()
+          ..activeServerId = 'srv_test';
+        final provider = _buildChatProvider(
+          chatRepository: repository,
+          localDataSource: localDataSource,
+        );
+        final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+        await tester.pumpWidget(_testApp(provider, appProvider));
+        await tester.pumpAndSettle();
+
+        await provider.loadSessions();
+        await provider.selectSession(provider.sessions.first);
+        await provider.initializeProviders();
+        await tester.pumpAndSettle();
+
+        // Progress line visible for the incomplete assistant, with no
+        // session.idle, no send stream and no navigation involved.
+        expect(
+          find.byKey(const ValueKey<String>('composer_reasoning_status_line')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(
+            const ValueKey<String>(
+              'composer_reasoning_status_type_dynamicReasoning',
+            ),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Working'), findsOneWidget);
+
+        // Terminal update arrives via SSE message.updated (fallback fetch),
+        // completing the same assistant id in place.
+        repository.messagesBySession['ses_flush'] = <ChatMessage>[
+          AssistantMessage(
+            id: 'msg_assistant_flush',
+            sessionId: 'ses_flush',
+            time: DateTime.fromMillisecondsSinceEpoch(2000),
+            completedTime: DateTime.fromMillisecondsSinceEpoch(2300),
+            parts: const <MessagePart>[
+              TextPart(
+                id: 'part_assistant_flush_final',
+                messageId: 'msg_assistant_flush',
+                sessionId: 'ses_flush',
+                text: 'done',
+              ),
+            ],
+          ),
+        ];
+        repository.emitEvent(
+          const ChatEvent(
+            type: 'message.updated',
+            properties: <String, dynamic>{
+              'info': <String, dynamic>{
+                'id': 'msg_assistant_flush',
+                'sessionID': 'ses_flush',
+              },
+            },
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        // The existing hide delay still applies; the terminal frame must
+        // already be delivered so one hide window clears the line.
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump();
+
+        expect(find.text('done'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey<String>('composer_reasoning_status_line')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey<String>('composer_reasoning_status_slot')),
+          findsOneWidget,
+        );
+      } finally {
+        debugDefaultTargetPlatformOverride = previousPlatform;
+      }
+    },
+  );
+
+  testWidgets(
     'keeps composer status and stop hidden for background-only sync status',
     (WidgetTester tester) async {
       final repository = FakeChatRepository(

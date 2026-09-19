@@ -105,6 +105,14 @@ extension _ChatPageComposerStatus on _ChatPageState {
     final latestMessage = chatProvider.messages.isEmpty
         ? null
         : chatProvider.messages.last;
+    final currentSessionId = chatProvider.currentSession?.id;
+    if (currentSessionId != null &&
+        isLatestTailSettledRevealable(
+          chatProvider.messages,
+          currentSessionId,
+        )) {
+      return null;
+    }
     if (latestMessage is AssistantMessage && latestMessage.isCompleted) {
       return null;
     }

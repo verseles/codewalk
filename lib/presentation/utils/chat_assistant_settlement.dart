@@ -17,6 +17,30 @@ bool hasRevealableAssistantContent(AssistantMessage message) {
   );
 }
 
+/// Returns true when the latest message tail of [sessionId] is a completed
+/// assistant message with revealable content.
+///
+/// Unlike [hasCompletedRevealableAssistantMessage] — which walks past
+/// completed tool-only tails to find earlier text — this predicate looks
+/// only at the latest tail: a later completed tool-only step, an
+/// incomplete assistant, or a newer user message keeps progress visible.
+/// Used by the composer/progress gating so a settled final answer clears
+/// "raciocinando..." even when a stale busy/retry status lingers, while
+/// genuine tool-only busy turns keep showing progress.
+bool isLatestTailSettledRevealable(
+  List<ChatMessage> messages,
+  String sessionId,
+) {
+  for (var i = messages.length - 1; i >= 0; i--) {
+    final message = messages[i];
+    if (message.sessionId != sessionId) continue;
+    if (message is UserMessage) return false;
+    if (message is! AssistantMessage) continue;
+    return message.isCompleted && hasRevealableAssistantContent(message);
+  }
+  return false;
+}
+
 /// Determines whether a list of messages for a given session has a settled,
 /// revealable completed assistant response, meaning the assistant has produced
 /// final text/reasoning content, not just tool-only work parts.
