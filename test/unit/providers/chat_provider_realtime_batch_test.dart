@@ -129,25 +129,25 @@ void main() {
     });
 
     test('session.status idle flushes the pending batch immediately', () async {
+      await provider.projectProvider.initializeProject();
+      await provider.initializeProviders();
+      await provider.loadSessions();
+      await provider.selectSession(
+        provider.sessions.firstWhere((session) => session.id == 'ses_1'),
+      );
+      await provider.refresh();
+      await settleUntil(
+        () => provider.debugHasRealtimeEventSubscription,
+        reason: 'Expected realtime subscription before status flush.',
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Arm a pending batch under the linux 120ms window, then end the
+      // turn via session.status idle (no session.idle): the terminal
+      // frame must flush immediately instead of waiting for the window.
       final previousPlatform = debugDefaultTargetPlatformOverride;
       debugDefaultTargetPlatformOverride = TargetPlatform.linux;
       try {
-        await provider.projectProvider.initializeProject();
-        await provider.initializeProviders();
-        await provider.loadSessions();
-        await provider.selectSession(
-          provider.sessions.firstWhere((session) => session.id == 'ses_1'),
-        );
-        await provider.refresh();
-        await settleUntil(
-          () => provider.debugHasRealtimeEventSubscription,
-          reason: 'Expected realtime subscription before status flush.',
-        );
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-
-        // Arm a pending batch, then end the turn via session.status idle
-        // (no session.idle): the terminal frame must flush immediately
-        // instead of waiting for the 120ms desktop batch window.
         for (var index = 0; index < 3; index += 1) {
           chatRepository.emitEvent(
             ChatEvent(
@@ -193,8 +193,8 @@ void main() {
         await pumpEventQueue();
         await pumpEventQueue();
 
-      expect(provider.sessionStatusById['ses_1']?.type.name, 'idle');
-      expect(provider.debugHasPendingDeltaNotify, isFalse);
+        expect(provider.sessionStatusById['ses_1']?.type.name, 'idle');
+        expect(provider.debugHasPendingDeltaNotify, isFalse);
       } finally {
         debugDefaultTargetPlatformOverride = previousPlatform;
       }
@@ -216,53 +216,61 @@ void main() {
 
       // A NEW completed tool-only step must not flush: busy tool chains
       // keep #176 coalescing; only revealable completion is terminal.
-      chatRepository.messagesBySession['ses_1'] = <ChatMessage>[
-        AssistantMessage(
-          id: 'msg_tool_step',
-          sessionId: 'ses_1',
-          time: DateTime.fromMillisecondsSinceEpoch(2000),
-          completedTime: DateTime.fromMillisecondsSinceEpoch(2100),
-          parts: <MessagePart>[
-            ToolPart(
-              id: 'part_tool_step',
-              messageId: 'msg_tool_step',
-              sessionId: 'ses_1',
-              callId: 'call_tool_step',
-              tool: 'bash',
-              state: ToolStateCompleted(
-                input: const <String, dynamic>{'command': 'pwd'},
-                output: '/tmp/project',
-                time: ToolTime(
-                  start: DateTime.fromMillisecondsSinceEpoch(2000),
-                  end: DateTime.fromMillisecondsSinceEpoch(2050),
+      // NOTE: inherently timing-sensitive (asserts the 120ms batch is
+      // still pending); the linux window keeps it robust on CI.
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      try {
+        chatRepository.messagesBySession['ses_1'] = <ChatMessage>[
+          AssistantMessage(
+            id: 'msg_tool_step',
+            sessionId: 'ses_1',
+            time: DateTime.fromMillisecondsSinceEpoch(2000),
+            completedTime: DateTime.fromMillisecondsSinceEpoch(2100),
+            parts: <MessagePart>[
+              ToolPart(
+                id: 'part_tool_step',
+                messageId: 'msg_tool_step',
+                sessionId: 'ses_1',
+                callId: 'call_tool_step',
+                tool: 'bash',
+                state: ToolStateCompleted(
+                  input: const <String, dynamic>{'command': 'pwd'},
+                  output: '/tmp/project',
+                  time: ToolTime(
+                    start: DateTime.fromMillisecondsSinceEpoch(2000),
+                    end: DateTime.fromMillisecondsSinceEpoch(2050),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ];
-      chatRepository.emitEvent(
-        const ChatEvent(
-          type: 'message.updated',
-          properties: <String, dynamic>{
-            'info': <String, dynamic>{
-              'id': 'msg_tool_step',
-              'sessionID': 'ses_1',
+            ],
+          ),
+        ];
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'message.updated',
+            properties: <String, dynamic>{
+              'info': <String, dynamic>{
+                'id': 'msg_tool_step',
+                'sessionID': 'ses_1',
+              },
             },
-          },
-        ),
-      );
+          ),
+        );
 
-      await pumpEventQueue();
-      await pumpEventQueue();
+        await pumpEventQueue();
+        await pumpEventQueue();
 
-      expect(
-        provider.messages
-            .whereType<AssistantMessage>()
-            .any((message) => message.id == 'msg_tool_step'),
-        isTrue,
-      );
-      expect(provider.debugHasPendingDeltaNotify, isTrue);
+        expect(
+          provider.messages
+              .whereType<AssistantMessage>()
+              .any((message) => message.id == 'msg_tool_step'),
+          isTrue,
+        );
+        expect(provider.debugHasPendingDeltaNotify, isTrue);
+      } finally {
+        debugDefaultTargetPlatformOverride = previousPlatform;
+      }
     });
   });
 }
