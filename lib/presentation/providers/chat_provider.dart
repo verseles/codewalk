@@ -5169,10 +5169,16 @@ class ChatProvider extends ChangeNotifier {
                 }
                 // Stream finished draining — finalize any incomplete messages
                 // that were deferred by the event reducer preserved-stream guard.
-                // Flush first so a pending batch cannot paint after settlement.
-                _flushDeltaNotification(
-                  reason: 'send-stream-ondone-stale-flush',
-                );
+                // Flush first so a pending batch cannot paint after settlement,
+                // unless a newer stream already owns the subscription.
+                final hasNewerStream =
+                    !identical(_messageSubscription, sendSubscription) &&
+                    _messageSubscription != null;
+                if (!hasNewerStream) {
+                  _flushDeltaNotification(
+                    reason: 'send-stream-ondone-stale-flush',
+                  );
+                }
                 _markIncompleteAssistantMessagesAsCompleted(
                   sessionId: streamSessionId,
                 );

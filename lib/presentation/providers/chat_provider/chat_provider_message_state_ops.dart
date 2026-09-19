@@ -768,11 +768,14 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       }
       _messages[index] = replacement;
       _messagesVersion++;
+      // Terminal flush only for revealable completion: completed tool-only
+      // step chunks stay batched so busy tool chains keep #176 coalescing.
       becameCompletedAssistant =
           existing is AssistantMessage &&
           !existing.isCompleted &&
           replacement is AssistantMessage &&
-          replacement.isCompleted;
+          replacement.isCompleted &&
+          hasRevealableAssistantContent(replacement);
       if (message is UserMessage) {
         _pendingLocalUserMessageIds.remove(message.id);
       }
@@ -797,7 +800,9 @@ extension _ChatProviderMessageStateOps on ChatProvider {
       }
       _messagesVersion++;
       becameCompletedAssistant =
-          message is AssistantMessage && message.isCompleted;
+          message is AssistantMessage &&
+          message.isCompleted &&
+          hasRevealableAssistantContent(message);
       AppLogger.debug('Added new message: ${message.id}, role=${message.role}');
     }
 
