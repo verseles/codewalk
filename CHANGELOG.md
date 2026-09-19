@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.246.0 - 2026-09-19
+
+- docs(chat): composer settles on terminal frames without navigation
+- test(chat): lock terminal-flush batching for tool-only steps
+- fix(review): narrow terminal flush to revealable tails, guard stale onDone
+- fix(chat): settle composer progress on terminal frames without navigation
+
 ## v1.245.0 - 2026-09-18
 
 - docs(settings): describe direct option search with exact control reveal
