@@ -114,6 +114,12 @@ typedef AppTabTrailingBuilder<T> = Widget? Function(BuildContext context, AppTab
 /// Builds the 28x28 leading content of a tab (icon, preset or status glyph).
 typedef AppTabLeadingBuilder<T> = Widget Function(BuildContext context, AppTab<T> tab);
 
+/// Builds an inline accessory rendered immediately after a tab in the regular
+/// region (for example a per-project "new conversation" button). Return null
+/// to render nothing. Accessories are not tabs: they never receive selection,
+/// focus reveal, hover/close state, or context-menu routing.
+typedef AppTabAccessoryBuilder<T> = Widget? Function(BuildContext context, AppTab<T> tab);
+
 /// Resolves the tab id that should receive focus after [closedId] is closed.
 /// Return null to leave focus untouched (for example file tabs, which must not
 /// steal focus from the editor when a dirty close is blocked).
@@ -134,6 +140,7 @@ class AppTabStrip<T> extends StatefulWidget {
     this.onContextMenu,
     this.leadingBuilder,
     this.trailingBuilder,
+    this.accessoryBuilder,
     this.trailingExtentBuilder,
     this.closeFocusResolver,
     this.contextMenuActionLabel,
@@ -153,6 +160,7 @@ class AppTabStrip<T> extends StatefulWidget {
   final AppTabContextMenuCallback<T>? onContextMenu;
   final AppTabLeadingBuilder<T>? leadingBuilder;
   final AppTabTrailingBuilder<T>? trailingBuilder;
+  final AppTabAccessoryBuilder<T>? accessoryBuilder;
 
   /// Width reserved for the trailing control when [trailingBuilder] returns
   /// non-null. Defaults to the historical session knob bounds
@@ -390,7 +398,7 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
           kAppTabPinnedSelectedMinWidth,
           pinnedRegionWidth - inactivePinnedWidth,
         );
-        final regularLayout = <({AppTab<T> tab, double width, Widget? trailing})>[];
+        final regularLayout = <({AppTab<T> tab, double width, Widget? trailing, Widget? accessory})>[];
         for (final tab in regularTabs) {
           final trailing =
               (tab.isSelected || widget.showTrailingOnUnselected)
@@ -405,6 +413,7 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
               maxTabWidth: effectiveMaxTabWidth,
             ),
             trailing: trailing,
+            accessory: widget.accessoryBuilder?.call(context, tab),
           ));
         }
         final selectedId = _selectedId();
@@ -415,7 +424,10 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
         final layoutWidths = <double>[
           for (final tab in pinnedTabs)
             tab.isSelected ? selectedPinnedContentWidth : kAppTabPinnedWidth,
-          for (final entry in regularLayout) entry.width,
+          for (final entry in regularLayout) ...[
+            entry.width,
+            if (entry.accessory != null) 1.0,
+          ],
         ];
         if (selectedId != _lastSelectedId ||
             selectedIndex != _lastSelectedIndex ||
@@ -509,7 +521,7 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              for (final entry in regularLayout)
+                              for (final entry in regularLayout) ...[
                                 RepaintBoundary(
                                   child: _buildTab(
                                     context,
@@ -518,6 +530,9 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                                     trailing: entry.trailing,
                                   ),
                                 ),
+                                if (entry.accessory != null)
+                                  RepaintBoundary(child: entry.accessory!),
+                              ],
                             ],
                           ),
                         ),

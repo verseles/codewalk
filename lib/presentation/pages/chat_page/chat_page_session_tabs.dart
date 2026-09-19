@@ -104,6 +104,8 @@ extension _ChatPageSessionTabs on _ChatPageState {
               onActivate: (tab) => unawaited(_activateSessionTab(tab)),
               onClose: (tab) => unawaited(_closeSessionTab(tab)),
               onContextMenu: _openSessionTabContextMenu,
+              onNewChatForProject: (anchor) =>
+                  unawaited(_openNewChatForProject(anchor)),
               trailingBuilder: (context, tab) {
                 if (!tab.isSelected || _isNewChatDraftTab(tab)) return null;
                 return Selector<
@@ -696,6 +698,31 @@ extension _ChatPageSessionTabs on _ChatPageState {
     await _reopenProjectContext(project.id);
   }
 
+  Future<void> _openNewChatForProject(SessionTabRecord anchor) async {
+    if (!_isChatScreenActive()) {
+      return;
+    }
+    if (anchor.identity.serverId.isNotEmpty &&
+        context.read<ChatProvider>().activeServerId !=
+            anchor.identity.serverId) {
+      return;
+    }
+    await _switchToSessionTabContext(anchor);
+    if (!mounted || !_isChatScreenActive()) {
+      return;
+    }
+    if (!_isSessionTabContextActive(anchor)) {
+      _showSessionTabNavigationError();
+      return;
+    }
+    final chatProvider = context.read<ChatProvider>();
+    if (chatProvider.isDraftingNewChat && chatProvider.currentSession == null) {
+      _inputFocusNode.requestFocus();
+      return;
+    }
+    await _createNewSession();
+  }
+
   Project? _projectForSessionTab(
     ProjectProvider projectProvider,
     SessionTabRecord tab,
@@ -884,7 +911,10 @@ extension _ChatPageSessionTabs on _ChatPageState {
         (chatProvider.currentSession?.id == current.identity.sessionId &&
             _isSessionTabContextActive(current));
     final fallback = wasActive
-        ? sessionTabCloseFallback(tabs, current.identity)
+        ? sessionTabCloseFallback(
+            groupSessionTabsByProject(tabs),
+            current.identity,
+          )
         : null;
 
     chatProvider.closeSessionTab(current.identity);

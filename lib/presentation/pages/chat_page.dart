@@ -75,6 +75,7 @@ import '../utils/duplicate_file_name.dart';
 import '../utils/file_highlight_language.dart';
 import '../utils/file_explorer_logic.dart';
 import '../utils/reasoning_status_parser.dart';
+import '../utils/session_tab_grouping.dart';
 import '../utils/session_tab_switcher_logic.dart';
 import '../utils/session_title_formatter.dart';
 import '../utils/shortcut_binding_codec.dart';

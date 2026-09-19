@@ -7,6 +7,7 @@ import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/project.dart';
 import '../providers/chat_provider.dart';
 import '../services/session_tab_icon_presets.dart';
+import '../utils/session_tab_grouping.dart';
 import 'app_tab_strip.dart';
 import 'project_icon.dart';
 
@@ -49,6 +50,7 @@ class SessionTabStrip extends StatelessWidget {
     required this.onClose,
     required this.onContextMenu,
     required this.trailingBuilder,
+    this.onNewChatForProject,
     this.fillWidth = true,
     this.transparentBackground = false,
   });
@@ -71,10 +73,18 @@ class SessionTabStrip extends StatelessWidget {
   final SessionTabContextMenuCallback onContextMenu;
   final SessionTabTrailingBuilder trailingBuilder;
 
+  /// Invoked with the last tab of a project group when its inline `+`
+  /// accessory is tapped. Null (tests) keeps grouping but renders no `+`.
+  final ValueChanged<SessionTabRecord>? onNewChatForProject;
+
   @override
   Widget build(BuildContext context) {
+    final orderedTabs = groupSessionTabsByProject(tabs);
+    final anchors = onNewChatForProject == null
+        ? const <SessionTabIdentity>{}
+        : projectNewChatAnchors(orderedTabs);
     final appTabs = <AppTab<SessionTabRecord>>[
-      for (final tab in tabs)
+      for (final tab in orderedTabs)
         AppTab<SessionTabRecord>(
           id: sessionTabIdentityKey(tab.identity),
           value: tab,
@@ -98,24 +108,63 @@ class SessionTabStrip extends StatelessWidget {
       leadingBuilder: (context, appTab) =>
           _buildLeading(context, appTab.value, _projectForTab(appTab.value)),
       trailingBuilder: (context, appTab) => trailingBuilder(context, appTab.value),
+      accessoryBuilder: (context, appTab) {
+        if (!anchors.contains(appTab.value.identity)) {
+          return null;
+        }
+        return _buildNewChatAccessory(context, appTab.value);
+      },
       onActivate: (appTab) => onActivate(appTab.value),
       onClose: (appTab) => onClose(appTab.value),
       onContextMenu: (appTab, position, {required bool haptic}) =>
           onContextMenu(appTab.value, position, haptic: haptic),
       closeFocusResolver: (tabIds, closedId) {
         final recordById = <String, SessionTabRecord>{
-          for (final tab in tabs) sessionTabIdentityKey(tab.identity): tab,
+          for (final tab in orderedTabs) sessionTabIdentityKey(tab.identity): tab,
         };
         final closed = recordById[closedId];
         if (closed == null) {
           return null;
         }
-        final fallback = sessionTabCloseFallback(tabs, closed.identity);
+        final fallback = sessionTabCloseFallback(orderedTabs, closed.identity);
         if (fallback == null) {
           return null;
         }
         return sessionTabIdentityKey(fallback.identity);
       },
+    );
+  }
+
+  Widget _buildNewChatAccessory(BuildContext context, SessionTabRecord anchor) {
+    final project = _projectForTab(anchor) ?? _fallbackProject(anchor);
+    final projectLabel = project.name.trim().isEmpty
+        ? fileBasename(anchor.identity.directory)
+        : project.name.trim();
+    final label = '${context.l10n.chatNewChat} ($projectLabel)';
+    final target = isCompact ? 40.0 : 32.0;
+    return Semantics(
+      button: true,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: SizedBox(
+          width: target,
+          height: target,
+          child: InkWell(
+            key: ValueKey<String>(
+              'session_tab_new_${sessionTabIdentityKey(anchor.identity)}',
+            ),
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => onNewChatForProject?.call(anchor),
+            child: Icon(
+              Symbols.add,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              semanticLabel: label,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
