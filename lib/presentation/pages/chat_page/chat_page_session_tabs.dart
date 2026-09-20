@@ -739,7 +739,20 @@ extension _ChatPageSessionTabs on _ChatPageState {
       // shared draft key, and empty-session drafts persist no text per
       // context: whatever lingers in the controller belongs to the previous
       // project, so a fresh chat here must start with a cleared composer.
-      _chatInputController.clearDraftWithoutFocus();
+      // Deferred past the rebuild: clearing synchronously could still hit the
+      // outgoing widget whose onDraftChanged closure captures the previous
+      // session id, wiping that session's persisted unsent draft. After the
+      // frame the attached config belongs to the target draft (null session
+      // id, for which persistence is a no-op).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_isChatScreenActive()) {
+          return;
+        }
+        if (!_isNewChatAnchorContextActive(anchor)) {
+          return;
+        }
+        _chatInputController.clearDraftWithoutFocus();
+      });
     }
   }
 
