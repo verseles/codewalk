@@ -172,6 +172,17 @@ void main() {
       expect(stripReleaseAnnouncement('> 📣 Hello!\n\n- feat: x'), '- feat: x');
     });
 
+    test('removes multiline block including continuations', () {
+      expect(
+        stripReleaseAnnouncement('> 📣 First\n> Second\n\n- feat: x'),
+        '- feat: x',
+      );
+    });
+
+    test('removes marker-only block with no text', () {
+      expect(stripReleaseAnnouncement('> 📣\n\n- feat: x'), '- feat: x');
+    });
+
     test('returns body unchanged without marker', () {
       const body = '- feat: x';
       expect(stripReleaseAnnouncement(body), body);

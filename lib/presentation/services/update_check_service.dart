@@ -114,7 +114,7 @@ bool _isAnnouncementStart(String trimmedLeft) {
 String? stripReleaseAnnouncement(String? body) {
   if (body == null) return null;
   final block = _announcementBlock(body);
-  if (block.text == null) return body;
+  if (block.count == 0) return body;
   final lines = body.split('\n');
   var drop = 0;
   while (drop < lines.length && lines[drop].trim().isEmpty) {
