@@ -2725,6 +2725,69 @@ void main() {
       expect(provider.canAbortActiveResponse, isTrue);
     });
 
+    test('latest tool-only tail after text is not coerced to idle', () async {
+      final textThenTool = <AssistantMessage>[
+        AssistantMessage(
+          id: 'msg_text_first',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(2000),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(2010),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_text_first',
+              messageId: 'msg_text_first',
+              sessionId: 'ses_1',
+              text: 'earlier answer',
+            ),
+          ],
+        ),
+        AssistantMessage(
+          id: 'msg_tool_last',
+          sessionId: 'ses_1',
+          time: DateTime.fromMillisecondsSinceEpoch(2020),
+          completedTime: DateTime.fromMillisecondsSinceEpoch(2030),
+          parts: <MessagePart>[
+            ToolPart(
+              id: 'part_tool_last',
+              messageId: 'msg_tool_last',
+              sessionId: 'ses_1',
+              callId: 'call_tool_last',
+              tool: 'bash',
+              state: ToolStateCompleted(
+                input: const <String, dynamic>{'command': 'echo hi'},
+                output: 'hi',
+                time: ToolTime(
+                  start: DateTime.fromMillisecondsSinceEpoch(2020),
+                  end: DateTime.fromMillisecondsSinceEpoch(2025),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ];
+
+      chatRepository.sendMessageHandler = (_, _, _, _) async* {
+        for (final m in textThenTool) {
+          yield Right(m);
+        }
+      };
+
+      await provider.projectProvider.initializeProject();
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+
+      await provider.sendMessage('run chain');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      chatRepository.sessionStatusById = const <String, SessionStatusInfo>{
+        'ses_1': SessionStatusInfo(type: SessionStatusType.busy),
+      };
+      await provider.loadSessionInsights('ses_1', silent: true);
+
+      expect(provider.sessionStatusById['ses_1']?.type, SessionStatusType.busy);
+      expect(provider.isCurrentSessionActivelyResponding, isTrue);
+    });
+
     test(
       'completed mixed tool+text final hides Stop while stale busy stays active',
       () async {

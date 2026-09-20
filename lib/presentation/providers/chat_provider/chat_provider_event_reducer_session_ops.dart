@@ -389,6 +389,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
           _sessionStatusById[sessionId] = const SessionStatusInfo(
             type: SessionStatusType.idle,
           );
+          _sseSettledAtBySessionId[sessionId] = DateTime.now();
           _traceFinal(
             'event-session-idle',
             sessionId: sessionId,

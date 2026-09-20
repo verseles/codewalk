@@ -2148,6 +2148,28 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  void _coerceStaleRestBusyRetryAfterSseIdle({
+    required Map<String, SessionStatusInfo> statusMap,
+    required String sessionId,
+  }) {
+    final currentStatus = _sessionStatusById[sessionId]?.type;
+    final settledAt = _sseSettledAtBySessionId[sessionId];
+    final sseSettledToIdle =
+        settledAt != null &&
+        DateTime.now().difference(settledAt) < const Duration(seconds: 4);
+    const idle = SessionStatusType.idle;
+    if (sseSettledToIdle &&
+        (currentStatus == null || currentStatus == idle) &&
+        (statusMap[sessionId]?.type == SessionStatusType.busy ||
+            statusMap[sessionId]?.type == SessionStatusType.retry) &&
+        isLatestTailSettledRevealable(
+          _messagesForSettledStatusGuard(sessionId),
+          sessionId,
+        )) {
+      statusMap[sessionId] = const SessionStatusInfo(type: idle);
+    }
+  }
+
   /// Returns true if [event] belongs to an ephemeral title-generation session.
   /// Checks both the session ID set and the session title as fallback
   /// (the title is known before the POST /session response arrives,
@@ -2184,23 +2206,10 @@ class ChatProvider extends ChangeNotifier {
         // made, not the session current when the response arrives
         // (the user may have switched sessions during the in-flight await).
         if (currentIdAtCall != null) {
-          final currentStatus = _sessionStatusById[currentIdAtCall]?.type;
-          final settledAt = _sseSettledAtBySessionId[currentIdAtCall];
-          final sseSettledToIdle =
-              settledAt != null &&
-              DateTime.now().difference(settledAt) < const Duration(seconds: 4);
-          const idle = SessionStatusType.idle;
-          if (sseSettledToIdle &&
-              (currentStatus == null || currentStatus == idle) &&
-              (statusMap[currentIdAtCall]?.type == SessionStatusType.busy ||
-                  statusMap[currentIdAtCall]?.type ==
-                      SessionStatusType.retry) &&
-              hasCompletedRevealableAssistantMessage(
-                _messagesForSettledStatusGuard(currentIdAtCall),
-                currentIdAtCall,
-              )) {
-            statusMap[currentIdAtCall] = const SessionStatusInfo(type: idle);
-          }
+          _coerceStaleRestBusyRetryAfterSseIdle(
+            statusMap: statusMap,
+            sessionId: currentIdAtCall,
+          );
         }
         _sessionStatusById = statusMap;
         _syncAttentionFromStatusMap(statusMap);
@@ -2595,24 +2604,10 @@ class ChatProvider extends ChangeNotifier {
           // one current now (user may have switched during the in-flight
           // await above).
           if (currentIdAtCall != null) {
-            final currentStatus = _sessionStatusById[currentIdAtCall]?.type;
-            final settledAt = _sseSettledAtBySessionId[currentIdAtCall];
-            final sseSettledToIdle =
-                settledAt != null &&
-                DateTime.now().difference(settledAt) <
-                    const Duration(seconds: 4);
-            const idle = SessionStatusType.idle;
-            if (sseSettledToIdle &&
-                (currentStatus == null || currentStatus == idle) &&
-                (statusMap[currentIdAtCall]?.type == SessionStatusType.busy ||
-                    statusMap[currentIdAtCall]?.type ==
-                        SessionStatusType.retry) &&
-                hasCompletedRevealableAssistantMessage(
-                  _messagesForSettledStatusGuard(currentIdAtCall),
-                  currentIdAtCall,
-                )) {
-              statusMap[currentIdAtCall] = const SessionStatusInfo(type: idle);
-            }
+            _coerceStaleRestBusyRetryAfterSseIdle(
+              statusMap: statusMap,
+              sessionId: currentIdAtCall,
+            );
           }
           _sessionStatusById = statusMap;
           _syncAttentionFromStatusMap(statusMap);
