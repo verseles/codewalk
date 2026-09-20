@@ -384,6 +384,7 @@ extension _ChatProviderEventReducerSessionOps on ChatProvider {
           if (!isCurrentSession &&
               previousStatusType == SessionStatusType.idle &&
               !hadErrorAttention) {
+            _sseSettledAtBySessionId[sessionId] = DateTime.now();
             break;
           }
           _sessionStatusById[sessionId] = const SessionStatusInfo(
