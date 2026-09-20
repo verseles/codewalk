@@ -11,7 +11,7 @@
 - Visual style layer (issue #86): `VisualStyle` (`classic` / `refined`) persisted in `ExperienceSettings`, exposed via `SettingsProvider`, and propagated through `AppVisualStyleTokens` `ThemeExtension` so chat surfaces can consume shape/surface tokens while `OpenCodeThemeTokens` continue to drive markdown/syntax palettes. New installs default to `VisualStyle.refined`; legacy persisted JSON missing the `visualStyle` key falls back to `VisualStyle.classic` for backward compatibility.
 - LaTeX math rendering (`$...$` and `$$...$$`) supported in chat messages via `flutter_math_fork` with custom markdown syntaxes and styled fallback on parse failure.
 - Session attention adds encrypted completion snapshots, root-session aggregation, and Android, desktop, and iOS presentation hosts.
-- Session tabs persist server-scoped open/closed session state and provide cross-project chat navigation with attention and busy indicators; per-session icon overrides (issue #138) replace the project icon with a Material Symbols preset per tab.
+- Session tabs persist server-scoped open/closed session state and provide cross-project chat navigation with attention and busy indicators; per-session icon overrides (issue #138) replace the project icon with a Material Symbols preset per tab; project grouping renders a per-project inline new-chat accessory after each draft-free group (issue #200).
 - Browser-style session tab switcher (issue #171): hold-to-cycle MRU overlay (`Ctrl+Tab` / `Ctrl+Shift+Tab`) with commit-on-release orchestration in ChatPage.
 
 ## Folder Structure
@@ -60,7 +60,7 @@ codewalk/
 │       │   ├── chat_page_types_part.dart # Shared intents, configurations, and keys (incl. scoped Selector/Selector2 build keys used by desktop chat body to avoid full shell rebuilds on composer selection changes)
 │       │   ├── chat_page_local_models_part.dart # Local UI state classes (part of chat_page.dart; see commit 8759defc)
 │       │   ├── chat_page/              # ChatPage decomposed clusters (26 modules)
-│         │       │   └── chat_page_session_tabs.dart # Cross-project session-tab activation, rollback, and close fallback
+│         │       │   └── chat_page_session_tabs.dart # Cross-project session-tab activation, rollback, close fallback, and per-project new-chat (issue #200)
   │       │   └── chat_page_tab_switcher.dart # Browser-style MRU tab-switcher orchestration: hold-to-cycle, commit-on-release, custom-binding match (issue #171)
 │       │   └── settings/               # Settings section pages plus shared section layout widgets
 │       ├── providers/                  # App/Chat/Project/Settings state orchestration
@@ -95,7 +95,7 @@ codewalk/
 │       │       ├── edge_tts_websocket_stub.dart # `web_socket_channel` transport for non-IO targets
 │       │       ├── elevenlabs_tts_backend.dart # ElevenLabs cloud TTS voice discovery and generated MP3 synthesis
 │       │       └── nvidia_nim_tts_backend.dart # NVIDIA Speech NIM cloud TTS voice discovery and generated WAV synthesis
-│       ├── utils/ # Presentation helpers (incl. WindowSizeClass MD3 breakpoints, diff parser, file path detector, file path markdown, math markdown, basic HTML markdown (issue #190), session_tab_switcher_logic.dart pure MRU ordering + index math — issue #171)
+│       ├── utils/ # Presentation helpers (incl. WindowSizeClass MD3 breakpoints, diff parser, file path detector, file path markdown, math markdown, basic HTML markdown (issue #190), session_tab_switcher_logic.dart pure MRU ordering + index math — issue #171, session_tab_grouping.dart pure display-only project grouping + new-chat anchors — issue #200)
 │       └── theme/                      # Material You theme: AppTheme, AppShapes, BrandColor seeds, AppSemanticColors, AppVisualStyleTokens (issue #86)
 ├── test/                               # Unit, widget, integration, presentation, support tests
 ├── tool/ci/                            # Analyzer budget, coverage gate, and session-overlay Android instrumentation scripts
@@ -307,8 +307,8 @@ lib/presentation/widgets/session_todo_list_widget.dart # Session task panel with
 lib/presentation/widgets/app_indeterminate_progress.dart # App-global bounded indeterminate indicators (`AppIndeterminateRing`/`AppIndeterminateBar`) with shared ref-counted 125 ms clock: static on reduced motion and compact desktop slots, stepped determinate on larger desktop slots, native on mobile/web (ADR-056)
 lib/presentation/widgets/session_context_menu.dart # Shared session popup/context menu entries, row gesture wrapper, and dispatch helpers for main sidebar sessions and Recent sessions tiles; exposes SessionMenuAction enum and buildUnifiedSessionMenuEntries for unified tab/session menus (issues #162/#163)
 lib/presentation/widgets/project_context_menu.dart # ProjectContextMenuRegion with right-click, long-press, ContextMenu key, Shift+F10, semantics and destructive Close project (issues #162/#163)
-lib/presentation/widgets/app_tab_strip.dart     # Generic browser-style tab engine: AppTab<T>, responsive sizing, pinned/regular viewports, gestures, context menus, focus, and semantics
-lib/presentation/widgets/session_tab_strip.dart # Thin SessionTabRecord adapter over AppTabStrip with project icons, attention/busy visuals, focus restoration, and per-tab icon presets (issue #138)
+lib/presentation/widgets/app_tab_strip.dart      # Generic browser-style tab engine with responsive sizing, scrolling, gestures, menus, focus, and semantics; optional generic AppTabAccessoryBuilder/accessoryBuilder rendered after regular tabs only (issue #200)
+lib/presentation/widgets/session_tab_strip.dart # Thin SessionTabRecord adapter over AppTabStrip with project icons, attention/busy visuals, focus restoration, and per-tab icon presets (issue #138); groups tabs by project via session_tab_grouping.dart with per-group inline new-chat accessory and onNewChatForProject (issue #200)
 lib/presentation/widgets/session_tab_icon_picker.dart # `showSessionTabIconPicker` dialog (fullscreen on compact layouts, AlertDialog on wide) returning `SessionTabIconSelection`; grid offers the project icon (via `ProjectIcon`, `autoDiscover: false`) plus the 12 `SessionTabIconPreset` tiles
 lib/presentation/utils/session_tab_switcher_logic.dart # Pure MRU ordering + index math: orderTabsForSwitcher, switcherInitialIndex, switcherStepIndex (issue #171)
 lib/presentation/widgets/session_tab_switcher_overlay.dart # SessionTabSwitcherOverlay Material You overlay widget (issue #171)
@@ -366,7 +366,7 @@ chat_page_timeline_runtime.dart              # Tool-chain expanded state key res
 chat_page_widgets.dart                       # UI components part of chat_page.dart: _ComposerStatusLanternText, _ComposerStatusLanternTextState, _DirectoryPickerSheet, _DirectoryPickerSheetState
 chat_page_search.dart                   # Timeline full-text search: inline AppBar input with 300ms debounce, case-insensitive text/reasoning matching, message-level next/previous navigation, and transient TextSpan highlighting; uses dedicated _ScrollOwner.searchResult for scroll coordination
 chat_page_mobile_overflow.dart                    # Renders pinned and overflow actions for mobile app bar, including display toggles, search, and terminal panel trigger
-chat_page_session_tabs.dart                        # Cross-project session-tab activation, rollback, and close fallback; no longer pre-activates inactive tabs for context-menu actions and routes unified menu selections through SessionActionTarget (issues #162/#163)
+chat_page_session_tabs.dart                        # Cross-project session-tab activation, rollback, and close fallback; no longer pre-activates inactive tabs for context-menu actions and routes unified menu selections through SessionActionTarget (issues #162/#163); per-project new-chat (_openNewChatForProject) and grouped close fallback (issue #200)
 ```
 
 ### Chat message widgets

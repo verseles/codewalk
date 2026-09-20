@@ -618,6 +618,14 @@
 - **Then** the placeholder has no close action, context menu, or trailing session control, and is excluded from provider session tabs and tab persistence
 - **Then** a failed lazy creation leaves the placeholder in the creation-failed state, and a successfully created session replaces the placeholder before prompt delivery completes
 
+- **Given** session tabs are enabled and the strip holds tabs from more than one project context
+- **When** the recent session tab strip is rendered
+- **Then** regular (non-pinned) tabs are grouped so tabs of the same project sit side by side in first-appearance group order, preserving each group's internal order; provider order and server-scoped tab persistence are unchanged and only the rendered order groups
+- **Then** immediately after the last regular tab of each project group, an inline `+` control opens a local `New Chat` draft for that project: it switches or reopens that project context when needed (with a navigation error and no draft when the switch fails), never creates an OpenCode session before the first send, and focuses the composer
+- **Then** a group already showing its `New Chat` draft renders no `+`; pin-only groups and open projects with no tabs render no `+`; pinned tabs stay in the leading pinned region and file tabs never show a project `+`
+- **Then** tapping `+` on the already-active project only focuses the composer when it is already drafting, and a `+` tap after a real project switch starts with a cleared composer so unsent text from the previous project is never inherited
+- **Then** closing the active tab selects the visually adjacent tab in grouped display order (right, then left), while undo still restores the tab at its original provider position
+
 - **Given** a root session is pinned in the Conversations sidebar for one of the active server's known project scopes
 - **When** session tabs are loaded or reconciled
 - **Then** the existing context-scoped sidebar pin is the sole durable pin authority, and the matching tab remains eligible even when it is older than 3 hours or locally suppressed
