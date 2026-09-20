@@ -63,11 +63,11 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 8. Apply only judge-approved fixes. Validate them with focused checks by default, and repeat the review when warranted.
 9. Evaluate the helpers used, identifying the best and worst, the essential and dispensable ones, the top two and bottom two, and any honorable mentions. Also send a full paragraph about, via hey.
 10. Run `HEY_CAPTION="specific caption" make android` when an APK is useful and supported. Do not run it for ARM64 targets.
-11. Update the documentation.
-12. Create a minor release unless instructed otherwise. Monitor it every 60 seconds with `cimonitor`.
+11. Create a minor release unless instructed otherwise. Monitor it every 60 seconds with `cimonitor`.
+12. Update the documentation of the project while monitor release. Commit doc updates but not push.
 13. Notify the user and provide the final report, including the helper evaluation.
     13.1. Ask whether any related issue should be closed. When useful, suggest the next task from GitHub Issues.
-    13.2. When relevant, ask whether the rules in `./AGENTS.md` should be updated to reflect the changes or introduce new rules.
+    13.2. When relevant and evergreen, ask whether the rules in `./AGENTS.md` should be updated to reflect the changes or introduce new rules.
     
 ## Release
 
