@@ -8,11 +8,14 @@ import '../providers/chat_provider.dart';
 /// matching the close-project canonicalization. Server-scoped so tabs from
 /// different servers never merge.
 String sessionTabProjectGroupKey(SessionTabRecord tab) {
+  final projectId = tab.projectId?.trim();
   final directory = normalizeOptionalFilePath(tab.identity.directory);
-  if (directory != null && directory != '/') {
+  // Root scopes persist the project id as the tab directory (scope fallback
+  // in the reconciler); canonicalize them onto the project fallback key so
+  // root tabs and the empty-directory draft share one group.
+  if (directory != null && directory != '/' && directory != projectId) {
     return '${tab.identity.serverId}::$directory';
   }
-  final projectId = tab.projectId?.trim();
   if (projectId != null && projectId.isNotEmpty) {
     return '${tab.identity.serverId}::project::$projectId';
   }

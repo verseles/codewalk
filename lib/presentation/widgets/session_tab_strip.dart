@@ -147,6 +147,7 @@ class SessionTabStrip extends StatelessWidget {
       label: label,
       child: Tooltip(
         message: label,
+        excludeFromSemantics: true,
         child: SizedBox(
           width: target,
           height: target,
@@ -156,11 +157,12 @@ class SessionTabStrip extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(8),
             onTap: () => onNewChatForProject?.call(anchor),
-            child: Icon(
-              Symbols.add,
-              size: 20,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              semanticLabel: label,
+            child: ExcludeSemantics(
+              child: Icon(
+                Symbols.add,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),

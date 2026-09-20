@@ -705,22 +705,55 @@ extension _ChatPageSessionTabs on _ChatPageState {
     if (anchor.identity.serverId.isNotEmpty &&
         context.read<ChatProvider>().activeServerId !=
             anchor.identity.serverId) {
+      _showSessionTabNavigationError();
       return;
     }
+    final wasAlreadyActive = _isNewChatAnchorContextActive(anchor);
     await _switchToSessionTabContext(anchor);
     if (!mounted || !_isChatScreenActive()) {
       return;
     }
-    if (!_isSessionTabContextActive(anchor)) {
+    if (!_isNewChatAnchorContextActive(anchor)) {
       _showSessionTabNavigationError();
       return;
     }
     final chatProvider = context.read<ChatProvider>();
-    if (chatProvider.isDraftingNewChat && chatProvider.currentSession == null) {
+    if (wasAlreadyActive &&
+        chatProvider.isDraftingNewChat &&
+        chatProvider.currentSession == null) {
       _inputFocusNode.requestFocus();
       return;
     }
     await _createNewSession();
+    if (!mounted) {
+      return;
+    }
+    if (!wasAlreadyActive) {
+      // A context switch preserves the widget-owned composer text under the
+      // shared draft key; a fresh chat in another project must not inherit
+      // unsent text from the previous project.
+      _chatInputController.clearDraftWithoutFocus();
+    }
+  }
+
+  /// Scope-aware variant of [_isSessionTabContextActive] for `+` anchors.
+  ///
+  /// Root (`/`) and placeholder (`-`) scopes persist the project id as the
+  /// tab directory, so path equivalence alone rejects an already-correct
+  /// context; fall back to the project id in that case.
+  bool _isNewChatAnchorContextActive(SessionTabRecord anchor) {
+    if (_isSessionTabContextActive(anchor)) {
+      return true;
+    }
+    if (normalizeOptionalFilePath(anchor.identity.directory) != null) {
+      return false;
+    }
+    final anchorProjectId = anchor.projectId?.trim();
+    if (anchorProjectId == null || anchorProjectId.isEmpty) {
+      return false;
+    }
+    return context.read<ProjectProvider>().currentProject?.id ==
+        anchorProjectId;
   }
 
   Project? _projectForSessionTab(

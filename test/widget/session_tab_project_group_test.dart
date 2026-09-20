@@ -110,9 +110,12 @@ void main() {
   });
 
   testWidgets('no + when callback is null', (tester) async {
-    await tester.pumpWidget(app(tabs: [tab('a1', '/a'), tab('b1', '/b')]));
+    final a1 = tab('a1', '/a');
+    final b1 = tab('b1', '/b');
+    await tester.pumpWidget(app(tabs: [a1, b1]));
     await tester.pump();
 
-    expect(find.byIcon(Icons.add), findsNothing);
+    expect(find.byKey(ValueKey(addKey(a1))), findsNothing);
+    expect(find.byKey(ValueKey(addKey(b1))), findsNothing);
   });
 }

@@ -69,4 +69,17 @@ void main() {
       isFalse,
     );
   });
+
+  test('projectId-as-directory shares the root group with empty draft', () {
+    final rootTab = tab('r1', 'p1', projectId: 'p1');
+    final draft = tab('', '', projectId: 'p1');
+    expect(
+      sessionTabProjectGroupKey(rootTab),
+      sessionTabProjectGroupKey(draft),
+    );
+    final anchors = projectNewChatAnchors(
+      groupSessionTabsByProject([rootTab, draft]),
+    );
+    expect(anchors, isEmpty);
+  });
 }
