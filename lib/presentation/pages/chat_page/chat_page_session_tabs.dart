@@ -718,9 +718,9 @@ extension _ChatPageSessionTabs on _ChatPageState {
       return;
     }
     final chatProvider = context.read<ChatProvider>();
-    if (wasAlreadyActive &&
-        chatProvider.isDraftingNewChat &&
-        chatProvider.currentSession == null) {
+    if (chatProvider.isDraftingNewChat && chatProvider.currentSession == null) {
+      // The (now current) target context is already drafting: focus it
+      // without wiping a pre-existing hidden draft of this project.
       _inputFocusNode.requestFocus();
       return;
     }
@@ -738,18 +738,21 @@ extension _ChatPageSessionTabs on _ChatPageState {
 
   /// Scope-aware variant of [_isSessionTabContextActive] for `+` anchors.
   ///
-  /// Root (`/`) and placeholder (`-`) scopes persist the project id as the
-  /// tab directory, so path equivalence alone rejects an already-correct
-  /// context; fall back to the project id in that case.
+  /// Mirrors [sessionTabProjectGroupKey]: root (`/`) and project-id-as-
+  /// directory scopes fall back to the project id instead of path
+  /// equivalence.
   bool _isNewChatAnchorContextActive(SessionTabRecord anchor) {
     if (_isSessionTabContextActive(anchor)) {
       return true;
     }
-    if (normalizeOptionalFilePath(anchor.identity.directory) != null) {
-      return false;
-    }
     final anchorProjectId = anchor.projectId?.trim();
     if (anchorProjectId == null || anchorProjectId.isEmpty) {
+      return false;
+    }
+    final directory = normalizeOptionalFilePath(anchor.identity.directory);
+    if (directory != null &&
+        directory != '/' &&
+        directory != anchorProjectId) {
       return false;
     }
     return context.read<ProjectProvider>().currentProject?.id ==
