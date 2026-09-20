@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.250.0 - 2026-09-20
+
+> 📣 Responses now appear instantly, no more stuck on reasoning, no need to switch tabs.
+
+- fix(chat): stamp settlement on duplicate session.idle for background sessions
+- fix(chat): require responding equality for timeline cache reuse
+- fix(chat): unify REST stale-busy guard on latest-tail with session.idle settlement
+
 ## v1.249.0 - 2026-09-20
 
 > 📣 News update: full changelog in About, plus quick links to Changelog and our Telegram group.
