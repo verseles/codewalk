@@ -718,20 +718,27 @@ extension _ChatPageSessionTabs on _ChatPageState {
       return;
     }
     final chatProvider = context.read<ChatProvider>();
-    if (chatProvider.isDraftingNewChat && chatProvider.currentSession == null) {
-      // The (now current) target context is already drafting: focus it
-      // without wiping a pre-existing hidden draft of this project.
+    final targetDrafting =
+        chatProvider.isDraftingNewChat && chatProvider.currentSession == null;
+    if (wasAlreadyActive && targetDrafting) {
+      // Already in the anchor project with its draft open: keep the
+      // in-progress composer text and just focus it.
       _inputFocusNode.requestFocus();
       return;
     }
-    await _createNewSession();
-    if (!mounted) {
-      return;
+    if (!targetDrafting) {
+      await _createNewSession();
+      if (!mounted) {
+        return;
+      }
+    } else {
+      _inputFocusNode.requestFocus();
     }
     if (!wasAlreadyActive) {
       // A context switch preserves the widget-owned composer text under the
-      // shared draft key; a fresh chat in another project must not inherit
-      // unsent text from the previous project.
+      // shared draft key, and empty-session drafts persist no text per
+      // context: whatever lingers in the controller belongs to the previous
+      // project, so a fresh chat here must start with a cleared composer.
       _chatInputController.clearDraftWithoutFocus();
     }
   }
