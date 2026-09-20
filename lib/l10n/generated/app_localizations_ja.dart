@@ -6517,4 +6517,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get sessionTabSwitcherHint => 'Ctrlを離して切り替え、Escでキャンセル';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version の新機能';
+  }
 }

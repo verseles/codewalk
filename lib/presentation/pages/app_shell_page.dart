@@ -58,6 +58,8 @@ class _AppShellPageState extends State<AppShellPage> {
   bool _wizardDismissedThisSession = false;
   // Ensures the startup update toast is shown at most once per session.
   String? _shownStartupUpdateVersion;
+  // Ensures the startup What's-new toast is shown at most once per session.
+  String? _shownStartupNewsVersion;
   // Guards for install-state SnackBars so they are shown at most once each.
   bool _shownProgressSnackBar = false;
   bool _shownDoneSnackBar = false;
@@ -191,6 +193,18 @@ class _AppShellPageState extends State<AppShellPage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _showUpdateToast(context, settingsProvider, updateResult);
           });
+        } else if (settingsProvider.pendingStartupNewsToast &&
+            settingsProvider.hasUnseenNews) {
+          // What's-new toast only when no update toast fired above.
+          final newsResult = settingsProvider.latestRelease;
+          if (newsResult != null &&
+              newsResult.latestVersion != _shownStartupNewsVersion) {
+            _shownStartupNewsVersion = newsResult.latestVersion;
+            settingsProvider.acknowledgeStartupNewsToast();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showNewsToast(context, newsResult);
+            });
+          }
         }
 
         // React to install state transitions with SnackBars.
@@ -281,6 +295,27 @@ class _AppShellPageState extends State<AppShellPage> {
       return;
     }
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  /// Shows a one-time SnackBar with the latest release announcement.
+  /// Visual only: dismissing it does not persist the news dismissal.
+  void _showNewsToast(BuildContext context, UpdateCheckResult result) {
+    if (!mounted) return;
+    final announcement = result.announcement;
+    if (announcement == null || announcement.isEmpty) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          announcement.length > 120
+              ? '${announcement.substring(0, 120)}...'
+              : announcement,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        duration: const Duration(seconds: 6),
+        showCloseIcon: true,
+      ),
+    );
   }
 
   void _showInstallingSnackBar(BuildContext context) {

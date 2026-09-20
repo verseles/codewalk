@@ -323,6 +323,71 @@ void main() {
     },
   );
 
+  testWidgets('startup news toast shows announcement once when up to date', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    ChatProvider? chatProvider;
+    AppProvider? appProvider;
+    SettingsProvider? settingsProvider;
+    try {
+      PackageInfo.setMockInitialValues(
+        appName: 'CodeWalk',
+        packageName: 'com.verseles.codewalk',
+        version: '1.2.3',
+        buildNumber: '45',
+        buildSignature: '',
+      );
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..experienceSettingsJson = jsonEncode(<String, dynamic>{
+          'checkUpdatesOnOpen': true,
+          'skipOnboardingWizard': true,
+        });
+      settingsProvider = SettingsProvider(
+        localDataSource: localDataSource,
+        dioClient: _NoopDioClient(),
+        soundService: SoundService(),
+        updateCheckService: _FakeUpdateCheckService(
+          const UpdateCheckResult(
+            latestVersion: '1.2.3',
+            announcement: 'Hello from Telegram!',
+            isNewer: false,
+          ),
+        ),
+      );
+      await settingsProvider.initialize();
+      chatProvider = _buildChatProvider(localDataSource: localDataSource);
+      appProvider = _buildAppProvider(
+        localDataSource: localDataSource,
+        dioClient: _NoopDioClient(),
+      );
+
+      await tester.pumpWidget(
+        _testAppWithSettings(chatProvider, appProvider, settingsProvider),
+      );
+      await tester.pump();
+      for (
+        var i = 0;
+        i < 10 && find.text('Hello from Telegram!').evaluate().isEmpty;
+        i += 1
+      ) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      expect(find.text('Hello from Telegram!'), findsOneWidget);
+      expect(find.text('Install'), findsNothing);
+    } finally {
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      chatProvider?.dispose();
+      appProvider?.dispose();
+      settingsProvider?.dispose();
+    }
+  });
+
   testWidgets(
     'keeps onboarding mounted after server add until the wizard is explicitly completed',
     (WidgetTester tester) async {

@@ -394,6 +394,7 @@ List<SettingsSearchOption> settingsSearchOptions(
   add('about', 'settings_about_check_now', l.settingsAboutCheckForUpdates);
   add('about', 'about_replay_chat_tour_tile', l.settingsAboutReplayChatTour);
   add('about', 'settings_about_github', l.aboutGitHub);
+  add('about', 'settings_about_telegram', l.aboutTelegram);
   add('about', 'settings_about_reset', l.settingsAboutResetApp);
   return options;
 }

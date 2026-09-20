@@ -128,4 +128,54 @@ void main() {
       expect(service.cachedResult, isNull);
     });
   });
+
+  group('parseReleaseAnnouncement', () {
+    test('extracts leading blockquote announcement', () {
+      expect(parseReleaseAnnouncement('> 📣 Hello!\n\n- feat: x'), 'Hello!');
+    });
+
+    test('tolerates no space after quote and leading blanks', () {
+      expect(
+        parseReleaseAnnouncement('\n\n>📣  Spaced  \n\n- fix: y'),
+        'Spaced',
+      );
+    });
+
+    test('returns null without marker', () {
+      expect(parseReleaseAnnouncement('- feat: x\n- fix: y'), isNull);
+    });
+
+    test('returns null for null or empty body', () {
+      expect(parseReleaseAnnouncement(null), isNull);
+      expect(parseReleaseAnnouncement(''), isNull);
+      expect(parseReleaseAnnouncement('  \n '), isNull);
+    });
+
+    test('ignores megaphone in the middle of notes', () {
+      expect(parseReleaseAnnouncement('- feat: x\nSome 📣 text'), isNull);
+    });
+
+    test('ignores quote without megaphone', () {
+      expect(parseReleaseAnnouncement('> Just a quote\n\n- feat: x'), isNull);
+    });
+  });
+
+  group('stripReleaseAnnouncement', () {
+    test('removes leading block and keeps notes', () {
+      expect(stripReleaseAnnouncement('> 📣 Hello!\n\n- feat: x'), '- feat: x');
+    });
+
+    test('returns body unchanged without marker', () {
+      const body = '- feat: x';
+      expect(stripReleaseAnnouncement(body), body);
+    });
+
+    test('returns null when only the block exists', () {
+      expect(stripReleaseAnnouncement('> 📣 Hello!'), isNull);
+    });
+
+    test('passes null through', () {
+      expect(stripReleaseAnnouncement(null), isNull);
+    });
+  });
 }

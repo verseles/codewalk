@@ -642,6 +642,85 @@ void main() {
     expect(find.text('Update available: v1.3.0'), findsOneWidget);
   });
 
+  testWidgets('settings landing shows news banner when up to date', (
+    WidgetTester tester,
+  ) async {
+    _setPackageInfoVersion(version: '1.2.3', buildNumber: '45');
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+      updateCheckService: _FakeUpdateCheckService(
+        const UpdateCheckResult(
+          latestVersion: '1.2.3',
+          releaseNotes: '> 📣 Hello from Telegram!\n\n- fix: x',
+          announcement: 'Hello from Telegram!',
+          isNewer: false,
+        ),
+      ),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+    await settingsProvider.checkForUpdate();
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: _localizedMaterialApp(home: const SettingsPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('settings_whats_new_banner')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('settings_update_available_banner')),
+      findsNothing,
+    );
+    expect(find.text("What's new in v1.2.3"), findsOneWidget);
+    expect(find.text('Hello from Telegram!'), findsOneWidget);
+    // Announcement block is stripped from the notes preview.
+    expect(find.textContaining('> 📣'), findsNothing);
+  });
+
+  testWidgets('About shows Telegram tile next to GitHub', (
+    WidgetTester tester,
+  ) async {
+    final local = InMemoryAppLocalDataSource()
+      ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+    final settingsProvider = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settingsProvider.initialize();
+    addTearDown(settingsProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SettingsProvider>.value(
+        value: settingsProvider,
+        child: _localizedMaterialApp(
+          home: const SettingsPage(initialSectionId: 'about'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('settings_about_telegram')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('settings_about_github')),
+      findsOneWidget,
+    );
+    expect(find.text('t.me/codewalkapp'), findsOneWidget);
+  });
+
   testWidgets('About manual update check shows checking state immediately', (
     WidgetTester tester,
   ) async {

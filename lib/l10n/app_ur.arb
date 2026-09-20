@@ -2292,5 +2292,18 @@
   "sessionTabSwitcherHint": "سوئچ کے لیے Ctrl چھوڑیں، منسوخ کے لیے Esc",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "settingsAboutWhatsNew": "v{version} میں نیا کیا ہے",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

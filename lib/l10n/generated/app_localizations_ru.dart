@@ -6853,4 +6853,12 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get sessionTabSwitcherHint =>
       'Отпустите Ctrl для переключения, Esc для отмены';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'Что нового в v$version';
+  }
 }

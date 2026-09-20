@@ -2139,5 +2139,18 @@
   "sessionTabSwitcherHint": "Strg loslassen zum Wechseln, Esc zum Abbrechen",
   "@sessionTabSwitcherHint": {
     "description": "CodeWalk UI string - sessionTabSwitcherHint"
+  },
+  "aboutTelegram": "Telegram",
+  "@aboutTelegram": {
+    "description": "CodeWalk UI string - aboutTelegram"
+  },
+  "settingsAboutWhatsNew": "Neuigkeiten in v{version}",
+  "@settingsAboutWhatsNew": {
+    "description": "CodeWalk UI string - settingsAboutWhatsNew",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

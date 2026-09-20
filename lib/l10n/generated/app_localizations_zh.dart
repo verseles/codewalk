@@ -6345,4 +6345,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sessionTabSwitcherHint => '松开 Ctrl 切换，Esc 取消';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version 的新内容';
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../providers/settings_provider.dart';
 import '../services/update_check_service.dart';
@@ -17,6 +18,8 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
     this.currentVersion,
     this.currentBuildNumber,
     this.showReleaseNotes = false,
+    this.isNews = false,
+    this.onDismiss,
   });
 
   final SettingsProvider settings;
@@ -25,12 +28,24 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
   final String? currentBuildNumber;
   final bool showReleaseNotes;
 
+  /// When true, the card renders the What's-new announcement surface instead
+  /// of the update/install surface (no install controls).
+  final bool isNews;
+  final VoidCallback? onDismiss;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final onContainer = colorScheme.onPrimaryContainer;
+    final notesPreview = showReleaseNotes
+        ? stripReleaseAnnouncement(result.releaseNotes)
+        : null;
     return Card(
-      key: const ValueKey<String>('settings_update_available_banner'),
+      key: ValueKey<String>(
+        isNews
+            ? 'settings_whats_new_banner'
+            : 'settings_update_available_banner',
+      ),
       color: colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -39,13 +54,20 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Symbols.system_update, color: onContainer),
+                Icon(
+                  isNews ? Symbols.campaign : Symbols.system_update,
+                  color: onContainer,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    context.l10n.settingsAboutUpdateAvailable(
-                      result.latestVersion,
-                    ),
+                    isNews
+                        ? context.l10n.settingsAboutWhatsNew(
+                            result.latestVersion,
+                          )
+                        : context.l10n.settingsAboutUpdateAvailable(
+                            result.latestVersion,
+                          ),
                     style: Theme.of(
                       context,
                     ).textTheme.titleSmall?.copyWith(color: onContainer),
@@ -62,21 +84,53 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
                 ).textTheme.bodySmall?.copyWith(color: onContainer),
               ),
             ],
-            if (showReleaseNotes &&
-                result.releaseNotes != null &&
-                result.releaseNotes!.isNotEmpty) ...[
+            if (result.announcement != null &&
+                result.announcement!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.smallBorderRadius,
+                  ),
+                ),
+                child: Text(
+                  result.announcement!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onTertiaryContainer,
+                  ),
+                ),
+              ),
+            ],
+            if (notesPreview != null && notesPreview.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                result.releaseNotes!.length > 400
-                    ? '${result.releaseNotes!.substring(0, 400)}...'
-                    : result.releaseNotes!,
+                notesPreview.length > 400
+                    ? '${notesPreview.substring(0, 400)}...'
+                    : notesPreview,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: onContainer),
               ),
             ],
             const SizedBox(height: 8),
-            _buildInstallControl(context),
+            if (isNews)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton(
+                    onPressed:
+                        onDismiss ??
+                        () => settings.dismissNews(result.latestVersion),
+                    child: Text(context.l10n.settingsAboutDismiss),
+                  ),
+                ],
+              )
+            else
+              _buildInstallControl(context),
           ],
         ),
       ),

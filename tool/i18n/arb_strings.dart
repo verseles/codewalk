@@ -6,6 +6,7 @@ library;
 
 const englishTemplate = <String, String>{
   'aboutGitHub': 'GitHub',
+  'aboutTelegram': 'Telegram',
   'appProviderCannotActivateUnhealthy': 'Cannot activate an unhealthy server',
   'appProviderDesktopBuildRequired': 'Use a desktop build to configure a managed local server.',
   'appProviderDesktopOnly': 'Managed local server is available only on desktop.',
@@ -1228,6 +1229,7 @@ const englishTemplate = <String, String>{
   'settingsAboutUpdateVersionSummary': 'Current: {installedVersion}; available: v{latestVersion}',
   'settingsAboutVersion': 'Version',
   'settingsAboutVersionBuild': '{version} (build {buildNumber})',
+  'settingsAboutWhatsNew': 'What\'s new in v{version}',
   'settingsAppearanceAmoledDark': 'AMOLED dark mode',
   'settingsAppearanceAmoledDarkActive': 'Use pure black surfaces while dark mode is active.',
   'settingsAppearanceAmoledDarkInactive': 'Switch to dark mode to enable AMOLED surfaces.',
@@ -1924,6 +1926,7 @@ const englishTemplate = <String, String>{
 const translations = <String, Map<String, String>>{
   'ar': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'لا يمكن تنشيط خادم غير سليم',
     'appProviderDesktopBuildRequired': 'استخدم نسخة سطح المكتب لتهيئة خادم محلي مُدار.',
     'appProviderDesktopOnly': 'الخادم المحلي المدار متاح فقط على سطح المكتب.',
@@ -3146,6 +3149,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'الحالي: {installedVersion}؛ المتاح: v{latestVersion}',
     'settingsAboutVersion': 'الإصدار',
     'settingsAboutVersionBuild': '‏{version} (البناء {buildNumber})',
+    'settingsAboutWhatsNew': 'الجديد في v{version}',
     'settingsAppearanceAmoledDark': 'وضع AMOLED الداكن',
     'settingsAppearanceAmoledDarkActive': 'استخدم أسطحًا سوداء نقية أثناء تنشيط الوضع الداكن.',
     'settingsAppearanceAmoledDarkInactive': 'قم بالتحويل إلى الوضع الداكن لتمكين أسطح AMOLED.',
@@ -3840,6 +3844,7 @@ const translations = <String, Map<String, String>>{
   },
   'bn': {
     'aboutGitHub': 'গিটহাব',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'একটি অস্বাস্থ্যকর সার্ভার সক্রিয় করা যাবে না',
     'appProviderDesktopBuildRequired': 'পরিচালিত স্থানীয় সার্ভার কনফিগার করতে একটি ডেস্কটপ বিল্ড ব্যবহার করুন।',
     'appProviderDesktopOnly': 'পরিচালিত স্থানীয় সার্ভার শুধুমাত্র ডেস্কটপে উপলব্ধ।',
@@ -5062,6 +5067,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'বর্তমান: {installedVersion}; উপলব্ধ: v{latestVersion}',
     'settingsAboutVersion': 'সংস্করণ',
     'settingsAboutVersionBuild': '{version} (বিল্ড {buildNumber})',
+    'settingsAboutWhatsNew': 'v{version}-এ নতুন কী আছে',
     'settingsAppearanceAmoledDark': 'AMOLED অন্ধকার মোড',
     'settingsAppearanceAmoledDarkActive': 'অন্ধকার মোড সক্রিয় থাকাকালীন খাঁটি কালো পৃষ্ঠ ব্যবহার করুন।',
     'settingsAppearanceAmoledDarkInactive': 'AMOLED সারফেস চালু করতে ডার্ক মোডে স্যুইচ করুন।',
@@ -5756,6 +5762,7 @@ const translations = <String, Map<String, String>>{
   },
   'de': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Ein fehlerhafter Server kann nicht aktiviert werden',
     'appProviderDesktopBuildRequired': 'Verwenden Sie einen Desktop-Build, um einen verwalteten lokalen Server zu konfigurieren.',
     'appProviderDesktopOnly': 'Der verwaltete lokale Server ist nur auf dem Desktop verfügbar.',
@@ -6978,6 +6985,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'Aktuell: {installedVersion}; verfügbar: v{latestVersion}',
     'settingsAboutVersion': 'Version',
     'settingsAboutVersionBuild': '{version} (Build {buildNumber})',
+    'settingsAboutWhatsNew': 'Neuigkeiten in v{version}',
     'settingsAppearanceAmoledDark': 'AMOLED-Dunkelmodus',
     'settingsAppearanceAmoledDarkActive': 'Verwenden Sie rein schwarze Oberflächen, während der Dunkelmodus aktiv ist.',
     'settingsAppearanceAmoledDarkInactive': 'Wechseln Sie in den Dunkelmodus, um AMOLED-Oberflächen zu aktivieren.',
@@ -7672,6 +7680,7 @@ const translations = <String, Map<String, String>>{
   },
   'es': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'No se puede activar un servidor no saludable',
     'appProviderDesktopBuildRequired': 'Use una compilación de escritorio para configurar un servidor local gestionado.',
     'appProviderDesktopOnly': 'El servidor local gestionado solo está disponible en escritorio.',
@@ -8894,6 +8903,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'Actual: {installedVersion}; disponible: v{latestVersion}',
     'settingsAboutVersion': 'Versión',
     'settingsAboutVersionBuild': '{version} (compilación {buildNumber})',
+    'settingsAboutWhatsNew': 'Novedades de la v{version}',
     'settingsAppearanceAmoledDark': 'Modo oscuro AMOLED',
     'settingsAppearanceAmoledDarkActive': 'Usar superficies negras puras mientras el modo oscuro esté activo.',
     'settingsAppearanceAmoledDarkInactive': 'Cambie al modo oscuro para habilitar superficies AMOLED.',
@@ -9588,6 +9598,7 @@ const translations = <String, Map<String, String>>{
   },
   'fr': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Impossible d\'activer un serveur en mauvaise santé',
     'appProviderDesktopBuildRequired': 'Utilisez une build de bureau pour configurer un serveur local géré.',
     'appProviderDesktopOnly': 'Le serveur local géré n\'est disponible que sur ordinateur.',
@@ -10810,6 +10821,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'Actuelle : {installedVersion}; disponible : v{latestVersion}',
     'settingsAboutVersion': 'Version',
     'settingsAboutVersionBuild': '{version} (build {buildNumber})',
+    'settingsAboutWhatsNew': 'Nouveautés de la v{version}',
     'settingsAppearanceAmoledDark': 'Mode sombre AMOLED',
     'settingsAppearanceAmoledDarkActive': 'Utiliser des surfaces d\'un noir pur lorsque le mode sombre est actif.',
     'settingsAppearanceAmoledDarkInactive': 'Basculez en mode sombre pour activer les surfaces AMOLED.',
@@ -11504,6 +11516,7 @@ const translations = <String, Map<String, String>>{
   },
   'hi': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'एक अस्वस्थ सर्वर को सक्रिय नहीं किया जा सकता',
     'appProviderDesktopBuildRequired': 'प्रबंधित स्थानीय सर्वर कॉन्फ़िगर करने के लिए डेस्कटॉप बिल्ड का उपयोग करें।',
     'appProviderDesktopOnly': 'प्रबंधित स्थानीय सर्वर केवल डेस्कटॉप पर उपलब्ध है।',
@@ -12726,6 +12739,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'वर्तमान: {installedVersion}; उपलब्ध: v{latestVersion}',
     'settingsAboutVersion': 'संस्करण',
     'settingsAboutVersionBuild': '{version} (बिल्ड {buildNumber})',
+    'settingsAboutWhatsNew': 'v{version} में नया क्या है',
     'settingsAppearanceAmoledDark': 'AMOLED डार्क मोड',
     'settingsAppearanceAmoledDarkActive': 'डार्क मोड सक्रिय होने पर शुद्ध काली सतहों का उपयोग करें।',
     'settingsAppearanceAmoledDarkInactive': 'AMOLED सतहों को सक्षम करने के लिए डार्क मोड पर स्विच करें।',
@@ -13420,6 +13434,7 @@ const translations = <String, Map<String, String>>{
   },
   'it': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Impossibile attivare un server non integro',
     'appProviderDesktopBuildRequired': 'Usa una build desktop per configurare un server locale gestito.',
     'appProviderDesktopOnly': 'Il server locale gestito è disponibile solo su desktop.',
@@ -14642,6 +14657,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'Attuale: {installedVersion}; disponibile: v{latestVersion}',
     'settingsAboutVersion': 'Versione',
     'settingsAboutVersionBuild': '{version} (build {buildNumber})',
+    'settingsAboutWhatsNew': 'Novità della v{version}',
     'settingsAppearanceAmoledDark': 'Modalità scura AMOLED',
     'settingsAppearanceAmoledDarkActive': 'Usa superfici completamente nere quando la modalità scura è attiva.',
     'settingsAppearanceAmoledDarkInactive': 'Passa alla modalità scura per abilitare le superfici AMOLED.',
@@ -15336,6 +15352,7 @@ const translations = <String, Map<String, String>>{
   },
   'ja': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': '異常なサーバーを有効化できません',
     'appProviderDesktopBuildRequired': '管理対象ローカルサーバーを構成するには、デスクトップビルドを使用してください。',
     'appProviderDesktopOnly': '管理対象ローカルサーバーはデスクトップでのみ利用可能です。',
@@ -16558,6 +16575,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': '現在: {installedVersion}; 利用可能: v{latestVersion}',
     'settingsAboutVersion': 'バージョン',
     'settingsAboutVersionBuild': '{version} (ビルド {buildNumber})',
+    'settingsAboutWhatsNew': 'v{version} の新機能',
     'settingsAppearanceAmoledDark': 'AMOLEDダークモード',
     'settingsAppearanceAmoledDarkActive': '使用する純粋な黒の画面をダークモードがアクティブな間に有効にします。',
     'settingsAppearanceAmoledDarkInactive': 'AMOLED画面を有効にするには、ダークモードに切り替えてください。',
@@ -17252,6 +17270,7 @@ const translations = <String, Map<String, String>>{
   },
   'ko': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': '상태가 좋지 않은 서버를 활성화할 수 없습니다.',
     'appProviderDesktopBuildRequired': '관리형 로컬 서버를 구성하려면 데스크톱 빌드를 사용하세요.',
     'appProviderDesktopOnly': '관리형 로컬 서버는 데스크톱에서만 사용할 수 있습니다.',
@@ -18474,6 +18493,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': '현재: {installedVersion}; 사용 가능: v{latestVersion}',
     'settingsAboutVersion': '버전',
     'settingsAboutVersionBuild': '{version} (빌드 {buildNumber})',
+    'settingsAboutWhatsNew': 'v{version}의 새로운 소식',
     'settingsAppearanceAmoledDark': 'AMOLED 다크 모드',
     'settingsAppearanceAmoledDarkActive': '다크 모드가 활성화된 동안 완전한 검은색 배경을 사용합니다.',
     'settingsAppearanceAmoledDarkInactive': 'AMOLED 배경을 활성화하려면 다크 모드로 전환하세요.',
@@ -19168,6 +19188,7 @@ const translations = <String, Map<String, String>>{
   },
   'pt': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Não é possível ativar um servidor não saudável',
     'appProviderDesktopBuildRequired': 'Use uma versão desktop para configurar um servidor local gerenciado.',
     'appProviderDesktopOnly': 'O servidor local gerenciado está disponível apenas no desktop.',
@@ -20390,6 +20411,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'Atual: {installedVersion}; disponível: v{latestVersion}',
     'settingsAboutVersion': 'Versão',
     'settingsAboutVersionBuild': '{version} (compilação {buildNumber})',
+    'settingsAboutWhatsNew': 'Novidades da v{version}',
     'settingsAppearanceAmoledDark': 'Modo escuro AMOLED',
     'settingsAppearanceAmoledDarkActive': 'Usar superfícies pretas puras enquanto o modo escuro estiver ativo.',
     'settingsAppearanceAmoledDarkInactive': 'Mude para o modo escuro para habilitar superfícies AMOLED.',
@@ -21084,6 +21106,7 @@ const translations = <String, Map<String, String>>{
   },
   'ru': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Невозможно активировать неисправный сервер',
     'appProviderDesktopBuildRequired': 'Используйте настольную версию, чтобы настроить управляемый локальный сервер.',
     'appProviderDesktopOnly': 'Управляемый локальный сервер доступен только на компьютере.',
@@ -22306,6 +22329,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'Текущая: {installedVersion}; доступна: v{latestVersion}',
     'settingsAboutVersion': 'Версия',
     'settingsAboutVersionBuild': '{version} (сборка {buildNumber})',
+    'settingsAboutWhatsNew': 'Что нового в v{version}',
     'settingsAppearanceAmoledDark': 'AMOLED темный режим',
     'settingsAppearanceAmoledDarkActive': 'Использовать чисто черные поверхности при активном темном режиме.',
     'settingsAppearanceAmoledDarkInactive': 'Переключитесь в темный режим, чтобы включить поверхности AMOLED.',
@@ -23000,6 +23024,7 @@ const translations = <String, Map<String, String>>{
   },
   'ur': {
     'aboutGitHub': 'گٹ ہب',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'غیر صحت مند سرور کو فعال نہیں کیا جا سکتا',
     'appProviderDesktopBuildRequired': 'منظم مقامی سرور کنفیگر کرنے کے لیے ڈیسک ٹاپ بلڈ استعمال کریں۔',
     'appProviderDesktopOnly': 'منظم مقامی سرور صرف ڈیسک ٹاپ پر دستیاب ہے۔',
@@ -24222,6 +24247,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': 'موجودہ: {installedVersion}؛ دستیاب: v{latestVersion}',
     'settingsAboutVersion': 'ورژن',
     'settingsAboutVersionBuild': '{version} (تعمیر {buildNumber} )',
+    'settingsAboutWhatsNew': 'v{version} میں نیا کیا ہے',
     'settingsAppearanceAmoledDark': 'AMOLED ڈارک موڈ',
     'settingsAppearanceAmoledDarkActive': 'سیاہ موڈ فعال ہونے کے دوران خالص سیاہ سطحوں کا استعمال کریں۔',
     'settingsAppearanceAmoledDarkInactive': 'AMOLED سطحوں کو فعال کرنے کے لیے ڈارک موڈ پر سوئچ کریں۔',
@@ -24916,6 +24942,7 @@ const translations = <String, Map<String, String>>{
   },
   'zh': {
     'aboutGitHub': 'GitHub',
+    'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': '无法激活不健康的服务器',
     'appProviderDesktopBuildRequired': '请使用桌面版配置托管本地服务器。',
     'appProviderDesktopOnly': '托管本地服务器仅在桌面端可用。',
@@ -26138,6 +26165,7 @@ const translations = <String, Map<String, String>>{
     'settingsAboutUpdateVersionSummary': '当前: {installedVersion}; 可用: v{latestVersion}',
     'settingsAboutVersion': '版本',
     'settingsAboutVersionBuild': '{version} (构建号 {buildNumber})',
+    'settingsAboutWhatsNew': 'v{version} 的新内容',
     'settingsAppearanceAmoledDark': 'AMOLED 深色模式',
     'settingsAppearanceAmoledDarkActive': '在深色模式处于活动状态时使用纯黑表面。',
     'settingsAppearanceAmoledDarkInactive': '切换到深色模式以启用 AMOLED 表面。',

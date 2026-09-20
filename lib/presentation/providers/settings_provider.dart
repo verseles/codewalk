@@ -133,6 +133,12 @@ class SettingsProvider extends ChangeNotifier {
       <NotificationCategory, String>{};
   UpdateCheckResult? _updateCheckResult;
   String? _dismissedUpdateVersion;
+  // Latest successful release payload, kept even when already up to date so
+  // the What's-new announcement stays visible. Null on failure/offline.
+  UpdateCheckResult? _latestRelease;
+  String? _dismissedNewsVersion;
+  // Set only by _performStartupUpdateCheck(); cleared by acknowledgeStartupNewsToast().
+  bool _pendingStartupNewsToast = false;
   bool _checkingForUpdate = false;
   bool _lastCheckFoundNoUpdate = false;
   // Set only by _performStartupUpdateCheck(); cleared by acknowledgeStartupUpdateToast().
@@ -194,6 +200,19 @@ class SettingsProvider extends ChangeNotifier {
   bool get dynamicColorAvailable => _dynamicColorAvailable;
   ExperienceSettings get settings => _settings;
   UpdateCheckResult? get updateCheckResult => _updateCheckResult;
+  UpdateCheckResult? get latestRelease => _latestRelease;
+  String? get dismissedNewsVersion => _dismissedNewsVersion;
+  bool get pendingStartupNewsToast => _pendingStartupNewsToast;
+
+  /// Whether the latest release carries an un-dismissed announcement.
+  bool get hasUnseenNews {
+    final release = _latestRelease;
+    final announcement = release?.announcement;
+    return announcement != null &&
+        announcement.isNotEmpty &&
+        release!.latestVersion != _dismissedNewsVersion;
+  }
+
   bool get checkingForUpdate => _checkingForUpdate;
   bool get lastCheckFoundNoUpdate => _lastCheckFoundNoUpdate;
   bool get pendingStartupUpdateToast => _pendingStartupUpdateToast;
@@ -419,6 +438,7 @@ class SettingsProvider extends ChangeNotifier {
     await _restoreSessionAttentionHost();
     _dismissedUpdateVersion = await _localDataSource
         .getDismissedUpdateVersion();
+    _dismissedNewsVersion = await _localDataSource.getDismissedNewsVersion();
     unawaited(syncNotificationsFromServerConfig());
     if (_settings.checkUpdatesOnOpen) {
       unawaited(_performStartupUpdateCheck());
@@ -555,13 +575,28 @@ class SettingsProvider extends ChangeNotifier {
         info.version,
         ignoreCooldown: ignoreCooldown,
       );
-      if (result != null &&
-          result.isNewer &&
-          result.latestVersion != _dismissedUpdateVersion) {
+      if (result == null) {
+        return;
+      }
+      final latestChanged =
+          _latestRelease?.latestVersion != result.latestVersion;
+      _latestRelease = result;
+      var shouldNotify = latestChanged;
+      if (result.isNewer && result.latestVersion != _dismissedUpdateVersion) {
         _updateCheckResult = result;
         if (announceStartupToast) {
           _pendingStartupUpdateToast = true;
         }
+        shouldNotify = true;
+      } else if (announceStartupToast &&
+          !result.isNewer &&
+          result.announcement != null &&
+          result.announcement!.isNotEmpty &&
+          result.latestVersion != _dismissedNewsVersion) {
+        _pendingStartupNewsToast = true;
+        shouldNotify = true;
+      }
+      if (shouldNotify) {
         notifyListeners();
       }
     } catch (_) {
@@ -573,6 +608,12 @@ class SettingsProvider extends ChangeNotifier {
   void acknowledgeStartupUpdateToast() {
     if (!_pendingStartupUpdateToast) return;
     _pendingStartupUpdateToast = false;
+  }
+
+  /// Clears the pending startup news flag after AppShellPage has consumed it.
+  void acknowledgeStartupNewsToast() {
+    if (!_pendingStartupNewsToast) return;
+    _pendingStartupNewsToast = false;
   }
 
   bool isNotificationEnabled(NotificationCategory category) {

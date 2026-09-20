@@ -47,6 +47,9 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
       final info = await PackageInfo.fromPlatform();
       _updateCheckService.clearCache();
       final result = await _updateCheckService.check(info.version);
+      if (result != null) {
+        _latestRelease = result;
+      }
       if (result != null &&
           result.isNewer &&
           result.latestVersion != _dismissedUpdateVersion) {
@@ -77,6 +80,15 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     notifyListeners();
   }
 
+  /// Dismisses only the What's-new announcement for [version].
+  /// Leaves the update/install state untouched.
+  Future<void> dismissNews(String version) async {
+    _dismissedNewsVersion = version;
+    _pendingStartupNewsToast = false;
+    await _localDataSource.saveDismissedNewsVersion(version);
+    notifyListeners();
+  }
+
   /// Resets in-memory state to defaults (used after clearAll during app reset).
   Future<void> resetToDefaults() async {
     _automaticUpdateCheckTimer?.cancel();
@@ -87,6 +99,9 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     _settings = ExperienceSettings.defaults();
     _updateCheckResult = null;
     _dismissedUpdateVersion = null;
+    _latestRelease = null;
+    _dismissedNewsVersion = null;
+    _pendingStartupNewsToast = false;
     _checkingForUpdate = false;
     _lastCheckFoundNoUpdate = false;
     _pendingStartupUpdateToast = false;

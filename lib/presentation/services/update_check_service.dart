@@ -53,6 +53,7 @@ class UpdateCheckResult {
     required this.latestVersion,
     this.releaseUrl,
     this.releaseNotes,
+    this.announcement,
     this.apkUrl,
     required this.isNewer,
   });
@@ -60,9 +61,67 @@ class UpdateCheckResult {
   final String latestVersion;
   final String? releaseUrl;
   final String? releaseNotes;
+  // Optional informal announcement extracted from the leading `> 📣` block
+  // of the release body. Shown verbatim in the author's language.
+  final String? announcement;
   // Direct download URL for the .apk asset from the GitHub release, if present.
   final String? apkUrl;
   final bool isNewer;
+}
+
+/// Extracts the leading `> 📣 ...` announcement block from a release body.
+///
+/// Only consecutive quote lines containing `📣` at the very top of [body]
+/// (after blank lines) form the announcement. Anything else — including a
+/// `📣` in the middle of the notes — is ignored and yields null.
+String? parseReleaseAnnouncement(String? body) {
+  if (body == null) return null;
+  final lines = body.split('\n');
+  final buffer = <String>[];
+  var started = false;
+  for (final line in lines) {
+    final trimmed = line.trimLeft();
+    if (!started) {
+      if (trimmed.isEmpty) continue;
+      if (!_isAnnouncementLine(trimmed)) return null;
+      started = true;
+    } else if (!_isAnnouncementLine(trimmed)) {
+      break;
+    }
+    buffer.add(
+      trimmed.replaceFirst(RegExp(r'^>\s?'), '').replaceFirst('📣', '').trim(),
+    );
+  }
+  final text = buffer.where((line) => line.isNotEmpty).join('\n').trim();
+  return text.isEmpty ? null : text;
+}
+
+bool _isAnnouncementLine(String trimmedLeft) {
+  return trimmedLeft.startsWith('>') && trimmedLeft.contains('📣');
+}
+
+/// Returns [body] without its leading announcement block, if any.
+String? stripReleaseAnnouncement(String? body) {
+  if (body == null) return null;
+  final lines = body.split('\n');
+  var index = 0;
+  var stripped = false;
+  while (index < lines.length) {
+    final trimmed = lines[index].trimLeft();
+    if (trimmed.isEmpty && !stripped) {
+      index++;
+      continue;
+    }
+    if (trimmed.startsWith('>') && trimmed.contains('📣')) {
+      stripped = true;
+      index++;
+      continue;
+    }
+    break;
+  }
+  if (!stripped) return body;
+  final rest = lines.sublist(index).join('\n').trim();
+  return rest.isEmpty ? null : rest;
 }
 
 class UpdateCheckService {
@@ -132,6 +191,7 @@ class UpdateCheckService {
         latestVersion: latestSemver.toString(),
         releaseUrl: data['html_url'] as String?,
         releaseNotes: data['body'] as String?,
+        announcement: parseReleaseAnnouncement(data['body'] as String?),
         apkUrl: apkUrl,
         isNewer: latestSemver.isNewerThan(currentSemver),
       );

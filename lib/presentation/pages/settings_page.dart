@@ -534,6 +534,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 currentBuildNumber: _buildNumber,
               ),
               const SizedBox(height: 10),
+            ] else if (settings.hasUnseenNews &&
+                settings.latestRelease != null) ...[
+              SettingsUpdateAvailableCard(
+                settings: settings,
+                result: settings.latestRelease!,
+                currentVersion: _version,
+                currentBuildNumber: _buildNumber,
+                isNews: true,
+              ),
+              const SizedBox(height: 10),
             ],
             TextField(
               key: const ValueKey<String>('settings_navigation_search'),

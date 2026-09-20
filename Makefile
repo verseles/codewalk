@@ -62,6 +62,7 @@ help:
 	@echo "  make android    Build Android APK (arm64)"
 	@echo "  make precommit  check + android"
 	@echo "  make release V=patch|minor|major  Bump version, changelog, commit, tag, push"
+	@echo "    ANNOUNCE=\"text\" (optional) embeds a release announcement; prompts once on TTY"
 	@echo "  make clean      Clean and restore dependencies"
 
 deps:
@@ -424,7 +425,12 @@ release:
 		*) echo "V must be patch, minor, or major"; exit 1 ;; \
 	esac; \
 	echo "$$cur_ver+$$cur_build -> $$new_ver+$$new_build"; \
-	python3 tool/release/changelog.py update "$$new_ver"; \
+	announce="$${ANNOUNCE:-}"; \
+	if [ -z "$$announce" ] && [ -t 0 ]; then \
+		printf 'Release announcement (optional, Enter to skip): '; \
+		read -r announce || announce=""; \
+	fi; \
+	python3 tool/release/changelog.py update "$$new_ver" --announce "$$announce"; \
 	sed -i "s/^version: .*/version: $$new_ver+$$new_build/" pubspec.yaml; \
 	git add pubspec.yaml CHANGELOG.md; \
 	git commit -m "release: cut v$$new_ver"; \

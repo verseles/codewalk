@@ -72,6 +72,15 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
                 currentVersion: _version,
                 currentBuildNumber: _buildNumber,
                 showReleaseNotes: true,
+              )
+            else if (settings.hasUnseenNews && settings.latestRelease != null)
+              SettingsUpdateAvailableCard(
+                settings: settings,
+                result: settings.latestRelease!,
+                currentVersion: _version,
+                currentBuildNumber: _buildNumber,
+                showReleaseNotes: true,
+                isNews: true,
               ),
             if (upToDate && updateResult == null) _buildUpToDateTile(context),
             _buildCheckUpdatesOnOpenTile(context, settings),
@@ -81,6 +90,7 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
             const SizedBox(height: 8),
             _buildReplayChatTourTile(context, settings),
             _buildGitHubTile(context),
+            _buildTelegramTile(context),
             const SizedBox(height: 20),
             SettingsGroupHeader(title: context.l10n.settingsGroupDataReset),
             const SizedBox(height: 8),
@@ -258,6 +268,17 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
       subtitle: const Text('verseles/codewalk'),
       trailing: const Icon(Symbols.open_in_new, size: 16),
       onTap: () => _openUrl('https://github.com/verseles/codewalk'),
+    );
+  }
+
+  Widget _buildTelegramTile(BuildContext context) {
+    return ListTile(
+      key: const ValueKey('settings_about_telegram'),
+      leading: const Icon(Symbols.send),
+      title: Text(context.l10n.aboutTelegram),
+      subtitle: const Text('t.me/codewalkapp'),
+      trailing: const Icon(Symbols.open_in_new, size: 16),
+      onTap: () => _openUrl(AppConstants.telegramInviteUrl),
     );
   }
 

@@ -6515,4 +6515,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get sessionTabSwitcherHint => 'Ctrl을 놓으면 전환, Esc로 취소';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version의 새로운 소식';
+  }
 }

@@ -2505,6 +2505,215 @@ void main() {
       expect(second.readAloudVoice, 'pt-br-x-tpf');
       expect(second.readAloudVoiceId, 'pt-br-x-tpf');
     });
+
+    group("What's-new news state", () {
+      test('manual check keeps latest release when up to date', () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(
+            latestVersion: '1.2.3',
+            releaseNotes: '> 📣 Hi!\n\n- fix: x',
+            announcement: 'Hi!',
+            isNewer: false,
+          ),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+
+        await provider.checkForUpdate();
+
+        expect(provider.updateCheckResult, isNull);
+        expect(provider.lastCheckFoundNoUpdate, isTrue);
+        expect(provider.latestRelease?.latestVersion, '1.2.3');
+        expect(provider.hasUnseenNews, isTrue);
+        expect(provider.pendingStartupNewsToast, isFalse);
+      });
+
+      test('dismissNews persists and hides without touching update state',
+          () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(
+            latestVersion: '1.2.3',
+            announcement: 'Hi!',
+            isNewer: false,
+          ),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+        await provider.checkForUpdate();
+        expect(provider.hasUnseenNews, isTrue);
+
+        await provider.dismissNews('1.2.3');
+
+        expect(provider.hasUnseenNews, isFalse);
+        expect(provider.updateCheckResult, isNull);
+        expect(local.dismissedNewsVersion, '1.2.3');
+
+        final second = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await second.initialize();
+        addTearDown(second.dispose);
+        await second.checkForUpdate();
+        expect(second.hasUnseenNews, isFalse);
+      });
+
+      test('startup check raises news toast only for up-to-date news',
+          () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource();
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(
+            latestVersion: '1.2.3',
+            announcement: 'Hi!',
+            isNewer: false,
+          ),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+
+        for (var i = 0; i < 100 && service.checkCount == 0; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        expect(service.checkCount, greaterThan(0));
+        for (var i = 0; i < 100 && !provider.hasUnseenNews; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+
+        expect(provider.hasUnseenNews, isTrue);
+        expect(provider.pendingStartupNewsToast, isTrue);
+        expect(provider.pendingStartupUpdateToast, isFalse);
+
+        provider.acknowledgeStartupNewsToast();
+        expect(provider.pendingStartupNewsToast, isFalse);
+      });
+
+      test('newer result without announcement raises update toast only',
+          () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource();
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(latestVersion: '1.3.0', isNewer: true),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+
+        for (var i = 0; i < 100 && service.checkCount == 0; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        for (var i = 0;
+            i < 100 && provider.updateCheckResult == null;
+            i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+
+        expect(provider.updateCheckResult?.latestVersion, '1.3.0');
+        expect(provider.pendingStartupUpdateToast, isTrue);
+        expect(provider.pendingStartupNewsToast, isFalse);
+        expect(provider.hasUnseenNews, isFalse);
+      });
+
+      test('resetToDefaults clears news state', () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(
+            latestVersion: '1.2.3',
+            announcement: 'Hi!',
+            isNewer: false,
+          ),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+        await provider.checkForUpdate();
+        expect(provider.hasUnseenNews, isTrue);
+
+        await provider.resetToDefaults();
+
+        expect(provider.latestRelease, isNull);
+        expect(provider.hasUnseenNews, isFalse);
+        expect(provider.pendingStartupNewsToast, isFalse);
+      });
+    });
   });
 }
 

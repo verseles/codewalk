@@ -72,7 +72,9 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 ## Release
 
 - New versions use `make release V=patch|minor|major`.
-- The release command updates `pubspec.yaml`, commits, creates a `vX.Y.Z` tag, and pushes.
+- The release command updates `pubspec.yaml` and `CHANGELOG.md`, commits, creates a `vX.Y.Z` tag, and pushes.
+- Optional release announcement: `ANNOUNCE="text" make release V=minor`, or answer the one-line TTY prompt (empty skips; never blocks CI).
+- The announcement ships as a `> 📣` block at the top of the version section and surfaces in-app as What's-new.
 - Ensure all code changes are committed before release. `make release` only commits the version bump.
 - Plain `push` is not a release and must not invoke `releaser`.
 - After release push/tag, CI watch belongs to `cimonitor`; `releaser` does not monitor CI.

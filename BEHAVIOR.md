@@ -2148,6 +2148,23 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the notice is not shown when no newer version is known or when the user dismissed that version
 - **Then** temporary update-check failures remain silent and do not block Settings
 
+### What's-new announcement from the latest release
+
+- **Given** the latest GitHub release body starts with a `> 📣` announcement block
+- **When** the user opens the main `Settings` screen or `Settings` > `About`
+- **Then** the announcement text is shown highlighted above the changelog notes, verbatim in the author's language
+- **Then** up-to-date users see a What's-new card in the same top slot where the update notice would appear; the card offers only dismissal, never installation
+- **Then** dismissing the announcement is independent of dismissing the update: each is remembered per version and neither hides the other
+- **Then** on startup, an unseen announcement shows a one-time snackbar only when no update snackbar is shown; closing the snackbar does not persist the dismissal
+- **Then** a release without the announcement block behaves exactly as before, and check failures stay silent
+
+### Telegram community entry
+
+- **Given** the user opens `Settings` > `About`
+- **When** the Help group is rendered
+- **Then** a permanent Telegram entry sits next to GitHub and opens `https://t.me/codewalkapp` in the external handler
+- **Then** the entry is discoverable through the Settings search
+
 ### Settings controls update immediately
 
 - **Given** the user changes any settings control (switch, radio, segmented control, dropdown)

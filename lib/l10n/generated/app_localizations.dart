@@ -11626,6 +11626,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Release Ctrl to switch, Esc to cancel'**
   String get sessionTabSwitcherHint;
+
+  /// CodeWalk UI string — aboutTelegram
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get aboutTelegram;
+
+  /// CodeWalk UI string — settingsAboutWhatsNew
+  ///
+  /// In en, this message translates to:
+  /// **'What\'\'s new in v{version}'**
+  String settingsAboutWhatsNew(String version);
 }
 
 class _AppLocalizationsDelegate

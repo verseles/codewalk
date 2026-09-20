@@ -6919,4 +6919,12 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sessionTabSwitcherHint =>
       'Relâchez Ctrl pour changer, Échap pour annuler';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'Nouveautés de la v$version';
+  }
 }

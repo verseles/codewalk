@@ -6798,4 +6798,12 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get sessionTabSwitcherHint =>
       'स्विच करने के लिए Ctrl छोड़ें, रद्द करने के लिए Esc';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version में नया क्या है';
+  }
 }

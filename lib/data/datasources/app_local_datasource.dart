@@ -425,6 +425,10 @@ abstract class AppLocalDataSource {
 
   Future<void> saveDismissedUpdateVersion(String version);
 
+  Future<String?> getDismissedNewsVersion();
+
+  Future<void> saveDismissedNewsVersion(String version);
+
   /// Technical comment translated to English.
   Future<void> clearAll();
 
@@ -2099,6 +2103,19 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   Future<void> saveDismissedUpdateVersion(String version) async {
     await _sharedPreferences.setString(
       AppConstants.dismissedUpdateVersionKey,
+      version,
+    );
+  }
+
+  @override
+  Future<String?> getDismissedNewsVersion() async {
+    return _sharedPreferences.getString(AppConstants.dismissedNewsVersionKey);
+  }
+
+  @override
+  Future<void> saveDismissedNewsVersion(String version) async {
+    await _sharedPreferences.setString(
+      AppConstants.dismissedNewsVersionKey,
       version,
     );
   }

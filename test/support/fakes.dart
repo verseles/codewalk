@@ -163,6 +163,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? defaultServerId;
   String? localOpencodeCommand;
   String? dismissedUpdateVersion;
+  String? dismissedNewsVersion;
   String? apiKey;
   String? selectedProvider;
   String? selectedModel;
@@ -232,6 +233,7 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     defaultServerId = null;
     localOpencodeCommand = null;
     dismissedUpdateVersion = null;
+    dismissedNewsVersion = null;
     apiKey = null;
     selectedProvider = null;
     selectedModel = null;
@@ -283,6 +285,14 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   @override
   Future<void> saveDismissedUpdateVersion(String version) async {
     dismissedUpdateVersion = version;
+  }
+
+  @override
+  Future<String?> getDismissedNewsVersion() async => dismissedNewsVersion;
+
+  @override
+  Future<void> saveDismissedNewsVersion(String version) async {
+    dismissedNewsVersion = version;
   }
 
   @override

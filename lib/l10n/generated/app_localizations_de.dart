@@ -6878,4 +6878,12 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get sessionTabSwitcherHint =>
       'Strg loslassen zum Wechseln, Esc zum Abbrechen';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'Neuigkeiten in v$version';
+  }
 }

@@ -61,6 +61,10 @@ class AppConstants {
 
   // Update check keys
   static const String dismissedUpdateVersionKey = 'dismissed_update_version';
+  static const String dismissedNewsVersionKey = 'dismissed_news_version';
+
+  // Community
+  static const String telegramInviteUrl = 'https://t.me/codewalkapp';
 
   // Basic auth storage keys
   static const String basicAuthEnabledKey = 'basic_auth_enabled';

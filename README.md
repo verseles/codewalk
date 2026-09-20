@@ -159,6 +159,7 @@ make test-fast  # excludes slow/integration tags
 make web        # build Flutter web app into build/web
 make android    # build arm64 APK
 make release V=patch # bump pubspec, update CHANGELOG.md, commit, tag, push
+#   ANNOUNCE="text" embeds an optional What's-new announcement (or answer the prompt)
 ```
 
 Use `make check` for normal validation. When you need a testable Android artifact, run `HEY_CAPTION="specific caption" make android` after checks pass.
@@ -254,6 +255,10 @@ For full technical details, see [CODEBASE.md](CODEBASE.md).
 - **Local Storage:** SharedPreferences
 - **Dependency Injection:** GetIt
 - **Design System:** Material Design 3
+
+## Community
+
+Chat with users, get release news, and send feedback: [Telegram — t.me/codewalkapp](https://t.me/codewalkapp). Tagged releases can carry a What's-new note that surfaces in-app under Settings › About.
 
 ## License
 

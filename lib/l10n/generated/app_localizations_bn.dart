@@ -6800,4 +6800,12 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get sessionTabSwitcherHint =>
       'Ctrl ছেড়ে পরিবর্তন করুন, Esc দিয়ে বাতিল';
+
+  @override
+  String get aboutTelegram => 'Telegram';
+
+  @override
+  String settingsAboutWhatsNew(String version) {
+    return 'v$version-এ নতুন কী আছে';
+  }
 }

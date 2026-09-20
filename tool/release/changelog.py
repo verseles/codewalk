@@ -56,7 +56,24 @@ def _read_changelog() -> str:
     )
 
 
-def update(version: str) -> None:
+def _announce_block(announce: str | None) -> str:
+    """Formats an optional release announcement as a visible blockquote.
+
+    Returns an empty string when there is no usable text so callers keep
+    the current section shape. Internal newlines collapse to spaces to keep
+    the announcement a single blockquote line.
+    """
+    if announce is None:
+        return ""
+    text = " ".join(announce.split()).strip()
+    if not text:
+        return ""
+    if len(text) > 300:
+        text = text[:300].rstrip()
+    return f"> 📣 {text}\n\n"
+
+
+def update(version: str, announce: str | None = None) -> None:
     tag = _normal_version(version)
     content = _read_changelog().rstrip() + "\n"
     heading_pattern = re.compile(rf"^##\s+{re.escape(tag)}(?:\s|$)", re.MULTILINE)
@@ -65,7 +82,7 @@ def update(version: str) -> None:
 
     date = _dt.date.today().isoformat()
     bullets = _commit_bullets(_latest_tag())
-    section = f"## {tag} - {date}\n\n" + "\n".join(bullets) + "\n\n"
+    section = f"## {tag} - {date}\n\n" + _announce_block(announce) + "\n".join(bullets) + "\n\n"
 
     first_heading = re.search(r"^##\s+", content, flags=re.MULTILINE)
     if first_heading:
@@ -93,6 +110,7 @@ def main() -> None:
 
     update_parser = sub.add_parser("update")
     update_parser.add_argument("version")
+    update_parser.add_argument("--announce", default=None)
 
     extract_parser = sub.add_parser("extract")
     extract_parser.add_argument("version")
@@ -100,7 +118,7 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.command == "update":
-        update(args.version)
+        update(args.version, announce=args.announce)
     elif args.command == "extract":
         extract(args.version, args.output)
 
