@@ -2152,7 +2152,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 - **Given** the latest GitHub release body starts with a `> 📣` announcement block
 - **When** the user opens the main `Settings` screen or `Settings` > `About`
-- **Then** the announcement text is shown highlighted above the changelog notes, verbatim in the author's language
+- **Then** the announcement text is shown highlighted, verbatim in the author's language: on the main `Settings` screen as a What's-new card without changelog notes, and in `Settings` > `About` above the full changelog
 - **Then** up-to-date users see a What's-new card in the same top slot where the update notice would appear; the card offers only dismissal, never installation
 - **Then** the What's-new card also offers a Changelog action that opens the `About` section and an Our group action that opens the Telegram community
 - **Then** `Settings` > `About` renders the full release changelog with scrolling instead of truncated previews with ellipsis

@@ -448,6 +448,8 @@ class _SettingsPageState extends State<SettingsPage> {
   void _openAboutSection() {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
+      // Clear any search navigation so its miss deadline cannot fire later.
+      _searchRequest = null;
       _selectedSectionId = 'about';
       _detailOpened = true;
       _showMobileDetail = true;

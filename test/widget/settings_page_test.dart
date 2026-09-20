@@ -685,6 +685,8 @@ void main() {
     expect(find.text('Hello from Telegram!'), findsOneWidget);
     // Announcement block is stripped from the notes preview.
     expect(find.textContaining('> 📣'), findsNothing);
+    // Landing shows the announcement only; notes live one tap away in About.
+    expect(find.text('- fix: x'), findsNothing);
     // News cards omit the installed-vs-available comparison.
     expect(find.textContaining('Current:'), findsNothing);
     // Dismiss, Changelog and Our group actions are present.

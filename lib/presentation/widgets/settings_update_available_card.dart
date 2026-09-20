@@ -114,14 +114,11 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
             ],
             if (notesPreview != null && notesPreview.isNotEmpty) ...[
               const SizedBox(height: 8),
+              // notesPreview is non-null only when showReleaseNotes (About),
+              // which renders the full changelog; the landing banner shows
+              // the announcement only, one tap away from full notes.
               Text(
-                // About shows the full changelog (scrollable parent);
-                // the landing banner keeps the truncated preview.
-                showReleaseNotes
-                    ? notesPreview
-                    : notesPreview.length > 400
-                    ? '${notesPreview.substring(0, 400)}...'
-                    : notesPreview,
+                notesPreview,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: onContainer),
