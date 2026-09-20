@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.249.0 - 2026-09-20
+
+> 📣 News update: full changelog in About, plus quick links to Changelog and our Telegram group.
+
+- fix(review): restore lockfile pins (keep CI resolution)
+- fix(review): restore lockfile pins plus About-side notes assertion
+- fix(review): honest landing notes behavior plus search reset on Changelog
+- feat(news): More/Changelog/Our group actions plus full changelog in About
+- docs: flow proposes release text upfront for user approval
+
 ## v1.248.0 - 2026-09-20
 
 > 📣 Telegram community is live — join us at https://t.me/codewalkapp. Release notes now surface in-app under Settings What's new.
