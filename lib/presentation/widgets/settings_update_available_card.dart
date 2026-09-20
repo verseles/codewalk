@@ -40,6 +40,9 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
     final notesPreview = showReleaseNotes
         ? stripReleaseAnnouncement(result.releaseNotes)
         : null;
+    // The installed-vs-available comparison only makes sense for updates;
+    // What's-new cards for up-to-date users omit it.
+    final versionSummary = isNews ? null : _versionSummary(context);
     return Card(
       key: ValueKey<String>(
         isNews
@@ -75,10 +78,10 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (_versionSummary(context) case final versionSummary?) ...[
+            if (versionSummary case final summary?) ...[
               const SizedBox(height: 6),
               Text(
-                versionSummary,
+                summary,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: onContainer),

@@ -195,12 +195,13 @@ class _AppShellPageState extends State<AppShellPage> {
           });
         } else if (settingsProvider.pendingStartupNewsToast &&
             settingsProvider.hasUnseenNews) {
-          // What's-new toast only when no update toast fired above.
+          // What's-new toast only when no update toast fired above. Ack here
+          // so hourly re-checks cannot leave a stale flag behind.
+          settingsProvider.acknowledgeStartupNewsToast();
           final newsResult = settingsProvider.latestRelease;
           if (newsResult != null &&
               newsResult.latestVersion != _shownStartupNewsVersion) {
             _shownStartupNewsVersion = newsResult.latestVersion;
-            settingsProvider.acknowledgeStartupNewsToast();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _showNewsToast(context, newsResult);
             });

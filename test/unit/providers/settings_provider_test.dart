@@ -2677,8 +2677,40 @@ void main() {
         expect(provider.hasUnseenNews, isFalse);
       });
 
-      test('resetToDefaults clears news state', () async {
+      test('failed manual check keeps last known update result', () async {
         TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(latestVersion: '1.3.0', isNewer: true),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+        await provider.checkForUpdate();
+        expect(provider.updateCheckResult?.latestVersion, '1.3.0');
+
+        service.result = null;
+        await provider.checkForUpdate();
+
+        expect(provider.updateCheckResult?.latestVersion, '1.3.0');
+        expect(provider.latestRelease?.latestVersion, '1.3.0');
+      });
+
+      test('resetToDefaults clears news state', () async {       TestWidgetsFlutterBinding.ensureInitialized();
         PackageInfo.setMockInitialValues(
           appName: 'CodeWalk',
           packageName: 'com.verseles.codewalk',

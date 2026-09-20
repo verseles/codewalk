@@ -69,7 +69,8 @@ def _announce_block(announce: str | None) -> str:
     if not text:
         return ""
     if len(text) > 300:
-        text = text[:300].rstrip()
+        text = text[:297].rsplit(" ", 1)[0] + "…"
+        print("warning: release announcement truncated to 300 characters")
     return f"> 📣 {text}\n\n"
 
 

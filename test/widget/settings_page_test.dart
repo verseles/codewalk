@@ -685,6 +685,8 @@ void main() {
     expect(find.text('Hello from Telegram!'), findsOneWidget);
     // Announcement block is stripped from the notes preview.
     expect(find.textContaining('> 📣'), findsNothing);
+    // News cards omit the installed-vs-available comparison.
+    expect(find.textContaining('Current:'), findsNothing);
   });
 
   testWidgets('About shows Telegram tile next to GitHub', (

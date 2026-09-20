@@ -47,17 +47,19 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
       final info = await PackageInfo.fromPlatform();
       _updateCheckService.clearCache();
       final result = await _updateCheckService.check(info.version);
-      if (result != null) {
-        _latestRelease = result;
+      if (result == null) {
+        // Failed check: keep the last known update/news state instead of
+        // flashing an empty surface (matches the silent-check behavior).
+        return;
       }
-      if (result != null &&
-          result.isNewer &&
+      _latestRelease = result;
+      if (result.isNewer &&
           result.latestVersion != _dismissedUpdateVersion) {
         _updateCheckResult = result;
         _lastCheckFoundNoUpdate = false;
       } else {
         _updateCheckResult = null;
-        _lastCheckFoundNoUpdate = result != null;
+        _lastCheckFoundNoUpdate = true;
       }
     } catch (error, stackTrace) {
       AppLogger.warn(

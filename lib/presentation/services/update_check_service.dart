@@ -71,56 +71,60 @@ class UpdateCheckResult {
 
 /// Extracts the leading `> 📣 ...` announcement block from a release body.
 ///
-/// Only consecutive quote lines containing `📣` at the very top of [body]
-/// (after blank lines) form the announcement. Anything else — including a
-/// `📣` in the middle of the notes — is ignored and yields null.
+/// The block starts at the first `>` line containing `📣` (after blank
+/// lines) and absorbs following `>` continuation lines, with or without the
+/// emoji. Anything else — including a `📣` in the middle of the notes —
+/// is ignored and yields null.
 String? parseReleaseAnnouncement(String? body) {
-  if (body == null) return null;
+  final block = _announcementBlock(body);
+  return block.text;
+}
+
+bool _isAnnouncementStart(String trimmedLeft) {
+  return trimmedLeft.startsWith('>') && trimmedLeft.contains('📣');
+}
+
+/// Shared boundary scan: returns how many leading lines form the
+/// announcement block and its cleaned text (null when there is no block).
+({int count, String? text}) _announcementBlock(String? body) {
+  if (body == null) return (count: 0, text: null);
   final lines = body.split('\n');
+  var index = 0;
+  while (index < lines.length && lines[index].trim().isEmpty) {
+    index++;
+  }
+  if (index >= lines.length || !_isAnnouncementStart(lines[index].trimLeft())) {
+    return (count: 0, text: null);
+  }
   final buffer = <String>[];
-  var started = false;
-  for (final line in lines) {
-    final trimmed = line.trimLeft();
-    if (!started) {
-      if (trimmed.isEmpty) continue;
-      if (!_isAnnouncementLine(trimmed)) return null;
-      started = true;
-    } else if (!_isAnnouncementLine(trimmed)) {
-      break;
-    }
+  final start = index;
+  while (index < lines.length) {
+    final trimmed = lines[index].trimLeft();
+    if (!trimmed.startsWith('>')) break;
     buffer.add(
       trimmed.replaceFirst(RegExp(r'^>\s?'), '').replaceFirst('📣', '').trim(),
     );
+    index++;
   }
   final text = buffer.where((line) => line.isNotEmpty).join('\n').trim();
-  return text.isEmpty ? null : text;
-}
-
-bool _isAnnouncementLine(String trimmedLeft) {
-  return trimmedLeft.startsWith('>') && trimmedLeft.contains('📣');
+  return (count: index - start, text: text.isEmpty ? null : text);
 }
 
 /// Returns [body] without its leading announcement block, if any.
 String? stripReleaseAnnouncement(String? body) {
   if (body == null) return null;
+  final block = _announcementBlock(body);
+  if (block.text == null) return body;
   final lines = body.split('\n');
-  var index = 0;
-  var stripped = false;
-  while (index < lines.length) {
-    final trimmed = lines[index].trimLeft();
-    if (trimmed.isEmpty && !stripped) {
-      index++;
-      continue;
-    }
-    if (trimmed.startsWith('>') && trimmed.contains('📣')) {
-      stripped = true;
-      index++;
-      continue;
-    }
-    break;
+  var drop = 0;
+  while (drop < lines.length && lines[drop].trim().isEmpty) {
+    drop++;
   }
-  if (!stripped) return body;
-  final rest = lines.sublist(index).join('\n').trim();
+  drop += block.count;
+  while (drop < lines.length && lines[drop].trim().isEmpty) {
+    drop++;
+  }
+  final rest = lines.sublist(drop).join('\n').trim();
   return rest.isEmpty ? null : rest;
 }
 

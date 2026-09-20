@@ -158,6 +158,13 @@ void main() {
     test('ignores quote without megaphone', () {
       expect(parseReleaseAnnouncement('> Just a quote\n\n- feat: x'), isNull);
     });
+
+    test('absorbs quote continuation lines without megaphone', () {
+      expect(
+        parseReleaseAnnouncement('> 📣 First line\n> Second line\n\n- feat: x'),
+        'First line\nSecond line',
+      );
+    });
   });
 
   group('stripReleaseAnnouncement', () {
