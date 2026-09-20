@@ -1179,6 +1179,7 @@
 - **Then** once a completed turn has settled, transient realtime status pulses do not auto re-open or rapidly re-collapse that same work group
 - **Then** the rendered identity of a settled assistant-work group is anchored to the final completed assistant turn, not to volatile intermediate work message ids, so same-turn passive refreshes reuse the existing grouped surface instead of remounting it
 - **Then** passive status-only or background refresh pulses must not re-enter active-response collapse deferral for an already settled turn unless a newer revealable assistant message actually exists
+- **Then** once the latest assistant tail has settled with revealable content, a stale REST busy/retry snapshot must not bring back reasoning progress, and a responding-to-idle flip rebuilds the timeline so the final answer is visible without switching tabs
 - **Then** long tool output is rendered inside the details dialog in a bounded viewport with its own scrollbar so tool growth does not keep stretching the outer chat timeline while the user is reading
 - **Then** the details dialog opens at the top of the output; when tool output continues updating inside that bounded viewport, the inner scroll may follow the latest tail only while the user is already near the bottom of that tool output; it must not yank the main chat viewport
 
