@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.247.0 - 2026-09-20
+
+- docs: behavior and codebase map for per-project tab grouping (#200)
+- fix(tabs): defer post-switch composer clear past rebuild
+- fix(tabs): clear lingering composer after real project switch
+- fix(tabs): root anchor verification and hidden target draft
+- fix(tabs): root scope, cross-project draft, semantics from review
+- feat(tabs): group session tabs by project with per-group new-chat button
+- test(chat): harden batch timing tests with linux window
+
 ## v1.246.0 - 2026-09-19
 
 - docs(chat): composer settles on terminal frames without navigation
