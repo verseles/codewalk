@@ -83,6 +83,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     _automaticUpdateCheckTimer = null;
     _lastSettingsOpenUpdateCheckAt = null;
     _silentUpdateCheckInFlight = null;
+    _silentUpdateCheckInFlightForced = false;
     _settings = ExperienceSettings.defaults();
     _updateCheckResult = null;
     _dismissedUpdateVersion = null;

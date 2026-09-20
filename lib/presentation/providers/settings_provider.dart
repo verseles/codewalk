@@ -146,6 +146,7 @@ class SettingsProvider extends ChangeNotifier {
   Timer? _automaticUpdateCheckTimer;
   DateTime? _lastSettingsOpenUpdateCheckAt;
   Future<void>? _silentUpdateCheckInFlight;
+  bool _silentUpdateCheckInFlightForced = false;
 
   @visibleForTesting
   static const Duration settingsOpenUpdateCheckInterval = Duration(minutes: 20);
@@ -514,14 +515,40 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> _performSilentUpdateCheck({
     required bool announceStartupToast,
     bool ignoreCooldown = false,
-  }) async {
-    final inFlight = _silentUpdateCheckInFlight;
-    if (inFlight != null) {
-      await inFlight;
-      return;
+  }) {
+    final pending = _silentUpdateCheckInFlight;
+    if (pending != null &&
+        (!ignoreCooldown || _silentUpdateCheckInFlightForced)) {
+      return pending;
     }
-    final done = Completer<void>();
-    _silentUpdateCheckInFlight = done.future;
+    // A forced Settings-open check arriving while a non-forced check is in
+    // flight chains behind it instead of joining its possibly cached result.
+    final task = pending == null
+        ? _runSilentUpdateCheck(
+            announceStartupToast: announceStartupToast,
+            ignoreCooldown: ignoreCooldown,
+          )
+        : pending.then(
+            (_) => _runSilentUpdateCheck(
+              announceStartupToast: announceStartupToast,
+              ignoreCooldown: ignoreCooldown,
+            ),
+          );
+    _silentUpdateCheckInFlight = task;
+    _silentUpdateCheckInFlightForced = ignoreCooldown;
+    task.whenComplete(() {
+      if (identical(_silentUpdateCheckInFlight, task)) {
+        _silentUpdateCheckInFlight = null;
+        _silentUpdateCheckInFlightForced = false;
+      }
+    });
+    return task;
+  }
+
+  Future<void> _runSilentUpdateCheck({
+    required bool announceStartupToast,
+    required bool ignoreCooldown,
+  }) async {
     try {
       final info = await PackageInfo.fromPlatform();
       final result = await _updateCheckService.check(
@@ -539,11 +566,6 @@ class SettingsProvider extends ChangeNotifier {
       }
     } catch (_) {
       // Silent checks swallow errors.
-    } finally {
-      done.complete();
-      if (identical(_silentUpdateCheckInFlight, done.future)) {
-        _silentUpdateCheckInFlight = null;
-      }
     }
   }
 
@@ -2502,6 +2524,7 @@ class SettingsProvider extends ChangeNotifier {
     _automaticUpdateCheckTimer?.cancel();
     _automaticUpdateCheckTimer = null;
     _silentUpdateCheckInFlight = null;
+    _silentUpdateCheckInFlightForced = false;
     super.dispose();
   }
 }

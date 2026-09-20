@@ -198,6 +198,29 @@ class _CountingUpdateCheckService extends UpdateCheckService {
   void clearCache() {}
 }
 
+class _GatedUpdateCheckService extends UpdateCheckService {
+  _GatedUpdateCheckService(this.gate, this.result);
+
+  final Completer<void> gate;
+  final UpdateCheckResult? result;
+  int checkCount = 0;
+  final List<bool> ignoreCooldowns = <bool>[];
+
+  @override
+  Future<UpdateCheckResult?> check(
+    String currentVersion, {
+    bool ignoreCooldown = false,
+  }) async {
+    checkCount += 1;
+    ignoreCooldowns.add(ignoreCooldown);
+    await gate.future;
+    return result;
+  }
+
+  @override
+  void clearCache() {}
+}
+
 class _FakeSessionAttentionHostService implements SessionAttentionHostService {
   _FakeSessionAttentionHostService({this.activationSucceeds = true});
 
@@ -410,8 +433,7 @@ void main() {
 
     test(
       'checkForUpdateOnSettingsOpen ignores toggle and dismissed versions silently',
-      () async {
-        TestWidgetsFlutterBinding.ensureInitialized();
+      () async {        TestWidgetsFlutterBinding.ensureInitialized();
         PackageInfo.setMockInitialValues(
           appName: 'CodeWalk',
           packageName: 'com.verseles.codewalk',
@@ -446,6 +468,54 @@ void main() {
         );
         expect(provider.updateCheckResult, isNull);
         await provider.setCheckUpdatesOnOpen(true);
+      },
+    );
+
+    test(
+      'forced settings-open check chains behind in-flight startup check',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource();
+        final gate = Completer<void>();
+        final service = _GatedUpdateCheckService(
+          gate,
+          const UpdateCheckResult(latestVersion: '1.3.0', isNewer: true),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        // checkUpdatesOnOpen defaults to true, so initialize() fires a
+        // non-forced startup check that blocks on the gate.
+        await provider.initialize();
+        addTearDown(provider.dispose);
+        for (var i = 0; i < 100 && service.checkCount == 0; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        expect(service.checkCount, 1);
+
+        final t0 = DateTime(2026, 9, 20, 12, 0);
+        final settingsFuture = provider.checkForUpdateOnSettingsOpen(now: t0);
+        // Give the chained task a chance to attach behind the startup check.
+        await Future<void>.delayed(Duration.zero);
+        expect(service.checkCount, 1);
+
+        gate.complete();
+        await settingsFuture;
+        expect(service.checkCount, 2);
+        expect(service.ignoreCooldowns, <bool>[false, true]);
+        expect(provider.updateCheckResult?.latestVersion, '1.3.0');
+        expect(provider.pendingStartupUpdateToast, isTrue);
       },
     );
 
