@@ -199,6 +199,18 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     HardwareKeyboard.instance.addHandler(_handleGlobalKeyEvent);
     unawaited(_loadVersion());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      try {
+        unawaited(
+          context.read<SettingsProvider?>()?.checkForUpdateOnSettingsOpen(),
+        );
+      } catch (_) {
+        // Provider absent in an unexpected tree — Settings must still open.
+      }
+    });
     final initialSectionId = widget.initialSectionId == 'logs'
         ? ''
         : widget.initialSectionId;

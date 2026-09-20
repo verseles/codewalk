@@ -81,6 +81,8 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
   Future<void> resetToDefaults() async {
     _automaticUpdateCheckTimer?.cancel();
     _automaticUpdateCheckTimer = null;
+    _lastSettingsOpenUpdateCheckAt = null;
+    _silentUpdateCheckInFlight = null;
     _settings = ExperienceSettings.defaults();
     _updateCheckResult = null;
     _dismissedUpdateVersion = null;

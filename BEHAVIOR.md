@@ -2128,6 +2128,15 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** a silent update check runs at startup and repeats every 1 hour while the app process is alive
 - **Then** the automatic check never shows a manual spinner/up-to-date confirmation; it only surfaces UI when a newer, non-dismissed version is found
 
+### Silent update check when opening Settings
+
+- **Given** the user opens the main `Settings` screen
+- **When** more than 20 minutes have passed since the last Settings-open check (or no Settings-open check ran yet in this process)
+- **Then** a silent update check runs in the background, bypassing the 1-hour service cache but never showing a spinner, up-to-date confirmation, or startup toast; only a newer, non-dismissed version surfaces through the Settings landing update notice
+- **Then** reopening Settings within 20 minutes performs no additional check
+- **Then** this Settings-open check runs even when `Check for updates on open` is disabled; the toggle continues to govern the startup and hourly checks
+- **Then** temporary update-check failures remain silent and do not block Settings
+
 ### Settings landing update notice
 
 - **Given** a newer, non-dismissed CodeWalk version was found by an update check

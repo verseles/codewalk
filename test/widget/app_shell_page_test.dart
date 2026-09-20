@@ -468,7 +468,10 @@ class _FakeUpdateCheckService extends UpdateCheckService {
   final UpdateCheckResult? result;
 
   @override
-  Future<UpdateCheckResult?> check(String currentVersion) async => result;
+  Future<UpdateCheckResult?> check(
+    String currentVersion, {
+    bool ignoreCooldown = false,
+  }) async => result;
 }
 
 class _NoopDioClient extends DioClient {

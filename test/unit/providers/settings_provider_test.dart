@@ -168,7 +168,31 @@ class _CompleterUpdateCheckService extends UpdateCheckService {
   final Completer<UpdateCheckResult?> completer;
 
   @override
-  Future<UpdateCheckResult?> check(String currentVersion) => completer.future;
+  Future<UpdateCheckResult?> check(
+    String currentVersion, {
+    bool ignoreCooldown = false,
+  }) => completer.future;
+
+  @override
+  void clearCache() {}
+}
+
+class _CountingUpdateCheckService extends UpdateCheckService {
+  _CountingUpdateCheckService(this.result);
+
+  UpdateCheckResult? result;
+  int checkCount = 0;
+  bool lastIgnoreCooldown = false;
+
+  @override
+  Future<UpdateCheckResult?> check(
+    String currentVersion, {
+    bool ignoreCooldown = false,
+  }) async {
+    checkCount += 1;
+    lastIgnoreCooldown = ignoreCooldown;
+    return result;
+  }
 
   @override
   void clearCache() {}
@@ -296,43 +320,134 @@ void main() {
       },
     );
 
-    test('checkForUpdate resets checking state when a listener throws', () async {
-      TestWidgetsFlutterBinding.ensureInitialized();
-      PackageInfo.setMockInitialValues(
-        appName: 'CodeWalk',
-        packageName: 'com.verseles.codewalk',
-        version: '1.2.3',
-        buildNumber: '45',
-        buildSignature: '',
-      );
-      // Restore the file-wide fail-fast PackageInfo mock so later tests do
-      // not hit the real update-check network.
-      addTearDown(_mockPackageInfoUnavailable);
-      final local = InMemoryAppLocalDataSource();
-      final completer = Completer<UpdateCheckResult?>();
-      final provider = SettingsProvider(
-        localDataSource: local,
-        dioClient: DioClient(),
-        soundService: _FakeSoundService(),
-        updateCheckService: _CompleterUpdateCheckService(completer),
-      );
-      await provider.initialize();
-      addTearDown(provider.dispose);
+    test(
+      'checkForUpdate resets checking state when a listener throws',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        // Restore the file-wide fail-fast PackageInfo mock so later tests do
+        // not hit the real update-check network.
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource();
+        final completer = Completer<UpdateCheckResult?>();
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: _CompleterUpdateCheckService(completer),
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
 
-      final previousOnError = FlutterError.onError;
-      FlutterError.onError = (_) {};
-      addTearDown(() => FlutterError.onError = previousOnError);
-      provider.addListener(() => throw StateError('listener boom'));
+        final previousOnError = FlutterError.onError;
+        FlutterError.onError = (_) {};
+        addTearDown(() => FlutterError.onError = previousOnError);
+        provider.addListener(() => throw StateError('listener boom'));
 
-      final future = provider.checkForUpdate();
-      expect(provider.checkingForUpdate, isTrue);
+        final future = provider.checkForUpdate();
+        expect(provider.checkingForUpdate, isTrue);
 
-      completer.complete(null);
-      await future;
+        completer.complete(null);
+        await future;
 
-      expect(provider.checkingForUpdate, isFalse);
-      expect(provider.updateCheckResult, isNull);
-    });
+        expect(provider.checkingForUpdate, isFalse);
+        expect(provider.updateCheckResult, isNull);
+      },
+    );
+
+    test(
+      'checkForUpdateOnSettingsOpen checks silently with 20min throttle',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(latestVersion: '1.3.0', isNewer: true),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+
+        final t0 = DateTime(2026, 9, 20, 12, 0);
+        await provider.checkForUpdateOnSettingsOpen(now: t0);
+        expect(service.checkCount, 1);
+        expect(service.lastIgnoreCooldown, isTrue);
+        expect(provider.updateCheckResult?.latestVersion, '1.3.0');
+        expect(provider.checkingForUpdate, isFalse);
+        expect(provider.lastCheckFoundNoUpdate, isFalse);
+        expect(provider.pendingStartupUpdateToast, isFalse);
+
+        await provider.checkForUpdateOnSettingsOpen(
+          now: t0.add(const Duration(minutes: 19)),
+        );
+        expect(service.checkCount, 1);
+
+        await provider.checkForUpdateOnSettingsOpen(
+          now: t0.add(const Duration(minutes: 21)),
+        );
+        expect(service.checkCount, 2);
+      },
+    );
+
+    test(
+      'checkForUpdateOnSettingsOpen ignores toggle and dismissed versions silently',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        PackageInfo.setMockInitialValues(
+          appName: 'CodeWalk',
+          packageName: 'com.verseles.codewalk',
+          version: '1.2.3',
+          buildNumber: '45',
+          buildSignature: '',
+        );
+        addTearDown(_mockPackageInfoUnavailable);
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = '{"checkUpdatesOnOpen": false}';
+        final service = _CountingUpdateCheckService(
+          const UpdateCheckResult(latestVersion: '1.3.0', isNewer: true),
+        );
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+          updateCheckService: service,
+        );
+        await provider.initialize();
+        addTearDown(provider.dispose);
+
+        await provider.setCheckUpdatesOnOpen(false);
+        final t0 = DateTime(2026, 9, 20, 12, 0);
+        await provider.checkForUpdateOnSettingsOpen(now: t0);
+        expect(service.checkCount, 1);
+
+        await provider.dismissUpdate('1.3.0');
+        provider.debugSetLastSettingsOpenUpdateCheckAtForTesting(null);
+        await provider.checkForUpdateOnSettingsOpen(
+          now: t0.add(const Duration(minutes: 30)),
+        );
+        expect(provider.updateCheckResult, isNull);
+        await provider.setCheckUpdatesOnOpen(true);
+      },
+    );
 
     test('persists the session attention presentation override', () async {
       final local = InMemoryAppLocalDataSource();
@@ -2276,7 +2391,10 @@ void main() {
 
       expect(second.readAloudProvider, ReadAloudProvider.nim);
       expect(second.readAloudBaseUrl, isEmpty);
-      expect(second.readAloudBaseUrl, isNot(kDefaultOpenAiCompatibleTtsBaseUrl));
+      expect(
+        second.readAloudBaseUrl,
+        isNot(kDefaultOpenAiCompatibleTtsBaseUrl),
+      );
     });
 
     test('read-aloud settings survive JSON roundtrip', () async {

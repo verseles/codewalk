@@ -79,8 +79,12 @@ class UpdateCheckService {
 
   UpdateCheckResult? get cachedResult => _cachedResult;
 
-  Future<UpdateCheckResult?> check(String currentVersion) async {
-    if (_lastCheck != null &&
+  Future<UpdateCheckResult?> check(
+    String currentVersion, {
+    bool ignoreCooldown = false,
+  }) async {
+    if (!ignoreCooldown &&
+        _lastCheck != null &&
         DateTime.now().difference(_lastCheck!) < _cooldown) {
       return _cachedResult;
     }

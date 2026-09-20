@@ -144,6 +144,11 @@ class SettingsProvider extends ChangeNotifier {
   bool _initialized = false;
   Future<void>? _initFuture;
   Timer? _automaticUpdateCheckTimer;
+  DateTime? _lastSettingsOpenUpdateCheckAt;
+  Future<void>? _silentUpdateCheckInFlight;
+
+  @visibleForTesting
+  static const Duration settingsOpenUpdateCheckInterval = Duration(minutes: 20);
   bool _openCodeDefaultsLoading = false;
   bool _openCodeDefaultsLoaded = false;
   String? _openCodeDefaultsError;
@@ -477,19 +482,68 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Silently checks for updates on startup. No spinner, no "up to date" state.
   /// Only notifies when a newer version is found and not already dismissed.
-  Future<void> _performStartupUpdateCheck() async {
+  Future<void> _performStartupUpdateCheck() {
+    return _performSilentUpdateCheck(announceStartupToast: true);
+  }
+
+  /// Silently checks for updates when the Settings screen is opened, at most
+  /// once every [settingsOpenUpdateCheckInterval].
+  ///
+  /// Unlike the manual [checkForUpdate], this never sets spinner or
+  /// up-to-date state, swallows errors, and never raises the startup toast —
+  /// the only surface is the Settings landing update card. The
+  /// `checkUpdatesOnOpen` toggle is intentionally ignored here: opening
+  /// Settings is explicit navigation to the surface that hosts the notice.
+  Future<void> checkForUpdateOnSettingsOpen({DateTime? now}) async {
+    if (!_initialized || _checkingForUpdate) {
+      return;
+    }
+    final current = now ?? DateTime.now();
+    final last = _lastSettingsOpenUpdateCheckAt;
+    if (last != null &&
+        current.difference(last) < settingsOpenUpdateCheckInterval) {
+      return;
+    }
+    _lastSettingsOpenUpdateCheckAt = current;
+    await _performSilentUpdateCheck(
+      announceStartupToast: false,
+      ignoreCooldown: true,
+    );
+  }
+
+  Future<void> _performSilentUpdateCheck({
+    required bool announceStartupToast,
+    bool ignoreCooldown = false,
+  }) async {
+    final inFlight = _silentUpdateCheckInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+    final done = Completer<void>();
+    _silentUpdateCheckInFlight = done.future;
     try {
       final info = await PackageInfo.fromPlatform();
-      final result = await _updateCheckService.check(info.version);
+      final result = await _updateCheckService.check(
+        info.version,
+        ignoreCooldown: ignoreCooldown,
+      );
       if (result != null &&
           result.isNewer &&
           result.latestVersion != _dismissedUpdateVersion) {
         _updateCheckResult = result;
-        _pendingStartupUpdateToast = true;
+        if (announceStartupToast) {
+          _pendingStartupUpdateToast = true;
+        }
         notifyListeners();
       }
     } catch (_) {
-      // Startup check is silent; errors are swallowed.
+      // Silent checks swallow errors.
+    } finally {
+      done.complete();
+      if (identical(_silentUpdateCheckInFlight, done.future)) {
+        _silentUpdateCheckInFlight = null;
+      }
     }
   }
 
@@ -1517,6 +1571,15 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  @visibleForTesting
+  DateTime? get debugLastSettingsOpenUpdateCheckAt =>
+      _lastSettingsOpenUpdateCheckAt;
+
+  @visibleForTesting
+  void debugSetLastSettingsOpenUpdateCheckAtForTesting(DateTime? value) {
+    _lastSettingsOpenUpdateCheckAt = value;
+  }
+
   Future<void> setSherpaLanguageCode(String languageCode) async {
     final normalized = languageCode.trim().toLowerCase();
     if (normalized.isEmpty) {
@@ -2438,6 +2501,7 @@ class SettingsProvider extends ChangeNotifier {
     _cellularDataSaverService.removeListener(_handleCellularDataSaverChanged);
     _automaticUpdateCheckTimer?.cancel();
     _automaticUpdateCheckTimer = null;
+    _silentUpdateCheckInFlight = null;
     super.dispose();
   }
 }
