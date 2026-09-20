@@ -701,6 +701,8 @@ void main() {
       find.byKey(const ValueKey<String>('settings_about_telegram')),
       findsOneWidget,
     );
+    // About renders the full stripped changelog notes.
+    expect(find.text('- fix: x'), findsOneWidget);
   });
 
   testWidgets('About shows Telegram tile next to GitHub', (
