@@ -2,6 +2,17 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.248.0 - 2026-09-20
+
+> 📣 Telegram community is live — join us at https://t.me/codewalkapp. Release notes now surface in-app under Settings What's new.
+
+- fix(review): strip empty announcement blocks and pin multiline strip
+- fix(review): address round-1 findings on news announcements
+- feat(news): in-app release announcements plus Telegram community entry
+- chore: sync flow step wording in AGENTS.md
+- fix(settings): chain forced settings-open check behind in-flight silent check
+- feat(settings): silent update check on settings open throttled to 20min
+
 ## v1.247.0 - 2026-09-20
 
 - docs: behavior and codebase map for per-project tab grouping (#200)
