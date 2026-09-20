@@ -11638,6 +11638,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What\'\'s new in v{version}'**
   String settingsAboutWhatsNew(String version);
+
+  /// CodeWalk UI string — appShellNewsMore
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get appShellNewsMore;
+
+  /// CodeWalk UI string — settingsAboutChangelog
+  ///
+  /// In en, this message translates to:
+  /// **'Changelog'**
+  String get settingsAboutChangelog;
+
+  /// CodeWalk UI string — settingsAboutOurGroup
+  ///
+  /// In en, this message translates to:
+  /// **'Our group'**
+  String get settingsAboutOurGroup;
 }
 
 class _AppLocalizationsDelegate

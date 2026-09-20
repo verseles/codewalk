@@ -378,6 +378,16 @@ void main() {
 
       expect(find.text('Hello from Telegram!'), findsOneWidget);
       expect(find.text('Install'), findsNothing);
+
+      await tester.ensureVisible(find.text('More'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(SnackBarAction));
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsPage), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('settings_navigation_search')),
+        findsOneWidget,
+      );
     } finally {
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpWidget(const SizedBox.shrink());

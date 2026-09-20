@@ -6705,4 +6705,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'الجديد في v$version';
   }
+
+  @override
+  String get appShellNewsMore => 'المزيد';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'مجموعتنا';
 }

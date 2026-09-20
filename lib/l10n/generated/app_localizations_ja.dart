@@ -6525,4 +6525,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'v$version の新機能';
   }
+
+  @override
+  String get appShellNewsMore => '詳細';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => '公式グループ';
 }

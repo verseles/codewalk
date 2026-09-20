@@ -2154,8 +2154,10 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **When** the user opens the main `Settings` screen or `Settings` > `About`
 - **Then** the announcement text is shown highlighted above the changelog notes, verbatim in the author's language
 - **Then** up-to-date users see a What's-new card in the same top slot where the update notice would appear; the card offers only dismissal, never installation
+- **Then** the What's-new card also offers a Changelog action that opens the `About` section and an Our group action that opens the Telegram community
+- **Then** `Settings` > `About` renders the full release changelog with scrolling instead of truncated previews with ellipsis
 - **Then** dismissing the announcement is independent of dismissing the update: each is remembered per version and neither hides the other
-- **Then** on startup, an unseen announcement shows a one-time snackbar only when no update snackbar is shown; closing the snackbar does not persist the dismissal
+- **Then** on startup, an unseen announcement shows a one-time snackbar only when no update snackbar is shown; the snackbar offers a More action that opens the main `Settings` screen with the full text; closing the snackbar does not persist the dismissal
 - **Then** a release without the announcement block behaves exactly as before, and check failures stay silent
 
 ### Telegram community entry

@@ -2305,5 +2305,17 @@
         "type": "String"
       }
     }
+  },
+  "appShellNewsMore": "更多",
+  "@appShellNewsMore": {
+    "description": "CodeWalk UI string - appShellNewsMore"
+  },
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutOurGroup": "我们的群组",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
   }
 }

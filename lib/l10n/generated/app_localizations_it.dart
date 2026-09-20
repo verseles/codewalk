@@ -6891,4 +6891,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'Novità della v$version';
   }
+
+  @override
+  String get appShellNewsMore => 'Altro';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'Il nostro gruppo';
 }

@@ -2305,5 +2305,17 @@
         "type": "String"
       }
     }
+  },
+  "appShellNewsMore": "আরও দেখুন",
+  "@appShellNewsMore": {
+    "description": "CodeWalk UI string - appShellNewsMore"
+  },
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutOurGroup": "আমাদের গ্রুপ",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
   }
 }

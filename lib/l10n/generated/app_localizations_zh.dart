@@ -6353,4 +6353,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'v$version 的新内容';
   }
+
+  @override
+  String get appShellNewsMore => '更多';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => '我们的群组';
 }

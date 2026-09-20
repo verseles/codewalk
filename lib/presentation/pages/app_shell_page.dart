@@ -13,9 +13,11 @@ import '../providers/settings_provider.dart';
 import '../services/desktop_tray_service.dart';
 import '../services/desktop_tray_service_types.dart';
 import '../services/update_check_service.dart';
+import '../utils/app_page_route.dart';
 import '../widgets/app_indeterminate_progress.dart';
 import 'chat_page.dart';
 import 'onboarding_wizard_page.dart';
+import 'settings_page.dart';
 
 /// Cold-start loading hint for the Tailscale bring-up that gates provider
 /// initialization. Pure mapping so it stays unit-testable without pumping.
@@ -300,6 +302,7 @@ class _AppShellPageState extends State<AppShellPage> {
 
   /// Shows a one-time SnackBar with the latest release announcement.
   /// Visual only: dismissing it does not persist the news dismissal.
+  /// The More action opens the Settings landing with the full text.
   void _showNewsToast(BuildContext context, UpdateCheckResult result) {
     if (!mounted) return;
     final announcement = result.announcement;
@@ -315,8 +318,19 @@ class _AppShellPageState extends State<AppShellPage> {
         ),
         duration: const Duration(seconds: 6),
         showCloseIcon: true,
+        action: SnackBarAction(
+          label: context.l10n.appShellNewsMore,
+          onPressed: () => unawaited(_openSettings(context)),
+        ),
       ),
     );
+  }
+
+  Future<void> _openSettings(BuildContext context) async {
+    if (!mounted) return;
+    await Navigator.of(
+      context,
+    ).push(AppPageRoute(builder: (_) => const SettingsPage()));
   }
 
   void _showInstallingSnackBar(BuildContext context) {

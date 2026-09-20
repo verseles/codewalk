@@ -6861,4 +6861,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'Что нового в v$version';
   }
+
+  @override
+  String get appShellNewsMore => 'Ещё';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'Наша группа';
 }

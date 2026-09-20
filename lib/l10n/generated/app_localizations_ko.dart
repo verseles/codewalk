@@ -6523,4 +6523,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'v$version의 새로운 소식';
   }
+
+  @override
+  String get appShellNewsMore => '더보기';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => '공식 그룹';
 }

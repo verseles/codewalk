@@ -2187,5 +2187,17 @@
         "type": "String"
       }
     }
+  },
+  "appShellNewsMore": "Altro",
+  "@appShellNewsMore": {
+    "description": "CodeWalk UI string - appShellNewsMore"
+  },
+  "settingsAboutChangelog": "Changelog",
+  "@settingsAboutChangelog": {
+    "description": "CodeWalk UI string - settingsAboutChangelog"
+  },
+  "settingsAboutOurGroup": "Il nostro gruppo",
+  "@settingsAboutOurGroup": {
+    "description": "CodeWalk UI string - settingsAboutOurGroup"
   }
 }

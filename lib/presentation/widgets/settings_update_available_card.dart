@@ -20,6 +20,7 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
     this.showReleaseNotes = false,
     this.isNews = false,
     this.onDismiss,
+    this.onOpenAbout,
   });
 
   final SettingsProvider settings;
@@ -32,6 +33,10 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
   /// of the update/install surface (no install controls).
   final bool isNews;
   final VoidCallback? onDismiss;
+
+  /// Opens the About section (full changelog). When null, the Changelog
+  /// button is hidden — used when the card already lives in About.
+  final VoidCallback? onOpenAbout;
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +115,11 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
             if (notesPreview != null && notesPreview.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                notesPreview.length > 400
+                // About shows the full changelog (scrollable parent);
+                // the landing banner keeps the truncated preview.
+                showReleaseNotes
+                    ? notesPreview
+                    : notesPreview.length > 400
                     ? '${notesPreview.substring(0, 400)}...'
                     : notesPreview,
                 style: Theme.of(
@@ -129,6 +138,17 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
                         onDismiss ??
                         () => settings.dismissNews(result.latestVersion),
                     child: Text(context.l10n.settingsAboutDismiss),
+                  ),
+                  if (onOpenAbout != null)
+                    OutlinedButton(
+                      onPressed: onOpenAbout,
+                      child: Text(context.l10n.settingsAboutChangelog),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        unawaited(_openUrl(AppConstants.telegramInviteUrl)),
+                    icon: const Icon(Symbols.send, size: 16),
+                    label: Text(context.l10n.settingsAboutOurGroup),
                   ),
                 ],
               )
@@ -238,6 +258,10 @@ class SettingsUpdateAvailableCard extends StatelessWidget {
   }
 
   Future<void> _openReleaseUrl(String url) async {
+    return _openUrl(url);
+  }
+
+  Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) {
       return;

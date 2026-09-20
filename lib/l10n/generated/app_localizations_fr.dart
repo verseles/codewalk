@@ -6927,4 +6927,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'Nouveautés de la v$version';
   }
+
+  @override
+  String get appShellNewsMore => 'Plus';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'Notre groupe';
 }

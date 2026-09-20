@@ -687,6 +687,18 @@ void main() {
     expect(find.textContaining('> 📣'), findsNothing);
     // News cards omit the installed-vs-available comparison.
     expect(find.textContaining('Current:'), findsNothing);
+    // Dismiss, Changelog and Our group actions are present.
+    expect(find.text('Dismiss'), findsOneWidget);
+    expect(find.text('Changelog'), findsOneWidget);
+    expect(find.text('Our group'), findsOneWidget);
+
+    await tester.tap(find.text('Changelog'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('settings_about_telegram')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('About shows Telegram tile next to GitHub', (

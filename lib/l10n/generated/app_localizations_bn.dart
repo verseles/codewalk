@@ -6808,4 +6808,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'v$version-এ নতুন কী আছে';
   }
+
+  @override
+  String get appShellNewsMore => 'আরও দেখুন';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'আমাদের গ্রুপ';
 }

@@ -6790,4 +6790,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'v$version میں نیا کیا ہے';
   }
+
+  @override
+  String get appShellNewsMore => 'مزید';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'ہمارا گروپ';
 }

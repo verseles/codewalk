@@ -6806,4 +6806,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String settingsAboutWhatsNew(String version) {
     return 'v$version में नया क्या है';
   }
+
+  @override
+  String get appShellNewsMore => 'और देखें';
+
+  @override
+  String get settingsAboutChangelog => 'Changelog';
+
+  @override
+  String get settingsAboutOurGroup => 'हमारा ग्रुप';
 }

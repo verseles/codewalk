@@ -445,6 +445,15 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  void _openAboutSection() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _selectedSectionId = 'about';
+      _detailOpened = true;
+      _showMobileDetail = true;
+    });
+  }
+
   void _openOption(SettingsSearchOption option) {
     FocusManager.instance.primaryFocus?.unfocus();
     final request = SettingsSearchRequest(
@@ -542,6 +551,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 currentVersion: _version,
                 currentBuildNumber: _buildNumber,
                 isNews: true,
+                onOpenAbout: _openAboutSection,
               ),
               const SizedBox(height: 10),
             ],
