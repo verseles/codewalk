@@ -10515,6 +10515,114 @@ void main() {
     );
   });
 
+  testWidgets('desktop utility pane mirrors context usage section', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = FakeChatRepository(
+      sessions: <ChatSession>[
+        ChatSession(
+          id: 'ses_desktop_context_mirror',
+          workspaceId: 'default',
+          time: DateTime.fromMillisecondsSinceEpoch(1000),
+          title: 'Context Mirror',
+        ),
+      ],
+    );
+    repository.messagesBySession['ses_desktop_context_mirror'] = <ChatMessage>[
+      AssistantMessage(
+        id: 'msg_desktop_context_mirror',
+        sessionId: 'ses_desktop_context_mirror',
+        time: DateTime.fromMillisecondsSinceEpoch(1100),
+        completedTime: DateTime.fromMillisecondsSinceEpoch(1200),
+        providerId: 'provider_1',
+        modelId: 'model_1',
+        cost: 0,
+        tokens: const MessageTokens(
+          input: 200,
+          output: 50,
+          reasoning: 25,
+          cacheRead: 25,
+          cacheWrite: 0,
+        ),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'part_desktop_context_mirror',
+            messageId: 'msg_desktop_context_mirror',
+            sessionId: 'ses_desktop_context_mirror',
+            text: 'Done',
+          ),
+        ],
+      ),
+    ];
+
+    final localDataSource = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(
+      chatRepository: repository,
+      localDataSource: localDataSource,
+    );
+    final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+
+    await provider.loadSessions();
+    await provider.selectSession(provider.sessions.first);
+    await tester.pumpAndSettle();
+
+    final section = find.byKey(
+      const ValueKey<String>('desktop_utility_context_section'),
+    );
+    // The utility pane is a lazily-built ListView; scroll the tail into
+    // view before asserting (same reason the quota mirror has no test).
+    final paneScrollable = find.ancestor(
+      of: find.text('Keyboard shortcuts'),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(section, 200, scrollable: paneScrollable);
+    await tester.pumpAndSettle();
+    expect(section, findsOneWidget);
+    expect(
+      find.descendant(of: section, matching: find.text('Usage')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: section, matching: find.text('Tokens')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: section, matching: find.text('Cost')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: section, matching: find.text('Limit')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: section, matching: find.text('300')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: section, matching: find.text('1,000')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(
+        const ValueKey<String>('desktop_utility_compact_now_button'),
+      ),
+      findsOneWidget,
+    );
+    // Popover stays closed until the knob is tapped.
+    expect(
+      find.byKey(const ValueKey<String>('context_usage_popover')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('integrated desktop context usage knob opens popover', (
     WidgetTester tester,
   ) async {

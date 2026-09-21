@@ -1703,6 +1703,32 @@ extension _ChatPageScaffold on _ChatPageState {
                       ),
                   ],
                 ),
+              // Issue #199: mirror the full context-usage section (grid,
+              // explanation, safe compact action) shown in the context-usage
+              // popover. Nested selector keeps streaming tokens off the outer
+              // pane build key. Quota stays a server-scoped sibling below.
+              if (chatProvider.currentSession != null)
+                Selector<ChatProvider, _DesktopContextUsageBuildKey>(
+                  selector: (_, provider) =>
+                      _desktopContextUsageBuildKey(provider),
+                  builder: (context, _, _) {
+                    final provider = context.read<ChatProvider>();
+                    if (provider.currentSession == null) {
+                      return const SizedBox.shrink();
+                    }
+                    final usage = _resolveSessionContextUsage(provider);
+                    final canCompact =
+                        !provider.isCompactingContext &&
+                        !provider.canAbortActiveResponse;
+                    return _buildDesktopContextUsageMirror(
+                      context,
+                      usage: usage,
+                      isCompacting: provider.isCompactingContext,
+                      canCompact: canCompact,
+                      onCompactNow: () => _compactCurrentSession(provider),
+                    );
+                  },
+                ),
               // Issue #166: mirror the same quota section shown in the
               // context-usage popover. Scoped to server id so switches
               // reload; the shared QuotaProvider TTL dedupes fetches.

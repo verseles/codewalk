@@ -141,11 +141,13 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     final lastId = messages.isNotEmpty ? messages.last.id : null;
     final pid = chatProvider.selectedProviderId;
     final mid = chatProvider.selectedModelId;
+    final messagesVersion = chatProvider.messagesVersion;
     if (_cachedContextUsage != null &&
         messages.length == _cachedContextUsageMsgCount &&
         lastId == _cachedContextUsageLastMsgId &&
         pid == _cachedContextUsageProviderId &&
-        mid == _cachedContextUsageModelId) {
+        mid == _cachedContextUsageModelId &&
+        messagesVersion == _cachedContextUsageMessagesVersion) {
       return _cachedContextUsage!;
     }
 
@@ -221,6 +223,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     _cachedContextUsageLastMsgId = lastId;
     _cachedContextUsageProviderId = pid;
     _cachedContextUsageModelId = mid;
+    _cachedContextUsageMessagesVersion = messagesVersion;
     _cachedContextUsage = snapshot;
     return snapshot;
   }
@@ -284,7 +287,6 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     required bool canCompact,
     required Future<void> Function() onCompactNow,
   }) {
-    final textTheme = Theme.of(context).textTheme;
     final serverId = context.read<AppProvider>().activeServer?.id;
 
     return SizedBox(
@@ -294,21 +296,57 @@ extension _ChatPageStatusPresenter on _ChatPageState {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            context.l10n.chatPageStatusContextUsage,
-            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          _buildContextUsageSectionContent(
+            context,
+            usage: usage,
+            isCompacting: isCompacting,
+            canCompact: canCompact,
+            showCompactAction: true,
+            onCompactTap: canCompact
+                ? () {
+                    Navigator.of(context).pop();
+                    unawaited(onCompactNow());
+                  }
+                : null,
           ),
-          const SizedBox(height: 10),
-          _buildContextUsageGrid(context, usage: usage),
-          const SizedBox(height: 10),
-          Text(
-            isCompacting
-                ? context.l10n.chatPageStatusCompactingContextNow
-                : context.l10n.chatPageStatusAutomaticCompactionExplanation,
-            style: textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+          QuotaPopupSection(serverId: serverId),
+        ],
+      ),
+    );
+  }
+
+  /// Shared context-usage section (title + grid + explanation + compact).
+  /// Issue #199: reused by the popover and the large-desktop utility mirror.
+  Widget _buildContextUsageSectionContent(
+    BuildContext context, {
+    required _SessionContextUsageSnapshot usage,
+    required bool isCompacting,
+    required bool canCompact,
+    required bool showCompactAction,
+    required VoidCallback? onCompactTap,
+    Key? compactActionKey,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          context.l10n.chatPageStatusContextUsage,
+          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 10),
+        _buildContextUsageGrid(context, usage: usage),
+        const SizedBox(height: 10),
+        Text(
+          isCompacting
+              ? context.l10n.chatPageStatusCompactingContextNow
+              : context.l10n.chatPageStatusAutomaticCompactionExplanation,
+          style: textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
+        ),
+        if (showCompactAction) ...[
           const SizedBox(height: 10),
           Divider(
             color: Theme.of(context).colorScheme.outlineVariant,
@@ -316,13 +354,9 @@ extension _ChatPageStatusPresenter on _ChatPageState {
           ),
           const SizedBox(height: 10),
           InkWell(
+            key: compactActionKey,
             borderRadius: BorderRadius.circular(10),
-            onTap: canCompact
-                ? () {
-                    Navigator.of(context).pop();
-                    unawaited(onCompactNow());
-                  }
-                : null,
+            onTap: onCompactTap,
             child: SizedBox(
               width: double.infinity,
               child: Padding(
@@ -353,9 +387,40 @@ extension _ChatPageStatusPresenter on _ChatPageState {
               ),
             ),
           ),
-          QuotaPopupSection(serverId: serverId),
         ],
-      ),
+      ],
+    );
+  }
+
+  /// Issue #199: large-desktop read-only mirror of the popover section.
+  /// Never pops a route; the compact action is hidden unless safely eligible.
+  Widget _buildDesktopContextUsageMirror(
+    BuildContext context, {
+    required _SessionContextUsageSnapshot usage,
+    required bool isCompacting,
+    required bool canCompact,
+    required Future<void> Function() onCompactNow,
+  }) {
+    final showAction = canCompact || isCompacting;
+    return Column(
+      key: const ValueKey<String>('desktop_utility_context_section'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildContextUsageSectionContent(
+          context,
+          usage: usage,
+          isCompacting: isCompacting,
+          canCompact: canCompact,
+          showCompactAction: showAction,
+          compactActionKey: const ValueKey<String>(
+            'desktop_utility_compact_now_button',
+          ),
+          onCompactTap: canCompact
+              ? () => unawaited(onCompactNow())
+              : null,
+        ),
+      ],
     );
   }
 

@@ -590,6 +590,28 @@ _DesktopUtilityPaneBuildKey _desktopUtilityPaneBuildKey(
   );
 }
 
+typedef _DesktopContextUsageBuildKey = ({
+  String? sessionId,
+  int messagesVersion,
+  String? selectedProviderId,
+  String? selectedModelId,
+  bool isCompactingContext,
+  bool canAbortActiveResponse,
+});
+
+_DesktopContextUsageBuildKey _desktopContextUsageBuildKey(
+  ChatProvider chatProvider,
+) {
+  return (
+    sessionId: chatProvider.currentSession?.id,
+    messagesVersion: chatProvider.messagesVersion,
+    selectedProviderId: chatProvider.selectedProviderId,
+    selectedModelId: chatProvider.selectedModelId,
+    isCompactingContext: chatProvider.isCompactingContext,
+    canAbortActiveResponse: chatProvider.canAbortActiveResponse,
+  );
+}
+
 _FilePaneBuildKey _filePaneBuildKey(ChatProvider chatProvider) {
   return (
     sessionId: chatProvider.currentSession?.id,
