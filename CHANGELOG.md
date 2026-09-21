@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.251.0 - 2026-09-21
+
+> 📣 Lateral desktop agora mostra contexto/custo junto com Cotas.
+
+- docs(#199): full context-usage mirror in desktop utility pane
+- fix(desktop): include provider catalog signature in context-usage keys (#199)
+- feat(desktop): mirror full context-usage section in utility pane (#199)
+- docs(behavior): settled answer visible without tab switch despite stale REST
+
 ## v1.250.0 - 2026-09-20
 
 > 📣 Responses now appear instantly, no more stuck on reasoning, no need to switch tabs.
