@@ -693,6 +693,7 @@ class _ChatPageState extends State<ChatPage>
   String? _cachedContextUsageProviderId;
   String? _cachedContextUsageModelId;
   int _cachedContextUsageMessagesVersion = -1;
+  int _cachedContextUsageCatalogSignature = -1;
   _SessionContextUsageSnapshot? _cachedContextUsage;
 
   // Cache for _resolveLatestReasoningPartKey (O(N*M) backward scan).

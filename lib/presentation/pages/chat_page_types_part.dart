@@ -595,6 +595,7 @@ typedef _DesktopContextUsageBuildKey = ({
   int messagesVersion,
   String? selectedProviderId,
   String? selectedModelId,
+  int providerCatalogSignature,
   bool isCompactingContext,
   bool canAbortActiveResponse,
 });
@@ -607,6 +608,7 @@ _DesktopContextUsageBuildKey _desktopContextUsageBuildKey(
     messagesVersion: chatProvider.messagesVersion,
     selectedProviderId: chatProvider.selectedProviderId,
     selectedModelId: chatProvider.selectedModelId,
+    providerCatalogSignature: _composerProviderCatalogSignature(chatProvider),
     isCompactingContext: chatProvider.isCompactingContext,
     canAbortActiveResponse: chatProvider.canAbortActiveResponse,
   );

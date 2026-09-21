@@ -142,12 +142,14 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     final pid = chatProvider.selectedProviderId;
     final mid = chatProvider.selectedModelId;
     final messagesVersion = chatProvider.messagesVersion;
+    final catalogSignature = _composerProviderCatalogSignature(chatProvider);
     if (_cachedContextUsage != null &&
         messages.length == _cachedContextUsageMsgCount &&
         lastId == _cachedContextUsageLastMsgId &&
         pid == _cachedContextUsageProviderId &&
         mid == _cachedContextUsageModelId &&
-        messagesVersion == _cachedContextUsageMessagesVersion) {
+        messagesVersion == _cachedContextUsageMessagesVersion &&
+        catalogSignature == _cachedContextUsageCatalogSignature) {
       return _cachedContextUsage!;
     }
 
@@ -224,6 +226,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     _cachedContextUsageProviderId = pid;
     _cachedContextUsageModelId = mid;
     _cachedContextUsageMessagesVersion = messagesVersion;
+    _cachedContextUsageCatalogSignature = catalogSignature;
     _cachedContextUsage = snapshot;
     return snapshot;
   }
