@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.252.0 - 2026-09-21
+
+> 📣 Simplified assistant work groups: completed tool activity now collapses into a single expandable header with no inner preview panel.
+
+- docs(agents): clarify ANNOUNCE text is in English
+- fix(chat): collapse assistant work into simple header-only group, drop bounded preview panel
+
 ## v1.251.0 - 2026-09-21
 
 > 📣 Lateral desktop agora mostra contexto/custo junto com Cotas.
