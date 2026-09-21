@@ -450,22 +450,7 @@ extension _ChatPageTimelineViewport on _ChatPageState {
                     } else if (entry is _TimelineCollapsedHistoryEntry) {
                       child = _buildCollapsedHistoryEntry(entry);
                     } else if (entry is _TimelineCollapsedAssistantWorkEntry) {
-                      child = _buildCollapsedAssistantWorkEntry(
-                        entry,
-                        buildPreviewMessage: (message) =>
-                            _buildTimelineMessageWidget(
-                              message: message,
-                              chatProvider: chatProvider,
-                              settingsProvider: settingsProvider,
-                              latestReasoningPartKey: latestReasoningPartKey,
-                              latestRevertibleMessageId:
-                                  latestRevertibleMessageId,
-                              finalAssistantRevealMessageId:
-                                  finalAssistantRevealMessageId,
-                              wrapRevealAnchor: false,
-                              keyPrefix: 'assistant_work_preview',
-                            ),
-                      );
+                      child = _buildCollapsedAssistantWorkEntry(entry);
                     } else if (entry is _TimelinePendingAssistantEntry) {
                       child = _buildPendingAssistantEntry(entry);
                     } else if (entry is _TimelinePermissionPromptEntry) {

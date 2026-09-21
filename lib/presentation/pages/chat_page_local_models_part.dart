@@ -233,14 +233,10 @@ class _TimelineCollapsedAssistantWorkEntry extends _TimelineEntry {
   const _TimelineCollapsedAssistantWorkEntry({
     required this.group,
     required this.expanded,
-    this.previewMessages = const <ChatMessage>[],
-    this.showBoundedPreview = false,
   });
 
   final _CollapsedAssistantWorkGroup group;
   final bool expanded;
-  final List<ChatMessage> previewMessages;
-  final bool showBoundedPreview;
 
   @override
   String get key => 'timeline_collapsed_assistant_work_${group.id}';

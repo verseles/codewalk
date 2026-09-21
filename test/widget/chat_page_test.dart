@@ -17421,11 +17421,11 @@ void main() {
             'timeline_assistant_work_preview_assistant_work_msg_work_final',
           ),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(find.text('2 work messages'), findsOneWidget);
-      expect(find.text('Working step 1'), findsOneWidget);
-      expect(find.text('Working step 2'), findsOneWidget);
+      expect(find.text('Working step 1'), findsNothing);
+      expect(find.text('Working step 2'), findsNothing);
       expect(find.text('Final assistant response'), findsOneWidget);
 
       await tester.tap(
@@ -19161,6 +19161,15 @@ void main() {
     );
     expect(find.text('2 work messages'), findsOneWidget);
     expect(find.text('Final assistant answer'), findsOneWidget);
+
+    expect(find.text('Details'), findsNothing);
+
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('timeline_collapsed_assistant_work_toggle'),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     expect(find.text('Details'), findsOneWidget);
 

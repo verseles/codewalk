@@ -878,7 +878,7 @@
 - **Then** the timeline updates in place without clearing to an empty skeleton first
 - **Then** collapsed history groups keep their per-session expansion state during switch and revalidation
 - **Then** historical assistant work/tool-call groups return collapsed after session return or revalidation (manual expansion is not restored)
-- **Then** the latest completed assistant work/tool-call run stays visible inside a bounded internal panel while it remains the newest run, so regrouping does not yank the main chat viewport
+- **Then** the latest completed assistant work/tool-call run collapses into the same simple header-only group as historical runs (count plus Expand/Hide toggle) with no internal bounded preview panel; intermediate calls render inline only after manual expansion
 - **Then** an already-selected empty session keeps its empty placeholder visible during background refresh (no loading skeleton blink)
 - **Then** returning from background or focus with no new chat content restores a settled cached session to the latest assistant response and an active cached session to the bottom, without a second jump
 - **Then** if refreshed settled content arrives during resume revalidation, the queued cached restore waits for that refresh to finish and then reveals the newest assistant response once instead of bottom-snapping first

@@ -349,30 +349,18 @@ extension _ChatPageTimelineRuntime on _ChatPageState {
   }
 
   Widget _buildCollapsedAssistantWorkEntry(
-    _TimelineCollapsedAssistantWorkEntry entry, {
-    required Widget Function(ChatMessage message) buildPreviewMessage,
-  }) {
+    _TimelineCollapsedAssistantWorkEntry entry,
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final visualTokens = theme.visualStyleTokens;
     final group = entry.group;
     final actionLabel = entry.expanded
         ? context.l10n.chatWorkHide
-        : (entry.showBoundedPreview
-              ? context.l10n.chatWorkExpand
-              : context.l10n.chatWorkShow);
+        : context.l10n.chatWorkExpand;
     final titleLabel = group.messageCount == 1
         ? context.l10n.chatWorkMessageOne
         : context.l10n.chatWorkMessagesMultiple(group.messageCount);
-    final previewMessages = entry.previewMessages;
-    final showPreview =
-        entry.showBoundedPreview &&
-        !entry.expanded &&
-        previewMessages.isNotEmpty;
-    final maxPreviewHeight = MediaQuery.sizeOf(context).height < 700
-        ? 220.0
-        : 320.0;
-    final allowInteractivePreviewScroll = !_isMobileRuntime;
 
     return Padding(
       key: ValueKey<String>(entry.key),
@@ -438,60 +426,6 @@ extension _ChatPageTimelineRuntime on _ChatPageState {
                     ),
                   ],
                 ),
-                if (showPreview) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    context.l10n.chatWorkBoundedPanelExplanation,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: visualTokens.isRefined
-                        ? visualTokens.controlRadius
-                        : BorderRadius.circular(10),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface.withValues(alpha: 0.95),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withValues(
-                            alpha: 0.45,
-                          ),
-                        ),
-                      ),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: maxPreviewHeight,
-                        ),
-                        child: ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(
-                            context,
-                          ).copyWith(overscroll: false),
-                          child: SingleChildScrollView(
-                            key: ValueKey<String>(
-                              'timeline_assistant_work_preview_${group.id}',
-                            ),
-                            primary: false,
-                            reverse: true,
-                            padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                            physics: allowInteractivePreviewScroll
-                                ? const ClampingScrollPhysics()
-                                : const NeverScrollableScrollPhysics(),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                for (final message in previewMessages)
-                                  buildPreviewMessage(message),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

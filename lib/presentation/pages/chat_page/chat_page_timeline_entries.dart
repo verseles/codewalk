@@ -458,15 +458,10 @@ extension _ChatPageTimelineEntries on _ChatPageState {
           createdAt: finalAssistant.time,
         );
         final expanded = _expandedAssistantWorkGroupId == workGroup.id;
-        final showBoundedPreview = assistantRunEnd == endExclusive;
         entries.add(
           _TimelineCollapsedAssistantWorkEntry(
             group: workGroup,
             expanded: expanded,
-            showBoundedPreview: showBoundedPreview,
-            previewMessages: showBoundedPreview
-                ? visibleWorkPreviewMessages
-                : const <ChatMessage>[],
           ),
         );
         if (expanded) {
