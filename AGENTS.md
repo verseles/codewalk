@@ -55,7 +55,7 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 
 1. If needed, ask the user clarifying questions. (Optional.)
 2. Plan the changes using the available planning tools.
-3. Ask at least one decision question. Present options such as A, B, or C and make the answers easy to provide—for example: `1C, 2D, 3A`. (Mandatory.) In the same round, propose the release announcement text (`ANNOUNCE`) for the final minor release and ask whether the user agrees — never ship release text the user has not approved.
+3. Ask at least one decision question. Present options such as A, B, or C and make the answers easy to provide—for example: `1C, 2D, 3A`. (Mandatory.) In the same round, propose the release announcement text in English (`ANNOUNCE`) for the final minor release and ask whether the user agrees — never ship release text the user has not approved.
 4. Implement the changes.
 5. Run focused validation while iterating. Once the code is stable, run `make check` once.
 6. Commit the changes.
