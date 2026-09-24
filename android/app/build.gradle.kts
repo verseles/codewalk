@@ -123,17 +123,6 @@ android {
         }
     }
 
-    packaging {
-        jniLibs {
-            // Keep Android APK arm64-only and lean. Sherpa is disabled on
-            // Android builds, so its native libraries are excluded here.
-            excludes += listOf(
-                "**/libonnxruntime.so",
-                "**/libsherpa-onnx-c-api.so",
-                "**/libsherpa-onnx-cxx-api.so",
-            )
-        }
-    }
 }
 
 flutter {

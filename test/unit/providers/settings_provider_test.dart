@@ -1402,12 +1402,13 @@ void main() {
         );
         await second.initialize();
 
-        // Linux/macOS/Windows support Moonshine. On Android, iOS, and web it
-        // falls back to Native for the slim-build engines.
+        // Linux/macOS/Windows/Android keep Moonshine. iOS and web fall back
+        // to Native.
         final expectedEngine =
             defaultTargetPlatform == TargetPlatform.linux ||
                 defaultTargetPlatform == TargetPlatform.macOS ||
-                defaultTargetPlatform == TargetPlatform.windows
+                defaultTargetPlatform == TargetPlatform.windows ||
+                defaultTargetPlatform == TargetPlatform.android
             ? SpeechToTextEngine.moonshine
             : SpeechToTextEngine.native;
         expect(second.speechToTextEngine, expectedEngine);
@@ -1463,6 +1464,31 @@ void main() {
         }
       },
     );
+
+    test('preserves downloadable speech engines on Android', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      for (final engine in const [
+        SpeechToTextEngine.sherpa,
+        SpeechToTextEngine.moonshine,
+        SpeechToTextEngine.parakeet,
+        SpeechToTextEngine.sensevoice,
+        SpeechToTextEngine.nemotron,
+      ]) {
+        final local = InMemoryAppLocalDataSource()
+          ..experienceSettingsJson = jsonEncode({
+            'speechToTextEngine': engine.name,
+          });
+        final provider = SettingsProvider(
+          localDataSource: local,
+          dioClient: DioClient(),
+          soundService: _FakeSoundService(),
+        );
+        await provider.initialize();
+        expect(provider.speechToTextEngine, engine);
+      }
+    });
 
     test('persists only-when notification and sound rules', () async {
       final local = InMemoryAppLocalDataSource();

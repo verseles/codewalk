@@ -1603,7 +1603,7 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 
 | Platform | Primary engine | Notes |
 |----------|---------------|-------|
-| Android | Native (system speech recognizer) | Sherpa/Moonshine runtimes excluded from Android build; Native only |
+| Android | Native (system speech recognizer) | Sherpa, Moonshine, Parakeet, SenseVoice, and Nemotron are optional on-device engines; their model files download after installation |
 | Linux | Sherpa ONNX or Moonshine via sherpa_onnx | On-device models are downloaded on demand; Native not supported on Linux |
 | macOS | Native (system speech recognizer) | Falls back to Sherpa ONNX if native unavailable; Moonshine is an optional desktop engine |
 | iOS | Native (system speech recognizer) | Native only in the current app build |
@@ -2404,9 +2404,9 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the app selects `Parakeet` as the default engine instead of `Sherpa`
 - **Then** explicit existing non-native user selections remain unchanged
 
-### Desktop can use Parakeet for offline multilingual speech-to-text
+### Android and desktop can use Parakeet for offline multilingual speech-to-text
 
-- **Given** the user opens `Settings` > `Speech to text` on Linux, macOS, or Windows
+- **Given** the user opens `Settings` > `Speech to text` on Android, Linux, macOS, or Windows
 - **When** the user selects the `Parakeet` engine
 - **Then** the settings screen shows a dedicated Parakeet model card with install status, download, remove, and refresh actions
 - **Then** the app keeps Parakeet downloadable and out of the shipped app bundle
@@ -2418,15 +2418,15 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the app opens a blocking `Parakeet Voice Setup` dialog instead of failing silently
 - **Then** after the download finishes successfully, the app retries the speech-input start flow automatically
 
-### Parakeet stays desktop-only
+### Parakeet is unavailable on iOS and Web
 
-- **Given** the app runs on Android, iOS, or Web
+- **Given** the app runs on iOS or Web
 - **When** speech-engine availability is evaluated from persisted settings
 - **Then** `Parakeet` is treated as unavailable and the app falls back to a supported engine instead of exposing a broken selection
 
-### Desktop can use SenseVoice for CJK-focused offline speech-to-text
+### Android and desktop can use SenseVoice for CJK-focused offline speech-to-text
 
-- **Given** the user opens `Settings` > `Speech to text` on Linux, macOS, or Windows
+- **Given** the user opens `Settings` > `Speech to text` on Android, Linux, macOS, or Windows
 - **When** the user selects the `SenseVoice` engine
 - **Then** the settings screen shows a dedicated SenseVoice model card with install status, download, remove, and refresh actions
 - **Then** the app presents SenseVoice as the strongest built-in option for Chinese, Cantonese, Japanese, Korean, and English
@@ -2438,9 +2438,9 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the app opens a blocking `SenseVoice Setup` dialog instead of failing silently
 - **Then** after the download finishes successfully, the app retries the speech-input start flow automatically
 
-### SenseVoice stays desktop-only
+### SenseVoice is unavailable on iOS and Web
 
-- **Given** the app runs on Android, iOS, or Web
+- **Given** the app runs on iOS or Web
 - **When** speech-engine availability is evaluated from persisted settings
 - **Then** `SenseVoice` is treated as unavailable and the app falls back to a supported engine instead of exposing a broken selection
 

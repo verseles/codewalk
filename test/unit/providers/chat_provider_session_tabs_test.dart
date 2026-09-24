@@ -537,7 +537,7 @@ void main() {
               id: 'message-a',
               sessionId: 'session-a',
               time: DateTime.fromMillisecondsSinceEpoch(1),
-              parts: <MessagePart>[
+              parts: const <MessagePart>[
                 TextPart(
                   id: 'part-a',
                   messageId: 'message-a',
@@ -553,7 +553,7 @@ void main() {
               id: 'message-b',
               sessionId: 'session-b',
               time: DateTime.fromMillisecondsSinceEpoch(1),
-              parts: <MessagePart>[
+              parts: const <MessagePart>[
                 TextPart(
                   id: 'part-b',
                   messageId: 'message-b',

@@ -95,7 +95,15 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   // chat input, settings, and tests all agree on what works where.
   bool get _supportsSherpa => SpeechEnginePlatformSupport.isSherpaSupported;
 
-  bool get _supportsSherpaModelManagement => _isLinux || _isWindows;
+  bool get _isAndroid {
+    if (kIsWeb) {
+      return false;
+    }
+    return defaultTargetPlatform == TargetPlatform.android;
+  }
+
+  bool get _supportsSherpaModelManagement =>
+      _isLinux || _isWindows || _isAndroid;
 
   bool get _isWindows {
     if (kIsWeb) {

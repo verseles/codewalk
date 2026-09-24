@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/experience_settings.dart';
+import 'stt_model_archive_installer_io.dart';
 
 class _NemotronModelSpec {
   const _NemotronModelSpec({
@@ -83,36 +81,13 @@ class NemotronModelManager {
   }) async {
     final spec = _specFor(modelId);
     final dir = Directory(await getModelDir(spec.id));
-    await dir.create(recursive: true);
-    final archiveUrl = '$_releaseBase/${spec.packageName}.tar.bz2';
-    final archiveResponse = await _dio.get<List<int>>(
-      archiveUrl,
-      options: Options(responseType: ResponseType.bytes),
-      onReceiveProgress: onProgress == null
-          ? null
-          : (received, total) {
-              if (total > 0) {
-                onProgress(received / total);
-              }
-            },
+    await installSttModelArchive(
+      dio: _dio,
+      url: '$_releaseBase/${spec.packageName}.tar.bz2',
+      destination: dir,
+      files: spec.files,
+      onProgress: onProgress,
     );
-    final archiveBytes = Uint8List.fromList(archiveResponse.data ?? <int>[]);
-    final tarBytes = BZip2Decoder().decodeBytes(archiveBytes);
-    final archive = TarDecoder().decodeBytes(tarBytes);
-    for (final entry in archive) {
-      if (!entry.isFile) {
-        continue;
-      }
-      final parts = entry.name.split('/');
-      final fileName = parts.isEmpty ? entry.name : parts.last;
-      if (!spec.files.contains(fileName)) {
-        continue;
-      }
-      final output = File('${dir.path}/$fileName');
-      await output.parent.create(recursive: true);
-      await output.writeAsBytes(entry.readBytes() ?? <int>[]);
-    }
-    onProgress?.call(1.0);
   }
 
   Future<void> deleteModel(String modelId) async {
@@ -140,4 +115,3 @@ class NemotronModelManager {
     return _models[normalizeModelId(modelId)]!;
   }
 }
-

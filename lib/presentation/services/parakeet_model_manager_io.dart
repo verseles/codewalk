@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/experience_settings.dart';
+import 'stt_model_archive_installer_io.dart';
 
 class _ParakeetModelSpec {
   const _ParakeetModelSpec({
@@ -23,7 +21,7 @@ class _ParakeetModelSpec {
   final List<String> files;
 }
 
-// Desktop Parakeet models are downloaded on demand from official sherpa-onnx
+// Parakeet models are downloaded on demand from official sherpa-onnx
 // release archives, mirroring the Moonshine manager flow to keep the runtime
 // isolated from the existing Kroko-only Sherpa manager.
 class ParakeetModelManager {
@@ -93,39 +91,13 @@ class ParakeetModelManager {
   }) async {
     final spec = _specFor(modelId);
     final dir = Directory(await getModelDir(spec.id));
-    await dir.create(recursive: true);
-
-    final archiveUrl = '$_releaseBase/${spec.packageName}.tar.bz2';
-    final archiveResponse = await _dio.get<List<int>>(
-      archiveUrl,
-      options: Options(responseType: ResponseType.bytes),
-      onReceiveProgress: onProgress == null
-          ? null
-          : (received, total) {
-              if (total > 0) {
-                onProgress(received / total);
-              }
-            },
+    await installSttModelArchive(
+      dio: _dio,
+      url: '$_releaseBase/${spec.packageName}.tar.bz2',
+      destination: dir,
+      files: spec.files,
+      onProgress: onProgress,
     );
-
-    final archiveBytes = Uint8List.fromList(archiveResponse.data ?? <int>[]);
-    final tarBytes = BZip2Decoder().decodeBytes(archiveBytes);
-    final archive = TarDecoder().decodeBytes(tarBytes);
-    for (final entry in archive) {
-      if (!entry.isFile) {
-        continue;
-      }
-      final parts = entry.name.split('/');
-      final fileName = parts.isEmpty ? entry.name : parts.last;
-      if (!spec.files.contains(fileName)) {
-        continue;
-      }
-      final output = File('${dir.path}/$fileName');
-      await output.parent.create(recursive: true);
-      await output.writeAsBytes(_fileBytes(entry));
-    }
-
-    onProgress?.call(1.0);
   }
 
   Future<void> deleteModel(String modelId) async {
@@ -155,9 +127,4 @@ class ParakeetModelManager {
     return _models[normalized]!;
   }
 
-  List<int> _fileBytes(ArchiveFile entry) {
-    // archive 4.x: entry.content is now FileContent; use readBytes() instead
-    final bytes = entry.readBytes();
-    return bytes ?? <int>[];
-  }
 }

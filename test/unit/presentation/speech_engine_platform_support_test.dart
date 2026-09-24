@@ -46,12 +46,13 @@ void main() {
       }
     });
 
-    // isSherpaSupported: web false; Android false; all other IO platforms true.
+    // isSherpaSupported: web false; Android and other IO platforms true.
     // iOS keeps the historic "supported"
     // flag because sherpa_onnx ships an iOS build, even though the chat input
     // never wires it up on iOS in practice.
     group('isSherpaSupported', () {
       for (final platform in const [
+        TargetPlatform.android,
         TargetPlatform.iOS,
         TargetPlatform.linux,
         TargetPlatform.macOS,
@@ -61,13 +62,6 @@ void main() {
         test('is true on $platform', () {
           debugDefaultTargetPlatformOverride = platform;
           expect(SpeechEnginePlatformSupport.isSherpaSupported, isTrue);
-        });
-      }
-
-      for (final platform in const [TargetPlatform.android]) {
-        test('is false on $platform', () {
-          debugDefaultTargetPlatformOverride = platform;
-          expect(SpeechEnginePlatformSupport.isSherpaSupported, isFalse);
         });
       }
     });
@@ -87,9 +81,14 @@ void main() {
         'isSenseVoiceSupported',
         () => SpeechEnginePlatformSupport.isSenseVoiceSupported,
       ),
+      (
+        'isNemotronSupported',
+        () => SpeechEnginePlatformSupport.isNemotronSupported,
+      ),
     ]) {
       group(entry.$1, () {
         for (final platform in const [
+          TargetPlatform.android,
           TargetPlatform.linux,
           TargetPlatform.macOS,
           TargetPlatform.windows,
@@ -102,7 +101,6 @@ void main() {
 
         for (final platform in const [
           TargetPlatform.iOS,
-          TargetPlatform.android,
           TargetPlatform.fuchsia,
         ]) {
           test('is false on $platform (regression for issue #43)', () {
@@ -113,11 +111,11 @@ void main() {
       });
     }
 
-    // hasAnyOnDeviceEngine: false only when no on-device engine is supported
-    // (Android). Linux/macOS/Windows expose all 4 on-device engines, iOS
-    // exposes Sherpa, fuchsia exposes Sherpa too.
+    // hasAnyOnDeviceEngine: Android, Linux, macOS, and Windows expose
+    // downloadable on-device engines. iOS and fuchsia expose Sherpa.
     group('hasAnyOnDeviceEngine', () {
       for (final platform in const [
+        TargetPlatform.android,
         TargetPlatform.linux,
         TargetPlatform.macOS,
         TargetPlatform.windows,
@@ -130,12 +128,6 @@ void main() {
         });
       }
 
-      for (final platform in const [TargetPlatform.android]) {
-        test('is false on $platform (regression for issue #43)', () {
-          debugDefaultTargetPlatformOverride = platform;
-          expect(SpeechEnginePlatformSupport.hasAnyOnDeviceEngine, isFalse);
-        });
-      }
     });
 
     test('API engine is supported on native mobile and desktop targets', () {

@@ -378,30 +378,18 @@ class SettingsProvider extends ChangeNotifier {
 
     // Platform STT policy migration:
     // - Linux: Native is disabled, force Parakeet for new installs / invalid native selections.
-    // - Android: Sherpa/Moonshine/Parakeet/SenseVoice are disabled in slim APK builds, force Native.
+    // - Android: on-device engines stay available and download models after install.
     // - Windows: Native is disabled because `speech_to_text_windows` can crash
     //   natively; force Parakeet while preserving on-device selections that now
     //   use CodeWalk's WASAPI microphone backend.
     // - iOS/Web: Moonshine/Parakeet/SenseVoice stay unavailable until a dedicated client path exists.
     final isLinux = !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
-    final isAndroid =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
     final isWindows =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
     final isIos = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     if (isLinux && _settings.speechToTextEngine == SpeechToTextEngine.native) {
       _settings = _settings.copyWith(
         speechToTextEngine: SpeechToTextEngine.parakeet,
-      );
-      shouldPersistPlatformSettings = true;
-    } else if (isAndroid &&
-        (_settings.speechToTextEngine == SpeechToTextEngine.sherpa ||
-            _settings.speechToTextEngine == SpeechToTextEngine.moonshine ||
-            _settings.speechToTextEngine == SpeechToTextEngine.parakeet ||
-            _settings.speechToTextEngine == SpeechToTextEngine.sensevoice ||
-            _settings.speechToTextEngine == SpeechToTextEngine.nemotron)) {
-      _settings = _settings.copyWith(
-        speechToTextEngine: SpeechToTextEngine.native,
       );
       shouldPersistPlatformSettings = true;
     } else if (isWindows &&

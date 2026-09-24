@@ -302,7 +302,19 @@ Use `SpeechInputService` as the abstraction contract, register native, Sherpa, d
 - ✅ SenseVoice adds a strong desktop option for Chinese, Cantonese, Japanese, Korean, and English via sherpa_onnx offline recognition.
 - ✅ Linux default to Parakeet with automatic migration prevents broken native-engine state on new installs.
 - ⚠ Feature parity between engines is not guaranteed at all times.
-- ❌ Sherpa/Moonshine/Parakeet/SenseVoice are unavailable in Android slim build profile.
+- ❌ (Historical, 2026-02-19) Sherpa/Moonshine/Parakeet/SenseVoice were unavailable in the Android slim build profile (sherpa_onnx native libs excluded). See Addendum 2026-09-24 below.
+
+### Addendum (2026-09-24): Android arm64 ships sherpa_onnx runtime with optional on-device engines
+
+- Original 2026-02-19 decision context is preserved above as history; only the Android slim-exclusion clause is amended.
+- Android arm64 builds now include the sherpa_onnx runtime and expose five optional on-device engines: Sherpa, Moonshine, Parakeet, SenseVoice, Nemotron. Model weights remain on-demand downloads, not bundled.
+- Native STT remains the Android default; on-device engines are opt-in.
+- `lib/presentation/services/stt_model_archive_installer_io.dart` streams large archives to disk and extracts off the UI isolate with staging.
+- Rationale: on-device STT gives offline/private transcription on capable arm64 devices; on-demand weights keep the base install lean; shared streaming installer avoids OOM on large archives.
+- Tradeoffs: APK grows by ~25MB of runtime; model downloads and disk use are user-driven and sizable; on-device inference raises RAM/CPU use vs native STT.
+- Rollback: restore the sherpa_onnx exclusion in `android/app/build.gradle.kts` and re-gate engine registration/selection to native-only on Android.
+- Regression tests: engine selection policy tests per platform, on-demand model install/extraction tests (streaming, staging, off-isolate), Android default-native assertion.
+- ADR-023 alignment: fully client-local speech input; no server protocol change.
 
 ### Key Files
 

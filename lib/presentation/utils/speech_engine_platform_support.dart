@@ -21,53 +21,27 @@ class SpeechEnginePlatformSupport {
         defaultTargetPlatform != TargetPlatform.windows;
   }
 
-  // Android slim APK builds exclude sherpa_onnx; allow everywhere else.
-  static bool get isSherpaSupported {
-    if (kIsWeb) {
-      return false;
-    }
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return false;
-    }
-    return true;
-  }
+  // Web has no sherpa runtime. Android keeps the runtime in the APK and
+  // downloads model files on demand.
+  static bool get isSherpaSupported => !kIsWeb;
 
-  // Desktop only. Linux/macOS use `record`; Windows uses CodeWalk WASAPI.
-  static bool get isMoonshineSupported {
+  static bool get _supportsDownloadableOnDeviceStt {
     if (kIsWeb) {
       return false;
     }
     return defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.windows;
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.android;
   }
 
-  static bool get isParakeetSupported {
-    if (kIsWeb) {
-      return false;
-    }
-    return defaultTargetPlatform == TargetPlatform.linux ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.windows;
-  }
+  static bool get isMoonshineSupported => _supportsDownloadableOnDeviceStt;
 
-  static bool get isSenseVoiceSupported {
-    if (kIsWeb) {
-      return false;
-    }
-    return defaultTargetPlatform == TargetPlatform.linux ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.windows;
-  }
+  static bool get isParakeetSupported => _supportsDownloadableOnDeviceStt;
 
-  static bool get isNemotronSupported {
-    if (kIsWeb) {
-      return false;
-    }
-    return defaultTargetPlatform == TargetPlatform.linux ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.windows;
-  }
+  static bool get isSenseVoiceSupported => _supportsDownloadableOnDeviceStt;
+
+  static bool get isNemotronSupported => _supportsDownloadableOnDeviceStt;
 
   // Cloud API keys must not be exposed in browser builds. Native mobile and
   // desktop apps can call a configured OpenAI-compatible endpoint directly.

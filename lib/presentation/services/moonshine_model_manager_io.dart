@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/experience_settings.dart';
+import 'stt_model_archive_installer_io.dart';
 
 class _MoonshineModelSpec {
   const _MoonshineModelSpec({
@@ -23,7 +21,7 @@ class _MoonshineModelSpec {
   final List<String> files;
 }
 
-// Native implementation of Moonshine model management for desktop IO platforms.
+// Native implementation of Moonshine model management for IO platforms.
 // Models are downloaded on demand from official sherpa-onnx release assets and
 // extracted under getApplicationSupportDirectory().
 class MoonshineModelManager {
@@ -108,56 +106,15 @@ class MoonshineModelManager {
   }) async {
     final spec = _specFor(modelId);
     final dir = Directory(await getModelDir(spec.id));
-    await dir.create(recursive: true);
-
-    final archiveUrl = '$_releaseBase/${spec.packageName}.tar.bz2';
-    final archiveResponse = await _dio.get<List<int>>(
-      archiveUrl,
-      options: Options(responseType: ResponseType.bytes),
-      onReceiveProgress: onProgress == null
-          ? null
-          : (received, total) {
-              if (total > 0) {
-                onProgress((received / total) * 0.85);
-              }
-            },
+    await installSttModelArchive(
+      dio: _dio,
+      url: '$_releaseBase/${spec.packageName}.tar.bz2',
+      destination: dir,
+      files: spec.files,
+      additionalUrl: '$_releaseBase/$_vadFile',
+      additionalFile: _vadFile,
+      onProgress: onProgress,
     );
-
-    final archiveBytes = Uint8List.fromList(archiveResponse.data ?? <int>[]);
-    final tarBytes = BZip2Decoder().decodeBytes(archiveBytes);
-    final archive = TarDecoder().decodeBytes(tarBytes);
-    for (final entry in archive) {
-      if (!entry.isFile) {
-        continue;
-      }
-      final parts = entry.name.split('/');
-      final fileName = parts.isEmpty ? entry.name : parts.last;
-      if (!spec.files.contains(fileName)) {
-        continue;
-      }
-      final output = File('${dir.path}/$fileName');
-      await output.parent.create(recursive: true);
-      await output.writeAsBytes(_fileBytes(entry));
-    }
-
-    final vadPath = '${dir.path}/$_vadFile';
-    await _dio.download(
-      '$_releaseBase/$_vadFile',
-      vadPath,
-      options: Options(
-        followRedirects: true,
-        receiveTimeout: const Duration(minutes: 10),
-      ),
-      onReceiveProgress: onProgress == null
-          ? null
-          : (received, total) {
-              if (total > 0) {
-                onProgress(0.85 + (received / total) * 0.15);
-              }
-            },
-    );
-
-    onProgress?.call(1.0);
   }
 
   Future<void> deleteModel(String modelId) async {
@@ -187,9 +144,4 @@ class MoonshineModelManager {
     return _models[normalized]!;
   }
 
-  List<int> _fileBytes(ArchiveFile entry) {
-    // archive 4.x: entry.content is now FileContent; use readBytes() instead
-    final bytes = entry.readBytes();
-    return bytes ?? <int>[];
-  }
 }
