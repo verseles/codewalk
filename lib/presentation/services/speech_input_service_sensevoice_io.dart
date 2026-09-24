@@ -4,6 +4,7 @@ import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
 
 import '../../core/logging/app_logger.dart';
 import '../utils/speech_engine_platform_support.dart';
+import 'offline_speech_segment_gate.dart';
 import 'sensevoice_model_manager.dart';
 import 'speech_audio_capture.dart';
 import 'speech_input_service.dart';
@@ -52,6 +53,8 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
   String? _activeModelDir;
   bool _isListening = false;
   bool _isAvailable = false;
+  Future<void> Function()? _finishOnStop;
+  Future<void>? _finishInFlight;
   String? _unavailableReason;
   String? _unavailableReasonKey;
 
@@ -167,53 +170,108 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
     _isListening = true;
     onStatus('listening');
 
-    final timeout = pauseFor ?? const Duration(seconds: 5);
     const maxUtteranceDuration = Duration(seconds: 15);
     final buffer = SenseVoiceAudioBuffer();
+    final gate = OfflineSpeechSegmentGate();
     Timer? silenceTimer;
     Timer? maxDurationTimer;
     var completed = false;
 
     Future<void> finishSession() async {
+      final inFlight = _finishInFlight;
+      if (inFlight != null) {
+        await inFlight;
+        return;
+      }
       if (completed) {
         return;
       }
       completed = true;
+      _finishOnStop = null;
       silenceTimer?.cancel();
       maxDurationTimer?.cancel();
+      final hadSpeech = gate.heardSpeech;
       final utterance = buffer.takeAll();
-      await stopListening();
-      if (utterance.isNotEmpty) {
-        final stream = recognizer.createStream();
-        try {
-          stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
-          recognizer.decode(stream);
-          final text = recognizer.getResult(stream).text.trim();
-          if (text.isNotEmpty) {
-            onResult(text, true);
+      final done = () async {
+        await _releaseCapture();
+        if (hadSpeech && utterance.isNotEmpty) {
+          final stream = recognizer.createStream();
+          try {
+            stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
+            recognizer.decode(stream);
+            final text = recognizer.getResult(stream).text.trim();
+            if (text.isNotEmpty) {
+              onResult(text, true);
+            }
+          } catch (error, stackTrace) {
+            AppLogger.error(
+              'SenseVoice offline decode failed',
+              error: error,
+              stackTrace: stackTrace,
+            );
+            onError();
+            return;
+          } finally {
+            stream.free();
           }
-        } catch (error, stackTrace) {
-          AppLogger.error(
-            'SenseVoice offline decode failed',
-            error: error,
-            stackTrace: stackTrace,
-          );
-          onError();
-          return;
-        } finally {
-          stream.free();
+        }
+        onStatus('done');
+      }();
+      _finishInFlight = done;
+      try {
+        await done;
+      } finally {
+        if (identical(_finishInFlight, done)) {
+          _finishInFlight = null;
         }
       }
-      onStatus('done');
     }
 
-    void armSilenceTimer() {
+    Future<void> flushSpokenSegment() async {
       silenceTimer?.cancel();
-      silenceTimer = Timer(timeout, () {
+      silenceTimer = null;
+      if (!_isListening || completed || !gate.heardSpeech) {
+        return;
+      }
+      final utterance = buffer.takeAll();
+      gate.reset();
+      if (utterance.isEmpty) {
+        return;
+      }
+      final stream = recognizer.createStream();
+      try {
+        stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
+        recognizer.decode(stream);
+        final text = recognizer.getResult(stream).text.trim();
+        if (text.isNotEmpty) {
+          onResult(text, true);
+        }
+      } catch (error, stackTrace) {
+        AppLogger.error(
+          'SenseVoice offline decode failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        onError();
+      } finally {
+        stream.free();
+      }
+    }
+
+    void noteChunk(Float32List samples) {
+      if (gate.isSpeech(samples)) {
+        silenceTimer?.cancel();
+        silenceTimer = null;
+        return;
+      }
+      if (!gate.heardSpeech || (silenceTimer?.isActive ?? false)) {
+        return;
+      }
+      silenceTimer = Timer(OfflineSpeechSegmentGate.trailingSilence, () {
         if (!_isListening) {
           return;
         }
-        unawaited(finishSession());
+        unawaited(flushSpokenSegment());
       });
     }
 
@@ -239,13 +297,19 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
       return;
     }
 
-    maxDurationTimer = Timer(maxUtteranceDuration, () {
-      if (!_isListening) {
-        return;
-      }
-      unawaited(finishSession());
-    });
-    armSilenceTimer();
+    _finishOnStop = finishSession;
+    void armMaxDuration() {
+      maxDurationTimer?.cancel();
+      maxDurationTimer = Timer(maxUtteranceDuration, () {
+        if (!_isListening) {
+          return;
+        }
+        unawaited(flushSpokenSegment());
+        armMaxDuration();
+      });
+    }
+
+    armMaxDuration();
 
     _audioSub = audioStream.listen(
       (chunk) {
@@ -254,8 +318,9 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
         }
         final samples = _pcm16ToFloat32(chunk);
         buffer.add(samples);
-        if (senseVoiceChunkHasSpeech(samples)) {
-          armSilenceTimer();
+        noteChunk(samples);
+        if (!gate.heardSpeech) {
+          buffer.takeAll();
         }
       },
       onError: (error) {
@@ -265,6 +330,7 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
           return;
         }
         completed = true;
+        _finishOnStop = null;
         _isListening = false;
         _applyCaptureFailure(
           speechAudioCaptureFailureInfoForError(error),
@@ -327,6 +393,21 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
 
   @override
   Future<void> stopListening() async {
+    final inFlight = _finishInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+    final finish = _finishOnStop;
+    if (finish != null) {
+      _finishOnStop = null;
+      await finish();
+      return;
+    }
+    await _releaseCapture();
+  }
+
+  Future<void> _releaseCapture() async {
     _isListening = false;
     await _audioSub?.cancel();
     _audioSub = null;

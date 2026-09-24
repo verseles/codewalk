@@ -2,33 +2,34 @@ part of '../chat_input_widget.dart';
 
 extension _ChatInputStateMachine on _ChatInputWidgetState {
   Future<void> _handleSendMessage() async {
-    final text = _controller.text.trim();
-    final payloadText = _mode == ChatComposerMode.shell
-        ? _normalizeShellPayload(text)
-        : text;
     if (!widget.enabled || _isSending) {
       return;
     }
-    if (payloadText.isEmpty &&
-        (_mode == ChatComposerMode.shell ||
-            (_attachments.isEmpty && widget.contextItems.isEmpty))) {
-      return;
-    }
-    if (_isListening) {
-      await _stopListening();
-    }
-
-    final draftTextAtSendStart = _controller.text;
-    final draftAttachmentsAtSendStart = List<FileInputPart>.unmodifiable(
-      _attachments,
-    );
-    final draftModeAtSendStart = _mode;
-
     _setState(() {
       _isSending = true;
     });
-
     try {
+      if (_isListening) {
+        await _stopListening();
+      }
+      if (!mounted) {
+        return;
+      }
+      final text = _controller.text.trim();
+      final payloadText = _mode == ChatComposerMode.shell
+          ? _normalizeShellPayload(text)
+          : text;
+      if (payloadText.isEmpty &&
+          (_mode == ChatComposerMode.shell ||
+              (_attachments.isEmpty && widget.contextItems.isEmpty))) {
+        return;
+      }
+
+      final draftTextAtSendStart = _controller.text;
+      final draftAttachmentsAtSendStart = List<FileInputPart>.unmodifiable(
+        _attachments,
+      );
+      final draftModeAtSendStart = _mode;
       // Format file line references as inline text so the LLM sees the
       // selected code directly instead of receiving opaque file parts.
       final fullPayload = _buildPayloadWithContext(payloadText);
