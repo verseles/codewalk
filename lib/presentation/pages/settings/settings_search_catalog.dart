@@ -312,6 +312,7 @@ List<SettingsSearchOption> settingsSearchOptions(
     l.speechMoonshine,
     l.speechParakeet,
     l.speechSenseVoice,
+    l.speechNemotron,
     l.speechApiEngine,
   ]);
   add('speech', 'settings_speech_silence', l.speechAutoStopSilence);

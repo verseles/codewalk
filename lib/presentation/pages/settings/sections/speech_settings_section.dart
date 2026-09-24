@@ -21,6 +21,7 @@ import '../../../utils/speech_engine_platform_support.dart';
 import '../../../utils/windows_settings_links.dart';
 import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
+import '../../../widgets/nemotron_model_download_dialog.dart';
 import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../widgets/settings_section_layout.dart';
 
@@ -106,6 +107,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   bool get _supportsMoonshine =>
       SpeechEnginePlatformSupport.isMoonshineSupported;
   bool get _supportsParakeet => SpeechEnginePlatformSupport.isParakeetSupported;
+  bool get _supportsNemotron => SpeechEnginePlatformSupport.isNemotronSupported;
   bool get _supportsSenseVoice =>
       SpeechEnginePlatformSupport.isSenseVoiceSupported;
 
@@ -203,7 +205,9 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             _supportsParakeet &&
                 selectedEngine == SpeechToTextEngine.parakeet ||
             _supportsSenseVoice &&
-                selectedEngine == SpeechToTextEngine.sensevoice;
+                selectedEngine == SpeechToTextEngine.sensevoice ||
+            _supportsNemotron &&
+                selectedEngine == SpeechToTextEngine.nemotron;
         return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
@@ -250,6 +254,11 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               const SizedBox(height: 8),
               _buildSenseVoiceModelCard(settingsProvider),
             ],
+            if (_supportsNemotron &&
+                selectedEngine == SpeechToTextEngine.nemotron) ...[
+              const SizedBox(height: 8),
+              const NemotronModelCard(),
+            ],
             if (selectedEngine == SpeechToTextEngine.api) ...[
               const SizedBox(height: 20),
               SettingsGroupHeader(title: context.l10n.speechApiProvider),
@@ -268,6 +277,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
     final moonshineEnabled = _supportsMoonshine;
     final parakeetEnabled = _supportsParakeet;
     final senseVoiceEnabled = _supportsSenseVoice;
+    final nemotronEnabled = _supportsNemotron;
     final nativeEnabled = SpeechEnginePlatformSupport.isNativeSupported;
     final apiEnabled = SpeechEnginePlatformSupport.isApiSupported;
     final nativeUnavailableHint = switch (defaultTargetPlatform) {
@@ -476,6 +486,18 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                       parakeetEnabled
                           ? context.l10n.speechParakeetSubtitle
                           : parakeetUnavailableHint,
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  RadioListTile<SpeechToTextEngine>(
+                    contentPadding: EdgeInsets.zero,
+                    value: SpeechToTextEngine.nemotron,
+                    enabled: nemotronEnabled,
+                    title: Text(context.l10n.speechNemotron),
+                    subtitle: Text(
+                      nemotronEnabled
+                          ? context.l10n.speechNemotronSubtitle
+                          : context.l10n.speechNemotronDesktopOnlyHint,
                     ),
                   ),
                   const Divider(height: 1),

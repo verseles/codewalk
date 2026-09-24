@@ -2304,5 +2304,21 @@
   "settingsAboutOurGroup": "مجموعتنا",
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string - settingsAboutOurGroup"
+  },
+  "speechNemotron": "Nemotron",
+  "@speechNemotron": {
+    "description": "CodeWalk UI string — speechNemotron"
+  },
+  "speechNemotronSubtitle": "Desktop streaming ASR for 40 locales, including Portuguese. Download about 630 MB.",
+  "@speechNemotronSubtitle": {
+    "description": "CodeWalk UI string — speechNemotronSubtitle"
+  },
+  "speechNemotronStaysDownloadable": "Nemotron 3.5 stays downloadable and out of the app bundle. One 560 ms streaming model covers 40 locales.",
+  "@speechNemotronStaysDownloadable": {
+    "description": "CodeWalk UI string — speechNemotronStaysDownloadable"
+  },
+  "speechNemotronDesktopOnlyHint": "Available on desktop only. Uses streaming multilingual recognition.",
+  "@speechNemotronDesktopOnlyHint": {
+    "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
   }
 }

@@ -8048,6 +8048,30 @@ abstract class AppLocalizations {
   /// **'Open speech settings'**
   String get speechOpenSpeechSettings;
 
+  /// CodeWalk UI string — speechNemotron
+  ///
+  /// In en, this message translates to:
+  /// **'Nemotron'**
+  String get speechNemotron;
+
+  /// CodeWalk UI string — speechNemotronSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop streaming ASR for 40 locales, including Portuguese. Download about 630 MB.'**
+  String get speechNemotronSubtitle;
+
+  /// CodeWalk UI string — speechNemotronStaysDownloadable
+  ///
+  /// In en, this message translates to:
+  /// **'Nemotron 3.5 stays downloadable and out of the app bundle. One 560 ms streaming model covers 40 locales.'**
+  String get speechNemotronStaysDownloadable;
+
+  /// CodeWalk UI string — speechNemotronDesktopOnlyHint
+  ///
+  /// In en, this message translates to:
+  /// **'Available on desktop only. Uses streaming multilingual recognition.'**
+  String get speechNemotronDesktopOnlyHint;
+
   /// CodeWalk UI string — speechParakeet
   ///
   /// In en, this message translates to:

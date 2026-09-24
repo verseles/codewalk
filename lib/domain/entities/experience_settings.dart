@@ -112,7 +112,15 @@ enum OpenCodeThemePreset {
   oneDark,
 }
 
-enum SpeechToTextEngine { native, sherpa, moonshine, parakeet, sensevoice, api }
+enum SpeechToTextEngine {
+  native,
+  sherpa,
+  moonshine,
+  parakeet,
+  sensevoice,
+  nemotron,
+  api,
+}
 
 enum SpeechApiProvider { openAi, groq, custom }
 
@@ -133,6 +141,7 @@ const String kMoonshineModelTiny = 'tiny';
 const String kMoonshineModelBase = 'base';
 const String kParakeetModelDefault = 'parakeet-v3';
 const String kSenseVoiceModelDefault = 'sensevoice-2024-07-17';
+const String kNemotronModelDefault = 'nemotron-3.5-560ms';
 const String kDefaultOpenAiCompatibleTtsBaseUrl = 'https://api.openai.com/v1';
 const String kDefaultOpenAiCompatibleTtsModel = 'gpt-4o-mini-tts';
 const String kDefaultElevenLabsTtsBaseUrl = 'https://api.elevenlabs.io/v1';
@@ -636,6 +645,7 @@ String speechToTextEngineKey(SpeechToTextEngine engine) {
     SpeechToTextEngine.moonshine => 'moonshine',
     SpeechToTextEngine.parakeet => 'parakeet',
     SpeechToTextEngine.sensevoice => 'sensevoice',
+    SpeechToTextEngine.nemotron => 'nemotron',
     SpeechToTextEngine.api => 'api',
   };
 }
@@ -646,6 +656,7 @@ SpeechToTextEngine speechToTextEngineFromKey(String value) {
     'moonshine' => SpeechToTextEngine.moonshine,
     'parakeet' => SpeechToTextEngine.parakeet,
     'sensevoice' => SpeechToTextEngine.sensevoice,
+    'nemotron' => SpeechToTextEngine.nemotron,
     'api' || 'cloud' || 'openai_compatible' => SpeechToTextEngine.api,
     _ => SpeechToTextEngine.native,
   };

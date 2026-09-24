@@ -44,6 +44,9 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       if (_isSenseVoiceEngineSupported) {
         candidates.add(SpeechToTextEngine.sensevoice);
       }
+      if (_isNemotronEngineSupported) {
+        candidates.add(SpeechToTextEngine.nemotron);
+      }
     } else if (primaryEngine == SpeechToTextEngine.sherpa) {
       candidates.add(SpeechToTextEngine.native);
       if (_isParakeetEngineSupported) {
@@ -52,12 +55,31 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       if (_isSenseVoiceEngineSupported) {
         candidates.add(SpeechToTextEngine.sensevoice);
       }
+      if (_isNemotronEngineSupported) {
+        candidates.add(SpeechToTextEngine.nemotron);
+      }
     } else if (primaryEngine == SpeechToTextEngine.parakeet) {
       if (_isNativeEngineSupported) {
         candidates.add(SpeechToTextEngine.native);
       }
       if (_isSherpaEngineSupported) {
         candidates.add(SpeechToTextEngine.sherpa);
+      }
+      if (_isSenseVoiceEngineSupported) {
+        candidates.add(SpeechToTextEngine.sensevoice);
+      }
+      if (_isNemotronEngineSupported) {
+        candidates.add(SpeechToTextEngine.nemotron);
+      }
+    } else if (primaryEngine == SpeechToTextEngine.nemotron) {
+      if (_isNativeEngineSupported) {
+        candidates.add(SpeechToTextEngine.native);
+      }
+      if (_isSherpaEngineSupported) {
+        candidates.add(SpeechToTextEngine.sherpa);
+      }
+      if (_isParakeetEngineSupported) {
+        candidates.add(SpeechToTextEngine.parakeet);
       }
       if (_isSenseVoiceEngineSupported) {
         candidates.add(SpeechToTextEngine.sensevoice);
@@ -84,6 +106,9 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       }
       if (_isSenseVoiceEngineSupported) {
         candidates.add(SpeechToTextEngine.sensevoice);
+      }
+      if (_isNemotronEngineSupported) {
+        candidates.add(SpeechToTextEngine.nemotron);
       }
     }
 
@@ -323,6 +348,8 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
         _showParakeetDownloadDialog();
       } else if (service is SenseVoiceSpeechInputService) {
         _showSenseVoiceDownloadDialog();
+      } else if (service is NemotronSpeechInputService) {
+        _showNemotronDownloadDialog();
       } else {
         _showSherpaDownloadDialog();
       }
@@ -390,6 +417,24 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     );
     if (downloaded == true && mounted) {
       _moonshineSpeechServiceInstance = null;
+      _activeSpeechService = null;
+      await _startListening();
+    }
+  }
+
+  Future<void> _showNemotronDownloadDialog() async {
+    if (!mounted) return;
+    _finishListeningLoading();
+    _setState(() {
+      _isListening = false;
+    });
+    final downloaded = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const NemotronModelDownloadDialog(),
+    );
+    if (downloaded == true && mounted) {
+      _nemotronSpeechServiceInstance = null;
       _activeSpeechService = null;
       await _startListening();
     }

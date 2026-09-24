@@ -60,6 +60,15 @@ class SpeechEnginePlatformSupport {
         defaultTargetPlatform == TargetPlatform.windows;
   }
 
+  static bool get isNemotronSupported {
+    if (kIsWeb) {
+      return false;
+    }
+    return defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows;
+  }
+
   // Cloud API keys must not be exposed in browser builds. Native mobile and
   // desktop apps can call a configured OpenAI-compatible endpoint directly.
   static bool get isApiSupported => !kIsWeb;
@@ -71,6 +80,7 @@ class SpeechEnginePlatformSupport {
     return isSherpaSupported ||
         isMoonshineSupported ||
         isParakeetSupported ||
-        isSenseVoiceSupported;
+        isSenseVoiceSupported ||
+        isNemotronSupported;
   }
 }

@@ -61,6 +61,7 @@ import '../../presentation/services/cellular_data_saver_service.dart';
 import '../../presentation/services/chat_title_generator.dart';
 import '../../presentation/services/event_feedback_dispatcher.dart';
 import '../../presentation/services/moonshine_model_manager.dart';
+import '../../presentation/services/nemotron_model_manager.dart';
 import '../../presentation/services/notification_service.dart';
 import '../../presentation/services/parakeet_model_manager.dart';
 import '../../presentation/services/project_icon_discovery_service.dart';
@@ -76,6 +77,7 @@ import '../../presentation/services/sherpa_model_manager.dart';
 import '../../presentation/services/sound_service.dart';
 import '../../presentation/services/speech_input_service_api.dart';
 import '../../presentation/services/speech_input_service_moonshine.dart';
+import '../../presentation/services/speech_input_service_nemotron.dart';
 import '../../presentation/services/speech_input_service_parakeet.dart';
 import '../../presentation/services/speech_input_service_sensevoice.dart';
 import '../../presentation/services/speech_input_service_sherpa.dart';
@@ -375,6 +377,7 @@ Future<void> init() async {
   sl.registerLazySingleton(MoonshineModelManager.new);
   sl.registerLazySingleton(ParakeetModelManager.new);
   sl.registerLazySingleton(SenseVoiceModelManager.new);
+  sl.registerLazySingleton(NemotronModelManager.new);
 
   // Speech input backends are registered independently and selected at runtime
   // from user settings (Native/speech_to_text or Sherpa on-device).
@@ -394,6 +397,9 @@ Future<void> init() async {
     );
     sl.registerLazySingleton(
       () => SenseVoiceSpeechInputService(sl<SenseVoiceModelManager>()),
+    );
+    sl.registerLazySingleton(
+      () => NemotronSpeechInputService(sl<NemotronModelManager>()),
     );
   }
   sl.registerLazySingleton<ChatTitleGenerator>(

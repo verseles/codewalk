@@ -26,6 +26,7 @@ import '../providers/settings_provider.dart';
 import '../services/speech_input_service.dart';
 import '../services/speech_input_service_api.dart';
 import '../services/speech_input_service_moonshine.dart';
+import '../services/speech_input_service_nemotron.dart';
 import '../services/speech_input_service_parakeet.dart';
 import '../services/speech_input_service_sensevoice.dart';
 import '../services/speech_input_service_sherpa.dart';
@@ -39,6 +40,7 @@ import 'app_indeterminate_progress.dart';
 import 'chat_input/chat_input_external_files.dart';
 import 'chat_tour_showcase.dart';
 import 'moonshine_model_download_dialog.dart';
+import 'nemotron_model_download_dialog.dart';
 import 'parakeet_model_download_dialog.dart';
 import 'searchable_dropdown_form_field.dart';
 import 'sensevoice_model_download_dialog.dart';
@@ -368,6 +370,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   MoonshineSpeechInputService? _moonshineSpeechServiceInstance;
   ParakeetSpeechInputService? _parakeetSpeechServiceInstance;
   SenseVoiceSpeechInputService? _senseVoiceSpeechServiceInstance;
+  NemotronSpeechInputService? _nemotronSpeechServiceInstance;
   ApiSpeechInputService? _apiSpeechServiceInstance;
   bool _isComposing = false;
   bool _isSending = false;
@@ -461,6 +464,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       SpeechEnginePlatformSupport.isParakeetSupported;
   bool get _isSenseVoiceEngineSupported =>
       SpeechEnginePlatformSupport.isSenseVoiceSupported;
+  bool get _isNemotronEngineSupported =>
+      SpeechEnginePlatformSupport.isNemotronSupported;
   bool get _isApiEngineSupported => SpeechEnginePlatformSupport.isApiSupported;
 
   bool get _isSoftwareKeyboardVisible {
@@ -506,6 +511,14 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     }
     return _senseVoiceSpeechServiceInstance ??= di
         .sl<SenseVoiceSpeechInputService>();
+  }
+
+  SpeechInputService? get _nemotronSpeechService {
+    if (!_isNemotronEngineSupported) {
+      return null;
+    }
+    return _nemotronSpeechServiceInstance ??= di
+        .sl<NemotronSpeechInputService>();
   }
 
   ApiSpeechInputService? get _apiSpeechService {
@@ -1823,6 +1836,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         _isParakeetEngineSupported ? _parakeetSpeechService : null,
       SpeechToTextEngine.sensevoice =>
         _isSenseVoiceEngineSupported ? _senseVoiceSpeechService : null,
+      SpeechToTextEngine.nemotron =>
+        _isNemotronEngineSupported ? _nemotronSpeechService : null,
       SpeechToTextEngine.api =>
         _isApiEngineSupported ? _apiSpeechService : null,
     };
@@ -1835,6 +1850,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
       SpeechToTextEngine.moonshine => context.l10n.speechMoonshine,
       SpeechToTextEngine.parakeet => context.l10n.speechParakeet,
       SpeechToTextEngine.sensevoice => context.l10n.speechSenseVoice,
+      SpeechToTextEngine.nemotron => context.l10n.speechNemotron,
       SpeechToTextEngine.api => context.l10n.speechApiEngine,
     };
   }
@@ -1843,7 +1859,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     SpeechInputService service,
     SettingsProvider settingsProvider,
   ) {
-    if (service is ApiSpeechInputService) {
+    if (service is ApiSpeechInputService ||
+        service is NemotronSpeechInputService) {
       return Localizations.localeOf(context).toLanguageTag();
     }
     if (service is! SherpaSpeechInputService) {

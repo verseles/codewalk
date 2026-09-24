@@ -398,7 +398,8 @@ class SettingsProvider extends ChangeNotifier {
         (_settings.speechToTextEngine == SpeechToTextEngine.sherpa ||
             _settings.speechToTextEngine == SpeechToTextEngine.moonshine ||
             _settings.speechToTextEngine == SpeechToTextEngine.parakeet ||
-            _settings.speechToTextEngine == SpeechToTextEngine.sensevoice)) {
+            _settings.speechToTextEngine == SpeechToTextEngine.sensevoice ||
+            _settings.speechToTextEngine == SpeechToTextEngine.nemotron)) {
       _settings = _settings.copyWith(
         speechToTextEngine: SpeechToTextEngine.native,
       );
@@ -418,7 +419,8 @@ class SettingsProvider extends ChangeNotifier {
     } else if ((kIsWeb || isIos) &&
         (_settings.speechToTextEngine == SpeechToTextEngine.moonshine ||
             _settings.speechToTextEngine == SpeechToTextEngine.parakeet ||
-            _settings.speechToTextEngine == SpeechToTextEngine.sensevoice)) {
+            _settings.speechToTextEngine == SpeechToTextEngine.sensevoice ||
+            _settings.speechToTextEngine == SpeechToTextEngine.nemotron)) {
       _settings = _settings.copyWith(
         speechToTextEngine: SpeechToTextEngine.native,
       );

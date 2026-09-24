@@ -4609,6 +4609,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get speechOpenSpeechSettings => 'Abrir configuración de voz';
 
   @override
+  String get speechNemotron => 'Nemotron';
+
+  @override
+  String get speechNemotronSubtitle =>
+      'Desktop streaming ASR for 40 locales, including Portuguese. Download about 630 MB.';
+
+  @override
+  String get speechNemotronStaysDownloadable =>
+      'Nemotron 3.5 stays downloadable and out of the app bundle. One 560 ms streaming model covers 40 locales.';
+
+  @override
+  String get speechNemotronDesktopOnlyHint =>
+      'Available on desktop only. Uses streaming multilingual recognition.';
+
+  @override
   String get speechParakeet => 'Parakeet';
 
   @override
