@@ -17,6 +17,10 @@ Start the web interface by running:
 
 This starts a local server on `127.0.0.1` with a random available port and automatically opens OpenCode in your default browser.
 
+If `OPENCODE_SERVER_PASSWORD` is not set, the server will be unsecured. This is fine for local use but should be set for network access.
+
+For the best experience, run `opencode web` from WSL rather than PowerShell. This ensures proper file system access and terminal integration.
+
 * * *
 
 ## [Configuration](https://opencode.ai/docs/web/#configuration)

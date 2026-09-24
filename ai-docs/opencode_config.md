@@ -19,6 +19,8 @@ OpenCode supports both **JSON** and **JSONC** (JSON with Comments) formats.
 
 You can place your config in a couple of different locations and they have a different order of precedence.
 
+Configuration files are **merged together**, not replaced.
+
 Configuration files are merged together, not replaced. Settings from the following config locations are combined. Later configs override earlier ones only for conflicting keys. Non-conflicting settings from all configs are preserved.
 
 For example, if your global config sets `autoupdate: true` and your project config sets `model: "anthropic/claude-sonnet-4-5"`, the final configuration will include both settings.
@@ -40,6 +42,8 @@ Config sources are loaded in this order (later sources override earlier ones):
 
 This means project configs can override global defaults, and global configs can override remote organizational defaults. Managed settings override everything.
 
+The `.opencode` and `~/.config/opencode` directories use **plural names** for subdirectories: `agents/`, `commands/`, `modes/`, `plugins/`, `skills/`, `tools/`, and `themes/`. Singular names (e.g., `agent/`) are also supported for backwards compatibility.
+
 * * *
 
 ### [Remote](https://opencode.ai/docs/config/#remote)
@@ -54,7 +58,7 @@ For example, if your organization provides MCP servers that are disabled by defa
 
 You can enable specific servers in your local config:
 
-`{  "mcp": {    "jira": {      "type": "remote",      "url": "https://jira.example.com/mcp",      "enabled": true    }  }}`
+`{  "mcp": {    "jira": {      "enabled": true    }  }}`
 
 * * *
 
@@ -73,6 +77,8 @@ Global config overrides remote organizational defaults.
 Add `opencode.json` in your project root. Project config has the highest precedence among standard config files - it overrides both global and remote configs.
 
 For project-specific TUI settings, add `tui.json` alongside it.
+
+Place project specific config in the root of your project.
 
 When OpenCode starts up, it first looks for a config file in the current directory, then traverses up to the nearest Git directory.
 
@@ -94,7 +100,7 @@ Custom config is loaded between global and project configs in the precedence ord
 
 Specify a custom config directory using the `OPENCODE_CONFIG_DIR` environment variable. This directory will be searched for agents, commands, modes, and plugins just like the standard `.opencode` directory, and should follow the same structure.
 
-`export OPENCODE_CONFIG_DIR=/path/to/my/config-directoryopencode run "Hello world"`
+`export OPENCODE_CONFIG_DIR=/path/to/my/config-directory`
 
 The custom directory is loaded after the global config and `.opencode` directories, so it **can override** their settings.
 
@@ -180,7 +186,7 @@ Legacy `theme`, `keybinds`, and `tui` keys in `opencode.json` are deprecated and
 
 You can configure server settings for the `opencode serve` and `opencode web` commands through the `server` option.
 
-`{  "$schema": "https://opencode.ai/config.json",  "server": {    "port": 4096,    "hostname": "0.0.0.0",    "mdns": true,    "mdnsDomain": "myproject.local",    "cors": ["http://localhost:5173"]  }}`
+`{  "$schema": "https://opencode.ai/config.json",  "server": {    "hostname": "0.0.0.0",    "mdns": true,    "mdnsDomain": "myproject.local",    "cors": ["http://localhost:5173"]  }}`
 
 Available options:
 
@@ -218,16 +224,17 @@ You can manage the tools an LLM can use through the `tools` option.
 
 You can configure the providers and models you want to use in your OpenCode config through the `provider`, `model` and `small_model` options.
 
-`{  "$schema": "https://opencode.ai/config.json",  "provider": {},  "model": "anthropic/claude-sonnet-4-5",  "small_model": "anthropic/claude-haiku-4-5"}`
+`{  "$schema": "https://opencode.ai/config.json",  "provider": {},  "small_model": "anthropic/claude-haiku-4-5"}`
 
 The `small_model` option configures a separate model for lightweight tasks like title generation. By default, OpenCode tries to use a cheaper model if one is available from your provider, otherwise it falls back to your main model.
 
-Provider options can include `timeout`, `chunkTimeout`, and `setCacheKey`:
+Provider options can include `timeout`, `headerTimeout`, `chunkTimeout`, and `setCacheKey`:
 
 `{  "$schema": "https://opencode.ai/config.json",  "provider": {    "anthropic": {      "options": {        "timeout": 600000,        "chunkTimeout": 30000,        "setCacheKey": true      }    }  }}`
 
 *   `timeout` - Request timeout in milliseconds (default: 300000). Set to `false` to disable.
-*   `chunkTimeout` - Timeout in milliseconds between streamed response chunks. If no chunk arrives in time, the request is aborted.
+*   `headerTimeout` - Timeout in milliseconds to wait for response headers (default: 300000, or 5 minutes). This timer stops once headers arrive and does not limit the streamed response body. Set to `false` to disable.
+*   `chunkTimeout` - Timeout in milliseconds between streamed response chunks (default: 300000, or 5 minutes). If no chunk arrives in time, the request is aborted. Set to `false` to disable.
 *   `setCacheKey` - Ensure a cache key is always set for designated provider.
 
 You can also configure [local models](https://opencode.ai/docs/models#local). [Learn more](https://opencode.ai/docs/models).
@@ -269,11 +276,13 @@ Some providers support additional configuration options beyond the generic `time
 
 Amazon Bedrock supports AWS-specific configuration:
 
-`{  "$schema": "https://opencode.ai/config.json",  "provider": {    "amazon-bedrock": {      "options": {        "region": "us-east-1",        "profile": "my-aws-profile",        "endpoint": "https://bedrock-runtime.us-east-1.vpce-xxxxx.amazonaws.com"      }    }  }}`
+`{  "$schema": "https://opencode.ai/config.json",  "provider": {    "amazon-bedrock": {        "region": "us-east-1",        "profile": "my-aws-profile",        "endpoint": "https://bedrock-runtime.us-east-1.vpce-xxxxx.amazonaws.com"      }  }}`
 
 *   `region` - AWS region for Bedrock (defaults to `AWS_REGION` env var or `us-east-1`)
 *   `profile` - AWS named profile from `~/.aws/credentials` (defaults to `AWS_PROFILE` env var)
 *   `endpoint` - Custom endpoint URL for VPC endpoints. This is an alias for the generic `baseURL` option using AWS-specific terminology. If both are specified, `endpoint` takes precedence.
+
+Bearer tokens (`AWS_BEARER_TOKEN_BEDROCK` or `/connect`) take precedence over profile-based authentication. See authentication precedence for details.
 
 [Learn more about Amazon Bedrock configuration](https://opencode.ai/docs/providers#amazon-bedrock).
 
@@ -403,7 +412,7 @@ You can enable and configure LSP servers through the `lsp` option. Omit it to ke
 
 Use an object to keep built-ins enabled while configuring overrides or custom LSP servers.
 
-`{  "$schema": "https://opencode.ai/config.json",  "lsp": {    "typescript": {      "disabled": true    }  }}`
+`{  "$schema": "https://opencode.ai/config.json",  "lsp": {    "typescript": {    }  }}`
 
 [Learn more about LSP servers here](https://opencode.ai/docs/lsp).
 
@@ -481,6 +490,8 @@ You can disable providers that are loaded automatically through the `disabled_pr
 
 `{  "$schema": "https://opencode.ai/config.json",  "disabled_providers": ["openai", "gemini"]}`
 
+The `disabled_providers` takes priority over `enabled_providers`.
+
 The `disabled_providers` option accepts an array of provider IDs. When a provider is disabled:
 
 *   It won’t be loaded even if environment variables are set.
@@ -506,6 +517,8 @@ If a provider appears in both `enabled_providers` and `disabled_providers`, the 
 The `experimental` key contains options that are under active development.
 
 `{  "$schema": "https://opencode.ai/config.json",  "experimental": {}}`
+
+Experimental options are not stable. They may change or be removed without notice.
 
 * * *
 
