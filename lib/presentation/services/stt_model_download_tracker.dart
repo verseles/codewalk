@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/logging/app_logger.dart';
 import '../../domain/entities/experience_settings.dart';
 
 /// App-lifetime progress for model downloads, independent of Settings routes.
@@ -42,7 +43,13 @@ class SttModelDownloadTracker extends ChangeNotifier {
         }
       });
       _lastFinished = SttModelDownload(engine, modelId, 1);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Speech model download failed',
+        error: error,
+        stackTrace: stackTrace,
+        tags: const {'speech', 'model-download'},
+      );
       _lastFinished = SttModelDownload(engine, modelId, 0, failed: true);
       rethrow;
     } finally {

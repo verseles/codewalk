@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:codewalk/presentation/services/stt_model_archive_installer_io.dart';
@@ -44,19 +45,50 @@ void main() {
     );
   }
 
-  test('extracts selected files off the UI isolate and publishes once', () async {
-    response = makeArchive();
-    final destination = Directory('${temp.path}/model');
-    final progress = <double>[];
+  test(
+    'extracts selected files off the UI isolate and publishes once',
+    () async {
+      response = makeArchive();
+      final destination = Directory('${temp.path}/model');
+      final progress = <double>[];
 
-    await install(destination, progress);
+      await install(destination, progress);
 
-    expect(await File('${destination.path}/encoder.onnx').readAsBytes(), [1, 2, 3]);
-    expect(await File('${destination.path}/tokens.txt').readAsBytes(), [4, 5]);
-    expect(File('${destination.path}/ignored.txt').existsSync(), isFalse);
-    expect(progress.last, 1);
-    expect(temp.listSync().map((entry) => entry.path), [destination.path]);
-  });
+      expect(await File('${destination.path}/encoder.onnx').readAsBytes(), [
+        1,
+        2,
+        3,
+      ]);
+      expect(await File('${destination.path}/tokens.txt').readAsBytes(), [
+        4,
+        5,
+      ]);
+      expect(File('${destination.path}/ignored.txt').existsSync(), isFalse);
+      expect(progress.last, 1);
+      expect(temp.listSync().map((entry) => entry.path), [destination.path]);
+    },
+  );
+
+  test(
+    'progress callback retaining an unsendable UI resource stays on main isolate',
+    () async {
+      response = makeArchive();
+      final destination = Directory('${temp.path}/model');
+      final widgetResource = ReceivePort();
+      addTearDown(widgetResource.close);
+      await installSttModelArchive(
+        dio: Dio(),
+        url: 'http://127.0.0.1:${server.port}/model.tar.bz2',
+        destination: destination,
+        files: const ['encoder.onnx', 'tokens.txt'],
+        onProgress: (_) => expect(widgetResource.sendPort, isNotNull),
+      );
+      expect(await File('${destination.path}/tokens.txt').readAsBytes(), [
+        4,
+        5,
+      ]);
+    },
+  );
 
   test('corrupt archive leaves an existing installation intact', () async {
     response = [0, 1, 2, 3];
@@ -64,7 +96,10 @@ void main() {
     File('${destination.path}/tokens.txt').writeAsBytesSync([7]);
     final progress = <double>[];
 
-    await expectLater(install(destination, progress), throwsA(isA<Exception>()));
+    await expectLater(
+      install(destination, progress),
+      throwsA(isA<Exception>()),
+    );
 
     expect(File('${destination.path}/tokens.txt').readAsBytesSync(), [7]);
     expect(progress, isNot(contains(1)));
@@ -76,7 +111,10 @@ void main() {
     final destination = Directory('${temp.path}/model');
     final progress = <double>[];
 
-    await expectLater(install(destination, progress), throwsA(isA<FormatException>()));
+    await expectLater(
+      install(destination, progress),
+      throwsA(isA<FormatException>()),
+    );
 
     expect(destination.existsSync(), isFalse);
     expect(progress, isNot(contains(1)));

@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import 'speech_model_residency_controller.dart';
 
@@ -42,9 +42,14 @@ Future<void> installSttModelArchive({
         }
       },
     );
-    await Isolate.run(
-      () => _extractArchive(archivePath, tarPath, staged.path, files),
-    );
+    // Only plain data crosses the isolate boundary. An inline closure here can
+    // retain the caller's progress callback (and its entire widget tree).
+    await compute(_extractArchiveTask, (
+      archivePath,
+      tarPath,
+      staged.path,
+      List<String>.of(files),
+    ));
     if (additionalUrl != null && additionalFile != null) {
       await dio.download(
         additionalUrl,
@@ -106,6 +111,10 @@ Future<void> installSttModelArchive({
       _installingModels.remove(destination.path);
     }
   }
+}
+
+void _extractArchiveTask((String, String, String, List<String>) task) {
+  _extractArchive(task.$1, task.$2, task.$3, task.$4);
 }
 
 void _extractArchive(
