@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/experience_settings.dart';
+import 'speech_model_residency_controller.dart';
 import 'stt_model_archive_installer_io.dart';
 import 'stt_model_download_tracker.dart';
 
@@ -107,9 +108,12 @@ class SenseVoiceModelManager {
 
   Future<void> deleteModel(String modelId) async {
     final dir = Directory(await getModelDir(modelId));
-    if (dir.existsSync()) {
-      await dir.delete(recursive: true);
-    }
+    await SpeechModelResidencyController.instance.mutateModel(
+      dir.path,
+      () async {
+        if (dir.existsSync()) await dir.delete(recursive: true);
+      },
+    );
   }
 
   Future<String> getModelDir(String modelId) async {
@@ -131,5 +135,4 @@ class SenseVoiceModelManager {
     final normalized = normalizeModelId(modelId);
     return _models[normalized]!;
   }
-
 }

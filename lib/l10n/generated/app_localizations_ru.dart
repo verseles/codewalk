@@ -9,6 +9,13 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => 'Сохранять в памяти';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      'Оставляет одну локальную голосовую модель загруженной после использования для ускорения следующих записей. Требует больше ОЗУ; при нехватке памяти система может выгрузить модель.';
+
+  @override
   String get aboutGitHub => 'GitHub';
 
   @override

@@ -9,6 +9,13 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => 'मेमोरी में रखें';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      'अगली रिकॉर्डिंग तेज़ी से शुरू करने के लिए उपयोग के बाद एक स्थानीय वॉइस मॉडल लोड रखा जाता है। अधिक RAM लगती है; मेमोरी कम होने पर सिस्टम इसे हटा सकता है।';
+
+  @override
   String get aboutGitHub => 'GitHub';
 
   @override

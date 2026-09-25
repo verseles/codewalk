@@ -17,6 +17,8 @@
   "speechCustomModel": "Modèle personnalisé…",
   "speechPitchHiddenForProvider": "La hauteur n''est pas prise en charge par ce fournisseur TTS et est masquée.",
   "@@locale": "fr",
+  "speechKeepModelInMemory": "Garder en mémoire",
+  "speechKeepModelInMemoryHint": "Garde un modèle vocal local chargé après utilisation pour accélérer les enregistrements suivants. Utilise plus de RAM ; le système peut le libérer si la mémoire est faible.",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "Impossible d''activer un serveur en mauvaise santé",
   "appProviderDesktopBuildRequired": "Utilisez une build de bureau pour configurer un serveur local géré.",

@@ -9,14 +9,24 @@ import '../../core/logging/app_logger.dart';
 import '../utils/speech_engine_platform_support.dart';
 import 'sherpa_model_manager.dart';
 import 'speech_audio_capture.dart';
-import 'speech_input_service.dart';
+import 'speech_model_residency_controller.dart';
 
 // Sherpa STT backend using sherpa_onnx OnlineRecognizer with Kroko streaming
 // transducer models and SpeechAudioCapture for microphone capture.
 // Audio pipeline: AudioRecorder (PCM 16-bit 16kHz mono) → int16→float32
 // conversion → sherpa_onnx OnlineStream → partial/final text results.
-class SherpaSpeechInputService implements SpeechInputService {
-  SherpaSpeechInputService(this._modelManager);
+class SherpaSpeechInputService with ResidentSpeechInputService {
+  SherpaSpeechInputService(
+    this._modelManager, {
+    this.recognizerFactory,
+    this.captureFactory = SpeechAudioCapture.new,
+    this.initializeBindings,
+  });
+
+  final sherpa.OnlineRecognizer Function(sherpa.OnlineRecognizerConfig)?
+  recognizerFactory;
+  final SpeechAudioCapture Function() captureFactory;
+  final void Function()? initializeBindings;
 
   final SherpaModelManager _modelManager;
   static const _defaultPauseFor = Duration(seconds: 5);
@@ -29,6 +39,23 @@ class SherpaSpeechInputService implements SpeechInputService {
   static bool _bindingsInitialized = false;
 
   sherpa.OnlineRecognizer? _recognizer;
+  String? _loadedModelDir;
+  Duration? _loadedPauseFor;
+  Future<void> Function()? _finishOnStop;
+  Future<void>? _finishInFlight;
+
+  @override
+  String? get residentModelPath => _loadedModelDir;
+
+  @override
+  void releaseResidentModel() {
+    final recognizer = _recognizer;
+    _recognizer = null;
+    _loadedModelDir = null;
+    _loadedPauseFor = null;
+    recognizer?.free();
+  }
+
   SpeechAudioCapture? _capture;
   StreamSubscription<Uint8List>? _audioSub;
   String? _activeLanguage;
@@ -51,7 +78,7 @@ class SherpaSpeechInputService implements SpeechInputService {
   String? get unavailableReasonKey => _unavailableReasonKey;
 
   @override
-  Future<bool> initialize() async {
+  Future<bool> initializeBackend() async {
     if (!SpeechEnginePlatformSupport.isSherpaSupported) {
       _isAvailable = false;
       _unavailableReason = 'Sherpa is unavailable on this platform.';
@@ -87,8 +114,7 @@ class SherpaSpeechInputService implements SpeechInputService {
 
     _activeLanguage = null;
     _activeModelDir = null;
-    _recognizer?.free();
-    _recognizer = null;
+    releaseResidentModel();
     // Service is supported on this platform, but no model is installed yet.
     // startListening() will emit `model_required` so the UI can offer download.
     AppLogger.info('Sherpa model unavailable; waiting for user download');
@@ -97,7 +123,7 @@ class SherpaSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<void> startListening({
+  Future<void> startBackend({
     required void Function(String text, bool isFinal) onResult,
     required void Function(String status) onStatus,
     required void Function() onError,
@@ -117,8 +143,7 @@ class SherpaSpeechInputService implements SpeechInputService {
           _activeLanguage = null;
           _activeModelDir = null;
           _isAvailable = false;
-          _recognizer?.free();
-          _recognizer = null;
+          releaseResidentModel();
           onStatus('model_required');
           return;
         }
@@ -166,12 +191,11 @@ class SherpaSpeechInputService implements SpeechInputService {
       return;
     }
 
-    final capture = SpeechAudioCapture();
+    final capture = captureFactory();
     _capture = capture;
 
     final hasPermission = await capture.hasPermission();
     if (!hasPermission) {
-      _capture = null;
       _applyCaptureFailure(
         capture.lastFailureInfo ??
             speechAudioCaptureFailureInfoForStatus(
@@ -212,15 +236,45 @@ class SherpaSpeechInputService implements SpeechInputService {
     }
 
     Future<void> completeListeningSession() async {
-      if (doneEmitted) {
+      final inFlight = _finishInFlight;
+      if (inFlight != null) {
+        await inFlight;
         return;
       }
+      if (doneEmitted) return;
       doneEmitted = true;
+      _finishOnStop = null;
       silenceTimer?.cancel();
-      freeStreamOnce();
-      await stopListening();
-      onStatus('done');
+      final done = () async {
+        try {
+          await _releaseCapture();
+          stream.inputFinished();
+          while (recognizer.isReady(stream)) {
+            recognizer.decode(stream);
+          }
+          final text = recognizer.getResult(stream).text.trim();
+          if (text.isNotEmpty) onResult(text, true);
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Sherpa final flush failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          onError();
+        } finally {
+          freeStreamOnce();
+        }
+        onStatus('done');
+      }();
+      _finishInFlight = done;
+      try {
+        await done;
+      } finally {
+        _finishInFlight = null;
+      }
     }
+
+    _finishOnStop = completeListeningSession;
 
     void armSilenceTimer() {
       silenceTimer?.cancel();
@@ -231,8 +285,6 @@ class SherpaSpeechInputService implements SpeechInputService {
         unawaited(completeListeningSession());
       });
     }
-
-    armSilenceTimer();
 
     Stream<Uint8List> audioStream;
     try {
@@ -247,8 +299,9 @@ class SherpaSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _isListening = false;
-      stream.free();
-      _capture = null;
+      doneEmitted = true;
+      _finishOnStop = null;
+      freeStreamOnce();
       _applyCaptureFailure(
         speechAudioCaptureFailureInfoForError(error),
         fallback: 'Microphone recording failed.',
@@ -257,32 +310,38 @@ class SherpaSpeechInputService implements SpeechInputService {
       return;
     }
 
+    armSilenceTimer();
     _audioSub = audioStream.listen(
       (chunk) {
         if (!_isListening) return;
-        // Convert Int16 PCM bytes to normalized Float32 samples for sherpa.
-        final samples = _pcm16ToFloat32(chunk);
-        stream.acceptWaveform(samples: samples, sampleRate: 16000);
+        try {
+          // Convert Int16 PCM bytes to normalized Float32 samples for sherpa.
+          final samples = _pcm16ToFloat32(chunk);
+          stream.acceptWaveform(samples: samples, sampleRate: 16000);
 
-        // Process all buffered frames.
-        while (recognizer.isReady(stream)) {
-          recognizer.decode(stream);
-        }
-
-        // Emit partial transcript for live feedback.
-        final partial = recognizer.getResult(stream).text.trim();
-        if (partial.isNotEmpty) {
-          onResult(partial, false);
-          armSilenceTimer();
-        }
-
-        // Detect utterance endpoint and stop after silence timeout.
-        if (recognizer.isEndpoint(stream)) {
-          final finalText = recognizer.getResult(stream).text.trim();
-          if (finalText.isNotEmpty) {
-            onResult(finalText, true);
+          // Process all buffered frames.
+          while (recognizer.isReady(stream)) {
+            recognizer.decode(stream);
           }
-          unawaited(completeListeningSession());
+
+          // Emit partial transcript for live feedback.
+          final partial = recognizer.getResult(stream).text.trim();
+          if (partial.isNotEmpty) {
+            onResult(partial, false);
+            armSilenceTimer();
+          }
+
+          // Detect utterance endpoint and stop after silence timeout.
+          if (recognizer.isEndpoint(stream)) {
+            unawaited(completeListeningSession());
+          }
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Sherpa decode failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          onError();
         }
       },
       onError: (error) {
@@ -292,6 +351,7 @@ class SherpaSpeechInputService implements SpeechInputService {
           return;
         }
         doneEmitted = true;
+        _finishOnStop = null;
         _isListening = false;
         AppLogger.warn('Sherpa audio stream reported an error');
         _applyCaptureFailure(
@@ -302,23 +362,7 @@ class SherpaSpeechInputService implements SpeechInputService {
         onError();
       },
       onDone: () {
-        silenceTimer?.cancel();
-        if (doneEmitted) {
-          freeStreamOnce();
-          return;
-        }
-        // Flush any remaining frames after the recorder closes.
-        while (recognizer.isReady(stream)) {
-          recognizer.decode(stream);
-        }
-        final finalText = recognizer.getResult(stream).text.trim();
-        if (finalText.isNotEmpty) {
-          onResult(finalText, true);
-        }
-        freeStreamOnce();
-        doneEmitted = true;
-        _isListening = false;
-        onStatus('done');
+        if (!doneEmitted) unawaited(completeListeningSession());
       },
     );
   }
@@ -346,12 +390,17 @@ class SherpaSpeechInputService implements SpeechInputService {
     required Duration pauseFor,
   }) async {
     _ensureBindingsInitialized();
-    _recognizer?.free();
+    if (_recognizer != null &&
+        _loadedModelDir == modelDir &&
+        _loadedPauseFor == pauseFor) {
+      return;
+    }
+    releaseResidentModel();
 
     final pauseSeconds = pauseFor.inMilliseconds / 1000.0;
     final rule2TrailingSilence = math.max(0.3, pauseSeconds / 2.0);
 
-    _recognizer = sherpa.OnlineRecognizer(
+    _recognizer = (recognizerFactory ?? sherpa.OnlineRecognizer.new)(
       sherpa.OnlineRecognizerConfig(
         model: sherpa.OnlineModelConfig(
           transducer: sherpa.OnlineTransducerModelConfig(
@@ -372,6 +421,8 @@ class SherpaSpeechInputService implements SpeechInputService {
         maxActivePaths: 4,
       ),
     );
+    _loadedModelDir = modelDir;
+    _loadedPauseFor = pauseFor;
   }
 
   Duration _normalizePauseFor(Duration pauseFor) {
@@ -386,6 +437,10 @@ class SherpaSpeechInputService implements SpeechInputService {
   }
 
   void _ensureBindingsInitialized() {
+    if (initializeBindings != null) {
+      initializeBindings!();
+      return;
+    }
     if (_bindingsInitialized) {
       return;
     }
@@ -395,7 +450,21 @@ class SherpaSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<void> stopListening() async {
+  Future<void> stopBackend() async {
+    final inFlight = _finishInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+    final finish = _finishOnStop;
+    if (finish != null) {
+      await finish();
+      return;
+    }
+    await _releaseCapture();
+  }
+
+  Future<void> _releaseCapture() async {
     _isListening = false;
     await _audioSub?.cancel();
     _audioSub = null;

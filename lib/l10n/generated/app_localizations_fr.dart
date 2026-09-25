@@ -9,6 +9,13 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => 'Garder en mémoire';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      'Garde un modèle vocal local chargé après utilisation pour accélérer les enregistrements suivants. Utilise plus de RAM ; le système peut le libérer si la mémoire est faible.';
+
+  @override
   String get aboutGitHub => 'GitHub';
 
   @override

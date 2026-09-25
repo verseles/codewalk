@@ -17,6 +17,8 @@
   "speechCustomModel": "اپنی مرضی کا ماڈل…",
   "speechPitchHiddenForProvider": "اس TTS فراہم کنندہ میں پچ سپورٹ نہیں ہے اور چھپی ہوئی ہے۔",
   "@@locale": "ur",
+  "speechKeepModelInMemory": "میموری میں رکھیں",
+  "speechKeepModelInMemoryHint": "اگلی ریکارڈنگ تیزی سے شروع کرنے کے لیے استعمال کے بعد ایک مقامی صوتی ماڈل لوڈ رکھتا ہے۔ زیادہ RAM استعمال ہوتی ہے؛ میموری کم ہونے پر سسٹم اسے ہٹا سکتا ہے۔",
   "aboutGitHub": "گٹ ہب",
   "appProviderCannotActivateUnhealthy": "غیر صحت مند سرور کو فعال نہیں کیا جا سکتا",
   "appProviderDesktopOnly": "منظم مقامی سرور صرف ڈیسک ٹاپ پر دستیاب ہے۔",

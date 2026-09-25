@@ -4,6 +4,8 @@ import 'dart:isolate';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 
+import 'speech_model_residency_controller.dart';
+
 final _installingModels = <String>{};
 
 /// Downloads into a sibling directory so incomplete files cannot look installed.
@@ -62,34 +64,40 @@ Future<void> installSttModelArchive({
         throw FormatException('Empty model file: $name');
       }
     }
-    if (destination.existsSync()) {
-      backup = await parent.createTemp('.stt-previous-');
-      await backup.delete();
-      await destination.rename(backup.path);
-    }
-    try {
-      await staged.rename(destination.path);
-    } catch (_) {
-      if (backup != null) {
-        try {
-          await backup.rename(destination.path);
-          backup = null;
-        } catch (restoreError) {
-          throw StateError(
-            'Could not restore previous model from ${backup?.path}: $restoreError',
-          );
+    await SpeechModelResidencyController.instance.mutateModel(
+      destination.path,
+      () async {
+        if (destination.existsSync()) {
+          backup = await parent.createTemp('.stt-previous-');
+          await backup!.delete();
+          await destination.rename(backup!.path);
         }
-      }
-      rethrow;
-    }
+        try {
+          await staged.rename(destination.path);
+        } catch (_) {
+          if (backup != null) {
+            try {
+              await backup!.rename(destination.path);
+              backup = null;
+            } catch (restoreError) {
+              throw StateError(
+                'Could not restore previous model from ${backup?.path}: $restoreError',
+              );
+            }
+          }
+          rethrow;
+        }
+      },
+    );
     onProgress?.call(1);
   } finally {
     if (workspace != null && workspace.existsSync()) {
       await workspace.delete(recursive: true);
     }
     // If restoration failed, the backup may be the only surviving model copy.
-    if (backup != null && destination.existsSync() && backup.existsSync()) {
-      await backup.delete(recursive: true);
+    final previous = backup;
+    if (previous != null && destination.existsSync() && previous.existsSync()) {
+      await previous.delete(recursive: true);
     }
     _installingModels.remove(destination.path);
   }

@@ -7,7 +7,7 @@ import '../utils/speech_engine_platform_support.dart';
 import 'offline_speech_segment_gate.dart';
 import 'sensevoice_model_manager.dart';
 import 'speech_audio_capture.dart';
-import 'speech_input_service.dart';
+import 'speech_model_residency_controller.dart';
 
 @visibleForTesting
 class SenseVoiceAudioBuffer {
@@ -40,14 +40,37 @@ bool senseVoiceChunkHasSpeech(Float32List samples, {double threshold = 0.015}) {
 
 // SenseVoice uses sherpa_onnx offline recognition. Linux/macOS capture uses
 // `record`; Windows uses CodeWalk WASAPI.
-class SenseVoiceSpeechInputService implements SpeechInputService {
-  SenseVoiceSpeechInputService(this._modelManager);
+class SenseVoiceSpeechInputService with ResidentSpeechInputService {
+  SenseVoiceSpeechInputService(
+    this._modelManager, {
+    this.recognizerFactory,
+    this.captureFactory = SpeechAudioCapture.new,
+    this.initializeBindings,
+  });
+
+  final sherpa.OfflineRecognizer Function(sherpa.OfflineRecognizerConfig)?
+  recognizerFactory;
+  final SpeechAudioCapture Function() captureFactory;
+  final void Function()? initializeBindings;
 
   final SenseVoiceModelManager _modelManager;
   static const _sampleRate = 16000;
   static bool _bindingsInitialized = false;
 
   sherpa.OfflineRecognizer? _recognizer;
+  String? _loadedModelDir;
+
+  @override
+  String? get residentModelPath => _loadedModelDir;
+
+  @override
+  void releaseResidentModel() {
+    final recognizer = _recognizer;
+    _recognizer = null;
+    _loadedModelDir = null;
+    recognizer?.free();
+  }
+
   SpeechAudioCapture? _capture;
   StreamSubscription<Uint8List>? _audioSub;
   String? _activeModelDir;
@@ -75,7 +98,7 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<bool> initialize() async {
+  Future<bool> initializeBackend() async {
     if (!_isDesktopSupported) {
       _unavailableReason = 'SenseVoice is available on desktop only.';
       _unavailableReasonKey = 'desktopOnly';
@@ -110,15 +133,14 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
     }
 
     _activeModelDir = null;
-    _recognizer?.free();
-    _recognizer = null;
+    releaseResidentModel();
     _unavailableReason = null;
     _isAvailable = false;
     return true;
   }
 
   @override
-  Future<void> startListening({
+  Future<void> startBackend({
     required void Function(String text, bool isFinal) onResult,
     required void Function(String status) onStatus,
     required void Function() onError,
@@ -152,11 +174,10 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
       return;
     }
 
-    final capture = SpeechAudioCapture();
+    final capture = captureFactory();
     _capture = capture;
     final hasPermission = await capture.hasPermission();
     if (!hasPermission) {
-      _capture = null;
       _applyCaptureFailure(
         capture.lastFailureInfo ??
             speechAudioCaptureFailureInfoForStatus(
@@ -195,8 +216,9 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
       final done = () async {
         await _releaseCapture();
         if (hadSpeech && utterance.isNotEmpty) {
-          final stream = recognizer.createStream();
+          sherpa.OfflineStream? stream;
           try {
+            stream = recognizer.createStream();
             stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
             recognizer.decode(stream);
             final text = recognizer.getResult(stream).text.trim();
@@ -212,7 +234,7 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
             onError();
             return;
           } finally {
-            stream.free();
+            stream?.free();
           }
         }
         onStatus('done');
@@ -238,8 +260,9 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
       if (utterance.isEmpty) {
         return;
       }
-      final stream = recognizer.createStream();
+      sherpa.OfflineStream? stream;
       try {
+        stream = recognizer.createStream();
         stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
         recognizer.decode(stream);
         final text = recognizer.getResult(stream).text.trim();
@@ -254,7 +277,7 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
         );
         onError();
       } finally {
-        stream.free();
+        stream?.free();
       }
     }
 
@@ -288,7 +311,6 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _isListening = false;
-      _capture = null;
       _applyCaptureFailure(
         speechAudioCaptureFailureInfoForError(error),
         fallback: 'Microphone recording failed.',
@@ -365,8 +387,9 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
   }
 
   void _recreateRecognizer(String modelDir) {
-    _recognizer?.free();
-    _recognizer = sherpa.OfflineRecognizer(
+    if (_recognizer != null && _loadedModelDir == modelDir) return;
+    releaseResidentModel();
+    _recognizer = (recognizerFactory ?? sherpa.OfflineRecognizer.new)(
       sherpa.OfflineRecognizerConfig(
         model: sherpa.OfflineModelConfig(
           senseVoice: sherpa.OfflineSenseVoiceModelConfig(
@@ -381,9 +404,14 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
         ),
       ),
     );
+    _loadedModelDir = modelDir;
   }
 
   void _ensureBindingsInitialized() {
+    if (initializeBindings != null) {
+      initializeBindings!();
+      return;
+    }
     if (_bindingsInitialized) {
       return;
     }
@@ -392,7 +420,7 @@ class SenseVoiceSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<void> stopListening() async {
+  Future<void> stopBackend() async {
     final inFlight = _finishInFlight;
     if (inFlight != null) {
       await inFlight;

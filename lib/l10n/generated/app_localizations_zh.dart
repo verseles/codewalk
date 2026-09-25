@@ -9,6 +9,13 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => '保留在内存中';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      '使用后保留一个已加载的本地语音模型，以加快后续录音。会占用更多内存；内存不足时系统可能会释放模型。';
+
+  @override
   String get aboutGitHub => 'GitHub';
 
   @override

@@ -1,5 +1,7 @@
 {
   "@@locale": "en",
+  "speechKeepModelInMemory": "Keep in memory",
+  "speechKeepModelInMemoryHint": "Keep one on-device voice model loaded after use for faster repeat recordings. Uses more RAM; the system may release it when memory is low.",
   "aboutGitHub": "GitHub",
   "@aboutGitHub": {
     "description": "CodeWalk UI string — aboutGitHub"

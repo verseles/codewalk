@@ -10,10 +10,20 @@ import '../utils/speech_engine_platform_support.dart';
 import 'nemotron_language.dart';
 import 'nemotron_model_manager.dart';
 import 'speech_audio_capture.dart';
-import 'speech_input_service.dart';
+import 'speech_model_residency_controller.dart';
 
-class NemotronSpeechInputService implements SpeechInputService {
-  NemotronSpeechInputService(this._modelManager);
+class NemotronSpeechInputService with ResidentSpeechInputService {
+  NemotronSpeechInputService(
+    this._modelManager, {
+    this.recognizerFactory,
+    this.captureFactory = SpeechAudioCapture.new,
+    this.initializeBindings,
+  });
+
+  final sherpa.OnlineRecognizer Function(sherpa.OnlineRecognizerConfig)?
+  recognizerFactory;
+  final SpeechAudioCapture Function() captureFactory;
+  final void Function()? initializeBindings;
 
   final NemotronModelManager _modelManager;
   static const _requiredModelFiles = <String>[
@@ -26,6 +36,22 @@ class NemotronSpeechInputService implements SpeechInputService {
   static bool _bindingsInitialized = false;
 
   sherpa.OnlineRecognizer? _recognizer;
+  String? _loadedModelDir;
+  Duration? _loadedPauseFor;
+  Future<void>? _finishInFlight;
+
+  @override
+  String? get residentModelPath => _loadedModelDir;
+
+  @override
+  void releaseResidentModel() {
+    final recognizer = _recognizer;
+    _recognizer = null;
+    _loadedModelDir = null;
+    _loadedPauseFor = null;
+    recognizer?.free();
+  }
+
   SpeechAudioCapture? _capture;
   StreamSubscription<Uint8List>? _audioSub;
   String? _activeModelDir;
@@ -48,7 +74,7 @@ class NemotronSpeechInputService implements SpeechInputService {
   String? get unavailableReasonKey => _unavailableReasonKey;
 
   @override
-  Future<bool> initialize() async {
+  Future<bool> initializeBackend() async {
     if (!SpeechEnginePlatformSupport.isNemotronSupported) {
       _unavailableReason = 'Nemotron is available on desktop only.';
       _unavailableReasonKey = 'desktopOnly';
@@ -86,14 +112,13 @@ class NemotronSpeechInputService implements SpeechInputService {
       return true;
     }
     _activeModelDir = null;
-    _recognizer?.free();
-    _recognizer = null;
+    releaseResidentModel();
     _isAvailable = false;
     return true;
   }
 
   @override
-  Future<void> startListening({
+  Future<void> startBackend({
     required void Function(String text, bool isFinal) onResult,
     required void Function(String status) onStatus,
     required void Function() onError,
@@ -105,7 +130,9 @@ class NemotronSpeechInputService implements SpeechInputService {
       onStatus('model_required');
       return;
     }
-    if (_requiredModelFiles.any((file) => !File('$modelDir/$file').existsSync())) {
+    if (_requiredModelFiles.any(
+      (file) => !File('$modelDir/$file').existsSync(),
+    )) {
       _isAvailable = false;
       onStatus('model_required');
       return;
@@ -131,10 +158,9 @@ class NemotronSpeechInputService implements SpeechInputService {
       onError();
       return;
     }
-    final capture = SpeechAudioCapture();
+    final capture = captureFactory();
     _capture = capture;
     if (!await capture.hasPermission()) {
-      _capture = null;
       _applyCaptureFailure(
         capture.lastFailureInfo ??
             speechAudioCaptureFailureInfoForStatus(
@@ -189,18 +215,35 @@ class NemotronSpeechInputService implements SpeechInputService {
           error: error,
           stackTrace: stackTrace,
         );
+        onError();
       }
     }
 
     Future<void> completeListeningSession() async {
+      final inFlight = _finishInFlight;
+      if (inFlight != null) {
+        await inFlight;
+        return;
+      }
       if (doneEmitted) return;
       doneEmitted = true;
       _finishOnStop = null;
       silenceTimer?.cancel();
-      flushFinalText();
-      freeStreamOnce();
-      await stopListening();
-      onStatus('done');
+      final done = () async {
+        try {
+          await _releaseCapture();
+          flushFinalText();
+        } finally {
+          freeStreamOnce();
+        }
+        onStatus('done');
+      }();
+      _finishInFlight = done;
+      try {
+        await done;
+      } finally {
+        _finishInFlight = null;
+      }
     }
 
     _finishOnStop = completeListeningSession;
@@ -213,7 +256,6 @@ class NemotronSpeechInputService implements SpeechInputService {
       });
     }
 
-    armSilenceTimer();
     Stream<Uint8List> audioStream;
     try {
       audioStream = await capture.startPcmStream(
@@ -227,10 +269,10 @@ class NemotronSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _isListening = false;
+      doneEmitted = true;
       silenceTimer?.cancel();
       _finishOnStop = null;
       freeStreamOnce();
-      _capture = null;
       _applyCaptureFailure(
         speechAudioCaptureFailureInfoForError(error),
         fallback: 'Microphone recording failed.',
@@ -238,21 +280,31 @@ class NemotronSpeechInputService implements SpeechInputService {
       onError();
       return;
     }
+    armSilenceTimer();
     _audioSub = audioStream.listen(
       (chunk) {
         if (!_isListening) return;
-        final samples = _pcm16ToFloat32(chunk);
-        stream.acceptWaveform(samples: samples, sampleRate: 16000);
-        while (recognizer.isReady(stream)) {
-          recognizer.decode(stream);
-        }
-        final partial = recognizer.getResult(stream).text.trim();
-        if (partial.isNotEmpty) {
-          onResult(partial, false);
-          armSilenceTimer();
-        }
-        if (recognizer.isEndpoint(stream)) {
-          unawaited(completeListeningSession());
+        try {
+          final samples = _pcm16ToFloat32(chunk);
+          stream.acceptWaveform(samples: samples, sampleRate: 16000);
+          while (recognizer.isReady(stream)) {
+            recognizer.decode(stream);
+          }
+          final partial = recognizer.getResult(stream).text.trim();
+          if (partial.isNotEmpty) {
+            onResult(partial, false);
+            armSilenceTimer();
+          }
+          if (recognizer.isEndpoint(stream)) {
+            unawaited(completeListeningSession());
+          }
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Nemotron decode failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          onError();
         }
       },
       onError: (error) {
@@ -270,17 +322,7 @@ class NemotronSpeechInputService implements SpeechInputService {
         onError();
       },
       onDone: () {
-        silenceTimer?.cancel();
-        if (doneEmitted) {
-          freeStreamOnce();
-          return;
-        }
-        doneEmitted = true;
-        _finishOnStop = null;
-        flushFinalText();
-        freeStreamOnce();
-        _isListening = false;
-        onStatus('done');
+        if (!doneEmitted) unawaited(completeListeningSession());
       },
     );
   }
@@ -290,9 +332,14 @@ class NemotronSpeechInputService implements SpeechInputService {
     required Duration pauseFor,
   }) {
     _ensureBindingsInitialized();
-    _recognizer?.free();
+    if (_recognizer != null &&
+        _loadedModelDir == modelDir &&
+        _loadedPauseFor == pauseFor) {
+      return;
+    }
+    releaseResidentModel();
     final pauseSeconds = pauseFor.inMilliseconds / 1000.0;
-    _recognizer = sherpa.OnlineRecognizer(
+    _recognizer = (recognizerFactory ?? sherpa.OnlineRecognizer.new)(
       sherpa.OnlineRecognizerConfig(
         model: sherpa.OnlineModelConfig(
           transducer: sherpa.OnlineTransducerModelConfig(
@@ -313,6 +360,8 @@ class NemotronSpeechInputService implements SpeechInputService {
         maxActivePaths: 4,
       ),
     );
+    _loadedModelDir = modelDir;
+    _loadedPauseFor = pauseFor;
   }
 
   Duration _normalizePauseFor(Duration pauseFor) {
@@ -320,6 +369,10 @@ class NemotronSpeechInputService implements SpeechInputService {
   }
 
   void _ensureBindingsInitialized() {
+    if (initializeBindings != null) {
+      initializeBindings!();
+      return;
+    }
     if (_bindingsInitialized) return;
     sherpa.initBindings();
     _bindingsInitialized = true;
@@ -335,13 +388,22 @@ class NemotronSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<void> stopListening() async {
+  Future<void> stopBackend() async {
+    final inFlight = _finishInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
     final finish = _finishOnStop;
     if (finish != null) {
       _finishOnStop = null;
       await finish();
       return;
     }
+    await _releaseCapture();
+  }
+
+  Future<void> _releaseCapture() async {
     _isListening = false;
     await _audioSub?.cancel();
     _audioSub = null;

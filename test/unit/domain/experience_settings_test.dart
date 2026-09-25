@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('speech retention defaults true and round-trips explicit opt-out', () {
+    expect(ExperienceSettings.defaults().speechKeepModelInMemory, isTrue);
+    for (final invalid in [null, 'false', 0, []]) {
+      expect(ExperienceSettings.fromJson({'speechKeepModelInMemory': invalid})
+          .speechKeepModelInMemory, isTrue);
+    }
+    final settings = ExperienceSettings.defaults().copyWith(speechKeepModelInMemory: false);
+    expect(ExperienceSettings.fromJson(settings.toJson()).speechKeepModelInMemory, isFalse);
+    expect(settings.copyWith().speechKeepModelInMemory, isFalse);
+  });
   group('session tabs visibility serialization', () {
     test('defaults to a platform-resolved override', () {
       final settings = ExperienceSettings.defaults();

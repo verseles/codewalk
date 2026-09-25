@@ -28,6 +28,7 @@ import 'presentation/providers/settings_provider.dart';
 import 'presentation/services/android_background_alert_worker.dart';
 import 'presentation/services/desktop_window_chrome_service.dart';
 import 'presentation/services/session_attention/session_overlay_entrypoint.dart';
+import 'presentation/services/speech_model_residency_controller.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/theme/opencode_theme_presets.dart';
 import 'presentation/widgets/desktop_window_title_bar.dart';
@@ -101,6 +102,7 @@ Future<void> main(List<String> args) async {
     }());
     WidgetsFlutterBinding.ensureInitialized();
     AppLogger.installGlobalHandlers();
+    SpeechModelResidencyController.instance.observeMemoryPressure();
     unawaited(AndroidProcessDiagnostics.recordStartup());
     if (_isAndroidRuntime()) {
       _configureAndroidMemoryBounds();

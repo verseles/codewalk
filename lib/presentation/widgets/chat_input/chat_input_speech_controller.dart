@@ -251,13 +251,20 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
     _speechSuffix = textWindow.trailingText;
     _speechCommittedText = '';
     try {
-      await service.startListening(
+      final starting = service.startListening(
         onResult: _onSpeechResult,
         onStatus: _onSpeechStatus,
         onError: _onSpeechError,
         pauseFor: pauseFor,
         localeId: _localeForService(service, settingsProvider),
       );
+      if (service is ResidentSpeechInputService) {
+        _speechSessionToken = service.sessionToken;
+      }
+      await starting;
+      if (!mounted && service is ResidentSpeechInputService) {
+        await service.residency.stop(_speechSessionToken);
+      }
       if (!mounted) return;
       _setState(() {
         _isListening = service.isListening;
@@ -298,7 +305,11 @@ extension _ChatInputSpeechController on _ChatInputWidgetState {
       return;
     }
     try {
-      await service.stopListening();
+      if (service is ResidentSpeechInputService) {
+        await service.residency.stop(_speechSessionToken);
+      } else {
+        await service.stopListening();
+      }
     } catch (_) {
       // Ignore platform stop errors to keep compose flow resilient.
     } finally {

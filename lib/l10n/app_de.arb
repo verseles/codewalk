@@ -17,6 +17,8 @@
   "speechCustomModel": "Benutzerdefiniertes Modell…",
   "speechPitchHiddenForProvider": "Die Tonhöhe wird von diesem TTS-Anbieter nicht unterstützt und ist ausgeblendet.",
   "@@locale": "de",
+  "speechKeepModelInMemory": "Im Speicher behalten",
+  "speechKeepModelInMemoryHint": "Behält ein lokales Sprachmodell nach der Nutzung geladen, um weitere Aufnahmen zu beschleunigen. Benötigt mehr RAM; bei Speichermangel kann das System es freigeben.",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "Ein fehlerhafter Server kann nicht aktiviert werden",
   "appProviderDesktopBuildRequired": "Verwenden Sie einen Desktop-Build, um einen verwalteten lokalen Server zu konfigurieren.",

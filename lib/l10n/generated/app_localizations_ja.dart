@@ -9,6 +9,13 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => 'メモリに保持';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      '使用後も端末内の音声モデルを1つ保持して、次の録音を速く開始します。RAM使用量が増えます。メモリ不足時にはシステムが解放する場合があります。';
+
+  @override
   String get aboutGitHub => 'GitHub';
 
   @override

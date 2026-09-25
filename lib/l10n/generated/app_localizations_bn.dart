@@ -9,6 +9,13 @@ class AppLocalizationsBn extends AppLocalizations {
   AppLocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => 'মেমোরিতে রাখুন';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      'পরের রেকর্ডিং দ্রুত শুরু করতে ব্যবহারের পরে একটি স্থানীয় ভয়েস মডেল লোড রাখা হয়। বেশি RAM লাগে; মেমোরি কম হলে সিস্টেম মডেলটি সরিয়ে দিতে পারে।';
+
+  @override
   String get aboutGitHub => 'গিটহাব';
 
   @override

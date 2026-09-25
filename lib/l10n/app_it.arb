@@ -17,6 +17,8 @@
   "speechCustomModel": "Modello personalizzato…",
   "speechPitchHiddenForProvider": "Il tono non è supportato da questo fornitore TTS ed è nascosto.",
   "@@locale": "it",
+  "speechKeepModelInMemory": "Mantieni in memoria",
+  "speechKeepModelInMemoryHint": "Mantiene caricato un modello vocale locale dopo l''uso per velocizzare le registrazioni successive. Usa più RAM; il sistema può liberarlo quando la memoria è scarsa.",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "Impossibile attivare un server non integro",
   "appProviderDesktopBuildRequired": "Usa una build desktop per configurare un server locale gestito.",

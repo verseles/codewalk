@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/experience_settings.dart';
+import 'speech_model_residency_controller.dart';
 import 'stt_model_download_tracker.dart';
 
 // Native implementation of sherpa-onnx model management for IO platforms.
@@ -98,39 +99,47 @@ class SherpaModelManager {
     void Function(double) onProgress,
   ) async {
     final dir = Directory(await getModelDir(lang));
-    await dir.create(recursive: true);
+    await SpeechModelResidencyController.instance.mutateModel(
+      dir.path,
+      () async {
+        await dir.create(recursive: true);
 
-    final path = '$lang/kroko_64l';
-    final base = '$_huggingFaceBase/$_repo/resolve/main/$path';
+        final path = '$lang/kroko_64l';
+        final base = '$_huggingFaceBase/$_repo/resolve/main/$path';
 
-    for (var i = 0; i < _modelFiles.length; i++) {
-      final file = _modelFiles[i];
-      final localPath = '${dir.path}/$file';
-      await _dio.download(
-        '$base/$file',
-        localPath,
-        options: Options(
-          followRedirects: true,
-          receiveTimeout: const Duration(minutes: 10),
-        ),
-        onReceiveProgress: (received, total) {
-          if (total > 0) {
-            // Distribute progress evenly across the 4 files.
-            final fileProgress = received / total;
-            onProgress((i + fileProgress) / _modelFiles.length);
-          }
-        },
-      );
-    }
-    onProgress(1.0);
+        for (var i = 0; i < _modelFiles.length; i++) {
+          final file = _modelFiles[i];
+          final localPath = '${dir.path}/$file';
+          await _dio.download(
+            '$base/$file',
+            localPath,
+            options: Options(
+              followRedirects: true,
+              receiveTimeout: const Duration(minutes: 10),
+            ),
+            onReceiveProgress: (received, total) {
+              if (total > 0) {
+                // Distribute progress evenly across the 4 files.
+                final fileProgress = received / total;
+                onProgress((i + fileProgress) / _modelFiles.length);
+              }
+            },
+          );
+        }
+        onProgress(1.0);
+      },
+    );
   }
 
   // Removes all model files for [lang] from disk to free space.
   Future<void> deleteModel(String lang) async {
     final dir = Directory(await getModelDir(lang));
-    if (dir.existsSync()) {
-      await dir.delete(recursive: true);
-    }
+    await SpeechModelResidencyController.instance.mutateModel(
+      dir.path,
+      () async {
+        if (dir.existsSync()) await dir.delete(recursive: true);
+      },
+    );
   }
 
   // Returns the local directory path for [lang] model files.

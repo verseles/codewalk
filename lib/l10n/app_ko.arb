@@ -1,5 +1,7 @@
 {
   "@@locale": "ko",
+  "speechKeepModelInMemory": "메모리에 유지",
+  "speechKeepModelInMemoryHint": "다음 녹음을 빠르게 시작하도록 사용 후 기기 내 음성 모델 하나를 유지합니다. RAM을 더 사용하며, 메모리가 부족하면 시스템이 모델을 해제할 수 있습니다.",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "상태가 좋지 않은 서버를 활성화할 수 없습니다.",
   "appProviderDesktopOnly": "관리형 로컬 서버는 데스크톱에서만 사용할 수 있습니다.",

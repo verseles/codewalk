@@ -17,6 +17,8 @@
   "speechCustomModel": "カスタムモデル…",
   "speechPitchHiddenForProvider": "ピッチはこの TTS プロバイダーでサポートされておらず、非表示になります。",
   "@@locale": "ja",
+  "speechKeepModelInMemory": "メモリに保持",
+  "speechKeepModelInMemoryHint": "使用後も端末内の音声モデルを1つ保持して、次の録音を速く開始します。RAM使用量が増えます。メモリ不足時にはシステムが解放する場合があります。",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "異常なサーバーを有効化できません",
   "appProviderDesktopOnly": "管理対象ローカルサーバーはデスクトップでのみ利用可能です。",

@@ -9,6 +9,13 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => '메모리에 유지';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      '다음 녹음을 빠르게 시작하도록 사용 후 기기 내 음성 모델 하나를 유지합니다. RAM을 더 사용하며, 메모리가 부족하면 시스템이 모델을 해제할 수 있습니다.';
+
+  @override
   String get aboutGitHub => 'GitHub';
 
   @override

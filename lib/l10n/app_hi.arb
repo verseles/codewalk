@@ -17,6 +17,8 @@
   "speechCustomModel": "कस्टम मॉडल…",
   "speechPitchHiddenForProvider": "पिच इस TTS प्रदाता द्वारा समर्थित नहीं है और छिपी हुई है।",
   "@@locale": "hi",
+  "speechKeepModelInMemory": "मेमोरी में रखें",
+  "speechKeepModelInMemoryHint": "अगली रिकॉर्डिंग तेज़ी से शुरू करने के लिए उपयोग के बाद एक स्थानीय वॉइस मॉडल लोड रखा जाता है। अधिक RAM लगती है; मेमोरी कम होने पर सिस्टम इसे हटा सकता है।",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "एक अस्वस्थ सर्वर को सक्रिय नहीं किया जा सकता",
   "appProviderDesktopOnly": "प्रबंधित स्थानीय सर्वर केवल डेस्कटॉप पर उपलब्ध है।",

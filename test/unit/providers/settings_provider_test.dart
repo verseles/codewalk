@@ -7,6 +7,7 @@ import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/session_attention/session_attention_host_service.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:codewalk/presentation/services/speech_model_residency_controller.dart';
 import 'package:codewalk/presentation/services/update_check_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -314,6 +315,21 @@ void main() {
   });
 
   group('SettingsProvider', () {
+    test('speech retention opt-out persists and restores runtime policy', () async {
+      final local = InMemoryAppLocalDataSource();
+      final provider = SettingsProvider(localDataSource: local, dioClient: DioClient(), soundService: _FakeSoundService());
+      await provider.initialize();
+      expect(provider.speechKeepModelInMemory, isTrue);
+      await provider.setSpeechKeepModelInMemory(false);
+      expect(SpeechModelResidencyController.instance.keepInMemory, isFalse);
+      expect(jsonDecode(local.experienceSettingsJson!)['speechKeepModelInMemory'], isFalse);
+      final restored = SettingsProvider(localDataSource: local, dioClient: DioClient(), soundService: _FakeSoundService());
+      await restored.initialize();
+      expect(restored.speechKeepModelInMemory, isFalse);
+      await restored.setSpeechKeepModelInMemory(true);
+      provider.dispose();
+      restored.dispose();
+    });
     test(
       'persists session attention mode only after host activation',
       () async {

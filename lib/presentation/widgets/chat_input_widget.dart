@@ -31,6 +31,7 @@ import '../services/speech_input_service_parakeet.dart';
 import '../services/speech_input_service_sensevoice.dart';
 import '../services/speech_input_service_sherpa.dart';
 import '../services/speech_input_service_stt.dart';
+import '../services/speech_model_residency_controller.dart';
 import '../theme/app_shapes.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_visual_style_tokens.dart';
@@ -365,6 +366,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   // STT services are resolved lazily. The active backend is selected from
   // settings (Native/Sherpa/Moonshine) and can fall back when unavailable.
   SpeechInputService? _activeSpeechService;
+  Object? _speechSessionToken;
   SttSpeechInputService? _nativeSpeechServiceInstance;
   SherpaSpeechInputService? _sherpaSpeechServiceInstance;
   MoonshineSpeechInputService? _moonshineSpeechServiceInstance;
@@ -542,6 +544,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     final speechService = _activeSpeechService;
     if (speechService is ApiSpeechInputService) {
       unawaited(speechService.cancelSession());
+    } else if (speechService is ResidentSpeechInputService) {
+      unawaited(speechService.residency.stop(_speechSessionToken));
     } else {
       unawaited(speechService?.stopListening() ?? Future.value());
     }

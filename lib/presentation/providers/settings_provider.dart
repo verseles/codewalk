@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'dart:io';
 import 'dart:isolate';
 
@@ -26,6 +27,7 @@ import '../services/cellular_data_saver_service.dart';
 import '../services/desktop_window_chrome_service.dart';
 import '../services/session_attention/session_attention_host_service.dart';
 import '../services/sound_service.dart';
+import '../services/speech_model_residency_controller.dart';
 import '../services/tts/read_aloud_default_resolver.dart';
 import '../services/update_check_service.dart';
 import '../utils/shortcut_binding_codec.dart';
@@ -299,6 +301,7 @@ class SettingsProvider extends ChangeNotifier {
   SpeechToTextEngine get speechToTextEngine => _settings.speechToTextEngine;
   OpenCodeThemePreset? get themePreset => _settings.themePreset;
   int get speechSilenceTimeoutSeconds => _settings.speechSilenceTimeoutSeconds;
+  bool get speechKeepModelInMemory => _settings.speechKeepModelInMemory;
   String get sherpaLanguageCode => _settings.sherpaLanguageCode;
   String get moonshineModelId => _settings.moonshineModelId;
   String get parakeetModelId => _settings.parakeetModelId;
@@ -370,6 +373,7 @@ class SettingsProvider extends ChangeNotifier {
         );
       }
     }
+    SpeechModelResidencyController.instance.setKeepInMemory(speechKeepModelInMemory);
     var shouldPersistPlatformSettings = false;
     if (!hasStoredExperienceSettings) {
       shouldPersistPlatformSettings =
@@ -1369,6 +1373,15 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(speechToTextEngine: engine);
+    SpeechModelResidencyController.instance.evictWhenIdle();
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setSpeechKeepModelInMemory(bool enabled) async {
+    if (speechKeepModelInMemory == enabled) return;
+    _settings = _settings.copyWith(speechKeepModelInMemory: enabled);
+    SpeechModelResidencyController.instance.setKeepInMemory(enabled);
     notifyListeners();
     await _persist();
   }
@@ -1643,6 +1656,7 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(sherpaLanguageCode: normalized);
+    SpeechModelResidencyController.instance.evictWhenIdle();
     notifyListeners();
     await _persist();
   }
@@ -1656,6 +1670,7 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(moonshineModelId: normalized);
+    SpeechModelResidencyController.instance.evictWhenIdle();
     notifyListeners();
     await _persist();
   }
@@ -1669,6 +1684,7 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(parakeetModelId: normalized);
+    SpeechModelResidencyController.instance.evictWhenIdle();
     notifyListeners();
     await _persist();
   }
@@ -1682,6 +1698,7 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(senseVoiceModelId: normalized);
+    SpeechModelResidencyController.instance.evictWhenIdle();
     notifyListeners();
     await _persist();
   }

@@ -254,6 +254,19 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
             SettingsGroupHeader(title: context.l10n.settingsGroupVoiceInput),
             const SizedBox(height: 8),
             _buildEngineCard(settingsProvider),
+            if (_supportsSherpa || _supportsMoonshine || _supportsParakeet ||
+                _supportsSenseVoice || _supportsNemotron)
+              Card(
+                child: SwitchListTile.adaptive(
+                  key: const ValueKey('settings_speech_keep_model_in_memory'),
+                  title: Text(context.l10n.speechKeepModelInMemory),
+                  subtitle: Text(context.l10n.speechKeepModelInMemoryHint),
+                  value: settingsProvider.speechKeepModelInMemory,
+                  onChanged: (value) => unawaited(
+                    settingsProvider.setSpeechKeepModelInMemory(value),
+                  ),
+                ),
+              ),
             const SizedBox(height: 12),
             _buildSilenceCard(
               settingsProvider: settingsProvider,

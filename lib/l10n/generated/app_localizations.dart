@@ -122,6 +122,18 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @speechKeepModelInMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep in memory'**
+  String get speechKeepModelInMemory;
+
+  /// No description provided for @speechKeepModelInMemoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep one on-device voice model loaded after use for faster repeat recordings. Uses more RAM; the system may release it when memory is low.'**
+  String get speechKeepModelInMemoryHint;
+
   /// CodeWalk UI string — aboutGitHub
   ///
   /// In en, this message translates to:

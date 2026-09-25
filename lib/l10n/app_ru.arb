@@ -17,6 +17,8 @@
   "speechCustomModel": "Пользовательская модель…",
   "speechPitchHiddenForProvider": "Высота тона не поддерживается этим TTS-поставщиком и скрыта.",
   "@@locale": "ru",
+  "speechKeepModelInMemory": "Сохранять в памяти",
+  "speechKeepModelInMemoryHint": "Оставляет одну локальную голосовую модель загруженной после использования для ускорения следующих записей. Требует больше ОЗУ; при нехватке памяти система может выгрузить модель.",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "Невозможно активировать неисправный сервер",
   "appProviderDesktopOnly": "Управляемый локальный сервер доступен только на компьютере.",

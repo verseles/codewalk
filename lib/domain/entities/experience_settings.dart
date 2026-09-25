@@ -1009,6 +1009,7 @@ class ExperienceSettings {
     this.contrastLevel = 0.0,
     this.speechToTextEngine = SpeechToTextEngine.native,
     this.speechSilenceTimeoutSeconds = 5,
+    this.speechKeepModelInMemory = true,
     this.sherpaLanguageCode = kSherpaLanguageSystem,
     this.moonshineModelId = kMoonshineModelTiny,
     this.parakeetModelId = kParakeetModelDefault,
@@ -1089,6 +1090,7 @@ class ExperienceSettings {
   final double contrastLevel;
   final SpeechToTextEngine speechToTextEngine;
   final int speechSilenceTimeoutSeconds;
+  final bool speechKeepModelInMemory;
   final String sherpaLanguageCode;
   final String moonshineModelId;
   final String parakeetModelId;
@@ -1169,6 +1171,7 @@ class ExperienceSettings {
     double? contrastLevel,
     SpeechToTextEngine? speechToTextEngine,
     int? speechSilenceTimeoutSeconds,
+    bool? speechKeepModelInMemory,
     String? sherpaLanguageCode,
     String? moonshineModelId,
     String? parakeetModelId,
@@ -1280,6 +1283,8 @@ class ExperienceSettings {
       speechToTextEngine: speechToTextEngine ?? this.speechToTextEngine,
       speechSilenceTimeoutSeconds:
           speechSilenceTimeoutSeconds ?? this.speechSilenceTimeoutSeconds,
+      speechKeepModelInMemory:
+          speechKeepModelInMemory ?? this.speechKeepModelInMemory,
       sherpaLanguageCode: sherpaLanguageCode ?? this.sherpaLanguageCode,
       moonshineModelId: moonshineModelId ?? this.moonshineModelId,
       parakeetModelId: parakeetModelId ?? this.parakeetModelId,
@@ -1411,6 +1416,7 @@ class ExperienceSettings {
       'contrastLevel': contrastLevel,
       'speechToTextEngine': speechToTextEngineKey(speechToTextEngine),
       'speechSilenceTimeoutSeconds': speechSilenceTimeoutSeconds,
+      'speechKeepModelInMemory': speechKeepModelInMemory,
       'sherpaLanguageCode': sherpaLanguageCode,
       'moonshineModelId': moonshineModelId,
       'parakeetModelId': parakeetModelId,
@@ -2091,6 +2097,9 @@ class ExperienceSettings {
       contrastLevel: contrastLevel,
       speechToTextEngine: speechToTextEngine,
       speechSilenceTimeoutSeconds: speechSilenceTimeoutSeconds,
+      speechKeepModelInMemory: json['speechKeepModelInMemory'] is bool
+          ? json['speechKeepModelInMemory'] as bool
+          : true,
       sherpaLanguageCode: sherpaLanguageCode,
       moonshineModelId: moonshineModelId,
       parakeetModelId: parakeetModelId,

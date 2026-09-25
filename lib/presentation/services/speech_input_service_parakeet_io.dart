@@ -7,7 +7,7 @@ import '../utils/speech_engine_platform_support.dart';
 import 'offline_speech_segment_gate.dart';
 import 'parakeet_model_manager.dart';
 import 'speech_audio_capture.dart';
-import 'speech_input_service.dart';
+import 'speech_model_residency_controller.dart';
 
 @visibleForTesting
 class ParakeetAudioBuffer {
@@ -41,14 +41,37 @@ bool parakeetChunkHasSpeech(Float32List samples, {double threshold = 0.015}) {
 // Parakeet desktop backend uses sherpa_onnx OfflineRecognizer with
 // modelType=nemo_transducer. Linux/macOS capture uses `record`; Windows uses
 // CodeWalk WASAPI.
-class ParakeetSpeechInputService implements SpeechInputService {
-  ParakeetSpeechInputService(this._modelManager);
+class ParakeetSpeechInputService with ResidentSpeechInputService {
+  ParakeetSpeechInputService(
+    this._modelManager, {
+    this.recognizerFactory,
+    this.captureFactory = SpeechAudioCapture.new,
+    this.initializeBindings,
+  });
+
+  final sherpa.OfflineRecognizer Function(sherpa.OfflineRecognizerConfig)?
+  recognizerFactory;
+  final SpeechAudioCapture Function() captureFactory;
+  final void Function()? initializeBindings;
 
   final ParakeetModelManager _modelManager;
   static const _sampleRate = 16000;
   static bool _bindingsInitialized = false;
 
   sherpa.OfflineRecognizer? _recognizer;
+  String? _loadedModelDir;
+
+  @override
+  String? get residentModelPath => _loadedModelDir;
+
+  @override
+  void releaseResidentModel() {
+    final recognizer = _recognizer;
+    _recognizer = null;
+    _loadedModelDir = null;
+    recognizer?.free();
+  }
+
   SpeechAudioCapture? _capture;
   StreamSubscription<Uint8List>? _audioSub;
   String? _activeModelDir;
@@ -76,7 +99,7 @@ class ParakeetSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<bool> initialize() async {
+  Future<bool> initializeBackend() async {
     if (!_isDesktopSupported) {
       _unavailableReason = 'Parakeet is available on desktop only.';
       _unavailableReasonKey = 'desktopOnly';
@@ -111,15 +134,14 @@ class ParakeetSpeechInputService implements SpeechInputService {
     }
 
     _activeModelDir = null;
-    _recognizer?.free();
-    _recognizer = null;
+    releaseResidentModel();
     _unavailableReason = null;
     _isAvailable = false;
     return true;
   }
 
   @override
-  Future<void> startListening({
+  Future<void> startBackend({
     required void Function(String text, bool isFinal) onResult,
     required void Function(String status) onStatus,
     required void Function() onError,
@@ -153,11 +175,10 @@ class ParakeetSpeechInputService implements SpeechInputService {
       return;
     }
 
-    final capture = SpeechAudioCapture();
+    final capture = captureFactory();
     _capture = capture;
     final hasPermission = await capture.hasPermission();
     if (!hasPermission) {
-      _capture = null;
       _applyCaptureFailure(
         capture.lastFailureInfo ??
             speechAudioCaptureFailureInfoForStatus(
@@ -196,8 +217,9 @@ class ParakeetSpeechInputService implements SpeechInputService {
       final done = () async {
         await _releaseCapture();
         if (hadSpeech && utterance.isNotEmpty) {
-          final stream = recognizer.createStream();
+          sherpa.OfflineStream? stream;
           try {
+            stream = recognizer.createStream();
             stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
             recognizer.decode(stream);
             final text = recognizer.getResult(stream).text.trim();
@@ -213,7 +235,7 @@ class ParakeetSpeechInputService implements SpeechInputService {
             onError();
             return;
           } finally {
-            stream.free();
+            stream?.free();
           }
         }
         onStatus('done');
@@ -239,8 +261,9 @@ class ParakeetSpeechInputService implements SpeechInputService {
       if (utterance.isEmpty) {
         return;
       }
-      final stream = recognizer.createStream();
+      sherpa.OfflineStream? stream;
       try {
+        stream = recognizer.createStream();
         stream.acceptWaveform(samples: utterance, sampleRate: _sampleRate);
         recognizer.decode(stream);
         final text = recognizer.getResult(stream).text.trim();
@@ -255,7 +278,7 @@ class ParakeetSpeechInputService implements SpeechInputService {
         );
         onError();
       } finally {
-        stream.free();
+        stream?.free();
       }
     }
 
@@ -289,7 +312,6 @@ class ParakeetSpeechInputService implements SpeechInputService {
         stackTrace: stackTrace,
       );
       _isListening = false;
-      _capture = null;
       _applyCaptureFailure(
         speechAudioCaptureFailureInfoForError(error),
         fallback: 'Microphone recording failed.',
@@ -366,8 +388,9 @@ class ParakeetSpeechInputService implements SpeechInputService {
   }
 
   void _recreateRecognizer(String modelDir) {
-    _recognizer?.free();
-    _recognizer = sherpa.OfflineRecognizer(
+    if (_recognizer != null && _loadedModelDir == modelDir) return;
+    releaseResidentModel();
+    _recognizer = (recognizerFactory ?? sherpa.OfflineRecognizer.new)(
       sherpa.OfflineRecognizerConfig(
         model: sherpa.OfflineModelConfig(
           transducer: sherpa.OfflineTransducerModelConfig(
@@ -384,9 +407,14 @@ class ParakeetSpeechInputService implements SpeechInputService {
         decodingMethod: 'greedy_search',
       ),
     );
+    _loadedModelDir = modelDir;
   }
 
   void _ensureBindingsInitialized() {
+    if (initializeBindings != null) {
+      initializeBindings!();
+      return;
+    }
     if (_bindingsInitialized) {
       return;
     }
@@ -395,7 +423,7 @@ class ParakeetSpeechInputService implements SpeechInputService {
   }
 
   @override
-  Future<void> stopListening() async {
+  Future<void> stopBackend() async {
     final inFlight = _finishInFlight;
     if (inFlight != null) {
       await inFlight;

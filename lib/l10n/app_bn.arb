@@ -17,6 +17,8 @@
   "speechCustomModel": "কাস্টম মডেল…",
   "speechPitchHiddenForProvider": "পিচ এই TTS প্রদানকারী দ্বারা সমর্থিত নয় এবং লুকানো থাকে।",
   "@@locale": "bn",
+  "speechKeepModelInMemory": "মেমোরিতে রাখুন",
+  "speechKeepModelInMemoryHint": "পরের রেকর্ডিং দ্রুত শুরু করতে ব্যবহারের পরে একটি স্থানীয় ভয়েস মডেল লোড রাখা হয়। বেশি RAM লাগে; মেমোরি কম হলে সিস্টেম মডেলটি সরিয়ে দিতে পারে।",
   "aboutGitHub": "গিটহাব",
   "appProviderCannotActivateUnhealthy": "একটি অস্বাস্থ্যকর সার্ভার সক্রিয় করা যাবে না",
   "appProviderDesktopOnly": "পরিচালিত স্থানীয় সার্ভার শুধুমাত্র ডেস্কটপে উপলব্ধ।",

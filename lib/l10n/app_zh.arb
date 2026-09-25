@@ -17,6 +17,8 @@
   "speechCustomModel": "自定义模型…",
   "speechPitchHiddenForProvider": "音调不受此 TTS 提供商支持，因此被隐藏。",
   "@@locale": "zh",
+  "speechKeepModelInMemory": "保留在内存中",
+  "speechKeepModelInMemoryHint": "使用后保留一个已加载的本地语音模型，以加快后续录音。会占用更多内存；内存不足时系统可能会释放模型。",
   "aboutGitHub": "GitHub",
   "appProviderCannotActivateUnhealthy": "无法激活不健康的服务器",
   "appProviderDesktopOnly": "托管本地服务器仅在桌面端可用。",

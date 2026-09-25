@@ -9,6 +9,13 @@ class AppLocalizationsUr extends AppLocalizations {
   AppLocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
+  String get speechKeepModelInMemory => 'میموری میں رکھیں';
+
+  @override
+  String get speechKeepModelInMemoryHint =>
+      'اگلی ریکارڈنگ تیزی سے شروع کرنے کے لیے استعمال کے بعد ایک مقامی صوتی ماڈل لوڈ رکھتا ہے۔ زیادہ RAM استعمال ہوتی ہے؛ میموری کم ہونے پر سسٹم اسے ہٹا سکتا ہے۔';
+
+  @override
   String get aboutGitHub => 'گٹ ہب';
 
   @override

@@ -82,6 +82,7 @@ import '../../presentation/services/speech_input_service_parakeet.dart';
 import '../../presentation/services/speech_input_service_sensevoice.dart';
 import '../../presentation/services/speech_input_service_sherpa.dart';
 import '../../presentation/services/speech_input_service_stt.dart';
+import '../../presentation/services/speech_model_residency_controller.dart';
 import '../../presentation/services/tts/edge_experimental_tts_backend.dart';
 import '../../presentation/services/tts/elevenlabs_tts_backend.dart';
 import '../../presentation/services/tts/native_tts_backend.dart';
@@ -373,6 +374,10 @@ Future<void> init() async {
   );
   // SherpaModelManager: registered on all platforms; stub on web.
   // On IO platforms it manages on-device Kroko model download and storage.
+  sl.registerSingleton<SpeechModelResidencyController>(
+    SpeechModelResidencyController.instance,
+    dispose: (controller) => controller.dispose(),
+  );
   sl.registerLazySingleton(SherpaModelManager.new);
   sl.registerLazySingleton(MoonshineModelManager.new);
   sl.registerLazySingleton(ParakeetModelManager.new);
