@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.253.0 - 2026-09-25
+
+> 📣 Offline speech just got better: Nemotron 3.5 and downloadable on-device models now work on Android, with downloads continuing as you navigate.
+
+- feat(speech): keep model download progress across settings navigation
+- feat(speech): enable downloadable on-device STT on Android
+- feat(speech): add downloadable Nemotron 3.5 streaming STT
+- docs: refresh OpenCode config, server, and web anchors
+- fix(speech): show offline STT before the mic is stopped
+
 ## v1.252.0 - 2026-09-21
 
 > 📣 Simplified assistant work groups: completed tool activity now collapses into a single expandable header with no inner preview panel.
