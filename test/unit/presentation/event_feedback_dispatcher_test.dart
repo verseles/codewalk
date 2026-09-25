@@ -5,6 +5,7 @@ import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/event_feedback_dispatcher.dart';
 import 'package:codewalk/presentation/services/notification_service.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
@@ -69,6 +70,14 @@ class _FakeSoundService extends SoundService {
 }
 
 void main() {
+  setUpAll(() {
+    // These are platform-independent feedback tests. Flutter's test target
+    // defaults to Android even on Linux, where Workmanager would launch real
+    // systemd commands during SettingsProvider notification toggles.
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+  });
+  tearDownAll(() => debugDefaultTargetPlatformOverride = null);
+
   test('formats finished notification title with session hint', () async {
     final settingsProvider = SettingsProvider(
       localDataSource: InMemoryAppLocalDataSource(),
