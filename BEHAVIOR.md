@@ -1610,6 +1610,14 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 | Windows | Parakeet or another on-device engine via CodeWalk WASAPI capture | Native Windows speech recognition is disabled for stability; model setup is shown when the selected on-device model is missing; Windows settings links remain available for microphone troubleshooting |
 | Web | Native (system speech recognizer) | Browser speech only |
 
+### On-device model downloads continue after leaving Settings
+
+- **Given** a Sherpa, Moonshine, Parakeet, SenseVoice, or Nemotron model download starts
+- **When** the user leaves and later reopens Settings while CodeWalk remains running
+- **Then** the download continues, the app-wide snackbar shows its progress and completion or failure, and the model card reflects the active download or final install status
+- **Then** the selected model preference persists when the download finishes, even if Settings was closed
+- **Then** only one on-device model download runs at a time; other model actions in Settings remain unavailable until it finishes
+
 ### Windows STT uses on-device engines through CodeWalk WASAPI capture
 
 - **Given** the user is on Windows desktop
@@ -2194,6 +2202,14 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the Linux uninstaller removes application integration and bundle files without implicitly deleting user data
 - **Then** on Windows, the initial install step stages the downloaded update without modifying the running install directory
 - **Then** on Windows, the `Restart` action starts an updater helper, closes CodeWalk, applies the staged update after the old process exits, and relaunches CodeWalk from the updated install path
+- **Then** an older snackbar cannot delay the installation progress indicator; if an STT model download overlaps the update, both states remain visible and `Restart` is offered only after the model download finishes
+
+### Android APK download progress is not hidden behind older snackbars
+
+- **Given** an Android update download starts while an update notice or another snackbar is visible
+- **When** the APK transfer begins
+- **Then** the progress snackbar replaces the older notice promptly, even if the download advances within one UI frame
+- **Then** when an STT model is downloading at the same time, both download progress indicators remain visible, and a completed model's result remains visible during the transition to the Android installer
 
 ### Snackbars are always manually dismissible
 

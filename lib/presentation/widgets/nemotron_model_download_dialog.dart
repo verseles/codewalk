@@ -6,6 +6,7 @@ import '../../core/di/injection_container.dart' as di;
 import '../../core/i18n/l10n_context.dart';
 import '../../domain/entities/experience_settings.dart';
 import '../services/nemotron_model_manager.dart';
+import '../services/stt_model_download_tracker.dart';
 import 'app_indeterminate_progress.dart';
 
 class NemotronModelCard extends StatefulWidget {
@@ -17,6 +18,8 @@ class NemotronModelCard extends StatefulWidget {
 
 class _NemotronModelCardState extends State<NemotronModelCard> {
   final _manager = di.sl<NemotronModelManager>();
+  final _downloads = SttModelDownloadTracker.instance;
+  int _observedTransition = 0;
   bool _installed = false;
   bool _busy = false;
   double _progress = 0;
@@ -25,7 +28,23 @@ class _NemotronModelCardState extends State<NemotronModelCard> {
   @override
   void initState() {
     super.initState();
+    _observedTransition = _downloads.transition;
+    _downloads.addListener(_handleDownloadChanged);
     unawaited(_refresh());
+  }
+
+  @override
+  void dispose() {
+    _downloads.removeListener(_handleDownloadChanged);
+    super.dispose();
+  }
+
+  void _handleDownloadChanged() {
+    if (!mounted) return;
+    setState(() {});
+    if (_observedTransition == _downloads.transition) return;
+    _observedTransition = _downloads.transition;
+    if (_downloads.active == null) unawaited(_refresh());
   }
 
   Future<void> _refresh() async {
@@ -90,6 +109,10 @@ class _NemotronModelCardState extends State<NemotronModelCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final download = _downloads.active;
+    final downloading = download?.engine == SpeechToTextEngine.nemotron;
+    final busy = _busy || download != null;
+    final progress = downloading ? download!.progress : _progress;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -106,21 +129,21 @@ class _NemotronModelCardState extends State<NemotronModelCard> {
             Row(
               children: [
                 FilledButton.icon(
-                  onPressed: _busy || _installed ? null : _download,
+                  onPressed: busy || _installed ? null : _download,
                   icon: const Icon(Icons.download_rounded),
                   label: Text(l10n.speechDownload),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
-                  onPressed: _busy || !_installed ? null : _delete,
+                  onPressed: busy || !_installed ? null : _delete,
                   child: Text(l10n.speechRemove),
                 ),
               ],
             ),
-            if (_busy) ...[
+            if (_busy || downloading) ...[
               const SizedBox(height: 10),
-              _progress > 0
-                  ? LinearProgressIndicator(value: _progress)
+              progress > 0
+                  ? LinearProgressIndicator(value: progress)
                   : const AppIndeterminateBar(),
             ],
             if (_error != null) ...[

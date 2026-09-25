@@ -177,6 +177,9 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
     _installProgress = 0.0;
     _lastInstallProgressNotify = null;
     notifyListeners();
+    // Give the shell a frame to present progress before a fast/cached APK
+    // transfer can advance straight to the system installer.
+    await WidgetsBinding.instance.endOfFrame;
 
     String? destPath;
     try {

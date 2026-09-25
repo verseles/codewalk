@@ -17,6 +17,7 @@ import '../../../services/moonshine_model_manager.dart';
 import '../../../services/parakeet_model_manager.dart';
 import '../../../services/sensevoice_model_manager.dart';
 import '../../../services/sherpa_model_manager.dart';
+import '../../../services/stt_model_download_tracker.dart';
 import '../../../utils/speech_engine_platform_support.dart';
 import '../../../utils/windows_settings_links.dart';
 import '../../../widgets/app_indeterminate_progress.dart';
@@ -45,6 +46,8 @@ class SpeechSettingsSection extends StatefulWidget {
 }
 
 class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
+  final SttModelDownloadTracker _downloads = SttModelDownloadTracker.instance;
+  int _observedDownloadTransition = 0;
   final SherpaModelManager _modelManager = di.sl<SherpaModelManager>();
   final MoonshineModelManager _moonshineModelManager = di
       .sl<MoonshineModelManager>();
@@ -77,6 +80,16 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   bool _isMutatingSenseVoiceModel = false;
   double _senseVoiceDownloadProgress = 0;
   String? _senseVoiceModelError;
+  bool get _sherpaBusy =>
+      _isMutatingModel || _downloads.active != null;
+  bool get _moonshineBusy =>
+      _isMutatingMoonshineModel || _downloads.active != null;
+  bool get _parakeetBusy =>
+      _isMutatingParakeetModel || _downloads.active != null;
+  bool get _senseVoiceBusy =>
+      _isMutatingSenseVoiceModel || _downloads.active != null;
+  double _visibleProgress(SpeechToTextEngine engine, double local) =>
+      _downloads.active?.engine == engine ? _downloads.active!.progress : local;
   double? _silenceDraftSeconds;
   final TextEditingController _speechApiKeyController = TextEditingController();
   bool _loadingSpeechApiKey = false;
@@ -122,6 +135,8 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   @override
   void initState() {
     super.initState();
+    _observedDownloadTransition = _downloads.transition;
+    _downloads.addListener(_handleDownloadsChanged);
     if (_supportsSherpaModelManagement) {
       unawaited(_loadModelCatalog());
     }
@@ -139,8 +154,21 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
 
   @override
   void dispose() {
+    _downloads.removeListener(_handleDownloadsChanged);
     _speechApiKeyController.dispose();
     super.dispose();
+  }
+
+  void _handleDownloadsChanged() {
+    if (!mounted) return;
+    setState(() {});
+    if (_observedDownloadTransition == _downloads.transition) return;
+    _observedDownloadTransition = _downloads.transition;
+    if (_downloads.active != null) return;
+    unawaited(_refreshModelStatuses());
+    unawaited(_refreshMoonshineModelStatuses());
+    unawaited(_refreshParakeetModelStatuses());
+    unawaited(_refreshSenseVoiceModelStatuses());
   }
 
   Future<void> _loadSpeechApiKeyState() async {
@@ -214,8 +242,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                 selectedEngine == SpeechToTextEngine.parakeet ||
             _supportsSenseVoice &&
                 selectedEngine == SpeechToTextEngine.sensevoice ||
-            _supportsNemotron &&
-                selectedEngine == SpeechToTextEngine.nemotron;
+            _supportsNemotron && selectedEngine == SpeechToTextEngine.nemotron;
         return SettingsSectionBody(
           padding: const EdgeInsets.all(AppConstants.defaultPadding),
           children: [
@@ -800,7 +827,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                       ),
                     )
                     .toList(growable: false),
-                onChanged: _isMutatingMoonshineModel
+                onChanged: _moonshineBusy
                     ? null
                     : (value) {
                         if (value == null) {
@@ -845,7 +872,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               Row(
                 children: [
                   FilledButton.icon(
-                    onPressed: _isMutatingMoonshineModel || installed
+                    onPressed: _moonshineBusy || installed
                         ? null
                         : () => unawaited(_downloadMoonshineModel(selectedId)),
                     icon: const Icon(Symbols.download_rounded),
@@ -853,7 +880,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    onPressed: _isMutatingMoonshineModel || !installed
+                    onPressed: _moonshineBusy || !installed
                         ? null
                         : () => unawaited(_deleteMoonshineModel(selectedId)),
                     icon: const Icon(Symbols.delete_outline),
@@ -862,18 +889,26 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   const SizedBox(width: 8),
                   IconButton(
                     tooltip: context.l10n.settingsSpeechRefreshStatus,
-                    onPressed: _isMutatingMoonshineModel
+                    onPressed: _moonshineBusy
                         ? null
                         : () => unawaited(_refreshMoonshineModelStatuses()),
                     icon: const Icon(Symbols.refresh_rounded),
                   ),
                 ],
               ),
-              if (_isMutatingMoonshineModel) ...[
+              if (_isMutatingMoonshineModel ||
+                  _downloads.active?.engine == SpeechToTextEngine.moonshine) ...[
                 const SizedBox(height: 10),
-                _moonshineDownloadProgress > 0
+                _visibleProgress(
+                          SpeechToTextEngine.moonshine,
+                          _moonshineDownloadProgress,
+                        ) >
+                        0
                     ? LinearProgressIndicator(
-                        value: _moonshineDownloadProgress,
+                        value: _visibleProgress(
+                          SpeechToTextEngine.moonshine,
+                          _moonshineDownloadProgress,
+                        ),
                       )
                     : const AppIndeterminateBar(),
               ],
@@ -937,7 +972,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                       ),
                     )
                     .toList(growable: false),
-                onChanged: _isMutatingParakeetModel
+                onChanged: _parakeetBusy
                     ? null
                     : (value) {
                         if (value == null) {
@@ -982,7 +1017,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               Row(
                 children: [
                   FilledButton.icon(
-                    onPressed: _isMutatingParakeetModel || installed
+                    onPressed: _parakeetBusy || installed
                         ? null
                         : () => unawaited(_downloadParakeetModel(selectedId)),
                     icon: const Icon(Symbols.download_rounded),
@@ -990,7 +1025,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    onPressed: _isMutatingParakeetModel || !installed
+                    onPressed: _parakeetBusy || !installed
                         ? null
                         : () => unawaited(_deleteParakeetModel(selectedId)),
                     icon: const Icon(Symbols.delete_outline),
@@ -999,18 +1034,26 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   const SizedBox(width: 8),
                   IconButton(
                     tooltip: context.l10n.settingsSpeechRefreshStatus,
-                    onPressed: _isMutatingParakeetModel
+                    onPressed: _parakeetBusy
                         ? null
                         : () => unawaited(_refreshParakeetModelStatuses()),
                     icon: const Icon(Symbols.refresh_rounded),
                   ),
                 ],
               ),
-              if (_isMutatingParakeetModel) ...[
+              if (_isMutatingParakeetModel ||
+                  _downloads.active?.engine == SpeechToTextEngine.parakeet) ...[
                 const SizedBox(height: 10),
-                _parakeetDownloadProgress > 0
+                _visibleProgress(
+                          SpeechToTextEngine.parakeet,
+                          _parakeetDownloadProgress,
+                        ) >
+                        0
                     ? LinearProgressIndicator(
-                        value: _parakeetDownloadProgress,
+                        value: _visibleProgress(
+                          SpeechToTextEngine.parakeet,
+                          _parakeetDownloadProgress,
+                        ),
                       )
                     : const AppIndeterminateBar(),
               ],
@@ -1074,7 +1117,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                       ),
                     )
                     .toList(growable: false),
-                onChanged: _isMutatingSenseVoiceModel
+                onChanged: _senseVoiceBusy
                     ? null
                     : (value) {
                         if (value == null) {
@@ -1119,7 +1162,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               Row(
                 children: [
                   FilledButton.icon(
-                    onPressed: _isMutatingSenseVoiceModel || installed
+                    onPressed: _senseVoiceBusy || installed
                         ? null
                         : () => unawaited(_downloadSenseVoiceModel(selectedId)),
                     icon: const Icon(Symbols.download_rounded),
@@ -1127,7 +1170,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    onPressed: _isMutatingSenseVoiceModel || !installed
+                    onPressed: _senseVoiceBusy || !installed
                         ? null
                         : () => unawaited(_deleteSenseVoiceModel(selectedId)),
                     icon: const Icon(Symbols.delete_outline),
@@ -1136,18 +1179,26 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   const SizedBox(width: 8),
                   IconButton(
                     tooltip: context.l10n.settingsSpeechRefreshStatus,
-                    onPressed: _isMutatingSenseVoiceModel
+                    onPressed: _senseVoiceBusy
                         ? null
                         : () => unawaited(_refreshSenseVoiceModelStatuses()),
                     icon: const Icon(Symbols.refresh_rounded),
                   ),
                 ],
               ),
-              if (_isMutatingSenseVoiceModel) ...[
+              if (_isMutatingSenseVoiceModel ||
+                  _downloads.active?.engine == SpeechToTextEngine.sensevoice) ...[
                 const SizedBox(height: 10),
-                _senseVoiceDownloadProgress > 0
+                _visibleProgress(
+                          SpeechToTextEngine.sensevoice,
+                          _senseVoiceDownloadProgress,
+                        ) >
+                        0
                     ? LinearProgressIndicator(
-                        value: _senseVoiceDownloadProgress,
+                        value: _visibleProgress(
+                          SpeechToTextEngine.sensevoice,
+                          _senseVoiceDownloadProgress,
+                        ),
                       )
                     : const AppIndeterminateBar(),
               ],
@@ -1241,7 +1292,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                     ),
                   ),
                 ],
-                onChanged: _isMutatingModel
+                onChanged: _sherpaBusy
                     ? null
                     : (value) {
                         if (value == null) return;
@@ -1287,7 +1338,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
               Row(
                 children: [
                   FilledButton.icon(
-                    onPressed: _isMutatingModel || installed
+                    onPressed: _sherpaBusy || installed
                         ? null
                         : () => unawaited(_downloadModel(effectiveCode)),
                     icon: const Icon(Symbols.download_rounded),
@@ -1295,7 +1346,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    onPressed: _isMutatingModel || !installed
+                    onPressed: _sherpaBusy || !installed
                         ? null
                         : () => unawaited(_deleteModel(effectiveCode)),
                     icon: const Icon(Symbols.delete_outline),
@@ -1304,18 +1355,23 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                   const SizedBox(width: 8),
                   IconButton(
                     tooltip: context.l10n.settingsSpeechRefreshStatus,
-                    onPressed: _isMutatingModel
+                    onPressed: _sherpaBusy
                         ? null
                         : () => unawaited(_refreshModelStatuses()),
                     icon: const Icon(Symbols.refresh_rounded),
                   ),
                 ],
               ),
-              if (_isMutatingModel) ...[
+              if (_isMutatingModel ||
+                  _downloads.active?.engine == SpeechToTextEngine.sherpa) ...[
                 const SizedBox(height: 10),
-                _downloadProgress > 0
+                _visibleProgress(SpeechToTextEngine.sherpa, _downloadProgress) >
+                        0
                     ? LinearProgressIndicator(
-                        value: _downloadProgress,
+                        value: _visibleProgress(
+                          SpeechToTextEngine.sherpa,
+                          _downloadProgress,
+                        ),
                       )
                     : const AppIndeterminateBar(),
               ],
@@ -1509,6 +1565,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   }
 
   Future<void> _downloadModel(String code) async {
+    final settingsProvider = context.read<SettingsProvider>();
     setState(() {
       _isMutatingModel = true;
       _downloadProgress = 0;
@@ -1527,11 +1584,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         },
       );
       _modelManager.setPreferredLanguage(code);
+      await settingsProvider.setSherpaLanguageCode(code);
       if (!mounted) {
         return;
       }
-      final settingsProvider = context.read<SettingsProvider>();
-      await settingsProvider.setSherpaLanguageCode(code);
       await _refreshModelStatuses();
     } catch (error) {
       if (!mounted) {
@@ -1647,6 +1703,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   }
 
   Future<void> _downloadMoonshineModel(String modelId) async {
+    final settingsProvider = context.read<SettingsProvider>();
     setState(() {
       _isMutatingMoonshineModel = true;
       _moonshineDownloadProgress = 0;
@@ -1665,11 +1722,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         },
       );
       _moonshineModelManager.setPreferredModelId(modelId);
+      await settingsProvider.setMoonshineModelId(modelId);
       if (!mounted) {
         return;
       }
-      final settingsProvider = context.read<SettingsProvider>();
-      await settingsProvider.setMoonshineModelId(modelId);
       await _refreshMoonshineModelStatuses();
     } catch (error) {
       if (!mounted) {
@@ -1717,6 +1773,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   }
 
   Future<void> _downloadParakeetModel(String modelId) async {
+    final settingsProvider = context.read<SettingsProvider>();
     setState(() {
       _isMutatingParakeetModel = true;
       _parakeetDownloadProgress = 0;
@@ -1735,11 +1792,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         },
       );
       _parakeetModelManager.setPreferredModelId(modelId);
+      await settingsProvider.setParakeetModelId(modelId);
       if (!mounted) {
         return;
       }
-      final settingsProvider = context.read<SettingsProvider>();
-      await settingsProvider.setParakeetModelId(modelId);
       await _refreshParakeetModelStatuses();
     } catch (error) {
       if (!mounted) {
@@ -1787,6 +1843,7 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
   }
 
   Future<void> _downloadSenseVoiceModel(String modelId) async {
+    final settingsProvider = context.read<SettingsProvider>();
     setState(() {
       _isMutatingSenseVoiceModel = true;
       _senseVoiceDownloadProgress = 0;
@@ -1805,11 +1862,10 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
         },
       );
       _senseVoiceModelManager.setPreferredModelId(modelId);
+      await settingsProvider.setSenseVoiceModelId(modelId);
       if (!mounted) {
         return;
       }
-      final settingsProvider = context.read<SettingsProvider>();
-      await settingsProvider.setSenseVoiceModelId(modelId);
       await _refreshSenseVoiceModelStatuses();
     } catch (error) {
       if (!mounted) {

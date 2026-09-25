@@ -12,6 +12,7 @@ import '../providers/app_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/desktop_tray_service.dart';
 import '../services/desktop_tray_service_types.dart';
+import '../services/stt_model_download_tracker.dart';
 import '../services/update_check_service.dart';
 import '../utils/app_page_route.dart';
 import '../widgets/app_indeterminate_progress.dart';
@@ -67,6 +68,17 @@ class _AppShellPageState extends State<AppShellPage> {
   bool _shownDoneSnackBar = false;
   bool _shownFailedSnackBar = false;
   UpdateInstallState _lastObservedInstallState = UpdateInstallState.idle;
+  final SttModelDownloadTracker _modelDownloads =
+      SttModelDownloadTracker.instance;
+  int _lastObservedModelTransition = 0;
+  SttModelDownload? _modelResultDuringInstall;
+
+  @override
+  void initState() {
+    super.initState();
+    _modelDownloads.addListener(_handleModelDownloadsChanged);
+    if (_modelDownloads.active != null) _handleModelDownloadsChanged();
+  }
 
   @override
   void didChangeDependencies() {
@@ -84,6 +96,7 @@ class _AppShellPageState extends State<AppShellPage> {
   @override
   void dispose() {
     _settingsProvider?.removeListener(_handleSettingsChanged);
+    _modelDownloads.removeListener(_handleModelDownloadsChanged);
     unawaited(_desktopTrayService.dispose());
     super.dispose();
   }
@@ -93,6 +106,158 @@ class _AppShellPageState extends State<AppShellPage> {
     // consumers. _configureDesktopTray catches its own failures, so this
     // listener never throws synchronously and cannot stop later listeners.
     unawaited(_configureDesktopTray());
+    final settingsProvider = _settingsProvider;
+    if (settingsProvider != null) {
+      _observeInstallState(settingsProvider);
+    }
+  }
+
+  void _observeInstallState(SettingsProvider settingsProvider) {
+    final installState = settingsProvider.installState;
+    if (installState == _lastObservedInstallState) return;
+    _lastObservedInstallState = installState;
+    if (installState == UpdateInstallState.idle) {
+      _shownProgressSnackBar = false;
+      _shownDoneSnackBar = false;
+      _shownFailedSnackBar = false;
+      _modelResultDuringInstall = null;
+    } else if (installState == UpdateInstallState.downloading &&
+        !_shownProgressSnackBar) {
+      _shownProgressSnackBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            settingsProvider.installState == UpdateInstallState.downloading) {
+          _showActiveDownloadsSnackBar(context, settingsProvider);
+        }
+      });
+    } else if (installState == UpdateInstallState.installing) {
+      if (_isDesktopRuntime && !_shownProgressSnackBar) {
+        _shownProgressSnackBar = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (_modelDownloads.active != null) {
+            _showActiveDownloadsSnackBar(context, settingsProvider);
+          } else {
+            _showInstallingSnackBar(context);
+          }
+        });
+      } else if (!_isDesktopRuntime) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (_modelDownloads.active != null) {
+            _showActiveDownloadsSnackBar(context, settingsProvider);
+          } else if (_modelResultDuringInstall case final result?) {
+            final messenger = ScaffoldMessenger.of(context);
+            messenger.clearSnackBars();
+            messenger.removeCurrentSnackBar();
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(_modelResultText(context, result)),
+                duration: const Duration(seconds: 5),
+                showCloseIcon: true,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).clearSnackBars();
+          }
+        });
+      }
+    } else if (installState == UpdateInstallState.done && !_shownDoneSnackBar) {
+      _shownDoneSnackBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_modelDownloads.active != null) {
+          _showActiveDownloadsSnackBar(context, settingsProvider);
+        } else {
+          _showDoneSnackBar(context, settingsProvider);
+        }
+      });
+    } else if (installState == UpdateInstallState.failed &&
+        !_shownFailedSnackBar) {
+      _shownFailedSnackBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_modelDownloads.active != null) {
+          _showActiveDownloadsSnackBar(context, settingsProvider);
+        } else {
+          _showFailedSnackBar(context, settingsProvider);
+        }
+      });
+    }
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
+  void _handleModelDownloadsChanged() {
+    if (_modelDownloads.transition == _lastObservedModelTransition) return;
+    _lastObservedModelTransition = _modelDownloads.transition;
+    final active = _modelDownloads.active;
+    final finished = _modelDownloads.lastFinished;
+    final settingsProvider = _settingsProvider;
+    if (active != null) {
+      _modelResultDuringInstall = null;
+    } else if (settingsProvider?.installState == UpdateInstallState.downloading ||
+        _isDesktopRuntime &&
+            settingsProvider?.installState == UpdateInstallState.installing) {
+      _modelResultDuringInstall = finished;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final currentSettings = _settingsProvider;
+      if (currentSettings != null &&
+          (currentSettings.installState == UpdateInstallState.downloading ||
+              _isDesktopRuntime &&
+                  currentSettings.installState == UpdateInstallState.installing ||
+              active != null &&
+                  currentSettings.installState != UpdateInstallState.idle)) {
+        _showActiveDownloadsSnackBar(context, currentSettings);
+        return;
+      }
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.removeCurrentSnackBar();
+      if (active != null) {
+        if (currentSettings != null) {
+          _showActiveDownloadsSnackBar(context, currentSettings);
+        }
+      } else if (finished != null) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (currentSettings?.installState == UpdateInstallState.done)
+                  Text(
+                    _isDesktopRuntime
+                        ? context.l10n.appShellUpdateInstalledRestartRequired
+                        : context.l10n.appShellUpdateInstalledRestartApp,
+                  ),
+                if (currentSettings?.installState == UpdateInstallState.failed)
+                  Text(context.l10n.appShellInstallFailed),
+                Text(_modelResultText(context, finished)),
+              ],
+            ),
+            duration: const Duration(seconds: 5),
+            showCloseIcon: true,
+            action: currentSettings?.installState == UpdateInstallState.done &&
+                    _isDesktopRuntime
+                ? SnackBarAction(
+                    label: context.l10n.appShellRestart,
+                    onPressed: () => unawaited(currentSettings!.restartDesktopApp()),
+                  )
+                : currentSettings?.installState == UpdateInstallState.failed
+                ? SnackBarAction(
+                    label: context.l10n.chatRetry2,
+                    onPressed: () => unawaited(currentSettings!.startInstall()),
+                  )
+                : null,
+          ),
+        );
+      }
+    });
+    // This listener also runs while AppShellPage is offstage behind Settings;
+    // addPostFrameCallback alone does not schedule a frame in that case.
+    WidgetsBinding.instance.scheduleFrame();
   }
 
   Future<void> _configureDesktopTray() async {
@@ -210,44 +375,6 @@ class _AppShellPageState extends State<AppShellPage> {
           }
         }
 
-        // React to install state transitions with SnackBars.
-        final installState = settingsProvider.installState;
-        if (installState != _lastObservedInstallState) {
-          _lastObservedInstallState = installState;
-          if (installState == UpdateInstallState.idle) {
-            // startInstall() briefly resets to idle before starting; clear guards
-            // so subsequent state transitions trigger fresh SnackBars.
-            _shownProgressSnackBar = false;
-            _shownDoneSnackBar = false;
-            _shownFailedSnackBar = false;
-          } else if (installState == UpdateInstallState.downloading &&
-              !_shownProgressSnackBar) {
-            _shownProgressSnackBar = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showDownloadingSnackBar(context, settingsProvider);
-            });
-          } else if (installState == UpdateInstallState.installing &&
-              !_shownProgressSnackBar &&
-              _isDesktopRuntime) {
-            _shownProgressSnackBar = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showInstallingSnackBar(context);
-            });
-          } else if (installState == UpdateInstallState.done &&
-              !_shownDoneSnackBar) {
-            _shownDoneSnackBar = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showDoneSnackBar(context, settingsProvider);
-            });
-          } else if (installState == UpdateInstallState.failed &&
-              !_shownFailedSnackBar) {
-            _shownFailedSnackBar = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showFailedSnackBar(context, settingsProvider);
-            });
-          }
-        }
-
         return const ChatPage();
       },
     );
@@ -266,7 +393,9 @@ class _AppShellPageState extends State<AppShellPage> {
     SettingsProvider settingsProvider,
     UpdateCheckResult result,
   ) {
-    if (!mounted) return;
+    if (!mounted || settingsProvider.installState != UpdateInstallState.idle) {
+      return;
+    }
     final canInstallDirectly = settingsProvider.canInstallUpdateDirectly(
       result,
     );
@@ -335,7 +464,10 @@ class _AppShellPageState extends State<AppShellPage> {
 
   void _showInstallingSnackBar(BuildContext context) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.removeCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
         duration: const Duration(days: 1),
         showCloseIcon: true,
@@ -354,29 +486,70 @@ class _AppShellPageState extends State<AppShellPage> {
     );
   }
 
-  /// Shows a persistent SnackBar while the APK is being downloaded.
-  void _showDownloadingSnackBar(
+  /// Keeps every active transfer visible in the root messenger across routes.
+  void _showActiveDownloadsSnackBar(
     BuildContext context,
     SettingsProvider settingsProvider,
   ) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.removeCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
         duration: const Duration(days: 1), // dismissed programmatically
         showCloseIcon: true,
+        action: settingsProvider.installState == UpdateInstallState.done &&
+                _isDesktopRuntime &&
+                _modelDownloads.active == null
+            ? SnackBarAction(
+                label: context.l10n.appShellRestart,
+                onPressed: () => unawaited(settingsProvider.restartDesktopApp()),
+              )
+            : settingsProvider.installState == UpdateInstallState.failed
+            ? SnackBarAction(
+                label: context.l10n.chatRetry2,
+                onPressed: () => unawaited(settingsProvider.startInstall()),
+              )
+            : null,
         content: ListenableBuilder(
-          listenable: settingsProvider,
+          listenable: Listenable.merge([settingsProvider, _modelDownloads]),
           builder: (_, _) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(context.l10n.appShellDownloadingUpdate),
-              const SizedBox(height: 4),
-              settingsProvider.installProgress > 0
-                  ? LinearProgressIndicator(
-                      value: settingsProvider.installProgress,
-                    )
-                  : const AppIndeterminateBar(),
+              if (settingsProvider.installState == UpdateInstallState.downloading) ...[
+                Text(context.l10n.appShellDownloadingUpdate),
+                const SizedBox(height: 4),
+                settingsProvider.installProgress > 0
+                    ? LinearProgressIndicator(value: settingsProvider.installProgress)
+                    : const AppIndeterminateBar(),
+              ],
+              if (_modelDownloads.active case final model?) ...[
+                if (settingsProvider.installState == UpdateInstallState.downloading)
+                  const SizedBox(height: 8),
+                Text('${context.l10n.speechDownload}: ${model.modelId}'),
+                const SizedBox(height: 4),
+                model.progress > 0
+                    ? LinearProgressIndicator(value: model.progress)
+                    : const AppIndeterminateBar(),
+              ],
+              if (_modelDownloads.active == null &&
+                  _modelResultDuringInstall != null)
+                Text(_modelResultText(context, _modelResultDuringInstall!)),
+              if (_modelDownloads.active != null &&
+                  settingsProvider.installState == UpdateInstallState.failed)
+                Text(context.l10n.appShellInstallFailed),
+              if (settingsProvider.installState == UpdateInstallState.installing &&
+                  _isDesktopRuntime)
+                Text(context.l10n.appShellInstallingUpdate),
+              if (_modelDownloads.active != null &&
+                  settingsProvider.installState == UpdateInstallState.done)
+                Text(
+                  _isDesktopRuntime
+                      ? context.l10n.appShellUpdateInstalledRestartRequired
+                      : context.l10n.appShellUpdateInstalledRestartApp,
+                ),
             ],
           ),
         ),
@@ -384,20 +557,35 @@ class _AppShellPageState extends State<AppShellPage> {
     );
   }
 
+  String _modelResultText(BuildContext context, SttModelDownload result) =>
+      result.failed
+          ? context.l10n.speechDownloadFailed(result.modelId)
+          : context.l10n.speechModelInstalled(result.modelId);
+
   /// Shows a SnackBar confirming the desktop update was applied.
   void _showDoneSnackBar(
     BuildContext context,
     SettingsProvider settingsProvider,
   ) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.removeCurrentSnackBar();
     final isDesktop = _isDesktopRuntime;
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          isDesktop
-              ? context.l10n.appShellUpdateInstalledRestartRequired
-              : context.l10n.appShellUpdateInstalledRestartApp,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isDesktop
+                  ? context.l10n.appShellUpdateInstalledRestartRequired
+                  : context.l10n.appShellUpdateInstalledRestartApp,
+            ),
+            if (_modelResultDuringInstall case final result?)
+              Text(_modelResultText(context, result)),
+          ],
         ),
         duration: const Duration(seconds: 10),
         showCloseIcon: true,
@@ -418,16 +606,26 @@ class _AppShellPageState extends State<AppShellPage> {
     SettingsProvider settingsProvider,
   ) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.removeCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
-        content: Text(context.l10n.appShellInstallFailed),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.l10n.appShellInstallFailed),
+            if (_modelResultDuringInstall case final result?)
+              Text(_modelResultText(context, result)),
+          ],
+        ),
         duration: const Duration(seconds: 8),
         showCloseIcon: true,
         action: SnackBarAction(
           label: context.l10n.chatRetry2,
           onPressed: () {
-            // Guards are cleared by the idle→downloading state transition in the builder.
+            // Guards are cleared by the idle→downloading state transition.
             unawaited(settingsProvider.startInstall());
           },
         ),

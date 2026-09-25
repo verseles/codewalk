@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../domain/entities/experience_settings.dart';
 import 'stt_model_archive_installer_io.dart';
+import 'stt_model_download_tracker.dart';
 
 class _ParakeetModelSpec {
   const _ParakeetModelSpec({
@@ -89,6 +90,18 @@ class ParakeetModelManager {
     String modelId, {
     void Function(double)? onProgress,
   }) async {
+    await SttModelDownloadTracker.instance.run(
+      engine: SpeechToTextEngine.parakeet,
+      modelId: normalizeModelId(modelId),
+      onProgress: onProgress,
+      download: (report) => _downloadModel(modelId, report),
+    );
+  }
+
+  Future<void> _downloadModel(
+    String modelId,
+    void Function(double) onProgress,
+  ) async {
     final spec = _specFor(modelId);
     final dir = Directory(await getModelDir(spec.id));
     await installSttModelArchive(

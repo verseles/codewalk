@@ -6,6 +6,7 @@ import 'package:codewalk/core/i18n/app_locales.dart';
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/core/tailscale/tailscale_state.dart';
 import 'package:codewalk/data/datasources/app_local_datasource.dart';
+import 'package:codewalk/domain/entities/experience_settings.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/create_chat_session.dart';
@@ -43,6 +44,7 @@ import 'package:codewalk/presentation/providers/project_provider.dart';
 import 'package:codewalk/presentation/providers/quota_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:codewalk/presentation/services/stt_model_download_tracker.dart';
 import 'package:codewalk/presentation/services/update_check_service.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:dartz/dartz.dart';
@@ -231,16 +233,55 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    tester
+        .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger).first)
+        .showSnackBar(
+          const SnackBar(
+            content: Text('Earlier notification'),
+            duration: Duration(seconds: 30),
+          ),
+        );
+    await tester.pump();
+
     settingsProvider.debugSetInstallStateForTesting(
       UpdateInstallState.installing,
     );
     await tester.pump();
     await tester.pump();
     expect(find.text('Installing update...'), findsOneWidget);
+    expect(find.text('Earlier notification'), findsNothing);
 
+    final modelFinished = Completer<void>();
+    final modelDownload = SttModelDownloadTracker.instance.run(
+      engine: SpeechToTextEngine.sherpa,
+      modelId: 'pt',
+      download: (_) => modelFinished.future,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    modelFinished.complete();
+    await modelDownload;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Installing update...'), findsOneWidget);
+    expect(find.text('Model installed (pt)'), findsOneWidget);
+
+    final secondFinished = Completer<void>();
+    final secondDownload = SttModelDownloadTracker.instance.run(
+      engine: SpeechToTextEngine.parakeet,
+      modelId: 'parakeet-v3',
+      download: (_) => secondFinished.future,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     settingsProvider.debugSetInstallStateForTesting(UpdateInstallState.done);
     await tester.pump();
     await tester.pump();
+    expect(find.text('Restart'), findsNothing);
+    secondFinished.complete();
+    await secondDownload;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(
       find.text(
         'Update installed. Restart is required to apply the new version.',
@@ -249,7 +290,180 @@ void main() {
     );
     expect(find.text('Restart'), findsOneWidget);
     expect(find.byIcon(Icons.close), findsOneWidget);
+
+    settingsProvider.debugSetInstallStateForTesting(UpdateInstallState.failed);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final thirdFinished = Completer<void>();
+    final thirdDownload = SttModelDownloadTracker.instance.run(
+      engine: SpeechToTextEngine.sensevoice,
+      modelId: 'sensevoice',
+      download: (_) => thirdFinished.future,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    thirdFinished.complete();
+    await thirdDownload;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.text('Model installed (sensevoice)'), findsOneWidget);
     debugDefaultTargetPlatformOverride = previousPlatform;
+  });
+
+  testWidgets('APK progress replaces an older snackbar before installing', (
+    WidgetTester tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    final local = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test'
+      ..defaultServerId = 'srv_test'
+      ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 'srv_test',
+          'url': 'http://127.0.0.1:4096',
+          'label': 'Test Server',
+          'basicAuthEnabled': false,
+          'basicAuthUsername': '',
+          'basicAuthPassword': '',
+          'createdAt': 0,
+          'updatedAt': 0,
+        },
+      ]);
+    final settings = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settings.initialize();
+    await settings.setCheckUpdatesOnOpen(false);
+    final app = _buildAppProvider(localDataSource: local);
+    final chat = _buildChatProvider(localDataSource: local);
+    await tester.pumpWidget(_testAppWithSettings(chat, app, settings));
+    await tester.pumpAndSettle();
+
+    final messenger = tester.state<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger).first,
+    );
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Older update toast'),
+        duration: Duration(seconds: 30),
+      ),
+    );
+    await tester.pump();
+    settings.debugSetInstallStateForTesting(
+      UpdateInstallState.downloading,
+      progress: 0.35,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Downloading update…'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsWidgets);
+    expect(find.text('Older update toast'), findsNothing);
+
+    settings.debugSetInstallStateForTesting(UpdateInstallState.installing);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Downloading update…'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    chat.dispose();
+    app.dispose();
+    settings.dispose();
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('STT progress survives leaving Settings', (tester) async {
+    final local = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_test'
+      ..defaultServerId = 'srv_test'
+      ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 'srv_test',
+          'url': 'http://127.0.0.1:4096',
+          'label': 'Test Server',
+          'basicAuthEnabled': false,
+          'basicAuthUsername': '',
+          'basicAuthPassword': '',
+          'createdAt': 0,
+          'updatedAt': 0,
+        },
+      ]);
+    final settings = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    await settings.initialize();
+    await settings.setCheckUpdatesOnOpen(false);
+    final app = _buildAppProvider(localDataSource: local);
+    final chat = _buildChatProvider(localDataSource: local);
+    await tester.pumpWidget(_testAppWithSettings(chat, app, settings));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('sidebar_settings_icon_button')),
+    );
+    await tester.pumpAndSettle();
+
+    final finish = Completer<void>();
+    expect(find.byType(AppShellPage, skipOffstage: false), findsOneWidget);
+    late void Function(double) report;
+    final download = SttModelDownloadTracker.instance.run(
+      engine: SpeechToTextEngine.parakeet,
+      modelId: 'parakeet-v3',
+      download: (progress) {
+        report = progress;
+        return finish.future;
+      },
+    );
+    await tester.pump();
+    report(0.4);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
+    expect(SttModelDownloadTracker.instance.active?.progress, 0.4);
+    expect(find.text('Download: parakeet-v3'), findsOneWidget);
+
+    settings.debugSetInstallStateForTesting(
+      UpdateInstallState.downloading,
+      progress: 0.25,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Download: parakeet-v3'), findsOneWidget);
+    expect(find.text('Downloading update…'), findsOneWidget);
+
+    settings.debugSetInstallStateForTesting(UpdateInstallState.installing);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Download: parakeet-v3'), findsOneWidget);
+
+    settings.debugSetInstallStateForTesting(UpdateInstallState.downloading);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Download: parakeet-v3'), findsWidgets);
+    finish.complete();
+    await download;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Model installed (parakeet-v3)'), findsOneWidget);
+    expect(find.text('Downloading update…'), findsOneWidget);
+
+    settings.debugSetInstallStateForTesting(UpdateInstallState.installing);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Model installed (parakeet-v3)'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    chat.dispose();
+    app.dispose();
+    settings.dispose();
   });
 
   testWidgets(
@@ -467,9 +681,7 @@ void main() {
     unawaited(settingsProvider.initialize());
     addTearDown(settingsProvider.dispose);
 
-    final localeProvider = LocaleProvider(
-      settingsProvider: settingsProvider,
-    );
+    final localeProvider = LocaleProvider(settingsProvider: settingsProvider);
     unawaited(localeProvider.initialize());
     addTearDown(localeProvider.dispose);
 
@@ -771,10 +983,7 @@ void _coldStartHintTests() {
     test('stays silent without Tailscale or in settled states', () {
       for (final state in TailscaleNodeState.values) {
         expect(
-          coldStartTailscaleHint(
-            tailscaleActive: false,
-            nodeState: state,
-          ),
+          coldStartTailscaleHint(tailscaleActive: false, nodeState: state),
           isNull,
         );
       }

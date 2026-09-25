@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../domain/entities/experience_settings.dart';
+import 'stt_model_download_tracker.dart';
+
 // Native implementation of sherpa-onnx model management for IO platforms.
 // Handles on-demand download of Kroko streaming transducer models from
 // HuggingFace, local storage under getApplicationSupportDirectory(), locale
@@ -82,6 +85,18 @@ class SherpaModelManager {
     String lang, {
     void Function(double)? onProgress,
   }) async {
+    await SttModelDownloadTracker.instance.run(
+      engine: SpeechToTextEngine.sherpa,
+      modelId: lang,
+      onProgress: onProgress,
+      download: (report) => _downloadModel(lang, report),
+    );
+  }
+
+  Future<void> _downloadModel(
+    String lang,
+    void Function(double) onProgress,
+  ) async {
     final dir = Directory(await getModelDir(lang));
     await dir.create(recursive: true);
 
@@ -98,18 +113,16 @@ class SherpaModelManager {
           followRedirects: true,
           receiveTimeout: const Duration(minutes: 10),
         ),
-        onReceiveProgress: onProgress == null
-            ? null
-            : (received, total) {
-                if (total > 0) {
-                  // Distribute progress evenly across the 4 files.
-                  final fileProgress = received / total;
-                  onProgress((i + fileProgress) / _modelFiles.length);
-                }
-              },
+        onReceiveProgress: (received, total) {
+          if (total > 0) {
+            // Distribute progress evenly across the 4 files.
+            final fileProgress = received / total;
+            onProgress((i + fileProgress) / _modelFiles.length);
+          }
+        },
       );
     }
-    onProgress?.call(1.0);
+    onProgress(1.0);
   }
 
   // Removes all model files for [lang] from disk to free space.
