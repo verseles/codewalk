@@ -318,7 +318,6 @@ class NemotronSpeechInputService with ResidentSpeechInputService {
           speechAudioCaptureFailureInfoForError(error),
           fallback: 'Microphone recording failed.',
         );
-        unawaited(stopListening());
         onError();
       },
       onDone: () {

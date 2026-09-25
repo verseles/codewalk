@@ -12,6 +12,7 @@ import 'stt_model_download_tracker.dart';
 // HuggingFace, local storage under getApplicationSupportDirectory(), locale
 // detection, and model lifecycle (install / check / delete).
 class SherpaModelManager {
+  SherpaModelManager({Dio? dio}) : _dio = dio ?? Dio();
   static const _availableLangs = ['de', 'en', 'es', 'fr', 'it', 'pt', 'tr'];
 
   // The 4 files required per language model (INT8 quantized Kroko 64-layer).
@@ -27,7 +28,7 @@ class SherpaModelManager {
 
   String? _cachedBaseDir;
   String? _preferredLanguage;
-  final _dio = Dio();
+  final Dio _dio;
 
   // Parses language or locale (e.g. `pt-BR`, `pt_BR.UTF-8`) to a supported
   // two-letter code, defaulting to `en` when unknown.
@@ -99,36 +100,64 @@ class SherpaModelManager {
     void Function(double) onProgress,
   ) async {
     final dir = Directory(await getModelDir(lang));
-    await SpeechModelResidencyController.instance.mutateModel(
-      dir.path,
-      () async {
-        await dir.create(recursive: true);
-
-        final path = '$lang/kroko_64l';
-        final base = '$_huggingFaceBase/$_repo/resolve/main/$path';
-
-        for (var i = 0; i < _modelFiles.length; i++) {
-          final file = _modelFiles[i];
-          final localPath = '${dir.path}/$file';
-          await _dio.download(
-            '$base/$file',
-            localPath,
-            options: Options(
-              followRedirects: true,
-              receiveTimeout: const Duration(minutes: 10),
-            ),
-            onReceiveProgress: (received, total) {
-              if (total > 0) {
-                // Distribute progress evenly across the 4 files.
-                final fileProgress = received / total;
-                onProgress((i + fileProgress) / _modelFiles.length);
-              }
-            },
-          );
+    await dir.parent.create(recursive: true);
+    final staged = await dir.parent.createTemp('.sherpa-install-');
+    Directory? backup;
+    try {
+      final path = '$lang/kroko_64l';
+      final base = '$_huggingFaceBase/$_repo/resolve/main/$path';
+      for (var i = 0; i < _modelFiles.length; i++) {
+        final file = _modelFiles[i];
+        await _dio.download(
+          '$base/$file',
+          '${staged.path}/$file',
+          options: Options(
+            followRedirects: true,
+            receiveTimeout: const Duration(minutes: 10),
+          ),
+          onReceiveProgress: (received, total) {
+            if (total > 0) {
+              onProgress((i + received / total) / _modelFiles.length);
+            }
+          },
+        );
+        if (File('${staged.path}/$file').lengthSync() == 0) {
+          throw FormatException('Empty model file: $file');
         }
-        onProgress(1.0);
-      },
-    );
+      }
+      await SpeechModelResidencyController.instance.mutateModel(
+        dir.path,
+        () async {
+          if (dir.existsSync()) {
+            backup = await dir.parent.createTemp('.sherpa-previous-');
+            await backup!.delete();
+            await dir.rename(backup!.path);
+          }
+          try {
+            await staged.rename(dir.path);
+          } catch (_) {
+            if (backup != null) {
+              try {
+                await backup!.rename(dir.path);
+                backup = null;
+              } catch (restoreError) {
+                throw StateError(
+                  'Could not restore previous model from ${backup?.path}: $restoreError',
+                );
+              }
+            }
+            rethrow;
+          }
+        },
+      );
+      onProgress(1.0);
+    } finally {
+      if (staged.existsSync()) await staged.delete(recursive: true);
+      final previous = backup;
+      if (previous != null && dir.existsSync() && previous.existsSync()) {
+        await previous.delete(recursive: true);
+      }
+    }
   }
 
   // Removes all model files for [lang] from disk to free space.

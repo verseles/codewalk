@@ -91,15 +91,20 @@ Future<void> installSttModelArchive({
     );
     onProgress?.call(1);
   } finally {
-    if (workspace != null && workspace.existsSync()) {
-      await workspace.delete(recursive: true);
+    try {
+      if (workspace != null && workspace.existsSync()) {
+        await workspace.delete(recursive: true);
+      }
+      // If restoration failed, the backup may be the only surviving model copy.
+      final previous = backup;
+      if (previous != null &&
+          destination.existsSync() &&
+          previous.existsSync()) {
+        await previous.delete(recursive: true);
+      }
+    } finally {
+      _installingModels.remove(destination.path);
     }
-    // If restoration failed, the backup may be the only surviving model copy.
-    final previous = backup;
-    if (previous != null && destination.existsSync() && previous.existsSync()) {
-      await previous.delete(recursive: true);
-    }
-    _installingModels.remove(destination.path);
   }
 }
 

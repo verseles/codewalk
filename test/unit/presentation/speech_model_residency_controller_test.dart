@@ -114,11 +114,14 @@ void main() {
     () async {
       await _start(first);
       final old = first.sessionToken;
+      final oldError = first.fail;
       final second = _Backend(controller, '/second');
       await _start(second);
       expect(first.loaded, isFalse);
       expect(second.loaded, isTrue);
       await controller.stop(old);
+      oldError!();
+      await controller.stop(null);
       expect(second.isListening, isTrue);
       await _start(second);
       final current = second.sessionToken;
