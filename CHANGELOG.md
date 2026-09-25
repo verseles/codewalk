@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.254.0 - 2026-09-25
+
+> 📣 Offline voice input now keeps your last-used model in memory for faster repeat recordings. Enabled by default, with one model at a time and an option to turn it off in Settings.
+
+- fix(speech): keep Android model extraction isolate-safe and log failures
+- build(android): align Gradle and Kotlin plugins with Flutter
+- fix(speech): stage Sherpa downloads and isolate session cleanup
+- feat(speech): retain one on-device model between recordings
+
 ## v1.253.0 - 2026-09-25
 
 > 📣 Offline speech just got better: Nemotron 3.5 and downloadable on-device models now work on Android, with downloads continuing as you navigate.
