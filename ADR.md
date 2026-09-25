@@ -316,6 +316,17 @@ Use `SpeechInputService` as the abstraction contract, register native, Sherpa, d
 - Regression tests: engine selection policy tests per platform, on-demand model install/extraction tests (streaming, staging, off-isolate), Android default-native assertion.
 - ADR-023 alignment: fully client-local speech input; no server protocol change.
 
+### Addendum (v1.254.0): STT on-device model retention — lazy default-on single resident recognizer
+
+- Previous Android runtime addendum (2026-09-24) remains in force; this addendum only documents retention/lifecycle policy.
+- Lazy default-on single resident recognizer across Sherpa/Moonshine/Parakeet/SenseVoice/Nemotron: the last-used on-device engine stays resident in memory so repeat recordings skip model reload.
+- Persisted Settings opt-out: users who prefer minimum RAM can disable retention; eviction then happens after each recording.
+- Lifecycle coordinator: serialized owner/model file mutations plus fresh audio streams per recording, so engine switches and model-file replacement cannot race an active transcription.
+- Resident retention with no TTL: the resident recognizer is retained indefinitely while the process lives until the memory-pressure callback, explicit opt-out, or engine/model switch/files mutate; if currently busy, eviction is deferred until finalization.
+- Safe model replacement: downloading or deleting a model evicts the resident instance first, then reloads lazily on next use; no stale weights are reused.
+- User RAM tradeoff: retention trades faster repeat-record start for resident native memory; opt-out restores per-recording load/release at the cost of slower start.
+- ADR-023 compliance: client-only lifecycle change; no server contract, endpoint, or event-semantics change.
+
 ### Key Files
 
 - `lib/presentation/services/speech_input_service.dart`

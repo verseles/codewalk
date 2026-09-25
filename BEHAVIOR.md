@@ -1618,6 +1618,24 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **Then** the selected model preference persists when the download finishes, even if Settings was closed
 - **Then** only one on-device model download runs at a time; other model actions in Settings remain unavailable until it finishes
 
+### Keep one local speech model in memory
+
+- **Given** an on-device speech engine is available and `Settings > Speech > Keep in memory` is enabled (the default)
+- **When** the user makes another recording with the same installed model and recognition timeout
+- **Then** the loaded model is reused while each recording gets a fresh audio stream, including after navigating away from chat; no model is preloaded before first use
+- **When** another local engine/model is selected, or its files are deleted or replaced
+- **Then** the previous recording finishes before its model is released; at most one local model remains resident
+- **When** the user disables `Keep in memory` or the system reports memory pressure
+- **Then** an idle model is released, or release waits until the active recording and final transcription finish; the saved opt-out applies on future launches
+- **Then** retaining a model can use more RAM, and process termination clears the cache
+
+### On-device download failures appear in App Logs
+
+- **Given** app logging is enabled in Settings
+- **When** a Sherpa, Moonshine, Parakeet, SenseVoice, or Nemotron download fails
+- **Then** the user still sees the download failure and App Logs records the handled error and stack trace
+- **Then** archive-based models extract on a worker isolate without sending the Settings widget or progress callback to that isolate
+
 ### Windows STT uses on-device engines through CodeWalk WASAPI capture
 
 - **Given** the user is on Windows desktop
