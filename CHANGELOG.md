@@ -2,6 +2,19 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.255.0 - 2026-09-26
+
+> 📣 Open projects faster with unified fuzzy search. Desktop sidebars resize and hide instantly, essential controls remain accessible, and Settings no longer leaves inactive chat tabs on screen.
+
+- fix(files): reuse canonical drive-root paths for chat links and read fallbacks
+- fix(paths): keep drive-root consumers consistent across workspace operations
+- fix(workspace): preserve Windows drive roots and UNC project paths
+- fix(workspace): guard picker scope and fit panes within the viewport
+- feat(workspace): unify project search and restore responsive desktop navigation
+- docs(agents): document Workmanager isolation in Linux tests
+- test(feedback): avoid Android worker setup in platform-neutral suite
+- docs: describe resident speech models and Android download recovery
+
 ## v1.254.0 - 2026-09-25
 
 > 📣 Offline voice input now keeps your last-used model in memory for faster repeat recordings. Enabled by default, with one model at a time and an option to turn it off in Settings.
