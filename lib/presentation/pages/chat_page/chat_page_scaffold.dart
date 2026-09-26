@@ -1497,260 +1497,269 @@ extension _ChatPageScaffold on _ChatPageState {
         final chatProvider = context.read<ChatProvider>();
         final settingsProvider = context.read<SettingsProvider>();
         return SafeArea(
-          child: ListView(
+          // Keep quota polling mounted for the lifetime of this bounded pane,
+          // including when its section is below the scroll viewport.
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(12),
-            children: [
-              if (onCollapseRequested != null)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    key: const ValueKey<String>('hide_utility_sidebar_button'),
-                    tooltip: context.l10n.chatHideUtilitySidebar,
-                    onPressed: onCollapseRequested,
-                    icon: const Icon(Symbols.right_panel_close_rounded),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (onCollapseRequested != null)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      key: const ValueKey<String>(
+                        'hide_utility_sidebar_button',
+                      ),
+                      tooltip: context.l10n.chatHideUtilitySidebar,
+                      onPressed: onCollapseRequested,
+                      icon: const Icon(Symbols.right_panel_close_rounded),
+                    ),
                   ),
-                ),
-              DirectSelector<
-                SettingsProvider,
-                ({bool collapsed, int bindings})
-              >(
-                select: (settings) => (
-                  collapsed: settings.utilityShortcutsCollapsed,
-                  bindings: _shortcutBindingsSignature(settings),
-                ),
-                builder: (context, shortcuts, _) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Semantics(
-                      button: true,
-                      expanded: !shortcuts.collapsed,
-                      label: context.l10n.sessionKeyboardShortcuts,
-                      child: InkWell(
-                        key: const ValueKey<String>('utility_shortcuts_toggle'),
-                        borderRadius: BorderRadius.circular(6),
-                        onTap: () => unawaited(
-                          settingsProvider.setUtilityShortcutsCollapsed(
-                            !settingsProvider.utilityShortcutsCollapsed,
+                DirectSelector<
+                  SettingsProvider,
+                  ({bool collapsed, int bindings})
+                >(
+                  select: (settings) => (
+                    collapsed: settings.utilityShortcutsCollapsed,
+                    bindings: _shortcutBindingsSignature(settings),
+                  ),
+                  builder: (context, shortcuts, _) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Semantics(
+                        button: true,
+                        expanded: !shortcuts.collapsed,
+                        label: context.l10n.sessionKeyboardShortcuts,
+                        child: InkWell(
+                          key: const ValueKey<String>(
+                            'utility_shortcuts_toggle',
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: ExcludeSemantics(
-                                  child: Text(
-                                    context.l10n.sessionKeyboardShortcuts,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleSmall
-                                        ?.copyWith(fontWeight: FontWeight.w600),
+                          borderRadius: BorderRadius.circular(6),
+                          onTap: () => unawaited(
+                            settingsProvider.setUtilityShortcutsCollapsed(
+                              !settingsProvider.utilityShortcutsCollapsed,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ExcludeSemantics(
+                                    child: Text(
+                                      context.l10n.sessionKeyboardShortcuts,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Icon(
-                                shortcuts.collapsed
-                                    ? Symbols.expand_more_rounded
-                                    : Symbols.expand_less_rounded,
-                                size: 18,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ],
+                                Icon(
+                                  shortcuts.collapsed
+                                      ? Symbols.expand_more_rounded
+                                      : Symbols.expand_less_rounded,
+                                  size: 18,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    if (!shortcuts.collapsed) ...[
-                      const SizedBox(height: 12),
-                      for (final hint in _keyboardShortcutHints(
-                        settingsProvider,
-                      ))
-                        _buildShortcutHint(hint.shortcut, hint.description),
+                      if (!shortcuts.collapsed) ...[
+                        const SizedBox(height: 12),
+                        for (final hint in _keyboardShortcutHints(
+                          settingsProvider,
+                        ))
+                          _buildShortcutHint(hint.shortcut, hint.description),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: _createNewSession,
-                icon: const Icon(Symbols.add_comment),
-                label: Text(context.l10n.chatNewChat),
-              ),
-              if (!FeatureFlags.refreshlessRealtime) ...[
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: _refreshData,
-                  icon: const Icon(Symbols.refresh),
-                  label: Text(context.l10n.chatRefresh),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: _createNewSession,
+                  icon: const Icon(Symbols.add_comment),
+                  label: Text(context.l10n.chatNewChat),
                 ),
-              ],
-              const SizedBox(height: 12),
-              if (chatProvider.currentSession != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Builder(
-                            builder: (context) {
-                              final currentSession =
-                                  chatProvider.currentSession!;
-                              return SessionTitleInlineEditor(
-                                key: ValueKey<String>(
-                                  'desktop_session_title_editor_${currentSession.id}',
-                                ),
-                                title: _sessionDisplayTitle(currentSession),
-                                editingValue: _sessionEditingValue(
-                                  currentSession,
-                                ),
-                                textStyle: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                                onRename: (title) => chatProvider.renameSession(
-                                  currentSession,
-                                  title,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        if (!FeatureFlags.refreshlessRealtime)
-                          IconButton(
-                            onPressed: () {
-                              final session = chatProvider.currentSession;
-                              if (session != null) {
-                                unawaited(
-                                  chatProvider.loadSessionInsights(
-                                    session.id,
-                                    userInitiated: true,
+                if (!FeatureFlags.refreshlessRealtime) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: _refreshData,
+                    icon: const Icon(Symbols.refresh),
+                    label: Text(context.l10n.chatRefresh),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                if (chatProvider.currentSession != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Builder(
+                              builder: (context) {
+                                final currentSession =
+                                    chatProvider.currentSession!;
+                                return SessionTitleInlineEditor(
+                                  key: ValueKey<String>(
+                                    'desktop_session_title_editor_${currentSession.id}',
                                   ),
+                                  title: _sessionDisplayTitle(currentSession),
+                                  editingValue: _sessionEditingValue(
+                                    currentSession,
+                                  ),
+                                  textStyle: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                  onRename: (title) => chatProvider
+                                      .renameSession(currentSession, title),
                                 );
-                              }
-                            },
-                            icon: const Icon(Symbols.sync, size: 18),
-                            tooltip: context.l10n.chatRefreshSessionDetails,
+                              },
+                            ),
+                          ),
+                          if (!FeatureFlags.refreshlessRealtime)
+                            IconButton(
+                              onPressed: () {
+                                final session = chatProvider.currentSession;
+                                if (session != null) {
+                                  unawaited(
+                                    chatProvider.loadSessionInsights(
+                                      session.id,
+                                      userInitiated: true,
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Symbols.sync, size: 18),
+                              tooltip: context.l10n.chatRefreshSessionDetails,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _sessionStatusLabel(
+                          chatProvider.currentSessionStatus ??
+                              const SessionStatusInfo(
+                                type: SessionStatusType.idle,
+                              ),
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.l10n.sessionChildrenCount(
+                          chatProvider.currentSessionChildren.length,
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      DirectConsumer<SettingsProvider>(
+                        builder: (context, settings, _) {
+                          return SessionTodoListWidget(
+                            todos: chatProvider.currentSessionTodo,
+                            collapsed: settings.taskListCollapsed,
+                            onToggleCollapsed: () => unawaited(
+                              settings.setTaskListCollapsed(
+                                !settings.taskListCollapsed,
+                              ),
+                            ),
+                            maxVisibleItems: 10,
+                          );
+                        },
+                      ),
+                      if (settingsProvider.showReviewChanges) ...[
+                        if (chatProvider.currentSessionDiff.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          SessionDiffViewer(
+                            key: ValueKey<String>(
+                              'desktop_session_diff_${chatProvider.currentSession?.id ?? 'none'}',
+                            ),
+                            diffs: chatProvider.currentSessionDiff,
+                            compact: false,
+                            onFileTap: (path, line) =>
+                                unawaited(_onFilePathTap(path, line, null)),
+                          ),
+                        ] else if (chatProvider.isCurrentSessionDiffLoaded)
+                          Text(
+                            context.l10n.sessionDiffFilesCount(0),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _sessionStatusLabel(
-                        chatProvider.currentSessionStatus ??
-                            const SessionStatusInfo(
-                              type: SessionStatusType.idle,
-                            ),
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      context.l10n.sessionChildrenCount(
-                        chatProvider.currentSessionChildren.length,
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    DirectConsumer<SettingsProvider>(
-                      builder: (context, settings, _) {
-                        return SessionTodoListWidget(
-                          todos: chatProvider.currentSessionTodo,
-                          collapsed: settings.taskListCollapsed,
-                          onToggleCollapsed: () => unawaited(
-                            settings.setTaskListCollapsed(
-                              !settings.taskListCollapsed,
-                            ),
-                          ),
-                          maxVisibleItems: 10,
-                        );
-                      },
-                    ),
-                    if (settingsProvider.showReviewChanges) ...[
-                      if (chatProvider.currentSessionDiff.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        SessionDiffViewer(
-                          key: ValueKey<String>(
-                            'desktop_session_diff_${chatProvider.currentSession?.id ?? 'none'}',
-                          ),
-                          diffs: chatProvider.currentSessionDiff,
-                          compact: false,
-                          onFileTap: (path, line) =>
-                              unawaited(_onFilePathTap(path, line, null)),
+                      if (chatProvider.isLoadingSessionInsights)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: AppIndeterminateBar(minHeight: 2),
                         ),
-                      ] else if (chatProvider.isCurrentSessionDiffLoaded)
-                        Text(
-                          context.l10n.sessionDiffFilesCount(0),
-                          style: Theme.of(context).textTheme.bodySmall,
+                      if (chatProvider.sessionInsightsError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            chatProvider.sessionInsightsError!,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                          ),
                         ),
                     ],
-                    if (chatProvider.isLoadingSessionInsights)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: AppIndeterminateBar(minHeight: 2),
-                      ),
-                    if (chatProvider.sessionInsightsError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                          chatProvider.sessionInsightsError!,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                        ),
-                      ),
-                  ],
-                ),
-              // Issue #199: mirror the full context-usage section (grid,
-              // explanation, safe compact action) shown in the context-usage
-              // popover. Nested selector keeps streaming tokens off the outer
-              // pane build key. Quota stays a server-scoped sibling below.
-              if (chatProvider.currentSession != null)
-                Selector<ChatProvider, _DesktopContextUsageBuildKey>(
-                  selector: (_, provider) =>
-                      _desktopContextUsageBuildKey(provider),
-                  builder: (context, _, _) {
-                    final provider = context.read<ChatProvider>();
-                    if (provider.currentSession == null) {
-                      return const SizedBox.shrink();
-                    }
-                    final usage = _resolveSessionContextUsage(provider);
-                    final canCompact =
-                        !provider.isCompactingContext &&
-                        !provider.canAbortActiveResponse;
-                    return _buildDesktopContextUsageMirror(
-                      context,
-                      usage: usage,
-                      isCompacting: provider.isCompactingContext,
-                      canCompact: canCompact,
-                      onCompactNow: () => _compactCurrentSession(provider),
-                    );
-                  },
-                ),
-              // Issue #166: mirror the same quota section shown in the
-              // context-usage popover. Scoped to server id so switches
-              // reload; the shared QuotaProvider TTL dedupes fetches.
-              Selector<AppProvider, String?>(
-                selector: (_, appProvider) => appProvider.activeServer?.id,
-                builder: (context, serverId, _) =>
-                    DirectSelector<SettingsProvider, bool>(
-                  select: (settings) =>
-                      settings.terminalPanelVisible &&
-                      settings.terminalPanelMaximized,
-                  builder: (context, terminalCoversPane, _) =>
-                      QuotaPopupSection(
-                    key: const ValueKey<String>(
-                      'desktop_utility_quota_section',
-                    ),
-                    serverId: serverId,
-                    autoRefresh: true,
-                    isVisible: !terminalCoversPane,
                   ),
+                // Issue #199: mirror the full context-usage section (grid,
+                // explanation, safe compact action) shown in the context-usage
+                // popover. Nested selector keeps streaming tokens off the outer
+                // pane build key. Quota stays a server-scoped sibling below.
+                if (chatProvider.currentSession != null)
+                  Selector<ChatProvider, _DesktopContextUsageBuildKey>(
+                    selector: (_, provider) =>
+                        _desktopContextUsageBuildKey(provider),
+                    builder: (context, _, _) {
+                      final provider = context.read<ChatProvider>();
+                      if (provider.currentSession == null) {
+                        return const SizedBox.shrink();
+                      }
+                      final usage = _resolveSessionContextUsage(provider);
+                      final canCompact =
+                          !provider.isCompactingContext &&
+                          !provider.canAbortActiveResponse;
+                      return _buildDesktopContextUsageMirror(
+                        context,
+                        usage: usage,
+                        isCompacting: provider.isCompactingContext,
+                        canCompact: canCompact,
+                        onCompactNow: () => _compactCurrentSession(provider),
+                      );
+                    },
+                  ),
+                // Issue #166: mirror the same quota section shown in the
+                // context-usage popover. Scoped to server id so switches
+                // reload; the shared QuotaProvider TTL dedupes fetches.
+                Selector<AppProvider, String?>(
+                  selector: (_, appProvider) => appProvider.activeServer?.id,
+                  builder: (context, serverId, _) =>
+                      DirectSelector<SettingsProvider, bool>(
+                        select: (settings) =>
+                            settings.terminalPanelVisible &&
+                            settings.terminalPanelMaximized,
+                        builder: (context, terminalCoversPane, _) =>
+                            QuotaPopupSection(
+                              key: const ValueKey<String>(
+                                'desktop_utility_quota_section',
+                              ),
+                              serverId: serverId,
+                              autoRefresh: true,
+                              isVisible: !terminalCoversPane,
+                            ),
+                      ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

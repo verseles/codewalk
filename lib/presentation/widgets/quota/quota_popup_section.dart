@@ -45,7 +45,9 @@ class _QuotaPopupSectionState extends State<QuotaPopupSection>
     _loadQueued = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadQueued = false;
-      if (!mounted || (widget.autoRefresh && !_refreshActive)) return;
+      if (!mounted) return;
+      final hasServer = widget.serverId?.trim().isNotEmpty == true;
+      if (hasServer && widget.autoRefresh && !_refreshActive) return;
       unawaited(_load());
     });
   }

@@ -86,6 +86,7 @@ for (const [s, e] of [[null, end], [start, null], [end, start], [nowSec + 10, en
   const result = parseXaiUsage(config(s, e));
   assert.equal(result.usedPercent, 25);
   assert.equal(result.windowSeconds, null);
+  assert.equal(result.resetAt, null);
 }
 assert.equal(parseXaiUsage(config(start, end, period(start, end))).windowSeconds, null);
 assert.equal(parseXaiUsage(Buffer.concat([frame(config(start, null)), frame(config(null, end))])).windowSeconds, null);

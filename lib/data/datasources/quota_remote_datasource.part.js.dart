@@ -1435,6 +1435,8 @@ function parseXaiUsage(bytes) {
   const resetPool = preferredReset.length > 0 ? preferredReset : resetCandidates;
   resetPool.sort((left, right) => left.resetAt - right.resetAt);
   let resetAt = resetPool.length > 0 ? resetPool[0].resetAt : null;
+  // An explicit current period must not reuse its start as a heuristic reset.
+  if (scan.periods.length > 0) resetAt = null;
   let windowSeconds = null;
   if (payloads.length === 1 && scan.configCount === 1 && scan.periods.length === 1) {
     const fields = scan.periods[0];

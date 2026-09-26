@@ -65,6 +65,45 @@ Future<void> _mount(
 }
 
 void main() {
+  for (final removedServer in <String?>[null, '  ']) {
+    testWidgets('G1 sidebar clears quota when server becomes $removedServer', (
+      tester,
+    ) async {
+      final remote = _Remote();
+      final provider = QuotaProvider(
+        remoteDataSource: remote,
+        now: tester.binding.clock.now,
+      );
+      final server = ValueNotifier<String?>('a');
+      await _mount(
+        tester,
+        provider,
+        ValueListenableBuilder(
+          valueListenable: server,
+          builder: (_, id, _) =>
+              QuotaPopupSection(serverId: id, autoRefresh: true),
+        ),
+      );
+      expect(provider.groups, isNotEmpty);
+      final pending = Completer<List<QuotaProviderResult>>();
+      remote.next = pending.future;
+      await tester.tap(find.byKey(const ValueKey('quota-refresh-button')));
+      await tester.pump();
+      server.value = removedServer;
+      await tester.pump();
+      await tester.pump();
+      expect(provider.groups, isEmpty);
+      pending.complete(remote.results);
+      await tester.pump();
+      await tester.pump(const Duration(minutes: 40));
+      expect(provider.groups, isEmpty);
+      expect(remote.calls, 2);
+      await tester.pumpWidget(const SizedBox());
+      provider.dispose();
+      server.dispose();
+    });
+  }
+
   for (final (seconds, label) in <(int?, String)>[
     (604800, 'Weekly Limit'),
     (18000, '5-Hour'),

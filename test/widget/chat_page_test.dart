@@ -10686,12 +10686,19 @@ void main() {
   });
 
   testWidgets('G1 quota sidebar disables polling under fullscreen terminal', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.binding.setSurfaceSize(const Size(1300, 500));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
     _disableAutomaticUpdateChecksForTest(local);
     final provider = _buildChatProvider(localDataSource: local);
     final appProvider = _buildAppProvider(localDataSource: local);
+    final quotaSource = FakeQuotaRemoteDataSource();
+    final quotas = QuotaProvider(
+      remoteDataSource: quotaSource,
+      now: tester.binding.clock.now,
+    );
+    addTearDown(quotas.dispose);
     final settings = SettingsProvider(
       localDataSource: local,
       dioClient: DioClient(),
@@ -10700,9 +10707,16 @@ void main() {
     addTearDown(settings.dispose);
     await settings.initialize();
     await tester.pumpWidget(_testApp(provider, appProvider,
-        settingsProvider: settings, forwardSettingsNotifications: false));
+        settingsProvider: settings, quotaProvider: quotas,
+        forwardSettingsNotifications: false));
     await tester.pumpAndSettle();
     final quota = find.byKey(const ValueKey('desktop_utility_quota_section'));
+    expect(quota, findsOneWidget);
+    expect(tester.getTopLeft(quota).dy, greaterThan(500));
+    expect(quotaSource.fetchCallCount, 1);
+    await tester.pump(const Duration(minutes: 20));
+    await tester.pump();
+    expect(quotaSource.fetchCallCount, 2);
     final scrollable = find.ancestor(
       of: find.text('Keyboard shortcuts'), matching: find.byType(Scrollable));
     await tester.scrollUntilVisible(quota, 200, scrollable: scrollable);
