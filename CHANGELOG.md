@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.256.0 - 2026-09-26
+
+> 📣 Rate limits now refresh automatically in the visible desktop sidebar. Codex labels reflect actual usage windows, and xAI shows Pace when billing-period timing is available.
+
+- docs: record closure of the released workspace flow
+- fix(quota): keep sidebar refresh mounted and clear invalid snapshots
+- fix(quota): use actual usage windows and refresh the visible desktop sidebar
+- docs: describe unified project navigation and drive-root handling
+
 ## v1.255.0 - 2026-09-26
 
 > 📣 Open projects faster with unified fuzzy search. Desktop sidebars resize and hide instantly, essential controls remain accessible, and Settings no longer leaves inactive chat tabs on screen.
