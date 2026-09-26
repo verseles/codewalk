@@ -4,45 +4,119 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/i18n/l10n_context.dart';
+import '../../../core/logging/app_logger.dart';
 import '../../providers/quota_provider.dart';
 import '../../theme/app_animations.dart';
 import 'quota_provider_group_row.dart';
 
 class QuotaPopupSection extends StatefulWidget {
-  const QuotaPopupSection({super.key, required this.serverId});
+  const QuotaPopupSection({
+    super.key,
+    required this.serverId,
+    this.autoRefresh = false,
+    this.isVisible = true,
+  });
 
   final String? serverId;
+  final bool autoRefresh;
+  final bool isVisible;
 
   @override
   State<QuotaPopupSection> createState() => _QuotaPopupSectionState();
 }
 
-class _QuotaPopupSectionState extends State<QuotaPopupSection> {
+class _QuotaPopupSectionState extends State<QuotaPopupSection>
+    with WidgetsBindingObserver {
+  static const _refreshInterval = Duration(minutes: 20);
+  Timer? _refreshTimer;
+  bool _routeVisible = true;
+  bool _refreshActive = false;
+  bool _loadQueued = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _queueLoad();
+  }
+
+  void _queueLoad() {
+    if (_loadQueued) return;
+    _loadQueued = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      context.read<QuotaProvider>().ensureLoaded(serverId: widget.serverId);
+      _loadQueued = false;
+      if (!mounted || (widget.autoRefresh && !_refreshActive)) return;
+      unawaited(_load());
     });
+  }
+
+  Future<void> _load({bool force = false}) async {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+    try {
+      await context.read<QuotaProvider>().ensureLoaded(
+        serverId: widget.serverId,
+        force: force,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.warn(
+        '[Quota] Refresh failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    } finally {
+      if (mounted && _refreshActive && _refreshTimer == null) {
+        _refreshTimer = Timer(_refreshInterval, () {
+          _refreshTimer = null;
+          if (mounted && _refreshActive) unawaited(_load());
+        });
+      }
+    }
+  }
+
+  void _syncRefresh() {
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    final active =
+        widget.autoRefresh &&
+        widget.isVisible &&
+        _routeVisible &&
+        widget.serverId?.trim().isNotEmpty == true &&
+        lifecycle != AppLifecycleState.hidden &&
+        lifecycle != AppLifecycleState.paused &&
+        lifecycle != AppLifecycleState.detached;
+    if (active == _refreshActive) return;
+    _refreshActive = active;
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+    if (active) _queueLoad();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _routeVisible = ModalRoute.isCurrentOf(context) ?? true;
+    _syncRefresh();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _syncRefresh();
   }
 
   @override
   void didUpdateWidget(covariant QuotaPopupSection oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _syncRefresh();
     if (oldWidget.serverId != widget.serverId) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        context.read<QuotaProvider>().ensureLoaded(
-          serverId: widget.serverId,
-          force: true,
-        );
-      });
+      _queueLoad();
     }
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -95,10 +169,7 @@ class _QuotaPopupSectionState extends State<QuotaPopupSection> {
                       : TextButton(
                           key: const ValueKey('quota-refresh-button'),
                           onPressed: () {
-                            context.read<QuotaProvider>().ensureLoaded(
-                              serverId: widget.serverId,
-                              force: true,
-                            );
+                            unawaited(_load(force: true));
                           },
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(

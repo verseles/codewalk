@@ -353,18 +353,16 @@ async function fX(a) {
     const s = d && d.rate_limit ? d.rate_limit.secondary_window : null;
     const cr = d && d.credits ? d.credits : null;
     const w = {};
-    if (p) {
-      w['5h'] = tUW({
-        uP: toN(p.used_percent),
-        wS: toN(p.limit_window_seconds),
-        rA: toTs(p.reset_at),
-      });
-    }
-    if (s) {
-      w.weekly = tUW({
-        uP: toN(s.used_percent),
-        wS: toN(s.limit_window_seconds),
-        rA: toTs(s.reset_at),
+    for (const [slot, entry] of [['primary', p], ['secondary', s]]) {
+      if (!entry) continue;
+      const seconds = toN(entry.limit_window_seconds);
+      const duration = Number.isSafeInteger(seconds) && seconds > 0 ? seconds : null;
+      const label = duration === 18000 ? '5h' : duration === 604800 ? 'weekly' : slot;
+      const key = Object.prototype.hasOwnProperty.call(w, label) ? label + '_' + slot : label;
+      w[key] = tUW({
+        uP: toN(entry.used_percent),
+        wS: duration,
+        rA: toTs(entry.reset_at),
       });
     }
     if (cr) {
@@ -1276,6 +1274,8 @@ function parseXaiUsage(bytes) {
   const samePath = (left, right) => left.length === right.length && left.every((value, index) => value === right[index]);
   const usagePercentPaths = [[1], [1, 1]];
   const hasPath = (paths, candidate) => paths.some((path) => samePath(path, candidate));
+  // Only descend into known messages; other length-delimited fields may be text.
+  const messagePaths = [[1], [1, 4], [1, 5], [1, 6], [1, 8], [1, 8, 2], [1, 8, 3]];
   const readVarint = (buf, state) => {
     let value = 0n;
     for (let shift = 0n; state.index < buf.length && shift < 64n; shift += 7n) {
@@ -1292,6 +1292,8 @@ function parseXaiUsage(bytes) {
     const cursor = state || { index: 0, order: 0 };
     const fixed32Fields = [];
     const varintFields = [];
+    const periods = [];
+    let configCount = 0;
     while (cursor.index < buf.length) {
       const key = readVarint(buf, cursor);
       if (key === null || key === 0n) return false;
@@ -1314,13 +1316,16 @@ function parseXaiUsage(bytes) {
         const length = readVarint(buf, cursor);
         if (length === null || length > BigInt(buf.length - cursor.index)) return false;
         const end = cursor.index + Number(length);
-        if (nestDepth >= 4 && length !== 0n) return false;
-        if (nestDepth < 4) {
+        if (hasPath(messagePaths, fieldPath)) {
           const nestedState = { index: 0, order: cursor.order };
           const nested = scanProtobuf(buf.slice(cursor.index, end), fieldPath, nestDepth + 1, nestedState);
           if (nested === false) return false;
           fixed32Fields.push.apply(fixed32Fields, nested.fixed32Fields);
           varintFields.push.apply(varintFields, nested.varintFields);
+          periods.push.apply(periods, nested.periods);
+          configCount += nested.configCount;
+          if (samePath(fieldPath, [1])) configCount++;
+          if (samePath(fieldPath, [1, 8])) periods.push(nested.varintFields);
           cursor.order = nestedState.order;
         }
         cursor.index = end;
@@ -1335,7 +1340,7 @@ function parseXaiUsage(bytes) {
       }
       return false;
     }
-    return { fixed32Fields: fixed32Fields, varintFields: varintFields };
+    return { fixed32Fields: fixed32Fields, varintFields: varintFields, periods: periods, configCount: configCount };
   };
   const parseGrpcTrailerStatus = (buf) => {
     let text;
@@ -1406,12 +1411,14 @@ function parseXaiUsage(bytes) {
     }
   }
   if (payloads.length === 0) throw new Error('xAI billing returned an empty protobuf response');
-  const scan = { fixed32Fields: [], varintFields: [] };
+  const scan = { fixed32Fields: [], varintFields: [], periods: [], configCount: 0 };
   for (let i = 0; i < payloads.length; i++) {
     const result = scanProtobuf(payloads[i]);
     if (result === false) throw new Error('xAI billing returned malformed protobuf');
     scan.fixed32Fields.push.apply(scan.fixed32Fields, result.fixed32Fields);
     scan.varintFields.push.apply(scan.varintFields, result.varintFields);
+    scan.periods.push.apply(scan.periods, result.periods);
+    scan.configCount += result.configCount;
   }
   const percentages = scan.fixed32Fields.filter((field) => (
     hasPath(usagePercentPaths, field.path)
@@ -1427,16 +1434,38 @@ function parseXaiUsage(bytes) {
   const preferredReset = resetCandidates.filter((field) => samePath(field.path, [1, 5, 1]));
   const resetPool = preferredReset.length > 0 ? preferredReset : resetCandidates;
   resetPool.sort((left, right) => left.resetAt - right.resetAt);
-  const resetAt = resetPool.length > 0 ? resetPool[0].resetAt : null;
+  let resetAt = resetPool.length > 0 ? resetPool[0].resetAt : null;
+  let windowSeconds = null;
+  if (payloads.length === 1 && scan.configCount === 1 && scan.periods.length === 1) {
+    const fields = scan.periods[0];
+    const timestamp = (fieldNumber) => {
+      const seconds = fields.filter((field) => samePath(field.path, [1, 8, fieldNumber, 1]));
+      const nanos = fields.filter((field) => samePath(field.path, [1, 8, fieldNumber, 2]));
+      if (seconds.length !== 1 || nanos.length > 1) return null;
+      if (seconds[0].value <= 0n || seconds[0].value > 253402300799n) return null;
+      if (nanos.length && nanos[0].value > 999999999n) return null;
+      return Number(seconds[0].value) * 1000 + (nanos.length ? Number(nanos[0].value) / 1000000 : 0);
+    };
+    const start = timestamp(2);
+    const end = timestamp(3);
+    const now = Date.now();
+    if (start !== null && end !== null && start <= now && now < end) {
+      const duration = Math.floor((end - start) / 1000);
+      if (duration > 0) {
+        windowSeconds = duration;
+        resetAt = Math.floor(end);
+      }
+    }
+  }
   const hasUsagePeriod = scan.varintFields.some((field) => (
     (field.path.length >= 2 && field.path[0] === 1 && field.path[1] === 6)
       || (samePath(field.path, [1, 8, 1]) && (field.value === 1n || field.value === 2n))
   ));
   if (usedPercent === null && scan.fixed32Fields.length === 0 && resetAt !== null && hasUsagePeriod) {
-    return { usedPercent: 0, resetAt: resetAt };
+    return { usedPercent: 0, resetAt: resetAt, windowSeconds: windowSeconds };
   }
   if (usedPercent === null) throw new Error('xAI billing response had no usable current-period usage');
-  return { usedPercent: usedPercent, resetAt: resetAt };
+  return { usedPercent: usedPercent, resetAt: resetAt, windowSeconds: windowSeconds };
 }
 
 async function fXai(a) {
@@ -1543,7 +1572,7 @@ async function fXai(a) {
       pId: 'xai',
       pName: 'xAI',
       ok: true,
-      use: { windows: { billing_cycle: tUW({ uP: usage.usedPercent, wS: null, rA: usage.resetAt }) } }
+      use: { windows: { billing_cycle: tUW({ uP: usage.usedPercent, wS: usage.windowSeconds, rA: usage.resetAt }) } }
     });
   } catch (err) {
     return bR({ pId: 'xai', pName: 'xAI', ok: false, err: err && err.message ? err.message : 'Request failed' });

@@ -12,16 +12,21 @@ class QuotaProvider extends ChangeNotifier {
   QuotaProvider({
     required QuotaRemoteDataSource remoteDataSource,
     AppLocalDataSource? localDataSource,
+    DateTime Function()? now,
   }) : _remoteDataSource = remoteDataSource,
-       _localDataSource = localDataSource;
+       _localDataSource = localDataSource,
+       _now = now ?? DateTime.now;
 
   final QuotaRemoteDataSource _remoteDataSource;
   final AppLocalDataSource? _localDataSource;
+  final DateTime Function() _now;
 
   static const Duration _cacheTtl = Duration(seconds: 60);
 
   String? _serverId;
   bool _isLoading = false;
+  bool _disposed = false;
+  int _serverGeneration = 0;
   DateTime? _lastFetchedAt;
   List<QuotaProviderResult> _results = const <QuotaProviderResult>[];
 
@@ -69,6 +74,7 @@ class QuotaProvider extends ChangeNotifier {
     required String? serverId,
     bool force = false,
   }) async {
+    if (_disposed) return;
     final normalizedServerId = serverId?.trim();
     AppLogger.info(
       '[Quota] ensureLoaded called — serverId=$normalizedServerId '
@@ -78,9 +84,9 @@ class QuotaProvider extends ChangeNotifier {
       AppLogger.info('[Quota] ensureLoaded abort: serverId is null/empty');
       if (_serverId != null || _results.isNotEmpty || _lastFetchedAt != null) {
         _serverId = null;
+        _serverGeneration++;
         _results = const <QuotaProviderResult>[];
         _lastFetchedAt = null;
-        _isLoading = false;
         notifyListeners();
       }
       return;
@@ -89,6 +95,7 @@ class QuotaProvider extends ChangeNotifier {
     final serverChanged = _serverId != normalizedServerId;
     if (serverChanged) {
       _serverId = normalizedServerId;
+      _serverGeneration++;
       _results = const <QuotaProviderResult>[];
       _lastFetchedAt = null;
     }
@@ -98,7 +105,7 @@ class QuotaProvider extends ChangeNotifier {
       return;
     }
 
-    final now = DateTime.now();
+    final now = _now();
     final isFresh =
         !force &&
         !serverChanged &&
@@ -110,27 +117,23 @@ class QuotaProvider extends ChangeNotifier {
     }
 
     _isLoading = true;
+    final generation = _serverGeneration;
     notifyListeners();
     try {
       AppLogger.info('[Quota] ensureLoaded: starting fetch...');
       await _clearLegacyOpenCodeGoCredentials();
+      if (_disposed || generation != _serverGeneration) return;
       final fetched = await _remoteDataSource.fetchQuotaResults();
-      if (normalizedServerId != _serverId) {
-        // The active server changed mid-flight: discard the stale payload
-        // instead of attributing it to the new server, then queue exactly
-        // one load for the current server. The reload runs on a microtask
-        // so it observes _isLoading released by the finally block below.
+      if (_disposed) return;
+      if (generation != _serverGeneration) {
+        // Discard stale payloads even after an A -> B -> A transition.
         AppLogger.info(
           '[Quota] ensureLoaded: discarding stale results after server change',
         );
-        final currentServerId = _serverId;
-        scheduleMicrotask(() {
-          unawaited(ensureLoaded(serverId: currentServerId));
-        });
         return;
       }
       _results = fetched;
-      _lastFetchedAt = DateTime.now();
+      _lastFetchedAt = _now();
       if (AppLogger.loggingEnabled) {
         final groupSummaries = groups
             .map(
@@ -147,8 +150,34 @@ class QuotaProvider extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+      if (!_disposed) {
+        notifyListeners();
+        if (generation != _serverGeneration && _serverId != null) {
+          scheduleMicrotask(() {
+            if (!_disposed) {
+              unawaited(
+                ensureLoaded(serverId: _serverId).catchError((
+                  Object error,
+                  StackTrace stackTrace,
+                ) {
+                  AppLogger.warn(
+                    '[Quota] Server reload failed',
+                    error: error,
+                    stackTrace: stackTrace,
+                  );
+                }),
+              );
+            }
+          });
+        }
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   Future<void> _clearLegacyOpenCodeGoCredentials() async {
@@ -172,10 +201,16 @@ class QuotaProvider extends ChangeNotifier {
     }
 
     usage.windows.forEach((windowLabel, window) {
-      final label =
-          usage.windows.length == 1 &&
-              usage.models.isEmpty &&
-              result.providerId != 'codex'
+      final isCodexLimit =
+          result.providerId == 'codex' &&
+          window.usedPercent != null &&
+          windowLabel != 'credits' &&
+          windowLabel != 'credits_balance';
+      final label = isCodexLimit
+          ? formatCodexWindowLabel(window.windowSeconds)
+          : usage.windows.length == 1 &&
+                usage.models.isEmpty &&
+                result.providerId != 'codex'
           ? result.providerName
           : formatWindowLabel(windowLabel);
       final entry = _buildEntry(
@@ -231,7 +266,8 @@ class QuotaProvider extends ChangeNotifier {
       usedPercent: window.usedPercent,
       resetAt: window.resetAt,
       windowSeconds: window.windowSeconds,
-      windowLabel: windowLabel,
+      windowLabel: result.providerId == 'codex' ? null : windowLabel,
+      now: _now(),
     );
     return QuotaEntry(
       providerId: result.providerId,

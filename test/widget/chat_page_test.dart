@@ -69,6 +69,7 @@ import 'package:codewalk/presentation/widgets/chat_message_widget.dart';
 import 'package:codewalk/presentation/widgets/chat_skeleton_shimmer.dart';
 import 'package:codewalk/presentation/widgets/desktop_window_title_bar.dart';
 import 'package:codewalk/presentation/widgets/message_entrance_animation.dart';
+import 'package:codewalk/presentation/widgets/quota/quota_popup_section.dart';
 import 'package:codewalk/presentation/widgets/session_context_menu.dart';
 import 'package:codewalk/presentation/widgets/session_tab_strip.dart';
 import 'package:codewalk/presentation/widgets/sidebar_selection_indicator.dart';
@@ -10682,6 +10683,45 @@ void main() {
       ),
       contains(moreOrLessEquals(popoverRect.width, epsilon: 0.1)),
     );
+  });
+
+  testWidgets('G1 quota sidebar disables polling under fullscreen terminal', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+    _disableAutomaticUpdateChecksForTest(local);
+    final provider = _buildChatProvider(localDataSource: local);
+    final appProvider = _buildAppProvider(localDataSource: local);
+    final settings = SettingsProvider(
+      localDataSource: local,
+      dioClient: DioClient(),
+      soundService: SoundService(),
+    );
+    addTearDown(settings.dispose);
+    await settings.initialize();
+    await tester.pumpWidget(_testApp(provider, appProvider,
+        settingsProvider: settings, forwardSettingsNotifications: false));
+    await tester.pumpAndSettle();
+    final quota = find.byKey(const ValueKey('desktop_utility_quota_section'));
+    final scrollable = find.ancestor(
+      of: find.text('Keyboard shortcuts'), matching: find.byType(Scrollable));
+    await tester.scrollUntilVisible(quota, 200, scrollable: scrollable);
+    await tester.pumpAndSettle();
+    expect(tester.widget<QuotaPopupSection>(quota).autoRefresh, isTrue);
+    expect(tester.widget<QuotaPopupSection>(quota).isVisible, isTrue);
+    await settings.setTerminalPanelVisible(true);
+    await settings.setTerminalPanelMaximized(true);
+    await tester.pump();
+    expect(tester.widget<QuotaPopupSection>(quota).isVisible, isFalse);
+    await settings.setTerminalPanelMaximized(false);
+    await settings.setTerminalPanelVisible(false);
+    await tester.pump();
+    expect(tester.widget<QuotaPopupSection>(quota).isVisible, isTrue);
+    await settings.setDesktopPaneVisible(DesktopPane.utility, false);
+    await tester.pump();
+    expect(quota, findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('desktop utility pane mirrors context usage section', (

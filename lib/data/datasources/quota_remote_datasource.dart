@@ -69,18 +69,29 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
 
   @override
   Future<List<QuotaProviderResult>> fetchQuotaResults() async {
-    final viaRest = await _fetchViaOpenChamberRest();
+    final baseUrl = dio.options.baseUrl;
+    final viaRest = await _fetchViaOpenChamberRest(baseUrl);
+    if (dio.options.baseUrl != baseUrl) return const [];
     if (viaRest != null) {
       AppLogger.info('[Quota] REST path returned ${viaRest.length} results');
       return viaRest;
     }
     AppLogger.info('[Quota] REST path unavailable, trying shell fallback');
-    return _fetchViaShellFallback();
+    return _fetchViaShellFallback(baseUrl);
   }
 
-  Future<List<QuotaProviderResult>?> _fetchViaOpenChamberRest() async {
+  String _boundPath(String baseUrl, String path) => baseUrl.isEmpty
+      ? path
+      : '${baseUrl.replaceFirst(RegExp(r'/+$'), '')}$path';
+
+  Future<List<QuotaProviderResult>?> _fetchViaOpenChamberRest(
+    String baseUrl,
+  ) async {
     try {
-      final response = await dio.get<dynamic>('/api/quota/providers');
+      final response = await dio.get<dynamic>(
+        _boundPath(baseUrl, '/api/quota/providers'),
+      );
+      if (dio.options.baseUrl != baseUrl) return const [];
       if (response.statusCode != 200) {
         AppLogger.info(
           '[Quota] REST /api/quota/providers returned ${response.statusCode}',
@@ -106,7 +117,7 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
       }
       AppLogger.info('[Quota] REST found providers: $providers');
       final results = await Future.wait(
-        providers.map(_fetchQuotaForProviderRest),
+        providers.map((id) => _fetchQuotaForProviderRest(id, baseUrl)),
       );
       return results.whereType<QuotaProviderResult>().toList(growable: false);
     } on DioException catch (error) {
@@ -126,9 +137,13 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
 
   Future<QuotaProviderResult?> _fetchQuotaForProviderRest(
     String providerId,
+    String baseUrl,
   ) async {
     try {
-      final response = await dio.get<dynamic>('/api/quota/$providerId');
+      if (dio.options.baseUrl != baseUrl) return null;
+      final response = await dio.get<dynamic>(
+        _boundPath(baseUrl, '/api/quota/$providerId'),
+      );
       if (response.statusCode != 200) {
         return null;
       }
@@ -145,17 +160,21 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
     }
   }
 
-  Future<List<QuotaProviderResult>> _fetchViaShellFallback() async {
+  Future<List<QuotaProviderResult>> _fetchViaShellFallback(
+    String baseUrl,
+  ) async {
     String? sessionId;
     try {
-      sessionId = await _createEphemeralSession();
+      if (dio.options.baseUrl != baseUrl) return const [];
+      sessionId = await _createEphemeralSession(baseUrl);
       if (sessionId == null) {
         AppLogger.info('[Quota] Shell fallback: failed to create session');
         return const <QuotaProviderResult>[];
       }
       AppLogger.info('[Quota] Shell fallback: session $sessionId created');
+      if (dio.options.baseUrl != baseUrl) return const [];
       final response = await dio.post<dynamic>(
-        '/session/$sessionId/shell',
+        _boundPath(baseUrl, '/session/$sessionId/shell'),
         data: <String, dynamic>{
           'agent': 'build',
           'command': _buildQuotaShellCommand(),
@@ -251,7 +270,12 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
     } finally {
       if (sessionId != null) {
         try {
-          await dio.delete<dynamic>('/session/$sessionId');
+          // Never send an old server's session ID to the newly selected host.
+          if (dio.options.baseUrl == baseUrl) {
+            await dio.delete<dynamic>(
+              _boundPath(baseUrl, '/session/$sessionId'),
+            );
+          }
         } catch (_) {}
         final ephemeralId = sessionId;
         Future<void>.delayed(const Duration(seconds: 5), () {
@@ -261,10 +285,10 @@ class QuotaRemoteDataSourceImpl implements QuotaRemoteDataSource {
     }
   }
 
-  Future<String?> _createEphemeralSession() async {
+  Future<String?> _createEphemeralSession(String baseUrl) async {
     try {
       final response = await dio.post<dynamic>(
-        '/session',
+        _boundPath(baseUrl, '/session'),
         data: <String, dynamic>{
           'title': ChatTitleGenerator.ephemeralSessionTitle,
         },

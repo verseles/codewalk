@@ -388,6 +388,8 @@ void main() {
       final provider = QuotaProvider(remoteDataSource: dataSource);
 
       final loadA = provider.ensureLoaded(serverId: 'srv_a');
+      await Future<void>.delayed(Duration.zero);
+      expect(dataSource.callCount, 1);
       // Server switch while the first fetch is in flight: clears state and
       // returns early because a load is already running.
       await provider.ensureLoaded(serverId: 'srv_b');

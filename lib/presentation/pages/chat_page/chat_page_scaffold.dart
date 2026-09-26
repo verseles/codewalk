@@ -1734,9 +1734,20 @@ extension _ChatPageScaffold on _ChatPageState {
               // reload; the shared QuotaProvider TTL dedupes fetches.
               Selector<AppProvider, String?>(
                 selector: (_, appProvider) => appProvider.activeServer?.id,
-                builder: (context, serverId, _) => QuotaPopupSection(
-                  key: const ValueKey<String>('desktop_utility_quota_section'),
-                  serverId: serverId,
+                builder: (context, serverId, _) =>
+                    DirectSelector<SettingsProvider, bool>(
+                  select: (settings) =>
+                      settings.terminalPanelVisible &&
+                      settings.terminalPanelMaximized,
+                  builder: (context, terminalCoversPane, _) =>
+                      QuotaPopupSection(
+                    key: const ValueKey<String>(
+                      'desktop_utility_quota_section',
+                    ),
+                    serverId: serverId,
+                    autoRefresh: true,
+                    isVisible: !terminalCoversPane,
+                  ),
                 ),
               ),
             ],

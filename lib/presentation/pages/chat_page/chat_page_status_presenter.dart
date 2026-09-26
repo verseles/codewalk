@@ -290,8 +290,6 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     required bool canCompact,
     required Future<void> Function() onCompactNow,
   }) {
-    final serverId = context.read<AppProvider>().activeServer?.id;
-
     return SizedBox(
       key: const ValueKey<String>('context_usage_popover'),
       width: 280,
@@ -312,7 +310,10 @@ extension _ChatPageStatusPresenter on _ChatPageState {
                   }
                 : null,
           ),
-          QuotaPopupSection(serverId: serverId),
+          Selector<AppProvider, String?>(
+            selector: (_, provider) => provider.activeServer?.id,
+            builder: (_, serverId, _) => QuotaPopupSection(serverId: serverId),
+          ),
         ],
       ),
     );

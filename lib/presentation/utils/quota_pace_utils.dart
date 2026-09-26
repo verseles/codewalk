@@ -62,6 +62,16 @@ String formatWindowLabel(String label) {
   }
 }
 
+String formatCodexWindowLabel(int? seconds) {
+  if (seconds == null || seconds <= 0) return 'Usage Limit';
+  if (seconds == 18000) return '5-Hour';
+  if (seconds == 604800) return 'Weekly Limit';
+  if (seconds % 86400 == 0) return '${seconds ~/ 86400}-Day Limit';
+  if (seconds % 3600 == 0) return '${seconds ~/ 3600}-Hour';
+  if (seconds % 60 == 0) return '${seconds ~/ 60}-Minute Limit';
+  return '$seconds-Second Limit';
+}
+
 int? inferWindowSeconds(String label) {
   final normalized = label.toLowerCase().trim();
   if (normalized == 'rolling') return 5 * 3600;
