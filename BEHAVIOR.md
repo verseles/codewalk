@@ -1536,8 +1536,9 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** tapping a provider group row expands it to reveal individual quota entries (requests, tokens, cost, etc.) each with its own bar and remaining figure
 - **Then** healthy quota bars use the theme success color rather than a hardcoded green, and expandable group headers expose button/expanded semantics
 - **Then** on desktop, hovering the `Pace` chip shows a tooltip explaining the prediction; on mobile, tapping it shows a dismissible snackbar
+- **Then** Codex limit labels follow the reported window duration, including a single weekly window or a genuine five-hour window; unfamiliar positive durations remain explicit, missing durations use `Usage Limit` without inferred Pace, and credits retain their own label
 - **Given** the host exposes OpenChamber-compatible REST endpoints (`GET /api/quota/providers`)
-- **When** the popup is opened (or every 60 seconds in background)
+- **When** the popup is opened or a refresh is requested, subject to the shared 60-second cache TTL unless manually forced
 - **Then** CodeWalk fetches live quota data from those endpoints without any client-side credentials
 - **Then** any provider returned by the REST endpoint can appear in the popup, including newer host-side providers such as Snowflake Cortex, Grok/xAI, or Cohere North when the connected server supplies them
 - **Given** the host does not expose OpenChamber endpoints
@@ -1561,6 +1562,7 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** `cursor` falls back to querying the local Cursor SQLite database on macOS hosts if environment tokens are missing
 - **Then** `ollama-cloud` parses HTML scraping safely, falling back to a descriptive error if the HTML format changes
 - **Then** `xai` / `grok` / `x-ai` host OAuth entries (`type=oauth` in `auth.json`) produce an `xAI` billing-cycle usage bar from `https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig`; API-key entries are skipped
+- **Then** xAI Pace uses the actual duration between valid current-period start/end timestamps and the same period's end as its reset; no fixed monthly duration is assumed, and an explicit invalid or ambiguous current period supplies neither Pace nor a reset countdown while valid percentage data remains visible
 - **Then** `deepseek` host API keys produce a DeepSeek credits-balance label from `https://api.deepseek.com/user/balance`, preferring USD then CNY
 - **Then** `cline-pass` host API keys produce ClinePass `5h`, weekly, and monthly usage bars from `https://api.cline.bot/api/v1/users/me/plan/usage-limits`
 - **Then** newer provider aliases for Snowflake Cortex and Cohere North are recognized by the shell fallback diagnostics so they are not shown as unknown configuration
@@ -1570,6 +1572,10 @@ Additional commands may be provided by the connected OpenCode server and merged 
 - **Then** the full context-usage section (usage/token/cost/limit grid, compaction explanation, and safe compact action) is mirrored at the end of the sidebar above the `Rate limits` section from the same session and provider snapshot (no second fetch; refresh in either surface updates both), while the `Context usage` popup keeps its own copy unchanged
 - **Then** the sidebar compact action is hidden while a response is abortable or no session is selected, and never dismisses a route when tapped
 - **Then** switching servers discards any in-flight quota payload from the previous server and reloads once for the current server instead of showing misattributed data
+- **Then** the open desktop utility pane refreshes quota every 20 minutes while its route and application are visible, including an unfocused desktop window; the quota section remains mounted even below the pane's scroll viewport
+- **Then** automatic refresh pauses when the pane is closed, its route is covered, the application is hidden/paused/detached, or the maximized terminal covers the pane; returning checks the shared cache, and the popup continues to load on opening or manual refresh without its own periodic timer
+- **Then** manual refresh remains forced, overlapping loads are coalesced, and removing the active server clears quota data and invalidates stale in-flight results
+- **Then** each quota request sequence remains bound to its starting host; after a host switch, subsequent probe work is stopped and cleanup is not sent to the newly selected host
 
 ---
 
