@@ -2587,6 +2587,73 @@ void main() {
       );
     });
 
+    testWidgets('G3 panes react directly and hidden controls survive search', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1500, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+      _disableAutomaticUpdateChecksForTest(local);
+      final provider = _buildChatProvider(localDataSource: local);
+      final appProvider = _buildAppProvider(localDataSource: local);
+      final settings = SettingsProvider(localDataSource: local, dioClient: DioClient(), soundService: SoundService());
+      addTearDown(settings.dispose);
+      await settings.initialize();
+      await tester.pumpWidget(_testApp(provider, appProvider, settingsProvider: settings, forwardSettingsNotifications: false));
+      await tester.pumpAndSettle();
+      for (final pane in DesktopPane.values) {
+        final finder = find.byKey(ValueKey<String>('desktop_pane_${pane.name}'));
+        final before = tester.getSize(finder).width;
+        settings.updateDesktopPaneWidthInMemory(pane, before + 24);
+        await tester.pump();
+        expect(tester.getSize(finder).width, before + 24);
+        await settings.setDesktopPaneVisible(pane, false);
+        await tester.pump();
+        expect(finder, findsNothing);
+        await settings.setDesktopPaneVisible(pane, true);
+        await tester.pump();
+        expect(tester.getSize(finder).width, before + 24);
+      }
+      await tester.tap(find.byKey(const ValueKey<String>('hide_conversations_sidebar_button')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey<String>('appbar_settings_button')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('appbar_project_context_button')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey<String>('chat_sync_status_chip')));
+      await tester.pumpAndSettle();
+      expect(find.text('Manage Servers'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<String>('appbar_timeline_search_button')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey<String>('appbar_settings_button')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey<String>('appbar_project_context_button')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey<String>('workspace_base_directory_input')), findsOneWidget);
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('G3 Settings suspends integrated tabs and restores them on back', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1300, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+      _disableAutomaticUpdateChecksForTest(local);
+      final provider = _buildChatProvider(localDataSource: local);
+      final appProvider = _buildAppProvider(localDataSource: local);
+      await tester.pumpWidget(_testApp(provider, appProvider, integratedWindowChrome: true));
+      await tester.pumpAndSettle();
+      final titlebar = find.byType(DesktopWindowTitleBar);
+      final tabs = find.descendant(of: titlebar, matching: find.byType(SessionTabStrip));
+      expect(tabs, findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey<String>('sidebar_settings_icon_button')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsPage), findsOneWidget);
+      expect(tabs, findsNothing);
+      expect(find.byKey(const ValueKey<String>('desktop_window_close')), findsOneWidget);
+      Navigator.of(tester.element(find.byType(SettingsPage))).pop();
+      await tester.pumpAndSettle();
+      expect(tabs, findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }, variant: const TargetPlatformVariant({TargetPlatform.linux}));
+
     testWidgets('desktop sidebars can be hidden and restored from menu', (
       WidgetTester tester,
     ) async {
@@ -4857,7 +4924,7 @@ void main() {
     },
   );
 
-  testWidgets('shows active directory and directory selector guidance', (
+  testWidgets('shows active directory and unified keyboard project search', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1000, 900));
@@ -4912,8 +4979,26 @@ void main() {
     );
     expect(find.text('Project context'), findsOneWidget);
     expect(find.text('Current directory: /repo/a'), findsOneWidget);
-    expect(find.text('Select a project below.'), findsOneWidget);
-    expect(find.byIcon(Symbols.close_rounded), findsOneWidget);
+    final input = find.byKey(const ValueKey<String>('workspace_base_directory_input'));
+    expect(input, findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
+    await tester.enterText(input, 'pa');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byType(Dialog), matching: find.text('Project A')), findsOneWidget);
+    final field = tester.widget<TextField>(input);
+    field.controller!.value = const TextEditingValue(text: 'pa', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 0, end: 2));
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(find.byType(Dialog), findsOneWidget, reason: 'IME Enter must not open a project');
+    field.controller!.clearComposing();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(field.controller!.text, '/repo/a/');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
   });
 
   testWidgets('renders grouped project conversation headers', (
@@ -6375,41 +6460,15 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
-
     expect(find.text('Browse directories'), findsOneWidget);
-    expect(
-      find.byKey(
-        const ValueKey<String>('workspace_selected_directory_preview'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('workspace_selected_directory_preview'),
-        ),
-        matching: find.text('/repo/a'),
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('Current directory: /repo/a'), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
       '/repo/custom',
     );
     await tester.pump();
-    expect(
-      find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('workspace_selected_directory_preview'),
-        ),
-        matching: find.text('/repo/custom'),
-      ),
-      findsOneWidget,
-    );
-    await tester.tap(find.text('Open folder'));
+    await tester.tap(find.byKey(const ValueKey<String>('workspace_open_path_button')));
     await tester.pumpAndSettle();
 
     expect(projectRepository.lastCreatedWorktreeName, isNull);
@@ -6459,14 +6518,13 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
       '/repo/plain',
     );
-    await tester.tap(find.text('Open folder'));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey<String>('workspace_open_path_button')));
     await tester.pumpAndSettle();
 
     expect(projectRepository.lastCreatedWorktreeName, isNull);
@@ -6510,26 +6568,24 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
       '/home/helio',
     );
-    await tester.tap(find.text('Open folder'));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey<String>('workspace_open_path_button')));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Choose Directory'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
     await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
       '/home/helio/MEGA/CONFIG/opencode',
     );
-    await tester.tap(find.text('Open folder'));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey<String>('workspace_open_path_button')));
     await tester.pumpAndSettle();
 
     expect(
@@ -6595,13 +6651,12 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
       '/repo/enter',
     );
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
@@ -6639,7 +6694,7 @@ void main() {
         ),
       ],
     );
-    projectRepository.searchResultsByQuery['feature'] = <FileNode>[
+    projectRepository.searchResultsByQuery['ftr'] = <FileNode>[
       const FileNode(
         path: '/repo/a/feature-search',
         name: 'feature-search',
@@ -6657,12 +6712,10 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
-      'feature',
+      'ftr',
     );
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pumpAndSettle();
@@ -6681,23 +6734,6 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
-
-    final directoryField = tester.widget<TextField>(
-      find.byKey(const ValueKey<String>('workspace_base_directory_input')),
-    );
-    expect(directoryField.controller?.text, '/repo/a/feature-search');
-    expect(
-      find.descendant(
-        of: find.byKey(
-          const ValueKey<String>('workspace_selected_directory_preview'),
-        ),
-        matching: find.text('/repo/a/feature-search'),
-      ),
-      findsOneWidget,
-    );
-
-    await tester.tap(find.text('Open folder'));
     await tester.pumpAndSettle();
 
     expect(provider.projectProvider.currentDirectory, '/repo/a/feature-search');
@@ -6748,8 +6784,6 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.byKey(const ValueKey<String>('workspace_base_directory_input')),
@@ -6764,7 +6798,7 @@ void main() {
     await tester.pump();
     expect(
       find.byKey(const ValueKey<String>('workspace_directory_suggestions')),
-      findsNothing,
+      findsOneWidget,
     );
 
     suggestionCompleter.complete();
@@ -6772,7 +6806,7 @@ void main() {
 
     expect(
       find.byKey(const ValueKey<String>('workspace_directory_suggestions')),
-      findsNothing,
+      findsOneWidget,
     );
     expect(find.text('/repo/a/feature-search'), findsNothing);
   });
@@ -6825,8 +6859,6 @@ void main() {
 
     await tester.tap(find.byTooltip('Choose Directory'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open project folder...'));
-    await tester.pumpAndSettle();
 
     await tester.tap(
       find.byKey(
@@ -6858,14 +6890,6 @@ void main() {
     await tester.tap(
       find.byKey(const ValueKey<String>('directory_picker_use_current')),
     );
-    await tester.pumpAndSettle();
-
-    final directoryField = tester.widget<TextField>(
-      find.byKey(const ValueKey<String>('workspace_base_directory_input')),
-    );
-    expect(directoryField.controller?.text, '/repo/a/client/app');
-
-    await tester.tap(find.text('Open folder'));
     await tester.pumpAndSettle();
 
     expect(projectRepository.lastCreatedWorktreeDirectory, isNull);

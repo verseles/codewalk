@@ -652,9 +652,34 @@ extension _ChatPageChrome on _ChatPageState {
   AppBar _buildAppBar({
     required bool isMobile,
     required bool isLargeDesktop,
+    required bool showHiddenPaneControls,
     required SettingsProvider settingsProvider,
   }) {
     const refreshlessEnabled = FeatureFlags.refreshlessRealtime;
+    final hiddenPaneActions = <Widget>[
+      if (showHiddenPaneControls) ...[
+        IconButton(
+          key: const ValueKey<String>('appbar_settings_button'),
+          tooltip: context.l10n.chatSettings,
+          icon: const Icon(Symbols.settings),
+          onPressed: () => unawaited(_openSettingsPage(closeOnSelect: false)),
+        ),
+        IconButton(
+          key: const ValueKey<String>('appbar_project_context_button'),
+          tooltip: context.l10n.chatProjectContext2,
+          icon: const Icon(Symbols.folder_open),
+          onPressed: () => unawaited(_openProjectSelectorDialog()),
+        ),
+        if (isMobile || _timelineSearchActive || !refreshlessEnabled)
+          _buildServerStatusControl(
+            closeOnSelect: false,
+            trigger: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Icon(Symbols.sync_rounded),
+            ),
+          ),
+      ],
+    ];
     return AppBar(
       toolbarHeight: _toolbarHeightForDensity(
         isMobile: isMobile,
@@ -842,10 +867,11 @@ extension _ChatPageChrome on _ChatPageState {
               isLargeDesktop: isLargeDesktop,
             ),
       actions: _timelineSearchActive
-          ? _buildTimelineSearchActions()
+          ? [...hiddenPaneActions, ..._buildTimelineSearchActions()]
           : isMobile
-          ? [_buildMobileAppBarActionsRow()]
+          ? [...hiddenPaneActions, _buildMobileAppBarActionsRow()]
           : [
+              ...hiddenPaneActions,
               if (!isMobile)
                 _buildTourTarget(
                   showcaseKey: _desktopSidebarMenuTourKey,
@@ -1140,9 +1166,11 @@ extension _ChatPageChrome on _ChatPageState {
                       chatProvider: chatProvider,
                       appProvider: appProvider,
                     );
-                    return Tooltip(
-                      message: context.l10n.chatSyncLabel(label),
-                      child: Padding(
+                    return _buildServerStatusControl(
+                      closeOnSelect: false,
+                      trigger: Tooltip(
+                        message: context.l10n.chatSyncLabel(label),
+                        child: Padding(
                         padding: EdgeInsets.only(
                           right: AppDensitySpacing.syncChipRightPadding(
                             settingsProvider.appDensity,
@@ -1150,8 +1178,8 @@ extension _ChatPageChrome on _ChatPageState {
                         ),
                         child: Container(
                           key: const ValueKey<String>('chat_sync_status_chip'),
-                          width: 28,
-                          height: 28,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             color: color.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(999),
@@ -1162,6 +1190,7 @@ extension _ChatPageChrome on _ChatPageState {
                             color: color,
                           ),
                         ),
+                      ),
                       ),
                     );
                   },
@@ -1675,62 +1704,6 @@ extension _ChatPageChrome on _ChatPageState {
     );
   }
 
-  Widget _buildSelectorSectionHeader(BuildContext context, String title) {
-    final density = _settingsProvider?.appDensity ?? AppDensity.normal;
-    return Padding(
-      padding: AppDensitySpacing.sectionHeaderPadding(density),
-      child: Text(
-        title,
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-
-  Widget _buildOpenProjectTile({
-    required BuildContext dialogContext,
-    required Project project,
-    required bool selected,
-    required VoidCallback? onSwitch,
-    required VoidCallback? onClose,
-    required bool closeEnabled,
-  }) {
-    final path = _directoryLabel(project.path);
-    final displayName = _projectDisplayLabel(project);
-
-    return ListTile(
-      dense: _useDenseListTiles(dialogContext),
-      contentPadding: AppDensitySpacing.listTileContentPadding(
-        _settingsProvider?.appDensity ?? AppDensity.normal,
-      ),
-      leading: ProjectIcon(project: project, size: 20, autoDiscover: true),
-      title: Text(displayName, overflow: TextOverflow.ellipsis),
-      subtitle: path == displayName
-          ? null
-          : Text(path, overflow: TextOverflow.ellipsis),
-      selected: selected,
-      onTap: onSwitch,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (selected)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 6),
-              child: Icon(Symbols.radio_button_checked, size: 18),
-            ),
-          IconButton(
-            icon: const Icon(Symbols.close_rounded),
-            tooltip: context.l10n.chatCloseProject(
-              _projectDisplayLabel(project),
-            ),
-            onPressed: closeEnabled ? onClose : null,
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _runProjectSelectorDialogAction(
     Future<void> Function() action,
   ) async {
@@ -1750,53 +1723,6 @@ extension _ChatPageChrome on _ChatPageState {
         _isProjectSelectorActionInFlight = false;
       });
     }
-  }
-
-  Future<void> _openCreateWorkspaceFromSelector(
-    BuildContext dialogContext,
-  ) async {
-    await _runProjectSelectorDialogAction(() async {
-      if (dialogContext.mounted) {
-        Navigator.of(dialogContext).pop();
-      }
-      await Future<void>.delayed(Duration.zero);
-      if (!mounted) {
-        return;
-      }
-      await _createWorkspace();
-    });
-  }
-
-  Future<void> _switchProjectFromSelector(
-    BuildContext dialogContext,
-    String projectId,
-  ) async {
-    await _runProjectSelectorDialogAction(() async {
-      if (dialogContext.mounted) {
-        Navigator.of(dialogContext).pop();
-      }
-      await Future<void>.delayed(Duration.zero);
-      if (!mounted) {
-        return;
-      }
-      await _switchProjectContext(projectId);
-    });
-  }
-
-  Future<void> _reopenProjectFromSelector(
-    BuildContext dialogContext,
-    String projectId,
-  ) async {
-    await _runProjectSelectorDialogAction(() async {
-      if (dialogContext.mounted) {
-        Navigator.of(dialogContext).pop();
-      }
-      await Future<void>.delayed(Duration.zero);
-      if (!mounted) {
-        return;
-      }
-      await _reopenProjectContext(projectId);
-    });
   }
 
   Future<void> _closeProjectFromSelector(String projectId) async {

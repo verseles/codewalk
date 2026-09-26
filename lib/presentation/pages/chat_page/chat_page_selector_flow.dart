@@ -7,13 +7,7 @@ extension _ChatPageSelectorFlow on _ChatPageState {
   }) {
     return Consumer<ProjectProvider>(
       builder: (context, projectProvider, child) {
-        final currentDirectoryFull = _directoryLabel(
-          projectProvider.currentDirectory,
-        );
-        final currentDirectoryChip = isMobile
-            ? _directoryBasename(currentDirectoryFull)
-            : currentDirectoryFull;
-
+        final directory = _directoryLabel(projectProvider.currentDirectory);
         return Align(
           alignment: Alignment.centerLeft,
           child: Tooltip(
@@ -30,9 +24,6 @@ extension _ChatPageSelectorFlow on _ChatPageState {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Flexible allows the text to shrink when the AppBar
-                    // title area is narrow (e.g. medium breakpoint with
-                    // the conversation pane taking 260dp).
                     Flexible(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
@@ -41,7 +32,7 @@ extension _ChatPageSelectorFlow on _ChatPageState {
                               : (isLargeDesktop ? 400 : 300),
                         ),
                         child: Text(
-                          currentDirectoryChip,
+                          isMobile ? _directoryBasename(directory) : directory,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(fontWeight: FontWeight.w600),
@@ -60,232 +51,453 @@ extension _ChatPageSelectorFlow on _ChatPageState {
     );
   }
 
-  Future<void> _openProjectSelectorDialog() async {
-    if (!mounted) {
-      return;
+  Future<void> _openProjectSelectorDialog() => _createWorkspace();
+}
+
+/// One route owns search, known projects, and optional directory browsing.
+class _ProjectOpenDialog extends StatefulWidget {
+  const _ProjectOpenDialog({
+    required this.initialDirectory,
+    required this.onSearch,
+    required this.onCloseProject,
+    required this.onArchiveProject,
+  });
+
+  final String initialDirectory;
+  final Future<List<FileNode>> Function(String query) onSearch;
+  final Future<void> Function(String id) onCloseProject;
+  final Future<void> Function(String id) onArchiveProject;
+
+  @override
+  State<_ProjectOpenDialog> createState() => _ProjectOpenDialogState();
+}
+
+class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
+  final _query = TextEditingController();
+  final _focus = FocusNode();
+  final _scroll = ScrollController();
+  Timer? _debounce;
+  int _generation = 0;
+  int _active = 0;
+  bool _loading = false;
+  bool _browsing = false;
+  bool _busy = false;
+  String? _error;
+  List<FileNode> _remote = const [];
+  late final AppProvider _app = context.read<AppProvider>();
+  late final String? _serverId = _app.activeServerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _app.addListener(_checkServer);
+  }
+
+  void _checkServer() {
+    if (_app.activeServerId == _serverId) return;
+    _generation++;
+    _debounce?.cancel();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _app.removeListener(_checkServer);
+    _debounce?.cancel();
+    _query.dispose();
+    _focus.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _search(String value) {
+    _debounce?.cancel();
+    final generation = ++_generation;
+    setState(() {
+      _active = 0;
+      _remote = const [];
+      _error = null;
+      _loading = value.trim().isNotEmpty;
+    });
+    if (!_loading) return;
+    _debounce = Timer(const Duration(milliseconds: 250), () async {
+      try {
+        final results = await widget.onSearch(value.trim());
+        if (!mounted ||
+            generation != _generation ||
+            _app.activeServerId != _serverId)
+          return;
+        setState(() {
+          _remote = results;
+          _loading = false;
+        });
+      } catch (_) {
+        if (!mounted || generation != _generation) return;
+        setState(() {
+          _loading = false;
+          _error = context.l10n.chatFailedToLoadDirectories;
+        });
+      }
+    });
+  }
+
+  void _complete(String path) {
+    final value = path.endsWith('/') ? path : '$path/';
+    _query.value = TextEditingValue(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
+    _search(value);
+    _focus.requestFocus();
+  }
+
+  void _select(String path) {
+    if (_busy || _app.activeServerId != _serverId) return;
+    Navigator.of(context).pop(path);
+  }
+
+  Future<void> _manage(Future<void> Function() action) async {
+    if (_busy || _app.activeServerId != _serverId) return;
+    setState(() => _busy = true);
+    try {
+      await action();
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
-    final view = View.of(context);
-    final screenWidth = MediaQueryData.fromView(view).size.width;
-    final isSmallScreen = WindowSizeClass.fromWidth(screenWidth).isCompact;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        return Consumer<ProjectProvider>(
-          builder: (context, projectProvider, child) {
-            final content = _buildProjectSelectorDialogContent(
-              dialogContext: dialogContext,
-              projectProvider: projectProvider,
-              isSmallScreen: isSmallScreen,
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = WindowSizeClass.fromWidth(
+          constraints.maxWidth,
+        ).isCompact;
+        return DirectConsumer<ProjectProvider>(
+          builder: (context, projects, _) {
+            final query = _query.text.trim();
+            final byPath =
+                <String, ({FileNode node, Project? project, bool open})>{};
+            for (final project in [
+              ...projects.openProjects,
+              ...projects.closedProjects,
+            ]) {
+              final path = normalizeFilePath(project.path);
+              byPath.putIfAbsent(
+                path,
+                () => (
+                  node: FileNode(
+                    path: path,
+                    name: project.name,
+                    type: FileNodeType.directory,
+                  ),
+                  project: project,
+                  open: projects.openProjectIds.contains(project.id),
+                ),
+              );
+            }
+            for (final node in _remote) {
+              byPath.putIfAbsent(
+                normalizeFilePath(node.path),
+                () => (node: node, project: null, open: false),
+              );
+            }
+            int? score(FileNode node) {
+              final name = projectDirectoryMatchScore(node.name, query);
+              final path = projectDirectoryMatchScore(node.path, query);
+              return name == null
+                  ? path
+                  : path == null
+                  ? name
+                  : min(name, path);
+            }
+
+            final rows =
+                byPath.values.where((row) => score(row.node) != null).toList()
+                  ..sort((a, b) {
+                    if (query.isEmpty && a.open != b.open)
+                      return a.open ? -1 : 1;
+                    final rank = score(a.node)!.compareTo(score(b.node)!);
+                    return rank != 0
+                        ? rank
+                        : a.node.path.compareTo(b.node.path);
+                  });
+            final selected = rows.isEmpty
+                ? null
+                : rows[min(_active, rows.length - 1)];
+            final rawPath = query.isEmpty ? widget.initialDirectory : query;
+            final canOpenPath =
+                query.isEmpty ||
+                query.startsWith('/') ||
+                RegExp(r'^[A-Za-z]:[/\\]').hasMatch(query);
+            final content = Material(
+              key: const ValueKey<String>('project_selector_dialog_content'),
+              child: _browsing
+                  ? Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).backButtonTooltip,
+                            icon: const Icon(Symbols.arrow_back),
+                            onPressed: () => setState(() => _browsing = false),
+                          ),
+                        ),
+                        Expanded(
+                          child: _DirectoryPickerSheet(
+                            initialDirectory: canOpenPath
+                                ? rawPath
+                                : widget.initialDirectory,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  context.l10n.chatProjectContext2,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: context.l10n.chatClose,
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(Symbols.close),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              context.l10n.workspaceCurrentDirectory(
+                                widget.initialDirectory == '/'
+                                    ? context.l10n.composerCannedScopeGlobal
+                                    : widget.initialDirectory,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Focus(
+                            onKeyEvent: (_, event) {
+                              if (event is! KeyDownEvent &&
+                                  event is! KeyRepeatEvent)
+                                return KeyEventResult.ignored;
+                              if (_query.value.composing.isValid &&
+                                  !_query.value.composing.isCollapsed)
+                                return KeyEventResult.ignored;
+                              final key = event.logicalKey;
+                              final keys = HardwareKeyboard.instance;
+                              final ctrlNavigation =
+                                  keys.isControlPressed &&
+                                  !keys.isAltPressed &&
+                                  !keys.isMetaPressed &&
+                                  !keys.isShiftPressed;
+                              final down =
+                                  key == LogicalKeyboardKey.arrowDown ||
+                                  (ctrlNavigation &&
+                                      key == LogicalKeyboardKey.keyN);
+                              final up =
+                                  key == LogicalKeyboardKey.arrowUp ||
+                                  (ctrlNavigation &&
+                                      key == LogicalKeyboardKey.keyP);
+                              if ((down || up) &&
+                                  !keys.isAltPressed &&
+                                  !keys.isMetaPressed &&
+                                  rows.isNotEmpty) {
+                                setState(
+                                  () => _active =
+                                      (_active + (down ? 1 : -1)) % rows.length,
+                                );
+                                if (_scroll.hasClients)
+                                  _scroll.jumpTo(
+                                    (_active * 72.0).clamp(
+                                      0.0,
+                                      _scroll.position.maxScrollExtent,
+                                    ),
+                                  );
+                                return KeyEventResult.handled;
+                              }
+                              if (key == LogicalKeyboardKey.tab &&
+                                  !keys.isShiftPressed &&
+                                  selected != null) {
+                                _complete(selected.node.path);
+                                return KeyEventResult.handled;
+                              }
+                              if (key == LogicalKeyboardKey.enter) {
+                                if (selected != null) {
+                                  _select(selected.node.path);
+                                } else if (canOpenPath) {
+                                  _select(rawPath);
+                                }
+                                return KeyEventResult.handled;
+                              }
+                              return KeyEventResult.ignored;
+                            },
+                            child: TextField(
+                              key: const ValueKey<String>(
+                                'workspace_base_directory_input',
+                              ),
+                              controller: _query,
+                              focusNode: _focus,
+                              autofocus: true,
+                              onChanged: _search,
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Symbols.search),
+                                hintText: context.l10n.chatFilterDirectories,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_loading) const AppIndeterminateBar(),
+                        if (_error != null) Text(_error!),
+                        Expanded(
+                          child: ListView.builder(
+                            key: const ValueKey<String>(
+                              'workspace_directory_suggestions',
+                            ),
+                            controller: _scroll,
+                            itemCount: rows.length,
+                            itemExtent: 72,
+                            itemBuilder: (context, index) {
+                              final row = rows[index];
+                              final project = row.project;
+                              return ListTile(
+                                key: ValueKey<String>(
+                                  'workspace_directory_suggestion_${row.node.path}',
+                                ),
+                                selected:
+                                    index == min(_active, rows.length - 1),
+                                leading: project == null
+                                    ? const Icon(Symbols.folder)
+                                    : ProjectIcon(project: project, size: 20),
+                                title: Text(
+                                  row.node.name.isEmpty
+                                      ? fileBasename(row.node.path)
+                                      : row.node.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  row.node.path,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                onTap: _busy
+                                    ? null
+                                    : () => _select(row.node.path),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      tooltip: context.l10n.workspaceBrowseDirs,
+                                      icon: const Icon(Symbols.chevron_right),
+                                      onPressed: () => _complete(row.node.path),
+                                    ),
+                                    if (project != null)
+                                      IconButton(
+                                        tooltip: row.open
+                                            ? context.l10n
+                                                  .workspaceCloseProject(
+                                                    project.name,
+                                                  )
+                                            : context.l10n
+                                                  .chatRemoveDisplayNameHistory(
+                                                    project.name,
+                                                  ),
+                                        icon: Icon(
+                                          row.open
+                                              ? Symbols.close
+                                              : Symbols.delete_outline_rounded,
+                                        ),
+                                        onPressed:
+                                            _busy ||
+                                                (row.open &&
+                                                    !projects.canCloseProject(
+                                                      project.id,
+                                                    ))
+                                            ? null
+                                            : () => _manage(
+                                                () => row.open
+                                                    ? widget.onCloseProject(
+                                                        project.id,
+                                                      )
+                                                    : widget.onArchiveProject(
+                                                        project.id,
+                                                      ),
+                                              ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              TextButton.icon(
+                                key: const ValueKey<String>(
+                                  'workspace_open_directory_picker_button',
+                                ),
+                                onPressed: () =>
+                                    setState(() => _browsing = true),
+                                icon: const Icon(Symbols.folder_open),
+                                label: Text(context.l10n.workspaceBrowseDirs),
+                              ),
+                              if (canOpenPath)
+                                FilledButton(
+                                  key: const ValueKey<String>(
+                                    'workspace_open_path_button',
+                                  ),
+                                  onPressed: _busy
+                                      ? null
+                                      : () => _select(rawPath),
+                                  child: Text(
+                                    '${context.l10n.workspaceOpenFolder}: $rawPath',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
             );
-            if (isSmallScreen) {
+            if (compact)
               return Dialog.fullscreen(
                 key: const ValueKey<String>(
                   'project_selector_dialog_fullscreen',
                 ),
-                child: content,
+                child: SafeArea(child: content),
               );
-            }
             return Dialog(
               key: const ValueKey<String>('project_selector_dialog_centered'),
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 24,
-              ),
               clipBehavior: Clip.antiAlias,
-              child: SizedBox(
-                width: 760,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 720),
-                  child: content,
-                ),
-              ),
+              child: SizedBox(width: 760, height: 600, child: content),
             );
           },
         );
       },
-    );
-  }
-
-  Widget _buildProjectSelectorDialogContent({
-    required BuildContext dialogContext,
-    required ProjectProvider projectProvider,
-    required bool isSmallScreen,
-  }) {
-    final colorScheme = Theme.of(dialogContext).colorScheme;
-    final currentProject = projectProvider.currentProject;
-    final selectorActionInFlight = _isProjectSelectorActionInFlight;
-    final currentDirectoryFull = _directoryLabel(
-      projectProvider.currentDirectory,
-    );
-
-    return Material(
-      key: const ValueKey<String>('project_selector_dialog_content'),
-      color: colorScheme.surface,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              isSmallScreen ? 16 : 20,
-              isSmallScreen ? 12 : 16,
-              isSmallScreen ? 8 : 12,
-              8,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.l10n.chatProjectContext2,
-                    style: Theme.of(dialogContext).textTheme.titleLarge,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Symbols.close),
-                  tooltip: context.l10n.chatClose,
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(isSmallScreen ? 16 : 20, 0, 20, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  currentProject == null
-                      ? context.l10n.workspaceNoActiveContext
-                      : context.l10n.workspaceCurrentDirectory(
-                          currentDirectoryFull,
-                        ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  context.l10n.chatSelectProjectBelow,
-                  style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(isSmallScreen ? 16 : 20, 4, 20, 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: selectorActionInFlight
-                      ? null
-                      : () => unawaited(
-                          _openCreateWorkspaceFromSelector(dialogContext),
-                        ),
-                  icon: const Icon(Symbols.add_box),
-                  label: Text(context.l10n.chatOpenProjectFolder),
-                ),
-                if (!FeatureFlags.refreshlessRealtime)
-                  FilledButton.tonalIcon(
-                    onPressed: selectorActionInFlight
-                        ? null
-                        : () => unawaited(projectProvider.loadProjects()),
-                    icon: const Icon(Symbols.refresh_rounded),
-                    label: Text(context.l10n.chatRefreshProjects),
-                  ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
-              children: [
-                _buildSelectorSectionHeader(
-                  dialogContext,
-                  context.l10n.workspaceOpenProjects,
-                ),
-                for (final project in projectProvider.openProjects)
-                  _buildOpenProjectTile(
-                    dialogContext: dialogContext,
-                    project: project,
-                    selected: project.id == currentProject?.id,
-                    onSwitch: selectorActionInFlight
-                        ? null
-                        : () => unawaited(
-                            _switchProjectFromSelector(
-                              dialogContext,
-                              project.id,
-                            ),
-                          ),
-                    onClose: selectorActionInFlight
-                        ? null
-                        : () =>
-                              unawaited(_closeProjectFromSelector(project.id)),
-                    closeEnabled:
-                        projectProvider.openProjects.length > 1 ||
-                        project.id != currentProject?.id,
-                  ),
-                if (projectProvider.closedProjects.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  _buildSelectorSectionHeader(
-                    dialogContext,
-                    context.l10n.workspaceClosedProjects,
-                  ),
-                  for (final project in projectProvider.closedProjects)
-                    Builder(
-                      builder: (_) {
-                        final displayName = _projectDisplayLabel(project);
-                        return ListTile(
-                          dense: _useDenseListTiles(dialogContext),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                          ),
-                          onTap: selectorActionInFlight
-                              ? null
-                              : () => unawaited(
-                                  _reopenProjectFromSelector(
-                                    dialogContext,
-                                    project.id,
-                                  ),
-                                ),
-                          leading: ProjectIcon(project: project, size: 20),
-                          title: Text(
-                            displayName,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text(
-                            _directoryLabel(project.path),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Symbols.delete_outline_rounded,
-                                ),
-                                tooltip: context.l10n
-                                    .chatRemoveDisplayNameHistory(displayName),
-                                onPressed: selectorActionInFlight
-                                    ? null
-                                    : () => unawaited(
-                                        _archiveClosedProjectFromSelector(
-                                          project.id,
-                                        ),
-                                      ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

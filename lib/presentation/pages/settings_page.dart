@@ -15,6 +15,7 @@ import '../providers/settings_provider.dart';
 import '../theme/app_animations.dart';
 import '../utils/app_page_route.dart';
 import '../utils/window_size_class.dart';
+import '../widgets/desktop_window_title_bar.dart';
 import '../widgets/direct_provider.dart';
 import '../widgets/settings_update_available_card.dart';
 import 'logs_page.dart';
@@ -60,6 +61,24 @@ class _SettingsSection {
 enum _SettingsNavigationGroup { setup, experience, input, support }
 
 class _SettingsPageState extends State<SettingsPage> {
+  DesktopWindowChromeController? _chromeController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = context.read<DesktopWindowChromeController?>();
+    if (identical(controller, _chromeController)) return;
+    final previous = _chromeController;
+    _chromeController = controller;
+    // The frame is above this route: notify after build, for every Settings
+    // entry point, and keep suspension while nested settings routes are open.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      previous?.resume(this);
+      if (mounted && identical(controller, _chromeController)) {
+        controller?.suspend(this);
+      }
+    });
+  }
   // Split layout when expanded or wider (840dp+)
   static const Duration _doubleEscapeCloseThreshold = Duration(
     milliseconds: 500,
@@ -245,6 +264,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   void dispose() {
+    final controller = _chromeController;
+    WidgetsBinding.instance.addPostFrameCallback((_) => controller?.resume(this));
     HardwareKeyboard.instance.removeHandler(_handleGlobalKeyEvent);
     _settingsSearchController.dispose();
     super.dispose();

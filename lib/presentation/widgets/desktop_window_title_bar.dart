@@ -31,6 +31,25 @@ bool _isDesktopRuntime() {
 class DesktopWindowChromeController extends ChangeNotifier {
   Object? _owner;
   WidgetBuilder? _titleBarBuilder;
+  final Set<Object> _suspensions = <Object>{};
+  bool _disposed = false;
+
+  void suspend(Object owner) {
+    if (_disposed) return;
+    if (_suspensions.add(owner)) notifyListeners();
+  }
+
+  void resume(Object owner) {
+    if (_disposed) return;
+    if (_suspensions.remove(owner)) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _suspensions.clear();
+    super.dispose();
+  }
 
   void attach(Object owner, WidgetBuilder titleBarBuilder) {
     if (identical(_owner, owner)) {
@@ -51,6 +70,7 @@ class DesktopWindowChromeController extends ChangeNotifier {
   }
 
   Widget buildTitleBar(BuildContext context) {
+    if (_suspensions.isNotEmpty) return const SizedBox.shrink();
     return _titleBarBuilder?.call(context) ?? const SizedBox.shrink();
   }
 }

@@ -546,7 +546,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
     return context.l10n.statusOnline;
   }
 
-  Widget _buildServerStatusControl({required bool closeOnSelect}) {
+  Widget _buildServerStatusControl({required bool closeOnSelect, Widget? trigger}) {
     return Consumer2<AppProvider, SettingsProvider>(
       builder: (context, appProvider, settingsProvider, _) {
         final active = appProvider.activeServer;
@@ -563,8 +563,8 @@ extension _ChatPageStatusPresenter on _ChatPageState {
         final visualTokens = theme.visualStyleTokens;
 
         return PopupMenuButton<String>(
-          key: const ValueKey<String>('sidebar_server_switch_button'),
-          tooltip: context.l10n.chatPageStatusSwitchServer,
+          key: ValueKey<String>(trigger == null ? 'sidebar_server_switch_button' : 'toolbar_server_switch_button'),
+          tooltip: trigger == null ? context.l10n.chatPageStatusSwitchServer : '${active?.displayName ?? context.l10n.chatPageStatusServer} · $statusLabel',
           onSelected: (value) async {
             if (value == '__manage__') {
               await _openSettingsPage(
@@ -625,7 +625,7 @@ extension _ChatPageStatusPresenter on _ChatPageState {
             );
             return items;
           },
-          child: Container(
+          child: trigger ?? Container(
             key: const ValueKey<String>('sidebar_server_status_control'),
             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
             decoration: BoxDecoration(

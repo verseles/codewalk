@@ -72,8 +72,9 @@ import '../utils/chat_abort_message.dart';
 import '../utils/chat_assistant_settlement.dart';
 import '../utils/chat_server_error_formatter.dart';
 import '../utils/duplicate_file_name.dart';
-import '../utils/file_highlight_language.dart';
 import '../utils/file_explorer_logic.dart';
+import '../utils/file_highlight_language.dart';
+import '../utils/project_directory_search.dart';
 import '../utils/reasoning_status_parser.dart';
 import '../utils/session_tab_grouping.dart';
 import '../utils/session_tab_switcher_logic.dart';
@@ -2382,7 +2383,16 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    return DirectSelector<SettingsProvider, (bool, bool, bool, double, double, double)>(
+      select: (settings) => (
+        settings.isDesktopPaneVisible(DesktopPane.conversations),
+        settings.isDesktopPaneVisible(DesktopPane.files),
+        settings.isDesktopPaneVisible(DesktopPane.utility),
+        settings.desktopPaneWidth(DesktopPane.conversations),
+        settings.desktopPaneWidth(DesktopPane.files),
+        settings.desktopPaneWidth(DesktopPane.utility),
+      ),
+      builder: (context, panes, _) => LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final sizeClass = WindowSizeClass.fromWidth(width);
@@ -2437,10 +2447,7 @@ class _ChatPageState extends State<ChatPage>
             });
           }
         }
-        final conversationsPaneEnabled =
-            context.select<SettingsProvider, bool>(
-              (s) => s.isDesktopPaneVisible(DesktopPane.conversations),
-            );
+        final conversationsPaneEnabled = panes.$1;
         // Medium: narrow conversation pane; expanded+: full pane
         final showConversationPane =
             !isMobile &&
@@ -2450,21 +2457,15 @@ class _ChatPageState extends State<ChatPage>
             !isMobile &&
             !isMedium &&
             width >= _filePaneBreakpoint &&
-            context.select<SettingsProvider, bool>(
-              (s) => s.isDesktopPaneVisible(DesktopPane.files),
-            );
+            panes.$2;
         final showDesktopUtilityPane =
             isLargeDesktop &&
-            context.select<SettingsProvider, bool>(
-              (s) => s.isDesktopPaneVisible(DesktopPane.utility),
-            );
+            panes.$3;
         // Medium breakpoint stays fixed (compact layout); expanded+ uses
         // the persisted/resizable width from settings.
         final sessionPaneWidth = isMedium
             ? _mediumSessionPaneWidth
-            : context.select<SettingsProvider, double>(
-                (s) => s.desktopPaneWidth(DesktopPane.conversations),
-              );
+            : panes.$4;
         final mainContentWidth = isLargeDesktop ? 960.0 : double.infinity;
         const refreshlessEnabled = FeatureFlags.refreshlessRealtime;
         final availableShortcutActions = shortcutActionsForRuntime(
@@ -2635,6 +2636,7 @@ class _ChatPageState extends State<ChatPage>
                                     isMobile ||
                                     (isMedium && !showConversationPane),
                                 isLargeDesktop: isLargeDesktop,
+                                showHiddenPaneControls: !isMobile && !showConversationPane,
                                 settingsProvider: appBarSettings,
                               );
                             },
@@ -2655,19 +2657,12 @@ class _ChatPageState extends State<ChatPage>
                                 verticalPadding: 0,
                               );
                             } else {
-                              final filePaneWidth = context
-                                  .select<SettingsProvider, double>(
-                                    (s) =>
-                                        s.desktopPaneWidth(DesktopPane.files),
-                                  );
-                              final utilityPaneWidth = context
-                                  .select<SettingsProvider, double>(
-                                    (s) =>
-                                        s.desktopPaneWidth(DesktopPane.utility),
-                                  );
+                              final filePaneWidth = panes.$5;
+                              final utilityPaneWidth = panes.$6;
                               final rowChildren = <Widget>[
                                 if (showConversationPane) ...[
                                   SizedBox(
+                                    key: const ValueKey<String>('desktop_pane_conversations'),
                                     width: sessionPaneWidth,
                                     child: _buildSessionPanel(
                                       closeOnSelect: false,
@@ -2693,6 +2688,7 @@ class _ChatPageState extends State<ChatPage>
                                 ],
                                 if (showDesktopFilePane) ...[
                                   SizedBox(
+                                    key: const ValueKey<String>('desktop_pane_files'),
                                     width: filePaneWidth,
                                     child: _buildDesktopFilePane(
                                       onCollapseRequested: () {
@@ -2726,6 +2722,7 @@ class _ChatPageState extends State<ChatPage>
                                     paneOnLeft: false,
                                   ),
                                   SizedBox(
+                                    key: const ValueKey<String>('desktop_pane_utility'),
                                     width: utilityPaneWidth,
                                     child: _buildDesktopUtilityPane(
                                       onCollapseRequested: () {
@@ -2860,6 +2857,7 @@ class _ChatPageState extends State<ChatPage>
           ),
         );
       },
+      ),
     );
   }
 

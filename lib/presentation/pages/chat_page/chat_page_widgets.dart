@@ -215,6 +215,7 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
   List<String> _directories = const <String>[];
   bool _loading = false;
   String? _error;
+  int _requestGeneration = 0;
 
   @override
   void initState() {
@@ -235,6 +236,7 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
   }
 
   Future<void> _loadDirectory(String directory) async {
+    final generation = ++_requestGeneration;
     setState(() {
       _loading = true;
       _error = null;
@@ -243,7 +245,7 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
     final provider = context.read<ProjectProvider>();
     final listed = await provider.listDirectories(directory);
 
-    if (!mounted) {
+    if (!mounted || generation != _requestGeneration) {
       return;
     }
 
@@ -306,8 +308,8 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
         : _directories
               .where((item) {
                 final base = _basename(item).toLowerCase();
-                return base.contains(query) ||
-                    item.toLowerCase().contains(query);
+                return projectDirectoryMatchScore(base, query) != null ||
+                    projectDirectoryMatchScore(item, query) != null;
               })
               .toList(growable: false);
     final parent = _parentDirectory(_currentDirectory);
