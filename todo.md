@@ -35,8 +35,8 @@ Validar conteúdo misto, temas claro/escuro e telas pequenas/grandes.
 
 ## G3 — Navegação e estrutura do workspace
 
-Afinidade alta a média. Código incluído no tag `v1.255.0`; confirmação de uso e
-fechamento das issues permanecem pendentes.
+Afinidade alta a média. Entregue em `v1.255.0`; as quatro issues foram encerradas
+em 26/09/2026 com autorização do usuário, após CI e release verdes.
 
 - [#202 — Abertura de projetos unificada com fuzzy](https://github.com/verseles/codewalk/issues/202)
 - [#204 — Resize/hide das sidebars imediatamente reativos](https://github.com/verseles/codewalk/issues/204)
