@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.257.0 - 2026-09-26
+
+> 📣 Settings now has a cleaner Refined look and unified server selection. Sherpa speech recognition is presented without experimental warnings.
+
+- feat(settings): unify server selection and simplify refined surfaces
+- docs: confirm rate-limit release validation
+- docs: describe rate-limit windows and visible sidebar refresh
+
 ## v1.256.0 - 2026-09-26
 
 > 📣 Rate limits now refresh automatically in the visible desktop sidebar. Codex labels reflect actual usage windows, and xAI shows Pace when billing-period timing is available.
