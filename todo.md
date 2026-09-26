@@ -6,8 +6,8 @@ aceitação; este documento registra a composição dos grupos.
 
 ## G1 — Rate Limits: dados, Pace e atualização
 
-Afinidade alta. Código incluído no tag `v1.256.0`; issues encerradas em
-26/09/2026 por solicitação do usuário, com o CI ainda em acompanhamento.
+Afinidade alta. Entregue em `v1.256.0`; issues encerradas em 26/09/2026 por
+solicitação do usuário. Release e CI concluídos com sucesso.
 
 - [#206 — Pace do xAI](https://github.com/verseles/codewalk/issues/206)
 - [#209 — Refresh periódico na sidebar desktop](https://github.com/verseles/codewalk/issues/209)
