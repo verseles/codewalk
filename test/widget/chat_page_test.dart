@@ -65,6 +65,7 @@ import 'package:codewalk/presentation/services/workspace_file_operations_service
 import 'package:codewalk/presentation/theme/app_shapes.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/presentation/utils/session_title_formatter.dart';
+import 'package:codewalk/presentation/widgets/chat_message_widget.dart';
 import 'package:codewalk/presentation/widgets/chat_skeleton_shimmer.dart';
 import 'package:codewalk/presentation/widgets/desktop_window_title_bar.dart';
 import 'package:codewalk/presentation/widgets/message_entrance_animation.dart';
@@ -7593,6 +7594,54 @@ void main() {
       );
     },
   );
+
+  testWidgets('G3 drive-root file links share tree tabs and relative read fallbacks', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+    final project = Project(id: 'drive', name: 'Drive', path: 'C:/', createdAt: DateTime(2026));
+    final repository = FakeProjectRepository(currentProject: project, projects: [project])
+      ..filesByPath['.'] = const [
+        FileNode(path: 'C:/notes.txt', name: 'notes.txt', type: FileNodeType.file),
+        FileNode(path: 'C:/apps', name: 'apps', type: FileNodeType.directory),
+      ]
+      ..filesByPath['apps'] = const [FileNode(path: 'C:/apps/app.txt', name: 'app.txt', type: FileNodeType.file)];
+    final reads = <String>[];
+    final lists = <String>[];
+    repository.listFilesDelay = (path) async { lists.add(path); };
+    repository.readFileContentHandler = ({directory, required path}) async {
+      reads.add(path);
+      return Right(FileContent(path: path, content: path == 'notes.txt' ? 'drive-root notes' : '', isBinary: false));
+    };
+    final session = ChatSession(id: 'drive_session', workspaceId: 'drive', directory: 'C:/', title: 'Drive session', time: DateTime(2026));
+    final chat = FakeChatRepository(sessions: [session]);
+    chat.messagesBySession[session.id] = [AssistantMessage(
+      id: 'drive_message', sessionId: session.id, time: DateTime(2026), completedTime: DateTime(2026),
+      parts: [TextPart(id: 'drive_text', messageId: 'drive_message', sessionId: session.id, text: 'See `notes.txt`.')],
+    )];
+    final provider = _buildChatProvider(localDataSource: local, projectRepository: repository, chatRepository: chat);
+    final appProvider = _buildAppProvider(localDataSource: local);
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('file_tree_item_C:/apps')));
+    await tester.pumpAndSettle();
+    expect(lists, contains('apps'));
+    expect(find.byKey(const ValueKey<String>('file_tree_item_C:/apps/app.txt')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey<String>('file_tree_item_C:/notes.txt')));
+    await tester.pumpAndSettle();
+    expect(reads, contains('notes.txt'));
+    final dialog = find.byKey(const ValueKey<String>('open_files_dialog_centered'));
+    for (final path in ['notes.txt', 'C:/notes.txt']) {
+      await tester.tap(find.descendant(of: dialog, matching: find.byTooltip('Close')));
+      await tester.pumpAndSettle();
+      tester.widget<ChatMessageWidget>(find.byType(ChatMessageWidget).first).onFileTap!(path, null, null);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey<String>('file_viewer_tab_C:/notes.txt')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('file_viewer_tab_C://notes.txt')), findsNothing);
+      expect(find.byKey(const ValueKey<String>('file_viewer_tab_C:/C:/notes.txt')), findsNothing);
+      expect(tester.takeException(), isNull);
+    }
+  });
 
   testWidgets('desktop open files button opens centered dialog with tabs', (
     WidgetTester tester,

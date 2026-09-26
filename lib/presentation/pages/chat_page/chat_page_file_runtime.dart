@@ -347,7 +347,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
       if (normalizedPath == normalizedContext) {
         candidates.add('.');
       }
-      final contextPrefix = '$normalizedContext/';
+      final contextPrefix = filePathChildPrefix(normalizedContext);
       if (normalizedPath.startsWith(contextPrefix)) {
         final relative = normalizedPath.substring(contextPrefix.length);
         if (relative.isNotEmpty) {
@@ -370,7 +370,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
         : _normalizeFilePath(contextDirectory);
     final candidates = <String>{normalizedPath};
     if (normalizedContext.isNotEmpty) {
-      final contextPrefix = '$normalizedContext/';
+      final contextPrefix = filePathChildPrefix(normalizedContext);
       if (normalizedPath.startsWith(contextPrefix)) {
         final relative = normalizedPath.substring(contextPrefix.length);
         if (relative.isNotEmpty) {
@@ -450,9 +450,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
       projectProvider: projectProvider,
       appProvider: appProvider,
     );
-    final resolvedPath = path.startsWith('/')
+    final resolvedPath = isAbsoluteFilePath(path)
         ? _normalizeFilePath(path)
-        : _normalizeFilePath('$rootDir/$path');
+        : _normalizeFilePath(rootDir == '/' ? '/$path' : joinParentPath(rootDir, path));
 
     // Set pending scroll target so the viewer scrolls after content loads.
     if (line != null && line > 0) {
@@ -1817,9 +1817,12 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (normalized == oldNormalized) {
       return newNormalized;
     }
-    if (normalized.startsWith('$oldNormalized/')) {
+    final prefix = filePathChildPrefix(oldNormalized);
+    if (normalized.startsWith(prefix)) {
       return _normalizeFilePath(
-        '$newNormalized/${normalized.substring(oldNormalized.length + 1)}',
+        newNormalized == '/'
+            ? '/${normalized.substring(prefix.length)}'
+            : joinParentPath(newNormalized, normalized.substring(prefix.length)),
       );
     }
     return normalized;
