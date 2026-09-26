@@ -56,6 +56,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.text('On-device speech recognition with downloadable models.'), findsOneWidget);
+      expect(find.textContaining('Sherpa is experimental'), findsNothing);
       final toggle = find.byKey(
         const ValueKey('settings_speech_keep_model_in_memory'),
       );

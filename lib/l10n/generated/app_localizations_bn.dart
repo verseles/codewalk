@@ -4609,10 +4609,6 @@ class AppLocalizationsBn extends AppLocalizations {
   String get speechSherpa => 'শেরপা';
 
   @override
-  String get speechSherpaExperimentalFail =>
-      'শেরপা পরীক্ষামূলক এবং কিছু ডিভাইসে ব্যর্থ হতে পারে। আপনি যদি সবচেয়ে স্থিতিশীল আচরণ চান তাহলে নেটিভ পছন্দ করুন।';
-
-  @override
   String get speechSherpaModelsLinux => 'শেরপা মডেল (লিনাক্স)';
 
   @override
@@ -5275,7 +5271,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get speechSherpaSubtitle =>
-      'ভারী, পরীক্ষামূলক এবং বাগ-প্রবণ। ডাউনলোড করা মডেলের সাথে প্রায়শই বেশি নির্ভুল।';
+      'ডাউনলোডযোগ্য মডেল দিয়ে ডিভাইসে কথ্য ভাষা শনাক্তকরণ।';
 
   @override
   String get speechMoonshineSubtitle =>

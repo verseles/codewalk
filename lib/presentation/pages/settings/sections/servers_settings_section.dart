@@ -11,10 +11,10 @@ import '../../../../core/i18n/l10n_context.dart';
 import '../../../../core/tailscale/tailscale_service.dart';
 import '../../../../domain/entities/server_profile.dart';
 import '../../../providers/app_provider.dart';
+import '../../../theme/app_visual_style_tokens.dart';
 import '../../../utils/app_page_route.dart';
 import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
-import '../../../widgets/searchable_dropdown_form_field.dart';
 import '../../onboarding_wizard_page.dart';
 import '../../opencode_setup_debug_page.dart';
 import '../widgets/settings_section_layout.dart';
@@ -27,7 +27,6 @@ class ServersSettingsSection extends StatefulWidget {
 }
 
 enum _ServerAction {
-  activate,
   setDefault,
   clearDefault,
   edit,
@@ -39,8 +38,9 @@ enum _ServerAction {
 
 class _ServersSettingsSectionState extends State<ServersSettingsSection> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
   int? _lastSearchSerial;
-  final _activeServerDropdownKey = GlobalKey<FormFieldState<String>>();
+  String? _activatingServerId;
   bool _loading = true;
 
   @override
@@ -64,6 +64,7 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -83,6 +84,16 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
           SettingsSearchDestination.contentReady(context);
         }
         final profiles = appProvider.serverProfiles;
+        final query = _searchController.text.trim().toLowerCase();
+        final filteredProfiles = profiles
+            .where(
+              (profile) => [
+                profile.displayName,
+                profile.url,
+                profile.id,
+              ].any((value) => value.toLowerCase().contains(query)),
+            )
+            .toList(growable: false);
         if (_loading && profiles.isEmpty) {
           return const Center(child: AppIndeterminateRing());
         }
@@ -133,22 +144,30 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                     ),
                     const SizedBox(height: 20),
                     SettingsGroupHeader(
-                      title: context.l10n.settingsGroupCurrentConnection,
+                      title: context.l10n.settingsServersChooseActive,
                     ),
                     const SizedBox(height: 8),
                     KeyedSubtree(
                       key: const ValueKey('settings_servers_active'),
-                      child: _buildActiveServerCard(appProvider),
-                    ),
-                    const SizedBox(height: 20),
-                    SettingsGroupHeader(
-                      title: context.l10n.settingsGroupThisDevice,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildLocalServerCard(appProvider),
-                    const SizedBox(height: 20),
-                    SettingsGroupHeader(
-                      title: context.l10n.settingsGroupSavedServers,
+                      child: TextField(
+                        key: const ValueKey('settings_servers_filter'),
+                        controller: _searchController,
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: context.l10n.serversSearchActiveHint,
+                          prefixIcon: const Icon(Symbols.search),
+                          suffixIcon: query.isEmpty
+                              ? null
+                              : IconButton(
+                                  tooltip: context.l10n.onboardingClear,
+                                  icon: const Icon(Symbols.close),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() {});
+                                  },
+                                ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -164,6 +183,13 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                         child: _buildEmptyState(),
                       ),
                     )
+                  : filteredProfiles.isEmpty
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(context.l10n.serversNoServersFound),
+                      ),
+                    )
                   : SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         if (index.isOdd) {
@@ -171,104 +197,33 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
                         }
                         return _buildProfileTile(
                           appProvider: appProvider,
-                          profile: profiles[index ~/ 2],
+                          profile: filteredProfiles[index ~/ 2],
                         );
-                      }, childCount: profiles.length * 2 - 1),
+                      }, childCount: filteredProfiles.length * 2 - 1),
                     ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(padding, 0, padding, padding),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (appProvider.activeServer?.tailscaleEnabled == true) ...[
+                      _buildTailscaleStatusCard(appProvider),
+                      const SizedBox(height: 20),
+                    ],
+                    SettingsGroupHeader(
+                      title: context.l10n.settingsGroupThisDevice,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildLocalServerCard(appProvider),
+                  ],
+                ),
+              ),
             ),
           ],
         );
       },
-    );
-  }
-
-  Widget _buildActiveServerCard(AppProvider appProvider) {
-    final activeServer = appProvider.activeServer;
-    final activeId = appProvider.activeServerId;
-    final hasActiveInList = appProvider.serverProfiles.any(
-      (profile) => profile.id == activeId,
-    );
-    final dropdownValue = hasActiveInList ? activeId : null;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.serversActiveServer,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 10),
-            SearchableDropdownFormField<String>(
-              key: _activeServerDropdownKey,
-              initialValue: dropdownValue,
-              searchHintText: context.l10n.serversSearchActiveHint,
-              emptyText: context.l10n.serversNoServersFound,
-              searchTermsBuilder: (value) =>
-                  _serverSearchTerms(appProvider, value),
-              items: appProvider.serverProfiles
-                  .map(
-                    (profile) => DropdownMenuItem<String>(
-                      value: profile.id,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _HealthDot(status: appProvider.healthFor(profile.id)),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: Text(
-                              profile.displayName,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (id) async {
-                final currentActiveId = appProvider.activeServerId;
-                if (id == null || id == currentActiveId) return;
-                final status = appProvider.healthFor(id);
-                if (status == ServerHealthStatus.unhealthy) {
-                  // Restore dropdown to the actual active value.
-                  _activeServerDropdownKey.currentState?.didChange(
-                    dropdownValue,
-                  );
-                  _showMessage(context.l10n.serversUnhealthyActivateError);
-                  return;
-                }
-
-                final ok = await appProvider.setActiveServer(id);
-                if (!ok && mounted) {
-                  // Restore dropdown on API failure.
-                  _activeServerDropdownKey.currentState?.didChange(
-                    dropdownValue,
-                  );
-                  _showMessage(appProvider.errorMessage);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: context.l10n.settingsServersChooseActive,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            if (activeServer != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                activeServer.url,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              if (activeServer.tailscaleEnabled) ...[
-                const SizedBox(height: 10),
-                _buildTailscaleStatusCard(appProvider),
-              ],
-            ],
-          ],
-        ),
-      ),
     );
   }
 
@@ -327,7 +282,9 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Theme.of(context).visualStyleTokens.isRefined
+            ? null
+            : Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,15 +429,6 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
     );
   }
 
-  List<String> _serverSearchTerms(AppProvider appProvider, String serverId) {
-    for (final profile in appProvider.serverProfiles) {
-      if (profile.id == serverId) {
-        return <String>[profile.displayName, profile.url, profile.id];
-      }
-    }
-    return <String>[serverId];
-  }
-
   Widget _buildLocalServerCard(AppProvider appProvider) {
     final status = appProvider.localServerStatus;
     final supported = appProvider.localServerSupported;
@@ -529,19 +477,27 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
-            Row(
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    shape: BoxShape.circle,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(child: Text(statusLabel)),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(statusLabel),
-                const Spacer(),
                 Text(
                   appProvider.localServerUrl,
                   style: Theme.of(context).textTheme.bodySmall,
@@ -645,74 +601,90 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
     final isDefault = profile.id == appProvider.defaultServerId;
 
     return Card(
+      key: ValueKey('settings_server_${profile.id}'),
       child: ListTile(
+        selected: isActive,
+        onTap: isActive || _activatingServerId != null
+            ? null
+            : () => _activateServer(appProvider, profile.id),
         leading: _HealthDot(status: appProvider.healthFor(profile.id)),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                profile.displayName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (isActive) _MetaChip(label: context.l10n.serversActive),
-            if (isDefault) _MetaChip(label: context.l10n.serversDefault),
-            if (profile.oauthEnabled)
-              _MetaChip(label: context.l10n.serverOAuthChip),
-            if (profile.tailscaleEnabled)
-              _MetaChip(label: context.l10n.serverTailscaleChip),
-          ],
-        ),
-        subtitle: Text(
-          profile.url,
-          maxLines: 2,
+        title: Text(
+          profile.displayName,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: PopupMenuButton<_ServerAction>(
-          icon: const Icon(Symbols.more_vert),
-          onSelected: (action) => _handleServerAction(
-            appProvider: appProvider,
-            profile: profile,
-            action: action,
-          ),
-          itemBuilder: (_) => [
-            if (!isActive)
-              PopupMenuItem(
-                value: _ServerAction.activate,
-                child: Text(context.l10n.serversSetActive),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(profile.url, maxLines: 2, overflow: TextOverflow.ellipsis),
+            if (isActive ||
+                isDefault ||
+                profile.oauthEnabled ||
+                profile.tailscaleEnabled)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (isActive) _MetaChip(label: context.l10n.serversActive),
+                    if (isDefault)
+                      _MetaChip(label: context.l10n.serversDefault),
+                    if (profile.oauthEnabled)
+                      _MetaChip(label: context.l10n.serverOAuthChip),
+                    if (profile.tailscaleEnabled)
+                      _MetaChip(label: context.l10n.serverTailscaleChip),
+                  ],
+                ),
               ),
-            if (!isDefault)
-              PopupMenuItem(
-                value: _ServerAction.setDefault,
-                child: Text(context.l10n.serversSetDefault),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_activatingServerId == profile.id)
+              const AppIndeterminateRing(size: 18),
+            PopupMenuButton<_ServerAction>(
+              icon: const Icon(Symbols.more_vert),
+              onSelected: (action) => _handleServerAction(
+                appProvider: appProvider,
+                profile: profile,
+                action: action,
               ),
-            if (isDefault)
-              PopupMenuItem(
-                value: _ServerAction.clearDefault,
-                child: Text(context.l10n.serversClearDefault),
-              ),
-            if (profile.oauthEnabled) ...[
-              PopupMenuItem(
-                value: _ServerAction.reauth,
-                child: Text(context.l10n.serverReauthenticate),
-              ),
-              PopupMenuItem(
-                value: _ServerAction.clearOAuth,
-                child: Text(context.l10n.serverClearOAuth),
-              ),
-            ],
-            PopupMenuItem(
-              value: _ServerAction.check,
-              child: Text(context.l10n.serversCheckHealth),
-            ),
-            PopupMenuItem(
-              value: _ServerAction.edit,
-              child: Text(context.l10n.serversEdit),
-            ),
-            PopupMenuItem(
-              value: _ServerAction.delete,
-              child: Text(context.l10n.serversDelete),
+              itemBuilder: (_) => [
+                if (!isDefault)
+                  PopupMenuItem(
+                    value: _ServerAction.setDefault,
+                    child: Text(context.l10n.serversSetDefault),
+                  ),
+                if (isDefault)
+                  PopupMenuItem(
+                    value: _ServerAction.clearDefault,
+                    child: Text(context.l10n.serversClearDefault),
+                  ),
+                if (profile.oauthEnabled) ...[
+                  PopupMenuItem(
+                    value: _ServerAction.reauth,
+                    child: Text(context.l10n.serverReauthenticate),
+                  ),
+                  PopupMenuItem(
+                    value: _ServerAction.clearOAuth,
+                    child: Text(context.l10n.serverClearOAuth),
+                  ),
+                ],
+                PopupMenuItem(
+                  value: _ServerAction.check,
+                  child: Text(context.l10n.serversCheckHealth),
+                ),
+                PopupMenuItem(
+                  value: _ServerAction.edit,
+                  child: Text(context.l10n.serversEdit),
+                ),
+                PopupMenuItem(
+                  value: _ServerAction.delete,
+                  child: Text(context.l10n.serversDelete),
+                ),
+              ],
             ),
           ],
         ),
@@ -763,22 +735,35 @@ class _ServersSettingsSectionState extends State<ServersSettingsSection> {
     );
   }
 
+  Future<void> _activateServer(AppProvider appProvider, String id) async {
+    if (_activatingServerId != null || id == appProvider.activeServerId) return;
+    if (appProvider.healthFor(id) == ServerHealthStatus.unhealthy) {
+      _showMessage(context.l10n.serversCannotActivateUnhealthy);
+      return;
+    }
+    setState(() => _activatingServerId = id);
+    try {
+      final ok = await appProvider.setActiveServer(id);
+      if (!ok) _showMessage(appProvider.errorMessage);
+    } catch (_) {
+      if (mounted) {
+        _showMessage(
+          appProvider.errorMessage.isEmpty
+              ? context.l10n.errorAnErrorOccurred
+              : appProvider.errorMessage,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _activatingServerId = null);
+    }
+  }
+
   Future<void> _handleServerAction({
     required AppProvider appProvider,
     required ServerProfile profile,
     required _ServerAction action,
   }) async {
     switch (action) {
-      case _ServerAction.activate:
-        if (appProvider.healthFor(profile.id) == ServerHealthStatus.unhealthy) {
-          _showMessage(context.l10n.serversCannotActivateUnhealthy);
-          return;
-        }
-        final ok = await appProvider.setActiveServer(profile.id);
-        if (!ok) {
-          _showMessage(appProvider.errorMessage);
-        }
-        break;
       case _ServerAction.setDefault:
         final ok = await appProvider.setDefaultServer(profile.id);
         if (!ok) {
@@ -913,16 +898,13 @@ class _MetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 6),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(10),
       ),
+      child: Text(label, style: Theme.of(context).textTheme.labelSmall),
     );
   }
 }

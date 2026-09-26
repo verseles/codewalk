@@ -5875,10 +5875,6 @@
   "@speechSherpa": {
     "description": "CodeWalk UI string — speechSherpa"
   },
-  "speechSherpaExperimentalFail": "Sherpa is experimental and can fail on some devices. Prefer Native if you want the most stable behavior.",
-  "@speechSherpaExperimentalFail": {
-    "description": "CodeWalk UI string — speechSherpaExperimentalFail"
-  },
   "speechSherpaModelsLinux": "Sherpa models (Linux)",
   "@speechSherpaModelsLinux": {
     "description": "CodeWalk UI string — speechSherpaModelsLinux"
@@ -6725,7 +6721,7 @@
   "@speechNativeSubtitle": {
     "description": "CodeWalk UI string — speechNativeSubtitle"
   },
-  "speechSherpaSubtitle": "Heavier, experimental, and bug-prone. Often more precise with downloaded models.",
+  "speechSherpaSubtitle": "On-device speech recognition with downloadable models.",
   "@speechSherpaSubtitle": {
     "description": "CodeWalk UI string — speechSherpaSubtitle"
   },

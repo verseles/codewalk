@@ -29,7 +29,7 @@ import 'settings/sections/shortcuts_settings_section.dart';
 import 'settings/sections/speech_settings_section.dart';
 import 'settings/sections/text_to_speech_settings_section.dart';
 import 'settings/settings_search_catalog.dart';
-import 'settings/widgets/settings_search_navigation.dart';
+import 'settings/widgets/settings_section_layout.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, this.initialSectionId = ''});
@@ -346,6 +346,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    return SettingsSurfaceTheme(child: Builder(builder: _buildSettingsContent));
+  }
+
+  Widget _buildSettingsContent(BuildContext context) {
     final visibleSections = _visibleSections;
     if (!visibleSections.any((item) => item.id == _selectedSectionId)) {
       _selectedSectionId = visibleSections.first.id;

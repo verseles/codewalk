@@ -4422,10 +4422,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechSherpa => 'Sherpa';
 
   @override
-  String get speechSherpaExperimentalFail =>
-      'Sherpa는 실험적 기능이며 일부 기기에서 작동하지 않을 수 있습니다. 가장 안정적인 동작을 원하시면 네이티브(Native) 방식을 권장합니다.';
-
-  @override
   String get speechSherpaModelsLinux => 'Sherpa 모델 (Linux)';
 
   @override
@@ -5073,8 +5069,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get speechNativeSubtitle => '더 간단하고 빠르게 시작됩니다.';
 
   @override
-  String get speechSherpaSubtitle =>
-      '더 무겁고 실험적이며 버그가 발생하기 쉽습니다. 다운로드한 모델에서는 종종 더 정확합니다.';
+  String get speechSherpaSubtitle => '다운로드 가능한 모델을 사용하는 온디바이스 음성 인식.';
 
   @override
   String get speechMoonshineSubtitle =>

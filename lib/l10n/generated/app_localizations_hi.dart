@@ -4607,10 +4607,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get speechSherpa => 'Sherpa';
 
   @override
-  String get speechSherpaExperimentalFail =>
-      'Sherpa प्रायोगिक है और कुछ उपकरणों पर विफल हो सकता है। यदि आप सबसे स्थिर व्यवहार चाहते हैं तो मूल (Native) को प्राथमिकता दें।';
-
-  @override
   String get speechSherpaModelsLinux => 'Sherpa मॉडल (Linux)';
 
   @override
@@ -5277,7 +5273,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get speechSherpaSubtitle =>
-      'भारी, प्रायोगिक और बग-प्रवण। डाउनलोड किए गए मॉडल के साथ अक्सर अधिक सटीक।';
+      'डाउनलोड करने योग्य मॉडलों के साथ डिवाइस पर वाक् पहचान।';
 
   @override
   String get speechMoonshineSubtitle =>

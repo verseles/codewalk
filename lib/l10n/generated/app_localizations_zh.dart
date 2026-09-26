@@ -4327,10 +4327,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechSherpa => 'Sherpa';
 
   @override
-  String get speechSherpaExperimentalFail =>
-      'Sherpa 是实验性的，在某些设备上可能会失败。如果您希望获得最稳定的行为，请首选“原生”。';
-
-  @override
   String get speechSherpaModelsLinux => 'Sherpa 模型（Linux）';
 
   @override
@@ -4960,7 +4956,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get speechNativeSubtitle => '启动更简单、更快速。';
 
   @override
-  String get speechSherpaSubtitle => '较笨重、实验性且容易出问题。使用下载的模型通常更准确。';
+  String get speechSherpaSubtitle => '使用可下载模型的设备端语音识别。';
 
   @override
   String get speechMoonshineSubtitle =>

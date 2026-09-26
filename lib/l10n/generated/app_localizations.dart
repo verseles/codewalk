@@ -8150,12 +8150,6 @@ abstract class AppLocalizations {
   /// **'Sherpa'**
   String get speechSherpa;
 
-  /// CodeWalk UI string — speechSherpaExperimentalFail
-  ///
-  /// In en, this message translates to:
-  /// **'Sherpa is experimental and can fail on some devices. Prefer Native if you want the most stable behavior.'**
-  String get speechSherpaExperimentalFail;
-
   /// CodeWalk UI string — speechSherpaModelsLinux
   ///
   /// In en, this message translates to:
@@ -9353,7 +9347,7 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — speechSherpaSubtitle
   ///
   /// In en, this message translates to:
-  /// **'Heavier, experimental, and bug-prone. Often more precise with downloaded models.'**
+  /// **'On-device speech recognition with downloadable models.'**
   String get speechSherpaSubtitle;
 
   /// CodeWalk UI string — speechMoonshineSubtitle

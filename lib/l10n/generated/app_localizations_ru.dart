@@ -4640,10 +4640,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get speechSherpa => 'Sherpa';
 
   @override
-  String get speechSherpaExperimentalFail =>
-      'Sherpa является экспериментальным и может давать сбои на некоторых устройствах. Используйте Встроенный для наиболее стабильной работы.';
-
-  @override
   String get speechSherpaModelsLinux => 'Модели Sherpa (Linux)';
 
   @override
@@ -5306,7 +5302,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get speechSherpaSubtitle =>
-      'Тяжелее, экспериментальный, склонен к ошибкам. Часто точнее с загруженными моделями.';
+      'Распознавание речи на устройстве с загружаемыми моделями.';
 
   @override
   String get speechMoonshineSubtitle =>

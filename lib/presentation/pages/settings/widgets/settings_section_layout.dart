@@ -1,8 +1,30 @@
 import 'package:flutter/material.dart';
 
+import '../../../theme/app_visual_style_tokens.dart';
 import '../../../utils/window_size_class.dart';
 
 export 'settings_search_navigation.dart';
+
+class SettingsSurfaceTheme extends StatelessWidget {
+  const SettingsSurfaceTheme({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final shape = theme.cardTheme.shape;
+    final data = theme.visualStyleTokens.isRefined && shape is OutlinedBorder
+        ? theme.copyWith(
+            cardTheme: theme.cardTheme.copyWith(
+              shape: shape.copyWith(side: BorderSide.none),
+            ),
+          )
+        : theme;
+    // Keep the same subtree when switching styles so form state survives.
+    return Theme(data: data, child: child);
+  }
+}
 
 class SettingsSectionIntro extends StatelessWidget {
   const SettingsSectionIntro({

@@ -492,26 +492,6 @@ class _SpeechSettingsSectionState extends State<SpeechSettingsSection> {
                           : sherpaUnavailableHint,
                     ),
                   ),
-                  if (sherpaEnabled) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Symbols.warning_amber_rounded,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            context.l10n.speechSherpaExperimentalFail,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                   const Divider(height: 1),
                   RadioListTile<SpeechToTextEngine>(
                     contentPadding: EdgeInsets.zero,
