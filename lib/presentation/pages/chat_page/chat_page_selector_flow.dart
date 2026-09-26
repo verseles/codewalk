@@ -236,7 +236,7 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
             final rawPath = query.isEmpty ? widget.initialDirectory : query;
             final canOpenPath =
                 query.isEmpty ||
-                query.startsWith('/') ||
+                query.replaceAll('\\', '/').startsWith('/') ||
                 RegExp(r'^[A-Za-z]:[/\\]').hasMatch(query);
             void submit() {
               final composing = _query.value.composing;
@@ -247,6 +247,7 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                 _select(rawPath);
               }
             }
+
             final content = Material(
               key: const ValueKey<String>('project_selector_dialog_content'),
               child: _browsing
@@ -352,8 +353,8 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                                 _complete(selected.node.path);
                                 return KeyEventResult.handled;
                               }
-                          if (key == LogicalKeyboardKey.enter) {
-                            submit();
+                              if (key == LogicalKeyboardKey.enter) {
+                                submit();
                                 return KeyEventResult.handled;
                               }
                               return KeyEventResult.ignored;
@@ -364,10 +365,10 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                               ),
                               controller: _query,
                               focusNode: _focus,
-                          autofocus: true,
-                          textInputAction: TextInputAction.go,
-                          onSubmitted: (_) => submit(),
-                          onChanged: _search,
+                              autofocus: true,
+                              textInputAction: TextInputAction.go,
+                              onSubmitted: (_) => submit(),
+                              onChanged: _search,
                               decoration: InputDecoration(
                                 prefixIcon: const Icon(Symbols.search),
                                 hintText: context.l10n.chatFilterDirectories,

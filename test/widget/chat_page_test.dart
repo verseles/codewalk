@@ -4987,6 +4987,39 @@ void main() {
     expect(find.byType(Dialog), findsNothing);
   });
 
+  testWidgets('G3 Windows drive root browsing and UNC manual opening retain scope', (tester) async {
+    final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+    final initial = Project(id: 'initial', name: 'Initial', path: '/repo/a', createdAt: DateTime(2026));
+    final repository = FakeProjectRepository(currentProject: initial, projects: [initial])
+      ..directoriesByPath['C:/'] = ['C:/apps']
+      ..directoriesByPath['C:/apps'] = [];
+    final provider = _buildChatProvider(localDataSource: local, projectRepository: repository);
+    final appProvider = _buildAppProvider(localDataSource: local);
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+    final input = find.byKey(const ValueKey<String>('workspace_base_directory_input'));
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    await tester.enterText(input, 'C:\\');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byType(Dialog), matching: find.text('C:/apps')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey<String>('workspace_open_directory_picker_button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('directory_picker_parent')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey<String>('directory_picker_use_current')));
+    await tester.pumpAndSettle();
+    expect(provider.projectProvider.currentDirectory, 'C:/');
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    await tester.enterText(input, r'\\server\share');
+    await tester.pump();
+    expect(find.byKey(const ValueKey<String>('workspace_open_path_button')), findsOneWidget);
+    await tester.testTextInput.receiveAction(TextInputAction.go);
+    await tester.pumpAndSettle();
+    expect(provider.projectProvider.currentDirectory, '//server/share');
+  });
+
   testWidgets('shows active directory and unified keyboard project search', (
     WidgetTester tester,
   ) async {

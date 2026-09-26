@@ -266,34 +266,22 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
   }
 
   String _normalizeDirectory(String input) {
-    var value = input.trim();
-    if (value.isEmpty) {
-      return '/';
-    }
-    if (value.length > 1 && value.endsWith('/')) {
-      value = value.substring(0, value.length - 1);
-    }
-    return value;
+    return normalizeOptionalFilePath(input) ?? '/';
   }
 
   String _basename(String path) {
-    final normalized = _normalizeDirectory(path).replaceAll('\\', '/');
-    if (normalized == '/') {
-      return '/';
-    }
-    final parts = normalized
-        .split('/')
-        .where((item) => item.trim().isNotEmpty)
-        .toList(growable: false);
-    return parts.isEmpty ? normalized : parts.last;
+    return fileBasename(_normalizeDirectory(path));
   }
 
   String? _parentDirectory(String path) {
     final normalized = _normalizeDirectory(path).replaceAll('\\', '/');
-    if (normalized == '/') {
+    if (normalized == '/' || RegExp(r'^[A-Za-z]:/$').hasMatch(normalized)) {
       return null;
     }
     final index = normalized.lastIndexOf('/');
+    if (index == 2 && RegExp(r'^[A-Za-z]:/').hasMatch(normalized)) {
+      return normalized.substring(0, 3);
+    }
     if (index <= 0) {
       return '/';
     }

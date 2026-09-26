@@ -1,5 +1,5 @@
 /// Normalizes a file path: trims whitespace, converts backslashes to forward
-/// slashes, and strips trailing slashes (except for bare root "/").
+/// slashes, and strips trailing slashes except for Unix and Windows drive roots.
 String normalizeFilePath(String path) {
   var value = path.trim().replaceAll('\\', '/');
   if (value.isEmpty) {
@@ -7,6 +7,10 @@ String normalizeFilePath(String path) {
   }
   if (RegExp(r'^/+$').hasMatch(value)) {
     return '/';
+  }
+  // A drive root is absolute; stripping its slash makes it drive-relative.
+  if (RegExp(r'^[A-Za-z]:/+$').hasMatch(value)) {
+    return '${value.substring(0, 2)}/';
   }
   if (value.length > 1) {
     value = value.replaceAll(RegExp(r'/+$'), '');
@@ -39,6 +43,7 @@ bool areEquivalentFilePaths(String? a, String? b) {
 /// Returns the base name (last path component) of a normalized path.
 String fileBasename(String path) {
   final normalized = normalizeFilePath(path);
+  if (RegExp(r'^[A-Za-z]:/$').hasMatch(normalized)) return normalized;
   if (normalized.isEmpty || normalized == '/') {
     return normalized.isEmpty ? 'file' : '/';
   }
