@@ -405,18 +405,29 @@
 - **When** the user switches to a different project
 - **Then** the visible session list changes to show only sessions belonging to that project
 
-### Project context picker is folder-first
+### Project context uses one searchable project/folder dialog
 
 - **Given** the user opens the project context picker (`Choose Directory`)
-- **When** the user interacts with context options
-- **Then** the UI uses project/folder language only (no workspace distinction in this flow)
-- **Then** the action `Open project folder...` allows opening any folder as project context, including non-Git folders
-- **Then** `Open project folder...` presents directory browsing as the primary action while keeping manual path entry available
-- **Then** the path that will be opened is shown before confirmation, so the user can verify the full project directory instead of only a folder name
-- **Then** inline fuzzy folder suggestions backed by OpenCode directory search preserve and select the full path when tapped
+- **When** the picker opens from the project title or Project Context action
+- **Then** one responsive dialog combines known open/closed projects and bounded server directory-search results, deduplicated by normalized path
+- **Then** the focused search field ranks names and paths with exact/prefix matches ahead of ordered, noncontiguous fuzzy matches
+- **Then** compact screens use a fullscreen dialog; desktop uses a centered dialog
+- **Then** arrow keys and Ctrl+N/Ctrl+P move the highlighted result, Enter or the soft-keyboard Go action opens it, Tab completes its directory path, and Escape dismisses the picker; unfinished IME composition does not submit
+- **Then** `Browse directories` switches to a directory browser within the same dialog rather than stacking another dialog or sheet
+- **Then** an explicit Open folder action keeps manual absolute-path entry available, including non-Git folders; the search field retains the full path
+- **Then** selecting a result opens its complete path immediately; stale search responses are discarded and changing servers dismisses the picker
+- **Then** Windows slash/backslash queries, drive roots such as `C:/`, and native UNC paths are supported without treating a drive root as drive-relative `C:`
 - **Then** tapping a project row switches/reopens that context immediately and closes the picker without requiring a secondary open action
 - **Then** removing a closed project from history hides that exact project path from the closed-project history across reloads until the user explicitly reopens or re-enters that path again
 - **Then** selector actions are serialized so repeated rapid taps do not trigger overlapping switch/reopen/close/archive operations
+
+### Drive-root file entry points share canonical paths
+
+- **Given** the active project is a Windows drive root such as `C:/`
+- **When** the user opens a file through the Files tree or a relative/absolute link in a chat message
+- **Then** those entry points use the same canonical file-tab and cache path, without duplicate separators or repeated drive prefixes
+- **Then** directory-listing and file-reading fallbacks retain their relative-path candidates, and file-operation path checks distinguish valid children from another drive
+- **Then** shell file operations still require the existing capability probe and server-side containment checks
 
 ### Per-project icons are local and auto-discovered
 
@@ -655,6 +666,7 @@
 - **Given** the session-tab display toggle is enabled and tabs are nonempty
 - **When** the chat surface is rendered
 - **Then** on desktop with integrated window chrome configured, the strip is rendered in the integrated desktop chrome; otherwise it appears below the app bar on compact and expanded layouts
+- **Then** opening Settings suspends the integrated session-tab content while retaining the window controls and drag region; nested Settings destinations keep it suspended, and returning to chat restores the tabs without changing the saved visibility preference
 - **Then** tabs default to enabled on every platform when there is no override, and an explicit `Display Toggles` choice, including `false`, persists
 - **Then** the strip height is 20% smaller, with smaller gaps and shoulders; active tabs have an 8px top radius and inactive tabs have a 5px top radius
 
@@ -2017,6 +2029,18 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 ---
 
 ## Settings
+
+### Desktop panes react immediately and preserve navigation access
+
+- **Given** the desktop Conversations, Files, or Utility pane is visible
+- **When** the user drags its resize handle or hides/restores it
+- **Then** the layout updates immediately from pane settings, without requiring a session switch or another UI action
+- **Then** requested widths remain within 160–500 logical pixels, are persisted at drag completion, and can be reset by double-tapping the handle
+- **Then** constrained desktop layouts reduce rendered pane widths above their 160-pixel minimum to reserve 320 pixels for chat, without overwriting the saved widths; existing pane breakpoints still apply
+- **Given** Conversations is hidden on a non-compact layout
+- **When** the chat toolbar is shown, including timeline-search mode
+- **Then** Settings and Project Context remain accessible from toolbar actions, and the Sync control opens the shared active-server selection/management menu
+- **Then** Project Context opens the same unified project/folder dialog as the sidebar action
 
 ### Settings landing has localized destination search
 
