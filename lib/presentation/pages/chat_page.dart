@@ -2659,11 +2659,25 @@ class _ChatPageState extends State<ChatPage>
                             } else {
                               final filePaneWidth = panes.$5;
                               final utilityPaneWidth = panes.$6;
+                              final paneCount = (showConversationPane ? 1 : 0) +
+                                  (showDesktopFilePane ? 1 : 0) +
+                                  (showDesktopUtilityPane ? 1 : 0);
+                              final handleWidth = (showConversationPane ? (isMedium ? 1.0 : 8.0) : 0.0) +
+                                  (showDesktopFilePane ? 8.0 : 0.0) +
+                                  (showDesktopUtilityPane ? 8.0 : 0.0);
+                              final requestedWidth = (showConversationPane ? sessionPaneWidth : 0.0) +
+                                  (showDesktopFilePane ? filePaneWidth : 0.0) +
+                                  (showDesktopUtilityPane ? utilityPaneWidth : 0.0);
+                              // Fit the current window without overwriting the user's
+                              // saved widths. Reserve usable chat space and pane minima.
+                              final extraRoom = max(0.0, width - 320 - handleWidth - paneCount * 160);
+                              final widthScale = min(1.0, extraRoom / max(1.0, requestedWidth - paneCount * 160));
+                              double fittedWidth(double requested) => 160 + (requested - 160) * widthScale;
                               final rowChildren = <Widget>[
                                 if (showConversationPane) ...[
                                   SizedBox(
                                     key: const ValueKey<String>('desktop_pane_conversations'),
-                                    width: sessionPaneWidth,
+                                    width: fittedWidth(sessionPaneWidth),
                                     child: _buildSessionPanel(
                                       closeOnSelect: false,
                                       isMobileLayout: false,
@@ -2689,7 +2703,7 @@ class _ChatPageState extends State<ChatPage>
                                 if (showDesktopFilePane) ...[
                                   SizedBox(
                                     key: const ValueKey<String>('desktop_pane_files'),
-                                    width: filePaneWidth,
+                                    width: fittedWidth(filePaneWidth),
                                     child: _buildDesktopFilePane(
                                       onCollapseRequested: () {
                                         unawaited(
@@ -2723,7 +2737,7 @@ class _ChatPageState extends State<ChatPage>
                                   ),
                                   SizedBox(
                                     key: const ValueKey<String>('desktop_pane_utility'),
-                                    width: utilityPaneWidth,
+                                    width: fittedWidth(utilityPaneWidth),
                                     child: _buildDesktopUtilityPane(
                                       onCollapseRequested: () {
                                         unawaited(

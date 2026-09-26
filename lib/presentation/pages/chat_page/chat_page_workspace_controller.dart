@@ -446,7 +446,7 @@ extension _ChatPageWorkspaceController on _ChatPageState {
   }
 
   String _directorySuggestionSearchQuery(String rawInput) {
-    final trimmed = rawInput.trim();
+    final trimmed = rawInput.trim().replaceAll('\\', '/');
     if (trimmed.isEmpty) {
       return '';
     }
@@ -463,7 +463,7 @@ extension _ChatPageWorkspaceController on _ChatPageState {
 
   String _directorySuggestionSearchRoot(String rawInput, String fallback) {
     final normalizedFallback = normalizeOptionalFilePath(fallback) ?? '/';
-    final trimmed = rawInput.trim();
+    final trimmed = rawInput.trim().replaceAll('\\', '/');
     if (trimmed.isEmpty || !trimmed.contains('/')) {
       return normalizedFallback;
     }
@@ -472,6 +472,9 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       return normalizedFallback;
     }
     final separator = normalizedPath.lastIndexOf('/');
+    if (separator == 2 && RegExp(r'^[A-Za-z]:/').hasMatch(normalizedPath)) {
+      return normalizedPath.substring(0, 3);
+    }
     if (separator <= 0) {
       return '/';
     }

@@ -85,11 +85,12 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
   String? _error;
   List<FileNode> _remote = const [];
   late final AppProvider _app = context.read<AppProvider>();
-  late final String? _serverId = _app.activeServerId;
+  late final String? _serverId;
 
   @override
   void initState() {
     super.initState();
+    _serverId = _app.activeServerId;
     _app.addListener(_checkServer);
   }
 
@@ -208,7 +209,10 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
             }
             int? score(FileNode node) {
               final name = projectDirectoryMatchScore(node.name, query);
-              final path = projectDirectoryMatchScore(node.path, query);
+              final path = projectDirectoryMatchScore(
+                normalizeFilePath(node.path),
+                query.replaceAll('\\', '/'),
+              );
               return name == null
                   ? path
                   : path == null
@@ -234,6 +238,15 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                 query.isEmpty ||
                 query.startsWith('/') ||
                 RegExp(r'^[A-Za-z]:[/\\]').hasMatch(query);
+            void submit() {
+              final composing = _query.value.composing;
+              if (composing.isValid && !composing.isCollapsed) return;
+              if (selected != null) {
+                _select(selected.node.path);
+              } else if (canOpenPath) {
+                _select(rawPath);
+              }
+            }
             final content = Material(
               key: const ValueKey<String>('project_selector_dialog_content'),
               child: _browsing
@@ -339,12 +352,8 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                                 _complete(selected.node.path);
                                 return KeyEventResult.handled;
                               }
-                              if (key == LogicalKeyboardKey.enter) {
-                                if (selected != null) {
-                                  _select(selected.node.path);
-                                } else if (canOpenPath) {
-                                  _select(rawPath);
-                                }
+                          if (key == LogicalKeyboardKey.enter) {
+                            submit();
                                 return KeyEventResult.handled;
                               }
                               return KeyEventResult.ignored;
@@ -355,8 +364,10 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                               ),
                               controller: _query,
                               focusNode: _focus,
-                              autofocus: true,
-                              onChanged: _search,
+                          autofocus: true,
+                          textInputAction: TextInputAction.go,
+                          onSubmitted: (_) => submit(),
+                          onChanged: _search,
                               decoration: InputDecoration(
                                 prefixIcon: const Icon(Symbols.search),
                                 hintText: context.l10n.chatFilterDirectories,

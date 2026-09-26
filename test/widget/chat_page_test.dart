@@ -2612,6 +2612,18 @@ void main() {
         await tester.pump();
         expect(tester.getSize(finder).width, before + 24);
       }
+      for (final pane in DesktopPane.values) {
+        settings.updateDesktopPaneWidthInMemory(pane, 500);
+      }
+      await tester.binding.setSurfaceSize(const Size(1200, 900));
+      await tester.pumpAndSettle();
+      final widths = DesktopPane.values.map((pane) => tester.getSize(find.byKey(ValueKey<String>('desktop_pane_${pane.name}'))).width).toList();
+      expect(widths.every((width) => width >= 160), isTrue);
+      expect(widths.reduce((a, b) => a + b), lessThanOrEqualTo(856.01));
+      expect(DesktopPane.values.every((pane) => settings.desktopPaneWidth(pane) == 500), isTrue);
+      expect(tester.takeException(), isNull);
+      await tester.binding.setSurfaceSize(const Size(1500, 900));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey<String>('hide_conversations_sidebar_button')));
       await tester.pump();
       expect(find.byKey(const ValueKey<String>('appbar_settings_button')), findsOneWidget);
@@ -4923,6 +4935,57 @@ void main() {
       expect(find.text('Select PDF'), findsOneWidget);
     },
   );
+
+  testWidgets('G3 untouched project picker closes on server switch', (tester) async {
+    final local = InMemoryAppLocalDataSource()
+      ..activeServerId = 'srv_a'
+      ..defaultServerId = 'srv_a'
+      ..serverProfilesJson = jsonEncode([
+        for (final id in ['srv_a', 'srv_b']) {'id': id, 'url': 'http://127.0.0.1:${id == 'srv_a' ? 4096 : 4097}', 'label': id, 'createdAt': 0, 'updatedAt': 0},
+      ]);
+    final provider = _buildChatProvider(localDataSource: local);
+    final appProvider = _buildAppProvider(localDataSource: local);
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(await appProvider.setActiveServer('srv_b', blockUnhealthy: false), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('G3 mobile keyboard opens Windows match and manual path', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+    final initial = Project(id: 'initial', name: 'Initial', path: '/repo/a', createdAt: DateTime(2026));
+    final windows = Project(id: 'windows', name: 'Windows App', path: 'C:/repo/app', createdAt: DateTime(2026));
+    final provider = _buildChatProvider(localDataSource: local, projectRepository: FakeProjectRepository(currentProject: initial, projects: [initial, windows]));
+    final appProvider = _buildAppProvider(localDataSource: local);
+    await tester.pumpWidget(_testApp(provider, appProvider));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    final input = find.byKey(const ValueKey<String>('workspace_base_directory_input'));
+    await tester.enterText(input, r'C:\repo\app');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byType(Dialog), matching: find.text('Windows App')), findsOneWidget);
+    await tester.testTextInput.receiveAction(TextInputAction.go);
+    await tester.pumpAndSettle();
+    expect(provider.projectProvider.currentProject?.id, 'windows');
+    expect(find.byType(Dialog), findsNothing);
+    await tester.tap(find.byTooltip('Choose Directory'));
+    await tester.pumpAndSettle();
+    await tester.enterText(input, '/repo/new-folder');
+    await tester.pump();
+    await tester.testTextInput.receiveAction(TextInputAction.go);
+    await tester.pumpAndSettle();
+    expect(provider.projectProvider.currentDirectory, '/repo/new-folder');
+    expect(find.byType(Dialog), findsNothing);
+  });
 
   testWidgets('shows active directory and unified keyboard project search', (
     WidgetTester tester,
