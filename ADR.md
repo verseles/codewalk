@@ -2886,6 +2886,8 @@ Adopt a **refined visual layer** on top of the existing Flutter Material / Mater
 
 6. **`OpenCodeThemeTokens` preset palette stays authoritative** — the `OpenCode` brand theme and the other official theme presets remain the canonical color source for both `classic` and `refined`. Dynamic color (`DynamicColorBuilder`, `SettingsProvider.dynamicColorAvailable`) continues to override the seed when available; AMOLED continues to apply on top of either style. The refined layer only modulates surface treatment, radii, shadows, and tonal offsets — it does not invent new color seeds.
 
+7. **G4 settings-surface amendment (v1.257.0; code `bc2e673`, release `4b3b635f`)** — `SettingsSurfaceTheme` remains around the Settings root in both styles to preserve form state; in Refined only, it locally removes the side from existing `OutlinedBorder` card shapes. This scope includes compact inline and desktop detail settings, not separate Logs, setup-wizard, or setup-debug routes. It does not change global theme, dividers, input/focus/error styling, or Classic; the passive Tailscale container border is also removed in Refined only. No ADR-023 exception, design dependency, or protocol change is introduced.
+
 ### Rationale
 
 - **Lower-risk incremental layer over existing architecture.** Material 3 widgets are kept; no widgets are replaced, no third-party design system is adopted, and the existing `AppShapes` / `AppDensitySpacing` / `OpenCodeThemeTokens` contracts are preserved. The refined look is an additive `ThemeExtension`, so most surfaces opt in by reading the extension while the rest of the widget tree keeps working unchanged.
@@ -2930,6 +2932,7 @@ This ADR is fully compliant with ADR-023. It introduces no OpenCode server contr
 - `lib/presentation/widgets/chat_message_widget.dart` — refined message shell (token-driven, with Classic fallback)
 - `lib/presentation/pages/chat_page.dart` (import owner) + `chat_page_scaffold.dart` + `chat_page_status_presenter.dart` + `chat_page_timeline_runtime.dart` + `chat_page_composer_widgets.dart` + composer parts — refined scaffold / status / timeline / composer region treatment (token-driven, with Classic fallback)
 - `lib/presentation/widgets/chat_session_list.dart` — refined sidebar list treatment (token-driven, with Classic fallback)
+- `lib/presentation/pages/settings/widgets/settings_section_layout.dart`, `lib/presentation/pages/settings_page.dart`, `lib/presentation/pages/settings/sections/servers_settings_section.dart`, `test/widget/settings_surface_theme_test.dart` — v1.257.0 G4 scoped Settings card/Tailscale treatment and form-state/theme-isolation coverage (`bc2e673`, release `4b3b635f`)
 - `test/unit/domain/experience_settings_test.dart` — `VisualStyle` default and serialization coverage
 - `test/unit/providers/settings_provider_test.dart` — `VisualStyle` getter / setter and persistence migration coverage
 - `test/unit/presentation/app_theme_test.dart` — `AppTheme.lightFrom` / `AppTheme.darkFrom` / `_buildTheme` dispatch and `AppVisualStyleTokens` registration coverage (including `withResponsiveSnackBars` Refined tokenization)

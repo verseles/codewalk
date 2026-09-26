@@ -56,7 +56,8 @@ Preservar mobile, atalhos, isolamento de contexto e desempenho do chat.
 
 ## G4 — Settings: simplificação visual e conteúdo
 
-Afinidade média.
+Afinidade média. Código incluído no tag `v1.257.0`; confirmação de uso e
+fechamento das issues permanecem pendentes.
 
 - [#201 — Reduzir bordas do modo Refinado](https://github.com/verseles/codewalk/issues/201)
 - [#203 — Unificar servidores ativos e salvos](https://github.com/verseles/codewalk/issues/203)

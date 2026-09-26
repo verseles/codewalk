@@ -233,6 +233,17 @@
 - **When** the user adds a new server profile (local, remote, work, etc.)
 - **Then** the profile is saved and the user can switch between profiles at any time
 
+### Settings uses one searchable server list
+
+- **Given** the user opens `Settings > Servers` on mobile or desktop
+- **When** the server profiles are displayed
+- **Then** each profile appears once in a list with its URL, health, and wrapping Active/Default/OAuth/Tailscale metadata; tapping or keyboard-activating an inactive row selects that server
+- **Then** the inline search filters names, URLs, and profile IDs without changing active/default selection or profile order; clearing it restores the full list
+- **Then** known-unhealthy targets are rejected, repeated row activations are blocked while a switch is pending, and selection reflects the provider's persisted active profile even if its subsequent connectivity check fails
+- **Then** the separate overflow menu retains default selection, health checks, editing, deletion, and applicable authentication actions
+- **Then** the active connection's Tailscale diagnostics remain outside the profile filter, and `This device` retains local-runtime controls below the list
+- **Then** Settings search can still reveal and highlight the server-selection filter through its existing destination
+
 ### Automatic health checks
 
 - **Given** server profiles are configured
@@ -1636,6 +1647,13 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 - **Then** the selected model preference persists when the download finishes, even if Settings was closed
 - **Then** only one on-device model download runs at a time; other model actions in Settings remain unavailable until it finishes
 
+### Sherpa has a descriptive engine subtitle
+
+- **Given** Sherpa is available in `Settings > Speech`
+- **When** the user views the speech-engine choices
+- **Then** Sherpa is described as `On-device speech recognition with downloadable models.` in English, with corresponding translations in all supported locales
+- **Then** the former Sherpa experimental warning row is omitted; platform availability, model controls, and other engines retain their existing behavior
+
 ### Keep one local speech model in memory
 
 - **Given** an on-device speech engine is available and `Settings > Speech > Keep in memory` is enabled (the default)
@@ -2084,7 +2102,7 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 
 ### Settings pickers are searchable
 
-- **Given** the user opens a settings select field (for example theme presets, OpenCode-backed defaults, sound type, active server, or Sherpa language)
+- **Given** the user opens a settings select field (for example theme presets, OpenCode-backed defaults, sound type, or Sherpa language)
 - **When** the user taps the field
 - **Then** the app opens a searchable picker with a search input inside the picker surface
 - **Then** typing filters the available options locally so long lists are faster to navigate on mobile and desktop
@@ -2105,6 +2123,8 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** older persisted settings that do not contain a `visualStyle` key continue to open in `Classic` for compatibility
 - **Then** selecting `Classic` preserves the existing Material 3 surface treatment
 - **Then** `Refined` applies quieter CodeWalk-specific surface, radius, separator, tint, and shadow tokens to the app theme, chat composer, message bubbles, timeline status cards, snackbars, and sidebar/session rows
+- **Then** Settings landing and inline detail sections use a scoped theme that removes Refined card outlines and the passive Tailscale panel outline while retaining card surfaces/radii, internal dividers, and functional input, focus, error, and selection treatments
+- **Then** switching between Classic and Refined keeps the Settings theme subtree stable so in-progress form state survives; separate setup, debug, and Logs routes retain their own theme scope
 - **Then** changing `Visual style` does not change the selected color palette, OpenCode preset, dynamic color preference, AMOLED dark preference, density, text scale, locale, or OpenCode server behavior
 
 ### OpenCode presets recolor markdown and code surfaces
