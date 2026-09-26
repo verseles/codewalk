@@ -62,5 +62,28 @@ String joinParentPath(String parent, String child) {
   if (parent.isEmpty || parent == '/' || parent == '.') {
     return child;
   }
+  if (parent.endsWith('/')) return '$parent$child';
   return '$parent/$child';
+}
+
+/// Separator-terminated root for containment checks and relative path slicing.
+String filePathChildPrefix(String path) {
+  final normalized = normalizeFilePath(path);
+  return normalized.endsWith('/') ? normalized : '$normalized/';
+}
+
+bool isAbsoluteFilePath(String path) {
+  final normalized = normalizeFilePath(path);
+  return normalized.startsWith('/') ||
+      RegExp('^[A-Za-z]:/').hasMatch(normalized);
+}
+
+String parentFilePath(String path) {
+  final normalized = normalizeFilePath(path);
+  if (RegExp(r'^[A-Za-z]:/$').hasMatch(normalized)) return normalized;
+  final separator = normalized.lastIndexOf('/');
+  if (separator == 2 && RegExp('^[A-Za-z]:/').hasMatch(normalized)) {
+    return normalized.substring(0, 3);
+  }
+  return separator <= 0 ? '/' : normalized.substring(0, separator);
 }

@@ -275,14 +275,14 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (normalizedDiff.isEmpty) {
       return null;
     }
-    if (normalizedDiff.startsWith('/')) {
+    if (isAbsoluteFilePath(normalizedDiff)) {
       return normalizedDiff;
     }
     final normalizedRoot = _normalizeFilePath(rootDirectory ?? '');
     if (normalizedRoot.isEmpty || normalizedRoot == '/') {
       return _normalizeFilePath('/$normalizedDiff');
     }
-    return _normalizeFilePath('$normalizedRoot/$normalizedDiff');
+    return _normalizeFilePath(joinParentPath(normalizedRoot, normalizedDiff));
   }
 
   Future<void> _loadRootDirectoryNodes({
@@ -1608,15 +1608,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
   }
 
   String _parentDirectoryForFilePath(String path) {
-    final normalized = _normalizeFilePath(path);
-    if (normalized.isEmpty || normalized == '/') {
-      return '/';
-    }
-    final index = normalized.lastIndexOf('/');
-    if (index <= 0) {
-      return '/';
-    }
-    return normalized.substring(0, index);
+    return parentFilePath(path);
   }
 
   String _absoluteFileTreePath(
@@ -1624,14 +1616,14 @@ extension _ChatPageFileRuntime on _ChatPageState {
     String path,
   ) {
     final normalized = _normalizeFilePath(path);
-    if (normalized.startsWith('/')) {
+    if (isAbsoluteFilePath(normalized)) {
       return normalized;
     }
     final root = _normalizeFilePath(fileState.rootDirectory);
     if (root.isEmpty || root == '/') {
       return _normalizeFilePath('/$normalized');
     }
-    return _normalizeFilePath('$root/$normalized');
+    return _normalizeFilePath(joinParentPath(root, normalized));
   }
 
   Set<String> _fileTreePathAliases(
@@ -1644,8 +1636,8 @@ extension _ChatPageFileRuntime on _ChatPageState {
     return <String>{
       normalized,
       absolute,
-      if (root.isNotEmpty && root != '/' && absolute.startsWith('$root/'))
-        absolute.substring(root.length + 1),
+      if (root.isNotEmpty && root != '/' && absolute.startsWith(filePathChildPrefix(root)))
+        absolute.substring(filePathChildPrefix(root).length),
     };
   }
 
@@ -1678,7 +1670,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
     if (parent == '/') {
       return _normalizeFilePath('/$name');
     }
-    return _normalizeFilePath('$parent/$name');
+    return _normalizeFilePath(joinParentPath(parent, name));
   }
 
   String _requestPathForFileTreeCacheKey({
@@ -1837,7 +1829,7 @@ extension _ChatPageFileRuntime on _ChatPageState {
     final normalizedPath = _normalizeFilePath(path);
     final normalizedParent = _normalizeFilePath(parent);
     return normalizedPath == normalizedParent ||
-        normalizedPath.startsWith('$normalizedParent/');
+        normalizedPath.startsWith(filePathChildPrefix(normalizedParent));
   }
 
   void _renamePathKeyedSetMap(

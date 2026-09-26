@@ -130,8 +130,9 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
         final results = await widget.onSearch(value.trim());
         if (!mounted ||
             generation != _generation ||
-            _app.activeServerId != _serverId)
+            _app.activeServerId != _serverId) {
           return;
+        }
         setState(() {
           _remote = results;
           _loading = false;
@@ -223,8 +224,9 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
             final rows =
                 byPath.values.where((row) => score(row.node) != null).toList()
                   ..sort((a, b) {
-                    if (query.isEmpty && a.open != b.open)
+                    if (query.isEmpty && a.open != b.open) {
                       return a.open ? -1 : 1;
+                    }
                     final rank = score(a.node)!.compareTo(score(b.node)!);
                     return rank != 0
                         ? rank
@@ -310,11 +312,13 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                           child: Focus(
                             onKeyEvent: (_, event) {
                               if (event is! KeyDownEvent &&
-                                  event is! KeyRepeatEvent)
+                                  event is! KeyRepeatEvent) {
                                 return KeyEventResult.ignored;
+                              }
                               if (_query.value.composing.isValid &&
-                                  !_query.value.composing.isCollapsed)
+                                  !_query.value.composing.isCollapsed) {
                                 return KeyEventResult.ignored;
+                              }
                               final key = event.logicalKey;
                               final keys = HardwareKeyboard.instance;
                               final ctrlNavigation =
@@ -338,13 +342,14 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                                   () => _active =
                                       (_active + (down ? 1 : -1)) % rows.length,
                                 );
-                                if (_scroll.hasClients)
+                                if (_scroll.hasClients) {
                                   _scroll.jumpTo(
                                     (_active * 72.0).clamp(
                                       0.0,
                                       _scroll.position.maxScrollExtent,
                                     ),
                                   );
+                                }
                                 return KeyEventResult.handled;
                               }
                               if (key == LogicalKeyboardKey.tab &&
@@ -495,13 +500,14 @@ class _ProjectOpenDialogState extends State<_ProjectOpenDialog> {
                       ],
                     ),
             );
-            if (compact)
+            if (compact) {
               return Dialog.fullscreen(
                 key: const ValueKey<String>(
                   'project_selector_dialog_fullscreen',
                 ),
                 child: SafeArea(child: content),
               );
+            }
             return Dialog(
               key: const ValueKey<String>('project_selector_dialog_centered'),
               clipBehavior: Clip.antiAlias,

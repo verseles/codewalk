@@ -278,14 +278,7 @@ class _DirectoryPickerSheetState extends State<_DirectoryPickerSheet> {
     if (normalized == '/' || RegExp(r'^[A-Za-z]:/$').hasMatch(normalized)) {
       return null;
     }
-    final index = normalized.lastIndexOf('/');
-    if (index == 2 && RegExp(r'^[A-Za-z]:/').hasMatch(normalized)) {
-      return normalized.substring(0, 3);
-    }
-    if (index <= 0) {
-      return '/';
-    }
-    return normalized.substring(0, index);
+    return parentFilePath(normalized);
   }
 
   @override

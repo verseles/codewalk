@@ -556,7 +556,7 @@ class WorkspaceFileOperationsServiceImpl
       );
     }
 
-    final target = normalizedPath.startsWith('/')
+    final target = isAbsoluteFilePath(normalizedPath)
         ? normalizedPath
         : _joinPath(root, normalizedPath);
     if (normalizeFilePath(target) == root) {
@@ -633,7 +633,7 @@ class WorkspaceFileOperationsServiceImpl
   bool _isPathUnderRoot(String rootDirectory, String candidate) {
     final root = normalizeFilePath(rootDirectory);
     final value = normalizeFilePath(candidate);
-    return value == root || value.startsWith('$root/');
+    return value == root || value.startsWith(filePathChildPrefix(root));
   }
 
   bool _isUnsafeRoot(String directory) {
@@ -650,15 +650,7 @@ class WorkspaceFileOperationsServiceImpl
   }
 
   String _parentPath(String path) {
-    final normalized = normalizeFilePath(path);
-    if (normalized.isEmpty || normalized == '/') {
-      return '/';
-    }
-    final separator = normalized.lastIndexOf('/');
-    if (separator <= 0) {
-      return '/';
-    }
-    return normalized.substring(0, separator);
+    return parentFilePath(path);
   }
 
   bool _hasUnsafePathTraversal(String path) {

@@ -486,8 +486,9 @@ String? _normalizeRemoteRelativePath({
   if (relativePath == root) {
     return null;
   }
-  if (relativePath.startsWith('$root/')) {
-    relativePath = relativePath.substring(root.length + 1);
+  final prefix = filePathChildPrefix(root);
+  if (relativePath.startsWith(prefix)) {
+    relativePath = relativePath.substring(prefix.length);
   }
   while (relativePath.startsWith('/')) {
     relativePath = relativePath.substring(1);
@@ -525,7 +526,7 @@ String _remoteSourcePath({
   if (root == '/') {
     return '/$relativePath';
   }
-  return '$root/$relativePath';
+  return joinParentPath(root, relativePath);
 }
 
 const _directIconCandidates = <_DirectIconCandidate>[
@@ -890,5 +891,6 @@ bool _shouldSkipDirectory(String path) {
 String _relativePath(String rootPath, String filePath) {
   final root = normalizeFilePath(rootPath);
   final file = normalizeFilePath(filePath);
-  return file.startsWith('$root/') ? file.substring(root.length + 1) : file;
+  final prefix = filePathChildPrefix(root);
+  return file.startsWith(prefix) ? file.substring(prefix.length) : file;
 }

@@ -4,6 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FileNodeModel', () {
+    test('joins drive-root child names without duplicate separators', () {
+      final node = FileNodeModel.fromJson(<String, dynamic>{
+        'name': 'apps',
+        'type': 'directory',
+      }, parentPath: 'C:/');
+      expect(node.path, 'C:/apps');
+      final explicit = FileNodeModel.fromJson(<String, dynamic>{
+        'path': 'readme.txt',
+        'type': 'file',
+      }, parentPath: 'C:/');
+      expect(explicit.path, 'C:/readme.txt');
+    });
     test('keeps rooted-relative path without forcing a leading slash', () {
       final node = FileNodeModel.fromJson(<String, dynamic>{
         'path': 'lib/main.dart',

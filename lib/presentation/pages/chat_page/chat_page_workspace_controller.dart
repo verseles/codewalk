@@ -472,7 +472,7 @@ extension _ChatPageWorkspaceController on _ChatPageState {
       return normalizedFallback;
     }
     final separator = normalizedPath.lastIndexOf('/');
-    if (separator == 2 && RegExp(r'^[A-Za-z]:/').hasMatch(normalizedPath)) {
+    if (separator == 2 && RegExp('^[A-Za-z]:/').hasMatch(normalizedPath)) {
       return normalizedPath.substring(0, 3);
     }
     if (separator <= 0) {

@@ -10,6 +10,28 @@ void main() {
   tearDown(ChatTitleGenerator.ephemeralSessionIds.clear);
 
   group('WorkspaceFileOperationsServiceImpl', () {
+    test('drive-root direct and nested children retain absolute operation paths', () async {
+      for (final parent in ['C:/', 'C:/apps']) {
+        final server = _FakeShellServer(shellPayloads: [
+          '{"ok":true,"code":"ok","message":"available"}',
+          '{"ok":true,"code":"ok"}',
+          '{"ok":true,"code":"ok"}',
+        ]);
+        final service = WorkspaceFileOperationsServiceImpl(dio: server.dio);
+        final expected = parent.endsWith('/') ? '${parent}file.txt' : '$parent/file.txt';
+        final created = await service.createFile(serverScopeKey: 'windows', rootDirectory: 'C:/', parentDirectory: parent, name: 'file.txt');
+        expect(created.ok, isTrue);
+        expect(created.path, expected);
+        final written = await service.writeFile(serverScopeKey: 'windows', rootDirectory: 'C:/', path: expected, content: 'example');
+        expect(written.ok, isTrue);
+        expect(written.path, expected);
+        expect(server.commands.last, contains("CW_PARENT_INPUT='$parent'"));
+        expect(server.shellCallCount, 3);
+        final outside = await service.writeFile(serverScopeKey: 'windows', rootDirectory: 'C:/', path: 'D:/file.txt', content: 'example');
+        expect(outside.code, WorkspaceFileOperationCode.outsideRoot);
+        expect(server.shellCallCount, 3);
+      }
+    });
     test('extracts the last sentinel payload from nested shell parts', () {
       final payload = WorkspaceFileOperationsServiceImpl.extractSentinelPayload(
         <String, dynamic>{
