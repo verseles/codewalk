@@ -2334,5 +2334,7 @@
   "speechNemotronDesktopOnlyHint": "Available on desktop only. Uses streaming multilingual recognition.",
   "@speechNemotronDesktopOnlyHint": {
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
-  }
+  },
+  "settingsAppearanceProjectTabColors": "项目标签页颜色",
+  "settingsAppearanceProjectTabColorsDescription": "使用检测到的项目图标颜色为会话标签页着色。"
 }

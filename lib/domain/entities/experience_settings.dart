@@ -925,6 +925,7 @@ class ExperienceSettings {
       visualStyle: VisualStyle.refined,
       localeCode: null,
       themePreset: null,
+      useProjectIconTabColors: true,
       useAmoledDark: false,
       useDynamicColor: true,
       customColorSeed: null,
@@ -1003,6 +1004,7 @@ class ExperienceSettings {
     this.visualStyle = VisualStyle.refined,
     this.localeCode,
     this.themePreset,
+    this.useProjectIconTabColors = true,
     this.useAmoledDark = false,
     this.useDynamicColor = true,
     this.customColorSeed,
@@ -1084,6 +1086,7 @@ class ExperienceSettings {
   final VisualStyle visualStyle;
   final String? localeCode;
   final OpenCodeThemePreset? themePreset;
+  final bool useProjectIconTabColors;
   final bool useAmoledDark;
   final bool useDynamicColor;
   final int? customColorSeed;
@@ -1165,6 +1168,7 @@ class ExperienceSettings {
     VisualStyle? visualStyle,
     String? Function()? localeCode,
     OpenCodeThemePreset? Function()? themePreset,
+    bool? useProjectIconTabColors,
     bool? useAmoledDark,
     bool? useDynamicColor,
     int? Function()? customColorSeed,
@@ -1274,6 +1278,7 @@ class ExperienceSettings {
       visualStyle: visualStyle ?? this.visualStyle,
       localeCode: localeCode != null ? localeCode() : this.localeCode,
       themePreset: themePreset != null ? themePreset() : this.themePreset,
+      useProjectIconTabColors: useProjectIconTabColors ?? this.useProjectIconTabColors,
       useAmoledDark: useAmoledDark ?? this.useAmoledDark,
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
       customColorSeed: customColorSeed != null
@@ -1410,6 +1415,7 @@ class ExperienceSettings {
       if (localeCode != null) 'localeCode': localeCode,
       if (themePreset != null)
         'themePreset': openCodeThemePresetKey(themePreset!),
+      'useProjectIconTabColors': useProjectIconTabColors,
       'useAmoledDark': useAmoledDark,
       'useDynamicColor': useDynamicColor,
       if (customColorSeed != null) 'customColorSeed': customColorSeed,
@@ -2091,6 +2097,8 @@ class ExperienceSettings {
       visualStyle: visualStyle,
       localeCode: localeCode,
       themePreset: themePreset,
+      useProjectIconTabColors: json['useProjectIconTabColors'] is bool
+          ? json['useProjectIconTabColors'] as bool : defaults.useProjectIconTabColors,
       useAmoledDark: useAmoledDark,
       useDynamicColor: useDynamicColor,
       customColorSeed: customColorSeed,

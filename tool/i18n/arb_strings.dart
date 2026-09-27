@@ -5,6 +5,8 @@
 library;
 
 const englishTemplate = <String, String>{
+  'settingsAppearanceProjectTabColors': 'Project tab colors',
+  'settingsAppearanceProjectTabColorsDescription': 'Tint session tabs with colors from detected project icons.',
   'aboutGitHub': 'GitHub',
   'aboutTelegram': 'Telegram',
   'appProviderCannotActivateUnhealthy': 'Cannot activate an unhealthy server',
@@ -1933,6 +1935,8 @@ const englishTemplate = <String, String>{
 
 const translations = <String, Map<String, String>>{
   'ar': {
+    'settingsAppearanceProjectTabColors': 'ألوان تبويبات المشاريع',
+    'settingsAppearanceProjectTabColorsDescription': 'تلوين تبويبات الجلسات بألوان أيقونات المشاريع المكتشفة.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'لا يمكن تنشيط خادم غير سليم',
@@ -3859,6 +3863,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'اقتراحات',
   },
   'bn': {
+    'settingsAppearanceProjectTabColors': 'প্রকল্পের ট্যাবের রং',
+    'settingsAppearanceProjectTabColorsDescription': 'শনাক্ত করা প্রকল্পের আইকনের রং দিয়ে সেশন ট্যাব রাঙান।',
     'aboutGitHub': 'গিটহাব',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'একটি অস্বাস্থ্যকর সার্ভার সক্রিয় করা যাবে না',
@@ -5785,6 +5791,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'পরামর্শ',
   },
   'de': {
+    'settingsAppearanceProjectTabColors': 'Projektfarben für Tabs',
+    'settingsAppearanceProjectTabColorsDescription': 'Sitzungstabs mit den Farben erkannter Projektsymbole einfärben.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Ein fehlerhafter Server kann nicht aktiviert werden',
@@ -7711,6 +7719,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'Vorschläge',
   },
   'es': {
+    'settingsAppearanceProjectTabColors': 'Colores de pestañas por proyecto',
+    'settingsAppearanceProjectTabColorsDescription': 'Tiñe las pestañas de sesión con los colores de los iconos de proyecto detectados.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'No se puede activar un servidor no saludable',
@@ -9637,6 +9647,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'Sugerencias',
   },
   'fr': {
+    'settingsAppearanceProjectTabColors': 'Couleurs des onglets par projet',
+    'settingsAppearanceProjectTabColorsDescription': 'Colore les onglets de session avec les couleurs des icônes de projet détectées.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Impossible d\'activer un serveur en mauvaise santé',
@@ -11563,6 +11575,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'Suggestions',
   },
   'hi': {
+    'settingsAppearanceProjectTabColors': 'प्रोजेक्ट टैब के रंग',
+    'settingsAppearanceProjectTabColorsDescription': 'पहचाने गए प्रोजेक्ट आइकन के रंगों से सेशन टैब रंगें।',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'एक अस्वस्थ सर्वर को सक्रिय नहीं किया जा सकता',
@@ -13489,6 +13503,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'सुझाव',
   },
   'it': {
+    'settingsAppearanceProjectTabColors': 'Colori delle schede per progetto',
+    'settingsAppearanceProjectTabColorsDescription': 'Colora le schede delle sessioni con i colori delle icone di progetto rilevate.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Impossibile attivare un server non integro',
@@ -15415,6 +15431,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'Suggerimenti',
   },
   'ja': {
+    'settingsAppearanceProjectTabColors': 'プロジェクトのタブ色',
+    'settingsAppearanceProjectTabColorsDescription': '検出されたプロジェクトアイコンの色でセッションタブを彩ります。',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': '異常なサーバーを有効化できません',
@@ -17341,6 +17359,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': '提案',
   },
   'ko': {
+    'settingsAppearanceProjectTabColors': '프로젝트 탭 색상',
+    'settingsAppearanceProjectTabColorsDescription': '감지된 프로젝트 아이콘의 색상으로 세션 탭을 표시합니다.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': '상태가 좋지 않은 서버를 활성화할 수 없습니다.',
@@ -19267,6 +19287,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': '추천 프로젝트',
   },
   'pt': {
+    'settingsAppearanceProjectTabColors': 'Cores das abas por projeto',
+    'settingsAppearanceProjectTabColorsDescription': 'Use as cores dos ícones de projeto detectados no fundo das abas de sessão.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Não é possível ativar um servidor não saudável',
@@ -21193,6 +21215,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'Sugestões',
   },
   'ru': {
+    'settingsAppearanceProjectTabColors': 'Цвета вкладок проектов',
+    'settingsAppearanceProjectTabColorsDescription': 'Окрашивать вкладки сеансов в цвета найденных значков проектов.',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'Невозможно активировать неисправный сервер',
@@ -23119,6 +23143,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'Предложения',
   },
   'ur': {
+    'settingsAppearanceProjectTabColors': 'پروجیکٹ ٹیب کے رنگ',
+    'settingsAppearanceProjectTabColorsDescription': 'شناخت شدہ پروجیکٹ آئیکنز کے رنگوں سے سیشن ٹیب رنگیں۔',
     'aboutGitHub': 'گٹ ہب',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': 'غیر صحت مند سرور کو فعال نہیں کیا جا سکتا',
@@ -25045,6 +25071,8 @@ const translations = <String, Map<String, String>>{
     'workspaceSuggestions': 'تجاویز',
   },
   'zh': {
+    'settingsAppearanceProjectTabColors': '项目标签页颜色',
+    'settingsAppearanceProjectTabColorsDescription': '使用检测到的项目图标颜色为会话标签页着色。',
     'aboutGitHub': 'GitHub',
     'aboutTelegram': 'Telegram',
     'appProviderCannotActivateUnhealthy': '无法激活不健康的服务器',

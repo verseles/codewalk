@@ -6549,4 +6549,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => '공식 그룹';
+
+  @override
+  String get settingsAppearanceProjectTabColors => '프로젝트 탭 색상';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      '감지된 프로젝트 아이콘의 색상으로 세션 탭을 표시합니다.';
 }

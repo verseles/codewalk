@@ -6884,4 +6884,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Nosso grupo';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'Cores das abas por projeto';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Use as cores dos ícones de projeto detectados no fundo das abas de sessão.';
 }

@@ -2334,5 +2334,7 @@
   "speechNemotronDesktopOnlyHint": "Available on desktop only. Uses streaming multilingual recognition.",
   "@speechNemotronDesktopOnlyHint": {
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
-  }
+  },
+  "settingsAppearanceProjectTabColors": "پروجیکٹ ٹیب کے رنگ",
+  "settingsAppearanceProjectTabColorsDescription": "شناخت شدہ پروجیکٹ آئیکنز کے رنگوں سے سیشن ٹیب رنگیں۔"
 }

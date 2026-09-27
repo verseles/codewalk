@@ -6888,4 +6888,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Наша группа';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'Цвета вкладок проектов';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Окрашивать вкладки сеансов в цвета найденных значков проектов.';
 }

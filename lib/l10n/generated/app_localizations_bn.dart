@@ -6835,4 +6835,11 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'আমাদের গ্রুপ';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'প্রকল্পের ট্যাবের রং';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'শনাক্ত করা প্রকল্পের আইকনের রং দিয়ে সেশন ট্যাব রাঙান।';
 }

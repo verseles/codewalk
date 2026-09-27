@@ -11686,6 +11686,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Our group'**
   String get settingsAboutOurGroup;
+
+  /// CodeWalk UI string — settingsAppearanceProjectTabColors
+  ///
+  /// In en, this message translates to:
+  /// **'Project tab colors'**
+  String get settingsAppearanceProjectTabColors;
+
+  /// CodeWalk UI string — settingsAppearanceProjectTabColorsDescription
+  ///
+  /// In en, this message translates to:
+  /// **'Tint session tabs with colors from detected project icons.'**
+  String get settingsAppearanceProjectTabColorsDescription;
 }
 
 class _AppLocalizationsDelegate

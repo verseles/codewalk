@@ -6833,4 +6833,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'हमारा ग्रुप';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'प्रोजेक्ट टैब के रंग';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'पहचाने गए प्रोजेक्ट आइकन के रंगों से सेशन टैब रंगें।';
 }

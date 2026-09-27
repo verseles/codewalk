@@ -6918,4 +6918,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Il nostro gruppo';
+
+  @override
+  String get settingsAppearanceProjectTabColors =>
+      'Colori delle schede per progetto';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Colora le schede delle sessioni con i colori delle icone di progetto rilevate.';
 }

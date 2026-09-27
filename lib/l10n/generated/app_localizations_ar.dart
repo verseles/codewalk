@@ -6732,4 +6732,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'مجموعتنا';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'ألوان تبويبات المشاريع';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'تلوين تبويبات الجلسات بألوان أيقونات المشاريع المكتشفة.';
 }

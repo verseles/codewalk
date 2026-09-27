@@ -89,6 +89,9 @@ List<SettingsSearchOption> settingsSearchOptions(
       l.settingsAppearanceVisualStyleRefined,
     ],
   );
+  add('appearance', 'settings_toggle_project_tab_colors',
+      l.settingsAppearanceProjectTabColors,
+      [l.settingsAppearanceProjectTabColorsDescription]);
   add(
     'appearance',
     'settings_toggle_amoled_dark',

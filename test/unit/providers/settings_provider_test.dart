@@ -1958,6 +1958,25 @@ void main() {
       expect(third.themePreset, isNull);
     });
 
+    test('project icon tab colors notify immediately and persist opt-out', () async {
+      final local = InMemoryAppLocalDataSource();
+      final first = SettingsProvider(localDataSource: local, dioClient: DioClient(),
+          soundService: _FakeSoundService());
+      await first.initialize();
+      expect(first.useProjectIconTabColors, isTrue);
+      var notified = false;
+      first.addListener(() => notified = !first.useProjectIconTabColors);
+      final saving = first.setUseProjectIconTabColors(false);
+      expect(notified, isTrue);
+      await saving;
+      final second = SettingsProvider(localDataSource: local, dioClient: DioClient(),
+          soundService: _FakeSoundService());
+      await second.initialize();
+      expect(second.useProjectIconTabColors, isFalse);
+      first.dispose();
+      second.dispose();
+    });
+
     test('persists AMOLED dark preference', () async {
       final local = InMemoryAppLocalDataSource();
       final first = SettingsProvider(

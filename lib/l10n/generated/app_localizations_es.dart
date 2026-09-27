@@ -6924,4 +6924,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Nuestro grupo';
+
+  @override
+  String get settingsAppearanceProjectTabColors =>
+      'Colores de pestañas por proyecto';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Tiñe las pestañas de sesión con los colores de los iconos de proyecto detectados.';
 }

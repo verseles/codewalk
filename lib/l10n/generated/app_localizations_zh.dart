@@ -6380,4 +6380,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => '我们的群组';
+
+  @override
+  String get settingsAppearanceProjectTabColors => '项目标签页颜色';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      '使用检测到的项目图标颜色为会话标签页着色。';
 }

@@ -6817,4 +6817,11 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'ہمارا گروپ';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'پروجیکٹ ٹیب کے رنگ';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'شناخت شدہ پروجیکٹ آئیکنز کے رنگوں سے سیشن ٹیب رنگیں۔';
 }

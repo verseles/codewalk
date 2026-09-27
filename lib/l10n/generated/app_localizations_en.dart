@@ -6798,4 +6798,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Our group';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'Project tab colors';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Tint session tabs with colors from detected project icons.';
 }

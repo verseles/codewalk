@@ -6551,4 +6551,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => '公式グループ';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'プロジェクトのタブ色';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      '検出されたプロジェクトアイコンの色でセッションタブを彩ります。';
 }

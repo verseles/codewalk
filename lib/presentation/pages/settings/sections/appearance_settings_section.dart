@@ -317,6 +317,14 @@ class AppearanceSettingsSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     SwitchListTile.adaptive(
+                      key: const ValueKey<String>('settings_toggle_project_tab_colors'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(context.l10n.settingsAppearanceProjectTabColors),
+                      subtitle: Text(context.l10n.settingsAppearanceProjectTabColorsDescription),
+                      value: settingsProvider.useProjectIconTabColors,
+                      onChanged: (value) => unawaited(settingsProvider.setUseProjectIconTabColors(value)),
+                    ),
+                    SwitchListTile.adaptive(
                       key: const ValueKey<String>(
                         'settings_toggle_amoled_dark',
                       ),

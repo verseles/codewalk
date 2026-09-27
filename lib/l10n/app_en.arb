@@ -8768,5 +8768,13 @@
   "settingsAboutOurGroup": "Our group",
   "@settingsAboutOurGroup": {
     "description": "CodeWalk UI string — settingsAboutOurGroup"
+  },
+  "settingsAppearanceProjectTabColors": "Project tab colors",
+  "settingsAppearanceProjectTabColorsDescription": "Tint session tabs with colors from detected project icons.",
+  "@settingsAppearanceProjectTabColors": {
+    "description": "CodeWalk UI string — settingsAppearanceProjectTabColors"
+  },
+  "@settingsAppearanceProjectTabColorsDescription": {
+    "description": "CodeWalk UI string — settingsAppearanceProjectTabColorsDescription"
   }
 }

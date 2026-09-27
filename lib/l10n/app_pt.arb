@@ -2334,5 +2334,7 @@
   "speechNemotronDesktopOnlyHint": "Available on desktop only. Uses streaming multilingual recognition.",
   "@speechNemotronDesktopOnlyHint": {
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
-  }
+  },
+  "settingsAppearanceProjectTabColors": "Cores das abas por projeto",
+  "settingsAppearanceProjectTabColorsDescription": "Use as cores dos ícones de projeto detectados no fundo das abas de sessão."
 }

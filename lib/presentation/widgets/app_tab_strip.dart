@@ -83,6 +83,7 @@ class AppTab<T> {
     this.isPinned = false,
     this.canClose = true,
     this.canOpenContextMenu = true,
+    this.projectColor,
   });
 
   final String id;
@@ -96,6 +97,30 @@ class AppTab<T> {
   final bool isPinned;
   final bool canClose;
   final bool canOpenContextMenu;
+  final Color? projectColor;
+}
+
+/// Keep the existing foreground roles readable on an icon-derived background.
+Color projectTabSurface(
+  Color seed,
+  Color base,
+  Iterable<Color> foregrounds, {
+  required bool selected,
+}) {
+  var alpha = selected ? 0.18 : 0.09;
+  final colors = foregrounds.toList();
+  for (var attempt = 0; attempt < 8; attempt++) {
+    final tinted = Color.alphaBlend(seed.withValues(alpha: alpha), base);
+    if (colors.every(
+      (color) =>
+          _contrastRatio(color, tinted) >=
+          math.min(4.5, _contrastRatio(color, base)),
+    )) {
+      return tinted;
+    }
+    alpha /= 2;
+  }
+  return base;
 }
 
 /// Context-menu callback routed with the tab and the global position.
@@ -659,11 +684,19 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
     final foreground = selected ? colorScheme.onSurface : colorScheme.onSurfaceVariant;
     final hovered = _hoveredId == id;
     final trailingHovered = _hoveredTrailingId == id;
-    final tabSurfaceColor = selected
+    final standardSurfaceColor = selected
         ? colorScheme.surface
         : hovered && !trailingHovered
             ? colorScheme.surface.withValues(alpha: 0.45)
             : Colors.transparent;
+    final tabSurfaceColor = tab.projectColor == null
+        ? standardSurfaceColor
+        : projectTabSurface(
+            tab.projectColor!,
+            selected ? colorScheme.surface : colorScheme.surfaceContainerHigh,
+            [foreground, colorScheme.primary],
+            selected: selected,
+          );
     final focusNode = _focusNodeFor(tab);
     final statesController = _statesControllerFor(tab);
     final canMenu = tab.canOpenContextMenu && widget.onContextMenu != null;
@@ -703,8 +736,8 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
                             ? colorScheme.primary.withValues(alpha: 0.09)
                             : Colors.transparent;
                 // #182: when AMOLED flattens surface roles, the selected tab
-                // would vanish into the strip band. Keep every fill pure
-                // black and add a minimal top indicator on the selected tab.
+                // would vanish into the strip band. Retain its top indicator
+                // even when project artwork supplies a tinted fill.
                 final showSelectionIndicator =
                     selected && _isTabSelectionCollapsed(colorScheme);
                 final selectionIndicatorColor =

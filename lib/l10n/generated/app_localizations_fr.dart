@@ -6954,4 +6954,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Notre groupe';
+
+  @override
+  String get settingsAppearanceProjectTabColors =>
+      'Couleurs des onglets par projet';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Colore les onglets de session avec les couleurs des icônes de projet détectées.';
 }

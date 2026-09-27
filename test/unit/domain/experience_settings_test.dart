@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('project icon colors default on and preserve explicit opt-out', () {
+    expect(ExperienceSettings.defaults().useProjectIconTabColors, isTrue);
+    for (final invalid in [null, 'false', 0, []]) {
+      expect(ExperienceSettings.fromJson({'useProjectIconTabColors': invalid})
+          .useProjectIconTabColors, isTrue);
+    }
+    final off = ExperienceSettings.defaults().copyWith(useProjectIconTabColors: false);
+    expect(off.copyWith().useProjectIconTabColors, isFalse);
+    expect(ExperienceSettings.fromJson(off.toJson()).useProjectIconTabColors, isFalse);
+  });
   test('speech retention defaults true and round-trips explicit opt-out', () {
     expect(ExperienceSettings.defaults().speechKeepModelInMemory, isTrue);
     for (final invalid in [null, 'false', 0, []]) {

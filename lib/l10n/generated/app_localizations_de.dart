@@ -6913,4 +6913,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsAboutOurGroup => 'Unsere Gruppe';
+
+  @override
+  String get settingsAppearanceProjectTabColors => 'Projektfarben für Tabs';
+
+  @override
+  String get settingsAppearanceProjectTabColorsDescription =>
+      'Sitzungstabs mit den Farben erkannter Projektsymbole einfärben.';
 }

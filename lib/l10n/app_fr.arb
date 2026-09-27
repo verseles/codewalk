@@ -2181,5 +2181,7 @@
   "speechNemotronDesktopOnlyHint": "Available on desktop only. Uses streaming multilingual recognition.",
   "@speechNemotronDesktopOnlyHint": {
     "description": "CodeWalk UI string — speechNemotronDesktopOnlyHint"
-  }
+  },
+  "settingsAppearanceProjectTabColors": "Couleurs des onglets par projet",
+  "settingsAppearanceProjectTabColorsDescription": "Colore les onglets de session avec les couleurs des icônes de projet détectées."
 }

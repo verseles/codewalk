@@ -240,6 +240,7 @@ class SettingsProvider extends ChangeNotifier {
   ThemeModeOption get themeMode => _settings.themeMode;
   VisualStyle get visualStyle => _settings.visualStyle;
   String? get localeCode => _settings.localeCode;
+  bool get useProjectIconTabColors => _settings.useProjectIconTabColors;
   bool get useAmoledDark => _settings.useAmoledDark;
   bool get useDynamicColor => _settings.useDynamicColor;
   int? get customColorSeed => _settings.customColorSeed;
@@ -880,6 +881,13 @@ class SettingsProvider extends ChangeNotifier {
       return;
     }
     _settings = _settings.copyWith(showRecentSessions: visible);
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> setUseProjectIconTabColors(bool value) async {
+    if (_settings.useProjectIconTabColors == value) return;
+    _settings = _settings.copyWith(useProjectIconTabColors: value);
     notifyListeners();
     await _persist();
   }

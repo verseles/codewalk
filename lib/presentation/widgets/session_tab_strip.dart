@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/i18n/l10n_context.dart';
 import '../../core/utils/path_utils.dart';
 import '../../domain/entities/chat_realtime.dart';
 import '../../domain/entities/project.dart';
 import '../providers/chat_provider.dart';
+import '../providers/project_icon_provider.dart';
+import '../providers/settings_provider.dart';
+import '../services/project_icon_models.dart';
 import '../services/session_tab_icon_presets.dart';
 import '../utils/session_tab_grouping.dart';
 import 'app_tab_strip.dart';
@@ -79,6 +85,24 @@ class SessionTabStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ProjectIconProvider?>();
+    final settings = context.watch<SettingsProvider?>();
+    return _SessionTabColors(
+      provider: provider,
+      settings: settings,
+      projects: {
+        for (final tab in tabs)
+          projectIconKeyFor(_projectForTab(tab) ?? _fallbackProject(tab)):
+              (project: _projectForTab(tab) ?? _fallbackProject(tab),
+               discover: _projectForTab(tab) != null &&
+                   openProjectIds.contains(_projectForTab(tab)!.id)),
+      }.values.toList(),
+      builder: (context) => _buildTabs(context, provider,
+          settings?.useProjectIconTabColors ?? true),
+    );
+  }
+
+  Widget _buildTabs(BuildContext context, ProjectIconProvider? provider, bool colorsEnabled) {
     final orderedTabs = groupSessionTabsByProject(tabs);
     final anchors = onNewChatForProject == null
         ? const <SessionTabIdentity>{}
@@ -95,6 +119,9 @@ class SessionTabStrip extends StatelessWidget {
           isPinned: tab.isPinned,
           canClose: tab.identity.isValid,
           canOpenContextMenu: tab.identity.isValid,
+          projectColor: colorsEnabled
+              ? provider?.colorFor(_projectForTab(tab) ?? _fallbackProject(tab))
+              : null,
         ),
     ];
     return AppTabStrip<SessionTabRecord>(
@@ -325,4 +352,95 @@ class SessionTabStrip extends StatelessWidget {
       createdAt: DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
+}
+
+/// Loads artwork even when an attention badge or preset replaces ProjectIcon.
+class _SessionTabColors extends StatefulWidget {
+  const _SessionTabColors({
+    required this.provider,
+    required this.settings,
+    required this.projects,
+    required this.builder,
+  });
+
+  final ProjectIconProvider? provider;
+  final SettingsProvider? settings;
+  final List<({Project project, bool discover})> projects;
+  final WidgetBuilder builder;
+
+  @override
+  State<_SessionTabColors> createState() => _SessionTabColorsState();
+}
+
+class _SessionTabColorsState extends State<_SessionTabColors> {
+  bool _scheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.provider?.addListener(_changed);
+    widget.settings?.addListener(_changed);
+    _schedule();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SessionTabColors oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.provider != widget.provider) {
+      oldWidget.provider?.removeListener(_changed);
+      widget.provider?.addListener(_changed);
+    }
+    if (oldWidget.settings != widget.settings) {
+      oldWidget.settings?.removeListener(_changed);
+      widget.settings?.addListener(_changed);
+    }
+    _schedule();
+  }
+
+  void _changed() {
+    if (!mounted) return;
+    setState(() {});
+    _schedule();
+  }
+
+  void _schedule() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      if (!mounted || !(widget.settings?.useProjectIconTabColors ?? true)) {
+        return;
+      }
+      final provider = widget.provider;
+      if (provider == null) return;
+      for (final entry in widget.projects) {
+        unawaited(_load(provider, entry));
+      }
+    });
+  }
+
+  Future<void> _load(
+    ProjectIconProvider provider,
+    ({Project project, bool discover}) entry,
+  ) async {
+    await provider.loadStoredIcon(entry.project);
+    if (!mounted || widget.provider != provider) return;
+    if (entry.discover) await provider.autoDiscoverIcon(entry.project);
+    if (!mounted ||
+        widget.provider != provider ||
+        !(widget.settings?.useProjectIconTabColors ?? true)) {
+      return;
+    }
+    await provider.ensureColor(entry.project);
+  }
+
+  @override
+  void dispose() {
+    widget.provider?.removeListener(_changed);
+    widget.settings?.removeListener(_changed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
 }
