@@ -86,7 +86,7 @@ codewalk/
 │       ├── services/                   # Platform/runtime services (tray, notifications, STT, read-aloud/TTS, terminal, etc.)
 │       │   ├── session_tab_icon_override_store.dart # Per-server persisted session-tab icon override store
 │       │   ├── session_tab_icon_presets.dart # SessionTabIconPreset enum + localized preset labels
-│       │   ├── project_icon_palette.dart # Dominant-color extraction for project icons
+│       │   ├── project_icon_palette.dart # Representative-color selection for project icons
 │       │   ├── session_attention/       # Attention coordinator, completion resolver, host contract/protocol, and platform entrypoints
 │       │   ├── car_messaging/           # Android Auto notification messaging: action handler, gate, dispatch worker, notifier, runtime (issue #99)
 │       │   └── tts/                    # Read-aloud TTS contracts, native/cloud backend adapters, executor, defaults, generated-audio player, and text extraction
@@ -188,7 +188,7 @@ lib/presentation/providers/app_provider.dart      # Server profiles, health poll
 lib/presentation/providers/project_provider.dart  # Project/worktree context selection and persistence; placeholder-root guards in persistence/restore paths (`_isPlaceholderRootProject`/`_isPlaceholderRootId`, sanitize + never persist/restore synthetic Global root); exposes file-name, file-content, and workspace-symbol search for Quick Open and composer mentions; `canCloseProject(projectId)` guards destructive close when only one open context remains
 lib/presentation/providers/project_icon_provider.dart # Client-owned project icon orchestration (ADR-040, issue #73): loads cached icons from `ProjectIconStore`, runs discovery via `ProjectIconDiscoveryService`, and exposes per-project `iconFor`/`isLoading`/`isDiscovering` state; `loadStoredIcon(project)` resolves cached/default icons only (used by closed project rows), `autoDiscoverIcon(project)` triggers one-shot discovery after loading stored state (used by open/active project surfaces; tracks per-key attempts via `_autoDiscoveryAttemptedKeys` to avoid repeats), and `discoverIcon(project)` is the lower-level discovery/save operation invoked by `autoDiscoverIcon(project)` and retained for provider orchestration/testing (not a UI button trigger); lazily extracts palettes into a bounded shared cache keyed by artwork digest, serializes decoding, and uses per-project revisions to reject stale stored-icon loads; OpenCode project payloads remain authoritative/unchanged
 lib/presentation/services/project_icon_models.dart      # Shared models for the project icon subsystem: `ProjectIconFormat` enum (png/jpeg/svg/webp/ico), metadata/data/candidate/result types, `projectIconMaxBytes` (5 MB cap), `projectIconKeyFor(Project)` stable key derivation, and helpers for ICO→PNG storage normalization
-lib/presentation/services/project_icon_palette.dart     # Samples rendered raster/SVG artwork and derives its dominant color with alpha-weighted quantization
+lib/presentation/services/project_icon_palette.dart     # Selects a representative rendered raster/SVG color with chroma/brightness scoring that favors colored accents over dark outlines and neutral pixels; preserves dark chromatic hues and gives black-only art a neutral tint
 lib/presentation/services/project_icon_store.dart       # Conditional factory barrel: routes `createProjectIconStore()` to IO or stub via `if (dart.library.io)`
 lib/presentation/services/project_icon_store_base.dart  # Abstract `ProjectIconStore` contract: `readIcon`, `saveIcon`, and `deleteIcon` keyed by project icon key
 lib/presentation/services/project_icon_store_io.dart    # IO implementation: stores icons under the CodeWalk app-support `project_icons/` directory with `{key}.{ext}` binaries and a shared `metadata.json`; ICO candidates are persisted as PNG bytes
@@ -592,7 +592,7 @@ test/unit/quota/                        # Quota/rate-limit unit tests (provider 
   quota_window_metadata_test.dart       # Extracts generated provider JS and runs Node against protobuf fixtures for xAI periods and Codex duration/collision keys; checks server-bound REST/shell requests
 test/unit/datasources/app_local_datasource_impl_test.dart # Best-effort legacy OpenCode Go credential purge: `clearOpenCodeGoDashboardCredentials()` deletes workspace-id/auth-cookie keys (incl. `::active` and orphaned variants) via secure-storage `readAll()` while preserving other values and suffix-mismatch keys (issue #96)
 test/unit/services/                     # Platform and runtime service unit tests:
-  project_icon_palette_test.dart        # Dominant-color extraction for raster/SVG artwork, alpha weighting, and invalid artwork
+  project_icon_palette_test.dart        # Colored accents beat dark outlines/neutrals; dark chromatic hues stay intact and black-only art gets a neutral tint; raster/SVG sampling, alpha weighting, and invalid-art coverage
   codewalk_terminal_controller_test.dart #   Terminal controller: server-side PTY lifecycle, WebSocket connectivity, resize debouncing, cursor tracking
   codewalk_terminal_url_test.dart        #   WebSocket terminal URL construction
   read_aloud_service_test.dart           #   Provider-routed read-aloud lifecycle, loading-before-playback state, generated-audio playback, secure API-key lookup, options, and message tracking

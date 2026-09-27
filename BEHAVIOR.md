@@ -691,10 +691,10 @@
 
 - **Given** a session tab has a detected project icon and `Project tab colors` is enabled in Settings > Appearance
 - **When** the icon loads, changes, or is removed
-- **Then** the tab uses a subtle background derived from the icon's dominant visible color, with stronger tint on the selected tab, and returns to its normal background when no palette is available
+- **Then** the tab uses a subtle background derived from a representative icon color, favoring colored accents over dark strokes and neutral pixels, with stronger tint on the selected tab; it returns to its normal background when no palette is available
 - **Then** pinned and draft tabs use the same palette, including when attention badges or custom glyphs replace the visible project icon; file tabs and the global theme keep their existing colors
 - **Then** tinting also applies in AMOLED mode while the rest of the interface remains black; normal, hover, and focus states keep foreground contrast at least 4.5:1 where the base theme supports it, otherwise they do not reduce that state's existing contrast
-- **Then** raster and SVG artwork are sampled once per cached image content; transparent, invalid, or unsupported artwork falls back to the normal tab background, and monochrome artwork uses a neutral tint
+- **Then** raster and SVG artwork are sampled once per cached image content; dark colored artwork retains its hue, black-only artwork uses a neutral tint, and transparent, invalid, or unsupported artwork falls back to the normal tab background
 - **Given** the user changes `Project tab colors`
 - **When** the setting is saved
 - **Then** the tab backgrounds update immediately and the choice persists; the setting defaults to enabled for new and existing installations
