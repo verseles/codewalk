@@ -176,7 +176,7 @@ void main() {
                   ),
                 )
                 .color,
-            mode == 'light' ? Colors.black : scheme.onSurface,
+            mode == 'light' ? Colors.black : scheme.onSurfaceVariant,
           );
           expect(
             discovery.calls,
@@ -229,7 +229,7 @@ void main() {
     }
   }
 
-  testWidgets('light palette uses readable color for a custom tab glyph', (
+  testWidgets('palette uses expected selected custom glyph color by theme', (
     tester,
   ) async {
     final settings = _settings();
@@ -251,29 +251,28 @@ void main() {
     final tabKey = ValueKey<String>(
       'session_tab_${sessionTabIdentityKey(selected.identity)}',
     );
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<SettingsProvider>.value(value: settings),
-          ChangeNotifierProvider<ProjectIconProvider>.value(value: icons),
-        ],
-        child: localizedMaterialApp(
-          theme: ThemeData(colorScheme: scheme),
-          home: Scaffold(
-            body: SessionTabStrip(
-              tabs: [selected],
-              projects: [paletteProject()],
-              openProjectIds: const {},
-              isCompact: true,
-              onActivate: (_) {},
-              onClose: (_) {},
-              onContextMenu: (_, _, {required haptic}) async {},
-              trailingBuilder: (_, _) => null,
-            ),
+    Widget appFor(ColorScheme colorScheme) => MultiProvider(
+      providers: [
+        ChangeNotifierProvider<SettingsProvider>.value(value: settings),
+        ChangeNotifierProvider<ProjectIconProvider>.value(value: icons),
+      ],
+      child: localizedMaterialApp(
+        theme: ThemeData(colorScheme: colorScheme),
+        home: Scaffold(
+          body: SessionTabStrip(
+            tabs: [selected],
+            projects: [paletteProject()],
+            openProjectIds: const {},
+            isCompact: true,
+            onActivate: (_) {},
+            onClose: (_) {},
+            onContextMenu: (_, _, {required haptic}) async {},
+            trailingBuilder: (_, _) => null,
           ),
         ),
       ),
     );
+    await tester.pumpWidget(appFor(scheme));
     await tester.pumpAndSettle();
     expect(
       tester.widget<Material>(find.byKey(tabKey)).color,
@@ -296,6 +295,27 @@ void main() {
     await settings.setUseProjectIconTabColors(false);
     await tester.pumpAndSettle();
     expect(tester.widget<Icon>(find.byKey(iconKey)).color, scheme.primary);
+    await settings.setUseProjectIconTabColors(true);
+    final darkScheme = ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.dark,
+    );
+    await tester.pumpWidget(appFor(darkScheme));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Icon>(find.byKey(iconKey)).color, darkScheme.primary);
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(
+              ValueKey<String>(
+                'session_tab_title_${sessionTabIdentityKey(selected.identity)}',
+              ),
+            ),
+          )
+          .style
+          ?.color,
+      darkScheme.onSurface,
+    );
   });
 
   test(
@@ -325,7 +345,12 @@ void main() {
                 : scheme.surfaceContainerHigh;
             final text = brightness == Brightness.light
                 ? Colors.black
-                : scheme.onSurface;
+                : selected
+                ? scheme.onSurface
+                : scheme.onSurfaceVariant;
+            final foregrounds = brightness == Brightness.light
+                ? [text]
+                : [text, scheme.primary];
             final overlays = [
               Colors.transparent,
               scheme.primary.withValues(alpha: .09),
@@ -334,20 +359,22 @@ void main() {
             final fill = projectTabSurface(
               seed,
               base,
-              [text],
+              foregrounds,
               selected: selected,
               overlays: overlays,
             );
             for (final overlay in overlays) {
-              expect(
-                contrast(Color.alphaBlend(overlay, fill), text),
-                greaterThanOrEqualTo(
-                  math.min(
-                    4.5,
-                    contrast(Color.alphaBlend(overlay, base), text),
+              for (final foreground in foregrounds) {
+                expect(
+                  contrast(Color.alphaBlend(overlay, fill), foreground),
+                  greaterThanOrEqualTo(
+                    math.min(
+                      4.5,
+                      contrast(Color.alphaBlend(overlay, base), foreground),
+                    ),
                   ),
-                ),
-              );
+                );
+              }
             }
           }
         }
