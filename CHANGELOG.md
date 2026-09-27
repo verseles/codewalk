@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.258.1 - 2026-09-27
+
+- fix(tabs): retain hue for dark project artwork
+- fix(tabs): prefer icon accent colors over dark outlines
+
 ## v1.258.0 - 2026-09-27
 
 > 📣 Session tabs now pick up a subtle color palette from project icons. You can turn this off in Settings > Appearance.
