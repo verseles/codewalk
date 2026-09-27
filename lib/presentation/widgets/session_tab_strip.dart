@@ -136,7 +136,7 @@ class SessionTabStrip extends StatelessWidget {
         context,
         appTab.value,
         _projectForTab(appTab.value),
-        hasPalette: appTab.projectColor != null,
+        paletteColor: appTab.projectColor,
       ),
       trailingBuilder: (context, appTab) => trailingBuilder(context, appTab.value),
       accessoryBuilder: (context, appTab) {
@@ -210,11 +210,16 @@ class SessionTabStrip extends StatelessWidget {
     BuildContext context,
     SessionTabRecord tab,
     Project? project, {
-    required bool hasPalette,
+    required Color? paletteColor,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final iconColor = hasPalette && colorScheme.brightness == Brightness.light
-        ? Colors.black
+    final iconColor =
+        paletteColor != null && colorScheme.brightness == Brightness.light
+        ? projectTabPaletteForeground(
+            colorScheme,
+            paletteColor,
+            selected: tab.isSelected,
+          )
         : tab.isSelected
             ? colorScheme.primary
             : colorScheme.onSurfaceVariant;
