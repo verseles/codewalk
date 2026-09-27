@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.258.0 - 2026-09-27
+
+> 📣 Session tabs now pick up a subtle color palette from project icons. You can turn this off in Settings > Appearance.
+
+- fix(tabs): preserve contrast and guard palette lifecycle races
+- feat(tabs): tint session tabs from project icon colors
+- docs: describe refined Settings and unified server selection
+
 ## v1.257.0 - 2026-09-26
 
 > 📣 Settings now has a cleaner Refined look and unified server selection. Sherpa speech recognition is presented without experimental warnings.
