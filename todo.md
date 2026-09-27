@@ -88,7 +88,7 @@ não bloquear a entrega dos anúncios pela reprodução do instalador.
 
 | Issue | Fronteira de trabalho |
 | --- | --- |
-| [#213 — Cores das abas](https://github.com/verseles/codewalk/issues/213) | Entregue na v1.258.2: paleta dos ícones nas abas e opção em Aparência; realces coloridos entre traços escuros e contraste legível em todas as paletas claras. Issue reaberta após regressão visual no tema claro; aguarda confirmação do usuário antes de fechar. |
+| [#213 — Cores das abas](https://github.com/verseles/codewalk/issues/213) | Entregue na v1.258.2: paleta dos ícones nas abas e opção em Aparência; realces coloridos entre traços escuros e contraste legível em todas as paletas claras. Issue encerrada em 27/09/2026 após confirmação visual do usuário. |
 | [#210 — Ctrl/Cmd+S](https://github.com/verseles/codewalk/issues/210) | Escopo de foco e atalho do diálogo em chat_page_file_viewer.dart. |
 | [#197 — Web fica offline](https://github.com/verseles/codewalk/issues/197) | Lifecycle, health checks e reconexão no navegador. |
 | [#193 — Limpeza da raiz](https://github.com/verseles/codewalk/issues/193) | Auditoria de referências, build e scripts antes de remover arquivos. |
