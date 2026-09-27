@@ -79,31 +79,51 @@ Future<ui.Color?> extractProjectIconColor(ProjectIconData icon) async {
   }
 }
 
-/// Alpha-weighted quantization avoids averaging distinct hues into a new one.
+/// Favor the visible artwork color over dark outlines and neutral backgrounds.
 ui.Color? dominantProjectIconColor(ByteData pixels) {
-  final buckets = <int, List<int>>{};
+  final coloredBuckets = <int, List<int>>{};
+  final neutralBuckets = <int, List<int>>{};
   for (var i = 0; i + 3 < pixels.lengthInBytes; i += 4) {
     final alpha = pixels.getUint8(i + 3);
     if (alpha < 16) continue;
     final r = pixels.getUint8(i);
     final g = pixels.getUint8(i + 1);
     final b = pixels.getUint8(i + 2);
+    final brightest = math.max(r, math.max(g, b));
+    final chroma = (brightest - math.min(r, math.min(g, b))).toInt();
+    final colored = chroma >= 28 && brightest >= 48;
     final key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
-    final bucket = buckets.putIfAbsent(key, () => [0, 0, 0, 0]);
-    bucket[0] += alpha;
-    bucket[1] += r * alpha;
-    bucket[2] += g * alpha;
-    bucket[3] += b * alpha;
+    final bucket = (colored ? coloredBuckets : neutralBuckets).putIfAbsent(
+      key,
+      () => [0, 0, 0, 0, 0],
+    );
+    final brightnessWeight = 16 + (brightest * brightest >> 8);
+    bucket[0] +=
+        alpha * (colored ? chroma * brightnessWeight : brightnessWeight);
+    bucket[1] += alpha;
+    bucket[2] += r * alpha;
+    bucket[3] += g * alpha;
+    bucket[4] += b * alpha;
   }
   List<int>? winner;
-  for (final bucket in buckets.values) {
+  for (final bucket
+      in (coloredBuckets.isEmpty ? neutralBuckets : coloredBuckets).values) {
     if (winner == null || bucket[0] > winner[0]) winner = bucket;
   }
   if (winner == null) return null;
-  return ui.Color.fromARGB(
-    255,
-    (winner[1] / winner[0]).round(),
-    (winner[2] / winner[0]).round(),
-    (winner[3] / winner[0]).round(),
-  );
+  var r = (winner[2] / winner[1]).round();
+  var g = (winner[3] / winner[1]).round();
+  var b = (winner[4] / winner[1]).round();
+  if (coloredBuckets.isEmpty) {
+    final neutral = math.max(128, math.max(r, math.max(g, b)));
+    return ui.Color.fromARGB(255, neutral, neutral, neutral);
+  }
+  final brightest = math.max(r, math.max(g, b));
+  if (brightest < 192) {
+    final scale = 192 / brightest;
+    r = (r * scale).round();
+    g = (g * scale).round();
+    b = (b * scale).round();
+  }
+  return ui.Color.fromARGB(255, r, g, b);
 }
