@@ -132,8 +132,12 @@ class SessionTabStrip extends StatelessWidget {
       keyPrefix: 'session_tab_',
       trailingExtentBuilder: (context, tab) => isCompact ? 40.0 : 32.0,
       contextMenuActionLabel: context.l10n.chatSessionActions,
-      leadingBuilder: (context, appTab) =>
-          _buildLeading(context, appTab.value, _projectForTab(appTab.value)),
+      leadingBuilder: (context, appTab) => _buildLeading(
+        context,
+        appTab.value,
+        _projectForTab(appTab.value),
+        hasPalette: appTab.projectColor != null,
+      ),
       trailingBuilder: (context, appTab) => trailingBuilder(context, appTab.value),
       accessoryBuilder: (context, appTab) {
         if (!anchors.contains(appTab.value.identity)) {
@@ -202,8 +206,21 @@ class SessionTabStrip extends StatelessWidget {
     return trimmed.isEmpty ? context.l10n.sessionExportUntitled : trimmed;
   }
 
-  Widget _buildLeading(BuildContext context, SessionTabRecord tab, Project? project) {
+  Widget _buildLeading(
+    BuildContext context,
+    SessionTabRecord tab,
+    Project? project, {
+    required bool hasPalette,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
+    var iconColor = tab.isSelected
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
+    if (hasPalette) {
+      iconColor = colorScheme.brightness == Brightness.light
+          ? Colors.black
+          : colorScheme.onSurface;
+    }
     final key = sessionTabIdentityKey(tab.identity);
     late final Widget leading;
     if (tab.hasUnseenError) {
@@ -236,7 +253,7 @@ class SessionTabStrip extends StatelessWidget {
             preset.icon,
             key: ValueKey<String>('session_tab_custom_icon_$key'),
             size: 20,
-            color: tab.isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            color: iconColor,
           ),
         );
       } else {
@@ -250,7 +267,7 @@ class SessionTabStrip extends StatelessWidget {
             key: ValueKey<String>('session_tab_project_icon_$key'),
             project: resolvedProject,
             size: 20,
-            color: tab.isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            color: iconColor,
             autoDiscover: project != null && openProjectIds.contains(project.id),
           ),
         );
