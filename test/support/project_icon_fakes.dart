@@ -68,6 +68,7 @@ class PaletteStore implements ProjectIconStore {
 }
 
 class PaletteDiscovery implements ProjectIconDiscoveryService {
+  Completer<ProjectIconDiscoveryResult>? pending;
   ProjectIconDiscoveryResult result = const ProjectIconDiscoveryResult(
     status: ProjectIconDiscoveryStatus.notFound,
   );
@@ -77,7 +78,7 @@ class PaletteDiscovery implements ProjectIconDiscoveryService {
   @override
   Future<ProjectIconDiscoveryResult> discover(Project project) async {
     calls++;
-    return result;
+    return pending == null ? result : pending!.future;
   }
 
   void found(ProjectIconData icon) {

@@ -424,7 +424,11 @@ class _SessionTabColorsState extends State<_SessionTabColors> {
     ({Project project, bool discover}) entry,
   ) async {
     await provider.loadStoredIcon(entry.project);
-    if (!mounted || widget.provider != provider) return;
+    if (!mounted ||
+        widget.provider != provider ||
+        !(widget.settings?.useProjectIconTabColors ?? true)) {
+      return;
+    }
     if (entry.discover) await provider.autoDiscoverIcon(entry.project);
     if (!mounted ||
         widget.provider != provider ||

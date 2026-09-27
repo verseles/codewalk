@@ -84,6 +84,53 @@ void main() {
     },
   );
 
+  test('reads started during discovery cannot restore old artwork', () async {
+    for (final found in [true, false]) {
+      final store = PaletteStore(null)..read = Completer();
+      final discovery = PaletteDiscovery()..pending = Completer();
+      if (found) discovery.found(paletteIcon([2]));
+      final provider = ProjectIconProvider(
+        store: store,
+        discoveryService: discovery,
+      );
+      final project = paletteProject();
+      final discovering = provider.discoverIcon(project);
+      final reading = provider.loadStoredIcon(project);
+      discovery.pending!.complete(discovery.result);
+      await discovering;
+      store.read!.complete(paletteIcon([1]));
+      await reading;
+      expect(provider.iconFor(project)?.bytes.first, found ? 2 : null);
+      provider.dispose();
+    }
+  });
+
+  test('removal prunes excess cached colors without another decode', () async {
+    final store = PaletteStore(null);
+    final discovery = PaletteDiscovery();
+    var extractions = 0;
+    final provider = ProjectIconProvider(
+      store: store,
+      discoveryService: discovery,
+      extractColor: (_) async {
+        extractions++;
+        return Colors.red;
+      },
+    );
+    for (var i = 0; i < 66; i++) {
+      store.icon = paletteIcon([i]);
+      await provider.loadStoredIcon(paletteProject('$i'));
+      await provider.ensureColor(paletteProject('$i'));
+    }
+    await provider.discoverIcon(paletteProject('0'));
+    await provider.discoverIcon(paletteProject('1'));
+    discovery.found(paletteIcon([0]));
+    await provider.discoverIcon(paletteProject('0'));
+    await provider.ensureColor(paletteProject('0'));
+    expect(extractions, 67, reason: 'removed palette was evicted immediately');
+    provider.dispose();
+  });
+
   test(
     'extraction completing after disposal cannot notify listeners',
     () async {

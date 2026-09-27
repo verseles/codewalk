@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -187,14 +188,83 @@ void main() {
                 ? scheme.surface
                 : scheme.surfaceContainerHigh;
             final text = selected ? scheme.onSurface : scheme.onSurfaceVariant;
-            final fill = projectTabSurface(seed, base, [
-              text,
-              scheme.primary,
-            ], selected: selected);
-            expect(contrast(fill, text), greaterThanOrEqualTo(4.5));
+            final overlays = [
+              Colors.transparent,
+              scheme.primary.withValues(alpha: .09),
+              scheme.primary.withValues(alpha: .14),
+            ];
+            final fill = projectTabSurface(
+              seed,
+              base,
+              [text, scheme.primary],
+              selected: selected,
+              overlays: overlays,
+            );
+            for (final overlay in overlays) {
+              for (final foreground in [text, scheme.primary]) {
+                expect(
+                  contrast(Color.alphaBlend(overlay, fill), foreground),
+                  greaterThanOrEqualTo(
+                    math.min(
+                      4.5,
+                      contrast(Color.alphaBlend(overlay, base), foreground),
+                    ),
+                  ),
+                );
+              }
+            }
           }
         }
       }
+    },
+  );
+
+  testWidgets(
+    'disabling colors during stored load does not start hidden discovery',
+    (tester) async {
+      final settings = _settings();
+      final store = PaletteStore(null)..read = Completer();
+      final discovery = PaletteDiscovery();
+      var extractions = 0;
+      final icons = ProjectIconProvider(
+        store: store,
+        discoveryService: discovery,
+        extractColor: (_) async {
+          extractions++;
+          return Colors.red;
+        },
+      );
+      addTearDown(settings.dispose);
+      addTearDown(icons.dispose);
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<SettingsProvider>.value(value: settings),
+            ChangeNotifierProvider<ProjectIconProvider>.value(value: icons),
+          ],
+          child: localizedMaterialApp(
+            home: Scaffold(
+              body: SessionTabStrip(
+                tabs: [_tab('pending', selected: true)],
+                projects: [paletteProject()],
+                openProjectIds: const {'palette'},
+                isCompact: true,
+                onActivate: (_) {},
+                onClose: (_) {},
+                onContextMenu: (_, _, {required haptic}) async {},
+                trailingBuilder: (_, _) => null,
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(store.reads, 1);
+      await settings.setUseProjectIconTabColors(false);
+      store.read!.complete(paletteIcon([1]));
+      await tester.pumpAndSettle();
+      expect(discovery.calls, 0);
+      expect(extractions, 0);
+      expect(tester.takeException(), isNull);
     },
   );
 

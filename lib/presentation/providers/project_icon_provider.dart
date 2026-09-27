@@ -70,13 +70,7 @@ class ProjectIconProvider extends ChangeNotifier {
           }
           if (_disposed) return;
           _colors[digest] = color;
-          while (_colors.length > 64) {
-            final unused = _colors.keys.where(
-              (key) => !_iconDigests.containsValue(key),
-            );
-            if (unused.isEmpty) break;
-            _colors.remove(unused.first);
-          }
+          _pruneColors();
           if (_iconDigests.containsValue(digest)) _notify();
         })
         .whenComplete(() {
@@ -91,6 +85,17 @@ class ProjectIconProvider extends ChangeNotifier {
     _iconsByKey[key] = icon;
     _iconDigests[key] =
         '${icon.metadata.storedFormat.name}:${sha256.convert(icon.bytes)}';
+    _pruneColors();
+  }
+
+  void _pruneColors() {
+    while (_colors.length > 64) {
+      final unused = _colors.keys.where(
+        (key) => !_iconDigests.containsValue(key),
+      );
+      if (unused.isEmpty) break;
+      _colors.remove(unused.first);
+    }
   }
 
   void _notify() {
@@ -189,6 +194,7 @@ class ProjectIconProvider extends ChangeNotifier {
           candidate: candidate,
         );
         if (_disposed) return result;
+        _revisions[key] = (_revisions[key] ?? 0) + 1;
         _setIcon(key, icon);
         _loadedKeys.add(key);
       } else if (result.status == ProjectIconDiscoveryStatus.notFound ||
@@ -196,8 +202,10 @@ class ProjectIconProvider extends ChangeNotifier {
           result.status == ProjectIconDiscoveryStatus.unsupported) {
         await _store.deleteIcon(key);
         if (_disposed) return result;
+        _revisions[key] = (_revisions[key] ?? 0) + 1;
         _iconsByKey.remove(key);
         _iconDigests.remove(key);
+        _pruneColors();
         _loadedKeys.add(key);
       }
       return result;

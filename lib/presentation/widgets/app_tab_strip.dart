@@ -106,15 +106,18 @@ Color projectTabSurface(
   Color base,
   Iterable<Color> foregrounds, {
   required bool selected,
+  Iterable<Color> overlays = const [Colors.transparent],
 }) {
   var alpha = selected ? 0.18 : 0.09;
   final colors = foregrounds.toList();
   for (var attempt = 0; attempt < 8; attempt++) {
     final tinted = Color.alphaBlend(seed.withValues(alpha: alpha), base);
     if (colors.every(
-      (color) =>
-          _contrastRatio(color, tinted) >=
-          math.min(4.5, _contrastRatio(color, base)),
+      (color) => overlays.every(
+        (overlay) =>
+            _contrastRatio(color, Color.alphaBlend(overlay, tinted)) >=
+            math.min(4.5, _contrastRatio(color, Color.alphaBlend(overlay, base))),
+      ),
     )) {
       return tinted;
     }
@@ -696,6 +699,11 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
             selected ? colorScheme.surface : colorScheme.surfaceContainerHigh,
             [foreground, colorScheme.primary],
             selected: selected,
+            overlays: [
+              Colors.transparent,
+              colorScheme.primary.withValues(alpha: 0.09),
+              colorScheme.primary.withValues(alpha: 0.14),
+            ],
           );
     final focusNode = _focusNodeFor(tab);
     final statesController = _statesControllerFor(tab);
