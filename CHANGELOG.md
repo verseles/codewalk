@@ -2,6 +2,12 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.258.2 - 2026-09-27
+
+- fix(tabs): choose palette ink by surface contrast
+- fix(tabs): preserve dark palette foregrounds
+- fix(tabs): show project palettes in light themes
+
 ## v1.258.1 - 2026-09-27
 
 - fix(tabs): retain hue for dark project artwork
