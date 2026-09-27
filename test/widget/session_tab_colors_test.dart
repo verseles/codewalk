@@ -48,6 +48,11 @@ SessionTabRecord _tab(
   errorToken: 'attention',
 );
 
+double _contrast(Color a, Color b) {
+  final x = a.computeLuminance(), y = b.computeLuminance();
+  return (math.max(x, y) + .05) / (math.min(x, y) + .05);
+}
+
 void main() {
   test('light presets keep project palette visible', () {
     for (final preset in openCodeThemePresetOptions()) {
@@ -55,17 +60,30 @@ void main() {
       for (final selected in [true, false]) {
         final base = selected ? scheme.surface : scheme.surfaceContainerHigh;
         for (final seed in [Colors.red, Colors.blue, Colors.green]) {
+          final foreground = projectTabPaletteForeground(
+            scheme,
+            seed,
+            selected: selected,
+          );
+          final overlays = [
+            Colors.transparent,
+            scheme.primary.withValues(alpha: .09),
+            scheme.primary.withValues(alpha: .14),
+          ];
           final fill = projectTabSurface(
             seed,
             base,
-            [Colors.black],
+            [foreground],
             selected: selected,
-            overlays: [
-              Colors.transparent,
-              scheme.primary.withValues(alpha: .09),
-              scheme.primary.withValues(alpha: .14),
-            ],
+            overlays: overlays,
           );
+          for (final overlay in overlays) {
+            expect(
+              _contrast(foreground, Color.alphaBlend(overlay, fill)),
+              greaterThanOrEqualTo(4.5),
+              reason: '$preset, $seed, selected=$selected, overlay=$overlay',
+            );
+          }
           expect(
             fill,
             isNot(base),
@@ -316,16 +334,37 @@ void main() {
           ?.color,
       darkScheme.onSurface,
     );
+    for (final preset in [
+      OpenCodeThemePreset.catppuccinFrappe,
+      OpenCodeThemePreset.catppuccinMacchiato,
+    ]) {
+      final darkSurfaceLightScheme = openCodeLightSchemeFor(preset)!;
+      await tester.pumpWidget(appFor(darkSurfaceLightScheme));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<Material>(find.byKey(tabKey)).color,
+        isNot(darkSurfaceLightScheme.surface),
+      );
+      expect(tester.widget<Icon>(find.byKey(iconKey)).color, Colors.white);
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(
+                ValueKey<String>(
+                  'session_tab_title_${sessionTabIdentityKey(selected.identity)}',
+                ),
+              ),
+            )
+            .style
+            ?.color,
+        Colors.white,
+      );
+    }
   });
 
   test(
     'tints preserve tab label contrast across light, dark and black surfaces',
     () {
-      double contrast(Color a, Color b) {
-        final x = a.computeLuminance(), y = b.computeLuminance();
-        return (math.max(x, y) + .05) / (math.min(x, y) + .05);
-      }
-
       for (final brightness in Brightness.values) {
         final scheme = ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -344,7 +383,7 @@ void main() {
                 ? scheme.surface
                 : scheme.surfaceContainerHigh;
             final text = brightness == Brightness.light
-                ? Colors.black
+                ? projectTabPaletteForeground(scheme, seed, selected: selected)
                 : selected
                 ? scheme.onSurface
                 : scheme.onSurfaceVariant;
@@ -366,11 +405,11 @@ void main() {
             for (final overlay in overlays) {
               for (final foreground in foregrounds) {
                 expect(
-                  contrast(Color.alphaBlend(overlay, fill), foreground),
+                  _contrast(Color.alphaBlend(overlay, fill), foreground),
                   greaterThanOrEqualTo(
                     math.min(
                       4.5,
-                      contrast(Color.alphaBlend(overlay, base), foreground),
+                      _contrast(Color.alphaBlend(overlay, base), foreground),
                     ),
                   ),
                 );

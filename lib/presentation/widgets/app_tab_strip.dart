@@ -126,6 +126,45 @@ Color projectTabSurface(
   return base;
 }
 
+List<Color> _projectTabOverlays(ColorScheme colorScheme) => [
+  Colors.transparent,
+  colorScheme.primary.withValues(alpha: 0.09),
+  colorScheme.primary.withValues(alpha: 0.14),
+];
+
+/// Pick readable ink for the surface after project tint and interaction overlays.
+Color projectTabPaletteForeground(
+  ColorScheme colorScheme,
+  Color seed, {
+  required bool selected,
+}) {
+  final base = selected
+      ? colorScheme.surface
+      : colorScheme.surfaceContainerHigh;
+  final tinted = Color.alphaBlend(
+    seed.withValues(alpha: selected ? 0.18 : 0.09),
+    base,
+  );
+  final overlays = _projectTabOverlays(colorScheme);
+
+  double weakestContrast(Color foreground) {
+    var weakest = double.infinity;
+    for (final surface in [base, tinted]) {
+      for (final overlay in overlays) {
+        weakest = math.min(
+          weakest,
+          _contrastRatio(foreground, Color.alphaBlend(overlay, surface)),
+        );
+      }
+    }
+    return weakest;
+  }
+
+  return weakestContrast(Colors.black) >= weakestContrast(Colors.white)
+      ? Colors.black
+      : Colors.white;
+}
+
 /// Context-menu callback routed with the tab and the global position.
 typedef AppTabContextMenuCallback<T> =
     Future<void> Function(
@@ -687,7 +726,11 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
     final lightPalette =
         tab.projectColor != null && colorScheme.brightness == Brightness.light;
     final foreground = lightPalette
-        ? Colors.black
+        ? projectTabPaletteForeground(
+            colorScheme,
+            tab.projectColor!,
+            selected: selected,
+          )
         : selected
             ? colorScheme.onSurface
             : colorScheme.onSurfaceVariant;
@@ -705,11 +748,7 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
             selected ? colorScheme.surface : colorScheme.surfaceContainerHigh,
             lightPalette ? [foreground] : [foreground, colorScheme.primary],
             selected: selected,
-            overlays: [
-              Colors.transparent,
-              colorScheme.primary.withValues(alpha: 0.09),
-              colorScheme.primary.withValues(alpha: 0.14),
-            ],
+            overlays: _projectTabOverlays(colorScheme),
           );
     final focusNode = _focusNodeFor(tab);
     final statesController = _statesControllerFor(tab);
