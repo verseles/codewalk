@@ -687,7 +687,17 @@
 - **Then** the compact session header remains visible when tabs are disabled or no selected tab represents the current session
 - **Given** AMOLED dark mode collapses the surface roles onto pure black
 - **When** the tab strip is rendered
-- **Then** the selected session and file tabs keep their pure-black fill and gain a minimal top selection indicator, while inactive tabs stay unchanged
+- **Then** selected tabs retain a minimal top selection indicator; file tabs and session tabs without an active project palette keep the pure-black fill
+
+- **Given** a session tab has a detected project icon and `Project tab colors` is enabled in Settings > Appearance
+- **When** the icon loads, changes, or is removed
+- **Then** the tab uses a subtle background derived from the icon's dominant visible color, with stronger tint on the selected tab, and returns to its normal background when no palette is available
+- **Then** pinned and draft tabs use the same palette, including when attention badges or custom glyphs replace the visible project icon; file tabs and the global theme keep their existing colors
+- **Then** tinting also applies in AMOLED mode while the rest of the interface remains black; normal, hover, and focus states keep foreground contrast at least 4.5:1 where the base theme supports it, otherwise they do not reduce that state's existing contrast
+- **Then** raster and SVG artwork are sampled once per cached image content; transparent, invalid, or unsupported artwork falls back to the normal tab background, and monochrome artwork uses a neutral tint
+- **Given** the user changes `Project tab colors`
+- **When** the setting is saved
+- **Then** the tab backgrounds update immediately and the choice persists; the setting defaults to enabled for new and existing installations
 
 - **Given** the tab strip is rendered
 - **When** the user swipes, uses the wheel or trackpad, or the app scrolls programmatically

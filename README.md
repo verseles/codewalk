@@ -30,7 +30,7 @@ A native (really fast!!) cross-platform client for [OpenCode](https://github.com
 - ↪️ Forward a message to one or more other sessions
 - 🧱 Block render mode — see each block as it finishes instead of watching text stream character by character
 - 📉 Context usage metrics, so you can see how much of the window a session is consuming
-- 🎨 Per-project icons discovered automatically from the repository
+- 🎨 Per-project icons discovered automatically from the repository, with matching session-tab colors you can disable in Appearance
 - 📶 Data saver that scales back background sync on cellular
 - 🖥 Server-hosted PTY terminal — a real command line running on the OpenCode host, embedded in the app
 - 🎙 Speech-to-text on every platform, including Linux
