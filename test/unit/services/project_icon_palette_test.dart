@@ -87,6 +87,17 @@ void main() {
     expect(color.g, greaterThan(color.r));
   });
 
+  test('very dark chromatic art keeps its hue when alone', () {
+    final pixels = Uint8List.fromList([
+      for (var i = 0; i < 64; i++) ...[0, 0, 40, 255],
+    ]);
+    final color = dominantProjectIconColor(ByteData.sublistView(pixels));
+    expect(color, isNotNull);
+    expect(color!.b, greaterThanOrEqualTo(0.75));
+    expect(color.b, greaterThan(color.g));
+    expect(color.g, color.r);
+  });
+
   test('PNG samples actual artwork and transparency', () async {
     final image = img.Image(width: 96, height: 48, numChannels: 4);
     img.fill(image, color: img.ColorRgba8(0, 0, 255, 0));
