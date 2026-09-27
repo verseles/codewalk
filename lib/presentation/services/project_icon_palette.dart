@@ -82,6 +82,7 @@ Future<ui.Color?> extractProjectIconColor(ProjectIconData icon) async {
 /// Favor the visible artwork color over dark outlines and neutral backgrounds.
 ui.Color? dominantProjectIconColor(ByteData pixels) {
   final coloredBuckets = <int, List<int>>{};
+  final darkColoredBuckets = <int, List<int>>{};
   final neutralBuckets = <int, List<int>>{};
   for (var i = 0; i + 3 < pixels.lengthInBytes; i += 4) {
     final alpha = pixels.getUint8(i + 3);
@@ -91,12 +92,12 @@ ui.Color? dominantProjectIconColor(ByteData pixels) {
     final b = pixels.getUint8(i + 2);
     final brightest = math.max(r, math.max(g, b));
     final chroma = (brightest - math.min(r, math.min(g, b))).toInt();
-    final colored = chroma >= 28 && brightest >= 48;
+    final colored = chroma >= 28;
     final key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
-    final bucket = (colored ? coloredBuckets : neutralBuckets).putIfAbsent(
-      key,
-      () => [0, 0, 0, 0, 0],
-    );
+    final buckets = colored
+        ? (brightest >= 48 ? coloredBuckets : darkColoredBuckets)
+        : neutralBuckets;
+    final bucket = buckets.putIfAbsent(key, () => [0, 0, 0, 0, 0]);
     final brightnessWeight = 16 + (brightest * brightest >> 8);
     bucket[0] +=
         alpha * (colored ? chroma * brightnessWeight : brightnessWeight);
@@ -106,15 +107,20 @@ ui.Color? dominantProjectIconColor(ByteData pixels) {
     bucket[4] += b * alpha;
   }
   List<int>? winner;
-  for (final bucket
-      in (coloredBuckets.isEmpty ? neutralBuckets : coloredBuckets).values) {
+  final hasColor = coloredBuckets.isNotEmpty || darkColoredBuckets.isNotEmpty;
+  final candidates = coloredBuckets.isNotEmpty
+      ? coloredBuckets
+      : darkColoredBuckets.isNotEmpty
+      ? darkColoredBuckets
+      : neutralBuckets;
+  for (final bucket in candidates.values) {
     if (winner == null || bucket[0] > winner[0]) winner = bucket;
   }
   if (winner == null) return null;
   var r = (winner[2] / winner[1]).round();
   var g = (winner[3] / winner[1]).round();
   var b = (winner[4] / winner[1]).round();
-  if (coloredBuckets.isEmpty) {
+  if (!hasColor) {
     final neutral = math.max(128, math.max(r, math.max(g, b)));
     return ui.Color.fromARGB(255, neutral, neutral, neutral);
   }
