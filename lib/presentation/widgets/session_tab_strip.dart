@@ -213,14 +213,11 @@ class SessionTabStrip extends StatelessWidget {
     required bool hasPalette,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    var iconColor = tab.isSelected
-        ? colorScheme.primary
-        : colorScheme.onSurfaceVariant;
-    if (hasPalette) {
-      iconColor = colorScheme.brightness == Brightness.light
-          ? Colors.black
-          : colorScheme.onSurface;
-    }
+    final iconColor = hasPalette && colorScheme.brightness == Brightness.light
+        ? Colors.black
+        : tab.isSelected
+            ? colorScheme.primary
+            : colorScheme.onSurfaceVariant;
     final key = sessionTabIdentityKey(tab.identity);
     late final Widget leading;
     if (tab.hasUnseenError) {
