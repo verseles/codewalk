@@ -684,7 +684,12 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
     final selected = tab.isSelected;
     final topRadius = selected ? kAppTabActiveTopRadius : kAppTabInactiveTopRadius;
     final radius = BorderRadius.vertical(top: Radius.circular(topRadius));
-    final foreground = selected ? colorScheme.onSurface : colorScheme.onSurfaceVariant;
+    var foreground = selected ? colorScheme.onSurface : colorScheme.onSurfaceVariant;
+    if (tab.projectColor != null) {
+      foreground = colorScheme.brightness == Brightness.light
+          ? Colors.black
+          : colorScheme.onSurface;
+    }
     final hovered = _hoveredId == id;
     final trailingHovered = _hoveredTrailingId == id;
     final standardSurfaceColor = selected
@@ -697,7 +702,7 @@ class _AppTabStripState<T> extends State<AppTabStrip<T>> {
         : projectTabSurface(
             tab.projectColor!,
             selected ? colorScheme.surface : colorScheme.surfaceContainerHigh,
-            [foreground, colorScheme.primary],
+            [foreground],
             selected: selected,
             overlays: [
               Colors.transparent,
