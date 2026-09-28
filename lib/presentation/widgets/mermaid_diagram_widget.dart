@@ -4,6 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/i18n/l10n_context.dart';
 import '../theme/app_shapes.dart';
+import '../theme/opencode_theme_presets.dart';
 
 /// Renders Mermaid diagram source code as a visual diagram.
 ///
@@ -100,7 +101,7 @@ class MermaidDiagramWidget extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 200),
             child: MermaidDiagram(
               code: code,
-              style: _resolveMermaidStyle(Theme.of(context).brightness),
+              style: _resolveMermaidStyle(context),
               errorBuilder: (ctx, error) =>
                   _buildFallbackCodeView(ctx),
             ),
@@ -131,10 +132,30 @@ class MermaidDiagramWidget extends StatelessWidget {
     );
   }
 
-  /// Resolves a mermaid theme style based on the app brightness.
-  MermaidStyle _resolveMermaidStyle(Brightness brightness) {
-    return brightness == Brightness.dark
-        ? MermaidStyle.dark()
-        : MermaidStyle.neutral();
+  /// Resolves Mermaid colors from the active app theme.
+  MermaidStyle _resolveMermaidStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final themeTokens =
+        theme.extension<OpenCodeThemeTokens>() ??
+        classicThemeTokensFrom(colorScheme);
+    final diagramBackground = colorScheme.surfaceContainerLowest;
+
+    return MermaidStyle(
+      backgroundColor: diagramBackground.toARGB32(),
+      defaultNodeStyle: NodeStyle(
+        fillColor: themeTokens.surfaceRaised.toARGB32(),
+        strokeColor: themeTokens.border.toARGB32(),
+        textColor: themeTokens.textBase.toARGB32(),
+      ),
+      defaultEdgeStyle: EdgeStyle(
+        strokeColor: themeTokens.textMuted.toARGB32(),
+        labelColor: themeTokens.textBase.toARGB32(),
+        labelBackgroundColor: diagramBackground.toARGB32(),
+      ),
+      themeMode: theme.brightness == Brightness.dark
+          ? MermaidThemeMode.dark
+          : MermaidThemeMode.light,
+    );
   }
 }

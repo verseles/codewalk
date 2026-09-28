@@ -474,6 +474,19 @@ class _ChatMessageWidgetState extends State<ChatMessageWidget> {
       listBullet: Theme.of(
         context,
       ).textTheme.bodyMedium?.copyWith(color: themeTokens.markdownListItem),
+      tableHead: theme.textTheme.bodyMedium?.copyWith(
+        color: themeTokens.textBase,
+        fontWeight: FontWeight.bold,
+      ),
+      tableBody: theme.textTheme.bodyMedium?.copyWith(
+        color: themeTokens.textBase,
+      ),
+      tableHeadCellsDecoration: BoxDecoration(color: themeTokens.surfaceRaised),
+      tableBorder: TableBorder.all(
+        color: themeTokens.border.withValues(alpha: 0.7),
+        borderRadius: AppShapes.borderExtraSmall,
+      ),
+      tableColumnWidth: const IntrinsicColumnWidth(),
       horizontalRuleDecoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: themeTokens.markdownHorizontalRule),
