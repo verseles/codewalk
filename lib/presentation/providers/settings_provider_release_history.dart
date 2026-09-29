@@ -94,6 +94,20 @@ extension SettingsProviderReleaseHistory on SettingsProvider {
         _releaseHistory.contains(state.from!);
   }
 
+  Future<bool> _hasReleaseHistoryInstallEvidence() async {
+    if (await _localDataSource.getServerProfilesJson() != null) return true;
+    // AppProvider migrates these keys independently during startup. Check the
+    // same evidence before that migration has necessarily saved a profile.
+    return (await _localDataSource.getServerHost())?.trim().isNotEmpty ==
+            true ||
+        await _localDataSource.getServerPort() != null ||
+        await _localDataSource.getBasicAuthEnabled() == true ||
+        (await _localDataSource.getBasicAuthUsername())?.trim().isNotEmpty ==
+            true ||
+        (await _localDataSource.getBasicAuthPassword())?.trim().isNotEmpty ==
+            true;
+  }
+
   Future<void> _initializeReleaseHistory({
     required bool existingInstall,
   }) async {
@@ -188,7 +202,8 @@ extension SettingsProviderReleaseHistory on SettingsProvider {
       _releaseHistory = result;
       _releaseHistoryCoverageMissing =
           target != null && !_coversPendingHistory();
-      if (target == _installedVersion &&
+      if (!result.failed &&
+          target == _installedVersion &&
           _coversPendingHistory() &&
           pendingReleaseAnnouncements == null &&
           _presentedAnnouncementKey != _installedReleaseState!.key) {

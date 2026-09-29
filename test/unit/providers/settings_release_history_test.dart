@@ -95,6 +95,57 @@ void main() {
     },
   );
 
+  for (final legacyKey in ['host', 'port', 'enabled', 'username', 'password']) {
+    test(
+      'legacy $legacyKey establishes existing install before profile migration',
+      () async {
+        final local = InMemoryAppLocalDataSource();
+        switch (legacyKey) {
+          case 'host':
+            await local.saveServerHost('localhost');
+          case 'port':
+            await local.saveServerPort(4096);
+          case 'enabled':
+            await local.saveBasicAuthEnabled(true);
+          case 'username':
+            await local.saveBasicAuthUsername('test-user');
+          case 'password':
+            await local.saveBasicAuthPassword('test-only');
+        }
+        final provider = await _provider(local, FakeReleaseHistoryService());
+        addTearDown(provider.dispose);
+        expect(
+          provider.pendingReleaseAnnouncements!.entries.single.version
+              .toString(),
+          '1.2.0',
+        );
+      },
+    );
+  }
+
+  test(
+    'failed maintenance-only refresh preserves pending until successful retry',
+    () async {
+      _version('1.1.1');
+      final local = _local(highest: '1.1.0');
+      final service = FakeReleaseHistoryService(
+        snapshot: ReleaseHistorySnapshot(
+          entries: parseReleaseHistory(releaseHistoryFixture),
+          failed: true,
+        ),
+      );
+      final provider = await _provider(local, service);
+      addTearDown(provider.dispose);
+      expect(provider.pendingReleaseAnnouncements, isNull);
+      expect(jsonDecode(local.releaseHistoryState!)['to'], '1.1.1');
+      service.snapshot = ReleaseHistorySnapshot(
+        entries: parseReleaseHistory(releaseHistoryFixture),
+      );
+      await provider.loadReleaseHistory(forceRefresh: true);
+      expect(jsonDecode(local.releaseHistoryState!)['to'], isNull);
+    },
+  );
+
   test(
     'fresh install seeds silently without loading archive automatically',
     () async {

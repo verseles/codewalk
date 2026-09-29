@@ -377,7 +377,8 @@ class SettingsProvider extends ChangeNotifier {
     final hasStoredExperienceSettings = raw != null && raw.trim().isNotEmpty;
     final hadServers =
         _releaseHistoryService != null &&
-        (await _localDataSource.getServerProfilesJson()) != null;
+        !hasStoredExperienceSettings &&
+        await _hasReleaseHistoryInstallEvidence();
     if (hasStoredExperienceSettings) {
       try {
         final decoded = jsonDecode(raw);
