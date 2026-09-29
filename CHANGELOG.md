@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.260.0 - 2026-09-29
+
+> 📣 Catch up on announcements from the releases you skipped, and revisit recent announcements and changelogs anytime in Settings > About.
+
+- fix(updates): retain pending news offline and detect legacy installs
+- feat(updates): preserve missed announcements and release history
+- docs: update project guidance and issue status
+- fix(test): harden suite reliability and coverage gates
+- docs(chat): describe Mermaid theme limits and rounded tables
+
 ## v1.259.0 - 2026-09-29
 
 > 📣 Assistant replies now render Mermaid diagrams more clearly across light and dark themes, with rounded Markdown tables and more legible headers.
