@@ -2,6 +2,25 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.259.0 - 2026-09-29
+
+> 📣 Assistant replies now render Mermaid diagrams more clearly across light and dark themes, with rounded Markdown tables and more legible headers.
+
+- fix(chat): guarantee Mermaid contrast and reuse theme style
+- feat(chat): theme Mermaid and style Markdown tables
+- docs: mark issue 213 closed
+- Merge remote-tracking branch 'origin/main'
+- docs(tabs): describe contrast-aware project palettes
+- fix(tabs): choose palette ink by surface contrast
+- fix(tabs): preserve dark palette foregrounds
+- fix(tabs): show project palettes in light themes
+- docs(todo): mark project tab colors issue closed
+- docs(tabs): describe accent-aware project palettes
+- Merge remote-tracking branch 'origin/main'
+- fix(tabs): retain hue for dark project artwork
+- fix(tabs): prefer icon accent colors over dark outlines
+- docs: describe project icon colors in session tabs
+
 ## v1.258.2 - 2026-09-27
 
 - fix(tabs): choose palette ink by surface contrast
