@@ -11,7 +11,7 @@ extension _ChatProviderAbortPolicyOps on ChatProvider {
 
   void _startAbortSuppression(String sessionId) {
     _abortSuppressionSessionId = sessionId;
-    _abortSuppressionStartedAt = DateTime.now();
+    _abortSuppressionStartedAt = _abortSuppressionNow();
   }
 
   void _clearAbortSuppression() {

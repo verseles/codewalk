@@ -150,6 +150,25 @@ void main() {
       return pending.timeout(const Duration(seconds: 5));
     }
 
+    Future<void> closeNormally(
+      CodewalkTerminalSocketConnection socket, {
+      _FakeTailscaleTcpConnection? peer,
+    }) async {
+      final transport = peer ?? connection;
+      final closeOffset = transport.clientToServer.length;
+      final closing = socket.close();
+      await _pump();
+      final frame = _parseClientFrame(
+        transport.clientToServer.toBytes(),
+        closeOffset,
+      );
+      expect(frame.opcode, 0x8);
+      expect(frame.masked, isTrue);
+      transport.peerToClient.add(_serverFrame(0x8, frame.payload));
+      await closing.timeout(const Duration(seconds: 1));
+      await socket.done.timeout(const Duration(seconds: 1));
+    }
+
     test('dials the tailnet host and sends an RFC 6455 handshake', () async {
       final socket = await openConnected(
         headers: const {'Authorization': 'Bearer cached-token'},
@@ -169,7 +188,7 @@ void main() {
       expect(request, contains('Connection: Upgrade\r\n'));
       expect(request, contains('Sec-WebSocket-Version: 13\r\n'));
       expect(request, contains('Authorization: Bearer cached-token\r\n'));
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('delivers server binary messages', () async {
@@ -184,7 +203,7 @@ void main() {
       expect(received, hasLength(1));
       expect(utf8.decode(received.single), 'hello');
       await subscription.cancel();
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('reassembles fragmented messages', () async {
@@ -202,7 +221,7 @@ void main() {
       expect(received, hasLength(1));
       expect(utf8.decode(received.single), 'hello');
       await subscription.cancel();
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('answers pings with masked pongs', () async {
@@ -219,7 +238,7 @@ void main() {
       expect(frame.masked, isTrue);
       expect(frame.payload, [1, 2, 3]);
       await subscription.cancel();
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('masks outbound binary sends', () async {
@@ -234,7 +253,7 @@ void main() {
       expect(frame.opcode, 0x2);
       expect(frame.masked, isTrue);
       expect(utf8.decode(frame.payload), 'ls\n');
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('rejects non-101 handshake responses', () async {
@@ -348,7 +367,7 @@ void main() {
       expect(received, hasLength(1));
       expect(utf8.decode(received.single), 'hi');
       await subscription.cancel();
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('drops pong frames instead of emitting them as data', () async {
@@ -362,7 +381,7 @@ void main() {
 
       expect(received, isEmpty);
       await subscription.cancel();
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('rejects fragmented messages exceeding the size cap', () async {
@@ -413,7 +432,7 @@ void main() {
         ascii.decode(ipv6Connection.clientToServer.toBytes()),
         contains('Host: [fd7a::1]:4096\r\n'),
       );
-      await socket.close();
+      await closeNormally(socket, peer: ipv6Connection);
     });
 
     test('accepts case-insensitive upgrade headers', () async {
@@ -441,7 +460,7 @@ void main() {
       );
 
       final socket = await pending.timeout(const Duration(seconds: 5));
-      await socket.close();
+      await closeNormally(socket);
     });
 
     test('rejects handshakes missing the connection header', () async {      final pending = openCodewalkTerminalSocketViaTailscale(

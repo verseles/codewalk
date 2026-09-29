@@ -99,8 +99,12 @@ codewalk/
 │       │       └── nvidia_nim_tts_backend.dart # NVIDIA Speech NIM cloud TTS voice discovery and generated WAV synthesis
 │       ├── utils/ # Presentation helpers (incl. WindowSizeClass MD3 breakpoints, diff parser, file path detector, file path markdown, math markdown, basic HTML markdown (issue #190), project_directory_search.dart pure `projectDirectoryMatchScore` ordered-subsequence scorer (G3 #202/#204/#205/#212), session_tab_switcher_logic.dart pure MRU ordering + index math — issue #171, session_tab_grouping.dart pure display-only project grouping + new-chat anchors — issue #200)
 │       └── theme/                      # Material You theme: AppTheme, AppShapes, BrandColor seeds, AppSemanticColors, AppVisualStyleTokens (issue #86)
-├── test/                               # Unit, widget, integration, presentation, support tests
-├── tool/ci/                            # Analyzer budget, coverage gate, and session-overlay Android instrumentation scripts
+├── test/                               # Unit, widget, integration, presentation, and support tests
+│   ├── support/chat_page_test_harness.dart # Shared ChatPage fixture for smoke and extended widget suites
+│   ├── widget/chat_page_smoke_test.dart # Five focused ChatPage smoke tests (composer tips and responsive shell)
+│   ├── widget/chat_page_test.dart      # Extended ChatPage widget regressions, tagged slow
+│   └── web/speech_engine_platform_support_test.dart # Browser-only speech capability test
+├── tool/ci/                            # Analyzer budget, LCOV coverage gate/fixtures, and session-overlay Android instrumentation scripts
 ├── tool/i18n/                          # ARB catalog sync/validation and code migration tooling (arb_strings.dart is generated from the ARBs)
 ├── .github/workflows/                  # CI and release workflows
 ├── .opencode/agents/                  # Repo-local OpenCode agents
@@ -529,9 +533,14 @@ make theme-sync-check
 make icons
 make icons-check
 make analyze
-make test
-make coverage
-make check
+make test                                    # Full Flutter suite, fail-fast, 10-minute timeout
+make test-fast                              # Excludes slow and integration tags
+make test-chat                              # ChatPage smoke + extended suites
+make test-web                               # Browser capability tests (requires Chrome)
+make test-coverage-tools                    # Python stdlib coverage-gate fixtures
+make coverage                               # Flutter LCOV plus the 35% global and per-file coverage gates
+make check                                  # deps + gen + analyze + coverage fixtures + full test suite
+make check-fast                             # deps + gen + analyze + coverage fixtures + fast (non-slow, non-integration) tests
 dart tool/i18n/sync_arb_strings_from_arbs.dart  # Rebuild tool/i18n/arb_strings.dart from canonical lib/l10n/app_*.arb
 dart tool/i18n/generate_arb.dart                # Validation-only: verify ARBs match the arb_strings.dart catalog (non-destructive)
 flutter gen-l10n                                # Regenerate AppLocalizations delegates into lib/l10n/generated/
@@ -547,6 +556,8 @@ flutter run -d linux
 flutter run -d android
 flutter run -d chrome
 ```
+
+The full-suite `make test` defaults to four Flutter workers (`TEST_JOBS=4`); set `TEST_JOBS` to override Makefile targets that use it.
 
 ## Testing/Quality Gates
 
@@ -573,7 +584,7 @@ test/unit/core/tailscale/tailscale_http_adapter_test.dart # Tailscale Dio adapte
 test/unit/core/tailscale/tailscale_peer_test.dart # TailscalePeer defaultUrl: default OpenCode port mapping and IPv6 bracketing
 test/unit/core/utils/path_utils_test.dart # Root-aware normalize/join/child-prefix/absolute/parent incl. drive-root (G3); no chat-link tab coverage
 test/unit/models/file_node_model_test.dart # File-node model coverage (path_utils downstream consumer, G3)
-test/unit/providers/                   # ChatProvider split tests (10 files, parallelized with -j 12); `settings_provider_test.dart` covers visual style, project-icon tab color preference persistence, provider-aware read-aloud preference persistence, and fresh-install read-aloud default/probe preservation behavior
+test/unit/providers/                   # ChatProvider split tests; Makefile parallel targets use `TEST_JOBS`, default 4; `settings_provider_test.dart` covers visual style, project-icon tab color preference persistence, provider-aware read-aloud preference persistence, and fresh-install read-aloud default/probe preservation behavior
 test/unit/providers/project_icon_provider_test.dart # Shared palette extraction, stale icon revision guards, cache pruning, and disposal coverage
   chat_provider_init_test.dart         #   12 tests — initialization, config sync, model/agent selection
   chat_provider_sync_test.dart         #   17 tests — deferred sync, cycle, scope, overrides, variant sync
@@ -583,7 +594,7 @@ test/unit/providers/project_icon_provider_test.dart # Shared palette extraction,
   chat_provider_snapshot_persistence_test.dart #   Snapshot-ids skip-on-noop regression test (issue #180; fails without the in-memory LRU)
   chat_provider_session_ops_test.dart  #   27 tests — rename/share/fork/delete, insights, undo/redo/revertToTurn parity (regression coverage), idle
   chat_provider_project_test.dart      #   13 tests — permissions, questions, project scope, favorites; project-switch SWR behavior + draft isolation + dirty-context cache retention
-  chat_provider_concurrency_test.dart  #   26 tests — render gate, multi-session, abort suppression
+  chat_provider_concurrency_test.dart  # Render gate, multi-session, and abort suppression; injected `abortSuppressionNow` defaults to `DateTime.now`, while `debugHasPendingRenderFlush` exposes test-only render state (no protocol change)
   chat_provider_selection_fallback_test.dart # Message-derived selection fallback tests (Feature 7): override isExplicit semantics, _restoreSelectionFromMessages() recovery paths, stale override → message fallback, non-explicit override → message fallback precedence
   chat_provider_session_tabs_test.dart # Session-tab load, reconciliation, persistence, tombstone, attention, project-scope, and icon-override load/preset/remove coverage
   chat_provider_test_support.dart      #   Shared utilities (RecordingDioClient, buildChatProvider, testModel); FakeChatRepository.getSessionsDelay
@@ -616,6 +627,10 @@ test/unit/di/speech_service_registration_test.dart # DI isolation: `ApiSpeechInp
 test/unit/presentation/                 # Presentation-level service tests; includes `project_directory_search_test.dart` (G3 pure scorer: exact/prefix/subsequence/unicode/empty only), `workspace_file_operations_service_test.dart` (issues #89 and #90) covering official tool-state parsing, malformed responses, shell quoting, capability probes, create/rename/delete session teardown, server-bound abort semantics, write-path validation, 48 KiB content chunking, and negotiated GNU/BSD/Python decoding; `app_theme_test.dart` (issue #86) covers `AppVisualStyleTokens.classic`/`refined` factories, theme-extension wiring through `AppTheme.lightFrom`/`darkFrom`, `withResponsiveSnackBars` shape switching, and the `ThemeData.visualStyleTokens` fallback getter
 test/unit/presentation/chat_input_external_files_test.dart # Pure composer external-attachment byte, name/MIME, and image-signature helper coverage
 test/widget/                           # Widget tests (includes icon assertions with Symbols.*, explicit compact/mobile collapsed-copy coverage for chat message and session todo surfaces, historical rewind action coverage, desktop/mobile spacing for ChatSessionList, toolbar undo/redo, slash-command parity, terminal mobile backspace simulation, Windows printable hardware key forwarding, Windows AltGr printable forwarding, AppShell update toast coverage in `app_shell_page_test.dart` with explicit teardown of ChatProvider/AppProvider/SettingsProvider in `finally` for clean run isolation, issue #86 Visual style coverage in `settings_page_test.dart` for the Appearance `SegmentedButton<VisualStyle>` (`settings_visual_style_segmented`) calling `setVisualStyle` and persisting `visualStyle: 'refined'`; `chat_message_widget_test.dart` and `chat_page_test.dart` were additionally run as regression suites to confirm no refined-surface regression on the chat surfaces, issue #89 file-tree coverage in `chat_page_test.dart` covering file-tree refresh, root New menu, new-file/new-folder dialogs, rename, delete confirmation + reconciliation, Quick Open lookup, and absolute/relative path resolution, and issue #90 editor coverage in `chat_page_test.dart` covering debounced autosave ownership/timing, per-path draft isolation, active-save coordination, lifecycle/close guards, CRLF save round-trip, current-draft Add-to-chat via gutter selection, dirty-state preservation on save failure, dirty relative-path rename blocker, and a `file editor opens empty text files as editable drafts` widget test that taps a known empty non-binary file and confirms the editor renders with the editable `CodeEditor`)
+test/widget/chat_page_smoke_test.dart # Five focused ChatPage smoke tests for composer tips and responsive shell; uses the shared fixture
+test/widget/chat_page_test.dart       # Extended ChatPage widget regressions; library-wide `slow` tag keeps them out of `test-fast`
+test/support/chat_page_test_harness.dart # Shared fixture builders for ChatPage app, providers, and test data
+test/web/speech_engine_platform_support_test.dart # Runs in a browser and verifies native speech is enabled while device engines/API speech are unavailable
 test/widget_test.dart                    # Focused composer attachment widget coverage for picker/drop data URLs, shell/non-current route gating, and Android content-URI clipboard bridging
   speech_settings_api_test.dart        #   API speech settings at mobile width: engine selection to `SpeechToTextEngine.api`, provider/API-key fields, and SttApiKeyStorage read/write via a fake backend
 test/widget/settings_surface_theme_test.dart # G4 scoped refined card styling leaves outside Settings cards unchanged and preserves live form state across style changes
@@ -635,13 +650,16 @@ test/widget/terminal_mobile_backspace_test.dart # Mobile IME backspace and raw m
 third_party/xterm/test/src/terminal_view_test.dart # Opt-in raw committed-text callback consumption and unchanged fallback behavior
 test/integration/                      # Integration tests; includes data-usage optimization and permission `remember` contract coverage in `opencode_server_integration_test.dart`, plus opt-in local OpenCode probe/create/write/read/delete coverage in `workspace_file_operations_live_test.dart`
 test/presentation/                     # Presentation-focused tests (incl. window_size_class_test.dart)
-test/support/                          # Test helpers/fakes; `mock_opencode_server.dart` includes extra counters for usage optimization tracking; `pump_localized_app.dart` wraps widgets with all l10n delegates for locale-aware tests; `FakeWorkspaceFileOperationsService` (test/support/fakes.dart) implements `WorkspaceFileOperationsService` with capability/result overrides, per-operation call counters + `onCreate*`/`onRename`/`onDelete`/`onWriteFile` hooks, and a `writeFileResult` override for issue #90 editor save testing
+test/support/                          # Test helpers/fakes; `chat_page_test_harness.dart` shares ChatPage app/provider fixtures between smoke and extended widget suites; `mock_opencode_server.dart` includes extra counters for usage optimization tracking; `pump_localized_app.dart` wraps widgets with all l10n delegates for locale-aware tests; `FakeWorkspaceFileOperationsService` (test/support/fakes.dart) implements `WorkspaceFileOperationsService` with capability/result overrides, per-operation call counters + `onCreate*`/`onRename`/`onDelete`/`onWriteFile` hooks, and a `writeFileResult` override for issue #90 editor save testing
 test/contract/                         # Contract tests; `chat_event_contract_test.dart` covers SSE event dispatch contract tests, including `session.idle` idle-trailing-error invariant (P-002), `message.created` fallback fetch dispatch, and `message.part.delta` stale-fallback monotonic-version merge coverage
 tool/ci/check_analyze_budget.sh        # Analyzer issue budget gate (default: 186)
-tool/ci/check_coverage.sh              # Coverage threshold gate (default: 35%)
+tool/ci/check_coverage.sh              # Shell entry point to the Python stdlib LCOV gate (default global minimum: 35%)
+tool/ci/check_coverage.py              # Validates fresh LCOV for normalized project-relative/absolute `lib/` sources (rejecting foreign/traversing paths), filters generated sources, requires DA/LF/LH consistency, checks four per-file floors, and forbids filtered output from overwriting raw input or policy
+tool/ci/coverage_baseline.tsv          # Four protected source files and minimum line-coverage floors; floors are not auto-lowered
+tool/ci/test_check_coverage.py         # Fourteen Python stdlib fixture tests for LCOV validation, filtering, freshness, and gate policy
 tool/ci/run_session_overlay_instrumentation.sh # Android session-overlay instrumentation runner for the GitHub Actions API 34–36 matrix; bounded APK installs/test execution, semantic result validation, and runtime diagnostics
 tool/release/changelog.py              # Changelog update/extract helper used by `make release` and GitHub Releases
-.github/workflows/ci.yml               # CI executes analyze + tests + coverage gate; includes Go setup (actions/setup-go@v5) in quality, test_shards, and coverage jobs for Tailscale dep; `windows_build` job runs on `windows-latest` and executes `flutter build windows --debug` to validate the runner-owned WASAPI microphone bridge compiles
+.github/workflows/ci.yml               # Quality job runs analyzer, Python coverage-gate fixtures, and browser speech-capability tests; four test shards each use 4 Flutter workers; main/tag pushes run the full coverage gate without installing lcov; includes Go setup for Tailscale and a Windows runner build
 .github/workflows/session-overlay-prototype.yml # Session-overlay prototype workflow: Android compile plus API 34–36 runtime instrumentation, and desktop compile matrix
 ```
 

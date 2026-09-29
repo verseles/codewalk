@@ -2198,16 +2198,32 @@ void main() {
           await provider.loadSessions();
           await provider.selectSession(sessionA);
 
-          localDataSource.saveCurrentSessionIdDelay = (_) =>
-              Future<void>.delayed(const Duration(seconds: 5));
-
-          final stopwatch = Stopwatch()..start();
-          await provider.selectSession(sessionB, awaitNetwork: false);
-          stopwatch.stop();
-
-          expect(stopwatch.elapsed, lessThan(const Duration(seconds: 5)));
-          expect(provider.currentSession?.id, sessionB.id);
           await provider.flushSelectionPersistence();
+          final writeStarted = Completer<void>();
+          final releaseWrite = Completer<void>();
+          localDataSource.saveCurrentSessionIdDelay = (_) {
+            if (!writeStarted.isCompleted) writeStarted.complete();
+            return releaseWrite.future;
+          };
+          try {
+            // This bound detects an accidental await of the gated write; it is
+            // not a speed assertion and is never waited on by a passing test.
+            await provider.selectSession(sessionB, awaitNetwork: false)
+                .timeout(const Duration(seconds: 2));
+            await writeStarted.future.timeout(const Duration(seconds: 2));
+            expect(provider.currentSession?.id, sessionB.id);
+            expect(releaseWrite.isCompleted, isFalse);
+          } finally {
+            releaseWrite.complete();
+            await provider.flushSelectionPersistence();
+          }
+          expect(
+            await localDataSource.getCurrentSessionId(
+              serverId: provider.activeServerId,
+              scopeId: provider.projectProvider.currentScopeId,
+            ),
+            sessionB.id,
+          );
         },
       );
 

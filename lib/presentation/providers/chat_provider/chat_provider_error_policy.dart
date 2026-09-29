@@ -92,7 +92,7 @@ extension _ChatProviderErrorPolicy on ChatProvider {
       return false;
     }
     final startedAt = _abortSuppressionStartedAt!;
-    if (DateTime.now().difference(startedAt) > _abortSuppressionWindow) {
+    if (_abortSuppressionNow().difference(startedAt) > _abortSuppressionWindow) {
       _clearAbortSuppression();
       return false;
     }

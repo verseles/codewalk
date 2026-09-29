@@ -1,3 +1,6 @@
+@Tags(<String>['slow'])
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -7,8 +10,6 @@ import 'package:codewalk/core/errors/exceptions.dart';
 import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/core/i18n/l10n_bridge.dart';
 import 'package:codewalk/core/network/dio_client.dart';
-import 'package:codewalk/data/datasources/app_local_datasource.dart';
-import 'package:codewalk/data/datasources/quota_remote_datasource.dart';
 import 'package:codewalk/data/datasources/terminal_remote_datasource.dart';
 import 'package:codewalk/data/models/pty_session_model.dart';
 import 'package:codewalk/domain/entities/agent.dart';
@@ -21,35 +22,6 @@ import 'package:codewalk/domain/entities/persisted_session_tabs_state.dart';
 import 'package:codewalk/domain/entities/project.dart';
 import 'package:codewalk/domain/entities/provider.dart';
 import 'package:codewalk/domain/entities/quota.dart';
-import 'package:codewalk/domain/usecases/abort_chat_session.dart';
-import 'package:codewalk/domain/usecases/check_connection.dart';
-import 'package:codewalk/domain/usecases/create_chat_session.dart';
-import 'package:codewalk/domain/usecases/delete_chat_session.dart';
-import 'package:codewalk/domain/usecases/fork_chat_session.dart';
-import 'package:codewalk/domain/usecases/get_agents.dart';
-import 'package:codewalk/domain/usecases/get_app_info.dart';
-import 'package:codewalk/domain/usecases/get_chat_message.dart';
-import 'package:codewalk/domain/usecases/get_chat_messages.dart';
-import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
-import 'package:codewalk/domain/usecases/get_providers.dart';
-import 'package:codewalk/domain/usecases/get_session_children.dart';
-import 'package:codewalk/domain/usecases/get_session_diff.dart';
-import 'package:codewalk/domain/usecases/get_session_status.dart';
-import 'package:codewalk/domain/usecases/get_session_todo.dart';
-import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
-import 'package:codewalk/domain/usecases/list_pending_questions.dart';
-import 'package:codewalk/domain/usecases/reject_question.dart';
-import 'package:codewalk/domain/usecases/reply_permission.dart';
-import 'package:codewalk/domain/usecases/reply_question.dart';
-import 'package:codewalk/domain/usecases/revert_chat_message.dart';
-import 'package:codewalk/domain/usecases/send_chat_message.dart';
-import 'package:codewalk/domain/usecases/share_chat_session.dart';
-import 'package:codewalk/domain/usecases/unrevert_chat_messages.dart';
-import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
-import 'package:codewalk/domain/usecases/update_chat_session.dart';
-import 'package:codewalk/domain/usecases/watch_chat_events.dart';
-import 'package:codewalk/domain/usecases/watch_global_chat_events.dart';
-import 'package:codewalk/l10n/generated/app_localizations_en.dart';
 import 'package:codewalk/presentation/pages/chat_page.dart';
 import 'package:codewalk/presentation/pages/settings_page.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
@@ -63,7 +35,6 @@ import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/tts/tts_backend.dart';
 import 'package:codewalk/presentation/services/workspace_file_operations_service.dart';
 import 'package:codewalk/presentation/theme/app_shapes.dart';
-import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:codewalk/presentation/utils/session_title_formatter.dart';
 import 'package:codewalk/presentation/widgets/chat_message_widget.dart';
 import 'package:codewalk/presentation/widgets/chat_skeleton_shimmer.dart';
@@ -89,6 +60,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:simple_icons/simple_icons.dart';
 
+import '../support/chat_page_test_harness.dart';
 import '../support/fakes.dart';
 import '../support/pump_localized_app.dart';
 
@@ -265,28 +237,6 @@ class _ControlledTtsBackend implements TtsBackend {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  test('composer receiving tips cover actionable agent prompt practices', () {
-    final l10n = AppLocalizationsEn();
-    final tips = buildComposerReceivingTips(l10n);
-    int? randomUpperBound;
-    final pickedIndex = pickComposerReceivingTipIndex(l10n, (max) {
-      randomUpperBound = max;
-      return 0;
-    });
-
-    expect(tips, hasLength(greaterThanOrEqualTo(20)));
-    expect(tips.toSet(), hasLength(tips.length));
-    expect(tips.every((tip) => tip.startsWith('Tip: ')), isTrue);
-    expect(tips.every((tip) => tip.length <= 80), isTrue);
-    expect(tips, contains('Tip: Start with the end goal'));
-    expect(tips, contains('Tip: Name relevant files, screens, or commands'));
-    expect(tips, contains('Tip: State constraints the agent must preserve'));
-    expect(tips, contains('Tip: Say which tests or checks should pass'));
-    expect(tips, contains('Tip: Add acceptance criteria for larger changes'));
-    expect(pickedIndex, 0);
-    expect(randomUpperBound, tips.length);
-  });
 
   group('ChatPage responsive shell', () {
     testWidgets('toolbar hides redo until session has redo state', (
@@ -961,35 +911,6 @@ void main() {
       );
     });
 
-    testWidgets('shows drawer on mobile width', (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(500, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test'
-        ..defaultServerId = 'srv_test'
-        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
-          <String, dynamic>{
-            'id': 'srv_test',
-            'url': 'http://127.0.0.1:4096',
-            'label': 'Test Server',
-            'basicAuthEnabled': false,
-            'basicAuthUsername': '',
-            'basicAuthPassword': '',
-            'createdAt': 0,
-            'updatedAt': 0,
-          },
-        ]);
-      final provider = _buildChatProvider(localDataSource: localDataSource);
-      final appProvider = _buildAppProvider(localDataSource: localDataSource);
-
-      await tester.pumpWidget(_testApp(provider, appProvider));
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(Symbols.menu), findsOneWidget);
-      expect(find.text('Desktop Shortcuts'), findsNothing);
-    });
-
     testWidgets('mobile double tap on conversation keeps chat route mounted', (
       WidgetTester tester,
     ) async {
@@ -1158,101 +1079,6 @@ void main() {
         await tester.pumpAndSettle();
       },
     );
-
-    testWidgets('mobile new chat from drawer closes the drawer', (
-      WidgetTester tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(500, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test'
-        ..defaultServerId = 'srv_test'
-        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
-          <String, dynamic>{
-            'id': 'srv_test',
-            'url': 'http://127.0.0.1:4096',
-            'label': 'Test Server',
-            'basicAuthEnabled': false,
-            'basicAuthUsername': '',
-            'basicAuthPassword': '',
-            'createdAt': 0,
-            'updatedAt': 0,
-          },
-        ]);
-      final provider = _buildChatProvider(localDataSource: localDataSource);
-      addTearDown(provider.dispose);
-      final appProvider = _buildAppProvider(localDataSource: localDataSource);
-
-      await tester.pumpWidget(_testApp(provider, appProvider));
-      await tester.pumpAndSettle();
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('appbar_drawer_button')),
-      );
-      await tester.pumpAndSettle();
-
-      final scaffoldState = tester.state<ScaffoldState>(
-        find.byType(Scaffold).first,
-      );
-      expect(scaffoldState.isDrawerOpen, isTrue);
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('sidebar_new_chat_button')),
-      );
-      await tester.pumpAndSettle();
-
-      expect(scaffoldState.isDrawerOpen, isFalse);
-      expect(find.text('How can I help you today?'), findsOneWidget);
-    });
-
-    testWidgets('mobile new chat shortcut closes an open drawer', (
-      WidgetTester tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(500, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test'
-        ..defaultServerId = 'srv_test'
-        ..serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
-          <String, dynamic>{
-            'id': 'srv_test',
-            'url': 'http://127.0.0.1:4096',
-            'label': 'Test Server',
-            'basicAuthEnabled': false,
-            'basicAuthUsername': '',
-            'basicAuthPassword': '',
-            'createdAt': 0,
-            'updatedAt': 0,
-          },
-        ]);
-      final provider = _buildChatProvider(localDataSource: localDataSource);
-      addTearDown(provider.dispose);
-      final appProvider = _buildAppProvider(localDataSource: localDataSource);
-
-      await tester.pumpWidget(_testApp(provider, appProvider));
-      await tester.pumpAndSettle();
-
-      await tester.tap(
-        find.byKey(const ValueKey<String>('appbar_drawer_button')),
-      );
-      await tester.pumpAndSettle();
-
-      final scaffoldState = tester.state<ScaffoldState>(
-        find.byType(Scaffold).first,
-      );
-      expect(scaffoldState.isDrawerOpen, isTrue);
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyN);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyN);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      await tester.pumpAndSettle();
-
-      expect(scaffoldState.isDrawerOpen, isFalse);
-      expect(find.text('How can I help you today?'), findsOneWidget);
-    });
 
     testWidgets(
       'latest session tap wins while another session switch is in flight',
@@ -2490,37 +2316,6 @@ void main() {
       await tester.pump();
       expect(find.byType(SnackBar), findsNothing);
       expect(find.text('Unhealthy'), findsNothing);
-    });
-
-    testWidgets('shows utility pane on large desktop width', (
-      WidgetTester tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(1300, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      final localDataSource = InMemoryAppLocalDataSource()
-        ..activeServerId = 'srv_test'
-        ..experienceSettingsJson = jsonEncode(<String, dynamic>{
-          'checkUpdatesOnOpen': false,
-          'composerAutoApprovePermissions': false,
-        });
-      final provider = _buildChatProvider(localDataSource: localDataSource);
-      final appProvider = _buildAppProvider(localDataSource: localDataSource);
-
-      await tester.pumpWidget(_testApp(provider, appProvider));
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(Symbols.menu), findsNothing);
-      expect(find.text('Keyboard shortcuts'), findsOneWidget);
-      expect(find.textContaining('Ctrl/Cmd'), findsNothing);
-      expect(find.text('Ctrl+N'), findsOneWidget);
-      expect(find.text('Alt+Shift+S'), findsOneWidget);
-      expect(find.text('Ctrl+P'), findsOneWidget);
-      expect(find.text('Ctrl+,'), findsOneWidget);
-      expect(find.text('Ctrl+M'), findsOneWidget);
-      expect(find.text('Ctrl+T'), findsOneWidget);
-      expect(find.text('Esc, Esc'), findsOneWidget);
-      expect(find.text(L10nBridge.current!.chatConversations), findsOneWidget);
     });
 
     testWidgets('session search hides sidebar actions while expanded', (
@@ -24043,227 +23838,12 @@ Future<void> _pumpPostOnboardingTourStart(WidgetTester tester) async {
   await tester.pump();
 }
 
-Widget _testApp(
-  ChatProvider provider,
-  AppProvider appProvider, {
-  SettingsProvider? settingsProvider,
-  QuotaProvider? quotaProvider,
-  QuotaRemoteDataSource? quotaRemoteDataSource,
-  CellularDataSaverService? cellularDataSaverService,
-  WorkspaceFileOperationsService? fileOperationsService,
-  MediaQueryData? mediaQueryData,
-  bool integratedWindowChrome = false,
-  bool forwardSettingsNotifications = true,
-}) {
-  if (di.sl.isRegistered<AppLocalDataSource>()) {
-    di.sl.unregister<AppLocalDataSource>();
-  }
-  di.sl.registerSingleton<AppLocalDataSource>(provider.localDataSource);
-  if (di.sl.isRegistered<WorkspaceFileOperationsService>()) {
-    di.sl.unregister<WorkspaceFileOperationsService>();
-  }
-  di.sl.registerSingleton<WorkspaceFileOperationsService>(
-    fileOperationsService ?? FakeWorkspaceFileOperationsService(),
-  );
-
-  final effectiveSettingsProvider =
-      settingsProvider ??
-      SettingsProvider(
-        localDataSource: provider.localDataSource,
-        dioClient: DioClient(),
-        soundService: SoundService(),
-        cellularDataSaverService: cellularDataSaverService,
-      );
-  if (settingsProvider == null) {
-    addTearDown(effectiveSettingsProvider.dispose);
-    _disableAutomaticUpdateChecksForTest(
-      provider.localDataSource as InMemoryAppLocalDataSource,
-    );
-    unawaited(effectiveSettingsProvider.initialize());
-  }
-
-  final effectiveQuotaProvider =
-      quotaProvider ??
-      QuotaProvider(
-        remoteDataSource: quotaRemoteDataSource ?? FakeQuotaRemoteDataSource(),
-      );
-  final desktopWindowChromeController = integratedWindowChrome
-      ? DesktopWindowChromeController()
-      : null;
-  if (desktopWindowChromeController != null) {
-    addTearDown(desktopWindowChromeController.dispose);
-  }
-
-  Widget home = const ChatPage();
-  if (mediaQueryData != null) {
-    home = MediaQuery(data: mediaQueryData, child: home);
-  }
-
-  return MultiProvider(
-    providers: [
-      ChangeNotifierProvider<ChatProvider>.value(value: provider),
-      ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-      ChangeNotifierProvider<ProjectProvider>.value(
-        value: provider.projectProvider,
-      ),
-      if (forwardSettingsNotifications) ChangeNotifierProvider<SettingsProvider>.value(
-        value: effectiveSettingsProvider,
-      ) else InheritedProvider<SettingsProvider>.value(
-        value: effectiveSettingsProvider,
-      ),
-      ChangeNotifierProvider<QuotaProvider>.value(
-        value: effectiveQuotaProvider,
-      ),
-      if (desktopWindowChromeController != null)
-        ChangeNotifierProvider<DesktopWindowChromeController>.value(
-          value: desktopWindowChromeController,
-        ),
-    ],
-    child: localizedMaterialApp(
-      theme: AppTheme.lightFrom(
-        ColorScheme.fromSeed(seedColor: AppTheme.seedColor),
-      ),
-      builder: integratedWindowChrome
-          ? (context, child) => DesktopWindowChromeFrame(child: child!)
-          : null,
-      home: home,
-    ),
-  );
-}
-
-void _disableAutomaticUpdateChecksForTest(
-  InMemoryAppLocalDataSource localDataSource,
-) {
-  final raw = localDataSource.experienceSettingsJson;
-  final settingsJson = raw == null || raw.trim().isEmpty
-      ? <String, dynamic>{}
-      : (jsonDecode(raw) as Map).cast<String, dynamic>();
-  settingsJson['checkUpdatesOnOpen'] = false;
-  settingsJson['sessionTabsGestureHintDismissed'] = true;
-  localDataSource.experienceSettingsJson = jsonEncode(settingsJson);
-}
-
-ChatProvider _buildChatProvider({
-  FakeChatRepository? chatRepository,
-  FakeProjectRepository? projectRepository,
-  FakeAppRepository? appRepository,
-  required InMemoryAppLocalDataSource localDataSource,
-  CellularDataSaverService? cellularDataSaverService,
-  bool includeVariants = false,
-  ProvidersResponse? providersResponse,
-}) {
-  final chatRepo = chatRepository ?? FakeChatRepository();
-  final appRepo = appRepository ?? FakeAppRepository();
-  appRepo.providersResult = Right(
-    providersResponse ??
-        ProvidersResponse(
-          providers: <Provider>[
-            Provider(
-              id: 'provider_1',
-              name: 'Provider 1',
-              env: const <String>[],
-              models: <String, Model>{
-                'model_1': _model(
-                  'model_1',
-                  variants: includeVariants
-                      ? const <String, ModelVariant>{
-                          'low': ModelVariant(id: 'low', name: 'Low'),
-                          'high': ModelVariant(id: 'high', name: 'High'),
-                        }
-                      : const <String, ModelVariant>{},
-                ),
-              },
-            ),
-          ],
-          defaultModels: const <String, String>{'provider_1': 'model_1'},
-          connected: const <String>['provider_1'],
-        ),
-  );
-
-  return ChatProvider(
-    sendChatMessage: SendChatMessage(chatRepo),
-    getChatSessions: GetChatSessions(chatRepo),
-    createChatSession: CreateChatSession(chatRepo),
-    getChatMessages: GetChatMessages(chatRepo),
-    getChatMessage: GetChatMessage(chatRepo),
-    getAgents: GetAgents(appRepo),
-    getProviders: GetProviders(appRepo),
-    deleteChatSession: DeleteChatSession(chatRepo),
-    updateChatSession: UpdateChatSession(chatRepo),
-    shareChatSession: ShareChatSession(chatRepo),
-    unshareChatSession: UnshareChatSession(chatRepo),
-    forkChatSession: ForkChatSession(chatRepo),
-    getSessionStatus: GetSessionStatus(chatRepo),
-    getSessionChildren: GetSessionChildren(chatRepo),
-    getSessionTodo: GetSessionTodo(chatRepo),
-    getSessionDiff: GetSessionDiff(chatRepo),
-    watchChatEvents: WatchChatEvents(chatRepo),
-    watchGlobalChatEvents: WatchGlobalChatEvents(chatRepo),
-    abortChatSession: AbortChatSession(chatRepo),
-    listPendingPermissions: ListPendingPermissions(chatRepo),
-    replyPermission: ReplyPermission(chatRepo),
-    listPendingQuestions: ListPendingQuestions(chatRepo),
-    replyQuestion: ReplyQuestion(chatRepo),
-    rejectQuestion: RejectQuestion(chatRepo),
-    revertChatMessage: RevertChatMessage(chatRepo),
-    unrevertChatMessages: UnrevertChatMessages(chatRepo),
-    projectProvider: ProjectProvider(
-      projectRepository: projectRepository ?? FakeProjectRepository(),
-      localDataSource: localDataSource,
-    ),
-    localDataSource: localDataSource,
-    cellularDataSaverService: cellularDataSaverService,
-    syncHealthCheckInterval: const Duration(milliseconds: 150),
-    foregroundResumeSyncIndicatorDuration: const Duration(milliseconds: 250),
-    foregroundResumeSyncIndicatorMaxCycles: 2,
-    abortSuppressionWindow: const Duration(milliseconds: 500),
-    sessionTabsPersistenceDebounce: Duration.zero,
-  );
-}
-
-AppProvider _buildAppProvider({
-  required InMemoryAppLocalDataSource localDataSource,
-  FakeAppRepository? appRepository,
-  CellularDataSaverService? cellularDataSaverService,
-}) {
-  _ensureActiveServerProfile(localDataSource);
-  final repository = appRepository ?? FakeAppRepository();
-  final provider = AppProvider(
-    getAppInfo: GetAppInfo(repository),
-    checkConnection: CheckConnection(repository),
-    localDataSource: localDataSource,
-    dioClient: DioClient(),
-    cellularDataSaverService: cellularDataSaverService,
-    enableHealthPolling: false,
-  );
-  unawaited(provider.initialize());
-  return provider;
-}
-
-void _ensureActiveServerProfile(InMemoryAppLocalDataSource localDataSource) {
-  final activeServerId = localDataSource.activeServerId?.trim();
-  if (activeServerId == null || activeServerId.isEmpty) {
-    return;
-  }
-  final existingProfilesJson = localDataSource.serverProfilesJson;
-  if (existingProfilesJson != null && existingProfilesJson.trim().isNotEmpty) {
-    return;
-  }
-
-  localDataSource.defaultServerId ??= activeServerId;
-  localDataSource.serverProfilesJson = jsonEncode(<Map<String, dynamic>>[
-    <String, dynamic>{
-      'id': activeServerId,
-      'url': 'http://127.0.0.1:4096',
-      'label': 'Test Server',
-      'basicAuthEnabled': false,
-      'basicAuthUsername': '',
-      'basicAuthPassword': '',
-      'createdAt': 0,
-      'updatedAt': 0,
-    },
-  ]);
-}
+// Keep local call sites stable while the smoke and extended suites share one
+// fixture implementation.
+const _testApp = buildChatPageTestApp;
+const _buildChatProvider = buildChatPageProvider;
+const _buildAppProvider = buildChatPageAppProvider;
+const _disableAutomaticUpdateChecksForTest = disableAutomaticUpdateChecksForTest;
 
 Model _model(
   String id, {

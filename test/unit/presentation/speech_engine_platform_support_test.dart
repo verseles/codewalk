@@ -17,10 +17,13 @@ void main() {
     // isNativeSupported: web and non-Linux/non-Windows IO platforms; Linux and
     // Windows default to on-device engines by design.
     group('isNativeSupported', () {
-      test('is true on the web', () {
-        // kIsWeb is a compile-time constant, so we can only exercise the
-        // IO-platform branches here. The web branch is verified by the build.
-        expect(SpeechEnginePlatformSupport.isNativeSupported, isNotNull);
+      test('re-evaluates native support after a platform change', () {
+        debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+        expect(SpeechEnginePlatformSupport.isNativeSupported, isFalse);
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        expect(SpeechEnginePlatformSupport.isNativeSupported, isTrue);
+        debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+        expect(SpeechEnginePlatformSupport.isNativeSupported, isFalse);
       });
 
       for (final platform in const [

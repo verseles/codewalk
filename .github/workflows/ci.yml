@@ -52,6 +52,12 @@ jobs:
       - name: Enforce analyze issue budget
         run: bash tool/ci/check_analyze_budget.sh /tmp/flutter_analyze.log 337
 
+      - name: Verify coverage gate fixtures
+        run: python3 -m unittest discover -s tool/ci -p test_check_coverage.py
+
+      - name: Test browser capabilities
+        run: flutter test --no-pub --platform chrome test/web
+
       - name: Upload analyze report
         uses: actions/upload-artifact@v4
         with:
@@ -91,7 +97,7 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Test shard
-        run: flutter test --no-pub -j 8 --total-shards 4 --shard-index ${{ matrix.shard_index }}
+        run: flutter test --no-pub -j 4 --total-shards 4 --shard-index ${{ matrix.shard_index }}
 
   windows_build:
     needs: quality
@@ -145,13 +151,6 @@ jobs:
         # -j 4: the 4-vCPU runners oversubscribe at -j 8 and trip 30s test
         # timeouts in I/O-heavy suites; halves contention, still <35min.
         run: flutter test --no-pub --coverage -j 4
-
-      - name: Install lcov
-        run: |
-          if ! command -v lcov >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y lcov
-          fi
 
       - name: Enforce coverage threshold
         run: bash tool/ci/check_coverage.sh coverage/lcov.info 35

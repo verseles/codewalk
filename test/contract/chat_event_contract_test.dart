@@ -49,6 +49,14 @@ void main() {
       provider = buildProvider();
     });
 
+    tearDown(() async {
+      await pumpEventQueue();
+      provider.dispose();
+      provider.projectProvider.dispose();
+      await pumpEventQueue();
+      defaultSettingsProvider.dispose();
+    });
+
     Future<void> settleUntil(
       bool Function() predicate, {
       int maxTicks = 40,
@@ -66,8 +74,65 @@ void main() {
       await provider.loadSessions();
       await provider.selectSession(provider.sessions.first);
       await provider.initializeProviders();
-      // Allow async subscription setup to complete before emitting events.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await settleUntil(() => provider.debugHasRealtimeEventSubscription);
+      await pumpEventQueue();
+    }
+
+    Future<void> expectIgnoredEvent(ChatEvent event) async {
+      // Match the IDs used by foreign events so removing a scope guard would
+      // actually replace/remove existing content rather than remain a no-op.
+      final message = UserMessage(
+        id: 'msg_x',
+        sessionId: 'ses_1',
+        time: DateTime.utc(2026),
+        parts: const <MessagePart>[
+          TextPart(
+            id: 'prt_x', messageId: 'msg_x', sessionId: 'ses_1', text: 'Keep me',
+          ),
+        ],
+      );
+      chatRepository.messagesBySession['ses_1'] = [message];
+      await provider.loadMessages('ses_1');
+      chatRepository.emitEvent(const ChatEvent(
+        type: 'permission.asked',
+        properties: <String, dynamic>{
+          'id': 'perm_keep', 'sessionID': 'ses_1', 'permission': 'bash',
+          'patterns': <String>['pwd'], 'always': <String>[],
+          'metadata': <String, dynamic>{},
+        },
+      ));
+      await settleUntil(() => provider.currentSessionPermissions.isNotEmpty);
+      await pumpEventQueue();
+
+      Map<String, Object?> snapshot() => <String, Object?>{
+        'state': provider.state,
+        'currentSession': provider.currentSession,
+        'messages': provider.messages.toList(),
+        'sessions': provider.sessions.toList(),
+        'statuses': Map<String, SessionStatusInfo>.from(provider.sessionStatusById),
+        'permissions': provider.currentSessionPermissions.toList(),
+        'questions': provider.currentSessionQuestions.toList(),
+        'error': provider.errorMessage,
+        'messageFetches': chatRepository.getMessageCallCount,
+        'historyFetches': chatRepository.getMessagesCallCount,
+      };
+      final before = snapshot();
+      expect(provider.messages, [message]);
+      chatRepository.emitEvent(event);
+      // A later valid event on the same stream is an observable delivery
+      // barrier; the negative assertion cannot pass before the event is read.
+      chatRepository.emitEvent(const ChatEvent(
+        type: 'todo.updated',
+        properties: <String, dynamic>{
+          'sessionID': 'ses_1',
+          'todos': <Map<String, dynamic>>[
+            {'id': 'delivery_barrier', 'content': 'Delivered', 'status': 'pending', 'priority': 'low'},
+          ],
+        },
+      ));
+      await settleUntil(() => provider.currentSessionTodo.any((todo) => todo.id == 'delivery_barrier'));
+      await pumpEventQueue();
+      expect(snapshot(), before, reason: '${event.type} must preserve current-session data');
     }
 
     // ── server.heartbeat ──
@@ -92,14 +157,16 @@ void main() {
     group('server.connected', () {
       test('triggers active session refresh without crashing', () async {
         await initAndSelectSession();
+        final fetchesBefore = chatRepository.getMessagesCallCount;
         chatRepository.emitEvent(
           const ChatEvent(
             type: 'server.connected',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
+        await settleUntil(() => chatRepository.getMessagesCallCount > fetchesBefore);
+        expect(provider.currentSession?.id, 'ses_1');
+        expect(provider.errorMessage, isNull);
       });
     });
 
@@ -355,12 +422,15 @@ void main() {
                 SessionStatusType.idle,
             reason: 'Expected other session status to become idle.',
           );
+          expect(provider.currentSession?.id, 'ses_1');
+          expect(provider.sessionAttentionFor('ses_other').hasUnreadCompletion, isTrue);
+          expect(provider.sessionAttentionFor('ses_1').hasUnreadCompletion, isFalse);
         },
       );
 
       test('ignores status event with missing sessionID', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'session.status',
             properties: <String, dynamic>{
@@ -368,9 +438,6 @@ void main() {
             },
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
     });
 
@@ -516,15 +583,12 @@ void main() {
 
       test('ignores idle event with missing sessionID', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'session.idle',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
 
       test(
@@ -647,15 +711,12 @@ void main() {
 
       test('ignores error event with null sessionID', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'session.error',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
     });
 
@@ -727,15 +788,12 @@ void main() {
 
       test('skips event with missing sessionID or messageId', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.created',
             properties: <String, dynamic>{'info': <String, dynamic>{}},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
     });
 
@@ -744,7 +802,7 @@ void main() {
     group('message.part.updated', () {
       test('skips event for non-current session', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.part.updated',
             properties: <String, dynamic>{
@@ -752,26 +810,22 @@ void main() {
                 'id': 'prt_x',
                 'messageID': 'msg_x',
                 'sessionID': 'ses_other',
+                'type': 'text',
+                'text': 'Foreign replacement',
               },
             },
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
 
       test('skips event with missing part data', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.part.updated',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
 
       test(
@@ -873,7 +927,7 @@ void main() {
     group('message.part.removed', () {
       test('skips event for non-current session', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.part.removed',
             properties: <String, dynamic>{
@@ -883,22 +937,16 @@ void main() {
             },
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
 
       test('skips event with missing fields', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.part.removed',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
     });
 
@@ -907,7 +955,7 @@ void main() {
     group('message.removed', () {
       test('skips event for non-current session', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.removed',
             properties: <String, dynamic>{
@@ -916,22 +964,16 @@ void main() {
             },
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
 
       test('skips event with missing fields', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'message.removed',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
     });
 
@@ -1109,15 +1151,12 @@ void main() {
 
       test('skips event with missing sessionID or requestID', () async {
         await initAndSelectSession();
-        chatRepository.emitEvent(
+        await expectIgnoredEvent(
           const ChatEvent(
             type: 'permission.replied',
             properties: <String, dynamic>{},
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
       });
     });
 
@@ -1604,12 +1643,16 @@ void main() {
     group('event stream failure', () {
       test('provider remains stable when event stream emits failure', () async {
         await initAndSelectSession();
+        final messagesBefore = provider.messages.toList();
+        final sessionBefore = provider.currentSession;
         chatRepository.emitEventFailure(
           const ServerFailure('SSE connection lost'),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        expect(provider.state, isNot(equals(ChatState.initial)));
+        await settleUntil(() => provider.syncState == ChatSyncState.reconnecting);
+        expect(provider.state, ChatState.loaded);
+        expect(provider.currentSession, sessionBefore);
+        expect(provider.messages, messagesBefore);
+        expect(provider.errorMessage, isNull);
       });
     });
 

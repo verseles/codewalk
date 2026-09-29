@@ -1,5 +1,51 @@
+import 'dart:convert';
+
 import 'package:codewalk/presentation/services/update_check_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _ReleaseAdapter implements HttpClientAdapter {
+  _ReleaseAdapter(this.responses);
+
+  final List<(int, Object?)> responses;
+  final requests = <RequestOptions>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options);
+    final response = responses.removeAt(0);
+    return ResponseBody.fromString(
+      jsonEncode(response.$2),
+      response.$1,
+      headers: <String, List<String>>{
+        'content-type': ['application/json'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+Map<String, dynamic> _release(String version) => <String, dynamic>{
+  'tag_name': 'v$version',
+  'html_url': 'https://example.com/releases/$version',
+  'body': '> 📣 New release\n\n- Fixes',
+  'assets': <Map<String, dynamic>>[
+    {
+      'name': 'desktop.zip',
+      'browser_download_url': 'https://example.com/app.zip',
+    },
+    {
+      'name': 'android.apk',
+      'browser_download_url': 'https://example.com/app.apk',
+    },
+  ],
+};
 
 void main() {
   group('Semver', () {
@@ -84,10 +130,13 @@ void main() {
         Semver.tryParse('0.9.9')!,
       ];
       versions.sort();
-      expect(
-        versions.map((v) => v.toString()).toList(),
-        ['0.9.9', '1.0.0', '1.0.1', '1.1.0', '2.0.0'],
-      );
+      expect(versions.map((v) => v.toString()).toList(), [
+        '0.9.9',
+        '1.0.0',
+        '1.0.1',
+        '1.1.0',
+        '2.0.0',
+      ]);
     });
   });
 
@@ -106,10 +155,7 @@ void main() {
     });
 
     test('handles null optional fields', () {
-      const result = UpdateCheckResult(
-        latestVersion: '1.0.0',
-        isNewer: false,
-      );
+      const result = UpdateCheckResult(latestVersion: '1.0.0', isNewer: false);
       expect(result.releaseUrl, isNull);
       expect(result.releaseNotes, isNull);
     });
@@ -117,16 +163,92 @@ void main() {
 
   group('UpdateCheckService', () {
     test('returns null for invalid current version', () async {
-      final service = UpdateCheckService();
+      final adapter = _ReleaseAdapter([]);
+      final dio = Dio()..httpClientAdapter = adapter;
+      addTearDown(() => dio.close(force: true));
+      final service = UpdateCheckService(dio: dio);
       final result = await service.check('invalid');
       expect(result, isNull);
+      expect(adapter.requests, isEmpty);
     });
 
-    test('clearCache resets cached result', () {
-      final service = UpdateCheckService();
-      service.clearCache();
-      expect(service.cachedResult, isNull);
+    test(
+      'clearCache resets a populated cache and permits a fresh request',
+      () async {
+        final adapter = _ReleaseAdapter([
+          (200, _release('2.0.0')),
+          (200, _release('3.0.0')),
+        ]);
+        final dio = Dio()..httpClientAdapter = adapter;
+        addTearDown(() => dio.close(force: true));
+        final service = UpdateCheckService(dio: dio);
+        final first = await service.check('1.0.0');
+        expect(first, isNotNull);
+        expect(service.cachedResult, same(first));
+        expect(await service.check('1.0.0'), same(first));
+        expect(adapter.requests, hasLength(1));
+
+        service.clearCache();
+        expect(service.cachedResult, isNull);
+        final refreshed = await service.check('1.0.0');
+        expect(refreshed?.latestVersion, '3.0.0');
+        expect(service.cachedResult, same(refreshed));
+        expect(adapter.requests, hasLength(2));
+      },
+    );
+
+    test('parses release metadata and selects the APK asset', () async {
+      final adapter = _ReleaseAdapter([(200, _release('2.0.0'))]);
+      final dio = Dio()..httpClientAdapter = adapter;
+      addTearDown(() => dio.close(force: true));
+      final service = UpdateCheckService(dio: dio);
+      final result = await service.check('1.0.0');
+      expect(result?.latestVersion, '2.0.0');
+      expect(result?.isNewer, isTrue);
+      expect(result?.apkUrl, 'https://example.com/app.apk');
+      expect(result?.releaseUrl, 'https://example.com/releases/2.0.0');
+      expect(result?.announcement, 'New release');
+      expect(result?.releaseNotes, '> 📣 New release\n\n- Fixes');
+      final request = adapter.requests.single;
+      expect(request.uri.path, '/repos/verseles/codewalk/releases/latest');
+      expect(request.headers['Accept'], 'application/vnd.github+json');
+      expect(request.headers['User-Agent'], 'CodeWalk');
     });
+
+    test(
+      'ignoreCooldown requests fresh data even with a populated cache',
+      () async {
+        final adapter = _ReleaseAdapter([
+          (200, _release('1.0.0')),
+          (200, _release('2.0.0')),
+        ]);
+        final dio = Dio()..httpClientAdapter = adapter;
+        addTearDown(() => dio.close(force: true));
+        final service = UpdateCheckService(dio: dio);
+        expect((await service.check('1.0.0'))?.isNewer, isFalse);
+        final result = await service.check('1.0.0', ignoreCooldown: true);
+        expect(result?.isNewer, isTrue);
+        expect(adapter.requests, hasLength(2));
+      },
+    );
+
+    for (final response in <(String, int, Object?)>[
+      ('missing tag', 200, <String, dynamic>{'body': 'No version'}),
+      ('invalid tag', 200, <String, dynamic>{'tag_name': 'invalid'}),
+      ('empty response', 200, null),
+      ('HTTP failure', 503, <String, dynamic>{'message': 'Unavailable'}),
+    ]) {
+      test('${response.$1} does not populate the release cache', () async {
+        final adapter = _ReleaseAdapter([(response.$2, response.$3)]);
+        final dio = Dio()..httpClientAdapter = adapter;
+        addTearDown(() => dio.close(force: true));
+        final service = UpdateCheckService(dio: dio);
+        expect(await service.check('1.0.0'), isNull);
+        expect(service.cachedResult, isNull);
+        expect(adapter.requests, hasLength(1));
+      });
+    }
+
   });
 
   group('parseReleaseAnnouncement', () {

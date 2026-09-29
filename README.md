@@ -153,16 +153,24 @@ directory.
 ### Make Targets
 
 ```bash
-make check      # deps + codegen + analyze + test
-make check-fast # deps + codegen + analyze + test-fast
-make test-fast  # excludes slow/integration tags
+make check      # deps + codegen + analyze + coverage-tool fixtures + full tests
+make check-fast # same setup, with the fast test selection
+make test-fast  # excludes slow/integration; includes ChatPage smoke scenarios
+make test-chat  # ChatPage smoke + extended scenarios
+make test-web   # browser capability tests; requires Chrome/Chromium
+make test-coverage-tools # LCOV validation and threshold regression fixtures
+make coverage   # full tests with coverage + global and protected-file floors
 make web        # build Flutter web app into build/web
 make android    # build arm64 APK
 make release V=patch # bump pubspec, update CHANGELOG.md, commit, tag, push
 #   ANNOUNCE="text" embeds an optional What's-new announcement (or answer the prompt)
 ```
 
-Use `make check` for normal validation. When you need a testable Android artifact, run `HEY_CAPTION="specific caption" make android` after checks pass.
+Use focused tests while iterating and `make check` at stable validation gates. Test targets default to four workers; override with `TEST_JOBS=N` when appropriate for the host. `make test-fast` retains the five ChatPage smoke scenarios while the extended suite remains required in full checks. Browser tests run separately via `make test-web` and in CI; set `CHROME_EXECUTABLE` if the browser is not discovered automatically.
+
+Coverage filtering uses Python 3 and does not require system `lcov`. The gate validates fresh Flutter LCOV records, excludes `.g.dart`, localization, and plugin registrant sources, and enforces the global floor plus the reviewed per-file floors in `tool/ci/coverage_baseline.tsv`. Missing protected sources, inconsistent totals, foreign source paths, or coverage below the configured floors fail the gate; an old filtered artifact is never used as a fallback. Floors are changed deliberately, not regenerated or lowered automatically.
+
+When you need a testable Android artifact, run `HEY_CAPTION="specific caption" make android` after checks pass.
 
 ### Web Deploy: Cloudflare Pages or Static Hosting
 

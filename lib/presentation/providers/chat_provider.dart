@@ -200,6 +200,7 @@ class ChatProvider extends ChangeNotifier {
     int degradedFailureThreshold = 3,
     bool refreshlessRealtimeEnabled = FeatureFlags.refreshlessRealtime,
     Duration abortSuppressionWindow = const Duration(seconds: 8),
+    DateTime Function()? abortSuppressionNow,
     Duration shortcutCycleWindow = const Duration(seconds: 3),
     DateTime Function()? sessionTabsNow,
     SessionTabIconOverrideStore? sessionTabIconOverrideStore,
@@ -231,6 +232,7 @@ class ChatProvider extends ChangeNotifier {
     _degradedFailureThreshold = degradedFailureThreshold;
     _refreshlessRealtimeEnabled = refreshlessRealtimeEnabled;
     _abortSuppressionWindow = abortSuppressionWindow;
+    _abortSuppressionNow = abortSuppressionNow ?? DateTime.now;
     _shortcutCycleWindow = shortcutCycleWindow;
     _sessionTabsNow = sessionTabsNow ?? DateTime.now;
     _sessionTabIconOverrideStore =
@@ -252,6 +254,9 @@ class ChatProvider extends ChangeNotifier {
 
   @visibleForTesting
   bool get debugHasPendingDeltaNotify => _deltaNotifyPending;
+
+  @visibleForTesting
+  bool get debugHasPendingRenderFlush => _hasPendingRenderFlush;
 
   @visibleForTesting
   bool get debugHasGlobalEventSubscription => _globalEventSubscription != null;
@@ -714,6 +719,7 @@ class ChatProvider extends ChangeNotifier {
   static const int _maxRecentAgents = 8;
   static const int _maxRecentVariantsPerModel = 8;
   late final Duration _abortSuppressionWindow;
+  late final DateTime Function() _abortSuppressionNow;
   static const Duration _remoteSelectionSyncThrottle = Duration(seconds: 2);
   static const String _configCodewalkNamespace = 'codewalk';
   static const String _configSelectionKey = 'selection';
@@ -1127,7 +1133,7 @@ class ChatProvider extends ChangeNotifier {
             _abortSuppressionSessionId != effectiveSessionId ||
             _abortSuppressionStartedAt == null
         ? false
-        : DateTime.now().difference(_abortSuppressionStartedAt!) <=
+        : _abortSuppressionNow().difference(_abortSuppressionStartedAt!) <=
               _abortSuppressionWindow;
     final lastMessage = _messages.isEmpty ? '-' : _messages.last.id;
     final suffix = details == null || details.trim().isEmpty

@@ -11,32 +11,7 @@ import 'package:codewalk/domain/entities/chat_message.dart';
 import 'package:codewalk/domain/entities/chat_realtime.dart';
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/domain/entities/provider.dart';
-import 'package:codewalk/domain/usecases/abort_chat_session.dart';
-import 'package:codewalk/domain/usecases/create_chat_session.dart';
-import 'package:codewalk/domain/usecases/delete_chat_session.dart';
-import 'package:codewalk/domain/usecases/fork_chat_session.dart';
-import 'package:codewalk/domain/usecases/get_agents.dart';
-import 'package:codewalk/domain/usecases/get_chat_message.dart';
-import 'package:codewalk/domain/usecases/get_chat_messages.dart';
-import 'package:codewalk/domain/usecases/get_chat_sessions.dart';
-import 'package:codewalk/domain/usecases/get_providers.dart';
-import 'package:codewalk/domain/usecases/get_session_children.dart';
-import 'package:codewalk/domain/usecases/get_session_diff.dart';
-import 'package:codewalk/domain/usecases/get_session_status.dart';
-import 'package:codewalk/domain/usecases/get_session_todo.dart';
-import 'package:codewalk/domain/usecases/list_pending_permissions.dart';
-import 'package:codewalk/domain/usecases/list_pending_questions.dart';
-import 'package:codewalk/domain/usecases/reject_question.dart';
-import 'package:codewalk/domain/usecases/reply_permission.dart';
-import 'package:codewalk/domain/usecases/reply_question.dart';
-import 'package:codewalk/domain/usecases/send_chat_message.dart';
-import 'package:codewalk/domain/usecases/share_chat_session.dart';
-import 'package:codewalk/domain/usecases/unshare_chat_session.dart';
-import 'package:codewalk/domain/usecases/update_chat_session.dart';
-import 'package:codewalk/domain/usecases/watch_chat_events.dart';
-import 'package:codewalk/domain/usecases/watch_global_chat_events.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
-import 'package:codewalk/presentation/providers/project_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,14 +26,16 @@ void main() {
     late InMemoryAppLocalDataSource localDataSource;
     late ChatProvider provider;
     late SettingsProvider defaultSettingsProvider;
+    final ownedProviders = <ChatProvider>[];
 
     ChatProvider buildProvider({
       DioClient? dioClient,
       Duration syncHealthCheckInterval = const Duration(seconds: 5),
       Duration abortSuppressionWindow = const Duration(milliseconds: 30),
+      DateTime Function()? abortSuppressionNow,
       SettingsProvider? settingsProvider,
     }) {
-      return buildChatProvider(
+      final created = buildChatProvider(
         chatRepository: chatRepository,
         appRepository: appRepository,
         localDataSource: localDataSource,
@@ -66,8 +43,11 @@ void main() {
         dioClient: dioClient,
         syncHealthCheckInterval: syncHealthCheckInterval,
         abortSuppressionWindow: abortSuppressionWindow,
+        abortSuppressionNow: abortSuppressionNow,
         settingsProvider: settingsProvider,
       );
+      ownedProviders.add(created);
+      return created;
     }
 
     setUp(() async {
@@ -79,112 +59,118 @@ void main() {
       provider = buildProvider();
     });
 
+    tearDown(() async {
+      await pumpEventQueue();
+      for (final owned in ownedProviders.reversed) {
+        owned.dispose();
+        owned.projectProvider.dispose();
+      }
+      ownedProviders.clear();
+      await pumpEventQueue();
+      defaultSettingsProvider.dispose();
+    });
+
+    Future<void> settleUntil(bool Function() predicate) async {
+      for (var tick = 0; tick < 40; tick++) {
+        if (predicate()) return;
+        await pumpEventQueue();
+      }
+      fail('Expected provider state after draining the event queue.');
+    }
+
     group('render gate', () {
+      Future<void> prepareBackgroundUpdate() async {
+        chatRepository.sessions.add(
+          ChatSession(
+            id: 'ses_background',
+            workspaceId: 'default',
+            time: DateTime.utc(2026),
+            title: 'Background session',
+          ),
+        );
+        await provider.projectProvider.initializeProject();
+        await provider.initializeProviders();
+        await provider.loadSessions();
+        await provider.selectSession(
+          provider.sessions.firstWhere((session) => session.id == 'ses_1'),
+        );
+        await settleUntil(() => provider.debugHasRealtimeEventSubscription);
+        await pumpEventQueue();
+        await provider.setForegroundActive(false);
+      }
+
+      Future<void> deleteBackgroundSession() async {
+        chatRepository.sessions.removeWhere(
+          (session) => session.id == 'ses_background',
+        );
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.deleted',
+            properties: <String, dynamic>{'sessionID': 'ses_background'},
+          ),
+        );
+        await settleUntil(
+          () => !provider.sessions.any(
+            (session) => session.id == 'ses_background',
+          ),
+        );
+      }
+
       test(
         'setForegroundActive(false) suppresses notifyListeners from _notifyListeners',
         () async {
-          int notifyCount = 0;
+          await prepareBackgroundUpdate();
+          var notifyCount = 0;
           provider.addListener(() {
             notifyCount += 1;
           });
-
-          // Background: render gate activates.
-          await provider.setForegroundActive(false);
-          notifyCount = 0;
-
-          // Trigger a notification path that uses _notifyListeners internally
-          // (e.g. setSessionSearchQuery uses direct notifyListeners, so we use
-          // a session status refresh which routes through _notifyListeners).
-          provider.setSessionSearchQuery('test');
-          // setSessionSearchQuery uses direct notifyListeners(), so it still fires.
-          // Reset and test via setSessionListFilter which also calls direct.
-          // The render gate targets _notifyListeners() — test by checking the
-          // hasPendingRenderFlush flag indirectly through setForegroundActive(true).
-
-          // When we come back to foreground, if there was a pending flush,
-          // notifyListeners fires.
-          notifyCount = 0;
-          await provider.setForegroundActive(true);
-          // Let microtask drain.
-          await Future<void>.delayed(Duration.zero);
-          // No pending flush because _notifyListeners was never called while
-          // in background (setSessionSearchQuery uses direct notifyListeners).
-          // This verifies setForegroundActive round-trip is clean.
-          expect(notifyCount, greaterThanOrEqualTo(0));
+          await deleteBackgroundSession();
+          expect(provider.sessions.map((session) => session.id), ['ses_1']);
+          expect(notifyCount, 0);
         },
       );
 
       test(
         'setForegroundActive(true) flushes pending render notification',
         () async {
-          // First trigger some state so provider has sessions.
-          await provider.loadSessions();
-          await Future<void>.delayed(Duration.zero);
-
-          int notifyCount = 0;
+          await prepareBackgroundUpdate();
+          final snapshots = <List<String>>[];
           provider.addListener(() {
-            notifyCount += 1;
+            snapshots.add(provider.sessions.map((session) => session.id).toList());
           });
-
-          // Go to background.
-          await provider.setForegroundActive(false);
-          notifyCount = 0;
-
-          // Come back — even without pending flush, this should not crash.
-          await provider.setForegroundActive(true);
-          await Future<void>.delayed(Duration.zero);
-
-          // notifyCount is at least 0 (no crash, clean round-trip).
-          expect(notifyCount, greaterThanOrEqualTo(0));
+          await deleteBackgroundSession();
+          expect(snapshots, isEmpty);
+          expect(provider.debugHasPendingRenderFlush, isTrue);
+          final resuming = provider.setForegroundActive(true);
+          expect(provider.debugHasPendingRenderFlush, isFalse);
+          // Gated notifications are coalesced into a microtask, not emitted
+          // synchronously and not delayed until network revalidation finishes.
+          await Future<void>.value();
+          expect(snapshots, isNotEmpty);
+          expect(snapshots.first, ['ses_1']);
+          await resuming;
         },
       );
 
       test(
         'SSE subscription is NOT cancelled when going to background',
         () async {
-          // Setup: initialize with refreshless realtime enabled.
-          final realtimeProvider = ChatProvider(
-            sendChatMessage: SendChatMessage(chatRepository),
-            abortChatSession: AbortChatSession(chatRepository),
-            getChatSessions: GetChatSessions(chatRepository),
-            createChatSession: CreateChatSession(chatRepository),
-            getChatMessages: GetChatMessages(chatRepository),
-            getChatMessage: GetChatMessage(chatRepository),
-            getAgents: GetAgents(appRepository),
-            getProviders: GetProviders(appRepository),
-            deleteChatSession: DeleteChatSession(chatRepository),
-            updateChatSession: UpdateChatSession(chatRepository),
-            shareChatSession: ShareChatSession(chatRepository),
-            unshareChatSession: UnshareChatSession(chatRepository),
-            forkChatSession: ForkChatSession(chatRepository),
-            getSessionStatus: GetSessionStatus(chatRepository),
-            getSessionChildren: GetSessionChildren(chatRepository),
-            getSessionTodo: GetSessionTodo(chatRepository),
-            getSessionDiff: GetSessionDiff(chatRepository),
-            watchChatEvents: WatchChatEvents(chatRepository),
-            watchGlobalChatEvents: WatchGlobalChatEvents(chatRepository),
-            listPendingPermissions: ListPendingPermissions(chatRepository),
-            replyPermission: ReplyPermission(chatRepository),
-            listPendingQuestions: ListPendingQuestions(chatRepository),
-            replyQuestion: ReplyQuestion(chatRepository),
-            rejectQuestion: RejectQuestion(chatRepository),
-            projectProvider: ProjectProvider(
-              projectRepository: FakeProjectRepository(),
-              localDataSource: localDataSource,
+          await prepareBackgroundUpdate();
+          expect(provider.refreshlessRealtimeEnabled, isTrue);
+          expect(provider.debugHasRealtimeEventSubscription, isTrue);
+          chatRepository.emitEvent(
+            const ChatEvent(
+              type: 'session.status',
+              properties: <String, dynamic>{
+                'sessionID': 'ses_1',
+                'status': <String, dynamic>{'type': 'busy'},
+              },
             ),
-            localDataSource: localDataSource,
-            refreshlessRealtimeEnabled: true,
           );
-
-          // Going to background should NOT throw or cancel SSE
-          // (previously it called _pauseRealtimeSubscriptions).
-          await realtimeProvider.setForegroundActive(false);
-
-          // syncState is not set to reconnecting anymore since SSE stays alive.
-          // The provider should still be functional.
-          expect(realtimeProvider.refreshlessRealtimeEnabled, isTrue);
-
-          realtimeProvider.dispose();
+          await settleUntil(
+            () => provider.sessionStatusById['ses_1']?.type ==
+                SessionStatusType.busy,
+          );
         },
       );
     });
@@ -522,6 +508,11 @@ void main() {
       // controllable send stream via StreamController, and a short
       // abortSuppressionWindow (50ms) to keep tests fast.
       late RecordingDioClient dioClient;
+      late DateTime abortNow;
+
+      setUp(() {
+        abortNow = DateTime.utc(2026, 1, 1);
+      });
 
       /// Bootstraps the provider with controllable stream support.
       /// Returns a [StreamController] that the test can close manually
@@ -564,6 +555,7 @@ void main() {
           dioClient: dioClient,
           syncHealthCheckInterval: const Duration(milliseconds: 50),
           abortSuppressionWindow: abortSuppressionWindow,
+          abortSuppressionNow: () => abortNow,
         );
 
         final sendStreamController =
@@ -597,6 +589,7 @@ void main() {
         await provider.initializeProviders();
         await provider.loadSessions();
         await provider.selectSession(provider.sessions.first);
+        await settleUntil(() => provider.debugHasRealtimeEventSubscription);
         dioClient.patchBodies.clear();
 
         return sendStreamController;
@@ -611,6 +604,47 @@ void main() {
               selection?['modelId'] == 'model_b';
         });
       }
+
+      test('abort suppression includes its exact expiry boundary', () async {
+        final sendStream = await initWithControllableStream();
+        await provider.sendMessage('hello');
+        await sendStream.close();
+        await pumpEventQueue();
+
+        void emitIdle() => chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'idle'},
+            },
+          ),
+        );
+
+        abortNow = abortNow.add(const Duration(milliseconds: 50));
+        emitIdle();
+        await pumpEventQueue();
+        await provider.setSelectedModelByProvider(
+          providerId: 'provider_b',
+          modelId: 'model_b',
+        );
+        expect(hasModelBPatch(), isFalse);
+
+        abortNow = abortNow.add(const Duration(microseconds: 1));
+        // A repeated idle status is deduplicated; a fresh transition retries
+        // the deferred selection after the policy deadline.
+        chatRepository.emitEvent(
+          const ChatEvent(
+            type: 'session.status',
+            properties: <String, dynamic>{
+              'sessionID': 'ses_1',
+              'status': <String, dynamic>{'type': 'busy'},
+            },
+          ),
+        );
+        emitIdle();
+        await settleUntil(hasModelBPatch);
+      });
 
       test(
         'selection sync deferred when abort suppression is active',
@@ -653,8 +687,8 @@ void main() {
           );
           expect(hasModelBPatch(), isFalse);
 
-          // Wait for suppression window (50ms) to expire + margin
-          await Future<void>.delayed(const Duration(milliseconds: 80));
+          // Expire policy time independently of host scheduling.
+          abortNow = abortNow.add(const Duration(milliseconds: 51));
 
           // Emit session.idle to trigger _attemptPendingRemoteSelectionSync
           chatRepository.emitEvent(
@@ -682,8 +716,7 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 10));
           await sendStream.close();
 
-          // Wait for suppression window to expire
-          await Future<void>.delayed(const Duration(milliseconds: 80));
+          abortNow = abortNow.add(const Duration(milliseconds: 51));
 
           // SSE reports busy — this guard takes over from abort suppression
           chatRepository.emitEvent(
@@ -794,6 +827,7 @@ void main() {
             dioClient: dioClient,
             syncHealthCheckInterval: const Duration(seconds: 10),
             abortSuppressionWindow: const Duration(milliseconds: 500),
+            abortSuppressionNow: () => abortNow,
           );
 
           final sendStreamController =
@@ -842,8 +876,12 @@ void main() {
 
           // Switch to ses_2. With global safety guard enabled, session A can
           // still block sync until A becomes safe (idle and suppression clear).
+          chatRepository.sessionStatusById['ses_1'] =
+              const SessionStatusInfo(type: SessionStatusType.busy);
           final session2 = provider.sessions.firstWhere((s) => s.id == 'ses_2');
           await provider.selectSession(session2);
+          await pumpEventQueue();
+          expect(provider.sessionStatusById['ses_1']?.type, SessionStatusType.busy);
 
           // Reset model to provider_a on ses_2 context so we can verify
           // an immediate sync when switching to provider_b.
@@ -858,11 +896,14 @@ void main() {
             providerId: 'provider_b',
             modelId: 'model_b',
           );
-          await Future<void>.delayed(const Duration(milliseconds: 600));
+          abortNow = abortNow.add(const Duration(milliseconds: 501));
+          await pumpEventQueue();
 
           // Still blocked because session A has not published idle yet.
           expect(hasModelBPatch(), isFalse);
 
+          chatRepository.sessionStatusById['ses_1'] =
+              const SessionStatusInfo(type: SessionStatusType.idle);
           chatRepository.emitEvent(
             const ChatEvent(
               type: 'session.status',
@@ -910,8 +951,16 @@ void main() {
           // Sync should still NOT have fired (suppression still active)
           expect(hasModelBPatch(), isFalse);
 
-          // Wait for window to expire + emit idle to flush
-          await Future<void>.delayed(const Duration(milliseconds: 60));
+          abortNow = abortNow.add(const Duration(milliseconds: 51));
+          chatRepository.emitEvent(
+            const ChatEvent(
+              type: 'session.status',
+              properties: <String, dynamic>{
+                'sessionID': 'ses_1',
+                'status': <String, dynamic>{'type': 'busy'},
+              },
+            ),
+          );
           chatRepository.emitEvent(
             const ChatEvent(
               type: 'session.status',
@@ -954,8 +1003,7 @@ void main() {
           // Nothing flushed yet
           expect(hasModelBPatch(), isFalse);
 
-          // Wait for window to expire + emit idle
-          await Future<void>.delayed(const Duration(milliseconds: 80));
+          abortNow = abortNow.add(const Duration(milliseconds: 51));
           chatRepository.emitEvent(
             const ChatEvent(
               type: 'session.status',

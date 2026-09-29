@@ -1,0 +1,8 @@
+# Protected source followed by its minimum executable-line coverage percentage.
+# Floors are set from a successful full run, reviewed, and never auto-lowered.
+# 2026-09-29 full VM run: 84.62%, 90.20%, 96.63%, and 65.55% respectively.
+# Keep at least two percentage points of headroom, rounded down to a 5-point band.
+lib/presentation/providers/chat_provider/chat_provider_abort_policy_ops.dart 80
+lib/presentation/providers/chat_provider/chat_provider_error_policy.dart 85
+lib/presentation/services/update_check_service.dart 90
+lib/core/network/dio_client.dart 60

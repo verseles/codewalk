@@ -47,11 +47,16 @@ void main() {
         expect(results.first.lineNumber, 100);
       });
 
-      test('matches home directory path', () {
+      test('does not link an unsupported home dotfile', () {
         final results = detector.detect('edit ~/.bashrc');
-        // ~/.bashrc has no directory separator after ~/, so it may not match
-        // depending on the regex. This is expected behavior.
-        // The regex requires at least one / segment after the prefix.
+        expect(results, isEmpty);
+      });
+
+      test('matches a home directory path with a supported extension', () {
+        final results = detector.detect('edit ~/project/main.dart:42');
+        expect(results, hasLength(1));
+        expect(results.single.path, '~/project/main.dart');
+        expect(results.single.lineNumber, 42);
       });
 
       test('matches deep nested paths', () {

@@ -1,11 +1,11 @@
-.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-fast test-unit test-widget test-integration test-shard coverage smoke check check-fast web desktop android precommit clean release
+.PHONY: help deps gen theme-sync theme-sync-check icons icons-tray icons-app tray-prepare icons-check analyze test test-parallel test-fast test-unit test-widget test-chat test-web test-coverage-tools test-integration test-shard coverage smoke check check-fast web desktop android precommit clean release
 
 APK_DIR = build/app/outputs/flutter-apk
 APK_PATH = $(APK_DIR)/codewalk.apk
 APK_METADATA_PATH = $(patsubst %/flutter-apk,%/apk/release,$(APK_DIR))/output-metadata.json
 ANDROID_KEY_PROPERTIES = android/key.properties
 ANALYZE_LOG = /tmp/flutter_analyze.log
-TEST_JOBS ?= 12
+TEST_JOBS ?= 4
 FAST_EXCLUDE_TAGS ?= slow,integration
 ANDROID_BUILD_CODE_OFFSET ?= 2001
 WEB_BASE_HREF ?= /
@@ -51,12 +51,15 @@ help:
 	@echo "  make test-fast  Run fast tests only (exclude slow/integration tags)"
 	@echo "  make test-unit  Run unit + presentation tests only"
 	@echo "  make test-widget  Run widget tests only"
+	@echo "  make test-chat  Run ChatPage smoke and extended scenarios"
+	@echo "  make test-web   Run browser capability tests (requires Chrome)"
+	@echo "  make test-coverage-tools  Verify LCOV filtering and coverage gates"
 	@echo "  make test-integration  Run integration-tagged tests only"
 	@echo "  make test-shard SHARD_TOTAL=N SHARD_INDEX=I  Run one sharded test slice"
 	@echo "  make coverage   Run tests with coverage + threshold gate"
 	@echo "  make smoke      Run integration smoke test against OpenCode server"
-	@echo "  make check      deps + gen + analyze + test"
-	@echo "  make check-fast deps + gen + analyze + test-fast"
+	@echo "  make check      deps + gen + analyze + coverage-tool fixtures + test"
+	@echo "  make check-fast deps + gen + analyze + coverage-tool fixtures + test-fast"
 	@echo "  make web        Build Flutter web app into build/web"
 	@echo "  make desktop    Build desktop app for current host OS"
 	@echo "  make android    Build Android APK (arm64)"
@@ -243,7 +246,7 @@ analyze:
 	bash tool/ci/check_analyze_budget.sh $(ANALYZE_LOG) 337
 
 test:
-	timeout --foreground 10m flutter test --no-pub --fail-fast $(QUIET)
+	timeout --foreground 10m flutter test --no-pub -j $(TEST_JOBS) --fail-fast $(QUIET)
 
 test-parallel:
 	flutter test --no-pub -j $(TEST_JOBS) $(QUIET)
@@ -256,6 +259,15 @@ test-unit:
 
 test-widget:
 	flutter test --no-pub -j $(TEST_JOBS) test/widget test/widget_test.dart $(QUIET)
+
+test-chat:
+	flutter test --no-pub -j $(TEST_JOBS) test/widget/chat_page_smoke_test.dart test/widget/chat_page_test.dart $(QUIET)
+
+test-web:
+	flutter test --no-pub --platform chrome test/web $(QUIET)
+
+test-coverage-tools:
+	python3 -m unittest discover -s tool/ci -p test_check_coverage.py $(QUIET)
 
 test-integration:
 	flutter test --no-pub -j 1 --tags integration test/integration $(QUIET)
@@ -274,9 +286,9 @@ coverage:
 smoke:
 	bash tool/qa/smoke_test.sh
 
-check: deps gen analyze test
+check: deps gen analyze test-coverage-tools test
 
-check-fast: deps gen analyze test-fast
+check-fast: deps gen analyze test-coverage-tools test-fast
 
 web:
 	flutter build web --release --base-href "$(WEB_BASE_HREF)" $(QUIET)

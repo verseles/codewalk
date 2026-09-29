@@ -58,18 +58,20 @@ void main() {
     late InMemoryAppLocalDataSource localDataSource;
     late ChatProvider provider;
     late SettingsProvider defaultSettingsProvider;
+    final ownedProviders = <ChatProvider>[];
 
     ChatProvider buildProvider({
       DioClient? dioClient,
       Duration syncSignalStaleThreshold = const Duration(seconds: 20),
       Duration syncHealthCheckInterval = const Duration(seconds: 5),
       Duration abortSuppressionWindow = const Duration(milliseconds: 30),
+      DateTime Function()? abortSuppressionNow,
       SettingsProvider? settingsProvider,
       CellularDataSaverService? cellularDataSaverService,
       EventFeedbackDispatcher? eventFeedbackDispatcher,
       ChatTitleGenerator? titleGenerator,
     }) {
-      return buildChatProvider(
+      final created = buildChatProvider(
         chatRepository: chatRepository,
         appRepository: appRepository,
         localDataSource: localDataSource,
@@ -78,11 +80,20 @@ void main() {
         syncSignalStaleThreshold: syncSignalStaleThreshold,
         syncHealthCheckInterval: syncHealthCheckInterval,
         abortSuppressionWindow: abortSuppressionWindow,
+        abortSuppressionNow: abortSuppressionNow,
         settingsProvider: settingsProvider,
         cellularDataSaverService: cellularDataSaverService,
         eventFeedbackDispatcher: eventFeedbackDispatcher,
         titleGenerator: titleGenerator,
       );
+      ownedProviders.add(created);
+      return created;
+    }
+
+    void disposeProvider(ChatProvider instance) {
+      if (!ownedProviders.remove(instance)) return;
+      instance.dispose();
+      instance.projectProvider.dispose();
     }
 
     setUp(() async {
@@ -92,6 +103,15 @@ void main() {
       localDataSource = fixtures.localDataSource;
       defaultSettingsProvider = fixtures.defaultSettingsProvider;
       provider = buildProvider();
+    });
+
+    tearDown(() async {
+      await pumpEventQueue();
+      for (final owned in ownedProviders.reversed.toList()) {
+        disposeProvider(owned);
+      }
+      await pumpEventQueue();
+      defaultSettingsProvider.dispose();
     });
 
     Future<void> settleUntil(
@@ -113,22 +133,26 @@ void main() {
         () => provider.debugHasRealtimeEventSubscription,
         reason: 'Expected realtime subscription before server.connected.',
       );
-      await pumpEventQueue();
-      for (var attempt = 0; attempt < 5; attempt += 1) {
+      final connected = Completer<void>();
+      void observeConnection() {
+        if (provider.syncState == ChatSyncState.connected &&
+            !connected.isCompleted) {
+          connected.complete();
+        }
+      }
+      provider.addListener(observeConnection);
+      try {
         chatRepository.emitEvent(
           const ChatEvent(
             type: 'server.connected',
             properties: <String, dynamic>{},
           ),
         );
-        for (var tick = 0; tick < 16; tick += 1) {
-          if (provider.syncState == ChatSyncState.connected) {
-            return;
-          }
-          await pumpEventQueue();
-        }
+        observeConnection();
+        await connected.future.timeout(const Duration(seconds: 2));
+      } finally {
+        provider.removeListener(observeConnection);
       }
-      fail('Expected server.connected signal to mark connected.');
     }
 
     Future<void> initializeRealtimeProvider() async {
@@ -150,7 +174,7 @@ void main() {
       final titleGenerator = _FakeChatTitleGenerator();
       provider = buildProvider(titleGenerator: titleGenerator);
 
-      provider.dispose();
+      disposeProvider(provider);
 
       expect(titleGenerator.cancelPendingWaitersCallCount, 1);
     });
@@ -815,7 +839,7 @@ void main() {
         await provider.setForegroundActive(false);
 
         final resumeTask = provider.setForegroundActive(true);
-        provider.dispose();
+        disposeProvider(provider);
         await resumeTask;
         await pumpEventQueue();
 
@@ -4497,6 +4521,10 @@ void main() {
     test(
       'abortActiveResponse suppresses abort-like errors identified by code-only payload',
       () async {
+        disposeProvider(provider);
+        provider = buildProvider(
+          abortSuppressionNow: () => DateTime.utc(2026, 1, 1),
+        );
         final streamController =
             StreamController<Either<Failure, ChatMessage>>();
         addTearDown(() async {
@@ -4540,6 +4568,10 @@ void main() {
     );
 
     test('session.error after stop still surfaces non-abort errors', () async {
+      disposeProvider(provider);
+      provider = buildProvider(
+        abortSuppressionNow: () => DateTime.utc(2026, 1, 1),
+      );
       final streamController = StreamController<Either<Failure, ChatMessage>>();
       addTearDown(() async {
         await streamController.close();
