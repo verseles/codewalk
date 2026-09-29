@@ -84,8 +84,7 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 ## Known Pitfalls
 
 - In Flutter tests on Linux, Workmanager 0.10 may execute real systemd/`systemctl` commands when the test target defaults to Android. For platform-independent tests that toggle Android-backed settings, use a no-op Workmanager fake or explicitly select the appropriate test platform, and restore any platform override in teardown; do not mask Android-specific behavior tests.
-- `dart tool/i18n/generate_arb.dart` is destructive to newer `.arb` keys. Never run it globally unless `arb_strings.dart` is synchronized with every existing key.
-- Safe translation workflow: generate missing-key payload, translate it, then merge back with `tool/i18n/merge_back_translations.py`.
+- Translations: for targeted changes, modify only the necessary keys, preserving existing messages and metadata. Keep the catalog, ARB files, and generated code synchronized. Before a full regeneration, verify that the sources contain every current key; afterward, inspect the diff for unintended removals or changes.
 - Non-interactive shells do not always source `.bashrc`/`.zshrc`; prepend `export PATH="$HOME/flutter/bin:$PATH"` before Flutter commands in main-agent and subagent contexts.
 - If `/tmp` is full and shell heredocs or git temp-files fail, export `TMPPREFIX=/home/ubuntu/.tmp/zsh_ TMPDIR=/home/ubuntu/.tmp TEMP=/home/ubuntu/.tmp TMP=/home/ubuntu/.tmp` (same-filesystem dir with space) for the command instead of deleting other processes' files.
 - After running `dart format`, inspect the diff hunks and revert unrelated formatter churn outside the intended change so commits stay minimal and reviewable.

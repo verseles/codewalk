@@ -1140,7 +1140,7 @@
 - **Then** when a preferred token falls below its contrast minimum, a fallback token is chosen in order before falling back to a high-contrast neutral
 - **Then** the resolved style is cached per theme, so ordinary rebuilds reuse the same style instance and the renderer is not re-styled on every frame
 - **Then** a light, dark, or preset change recomputes the style, so a cached style never survives a theme switch
-- **Then** this does not guarantee contrast for every painted element: explicit source styles and fixed-color paths in `flutter_mermaid` 0.1.0 bypass these defaults, including parts of sequence, Kanban, radar, XY, timeline, and flowchart subgraphs; issue #194 remains open for those limitations
+- **Then** this does not guarantee contrast for every painted element: explicit source styles and fixed-color paths in `flutter_mermaid` 0.1.0 bypass these defaults, including parts of sequence, Kanban, radar, XY, timeline, and flowchart subgraphs
 
 ### Markdown tables render as rounded scrollable tables
 

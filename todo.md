@@ -22,7 +22,11 @@ Usar a duração real; uma janela isolada não é necessariamente semanal.
 
 ## G2 — Renderização de mensagens
 
-Afinidade alta.
+Afinidade alta. Melhorias entregues em `v1.259.0`; as três issues foram
+encerradas em 29/09/2026 após validação manual e autorização do usuário,
+com release e CI verdes. A #191 foi encerrada pelo aceite dos exemplos mistos,
+sem reprodução da falha original; as limitações de cores fixas do renderer
+Mermaid permanecem documentadas para a #194.
 
 - [#191 — Tela branca/cinza com Mermaid + LaTeX](https://github.com/verseles/codewalk/issues/191)
 - [#194 — Contraste do Mermaid em light/dark](https://github.com/verseles/codewalk/issues/194)
@@ -56,8 +60,8 @@ Preservar mobile, atalhos, isolamento de contexto e desempenho do chat.
 
 ## G4 — Settings: simplificação visual e conteúdo
 
-Afinidade média. Código incluído no tag `v1.257.0`; confirmação de uso e
-fechamento das issues permanecem pendentes.
+Afinidade média. Entregue em `v1.257.0`; as três issues foram encerradas em
+26/09/2026 com autorização do usuário, após release e CI concluídos com sucesso.
 
 - [#201 — Reduzir bordas do modo Refinado](https://github.com/verseles/codewalk/issues/201)
 - [#203 — Unificar servidores ativos e salvos](https://github.com/verseles/codewalk/issues/203)
