@@ -2266,8 +2266,31 @@ Most shortcuts use `mod` (Cmd on macOS, Ctrl on other platforms), with conflict-
 - **Then** the What's-new card also offers a Changelog action that opens the `About` section and an Our group action that opens the Telegram community
 - **Then** `Settings` > `About` renders the full release changelog with scrolling instead of truncated previews with ellipsis
 - **Then** dismissing the announcement is independent of dismissing the update: each is remembered per version and neither hides the other
-- **Then** on startup, an unseen announcement shows a one-time snackbar only when no update snackbar is shown; the snackbar offers a More action that opens the main `Settings` screen with the full text; closing the snackbar does not persist the dismissal
 - **Then** a release without the announcement block behaves exactly as before, and check failures stay silent
+
+### Announcements across installed releases
+
+- **Given** an existing installation launches a newer CodeWalk version
+- **When** the release archive covers both the previous recorded version and the installed version
+- **Then** a scrollable dialog shows the announcements from every release in that interval, newest first, excluding future releases and releases without an announcement
+- **Then** the dialog waits until the main chat route is active, onboarding and its pending tour are clear, and update installation is idle
+- **Then** `Do not show again` starts checked; only the dialog's explicit Close action with that checkbox checked saves acknowledgement of the interval
+- **Then** Back, tapping outside, or closing with the checkbox unchecked keeps the interval pending for the next launch; the same interval is not shown again in the current process
+- **Then** a later upgrade includes any still-pending announcements from earlier upgrades
+- **Then** the first migration of an existing installation offers only the installed version's announcement, because older install history is unknown; a fresh installation establishes its baseline silently
+- **Then** dismissed update and What's-new card versions remain independent of installed-version tracking
+- **Then** failed or incomplete history loads preserve the pending interval; readable announcements from a complete saved archive can still be shown and explicitly acknowledged offline
+- **Then** a covered interval containing only maintenance releases is resolved silently only after a successful history load
+
+### Permanent release history in About
+
+- **Given** the user opens `Settings` > `About`
+- **When** the user selects `Release history`
+- **Then** a dedicated page shows release versions, dates, highlighted announcements, and expandable selectable changelog text in the author's original language
+- **Then** the entry remains available after dismissing an update or announcement card; opening the page does not acknowledge the automatic announcement dialog
+- **Then** the page loads the repository's raw `CHANGELOG.md`, preserves its last successfully saved archive for offline use, and offers refresh/retry with loading, empty, failure, saved-copy, and missing-interval states
+- **Then** manual history can include newer releases than the installed version, with 20 entries initially and a Load more action for older releases
+- **Then** resetting the app clears both history cache and installed-release state, after invalidating pending loads and draining writes
 
 ### Telegram community entry
 

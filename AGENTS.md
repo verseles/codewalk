@@ -75,6 +75,8 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 - The release command updates `pubspec.yaml` and `CHANGELOG.md`, commits, creates a `vX.Y.Z` tag, and pushes.
 - Optional release announcement: `ANNOUNCE="text" make release V=minor`, or answer the one-line TTY prompt (empty skips; never blocks CI).
 - The announcement ships as a `> 📣` block at the top of the version section and surfaces in-app as What's-new.
+- Keep `CHANGELOG.md` machine-readable for in-app release history: use unique `## vX.Y.Z - YYYY-MM-DD` headings, newest releases first. Reserve `##` headings for releases; use `###` for subsections.
+- Each release may have one optional leading `> 📣` announcement, on a single line in English with at most 300 characters. Releases without an announcement are valid. Preserve prior sections and their original announcement text; verify the archive parser tests when changing the format or generator.
 - Ensure all code changes are committed before release. `make release` only commits the version bump.
 - Plain `push` is not a release and must not invoke `releaser`.
 - After release push/tag, CI watch belongs to `cimonitor`; `releaser` does not monitor CI.
