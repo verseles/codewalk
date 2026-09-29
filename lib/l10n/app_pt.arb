@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "Histórico de versões",
+  "releaseHistoryDescription": "Anúncios e alterações recentes",
+  "releaseHistoryLoadError": "Não foi possível carregar o histórico. Verifique sua conexão e tente novamente.",
+  "releaseHistoryStale": "Exibindo uma cópia salva. A atualização falhou; novidades mais recentes podem estar ausentes.",
+  "releaseHistoryEmpty": "Nenhuma nota de versão disponível.",
+  "releaseHistoryIncomplete": "As notas da sua atualização ainda não estão disponíveis. Elas serão verificadas novamente ao reabrir o app.",
+  "releaseHistorySaveError": "Não foi possível salvar sua escolha. Estes anúncios podem aparecer novamente na próxima abertura.",
+  "releaseAnnouncementsTitle": "Novidades",
+  "releaseAnnouncementsDoNotShowAgain": "Não mostrar novamente até a próxima atualização",
   "speechReadAloudNoVoice": "Selecione uma voz para este provedor de TTS.",
   "speechProviderTextTooLong": "O texto é longo demais para este modelo de TTS.",
   "speechProviderInvalidAudio": "O provedor de TTS retornou um áudio não reconhecido.",

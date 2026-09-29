@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "সংস্করণের ইতিহাস",
+  "releaseHistoryDescription": "সাম্প্রতিক ঘোষণা ও পরিবর্তন",
+  "releaseHistoryLoadError": "সংস্করণের ইতিহাস লোড করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "releaseHistoryStale": "সংরক্ষিত অনুলিপি দেখানো হচ্ছে। রিফ্রেশ ব্যর্থ হয়েছে; নতুন তথ্য নাও থাকতে পারে।",
+  "releaseHistoryEmpty": "কোনো সংস্করণের বিবরণ পাওয়া যায়নি।",
+  "releaseHistoryIncomplete": "আপনার আপডেটের বিবরণ এখনও পাওয়া যায়নি। পরের বার অ্যাপ খুললে আবার পরীক্ষা করা হবে।",
+  "releaseHistorySaveError": "আপনার পছন্দ সংরক্ষণ করা যায়নি। এই ঘোষণাগুলো পরের বার আবার দেখা যেতে পারে।",
+  "releaseAnnouncementsTitle": "নতুন কী আছে",
+  "releaseAnnouncementsDoNotShowAgain": "পরবর্তী আপডেট পর্যন্ত আর দেখাবেন না",
   "speechReadAloudNoVoice": "এই TTS প্রদানকারীর জন্য একটি ভয়েস নির্বাচন করুন।",
   "speechProviderTextTooLong": "এই TTS মডেলের জন্য টেক্সটটি খুব দীর্ঘ।",
   "speechProviderInvalidAudio": "TTS প্রদানকারী অজানা অডিও ফিরিয়ে দিয়েছে।",

@@ -9,6 +9,38 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'سجل الإصدارات';
+
+  @override
+  String get releaseHistoryDescription => 'الإعلانات والتغييرات الأخيرة';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'تعذر تحميل سجل الإصدارات. تحقق من اتصالك وحاول مرة أخرى.';
+
+  @override
+  String get releaseHistoryStale =>
+      'تُعرض نسخة محفوظة. فشل التحديث؛ قد تكون الملاحظات الأحدث غير موجودة.';
+
+  @override
+  String get releaseHistoryEmpty => 'لا توجد ملاحظات إصدار متاحة.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'ملاحظات تحديثك غير متاحة بعد. سيتم التحقق منها عند فتح التطبيق مجددًا.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'تعذر حفظ اختيارك. قد تظهر هذه الإعلانات مجددًا في المرة القادمة.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'ما الجديد';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'عدم العرض مجددًا حتى التحديث القادم';
+
+  @override
   String get speechKeepModelInMemory => 'الاحتفاظ في الذاكرة';
 
   @override

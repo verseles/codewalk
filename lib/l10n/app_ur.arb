@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "ورژنز کی تاریخ",
+  "releaseHistoryDescription": "حالیہ اعلانات اور تبدیلیاں",
+  "releaseHistoryLoadError": "ورژنز کی تاریخ لوڈ نہیں ہو سکی۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
+  "releaseHistoryStale": "محفوظ شدہ نقل دکھائی جا رہی ہے۔ ریفریش ناکام ہوا؛ نئی معلومات موجود نہیں ہو سکتیں۔",
+  "releaseHistoryEmpty": "کوئی ریلیز نوٹس دستیاب نہیں۔",
+  "releaseHistoryIncomplete": "آپ کی اپ ڈیٹ کے نوٹس ابھی دستیاب نہیں۔ اگلی بار ایپ کھولنے پر دوبارہ جانچ ہوگی۔",
+  "releaseHistorySaveError": "آپ کا انتخاب محفوظ نہیں ہو سکا۔ یہ اعلانات اگلی بار دوبارہ ظاہر ہو سکتے ہیں۔",
+  "releaseAnnouncementsTitle": "نیا کیا ہے",
+  "releaseAnnouncementsDoNotShowAgain": "اگلی اپ ڈیٹ تک دوبارہ نہ دکھائیں",
   "speechReadAloudNoVoice": "اس TTS فراہم کنندہ کے لیے ایک آواز منتخب کریں۔",
   "speechProviderTextTooLong": "اس TTS ماڈل کے لیے متن بہت لمبا ہے۔",
   "speechProviderInvalidAudio": "TTS فراہم کنندہ نے غیر تسلیم شدہ آڈیو واپس کیا۔",

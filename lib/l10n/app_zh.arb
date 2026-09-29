@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "版本历史",
+  "releaseHistoryDescription": "近期公告和更新日志",
+  "releaseHistoryLoadError": "无法加载版本历史。请检查网络连接后重试。",
+  "releaseHistoryStale": "正在显示已保存的副本。刷新失败，可能缺少最新说明。",
+  "releaseHistoryEmpty": "暂无版本说明。",
+  "releaseHistoryIncomplete": "此次更新的说明尚未提供。下次打开应用时会再次检查。",
+  "releaseHistorySaveError": "无法保存您的选择。这些公告可能会在下次打开时再次显示。",
+  "releaseAnnouncementsTitle": "新功能",
+  "releaseAnnouncementsDoNotShowAgain": "下次更新前不再显示",
   "speechReadAloudNoVoice": "为此 TTS 提供商选择语音。",
   "speechProviderTextTooLong": "此 TTS 模型的文本过长。",
   "speechProviderInvalidAudio": "TTS 提供商返回了无法识别的音频。",

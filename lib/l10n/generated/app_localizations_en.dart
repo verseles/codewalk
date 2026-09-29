@@ -9,6 +9,38 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'Release history';
+
+  @override
+  String get releaseHistoryDescription => 'Recent announcements and changelogs';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Unable to load release history. Check your connection and try again.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Showing a saved copy. Refresh failed; newer notes may be missing.';
+
+  @override
+  String get releaseHistoryEmpty => 'No release notes available.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'Notes for your update are not available yet. They will be checked again when you reopen the app.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'Your choice could not be saved. These announcements may appear again next time.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'What’s new';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Do not show again until the next update';
+
+  @override
   String get speechKeepModelInMemory => 'Keep in memory';
 
   @override

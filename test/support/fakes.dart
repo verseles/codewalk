@@ -164,6 +164,8 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
   String? localOpencodeCommand;
   String? dismissedUpdateVersion;
   String? dismissedNewsVersion;
+  String? releaseHistoryState;
+  String? releaseHistoryCache;
   String? apiKey;
   String? selectedProvider;
   String? selectedModel;
@@ -234,6 +236,8 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
     localOpencodeCommand = null;
     dismissedUpdateVersion = null;
     dismissedNewsVersion = null;
+    releaseHistoryState = null;
+    releaseHistoryCache = null;
     apiKey = null;
     selectedProvider = null;
     selectedModel = null;
@@ -289,6 +293,22 @@ class InMemoryAppLocalDataSource implements AppLocalDataSource {
 
   @override
   Future<String?> getDismissedNewsVersion() async => dismissedNewsVersion;
+
+  @override
+  Future<String?> getReleaseHistoryState() async => releaseHistoryState;
+
+  @override
+  Future<void> saveReleaseHistoryState(String state) async {
+    releaseHistoryState = state;
+  }
+
+  @override
+  Future<String?> getReleaseHistoryCache() async => releaseHistoryCache;
+
+  @override
+  Future<void> saveReleaseHistoryCache(String cache) async {
+    releaseHistoryCache = cache;
+  }
 
   @override
   Future<void> saveDismissedNewsVersion(String version) async {

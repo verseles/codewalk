@@ -9,6 +9,36 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'バージョン履歴';
+
+  @override
+  String get releaseHistoryDescription => '最近のお知らせと変更履歴';
+
+  @override
+  String get releaseHistoryLoadError => '履歴を読み込めませんでした。接続を確認して再試行してください。';
+
+  @override
+  String get releaseHistoryStale =>
+      '保存済みのコピーを表示しています。更新に失敗したため、最新の情報が含まれていない場合があります。';
+
+  @override
+  String get releaseHistoryEmpty => 'リリースノートはありません。';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'この更新のリリースノートはまだありません。次回アプリを開いたときに再確認します。';
+
+  @override
+  String get releaseHistorySaveError =>
+      '選択を保存できませんでした。次回もこれらのお知らせが表示される場合があります。';
+
+  @override
+  String get releaseAnnouncementsTitle => '新着情報';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => '次の更新まで表示しない';
+
+  @override
   String get speechKeepModelInMemory => 'メモリに保持';
 
   @override

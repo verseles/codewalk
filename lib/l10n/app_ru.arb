@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "История версий",
+  "releaseHistoryDescription": "Недавние объявления и изменения",
+  "releaseHistoryLoadError": "Не удалось загрузить историю. Проверьте подключение и повторите попытку.",
+  "releaseHistoryStale": "Показана сохранённая копия. Обновить данные не удалось; последние заметки могут отсутствовать.",
+  "releaseHistoryEmpty": "Заметки о версиях недоступны.",
+  "releaseHistoryIncomplete": "Заметки о вашем обновлении пока недоступны. Проверка повторится при следующем запуске приложения.",
+  "releaseHistorySaveError": "Не удалось сохранить выбор. Эти объявления могут появиться снова при следующем запуске.",
+  "releaseAnnouncementsTitle": "Что нового",
+  "releaseAnnouncementsDoNotShowAgain": "Не показывать до следующего обновления",
   "speechReadAloudNoVoice": "Выберите голос для этого TTS-поставщика.",
   "speechProviderTextTooLong": "Текст слишком длинный для этой TTS-модели.",
   "speechProviderInvalidAudio": "TTS-поставщик вернул нераспознанный звук.",

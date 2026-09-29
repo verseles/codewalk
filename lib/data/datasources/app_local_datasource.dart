@@ -429,6 +429,11 @@ abstract class AppLocalDataSource {
 
   Future<void> saveDismissedNewsVersion(String version);
 
+  Future<String?> getReleaseHistoryState();
+  Future<void> saveReleaseHistoryState(String state);
+  Future<String?> getReleaseHistoryCache();
+  Future<void> saveReleaseHistoryCache(String cache);
+
   /// Technical comment translated to English.
   Future<void> clearAll();
 
@@ -2110,6 +2115,38 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   @override
   Future<String?> getDismissedNewsVersion() async {
     return _sharedPreferences.getString(AppConstants.dismissedNewsVersionKey);
+  }
+
+  @override
+  Future<String?> getReleaseHistoryState() async =>
+      _sharedPreferences.getString(AppConstants.releaseHistoryStateKey);
+
+  @override
+  Future<void> saveReleaseHistoryState(String state) async {
+    if (state.length > 4096 ||
+        !await _sharedPreferences.setString(
+          AppConstants.releaseHistoryStateKey,
+          state,
+        )) {
+      throw StateError('Unable to save release history state');
+    }
+  }
+
+  @override
+  Future<String?> getReleaseHistoryCache() async =>
+      _sharedPreferences.getString(AppConstants.releaseHistoryCacheKey);
+
+  @override
+  Future<void> saveReleaseHistoryCache(String cache) async {
+    // Keep this small archive bounded on native and web. Never remove the
+    // previous successful value when a new response cannot be persisted.
+    if (utf8.encode(cache).length > 512 * 1024 ||
+        !await _sharedPreferences.setString(
+          AppConstants.releaseHistoryCacheKey,
+          cache,
+        )) {
+      throw StateError('Unable to save release history cache');
+    }
   }
 
   @override

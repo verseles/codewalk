@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "Versionsverlauf",
+  "releaseHistoryDescription": "Aktuelle Ankündigungen und Änderungen",
+  "releaseHistoryLoadError": "Der Versionsverlauf konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "releaseHistoryStale": "Eine gespeicherte Kopie wird angezeigt. Die Aktualisierung ist fehlgeschlagen; neuere Hinweise können fehlen.",
+  "releaseHistoryEmpty": "Keine Versionshinweise verfügbar.",
+  "releaseHistoryIncomplete": "Die Hinweise zu deinem Update sind noch nicht verfügbar. Sie werden beim nächsten Öffnen der App erneut geprüft.",
+  "releaseHistorySaveError": "Deine Auswahl konnte nicht gespeichert werden. Diese Ankündigungen können beim nächsten Mal erneut erscheinen.",
+  "releaseAnnouncementsTitle": "Neuigkeiten",
+  "releaseAnnouncementsDoNotShowAgain": "Bis zum nächsten Update nicht mehr anzeigen",
   "speechReadAloudNoVoice": "Wähle eine Stimme für diesen TTS-Anbieter.",
   "speechProviderTextTooLong": "Der Text ist für dieses TTS-Modell zu lang.",
   "speechProviderInvalidAudio": "Der TTS-Anbieter hat nicht erkanntes Audio zurückgegeben.",

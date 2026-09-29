@@ -67,6 +67,7 @@ import '../../presentation/services/parakeet_model_manager.dart';
 import '../../presentation/services/project_icon_discovery_service.dart';
 import '../../presentation/services/project_icon_store.dart';
 import '../../presentation/services/read_aloud_service.dart';
+import '../../presentation/services/release_history_service.dart';
 import '../../presentation/services/sensevoice_model_manager.dart';
 import '../../presentation/services/session_attention/session_attention_completion_resolver.dart';
 import '../../presentation/services/session_attention/session_attention_coordinator.dart';
@@ -411,6 +412,7 @@ Future<void> init() async {
     () => OpenCodeTitleGenerator(dio: sl<DioClient>().dio),
   );
   sl.registerLazySingleton(UpdateCheckService.new);
+  sl.registerLazySingleton(() => ReleaseHistoryService(localDataSource: sl()));
   sl.registerLazySingleton(createProjectIconStore);
   sl.registerLazySingleton(
     () => createProjectIconDiscoveryService(dio: sl<DioClient>().dio),
@@ -546,6 +548,7 @@ Future<void> init() async {
       dioClient: sl(),
       soundService: sl(),
       updateCheckService: sl(),
+      releaseHistoryService: sl(),
       cellularDataSaverService: sl(),
       sessionAttentionHostService: sl(),
       sessionAttentionStopTts: sl<ReadAloudService>().stop,

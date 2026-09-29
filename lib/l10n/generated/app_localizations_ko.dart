@@ -9,6 +9,36 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => '버전 기록';
+
+  @override
+  String get releaseHistoryDescription => '최근 공지 및 변경 사항';
+
+  @override
+  String get releaseHistoryLoadError => '버전 기록을 불러올 수 없습니다. 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get releaseHistoryStale =>
+      '저장된 사본을 표시합니다. 새로고침에 실패하여 최신 내용이 없을 수 있습니다.';
+
+  @override
+  String get releaseHistoryEmpty => '사용 가능한 릴리스 노트가 없습니다.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      '이번 업데이트의 릴리스 노트가 아직 없습니다. 앱을 다시 열 때 확인합니다.';
+
+  @override
+  String get releaseHistorySaveError =>
+      '선택을 저장할 수 없습니다. 다음에 이 공지가 다시 표시될 수 있습니다.';
+
+  @override
+  String get releaseAnnouncementsTitle => '새로운 소식';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => '다음 업데이트까지 다시 표시하지 않기';
+
+  @override
   String get speechKeepModelInMemory => '메모리에 유지';
 
   @override

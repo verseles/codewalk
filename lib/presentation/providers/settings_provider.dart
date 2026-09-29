@@ -25,6 +25,7 @@ import '../services/android_foreground_monitor_service.dart';
 import '../services/car_messaging/car_messaging_runtime.dart';
 import '../services/cellular_data_saver_service.dart';
 import '../services/desktop_window_chrome_service.dart';
+import '../services/release_history_service.dart';
 import '../services/session_attention/session_attention_host_service.dart';
 import '../services/sound_service.dart';
 import '../services/speech_model_residency_controller.dart';
@@ -34,6 +35,7 @@ import '../utils/shortcut_binding_codec.dart';
 import '../utils/shortcut_l10n.dart';
 
 part 'settings_provider_opencode_defaults.dart';
+part 'settings_provider_release_history.dart';
 part 'settings_provider_update_install.dart';
 
 /// Tracks the lifecycle of an in-app update installation.
@@ -79,6 +81,7 @@ class SettingsProvider extends ChangeNotifier {
     required DioClient dioClient,
     required SoundService soundService,
     UpdateCheckService? updateCheckService,
+    ReleaseHistoryService? releaseHistoryService,
     CellularDataSaverService? cellularDataSaverService,
     NativeReadAloudAvailabilityProbe? nativeReadAloudAvailabilityProbe,
     SessionAttentionHostService? sessionAttentionHostService,
@@ -93,6 +96,7 @@ class SettingsProvider extends ChangeNotifier {
        _dioClient = dioClient,
        _soundService = soundService,
        _updateCheckService = updateCheckService ?? UpdateCheckService(),
+       _releaseHistoryService = releaseHistoryService,
        _nativeReadAloudAvailabilityProbe = nativeReadAloudAvailabilityProbe,
        _sessionAttentionHostService =
            sessionAttentionHostService ??
@@ -114,6 +118,16 @@ class SettingsProvider extends ChangeNotifier {
   final DioClient _dioClient;
   final SoundService _soundService;
   final UpdateCheckService _updateCheckService;
+  final ReleaseHistoryService? _releaseHistoryService;
+  _InstalledReleaseState? _installedReleaseState;
+  ReleaseHistorySnapshot _releaseHistory = const ReleaseHistorySnapshot();
+  Semver? _installedVersion;
+  bool _releaseHistoryLoading = false;
+  bool _releaseHistoryCoverageMissing = false;
+  String? _presentedAnnouncementKey;
+  int _releaseHistoryGeneration = 0;
+  Future<void> _releaseHistoryWriteQueue = Future<void>.value();
+  Future<void>? _releaseHistoryLoad;
   final NativeReadAloudAvailabilityProbe? _nativeReadAloudAvailabilityProbe;
   final SessionAttentionHostService _sessionAttentionHostService;
   final SessionAttentionStopTts? _sessionAttentionStopTts;
@@ -200,6 +214,7 @@ class SettingsProvider extends ChangeNotifier {
       Duration(milliseconds: 350);
 
   bool get initialized => _initialized;
+  void _notifyReleaseHistoryChanged() => notifyListeners();
   bool get dynamicColorAvailable => _dynamicColorAvailable;
   ExperienceSettings get settings => _settings;
   UpdateCheckResult? get updateCheckResult => _updateCheckResult;
@@ -360,6 +375,9 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> _initializeInternal() async {
     final raw = await _localDataSource.getExperienceSettingsJson();
     final hasStoredExperienceSettings = raw != null && raw.trim().isNotEmpty;
+    final hadServers =
+        _releaseHistoryService != null &&
+        (await _localDataSource.getServerProfilesJson()) != null;
     if (hasStoredExperienceSettings) {
       try {
         final decoded = jsonDecode(raw);
@@ -435,6 +453,9 @@ class SettingsProvider extends ChangeNotifier {
     _dismissedUpdateVersion = await _localDataSource
         .getDismissedUpdateVersion();
     _dismissedNewsVersion = await _localDataSource.getDismissedNewsVersion();
+    await _initializeReleaseHistory(
+      existingInstall: hasStoredExperienceSettings || hadServers,
+    );
     unawaited(syncNotificationsFromServerConfig());
     if (_settings.checkUpdatesOnOpen) {
       unawaited(_performStartupUpdateCheck());
@@ -443,6 +464,9 @@ class SettingsProvider extends ChangeNotifier {
     _configureAutomaticUpdateChecks();
     _initialized = true;
     notifyListeners();
+    if (_installedReleaseState?.to != null) {
+      unawaited(loadReleaseHistory());
+    }
   }
 
   Future<bool> _applyFirstRunReadAloudDefaults() async {
@@ -2553,6 +2577,7 @@ class SettingsProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _releaseHistoryGeneration++;
     _settingsPersistDebounce?.cancel();
     _settingsPersistDebounce = null;
     if (_hasPendingSettingsPersist) {

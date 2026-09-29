@@ -9,6 +9,37 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'संस्करण इतिहास';
+
+  @override
+  String get releaseHistoryDescription => 'हाल की घोषणाएँ और बदलाव';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'संस्करण इतिहास लोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर कोशिश करें।';
+
+  @override
+  String get releaseHistoryStale =>
+      'सहेजी गई प्रति दिखाई जा रही है। रीफ़्रेश विफल रहा; नई जानकारी उपलब्ध नहीं हो सकती।';
+
+  @override
+  String get releaseHistoryEmpty => 'कोई संस्करण विवरण उपलब्ध नहीं है।';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'आपके अपडेट का विवरण अभी उपलब्ध नहीं है। अगली बार ऐप खोलने पर फिर जाँचा जाएगा।';
+
+  @override
+  String get releaseHistorySaveError =>
+      'आपका चयन सहेजा नहीं जा सका। ये घोषणाएँ अगली बार फिर दिखाई दे सकती हैं।';
+
+  @override
+  String get releaseAnnouncementsTitle => 'नया क्या है';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => 'अगले अपडेट तक फिर न दिखाएँ';
+
+  @override
   String get speechKeepModelInMemory => 'मेमोरी में रखें';
 
   @override

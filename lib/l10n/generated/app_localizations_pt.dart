@@ -9,6 +9,38 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'Histórico de versões';
+
+  @override
+  String get releaseHistoryDescription => 'Anúncios e alterações recentes';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Não foi possível carregar o histórico. Verifique sua conexão e tente novamente.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Exibindo uma cópia salva. A atualização falhou; novidades mais recentes podem estar ausentes.';
+
+  @override
+  String get releaseHistoryEmpty => 'Nenhuma nota de versão disponível.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'As notas da sua atualização ainda não estão disponíveis. Elas serão verificadas novamente ao reabrir o app.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'Não foi possível salvar sua escolha. Estes anúncios podem aparecer novamente na próxima abertura.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Novidades';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Não mostrar novamente até a próxima atualização';
+
+  @override
   String get speechKeepModelInMemory => 'Manter na memória';
 
   @override

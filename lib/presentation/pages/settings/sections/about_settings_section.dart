@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:async';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/injection_container.dart' as di;
@@ -12,10 +13,12 @@ import '../../../../data/datasources/app_local_datasource.dart';
 import '../../../providers/app_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/session_attention/session_attention_completion_resolver.dart';
+import '../../../utils/app_page_route.dart';
 import '../../../widgets/app_indeterminate_progress.dart';
 import '../../../widgets/direct_provider.dart';
 import '../../../widgets/settings_update_available_card.dart';
 import '../../app_shell_page.dart';
+import '../release_history_page.dart';
 import '../widgets/settings_section_layout.dart';
 
 class AboutSettingsSection extends StatefulWidget {
@@ -65,6 +68,16 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
             ),
             const SizedBox(height: 8),
             _buildVersionTile(context),
+            ListTile(
+              key: const ValueKey('settings_about_release_history'),
+              leading: const Icon(Symbols.history),
+              title: Text(context.l10n.releaseHistoryTitle),
+              subtitle: Text(context.l10n.releaseHistoryDescription),
+              trailing: const Icon(Symbols.chevron_right),
+              onTap: () => Navigator.of(
+                context,
+              ).push(AppPageRoute(builder: (_) => const ReleaseHistoryPage())),
+            ),
             if (updateResult != null && updateResult.isNewer)
               SettingsUpdateAvailableCard(
                 settings: settings,
@@ -234,6 +247,8 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
 
     // Clear all persisted data.
     final localDataSource = di.sl<AppLocalDataSource>();
+    final settingsProvider = context.read<SettingsProvider>();
+    await settingsProvider.resetReleaseHistory();
     if (di.sl.isRegistered<SessionAttentionCompletionResolver>()) {
       await di.sl<SessionAttentionCompletionResolver>().clear();
     }
@@ -242,7 +257,6 @@ class _AboutSettingsSectionState extends State<AboutSettingsSection> {
 
     // Reset in-memory provider state and re-initialize from (now empty) storage.
     final appProvider = context.read<AppProvider>();
-    final settingsProvider = context.read<SettingsProvider>();
     // A full reset also drops the Tailscale device identity, so the next
     // Tailscale use requires interactive login again.
     await appProvider.logoutTailscale();

@@ -9,6 +9,38 @@ class AppLocalizationsUr extends AppLocalizations {
   AppLocalizationsUr([String locale = 'ur']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'ورژنز کی تاریخ';
+
+  @override
+  String get releaseHistoryDescription => 'حالیہ اعلانات اور تبدیلیاں';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'ورژنز کی تاریخ لوڈ نہیں ہو سکی۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get releaseHistoryStale =>
+      'محفوظ شدہ نقل دکھائی جا رہی ہے۔ ریفریش ناکام ہوا؛ نئی معلومات موجود نہیں ہو سکتیں۔';
+
+  @override
+  String get releaseHistoryEmpty => 'کوئی ریلیز نوٹس دستیاب نہیں۔';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'آپ کی اپ ڈیٹ کے نوٹس ابھی دستیاب نہیں۔ اگلی بار ایپ کھولنے پر دوبارہ جانچ ہوگی۔';
+
+  @override
+  String get releaseHistorySaveError =>
+      'آپ کا انتخاب محفوظ نہیں ہو سکا۔ یہ اعلانات اگلی بار دوبارہ ظاہر ہو سکتے ہیں۔';
+
+  @override
+  String get releaseAnnouncementsTitle => 'نیا کیا ہے';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'اگلی اپ ڈیٹ تک دوبارہ نہ دکھائیں';
+
+  @override
   String get speechKeepModelInMemory => 'میموری میں رکھیں';
 
   @override

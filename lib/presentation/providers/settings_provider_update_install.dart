@@ -93,6 +93,7 @@ extension SettingsProviderUpdateInstall on SettingsProvider {
 
   /// Resets in-memory state to defaults (used after clearAll during app reset).
   Future<void> resetToDefaults() async {
+    await resetReleaseHistory();
     _automaticUpdateCheckTimer?.cancel();
     _automaticUpdateCheckTimer = null;
     _lastSettingsOpenUpdateCheckAt = null;

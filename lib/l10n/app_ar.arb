@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "سجل الإصدارات",
+  "releaseHistoryDescription": "الإعلانات والتغييرات الأخيرة",
+  "releaseHistoryLoadError": "تعذر تحميل سجل الإصدارات. تحقق من اتصالك وحاول مرة أخرى.",
+  "releaseHistoryStale": "تُعرض نسخة محفوظة. فشل التحديث؛ قد تكون الملاحظات الأحدث غير موجودة.",
+  "releaseHistoryEmpty": "لا توجد ملاحظات إصدار متاحة.",
+  "releaseHistoryIncomplete": "ملاحظات تحديثك غير متاحة بعد. سيتم التحقق منها عند فتح التطبيق مجددًا.",
+  "releaseHistorySaveError": "تعذر حفظ اختيارك. قد تظهر هذه الإعلانات مجددًا في المرة القادمة.",
+  "releaseAnnouncementsTitle": "ما الجديد",
+  "releaseAnnouncementsDoNotShowAgain": "عدم العرض مجددًا حتى التحديث القادم",
   "speechKeepModelInMemory": "الاحتفاظ في الذاكرة",
   "speechKeepModelInMemoryHint": "يُبقي نموذجًا صوتيًا محليًا واحدًا محمّلًا بعد الاستخدام لتسريع التسجيلات التالية. يستهلك ذاكرة RAM إضافية؛ وقد يحرره النظام عند انخفاض الذاكرة.",
   "speechReadAloudNoVoice": "حدد صوتًا لمزود TTS هذا.",

@@ -46,6 +46,7 @@ import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/services/stt_model_download_tracker.dart';
 import 'package:codewalk/presentation/services/update_check_service.dart';
+import 'package:codewalk/presentation/widgets/release_announcements_dialog.dart';
 import 'package:codewalk/presentation/theme/app_theme.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -57,6 +58,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart' hide Provider;
 
 import '../support/fakes.dart';
+import '../support/release_history_fakes.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -537,7 +539,7 @@ void main() {
     },
   );
 
-  testWidgets('startup news toast shows announcement once when up to date', (
+  testWidgets('startup migration dialog shows installed announcement once', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 900));
@@ -549,7 +551,7 @@ void main() {
       PackageInfo.setMockInitialValues(
         appName: 'CodeWalk',
         packageName: 'com.verseles.codewalk',
-        version: '1.2.3',
+        version: '1.2.0',
         buildNumber: '45',
         buildSignature: '',
       );
@@ -570,8 +572,10 @@ void main() {
             isNewer: false,
           ),
         ),
+        releaseHistoryService: FakeReleaseHistoryService(),
       );
       await settingsProvider.initialize();
+      await settingsProvider.loadReleaseHistory();
       chatProvider = _buildChatProvider(localDataSource: localDataSource);
       appProvider = _buildAppProvider(
         localDataSource: localDataSource,
@@ -584,24 +588,24 @@ void main() {
       await tester.pump();
       for (
         var i = 0;
-        i < 10 && find.text('Hello from Telegram!').evaluate().isEmpty;
+        i < 10 && find.text('Current announcement').evaluate().isEmpty;
         i += 1
       ) {
         await tester.pump(const Duration(milliseconds: 50));
       }
 
-      expect(find.text('Hello from Telegram!'), findsOneWidget);
+      expect(find.text('Current announcement'), findsOneWidget);
+      expect(find.text('Future announcement'), findsNothing);
+      expect(find.text('Hello from Telegram!'), findsNothing);
       expect(find.text('Install'), findsNothing);
-
-      await tester.ensureVisible(find.text('More'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byType(SnackBarAction));
-      await tester.pumpAndSettle();
-      expect(find.byType(SettingsPage), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey<String>('settings_navigation_search')),
-        findsOneWidget,
+      await tester.tap(
+        find.byKey(const ValueKey('release_announcements_close')),
       );
+      await tester.pumpAndSettle();
+      expect(find.byType(ReleaseAnnouncementsDialog), findsNothing);
+      await settingsProvider.loadReleaseHistory(forceRefresh: true);
+      await tester.pumpAndSettle();
+      expect(find.byType(ReleaseAnnouncementsDialog), findsNothing);
     } finally {
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpWidget(const SizedBox.shrink());

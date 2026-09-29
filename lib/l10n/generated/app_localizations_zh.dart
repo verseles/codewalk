@@ -9,6 +9,33 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => '版本历史';
+
+  @override
+  String get releaseHistoryDescription => '近期公告和更新日志';
+
+  @override
+  String get releaseHistoryLoadError => '无法加载版本历史。请检查网络连接后重试。';
+
+  @override
+  String get releaseHistoryStale => '正在显示已保存的副本。刷新失败，可能缺少最新说明。';
+
+  @override
+  String get releaseHistoryEmpty => '暂无版本说明。';
+
+  @override
+  String get releaseHistoryIncomplete => '此次更新的说明尚未提供。下次打开应用时会再次检查。';
+
+  @override
+  String get releaseHistorySaveError => '无法保存您的选择。这些公告可能会在下次打开时再次显示。';
+
+  @override
+  String get releaseAnnouncementsTitle => '新功能';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain => '下次更新前不再显示';
+
+  @override
   String get speechKeepModelInMemory => '保留在内存中';
 
   @override

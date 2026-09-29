@@ -9,6 +9,39 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'Versionsverlauf';
+
+  @override
+  String get releaseHistoryDescription =>
+      'Aktuelle Ankündigungen und Änderungen';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Der Versionsverlauf konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Eine gespeicherte Kopie wird angezeigt. Die Aktualisierung ist fehlgeschlagen; neuere Hinweise können fehlen.';
+
+  @override
+  String get releaseHistoryEmpty => 'Keine Versionshinweise verfügbar.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'Die Hinweise zu deinem Update sind noch nicht verfügbar. Sie werden beim nächsten Öffnen der App erneut geprüft.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'Deine Auswahl konnte nicht gespeichert werden. Diese Ankündigungen können beim nächsten Mal erneut erscheinen.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Neuigkeiten';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Bis zum nächsten Update nicht mehr anzeigen';
+
+  @override
   String get speechKeepModelInMemory => 'Im Speicher behalten';
 
   @override

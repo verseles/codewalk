@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "Historial de versiones",
+  "releaseHistoryDescription": "Anuncios y cambios recientes",
+  "releaseHistoryLoadError": "No se pudo cargar el historial. Comprueba tu conexión e inténtalo de nuevo.",
+  "releaseHistoryStale": "Se muestra una copia guardada. La actualización falló; pueden faltar notas recientes.",
+  "releaseHistoryEmpty": "No hay notas de versión disponibles.",
+  "releaseHistoryIncomplete": "Las notas de tu actualización aún no están disponibles. Se comprobarán al volver a abrir la aplicación.",
+  "releaseHistorySaveError": "No se pudo guardar tu elección. Estos anuncios podrían volver a aparecer la próxima vez.",
+  "releaseAnnouncementsTitle": "Novedades",
+  "releaseAnnouncementsDoNotShowAgain": "No volver a mostrar hasta la próxima actualización",
   "speechReadAloudNoVoice": "Selecciona una voz para este proveedor de TTS.",
   "speechProviderTextTooLong": "El texto es demasiado largo para este modelo de TTS.",
   "speechProviderInvalidAudio": "El proveedor de TTS devolvió un audio no reconocido.",

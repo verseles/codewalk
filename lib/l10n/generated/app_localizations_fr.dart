@@ -9,6 +9,38 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'Historique des versions';
+
+  @override
+  String get releaseHistoryDescription => 'Annonces et changements récents';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Impossible de charger l’historique. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Une copie enregistrée est affichée. L’actualisation a échoué ; des notes récentes peuvent manquer.';
+
+  @override
+  String get releaseHistoryEmpty => 'Aucune note de version disponible.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'Les notes de votre mise à jour ne sont pas encore disponibles. Elles seront vérifiées à la prochaine ouverture de l’application.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'Votre choix n’a pas pu être enregistré. Ces annonces peuvent réapparaître la prochaine fois.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Nouveautés';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Ne plus afficher jusqu’à la prochaine mise à jour';
+
+  @override
   String get speechKeepModelInMemory => 'Garder en mémoire';
 
   @override

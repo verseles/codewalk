@@ -9,6 +9,38 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'История версий';
+
+  @override
+  String get releaseHistoryDescription => 'Недавние объявления и изменения';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Не удалось загрузить историю. Проверьте подключение и повторите попытку.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Показана сохранённая копия. Обновить данные не удалось; последние заметки могут отсутствовать.';
+
+  @override
+  String get releaseHistoryEmpty => 'Заметки о версиях недоступны.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'Заметки о вашем обновлении пока недоступны. Проверка повторится при следующем запуске приложения.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'Не удалось сохранить выбор. Эти объявления могут появиться снова при следующем запуске.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Что нового';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Не показывать до следующего обновления';
+
+  @override
   String get speechKeepModelInMemory => 'Сохранять в памяти';
 
   @override

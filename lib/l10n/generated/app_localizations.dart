@@ -122,6 +122,60 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// Permanent release history entry and page title
+  ///
+  /// In en, this message translates to:
+  /// **'Release history'**
+  String get releaseHistoryTitle;
+
+  /// About release history entry subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Recent announcements and changelogs'**
+  String get releaseHistoryDescription;
+
+  /// No cached changelog available after a failed fetch
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load release history. Check your connection and try again.'**
+  String get releaseHistoryLoadError;
+
+  /// Cached release notes remain readable after a failed refresh
+  ///
+  /// In en, this message translates to:
+  /// **'Showing a saved copy. Refresh failed; newer notes may be missing.'**
+  String get releaseHistoryStale;
+
+  /// Empty release history state
+  ///
+  /// In en, this message translates to:
+  /// **'No release notes available.'**
+  String get releaseHistoryEmpty;
+
+  /// The changelog does not yet cover the installed update interval
+  ///
+  /// In en, this message translates to:
+  /// **'Notes for your update are not available yet. They will be checked again when you reopen the app.'**
+  String get releaseHistoryIncomplete;
+
+  /// Release announcement acknowledgment persistence failed
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice could not be saved. These announcements may appear again next time.'**
+  String get releaseHistorySaveError;
+
+  /// Post-upgrade announcement dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'What’s new'**
+  String get releaseAnnouncementsTitle;
+
+  /// Default-checked post-upgrade dialog suppression checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show again until the next update'**
+  String get releaseAnnouncementsDoNotShowAgain;
+
   /// No description provided for @speechKeepModelInMemory.
   ///
   /// In en, this message translates to:

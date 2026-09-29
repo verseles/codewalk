@@ -9,6 +9,38 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'Cronologia delle versioni';
+
+  @override
+  String get releaseHistoryDescription => 'Annunci e modifiche recenti';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'Impossibile caricare la cronologia. Controlla la connessione e riprova.';
+
+  @override
+  String get releaseHistoryStale =>
+      'Viene mostrata una copia salvata. L’aggiornamento non è riuscito; alcune note recenti potrebbero mancare.';
+
+  @override
+  String get releaseHistoryEmpty => 'Nessuna nota di versione disponibile.';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'Le note del tuo aggiornamento non sono ancora disponibili. Verranno ricontrollate alla prossima apertura dell’app.';
+
+  @override
+  String get releaseHistorySaveError =>
+      'Impossibile salvare la scelta. Questi annunci potrebbero riapparire la prossima volta.';
+
+  @override
+  String get releaseAnnouncementsTitle => 'Novità';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'Non mostrare più fino al prossimo aggiornamento';
+
+  @override
   String get speechKeepModelInMemory => 'Mantieni in memoria';
 
   @override

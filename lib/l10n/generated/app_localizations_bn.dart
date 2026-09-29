@@ -9,6 +9,38 @@ class AppLocalizationsBn extends AppLocalizations {
   AppLocalizationsBn([String locale = 'bn']) : super(locale);
 
   @override
+  String get releaseHistoryTitle => 'সংস্করণের ইতিহাস';
+
+  @override
+  String get releaseHistoryDescription => 'সাম্প্রতিক ঘোষণা ও পরিবর্তন';
+
+  @override
+  String get releaseHistoryLoadError =>
+      'সংস্করণের ইতিহাস লোড করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।';
+
+  @override
+  String get releaseHistoryStale =>
+      'সংরক্ষিত অনুলিপি দেখানো হচ্ছে। রিফ্রেশ ব্যর্থ হয়েছে; নতুন তথ্য নাও থাকতে পারে।';
+
+  @override
+  String get releaseHistoryEmpty => 'কোনো সংস্করণের বিবরণ পাওয়া যায়নি।';
+
+  @override
+  String get releaseHistoryIncomplete =>
+      'আপনার আপডেটের বিবরণ এখনও পাওয়া যায়নি। পরের বার অ্যাপ খুললে আবার পরীক্ষা করা হবে।';
+
+  @override
+  String get releaseHistorySaveError =>
+      'আপনার পছন্দ সংরক্ষণ করা যায়নি। এই ঘোষণাগুলো পরের বার আবার দেখা যেতে পারে।';
+
+  @override
+  String get releaseAnnouncementsTitle => 'নতুন কী আছে';
+
+  @override
+  String get releaseAnnouncementsDoNotShowAgain =>
+      'পরবর্তী আপডেট পর্যন্ত আর দেখাবেন না';
+
+  @override
   String get speechKeepModelInMemory => 'মেমোরিতে রাখুন';
 
   @override

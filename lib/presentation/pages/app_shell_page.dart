@@ -14,11 +14,10 @@ import '../services/desktop_tray_service.dart';
 import '../services/desktop_tray_service_types.dart';
 import '../services/stt_model_download_tracker.dart';
 import '../services/update_check_service.dart';
-import '../utils/app_page_route.dart';
 import '../widgets/app_indeterminate_progress.dart';
+import '../widgets/release_announcements_dialog.dart';
 import 'chat_page.dart';
 import 'onboarding_wizard_page.dart';
-import 'settings_page.dart';
 
 /// Cold-start loading hint for the Tailscale bring-up that gates provider
 /// initialization. Pure mapping so it stays unit-testable without pumping.
@@ -61,8 +60,7 @@ class _AppShellPageState extends State<AppShellPage> {
   bool _wizardDismissedThisSession = false;
   // Ensures the startup update toast is shown at most once per session.
   String? _shownStartupUpdateVersion;
-  // Ensures the startup What's-new toast is shown at most once per session.
-  String? _shownStartupNewsVersion;
+  bool _releaseDialogScheduled = false;
   // Guards for install-state SnackBars so they are shown at most once each.
   bool _shownProgressSnackBar = false;
   bool _shownDoneSnackBar = false;
@@ -351,7 +349,47 @@ class _AppShellPageState extends State<AppShellPage> {
         // Flag is set here (not in the callback) to prevent multiple
         // addPostFrameCallback registrations across rebuilds.
         final updateResult = settingsProvider.updateCheckResult;
-        if (settingsProvider.pendingStartupUpdateToast &&
+        final batch = settingsProvider.pendingReleaseAnnouncements;
+        final routeIsCurrent = ModalRoute.isCurrentOf(context) ?? true;
+        if (batch != null &&
+            !_releaseDialogScheduled &&
+            routeIsCurrent &&
+            !settingsProvider.pendingPostOnboardingChatTour &&
+            settingsProvider.installState == UpdateInstallState.idle) {
+          _releaseDialogScheduled = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              if (!mounted ||
+                  _onboardingActive ||
+                  !(ModalRoute.isCurrentOf(context) ?? true) ||
+                  settingsProvider.pendingReleaseAnnouncements?.key !=
+                      batch.key ||
+                  settingsProvider.installState != UpdateInstallState.idle) {
+                return;
+              }
+              settingsProvider.markReleaseAnnouncementsPresented(batch.key);
+              final suppress = await showDialog<bool>(
+                context: context,
+                builder: (_) =>
+                    ReleaseAnnouncementsDialog(entries: batch.entries),
+              );
+              if (suppress == true) {
+                final saved = await settingsProvider
+                    .acknowledgeReleaseAnnouncements(batch.key);
+                if (!saved && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n.releaseHistorySaveError),
+                    ),
+                  );
+                }
+              }
+            } finally {
+              if (mounted) setState(() => _releaseDialogScheduled = false);
+            }
+          });
+        } else if (!_releaseDialogScheduled &&
+            settingsProvider.pendingStartupUpdateToast &&
             updateResult != null &&
             updateResult.isNewer &&
             updateResult.latestVersion != _shownStartupUpdateVersion) {
@@ -360,19 +398,6 @@ class _AppShellPageState extends State<AppShellPage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _showUpdateToast(context, settingsProvider, updateResult);
           });
-        } else if (settingsProvider.pendingStartupNewsToast &&
-            settingsProvider.hasUnseenNews) {
-          // What's-new toast only when no update toast fired above. Ack here
-          // so hourly re-checks cannot leave a stale flag behind.
-          settingsProvider.acknowledgeStartupNewsToast();
-          final newsResult = settingsProvider.latestRelease;
-          if (newsResult != null &&
-              newsResult.latestVersion != _shownStartupNewsVersion) {
-            _shownStartupNewsVersion = newsResult.latestVersion;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showNewsToast(context, newsResult);
-            });
-          }
         }
 
         return const ChatPage();
@@ -427,39 +452,6 @@ class _AppShellPageState extends State<AppShellPage> {
       return;
     }
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-
-  /// Shows a one-time SnackBar with the latest release announcement.
-  /// Visual only: dismissing it does not persist the news dismissal.
-  /// The More action opens the Settings landing with the full text.
-  void _showNewsToast(BuildContext context, UpdateCheckResult result) {
-    if (!mounted) return;
-    final announcement = result.announcement;
-    if (announcement == null || announcement.isEmpty) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          announcement.length > 120
-              ? '${announcement.substring(0, 120)}...'
-              : announcement,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        duration: const Duration(seconds: 6),
-        showCloseIcon: true,
-        action: SnackBarAction(
-          label: context.l10n.appShellNewsMore,
-          onPressed: () => unawaited(_openSettings(context)),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openSettings(BuildContext context) async {
-    if (!mounted) return;
-    await Navigator.of(
-      context,
-    ).push(AppPageRoute(builder: (_) => const SettingsPage()));
   }
 
   void _showInstallingSnackBar(BuildContext context) {

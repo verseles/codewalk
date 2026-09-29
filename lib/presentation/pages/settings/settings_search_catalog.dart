@@ -395,6 +395,9 @@ List<SettingsSearchOption> settingsSearchOptions(
     );
   }
   add('about', 'settings_about_check_on_open', l.settingsAboutCheckOnOpen);
+  add('about', 'settings_about_release_history', l.releaseHistoryTitle, [
+    l.settingsAboutChangelog, l.releaseHistoryDescription, 'ANNOUNCE',
+  ]);
   add('about', 'settings_about_check_now', l.settingsAboutCheckForUpdates);
   add('about', 'about_replay_chat_tour_tile', l.settingsAboutReplayChatTour);
   add('about', 'settings_about_github', l.aboutGitHub);

@@ -1,4 +1,13 @@
 {
+  "releaseHistoryTitle": "संस्करण इतिहास",
+  "releaseHistoryDescription": "हाल की घोषणाएँ और बदलाव",
+  "releaseHistoryLoadError": "संस्करण इतिहास लोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर कोशिश करें।",
+  "releaseHistoryStale": "सहेजी गई प्रति दिखाई जा रही है। रीफ़्रेश विफल रहा; नई जानकारी उपलब्ध नहीं हो सकती।",
+  "releaseHistoryEmpty": "कोई संस्करण विवरण उपलब्ध नहीं है।",
+  "releaseHistoryIncomplete": "आपके अपडेट का विवरण अभी उपलब्ध नहीं है। अगली बार ऐप खोलने पर फिर जाँचा जाएगा।",
+  "releaseHistorySaveError": "आपका चयन सहेजा नहीं जा सका। ये घोषणाएँ अगली बार फिर दिखाई दे सकती हैं।",
+  "releaseAnnouncementsTitle": "नया क्या है",
+  "releaseAnnouncementsDoNotShowAgain": "अगले अपडेट तक फिर न दिखाएँ",
   "speechReadAloudNoVoice": "इस TTS प्रदाता के लिए एक आवाज़ चुनें।",
   "speechProviderTextTooLong": "यह टेक्स्ट इस TTS मॉडल के लिए बहुत लंबा है।",
   "speechProviderInvalidAudio": "TTS प्रदाता ने अपरिचित ऑडियो लौटाया।",

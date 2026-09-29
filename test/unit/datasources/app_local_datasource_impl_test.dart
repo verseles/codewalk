@@ -142,6 +142,39 @@ void main() {
   });
 
   test(
+    'release history persists independently, rejects oversize and resets',
+    () async {
+      final prefs = await SharedPreferences.getInstance();
+      final dataSource = AppLocalDataSourceImpl(
+        sharedPreferences: prefs,
+        chatCachePayloadStore: _InMemoryChatCachePayloadStore(),
+      );
+      await dataSource.saveReleaseHistoryState(
+        '{"schema":1,"highest":"1.2.0"}',
+      );
+      await dataSource.saveReleaseHistoryCache('{"body":"archive"}');
+      await dataSource.saveDismissedNewsVersion('1.3.0');
+      final restored = AppLocalDataSourceImpl(sharedPreferences: prefs);
+      expect(await restored.getReleaseHistoryState(), contains('1.2.0'));
+      expect(await restored.getReleaseHistoryCache(), contains('archive'));
+      await expectLater(
+        dataSource.saveReleaseHistoryState('x' * 4097),
+        throwsStateError,
+      );
+      await expectLater(
+        dataSource.saveReleaseHistoryCache('x' * (512 * 1024 + 1)),
+        throwsStateError,
+      );
+      expect(await restored.getReleaseHistoryCache(), contains('archive'));
+      expect(await restored.getReleaseHistoryState(), contains('1.2.0'));
+      expect(await restored.getDismissedNewsVersion(), '1.3.0');
+      await dataSource.clearAll();
+      expect(await restored.getReleaseHistoryCache(), isNull);
+      expect(await restored.getReleaseHistoryState(), isNull);
+    },
+  );
+
+  test(
     'migrates legacy api key from SharedPreferences to secure storage',
     () async {
       SharedPreferences.setMockInitialValues(<String, Object>{
