@@ -10,7 +10,7 @@ import '../theme/opencode_theme_presets.dart';
 ///
 /// Falls back to displaying the raw source in a styled code block when
 /// the diagram cannot be parsed or rendered.
-class MermaidDiagramWidget extends StatelessWidget {
+class MermaidDiagramWidget extends StatefulWidget {
   const MermaidDiagramWidget({
     super.key,
     required this.code,
@@ -22,6 +22,19 @@ class MermaidDiagramWidget extends StatelessWidget {
 
   /// Called when the user taps the copy source action.
   final VoidCallback? onCopySource;
+
+  @override
+  State<MermaidDiagramWidget> createState() => _MermaidDiagramWidgetState();
+}
+
+class _MermaidDiagramWidgetState extends State<MermaidDiagramWidget> {
+  late MermaidStyle _mermaidStyle;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mermaidStyle = _resolveMermaidStyle(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +83,14 @@ class MermaidDiagramWidget extends StatelessWidget {
                 ),
           ),
           const Spacer(),
-          if (onCopySource != null)
+          if (widget.onCopySource != null)
             IconButton(
               icon: Icon(
                 Symbols.content_copy,
                 size: 18,
                 color: colorScheme.onSurfaceVariant,
               ),
-              onPressed: onCopySource,
+              onPressed: widget.onCopySource,
               tooltip: l10n.mermaidCopySourceTooltip,
               visualDensity: VisualDensity.compact,
             ),
@@ -100,8 +113,8 @@ class MermaidDiagramWidget extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 200),
             child: MermaidDiagram(
-              code: code,
-              style: _resolveMermaidStyle(context),
+              code: widget.code,
+              style: _mermaidStyle,
               errorBuilder: (ctx, error) =>
                   _buildFallbackCodeView(ctx),
             ),
@@ -122,7 +135,7 @@ class MermaidDiagramWidget extends StatelessWidget {
             Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: SelectableText(
-        code,
+        widget.code,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontFamily: 'monospace',
               color: colorScheme.onSurfaceVariant,
@@ -140,22 +153,88 @@ class MermaidDiagramWidget extends StatelessWidget {
         theme.extension<OpenCodeThemeTokens>() ??
         classicThemeTokensFrom(colorScheme);
     final diagramBackground = colorScheme.surfaceContainerLowest;
+    final nodeFill = themeTokens.surfaceRaised;
+    final nodeText = _colorWithMinimumContrast(
+      preferred: themeTokens.textBase,
+      fallbacks: <Color>[colorScheme.onSurface, colorScheme.onSurfaceVariant],
+      background: nodeFill,
+      minimumContrast: 4.5,
+    );
+    final nodeStroke = _colorWithMinimumContrast(
+      preferred: themeTokens.border,
+      fallbacks: <Color>[
+        themeTokens.textMuted,
+        themeTokens.textBase,
+        colorScheme.primary,
+      ],
+      background: nodeFill,
+      minimumContrast: 3,
+    );
+    final edgeStroke = _colorWithMinimumContrast(
+      preferred: themeTokens.textMuted,
+      fallbacks: <Color>[
+        themeTokens.textBase,
+        themeTokens.border,
+        colorScheme.primary,
+      ],
+      background: diagramBackground,
+      minimumContrast: 3,
+    );
+    final edgeLabel = _colorWithMinimumContrast(
+      preferred: themeTokens.textBase,
+      fallbacks: <Color>[colorScheme.onSurface, themeTokens.textMuted],
+      background: diagramBackground,
+      minimumContrast: 4.5,
+    );
 
     return MermaidStyle(
       backgroundColor: diagramBackground.toARGB32(),
       defaultNodeStyle: NodeStyle(
-        fillColor: themeTokens.surfaceRaised.toARGB32(),
-        strokeColor: themeTokens.border.toARGB32(),
-        textColor: themeTokens.textBase.toARGB32(),
+        fillColor: nodeFill.toARGB32(),
+        strokeColor: nodeStroke.toARGB32(),
+        textColor: nodeText.toARGB32(),
       ),
       defaultEdgeStyle: EdgeStyle(
-        strokeColor: themeTokens.textMuted.toARGB32(),
-        labelColor: themeTokens.textBase.toARGB32(),
+        strokeColor: edgeStroke.toARGB32(),
+        labelColor: edgeLabel.toARGB32(),
         labelBackgroundColor: diagramBackground.toARGB32(),
       ),
       themeMode: theme.brightness == Brightness.dark
           ? MermaidThemeMode.dark
           : MermaidThemeMode.light,
     );
+  }
+
+  Color _colorWithMinimumContrast({
+    required Color preferred,
+    required List<Color> fallbacks,
+    required Color background,
+    required double minimumContrast,
+  }) {
+    final candidates = <Color>[
+      preferred,
+      ...fallbacks,
+      Colors.black,
+      Colors.white,
+    ];
+    for (final candidate in candidates) {
+      final opaque = Color.alphaBlend(candidate, background);
+      if (_contrastRatio(opaque, background) >= minimumContrast) {
+        return opaque;
+      }
+    }
+    return Colors.black;
+  }
+
+  double _contrastRatio(Color foreground, Color background) {
+    final foregroundLuminance = foreground.computeLuminance();
+    final backgroundLuminance = background.computeLuminance();
+    final lighter = foregroundLuminance > backgroundLuminance
+        ? foregroundLuminance
+        : backgroundLuminance;
+    final darker = foregroundLuminance > backgroundLuminance
+        ? backgroundLuminance
+        : foregroundLuminance;
+    return (lighter + 0.05) / (darker + 0.05);
   }
 }

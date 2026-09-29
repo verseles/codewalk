@@ -104,6 +104,11 @@ void main() {
         (null, Brightness.light),
         (OpenCodeThemePreset.github, Brightness.light),
         (OpenCodeThemePreset.dracula, Brightness.dark),
+        (OpenCodeThemePreset.everforest, Brightness.light),
+        (OpenCodeThemePreset.osakaJade, Brightness.dark),
+        (OpenCodeThemePreset.carbonfox, Brightness.light),
+        (OpenCodeThemePreset.solarized, Brightness.light),
+        (OpenCodeThemePreset.vesper, Brightness.dark),
       ];
 
       for (final themeCase in themeCases) {
@@ -148,49 +153,121 @@ void main() {
           style.defaultNodeStyle.fillColor,
           themeTokens.surfaceRaised.toARGB32(),
         );
-        expect(
-          style.defaultNodeStyle.strokeColor,
-          themeTokens.border.toARGB32(),
-        );
-        expect(
-          style.defaultNodeStyle.textColor,
-          themeTokens.textBase.toARGB32(),
-        );
-        expect(
-          style.defaultEdgeStyle.strokeColor,
-          themeTokens.textMuted.toARGB32(),
-        );
-        expect(
-          style.defaultEdgeStyle.labelColor,
-          themeTokens.textBase.toARGB32(),
-        );
+        expect(style.defaultNodeStyle.strokeColor, isNotNull);
         expect(
           style.defaultEdgeStyle.labelBackgroundColor,
           colorScheme.surfaceContainerLowest.toARGB32(),
         );
+        final nodeFill = Color(style.defaultNodeStyle.fillColor!);
+        final nodeText = Color(style.defaultNodeStyle.textColor!);
+        final nodeStroke = Color(style.defaultNodeStyle.strokeColor!);
+        final edgeStroke = Color(style.defaultEdgeStyle.strokeColor!);
+        final edgeLabel = Color(style.defaultEdgeStyle.labelColor!);
+        final edgeLabelBackground = Color(
+          style.defaultEdgeStyle.labelBackgroundColor!,
+        );
+        expect(nodeText.a, 1);
+        expect(edgeLabel.a, 1);
+        expect(_contrastRatio(nodeText, nodeFill), greaterThanOrEqualTo(4.5));
         expect(
-          _contrastRatio(
-            Color(style.defaultNodeStyle.textColor!),
-            Color(style.defaultNodeStyle.fillColor!),
-          ),
+          _contrastRatio(edgeLabel, edgeLabelBackground),
           greaterThanOrEqualTo(4.5),
         );
+        expect(_contrastRatio(nodeStroke, nodeFill), greaterThanOrEqualTo(3));
         expect(
-          _contrastRatio(
-            Color(style.defaultEdgeStyle.labelColor!),
-            Color(style.defaultEdgeStyle.labelBackgroundColor!),
-          ),
-          greaterThanOrEqualTo(4.5),
-        );
-        expect(
-          _contrastRatio(
-            Color(style.defaultEdgeStyle.strokeColor!),
-            Color(style.backgroundColor),
-          ),
+          _contrastRatio(edgeStroke, Color(style.backgroundColor)),
           greaterThanOrEqualTo(3),
         );
         expect(tester.takeException(), isNull);
       }
+    });
+
+    testWidgets('keeps MermaidStyle identity across ordinary rebuilds', (
+      WidgetTester tester,
+    ) async {
+      late StateSetter rebuild;
+      var rebuildCount = 0;
+      // The widget must stay non-const: a canonicalized const instance is
+      // skipped by updateChild, so State.build would never re-run and the
+      // identity assertion would pass vacuously.
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return Scaffold(
+                body: Column(
+                  children: [
+                    Text('$rebuildCount'),
+                    // ignore: prefer_const_constructors
+                    MermaidDiagramWidget(code: 'graph TD\nA --> B'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final styleBefore = tester
+          .widget<MermaidDiagram>(find.byType(MermaidDiagram))
+          .style;
+
+      rebuild(() => rebuildCount++);
+      await tester.pumpAndSettle();
+      final styleAfter = tester
+          .widget<MermaidDiagram>(find.byType(MermaidDiagram))
+          .style;
+
+      expect(identical(styleBefore, styleAfter), isTrue);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('refreshes MermaidStyle when the theme changes', (
+      WidgetTester tester,
+    ) async {
+      const lightScheme = ColorScheme.light();
+      const darkScheme = ColorScheme.dark();
+      const code = 'graph TD\nA --> B';
+
+      Future<void> pumpWith(ColorScheme colorScheme) async {
+        await tester.pumpWidget(
+          localizedMaterialApp(
+            theme: ThemeData(
+              platform: TargetPlatform.android,
+              colorScheme: colorScheme,
+              extensions: <ThemeExtension<dynamic>>[
+                classicThemeTokensFrom(colorScheme),
+              ],
+            ),
+            home: const Scaffold(body: MermaidDiagramWidget(code: code)),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await pumpWith(lightScheme);
+      final lightStyle = tester
+          .widget<MermaidDiagram>(find.byType(MermaidDiagram))
+          .style!;
+
+      await pumpWith(darkScheme);
+      final darkStyle = tester
+          .widget<MermaidDiagram>(find.byType(MermaidDiagram))
+          .style!;
+
+      expect(identical(lightStyle, darkStyle), isFalse);
+      expect(
+        lightStyle.backgroundColor,
+        lightScheme.surfaceContainerLowest.toARGB32(),
+      );
+      expect(
+        darkStyle.backgroundColor,
+        darkScheme.surfaceContainerLowest.toARGB32(),
+      );
+      expect(lightStyle.themeMode, MermaidThemeMode.light);
+      expect(darkStyle.themeMode, MermaidThemeMode.dark);
+      expect(tester.takeException(), isNull);
     });
   });
 }
