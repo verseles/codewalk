@@ -1130,6 +1130,26 @@
 - **Then** touch gestures pass through to the parent chat scroll, avoiding scroll lock
 - **Then** horizontal scrolling within the diagram remains available when the diagram is wider than the viewport
 
+### Mermaid diagram colors follow the active theme
+
+- **Given** a mermaid diagram is rendered under a built-in theme preset or the default theme
+- **When** a renderer component uses the app-provided default `MermaidStyle` colors
+- **Then** the diagram background, node fill, node border, node text, edge stroke, and edge label colors are derived from the active theme instead of a fixed palette
+- **Then** default text and stroke color candidates are alpha-blended over their respective theme backgrounds before contrast is checked
+- **Then** the resolved default node and edge-label text colors reach at least 4.5:1 contrast against their respective backgrounds, and default node borders and edge strokes reach at least 3:1
+- **Then** when a preferred token falls below its contrast minimum, a fallback token is chosen in order before falling back to a high-contrast neutral
+- **Then** the resolved style is cached per theme, so ordinary rebuilds reuse the same style instance and the renderer is not re-styled on every frame
+- **Then** a light, dark, or preset change recomputes the style, so a cached style never survives a theme switch
+- **Then** this does not guarantee contrast for every painted element: explicit source styles and fixed-color paths in `flutter_mermaid` 0.1.0 bypass these defaults, including parts of sequence, Kanban, radar, XY, timeline, and flowchart subgraphs; issue #194 remains open for those limitations
+
+### Markdown tables render as rounded scrollable tables
+
+- **Given** an assistant message contains a Markdown table
+- **When** the message is rendered
+- **Then** the table is drawn with rounded corners, a bold header row on a distinct theme surface, and intrinsic column widths
+- **Then** a table wider than the message viewport scrolls horizontally inside its own bounds instead of overflowing the message
+- **Then** table cell content still supports inline formatting and links
+
 ### LaTeX math expressions render as typeset equations
 
 - **Given** an assistant message contains an inline math expression `$...$` with LaTeX command tokens (e.g. `\frac`, `\sum`, `\sqrt`)
