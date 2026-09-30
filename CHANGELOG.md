@@ -2,6 +2,14 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.261.0 - 2026-09-30
+
+> 📣 Session tab actions are now grouped into a compact, accessible icon menu with clearer keyboard, mouse, and touch navigation.
+
+- fix(tabs): respect popup safe-area width when wrapping actions
+- feat(tabs): group context actions into an accessible icon menu (#221)
+- docs(updates): describe announcement history and archive contract
+
 ## v1.260.0 - 2026-09-29
 
 > 📣 Catch up on announcements from the releases you skipped, and revisit recent announcements and changelogs anytime in Settings > About.
