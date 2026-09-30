@@ -540,33 +540,27 @@ class _SessionActionGridMenuEntryState
                   groupIndex++
                 ) ...[
                   if (groupIndex > 0) const Divider(height: 16),
-                  for (
-                    var start = 0;
-                    start < widget.groups[groupIndex].length;
-                    start += columns
-                  )
-                    Row(
-                      children: [
-                        for (final item
-                            in widget.groups[groupIndex]
-                                .skip(start)
-                                .take(columns))
-                          FocusTraversalOrder(
-                            key: ValueKey<SessionMenuAction>(item.action),
-                            order: NumericFocusOrder((order++).toDouble()),
-                            child: SizedBox(
-                              width: 56,
-                              height: 48,
-                              child: Center(
-                                child: _SessionMenuIconButton(
-                                  item: item,
-                                  autofocus: order == 1,
-                                ),
+                  // showMenu removes MediaQuery padding but constrains the
+                  // surface to the safe area. Wrap uses that actual width.
+                  Wrap(
+                    children: [
+                      for (final item in widget.groups[groupIndex])
+                        FocusTraversalOrder(
+                          key: ValueKey<SessionMenuAction>(item.action),
+                          order: NumericFocusOrder((order++).toDouble()),
+                          child: SizedBox(
+                            width: 56,
+                            height: 48,
+                            child: Center(
+                              child: _SessionMenuIconButton(
+                                item: item,
+                                autofocus: order == 1,
                               ),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
+                  ),
                 ],
               ],
             ),

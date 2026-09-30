@@ -39,6 +39,7 @@ Future<void> _pumpMenu(
   String? closeLabel = 'Close project',
   TextDirection direction = TextDirection.ltr,
   double textScale = 1,
+  EdgeInsets padding = EdgeInsets.zero,
   bool open = true,
   FocusNode? openerFocus,
   ValueChanged<SessionMenuAction?>? onSelected,
@@ -51,7 +52,7 @@ Future<void> _pumpMenu(
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(
           context,
-        ).copyWith(textScaler: TextScaler.linear(textScale)),
+        ).copyWith(textScaler: TextScaler.linear(textScale), padding: padding),
         child: Directionality(textDirection: direction, child: child!),
       ),
       home: Scaffold(
@@ -320,6 +321,32 @@ void main() {
       expect(_action(SessionMenuAction.pin), findsNothing);
       expect(result, isNull);
       expect(opener.hasFocus, isTrue);
+    },
+  );
+
+  testWidgets(
+    'narrow safe-area popup keeps every action inside its usable width',
+    (tester) async {
+      tester.view.physicalSize = const Size(200, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await _pumpMenu(
+        tester,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+      );
+      expect(tester.takeException(), isNull);
+      for (final action in SessionMenuAction.values) {
+        final rect = tester.getRect(_action(action));
+        expect(rect.width, 48);
+        expect(rect.height, 48);
+        expect(rect.left, greaterThanOrEqualTo(32));
+        expect(rect.right, lessThanOrEqualTo(168));
+      }
+      expect(
+        tester.getCenter(_action(SessionMenuAction.changeIcon)).dy,
+        greaterThan(tester.getCenter(_action(SessionMenuAction.pin)).dy),
+      );
     },
   );
 
