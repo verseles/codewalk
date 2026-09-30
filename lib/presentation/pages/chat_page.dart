@@ -99,6 +99,7 @@ import '../widgets/modal_primary_action_shortcuts.dart';
 import '../widgets/permission_request_card.dart';
 import '../widgets/project_context_menu.dart';
 import '../widgets/project_icon.dart';
+import '../widgets/project_session_picker.dart';
 import '../widgets/question_request_card.dart';
 import '../widgets/quota/quota_popup_section.dart';
 import '../widgets/session_attention_overlay/session_attention_overlay.dart';

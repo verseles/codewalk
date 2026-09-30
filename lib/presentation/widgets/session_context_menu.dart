@@ -9,7 +9,8 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../core/i18n/l10n_context.dart';
 import '../../core/logging/app_logger.dart';
 import '../../domain/entities/chat_session.dart';
-import '../providers/chat_provider.dart' show SessionTabIdentity;
+import '../providers/chat_provider.dart'
+    show SessionTabIdentity, SessionAttentionState, SessionAttentionKind;
 import '../utils/session_title_formatter.dart';
 import 'modal_primary_action_shortcuts.dart';
 
@@ -38,6 +39,141 @@ enum SessionMenuAction {
   undo,
   redo,
   compact,
+}
+
+sealed class SessionTabMenuSelection {
+  const SessionTabMenuSelection();
+}
+
+final class SessionTabMenuActionSelection extends SessionTabMenuSelection {
+  const SessionTabMenuActionSelection(this.action);
+  final SessionMenuAction action;
+}
+
+final class SessionTabMenuSessionSelection extends SessionTabMenuSelection {
+  const SessionTabMenuSessionSelection(this.identity);
+  final SessionTabIdentity identity;
+}
+
+final class SessionTabMenuMoreSelection extends SessionTabMenuSelection {
+  const SessionTabMenuMoreSelection();
+}
+
+class SessionMenuSession {
+  const SessionMenuSession({
+    required this.identity,
+    required this.title,
+    required this.attention,
+    required this.isSelected,
+  });
+
+  final SessionTabIdentity identity;
+  final String title;
+  final SessionAttentionState attention;
+  final bool isSelected;
+}
+
+/// Shared choice row for the tab preview and its full project selector.
+class SessionMenuSessionTile extends StatelessWidget {
+  const SessionMenuSessionTile({
+    super.key,
+    required this.session,
+    required this.onPressed,
+  });
+
+  final SessionMenuSession session;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final kind = session.attention.primaryKind;
+    final statusLabel = switch (kind) {
+      SessionAttentionKind.error => context.l10n.sessionAttentionKindError,
+      SessionAttentionKind.pendingInteraction =>
+        context.l10n.sessionAttentionKindPendingInteraction,
+      SessionAttentionKind.unreadCompletion =>
+        context.l10n.sessionAttentionKindCompleted,
+      SessionAttentionKind.active => context.l10n.sessionAttentionKindActive,
+      SessionAttentionKind.none => '',
+    };
+    final colorScheme = Theme.of(context).colorScheme;
+    final statusIcon = switch (kind) {
+      SessionAttentionKind.error => Symbols.error,
+      SessionAttentionKind.pendingInteraction => Symbols.help,
+      SessionAttentionKind.unreadCompletion => Symbols.circle,
+      SessionAttentionKind.active => Symbols.sync_rounded,
+      SessionAttentionKind.none => null,
+    };
+    final statusColor = switch (kind) {
+      SessionAttentionKind.error => colorScheme.error,
+      SessionAttentionKind.pendingInteraction => colorScheme.tertiary,
+      _ => colorScheme.primary,
+    };
+    return Semantics(
+      button: true,
+      selected: session.isSelected,
+      label: [
+        session.title,
+        if (statusLabel.isNotEmpty) statusLabel,
+        if (session.attention.isActive && kind != SessionAttentionKind.active)
+          context.l10n.sessionAttentionKindActive,
+      ].join(', '),
+      onTap: onPressed,
+      child: ExcludeSemantics(
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            alignment: AlignmentDirectional.centerStart,
+            minimumSize: const Size(48, 48),
+            visualDensity: VisualDensity.standard,
+            tapTargetSize: MaterialTapTargetSize.padded,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            foregroundColor: session.isSelected
+                ? colorScheme.primary
+                : colorScheme.onSurface,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  session.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: session.isSelected ? FontWeight.w700 : null,
+                  ),
+                ),
+              ),
+              if (session.attention.isActive &&
+                  kind != SessionAttentionKind.active) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Symbols.sync_rounded,
+                  size: 16,
+                  color: colorScheme.primary,
+                ),
+              ],
+              if (statusIcon != null) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  statusIcon,
+                  key: ValueKey<String>(
+                    'session_choice_status_${kind.name}_${session.identity.sessionId}',
+                  ),
+                  size: kind == SessionAttentionKind.unreadCompletion ? 10 : 18,
+                  color: statusColor,
+                ),
+              ],
+              if (session.isSelected) ...[
+                const SizedBox(width: 4),
+                Icon(Symbols.check, size: 18, color: colorScheme.primary),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class SessionContextMenuActions {
@@ -289,7 +425,7 @@ List<PopupMenuEntry<String>> buildSessionContextMenuEntries(
   ];
 }
 
-List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
+List<PopupMenuEntry<SessionTabMenuSelection>> buildUnifiedSessionMenuEntries(
   BuildContext context, {
   ChatSession? session,
   required bool isPinned,
@@ -303,6 +439,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
   bool canCloseProject = false,
   String? closeProjectLabel,
   ValueListenable<int>? dismissSignal,
+  List<SessionMenuSession> recentSessions = const [],
 }) {
   _SessionMenuIconAction item(
     SessionMenuAction action, {
@@ -448,6 +585,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
       groups: groups,
       initialColumns: _sessionMenuColumns(context),
       dismissSignal: dismissSignal,
+      recentSessions: recentSessions,
     ),
   ];
 }
@@ -476,16 +614,19 @@ class _SessionMenuIconAction {
   final bool? toggled;
 }
 
-class _SessionActionGridMenuEntry extends PopupMenuEntry<SessionMenuAction> {
+class _SessionActionGridMenuEntry
+    extends PopupMenuEntry<SessionTabMenuSelection> {
   const _SessionActionGridMenuEntry({
     required this.groups,
     required this.initialColumns,
     this.dismissSignal,
+    this.recentSessions = const [],
   });
 
   final List<List<_SessionMenuIconAction>> groups;
   final int initialColumns;
   final ValueListenable<int>? dismissSignal;
+  final List<SessionMenuSession> recentSessions;
 
   @override
   double get height =>
@@ -493,11 +634,20 @@ class _SessionActionGridMenuEntry extends PopupMenuEntry<SessionMenuAction> {
         0,
         (sum, group) => sum + (group.length / initialColumns).ceil() * 48,
       ) +
-      (groups.length - 1) * 16;
+      (groups.length - 1) * 16 +
+      (recentSessions.isEmpty ? 0 : 48 + (recentSessions.length + 1) * 48);
 
   @override
-  bool represents(SessionMenuAction? value) =>
-      groups.any((group) => group.any((item) => item.action == value));
+  bool represents(SessionTabMenuSelection? value) => switch (value) {
+    SessionTabMenuActionSelection(:final action) => groups.any(
+      (group) => group.any((item) => item.action == action),
+    ),
+    SessionTabMenuSessionSelection(:final identity) => recentSessions.any(
+      (session) => session.identity == identity,
+    ),
+    SessionTabMenuMoreSelection() => recentSessions.isNotEmpty,
+    null => false,
+  };
 
   @override
   State<_SessionActionGridMenuEntry> createState() =>
@@ -510,7 +660,7 @@ class _SessionActionGridMenuEntryState
     traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
     directionalTraversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
   );
-  ModalRoute<SessionMenuAction>? _menuRoute;
+  ModalRoute<SessionTabMenuSelection>? _menuRoute;
 
   @override
   void initState() {
@@ -521,7 +671,7 @@ class _SessionActionGridMenuEntryState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _menuRoute = ModalRoute.of<SessionMenuAction>(context);
+    _menuRoute = ModalRoute.of<SessionTabMenuSelection>(context);
   }
 
   @override
@@ -606,6 +756,51 @@ class _SessionActionGridMenuEntryState
                     ],
                   ),
                 ],
+                if (widget.recentSessions.isNotEmpty) ...[
+                  const Divider(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    child: Text(
+                      context.l10n.chatRecentSessions,
+                      key: const ValueKey<String>('session_tab_recent_header'),
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ),
+                  for (final session in widget.recentSessions)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder((order++).toDouble()),
+                      child: SessionMenuSessionTile(
+                        key: ValueKey<String>(
+                          'session_tab_recent_${session.identity.sessionId}',
+                        ),
+                        session: session,
+                        onPressed: () {
+                          Tooltip.dismissAllToolTips();
+                          Navigator.of(context).pop(
+                            SessionTabMenuSessionSelection(session.identity),
+                          );
+                        },
+                      ),
+                    ),
+                  FocusTraversalOrder(
+                    order: NumericFocusOrder(order.toDouble()),
+                    child: TextButton(
+                      key: const ValueKey<String>('session_tab_menu_show_more'),
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        visualDensity: VisualDensity.standard,
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                      ),
+                      onPressed: () {
+                        Tooltip.dismissAllToolTips();
+                        Navigator.of(
+                          context,
+                        ).pop(const SessionTabMenuMoreSelection());
+                      },
+                      child: Text(context.l10n.chatMessageShowMore),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -660,7 +855,9 @@ class _SessionMenuIconButtonState extends State<_SessionMenuIconButton> {
     final select = item.enabled
         ? () {
             Tooltip.dismissAllToolTips();
-            Navigator.of(context).pop(item.action);
+            Navigator.of(
+              context,
+            ).pop(SessionTabMenuActionSelection(item.action));
           }
         : null;
     return Tooltip(

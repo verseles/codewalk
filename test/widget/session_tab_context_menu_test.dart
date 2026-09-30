@@ -3,6 +3,7 @@ import 'dart:ui' show Tristate;
 
 import 'package:codewalk/domain/entities/chat_session.dart';
 import 'package:codewalk/presentation/providers/chat_provider.dart';
+import 'package:codewalk/presentation/widgets/project_session_picker.dart';
 import 'package:codewalk/presentation/widgets/session_context_menu.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,8 @@ Future<void> _pumpMenu(
   FocusNode? openerFocus,
   ValueChanged<SessionMenuAction?>? onSelected,
   ValueNotifier<int>? dismissSignal,
+  List<SessionMenuSession> recentSessions = const [],
+  ValueChanged<SessionTabMenuSelection?>? onResult,
 }) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump();
@@ -75,7 +78,7 @@ Future<void> _pumpMenu(
         body: Builder(
           builder: (context) {
             Future<void> show() async {
-              final result = await showMenu<SessionMenuAction>(
+              final result = await showMenu<SessionTabMenuSelection>(
                 context: context,
                 requestFocus: true,
                 position: const RelativeRect.fromLTRB(16, 64, 16, 16),
@@ -95,9 +98,13 @@ Future<void> _pumpMenu(
                   canCloseProject: !disabled,
                   closeProjectLabel: closeLabel,
                   dismissSignal: dismissSignal,
+                  recentSessions: recentSessions,
                 ),
               );
-              onSelected?.call(result);
+              onResult?.call(result);
+              onSelected?.call(
+                result is SessionTabMenuActionSelection ? result.action : null,
+              );
             }
 
             return GestureDetector(
@@ -121,6 +128,212 @@ Future<void> _pumpMenu(
 }
 
 void main() {
+  SessionMenuSession choice(
+    String id, {
+    SessionAttentionState attention = const SessionAttentionState(),
+    bool selected = false,
+  }) => SessionMenuSession(
+    identity: SessionTabIdentity(
+      serverId: 'server',
+      directory: '/project',
+      sessionId: id,
+    ),
+    title: 'Conversation $id with a long title',
+    attention: attention,
+    isSelected: selected,
+  );
+
+  testWidgets(
+    'project selector updates cached rows and dismisses on server invalidation',
+    (tester) async {
+      final updates = ValueNotifier<int>(0);
+      addTearDown(updates.dispose);
+      var valid = true;
+      var sessions = [choice('first'), choice('second')];
+      await tester.pumpWidget(
+        localizedMaterialApp(
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showDialog<SessionTabIdentity>(
+                context: context,
+                builder: (_) => ProjectSessionPicker(
+                  projectLabel: 'Project',
+                  updates: updates,
+                  sessions: () => sessions,
+                  isValid: () => valid,
+                ),
+              ),
+              child: const Text('Open picker'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open picker'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('project_session_picker_first')),
+        findsOneWidget,
+      );
+      sessions = [choice('second')];
+      updates.value++;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('project_session_picker_first')),
+        findsNothing,
+      );
+      valid = false;
+      updates.value++;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey<String>('project_session_picker')),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'recent session rows return scoped identity and show more',
+    (tester) async {
+      final session = choice('other', selected: true);
+      SessionTabMenuSelection? result;
+      await _pumpMenu(
+        tester,
+        recentSessions: [session],
+        onResult: (value) => result = value,
+      );
+      final row = find.byKey(
+        const ValueKey<String>('session_tab_recent_other'),
+      );
+      expect(
+        tester.getSemantics(row).flagsCollection.isSelected,
+        Tristate.isTrue,
+      );
+      expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(
+        (result as SessionTabMenuSessionSelection).identity,
+        session.identity,
+      );
+      expect(_action(SessionMenuAction.pin), findsNothing);
+      await _pumpMenu(
+        tester,
+        recentSessions: [session],
+        onResult: (value) => result = value,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey<String>('session_tab_menu_show_more')),
+      );
+      await tester.pumpAndSettle();
+      expect(result, isA<SessionTabMenuMoreSelection>());
+    },
+    semanticsEnabled: true,
+  );
+
+  testWidgets(
+    'keyboard reaches recent rows and show more within the menu loop',
+    (tester) async {
+      SessionTabMenuSelection? result;
+      await _pumpMenu(
+        tester,
+        recentSessions: [choice('other')],
+        onResult: (value) => result = value,
+      );
+      tester
+          .widget<IconButton>(_action(SessionMenuAction.closeProject))
+          .focusNode!
+          .requestFocus();
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(
+        Focus.of(
+          tester.element(find.text('Conversation other with a long title')),
+        ).hasFocus,
+        isTrue,
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(result, isA<SessionTabMenuMoreSelection>());
+      await _pumpMenu(
+        tester,
+        recentSessions: [choice('other')],
+        onResult: (value) => result = value,
+      );
+      tester
+          .widget<IconButton>(_action(SessionMenuAction.closeProject))
+          .focusNode!
+          .requestFocus();
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(result, isNull);
+      expect(
+        find.byKey(const ValueKey<String>('session_tab_recent_header')),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'recent statuses remain accessible in scaled narrow RTL menus',
+    (tester) async {
+      tester.view.physicalSize = const Size(200, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final choices = [
+        choice(
+          'error',
+          attention: const SessionAttentionState(
+            hasError: true,
+            isActive: true,
+          ),
+          selected: true,
+        ),
+        choice(
+          'pending',
+          attention: const SessionAttentionState(hasPendingInteraction: true),
+        ),
+        choice(
+          'unread',
+          attention: const SessionAttentionState(hasUnreadCompletion: true),
+        ),
+        choice('busy', attention: const SessionAttentionState(isActive: true)),
+      ];
+      await _pumpMenu(
+        tester,
+        textScale: 2,
+        direction: TextDirection.rtl,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        recentSessions: choices,
+      );
+      expect(tester.takeException(), isNull);
+      for (final session in choices) {
+        final row = find.byKey(
+          ValueKey<String>('session_tab_recent_${session.identity.sessionId}'),
+        );
+        await tester.ensureVisible(row);
+        await tester.pumpAndSettle();
+        final data = tester.getSemantics(row).getSemanticsData();
+        expect(data.flagsCollection.isButton, isTrue);
+        expect(data.label, contains(session.title));
+        expect(data.label.length, greaterThan(session.title.length));
+        final rect = tester.getRect(row);
+        expect(rect.left, greaterThanOrEqualTo(32));
+        expect(rect.right, lessThanOrEqualTo(168));
+        expect(rect.height, greaterThanOrEqualTo(48));
+      }
+      expect(tester.takeException(), isNull);
+    },
+    semanticsEnabled: true,
+  );
+
   testWidgets('desktop groups all actions into four-column rows', (
     tester,
   ) async {

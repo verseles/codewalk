@@ -164,6 +164,22 @@ extension _ChatPageSessionTabs on _ChatPageState {
     final canUndo = chatProvider.canUndoCurrentSession;
     final canRedo = chatProvider.canRedoCurrentSession;
     final canCompact = !chatProvider.isCompactingContext && !chatProvider.canAbortActiveResponse;
+    final settingsProvider = context.read<SettingsProvider>();
+    final showRecentSessions =
+        _isMobileRuntime ||
+        context.windowSizeClass.isCompact ||
+        !settingsProvider.isDesktopPaneVisible(DesktopPane.conversations);
+    final scopeId = project != null
+        ? _scopeIdForProject(project)
+        : tab.identity.directory;
+    final recentSessions = showRecentSessions
+        ? _sessionChoicesForTab(tab, scopeId: scopeId)
+            .where(
+              (session) => session.identity.sessionId != tab.identity.sessionId,
+            )
+            .take(5)
+            .toList(growable: false)
+        : const <SessionMenuSession>[];
 
     final entries = buildUnifiedSessionMenuEntries(
       context,
@@ -179,6 +195,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
       canCloseProject: canClose,
       closeProjectLabel: closeLabel,
       dismissSignal: _sessionTabMenuDismissSignal,
+      recentSessions: recentSessions,
     );
 
     if (haptic) {
@@ -187,7 +204,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
     logSessionContextMenuOpen(surface: 'tab', sessionId: tab.identity.sessionId);
     final overlay = Overlay.of(context).context.findRenderObject();
     if (overlay is! RenderBox) return;
-    final selected = await showMenu<SessionMenuAction>(
+    final selected = await showMenu<SessionTabMenuSelection>(
       context: context,
       requestFocus: true,
       position: RelativeRect.fromRect(
@@ -197,14 +214,98 @@ extension _ChatPageSessionTabs on _ChatPageState {
       items: entries,
     );
     if (!mounted || !_isChatScreenActive() || selected == null) return;
+    if (chatProvider.activeServerId != tab.identity.serverId) return;
+    switch (selected) {
+      case SessionTabMenuSessionSelection(:final identity):
+        await _activateSessionChoice(tab, identity, scopeId: scopeId);
+        return;
+      case SessionTabMenuMoreSelection():
+        final identity = await showDialog<SessionTabIdentity>(
+          context: context,
+          builder: (_) => ProjectSessionPicker(
+            projectLabel: project != null
+                ? _projectDisplayLabel(project)
+                : _directoryBasename(tab.identity.directory),
+            updates: chatProvider,
+            isValid: () =>
+                mounted && chatProvider.activeServerId == tab.identity.serverId,
+            sessions: () => _sessionChoicesForTab(tab, scopeId: scopeId),
+          ),
+        );
+        if (identity != null && mounted && _isChatScreenActive()) {
+          await _activateSessionChoice(tab, identity, scopeId: scopeId);
+        }
+        return;
+      case SessionTabMenuActionSelection():
+        break;
+    }
     await _handleUnifiedTabMenuSelection(
       tab: tab,
       hasExactSnapshot: hasExactSnapshot,
       effectiveSession: effectiveSession,
       exactSession: exactSession,
       isActive: isActive,
-      action: selected,
+      action: selected.action,
       project: project,
+    );
+  }
+
+  List<SessionMenuSession> _sessionChoicesForTab(
+    SessionTabRecord tab, {
+    required String scopeId,
+  }) {
+    final chatProvider = context.read<ChatProvider>();
+    if (chatProvider.activeServerId != tab.identity.serverId) return const [];
+    final projectProvider = context.read<ProjectProvider>();
+    return [
+      for (final session in chatProvider.recentRootSessionsForScopeId(scopeId))
+        SessionMenuSession(
+          identity: SessionTabIdentity(
+            serverId: tab.identity.serverId,
+            directory: tab.identity.directory,
+            sessionId: session.id,
+          ),
+          title: _sessionDisplayTitle(session),
+          attention: chatProvider.sessionAttentionForScope(
+            session.id,
+            scopeId: scopeId,
+          ),
+          isSelected:
+              chatProvider.currentSession?.id == session.id &&
+              (areEquivalentFilePaths(projectProvider.currentScopeId, scopeId) ||
+                  _isNewChatAnchorContextActive(tab)),
+        ),
+    ];
+  }
+
+  Future<void> _activateSessionChoice(
+    SessionTabRecord anchor,
+    SessionTabIdentity identity, {
+    required String scopeId,
+  }) async {
+    final chatProvider = context.read<ChatProvider>();
+    if (identity.serverId != chatProvider.activeServerId ||
+        identity.serverId != anchor.identity.serverId ||
+        !areEquivalentFilePaths(identity.directory, anchor.identity.directory)) {
+      return;
+    }
+    final session = chatProvider
+        .recentRootSessionsForScopeId(scopeId)
+        .where((session) => session.id == identity.sessionId)
+        .firstOrNull;
+    if (session == null) {
+      _showSessionTabNavigationError();
+      return;
+    }
+    await _activateSessionTab(
+      SessionTabRecord(
+        identity: identity,
+        projectId: anchor.projectId,
+        title: _sessionDisplayTitle(session),
+        lastOpenedAtMs: 0,
+        serverUpdatedAtMs: session.time.millisecondsSinceEpoch,
+        status: SessionStatusType.idle,
+      ),
     );
   }
 
