@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.263.0 - 2026-09-30
+
+> 📣 CodeWalk now shows project icons in the top bar, highlights JSONC comments in the native editor, and adds accessible horizontal scrollbars to long code blocks.
+
+- fix(chat): keep code scrollbars clear of mobile safe-area insets
+- feat(chat): show project icons, highlight JSONC, and add accessible code scrollbars
+
 ## v1.262.1 - 2026-09-30
 
 - fix(tabs): soften the recent sessions section heading
