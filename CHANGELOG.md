@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.262.1 - 2026-09-30
+
+- fix(tabs): soften the recent sessions section heading
+- docs(tabs): describe recent-session menu and guarded project picker
+
 ## v1.262.0 - 2026-09-30
 
 > 📣 Switch between a project's recent sessions directly from its tab menu, with clear status indicators and quick access to more conversations.
