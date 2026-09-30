@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.264.0 - 2026-09-30
+
+> 📣 Double-tap an idle, empty Send button to send continue. Save with Ctrl+S or Cmd+S from anywhere in the editor dialog, and see the current task in collapsed task lists.
+
+- feat(chat): add empty-send continue gesture, dialog-wide save, and active task summaries
+- docs(chat): document project icons, JSONC editing, and code scrollbar behavior
+
 ## v1.263.0 - 2026-09-30
 
 > 📣 CodeWalk now shows project icons in the top bar, highlights JSONC comments in the native editor, and adds accessible horizontal scrollbars to long code blocks.
