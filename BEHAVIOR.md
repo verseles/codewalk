@@ -738,10 +738,19 @@
 - **Then** the menu uses four columns on mobile or desktop whenever four 56px cells fit, and each group wraps only as needed to the popup's actual available width, including horizontal safe-area insets; action targets remain 48×48px and RTL follows the reading direction
 - **Then** full localized action names appear on mouse hover, keyboard focus, or touch hold without executing the action; tap/click, `Enter`, or `Space` selects, `Tab`/`Shift+Tab` follow action order, arrows move focus spatially, and `Escape` dismisses the menu and returns keyboard focus to its opener
 - **Then** disabled actions cannot execute and toggle actions expose their current state visually and semantically; the final row distributes delete, share/unshare, and close project across the available width, with share centered between the outer buttons when all three are present, no circular outlines, and error coloring only for delete/close; deletion still requires the existing confirmation and project closure keeps its existing behavior
-- **Then** clicking an integrated-window tab or its new-chat action dismisses the exact tab popup before activation, and opening another tab menu dismisses the previous one; dismissal selects no action and preserves any dialog above the popup
+- **Then** activating, closing, or starting a new chat from an integrated-window tab dismisses the exact tab popup or project-session picker before navigation, and opening another tab menu dismisses the previous one; dismissal selects no action and preserves any unrelated dialog above the dismissed surface
 - **When** the user presses `Delete` or invokes the semantic dismiss action
 - **Then** only that local tab closes
 - **Then** there is no visible close button on a tab
+
+- **Given** the user opens a session tab menu on mobile, in a compact window, or with the desktop Conversations pane hidden
+- **Then** a `Recent sessions` section shows up to five cached, non-archived root conversations from that tab's project, ordered by recency and excluding the session represented by that tab; the section is absent when no alternatives are cached
+- **Then** each conversation row exposes its title, current-selection state, and error, pending-interaction, unread-completion, or active status; rows have at least 48px targets and participate in the menu's keyboard traversal
+- **When** the user selects a recent conversation
+- **Then** the menu closes and CodeWalk switches to that conversation's project and session through guarded tab navigation, including root project scopes; merely opening the menu makes no server request and does not activate the tab
+- **When** the user selects the final `Show more` action
+- **Then** a searchable picker shows all cached, non-archived root conversations in that project, including the menu tab's session, without revealing or changing the Conversations pane; it is fullscreen in compact windows and a dialog on larger windows
+- **Then** the picker searches conversation titles and refreshes cached rows and status as provider data changes; server changes dismiss it, and selections are revalidated so removed or archived conversations and stale navigation results cannot override newer navigation
 
 - **Given** new session tabs become eligible while the tab gesture hint is enabled
 - **When** the chat is active
