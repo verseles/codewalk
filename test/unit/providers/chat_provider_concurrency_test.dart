@@ -70,12 +70,12 @@ void main() {
       defaultSettingsProvider.dispose();
     });
 
-    Future<void> settleUntil(bool Function() predicate) async {
+    Future<void> settleUntil(bool Function() predicate, {String? reason}) async {
       for (var tick = 0; tick < 40; tick++) {
         if (predicate()) return;
         await pumpEventQueue();
       }
-      fail('Expected provider state after draining the event queue.');
+      fail('Expected provider state after draining the event queue.${reason == null ? '' : ' $reason'}');
     }
 
     group('render gate', () {
@@ -715,7 +715,12 @@ void main() {
           await provider.sendMessage('hello');
           await Future<void>.delayed(const Duration(milliseconds: 10));
           await sendStream.close();
+          await pumpEventQueue();
 
+          // Completion reconciliation also polls the authoritative status map.
+          // Keep that snapshot consistent with the busy SSE transition.
+          chatRepository.sessionStatusById['ses_1'] =
+              const SessionStatusInfo(type: SessionStatusType.busy);
           abortNow = abortNow.add(const Duration(milliseconds: 51));
 
           // SSE reports busy — this guard takes over from abort suppression
@@ -728,7 +733,10 @@ void main() {
               },
             ),
           );
-          await Future<void>.delayed(const Duration(milliseconds: 20));
+          await settleUntil(
+            () => provider.sessionStatusById['ses_1']?.type == SessionStatusType.busy,
+            reason: 'Waiting for busy SSE status.',
+          );
 
           // Switch model while busy
           await provider.setSelectedModelByProvider(
@@ -738,6 +746,8 @@ void main() {
           expect(hasModelBPatch(), isFalse);
 
           // SSE reports idle — flush should happen
+          chatRepository.sessionStatusById['ses_1'] =
+              const SessionStatusInfo(type: SessionStatusType.idle);
           chatRepository.emitEvent(
             const ChatEvent(
               type: 'session.status',
@@ -747,8 +757,7 @@ void main() {
               },
             ),
           );
-          await Future<void>.delayed(const Duration(milliseconds: 40));
-
+          await settleUntil(hasModelBPatch, reason: 'Waiting for deferred model B PATCH after idle.');
           expect(hasModelBPatch(), isTrue);
         },
       );

@@ -22438,106 +22438,172 @@ void main() {
     );
   });
 
-  testWidgets('shows labeled session actions for the active session', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('tab action menu preserves inactive selection until an active-only action', (tester) async {
     final repository = FakeChatRepository(
-      sessions: <ChatSession>[
-        ChatSession(
-          id: 'ses_session_actions',
-          workspaceId: 'default',
-          time: DateTime.fromMillisecondsSinceEpoch(1000),
-          title: 'Action Session',
-        ),
+      sessions: [
+        for (final id in ['first', 'second'])
+          ChatSession(id: id, workspaceId: 'default', time: DateTime.now(), title: id),
       ],
     );
-    repository.messagesBySession['ses_session_actions'] = <ChatMessage>[
-      UserMessage(
-        id: 'msg_user_1',
-        sessionId: 'ses_session_actions',
-        time: DateTime.fromMillisecondsSinceEpoch(1100),
-        parts: const <MessagePart>[
-          TextPart(
-            id: 'part_user_1',
-            messageId: 'msg_user_1',
-            sessionId: 'ses_session_actions',
-            text: 'hello',
-          ),
-        ],
-      ),
-    ];
-
-    final localDataSource = InMemoryAppLocalDataSource()
-      ..activeServerId = 'srv_test';
-    final provider = _buildChatProvider(
-      chatRepository: repository,
-      localDataSource: localDataSource,
-    );
-    final appProvider = _buildAppProvider(localDataSource: localDataSource);
-
+    final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
+    final provider = _buildChatProvider(chatRepository: repository, localDataSource: local);
+    final appProvider = _buildAppProvider(localDataSource: local);
     await tester.pumpWidget(_testApp(provider, appProvider));
     await tester.pumpAndSettle();
-
     await provider.loadSessions();
-    await provider.selectSession(provider.sessions.first);
+    await provider.selectSession(provider.sessions.singleWhere((session) => session.id == 'second'));
+    await provider.selectSession(provider.sessions.singleWhere((session) => session.id == 'first'));
     await tester.pumpAndSettle();
     await _ensureDesktopSessionTabsVisible(tester);
-
-    expect(
-      find.byKey(const ValueKey<String>('chat_compact_session_header')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('current_session_actions_button')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const ValueKey<String>('appbar_context_usage_button')),
-      findsOneWidget,
-    );
-    await _openActiveSessionTabMenu(tester, provider);
-
-    expect(find.text('Rename session'), findsOneWidget);
-    expect(find.text('Change icon'), findsOneWidget);
-    expect(find.text('Pin'), findsOneWidget);
-    expect(find.text('Share session'), findsOneWidget);
-    expect(find.text('View tasks'), findsOneWidget);
-    expect(find.text('Review changes'), findsOneWidget);
-    expect(find.text('Undo last turn'), findsOneWidget);
-    expect(find.text('Redo last undone turn'), findsOneWidget);
-    expect(find.text('Compact context'), findsOneWidget);
-
-    await tester.tap(find.text('Change icon'));
+    final inactive = provider.sessionTabs.singleWhere((tab) => tab.identity.sessionId == 'second');
+    Future<void> openInactive() async {
+      await tester.tap(
+        find.byKey(ValueKey<String>('session_tab_activate_${sessionTabIdentityKey(inactive.identity)}')),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await _pumpUiFrames(tester);
+    }
+    await openInactive();
+    expect(provider.currentSession?.id, 'first');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
-    expect(find.text('Choose tab icon'), findsOneWidget);
-    await tester.tap(
-      find.byKey(const ValueKey<String>('session_tab_icon_option_terminal')),
-    );
+    expect(provider.currentSession?.id, 'first');
+    await openInactive();
+    await tester.tap(find.byKey(const ValueKey<String>('session_tab_menu_changeIcon')));
     await tester.pumpAndSettle();
-    expect(provider.sessionTabs.single.iconPresetId, 'terminal');
-    expect(
-      await localDataSource.getSessionTabIconOverridesJson(
-        serverId: 'srv_test',
-      ),
-      contains('terminal'),
-    );
-
-    await _openActiveSessionTabMenu(tester, provider);
-    await tester.tap(find.text('Rename session'));
+    await tester.tap(find.byKey(const ValueKey<String>('session_tab_icon_option_terminal')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).last, 'Renamed from tab');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect(provider.currentSession?.title, 'Renamed from tab');
-
-    await _openActiveSessionTabMenu(tester, provider);
-    await tester.tap(find.text('Pin'));
-    await tester.pumpAndSettle();
-    expect(provider.isSessionPinned('ses_session_actions'), isTrue);
-
-    await _openActiveSessionTabMenu(tester, provider);
-    expect(find.text('Unpin'), findsOneWidget);
+    expect(provider.currentSession?.id, 'first');
+    expect(provider.sessionTabs.singleWhere((tab) => tab.identity == inactive.identity).iconPresetId, 'terminal');
+    await openInactive();
+    await tester.tap(find.byKey(const ValueKey<String>('session_tab_menu_viewTasks')));
+    await _pumpSessionTabNavigation(tester);
+    expect(provider.currentSession?.id, 'second');
+    expect(find.byKey(const ValueKey<String>('current_session_insights_dialog')), findsOneWidget);
   });
+
+  testWidgets(
+    'shows compact accessible session actions for the active session',
+    (WidgetTester tester) async {
+      final repository = FakeChatRepository(
+        sessions: <ChatSession>[
+          ChatSession(
+            id: 'ses_session_actions',
+            workspaceId: 'default',
+            time: DateTime.fromMillisecondsSinceEpoch(1000),
+            title: 'Action Session',
+          ),
+        ],
+      );
+      repository.messagesBySession['ses_session_actions'] = <ChatMessage>[
+        UserMessage(
+          id: 'msg_user_1',
+          sessionId: 'ses_session_actions',
+          time: DateTime.fromMillisecondsSinceEpoch(1100),
+          parts: const <MessagePart>[
+            TextPart(
+              id: 'part_user_1',
+              messageId: 'msg_user_1',
+              sessionId: 'ses_session_actions',
+              text: 'hello',
+            ),
+          ],
+        ),
+      ];
+
+      final localDataSource = InMemoryAppLocalDataSource()
+        ..activeServerId = 'srv_test';
+      final provider = _buildChatProvider(
+        chatRepository: repository,
+        localDataSource: localDataSource,
+      );
+      final appProvider = _buildAppProvider(localDataSource: localDataSource);
+
+      await tester.pumpWidget(_testApp(provider, appProvider));
+      await tester.pumpAndSettle();
+
+      await provider.loadSessions();
+      await provider.selectSession(provider.sessions.first);
+      await tester.pumpAndSettle();
+      await _ensureDesktopSessionTabsVisible(tester);
+
+      expect(
+        find.byKey(const ValueKey<String>('chat_compact_session_header')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('current_session_actions_button')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey<String>('appbar_context_usage_button')),
+        findsOneWidget,
+      );
+      await _openActiveSessionTabMenu(tester, provider);
+
+      for (final entry in {
+        'rename': 'Rename session',
+        'changeIcon': 'Change icon',
+        'pin': 'Pin',
+        'share': 'Share session',
+        'viewTasks': 'View tasks',
+        'reviewChanges': 'Review changes',
+        'undo': 'Undo last turn',
+        'redo': 'Redo last undone turn',
+        'compact': 'Compact context',
+      }.entries) {
+        final tooltip = find.ancestor(
+          of: find.byKey(ValueKey<String>('session_tab_menu_${entry.key}')),
+          matching: find.byType(Tooltip),
+        );
+        expect(tester.widget<Tooltip>(tooltip).message, entry.value);
+      }
+
+      await tester.tap(
+        find.byKey(const ValueKey<String>('session_tab_menu_changeIcon')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Choose tab icon'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('session_tab_icon_option_terminal')),
+      );
+      await tester.pumpAndSettle();
+      expect(provider.sessionTabs.single.iconPresetId, 'terminal');
+      expect(
+        await localDataSource.getSessionTabIconOverridesJson(
+          serverId: 'srv_test',
+        ),
+        contains('terminal'),
+      );
+
+      await _openActiveSessionTabMenu(tester, provider);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('session_tab_menu_rename')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'Renamed from tab');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(provider.currentSession?.title, 'Renamed from tab');
+
+      await _openActiveSessionTabMenu(tester, provider);
+      await tester.tap(
+        find.byKey(const ValueKey<String>('session_tab_menu_pin')),
+      );
+      await tester.pumpAndSettle();
+      expect(provider.isSessionPinned('ses_session_actions'), isTrue);
+
+      await _openActiveSessionTabMenu(tester, provider);
+      expect(
+        tester.widget<Tooltip>(find.ancestor(
+          of: find.byKey(const ValueKey<String>('session_tab_menu_pin')),
+          matching: find.byType(Tooltip),
+        )).message,
+        'Unpin',
+      );
+    },
+  );
 
   testWidgets('session actions can open the current session details dialog', (
     WidgetTester tester,
@@ -22607,7 +22673,9 @@ void main() {
     await _ensureDesktopSessionTabsVisible(tester);
 
     await _openActiveSessionTabMenu(tester, provider);
-    await tester.tap(find.text('View tasks'));
+    await tester.tap(
+      find.byKey(const ValueKey<String>('session_tab_menu_viewTasks')),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(milliseconds: 250));

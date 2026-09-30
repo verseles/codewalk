@@ -186,6 +186,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
     if (overlay is! RenderBox) return;
     final selected = await showMenu<SessionMenuAction>(
       context: context,
+      requestFocus: true,
       position: RelativeRect.fromRect(
         Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 1, 1),
         Offset.zero & overlay.size,

@@ -1256,6 +1256,9 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await tester.pump();
 
+    await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
+    await tester.pump();
+
     final semantics = tester.widget<Semantics>(
       find.byWidgetPredicate(
         (widget) =>
@@ -1274,6 +1277,7 @@ void main() {
     expect(requests, <({SessionTabIdentity identity, bool haptic})>[
       (identity: tab.identity, haptic: false),
       (identity: tab.identity, haptic: true),
+      (identity: tab.identity, haptic: false),
       (identity: tab.identity, haptic: false),
       (identity: tab.identity, haptic: false),
     ]);

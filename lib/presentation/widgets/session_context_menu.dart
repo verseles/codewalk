@@ -297,207 +297,372 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
   bool canCloseProject = false,
   String? closeProjectLabel,
 }) {
-  final errorColor = Theme.of(context).colorScheme.error;
-  final entries = <PopupMenuEntry<SessionMenuAction>>[];
-
-  PopupMenuItem<SessionMenuAction> item(
+  _SessionMenuIconAction item(
     SessionMenuAction action, {
     required IconData icon,
     required String label,
-    Color? color,
     bool enabled = true,
+    bool? toggled,
+    bool destructive = false,
   }) {
-    return PopupMenuItem<SessionMenuAction>(
-      value: action,
+    return _SessionMenuIconAction(
+      action: action,
+      icon: icon,
+      label: label,
       enabled: enabled,
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: color != null ? TextStyle(color: color) : null,
+      toggled: toggled,
+      destructive: destructive,
+    );
+  }
+
+  final groups = <List<_SessionMenuIconAction>>[
+    [
+      item(
+        SessionMenuAction.pin,
+        icon: Symbols.push_pin,
+        label: isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
+        toggled: isPinned,
+      ),
+      item(
+        SessionMenuAction.rename,
+        icon: Symbols.edit,
+        label: session != null && tabIdentity != null
+            ? context.l10n.sessionTabRenameAction
+            : context.l10n.sessionRename,
+      ),
+      if (includeTabLocal && tabIdentity != null)
+        item(
+          SessionMenuAction.changeIcon,
+          icon: Symbols.category,
+          label: context.l10n.sessionTabChangeIconAction,
+        ),
+      if (session != null)
+        item(
+          SessionMenuAction.archive,
+          icon: session.archived ? Symbols.unarchive : Symbols.archive,
+          label: session.archived
+              ? context.l10n.sessionUnarchive
+              : context.l10n.sessionArchive,
+          toggled: session.archived,
+        ),
+    ],
+    [
+      if (includeActiveOnly) ...[
+        item(
+          SessionMenuAction.undo,
+          icon: Symbols.undo_rounded,
+          label: context.l10n.chatUndoLastTurn,
+          enabled: isActive ? canUndo : true,
+        ),
+        item(
+          SessionMenuAction.redo,
+          icon: Symbols.redo_rounded,
+          label: context.l10n.chatRedoLastTurn,
+          enabled: isActive ? canRedo : true,
+        ),
+      ],
+      item(
+        SessionMenuAction.fork,
+        icon: Symbols.call_split,
+        label: context.l10n.sessionFork,
+      ),
+      if (includeActiveOnly)
+        item(
+          SessionMenuAction.compact,
+          icon: Symbols.compress,
+          label: context.l10n.sessionCompactContext,
+          enabled: isActive ? canCompact : true,
+        ),
+    ],
+    if (includeActiveOnly)
+      [
+        item(
+          SessionMenuAction.viewTasks,
+          icon: Symbols.checklist,
+          label: context.l10n.sessionViewTasks,
+        ),
+        item(
+          SessionMenuAction.reviewChanges,
+          icon: Symbols.preview,
+          label: context.l10n.chatReviewChanges,
+        ),
+        item(
+          SessionMenuAction.exportMarkdown,
+          icon: Symbols.description,
+          label: context.l10n.sessionExportMarkdown,
+        ),
+        item(
+          SessionMenuAction.exportJson,
+          icon: Symbols.data_object,
+          label: context.l10n.sessionExportDebugJson,
+        ),
+      ],
+    if (session != null)
+      [
+        item(
+          SessionMenuAction.share,
+          icon: session.shared ? Symbols.link_off : Symbols.link,
+          label: tabIdentity != null
+              ? (session.shared
+                    ? context.l10n.sessionUnshare
+                    : context.l10n.sessionShare)
+              : (session.shared
+                    ? context.l10n.sessionUnshareAction
+                    : context.l10n.sessionShareAction),
+          toggled: session.shared,
+        ),
+        if (session.shareUrl != null && session.shareUrl!.isNotEmpty)
+          item(
+            SessionMenuAction.copyLink,
+            icon: Symbols.content_copy,
+            label: context.l10n.sessionCopyLink,
+          ),
+      ],
+    [
+      item(
+        SessionMenuAction.delete,
+        icon: Symbols.delete,
+        label: context.l10n.sessionDelete,
+        destructive: true,
+      ),
+      if (closeProjectLabel != null)
+        item(
+          SessionMenuAction.closeProject,
+          icon: Symbols.close,
+          label: closeProjectLabel,
+          enabled: canCloseProject,
+          destructive: true,
+        ),
+    ],
+  ];
+
+  return [
+    _SessionActionGridMenuEntry(
+      groups: groups,
+      initialColumns: _sessionMenuColumns(context),
+    ),
+  ];
+}
+
+int _sessionMenuColumns(BuildContext context) {
+  final media = MediaQuery.of(context);
+  final available = media.size.width - media.padding.horizontal - 16;
+  final preferred = media.size.width < 600 ? 3 : 4;
+  return (available / 56).floor().clamp(1, preferred);
+}
+
+class _SessionMenuIconAction {
+  const _SessionMenuIconAction({
+    required this.action,
+    required this.icon,
+    required this.label,
+    required this.enabled,
+    required this.destructive,
+    this.toggled,
+  });
+
+  final SessionMenuAction action;
+  final IconData icon;
+  final String label;
+  final bool enabled;
+  final bool destructive;
+  final bool? toggled;
+}
+
+class _SessionActionGridMenuEntry extends PopupMenuEntry<SessionMenuAction> {
+  const _SessionActionGridMenuEntry({
+    required this.groups,
+    required this.initialColumns,
+  });
+
+  final List<List<_SessionMenuIconAction>> groups;
+  final int initialColumns;
+
+  @override
+  double get height =>
+      groups.fold<double>(
+        0,
+        (sum, group) => sum + (group.length / initialColumns).ceil() * 48,
+      ) +
+      (groups.length - 1) * 16;
+
+  @override
+  bool represents(SessionMenuAction? value) =>
+      groups.any((group) => group.any((item) => item.action == value));
+
+  @override
+  State<_SessionActionGridMenuEntry> createState() =>
+      _SessionActionGridMenuEntryState();
+}
+
+class _SessionActionGridMenuEntryState
+    extends State<_SessionActionGridMenuEntry> {
+  final _scopeNode = FocusScopeNode(
+    traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+    directionalTraversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+  );
+
+  @override
+  void dispose() {
+    _scopeNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final columns = _sessionMenuColumns(context);
+    var order = 0;
+    return SizedBox(
+      width: columns * 56,
+      child: FocusScope(
+        node: _scopeNode,
+        child: FocusTraversalGroup(
+          policy: OrderedTraversalPolicy(),
+          child: Shortcuts(
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+              SingleActivator(LogicalKeyboardKey.arrowLeft):
+                  DirectionalFocusIntent(TraversalDirection.left),
+              SingleActivator(LogicalKeyboardKey.arrowRight):
+                  DirectionalFocusIntent(TraversalDirection.right),
+              SingleActivator(LogicalKeyboardKey.arrowUp):
+                  DirectionalFocusIntent(TraversalDirection.up),
+              SingleActivator(LogicalKeyboardKey.arrowDown):
+                  DirectionalFocusIntent(TraversalDirection.down),
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (
+                  var groupIndex = 0;
+                  groupIndex < widget.groups.length;
+                  groupIndex++
+                ) ...[
+                  if (groupIndex > 0) const Divider(height: 16),
+                  for (
+                    var start = 0;
+                    start < widget.groups[groupIndex].length;
+                    start += columns
+                  )
+                    Row(
+                      children: [
+                        for (final item
+                            in widget.groups[groupIndex]
+                                .skip(start)
+                                .take(columns))
+                          FocusTraversalOrder(
+                            key: ValueKey<SessionMenuAction>(item.action),
+                            order: NumericFocusOrder((order++).toDouble()),
+                            child: SizedBox(
+                              width: 56,
+                              height: 48,
+                              child: Center(
+                                child: _SessionMenuIconButton(
+                                  item: item,
+                                  autofocus: order == 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                ],
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  // Entity actions.
-  if (session != null) {
-    entries.add(
-      item(
-        SessionMenuAction.pin,
-        icon: Symbols.push_pin,
-        label: isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.rename,
-        icon: Symbols.edit,
-        label: tabIdentity != null ? context.l10n.sessionTabRenameAction : context.l10n.sessionRename,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.share,
-        icon: session.shared ? Symbols.link_off : Symbols.link,
-        label: tabIdentity != null
-            ? (session.shared ? context.l10n.sessionUnshare : context.l10n.sessionShare)
-            : (session.shared ? context.l10n.sessionUnshareAction : context.l10n.sessionShareAction),
-      ),
-    );
-    if (session.shareUrl != null && session.shareUrl!.isNotEmpty) {
-      entries.add(
-        item(
-          SessionMenuAction.copyLink,
-          icon: Symbols.content_copy,
-          label: context.l10n.sessionCopyLink,
         ),
-      );
+      ),
+    );
+  }
+}
+
+class _SessionMenuIconButton extends StatefulWidget {
+  const _SessionMenuIconButton({required this.item, required this.autofocus});
+
+  final _SessionMenuIconAction item;
+  final bool autofocus;
+
+  @override
+  State<_SessionMenuIconButton> createState() => _SessionMenuIconButtonState();
+}
+
+class _SessionMenuIconButtonState extends State<_SessionMenuIconButton> {
+  final _focusNode = FocusNode();
+  final _tooltipKey = GlobalKey<TooltipState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocus);
+  }
+
+  void _handleFocus() {
+    setState(() {});
+    Tooltip.dismissAllToolTips();
+    if (_focusNode.hasFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_focusNode.hasFocus) return;
+        Tooltip.dismissAllToolTips();
+        _tooltipKey.currentState?.ensureTooltipVisible();
+      });
     }
-    entries.add(
-      item(
-        SessionMenuAction.archive,
-        icon: session.archived ? Symbols.unarchive : Symbols.archive,
-        label: session.archived
-            ? context.l10n.sessionUnarchive
-            : context.l10n.sessionArchive,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.fork,
-        icon: Symbols.call_split,
-        label: context.l10n.sessionFork,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.delete,
-        icon: Symbols.delete,
-        label: context.l10n.sessionDelete,
-        color: errorColor,
-      ),
-    );
-  } else {
-    entries.add(
-      item(
-        SessionMenuAction.pin,
-        icon: Symbols.push_pin,
-        label: isPinned ? context.l10n.sessionUnpin : context.l10n.sessionPin,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.rename,
-        icon: Symbols.edit,
-        label: context.l10n.sessionRename,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.fork,
-        icon: Symbols.call_split,
-        label: context.l10n.sessionFork,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.delete,
-        icon: Symbols.delete,
-        label: context.l10n.sessionDelete,
-        color: errorColor,
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocus);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    final select = item.enabled
+        ? () {
+            Tooltip.dismissAllToolTips();
+            Navigator.of(context).pop(item.action);
+          }
+        : null;
+    return Tooltip(
+      key: _tooltipKey,
+      message: item.label,
+      excludeFromSemantics: true,
+      enableFeedback: false,
+      child: Semantics(
+        container: true,
+        button: true,
+        label: item.label,
+        enabled: item.enabled,
+        toggled: item.toggled,
+        focused: _focusNode.hasFocus,
+        onTap: select,
+        child: ExcludeSemantics(
+          child: IconButton(
+            key: ValueKey<String>('session_tab_menu_${item.action.name}'),
+            focusNode: _focusNode,
+            autofocus: widget.autofocus,
+            onPressed: select,
+            isSelected: item.toggled,
+            iconSize: 22,
+            style: IconButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              maximumSize: const Size(48, 48),
+              visualDensity: VisualDensity.standard,
+              foregroundColor: item.destructive
+                  ? Theme.of(context).colorScheme.error
+                  : null,
+              side: item.destructive
+                  ? BorderSide(color: Theme.of(context).colorScheme.outline)
+                  : null,
+            ),
+            icon: Icon(item.icon, fill: item.toggled == true ? 1 : 0),
+          ),
+        ),
       ),
     );
   }
-
-  if (includeTabLocal && tabIdentity != null) {
-    entries.add(
-      item(
-        SessionMenuAction.changeIcon,
-        icon: Symbols.category,
-        label: context.l10n.sessionTabChangeIconAction,
-      ),
-    );
-  }
-
-  if (includeActiveOnly) {
-    entries.add(const PopupMenuDivider());
-    entries.add(
-      item(
-        SessionMenuAction.exportMarkdown,
-        icon: Symbols.description,
-        label: context.l10n.sessionExportMarkdown,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.exportJson,
-        icon: Symbols.data_object,
-        label: context.l10n.sessionExportDebugJson,
-      ),
-    );
-    entries.add(const PopupMenuDivider());
-    entries.add(
-      item(
-        SessionMenuAction.viewTasks,
-        icon: Symbols.checklist,
-        label: context.l10n.sessionViewTasks,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.reviewChanges,
-        icon: Symbols.preview,
-        label: context.l10n.chatReviewChanges,
-      ),
-    );
-    entries.add(const PopupMenuDivider());
-    entries.add(
-      item(
-        SessionMenuAction.undo,
-        icon: Symbols.undo_rounded,
-        label: context.l10n.chatUndoLastTurn,
-        enabled: isActive ? canUndo : true,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.redo,
-        icon: Symbols.redo_rounded,
-        label: context.l10n.chatRedoLastTurn,
-        enabled: isActive ? canRedo : true,
-      ),
-    );
-    entries.add(
-      item(
-        SessionMenuAction.compact,
-        icon: Symbols.compress,
-        label: context.l10n.sessionCompactContext,
-        enabled: isActive ? canCompact : true,
-      ),
-    );
-  }
-
-  if (closeProjectLabel != null) {
-    entries.add(const PopupMenuDivider());
-    entries.add(
-      item(
-        SessionMenuAction.closeProject,
-        icon: Symbols.close,
-        label: closeProjectLabel,
-        color: errorColor,
-        enabled: canCloseProject,
-      ),
-    );
-  }
-
-  return entries;
 }
 
 Future<void> showSessionContextMenu(
