@@ -2,6 +2,11 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.261.1 - 2026-09-30
+
+- fix(tabs): dismiss context menus on switch and balance mobile actions
+- docs(tabs): describe grouped accessible context actions
+
 ## v1.261.0 - 2026-09-30
 
 > 📣 Session tab actions are now grouped into a compact, accessible icon menu with clearer keyboard, mouse, and touch navigation.
