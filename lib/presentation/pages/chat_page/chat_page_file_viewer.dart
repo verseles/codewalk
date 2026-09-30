@@ -363,11 +363,6 @@ extension _ChatPageFileViewer on _ChatPageState {
       fileState: fileState,
       readOnly: readOnlyReason != null,
       readOnlyReason: readOnlyReason,
-      canSave: _canSaveFileDraft(
-        fileState: fileState,
-        path: normalizedPath,
-        draft: draft,
-      ),
       onSave: () => unawaited(
         _saveFileEditorDraft(
           fileState: fileState,
@@ -766,7 +761,6 @@ extension _ChatPageFileViewer on _ChatPageState {
     required _FileExplorerContextState fileState,
     required bool readOnly,
     required String? readOnlyReason,
-    required bool canSave,
     required VoidCallback onSave,
     VoidCallback? onChanged,
     VoidCallback? onLineSelectionChanged,
@@ -957,16 +951,6 @@ extension _ChatPageFileViewer on _ChatPageState {
       },
       child: CallbackShortcuts(
         bindings: <ShortcutActivator, VoidCallback>{
-          const SingleActivator(LogicalKeyboardKey.keyS, control: true): () {
-            if (canSave) {
-              onSave();
-            }
-          },
-          const SingleActivator(LogicalKeyboardKey.keyS, meta: true): () {
-            if (canSave) {
-              onSave();
-            }
-          },
           // Keyboards with dedicated clipboard keys emit these instead of
           // Ctrl+V and friends, and re_editor only binds the Ctrl/Cmd
           // combinations, so the keyboard's own paste button did nothing

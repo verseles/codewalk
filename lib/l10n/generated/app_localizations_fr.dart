@@ -5834,8 +5834,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chatMessageUnableToOpenLink => 'Impossible d\'ouvrir le lien';
 
   @override
-  String sessionTodoInProgressCompact(int current, int total) {
-    return '$current/$total en cours';
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
   }
 
   @override

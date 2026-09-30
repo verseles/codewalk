@@ -1656,7 +1656,7 @@
   "chatMessageLargeMessageTruncated": "অ্যাপ স্থিতিশীলতার জন্য বড় বার্তার প্রিভিউ ছাঁটা হয়েছে।",
   "chatMessageInvalidLinkFormat": "অবৈধ লিংক ফরম্যাট",
   "chatMessageUnableToOpenLink": "লিংক খোলা যাচ্ছে না",
-  "sessionTodoInProgressCompact": "{current}/{total} চলছে",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "কাজ {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} সম্পন্ন",
   "sessionTodoCompletedCount": "কাজ {count}/{total} সম্পন্ন হয়েছে",

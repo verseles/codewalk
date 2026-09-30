@@ -1656,7 +1656,7 @@
   "chatMessageLargeMessageTruncated": "为保证应用稳定性，大消息预览已被截断。",
   "chatMessageInvalidLinkFormat": "无效的链接格式",
   "chatMessageUnableToOpenLink": "无法打开链接",
-  "sessionTodoInProgressCompact": "进行中 {current}/{total}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "任务 {index}/{total} {content}",
   "sessionTodoDoneCompact": "已完成 {count}/{total}",
   "sessionTodoCompletedCount": "已完成 {count}/{total} 个任务",

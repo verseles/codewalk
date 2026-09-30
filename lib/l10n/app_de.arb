@@ -1849,7 +1849,7 @@
   "chatMessageLargeMessageTruncated": "Vorschau großer Nachricht aus Stabilitätsgründen gekürzt.",
   "chatMessageInvalidLinkFormat": "Ungültiges Linkformat",
   "chatMessageUnableToOpenLink": "Link konnte nicht geöffnet werden",
-  "sessionTodoInProgressCompact": "{current}/{total} in Bearbeitung",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "Aufgabe {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} erledigt",
   "sessionTodoCompletedCount": "Aufgaben {count}/{total} abgeschlossen",

@@ -5510,8 +5510,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get chatMessageUnableToOpenLink => '링크를 열 수 없습니다';
 
   @override
-  String sessionTodoInProgressCompact(int current, int total) {
-    return '$current/$total 진행 중';
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
   }
 
   @override

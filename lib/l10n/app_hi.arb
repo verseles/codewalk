@@ -1656,7 +1656,7 @@
   "chatMessageLargeMessageTruncated": "ऐप स्थिरता के लिए बड़े संदेश का पूर्वावलोकन छोटा किया गया।",
   "chatMessageInvalidLinkFormat": "अमान्य लिंक प्रारूप",
   "chatMessageUnableToOpenLink": "लिंक खोलने में असमर्थ",
-  "sessionTodoInProgressCompact": "{current}/{total} प्रगति पर",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "कार्य {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} पूर्ण",
   "sessionTodoCompletedCount": "कार्य {count}/{total} पूर्ण हुए",

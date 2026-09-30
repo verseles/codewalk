@@ -1808,7 +1808,7 @@
   "chatMessageLargeMessageTruncated": "Предпросмотр большого сообщения обрезан для стабильности приложения.",
   "chatMessageInvalidLinkFormat": "Недопустимый формат ссылки",
   "chatMessageUnableToOpenLink": "Не удалось открыть ссылку",
-  "sessionTodoInProgressCompact": "{current}/{total} в работе",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "Задача {index}/{total}: {content}",
   "sessionTodoDoneCompact": "{count}/{total} готово",
   "sessionTodoCompletedCount": "Задач выполнено: {count}/{total}",

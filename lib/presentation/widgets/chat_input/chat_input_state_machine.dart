@@ -1,8 +1,10 @@
 part of '../chat_input_widget.dart';
 
 extension _ChatInputStateMachine on _ChatInputWidgetState {
-  Future<void> _handleSendMessage() async {
-    if (!widget.enabled || _isSending) {
+  Future<void> _handleSendMessage({bool continueWhenEmpty = false}) async {
+    if (!widget.enabled ||
+        _isSending ||
+        (continueWhenEmpty && !_canSendContinue)) {
       return;
     }
     _setState(() {
@@ -15,7 +17,7 @@ extension _ChatInputStateMachine on _ChatInputWidgetState {
       if (!mounted) {
         return;
       }
-      final text = _controller.text.trim();
+      final text = continueWhenEmpty ? 'continue' : _controller.text.trim();
       final payloadText = _mode == ChatComposerMode.shell
           ? _normalizeShellPayload(text)
           : text;

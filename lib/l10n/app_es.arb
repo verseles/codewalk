@@ -1656,7 +1656,7 @@
   "chatMessageLargeMessageTruncated": "Vista previa de mensaje grande truncada por estabilidad de la aplicación.",
   "chatMessageInvalidLinkFormat": "Formato de enlace inválido",
   "chatMessageUnableToOpenLink": "No se puede abrir el enlace",
-  "sessionTodoInProgressCompact": "{current}/{total} en progreso",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "Tarea {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} completados",
   "sessionTodoCompletedCount": "Tareas {count}/{total} completadas",

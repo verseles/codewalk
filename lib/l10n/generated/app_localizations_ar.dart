@@ -5654,8 +5654,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatMessageUnableToOpenLink => 'تعذّر فتح الرابط';
 
   @override
-  String sessionTodoInProgressCompact(int current, int total) {
-    return '$current/$total قيد التنفيذ';
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
   }
 
   @override

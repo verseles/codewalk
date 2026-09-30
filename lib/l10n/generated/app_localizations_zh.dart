@@ -5383,8 +5383,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatMessageUnableToOpenLink => '无法打开链接';
 
   @override
-  String sessionTodoInProgressCompact(int current, int total) {
-    return '进行中 $current/$total';
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
   }
 
   @override

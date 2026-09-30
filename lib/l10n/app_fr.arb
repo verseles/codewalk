@@ -1849,7 +1849,7 @@
   "chatMessageLargeMessageTruncated": "Aperçu du message volumineux tronqué pour la stabilité de l''application.",
   "chatMessageInvalidLinkFormat": "Format de lien invalide",
   "chatMessageUnableToOpenLink": "Impossible d''ouvrir le lien",
-  "sessionTodoInProgressCompact": "{current}/{total} en cours",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "Tâche {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} terminées",
   "sessionTodoCompletedCount": "Tâches {count}/{total} terminées",

@@ -1,6 +1,24 @@
 part of '../chat_input_widget.dart';
 
 extension _ChatInputSendController on _ChatInputWidgetState {
+  bool get _canSendContinue =>
+      widget.enabled &&
+      !widget.isResponding &&
+      !_isSending &&
+      !_isListening &&
+      !_isStartingListening &&
+      _mode == ChatComposerMode.normal &&
+      _controller.text.trim().isEmpty &&
+      _attachments.isEmpty &&
+      widget.contextItems.isEmpty;
+
+  void _handleEmptySendDoubleTap() {
+    if (!_canSendContinue) {
+      return;
+    }
+    unawaited(_handleSendMessage(continueWhenEmpty: true));
+  }
+
   void _handleSendButtonTap() {
     if (_holdSendTriggered) {
       _holdSendTriggered = false;

@@ -1643,7 +1643,7 @@
   "chatMessageLargeMessageTruncated": "تم اقتطاع معاينة الرسالة الكبيرة من أجل استقرار التطبيق.",
   "chatMessageInvalidLinkFormat": "تنسيق رابط غير صالح",
   "chatMessageUnableToOpenLink": "تعذّر فتح الرابط",
-  "sessionTodoInProgressCompact": "{current}/{total} قيد التنفيذ",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "المهمة {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} منجز",
   "sessionTodoCompletedCount": "المهام {count}/{total} مكتملة",

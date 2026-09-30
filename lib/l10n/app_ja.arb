@@ -1656,7 +1656,7 @@
   "chatMessageLargeMessageTruncated": "アプリ安定性のため大きなメッセージのプレビューを切り詰めました。",
   "chatMessageInvalidLinkFormat": "無効なリンク形式です",
   "chatMessageUnableToOpenLink": "リンクを開けません",
-  "sessionTodoInProgressCompact": "{current}/{total} 進行中",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "タスク {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} 完了",
   "sessionTodoCompletedCount": "タスク {count}/{total} 完了",

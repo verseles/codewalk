@@ -7291,7 +7291,7 @@
   "@chatMessageUnableToOpenLink": {
     "description": "CodeWalk UI string — chatMessageUnableToOpenLink"
   },
-  "sessionTodoInProgressCompact": "{current}/{total} in progress",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "@sessionTodoInProgressCompact": {
     "description": "CodeWalk UI string — sessionTodoInProgressCompact",
     "placeholders": {
@@ -7300,6 +7300,9 @@
       },
       "total": {
         "type": "int"
+      },
+      "content": {
+        "type": "String"
       }
     }
   },

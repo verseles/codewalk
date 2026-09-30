@@ -452,7 +452,8 @@ extension _ChatPageFileRuntime on _ChatPageState {
     );
     final resolvedPath = isAbsoluteFilePath(path)
         ? _normalizeFilePath(path)
-        : _normalizeFilePath(rootDir == '/' ? '/$path' : joinParentPath(rootDir, path));
+        : _normalizeFilePath(
+            rootDir == '/' ? '/$path' : joinParentPath(rootDir, path));
 
     // Set pending scroll target so the viewer scrolls after content loads.
     if (line != null && line > 0) {
@@ -747,6 +748,56 @@ extension _ChatPageFileRuntime on _ChatPageState {
               setDialogState(() {});
             }
 
+            void saveActiveFile() {
+              if (!mounted ||
+                  !dialogContext.mounted ||
+                  ModalRoute.of(dialogContext)?.isCurrent != true) {
+                return;
+              }
+              final activePath = fileState.tabSelection.activePath;
+              if (activePath == null) {
+                return;
+              }
+              final path = _normalizeFilePath(activePath);
+              final active = fileState.tabsByPath[path];
+              final draft = fileState.editorDraftsByPath[path];
+              if (active?.status != _FileTabLoadStatus.ready ||
+                  draft == null ||
+                  !_canSaveFileDraft(
+                    fileState: fileState,
+                    path: path,
+                    draft: draft,
+                  )) {
+                return;
+              }
+              unawaited(
+                _saveFileEditorDraft(
+                  fileState: fileState,
+                  projectProvider: projectProvider,
+                  path: path,
+                  onUpdated: refreshDialog,
+                ),
+              );
+            }
+
+            Widget withSaveShortcuts(Widget dialog) {
+              return CallbackShortcuts(
+                bindings: <ShortcutActivator, VoidCallback>{
+                  const SingleActivator(
+                    LogicalKeyboardKey.keyS,
+                    control: true,
+                    includeRepeats: false,
+                  ): saveActiveFile,
+                  const SingleActivator(
+                    LogicalKeyboardKey.keyS,
+                    meta: true,
+                    includeRepeats: false,
+                  ): saveActiveFile,
+                },
+                child: dialog,
+              );
+            }
+
             // Dialog close shared by both variants: same row as the tab
             // strip (right side) instead of a header of its own (issue #167).
             // Single builder so the two branches cannot diverge.
@@ -763,73 +814,77 @@ extension _ChatPageFileRuntime on _ChatPageState {
             }
 
             if (fullscreen) {
-              return Dialog.fullscreen(
-                key: const ValueKey<String>('open_files_dialog_fullscreen'),
-                child: Scaffold(
-                  // No AppBar: the dialog close shares the tab-strip row
-                  // (right side) instead of owning a header bar (issue #167).
-                  body: SafeArea(
-                    top: true,
-                    bottom: false,
-                    child: _buildFileViewerPanel(
-                      fileState: fileState,
-                      projectProvider: projectProvider,
-                      height: double.infinity,
-                      margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                      onStateChanged: refreshDialog,
-                      headerTrailing: buildDialogCloseButton(),
-                      onContextAdded: () {
-                      // Pop the viewer. A second pop only happens when the
-                      // mobile Files dialog is genuinely underneath (issue
-                      // #167): direct entries (chat links, quick-open, tree)
-                      // sit straight above chat, so an unconditional second
-                      // pop would eject the ChatPage route.
-                      final navigator = Navigator.of(dialogContext);
-                      navigator.pop();
-                      if (navigator.canPop()) {
-                        navigator.pop();
-                      }
-                      _inputFocusNode.requestFocus();
-                    },
+              return withSaveShortcuts(
+                Dialog.fullscreen(
+                  key: const ValueKey<String>('open_files_dialog_fullscreen'),
+                  child: Scaffold(
+                    // No AppBar: the dialog close shares the tab-strip row
+                    // (right side) instead of owning a header bar (issue #167).
+                    body: SafeArea(
+                      top: true,
+                      bottom: false,
+                      child: _buildFileViewerPanel(
+                        fileState: fileState,
+                        projectProvider: projectProvider,
+                        height: double.infinity,
+                        margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                        onStateChanged: refreshDialog,
+                        headerTrailing: buildDialogCloseButton(),
+                        onContextAdded: () {
+                          // Pop the viewer. A second pop only happens when the
+                          // mobile Files dialog is genuinely underneath (issue
+                          // #167): direct entries (chat links, quick-open, tree)
+                          // sit straight above chat, so an unconditional second
+                          // pop would eject the ChatPage route.
+                          final navigator = Navigator.of(dialogContext);
+                          navigator.pop();
+                          if (navigator.canPop()) {
+                            navigator.pop();
+                          }
+                          _inputFocusNode.requestFocus();
+                        },
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            );
+              );
             }
-            return Dialog(
-              key: const ValueKey<String>('open_files_dialog_centered'),
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 24,
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: SizedBox(
-                width: dialogWidth.toDouble(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: 300,
-                    maxHeight: dialogHeight.toDouble(),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: _buildFileViewerPanel(
-                          fileState: fileState,
-                          projectProvider: projectProvider,
-                          height: double.infinity,
-                          margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
-                          onStateChanged: refreshDialog,
-                          // Dialog close shares the tab-strip row (right
-                          // side); no header row of its own (issue #167).
-                          headerTrailing: buildDialogCloseButton(),
-                          onContextAdded: () {
-                            Navigator.of(dialogContext).pop();
-                            _inputFocusNode.requestFocus();
-                          },
+            return withSaveShortcuts(
+              Dialog(
+                key: const ValueKey<String>('open_files_dialog_centered'),
+                insetPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 24,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SizedBox(
+                  width: dialogWidth.toDouble(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: 300,
+                      maxHeight: dialogHeight.toDouble(),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _buildFileViewerPanel(
+                            fileState: fileState,
+                            projectProvider: projectProvider,
+                            height: double.infinity,
+                            margin: const EdgeInsets.fromLTRB(4, 10, 4, 10),
+                            onStateChanged: refreshDialog,
+                            // Dialog close shares the tab-strip row (right
+                            // side); no header row of its own (issue #167).
+                            headerTrailing: buildDialogCloseButton(),
+                            onContextAdded: () {
+                              Navigator.of(dialogContext).pop();
+                              _inputFocusNode.requestFocus();
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1636,7 +1691,9 @@ extension _ChatPageFileRuntime on _ChatPageState {
     return <String>{
       normalized,
       absolute,
-      if (root.isNotEmpty && root != '/' && absolute.startsWith(filePathChildPrefix(root)))
+      if (root.isNotEmpty &&
+          root != '/' &&
+          absolute.startsWith(filePathChildPrefix(root)))
         absolute.substring(filePathChildPrefix(root).length),
     };
   }

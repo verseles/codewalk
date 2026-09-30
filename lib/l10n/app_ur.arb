@@ -1161,7 +1161,7 @@
   "sessionTitleYesterday": "کل {time} ({date})",
   "sessionTodoCompletedCount": "{count}/{total} کام مکمل",
   "sessionTodoDoneCompact": "{count}/{total} مکمل",
-  "sessionTodoInProgressCompact": "{current}/{total} جاری ہیں",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "کام {index}/{total} {content}",
   "sessionTodoTasksCount": "کام ({count})",
   "sessionUnarchive": "آرکائیو سے نکالیں",

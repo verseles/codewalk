@@ -125,8 +125,9 @@ class _SessionTodoListWidgetState extends State<SessionTodoListWidget> {
         return l10n?.sessionTodoInProgressCompact(
               inProgressIndex + 1,
               todos.length,
+              task.content,
             ) ??
-            '${inProgressIndex + 1}/${todos.length} in progress';
+            '${inProgressIndex + 1}/${todos.length} ${task.content}';
       }
       return l10n?.sessionTodoTaskProgress(
             task.content,

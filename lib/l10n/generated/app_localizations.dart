@@ -10006,8 +10006,8 @@ abstract class AppLocalizations {
   /// CodeWalk UI string — sessionTodoInProgressCompact
   ///
   /// In en, this message translates to:
-  /// **'{current}/{total} in progress'**
-  String sessionTodoInProgressCompact(int current, int total);
+  /// **'{current}/{total} {content}'**
+  String sessionTodoInProgressCompact(int current, int total, String content);
 
   /// CodeWalk UI string — sessionTodoTaskProgress
   ///

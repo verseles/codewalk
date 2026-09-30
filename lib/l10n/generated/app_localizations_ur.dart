@@ -5716,8 +5716,8 @@ class AppLocalizationsUr extends AppLocalizations {
   String get chatMessageUnableToOpenLink => 'لنک کھولنے سے قاصر';
 
   @override
-  String sessionTodoInProgressCompact(int current, int total) {
-    return '$current/$total جاری ہیں';
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
   }
 
   @override

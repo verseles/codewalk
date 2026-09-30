@@ -1627,7 +1627,7 @@
   "chatMessageLargeMessageTruncated": "앱 안정성을 위해 큰 메시지 미리보기가 잘렸습니다.",
   "chatMessageInvalidLinkFormat": "잘못된 링크 형식",
   "chatMessageUnableToOpenLink": "링크를 열 수 없습니다",
-  "sessionTodoInProgressCompact": "{current}/{total} 진행 중",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "작업 {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} 완료",
   "sessionTodoCompletedCount": "작업 {count}/{total}개 완료됨",

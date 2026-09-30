@@ -1,6 +1,8 @@
 import 'package:codewalk/domain/entities/chat_session.dart';
+import 'package:codewalk/l10n/generated/app_localizations.dart';
 import 'package:codewalk/presentation/widgets/session_todo_list_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -32,15 +34,23 @@ void main() {
     VoidCallback? onToggle,
     int maxVisibleItems = 5,
     bool disableAnimations = false,
+    Locale? locale,
+    double textScale = 1,
   }) {
     return MaterialApp(
+      locale: locale,
+      localizationsDelegates: locale == null
+          ? null
+          : AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(splashFactory: InkRipple.splashFactory),
       home: Scaffold(
         body: Builder(
           builder: (context) => MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(disableAnimations: disableAnimations),
+            data: MediaQuery.of(context).copyWith(
+              disableAnimations: disableAnimations,
+              textScaler: TextScaler.linear(textScale),
+            ),
             child: SessionTodoListWidget(
               todos: items,
               collapsed: collapsed,
@@ -113,8 +123,94 @@ void main() {
 
     await tester.pumpWidget(buildWidget(collapsed: true));
 
-    expect(find.text('2/3 in progress'), findsOneWidget);
+    expect(find.text('2/3 Write API endpoints'), findsOneWidget);
     expect(find.text('Task 2/3 Write API endpoints'), findsNothing);
+  });
+
+  testWidgets('collapsed mobile task ellipsizes long text at large scale', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 700);
+    addTearDown(tester.view.reset);
+    final content = List.filled(20, 'Implementar endpoints da API').join(' ');
+    final items = <SessionTodo>[
+      SessionTodo(
+        id: 'long',
+        content: content,
+        status: 'in_progress',
+        priority: 'high',
+      ),
+    ];
+    await tester.pumpWidget(
+      buildWidget(items: items, collapsed: true, textScale: 2),
+    );
+    final summary = find.text('1/1 $content');
+    final text = tester.widget<Text>(summary);
+    expect(text.maxLines, 1);
+    expect(text.overflow, TextOverflow.ellipsis);
+    expect(
+      tester.renderObject<RenderParagraph>(summary).didExceedMaxLines,
+      isTrue,
+    );
+    expect(items.single.content, content);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('collapsed localized task updates without expanding', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.reset);
+    var toggles = 0;
+    await tester.pumpWidget(
+      buildWidget(
+        collapsed: true,
+        locale: const Locale('pt'),
+        onToggle: () => toggles++,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('2/3 Write API endpoints'), findsOneWidget);
+    const updated = <SessionTodo>[
+      SessionTodo(
+        id: '1',
+        content: 'Set up database',
+        status: 'completed',
+        priority: 'high',
+      ),
+      SessionTodo(
+        id: '2',
+        content: 'Write API endpoints',
+        status: 'completed',
+        priority: 'medium',
+      ),
+      SessionTodo(
+        id: '3',
+        content: 'Add tests — texto original',
+        status: 'in_progress',
+        priority: 'low',
+      ),
+    ];
+    await tester.pumpWidget(
+      buildWidget(
+        items: updated,
+        collapsed: true,
+        locale: const Locale('pt'),
+        onToggle: () => toggles++,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('3/3 Add tests — texto original'), findsOneWidget);
+    expect(find.text('2/3 Write API endpoints'), findsNothing);
+    expect(find.text('Set up database'), findsNothing);
+    final progress = tester.widget<LinearProgressIndicator>(
+      find.byKey(const ValueKey<String>('session_todo_progress_bar')),
+    );
+    expect(progress.value, closeTo(2 / 3, 0.001));
+    await tester.tap(find.text('3/3 Add tests — texto original'));
+    expect(toggles, 1);
   });
 
   testWidgets(

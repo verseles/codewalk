@@ -5730,8 +5730,8 @@ class AppLocalizationsBn extends AppLocalizations {
   String get chatMessageUnableToOpenLink => 'লিংক খোলা যাচ্ছে না';
 
   @override
-  String sessionTodoInProgressCompact(int current, int total) {
-    return '$current/$total চলছে';
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
   }
 
   @override

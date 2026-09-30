@@ -17,6 +17,7 @@ import 'package:codewalk/presentation/widgets/chat_input_widget.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1317,6 +1318,177 @@ void main() {
     expect(find.byIcon(Symbols.code_rounded), findsOneWidget);
     expect(find.byIcon(Symbols.tune_rounded), findsOneWidget);
   });
+
+  for (final kind in [PointerDeviceKind.touch, PointerDeviceKind.mouse]) {
+    testWidgets('empty send button double tap sends continue once with $kind', (
+      tester,
+    ) async {
+      final sent = <ChatInputSubmission>[];
+      final pending = Completer<void>();
+      await tester.pumpWidget(
+        _buildChatInputHarness(
+          child: ChatInputWidget(
+            onSendMessage: (submission) {
+              sent.add(submission);
+              return pending.future;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final button = find.byKey(const ValueKey<String>('composer_send_button'));
+      await tester.tap(button, kind: kind);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(sent, isEmpty);
+      await tester.tap(button, kind: kind);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(button, kind: kind);
+      await tester.pump();
+      expect(sent, hasLength(1));
+      expect(sent.single.text, 'continue');
+      expect(sent.single.mode, ChatComposerMode.normal);
+      expect(sent.single.attachments, isEmpty);
+      await tester.tap(button, kind: kind);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(button, kind: kind);
+      await tester.pump();
+      expect(sent, hasLength(1));
+      // Typing while the submission is pending must retain the new draft.
+      await tester.enterText(find.byType(TextField), 'next draft');
+      pending.complete();
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'next draft',
+      );
+    });
+  }
+
+  testWidgets('empty send button ignores disabled and Stop states', (
+    tester,
+  ) async {
+    final sent = <ChatInputSubmission>[];
+    var stops = 0;
+    for (final responding in [false, true]) {
+      await tester.pumpWidget(
+        _buildChatInputHarness(
+          child: ChatInputWidget(
+            key: ValueKey(responding),
+            enabled: responding,
+            isResponding: responding,
+            onStopRequested: () => stops++,
+            onSendMessage: sent.add,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final button = find.byKey(const ValueKey<String>('composer_send_button'));
+      await tester.tap(button);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(sent, isEmpty);
+    }
+    expect(stops, greaterThan(0));
+  });
+
+  testWidgets(
+    'empty send button cannot replace text shell attachments or context',
+    (tester) async {
+      const file = FileInputPart(
+        mime: 'image/png',
+        url: 'data:image/png;base64,AA==',
+        filename: 'image.png',
+      );
+      for (final scenario in ['text', 'shell', 'attachment', 'context']) {
+        final sent = <ChatInputSubmission>[];
+        await tester.pumpWidget(
+          _buildChatInputHarness(
+            child: ChatInputWidget(
+              key: ValueKey(scenario),
+              onSendMessage: sent.add,
+              showAttachmentButton: true,
+              contextItems: scenario == 'context' ? const [file] : const [],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        if (scenario == 'attachment') {
+          // Restores are applied through didUpdateWidget, like a session draft.
+          await tester.pumpWidget(
+            _buildChatInputHarness(
+              child: ChatInputWidget(
+                key: ValueKey(scenario),
+                onSendMessage: sent.add,
+                showAttachmentButton: true,
+                prefilledDraft: const ChatComposerDraft(
+                  text: '',
+                  attachments: [file],
+                ),
+                prefilledDraftVersion: 1,
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+        if (scenario == 'text' || scenario == 'shell') {
+          await tester.enterText(
+            find.byType(TextField),
+            scenario == 'shell' ? '!pwd' : 'hello',
+          );
+          await tester.pumpAndSettle();
+        }
+        final button = find.byKey(
+          const ValueKey<String>('composer_send_button'),
+        );
+        expect(
+          tester.widget<FilledButton>(button).onPressed,
+          isNotNull,
+          reason: scenario,
+        );
+        await tester.tap(button);
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        expect(sent, isNotEmpty);
+        expect(
+          sent.every((submission) => submission.text != 'continue'),
+          isTrue,
+          reason: scenario,
+        );
+        if (scenario == 'text' ||
+            scenario == 'shell' ||
+            scenario == 'attachment') {
+          expect(sent, hasLength(1));
+        }
+        if (scenario == 'attachment') {
+          expect(sent.single.attachments, const [file]);
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'empty send button cancels continue when payload changes between taps',
+    (tester) async {
+      final sent = <ChatInputSubmission>[];
+      await tester.pumpWidget(
+        _buildChatInputHarness(child: ChatInputWidget(onSendMessage: sent.add)),
+      );
+      await tester.pumpAndSettle();
+      final button = find.byKey(const ValueKey<String>('composer_send_button'));
+      await tester.tap(button);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.enterText(find.byType(TextField), 'new content');
+      await tester.pump();
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(
+        sent.every((submission) => submission.text == 'new content'),
+        isTrue,
+      );
+    },
+  );
 
   testWidgets(
     'holding send button for 300ms inserts newline instead of sending',

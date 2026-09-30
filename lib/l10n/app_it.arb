@@ -1971,7 +1971,7 @@
   "chatMessageInvalidLinkFormat": "Formato del link non valido",
   "chatMessageUnableToOpenLink": "Impossibile aprire il link",
   "chatMessageWeeksAgo": "{count} sett fa",
-  "sessionTodoInProgressCompact": "{current}/{total} in corso",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoTaskProgress": "Attività {index}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} completate",
   "sessionTodoCompletedCount": "Attività {count}/{total} completate",
