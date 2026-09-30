@@ -763,7 +763,10 @@ class _SessionActionGridMenuEntryState
                     child: Text(
                       context.l10n.chatRecentSessions,
                       key: const ValueKey<String>('session_tab_recent_header'),
-                      style: Theme.of(context).textTheme.labelLarge,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   for (final session in widget.recentSessions)

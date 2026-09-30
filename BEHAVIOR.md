@@ -745,6 +745,7 @@
 
 - **Given** the user opens a session tab menu on mobile, in a compact window, or with the desktop Conversations pane hidden
 - **Then** a `Recent sessions` section shows up to five cached, non-archived root conversations from that tab's project, ordered by recency and excluding the session represented by that tab; the section is absent when no alternatives are cached
+- **Then** the section heading uses smaller, regular-weight text in the theme's secondary surface color, keeping the conversation titles and selected state visually prominent
 - **Then** each conversation row exposes its title, current-selection state, and error, pending-interaction, unread-completion, or active status; rows have at least 48px targets and participate in the menu's keyboard traversal
 - **When** the user selects a recent conversation
 - **Then** the menu closes and CodeWalk switches to that conversation's project and session through guarded tab navigation, including root project scopes; merely opening the menu makes no server request and does not activate the tab
