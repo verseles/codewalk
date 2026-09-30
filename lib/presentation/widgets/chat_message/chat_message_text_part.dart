@@ -534,22 +534,30 @@ class _MarkdownScrollableCodeBlockState
                 }
                 return false;
               },
-              child: Scrollbar(
-                controller: _controller,
-                interactive: true,
-                thumbVisibility: visible,
-                trackVisibility: desktop && visible,
-                scrollbarOrientation: ScrollbarOrientation.bottom,
-                thickness: 6,
-                child: SingleChildScrollView(
+              // This scrollbar belongs to the code box, not the screen edge.
+              child: MediaQuery.removePadding(
+                context: context,
+                removeLeft: true,
+                removeTop: true,
+                removeRight: true,
+                removeBottom: true,
+                child: Scrollbar(
                   controller: _controller,
-                  primary: false,
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.fromLTRB(8, 8, 8, _overflow ? 20 : 8),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: widget.onTapCode,
-                    child: widget.child,
+                  interactive: true,
+                  thumbVisibility: visible,
+                  trackVisibility: desktop && visible,
+                  scrollbarOrientation: ScrollbarOrientation.bottom,
+                  thickness: 6,
+                  child: SingleChildScrollView(
+                    controller: _controller,
+                    primary: false,
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.fromLTRB(8, 8, 8, _overflow ? 20 : 8),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: widget.onTapCode,
+                      child: widget.child,
+                    ),
                   ),
                 ),
               ),

@@ -14,9 +14,14 @@ Widget _host(
   String text, {
   TargetPlatform platform = TargetPlatform.linux,
   double width = 340,
+  EdgeInsets padding = EdgeInsets.zero,
   Widget? after,
 }) => localizedMaterialApp(
   theme: ThemeData(platform: platform),
+  builder: (context, child) => MediaQuery(
+    data: MediaQuery.of(context).copyWith(padding: padding),
+    child: child!,
+  ),
   home: Scaffold(
     body: SingleChildScrollView(
       child: Column(
@@ -83,8 +88,14 @@ void main() {
         null,
       ),
     );
-    await tester.pumpWidget(_host(_fence(_longLine)));
+    await tester.pumpWidget(
+      _host(
+        _fence(_longLine),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 34),
+      ),
+    );
     await tester.pumpAndSettle();
+    expect(MediaQuery.paddingOf(tester.element(_bars)), EdgeInsets.zero);
     var bar = _scrollbars(tester).single;
     expect(bar.controller!.position.maxScrollExtent, greaterThan(0));
     expect(bar.thumbVisibility, isFalse);
@@ -231,4 +242,36 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('iOS code scrollbar stays in its gutter with safe-area insets', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        _fence(_longLine),
+        platform: TargetPlatform.iOS,
+        padding: const EdgeInsets.fromLTRB(20, 44, 20, 34),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(MediaQuery.paddingOf(tester.element(_bars)), EdgeInsets.zero);
+    final bar = _scrollbars(tester).single;
+    await tester.dragFrom(tester.getCenter(_bars), const Offset(-100, 0));
+    await tester.pump();
+    final paint = tester.widget<CustomPaint>(
+      find.descendant(
+        of: _bars,
+        matching: find.byWidgetPredicate(
+          (w) => w is CustomPaint && w.foregroundPainter is ScrollbarPainter,
+        ),
+      ),
+    );
+    expect(
+      (paint.foregroundPainter! as ScrollbarPainter).padding,
+      EdgeInsets.zero,
+    );
+    expect(bar.controller!.offset, greaterThan(0));
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+  });
 }
