@@ -477,6 +477,8 @@
 - **Then** closing the last open file tab dismisses the open-files dialog instead of leaving an empty panel
 - **Then** editing a file marks its tab dirty with `*` and enables the viewer `Save` action
 - **Then** pressing the `Save` action or `Ctrl+S` / `Cmd+S` writes the active dirty file through the shell-gated workspace file operation service scoped to the active project directory, using one negotiated single-pipeline shell transport rather than a local client filesystem write
+- **Then** `Ctrl+S` / `Cmd+S` works from any focused control inside the current open-files dialog, including its toolbar and tab strip, in both centered and fullscreen layouts
+- **Then** the shortcut resolves the active file at invocation time, ignores repeated key events, and does not save clean, read-only, oversized, or already-saving drafts or a file dialog covered by another modal
 - **Then** global autosave is off by default and can be toggled by the user
 - **Given** a dirty draft and autosave enabled
 - **When** the draft has not changed for 30 seconds
@@ -1008,6 +1010,14 @@
 - **When** the user taps the primary composer action
 - **Then** the app sends that prompt immediately through the normal async send path without locally batching or draining other drafts
 - **Then** the app does not auto-abort the active response as part of that send action
+
+### Double-tapping an idle empty Send continues the conversation
+
+- **Given** the composer is enabled and idle in normal mode, with only empty or whitespace text, no attachments or context items, and no dictation starting or running
+- **When** the user double-taps or primary-mouse double-clicks the empty `Send` control using Flutter's default double-tap timing
+- **Then** the app submits the literal `continue` once through the existing normal message-send path
+- **Then** a single empty tap or empty keyboard submission does not send `continue`, and the gesture is unavailable while sending or responding
+- **Then** text typed while the submission is pending remains in the composer; ordinary send, shell submission, `Stop`, and hold-to-insert-newline keep their existing behavior
 
 ### Busy-state UI does not invent local queue lifecycle
 
@@ -1892,7 +1902,8 @@ The app uses a platform-aware speech engine strategy with automatic fallback whe
 
 - **Given** the session task panel is collapsed on a compact viewport (mobile width)
 - **When** at least one task is in progress
-- **Then** the header summary uses compact count-first text (`x/y in progress`) without including task content text
+- **Then** the header summary uses compact count-first text (`x/y task content`) with the active task's verbatim content, stays on one line, and truncates long content with an end ellipsis
+- **Then** changing the active task or its content updates the summary while the panel remains collapsed; desktop summaries, the progress bar, and collapse toggling keep their existing behavior
 - **When** no task is in progress
 - **Then** the header summary uses compact completion text (`x/y done`)
 
