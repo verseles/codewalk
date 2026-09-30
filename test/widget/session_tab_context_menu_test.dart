@@ -143,6 +143,55 @@ void main() {
     isSelected: selected,
   );
 
+  testWidgets('picker dismissal removes only its owned route', (tester) async {
+    final signal = ValueNotifier<int>(0);
+    final updates = ValueNotifier<int>(0);
+    addTearDown(signal.dispose);
+    addTearDown(updates.dispose);
+    late BuildContext homeContext;
+    await tester.pumpWidget(
+      localizedMaterialApp(
+        home: Builder(
+          builder: (context) {
+            homeContext = context;
+            return TextButton(
+              onPressed: () => showDialog<SessionTabIdentity>(
+                context: context,
+                builder: (_) => ProjectSessionPicker(
+                  projectLabel: 'Project',
+                  updates: updates,
+                  dismissSignal: signal,
+                  sessions: () => [choice('first')],
+                  isValid: () => true,
+                ),
+              ),
+              child: const Text('Open picker'),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open picker'));
+    await tester.pumpAndSettle();
+    final top = showDialog<void>(
+      context: homeContext,
+      builder: (_) => const AlertDialog(content: Text('Unrelated route')),
+    );
+    await tester.pumpAndSettle();
+    signal.value++;
+    await tester.pumpAndSettle();
+    expect(find.text('Unrelated route'), findsOneWidget);
+    Navigator.of(homeContext).pop();
+    await top;
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('project_session_picker')),
+      findsNothing,
+    );
+    expect(find.text('Open picker'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'project selector updates cached rows and dismisses on server invalidation',
     (tester) async {

@@ -220,6 +220,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
         await _activateSessionChoice(tab, identity, scopeId: scopeId);
         return;
       case SessionTabMenuMoreSelection():
+        final dismissGeneration = _sessionTabMenuDismissSignal.value;
         final identity = await showDialog<SessionTabIdentity>(
           context: context,
           builder: (_) => ProjectSessionPicker(
@@ -227,12 +228,16 @@ extension _ChatPageSessionTabs on _ChatPageState {
                 ? _projectDisplayLabel(project)
                 : _directoryBasename(tab.identity.directory),
             updates: chatProvider,
+            dismissSignal: _sessionTabMenuDismissSignal,
             isValid: () =>
                 mounted && chatProvider.activeServerId == tab.identity.serverId,
             sessions: () => _sessionChoicesForTab(tab, scopeId: scopeId),
           ),
         );
-        if (identity != null && mounted && _isChatScreenActive()) {
+        if (identity != null &&
+            mounted &&
+            _isChatScreenActive() &&
+            _sessionTabMenuDismissSignal.value == dismissGeneration) {
           await _activateSessionChoice(tab, identity, scopeId: scopeId);
         }
         return;
@@ -908,9 +913,15 @@ extension _ChatPageSessionTabs on _ChatPageState {
 
   bool _isSessionTabContextActive(SessionTabRecord tab) {
     final projectProvider = context.read<ProjectProvider>();
-    final currentPath = projectProvider.currentProject?.path;
-    return currentPath != null &&
-        areEquivalentFilePaths(currentPath, tab.identity.directory);
+    final project = projectProvider.currentProject;
+    if (project == null) return false;
+    if (areEquivalentFilePaths(project.path, tab.identity.directory)) {
+      return true;
+    }
+    // Root/placeholder projects persist their scope id as the tab directory.
+    return tab.projectId?.trim() == project.id &&
+        _scopeIdForProject(project) == project.id &&
+        areEquivalentFilePaths(project.id, tab.identity.directory);
   }
 
   ChatSession _placeholderSessionForTab(SessionTabRecord tab) {
@@ -1056,6 +1067,8 @@ extension _ChatPageSessionTabs on _ChatPageState {
   }
 
   Future<void> _closeSessionTab(SessionTabRecord tab) async {
+    if (!mounted) return;
+    _sessionTabMenuDismissSignal.value++;
     if (!_isChatScreenActive()) {
       return;
     }

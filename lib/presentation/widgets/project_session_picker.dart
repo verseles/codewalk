@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -13,12 +14,14 @@ class ProjectSessionPicker extends StatefulWidget {
     required this.updates,
     required this.sessions,
     required this.isValid,
+    this.dismissSignal,
   });
 
   final String projectLabel;
   final Listenable updates;
   final List<SessionMenuSession> Function() sessions;
   final bool Function() isValid;
+  final ValueListenable<int>? dismissSignal;
 
   @override
   State<ProjectSessionPicker> createState() => _ProjectSessionPickerState();
@@ -32,6 +35,7 @@ class _ProjectSessionPickerState extends State<ProjectSessionPicker> {
   void initState() {
     super.initState();
     widget.updates.addListener(_handleUpdate);
+    widget.dismissSignal?.addListener(_dismiss);
   }
 
   @override
@@ -42,19 +46,24 @@ class _ProjectSessionPickerState extends State<ProjectSessionPicker> {
 
   void _handleUpdate() {
     if (!widget.isValid()) {
-      // Server changes invalidate this selector, not any route above it.
-      final route = _route;
-      if (route != null && route.isActive) {
-        route.navigator?.removeRoute(route);
-      }
+      _dismiss();
       return;
     }
     setState(() {});
   }
 
+  void _dismiss() {
+    // Invalidation and title-bar navigation remove only this owned route.
+    final route = _route;
+    if (route != null && route.isActive) {
+      route.navigator?.removeRoute(route);
+    }
+  }
+
   @override
   void dispose() {
     widget.updates.removeListener(_handleUpdate);
+    widget.dismissSignal?.removeListener(_dismiss);
     _searchController.dispose();
     super.dispose();
   }

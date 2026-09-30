@@ -8,7 +8,6 @@ import 'package:codewalk/presentation/providers/chat_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
 import 'package:codewalk/presentation/widgets/session_tab_strip.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,7 +49,10 @@ Future<({ChatProvider chat, SettingsProvider settings})> _pumpChat(
   FakeChatRepository repository, {
   bool pane = false,
   double width = 1200,
+  Project? currentProject,
+  bool integratedChrome = false,
 }) async {
+  final project = currentProject ?? _project;
   await tester.binding.setSurfaceSize(Size(width, 1000));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   tester.view.physicalSize = Size(width, 1000);
@@ -59,17 +61,17 @@ Future<({ChatProvider chat, SettingsProvider settings})> _pumpChat(
   addTearDown(tester.view.resetDevicePixelRatio);
   final local = InMemoryAppLocalDataSource()..activeServerId = 'srv_test';
   disableAutomaticUpdateChecksForTest(local);
-  await local.saveCurrentProjectId(_project.id, serverId: 'srv_test');
+  await local.saveCurrentProjectId(project.id, serverId: 'srv_test');
   await local.saveOpenProjectIdsJson(
-    jsonEncode([_project.id, _otherProject.id]),
+    jsonEncode([project.id, _otherProject.id]),
     serverId: 'srv_test',
   );
   final chat = buildChatPageProvider(
     localDataSource: local,
     chatRepository: repository,
     projectRepository: FakeProjectRepository(
-      currentProject: _project,
-      projects: [_project, _otherProject],
+      currentProject: project,
+      projects: [project, _otherProject],
     ),
   );
   final app = buildChatPageAppProvider(localDataSource: local);
@@ -80,8 +82,20 @@ Future<({ChatProvider chat, SettingsProvider settings})> _pumpChat(
   );
   await settings.initialize();
   await settings.setShowSessionTabsOverride(true);
-  await settings.setDesktopWindowChrome(DesktopWindowChrome.systemDecoration);
+  await settings.setDesktopWindowChrome(
+    integratedChrome
+        ? DesktopWindowChrome.integratedTabs
+        : DesktopWindowChrome.systemDecoration,
+  );
   await settings.setDesktopPaneVisible(DesktopPane.conversations, pane);
+  await tester.pumpWidget(
+    buildChatPageTestApp(
+      chat,
+      app,
+      settingsProvider: settings,
+      integratedWindowChrome: integratedChrome,
+    ),
+  );
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox.shrink());
     chat.dispose();
@@ -89,9 +103,6 @@ Future<({ChatProvider chat, SettingsProvider settings})> _pumpChat(
     app.dispose();
     settings.dispose();
   });
-  await tester.pumpWidget(
-    buildChatPageTestApp(chat, app, settingsProvider: settings),
-  );
   await tester.pumpAndSettle();
   await chat.loadSessions();
   await chat.selectSession(
@@ -132,6 +143,102 @@ Future<void> _settleNavigation(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('recent session activation supports root project-ID scopes', (
+    tester,
+  ) async {
+    final root = Project(
+      id: 'root',
+      name: 'Root',
+      path: '/',
+      createdAt: DateTime(2026),
+    );
+    final fixture = await _pumpChat(
+      tester,
+      FakeChatRepository(
+        sessions: [
+          for (final id in ['anchor', 'other'])
+            ChatSession(
+              id: id,
+              workspaceId: 'default',
+              title: id,
+              time: DateTime.now(),
+            ),
+        ],
+      ),
+      currentProject: root,
+    );
+    final anchor = fixture.chat.sessionTabs.singleWhere(
+      (tab) => tab.isSelected,
+    );
+    expect(anchor.identity.directory, root.id);
+    await _openMenu(tester, anchor);
+    await tester.tap(
+      find.byKey(const ValueKey<String>('session_tab_recent_other')),
+    );
+    await _settleNavigation(tester);
+    expect(fixture.chat.currentSession?.id, 'other');
+    expect(fixture.chat.projectProvider.currentProject?.id, root.id);
+  });
+
+  for (final action in ['switch', 'new', 'close-last']) {
+    testWidgets(
+      'integrated titlebar $action dismisses the project picker',
+      (tester) async {
+        final fixture = await _pumpChat(
+          tester,
+          FakeChatRepository(sessions: [_session('anchor'), _session('other')]),
+          integratedChrome: true,
+        );
+        final anchor = fixture.chat.sessionTabs.singleWhere(
+          (tab) => tab.isSelected,
+        );
+        if (action == 'close-last') {
+          for (final tab in fixture.chat.sessionTabs.where(
+            (tab) => tab.identity != anchor.identity,
+          )) {
+            fixture.chat.closeSessionTab(tab.identity);
+          }
+          await tester.pumpAndSettle();
+        }
+        await _openMenu(tester, anchor);
+        await tester.tap(
+          find.byKey(const ValueKey<String>('session_tab_menu_show_more')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey<String>('project_session_picker')),
+          findsOneWidget,
+        );
+        final strip = tester.widget<SessionTabStrip>(
+          find.byType(SessionTabStrip),
+        );
+        switch (action) {
+          case 'switch':
+            strip.onActivate(
+              fixture.chat.sessionTabs.singleWhere(
+                (tab) => tab.identity.sessionId == 'other',
+              ),
+            );
+          case 'new':
+            strip.onNewChatForProject!(anchor);
+          case 'close-last':
+            strip.onClose(anchor);
+        }
+        await _settleNavigation(tester);
+        expect(
+          find.byKey(const ValueKey<String>('project_session_picker')),
+          findsNothing,
+        );
+        expect(
+          fixture.chat.currentSession?.id,
+          action == 'switch' ? 'other' : isNot('anchor'),
+        );
+        expect(tester.takeException(), isNull);
+      },
+      variant: const TargetPlatformVariant({TargetPlatform.linux}),
+    );
+  }
+
   testWidgets(
     'session tab menu recent uses an inactive project snapshot for navigation',
     (tester) async {
@@ -318,7 +425,7 @@ void main() {
           findsOneWidget,
         );
       },
-      variant: TargetPlatformVariant({TargetPlatform.linux}),
+      variant: const TargetPlatformVariant({TargetPlatform.linux}),
     );
   }
 
