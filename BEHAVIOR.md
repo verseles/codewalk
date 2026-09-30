@@ -450,6 +450,7 @@
 - **Then** `build/icon.*` is checked as a direct Electron build-resource candidate without traversing generated `build` output
 - **Then** if multiple icons are found, known app-icon paths win over generic app assets, which win over web favicons; within the same priority, higher-resolution/density names and then the shortest relative path win
 - **Then** supported icons up to 5 MB are copied into CodeWalk app support storage and rendered in project rows, recent-session project chips, and the project-context header
+- **Then** when the desktop Conversations pane is hidden, the top-bar Project Context button uses the same current-project icon and updates when the project or its icon changes; without a current project or usable icon it keeps the folder fallback
 - **Then** ICO files are stored as PNG after local decoding; PNG, JPEG, SVG, and WebP bytes are stored as local app data without external network calls
 - **Then** CodeWalk does not show a manual `Find project icon` action; closed project history rows keep the stored/default icon until reopened
 - **Then** when no supported icon is found, the icon is unreadable/oversized, discovery is unavailable on the platform, or rendering fails, CodeWalk keeps the default `Symbols.folder_open` fallback
@@ -470,6 +471,7 @@
 - **Given** a connected server, an active project context, and shell-gated file operations supported for the project root
 - **When** the user opens a non-binary text file from the file tree, Quick Open, or a tapped assistant file path
 - **Then** the open-files surface renders a focused code editor with line numbers, syntax highlighting, a unified tab strip shared with session tabs (same Chrome visuals, gestures, overflow, and semantics; file tabs always show a close button and never pin), and the same desktop/mobile dialog behavior as the file viewer
+- **Then** `.jsonc` files, including uppercase extensions, use the bundled JSON highlighting mode for JSON structure and line/block comments; existing `.json` highlighting and editing/save behavior remain unchanged, and highlighting does not validate JSONC or add JSON5 support
 - **Then** the open-files surface shows no `Open files (n)` title; the tab strip itself communicates the open files, and editor actions (`Save`, `Undo`, `Redo`, autosave toggle, `Retry`, line-selection actions) live in a bottom action bar below the editor instead of the header row
 - **Then** the dialog close control shares the tab-strip header row on the right side at strip height instead of occupying a header row of its own, and the centered dialog keeps only thin side margins
 - **Then** closing the last open file tab dismisses the open-files dialog instead of leaving an empty panel
@@ -1111,6 +1113,18 @@
 - **Then** the app opens the file viewer for that path and scrolls to the referenced line instead of copying the text
 - **Then** Windows absolute paths such as `C:\repo\lib\main.dart:42` are tappable on every client OS, not only when CodeWalk itself is running on Windows
 - **Then** ordinary inline code snippets and fenced code blocks remain copyable
+
+### Long Markdown code blocks have accessible horizontal scrollbars
+
+- **Given** an ordinary fenced code block is wider than the message viewport
+- **Then** on desktop its horizontal scrollbar appears on hover, focus, or scrolling interaction and supports mouse thumb dragging and track clicks without copying the code
+- **Then** the overflowing block is keyboard-focusable; unmodified Left/Right scroll by a bounded step, Home/End move to the horizontal limits, and modified selection shortcuts or keys focused in other controls are not intercepted
+- **Then** horizontal wheel/touchpad input and mobile touch swipes continue to scroll the code, while vertical wheel input remains available to the parent chat
+- **Then** mobile scrollbars appear temporarily while scrolling, and the overflow-only bottom gutter keeps both Material and Cupertino thumbs clear of the text regardless of screen safe-area padding
+- **Then** blocks keep independent scroll controllers and preserve their offsets across content updates and resizing, clamp offsets when content shrinks, and dispose their scroll/focus resources when removed
+- **Given** the code fits within the viewport
+- **Then** no scrollbar or extra bottom gutter is shown, and the block does not add a keyboard tab stop
+- **Then** code-content taps still copy the source, syntax highlighting and theme typography are preserved, and Mermaid blocks keep their separate diagram behavior
 
 ### Message image sharing exports PNG files
 
