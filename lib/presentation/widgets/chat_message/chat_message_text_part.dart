@@ -49,6 +49,7 @@ extension _ChatMessageTextPartBuilder on _ChatMessageWidgetState {
             basicHtmlMathTag: BasicHtmlMathBuilder(),
           },
           'pre': _MarkdownCodeBlockTapBuilder(
+            partId: part.id,
             themeTokens: themeTokens,
             onTapCode: (code) => _copyTextToClipboard(context, code),
             onMermaidCode: (code) => MermaidDiagramWidget(
@@ -311,12 +312,15 @@ class _StreamingMarkdownThrottleState
 
 class _MarkdownCodeBlockTapBuilder extends MarkdownElementBuilder {
   _MarkdownCodeBlockTapBuilder({
+    required this.partId,
     required this.themeTokens,
     required this.onTapCode,
     this.onMermaidCode,
   });
 
   final OpenCodeThemeTokens themeTokens;
+  final String partId;
+  int _blockIndex = 0;
   final ValueChanged<String> onTapCode;
 
   /// If set and the fenced block language is "mermaid", the builder
@@ -338,6 +342,7 @@ class _MarkdownCodeBlockTapBuilder extends MarkdownElementBuilder {
       return null;
     }
     final language = _markdownCodeLanguage(element);
+    final blockIndex = _blockIndex++;
 
     // Route mermaid blocks to the diagram widget.
     if (language == 'mermaid' && onMermaidCode != null) {
@@ -360,28 +365,18 @@ class _MarkdownCodeBlockTapBuilder extends MarkdownElementBuilder {
       brightness: Theme.of(context).brightness,
       baseStyle: style,
     );
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => onTapCode(code),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: themeTokens.codeBlockBackground,
-          border: Border.all(color: themeTokens.border.withValues(alpha: 0.7)),
-          borderRadius: AppShapes.borderSmall,
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.all(8),
-          child: language == null
-              ? Text(code, style: style)
-              : HighlightView(
-                  code,
-                  language: language,
-                  theme: highlightTheme,
-                  textStyle: style,
-                ),
-        ),
-      ),
+    return _MarkdownScrollableCodeBlock(
+      key: ValueKey<String>('markdown_code_${partId}_$blockIndex'),
+      themeTokens: themeTokens,
+      onTapCode: () => onTapCode(code),
+      child: language == null
+          ? Text(code, style: style)
+          : HighlightView(
+              code,
+              language: language,
+              theme: highlightTheme,
+              textStyle: style,
+            ),
     );
   }
 
@@ -404,6 +399,165 @@ class _MarkdownCodeBlockTapBuilder extends MarkdownElementBuilder {
       }
     }
     return null;
+  }
+}
+
+class _MarkdownScrollableCodeBlock extends StatefulWidget {
+  const _MarkdownScrollableCodeBlock({
+    super.key,
+    required this.themeTokens,
+    required this.onTapCode,
+    required this.child,
+  });
+
+  final OpenCodeThemeTokens themeTokens;
+  final VoidCallback onTapCode;
+  final Widget child;
+
+  @override
+  State<_MarkdownScrollableCodeBlock> createState() =>
+      _MarkdownScrollableCodeBlockState();
+}
+
+class _MarkdownScrollableCodeBlockState
+    extends State<_MarkdownScrollableCodeBlock> {
+  final _controller = ScrollController();
+  final _focusNode = FocusNode(debugLabel: 'Markdown code scrolling');
+  Timer? _interactionTimer;
+  bool _overflow = false;
+  bool _hovered = false;
+  bool _focused = false;
+  bool _interacting = false;
+  bool _metricsScheduled = false;
+
+  @override
+  void dispose() {
+    _interactionTimer?.cancel();
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _updateMetrics() {
+    if (_metricsScheduled) return;
+    _metricsScheduled = true;
+    // Layout/streaming can change the extent without changing the offset.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _metricsScheduled = false;
+      if (!mounted || !_controller.hasClients) return;
+      final overflow = _controller.position.maxScrollExtent > 0;
+      if (overflow != _overflow) {
+        setState(() => _overflow = overflow);
+      }
+    });
+  }
+
+  void _showDuringInteraction() {
+    _interactionTimer?.cancel();
+    if (!_interacting) setState(() => _interacting = true);
+    _interactionTimer = Timer(const Duration(milliseconds: 1200), () {
+      if (mounted) setState(() => _interacting = false);
+    });
+  }
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    final keyboard = HardwareKeyboard.instance;
+    if (!node.hasPrimaryFocus ||
+        !_overflow ||
+        event is KeyUpEvent ||
+        keyboard.isControlPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
+    final position = _controller.position;
+    final double target;
+    if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      target = position.pixels - 80;
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      target = position.pixels + 80;
+    } else if (event.logicalKey == LogicalKeyboardKey.home) {
+      target = position.minScrollExtent;
+    } else if (event.logicalKey == LogicalKeyboardKey.end) {
+      target = position.maxScrollExtent;
+    } else {
+      return KeyEventResult.ignored;
+    }
+    _controller.jumpTo(
+      target.clamp(position.minScrollExtent, position.maxScrollExtent),
+    );
+    _showDuringInteraction();
+    return KeyEventResult.handled;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final platform = Theme.of(context).platform;
+    final desktop =
+        platform != TargetPlatform.android && platform != TargetPlatform.iOS;
+    final visible =
+        _overflow &&
+        (desktop ? _hovered || _focused || _interacting : _focused);
+    return Focus(
+      focusNode: _focusNode,
+      canRequestFocus: _overflow,
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: _handleKey,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: widget.themeTokens.codeBlockBackground,
+            border: Border.all(
+              color: _focused
+                  ? Theme.of(context).colorScheme.primary
+                  : widget.themeTokens.border.withValues(alpha: 0.7),
+            ),
+            borderRadius: AppShapes.borderSmall,
+          ),
+          child: NotificationListener<ScrollMetricsNotification>(
+            onNotification: (notification) {
+              if (notification.metrics.axis == Axis.horizontal)
+                _updateMetrics();
+              return false;
+            },
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.depth == 0 &&
+                    notification.metrics.axis == Axis.horizontal) {
+                  _updateMetrics();
+                  if (notification is ScrollUpdateNotification) {
+                    _showDuringInteraction();
+                  }
+                }
+                return false;
+              },
+              child: Scrollbar(
+                controller: _controller,
+                interactive: true,
+                thumbVisibility: visible,
+                trackVisibility: desktop && visible,
+                scrollbarOrientation: ScrollbarOrientation.bottom,
+                thickness: 6,
+                child: SingleChildScrollView(
+                  controller: _controller,
+                  primary: false,
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.fromLTRB(8, 8, 8, _overflow ? 20 : 8),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.onTapCode,
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

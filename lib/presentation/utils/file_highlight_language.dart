@@ -13,5 +13,9 @@ final Map<String, String> _builtinLanguageByNameOrAlias = () {
 }();
 
 String? resolveBuiltinFileHighlightLanguage(String extension) {
-  return _builtinLanguageByNameOrAlias[extension.trim().toLowerCase()];
+  final normalized = extension.trim().toLowerCase();
+  // The bundled JSON mode already highlights both JSONC comment forms.
+  return _builtinLanguageByNameOrAlias[normalized == 'jsonc'
+      ? 'json'
+      : normalized];
 }

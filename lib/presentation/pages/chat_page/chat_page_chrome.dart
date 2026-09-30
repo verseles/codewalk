@@ -667,7 +667,19 @@ extension _ChatPageChrome on _ChatPageState {
         IconButton(
           key: const ValueKey<String>('appbar_project_context_button'),
           tooltip: context.l10n.chatProjectContext2,
-          icon: const Icon(Symbols.folder_open),
+          icon: Selector<ProjectProvider, Project?>(
+            selector: (_, provider) => provider.currentProject,
+            builder: (context, project, _) => project == null
+                ? const Icon(Symbols.folder_open)
+                : ExcludeSemantics(
+                    child: ProjectIcon(
+                      project: project,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      autoDiscover: true,
+                    ),
+                  ),
+          ),
           onPressed: () => unawaited(_openProjectSelectorDialog()),
         ),
         if (isMobile || _timelineSearchActive || !refreshlessEnabled)
