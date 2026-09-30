@@ -81,7 +81,7 @@ codewalk/
 │       │   ├── codewalk_terminal_extra_keys.dart # Native Android/iOS terminal extra-key widget and controller
 │       │   ├── session_attention_overlay/ # Shared bubble/panel overlay widget and controller
 │       │   ├── project_context_menu.dart # ProjectContextMenuRegion with right-click, long-press, ContextMenu key, Shift+F10, semantics and destructive Close project
-│       │   ├── session_context_menu.dart # Shared session popup/context menu with SessionMenuAction enum and buildUnifiedSessionMenuEntries
+│       │   ├── session_context_menu.dart # Sidebar/Recent-session row menus plus the tab-only grouped icon menu; retains the existing sidebar dispatch
   │   │       ├── session_tab_icon_picker.dart # Session-tab icon preset picker dialog (project icon or 12 Material Symbols presets)
   │   │       └── session_tab_switcher_overlay.dart # SessionTabSwitcherOverlay Material You MRU tab-switcher overlay (issue #171)
 │   │       ├── app_tab_strip.dart      # Generic browser-style tab engine with responsive sizing, scrolling, gestures, menus, focus, and semantics
@@ -110,6 +110,7 @@ codewalk/
 │   ├── unit/providers/settings_release_history_test.dart # Installed-version interval, persistence, and announcement tests
 │   ├── widget/release_history_test.dart # Release history page and announcement dialog widget tests
 │   ├── widget/chat_page_smoke_test.dart # Five focused ChatPage smoke tests (composer tips and responsive shell)
+│   ├── widget/session_tab_context_menu_test.dart # Dedicated grouped session-tab menu coverage: layout, safe-area wrapping, keyboard focus, tooltips, semantics, and action selection (issue #221)
 │   ├── widget/chat_page_test.dart      # Extended ChatPage widget regressions, tagged slow
 │   └── web/speech_engine_platform_support_test.dart # Browser-only speech capability test
 ├── tool/ci/                            # Analyzer budget, LCOV coverage gate/fixtures, and session-overlay Android instrumentation scripts
@@ -330,7 +331,7 @@ lib/presentation/widgets/project_icon.dart # `ProjectIcon` widget renders cached
 lib/presentation/widgets/session_diff_viewer.dart # Rich diff review surface: DiffViewMode enum (summary/unified/split), 3 view toggles, line number gutters, per-line syntax highlighting, lazy hunk collapse/expand keyed by file/hunk identity, selected-file preservation across diff refreshes, onFileTap jump action (wired at all 3 call sites)
 lib/presentation/widgets/session_todo_list_widget.dart # Session task panel with progress bar and keyboard-aware collapse; compact mobile collapsed summaries use count-first wording (`x/y in progress`, `x/y done`); in-progress ring via `AppIndeterminateRing` (ADR-056)
 lib/presentation/widgets/app_indeterminate_progress.dart # App-global bounded indeterminate indicators (`AppIndeterminateRing`/`AppIndeterminateBar`) with shared ref-counted 125 ms clock: static on reduced motion and compact desktop slots, stepped determinate on larger desktop slots, native on mobile/web (ADR-056)
-lib/presentation/widgets/session_context_menu.dart # Shared session popup/context menu entries, row gesture wrapper, and dispatch helpers for main sidebar sessions and Recent sessions tiles; exposes SessionMenuAction enum and buildUnifiedSessionMenuEntries for unified tab/session menus (issues #162/#163)
+lib/presentation/widgets/session_context_menu.dart # Keeps the existing row-based sidebar/Recent-session menu and dispatch helpers unchanged; provides a private grouped icon `PopupMenuEntry` for session tabs with adaptive 3-column compact / 4-column wide layout that wraps to the popup's actual safe-area-constrained width, plus keyboard focus traversal, focus-triggered tooltips, and action semantics (issues #162/#163/#221)
 lib/presentation/widgets/project_context_menu.dart # ProjectContextMenuRegion with right-click, long-press, ContextMenu key, Shift+F10, semantics and destructive Close project (issues #162/#163)
 lib/presentation/widgets/app_tab_strip.dart      # Generic browser-style tab engine with responsive sizing, scrolling, gestures, menus, focus, and semantics; optional `AppTab.projectColor` uses contrast-preserving tinted surfaces across selection and interactive overlay states; optional generic AppTabAccessoryBuilder/accessoryBuilder rendered after regular tabs only (issue #200)
 lib/presentation/widgets/session_tab_strip.dart # Thin SessionTabRecord adapter over AppTabStrip with project icons, attention/busy visuals, focus restoration, and per-tab icon presets (issue #138); an independent provider/settings listener loads icon artwork and palettes even when attention or a preset replaces the leading project icon; groups tabs by project via session_tab_grouping.dart with per-group inline new-chat accessory and onNewChatForProject (issue #200)
