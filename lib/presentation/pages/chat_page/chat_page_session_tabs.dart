@@ -147,6 +147,8 @@ extension _ChatPageSessionTabs on _ChatPageState {
     Offset globalPosition, {
     required bool haptic,
   }) async {
+    if (!mounted) return;
+    _sessionTabMenuDismissSignal.value++;
     if (_isNewChatDraftTab(tab)) return;
     if (!mounted || !_isChatScreenActive()) return;
     final chatProvider = context.read<ChatProvider>();
@@ -176,6 +178,7 @@ extension _ChatPageSessionTabs on _ChatPageState {
       canCompact: canCompact,
       canCloseProject: canClose,
       closeProjectLabel: closeLabel,
+      dismissSignal: _sessionTabMenuDismissSignal,
     );
 
     if (haptic) {
@@ -500,6 +503,8 @@ extension _ChatPageSessionTabs on _ChatPageState {
   }
 
   Future<bool> _activateSessionTab(SessionTabRecord tab) async {
+    if (!mounted) return false;
+    _sessionTabMenuDismissSignal.value++;
     if (!_isChatScreenActive()) {
       return false;
     }
@@ -700,6 +705,8 @@ extension _ChatPageSessionTabs on _ChatPageState {
   }
 
   Future<void> _openNewChatForProject(SessionTabRecord anchor) async {
+    if (!mounted) return;
+    _sessionTabMenuDismissSignal.value++;
     if (!_isChatScreenActive()) {
       return;
     }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show Tristate;
 
 import 'package:codewalk/domain/entities/chat_session.dart';
@@ -43,6 +44,7 @@ Future<void> _pumpMenu(
   bool open = true,
   FocusNode? openerFocus,
   ValueChanged<SessionMenuAction?>? onSelected,
+  ValueNotifier<int>? dismissSignal,
 }) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump();
@@ -53,7 +55,21 @@ Future<void> _pumpMenu(
         data: MediaQuery.of(
           context,
         ).copyWith(textScaler: TextScaler.linear(textScale), padding: padding),
-        child: Directionality(textDirection: direction, child: child!),
+        child: Directionality(
+          textDirection: direction,
+          child: dismissSignal == null
+              ? child!
+              : Column(
+                  children: [
+                    TextButton(
+                      key: const ValueKey<String>('external_tab'),
+                      onPressed: () => dismissSignal.value++,
+                      child: const Text('Another window tab'),
+                    ),
+                    Expanded(child: child!),
+                  ],
+                ),
+        ),
       ),
       home: Scaffold(
         body: Builder(
@@ -78,6 +94,7 @@ Future<void> _pumpMenu(
                   canCompact: !disabled,
                   canCloseProject: !disabled,
                   closeProjectLabel: closeLabel,
+                  dismissSignal: dismissSignal,
                 ),
               );
               onSelected?.call(result);
@@ -131,8 +148,12 @@ void main() {
         SessionMenuAction.exportMarkdown,
         SessionMenuAction.exportJson,
       ],
-      [SessionMenuAction.share, SessionMenuAction.copyLink],
-      [SessionMenuAction.delete, SessionMenuAction.closeProject],
+      [SessionMenuAction.copyLink],
+      [
+        SessionMenuAction.delete,
+        SessionMenuAction.share,
+        SessionMenuAction.closeProject,
+      ],
     ];
     double previousY = 0;
     for (final group in groups) {
@@ -145,7 +166,17 @@ void main() {
     }
     expect(find.byType(Divider), findsNWidgets(4));
     final delete = tester.widget<IconButton>(_action(SessionMenuAction.delete));
-    expect(delete.style!.side!.resolve({}), isNotNull);
+    expect(delete.style!.side?.resolve({}), isNull);
+    final close = tester.widget<IconButton>(
+      _action(SessionMenuAction.closeProject),
+    );
+    expect(close.style!.side?.resolve({}), isNull);
+    final deleteX = tester.getCenter(_action(SessionMenuAction.delete)).dx;
+    final shareX = tester.getCenter(_action(SessionMenuAction.share)).dx;
+    final closeX = tester.getCenter(_action(SessionMenuAction.closeProject)).dx;
+    expect(deleteX, tester.getCenter(_action(SessionMenuAction.pin)).dx);
+    expect(closeX, tester.getCenter(_action(SessionMenuAction.archive)).dx);
+    expect(shareX, (deleteX + closeX) / 2);
   });
 
   testWidgets(
@@ -325,6 +356,56 @@ void main() {
   );
 
   testWidgets(
+    'an external window tab dismisses the exact popup and completes its future',
+    (tester) async {
+      final signal = ValueNotifier<int>(0);
+      addTearDown(signal.dispose);
+      var completed = false;
+      SessionMenuAction? result;
+      await _pumpMenu(
+        tester,
+        dismissSignal: signal,
+        onSelected: (value) {
+          completed = true;
+          result = value;
+        },
+      );
+      await tester.tap(find.byKey(const ValueKey<String>('external_tab')));
+      await tester.pumpAndSettle();
+      expect(_action(SessionMenuAction.pin), findsNothing);
+      expect(completed, isTrue);
+      expect(result, isNull);
+      expect(find.byKey(const ValueKey<String>('open_menu')), findsOneWidget);
+    },
+  );
+
+  testWidgets('external dismissal never pops a dialog above the menu', (
+    tester,
+  ) async {
+    final signal = ValueNotifier<int>(0);
+    addTearDown(signal.dispose);
+    await _pumpMenu(tester, dismissSignal: signal);
+    final context = tester.element(
+      find.byKey(const ValueKey<String>('open_menu')),
+    );
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => const AlertDialog(title: Text('Keep this dialog')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('external_tab')));
+    await tester.pumpAndSettle();
+    expect(_action(SessionMenuAction.pin), findsNothing);
+    expect(find.text('Keep this dialog'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey<String>('external_tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Keep this dialog'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
     'narrow safe-area popup keeps every action inside its usable width',
     (tester) async {
       tester.view.physicalSize = const Size(200, 640);
@@ -375,10 +456,23 @@ void main() {
         final pin = tester.getRect(_action(SessionMenuAction.pin));
         expect(pin.left, greaterThanOrEqualTo(0));
         expect(pin.right, lessThanOrEqualTo(width));
-        expect(
-          tester.getCenter(_action(SessionMenuAction.archive)).dy,
-          greaterThan(tester.getCenter(_action(SessionMenuAction.pin)).dy),
-        );
+        final archiveY = tester
+            .getCenter(_action(SessionMenuAction.archive))
+            .dy;
+        final pinY = tester.getCenter(_action(SessionMenuAction.pin)).dy;
+        if (width >= 240) {
+          expect(archiveY, pinY, reason: 'Four targets fit on mobile');
+          expect(
+            tester.getCenter(_action(SessionMenuAction.share)).dy,
+            tester.getCenter(_action(SessionMenuAction.delete)).dy,
+          );
+          expect(
+            tester.getCenter(_action(SessionMenuAction.closeProject)).dy,
+            tester.getCenter(_action(SessionMenuAction.delete)).dy,
+          );
+        } else {
+          expect(archiveY, greaterThan(pinY));
+        }
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pumpAndSettle();
       }

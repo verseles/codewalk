@@ -368,6 +368,7 @@ class _ChatPageState extends State<ChatPage>
   // no ChatProvider notification happens until commit.
   List<SessionTabRecord> _tabSwitcherTabs = const <SessionTabRecord>[];
   final ValueNotifier<int?> _tabSwitcherPreview = ValueNotifier<int?>(null);
+  final ValueNotifier<int> _sessionTabMenuDismissSignal = ValueNotifier<int>(0);
   Set<SessionTabIdentity> _knownSessionTabIdentities = <SessionTabIdentity>{};
   final Set<SessionTabIdentity> _pendingSessionTabHintIdentities =
       <SessionTabIdentity>{};
@@ -943,6 +944,7 @@ class _ChatPageState extends State<ChatPage>
     _timelineSearchController.dispose();
     _timelineSearchFocusNode.dispose();
     _tabSwitcherPreview.dispose();
+    _sessionTabMenuDismissSignal.dispose();
     _scrollController.removeListener(_handleScrollChanged);
     HardwareKeyboard.instance.removeHandler(_handleGlobalShortcutKeyEvent);
     ShowcaseView.get().unregister();

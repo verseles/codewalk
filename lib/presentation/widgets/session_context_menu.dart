@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -156,12 +157,17 @@ class SessionContextMenuRegion extends StatelessWidget {
 
         return CallbackShortcuts(
           bindings: <ShortcutActivator, VoidCallback>{
-            const SingleActivator(LogicalKeyboardKey.contextMenu): () => openAtCenter(haptic: false),
-            const SingleActivator(LogicalKeyboardKey.f10, shift: true): () => openAtCenter(haptic: false),
+            const SingleActivator(LogicalKeyboardKey.contextMenu): () =>
+                openAtCenter(haptic: false),
+            const SingleActivator(LogicalKeyboardKey.f10, shift: true): () =>
+                openAtCenter(haptic: false),
           },
           child: Semantics(
             customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
-              CustomSemanticsAction(label: innerContext.l10n.chatSessionActions): () => openAtCenter(haptic: false),
+              CustomSemanticsAction(
+                label: innerContext.l10n.chatSessionActions,
+              ): () =>
+                  openAtCenter(haptic: false),
             },
             onLongPress: () => openAtCenter(haptic: true),
             child: GestureDetector(
@@ -296,6 +302,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
   bool canCompact = true,
   bool canCloseProject = false,
   String? closeProjectLabel,
+  ValueListenable<int>? dismissSignal,
 }) {
   _SessionMenuIconAction item(
     SessionMenuAction action, {
@@ -397,8 +404,22 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
           label: context.l10n.sessionExportDebugJson,
         ),
       ],
-    if (session != null)
+    if (session?.shareUrl?.isNotEmpty == true)
       [
+        item(
+          SessionMenuAction.copyLink,
+          icon: Symbols.content_copy,
+          label: context.l10n.sessionCopyLink,
+        ),
+      ],
+    [
+      item(
+        SessionMenuAction.delete,
+        icon: Symbols.delete,
+        label: context.l10n.sessionDelete,
+        destructive: true,
+      ),
+      if (session != null)
         item(
           SessionMenuAction.share,
           icon: session.shared ? Symbols.link_off : Symbols.link,
@@ -411,20 +432,6 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
                     : context.l10n.sessionShareAction),
           toggled: session.shared,
         ),
-        if (session.shareUrl != null && session.shareUrl!.isNotEmpty)
-          item(
-            SessionMenuAction.copyLink,
-            icon: Symbols.content_copy,
-            label: context.l10n.sessionCopyLink,
-          ),
-      ],
-    [
-      item(
-        SessionMenuAction.delete,
-        icon: Symbols.delete,
-        label: context.l10n.sessionDelete,
-        destructive: true,
-      ),
       if (closeProjectLabel != null)
         item(
           SessionMenuAction.closeProject,
@@ -440,6 +447,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
     _SessionActionGridMenuEntry(
       groups: groups,
       initialColumns: _sessionMenuColumns(context),
+      dismissSignal: dismissSignal,
     ),
   ];
 }
@@ -447,8 +455,7 @@ List<PopupMenuEntry<SessionMenuAction>> buildUnifiedSessionMenuEntries(
 int _sessionMenuColumns(BuildContext context) {
   final media = MediaQuery.of(context);
   final available = media.size.width - media.padding.horizontal - 16;
-  final preferred = media.size.width < 600 ? 3 : 4;
-  return (available / 56).floor().clamp(1, preferred);
+  return (available / 56).floor().clamp(1, 4);
 }
 
 class _SessionMenuIconAction {
@@ -473,10 +480,12 @@ class _SessionActionGridMenuEntry extends PopupMenuEntry<SessionMenuAction> {
   const _SessionActionGridMenuEntry({
     required this.groups,
     required this.initialColumns,
+    this.dismissSignal,
   });
 
   final List<List<_SessionMenuIconAction>> groups;
   final int initialColumns;
+  final ValueListenable<int>? dismissSignal;
 
   @override
   double get height =>
@@ -501,9 +510,41 @@ class _SessionActionGridMenuEntryState
     traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
     directionalTraversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
   );
+  ModalRoute<SessionMenuAction>? _menuRoute;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.dismissSignal?.addListener(_dismissMenu);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _menuRoute = ModalRoute.of<SessionMenuAction>(context);
+  }
+
+  @override
+  void didUpdateWidget(_SessionActionGridMenuEntry oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.dismissSignal != widget.dismissSignal) {
+      oldWidget.dismissSignal?.removeListener(_dismissMenu);
+      widget.dismissSignal?.addListener(_dismissMenu);
+    }
+  }
+
+  void _dismissMenu() {
+    final route = _menuRoute;
+    if (route != null && route.isActive) {
+      // Integrated window tabs live outside the popup's modal barrier.
+      // Remove only this menu, never a dialog subsequently opened above it.
+      route.navigator?.removeRoute(route);
+    }
+  }
 
   @override
   void dispose() {
+    widget.dismissSignal?.removeListener(_dismissMenu);
     _scopeNode.dispose();
     super.dispose();
   }
@@ -543,6 +584,9 @@ class _SessionActionGridMenuEntryState
                   // showMenu removes MediaQuery padding but constrains the
                   // surface to the safe area. Wrap uses that actual width.
                   Wrap(
+                    alignment: groupIndex == widget.groups.length - 1
+                        ? WrapAlignment.spaceBetween
+                        : WrapAlignment.start,
                     children: [
                       for (final item in widget.groups[groupIndex])
                         FocusTraversalOrder(
@@ -646,9 +690,6 @@ class _SessionMenuIconButtonState extends State<_SessionMenuIconButton> {
               visualDensity: VisualDensity.standard,
               foregroundColor: item.destructive
                   ? Theme.of(context).colorScheme.error
-                  : null,
-              side: item.destructive
-                  ? BorderSide(color: Theme.of(context).colorScheme.outline)
                   : null,
             ),
             icon: Icon(item.icon, fill: item.toggled == true ? 1 : 0),
