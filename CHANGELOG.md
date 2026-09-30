@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.262.0 - 2026-09-30
+
+> 📣 Switch between a project's recent sessions directly from its tab menu, with clear status indicators and quick access to more conversations.
+
+- fix(tabs): guard project picker navigation and root session scopes
+- chore: align Flutter lockfile and remove obsolete todo notes
+- feat(tabs): switch recent project sessions from the context menu (#222)
+- docs(tabs): document menu dismissal and responsive footer
+
 ## v1.261.1 - 2026-09-30
 
 - fix(tabs): dismiss context menus on switch and balance mobile actions
