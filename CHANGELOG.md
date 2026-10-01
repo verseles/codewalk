@@ -2,6 +2,13 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.265.0 - 2026-10-01
+
+> 📣 Fixed desktop code editor right-click crashes. Clipboard menus now open reliably while preserving mobile selection, read-only behavior, and light and dark themes.
+
+- fix(editor): prevent desktop context menu crashes and own toolbar lifecycle
+- docs(chat): describe empty-send continue, dialog save shortcuts, and active task summaries
+
 ## v1.264.0 - 2026-09-30
 
 > 📣 Double-tap an idle, empty Send button to send continue. Save with Ctrl+S or Cmd+S from anywhere in the editor dialog, and see the current task in collapsed task lists.
