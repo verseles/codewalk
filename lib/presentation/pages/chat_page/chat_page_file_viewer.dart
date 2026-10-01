@@ -770,112 +770,120 @@ extension _ChatPageFileViewer on _ChatPageState {
     final textStyle = Theme.of(
       context,
     ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace', height: 1.4);
-    final editor = CodeEditor(
-      key: ValueKey<String>('file_editor_$path'),
-      controller: draft.controller,
-      scrollController: draft.scrollController,
+    final editor = FileEditorToolbarOwner(
       readOnly: readOnly,
-      showCursorWhenReadOnly: false,
-      toolbarController: fileEditorSelectionToolbarController(
+      controller: draft.controller,
+      builder: (toolbar, escapeAction) => CodeEditor(
+        key: ValueKey<String>('file_editor_$path'),
+        controller: draft.controller,
+        scrollController: draft.scrollController,
         readOnly: readOnly,
-      ),
-      wordWrap: false,
-      chunkAnalyzer: const NonCodeChunkAnalyzer(),
-      onChanged: (_) {
-        if (_isEditorContentTooLarge(draft.controller.text)) {
-          draft.saveErrorMessage = _draftTooLargeSaveMessage;
-        } else if (draft.saveErrorMessage != null) {
-          draft.saveErrorMessage = null;
-        }
-        _scheduleEditorAutosave(draft: draft, onSave: onSave);
-        onChanged?.call();
-      },
-      padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
-      indicatorBuilder:
-          (context, editingController, chunkController, notifier) {
-            final selectedLines =
-                fileState.selectedLinesByPath[normalizedPath] ?? const <int>{};
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                border: Border(
-                  right: BorderSide(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        showCursorWhenReadOnly: false,
+        toolbarController: toolbar,
+        shortcutOverrideActions: <Type, Action<Intent>>{
+          CodeShortcutEscIntent: escapeAction,
+        },
+        wordWrap: false,
+        chunkAnalyzer: const NonCodeChunkAnalyzer(),
+        onChanged: (_) {
+          if (_isEditorContentTooLarge(draft.controller.text)) {
+            draft.saveErrorMessage = _draftTooLargeSaveMessage;
+          } else if (draft.saveErrorMessage != null) {
+            draft.saveErrorMessage = null;
+          }
+          _scheduleEditorAutosave(draft: draft, onSave: onSave);
+          onChanged?.call();
+        },
+        padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
+        indicatorBuilder:
+            (context, editingController, chunkController, notifier) {
+              final selectedLines =
+                  fileState.selectedLinesByPath[normalizedPath] ??
+                  const <int>{};
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerLow,
+                  border: Border(
+                    right: BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
                   ),
                 ),
-              ),
-              child: Listener(
-                key: ValueKey<String>('file_editor_gutter_$normalizedPath'),
-                behavior: HitTestBehavior.opaque,
-                onPointerDown: (event) {
-                  final lineNumber = _lineNumberForEditorGutterTap(
-                    controller: editingController,
-                    notifier: notifier,
-                    localPosition: event.localPosition,
-                  );
-                  if (lineNumber == null) {
-                    return;
-                  }
-                  _handleGutterLineTap(
-                    fileState: fileState,
-                    path: normalizedPath,
-                    lineNumber: lineNumber,
-                    lineCount: editingController.lineCount,
-                    isShiftHeld: HardwareKeyboard.instance.isShiftPressed,
-                  );
-                  onLineSelectionChanged?.call();
-                },
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _EditorLineSelectionPainter(
-                          controller: editingController,
-                          notifier: notifier,
-                          selectedLines: selectedLines,
-                          color: colorScheme.primary.withValues(alpha: 0.12),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: DefaultCodeLineNumber(
-                        controller: editingController,
-                        notifier: notifier,
-                        textStyle: textStyle?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.55,
+                child: Listener(
+                  key: ValueKey<String>('file_editor_gutter_$normalizedPath'),
+                  behavior: HitTestBehavior.opaque,
+                  onPointerDown: (event) {
+                    final lineNumber = _lineNumberForEditorGutterTap(
+                      controller: editingController,
+                      notifier: notifier,
+                      localPosition: event.localPosition,
+                    );
+                    if (lineNumber == null) {
+                      return;
+                    }
+                    _handleGutterLineTap(
+                      fileState: fileState,
+                      path: normalizedPath,
+                      lineNumber: lineNumber,
+                      lineCount: editingController.lineCount,
+                      isShiftHeld: HardwareKeyboard.instance.isShiftPressed,
+                    );
+                    onLineSelectionChanged?.call();
+                  },
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _EditorLineSelectionPainter(
+                            controller: editingController,
+                            notifier: notifier,
+                            selectedLines: selectedLines,
+                            color: colorScheme.primary.withValues(alpha: 0.12),
                           ),
                         ),
-                        focusedTextStyle: textStyle?.copyWith(
-                          color: colorScheme.primary,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: DefaultCodeLineNumber(
+                          controller: editingController,
+                          notifier: notifier,
+                          textStyle: textStyle?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.55,
+                            ),
+                          ),
+                          focusedTextStyle: textStyle?.copyWith(
+                            color: colorScheme.primary,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+              );
+            },
+        style: CodeEditorStyle(
+          fontSize: textStyle?.fontSize,
+          fontFamily: 'monospace',
+          fontHeight: 1.4,
+          textColor: colorScheme.onSurface,
+          backgroundColor: colorScheme.surface,
+          selectionColor: colorScheme.primary.withValues(alpha: 0.20),
+          highlightColor: colorScheme.secondaryContainer.withValues(
+            alpha: 0.45,
+          ),
+          cursorColor: colorScheme.primary,
+          cursorLineColor: colorScheme.primary.withValues(alpha: 0.08),
+          codeTheme: CodeHighlightTheme(
+            languages: <String, CodeHighlightThemeMode>{
+              language: CodeHighlightThemeMode(
+                mode: _resolveEditorLanguageMode(language),
+                maxSize: _maxHighlightedFileLength,
+                maxLineLength: 20000,
               ),
-            );
-          },
-      style: CodeEditorStyle(
-        fontSize: textStyle?.fontSize,
-        fontFamily: 'monospace',
-        fontHeight: 1.4,
-        textColor: colorScheme.onSurface,
-        backgroundColor: colorScheme.surface,
-        selectionColor: colorScheme.primary.withValues(alpha: 0.20),
-        highlightColor: colorScheme.secondaryContainer.withValues(alpha: 0.45),
-        cursorColor: colorScheme.primary,
-        cursorLineColor: colorScheme.primary.withValues(alpha: 0.08),
-        codeTheme: CodeHighlightTheme(
-          languages: <String, CodeHighlightThemeMode>{
-            language: CodeHighlightThemeMode(
-              mode: _resolveEditorLanguageMode(language),
-              maxSize: _maxHighlightedFileLength,
-              maxLineLength: 20000,
-            ),
-          },
-          theme: _resolveHighlightTheme(context),
+            },
+            theme: _resolveHighlightTheme(context),
+          ),
         ),
       ),
     );
@@ -1247,22 +1255,83 @@ extension _ChatPageFileViewer on _ChatPageState {
   }
 }
 
-/// Selection toolbars for the file editor, one per edit mode.
+/// Selection toolbars for the file editor, owned by each mounted editor.
 ///
 /// `CodeEditor` only shows a selection menu when a toolbar controller is
 /// supplied; without one it calls `toolbarController?.show(...)` and nothing
 /// happens, which is why copying and pasting were unavailable on Android
 /// (#121). Button labels come from `ContextMenuButtonType`, so Flutter
 /// localises them and no new strings are needed.
-final Map<bool, SelectionToolbarController> _fileEditorToolbarControllers =
-    <bool, SelectionToolbarController>{};
-
 SelectionToolbarController fileEditorSelectionToolbarController({
   required bool readOnly,
 }) {
-  return _fileEditorToolbarControllers.putIfAbsent(
-    readOnly,
-    () => MobileSelectionToolbarController(
+  return _FileEditorSelectionToolbarController(readOnly: readOnly);
+}
+
+class FileEditorToolbarOwner extends StatefulWidget {
+  const FileEditorToolbarOwner({
+    super.key,
+    required this.readOnly,
+    required this.controller,
+    required this.builder,
+  });
+
+  final bool readOnly;
+  final CodeLineEditingController controller;
+  final Widget Function(SelectionToolbarController, Action<Intent>) builder;
+
+  @override
+  State<FileEditorToolbarOwner> createState() => _FileEditorToolbarOwnerState();
+}
+
+class _FileEditorToolbarOwnerState extends State<FileEditorToolbarOwner> {
+  late _FileEditorSelectionToolbarController _toolbar;
+
+  @override
+  void initState() {
+    super.initState();
+    _toolbar = _FileEditorSelectionToolbarController(readOnly: widget.readOnly);
+  }
+
+  @override
+  void didUpdateWidget(FileEditorToolbarOwner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.readOnly != widget.readOnly ||
+        oldWidget.controller != widget.controller) {
+      _toolbar.hide(context);
+      _toolbar = _FileEditorSelectionToolbarController(
+        readOnly: widget.readOnly,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    // re_editor's desktop overlay does not hide its toolbar on disposal.
+    _toolbar.hide(context);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(
+    _toolbar,
+    CallbackAction<CodeShortcutEscIntent>(
+      onInvoke: (_) {
+        if (_toolbar.isDesktopShown) {
+          _toolbar.hide(context);
+        } else {
+          widget.controller.cancelSelection();
+        }
+        return null;
+      },
+    ),
+  );
+}
+
+class _FileEditorSelectionToolbarController
+    implements SelectionToolbarController {
+  _FileEditorSelectionToolbarController({required this.readOnly}) {
+    _mobile = MobileSelectionToolbarController(
       builder:
           ({
             required BuildContext context,
@@ -1271,48 +1340,136 @@ SelectionToolbarController fileEditorSelectionToolbarController({
             required VoidCallback onDismiss,
             required VoidCallback onRefresh,
           }) {
-            final hasSelection = controller.selectedText.isNotEmpty;
             return AdaptiveTextSelectionToolbar.buttonItems(
               anchors: anchors,
-              buttonItems: <ContextMenuButtonItem>[
-                if (hasSelection)
-                  ContextMenuButtonItem(
-                    type: ContextMenuButtonType.copy,
-                    onPressed: () {
-                      unawaited(controller.copy());
-                      onDismiss();
-                    },
-                  ),
-                if (hasSelection && !readOnly)
-                  ContextMenuButtonItem(
-                    type: ContextMenuButtonType.cut,
-                    onPressed: () {
-                      controller.cut();
-                      onDismiss();
-                    },
-                  ),
-                // Pasting needs a writable buffer, so it is offered only when
-                // the file is actually editable.
-                if (!readOnly)
-                  ContextMenuButtonItem(
-                    type: ContextMenuButtonType.paste,
-                    onPressed: () {
-                      controller.paste();
-                      onDismiss();
-                    },
-                  ),
-                ContextMenuButtonItem(
-                  type: ContextMenuButtonType.selectAll,
-                  onPressed: () {
-                    controller.selectAll();
-                    onRefresh();
-                  },
-                ),
-              ],
+              buttonItems: _buttonItems(controller, onDismiss, onRefresh),
             );
           },
-    ),
-  );
+    );
+  }
+
+  final bool readOnly;
+  late final MobileSelectionToolbarController _mobile;
+  ContextMenuController? _desktop;
+
+  bool get isDesktopShown => _desktop?.isShown ?? false;
+
+  List<ContextMenuButtonItem> _buttonItems(
+    CodeLineEditingController controller,
+    VoidCallback onDismiss,
+    VoidCallback onRefresh,
+  ) {
+    final hasSelection = controller.selectedText.isNotEmpty;
+    return <ContextMenuButtonItem>[
+      if (hasSelection)
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.copy,
+          onPressed: () {
+            unawaited(controller.copy());
+            onDismiss();
+          },
+        ),
+      if (hasSelection && !readOnly)
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.cut,
+          onPressed: () {
+            controller.cut();
+            onDismiss();
+          },
+        ),
+      // Pasting needs a writable buffer, so it is offered only when
+      // the file is actually editable.
+      if (!readOnly)
+        ContextMenuButtonItem(
+          type: ContextMenuButtonType.paste,
+          onPressed: () {
+            controller.paste();
+            onDismiss();
+          },
+        ),
+      ContextMenuButtonItem(
+        type: ContextMenuButtonType.selectAll,
+        onPressed: () {
+          controller.selectAll();
+          onRefresh();
+        },
+      ),
+    ];
+  }
+
+  @override
+  void hide(BuildContext context) {
+    _mobile.hide(context);
+    _desktop?.remove();
+    _desktop = null;
+  }
+
+  @override
+  void show({
+    required BuildContext context,
+    required CodeLineEditingController controller,
+    required TextSelectionToolbarAnchors anchors,
+    Rect? renderRect,
+    required LayerLink layerLink,
+    required ValueNotifier<bool> visibility,
+  }) {
+    hide(context);
+    // Mobile selection handles supply a render rectangle. Desktop mouse
+    // selection deliberately supplies null; its anchor is already global.
+    if (renderRect != null) {
+      _mobile.show(
+        context: context,
+        controller: controller,
+        anchors: anchors,
+        renderRect: renderRect,
+        layerLink: layerLink,
+        visibility: visibility,
+      );
+      return;
+    }
+    final menu = ContextMenuController();
+    _desktop = menu;
+    menu.show(
+      context: context,
+      contextMenuBuilder: (menuContext) {
+        final items = _buttonItems(controller, () => hide(context), () {
+          if (menu.isShown) menu.markNeedsBuild();
+        });
+        return Padding(
+          padding: const EdgeInsets.all(8),
+          child: CustomSingleChildLayout(
+            delegate: DesktopTextSelectionToolbarLayoutDelegate(
+              anchor: anchors.primaryAnchor - const Offset(8, 8),
+            ),
+            child: TapRegion(
+              onTapOutside: (_) => hide(context),
+              // Keep toolbar taps in the editor's focus group so selecting
+              // all can refresh the menu instead of dismissing it on blur.
+              child: CodeEditorTapRegion(
+                child: SizedBox(
+                  width: 222,
+                  child: Material(
+                    key: const ValueKey<String>('file_editor_desktop_menu'),
+                    color: Theme.of(menuContext).colorScheme.surfaceContainer,
+                    elevation: 2,
+                    borderRadius: BorderRadius.circular(8),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                        menuContext,
+                        items,
+                      ).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _EditorLineSelectionPainter extends CustomPainter {
