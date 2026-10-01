@@ -518,6 +518,17 @@
 - **Then** binary files keep their existing non-editing fallback state
 - **Then** files or editor drafts larger than 64 KiB UTF-8 open read-only or become unsaveable so editing stays responsive, while servers without supported shell file operations keep the existing safe fallback behavior
 
+### File editor clipboard menus follow the input surface
+
+- **Given** an open text file in the built-in editor
+- **When** the user right-clicks inside the editor on desktop
+- **Then** a bounded context menu opens near the mouse position using the current light or dark theme, without a selection-rectangle exception or a full-screen error surface
+- **Then** `Copy` is available for selected text, `Cut` requires selected text and a writable file, `Paste` requires a writable file, and `Select all` remains available for read-only files
+- **Then** choosing `Select all` refreshes the menu actions while keeping the editor's focus group intact
+- **Then** an outside click, editor focus loss, scrolling, a content edit, or editor teardown dismisses the desktop menu; switching buffers or read-only mode also removes the previous menu
+- **Then** `Escape` dismisses an open desktop menu without clearing the selection; when no menu is open it keeps the editor's selection-cancel behavior
+- **Then** Android and iOS selection-handle menus retain the mobile toolbar path and the same clipboard action restrictions
+
 ### Composer mentions include workspace symbols
 
 - **Given** the user types `@` in the composer
