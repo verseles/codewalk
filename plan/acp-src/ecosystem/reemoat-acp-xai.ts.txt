@@ -1,0 +1,260 @@
+// Raw extract from https://github.com/rends-east/reemoat/blob/568beecb2e4ff3acff1be75690f68af462b6a483/src/acp/xai.ts (AGPL-3.0) - Grok Build ACP extension methods
+/** grok's own client-bound requests, which ACP has no method for: the one module that knows their shapes, measured on grok 1.0.40 (Q6.113, Q2.235). */
+
+import * as acp from "@agentclientprotocol/sdk";
+import type { ElicitationRequest } from "./client.js";
+import { MAX_PARENT_ID_CHARS } from "./subagents.js";
+
+export const XAI_ASK_USER_QUESTION = "_x.ai/ask_user_question";
+export const XAI_EXIT_PLAN_MODE = "_x.ai/exit_plan_mode";
+export const XAI_MCP_ELICIT = "_x.ai/mcp/elicit";
+/** A notification firehose; only `interaction_resolved` is read, the agent withdrawing what it asked. */
+export const XAI_SESSION_NOTIFICATION = "_x.ai/session_notification";
+
+export interface XaiQuestion {
+  /** The answers map's key, so it is carried whole and never clipped. */
+  question: string;
+  options: { label: string; description: string | null }[];
+  multiSelect: boolean;
+}
+
+export interface XaiQuestionRequest {
+  sessionId: string;
+  toolCallId: string;
+  questions: XaiQuestion[];
+}
+
+/** `chat_about_this` and `skip_interview` exist on the wire and are never sent: nothing on the card asks for either. */
+export type XaiQuestionResponse =
+  | { outcome: "accepted"; answers: Record<string, string | string[]> }
+  | { outcome: "cancelled" };
+
+export interface XaiPlanRequest {
+  sessionId: string;
+  toolCallId: string;
+  plan: string;
+}
+
+/** Any other outcome reads to grok as "revise the plan", which is what cancelled is measured to do. */
+export type XaiPlanResponse = { outcome: "approved" | "abandoned" | "cancelled" };
+
+export interface XaiMcpElicitRequest {
+  sessionId: string;
+  toolCallId: string | null;
+  serverName: string | null;
+  message: string;
+  requestedSchema: acp.ElicitationSchema;
+}
+
+export type XaiMcpElicitResponse =
+  | { outcome: "accept"; content: Record<string, unknown> }
+  | { outcome: "decline" }
+  | { outcome: "cancel" };
+
+// The keys and the marker of claude-agent-acp's AskUserQuestion bridge, whose marker is deliberately agent-neutral.
+const QUESTION_KEY = (index: number): string => `question_${index}`;
+const OWN_ANSWER_KEY = (index: number): string => `question_${index}_custom`;
+const OWN_ANSWER_MARKER = "_askUserQuestionCustomAnswer";
+const SEVERAL_QUESTIONS = "Please answer the following questions.";
+
+export const XAI_PLAN_TITLE = "Approve plan";
+
+/** Named by the outcome each sends; the card draws these names, since a kind's word describes a grant and a plan is not one. */
+export const XAI_PLAN_OPTIONS: readonly acp.PermissionOption[] = Object.freeze([
+  Object.freeze({ optionId: "approved", name: "Approve plan", kind: "allow_once" as const }),
+  Object.freeze({ optionId: "abandoned", name: "Abandon plan", kind: "reject_once" as const }),
+]);
+
+const PLAN_OUTCOMES: Readonly<Record<string, XaiPlanResponse["outcome"]>> = Object.freeze({
+  approved: "approved",
+  abandoned: "abandoned",
+});
+
+function refuse(method: string, why: string): never {
+  throw acp.RequestError.invalidParams({ method }, why);
+}
+
+function record(value: unknown, method: string, what: string): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) refuse(method, `${what} must be an object`);
+  return value as Record<string, unknown>;
+}
+
+function text(value: unknown, method: string, what: string): string {
+  if (typeof value !== "string" || value.length === 0) refuse(method, `${what} must be a non-empty string`);
+  return value;
+}
+
+// Refused rather than clipped: the id is how grok's own withdrawal names the request (Q6.113).
+function callId(value: unknown, method: string): string {
+  const id = text(value, method, "toolCallId");
+  if (id.length > MAX_PARENT_ID_CHARS) refuse(method, `toolCallId is longer than ${MAX_PARENT_ID_CHARS} characters`);
+  return id;
+}
+
+/** Strict about what is read, lenient about what is not: `mode`, and anything grok adds later, is ignored (Q2.22). */
+export function parseQuestionRequest(params: unknown): XaiQuestionRequest {
+  const method = XAI_ASK_USER_QUESTION;
+  const body = record(params, method, "params");
+  const raw = body["questions"];
+  if (!Array.isArray(raw) || raw.length === 0) refuse(method, "questions must be a non-empty array");
+  const questions: XaiQuestion[] = [];
+  const seen = new Set<string>();
+  for (const entry of raw) {
+    const shape = record(entry, method, "a question");
+    const question = text(shape["question"], method, "a question's text");
+    // Answers are keyed by the text, so two identical questions could not both be answered; grok refuses them itself.
+    if (seen.has(question)) refuse(method, `two questions share the text ${JSON.stringify(question)}`);
+    seen.add(question);
+    const rawOptions = shape["options"] ?? [];
+    if (!Array.isArray(rawOptions)) refuse(method, "a question's options must be an array");
+    const options = rawOptions.map((option) => {
+      const fields = record(option, method, "an option");
+      const label = text(fields["label"], method, "an option's label");
+      const described = fields["description"];
+      if (described !== undefined && described !== null && typeof described !== "string") {
+        refuse(method, "an option's description must be a string");
+      }
+      // grok fills an absent description with the label, which would draw every such option twice.
+      const description = typeof described === "string" && described !== "" && described !== label ? described : null;
+      return { label, description };
+    });
+    const multi = shape["multiSelect"];
+    if (multi !== undefined && multi !== null && typeof multi !== "boolean") refuse(method, "multiSelect must be a boolean");
+    questions.push({ question, options, multiSelect: multi === true });
+  }
+  return { sessionId: text(body["sessionId"], method, "sessionId"), toolCallId: callId(body["toolCallId"], method), questions };
+}
+
+/** claude's bridge, one field per question plus its own-answer box; the projection behind it holds every bound. */
+export function questionElicitation(request: XaiQuestionRequest): ElicitationRequest {
+  const single = request.questions.length === 1;
+  const properties: Record<string, acp.ElicitationPropertySchema> = {};
+  request.questions.forEach((question, index) => {
+    const description = single ? undefined : question.question;
+    // grok has no short header, so the question is the title: it labels a logged answer the transcript cannot join back.
+    const title = question.question;
+    if (question.options.length === 0) {
+      properties[QUESTION_KEY(index)] = { type: "string", title, description };
+      return;
+    }
+    const choices = question.options.map((option) => ({
+      const: option.label,
+      title: option.label,
+      ...(option.description === null ? {} : { description: option.description }),
+    }));
+    properties[QUESTION_KEY(index)] = question.multiSelect
+      ? ({ type: "array", title, description, items: { anyOf: choices } } as acp.ElicitationPropertySchema)
+      : ({ type: "string", title, description, oneOf: choices } as acp.ElicitationPropertySchema);
+    properties[OWN_ANSWER_KEY(index)] = {
+      type: "string",
+      title: "Other",
+      description: "Type your own answer instead of choosing an option above (optional).",
+      _meta: { [OWN_ANSWER_MARKER]: { questionId: QUESTION_KEY(index), isCustomAnswer: true } },
+    } as acp.ElicitationPropertySchema;
+  });
+  return {
+    sessionId: request.sessionId,
+    toolCallId: request.toolCallId,
+    message: single ? (request.questions[0]?.question ?? SEVERAL_QUESTIONS) : SEVERAL_QUESTIONS,
+    requestedSchema: { type: "object", properties },
+  };
+}
+
+/** A typed own answer wins over the selection, as on claude; a decline has no word of its own on this wire. */
+export function questionResponse(
+  response: acp.CreateElicitationResponse,
+  questions: readonly XaiQuestion[],
+): XaiQuestionResponse {
+  if (response.action !== "accept") return { outcome: "cancelled" };
+  const content = ((response as { content?: unknown }).content ?? {}) as Record<string, unknown>;
+  const answers: Record<string, string | string[]> = {};
+  questions.forEach((question, index) => {
+    const own = content[OWN_ANSWER_KEY(index)];
+    if (typeof own === "string" && own.trim() !== "") {
+      answers[question.question] = own.trim();
+      return;
+    }
+    const picked = content[QUESTION_KEY(index)];
+    if (Array.isArray(picked)) {
+      const labels = picked.filter((entry): entry is string => typeof entry === "string");
+      if (labels.length > 0) answers[question.question] = labels;
+      return;
+    }
+    if (typeof picked === "string" && picked !== "") answers[question.question] = picked;
+  });
+  return { outcome: "accepted", answers };
+}
+
+export function parsePlanRequest(params: unknown): XaiPlanRequest {
+  const method = XAI_EXIT_PLAN_MODE;
+  const body = record(params, method, "params");
+  const plan = body["planContent"];
+  // An empty plan is legal: grok opens the same approval over a missing plan.md.
+  if (plan !== undefined && plan !== null && typeof plan !== "string") refuse(method, "planContent must be a string");
+  return {
+    sessionId: text(body["sessionId"], method, "sessionId"),
+    toolCallId: callId(body["toolCallId"], method),
+    plan: typeof plan === "string" ? plan : "",
+  };
+}
+
+/** A permission, so the plan card draws it: the plan rides `rawInput.plan`, which is where the card reads one. */
+export function planPermission(request: XaiPlanRequest): acp.RequestPermissionRequest {
+  return {
+    sessionId: request.sessionId,
+    toolCall: { toolCallId: request.toolCallId, title: XAI_PLAN_TITLE, rawInput: { plan: request.plan } },
+    options: XAI_PLAN_OPTIONS.map((option) => ({ ...option })),
+  };
+}
+
+export function planResponse(response: acp.RequestPermissionResponse): XaiPlanResponse {
+  const outcome = response.outcome.outcome === "selected" ? PLAN_OUTCOMES[response.outcome.optionId] : undefined;
+  return { outcome: outcome ?? "cancelled" };
+}
+
+/** url mode is refused as `elicitation/create`'s is (Q2.20); grok hands its MCP server a cancel for any refusal. */
+export function parseMcpElicitRequest(params: unknown): XaiMcpElicitRequest {
+  const method = XAI_MCP_ELICIT;
+  const body = record(params, method, "params");
+  const mode = body["mode"];
+  if (mode !== undefined && mode !== null && mode !== "form") {
+    refuse(method, `this client only renders form elicitations, not ${JSON.stringify(mode)}`);
+  }
+  const message = body["message"];
+  if (message !== undefined && message !== null && typeof message !== "string") refuse(method, "message must be a string");
+  const toolCallId = body["toolCallId"];
+  const serverName = body["serverName"];
+  return {
+    sessionId: text(body["sessionId"], method, "sessionId"),
+    toolCallId: toolCallId === undefined || toolCallId === null ? null : callId(toolCallId, method),
+    serverName: typeof serverName === "string" && serverName !== "" ? serverName : null,
+    message: typeof message === "string" ? message : "",
+    requestedSchema: record(body["requestedSchema"], method, "requestedSchema") as acp.ElicitationSchema,
+  };
+}
+
+/** Names the server, as grok's own card does: the question is a third party's, not the agent's. */
+export function mcpElicitation(request: XaiMcpElicitRequest): ElicitationRequest {
+  return {
+    sessionId: request.sessionId,
+    toolCallId: request.toolCallId,
+    message: request.serverName === null ? request.message : `${request.serverName}: ${request.message}`,
+    requestedSchema: request.requestedSchema,
+  };
+}
+
+export function mcpElicitResponse(response: acp.CreateElicitationResponse): XaiMcpElicitResponse {
+  if (response.action === "decline") return { outcome: "decline" };
+  if (response.action !== "accept") return { outcome: "cancel" };
+  return { outcome: "accept", content: ((response as { content?: unknown }).content ?? {}) as Record<string, unknown> };
+}
+
+/** Never throws: it parses every notification on a stream carrying one per streamed token. */
+export function readInteractionResolved(params: unknown): { sessionId: string; toolCallId: string } | null {
+  if (typeof params !== "object" || params === null) return null;
+  const { sessionId, update } = params as { sessionId?: unknown; update?: unknown };
+  if (typeof sessionId !== "string" || typeof update !== "object" || update === null) return null;
+  const shape = update as { sessionUpdate?: unknown; tool_call_id?: unknown };
+  if (shape.sessionUpdate !== "interaction_resolved" || typeof shape.tool_call_id !== "string") return null;
+  return { sessionId, toolCallId: shape.tool_call_id };
+}

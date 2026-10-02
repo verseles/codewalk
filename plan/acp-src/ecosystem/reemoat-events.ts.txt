@@ -1,0 +1,1008 @@
+// Raw extract from https://github.com/rends-east/reemoat/blob/568beecb2e4ff3acff1be75690f68af462b6a483/src/events.ts (AGPL-3.0)
+import type {
+  PermissionOptionKind,
+  PlanEntry,
+  StopReason,
+  ToolCallStatus,
+  ToolKind,
+  Usage,
+} from "@agentclientprotocol/sdk";
+import type { AgentId } from "./acp/agents.js";
+import type { BackgroundTask } from "./acp/asynctasks.js";
+import { describeError } from "./http.js";
+
+/** Every agent collapses into this union. Optional data is T | null, never ?:, so every event serializes to a stable shape. */
+export type SessionEvent =
+  | SessionStartedEvent
+  | AgentConfigEvent
+  | TextEvent
+  | ToolCallEvent
+  | ToolCallUpdateEvent
+  | FileChangeEvent
+  | PermissionRequestEvent
+  | PermissionResolvedEvent
+  | ElicitationRequestEvent
+  | ElicitationResolvedEvent
+  | PlanEvent
+  | PromptEvent
+  | StatusEvent
+  | WorkspaceEvent
+  | TurnEndEvent
+  | AgentLogEvent
+  | ContextClearedEvent
+  | OtherUpdateEvent
+  | ErrorEvent;
+
+export interface FileLocation {
+  path: string;
+  line: number | null;
+}
+
+export interface PermissionOptionSummary {
+  optionId: string;
+  name: string;
+  kind: PermissionOptionKind;
+}
+
+export interface ElicitationOption {
+  value: string;
+  label: string;
+  description: string | null;
+}
+
+/** `pattern` is deliberately dropped: an agent-chosen regex is a ReDoS hazard. */
+export interface ElicitationField {
+  key: string;
+  kind: "string" | "number" | "integer" | "boolean" | "multi_select";
+  title: string | null;
+  description: string | null;
+  required: boolean;
+  options: ElicitationOption[] | null;
+  min: number | null;
+  max: number | null;
+  format: "email" | "uri" | "date" | "date-time" | null;
+  default: string | number | boolean | string[] | null;
+  /** Read only from a declared `_meta`, never from the key's shape (Q6.54). */
+  alternativeTo: string | null;
+}
+
+export interface ElicitationForm {
+  fields: ElicitationField[];
+}
+
+export interface ElicitationAnswer {
+  key: string;
+  label: string;
+  value: string;
+}
+
+export interface SessionStartedEvent {
+  type: "session_started";
+  agent: AgentId;
+  sessionId: string;
+  agentInfo: { name: string; version: string } | null;
+  modes: AgentModes | null;
+}
+
+export interface AgentConfigChoice {
+  value: string;
+  name: string;
+  description: string | null;
+  group: string | null;
+}
+
+/** `category` is the only portable meaning (ids differ per agent); an unknown or absent one must still render. */
+export interface AgentConfigOption {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  kind: "select" | "boolean";
+  value: string | boolean;
+  choices: AgentConfigChoice[];
+  truncated?: boolean;
+}
+
+export interface AgentModes {
+  current: string;
+  available: { id: string; name: string; description: string | null }[];
+}
+
+/** Always complete, never a delta; render from this, not from what was last asked for. */
+export interface AgentConfigEvent {
+  type: "agent_config";
+  modes: AgentModes | null;
+  options: AgentConfigOption[];
+}
+
+export type AgentConfig = Omit<AgentConfigEvent, "type">;
+
+/** Snapshot-only: never logged, never merged with TurnEndEvent's usage. */
+export interface ContextUsage {
+  used: number;
+  /** How large the window is, or 0 when the agent did not say. */
+  size: number;
+  cost: { amount: number; currency: string } | null;
+}
+
+export interface AgentCommand {
+  name: string;
+  description: string;
+  hint: string | null;
+}
+
+/** Replaced whole, never merged; deliberately not part of AgentConfig. */
+export interface AgentCommands {
+  commands: AgentCommand[];
+  dropped: number;
+}
+
+export interface TextEvent {
+  type: "text";
+  role: "agent" | "user";
+  thought: boolean;
+  text: string;
+  /** Once a connection has used message ids, a chunk without one gets a `~`-prefixed id of its own (Q3.604). */
+  messageId: string | null;
+}
+
+export interface ToolCallEvent {
+  type: "tool_call";
+  toolCallId: string;
+  title: string;
+  kind: ToolKind;
+  status: ToolCallStatus;
+  locations: FileLocation[];
+  rawInput: unknown;
+  parentToolCallId: string | null;
+  /** Read from the call only, never merged from an update. */
+  subagent: boolean;
+}
+
+export interface ToolCallUpdateEvent {
+  type: "tool_call_update";
+  toolCallId: string;
+  title: string | null;
+  status: ToolCallStatus | null;
+  locations: FileLocation[];
+  rawInput: unknown;
+  images: StoredFileRef[] | null;
+  content: string[] | null;
+  /** Null means this update did not say, never top level: take lineage first-non-null. */
+  parentToolCallId: string | null;
+  /** Set only by claude, and only with `asyncTasks` declared (Q3.592). */
+  backgrounded: boolean;
+}
+
+export interface FileChangeEvent {
+  type: "file_change";
+  path: string;
+  oldText: string | null;
+  newText: string;
+  source: "diff" | "fs_write";
+  toolCallId: string | null;
+}
+
+/** Parked for a client when `permissionId` is set; otherwise a bare Session answered inline in `decision`. */
+export interface PermissionRequestEvent {
+  type: "permission_request";
+  permissionId: string | null;
+  toolCallId: string | null;
+  title: string;
+  options: PermissionOptionSummary[];
+  decision: string | null;
+}
+
+/** turn_ended, pump_failed and no_turn are no longer written (Q2.232) and stay because stored logs hold them. */
+export type AnswerResolvedBy =
+  | "client"
+  | "agent_withdrew"
+  | "agent_gone"
+  | "session_stopped"
+  | "turn_ended"
+  | "pump_failed"
+  | "no_turn"
+  | "turn_cancelled";
+
+export interface PermissionResolvedEvent {
+  type: "permission_resolved";
+  permissionId: string;
+  toolCallId: string | null;
+  title: string;
+  outcome: "selected" | "cancelled";
+  optionId: string | null;
+  by: AnswerResolvedBy;
+}
+
+export interface ElicitationRequestEvent {
+  type: "elicitation_request";
+  elicitationId: string;
+  toolCallId: string | null;
+  message: string;
+}
+
+export interface ElicitationResolvedEvent {
+  type: "elicitation_resolved";
+  elicitationId: string;
+  toolCallId: string | null;
+  message: string;
+  action: "accept" | "decline" | "cancel";
+  /** Rendered labels, never wire values; null for decline and cancel. */
+  answers: ElicitationAnswer[] | null;
+  by: AnswerResolvedBy;
+}
+
+export interface PlanEvent {
+  type: "plan";
+  entries: PlanEntry[];
+}
+
+/** No path or URL, since the log outlives the disk: clients rebuild it from (sessionId, uploadId). */
+export interface StoredFileRef {
+  uploadId: string;
+  name: string;
+  mime: string | null;
+  bytes: number;
+}
+
+export interface PromptAttachmentRef extends StoredFileRef {
+  inlined: boolean;
+}
+
+/** Another session's message, as this daemon verified it; every field is ours, none is the sender's say-so except name. */
+export interface PeerOrigin {
+  /** Both start or join a turn: message is what another agent wrote, notice is this daemon saying what became of one. */
+  kind: "message" | "notice";
+  name: string;
+  ref: string;
+  /** null is this machine. */
+  machineId: string | null;
+  machineLabel: string | null;
+  harness: string;
+  messageId: string;
+  hops: number;
+}
+
+/** A session a person's `@name` named, as the note beside the message resolved it (Q2.246). */
+export interface PromptMention {
+  name: string;
+  ref: string;
+}
+
+export interface PromptEvent {
+  type: "prompt";
+  /** Exactly the text block the agent received, envelope included, so a client that ignores from still shows who wrote it; files and the mention note are blocks of their own. */
+  text: string;
+  attachments: PromptAttachmentRef[] | null;
+  /** null for a person's message. */
+  from: PeerOrigin | null;
+  /** Present only on a person's message whose note named somebody. */
+  mentions?: PromptMention[];
+  /** Present only on an ask_question answer sent as a message: the elicitation whose resolution already draws it (Q2.251). */
+  answers?: string;
+}
+
+export interface WorkspaceEvent {
+  type: "workspace";
+  mode: SessionWorkspace["mode"];
+  root: string;
+  requestedCwd: string;
+  branch: string | null;
+  baseCommit: string | null;
+  plainReason: PlainReason | null;
+  warnings: { code: string; message: string }[];
+}
+
+/** Narrative only: the snapshot is authoritative. */
+export interface StatusEvent {
+  type: "status";
+  status: SessionStatus;
+  exit: SessionExit | null;
+}
+
+/** ACP's reasons plus this daemon's `agent_error` and `abandoned` (Q2.103, Q2.218). */
+export type TurnStopReason = StopReason | "agent_error" | "abandoned";
+
+export interface TurnEndEvent {
+  type: "turn_end";
+  stopReason: TurnStopReason;
+  usage: Usage | null;
+}
+
+export interface ContextClearedEvent {
+  type: "context_cleared";
+  agentSessionId: string;
+  previousAgentSessionId: string;
+}
+
+export interface AgentLogEvent {
+  type: "agent_log";
+  line: string;
+}
+
+/** A `session/update` variant with no event of its own, kept raw so nothing the agent says disappears. */
+export interface OtherUpdateEvent {
+  type: "other";
+  sessionUpdate: string;
+  raw: unknown;
+}
+
+export interface ErrorEvent {
+  type: "error";
+  message: string;
+  data: unknown;
+}
+
+/** Derived, never stored. `blocked` outranks `running`. */
+export type SessionStatus =
+  | "starting"
+  | "idle"
+  | "running"
+  | "blocked"
+  | "stopping"
+  | "exited"
+  | "failed"
+  | "interrupted"
+  // Released for idleness, never drawn as a warning or as exited.
+  | "parked";
+
+export type ExitReason =
+  | "stopped"
+  | "agent_exited"
+  | "start_failed"
+  | "start_timeout"
+  | "daemon_shutdown"
+  // Never written: kept only because rows already on disk may carry it.
+  | "agent_kill_failed"
+  | "daemon_restarted"
+  | "config_changed"
+  // Not in DAEMON_EXIT_REASONS: only signing in again resumes it.
+  | "agent_signed_out"
+  // Not in DAEMON_EXIT_REASONS (no boot resume), but {@link keepsItsConversation} keeps it from the prune.
+  | "parked";
+
+/** Exits meaning the daemon went away rather than anybody deciding. */
+export const DAEMON_EXIT_REASONS = ["daemon_restarted", "daemon_shutdown", "config_changed"] as const;
+
+/** A closed list; daemon config otherwise stays env-only (Q2.225). */
+export type MachineSettingKey = "idleReleaseMinutes";
+
+const MACHINE_SETTING_MEMBERS: Record<MachineSettingKey, true> = {
+  idleReleaseMinutes: true,
+};
+
+export const MACHINE_SETTING_KEYS = Object.keys(MACHINE_SETTING_MEMBERS) as MachineSettingKey[];
+
+export function isMachineSettingKey(value: unknown): value is MachineSettingKey {
+  return typeof value === "string" && Object.hasOwn(MACHINE_SETTING_MEMBERS, value);
+}
+
+/** Beside the settings in machine_settings, and written only by PUT /peers/links: PATCH /settings never names it (Q1.654). */
+export type PeerPolicyKey = "peerMessagesPolicy";
+
+/** Judged by `data.errorKind` only, never the message; never throws. */
+export function isAuthFailure(event: { type: string; data?: unknown }): boolean {
+  if (event.type !== "error") return false;
+  const outer = event.data;
+  if (typeof outer !== "object" || outer === null) return false;
+  const inner = (outer as { data?: unknown }).data;
+  if (typeof inner !== "object" || inner === null) return false;
+  return (inner as { errorKind?: unknown }).errorKind === "authentication_failed";
+}
+
+export function endedWithDaemon(exit: { reason: ExitReason } | null | undefined): boolean {
+  if (exit === null || exit === undefined) return false;
+  return (DAEMON_EXIT_REASONS as readonly ExitReason[]).includes(exit.reason);
+}
+
+/** Ended still holding its conversation, so the prune must keep it (Q2.222). */
+export function keepsItsConversation(
+  exit: { reason: ExitReason } | null | undefined,
+): boolean {
+  if (exit === null || exit === undefined) return false;
+  return endedWithDaemon(exit) || exit.reason === "parked";
+}
+
+/** Exhaustive both ways, so an unknown reason from a newer build is never acted on. */
+export const EXIT_REASON_MEMBERS: Record<ExitReason, true> = {
+  stopped: true,
+  agent_exited: true,
+  start_failed: true,
+  start_timeout: true,
+  daemon_shutdown: true,
+  agent_kill_failed: true,
+  daemon_restarted: true,
+  config_changed: true,
+  agent_signed_out: true,
+  parked: true,
+};
+
+export function isExitReason(value: unknown): value is ExitReason {
+  return typeof value === "string" && Object.hasOwn(EXIT_REASON_MEMBERS, value);
+}
+
+export type ResumeGiveUp =
+  | "workspace_missing"
+  | "unsupported"
+  | "forgotten"
+  | "attempts_exhausted";
+
+/** An unknown value reads as not given up. */
+export function isPersistedGiveUp(value: unknown): value is ResumeGiveUp {
+  return value === "forgotten";
+}
+
+/** A host pid or a container process group; confusing them sends SIGKILL to a stranger. */
+export type AgentHandle =
+  | { kind: "local"; pid: number }
+  | {
+      kind: "container";
+      containerId: string;
+      pgid: number;
+      containerStartedAt: number;
+    };
+
+export interface SessionExit {
+  reason: ExitReason;
+  detail: string | null;
+  at: number;
+  agentHandle: AgentHandle | null;
+  agentConfirmedDead: boolean;
+}
+
+export type PlainReason = "not_requested" | "not_a_repo" | "unborn_head" | "git_missing";
+
+export interface SessionWorkspace {
+  mode: "worktree" | "plain";
+  root: string;
+  requestedCwd: string;
+  git: {
+    /** The main worktree — where `worktree add`/`remove`/`prune` must run. */
+    repoRoot: string;
+    commonDir: string;
+    branch: string | null;
+    createdBranch: boolean;
+    baseCommit: string;
+  } | null;
+  plainReason: PlainReason | null;
+  createdAt: number;
+}
+
+export interface StoredEvent {
+  readonly seq: number;
+  readonly ts: number;
+  readonly event: SessionEvent;
+}
+
+export interface EventStoreStats {
+  firstSeq: number;
+  /** Highest seq ever assigned. Survives eviction — it is the resume cursor. */
+  lastSeq: number;
+  count: number;
+  dropped: number;
+  approxBytes: number;
+}
+
+export function oldestAvailable(stats: { firstSeq: number; lastSeq: number; count: number }): number {
+  return stats.count > 0 ? stats.firstSeq : stats.lastSeq + 1;
+}
+
+export interface EventStore {
+  /** MUST NOT throw: it runs in the agent's event path. */
+  append(sessionId: string, event: SessionEvent): StoredEvent;
+  read(sessionId: string, since: number, limit: number, maxBytes: number): StoredEvent[];
+  stats(sessionId: string): EventStoreStats;
+  drop(sessionId: string): void;
+}
+
+export interface PersistedSession {
+  id: string;
+  agent: AgentId;
+  createdAt: number;
+  workspace: SessionWorkspace;
+  agentSessionId: string | null;
+  agentHandle: AgentHandle | null;
+  status: SessionStatus;
+  exit: SessionExit | null;
+  turnCounter: number;
+  lastEventAt: number | null;
+  askSeq: number;
+  askSalt: string;
+  ultracode: boolean | null;
+  customAgent: string | null;
+  // A plain string, since a newer build may write other values; read through isPersistedGiveUp.
+  resumeGaveUp: string | null;
+  // Monotonic floors, so a pruned session never reuses a seq a client has seen.
+  lastSeq: number;
+  dropped: number;
+  title: string | null;
+  /** null only on a row an older build wrote; restore() backfills it. */
+  nickname: string | null;
+  pinned: boolean;
+  rank: number | null;
+  peerMessagesOff: boolean;
+  agentState: AgentStateMemory | null;
+  /** Absent on a row an older build wrote, and on a test's hand-made one. */
+  openQuestion?: OpenQuestionRow | null;
+}
+
+/** An ask_question still waiting for its person, kept on the row so a restart draws the card again (Q2.250). */
+export interface OpenQuestionRow {
+  elicitationId: string;
+  /** The agent's ask_question call, which the transcript folds into the card; absent when none was seen. */
+  toolCallId?: string;
+  title: string | null;
+  questions: { id: string; prompt: string; options: { id: string; label: string }[]; allowMultiple: boolean }[];
+  raisedAt: number;
+}
+
+export interface AgentStateMemory {
+  /** The raw `agentConfigState`, never the composed `snapshot().agentConfig`. */
+  config: AgentConfig;
+  commands: AgentCommands;
+  /** Finished background rows; absent on a blob an older build wrote (Q2.234). */
+  tasks?: BackgroundTask[];
+}
+
+export interface SessionStore {
+  /** Idempotent upsert; MUST NOT throw. */
+  put(row: PersistedSession): void;
+  list(): PersistedSession[];
+  remove(id: string): void;
+}
+
+export interface MemoryEventStoreOptions {
+  maxEventsPerSession?: number;
+  maxBytesPerSession?: number;
+  maxEventBytes?: number;
+}
+
+export const DEFAULT_MAX_EVENTS = Number.POSITIVE_INFINITY;
+export const DEFAULT_MAX_BYTES = Number.POSITIVE_INFINITY;
+export const DEFAULT_MAX_EVENT_BYTES = 128 * 1024;
+const COMPACT_THRESHOLD = 1_024;
+
+interface Retained {
+  readonly stored: StoredEvent;
+  readonly bytes: number;
+}
+
+interface SessionState {
+  events: Retained[];
+  head: number;
+  nextSeq: number;
+  dropped: number;
+  bytes: number;
+}
+
+export class MemoryEventStore implements EventStore {
+  private readonly sessions = new Map<string, SessionState>();
+  private readonly maxEvents: number;
+  private readonly maxBytes: number;
+  private readonly maxEventBytes: number;
+
+  constructor(options: MemoryEventStoreOptions = {}) {
+    this.maxEvents = options.maxEventsPerSession ?? DEFAULT_MAX_EVENTS;
+    this.maxBytes = options.maxBytesPerSession ?? DEFAULT_MAX_BYTES;
+    this.maxEventBytes = options.maxEventBytes ?? DEFAULT_MAX_EVENT_BYTES;
+  }
+
+  append(sessionId: string, event: SessionEvent): StoredEvent {
+    const state = this.stateFor(sessionId);
+
+    // Truncated before the seq is assigned, so the logged record is the one every byte count describes.
+    let payload: SessionEvent;
+    let bytes: number;
+    try {
+      payload = truncateEvent(event, this.maxEventBytes);
+      bytes = estimateBytes(payload);
+    } catch (error) {
+      payload = {
+        type: "error",
+        message: `event could not be recorded: ${describeError(error)}`,
+        data: null,
+      };
+      bytes = 256;
+    }
+
+    const stored: StoredEvent = { seq: state.nextSeq, ts: Date.now(), event: payload };
+    state.nextSeq += 1;
+    state.events.push({ stored, bytes });
+    state.bytes += bytes;
+    this.evict(state);
+    return stored;
+  }
+
+  read(sessionId: string, since: number, limit: number, maxBytes: number): StoredEvent[] {
+    const state = this.sessions.get(sessionId);
+    if (!state) return [];
+    const first = state.events[state.head];
+    if (!first) return [];
+
+    let index = state.head + Math.max(0, since + 1 - first.stored.seq);
+    const out: StoredEvent[] = [];
+    let bytes = 0;
+    while (index < state.events.length && out.length < limit) {
+      const retained = state.events[index]!;
+      // Always yield at least one event, or an oversized record wedges the reader.
+      if (out.length > 0 && bytes + retained.bytes > maxBytes) break;
+      out.push(retained.stored);
+      bytes += retained.bytes;
+      index += 1;
+    }
+    return out;
+  }
+
+  stats(sessionId: string): EventStoreStats {
+    const state = this.sessions.get(sessionId);
+    if (!state) return { firstSeq: 0, lastSeq: 0, count: 0, dropped: 0, approxBytes: 0 };
+    const count = state.events.length - state.head;
+    return {
+      firstSeq: count > 0 ? state.events[state.head]!.stored.seq : 0,
+      lastSeq: state.nextSeq - 1,
+      count,
+      dropped: state.dropped,
+      approxBytes: state.bytes,
+    };
+  }
+
+  drop(sessionId: string): void {
+    this.sessions.delete(sessionId);
+  }
+
+  private stateFor(sessionId: string): SessionState {
+    let state = this.sessions.get(sessionId);
+    if (!state) {
+      state = { events: [], head: 0, nextSeq: 1, dropped: 0, bytes: 0 };
+      this.sessions.set(sessionId, state);
+    }
+    return state;
+  }
+
+  private evict(state: SessionState): void {
+    for (;;) {
+      const count = state.events.length - state.head;
+      if (count <= 1) break;
+      if (count <= this.maxEvents && state.bytes <= this.maxBytes) break;
+      state.bytes -= state.events[state.head]!.bytes;
+      state.head += 1;
+      state.dropped += 1;
+    }
+    if (state.head > COMPACT_THRESHOLD) {
+      state.events = state.events.slice(state.head);
+      state.head = 0;
+    }
+  }
+}
+
+export type EventListener = (stored: StoredEvent) => void;
+export type ListenerErrorHandler = (listener: EventListener, error: unknown) => void;
+
+export class SessionLog {
+  private readonly listeners = new Set<EventListener>();
+
+  constructor(
+    readonly sessionId: string,
+    private readonly store: EventStore,
+    private readonly onListenerError?: ListenerErrorHandler,
+  ) {}
+
+  /** Synchronous, so seq order is delivery order; a throwing listener is evicted without skipping the others. */
+  append(event: SessionEvent): StoredEvent {
+    const stored = this.store.append(this.sessionId, event);
+    for (const listener of [...this.listeners]) {
+      try {
+        listener(stored);
+      } catch (error) {
+        this.listeners.delete(listener);
+        this.onListenerError?.(listener, error);
+      }
+    }
+    return stored;
+  }
+
+  subscribe(listener: EventListener): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  read(since: number, limit: number, maxBytes: number): StoredEvent[] {
+    return this.store.read(this.sessionId, since, limit, maxBytes);
+  }
+
+  stats(): EventStoreStats {
+    return this.store.stats(this.sessionId);
+  }
+
+  get subscriberCount(): number {
+    return this.listeners.size;
+  }
+
+  drop(): void {
+    this.listeners.clear();
+    this.store.drop(this.sessionId);
+  }
+}
+
+const TRUNCATION_NOTE_BYTES = 32;
+
+function idSize(id: string | null): number {
+  return id === null ? 0 : id.length;
+}
+
+function peerOriginBytes(from: PeerOrigin | null): number {
+  if (from === null) return 0;
+  return 128 + from.name.length + from.ref.length + (from.machineId?.length ?? 0) + (from.machineLabel?.length ?? 0) +
+    from.harness.length + from.messageId.length;
+}
+
+function attachmentBytes(attachments: PromptAttachmentRef[] | null): number {
+  return refBytes(attachments);
+}
+
+function mentionBytes(mentions: readonly PromptMention[] | undefined): number {
+  let total = 0;
+  for (const mention of mentions ?? []) total += 32 + mention.name.length + mention.ref.length;
+  return total;
+}
+
+function refBytes(refs: readonly StoredFileRef[] | null): number {
+  if (refs === null) return 0;
+  let total = 0;
+  for (const ref of refs) {
+    total += 96 + ref.uploadId.length + ref.name.length + (ref.mime?.length ?? 0);
+  }
+  return total;
+}
+
+const SIZES = new WeakMap<object, number>();
+
+export function jsonSize(value: unknown): number {
+  if (value == null) return 0;
+  const memo = typeof value === "object" ? SIZES.get(value as object) : undefined;
+  if (memo !== undefined) return memo;
+  let size: number;
+  try {
+    size = JSON.stringify(value)?.length ?? 0;
+  } catch {
+    // Unserializable: assume the worst rather than 0, or the bound it feeds is fiction.
+    size = 4_096;
+  }
+  if (typeof value === "object") SIZES.set(value as object, size);
+  return size;
+}
+
+const BYTES = new WeakMap<object, number>();
+
+export function jsonBytes(value: unknown): number {
+  if (value == null) return 0;
+  const memo = typeof value === "object" ? BYTES.get(value as object) : undefined;
+  if (memo !== undefined) return memo;
+  let size: number;
+  try {
+    size = Buffer.byteLength(JSON.stringify(value) ?? "", "utf8");
+  } catch {
+    // Worst case rather than 0: this feeds a refusal.
+    size = 4_096;
+  }
+  if (typeof value === "object") BYTES.set(value as object, size);
+  return size;
+}
+
+function optionBytes(options: PermissionOptionSummary[]): number {
+  let total = 0;
+  for (const option of options) total += option.optionId.length + option.name.length + 32;
+  return total;
+}
+
+function locationBytes(locations: readonly FileLocation[]): number {
+  let total = 0;
+  for (const location of locations) total += location.path.length + 24;
+  return total;
+}
+
+export function estimateBytes(event: SessionEvent): number {
+  switch (event.type) {
+    case "text":
+      return 64 + event.text.length + (event.messageId?.length ?? 0);
+    case "prompt":
+      // ?? null: events logged before from existed are read back without it.
+      return (
+        64 +
+        event.text.length +
+        attachmentBytes(event.attachments) +
+        peerOriginBytes(event.from ?? null) +
+        mentionBytes(event.mentions)
+      );
+    case "agent_log":
+      return 64 + event.line.length;
+    case "context_cleared":
+      return 64 + event.agentSessionId.length + event.previousAgentSessionId.length;
+    case "file_change":
+      return 128 + event.path.length + event.newText.length + (event.oldText?.length ?? 0);
+    case "tool_call":
+      return (
+        256 +
+        event.title.length +
+        jsonSize(event.rawInput) +
+        locationBytes(event.locations) +
+        idSize(event.toolCallId) +
+        idSize(event.parentToolCallId)
+      );
+    case "tool_call_update":
+      return (
+        192 +
+        (event.title?.length ?? 0) +
+        jsonSize(event.rawInput) +
+        (event.content?.reduce((total, block) => total + block.length + 8, 0) ?? 0) +
+        refBytes(event.images) +
+        locationBytes(event.locations) +
+        idSize(event.toolCallId) +
+        idSize(event.parentToolCallId)
+      );
+    case "other":
+      return 128 + event.sessionUpdate.length + jsonSize(event.raw);
+    case "error":
+      return 256 + event.message.length + jsonSize(event.data);
+    case "plan":
+      return 128 + event.entries.reduce((total, entry) => total + entry.content.length + 32, 0);
+    case "permission_request":
+      return 256 + event.title.length + optionBytes(event.options);
+    case "permission_resolved":
+      return 256 + event.title.length;
+    // No `default` arm here or in `truncateEvent`: a new event type must be accounted for in both to compile.
+    case "elicitation_request":
+      return 256 + event.message.length;
+    case "elicitation_resolved":
+      return (
+        256 +
+        event.message.length +
+        (event.answers?.reduce(
+          (total, answer) => total + answer.key.length + answer.label.length + answer.value.length + 32,
+          0,
+        ) ?? 0)
+      );
+    case "workspace":
+      return (
+        256 +
+        event.root.length +
+        event.requestedCwd.length +
+        event.warnings.reduce((total, warning) => total + warning.message.length + 32, 0)
+      );
+    case "agent_config":
+      return (
+        128 +
+        (event.modes === null ? 0 : event.modes.current.length) +
+        (event.modes?.available.reduce((total, mode) => total + mode.id.length + mode.name.length + 32, 0) ?? 0) +
+        event.options.reduce(
+          (total, option) =>
+            total +
+            option.id.length +
+            option.name.length +
+            (option.description?.length ?? 0) +
+            64 +
+            option.choices.reduce(
+              (sum, choice) => sum + choice.value.length + choice.name.length + (choice.description?.length ?? 0) + 32,
+              0,
+            ),
+          0,
+        )
+      );
+    case "session_started":
+    case "status":
+    case "turn_end":
+      return 192;
+  }
+}
+
+/** The Buffer round trip copies out of V8's sliced string so the parent is freed; never simplify it to a bare slice. */
+export function clip(value: string, budget: number): string {
+  if (value.length <= budget) return value;
+  let kept = Math.max(budget - TRUNCATION_NOTE_BYTES, 0);
+  const last = value.charCodeAt(kept - 1);
+  if (last >= 0xd800 && last <= 0xdbff) kept -= 1;
+  const head = Buffer.from(value.slice(0, kept), "utf8").toString("utf8");
+  return `${head}…[truncated ${value.length - kept} bytes]`;
+}
+
+function shrink(value: unknown): unknown {
+  return { truncated: true, bytes: jsonSize(value) };
+}
+
+export function clampBlob(value: unknown, maxBytes: number): unknown {
+  if (value === null || value === undefined) return null;
+  return jsonSize(value) <= maxBytes ? value : shrink(value);
+}
+
+export function truncateEvent(event: SessionEvent, maxBytes: number): SessionEvent {
+  if (estimateBytes(event) <= maxBytes) return event;
+
+  switch (event.type) {
+    case "text":
+      return { ...event, text: clip(event.text, maxBytes) };
+    case "prompt": {
+      const spent = attachmentBytes(event.attachments) + peerOriginBytes(event.from ?? null) + mentionBytes(event.mentions);
+      return { ...event, text: clip(event.text, Math.max(maxBytes - spent - 64, 512)) };
+    }
+    case "agent_log":
+      return { ...event, line: clip(event.line, maxBytes) };
+    // Never cut: a truncated question or answer is a wrong one, and both are bounded upstream.
+    case "elicitation_request":
+    case "elicitation_resolved":
+      return event;
+    case "file_change": {
+      const half = Math.floor(maxBytes / 2);
+      return {
+        ...event,
+        oldText: event.oldText === null ? null : clip(event.oldText, half),
+        newText: clip(event.newText, half),
+      };
+    }
+    case "tool_call":
+      return {
+        ...event,
+        title: clip(event.title, maxBytes),
+        rawInput: shrink(event.rawInput),
+        locations: cutLocations(event.locations),
+      };
+    case "tool_call_update": {
+      const blocks = event.content?.length ?? 0;
+      const budget = Math.max(Math.floor(maxBytes / Math.max(blocks, 1)) - 32, 64);
+      return {
+        ...event,
+        rawInput: shrink(event.rawInput),
+        content: event.content === null ? null : event.content.map((block) => clip(block, budget)),
+        locations: cutLocations(event.locations),
+      };
+    }
+    case "other":
+      return { ...event, raw: shrink(event.raw) };
+    case "error":
+      return { ...event, message: clip(event.message, maxBytes), data: shrink(event.data) };
+    case "plan": {
+      const budget = Math.max(Math.floor(maxBytes / Math.max(event.entries.length, 1)) - 32, 64);
+      return {
+        ...event,
+        entries: event.entries.map((entry) => ({ ...entry, content: clip(entry.content, budget) })),
+      };
+    }
+    case "workspace": {
+      const budget = Math.max(Math.floor(maxBytes / Math.max(event.warnings.length, 1)) - 32, 64);
+      return {
+        ...event,
+        warnings: event.warnings.map((warning) => ({ ...warning, message: clip(warning.message, budget) })),
+      };
+    }
+    case "agent_config":
+      return {
+        ...event,
+        options: event.options.map((option) => ({
+          ...option,
+          description: null,
+          choices: option.choices.map((choice) => ({ ...choice, description: null })),
+        })),
+        modes:
+          event.modes === null
+            ? null
+            : {
+                ...event.modes,
+                available: event.modes.available.map((mode) => ({ ...mode, description: null })),
+              },
+      };
+    // Ingest refuses title and options as one 8 KiB weighing (it replaced MAX_PERMISSION_TITLE_CHARS); `optionId` round-trips, so is never cut.
+    case "permission_request":
+    case "permission_resolved":
+      return { ...event, title: clip(event.title, maxBytes) };
+    case "context_cleared":
+    case "session_started":
+    case "status":
+    case "turn_end":
+      return event;
+  }
+}
+
+function cutLocations(locations: readonly FileLocation[]): FileLocation[] {
+  return locations.slice(0, 32).map((location) => ({ ...location, path: clip(location.path, 256) }));
+}

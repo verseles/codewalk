@@ -1,0 +1,293 @@
+################ schema.json
+InitializeRequest {
+  protocolVersion: ProtocolVersion
+  info: Implementation
+  capabilities?: ClientCapabilities
+  _meta?: object | null
+}
+
+InitializeResponse {
+  protocolVersion: ProtocolVersion
+  info: Implementation
+  capabilities?: AgentCapabilities
+  authMethods?: AuthMethod[]
+  _meta?: object | null
+}
+
+AgentCapabilities {
+  session?: SessionCapabilities | null
+  auth?: AgentAuthCapabilities | null
+  _meta?: object | null
+}
+
+SessionCapabilities {
+  prompt?: PromptCapabilities | null
+  mcp?: McpCapabilities | null
+  delete?: SessionDeleteCapabilities | null
+  additionalDirectories?: SessionAdditionalDirectoriesCapabilities | null
+  _meta?: object | null
+}
+
+PromptResponse {
+  messageId: MessageId
+  _meta?: object | null
+}
+
+SessionUpdate =
+  | sessionUpdate="user_message_chunk" ContentChunk
+  | sessionUpdate="user_message" UserMessage
+  | sessionUpdate="agent_message_chunk" ContentChunk
+  | sessionUpdate="agent_message" AgentMessage
+  | sessionUpdate="agent_thought_chunk" ContentChunk
+  | sessionUpdate="agent_thought" AgentThought
+  | sessionUpdate="state_update" StateUpdate
+  | sessionUpdate="tool_call_content_chunk" ToolCallContentChunk
+  | sessionUpdate="tool_call_update" ToolCallUpdate
+  | sessionUpdate="terminal_update" TerminalUpdate
+  | sessionUpdate="terminal_output_chunk" TerminalOutputChunk
+  | sessionUpdate="plan_update" PlanUpdate
+  | sessionUpdate="available_commands_update" AvailableCommandsUpdate
+  | sessionUpdate="config_option_update" ConfigOptionUpdate
+  | sessionUpdate="session_info_update" SessionInfoUpdate
+  | sessionUpdate="usage_update" UsageUpdate
+  |  object
+
+StateUpdate =
+  | state="running" RunningStateUpdate
+  | state="idle" IdleStateUpdate
+  | state="requires_action" RequiresActionStateUpdate
+  |  object
+
+## missing SessionState
+StopReason =
+  | "end_turn"
+  | "max_tokens"
+  | "max_turn_requests"
+  | "refusal"
+  | "cancelled"
+  |  string
+
+ToolCallUpdate {
+  toolCallId: ToolCallId
+  name?: string | null
+  title?: string | null
+  kind?: ToolKind | null
+  status?: ToolCallStatus | null
+  content?: array | null
+  locations?: array | null
+  rawInput?: unknown
+  rawOutput?: unknown
+  _meta?: object | null
+}
+
+ToolCallStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  |  string
+
+ToolCallContentChunk {
+  toolCallId: ToolCallId
+  content: ToolCallContent
+  _meta?: object | null
+}
+
+TerminalUpdate {
+  terminalId: TerminalId
+  command?: string | null
+  cwd?: AbsolutePath | null
+  output?: TerminalOutput | null
+  exitStatus?: TerminalExitStatus | null
+  _meta?: object | null
+}
+
+TerminalOutputChunk {
+  terminalId: TerminalId
+  data: string
+  _meta?: object | null
+}
+
+ToolCallContent =
+  | type="content" Content
+  | type="diff" Diff
+  | type="terminal" Terminal
+  |  object
+
+Diff {
+  changes: DiffChange[]
+  patch?: DiffPatch | null
+  _meta?: object | null
+}
+
+## missing FileChange
+DiffPatch {
+  format: DiffPatchFormat
+  text: string
+}
+
+RequestPermissionRequest {
+  sessionId: SessionId
+  title: string
+  description?: string | null
+  subject?: RequestPermissionSubject | null
+  options: PermissionOption[]
+  _meta?: object | null
+}
+
+## missing PermissionSubject
+CommandPermissionSubject {
+  command: string
+  cwd: AbsolutePath
+  toolCallId?: ToolCallId | null
+  terminalId?: TerminalId | null
+  _meta?: object | null
+}
+
+PlanUpdate {
+  plan: PlanUpdateContent
+  _meta?: object | null
+}
+
+## missing PlanContent
+## missing ItemsPlan
+ResumeSessionRequest {
+  sessionId: SessionId
+  cwd: AbsolutePath
+  additionalDirectories?: AbsolutePath[]
+  mcpServers?: McpServer[]
+  replayFrom?: ReplayFrom | null
+  _meta?: object | null
+}
+
+ReplayFrom =
+  | type="start" ReplayFromStart
+  |  object
+
+SessionConfigOption {
+  configId: SessionConfigId
+  name: string
+  description?: string | null
+  category?: SessionConfigOptionCategory | null
+  _meta?: object | null
+}
+
+UsageUpdate {
+  used: integer
+  size: integer
+  cost?: Cost | null
+  _meta?: object | null
+}
+
+################ schema.unstable.json
+SessionUpdate =
+  | sessionUpdate="user_message_chunk" ContentChunk
+  | sessionUpdate="user_message" UserMessage
+  | sessionUpdate="agent_message_chunk" ContentChunk
+  | sessionUpdate="agent_message" AgentMessage
+  | sessionUpdate="agent_thought_chunk" ContentChunk
+  | sessionUpdate="agent_thought" AgentThought
+  | sessionUpdate="state_update" StateUpdate
+  | sessionUpdate="tool_call_content_chunk" ToolCallContentChunk
+  | sessionUpdate="tool_call_update" ToolCallUpdate
+  | sessionUpdate="terminal_update" TerminalUpdate
+  | sessionUpdate="terminal_output_chunk" TerminalOutputChunk
+  | sessionUpdate="plan_update" PlanUpdate
+  | sessionUpdate="plan_removed" PlanRemoved
+  | sessionUpdate="available_commands_update" AvailableCommandsUpdate
+  | sessionUpdate="config_option_update" ConfigOptionUpdate
+  | sessionUpdate="session_info_update" SessionInfoUpdate
+  | sessionUpdate="usage_update" UsageUpdate
+  | sessionUpdate="notice" Notice
+  | sessionUpdate="compaction_update" CompactionUpdate
+  | sessionUpdate="compaction_summary_chunk" CompactionSummaryChunk
+  | sessionUpdate="subagent_update" SubagentUpdate
+  | sessionUpdate="session_message" SessionMessage
+  | sessionUpdate="session_message_chunk" SessionMessageChunk
+  |  object
+
+SubagentUpdate {
+  sessionId: SessionId
+  title?: string | null
+  description?: string | null
+  capabilities?: SubagentSessionCapabilities | null
+  state?: StateUpdate | null
+  _meta?: object | null
+}
+
+## missing SubagentState
+SessionMessage {
+  messageId: MessageId
+  senderSessionId?: SessionId | null
+  recipientSessionId?: SessionId | null
+  content?: array | null
+  _meta?: object | null
+}
+
+SessionMessageChunk {
+  messageId: MessageId
+  senderSessionId?: SessionId | null
+  recipientSessionId?: SessionId | null
+  content: ContentBlock
+  _meta?: object | null
+}
+
+Notice {
+  severity: NoticeSeverity
+  title: string
+  description?: string | null
+  _meta?: object | null
+}
+
+CompactionUpdate {
+  compactionId: CompactionId
+  status: CompactionStatus
+  summary?: array | null
+  error?: string | null
+  _meta?: object | null
+}
+
+CompactionSummaryChunk {
+  compactionId: CompactionId
+  content: ContentBlock
+  _meta?: object | null
+}
+
+ForkSessionRequest {
+  sessionId: SessionId
+  cwd: AbsolutePath
+  additionalDirectories?: AbsolutePath[]
+  mcpServers?: McpServer[]
+  _meta?: object | null
+}
+
+ForkSessionResponse {
+  sessionId: SessionId
+  configOptions?: SessionConfigOption[]
+  availableCommands?: AvailableCommand[]
+  _meta?: object | null
+}
+
+PlanRemoved {
+  planId: PlanId
+  _meta?: object | null
+}
+
+ClientCapabilities {
+  auth?: AuthCapabilities | null
+  elicitation?: ElicitationCapabilities | null
+  nes?: ClientNesCapabilities | null
+  positionEncodings?: PositionEncodingKind[]
+  _meta?: object | null
+}
+
+AgentCapabilities {
+  session?: SessionCapabilities | null
+  auth?: AgentAuthCapabilities | null
+  providers?: ProvidersCapabilities | null
+  nes?: NesCapabilities | null
+  positionEncoding?: PositionEncodingKind | null
+  _meta?: object | null
+}
+

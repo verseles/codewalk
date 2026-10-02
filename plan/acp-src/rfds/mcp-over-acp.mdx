@@ -1,0 +1,336 @@
+---
+title: "MCP-over-ACP: Stateless MCP Requests over ACP"
+---
+
+Author(s): [nikomatsakis](https://github.com/nikomatsakis)
+
+## Elevator pitch
+
+Let an ACP client or proxy supply tools to an agent using the ACP connection it already has. Declare an MCP server with `"type": "acp"`, then send independent MCP requests to its `serverId`. Results, request-scoped notifications, and cancellation travel over ACP without a second process or network endpoint.
+
+This draft targets **MCP 2026-07-28 only**. It does not emulate older MCP revisions. ACP initialization and sessions remain unchanged, but there is no MCP initialization handshake, MCP connection object, or connect/disconnect exchange.
+
+## Motivation
+
+ACP manages an agent's conversation while MCP provides tools behind it. A client often needs to do both: provide project-aware tools, ask the agent to use them, and execute them inside the client's process or sandbox.
+
+Requiring a separate HTTP listener or subprocess for those tools creates an extra communication path and makes isolation harder. Native MCP-over-ACP keeps the interaction on the authorized ACP channel. It works directly between a client and an agent; proxy chains are useful but not required.
+
+## Protocol model
+
+There are three identities, with different purposes:
+
+- **`serverId`** names a server declared by its provider. It selects a tool/resource/prompt offering, not an MCP session.
+- **`requestId`** is a caller-generated opaque string identifying one logical MCP request. It is used as the inner MCP JSON-RPC ID and is preserved across ACP proxies.
+- **Outer JSON-RPC `id`** identifies the ACP request on one hop. A proxy may renumber it when forwarding.
+
+Every operation carries its own MCP version, client capabilities, and other request context. Nothing about a previous request establishes that context for the next one. A subscription may keep one request alive; that is not a session for unrelated calls.
+
+Stateless MCP does not require stateless application services. Providers may reuse tool implementations, database pools, caches, and authorization services. Execution and notification permissions belong to each operation, while application state may outlive it. Discovery, listing, and execution must use that operation's explicit caller context, not the identity or capabilities of an earlier request.
+
+The binding uses one method name, `mcp/message`, in two directions:
+
+- An **agent-to-provider request** invokes one MCP operation and eventually receives one result or error.
+- A **provider-to-agent notification** carries an MCP notification belonging to that active operation.
+
+`mcp/message` is this binding's ACP transport envelope, not an MCP-defined method. JSON-RPC distinguishes the two forms by the outer `id`: requests have one, notifications do not. The inner MCP method is preserved, such as `tools/call` for a request or `notifications/progress` for a notification. Implementations dispatch by JSON-RPC message kind and direction, not the outer method name alone.
+
+There are no provider-originated MCP requests. Interactive tools use MCP's multi round-trip request pattern (MRTR).
+
+## Declaring a server
+
+The client checks the agent's ACP MCP capability, then includes a declaration in a session setup request. For example, `session/new` parameters can include:
+
+```json
+{
+  "cwd": "/workspace/project",
+  "mcpServers": [
+    {
+      "type": "acp",
+      "name": "project-tools",
+      "serverId": "project-tools:7a72"
+    }
+  ]
+}
+```
+
+The provider generates the opaque `serverId`. A server ID identifies one registration for the lifetime of the ACP connection and must not be rebound to a different registration, including after removal. The same registration may be offered to multiple ACP sessions; distinct offerings use distinct server IDs rather than hidden per-MCP-connection catalogs.
+
+The provider must be ready to serve requests when it publishes the declaration. An agent may invoke tools or discover the server before returning the ACP session ID.
+
+Only the owning provider claims requests for its registered IDs. Intermediaries without a matching registration forward the request. If no provider can resolve the ID, the final recipient returns the binding's server-unavailable error.
+
+A declaration is a reference to a registration, not a remote allocation request. This RFD adds no server-update or unadvertisement method. The provider owns the registration's local lifetime: releasing it rejects future requests and cancels outstanding work. Closing the ACP connection releases all its registrations. Merely omitting a previously declared server from a later setup request does not revoke a registration used by another session.
+
+### Capability advertising
+
+In **ACP v1**, the relevant `InitializeResponse` fragment is:
+
+```json
+{
+  "agentCapabilities": {
+    "mcpCapabilities": {
+      "acp": true
+    }
+  }
+}
+```
+
+Omission is equivalent to `false`.
+
+In **draft ACP v2**, the fragment is:
+
+```json
+{
+  "capabilities": {
+    "session": {
+      "mcp": {
+        "acp": {}
+      }
+    }
+  }
+}
+```
+
+The v2 field is an optional object: omission or `null` means support is not advertised, and `{}` advertises support. These are ACP capabilities, separate from the MCP client capabilities carried on each request.
+
+An intermediary only advertises support when its downstream chain can consume this transport. The conductor does not unconditionally add the capability. A proxy that provides no adaptation preserves its successor's capabilities.
+
+This capability advertises the MCP transport, not every optional MCP feature or a guarantee that every operation can be cancelled. MCP discovery and per-request capabilities describe the supported features.
+
+## Requests and results
+
+The agent sends an ACP request with a server ID, a fresh logical MCP request ID, and flattened MCP method/parameters:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 20,
+  "method": "mcp/message",
+  "params": {
+    "serverId": "project-tools:7a72",
+    "requestId": "mcp-request:a11f",
+    "method": "tools/call",
+    "params": {
+      "name": "echo",
+      "arguments": {
+        "message": "hello"
+      },
+      "_meta": {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {},
+        "io.modelcontextprotocol/clientInfo": {
+          "name": "example-agent",
+          "version": "1"
+        },
+        "progressToken": "progress-1"
+      }
+    }
+  }
+}
+```
+
+The provider executes the inner request using `"mcp-request:a11f"` as its MCP JSON-RPC ID. It does not use the outer ACP ID `20`, which may differ on another hop.
+
+The successful ACP response carries exactly one inner MCP outcome. A result is nested under `result`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 20,
+  "result": {
+    "result": {
+      "resultType": "complete",
+      "content": [
+        {
+          "type": "text",
+          "text": "hello"
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+An inner MCP protocol error is also a successful **outer ACP response**, using the carrier's `error` branch:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 20,
+  "result": {
+    "error": {
+      "code": -32602,
+      "message": "Unknown tool",
+      "data": { "name": "echo" }
+    }
+  }
+}
+```
+
+This preserves error-domain provenance. An inner error code is an MCP code; it must not be interpreted as an ACP error, even if the numerical codes collide. For example, an inner `-32000` must not trigger ACP authentication. An MCP tool-execution error remains a result with `isError`, not either kind of protocol error.
+
+Senders MUST include exactly one of `result` or `error` in the carrier. `result` must be present on the result branch and accepts any JSON value, including explicit `null`. `error` is a non-null object with required integer `code` and string `message`; optional `data` distinguishes omission from explicit `null`. Receivers ignore unknown outer carrier fields and prefer `result` if both outcome keys are present, matching the existing JSON-RPC response handling. Unknown inner result and error fields remain opaque and are preserved. An optional carrier `_meta` contains ACP metadata and is separate from the inner outcome's metadata; omission, `null`, and invalid non-object values are all treated as absent.
+
+### Binding failures
+
+Outer ACP errors are reserved for failures to admit, route, or execute the binding itself:
+
+| Code     | Meaning                                                            |
+| -------- | ------------------------------------------------------------------ |
+| `-32602` | Malformed ACP envelope or duplicate active `(serverId, requestId)` |
+| `-32800` | ACP operation cancelled                                            |
+| `-33000` | Binding resource limit exceeded                                    |
+| `-33001` | Server registration unavailable                                    |
+| `-33002` | Backend or transport failed without a valid MCP outcome            |
+
+These binding-specific codes do not allocate new meanings in MCP's reserved `-32000` through `-32019` range. No implementation may report overload as ACP's authentication-required error. A malformed inner MCP request or an MCP error returned by a backend belongs in the outcome carrier instead.
+
+`server/discover` is an ordinary inner MCP request. It is supported but is not a prerequisite for calling a tool. The transport does not silently perform an MCP handshake or substitute ACP capability discovery for MCP server discovery.
+
+Discovery's `supportedVersions` describes the revisions available through this binding. The SDK restricts it to 2026-07-28, even when the hosted backend supports additional revisions on other transports; it does not invent support that the backend lacks. Other discovery capabilities and metadata are preserved.
+
+### Fields and metadata
+
+`serverId`, `requestId`, and `method` are required non-null strings on both requests and notifications. A caller uses a fresh `requestId` for each operation, including an MRTR retry, and must not reuse an active ID for the same server on the same ACP connection.
+
+The inner `params` field accepts an object or `null` and is optional at the envelope level. Omission and `null` both mean no inner parameters; positional arrays are invalid. This does not relax MCP's requirements: a valid 2026-07-28 request must include its required metadata in `params._meta`.
+
+An optional outer `_meta` object alongside `serverId` is ACP envelope metadata. Omission and `null` are equivalent. It is distinct from MCP metadata inside the inner parameters or result, which must be preserved.
+
+Providers validate the per-request MCP version and capabilities. Missing or malformed required inner metadata is an MCP invalid-parameters outcome. An unsupported version is MCP's `UnsupportedProtocolVersion` error (`-32022`), with the supported and requested versions, inside the outcome carrier. This binding's supported set contains only 2026-07-28: a caller without a mutual version surfaces that error rather than falling back to `initialize` or an earlier revision.
+
+## Request-scoped notifications
+
+While a request is active, its provider can send a notification with the same server and logical request IDs:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "mcp/message",
+  "params": {
+    "serverId": "project-tools:7a72",
+    "requestId": "mcp-request:a11f",
+    "method": "notifications/progress",
+    "params": {
+      "progressToken": "progress-1",
+      "progress": 1,
+      "total": 2
+    }
+  }
+}
+```
+
+The outer notification has no JSON-RPC ID and receives no response. It belongs only to the identified request; a consumer must not deliver unknown or late notifications to a different operation.
+
+Progress tokens and other MCP metadata are preserved. Progress and any supported logging notifications belong to their original request, not an unrelated subscription. A provider stops forwarding notifications for a request once its final result or error has been sent.
+
+### Subscriptions
+
+`subscriptions/listen` is a long-lived `mcp/message` request, not a new ACP connection. Its first associated MCP notification is `notifications/subscriptions/acknowledged`. Subsequent notifications obey the acknowledged filter.
+
+Each subscription notification carries `io.modelcontextprotocol/subscriptionId` in its inner `_meta`. That value is the logical `requestId` of the listen request, not the outer ACP JSON-RPC ID. A graceful completion result carries the same subscription metadata. Multiple subscriptions and ordinary requests may be active concurrently.
+
+## Cancellation and lifetime
+
+Cancellation uses ACP's existing `$/cancel_request` for the **outer ACP request**; this binding adds no separate cancellation method or support requirement. A caller can request cancellation when it no longer needs an operation's result. For the example request above:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "$/cancel_request",
+  "params": {
+    "requestId": 20
+  }
+}
+```
+
+This cancellation ID is hop-local. When a proxy forwards cancellation, it uses its downstream ACP request ID; it does not rewrite the logical MCP `requestId` or tunnel an unrelated hop's cancellation ID.
+
+Cancellation is best effort. A provider may complete an operation normally if it cannot cancel it or completion wins the race. When it honors cancellation, it stops producing new notifications for that operation and answers the original ACP request with a cancellation error after cleanup. Cancelling one operation does not cancel sibling requests, subscriptions, the server registration, or the containing ACP connection.
+
+For long-lived operations such as `subscriptions/listen`, per-request cancellation is useful because it avoids closing the whole ACP connection to stop one stream. An HTTP adapter translates response-stream closure into a cancellation request upstream, following [MCP's transport-specific cancellation rules](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/cancellation).
+
+Honoring cancellation is not merely deletion of a routing entry. Execution and cleanup remain supervised; admission permits and the active logical ID stay owned until cleanup finishes. A reusable service remains available for sibling operations. Work reported as cancelled before execution does not start later. Cancellation cannot roll back already-performed external side effects.
+
+Releasing a provider registration or closing its ACP connection cancels all work owned by it. Transport EOF initiates cancellation; it must not wait indefinitely for an application future that is itself awaiting the disconnected peer. Unknown servers and invalid or duplicate active request IDs receive errors; malformed notifications do not receive synthetic replies.
+
+Bound notification buffering, frame sizes, and outstanding work. Retain resource accounting while messages are queued, deferred, serialized, or held in an unread response body, not only while backend execution is active. Keep shutdown and any supported cancellation responsive when data capacity is exhausted. If an implementation cannot continue a stream safely, fail or cancel that request explicitly instead of silently dropping subscription events or growing an unbounded queue. Do not block unrelated dispatch while waiting for a slow consumer.
+
+## Interactive tools
+
+MCP 2026-07-28 replaces reverse JSON-RPC calls with MRTR. For `tools/call`, `resources/read`, or `prompts/get`, a provider may return `resultType: "input_required"` with input requests and/or opaque `requestState`. That completes the current ACP request.
+
+The agent obtains the requested input, then issues a fresh `mcp/message` request for the original operation with `inputResponses` and the exact opaque state. Each retry supplies its own MCP metadata and uses a fresh logical request ID. The transport must not parse retry state, automatically approve an elicitation, or replay side-effecting calls without the agent's policy.
+
+This flow needs neither a persistent MCP session nor a provider-originated ACP request.
+
+## Proxying and HTTP adaptation
+
+Proxies preserve `serverId`, logical `requestId`, inner payloads, and metadata. Normal ACP forwarding handles outer responses and, where supported, hop-local cancellation. Providers claim requests for their declared servers; other components forward them normally. There is no conductor MCP connection table or special connect/disconnect routing.
+
+An optional adapter may expose a native server to a **modern MCP HTTP client**. HTTP capability alone does not prove that an agent supports this MCP revision. The adapter must not add a legacy fallback.
+
+The HTTP endpoint can be reused, but every POST represents its own request:
+
+- Accept a single JSON-RPC request per POST and return JSON or request-scoped SSE. Reject batches and client-sent responses.
+- Support subscriptions as long-lived POST response streams. Closing one response stream requests cancellation of only its mapped ACP request and stops delivery on that stream.
+- Return 405 for GET and DELETE. Do not issue session headers or implement SSE resumption.
+- Validate protocol-version, method, name, and applicable mirrored tool-parameter headers against the body, including required value decoding.
+- Validate supplied Origin headers, bind local listeners to loopback, and enforce access control. A random port is not authentication.
+- Allocate independent logical MCP IDs for overlapping HTTP request IDs. Translate MCP ID references at this transport boundary, including subscription IDs, while preserving progress tokens and opaque state. ACP proxies do not perform that translation.
+
+### Native-tool re-export
+
+The Rust adapter exposes a **new local HTTP endpoint for native tools**, not a transparent tunnel for another HTTP endpoint's routing or authorization policy. It uses one loopback listener per ACP connection. A non-secret encoding of `serverId` identifies the route, and a connection-specific bearer credential is bound to that server. Credentials never appear in URLs. The provider still decides whether the registration exists and the caller is authorized; retaining an old URL does not resurrect a removed registration.
+
+This endpoint does not advertise tool-parameter header mirroring. It removes `x-mcp-header` only from actual schema annotation positions in returned tool descriptors, preserving validation keywords, argument names, and example/default data. It rejects supplied `Mcp-Param-*` headers rather than assigning them authority. Standard method/name/version header validation still applies.
+
+Each `tools/call` goes directly to its native provider without hidden `tools/list` requests. This avoids a descriptor lookup/execution race and does not introduce a discovery prerequisite. Native ACP passthrough preserves descriptors unchanged. A deployment requiring an existing HTTP gateway's parameter-header policy must implement that policy at the new endpoint or decline this re-export; native execution cannot inherit HTTP headers that were never transported.
+
+HTTP is an adapter, not a prerequisite for the native protocol. Its validation and security surface must be tested separately; working native tool calls do not establish HTTP conformance.
+
+## Security
+
+Server IDs and request IDs are routing identifiers, not credentials. Providers bind server ownership and visibility to the supplying ACP component and authorized callers. Self-reported MCP `clientInfo` is not an authentication identity.
+
+Keep outer ACP metadata separate from inner MCP metadata. Do not persist runtime credentials from rewritten HTTP declarations in traces.
+
+Servers treat MRTR state as attacker-controlled input. Where it influences authorization or business logic, protect integrity and address principal binding, expiry, replay, and single-use requirements. Intermediaries keep it opaque.
+
+Tool lists vary by explicit server identity and authorization scope, not hidden connection state. Preserve required cache metadata and do not share private catalogs across callers.
+
+## Implementation and validation
+
+The Rust implementation uses each ACP version's unstable `MessageMcpRequest`, `MessageMcpResponse`, `MessageMcpNotification`, `McpError`, and `McpRequestId` schema types. The v1 and v2 response and error types are defined independently so either version can evolve without changing the other. Their JSON representation is currently the same.
+
+The SDK's target API separates a reusable `McpService` from each owned operation. A `McpRequestContext` supplies logical/server identity, validated metadata and capabilities, cancellation, and request-scoped notifications. A backend factory is an explicit adapter for implementations that need per-operation construction, not a requirement imposed by stateless MCP. Integration adapters must supervise any tasks spawned by their underlying library, not assume dropping a wrapper joins detached handlers.
+
+Reference implementation tests cover:
+
+- Real discovery and tool calls without MCP initialization, directly and through a proxy.
+- Stable logical IDs when ACP outer IDs are renumbered.
+- Independent concurrent requests, request-specific metadata/errors, and rejection of duplicate active IDs.
+- Separation of inner MCP errors from outer ACP errors, including colliding codes, explicit null data, and unknown extension fields.
+- MRTR with nonempty input responses, opaque state, and fresh retry IDs.
+- Subscription acknowledgement ordering, filtered notifications, correlation, and graceful completion.
+- Cancellation of queued and running tools and subscriptions, including noncooperative user futures, registration removal, transport EOF, late-message rejection, and joined resource cleanup.
+- Slow readers, bounded pending work, control-plane liveness under saturation, and admission recovery after response-body release.
+- HTTP request isolation, header/Origin/access checks, direct annotated native-tool calls without preliminary requests, request-close cancellation, and rejection of removed transport behavior.
+
+These tests verify the binding, not every optional MCP feature. Tasks, Apps, and other extensions remain opt-in. The new design should not depend on deprecated Roots, Sampling, or Logging features.
+
+### Stabilization gates
+
+The Rust reference implementation exercises the versioned response carriers, reusable services, bounded transport queues, and native-tool HTTP re-export together. Its cleanup regression deliberately pauses a tool runner while ACP continues dispatching: cancellation cannot settle or release the logical request ID until the runner drops the tool future. Both mutable and concurrent tools use this rule. Independent item-count limits are not evidence of complete memory bounds, and dropping a task handle is not evidence that its work stopped.
+
+Concrete buffer sizes and concurrency quotas are implementation policies, not wire-protocol constants. Their behavior must be configurable or documented, and quota failures must preserve the error-domain distinction above. Both ACP v1 and draft v2 must exercise the same binding semantics; this proposal does not otherwise stabilize ACP v2 or optional MCP extensions.
+
+The Rust reference implementation supervises cancellation and joins owned backend work before reporting it complete; it cannot forcibly terminate detached application work. These are implementation safeguards, not additional cancellation requirements for advertising the transport. The reference tests establish the covered binding behavior, not full conformance for every MCP feature or readiness to publish packages. The draft schema must be released and dependent SDK major versions coordinated before publication.
+
+## References and revision history
+
+Normative MCP references: [2026-07-28 specification](https://modelcontextprotocol.io/specification/2026-07-28), [versioning](https://modelcontextprotocol.io/specification/2026-07-28/basic/lifecycle), [MRTR](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr), [subscriptions](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/subscriptions), [cancellation](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/cancellation), and [Streamable HTTP](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http).
+
+This proposal was split from the [proxy-chain RFD](./proxy-chains). Earlier drafts used server `id`/`acpId`, an MCP connection ID, connect/disconnect methods, and reverse requests. Those drafts and the stateful implementation checkpoint are not compatibility commitments. This revision replaces them with server-addressed requests and request-scoped notifications targeting MCP 2026-07-28 only.

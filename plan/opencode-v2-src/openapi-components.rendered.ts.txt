@@ -1,0 +1,1911 @@
+// Rendered from anomalyco/opencode@v2.0.21 packages/protocol/openapi.json (components.schemas).
+// Auto-generated compact TypeScript-like notation. `X?:` = optional key (the wire also accepts null for optional keys).
+// Names ending in `Encoded` are shown without the suffix in references. Timestamps typed `number` are epoch milliseconds.
+
+type Agent.Color = string
+
+type Agent.Info = {
+  id: string
+  name: string
+  model?: Model.Ref
+  request: Provider.Request
+  system?: string
+  description?: string
+  mode: "subagent" | "primary" | "all"
+  hidden: boolean
+  color?: Agent.Color
+  steps?: integer /*exclusiveMinimum 0*/
+  permissions: Permission.Ruleset
+}
+
+type AgentNotFoundError = {
+  _tag: "AgentNotFoundError"
+  agentID: string
+  message: string
+}
+
+type Command.Info = {
+  name: string
+  description?: string
+}
+
+type CommandExecutionError = {
+  _tag: "CommandExecutionError"
+  command: string
+  message: string
+}
+
+type CommandNotFoundError = {
+  _tag: "CommandNotFoundError"
+  command: string
+  message: string
+}
+
+type Config.Agent = {
+  model?: 
+    | string /*pattern ^[^/#]+\/[^#]+(?:#[^#]+)?$*/
+    | {
+          providerID: string /*pattern ^[^/#]+$*/
+          model: string /*pattern ^[^#]+$*/
+          variant?: string /*pattern ^[^#]+$*/
+        }
+  request?: {
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+  }
+  system?: string
+  description?: string
+  mode?: "subagent" | "primary" | "all"
+  hidden?: boolean
+  color?: string /*pattern ^#[0-9a-fA-F]{6}$*/
+  steps?: integer /*exclusiveMinimum 0*/
+  disabled?: boolean
+  permissions?: Permission.Ruleset
+}
+
+type Config.Command = {
+  template: string
+  description?: string
+  agent?: string
+  model?: 
+    | string /*pattern ^[^/#]+\/[^#]+(?:#[^#]+)?$*/
+    | {
+          providerID: string /*pattern ^[^/#]+$*/
+          model: string /*pattern ^[^#]+$*/
+          variant?: string /*pattern ^[^#]+$*/
+        }
+  subagent?: boolean
+  subtask?: boolean  // Deprecated alias for subagent.
+}
+
+type Config.Directory = {
+  type: "directory"
+  path: string
+}
+
+type Config.Document = {
+  type: "document"
+  path?: string
+  info: Config.Info
+}
+
+type Config.Entry = Config.Document | Config.Directory
+
+type Config.Formatter.Entry = {
+  disabled?: boolean
+  command?: string[]
+  environment?: Record<string, string>
+  extensions?: string[]
+}
+
+type Config.Info = {
+  "$schema"?: string
+  shell?: string
+  model?: 
+    | string /*pattern ^[^/#]+\/[^#]+(?:#[^#]+)?$*/
+    | {
+          providerID: string /*pattern ^[^/#]+$*/
+          model: string /*pattern ^[^#]+$*/
+          variant?: string /*pattern ^[^#]+$*/
+        }
+  default_agent?: string
+  update?: "disable" | "notify" | "auto"
+  share?: "manual" | "auto" | "disabled"
+  enterprise?: {
+    url?: string
+  }
+  username?: string
+  permissions?: Permission.Ruleset
+  agents?: Record<string, Config.Agent>
+  snapshots?: boolean
+  watcher?: {
+    ignore?: string[]
+  }
+  formatter?: boolean | Record<string, Config.Formatter.Entry>
+  lsp?: 
+    | boolean
+    | Record<string, 
+          | {
+                disabled: true
+              }
+          | Config.LSP.Server>
+  media?: {
+    image?: {
+      auto_resize?: boolean
+      max_width?: integer /*exclusiveMinimum 0*/
+      max_height?: integer /*exclusiveMinimum 0*/
+      max_base64_bytes?: integer /*exclusiveMinimum 0*/
+    }
+  }
+  tool_output?: {
+    max_lines?: integer /*exclusiveMinimum 0*/
+    max_bytes?: integer /*exclusiveMinimum 0*/
+  }
+  mcp?: {
+    timeout?: {
+      startup?: integer /*exclusiveMinimum 0*/
+      catalog?: integer /*exclusiveMinimum 0*/
+      execution?: integer /*exclusiveMinimum 0*/
+    }
+    servers?: Record<string, Mcp.LocalConfig | Mcp.RemoteConfig>
+  }
+  compaction?: {
+    auto?: boolean
+    keep?: {
+      tokens?: integer /*minimum 0*/
+    }
+    buffer?: integer /*minimum 0*/
+  }
+  skills?: string[]
+  commands?: Record<string, Config.Command>
+  instructions?: string[]
+  references?: Record<string, string | Config.Reference.Git | Config.Reference.Local>
+  websearch?: false | ConfigWebSearch.Info
+  plugins?: (string | Config.Plugin.Entry)[]
+  worktree?: Config.Worktree
+  warming?: boolean | Config.Warming
+  providers?: Record<string, Config.Provider>
+  experimental?: {
+    portable_shell_scanner?: boolean
+    subagent_depth?: integer /*minimum 0*/
+    policies?: {
+      action: "provider.use" | "permission"
+      resource: string
+      effect: "allow" | "deny"
+    }[]
+  }
+}
+
+type Config.LSP.Server = {
+  command: string[]
+  extensions?: string[]
+  disabled?: boolean
+  env?: Record<string, string>
+  initialization?: Record<string, unknown>
+}
+
+type Config.Model.Cost = {
+  tier?: {
+    type: "context"
+    size: integer
+  }
+  input: Money.USDPerMillionTokens
+  output: Money.USDPerMillionTokens
+  cache?: {
+    read?: Money.USDPerMillionTokens
+    write?: Money.USDPerMillionTokens
+  }
+}
+
+type Config.Model.Settings = Record<string, unknown | null>
+
+type Config.Model = {
+  modelID?: string
+  family?: string
+  name?: string
+  compatibility?: Model.Compatibility
+  package?: string
+  settings?: Config.Model.Settings
+  headers?: Record<string, string>
+  body?: Record<string, unknown>
+  capabilities?: Model.Capabilities
+  variants?: {
+    id: string
+    settings?: Config.Model.Settings
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+  }[]
+  cost?: Config.Model.Cost | Config.Model.Cost[]
+  disabled?: boolean
+  limit?: {
+    context?: integer
+    input?: integer
+    output?: integer
+  }
+}
+
+type Config.Patch = {
+  shell: string | null
+}
+
+type Config.Plugin.Entry = {
+  package: string
+  options?: Record<string, unknown>
+}
+
+type Config.Provider.Settings = Record<string, unknown | null>
+
+type Config.Provider = {
+  canonical?: string
+  name?: string
+  env?: string[]
+  package?: string
+  settings?: Config.Provider.Settings
+  headers?: Record<string, string>
+  body?: Record<string, unknown>
+  models?: Record<string, Config.Model>
+}
+
+type Config.Reference.Git = {
+  repository: string
+  branch?: string
+  description?: string
+  hidden?: boolean
+}
+
+type Config.Reference.Local = {
+  path: string
+  description?: string
+  hidden?: boolean
+}
+
+type Config.Warming = {
+  prompt?: string
+  interval?: string
+  duration?: string
+}
+
+type Config.Worktree = {
+  directory: string
+}
+
+type ConfigShell.Option = {
+  path: string
+  name: string
+  acceptable: boolean
+}
+
+type ConfigWebSearch.Info = {
+  provider: "random" | string
+}
+
+type ConflictError = {
+  _tag: "ConflictError"
+  message: string
+  resource?: string
+}
+
+type Connection.CredentialInfo = {
+  type: "credential"
+  id: string
+  label: string
+  method: "key" | "oauth"
+}
+
+type Connection.EnvInfo = {
+  type: "env"
+  name: string
+}
+
+type Connection.Info = Connection.CredentialInfo | Connection.EnvInfo
+
+type FileDiff.Info = {
+  file: string
+  patch: string
+  additions: integer /*minimum 0*/
+  deletions: integer /*minimum 0*/
+  status: "added" | "deleted" | "modified"
+}
+
+type FileNotFoundError = {
+  _tag: "FileNotFoundError"
+  path: string
+  message: string
+}
+
+type FileSystem.Entry = {
+  path: string
+  type: "file" | "directory"
+}
+
+type FileSystem.Write = {
+  path: string
+}
+
+type ForbiddenError = {
+  _tag: "ForbiddenError"
+  message: string
+}
+
+type Form.Answer = Record<string, Form.Value>
+
+type Form.BooleanField = {
+  key: string
+  title?: string
+  description?: string
+  required?: boolean
+  hidden?: boolean
+  when?: Form.When[]
+  type: "boolean"
+  default?: boolean
+}
+
+type Form.CreatePayload = {
+  id?: string /*pattern ^frm_*/
+  title: string
+  metadata?: Form.Metadata
+  fields: Form.Fields
+}
+
+type Form.Detail = {
+  id: string /*pattern ^frm_*/
+  sessionID: string
+  title: string
+  metadata?: Form.Metadata
+  fields: Form.Fields
+  state: Form.State
+}
+
+type Form.ExternalField = {
+  key: string
+  type: "external"
+  url: string
+  title?: string
+  description?: string
+}
+
+type Form.Field = 
+  | Form.StringField
+  | Form.NumberField
+  | Form.IntegerField
+  | Form.BooleanField
+  | Form.MultiselectField
+  | Form.ExternalField
+
+type Form.Fields = [Form.Field]
+
+type Form.Fields_1 = [Form.Field]
+
+type Form.Fields_2 = [Form.Field]
+
+type Form.Info = {
+  id: string /*pattern ^frm_*/
+  sessionID: string
+  title: string
+  metadata?: Form.Metadata
+  fields: Form.Fields
+}
+
+type Form.IntegerField = {
+  key: string
+  title?: string
+  description?: string
+  required?: boolean
+  hidden?: boolean
+  when?: Form.When[]
+  type: "integer"
+  minimum?: number | "Infinity" | "-Infinity" | "NaN"
+  maximum?: number | "Infinity" | "-Infinity" | "NaN"
+  default?: number | "Infinity" | "-Infinity" | "NaN"
+}
+
+type Form.Metadata = Record<string, unknown>
+
+type Form.MultiselectField = {
+  key: string
+  title?: string
+  description?: string
+  required?: boolean
+  hidden?: boolean
+  when?: Form.When[]
+  type: "multiselect"
+  options: Form.Option[]
+  minItems?: integer /*minimum 0*/
+  maxItems?: integer /*minimum 0*/
+  custom?: boolean
+  default?: string[]
+}
+
+type Form.NumberField = {
+  key: string
+  title?: string
+  description?: string
+  required?: boolean
+  hidden?: boolean
+  when?: Form.When[]
+  type: "number"
+  minimum?: number | "Infinity" | "-Infinity" | "NaN"
+  maximum?: number | "Infinity" | "-Infinity" | "NaN"
+  default?: number | "Infinity" | "-Infinity" | "NaN"
+}
+
+type Form.Option = {
+  value: string
+  label: string
+  description?: string
+}
+
+type Form.Reply = {
+  answer: Form.Answer
+}
+
+type Form.State = 
+  | {
+      status: "pending"
+    }
+  | {
+      status: "answered"
+      answer: Form.Answer
+    }
+  | {
+      status: "cancelled"
+      message?: string
+    }
+
+type Form.StringField = {
+  key: string
+  title?: string
+  description?: string
+  required?: boolean
+  hidden?: boolean
+  when?: Form.When[]
+  type: "string"
+  format?: "email" | "uri" | "date" | "date-time"
+  minLength?: integer /*minimum 0*/
+  maxLength?: integer /*minimum 0*/
+  pattern?: string
+  placeholder?: string
+  default?: string
+  options?: Form.Option[]
+  custom?: boolean
+}
+
+type Form.Value = string | number | "Infinity" | "-Infinity" | "NaN" | boolean | string[]
+
+type Form.When = {
+  key: string
+  op: "eq" | "neq"
+  value: string | number | "Infinity" | "-Infinity" | "NaN" | boolean
+}
+
+type FormAlreadySettledError = {
+  _tag: "FormAlreadySettledError"
+  id: string
+  message: string
+}
+
+type FormInvalidAnswerError = {
+  _tag: "FormInvalidAnswerError"
+  id: string
+  message: string
+}
+
+type FormNotFoundError = {
+  _tag: "FormNotFoundError"
+  id: string
+  message: string
+}
+
+type GenerateTextResponse = {
+  data: {
+    text: string
+  }
+}
+
+type InstructionEntry.Info = {
+  key: InstructionEntry.Key
+  value: {"description": "JSON value attached to the session's instructions"}  // JSON value attached to the session's instructions
+}
+
+/** Instruction entry key (lowercase alphanumerics plus . _ -) */
+type InstructionEntry.Key = string /*pattern ^[a-z0-9][a-z0-9._-]*$*/
+
+type InstructionEntryValueTooLargeError = {
+  _tag: "InstructionEntryValueTooLargeError"
+  actualBytes: integer
+  maxBytes: integer
+  message: string
+}
+
+type Integration.Attempt = {
+  attemptID: string
+  url: string
+  instructions: string
+  mode: "auto" | "code"
+  time: {
+    created: number | "Infinity" | "-Infinity" | "NaN"
+    expires: number | "Infinity" | "-Infinity" | "NaN"
+  }
+}
+
+type Integration.AttemptStatus = 
+  | {
+      status: "pending"
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+  | {
+      status: "complete"
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+  | {
+      status: "failed"
+      message: string
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+  | {
+      status: "expired"
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+
+type Integration.CommandAttempt = {
+  attemptID: string
+  time: {
+    created: number | "Infinity" | "-Infinity" | "NaN"
+    expires: number | "Infinity" | "-Infinity" | "NaN"
+  }
+}
+
+type Integration.CommandAttemptStatus = 
+  | {
+      status: "pending"
+      message?: string
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+  | {
+      status: "complete"
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+  | {
+      status: "failed"
+      message: string
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+  | {
+      status: "expired"
+      time: {
+        created: number | "Infinity" | "-Infinity" | "NaN"
+        expires: number | "Infinity" | "-Infinity" | "NaN"
+      }
+    }
+
+type Integration.CommandMethod = {
+  id: string
+  type: "command"
+  label: string
+  command: string[]
+}
+
+type Integration.EnvMethod = {
+  type: "env"
+  names: string[]
+}
+
+type Integration.Info = {
+  id: string
+  name: string
+  metadata?: Record<string, unknown>
+  methods: Integration.Method[]
+  connections: Connection.Info[]
+}
+
+type Integration.KeyMethod = {
+  type: "key"
+  label?: string
+  form?: Form.Fields_2
+}
+
+type Integration.Method = Integration.OAuthMethod | Integration.CommandMethod | Integration.KeyMethod | Integration.EnvMethod
+
+type Integration.OAuthMethod = {
+  id: string
+  type: "oauth"
+  label: string
+  form?: Form.Fields_1
+}
+
+type IntegrationAttemptNotFoundError = {
+  _tag: "IntegrationAttemptNotFoundError"
+  integrationID: string
+  attemptID: string
+  message: string
+}
+
+type IntegrationMethodNotFoundError = {
+  _tag: "IntegrationMethodNotFoundError"
+  integrationID: string
+  methodID: string
+  message: string
+}
+
+type IntegrationNotFoundError = {
+  _tag: "IntegrationNotFoundError"
+  integrationID: string
+  message: string
+}
+
+type InvalidCursorError = {
+  _tag: "InvalidCursorError"
+  message: string
+}
+
+type InvalidRequestError = {
+  _tag: "InvalidRequestError"
+  message: string
+  kind?: string
+  field?: string
+}
+
+type Location.PublicInfo = {
+  directory: string
+  project: {
+    id: string
+    directory: string
+    canonical: string
+  }
+}
+
+type Location.PublicRef = {
+  directory: string
+}
+
+type Mcp.LocalConfig = {
+  type: "local"
+  command: string[]
+  cwd?: string
+  environment?: Record<string, string>
+  disabled?: boolean
+  codemode?: boolean
+  timeout?: {
+    startup?: integer /*exclusiveMinimum 0*/
+    catalog?: integer /*exclusiveMinimum 0*/
+    execution?: integer /*exclusiveMinimum 0*/
+  }
+  protocol?: Mcp.Protocol
+}
+
+type Mcp.OAuthConfig = {
+  client_id?: string
+  client_secret?: string
+  scope?: string
+  callback_port?: integer /*minimum 1, maximum 65535*/
+  redirect_uri?: string
+  auth_server_metadata_url?: string
+}
+
+/** MCP protocol negotiation. "legacy" (default) opens with the initialize handshake and speaks protocol revisions up to 2025-11-25. "auto" probes for the 2026-07-28 revision and falls back to legacy when the server does not support it. "2026-07-28" requires that revision and fails otherwise. */
+type Mcp.Protocol = "legacy" | "auto" | "2026-07-28"
+
+type Mcp.RemoteConfig = {
+  type: "remote"
+  url: string
+  headers?: Record<string, string>
+  oauth?: Mcp.OAuthConfig | false
+  disabled?: boolean
+  codemode?: boolean
+  timeout?: {
+    startup?: integer /*exclusiveMinimum 0*/
+    catalog?: integer /*exclusiveMinimum 0*/
+    execution?: integer /*exclusiveMinimum 0*/
+  }
+  protocol?: Mcp.Protocol
+}
+
+type Mcp.Resource = {
+  server: string
+  name: string
+  uri: string
+  description?: string
+  mimeType?: string
+}
+
+type Mcp.ResourceCatalog = {
+  resources: Mcp.Resource[]
+  templates: Mcp.ResourceTemplate[]
+}
+
+type Mcp.ResourceTemplate = {
+  server: string
+  name: string
+  uriTemplate: string
+  description?: string
+  mimeType?: string
+}
+
+type Mcp.Server = {
+  name: string
+  status: Mcp.Status.Connected | Mcp.Status.Pending | Mcp.Status.Disabled | Mcp.Status.Failed | Mcp.Status.NeedsAuth
+  integrationID?: string
+}
+
+type Mcp.Status.Connected = {
+  status: "connected"
+}
+
+type Mcp.Status.Disabled = {
+  status: "disabled"
+}
+
+type Mcp.Status.Failed = {
+  status: "failed"
+  error: string
+}
+
+type Mcp.Status.NeedsAuth = {
+  status: "needs_auth"
+  error: string
+}
+
+type Mcp.Status.Pending = {
+  status: "pending"
+}
+
+type McpServerNotFoundError = {
+  _tag: "McpServerNotFoundError"
+  server: string
+  message: string
+}
+
+type MessageNotFoundError = {
+  _tag: "MessageNotFoundError"
+  sessionID: string
+  messageID: string
+  message: string
+}
+
+type Model.Capabilities = {
+  tools: boolean
+  input: string[]
+  output: string[]
+}
+
+type Model.Compatibility = {
+  reasoningField?: Model.ReasoningField
+  requireReasoning?: boolean
+  maxTokensField?: Model.MaxTokensField
+  requireFinishReason?: boolean
+  requireAssistantAfterTool?: boolean
+  supportsPromptCacheKey?: boolean
+}
+
+type Model.Cost = {
+  tier?: {
+    type: "context"
+    size: integer
+  }
+  input: Money.USDPerMillionTokens
+  output: Money.USDPerMillionTokens
+  cache: {
+    read: Money.USDPerMillionTokens
+    write: Money.USDPerMillionTokens
+  }
+}
+
+type Model.Info = {
+  id: string
+  modelID: string
+  providerID: string
+  canonical?: string
+  family?: string
+  name: string
+  compatibility?: Model.Compatibility
+  package?: string
+  settings?: Model.Settings
+  headers?: Record<string, string>
+  body?: Record<string, unknown>
+  capabilities: Model.Capabilities
+  variants: Model.Variant[]
+  time: {
+    released: number
+  }
+  cost: Model.Cost[]
+  status: "alpha" | "beta" | "deprecated" | "active"
+  enabled: boolean
+  limit: {
+    context: integer
+    input?: integer
+    output: integer
+  }
+}
+
+type Model.MaxTokensField = "max_completion_tokens" | "max_tokens"
+
+type Model.ReasoningField = "reasoning" | "reasoning_content" | "reasoning_text" | string
+
+type Model.Ref = {
+  id: string
+  providerID: string
+  variant?: string
+}
+
+type Model.Settings = Record<string, unknown>
+
+type Model.Variant = {
+  id: string
+  settings?: Model.Settings
+  headers?: Record<string, string>
+  body?: Record<string, unknown>
+}
+
+type Money.USD = number
+
+type Money.USDPerMillionTokens = number
+
+type Permission.Effect = "allow" | "deny" | "ask"
+
+type Permission.Reply = "once" | "always" | "reject"
+
+type Permission.Request = {
+  id: string /*pattern ^per*/
+  sessionID: string /*pattern ^ses*/
+  action: string
+  resources: string[]
+  save?: string[]
+  metadata?: Record<string, unknown>
+  source?: Permission.Source
+  message?: string
+}
+
+type Permission.Rule = {
+  action: string
+  resource: string
+  effect: Permission.Effect
+}
+
+type Permission.Ruleset = Permission.Rule[]
+
+type Permission.Source = 
+  | {
+      type: "tool"
+      messageID: string
+      id: string
+    }
+
+type PermissionNotFoundError = {
+  _tag: "PermissionNotFoundError"
+  requestID: string
+  message: string
+}
+
+type PermissionSaved.Info = {
+  id: string
+  projectID: string
+  action: string
+  resource: string
+  time: {
+    created: number
+    updated: number
+  }
+}
+
+type PersistentPty.CreateInput = {
+  command?: string
+  args: string[]
+  cwd?: string
+  title: string
+  env: Record<string, string>
+  size?: {
+    cols: integer /*exclusiveMinimum 0*/
+    rows: integer /*exclusiveMinimum 0*/
+  }
+}
+
+type PersistentPty.Handoff = {
+  directory: string
+  instanceID: string
+  ticket: string
+  expiresAt: number | "Infinity" | "-Infinity" | "NaN"
+}
+
+type PersistentPty.Info = {
+  id: string /*pattern ^pty*/
+  title: string
+  command: string
+  args: string[]
+  cwd: string
+  status: "running" | "exited"
+  pid: integer /*minimum 0*/
+  exitCode?: integer /*minimum 0*/
+  sessionID: string /*pattern ^ses*/
+  foregroundProcess: string | null
+  size: {
+    cols: integer /*exclusiveMinimum 0*/
+    rows: integer /*exclusiveMinimum 0*/
+  }
+  output: {
+    head: integer /*minimum 0*/
+    tail: integer /*minimum 0*/
+  }
+}
+
+type PersistentPty.ReadLines = string
+
+type PersistentPty.ReadResult = {
+  ptyID: string /*pattern ^pty*/
+  title: string
+  cwd: string
+  foregroundProcess: string | null
+  screen: {
+    text: string
+    cols: integer /*exclusiveMinimum 0*/
+    rows: integer /*exclusiveMinimum 0*/
+    cursor: {
+      x: integer /*minimum 0*/
+      y: integer /*minimum 0*/
+    }
+  }
+}
+
+type PersistentPty.Snapshot = {
+  info: PersistentPty.Info
+  text: string
+  checkpoint: string /*byte*/
+  cursor: {
+    x: integer /*minimum 0*/
+    y: integer /*minimum 0*/
+  }
+}
+
+type PersistentPty.UpdateInput = {
+  attachmentID?: string
+  size: {
+    cols: integer /*exclusiveMinimum 0*/
+    rows: integer /*exclusiveMinimum 0*/
+  }
+}
+
+type Plugin.Features = {
+  server?: true
+  tui?: true
+  rpc?: true
+}
+
+type Plugin.Info = {
+  id?: string
+  source: Plugin.Source
+  features: Plugin.Features
+  state: Plugin.State
+}
+
+type Plugin.Source = 
+  | {
+      type: "builtin"
+    }
+  | {
+      type: "package"
+      target: string
+      version?: string
+      outdated?: true
+      updating?: true
+    }
+  | {
+      type: "local"
+      path: string
+    }
+  | {
+      type: "sdk"
+    }
+
+type Plugin.State = 
+  | {
+      status: "active"
+    }
+  | {
+      status: "failed"
+      error: string
+      ref?: string
+    }
+
+type Project = {
+  id: string
+  canonical: string
+  vcs?: Project.Vcs
+  name?: string
+  icon?: Project.Icon
+  commands?: Project.Commands
+  time: Project.Time
+  sandboxes: string[]
+}
+
+type Project.Commands = {
+  start?: string  // Startup script to run when creating a new workspace (worktree)
+}
+
+type Project.Icon = {
+  url?: string
+  override?: string
+  color?: string
+}
+
+type Project.Time = {
+  created: integer /*minimum 0*/
+  updated: integer /*minimum 0*/
+  active: integer /*minimum 0*/
+}
+
+type Project.Vcs = string /*pattern ^[a-z][a-z0-9._-]*$*/
+
+type ProjectNotFoundError = {
+  _tag: "ProjectNotFoundError"
+  projectID: string
+  message: string
+}
+
+type Prompt.AgentAttachment = {
+  name: string
+  mention?: Prompt.Mention
+}
+
+type Prompt.Base64 = string /*pattern ^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$*/
+
+type Prompt.FileAttachment = {
+  data: Prompt.Base64
+  mime: string
+  source: Prompt.FileSource
+  name?: string
+  description?: string
+  mention?: Prompt.Mention
+}
+
+type Prompt.FileSource = 
+  | {
+      type: "inline"
+    }
+  | {
+      type: "uri"
+      uri: string
+    }
+
+type Prompt.Mention = {
+  start: number
+  end: number
+  text: string
+}
+
+type Prompt.SkillAttachment = {
+  id: string
+  name: string
+  text?: string
+  mention?: Prompt.Mention
+}
+
+type PromptInput.FileAttachment = {
+  uri: string
+  name?: string
+  description?: string
+  mention?: Prompt.Mention
+}
+
+type PromptInput.SkillAttachment = {
+  id: string
+  mention?: Prompt.Mention
+}
+
+type Provider.Compaction = 
+  | {
+      type: "summary"
+    }
+  | {
+      type: "native"
+    }
+
+type Provider.Info = {
+  id: string
+  canonical?: string
+  integrationID?: string
+  name: string
+  activation: "auto" | "enabled" | "disabled"
+  package: string
+  settings?: Provider.Settings
+  headers?: Record<string, string>
+  body?: Record<string, unknown>
+}
+
+type Provider.Request = {
+  settings: Provider.Settings
+  headers: Record<string, string>
+  body: Record<string, unknown>
+}
+
+type Provider.Settings = Record<string, unknown>
+
+type Provider.Transport = "http" | "websocket"
+
+type ProviderNotFoundError = {
+  _tag: "ProviderNotFoundError"
+  providerID: string
+  message: string
+}
+
+type Pty = {
+  id: string /*pattern ^pty*/
+  title: string
+  command: string
+  args: string[]
+  cwd: string
+  status: "running" | "exited"
+  pid: integer /*minimum 0*/
+  exitCode?: integer /*minimum 0*/
+}
+
+type PtyNotFoundError = {
+  _tag: "PtyNotFoundError"
+  ptyID: string
+  message: string
+}
+
+type PtyTicket.ConnectToken = {
+  ticket: string
+  expires_in: integer /*exclusiveMinimum 0*/
+}
+
+type Reference.GitSource = {
+  type: "git"
+  repository: string
+  branch?: string
+}
+
+type Reference.Info = {
+  name: string
+  path: string
+  description?: string
+  hidden?: boolean
+  source: Reference.Source
+}
+
+type Reference.LocalSource = {
+  type: "local"
+  path: string
+}
+
+type Reference.Source = Reference.LocalSource | Reference.GitSource
+
+type Rpc.Input = {
+  input?: unknown
+}
+
+type Rpc.Output = {
+  output?: unknown
+}
+
+type RpcError = {
+  _tag: "RpcError"
+  type: string
+  message: string
+  data?: unknown
+}
+
+type RpcInternalError = {
+  _tag: "RpcInternalError"
+  type: "rpc.internal" | "rpc.invalid_output"
+  message: string
+  data?: unknown
+}
+
+type ServerInfo = {
+  version: string
+  pid: integer /*minimum 0*/
+  urls: string[]
+  paths: {
+    tmp: string
+  }
+}
+
+type ServiceUnavailableError = {
+  _tag: "ServiceUnavailableError"
+  message: string
+  service?: string
+}
+
+type Session.ForkBoundary = 
+  | {
+      type: "before"
+      messageID: string /*pattern ^msg_*/
+    }
+  | {
+      type: "through"
+      messageID: string /*pattern ^msg_*/
+    }
+
+type Session.Inbox.Compaction = {
+  id: string /*pattern ^msg_*/
+  sessionID: string /*pattern ^ses*/
+  time: {
+    created: number
+  }
+  type: "compaction"
+  payload: Session.Inbox.CompactionPayload
+  delivery: Session.Inbox.Delivery
+}
+
+type Session.Inbox.CompactionPayload = Record<string, unknown> | unknown[]
+
+type Session.Inbox.Delivery = "steer" | "queue"
+
+type Session.Inbox.Info = Session.Inbox.User | Session.Inbox.Synthetic | Session.Inbox.Compaction | Session.Inbox.Move
+
+type Session.Inbox.Move = {
+  id: string /*pattern ^msg_*/
+  sessionID: string /*pattern ^ses*/
+  time: {
+    created: number
+  }
+  type: "move"
+  delivery: Session.Inbox.Delivery
+  payload: Session.Inbox.MovePayload
+}
+
+type Session.Inbox.MovePayload = {
+  projectID: string
+  subpath?: string
+  location: Location.PublicRef
+}
+
+type Session.Inbox.Synthetic = {
+  id: string /*pattern ^msg_*/
+  sessionID: string /*pattern ^ses*/
+  time: {
+    created: number
+  }
+  type: "synthetic"
+  payload: Session.Inbox.SyntheticPayload
+  delivery: Session.Inbox.Delivery
+}
+
+type Session.Inbox.SyntheticPayload = {
+  text: string
+  description?: string
+  metadata?: Record<string, unknown>
+}
+
+type Session.Inbox.User = {
+  id: string /*pattern ^msg_*/
+  sessionID: string /*pattern ^ses*/
+  time: {
+    created: number
+  }
+  type: "user"
+  payload: Session.Inbox.UserPayload
+  delivery: Session.Inbox.Delivery
+}
+
+type Session.Inbox.UserPayload = {
+  text: string
+  files?: Prompt.FileAttachment[]
+  agents?: Prompt.AgentAttachment[]
+  skills?: Prompt.SkillAttachment[]
+  metadata?: Record<string, unknown>
+}
+
+type Session.Info = {
+  id: string /*pattern ^ses*/
+  parentID?: string /*pattern ^ses*/
+  fork?: {
+    sessionID: string /*pattern ^ses*/
+    boundary: Session.ForkBoundary
+  }
+  projectID: string
+  agent?: string
+  model?: Model.Ref
+  cost: Money.USD
+  tokens: TokenUsage.Info
+  outcome?: "succeeded" | "failed" | "interrupted"
+  time: {
+    created: number
+    updated: number
+    idle?: number
+    viewed?: number
+    archived?: number
+  }
+  title?: string
+  subpath?: string
+  metadata?: Session.Metadata
+  permissions?: Permission.Ruleset
+  revert?: Session.Revert
+  location: Location.PublicRef
+}
+
+type Session.Message.AgentSelected = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  type: "agent-switched"
+  agent: string
+  previous?: string
+}
+
+type Session.Message.Assistant = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+    streamed?: number
+    completed?: number
+  }
+  type: "assistant"
+  agent: string
+  model: Model.Ref
+  content: (Session.Message.Assistant.Text | Session.Message.Assistant.Reasoning | Session.Message.Assistant.Tool)[]
+  snapshot?: {
+    start?: string
+    end?: string
+    files?: string[]
+  }
+  finish?: "stop" | "length" | "tool-calls" | "content-filter" | "error" | "unknown"
+  rawFinish?: string
+  providerState?: Session.Message.ProviderState_4
+  cost?: Money.USD
+  tokens?: TokenUsage.Info
+  error?: Session.StructuredError
+  retry?: Session.Message.Assistant.Retry
+}
+
+type Session.Message.Assistant.Reasoning = {
+  type: "reasoning"
+  text: string
+  state?: Session.Message.ProviderState_1
+  time?: {
+    created: number
+    completed?: number
+  }
+}
+
+type Session.Message.Assistant.Retry = {
+  attempt: integer /*exclusiveMinimum 0*/
+  at: number
+  error: Session.StructuredError
+}
+
+type Session.Message.Assistant.Text = {
+  type: "text"
+  text: string
+  state?: Session.Message.ProviderState
+}
+
+type Session.Message.Assistant.Tool = {
+  type: "tool"
+  id: string
+  name: string
+  executed?: boolean
+  providerState?: Session.Message.ProviderState_2
+  providerResultState?: Session.Message.ProviderState_3
+  state: 
+    | Session.Message.ToolState.Streaming
+    | Session.Message.ToolState.Running
+    | Session.Message.ToolState.Completed
+    | Session.Message.ToolState.Error
+  time: {
+    created: number
+    ran?: number
+    completed?: number
+  }
+}
+
+type Session.Message.Compaction = Session.Message.Compaction.Running | Session.Message.Compaction.Completed | Session.Message.Compaction.Failed
+
+type Session.Message.Compaction.Completed = {
+  type: "compaction"
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  status: "completed"
+  reason: "auto" | "manual"
+  model?: Model.Ref
+  providerState?: Session.Message.ProviderState_5
+  summary: string
+  recent: string
+  providerContext?: Session.ProviderContext
+  cost?: Money.USD
+  tokens?: TokenUsage.Info
+}
+
+type Session.Message.Compaction.Failed = {
+  type: "compaction"
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  status: "failed"
+  reason: "auto" | "manual"
+  error: Session.StructuredError
+  cost?: Money.USD
+  tokens?: TokenUsage.Info
+}
+
+type Session.Message.Compaction.Running = {
+  type: "compaction"
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  status: "running"
+  reason: "auto" | "manual"
+  summary: string
+  recent: string
+}
+
+type Session.Message.Idle = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  type: "idle"
+  outcome: "succeeded" | "failed" | "interrupted"
+}
+
+type Session.Message.Info = 
+  | Session.Message.AgentSelected
+  | Session.Message.ModelSelected
+  | Session.Message.LocationSwitched
+  | Session.Message.User
+  | Session.Message.Synthetic
+  | Session.Message.System
+  | Session.Message.Skill
+  | Session.Message.Shell
+  | Session.Message.Assistant
+  | Session.Message.Compaction
+  | Session.Message.Idle
+
+type Session.Message.LocationSwitched = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  type: "location-switched"
+  projectID?: string
+  subpath?: string
+  location: Location.PublicRef
+  previous?: 
+    | {
+          location: Location.PublicRef
+          projectID?: string
+          subpath?: string
+        }
+   
+}
+
+type Session.Message.ModelSelected = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  type: "model-switched"
+  model: Model.Ref
+  previous?: Model.Ref
+}
+
+type Session.Message.ProviderState = Record<string, unknown>
+
+type Session.Message.ProviderState_1 = Record<string, unknown>
+
+type Session.Message.ProviderState_2 = Record<string, unknown>
+
+type Session.Message.ProviderState_3 = Record<string, unknown>
+
+type Session.Message.ProviderState_4 = Record<string, unknown>
+
+type Session.Message.ProviderState_5 = Record<string, unknown>
+
+type Session.Message.Shell = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+    completed?: number
+  }
+  type: "shell"
+  shellID: string /*pattern ^sh_*/
+  command: string
+  status: "running" | "exited" | "timeout" | "killed"
+  exit?: number | "Infinity" | "-Infinity" | "NaN"
+  output?: {
+    output: string
+    cursor: integer /*minimum 0*/
+    size: integer /*minimum 0*/
+    truncated: boolean
+  }
+}
+
+type Session.Message.Skill = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  type: "skill"
+  skill: string
+  name: string
+  text: string
+}
+
+type Session.Message.Synthetic = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  text: string
+  description?: string
+  type: "synthetic"
+}
+
+type Session.Message.System = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  type: "system"
+  text: string
+  description?: string
+}
+
+type Session.Message.ToolState.Completed = {
+  status: "completed"
+  input: Record<string, unknown>
+  content: [Tool.Content]
+  metadata?: Record<string, unknown>
+}
+
+type Session.Message.ToolState.Error = {
+  status: "error"
+  input: Record<string, unknown>
+  error: Session.StructuredError
+  content?: [Tool.Content]
+  metadata?: Record<string, unknown>
+}
+
+type Session.Message.ToolState.Running = {
+  status: "running"
+  input: Record<string, unknown>
+  metadata: Record<string, unknown>
+}
+
+type Session.Message.ToolState.Streaming = {
+  status: "streaming"
+  input: string
+}
+
+type Session.Message.User = {
+  id: string /*pattern ^msg_*/
+  metadata?: Record<string, unknown>
+  time: {
+    created: number
+  }
+  text: string
+  files?: Prompt.FileAttachment[]
+  agents?: Prompt.AgentAttachment[]
+  skills?: Prompt.SkillAttachment[]
+  type: "user"
+}
+
+type Session.Metadata = Record<string, unknown>
+
+type Session.ProviderContext = {
+  version: 1
+  provenance: Session.ProviderContext.Provenance
+  messages: unknown
+}
+
+type Session.ProviderContext.Provenance = {
+  providerID: string
+  provider: string
+  modelID: string
+  route: string
+  protocol: string
+  endpoint: string
+}
+
+type Session.Revert = {
+  messageID: string /*pattern ^msg_*/
+  partID?: string
+  snapshot?: string
+  files?: FileDiff.Info[]
+}
+
+type Session.StructuredError = {
+  type: string
+  message: string
+  status?: integer /*minimum 100, maximum 599*/
+}
+
+type SessionActive = {
+  type: "running"
+}
+
+type SessionBusyError = {
+  _tag: "SessionBusyError"
+  sessionID: string
+  message: string
+}
+
+type SessionGenerateResponse = {
+  data: {
+    text: string
+  }
+}
+
+type SessionInterruptResponse = {
+  interrupted: boolean  // Whether an active execution owned by this OpenCode process was interrupted.
+}
+
+type SessionLogItem = string
+
+type SessionMessagesResponse = {
+  data: Session.Message.Info[]
+  cursor: {
+    previous?: string
+    next?: string
+  }
+}
+
+type SessionNotFoundError = {
+  _tag: "SessionNotFoundError"
+  sessionID: string
+  message: string
+}
+
+type SessionStats.Activity = {
+  date: string
+  steps: integer /*minimum 0*/
+}
+
+type SessionStats.Info = {
+  range: {
+    from: number
+    to: number
+  }
+  sessions: integer /*minimum 0*/
+  subagents: integer /*minimum 0*/
+  prompts: integer /*minimum 0*/
+  steps: integer /*minimum 0*/
+  tokens: TokenUsage.Info
+  cost: Money.USD
+  tools: SessionStats.Tools
+  activeDays: integer /*minimum 0*/
+  streak: integer /*minimum 0*/
+  activity: SessionStats.Activity[]
+  models: SessionStats.ModelUsage[]
+}
+
+type SessionStats.ModelUsage = {
+  model: Model.Ref
+  steps: integer /*minimum 0*/
+  tokens: TokenUsage.Info
+  cost: Money.USD
+}
+
+type SessionStats.ToolTotals = {
+  calls: integer /*minimum 0*/
+  succeeded: integer /*minimum 0*/
+  failed: integer /*minimum 0*/
+  unfinished: integer /*minimum 0*/
+}
+
+type SessionStats.ToolUsage = {
+  name: string
+  calls: integer /*minimum 0*/
+  succeeded: integer /*minimum 0*/
+  failed: integer /*minimum 0*/
+  unfinished: integer /*minimum 0*/
+  durationP50?: number
+}
+
+type SessionStats.Tools = 
+  | {
+      mode: "none"
+    }
+  | {
+      mode: "summary"
+      totals: SessionStats.ToolTotals
+    }
+  | {
+      mode: "detail"
+      totals: SessionStats.ToolTotals
+      usage: SessionStats.ToolUsage[]
+    }
+
+type SessionTransfer.Data = {
+  info: Session.Info
+  messages: Session.Message.Info[]
+}
+
+type SessionsResponse = {
+  data: Session.Info[]
+  cursor: {
+    previous?: string
+    next?: string
+  }
+}
+
+type Shell.Info = {
+  id: string /*pattern ^sh_*/
+  status: "running" | "exited" | "timeout" | "killed"
+  command: string
+  cwd: string
+  shell: string
+  file: string
+  pid?: integer /*minimum 0*/
+  exit?: number
+  metadata: Record<string, unknown>
+  time: {
+    started: number  // Start time in milliseconds since the Unix epoch
+    completed?: number
+  }
+}
+
+type ShellNotFoundError = {
+  _tag: "ShellNotFoundError"
+  id: string
+  message: string
+}
+
+type Skill.Info = {
+  id: string
+  name: string
+  description?: string
+  autoinvoke?: boolean
+  path: string
+  content: string
+}
+
+type SkillNotFoundError = {
+  _tag: "SkillNotFoundError"
+  skill: string
+  message: string
+}
+
+type TokenUsage.Info = {
+  input: number
+  output: number
+  reasoning: number
+  cache: {
+    read: number
+    write: number
+  }
+}
+
+type Tool.Content = Tool.TextContent | Tool.FileContent
+
+type Tool.FileContent = {
+  type: "file"
+  uri: string
+  mime: string
+  name?: string
+}
+
+type Tool.TextContent = {
+  type: "text"
+  text: string
+}
+
+type UnauthorizedError = {
+  _tag: "UnauthorizedError"
+  message: string
+}
+
+type UnknownError = {
+  _tag: "UnknownError"
+  message: string
+  ref?: string
+}
+
+type V2Event = string
+
+type Vcs.Base = {
+  name: string
+  ref: string
+  source: "reflog" | "default"
+}
+
+type Vcs.Branch = {
+  current?: string
+  default?: string
+}
+
+type Vcs.BranchList = string[]
+
+type Vcs.FileStatus = {
+  file: string
+  additions: integer /*minimum 0*/
+  deletions: integer /*minimum 0*/
+  status: "added" | "deleted" | "modified"
+}
+
+type Vcs.Info = {
+  provider?: string
+  branch: Vcs.Branch
+}
+
+type Vcs.Mode = "working" | "branch" | "committed"
+
+type WebSearch.Provider = {
+  id: string
+  name: string
+}
+
+type WebSearch.Response = {
+  providerID: string
+  results: WebSearch.Result[]
+}
+
+type WebSearch.Result = {
+  url: string
+  title?: string
+  content?: string
+  time: {
+    published?: number
+  }
+}
+
+type Worktree.CreateInput = {
+  projectID: string
+  from?: string
+  branch?: string
+  directory?: string
+  name?: string
+}
+
+type Worktree.Directory = {
+  directory: string
+  strategy?: string
+}
+
+type Worktree.Info = {
+  directory: string
+}
+
+type Worktree.List = Worktree.Directory[]
+
+type Worktree.RemoveInput = {
+  projectID: string
+  directory: string
+  force: boolean
+}
+
+type WorktreeError = {
+  name: "WorktreeError"
+  data: {
+    message: string
+    forceRequired?: boolean
+  }
+}

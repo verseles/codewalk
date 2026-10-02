@@ -1,0 +1,84 @@
+# Maintainers
+
+The current maintainers for ACP are:
+
+**Last updated:** June 1, 2026
+
+## Lead Maintainers
+
+| Name           | Email                        | GitHub                       |
+| -------------- | ---------------------------- | ---------------------------- |
+| Ben Brandt     | benjamin@zed.dev             | https://github.com/benbrandt |
+| Sergey Ignatov | sergey.ignatov@jetbrains.com | https://github.com/ignatov   |
+
+## Core Maintainers
+
+| Name             | GitHub                           |
+| ---------------- | -------------------------------- |
+| Agus Zubiaga     | https://github.com/agu-z         |
+| Anna Zhdan       | https://github.com/anna239       |
+| Niko Matsakis    | https://github.com/nikomatsakis  |
+| Vadim Briliantov | https://github.com/Ololoshechkin |
+
+## SDK Maintainers
+
+### Java SDK
+
+| Name         | GitHub                         |
+| ------------ | ------------------------------ |
+| Mark Pollack | https://github.com/markpollack |
+
+### Kotlin SDK
+
+| Name              | GitHub                        |
+| ----------------- | ----------------------------- |
+| Sergey Ignatov    | https://github.com/ignatov    |
+| Anna Zhdan        | https://github.com/anna239    |
+| Artem Bukhonov    | https://github.com/nerzhulart |
+| Stanislav Erokhin | https://github.com/erokhins   |
+
+### Python SDK
+
+| Name           | GitHub                       |
+| -------------- | ---------------------------- |
+| Chojan Shang   | https://github.com/PsiACE    |
+| Richard Chien  | https://github.com/stdrc     |
+| Frost Ming     | https://github.com/frostming |
+| Clément Drouin | https://github.com/Nemtecl   |
+| Michel Thomazo | https://github.com/michelTho |
+
+### Rust SDK
+
+| Name             | GitHub                          |
+| ---------------- | ------------------------------- |
+| Ben Brandt       | https://github.com/benbrandt    |
+| Niko Matsakis    | https://github.com/nikomatsakis |
+| Richard Feldman  | https://github.com/rtfeldman    |
+| Agus Zubiaga     | https://github.com/agu-z        |
+| Bennet Bo Fenner | https://github.com/bennetbo     |
+
+### TypeScript SDK
+
+| Name             | GitHub                       |
+| ---------------- | ---------------------------- |
+| Ben Brandt       | https://github.com/benbrandt |
+| Richard Feldman  | https://github.com/rtfeldman |
+| Agus Zubiaga     | https://github.com/agu-z     |
+| Bennet Bo Fenner | https://github.com/bennetbo  |
+
+## Working Group & Interest Group Maintainers
+
+[Working Groups and Interest Groups](https://agentclientprotocol.com/community/working-interest-groups) are not required to have maintainers (they can be managed by informal facilitators), but maintainers may be appointed on an as-needed basis.
+
+### Transports
+
+| Name         | GitHub                         |
+| ------------ | ------------------------------ |
+| Anna Zhdan   | https://github.com/anna239     |
+| Alex Hancock | https://github.com/alexhancock |
+
+---
+
+This document is updated by the ACP maintainers and reflects the current
+governance structure. For more information about ACP governance, see our
+[governance documentation](https://agentclientprotocol.com/community/governance).

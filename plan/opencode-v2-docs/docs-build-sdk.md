@@ -1,0 +1,103 @@
+# Overview
+
+- Source URL: https://opencode.ai/v2/docs/build/sdk/
+- Source file: https://github.com/anomalyco/opencode/blob/bb381e8bdd1ff22c7329e07c068ec0099031f382/services/www/src/docs/content/build/sdk/index.mdx
+- Fetched: 2026-10-02 (OpenCode V2 docs; branch `v2` @ `bb381e8bdd`; latest release at fetch time: 2.0.21)
+- Note: content is the verbatim MDX source rendered at the URL above; MDX components (CodeTabs, Callout, Card, PlanTabs, table wrappers) were flattened to Markdown and docs-relative links made absolute. No text was summarized or omitted.
+
+---
+`@opencode/sdk` hosts OpenCode directly inside your application. Unlike the
+[network client](https://opencode.ai/v2/docs/build/client), it assembles the OpenCode server and routes API
+calls through its HTTP router in memory. It opens no HTTP listener and adds no
+network hop between the client and server.
+
+For Cloudflare Durable Objects, see the [Cloudflare guide](https://opencode.ai/v2/docs/build/sdk/cloudflare).
+
+Install the SDK:
+
+```sh
+bun add @opencode/sdk
+```
+
+## Create a host
+
+`OpenCode.create()` returns an explicitly owned host. Use `await using` to
+release its router, Location services, fibers, and scoped plugin registrations:
+
+```ts
+import { OpenCode } from "@opencode/sdk"
+
+await using opencode = await OpenCode.create()
+const session = await opencode.sessions.create({
+  location: { directory: "/workspace" },
+})
+
+await opencode.sessions.prompt({
+  sessionID: session.id,
+  text: "Review the current changes",
+})
+```
+
+Call `await opencode.close()` explicitly when explicit resource management is
+not available.
+
+The embedded host uses the same Promise values, declared errors, request
+options, and `AsyncIterable` streams as `@opencode/client`. It exposes the
+full generated client and adds the convenience aliases `sessions` and `events`
+for the session and event groups.
+
+## Worktrees
+
+Worktree operations require a `projectID`. Create and refresh load configuration and plugins from the project's saved
+canonical checkout. List reads saved inventory only; remove activates canonical plugins and uses the recorded strategy,
+failing if that strategy is unavailable.
+
+```ts
+const projectID = session.projectID
+const worktree = await opencode.worktree.create({ projectID, name: "task" })
+await opencode.worktree.refresh({ projectID })
+await opencode.worktree.remove({ projectID, directory: worktree.directory, force: false })
+```
+
+Refresh discovers worktrees across known checkout roots using all available strategies. Register a custom strategy
+through a [plugin's worktree transform](https://opencode.ai/v2/docs/build/plugins#worktrees).
+
+## Stream events
+
+```ts
+for await (const event of opencode.events.subscribe()) {
+  console.log(event.type)
+}
+```
+
+Pass an `AbortSignal` through the generated request options, or leave an
+iteration to cancel its response body.
+
+## Customize
+
+Customize your OpenCode instance by registering plugins. Pass plugins to
+`OpenCode.create()` to customize agents, models, tools, and other behavior when
+the embedded host starts:
+
+```ts
+import { Plugin } from "@opencode/plugin"
+import { OpenCode } from "@opencode/sdk"
+
+const plugin = Plugin.define({
+  id: "customize-agent",
+  async setup(ctx) {
+    await ctx.agent.transform((agents) => {
+      agents.update("build", (agent) => {
+        agent.description = "Builds features and fixes bugs for our team"
+      })
+    })
+  },
+})
+
+await using opencode = await OpenCode.create({ plugins: [plugin] })
+```
+
+Call `await opencode.plugin(plugin)` to register another plugin after startup.
+
+See the [full plugins documentation](https://opencode.ai/v2/docs/build/plugins) for plugin hooks,
+transforms, tools, and the complete plugin context.

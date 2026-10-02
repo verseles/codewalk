@@ -1,0 +1,144 @@
+# Warming
+
+- Source URL: https://opencode.ai/v2/docs/warming/
+- Source file: https://github.com/anomalyco/opencode/blob/bb381e8bdd1ff22c7329e07c068ec0099031f382/services/www/src/docs/content/warming.mdx
+- Fetched: 2026-10-02 (OpenCode V2 docs; branch `v2` @ `bb381e8bdd`; latest release at fetch time: 2.0.21)
+- Note: content is the verbatim MDX source rendered at the URL above; MDX components (CodeTabs, Callout, Card, PlanTabs, table wrappers) were flattened to Markdown and docs-relative links made absolute. No text was summarized or omitted.
+
+---
+Session warming sends periodic model requests to preserve provider-side prompt
+caches or other short-lived state while you pause between prompts. It is
+disabled by default.
+
+Enable warming in any [OpenCode configuration file](https://opencode.ai/v2/docs/config):
+
+```jsonc title="opencode.jsonc"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "warming": true,
+}
+```
+
+With this configuration, OpenCode warms a recently active session after four
+minutes without a model request. It continues every four minutes until 30
+minutes have passed since the latest non-warming request.
+
+## Options
+
+Use the object form to change the warming prompt, idle interval, or active
+window:
+
+```jsonc title="opencode.jsonc"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "warming": {
+    "prompt": "Do not perform any work. Reply with exactly: OK",
+    "interval": "5 minutes",
+    "duration": "1 hour",
+  },
+}
+```
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| `prompt` | Keep-alive instruction | Appended as a transient user message for each warming request. The default asks the model to do no work, use no tools, and reply with `OK`. |
+| `interval` | `"4 minutes"` | Idle time before the next warming request. |
+| `duration` | `"30 minutes"` | Warming window measured from the latest non-warming model request. |
+
+Omitted object fields keep their defaults. For example, this changes only the
+interval:
+
+```jsonc title="opencode.jsonc"
+{
+  "warming": {
+    "interval": "2 minutes",
+  },
+}
+```
+
+## Durations
+
+`interval` and `duration` accept duration strings. Both must resolve to finite
+values greater than zero; otherwise OpenCode skips warming and logs a warning.
+
+```jsonc title="opencode.jsonc"
+{
+  "warming": {
+    "interval": "30 seconds",
+    "duration": "1 hour",
+  },
+}
+```
+
+## Timing
+
+Warming starts after a non-warming model request. After a warming request
+finishes, the next idle interval starts, but the active window is not extended.
+
+```text
+00:00  normal model request
+00:04  warming request
+00:08  warming request
+00:30  warming stops
+```
+
+Any new non-warming model activity resets both timers. If the interval is as
+long as or longer than the duration, the active window expires before a warming
+request is sent.
+
+```text
+00:00  normal model request
+00:20  normal model request; window restarts
+00:24  warming request
+00:50  warming stops
+```
+
+## Requests
+
+A warming request uses the session's current model, agent, instructions, and
+conversation context. OpenCode appends the configured prompt transiently,
+makes one model call, and discards the response.
+
+```text
+[current session context]
+[transient user message: keep-alive prompt]
+→ one model response, discarded
+```
+
+The request does not admit input, add messages to history, or mutate durable
+session state. OpenCode does not dispatch local tool calls or continue a tool
+loop; the default prompt also tells the model not to use tools.
+
+## Failures
+
+Warming failures are logged without failing or changing the session. OpenCode
+waits until the next interval before trying again, while the original active
+window continues to count down.
+
+```text
+00:04  warming request fails; session is unchanged
+00:08  next warming attempt
+```
+
+## Costs
+
+Warming requests are real provider requests. They can consume tokens, incur
+costs, count against rate limits, and fail like other model requests.
+
+- Shorter intervals increase request volume.
+- Longer durations allow more warming requests.
+- Enable warming only when its provider-side benefit is worth the added usage.
+
+For example, the defaults allow up to seven warming attempts during one
+uninterrupted 30-minute window: at minutes 4, 8, 12, 16, 20, 24, and 28.
+
+## Disabling
+
+Set `warming` to `false` to disable it explicitly. Omitting the field also
+leaves warming disabled.
+
+```jsonc title="opencode.jsonc"
+{
+  "warming": false,
+}
+```

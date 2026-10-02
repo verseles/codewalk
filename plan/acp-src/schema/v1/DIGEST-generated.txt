@@ -1,0 +1,431 @@
+InitializeRequest {
+  protocolVersion: ProtocolVersion
+  clientCapabilities?: ClientCapabilities
+  clientInfo?: Implementation | null
+  _meta?: object | null
+}
+
+InitializeResponse {
+  protocolVersion: ProtocolVersion
+  agentCapabilities?: AgentCapabilities
+  authMethods?: AuthMethod[]
+  agentInfo?: Implementation | null
+  _meta?: object | null
+}
+
+ClientCapabilities {
+  fs?: FileSystemCapabilities
+  terminal?: boolean
+  session?: ClientSessionCapabilities | null
+  auth?: AuthCapabilities
+  elicitation?: ElicitationCapabilities | null
+  _meta?: object | null
+}
+
+FileSystemCapabilities {
+  readTextFile?: boolean
+  writeTextFile?: boolean
+  _meta?: object | null
+}
+
+AgentCapabilities {
+  loadSession?: boolean
+  promptCapabilities?: PromptCapabilities
+  mcpCapabilities?: McpCapabilities
+  sessionCapabilities?: SessionCapabilities
+  auth?: AgentAuthCapabilities
+  _meta?: object | null
+}
+
+SessionCapabilities {
+  list?: SessionListCapabilities | null
+  delete?: SessionDeleteCapabilities | null
+  additionalDirectories?: SessionAdditionalDirectoriesCapabilities | null
+  resume?: SessionResumeCapabilities | null
+  close?: SessionCloseCapabilities | null
+  _meta?: object | null
+}
+
+PromptCapabilities {
+  image?: boolean
+  audio?: boolean
+  embeddedContext?: boolean
+  _meta?: object | null
+}
+
+McpCapabilities {
+  http?: boolean
+  sse?: boolean
+  _meta?: object | null
+}
+
+AuthMethod =
+  | type="terminal" AuthMethodTerminal
+  |  AuthMethodAgent
+
+NewSessionRequest {
+  cwd: string
+  additionalDirectories?: string[]
+  mcpServers: McpServer[]
+  _meta?: object | null
+}
+
+NewSessionResponse {
+  sessionId: SessionId
+  modes?: SessionModeState | null
+  configOptions?: array | null
+  _meta?: object | null
+}
+
+LoadSessionRequest {
+  mcpServers: McpServer[]
+  cwd: string
+  additionalDirectories?: string[]
+  sessionId: SessionId
+  _meta?: object | null
+}
+
+ResumeSessionRequest {
+  sessionId: SessionId
+  cwd: string
+  additionalDirectories?: string[]
+  mcpServers?: McpServer[]
+  _meta?: object | null
+}
+
+ListSessionsRequest {
+  cwd?: string | null
+  cursor?: string | null
+  _meta?: object | null
+}
+
+ListSessionsResponse {
+  sessions: SessionInfo[]
+  nextCursor?: string | null
+  _meta?: object | null
+}
+
+SessionInfo {
+  sessionId: SessionId
+  cwd: string
+  additionalDirectories?: string[]
+  title?: string | null
+  updatedAt?: string | null
+  _meta?: object | null
+}
+
+PromptRequest {
+  sessionId: SessionId
+  prompt: ContentBlock[]
+  _meta?: object | null
+}
+
+PromptResponse {
+  stopReason: StopReason
+  _meta?: object | null
+}
+
+StopReason =
+  | "end_turn"
+  | "max_tokens"
+  | "max_turn_requests"
+  | "refusal"
+  | "cancelled"
+
+SessionNotification {
+  sessionId: SessionId
+  update: SessionUpdate
+  _meta?: object | null
+}
+
+SessionUpdate =
+  | sessionUpdate="user_message_chunk" ContentChunk
+  | sessionUpdate="agent_message_chunk" ContentChunk
+  | sessionUpdate="agent_thought_chunk" ContentChunk
+  | sessionUpdate="tool_call" ToolCall
+  | sessionUpdate="tool_call_update" ToolCallUpdate
+  | sessionUpdate="plan" Plan
+  | sessionUpdate="available_commands_update" AvailableCommandsUpdate
+  | sessionUpdate="current_mode_update" CurrentModeUpdate
+  | sessionUpdate="config_option_update" ConfigOptionUpdate
+  | sessionUpdate="session_info_update" SessionInfoUpdate
+  | sessionUpdate="usage_update" UsageUpdate
+
+ContentChunk {
+  content: ContentBlock
+  messageId?: MessageId | null
+  _meta?: object | null
+}
+
+ContentBlock =
+  | type="text" TextContent
+  | type="image" ImageContent
+  | type="audio" AudioContent
+  | type="resource_link" ResourceLink
+  | type="resource" EmbeddedResource
+
+TextContent {
+  annotations?: Annotations | null
+  text: string
+  _meta?: object | null
+}
+
+ImageContent {
+  annotations?: Annotations | null
+  data: string
+  mimeType: string
+  uri?: string | null
+  _meta?: object | null
+}
+
+AudioContent {
+  annotations?: Annotations | null
+  data: string
+  mimeType: string
+  _meta?: object | null
+}
+
+EmbeddedResource {
+  annotations?: Annotations | null
+  resource: EmbeddedResourceResource
+  _meta?: object | null
+}
+
+ResourceLink {
+  annotations?: Annotations | null
+  description?: string | null
+  mimeType?: string | null
+  name: string
+  size?: integer | null
+  title?: string | null
+  uri: string
+  _meta?: object | null
+}
+
+ToolCall {
+  toolCallId: ToolCallId
+  title: string
+  name?: string | null
+  kind?: ToolKind
+  status?: ToolCallStatus
+  content?: ToolCallContent[]
+  locations?: ToolCallLocation[]
+  rawInput?: unknown
+  rawOutput?: unknown
+  _meta?: object | null
+}
+
+ToolCallUpdate {
+  toolCallId: ToolCallId
+  kind?: ToolKind | null
+  status?: ToolCallStatus | null
+  title?: string | null
+  name?: string | null
+  content?: array | null
+  locations?: array | null
+  rawInput?: unknown
+  rawOutput?: unknown
+  _meta?: object | null
+}
+
+ToolKind =
+  | "read"
+  | "edit"
+  | "delete"
+  | "move"
+  | "search"
+  | "execute"
+  | "think"
+  | "fetch"
+  | "switch_mode"
+  | "other"
+
+ToolCallStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "failed"
+
+ToolCallContent =
+  | type="content" Content
+  | type="diff" Diff
+  | type="terminal" Terminal
+
+Diff {
+  path: string
+  oldText?: string | null
+  newText: string
+  _meta?: object | null
+}
+
+Terminal {
+  terminalId: TerminalId
+  _meta?: object | null
+}
+
+ToolCallLocation {
+  path: string
+  line?: integer | null
+  _meta?: object | null
+}
+
+Plan {
+  entries: PlanEntry[]
+  _meta?: object | null
+}
+
+PlanEntry {
+  content: string
+  priority: PlanEntryPriority
+  status: PlanEntryStatus
+  _meta?: object | null
+}
+
+PlanEntryPriority =
+  | "high"
+  | "medium"
+  | "low"
+
+PlanEntryStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+
+AvailableCommandsUpdate {
+  availableCommands: AvailableCommand[]
+  _meta?: object | null
+}
+
+AvailableCommand {
+  name: string
+  description: string
+  input?: AvailableCommandInput | null
+  _meta?: object | null
+}
+
+CurrentModeUpdate {
+  currentModeId: SessionModeId
+  _meta?: object | null
+}
+
+ConfigOptionUpdate {
+  configOptions: SessionConfigOption[]
+  _meta?: object | null
+}
+
+SessionConfigOption {
+  id: SessionConfigId
+  name: string
+  description?: string | null
+  category?: SessionConfigOptionCategory | null
+  _meta?: object | null
+}
+
+SessionInfoUpdate {
+  title?: string | null
+  updatedAt?: string | null
+  _meta?: object | null
+}
+
+UsageUpdate {
+  used: integer
+  size: integer
+  cost?: Cost | null
+  _meta?: object | null
+}
+
+Cost {
+  amount: number
+  currency: string
+  _meta?: object | null
+}
+
+RequestPermissionRequest {
+  sessionId: SessionId
+  toolCall: ToolCallUpdate
+  options: PermissionOption[]
+  _meta?: object | null
+}
+
+PermissionOption {
+  optionId: PermissionOptionId
+  name: string
+  kind: PermissionOptionKind
+  _meta?: object | null
+}
+
+PermissionOptionKind =
+  | "allow_once"
+  | "allow_always"
+  | "reject_once"
+  | "reject_always"
+
+RequestPermissionResponse {
+  outcome: RequestPermissionOutcome
+  _meta?: object | null
+}
+
+RequestPermissionOutcome =
+  | outcome="cancelled" object
+  | outcome="selected" SelectedPermissionOutcome
+
+CancelNotification {
+  sessionId: SessionId
+  _meta?: object | null
+}
+
+SetSessionModeRequest {
+  sessionId: SessionId
+  modeId: SessionModeId
+  _meta?: object | null
+}
+
+SetSessionConfigOptionRequest {
+  sessionId: SessionId
+  configId: SessionConfigId
+  _meta?: object | null
+}
+
+ReadTextFileRequest {
+  sessionId: SessionId
+  path: string
+  line?: integer | null
+  limit?: integer | null
+  _meta?: object | null
+}
+
+WriteTextFileRequest {
+  sessionId: SessionId
+  path: string
+  content: string
+  _meta?: object | null
+}
+
+CreateTerminalRequest {
+  sessionId: SessionId
+  command: string
+  args?: string[]
+  env?: EnvVariable[]
+  cwd?: string | null
+  outputByteLimit?: integer | null
+  _meta?: object | null
+}
+
+TerminalOutputResponse {
+  output: string
+  truncated: boolean
+  exitStatus?: TerminalExitStatus | null
+  _meta?: object | null
+}
+
+TerminalExitStatus {
+  exitCode?: integer | null
+  signal?: string | null
+  _meta?: object | null
+}
+
+CreateElicitationRequest {
+  message: string
+  _meta?: object | null
+}
+

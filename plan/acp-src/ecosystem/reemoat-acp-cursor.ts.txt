@@ -1,0 +1,289 @@
+// Raw extract from https://github.com/rends-east/reemoat/blob/568beecb2e4ff3acff1be75690f68af462b6a483/src/acp/cursor.ts (AGPL-3.0) - Cursor ACP extension methods
+/** cursor's own client-bound requests and subagent frames, which ACP has no method or update for: the one module that knows their shapes (Q6.117). */
+
+import * as acp from "@agentclientprotocol/sdk";
+import type { ElicitationRequest } from "./client.js";
+import { MAX_PARENT_ID_CHARS } from "./subagents.js";
+
+export const CURSOR_ASK_QUESTION = "cursor/ask_question";
+export const CURSOR_CREATE_PLAN = "cursor/create_plan";
+/** Requests with ids although nothing reads their answer: an unanswered one grows cursor's pending map for the life of the process. */
+export const CURSOR_UPDATE_TODOS = "cursor/update_todos";
+export const CURSOR_TASK = "cursor/task";
+export const CURSOR_GENERATE_IMAGE = "cursor/generate_image";
+
+/** Two updates outside the SDK's closed union, diverted below it as the async-task drafts are; each name is also the stdout pre-filter. */
+export const CURSOR_SUBAGENT_UPDATES: readonly string[] = ["subagent_spawned", "subagent_state_update"];
+
+/** Only under `_meta`: the SDK strips a top-level clientCapabilities key before cursor reads it. */
+export const CURSOR_CLIENT_META: Readonly<Record<string, unknown>> = Object.freeze({
+  // A child's own steps on the wire, on a session id of its own; without it a delegation is one opaque card.
+  subagents: true,
+  // Effort as a `thought_level` control beside a model named by its bare id, instead of one list of every variant.
+  parameterizedModelPicker: true,
+});
+
+/** undefined for every other harness, which would read neither key. */
+export function clientMetaFor(agent: string): Readonly<Record<string, unknown>> | undefined {
+  return agent === "cursor" ? CURSOR_CLIENT_META : undefined;
+}
+
+/** True where every control but the mode belongs to the chosen model, which parameterizedModelPicker asks for (Q2.249). */
+export function modelScopesControls(agent: string): boolean {
+  return clientMetaFor(agent)?.["parameterizedModelPicker"] === true;
+}
+
+export interface CursorQuestion {
+  id: string;
+  prompt: string;
+  options: { id: string; label: string }[];
+  allowMultiple: boolean;
+}
+
+export interface CursorQuestionRequest {
+  toolCallId: string;
+  title: string | null;
+  questions: CursorQuestion[];
+}
+
+/** No free text: cursor reads selected option ids and nothing else. */
+export type CursorQuestionResponse = {
+  outcome:
+    | { outcome: "answered"; answers: { questionId: string; selectedOptionIds: string[] }[] }
+    | { outcome: "skipped" }
+    | { outcome: "cancelled" };
+};
+
+export type CursorTodoStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+export interface CursorTodo {
+  id: string;
+  content: string;
+  status: CursorTodoStatus;
+}
+
+export interface CursorPlanRequest {
+  toolCallId: string;
+  plan: string;
+}
+
+/** An error accepts the plan (cursor writes the file itself), so a refusal has to be `rejected`. */
+export type CursorPlanResponse = { outcome: { outcome: "accepted" | "rejected" | "cancelled" } };
+
+export interface CursorTodosRequest {
+  toolCallId: string;
+  todos: CursorTodo[];
+  /** true updates the listed ids and appends new ones; false replaces the list. */
+  merge: boolean;
+}
+
+export interface CursorImageRequest {
+  toolCallId: string;
+  filePath: string | null;
+}
+
+export interface SubagentSpawn {
+  childSessionId: string;
+  parentToolCallId: string;
+}
+
+const QUESTION_KEY = (index: number): string => `question_${index}`;
+const SEVERAL_QUESTIONS = "Please answer the following questions.";
+
+export const CURSOR_PLAN_TITLE = "Approve plan";
+
+export const CURSOR_PLAN_OPTIONS: readonly acp.PermissionOption[] = Object.freeze([
+  Object.freeze({ optionId: "accepted", name: "Approve plan", kind: "allow_once" as const }),
+  Object.freeze({ optionId: "rejected", name: "Reject plan", kind: "reject_once" as const }),
+]);
+
+const TODO_STATUSES: readonly string[] = ["pending", "in_progress", "completed", "cancelled"];
+
+function refuse(method: string, why: string): never {
+  throw acp.RequestError.invalidParams({ method }, why);
+}
+
+function record(value: unknown, method: string, what: string): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) refuse(method, `${what} must be an object`);
+  return value as Record<string, unknown>;
+}
+
+function text(value: unknown, method: string, what: string): string {
+  if (typeof value !== "string" || value.length === 0) refuse(method, `${what} must be a non-empty string`);
+  return value;
+}
+
+// Refused rather than clipped: with no sessionId on these requests, the id is the only thing tying one to its card.
+function callId(value: unknown, method: string): string {
+  const id = text(value, method, "toolCallId");
+  if (id.length > MAX_PARENT_ID_CHARS) refuse(method, `toolCallId is longer than ${MAX_PARENT_ID_CHARS} characters`);
+  return id;
+}
+
+/** Strict about what is read, lenient about what is not (Q2.22). */
+export function parseQuestionRequest(params: unknown): CursorQuestionRequest {
+  const method = CURSOR_ASK_QUESTION;
+  const body = record(params, method, "params");
+  const raw = body["questions"];
+  if (!Array.isArray(raw) || raw.length === 0) refuse(method, "questions must be a non-empty array");
+  const seen = new Set<string>();
+  const questions = raw.map((entry): CursorQuestion => {
+    const shape = record(entry, method, "a question");
+    const id = text(shape["id"], method, "a question's id");
+    if (seen.has(id)) refuse(method, `two questions share the id ${JSON.stringify(id)}`);
+    seen.add(id);
+    const prompt = text(shape["prompt"], method, "a question's prompt");
+    const rawOptions = shape["options"];
+    // A question with nothing to pick has no answer on this wire, which carries option ids and never text.
+    if (!Array.isArray(rawOptions) || rawOptions.length === 0) refuse(method, "a question must offer at least one option");
+    const options = rawOptions.map((option) => {
+      const fields = record(option, method, "an option");
+      return { id: text(fields["id"], method, "an option's id"), label: text(fields["label"], method, "an option's label") };
+    });
+    const multi = shape["allowMultiple"];
+    if (multi !== undefined && multi !== null && typeof multi !== "boolean") refuse(method, "allowMultiple must be a boolean");
+    return { id, prompt, options, allowMultiple: multi === true };
+  });
+  const title = body["title"];
+  return {
+    toolCallId: callId(body["toolCallId"], method),
+    title: typeof title === "string" && title.trim() !== "" ? title : null,
+    questions,
+  };
+}
+
+/** One field per question, valued by option id and titled by label, so a logged answer reads as the label. */
+export function questionElicitation(request: CursorQuestionRequest, sessionId: string): ElicitationRequest {
+  const single = request.questions.length === 1;
+  const properties: Record<string, acp.ElicitationPropertySchema> = {};
+  request.questions.forEach((question, index) => {
+    const choices = question.options.map((option) => ({ const: option.id, title: option.label }));
+    const title = question.prompt;
+    const description = single ? undefined : question.prompt;
+    properties[QUESTION_KEY(index)] = question.allowMultiple
+      ? ({ type: "array", title, description, items: { anyOf: choices } } as acp.ElicitationPropertySchema)
+      : ({ type: "string", title, description, oneOf: choices } as acp.ElicitationPropertySchema);
+  });
+  // The card draws no heading equal to a field's title, so a single untitled question is not drawn twice.
+  const lead = single ? (request.questions[0]?.prompt ?? SEVERAL_QUESTIONS) : SEVERAL_QUESTIONS;
+  return {
+    sessionId,
+    toolCallId: request.toolCallId,
+    message: request.title ?? lead,
+    requestedSchema: { type: "object", properties },
+  };
+}
+
+/** Skip is cursor's `skipped`, which it reports to the model as the person skipping; a cancel is its own word. */
+export function questionResponse(
+  response: acp.CreateElicitationResponse,
+  questions: readonly CursorQuestion[],
+): CursorQuestionResponse {
+  if (response.action === "decline") return { outcome: { outcome: "skipped" } };
+  if (response.action !== "accept") return { outcome: { outcome: "cancelled" } };
+  const content = ((response as { content?: unknown }).content ?? {}) as Record<string, unknown>;
+  const answers: { questionId: string; selectedOptionIds: string[] }[] = [];
+  questions.forEach((question, index) => {
+    const picked = content[QUESTION_KEY(index)];
+    const known = new Set(question.options.map((option) => option.id));
+    const ids = (Array.isArray(picked) ? picked : [picked]).filter(
+      (entry): entry is string => typeof entry === "string" && known.has(entry),
+    );
+    if (ids.length > 0) answers.push({ questionId: question.id, selectedOptionIds: ids });
+  });
+  return { outcome: { outcome: "answered", answers } };
+}
+
+export function parsePlanRequest(params: unknown): CursorPlanRequest {
+  const method = CURSOR_CREATE_PLAN;
+  const body = record(params, method, "params");
+  const plan = body["plan"];
+  if (plan !== undefined && plan !== null && typeof plan !== "string") refuse(method, "plan must be a string");
+  return { toolCallId: callId(body["toolCallId"], method), plan: typeof plan === "string" ? plan : "" };
+}
+
+/** A permission, so the plan card draws it off `rawInput.plan`. */
+export function planPermission(request: CursorPlanRequest, sessionId: string): acp.RequestPermissionRequest {
+  return {
+    sessionId,
+    toolCall: { toolCallId: request.toolCallId, title: CURSOR_PLAN_TITLE, rawInput: { plan: request.plan } },
+    options: CURSOR_PLAN_OPTIONS.map((option) => ({ ...option })),
+  };
+}
+
+export function planResponse(response: acp.RequestPermissionResponse): CursorPlanResponse {
+  if (response.outcome.outcome !== "selected") return { outcome: { outcome: "cancelled" } };
+  const picked = response.outcome.optionId;
+  return { outcome: { outcome: picked === "accepted" || picked === "rejected" ? picked : "cancelled" } };
+}
+
+export function parseTodosRequest(params: unknown): CursorTodosRequest {
+  const method = CURSOR_UPDATE_TODOS;
+  const body = record(params, method, "params");
+  const raw = body["todos"];
+  if (!Array.isArray(raw)) refuse(method, "todos must be an array");
+  const todos = raw.map((entry): CursorTodo => {
+    const shape = record(entry, method, "a todo");
+    const status = shape["status"];
+    return {
+      id: text(shape["id"], method, "a todo's id"),
+      content: text(shape["content"], method, "a todo's content"),
+      // cursor maps anything it does not know to pending before sending; unknown here is the same answer.
+      status: typeof status === "string" && TODO_STATUSES.includes(status) ? (status as CursorTodoStatus) : "pending",
+    };
+  });
+  return { toolCallId: callId(body["toolCallId"], method), todos, merge: body["merge"] === true };
+}
+
+/** The list after one update. A merge keeps the order it had and appends what is new. */
+export function mergeTodos(current: readonly CursorTodo[], request: CursorTodosRequest): CursorTodo[] {
+  if (!request.merge) return [...request.todos];
+  const next = [...current];
+  for (const todo of request.todos) {
+    const at = next.findIndex((one) => one.id === todo.id);
+    if (at >= 0) next[at] = todo;
+    else next.push(todo);
+  }
+  return next;
+}
+
+/** ACP's plan has no cancelled status; a cancelled item is no longer anything to do, so it is left off rather than drawn as pending. */
+export function todosAsPlan(todos: readonly CursorTodo[]): acp.PlanEntry[] {
+  return todos
+    .filter((todo) => todo.status !== "cancelled")
+    .map((todo) => ({ content: todo.content, priority: "medium", status: todo.status as acp.PlanEntryStatus }));
+}
+
+export function parseImageRequest(params: unknown): CursorImageRequest {
+  const method = CURSOR_GENERATE_IMAGE;
+  const body = record(params, method, "params");
+  const filePath = body["filePath"];
+  return {
+    toolCallId: callId(body["toolCallId"], method),
+    filePath: typeof filePath === "string" && filePath !== "" ? filePath : null,
+  };
+}
+
+/** Which MCP server and tool a call names, read off the rawInput cursor puts on its `tool_call_update`. */
+export function readMcpToolCall(rawInput: unknown): { server: string; tool: string } | null {
+  if (typeof rawInput !== "object" || rawInput === null) return null;
+  const shape = rawInput as { providerIdentifier?: unknown; toolName?: unknown };
+  if (typeof shape.providerIdentifier !== "string" || typeof shape.toolName !== "string") return null;
+  return { server: shape.providerIdentifier, tool: shape.toolName };
+}
+
+/** Never throws: it runs on every diverted update line. */
+export function readSubagentSpawn(update: unknown): SubagentSpawn | null {
+  if (typeof update !== "object" || update === null) return null;
+  const shape = update as { sessionUpdate?: unknown; subagentSessionId?: unknown; _meta?: unknown };
+  if (shape.sessionUpdate !== "subagent_spawned") return null;
+  const child = shape.subagentSessionId;
+  if (typeof child !== "string" || child === "" || child.length > MAX_PARENT_ID_CHARS) return null;
+  const meta = shape._meta;
+  if (typeof meta !== "object" || meta === null) return null;
+  const cursor = (meta as { cursor?: unknown }).cursor;
+  if (typeof cursor !== "object" || cursor === null) return null;
+  const parent = (cursor as { toolCallId?: unknown }).toolCallId;
+  if (typeof parent !== "string" || parent === "" || parent.length > MAX_PARENT_ID_CHARS) return null;
+  return { childSessionId: child, parentToolCallId: parent };
+}

@@ -1,0 +1,297 @@
+---
+title: "Message ID"
+---
+
+- Author(s): [@michelTho](https://github.com/michelTho), [@nemtecl](https://github.com/nemtecl)
+- Champion: [@benbrandt](https://github.com/benbrandt)
+
+## Elevator pitch
+
+Add a `messageId` field to `agent_message_chunk`, `user_message_chunk`, `agent_thought_chunk` session updates to uniquely identify individual messages within a conversation. Only agents generate message IDs, and the IDs are opaque strings. This enables clients to distinguish between different messages beyond changes in update type and lays the groundwork for future capabilities like message editing and session deduplication.
+
+## Status quo
+
+Currently, when an Agent sends message chunks via `session/update` notifications, there is no explicit identifier for the message being streamed:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+    "sessionId": "sess_abc123def456",
+    "update": {
+      "sessionUpdate": "agent_message_chunk",
+      "content": {
+        "type": "text",
+        "text": "Let me analyze your code..."
+      }
+    }
+  }
+}
+```
+
+This creates several limitations:
+
+1. **Ambiguous message boundaries** - When the Agent sends multiple messages in sequence (e.g., alternating between agent and user messages, or multiple agent messages), Clients can only infer message boundaries by detecting a change in the `sessionUpdate` type. If an Agent sends consecutive messages of the same type, Clients cannot distinguish where one message ends and another begins.
+
+2. **Non-standard workarounds** - Currently, implementations rely on the `_meta` field to work around this limitation. While functional, this approach is not standardized and each implementation may use different conventions.
+
+3. **Limited future capabilities** - Without stable message identifiers, it's difficult to build features like:
+   - Message editing or updates
+   - Message-specific metadata or annotations
+   - Message threading or references
+   - Undo/redo functionality
+
+As an example, consider this sequence where a Client cannot reliably determine message boundaries:
+
+```json
+// First agent message chunk
+{ "sessionUpdate": "agent_message_chunk", "content": { "type": "text", "text": "Analyzing..." } }
+
+// More chunks... but is this still the same message or a new one?
+{ "sessionUpdate": "agent_message_chunk", "content": { "type": "text", "text": "Found issues." } }
+
+// Tool call happens
+{ "sessionUpdate": "tool_call", ... }
+
+// Another agent message - definitely a new message
+{ "sessionUpdate": "agent_message_chunk", "content": { "type": "text", "text": "Fixed the issues." } }
+```
+
+## What we propose to do about it
+
+Add a `messageId` field to `AgentMessageChunk`, `UserMessageChunk`, and `AgentThoughtChunk` session updates. This field would:
+
+1. **Provide stable message identification** - Each message gets a unique identifier that remains constant across all chunks of that message.
+
+2. **Enable reliable message boundary detection** - Clients can definitively determine when a new message starts by observing a change in `messageId`.
+
+3. **Create an extension point for future features** - Message IDs can be referenced in future protocol enhancements.
+
+### Proposed Structure
+
+This RFD does not add a message ID to the `session/prompt` request or response. Clients do not create protocol message IDs. If the Agent emits the accepted user message through `session/update`, it generates and attaches the appropriate message ID to that user message.
+
+The follow-up [v2 Prompt Lifecycle RFD](./v2/prompt.mdx#change-the-sessionprompt-response) explores returning that agent-generated `messageId` in the successful prompt response, while leaving the request unchanged. In that proposal, acceptance means insertion: the response acknowledges that the user message has been inserted, without waiting for turn completion. Session updates report the same insertion's content and placement.
+
+If the Agent sends `user_message_chunk` updates (e.g., during `session/load`), it uses the user message ID:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+    "sessionId": "sess_abc123def456",
+    "update": {
+      "sessionUpdate": "user_message_chunk",
+      "messageId": "msg_user_8f7a1",
+      "content": {
+        "type": "text",
+        "text": "Can you analyze this code?"
+      }
+    }
+  }
+}
+```
+
+For agent message chunks, the Agent also generates and includes a `messageId`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+    "sessionId": "sess_abc123def456",
+    "update": {
+      "sessionUpdate": "agent_message_chunk",
+      "messageId": "msg_agent_c42b9",
+      "content": {
+        "type": "text",
+        "text": "Let me analyze your code..."
+      }
+    }
+  }
+}
+```
+
+The `messageId` field would be:
+
+- **Optional in v1** on `agent_message_chunk`, `user_message_chunk`, and `agent_thought_chunk` updates. An omitted `messageId` and an explicit `null` are equivalent and both mean the Agent did not provide a message ID for that chunk.
+- **Required in v2** on `agent_message_chunk`, `user_message_chunk`, and `agent_thought_chunk` updates. The field MUST be present and MUST be a non-null string.
+- **Agent-generated** - the Agent is the only participant that creates protocol message IDs
+- **Unique per message** within a session
+- **Stable across chunks** - all chunks belonging to the same message share the same `messageId`
+- **Opaque** - Implementations treat it as an identifier without parsing its structure
+
+In v1, if an Agent supports message IDs and emits an accepted or replayed user message through `session/update`, it SHOULD include `messageId` on that user message update. In v2, every streamed user, agent, and thought message chunk MUST include a `messageId`.
+
+## Shiny future
+
+Once this feature exists:
+
+1. **Clear message boundaries** - Clients can reliably render distinct message bubbles in the UI, even when multiple messages of the same type are sent consecutively.
+
+2. **Better streaming UX** - Clients know exactly which message element to append chunks to, enabling smoother visual updates.
+
+3. **Foundation for editing** - With stable message identifiers, future protocol versions could add:
+   - `message/edit` - Agent updates the content of a previously sent message
+   - `message/delete` - Agent removes a message from the conversation
+   - `message/replace` - Agent replaces an entire message with new content
+
+4. **Message metadata** - Future capabilities could reference messages by ID:
+   - Annotations or reactions to specific messages
+   - Citation or cross-reference between messages
+   - Tool calls that reference which message triggered them
+
+5. **Enhanced debugging** - Implementations can trace message flow more easily with explicit IDs in logs and debugging tools.
+
+Example future editing capability:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "session/update",
+  "params": {
+    "sessionId": "sess_abc123def456",
+    "update": {
+      "sessionUpdate": "message_update",
+      "messageId": "ea87d0e7-beb8-484a-a404-94a30b78a5a8",
+      "updateType": "replace",
+      "content": {
+        "type": "text",
+        "text": "Actually, let me correct that analysis..."
+      }
+    }
+  }
+}
+```
+
+## Implementation details and plan
+
+### Phase 1: Core Protocol Changes
+
+1. **Update schema** (`schema/schema.json`):
+   - Add optional `messageId` field (type: `string`) to v1 `ContentChunk` (used by `AgentMessageChunk`, `UserMessageChunk`, `AgentThoughtChunk`)
+   - Add required `messageId` field (type: `string`) to v2 `ContentChunk`
+
+2. **Update Rust SDK** (`rust/client.rs` and `rust/agent.rs`):
+   - Add a dedicated `MessageId` newtype
+   - Add `message_id: Option<MessageId>` field to the v1 `ContentChunk` struct
+   - Add `message_id: MessageId` field to the v2 `ContentChunk` struct
+   - Update serialization to include `messageId` in JSON output when present for v1 and always for v2
+
+3. **Update TypeScript SDK** (if applicable):
+   - Add `messageId` field to corresponding session update types
+
+4. **Update documentation** (`docs/protocol/prompt-turn.mdx`):
+   - Document the `messageId` field and its semantics
+   - Add examples showing message boundaries
+   - Explain that `messageId` changes indicate new messages
+
+### Phase 2: Reference Implementation
+
+5. **Update example agents**:
+   - Modify example agents to generate and include `messageId` in chunks
+   - Demonstrate consistent IDs across chunks of the same message
+
+6. **Update example clients**:
+   - Update clients to consume `messageId` field
+   - Use IDs to properly group chunks into messages
+   - Demonstrate clear message boundary rendering
+
+### Backward Compatibility
+
+The `messageId` field is **optional in v1** to ensure this is a non-breaking change. Agents SHOULD include the `messageId` field on message chunks they can identify, but it is not required for v1 compatibility. Features that rely on `messageId` (such as future message editing capabilities) will implicitly require the field to be present - Agents that don't provide it simply won't support those features.
+
+The field is **required in v2**, where breaking protocol changes are allowed. v2 agents MUST include `messageId` on every streamed message chunk, and v2 clients can reject chunks where the field is omitted or `null`.
+
+## Frequently asked questions
+
+### What alternative approaches did you consider, and why did you settle on this one?
+
+1. **Continue using `_meta` field** - This is the current workaround but:
+   - Not standardized across implementations
+   - Doesn't signal semantic importance
+   - Easy to overlook or implement inconsistently
+
+2. **Detect message boundaries heuristically** - Clients could infer boundaries from timing, content types, or session state:
+   - Unreliable and fragile
+   - Doesn't work for all scenarios (e.g., consecutive same-type messages)
+   - Creates inconsistent behavior across implementations
+
+3. **Use explicit "message start/end" markers** - Wrap messages with begin/end notifications:
+   - More complex protocol interaction
+   - Requires additional notifications
+   - More state to track on both sides
+
+4. **Client-generated prompt IDs** - Let Clients generate IDs for `session/prompt` requests:
+   - Creates two sources of truth for protocol IDs
+   - Requires agreement on uniqueness across clients and agents
+   - Conflicts with the Agent's role as owner of the session history
+
+This alternative concerned client-generated IDs being used as canonical message IDs. The [v2 Prompt Lifecycle RFD](./v2/prompt.mdx#correlate-prompts-with-accepted-user-messages) instead explores returning the agent-owned `messageId` for correlation. It retains a separate [client-generated correlation token](./v2/prompt.mdx#client-generated-correlation-token) as an alternative for recovering a submission's identity after a lost response, without letting the client choose canonical message IDs.
+
+The proposed approach with `messageId` is:
+
+- **Simple** - Just one new field with clear semantics
+- **Flexible** - Enables future capabilities without further protocol changes
+- **Practical** - IDs come from the same side that owns and emits session history
+- **Format-agnostic** - Agents can use identifiers that fit their own storage model
+
+### Who generates message IDs?
+
+**Only the Agent generates protocol message IDs.**
+
+- **For user messages**: The Client sends a prompt without a message ID. If the Agent emits that accepted or replayed user message as a `session/update`, the Agent generates the message ID and includes it in that notification.
+- **For agent messages and thoughts**: The Agent generates the ID when creating the message or thought and includes it in session update chunks.
+
+This matches other protocol identifiers (`sessionId`, `terminalId`, `toolCallId`) which are agent-generated, and provides practical benefits:
+
+- **Single source of truth** - The Agent owns session persistence and message ordering
+- **No format coordination** - The protocol does not need to standardize UUIDs or another shared ID format
+- **Adapter-friendly** - Adapters for agents that don't support message IDs can simply omit them
+
+### Should this field be required or optional?
+
+The field is **optional** for v1 to ensure backward compatibility. Agents SHOULD include `messageId`, but it is not required. In v1, omitting `messageId` and sending `null` are equivalent and both mean no message ID was provided.
+
+The field is **required** for v2. The key MUST be present and its value MUST be a non-null string.
+
+### What format should message IDs use?
+
+Message IDs are opaque strings generated by the Agent.
+
+Clients MUST compare message IDs as opaque strings and MUST NOT parse or infer meaning from their structure.
+
+Because IDs only come from the Agent, collision avoidance is the Agent's responsibility within the session.
+
+### What about message IDs across session loads?
+
+When a session is loaded via `session/load`, the Agent may:
+
+- Preserve original message IDs if replaying the conversation history
+- Generate new message IDs if only exposing current state
+
+The protocol doesn't require message IDs to be stable across session loads, though Agents MAY choose to make them stable if their implementation supports it.
+
+The follow-up [v2 Prompt Lifecycle RFD](./v2/prompt.mdx#correlation-and-replay) proposes matching IDs on the prompt response and live user-message updates, without requiring the Agent to persist the message or retain it for any minimum period. If the Agent retains and replays that message within the session, it must use the returned ID so the client can recognize it, including after reconnecting or restarting. Live-only or discarded messages need not appear in later replay. That proposal does not change v1's replay rules.
+
+### Does this apply to other session updates like tool calls or plan updates?
+
+This RFD addresses `agent_message_chunk`, `user_message_chunk`, and `agent_thought_chunk` updates.
+Other session update types (like `tool_call`, `plan`) already have their own identification mechanisms:
+
+- Tool calls use `toolCallId`
+- Plan entries can be tracked by their position in the `entries` array
+
+Future RFDs may propose extending `messageId` to other update types if use cases emerge.
+
+## Revision history
+
+- **2026-06-05**: Moved to Completed and stabilized optional v1 `messageId` in the stable protocol artifacts
+- **2026-06-03**: Moved the v1 portion of the RFD to Preview while v2-specific behavior remains part of the v2 draft work
+- **2026-06-03**: Moved the RFD out of the v2 Draft group while keeping v2-specific behavior; added a dedicated `MessageId` type, and made v2 require message IDs on streamed message chunks while v1 keeps optional message IDs for compatibility
+- **2026-06-02**: Updated the proposal so message IDs are Agent-generated only, removed client-provided prompt IDs and prompt response acknowledgments, and removed the UUID requirement in favor of opaque strings
+- **2026-02-17**: Added "Message ID Acknowledgment" section to clarify that presence/absence of `userMessageId` in response indicates whether the Agent recorded the ID; clarified that UUID format is MUST (not SHOULD) since both sides generate IDs; renamed response field to `userMessageId` for clarity (request keeps `messageId`)
+- **2026-01-29**: Updated to allow both clients and agents to generate message IDs using UUID format
+- **2025-11-09**: Initial draft
