@@ -168,6 +168,21 @@
 - **Then** the failure screen treats the failed health check as diagnostic, not a trap: the wizard stays open and exposes a primary continue action plus dedicated recovery paths so the user always has a way out
 - **Then** the screen shows the captured connection error (or a generic `Server connection could not be verified.` fallback) and a reminder that a server can also be added later from `Settings > Servers`
 
+- **Given** a server returns HTML, malformed JSON, or an unexpected API object while testing a saved or new profile
+- **When** the connection response cannot be validated
+- **Then** the test finishes with a controlled connection issue instead of leaving the loading indicator running; diagnostics identify the endpoint or HTTP status without displaying response bodies or credentials
+- **Then** a healthy result requires a valid OpenCode health or path response; an explicit unhealthy health response remains unhealthy
+- **Then** app discovery retains its validated legacy `/app` fallback for missing or invalid `/path` responses, while authentication, transport, and server failures retain their failure status
+
+- **Given** another health sweep is running when the user saves and tests a profile
+- **When** the existing sweep finishes
+- **Then** the saved profile receives its own fresh health probe before the wizard reports success or failure; automatic polling does not queue another sweep while one is already running
+- **Then** testing an inactive profile uses that profile's diagnostic and preserves any connection error belonging to the active server
+
+- **Given** the user cancels a connection test or starts a newer attempt
+- **When** an older attempt completes
+- **Then** it does not advance the wizard, clear the newer loading state, or overwrite newer connection diagnostics; cancellation preserves the last completed health result and the saved profile remains available for retry without duplication
+
 - **Given** the onboarding failure screen is visible
 - **When** the user taps the primary `Start using <AppName>` action (or `Done` when the wizard is opened from `Settings`)
 - **Then** the wizard activates the saved profile as the active server using `setActiveServer(blockUnhealthy: false)` and completes onboarding without re-prompting for the same URL
