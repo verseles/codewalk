@@ -15,6 +15,14 @@
 - After completing a change, decide whether tests need adding or updating.
 - Use descriptive commit messages when committing project work.
 
+## Version Lines and Branches
+
+- **`v1` is the legacy CodeWalk 1 / OpenCode 1 maintenance branch.** Implement v1 fixes and the final transition minor there, then bounded patches until the product owner accepts the usable v2 MVP. After that acceptance, freeze routine v1 development/releases; retain the legacy branch and downloads.
+- **`main` is the CodeWalk v2 migration/development line.** It currently retains the v1 source, assets, tests, and build tooling as a temporary reference/reuse baseline alongside `v2-plan.md`; this is not an implemented v2 client. Build the new skeleton and port reusable pieces selectively. Remove superseded v1 code only as validated replacements land and complete the final cutover; do not empty `main` to leave only planning files.
+- Check the active Git branch before editing. A checkout on `v1` means legacy work; the presence of `v2-plan.md` does not authorize implementing the v2 rewrite there. Keep `BEHAVIOR.md`, `CODEBASE.md`, and official contract anchors aligned with the implementation of the active line. Use `main` for v2 work unless the user explicitly directs otherwise; remain on `v1` when that checkout is requested.
+- Do not merge the complete rewritten v2 tree into `v1`, or routinely merge legacy maintenance into `main`. Port only relevant fixes/shared installer changes individually and validate them on each affected line. Keeping source available for reuse does not authorize a v1/v2 runtime compatibility switch.
+- Before publishing rewritten v2 code from `main`, implement and verify the production-Web/preview split in `V1-04`. v2 betas are opt-in prereleases, not the public stable channel. The v1 freeze at MVP and the v2 GA promotion are separate milestones; follow `v2-plan.md` for the transition gates.
+
 ## Required Context
 
 - Read `BEHAVIOR.md` before substantial planning.
@@ -63,7 +71,7 @@ When the user explicitly asks for `flow`, follow this order, but adapting the us
 8. Apply only judge-approved fixes. Validate them with focused checks by default, and repeat the review when warranted.
 9. Evaluate the helpers used, identifying the best and worst, the essential and dispensable ones, the top two and bottom two, and any honorable mentions. Also send a full paragraph about, via hey.
 10. Run `HEY_CAPTION="specific caption" make android` when an APK is useful and supported. Do not run it for ARM64 targets.
-11. Create a minor release unless instructed otherwise. Monitor it every 60 seconds with `cimonitor`.
+11. Create a minor release unless instructed otherwise. On `v1`, the transition minor is the last planned minor; subsequent maintenance uses patches only until the accepted v2 MVP, then routine v1 releases stop. Monitor releases every 60 seconds with `cimonitor`.
 12. Update the documentation of the project while monitor release. Commit doc updates but not push.
 13. Notify the user and provide the final report, including the helper evaluation.
     13.1. Ask whether any related issue should be closed. When useful, suggest the next task from GitHub Issues.

@@ -1,6 +1,6 @@
 # CodeWalk v2 — Implementation Plan
 
-> **Status:** Ready for execution. All product decisions are closed (2026-10-02).
+> **Status:** Option A confirmed. Local legacy branch `v1` created/selected at `d1ed5ee9`, before the transition minor; `main` retains the current v1 code as a temporary v2 reference/reuse baseline. Branch publication and deployment split remain separate work (§9.5, 2026-10-02).
 > **Baseline:** repository revision `14fbf519`, CodeWalk `1.265.0+1790827338` (last v1 release `v1.265.0`).
 > **Evidence snapshot:** 2026-10-02. Upstream projects change weekly; every pinned fact below must be re-checked by the spike that owns it before code depends on it.
 > **Inputs:** the research pack in `plan/` (dossiers `00`–`31` plus raw evidence folders), the decision register `plan/02-decisions.md`, sixteen independent planner reports in `plan/helper-plans/`, and the orchestrator's local verification of every claim on which the reports disagreed.
@@ -68,12 +68,13 @@ The seven key outcomes:
 3. **Hybrid topology (D01).** Harnesses without a usable network server (Codex, Claude Code, Pi, Muse, and initially Grok and dsh) are reached through the **CodeWalk Host**, a small TypeScript/Node service on the user's machine. The host translates every native protocol into **one** CodeWalk protocol. A future harness that ships its own official, authenticated, multi-client server may get a direct adapter. The path toward "everything through the host" stays open.
 4. **Release train (D02).** v2.0 OpenCode → v2.1 Host + Codex → v2.2 Claude Code + Pi → v2.3 Grok Build + Muse Code. DeepSeek Harness (`dsh`) remains experimental.
 5. **"Allow all" stays ON by default (D05)** for every session, as in v1. Underneath, it approves each request **once**, like the official OpenCode clients, so agent restrictions and the user's deny rules keep working and no permanent rules are written. Users can switch a session to another mode when the harness supports it.
-6. **Transition (D04).** Same application ID. A final v1 release shows a clear warning that the next version changes everything and lets the user decide whether to update. Legacy v1 remains available.
+6. **Transition (D04).** Same application ID. The last planned v1 minor includes the update warning, user choice, and channel-aware desktop installers. v1 patches continue during migration; v1 maintenance freezes when the product owner accepts a usable v2 MVP. Promoting v2 to stable is a separate GA milestone. Legacy v1 remains available.
 7. **Honest capabilities.** What a harness cannot do is hidden or disabled with a reason. CodeWalk never emulates missing upstream features with hidden sessions, shell scripts, or credential scraping (v1 did all three).
 
 ```mermaid
 flowchart LR
-  V1F["v1.266 (final v1)\nupdate gate"] --> V20["v2.0\nOpenCode v2\n6 platforms"]
+  V1F["v1.266 (last v1 minor)\nupdate gate + installers"] --> MVP["v2 MVP beta\nv1 maintenance freezes"]
+  MVP --> V20["v2.0 GA\nOpenCode v2\n6 platforms"]
   V20 --> V21["v2.1\nCodeWalk Host\n+ Codex\n+ push sinks"]
   V21 --> V22["v2.2\nClaude Code\n+ Pi"]
   V22 --> V23["v2.3\nGrok Build\n+ Muse Code"]
@@ -90,8 +91,8 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 |---|---|---|---|
 | D01 | Connection architecture | Hybrid: OpenCode direct; CodeWalk Host translates all other harnesses; direct adapters allowed for future harness servers; path to universal gateway preserved | Product owner (option A + clauses) |
 | D02 | Release phases | v2.0 OpenCode only, with gates G1–G5; v2.1 Host + Codex; v2.2 Claude + Pi; v2.3 Grok + Muse; dsh experimental | Product owner ("A with gates") |
-| D03 | Rewrite strategy | New skeleton in this repo; `v1` maintenance branch; selective reuse | Product owner (baseline kept) |
-| D04 | App identity and legacy | Same app ID; final v1 release with a clear update warning and user choice; legacy stays downloadable | Product owner (option C) |
+| D03 | Rewrite strategy | New skeleton in this repo; legacy `v1` branch now; `main` retains v1 reference code until validated replacement/cutover; selective reuse | Product owner (option A); initial main contents delegated to orchestrator |
+| D04 | App identity and legacy | Same app ID; last v1 minor with update warning and user choice; patches until accepted v2 MVP, then freeze; legacy stays downloadable | Product owner (option C; MVP-freeze refinement) |
 | D05 | Allow-all | ON by default for all sessions; automatic one-time approval; switchable modes per harness capability | Product owner (refined) |
 | D06 | Quotas and usage | Native signals first; experimental opt-in vendor usage connectors run only on the host | Product owner (baseline kept, narrowed) |
 | D07 | Notifications | v2.0 local while connected + one Android monitor; v2.1 host attention inbox + user-chosen push sinks + Web Push; no CodeWalk-operated push | Delegated → orchestrator |
@@ -155,19 +156,19 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 
 **Why.** v1's `ChatProvider` (~22.8k lines in ~30 `part` files) and `ChatPage` (~27.5k lines in ~30 files) embed OpenCode v1 wire types and recovery heuristics; 26 presentation files call Dio directly; presentation is ~83% of ~158k lines [V `plan/00`]. Incremental migration would drag 25 v1-only workarounds into a protocol that no longer needs them.
 
-**Refinements.** The final v1 release (D04) happens before the branch cut. Production Web deployment moves to the `v1` branch until v2.0 GA, because `web-pages.yml` deploys on every push to `main` [V] (§9.5).
+**Refinements (option A confirmed).** Create the legacy `v1` branch now from the current v1 baseline (`d1ed5ee9`, CodeWalk 1.265.0 plus planning); implement the transition minor and later maintenance patches on that branch. Do not wait for v1.266.0 to create it or recreate the branch from that future tag. Keep the current v1 source/tests/tooling in `main` as a temporary reference for selective porting, not as a commitment to incremental migration or dual-runtime support. Separate production Web from `main` before publishing the v2 rewrite (§9.5); `web-pages.yml` currently deploys on every push to `main` [V].
 
-### D04 — Same app ID; final v1 release asks the user
+### D04 — Same app ID; last v1 minor asks the user
 
-**Decision (option C, product owner).** Keep `com.verseles.codewalk`. Publish one final v1 release whose updater, when it finds CodeWalk 2, shows a **clear warning that the next version changes everything** (it requires OpenCode 2 servers; v1 servers stop working) and lets the user choose: update now, stay on CodeWalk 1, or decide later. Legacy v1 remains downloadable.
+**Decision (option C, product owner).** Keep `com.verseles.codewalk`. Publish the last planned v1 minor whose updater, when it finds CodeWalk 2, shows a **clear warning that the next version changes everything** (it requires OpenCode 2 servers; v1 servers stop working) and lets the user choose: update now, stay on CodeWalk 1, or decide later. Both desktop installers honor that choice. Continue v1 maintenance patches during migration, then freeze v1 when the product owner accepts a usable v2 MVP (§9.6). Legacy v1 remains downloadable; MVP acceptance does not promote v2 to stable.
 
 **Why.** Users must not be silently moved into an app that cannot talk to their servers. The product owner prefers giving the user an explicit, informed choice over creating a second app identity.
 
 **Consequences that MUST be handled** (§9):
 
-- Users who never install the final v1 release before v2.0 ships will still be offered v2 by the older updater, which picks the GitHub `releases/latest` APK [V]. Mitigations: ship the final v1 release early (before v2.0 betas); start the v2.0.0 release notes and announcement with the OpenCode 2 requirement; v2 detects v1 servers and links the legacy build.
+- Users who never install the transition minor before v2.0 ships will still be offered v2 by the older updater, which picks the GitHub `releases/latest` APK [V]. Mitigations: ship the transition minor early (before v2.0 betas); start the v2.0.0 release notes and announcement with the OpenCode 2 requirement; v2 detects v1 servers and links the legacy build.
 - v1 and v2 cannot coexist on one Android device (same ID).
-- Android build codes are epoch-based (`date +%s + 2001`) [V `Makefile:10,21–25`]. A legacy APK built **after** a v2 release has a higher version code and installs over v2. This is a usable rollback path, provided v2 never deletes v1 data and the legacy updater never re-offers v2 to a user who chose to stay.
+- Android build codes are epoch-based with a branch-local floor [V `Makefile:10,21–25`]. Verify increasing codes across **both** release lines, including concurrent builds; a branch-local floor alone is not a global ordering guarantee. A later-built, higher-code legacy APK can be a rollback path if v1 data is intact, but a frozen v1 APK is not guaranteed to install over a newer beta or GA build. Do not promise one-tap APK rollback after the freeze or create routine v1 rebuilds just to keep that promise.
 
 **Rejected.** A separate legacy app ID (`com.verseles.codewalk.legacy`, would allow coexistence but adds an identity and starts the legacy app empty); same ID without any warning.
 
@@ -307,8 +308,8 @@ Sixteen helpers produced independent plans (full texts in `plan/helper-plans/`).
 
 | Fact | Consequence | Source |
 |---|---|---|
-| Updater reads GitHub `releases/latest`, takes the first `.apk`, and its `Semver` strips prerelease/build metadata before comparing. | v1 users are offered v2 automatically; v2 betas compare equal to finals. The final v1 release (D04) and a new v2 updater fix both. | [V `lib/presentation/services/update_check_service.dart:5–23,156–190`] |
-| Android build code = `date +%s + 2001` (minimum: previous + 1). | Later-built legacy APKs install over earlier v2 builds. Keep the scheme on both branches. | [V `Makefile:10,21–25`] |
+| Updater reads GitHub `releases/latest`, takes the first `.apk`, and its `Semver` strips prerelease/build metadata before comparing. | v1 users are offered v2 automatically; v2 betas compare equal to finals. The transition minor (D04) and a new v2 updater fix both. | [V `lib/presentation/services/update_check_service.dart:5–23,156–190`] |
+| Android build code = `date +%s + 2001` (minimum: previous + 1 on that line). | Keep the scheme, but verify global ordering across both lines; a frozen legacy APK may not install over a newer v2 build. | [V `Makefile:10,21–25`] |
 | `release.yml` publishes every `v*` tag with `prerelease: false`. | Needs prerelease support for v2 betas and `make_latest: false` for legacy releases after v2 GA. | [V `.github/workflows/release.yml:276`] |
 | `web-pages.yml` deploys `build/web` to Cloudflare Pages on push to `main` (`--branch=main`). | v2 development on `main` would replace production Web; split deployments first (§9.5). | [V `.github/workflows/web-pages.yml`] |
 | macOS release build is sandboxed (`com.apple.security.app-sandbox = true`). | Managed installation and process supervision on macOS need a non-sandboxed, notarized distribution or a separately installed host. | [V `macos/Runner/Release.entitlements`] |
@@ -985,27 +986,48 @@ Bounded caches, generation guards, notification batching, and reconnect backoff 
 
 ```mermaid
 flowchart TD
-  A["V1-01 update gate in v1 updater"] --> B["V1-02 release v1.266.0 (final v1)"]
-  B --> C["V1-03 cut branch v1 at v1.266.0"]
-  C --> D["V1-04 production Web deploys from v1"]
+  C["V1-03 create legacy branch v1 now from d1ed5ee9"] --> A["V1-01 update gate + exact-version handoff on v1"]
+  A --> I["V1-05 both installers + acceptance tests"]
+  I --> B["V1-02 release v1.266.0 (last v1 minor)"]
+  B --> D["V1-04 production Web deploys from v1"]
   D --> E["main becomes v2 development"]
   E --> F["v2.0.0-beta.N prereleases"]
-  F --> G["v2.0.0 GA: Web deploys from main; legacy Web alias; v1 releases stop being 'latest'"]
+  B --> P["v1.266.x maintenance patches during migration"]
+  F --> M["V2-086 accepted usable MVP: freeze v1 maintenance"]
+  P -.-> M
+  M --> G["v2.0.0 GA after remaining gates: stable/latest and Web move to v2; legacy stays available"]
 ```
 
-### 9.2 Final v1 release and its update gate (D04)
+The branch cut happens now; the transition minor is developed/released on `v1`. Keep the unchanged v1 baseline in `main` until the production/preview split permits publishing the v2 rewrite.
+
+### 9.2 Last v1 minor and its update gate (D04)
 
 - When the v1 updater finds a release with a **higher major version**, it does not show the usual update prompt. It shows a full explanation: CodeWalk 2 requires OpenCode 2 servers; v1 servers stop working; what changes; link to the migration notes. Choices: **Update to CodeWalk 2** · **Stay on CodeWalk 1** · **Remind me later**.
 - "Stay on CodeWalk 1" persists and switches the updater to v1-only mode: it lists releases (GitHub releases API, paginated) and considers only tags `v1.*`; it never offers v2 again unless the user changes it in Settings.
-- Desktop install scripts get an equivalent channel pin (verify `install.sh`/`install.ps1` behavior [H]).
+- Desktop install scripts MUST implement the equivalent major/channel selection and explicit migration contract below; `V1-05` is a release prerequisite, not an inspection-only task.
 - Ship v1.266.0 before the first v2 beta, so most users have the gate before v2 exists.
+- v1.266.0 is the last planned **minor**, not the last possible patch. Maintenance patches `v1.266.x` continue until the accepted MVP checkpoint (§9.6).
+
+#### 9.2.1 CodeWalk desktop installer contract
+
+This applies to `install.sh` and `install.ps1`, which install **CodeWalk**. It is separate from managed installation of the OpenCode server (`V2-075`). Both scripts currently select `/releases/latest` unconditionally [V `install.sh:91–95`, `install.ps1:324–328`].
+
+- **Selection:** provide the same documented `stable`, `v1`, and `beta` choices in both scripts, with an explicit target-version input for app-driven updates. Environment inputs such as `CODEWALK_CHANNEL` / `CODEWALK_VERSION` must work with the existing pipe-to-shell / PowerShell entry points. Fix the exact interface in `V1-05`; do not require an interactive terminal to express a choice.
+- **Defaults and persistence:** new installs use stable. Existing installs retain their permitted major and saved channel; a v1 install never crosses to v2 implicitly when stable/latest changes. A missing or unreadable installed version must not be treated as a fresh install when an existing bundle is present. Persist an explicit v1 choice across update and reinstall, while allowing a deliberate change later.
+- **Resolution:** stable excludes drafts and prereleases; beta is explicit opt-in for v2 prereleases. The v1 selector traverses release-list pagination and chooses the highest compatible stable `v1.*` version by semantic ordering, including after GA and after the freeze. `/releases/latest` is repository-wide, not a branch or major selector. An explicit target tag must satisfy the approved major/channel policy.
+- **Cross-major migration:** explain the OpenCode 2 requirement and require explicit consent before replacement. Without consent, non-interactive execution exits clearly and preserves the installation. The app passes the **exact approved release tag, channel, and migration choice** to the installer; showing a gate and then downloading a different latest release is not acceptable [V current desktop invocations omit these values in `settings_provider_update_install.dart:253,258`].
+- **Deferred Windows apply:** preserve the approved version/channel through staging and restart; apply exactly the staged payload. `.pending-version` already records a target version, and `apply` currently bypasses release selection [V `install.ps1:247,298–319`]. Preserve that behavior. The restart/helper paths fetch the installer script again [V `install.ps1:290–295`, `settings_provider_update_install.dart:290–295`]; use a compatible pinned/local executor or enforce a stable staging contract so a later script cannot reinterpret the choice. Verify the actual `install.cat` routing before relying on a branch or tag URL [U `V1-05`].
+- **Failure and data preservation:** no compatible release/asset, malformed metadata, network failure, or incompatible staged state must stop before replacement or restore the prior usable bundle. Never fall back silently to another major/channel. Keep existing user-data preservation, executable links, desktop integration, and restart behavior; test failures as well as happy paths.
+- **README and tests:** document the supported commands, defaults, beta opt-in, v1 pin, and migration behavior when implemented. Extend existing Linux installer tests and add executable Windows acceptance tests; exercise the shared selection contract on macOS too. Use offline release/asset fixtures and isolated temporary install directories, not live updates of the developer's installed app.
 
 ### 9.3 v2 versioning and updater
 
 - `pubspec.yaml` → `2.0.0+<epoch build code>`; never reset the build number (Android requires increasing version codes).
-- v2 betas are tagged `v2.0.0-beta.N` and published as **prereleases** (release workflow derives `prerelease` from a `-` in the tag; `make release` needs prerelease support).
+- v2 betas are tagged `v2.0.0-beta.N` and published with **`prerelease: true`, `make_latest: false`**. A beta suffix or a separate branch does not set these flags. The workflow and release tooling must support this **before the first beta**, not only at GA (`V2-077`).
 - The v2 updater uses true semver ordering including prereleases, offers channels (stable / beta), ignores releases whose major is not 2, and keeps the existing What's-new parser of `CHANGELOG.md`.
-- After v2.0.0 GA, releases built from the `v1` branch set `make_latest: false`, so `releases/latest` always points to v2.
+- During migration, stable v1 patches remain eligible for latest; freezing v1 at MVP leaves the last stable v1 release in place. Only GA publishes **exactly `v2.0.0`** with `prerelease: false`, `make_latest: true` and moves the public stable channel to v2. Do not use a major-increment command to promote a version already set to `2.0.0-beta.N` or `2.0.0`; it can produce `3.0.0` instead.
+- After v2.0.0 GA, any explicitly authorized legacy release sets `make_latest: false`. Determine release policy from the tag/version and an explicit promotion decision, not from a presumed branch name in a tag-triggered job.
+- Serialize release publication across both lines or verify a shared highest published Android build code before assigning the next one. GA must upgrade devices running any published beta or v1 patch; test ordering without resetting the epoch-based scheme.
 
 ### 9.4 Local data migration
 
@@ -1013,14 +1035,26 @@ flowchart TD
 - **Import once, read-only, restartable:** appearance, locale, accessibility, shortcuts, voice settings and API keys (secure storage), notification preferences, canned answers, the v1 "Allow all" toggle value (preserve an explicit OFF), server profiles as **"needs OpenCode 2 check"** (credentials re-bound only to the same origin; port 4096 is never rewritten to 49374 automatically).
 - **Not imported as truth:** v1 message caches, tabs and pins whose sessions cannot be mapped. Drafts that cannot be mapped go to a "Recovered drafts" list.
 - A migration report (counts, unresolved items) is visible in Settings → About → Migration.
-- **Rollback:** reinstalling a later-built legacy APK works because v1 keys are intact; the OpenCode server database is OpenCode's responsibility (back it up before a managed v1→v2 OpenCode upgrade; never run v1 and v2 binaries against the same database concurrently [H]).
+- **Rollback:** v1 keys remain intact, but Android install-over rollback also requires a compatible signature and a higher legacy build code; the frozen v1 artifact may not satisfy that. Document the limitation rather than promising rollback merely because data is preserved. The OpenCode server database is OpenCode's responsibility (back it up before a managed v1→v2 OpenCode upgrade; never run v1 and v2 binaries against the same database concurrently [H]).
 
 ### 9.5 Branches and Web deployment
 
-- `v1` maintenance branch from tag `v1.266.0`. Legacy fixes are made there and released with `make_latest: false` after v2 GA.
-- `main` becomes v2 development immediately after the cut. Day-to-day work stays on `main` (project rule); no long-lived v2 branch is needed because production Web moves to `v1`.
+- `v1` is the legacy maintenance branch, created now from `d1ed5ee9` (the current v1.265.0 code plus the committed plan). The transition minor v1.266.0 and subsequent patches are developed/released there; normal maintenance freezes at the accepted v2 MVP (§9.6). The branch and its published artifacts remain available.
+- `main` is the v2 development line, but initially keeps the complete current v1 source, assets, tests, and build/release tooling alongside the plan. This preserves reusable UI/services and regression evidence, and avoids breaking the existing CI/Web setup before its replacement is ready. Do not turn `main` into a plan-only tree. Establish the v2 skeleton (`V2-020`), port selected pieces with tests (§8), and remove superseded code through validated implementation stages/final cutover (`V2-084`).
+- Default v2 work stays on `main`; legacy fixes and the transition minor belong on `v1`. The product owner's requested active checkout is `v1` for the current preparation task. Branch role, not the presence of the v2 plan or temporarily shared source, determines which version is being changed.
 - `web-pages.yml`: production deploy from `v1` until v2.0.0; `main` deploys to a preview alias. At GA: production from `main`, legacy Web kept at a stable alias (for example the `v1` Pages branch alias) [I: Cloudflare Pages branch aliases; verify].
 - A temporary `lib/main_v2.dart` entry point MAY exist during development; at cutover (`V2-084`) the old v1 code is deleted from `main` and `main.dart` boots v2. Production never contains a v1/v2 runtime switch.
+
+**Confirmed topology and initial-main decision.** The product owner selected A: `main` develops v2 and `v1` receives temporary legacy maintenance. No separate long-lived `v2` branch is needed. The orchestrator's delegated decision is to retain the current code in `main` as a temporary reference/reuse baseline: deleting it now would discard convenient test/reuse evidence and break the current build/deploy inputs before a v2 replacement exists. This does not approve further v1 product development on `main` or a runtime v1/v2 switch.
+
+**Low-complexity working rule.** No recurring whole-branch merges between the rewritten v2 and v1. Port an applicable fix individually and validate it in each line. An optional **per-machine** Git worktree can keep v1 patch files/build outputs separate from daily v2 work; refs and external caches remain shared. Keep linked worktrees local rather than assuming their administrative paths are portable between synchronized machines.
+
+### 9.6 Maintenance window and MVP freeze
+
+- Publish v1.266.0 as the last planned minor with the gate and tested installers. Until a usable v2 MVP is accepted, release bounded v1 fixes as `v1.266.x`; new product work belongs to v2.
+- `V2-086` is an explicit product-owner checkpoint: an installable opt-in beta demonstrates connection/pairing, session/history access, sending and streamed tools, permissions, stop/reconnect, and preservation/import of v1 settings on the agreed Android and desktop targets. Agree the exact platform/flow checklist before declaring the MVP accepted.
+- After that acceptance, freeze routine v1 development and releases. Preserve its download and production Web until v2 GA. Any later critical exception requires an explicit decision; do not create an indefinite automatic maintenance commitment.
+- The freeze does **not** waive G1–G5, remaining v2.0 scope, platform gates, or the reviewer loop. Beta feedback and the remaining work continue in v2; only GA promotes stable/latest and production Web.
 
 ---
 
@@ -1032,13 +1066,13 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 |---|---|---|
 | ADR-058 "CodeWalk v2 architecture" | New: hybrid topology (D01 + clauses), ports and adapters, canonical model, capability model, contract-first per harness; supersedes ADR-023's v1-specific invariants while keeping its principle | M0 (`V2-002`) |
 | ADR-059 "Permission modes in v2" | New: D05 semantics; supersedes EXC-001 (v1 `always` + remember); documents the exception "auto-approve ON by default" (official default is off, mechanism matches the official auto-accept) | M0 (`V2-003`) |
-| ADR-060 "v1 → v2 transition" | New: D04 update gate, versioning, data namespace, legacy branch, Web split | M0 (`V2-004`) |
+| ADR-060 "v1 → v2 transition" | New: D04 update gate and installer contract, versioning, data namespace, confirmed branch topology, Web split, patches until accepted MVP and freeze separate from GA | M0 (`V2-004`); update at `V2-086` |
 | ADR-061 "CodeWalk Host and CHP" | New: host responsibilities, security, CHP v1, approval responder, attention inbox | v2.1 (`V21-012`) |
 | Existing ADRs | Review each against v2 and mark superseded/revised with a pointer: candidates ADR-002 (scoping key), ADR-003 (dual SSE), ADR-009 (hidden-session titles), ADR-016 (caches, keep), ADR-019 (config deferral), ADR-029 (quota shell probe), ADR-031 (v1 revert), ADR-033 (proxy auth: must compose with mandatory upstream Basic auth), ADR-041 (delta reconciliation), ADR-043 (shell-gated file writes), ADR-049 (attention overlay), ADR-055 (Android Auto). Verify each ADR's actual scope during the review [H list]. | M0 + as features land |
 | `CONTRACT_MATRIX.md` | Rewrite per harness and operation (used × tested × stability), generated from `used-operations` lists | v2.0 |
 | `ai-docs/opencode_*.md` | Replace with pinned v2 anchors (copied from `plan/opencode-v2-docs/`); v1 anchors stay on the `v1` branch | v2.0 |
 | `BEHAVIOR.md` | Reset for v2 and grow stage by stage | v2.0 onward |
-| `CODEBASE.md`, `README.md` | Regenerate when the structure exists; README explains client vs host vs harness setup and platform limits | v2.0, v2.1 |
+| `CODEBASE.md`, `README.md` | Regenerate when the structure exists; README explains client vs host vs harness setup and platform limits. Before the transition minor, document tested CodeWalk installer commands, stable/v1/beta selection and migration; update for GA and host setup as those ship | `V1-05`, v2.0, v2.1 |
 | `CHANGELOG.md` | Keep machine-readable headings; v2.0.0 starts with an announcement line about the OpenCode 2 requirement | Releases |
 
 ---
@@ -1049,7 +1083,9 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 
 | Release | Scope | Ships when |
 |---|---|---|
-| **v1.266.0** (final v1) | Update gate (D04), announcement | Before the first v2 beta |
+| **v1.266.0** (last planned v1 minor) | Update gate (D04), tested CodeWalk desktop installers, announcement | Before the first v2 beta |
+| **v1.266.x** (temporary maintenance) | Bounded fixes while migrating; no new v1 product work | Until the product owner accepts the v2 MVP |
+| **v2.0.0-beta.N / MVP** | Opt-in usable OpenCode v2 subset; explicit platform/flow acceptance; freeze routine v1 maintenance | `V2-086`; G1–G5 and beta publication controls pass; not a stable-channel promotion |
 | **v2.0** | Complete OpenCode v2 client on Android, Linux, macOS, Windows, Web; iOS per prerequisites; managed desktop install; migration from v1; local notifications + Android monitor | Gates G1–G5 pass; platform gates pass; review loop clean |
 | **v2.1** | CodeWalk Host (desktop + headless npm); Codex via shared daemon; OpenCode observer (24/7 "Allow all", attention); push sinks (ntfy, UnifiedPush, webhook, Web Push); Android overlay and Android Auto return; experimental usage connectors | Host packaging proven on all desktop targets; Codex live-attach acceptance passes |
 | **v2.2** | Host workspace services; Claude Code; Pi | Claude licensing/policy gate passes |
@@ -1058,7 +1094,7 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 
 ### 11.2 The five v2.0 gates (answer to "will v2.0 be OpenCode-shaped?")
 
-The v2.0 release is **blocked** until all five pass. Each gate is a work item in §12.
+The v2.0 release is **blocked** until all five pass. Each gate is a work item in §12. Keep these architecture gates for public MVP prereleases too: freezing v1 at the accepted MVP (§9.6) does not waive D02's safeguards or promote the beta to stable. GA additionally requires the remaining feature scope and platform/release gates.
 
 | Gate | What must be true | Why it prevents rework | Work item |
 |---|---|---|---|
@@ -1106,10 +1142,11 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 ### 12.0 Checklist overview
 
-**Milestone v1.266 — Final v1 release (transition)**
+**Milestone v1.266 — Last planned v1 minor (transition)**
+- [ ] V1-03 Create the legacy `v1` branch now and set maintenance rules
 - [ ] V1-01 Update gate for major versions in the v1 updater
+- [ ] V1-05 Update both CodeWalk desktop installers and their acceptance tests
 - [ ] V1-02 Release v1.266.0 with the CodeWalk 2 announcement
-- [ ] V1-03 Cut the `v1` branch and set legacy release rules
 - [ ] V1-04 Split Web deployment (production from `v1`)
 
 **Milestone v2.0 — OpenCode v2 client**
@@ -1117,7 +1154,7 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 - Spikes: [ ] V2-005 (SP-01) · [ ] V2-006 (SP-02, G1) · [ ] V2-007 (SP-03, G1) · [ ] V2-008 (SP-04) · [ ] V2-009 (SP-05) · [ ] V2-010 (SP-06) · [ ] V2-011 (SP-07) · [ ] V2-012 (SP-08)
 - Core: [ ] V2-020 · [ ] V2-021 (G4) · [ ] V2-022 · [ ] V2-023 · [ ] V2-024 (G3) · [ ] V2-025 (G5) · [ ] V2-026 (G2) · [ ] V2-027 · [ ] V2-028
 - OpenCode adapter: [ ] V2-040 · [ ] V2-041 · [ ] V2-042 · [ ] V2-043 · [ ] V2-044 · [ ] V2-045 · [ ] V2-046 · [ ] V2-047 · [ ] V2-048 · [ ] V2-049 · [ ] V2-050 · [ ] V2-051 · [ ] V2-052 · [ ] V2-053 · [ ] V2-054 · [ ] V2-055 · [ ] V2-056
-- App, platforms, release: [ ] V2-070 · [ ] V2-071 · [ ] V2-072 · [ ] V2-073 · [ ] V2-074 · [ ] V2-075 · [ ] V2-076 · [ ] V2-077 · [ ] V2-078 · [ ] V2-079 · [ ] V2-080 · [ ] V2-081 · [ ] V2-082 · [ ] V2-083 · [ ] V2-084 · [ ] V2-085
+- App, platforms, release: [ ] V2-070 · [ ] V2-071 · [ ] V2-072 · [ ] V2-073 · [ ] V2-074 · [ ] V2-075 · [ ] V2-076 · [ ] V2-077 · [ ] V2-078 · [ ] V2-079 · [ ] V2-080 · [ ] V2-081 · [ ] V2-082 · [ ] V2-083 · [ ] V2-084 · [ ] V2-085 · [ ] V2-086
 
 **Milestone v2.1 — CodeWalk Host + Codex**
 - [ ] V21-001 · [ ] V21-002 · [ ] V21-003 · [ ] V21-004 · [ ] V21-005 · [ ] V21-006 · [ ] V21-007 · [ ] V21-008 · [ ] V21-009 · [ ] V21-010 · [ ] V21-011 · [ ] V21-012
@@ -1132,42 +1169,57 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 ---
 
-### 12.1 Milestone v1.266 — Final v1 release (transition)
+### 12.1 Milestone v1.266 — Last planned v1 minor (transition)
 
 #### V1-01 — Update gate for major versions in the v1 updater
 - **Type / size / labels:** feature · M · `milestone:v1.266` `area:release`
-- **Depends on:** —
+- **Depends on:** V1-03 (local legacy branch creation and branch-role guidance)
 - **Why:** D04 (option C). v1 users must not be moved silently into an app that cannot talk to OpenCode 1 servers; they decide with full information.
 - **Scope:**
   - In `lib/presentation/services/update_check_service.dart`: when the newest release has a higher major version than the installed app, show a dedicated dialog instead of the normal update prompt.
   - Dialog content: CodeWalk 2 requires OpenCode 2 servers; v1 servers stop working; summary of what changes (§5.15); link to migration notes; choices **Update to CodeWalk 2** / **Stay on CodeWalk 1** / **Remind me later**.
   - "Stay" persists and switches the updater to v1-only mode: list releases via the GitHub releases API (paginated) and consider only `v1.*` tags. A Settings entry lets the user change this later.
-  - Check the desktop install scripts (`install.sh`, `install.ps1`) for an equivalent channel pin.
+  - Define the approved release-tag/channel/migration-choice handoff for desktop updates; `V1-05` implements and tests it in the app invocations and both installers.
   - Strings in all 14 locales (targeted ARB edits only).
 - **Done when:**
   - [ ] Unit tests cover: 1.x → 1.y offered normally; 1.x → 2.y shows the gate; after "Stay", only 1.y is offered; after "Later", the gate returns after the configured interval.
   - [ ] Widget test for the dialog; manual check on Android and one desktop OS.
   - [ ] Focused analyze/tests pass; `make check` passes before the release.
 
+#### V1-05 — Update both CodeWalk desktop installers and acceptance tests
+- **Type / size / labels:** feature + test · M · `milestone:v1.266` `area:desktop` `area:release` `type:test`
+- **Depends on:** V1-01
+- **Why:** A warning in the app does not protect desktop users if the installer resolves a different latest release or drops the user's legacy/beta choice. Both scripts currently use `/releases/latest`; this must be fixed before shipping the transition minor.
+- **Scope:**
+  - Implement §9.2.1 in `install.sh` and `install.ps1`: stable/v1/beta selection, explicit target tag, installed-major detection, saved choice, paginated semantic resolution, deliberate cross-major consent, and non-interactive behavior. Keep the interface aligned across scripts and usable through the current installation entry points.
+  - Update desktop invocations in `lib/presentation/providers/settings_provider_update_install.dart` to pass the exact approved tag/channel/migration choice. Preserve this through Windows stage/restart/apply and a compatible pinned/local executor or a proven stable staging contract; never re-resolve the chosen target during apply.
+  - Extend `test/unit/scripts/linux_installer_test.dart`; add executable Windows acceptance coverage on a Windows runner with mocked release/asset responses and isolated temporary install roots. Exercise shared selection behavior on macOS, and keep existing data-preservation, staging, integration, and rollback checks. Do not add a new test framework solely for this task if the existing harness can execute the cases.
+  - Verify `install.cat` routing and direct-script/tag entry points; update `README.md` with commands that were actually tested, including v1 after GA and beta opt-in. Do not imply that a Git branch alone selects a release channel.
+- **Done when:**
+  - [ ] Offline fixtures cover multiple release pages, drafts/prereleases, semantic beta ordering (`beta.2` vs `beta.10`), fresh stable install, v1→v1 update, v1 pin after v2 GA, beta opt-in, explicit target, cross-major consent/cancellation, and existing bundle with unknown version.
+  - [ ] App selection A remains target A when a newer release B appears before download; missing assets/API failure never cross a major/channel or damage the prior installation/data.
+  - [ ] Windows applies exactly the staged version and retains the choice when the remote script/release list changes; incompatible staging fails without silently downloading another target.
+  - [ ] Shell syntax and focused Flutter installer tests pass; Windows and macOS acceptance pass on their runners; tested README commands match the contract; `make check` passes at the transition-minor release gate.
+
 #### V1-02 — Release v1.266.0 with the CodeWalk 2 announcement
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:release`
-- **Depends on:** V1-01
+- **Depends on:** V1-01, V1-05
 - **Why:** The gate only protects users who receive it before v2 exists.
 - **Scope:** `ANNOUNCE="…" make release V=minor`; announcement text (English, ≤ 300 characters) approved by the product owner, for example: "CodeWalk 2 is coming: it requires OpenCode 2 servers. When it arrives, this version will ask before updating."
 - **Done when:** [ ] release published, CI green, What's-new shows the announcement; [ ] product owner approved the text.
 
-#### V1-03 — Cut the `v1` branch and set legacy release rules
+#### V1-03 — Create the legacy `v1` branch now and set maintenance rules
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:release`
-- **Depends on:** V1-02
+- **Depends on:** —
 - **Why:** Preserve a releasable v1 for users who stay (D03, D04).
-- **Scope:** create `v1` from tag `v1.266.0`; document how to release legacy fixes from `v1`; after v2.0.0 exists, legacy releases MUST use `make_latest: false` (workflow input or branch-based condition); keep the epoch build-code scheme.
-- **Done when:** [ ] branch builds in CI; [ ] procedure documented (ADR-060 or README); [ ] a dry run confirms a legacy release does not become "latest".
+- **Scope:** create the local `v1` branch now from `d1ed5ee9` and select it as requested; document branch roles in `AGENTS.md`. Keep the current source/tests/tooling in `main` as the temporary v2 reference baseline. Implement V1-01/V1-05 and publish V1-02 later on `v1`; do not move/recreate its starting point at the future transition tag. Record bounded maintenance until the accepted MVP and subsequent freeze. Branch publication/tracking and CI proof require a separately authorized push; local branch creation alone does not imply a published legacy branch.
+- **Done when:** [ ] option A and branch roles recorded; [ ] local `v1` exists at the intended baseline and checkout preserves local work; [ ] `main` retains the original code/tree; [ ] before the first authorized legacy release, tracking/publication and passing CI are verified, with the post-GA latest/build-code policy from §9.3 tested in V2-077.
 
 #### V1-04 — Split Web deployment
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:web` `area:release`
-- **Depends on:** V1-03
+- **Depends on:** V1-03, V1-02
 - **Why:** `web-pages.yml` deploys production on every push to `main`; v2 development must not replace the production Web app.
-- **Scope:** production deploy from `v1`; `main` deploys to a preview alias; document the GA switch (production from `main`, legacy at a stable alias).
+- **Scope:** implement option A's production/preview split: production deploys from `v1`, `main` from a preview alias. Verify both workflow routing and the hosting production-branch setting, because the current workflow hardcodes the destination to `main`. Complete this before publishing rewritten v2 code from `main`; local branch creation by itself does not change production routing. Document the GA switch (production from `main`, legacy at a stable alias). MVP acceptance freezes v1 maintenance without switching Web production.
 - **Done when:** [ ] a push to `main` changes only the preview; [ ] production still serves v1.
 
 ### 12.2 Milestone v2.0 — Foundations
@@ -1196,7 +1248,7 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 #### V2-004 — ADR-060: v1 → v2 transition
 - **Type / size / labels:** docs · S · `milestone:v2.0` `type:docs`
 - **Depends on:** V2-001
-- **Scope:** update gate, versioning, data namespace and importer, legacy branch rules, Web split (§9).
+- **Scope:** update gate and CodeWalk installer contract, versioning, data namespace and importer, confirmed branch rules, Web split, temporary patches, accepted-MVP freeze separate from stable GA (§9).
 - **Done when:** [ ] ADR merged.
 
 #### V2-005 — SP-01: OpenCode v2 live contract capture
@@ -1454,14 +1506,14 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V2-077 — v2 updater and prerelease tooling
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:release`
-- **Depends on:** V2-020
-- **Scope:** semver with prerelease ordering; stable/beta channels; ignore majors ≠ 2; release workflow derives `prerelease` from tags with `-`; `make release` supports prerelease versions.
-- **Done when:** [ ] tests: `2.0.0-beta.1 < 2.0.0-beta.2 < 2.0.0`; 1.x releases never offered to v2.
+- **Depends on:** V2-020, V1-05
+- **Scope:** semver with prerelease ordering; stable/beta channels; ignore majors ≠ 2; keep both CodeWalk installers and app-driven exact-version handoff aligned with §9.2.1. Before the first beta, make release tooling/workflows publish `v2.0.0-beta.N` with `prerelease: true`, `make_latest: false`. Add explicit promotion to exactly `2.0.0`, not a major increment from a `2.x` version; stable GA uses `prerelease: false`, `make_latest: true`. Apply the post-GA legacy policy by tag/version, and verify global Android build-code ordering. Publish only the intended release commit/tag rather than unintentionally including another line's pending tags.
+- **Done when:** [ ] tests: `2.0.0-beta.2 < 2.0.0-beta.10 < 2.0.0`; 1.x releases never offered to v2; [ ] beta is opt-in in both installers and the updater; [ ] fixtures/dry runs cover beta flags, exact GA promotion, legacy latest policy, targeted tag publication, and Android ordering across both lines.
 
 #### V2-078 — Platform build gates in CI
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:platform`
 - **Depends on:** V2-020, V2-009
-- **Scope:** Android APK on an x64 runner (not ARM64 Linux); Linux, macOS, Windows builds on their runners; `make test-web` and Web build; iOS `flutter build ios --no-codesign` on macOS.
+- **Scope:** Android APK on an x64 runner (not ARM64 Linux); Linux, macOS, Windows builds on their runners; `make test-web` and Web build; iOS `flutter build ios --no-codesign` on macOS. While a temporary `main_v2.dart` exists, beta build jobs must explicitly select the v2 entry point and prove that the packaged app is v2; do not publish a v1 bootstrap with a v2 tag.
 - **Done when:** [ ] all builds green on a PR; [ ] failures block release.
 
 #### V2-079 — Accessibility and localization pass
@@ -1492,20 +1544,28 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 #### V2-083 — Documentation for v2.0
 - **Type / size / labels:** docs · M · `milestone:v2.0` `type:docs`
 - **Depends on:** feature completion
-- **Scope:** `BEHAVIOR.md` reset for v2; `CONTRACT_MATRIX.md` per operation; `ai-docs/` v2 anchors; `CODEBASE.md` (codemapper flow); `README.md` (setup, pairing, platform limits); release notes draft from §5.15.
+- **Scope:** `BEHAVIOR.md` reset for v2; `CONTRACT_MATRIX.md` per operation; `ai-docs/` v2 anchors; `CODEBASE.md` (codemapper flow); `README.md` (setup, pairing, platform limits, tested CodeWalk installer commands, stable/beta/v1 selection, frozen legacy access, Android same-ID/rollback limits); release notes draft from §5.15.
 - **Done when:** [ ] docs reviewed against implemented behavior.
 
 #### V2-084 — Cutover
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:release`
-- **Depends on:** all v2.0 items, G1–G5
+- **Depends on:** V2-001–V2-012, V2-020–V2-028, V2-040–V2-056, V2-070–V2-083, G1–G5; exclude only items explicitly deferred with a recorded reason. The release/checkpoint successors are not prerequisites of this cutover.
 - **Scope:** delete v1 code from `main`; `main.dart` boots v2; remove `main_v2.dart`; analyzer budget reset for the new tree (zero new warnings); final `make check` and `make test-web`; reviewer loop on the complete stage.
 - **Done when:** [ ] no v1 code or routes remain on `main`; [ ] gates and review clean.
 
-#### V2-085 — Betas and the 2.0.0 release
+#### V2-085 — The 2.0.0 GA release
 - **Type / size / labels:** chore · S · `milestone:v2.0` `area:release`
-- **Depends on:** V2-084, V2-077, V1-02
-- **Scope:** `v2.0.0-beta.N` prereleases; feedback round; `make release V=major` with an approved announcement starting with the OpenCode 2 requirement; Web production switch (V1-04 procedure); legacy releases set to `make_latest: false`.
+- **Depends on:** V2-084, V2-077, V2-086, V1-02
+- **Scope:** finish beta feedback and the remaining GA gates; use the explicit promotion path from V2-077 to publish exactly `v2.0.0` with an approved announcement starting with the OpenCode 2 requirement and stable/latest metadata. Do not run a major increment on a `2.x` version. Switch Web production (V1-04 procedure); frozen legacy remains downloadable and any authorized legacy exception uses `make_latest: false`.
 - **Done when:** [ ] 2.0.0 published; [ ] v1.266 users see the gate; [ ] Web production serves v2 and legacy has its alias.
+
+#### V2-086 — Usable MVP beta and v1 maintenance freeze
+- **Type / size / labels:** test + chore · M · `milestone:v2.0` `area:release`
+- **Depends on:** V1-04, V1-05, V2-040, V2-041, V2-042, V2-043, V2-044, V2-045, V2-046, V2-047, V2-070, V2-071, V2-076, V2-077, V2-078, G1–G5
+- **Sequencing:** this is an earlier acceptance checkpoint, despite its higher stable ID; it does not depend on GA or V2-084.
+- **Why:** The product owner wants v1 fixes available during migration and routine v1 maintenance frozen once v2 is usable, rather than maintaining v1 until the complete v2.0 GA release.
+- **Scope:** agree the MVP platform/flow checklist (§9.6); publish an installable `v2.0.0-beta.N` as opt-in with the actual v2 entry point and G1–G5 passing; verify basic OpenCode flows, migration/data preservation, channel behavior and reconnect on the agreed Android and desktop targets; collect product-owner acceptance. Record the frozen v1 tag/commit and stop routine v1 development/releases while preserving downloads and production Web. Finish remaining features/GA gates in v2 while keeping G1–G5 green.
+- **Done when:** [ ] checklist agreed and evidenced; [ ] product owner accepts the usable MVP; [ ] freeze recorded with the final maintenance artifact; [ ] beta is not latest and does not replace Web production; [ ] no full-tree merges or runtime compatibility switch were introduced.
 
 ### 12.6 Milestone v2.1 — CodeWalk Host + Codex
 
@@ -1666,6 +1726,8 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 | External sessions | TUI-created session before/after connect; live vs history-only labels; busy owner |
 | Multi-host | Same native id on two hosts and two harnesses: no cross-talk in caches, drafts, tabs, notifications |
 | Upgrade | v1.266 → v2 import; v1 keys intact; later legacy APK install-over keeps v1 data |
+| CodeWalk installers | Both scripts: offline pagination and semver fixtures; fresh stable install; saved v1 pin after GA; beta opt-in; exact approved tag survives a newer release appearing; cross-major consent/non-interactive refusal; unknown installed version; missing asset/API failure preserves prior bundle/data; Windows stage/apply retains target and survives a changed remote script; macOS exercises the same selection contract |
+| Release transition | Real prerelease flags, beta excluded from latest, stable v1 patches until accepted MVP, freeze without GA promotion, exact `2.0.0` promotion, legacy exceptions do not displace v2 latest, increasing Android codes across both lines and actual v2 beta entry point |
 | Web | CORS preflight with `Authorization`; rejected origin; mixed content; token never in URLs except tickets |
 | iOS | Suspend/resume reconnect and hydrate; Local Network permission denied; no background promise |
 | Accessibility | Semantics on cards and tray; 200% text; RTL; keyboard-only; throttled announcements |
@@ -1678,6 +1740,12 @@ export PATH="$HOME/flutter/bin:$PATH" && dart test packages/codewalk_core
 export PATH="$HOME/flutter/bin:$PATH" && dart test packages/harness_opencode
 export PATH="$HOME/flutter/bin:$PATH" && flutter analyze <touched paths>
 export PATH="$HOME/flutter/bin:$PATH" && flutter test test/<touched area>
+
+# CodeWalk installer changes (V1-05): existing Flutter-based shell fixtures
+sh -n install.sh
+export PATH="$HOME/flutter/bin:$PATH" && flutter test test/unit/scripts/linux_installer_test.dart
+# Run the added Windows/macOS acceptance cases on native runners;
+# record their exact commands in V1-05 when the harness is implemented.
 
 # milestone gates (not after every micro-fix)
 export PATH="$HOME/flutter/bin:$PATH" && make check
@@ -1704,6 +1772,8 @@ npm --prefix host run test:contract
 | OpenCode v2 API churn (OpenAPI version `0.0.1`, near-daily releases) | Broken features after upgrades | Pinned tested window, nightly drift job, tolerant decoding, experimental routes behind flags |
 | Canonical model fits only OpenCode | Rework when adding harnesses | Gates G1–G5 block v2.0 |
 | Users updated into v2 with v1 servers | Stranded users | Final v1 gate, early v1.266 release, v1 explainer with legacy link, announcement |
+| Desktop installer discards the approved target/channel | User receives another version or unintended major | V1-05 before transition minor; exact app→installer handoff; persistent v1/beta choice; offline two-script acceptance; staged Windows contract |
+| MVP freeze confused with GA or automatic legacy maintenance | Stable users receive an incomplete v2 or v1 work continues indefinitely | Separate V2-086 acceptance/freeze from V2-085 GA; preserve stable v1 until GA; explicit decision for any post-freeze exception |
 | "Allow all" approves something the user would have refused in a terminal | Unwanted action | Product decision (D05); per-session Ask mode; agent deny rules preserved; never `always`; questions never automatic |
 | Lost events after disconnect | Wrong or stuck state | Buffer + hydrate; authoritative `ended`; host replay (v2.1); explicit gaps |
 | Global event stream bandwidth on cellular | Data and battery cost | SP-01 measurement; isolate batching; close stream when backgrounded and idle; host coalescing (G-BW) |
@@ -1777,6 +1847,8 @@ Implementation will contradict some details. When it does:
 | Date | Change | Affects | Reason |
 |---|---|---|---|
 | 2026-10-02 | Initial plan; D01, D02, D04, D05 decided with the product owner; D07, D15 decided by the orchestrator (delegated) | All | Planning round with 16 independent plans and local verification |
+| 2026-10-02 | Require both CodeWalk installer updates and executable acceptance tests (V1-05); distinguish last v1 minor, temporary patches, accepted-MVP freeze (V2-086), and GA; reopen branch topology for confirmation without changing the baseline | D03/D04; §§9–13, 17, 20 | Product-owner follow-up; verified latest-only installer selection and missing app handoff; focused planner consultation (12 results, four Claude helpers unavailable after one retry each) |
+| 2026-10-02 | Confirm option A; create/select legacy `v1` now before the final minor; retain current v1 code/tests/tooling in `main` as a temporary reuse/reference baseline; move the transition-minor work to `v1` | D03; §§9, 12, 20; `AGENTS.md` | Product owner selected A and requested immediate legacy checkout; initial-main contents delegated to orchestrator. Retaining the baseline preserves reuse/test evidence and current build inputs until validated replacement |
 
 ---
 
@@ -1807,14 +1879,17 @@ Implementation will contradict some details. When it does:
 
 **Official upstream references (recheck before use).** OpenCode v2 docs https://opencode.ai/v2/docs/ and source `anomalyco/opencode` (tag v2.0.21) · Codex `openai/codex` (rust-v0.160.0) and app-server docs · Claude Agent SDK docs and Anthropic legal/compliance page · Pi `earendil-works/pi` · Muse SDK `meta-models/muse-code-sdk` · Grok Build `xai-org/grok-build` · DeepSeek Harness `deepseek-ai/deepseek-harness` · ACP `agentclientprotocol/agent-client-protocol` · OpenChamber `openchamber/openchamber` (secondary reference only, commit `fc012ae0…`).
 
+**Transition references (2026-10-02 follow-up).** GitHub Releases API https://docs.github.com/en/rest/releases/releases (latest excludes drafts/prereleases; release metadata and paginated listing) · Git worktree manual https://git-scm.com/docs/git-worktree (separate working trees, shared repository data). Local anchors: `install.sh:91–95`, `install.ps1:247,290–328`, `lib/presentation/providers/settings_provider_update_install.dart:238–305`, `test/unit/scripts/linux_installer_test.dart`, `.github/workflows/ci.yml:6–9,69,124`.
+
 ---
 
 ## 20. Execution start
 
-1. **Now:** `V1-01` (update gate) → `V1-02` (release v1.266.0) → `V1-03` (cut `v1`) → `V1-04` (Web split). Nothing in v2 lands on `main` before `V1-04`.
+1. **Now:** `V1-03` (create/select legacy `v1`, document roles, retain current code in `main`) → implement on `v1`: `V1-01` (update gate + selection contract) → `V1-05` (both installers + tests + README) → `V1-02` (last v1 minor, v1.266.0) → `V1-04` (production/preview split). Do not publish rewritten v2 code from `main` before `V1-04`; keeping its unchanged reference baseline is intentional.
 2. **In parallel, no code risk:** `V2-001`–`V2-004` (plan, ADRs) and the spikes `V2-005`–`V2-012` (start SP-01, SP-02, SP-03 first: they feed G1/G2).
 3. **First v2 code:** `V2-020` skeleton → `V2-021` (G4) → `V2-022`/`V2-023` → `V2-024` (G3) and `V2-025` (G5) → `V2-026` (G2) once SP-02/SP-03 fixtures exist.
 4. **First green test:** a reducer test replaying the SP-01 plain-turn fixture into `codewalk_core`.
+5. **During migration:** ship bounded v1 patches on the maintenance line; make `V2-077` / `V2-078` ready before the first v2 beta. At `V2-086`, accept the usable MVP and freeze routine v1 maintenance. Continue v2 feedback and remaining work; only `V2-084` → `V2-085` promotes GA, stable/latest, and Web production.
 
 ```bash
 source ~/paths
