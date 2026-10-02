@@ -2,6 +2,19 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v1.265.1 - 2026-10-02
+
+> 📣 Server connection tests now report unexpected responses instead of getting stuck, with clearer handling of invalid API responses and authentication failures.
+
+- fix(connection): let slow health sweeps finish before polling again
+- fix(connection): await fresh profile probes and retain active errors
+- fix(connection): preserve probe status and ignore cancelled updates
+- fix(connection): finish failed server tests and validate responses (#226)
+- docs(transition): define legacy v1 branch and v2 migration gates
+- v2 plan
+- chore: remove obsolete root tooling and archived reports
+- docs(editor): describe desktop clipboard menus and toolbar dismissal
+
 ## v1.265.0 - 2026-10-01
 
 > 📣 Fixed desktop code editor right-click crashes. Clipboard menus now open reliably while preserving mobile selection, read-only behavior, and light and dark themes.
