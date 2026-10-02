@@ -75,6 +75,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
   // ID of the server profile added during this wizard session, so "Try again"
   // re-tests health instead of attempting a duplicate addServerProfile.
   String? _addedServerId;
+  Set<String>? _pendingAddExistingServerIds;
   String? _editingServerId;
 
   final TextEditingController _urlController = TextEditingController();
@@ -529,6 +530,7 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
     _testCancelToken = null;
     setState(() {
       _addedServerId = null;
+      _pendingAddExistingServerIds = null;
       _editingServerId = null;
       _testing = false;
       _tailscaleUrlManualOverride = false;
@@ -568,15 +570,9 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
 
     final appProvider = context.read<AppProvider>();
     final adjustedUrl = _mapAndroidLoopback(_urlController.text.trim());
-    final label = _labelController.text.trim();
-    appProvider.recordSetupDebugEvent(
-      source: context.l10n.setupDebugSourceManualConnection,
-      message: context.l10n.setupDebugMessageTestingServerUrl(adjustedUrl),
-    );
-    final username = _usernameController.text.trim();
-    final password = _passwordController.text.trim();
-    final oauthEnabled = _oauthEnabled && _oauthSupported;
-    final tailscaleEnabled = _tailscaleEnabled && _tailscaleSupported;
+    final existingServerIds = appProvider.serverProfiles
+        .map((profile) => profile.id)
+        .toSet();
 
     void clearTokenIfCurrent() {
       if (identical(_testCancelToken, cancelToken)) {
@@ -584,18 +580,117 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
       }
     }
 
-    final trackedServerId = _editingServerId ?? _addedServerId;
-    final hasTrackedServer =
-        trackedServerId != null &&
-        appProvider.serverProfiles.any(
-          (profile) => profile.id == trackedServerId,
-        );
+    try {
+      final label = _labelController.text.trim();
+      appProvider.recordSetupDebugEvent(
+        source: context.l10n.setupDebugSourceManualConnection,
+        message: context.l10n.setupDebugMessageTestingServerUrl(adjustedUrl),
+      );
+      final username = _usernameController.text.trim();
+      final password = _passwordController.text.trim();
+      final oauthEnabled = _oauthEnabled && _oauthSupported;
+      final tailscaleEnabled = _tailscaleEnabled && _tailscaleSupported;
 
-    // If this wizard already created a server profile, update/re-check the same
-    // profile instead of attempting to add a duplicate URL.
-    if (hasTrackedServer) {
-      final updated = await appProvider.updateServerProfile(
-        id: trackedServerId,
+      // Cancel may return before addServerProfile finishes its health probe.
+      // Adopt only a newly created matching profile from that pending add.
+      final pendingIds = _pendingAddExistingServerIds;
+      if (_addedServerId == null &&
+          _editingServerId == null &&
+          pendingIds != null) {
+        for (final profile in appProvider.serverProfiles) {
+          if (!pendingIds.contains(profile.id) && profile.url == adjustedUrl) {
+            _addedServerId = profile.id;
+            break;
+          }
+        }
+      }
+
+      final trackedServerId = _editingServerId ?? _addedServerId;
+      final hasTrackedServer =
+          trackedServerId != null &&
+          appProvider.serverProfiles.any(
+            (profile) => profile.id == trackedServerId,
+          );
+
+      // If this wizard already created a server profile, update/re-check the same
+      // profile instead of attempting to add a duplicate URL.
+      if (hasTrackedServer) {
+        final updated = await appProvider.updateServerProfile(
+          id: trackedServerId,
+          url: adjustedUrl,
+          label: label,
+          basicAuthEnabled: _basicAuthEnabled,
+          basicAuthUsername: username,
+          basicAuthPassword: password,
+          oauthEnabled: oauthEnabled,
+          tailscaleEnabled: tailscaleEnabled,
+          aiGeneratedTitlesEnabled: _aiGeneratedTitlesEnabled,
+          healthCancelToken: cancelToken,
+        );
+        if (!mounted || _isStaleTestRun(generation)) return;
+        if (!updated) {
+          appProvider.recordSetupDebugEvent(
+            source: context.l10n.setupDebugSourceManualConnection,
+            message: appProvider.errorMessage,
+            severity: SetupDebugSeverity.error,
+          );
+          clearTokenIfCurrent();
+          setState(() {
+            _testing = false;
+            _connectionError = appProvider.errorMessage;
+          });
+          return;
+        }
+
+        if (oauthEnabled) {
+          final authenticated = await appProvider.handleOAuthChallenge(
+            serverUrl: adjustedUrl,
+          );
+          if (!mounted || _isStaleTestRun(generation)) return;
+          if (!authenticated) {
+            final detail = appProvider.errorMessage.trim();
+            clearTokenIfCurrent();
+            setState(() {
+              _testing = false;
+              _connectionError = detail.isNotEmpty
+                  ? detail
+                  : context.l10n.onboardingCloudflareAuthFailed;
+            });
+            return;
+          }
+        }
+
+        final health = appProvider.healthFor(trackedServerId);
+        final connectionError = appProvider.errorMessage.trim();
+        final verified =
+            health == ServerHealthStatus.healthy && connectionError.isEmpty;
+        final detail = connectionError.isNotEmpty
+            ? connectionError
+            : appProvider.healthErrorFor(trackedServerId) ??
+                  context.l10n.onboardingHealthCheckFailedMayBeStarting;
+        final healthMessage = !verified
+            ? context.l10n.onboardingHealthCheckFailedMayBeStarting
+            : context.l10n.onboardingConnectionUpdated;
+        appProvider.recordSetupDebugEvent(
+          source: context.l10n.setupDebugSourceManualConnection,
+          message: healthMessage,
+          severity: !verified
+              ? SetupDebugSeverity.error
+              : SetupDebugSeverity.info,
+        );
+        clearTokenIfCurrent();
+        setState(() {
+          _testing = false;
+          _connectionSuccess = verified;
+          _readyFromManagedLocal = false;
+          _connectionError = verified ? null : detail;
+          _step = 2;
+        });
+        return;
+      }
+
+      _pendingAddExistingServerIds = existingServerIds;
+      final success = await appProvider.addServerProfile(
         url: adjustedUrl,
         label: label,
         basicAuthEnabled: _basicAuthEnabled,
@@ -604,10 +699,82 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
         oauthEnabled: oauthEnabled,
         tailscaleEnabled: tailscaleEnabled,
         aiGeneratedTitlesEnabled: _aiGeneratedTitlesEnabled,
+        setAsActive: true,
         healthCancelToken: cancelToken,
       );
+
+      String? serverId;
+      for (final profile in appProvider.serverProfiles.reversed) {
+        if (!existingServerIds.contains(profile.id)) {
+          serverId = profile.id;
+          break;
+        }
+      }
+      if (success) {
+        serverId ??= appProvider.activeServerId;
+        serverId ??= appProvider.serverProfiles.isNotEmpty
+            ? appProvider.serverProfiles.last.id
+            : null;
+
+        // Record the new profile even on a stale run so a retry after Cancel
+        // updates the same profile instead of creating a duplicate. Only on
+        // success: a failed add persists nothing, so falling back to the
+        // active/last profile here would latch an unrelated existing profile
+        // and silently rewrite it on the next attempt.
+        if (_editingServerId == null &&
+            serverId != null &&
+            identical(_pendingAddExistingServerIds, existingServerIds)) {
+          _addedServerId = serverId;
+        }
+      }
       if (!mounted || _isStaleTestRun(generation)) return;
-      if (!updated) {
+
+      if (success) {
+        if (oauthEnabled) {
+          final authenticated = await appProvider.handleOAuthChallenge(
+            serverUrl: adjustedUrl,
+          );
+          if (!mounted || _isStaleTestRun(generation)) return;
+          if (!authenticated) {
+            final detail = appProvider.errorMessage.trim();
+            clearTokenIfCurrent();
+            setState(() {
+              _testing = false;
+              _connectionError = detail.isNotEmpty
+                  ? detail
+                  : context.l10n.onboardingCloudflareAuthFailed;
+            });
+            return;
+          }
+        }
+
+        final health = serverId == null
+            ? ServerHealthStatus.unhealthy
+            : appProvider.healthFor(serverId);
+        final verified = health == ServerHealthStatus.healthy;
+        final detail = serverId == null
+            ? context.l10n.onboardingAddedButHealthCheckFailed
+            : appProvider.healthErrorFor(serverId) ??
+                  context.l10n.onboardingAddedButHealthCheckFailed;
+        final healthMessage = !verified
+            ? context.l10n.onboardingAddedButHealthCheckFailed
+            : context.l10n.onboardingConnectionSaved;
+        appProvider.recordSetupDebugEvent(
+          source: context.l10n.setupDebugSourceManualConnection,
+          message: healthMessage,
+          severity: !verified
+              ? SetupDebugSeverity.error
+              : SetupDebugSeverity.info,
+        );
+        clearTokenIfCurrent();
+        setState(() {
+          _testing = false;
+          _connectionSuccess = verified;
+          _readyFromManagedLocal = false;
+          _connectionError = verified ? null : detail;
+          _step = 2;
+        });
+      } else {
         appProvider.recordSetupDebugEvent(
           source: context.l10n.setupDebugSourceManualConnection,
           message: appProvider.errorMessage,
@@ -618,144 +785,37 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
           _testing = false;
           _connectionError = appProvider.errorMessage;
         });
-        return;
       }
-
-      if (oauthEnabled) {
-        final authenticated = await appProvider.handleOAuthChallenge(
-          serverUrl: adjustedUrl,
-        );
-        if (!mounted || _isStaleTestRun(generation)) return;
-        if (!authenticated) {
-          final detail = appProvider.errorMessage.trim();
-          clearTokenIfCurrent();
-          setState(() {
-            _testing = false;
-            _connectionError = detail.isNotEmpty
-                ? detail
-                : context.l10n.onboardingCloudflareAuthFailed;
-          });
-          return;
+    } catch (error) {
+      if (!mounted || _isStaleTestRun(generation)) return;
+      // A profile may have been persisted before a later diagnostic failed.
+      for (final profile in appProvider.serverProfiles) {
+        if (!existingServerIds.contains(profile.id) &&
+            profile.url == adjustedUrl) {
+          _addedServerId = profile.id;
+          break;
         }
       }
-
-      final health = appProvider.healthFor(trackedServerId);
-      final healthMessage = health == ServerHealthStatus.unhealthy
-          ? context.l10n.onboardingHealthCheckFailedMayBeStarting
-          : context.l10n.onboardingConnectionUpdated;
-      appProvider.recordSetupDebugEvent(
-        source: context.l10n.setupDebugSourceManualConnection,
-        message: healthMessage,
-        severity: health == ServerHealthStatus.unhealthy
-            ? SetupDebugSeverity.error
-            : SetupDebugSeverity.info,
+      final savedId = _editingServerId ?? _addedServerId;
+      final hasSavedProfile = appProvider.serverProfiles.any(
+        (profile) => profile.id == savedId,
       );
-      clearTokenIfCurrent();
-      setState(() {
-        _testing = false;
-        _connectionSuccess = health != ServerHealthStatus.unhealthy;
-        _readyFromManagedLocal = false;
-        _connectionError = health == ServerHealthStatus.unhealthy
-            ? context.l10n.onboardingHealthCheckFailedMayBeStarting
-            : null;
-        _step = 2;
-      });
-      return;
-    }
-
-    final existingServerIds = appProvider.serverProfiles
-        .map((profile) => profile.id)
-        .toSet();
-    final success = await appProvider.addServerProfile(
-      url: adjustedUrl,
-      label: label,
-      basicAuthEnabled: _basicAuthEnabled,
-      basicAuthUsername: username,
-      basicAuthPassword: password,
-      oauthEnabled: oauthEnabled,
-      tailscaleEnabled: tailscaleEnabled,
-      aiGeneratedTitlesEnabled: _aiGeneratedTitlesEnabled,
-      setAsActive: true,
-      healthCancelToken: cancelToken,
-    );
-
-    String? serverId;
-    for (final profile in appProvider.serverProfiles.reversed) {
-      if (!existingServerIds.contains(profile.id)) {
-        serverId = profile.id;
-        break;
-      }
-    }
-    if (success) {
-      serverId ??= appProvider.activeServerId;
-      serverId ??= appProvider.serverProfiles.isNotEmpty
-          ? appProvider.serverProfiles.last.id
-          : null;
-
-      // Record the new profile even on a stale run so a retry after Cancel
-      // updates the same profile instead of creating a duplicate. Only on
-      // success: a failed add persists nothing, so falling back to the
-      // active/last profile here would latch an unrelated existing profile
-      // and silently rewrite it on the next attempt.
-      if (_editingServerId == null && serverId != null) {
-        _addedServerId = serverId;
-      }
-    }
-    if (!mounted || _isStaleTestRun(generation)) return;
-
-    if (success) {
-      if (oauthEnabled) {
-        final authenticated = await appProvider.handleOAuthChallenge(
-          serverUrl: adjustedUrl,
-        );
-        if (!mounted || _isStaleTestRun(generation)) return;
-        if (!authenticated) {
-          final detail = appProvider.errorMessage.trim();
-          clearTokenIfCurrent();
-          setState(() {
-            _testing = false;
-            _connectionError = detail.isNotEmpty
-                ? detail
-                : context.l10n.onboardingCloudflareAuthFailed;
-          });
-          return;
-        }
-      }
-
-      final health = serverId == null
-          ? ServerHealthStatus.unhealthy
-          : appProvider.healthFor(serverId);
-      final healthMessage = health == ServerHealthStatus.unhealthy
-          ? context.l10n.onboardingAddedButHealthCheckFailed
-          : context.l10n.onboardingConnectionSaved;
       appProvider.recordSetupDebugEvent(
         source: context.l10n.setupDebugSourceManualConnection,
-        message: healthMessage,
-        severity: health == ServerHealthStatus.unhealthy
-            ? SetupDebugSeverity.error
-            : SetupDebugSeverity.info,
-      );
-      clearTokenIfCurrent();
-      setState(() {
-        _testing = false;
-        _connectionSuccess = health != ServerHealthStatus.unhealthy;
-        _readyFromManagedLocal = false;
-        _connectionError = health == ServerHealthStatus.unhealthy
-            ? context.l10n.onboardingAddedButHealthCheckFailed
-            : null;
-        _step = 2;
-      });
-    } else {
-      appProvider.recordSetupDebugEvent(
-        source: context.l10n.setupDebugSourceManualConnection,
-        message: appProvider.errorMessage,
+        message: 'Connection test failed (${error.runtimeType}).',
         severity: SetupDebugSeverity.error,
       );
-      clearTokenIfCurrent();
       setState(() {
-        _testing = false;
-        _connectionError = appProvider.errorMessage;
+        _connectionSuccess = false;
+        _readyFromManagedLocal = false;
+        _connectionError = context.l10n.onboardingCouldNotVerify;
+        if (hasSavedProfile) _step = 2;
       });
+    } finally {
+      clearTokenIfCurrent();
+      if (mounted && !_isStaleTestRun(generation) && _testing) {
+        setState(() => _testing = false);
+      }
     }
   }
 

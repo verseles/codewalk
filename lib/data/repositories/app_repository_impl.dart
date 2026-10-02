@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
+import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/dio_client.dart';
 import '../../domain/entities/agent.dart';
@@ -31,7 +32,12 @@ class AppRepositoryImpl with DioExceptionHandler implements AppRepository {
       );
       return Right(appInfoModel.toEntity());
     } on DioException catch (e) {
+      if (e.error is FormatException) {
+        return const Left(ParseFailure('Invalid OpenCode JSON response.'));
+      }
       return Left(handleDioException(e));
+    } on ParseException catch (e) {
+      return Left(ParseFailure(e.message));
     } on Exception catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -55,7 +61,12 @@ class AppRepositoryImpl with DioExceptionHandler implements AppRepository {
       await remoteDataSource.getAppInfo(directory: directory);
       return const Right(true);
     } on DioException catch (e) {
+      if (e.error is FormatException) {
+        return const Left(ParseFailure('Invalid OpenCode JSON response.'));
+      }
       return Left(handleDioException(e));
+    } on ParseException catch (e) {
+      return Left(ParseFailure(e.message));
     } on Exception catch (e) {
       return Left(NetworkFailure(e.toString()));
     }

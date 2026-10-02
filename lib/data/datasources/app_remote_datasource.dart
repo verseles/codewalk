@@ -1,4 +1,8 @@
+import 'package:dio/dio.dart';
+
+import '../../core/errors/exceptions.dart';
 import '../../core/logging/app_logger.dart';
+import '../../core/network/opencode_connection_response.dart';
 import '../models/agent_model.dart';
 import '../models/app_info_model.dart';
 import '../models/provider_model.dart';
@@ -179,15 +183,22 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
     // Current API uses GET /path. Keep /app as fallback for older servers.
     try {
       final response = await dio.get('/path', queryParameters: queryParams);
-      if (response.data is Map<String, dynamic>) {
-        return _appInfoFromPath(response.data as Map<String, dynamic>);
-      }
-    } catch (_) {
-      // Fallback below
+      return _appInfoFromPath(decodeOpenCodePath(response.data));
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      if (status != 404 && status != 405) rethrow;
+    } on ParseException {
+      // Older servers can return their web shell for an unavailable /path.
+      // Keep the existing fallback, but require a valid legacy response.
     }
 
     final legacy = await dio.get('/app', queryParameters: queryParams);
-    return AppInfoModel.fromJson(legacy.data as Map<String, dynamic>);
+    final data = decodeOpenCodeObject(legacy.data, '/app');
+    try {
+      return AppInfoModel.fromJson(data);
+    } on TypeError {
+      throw const ParseException('Invalid legacy OpenCode response from /app.');
+    }
   }
 
   @override

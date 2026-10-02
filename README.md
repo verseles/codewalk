@@ -1,5 +1,7 @@
 # CodeWalk
 
+> **HEADS UP!** CodeWalk v2 is coming soon, with support for OpenCode v2 and several other coding harnesses. OpenCode v1 will not be supported in CodeWalk v2. CodeWalk v1 has moved to the [`v1` branch](https://github.com/verseles/codewalk/tree/v1) and will receive only rare bug-fix updates.
+
 <p align="center"><img src="demo-desktop.gif" alt="CodeWalk desktop demo" /></p>
 <p align="center">https://github.com/user-attachments/assets/032f64e2-e8ee-4024-b49a-ca95a774653f</p>
 

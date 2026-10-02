@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:codewalk/core/errors/failures.dart';
 import 'package:codewalk/core/i18n/app_locales.dart';
 import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/core/tailscale/tailscale_service.dart';
+import 'package:codewalk/data/datasources/app_remote_datasource.dart';
+import 'package:codewalk/data/repositories/app_repository_impl.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/l10n/generated/app_localizations.dart';
@@ -11,6 +14,8 @@ import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:codewalk/presentation/providers/settings_provider.dart';
 import 'package:codewalk/presentation/services/local_opencode_server_runtime_types.dart';
 import 'package:codewalk/presentation/services/sound_service.dart';
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +26,42 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../support/fakes.dart';
+
+class _ConnectionResponseAdapter implements HttpClientAdapter {
+  bool valid = false;
+  final requests = <String>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options.path);
+    return ResponseBody.fromString(
+      valid
+          ? '{"config":"/config","state":"/state","worktree":"/project","directory":"/project"}'
+          : '<html>authentication page</html>',
+      200,
+      headers: <String, List<String>>{
+        Headers.contentTypeHeader: <String>[
+          valid ? 'application/json' : 'text/html',
+        ],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _DelayedConnectionRepository extends FakeAppRepository {
+  final gate = Completer<Either<Failure, bool>>();
+
+  @override
+  Future<Either<Failure, bool>> checkConnection({String? directory}) =>
+      gate.future;
+}
 
 class _NoopTailscaleService extends TailscaleService {
   @override
@@ -159,6 +200,184 @@ void main() {
     await provider.initialize();
     return provider;
   }
+
+  group('issue 226 connection response failures', () {
+    testWidgets(
+      'tracked profile with HTML API response finishes and can recover',
+      (tester) async {
+        await _setLargeSurface(tester);
+        final client = DioClient();
+        final adapter = _ConnectionResponseAdapter();
+        client.dio.httpClientAdapter = adapter;
+        final repository = AppRepositoryImpl(
+          remoteDataSource: AppRemoteDataSourceImpl(dio: client.dio),
+          localDataSource: localDataSource,
+          dioClient: client,
+        );
+        final provider = AppProvider(
+          getAppInfo: GetAppInfo(repository),
+          checkConnection: CheckConnection(repository),
+          localDataSource: localDataSource,
+          dioClient: client,
+          tailscaleService: _NoopTailscaleService(),
+          serverHealthProbe: (_) async => adapter.valid
+              ? ServerHealthStatus.healthy
+              : ServerHealthStatus.unhealthy,
+          enableHealthPolling: false,
+        );
+        await provider.initialize();
+        await tester.pumpWidget(buildWizard(providerOverride: provider));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Connect to a running server'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('server_test_button')),
+        );
+        await tester.tap(find.byKey(const ValueKey('server_test_button')));
+        await _waitForReadyFailure(tester);
+        expect(provider.serverProfiles, hasLength(1));
+
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('server_test_button')),
+        );
+        await tester.tap(find.byKey(const ValueKey('server_test_button')));
+        await _waitForReadyFailure(tester);
+        expect(adapter.requests, <String>['/path', '/app']);
+        expect(
+          find.textContaining('Expected OpenCode JSON from /app.'),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('server_test_cancel_button')),
+          findsNothing,
+        );
+        expect(find.text('Try again'), findsOneWidget);
+        expect(find.text('Open settings'), findsOneWidget);
+        expect(provider.serverProfiles, hasLength(1));
+        expect(tester.takeException(), isNull);
+
+        adapter.valid = true;
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('server_test_button')),
+        );
+        await tester.tap(find.byKey(const ValueKey('server_test_button')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('step_ready_success')),
+          findsOneWidget,
+        );
+        expect(provider.serverProfiles, hasLength(1));
+        await tester.pumpWidget(const SizedBox.shrink());
+        provider.dispose();
+        client.dio.close(force: true);
+        client.sseDio.close(force: true);
+      },
+    );
+
+    testWidgets(
+      'unexpected post-save error releases spinner and retries same profile',
+      (tester) async {
+        await _setLargeSurface(tester);
+        final provider = AppProvider(
+          getAppInfo: GetAppInfo(FakeAppRepository()),
+          checkConnection: CheckConnection(FakeAppRepository()),
+          localDataSource: localDataSource,
+          dioClient: DioClient(),
+          tailscaleService: _NoopTailscaleService(),
+          serverHealthProbe: (_) async =>
+              throw StateError('private error details'),
+          enableHealthPolling: false,
+        );
+        await provider.initialize();
+        await tester.pumpWidget(buildWizard(providerOverride: provider));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Connect to a running server'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('server_test_button')),
+        );
+        await tester.tap(find.byKey(const ValueKey('server_test_button')));
+        await _waitForReadyFailure(tester);
+        expect(
+          find.text('Could not verify the server connection.'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('private error details'), findsNothing);
+        expect(
+          find.byKey(const ValueKey('server_test_cancel_button')),
+          findsNothing,
+        );
+        expect(provider.serverProfiles, hasLength(1));
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('server_test_button')),
+        );
+        await tester.tap(find.byKey(const ValueKey('server_test_button')));
+        await _waitForReadyFailure(tester);
+        expect(provider.serverProfiles, hasLength(1));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        provider.dispose();
+      },
+    );
+    testWidgets(
+      'late error from a cancelled run cannot unlock the current test',
+      (tester) async {
+        await _setLargeSurface(tester);
+        final firstHealth = Completer<ServerHealthStatus>();
+        final repository = _DelayedConnectionRepository();
+        var healthCalls = 0;
+        final provider = AppProvider(
+          getAppInfo: GetAppInfo(repository),
+          checkConnection: CheckConnection(repository),
+          localDataSource: localDataSource,
+          dioClient: DioClient(),
+          tailscaleService: _NoopTailscaleService(),
+          serverHealthProbe: (_) {
+            healthCalls++;
+            return healthCalls == 1
+                ? firstHealth.future
+                : Future.value(ServerHealthStatus.unhealthy);
+          },
+          enableHealthPolling: false,
+        );
+        await provider.initialize();
+        await tester.pumpWidget(buildWizard(providerOverride: provider));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Connect to a running server'));
+        await tester.pumpAndSettle();
+        final testButton = find.byKey(const ValueKey('server_test_button'));
+        final cancelButton = find.byKey(
+          const ValueKey('server_test_cancel_button'),
+        );
+        await tester.ensureVisible(testButton);
+        await tester.tap(testButton);
+        await tester.pump();
+        await tester.tap(cancelButton);
+        await tester.pump();
+        await tester.tap(testButton);
+        await tester.pump();
+        expect(cancelButton, findsOneWidget);
+        firstHealth.completeError(StateError('late failure'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(cancelButton, findsOneWidget);
+        expect(find.byKey(const ValueKey('step_ready_failed')), findsNothing);
+        repository.gate.complete(const Right(true));
+        await _waitForReadyFailure(tester);
+        expect(cancelButton, findsNothing);
+        expect(provider.serverProfiles, hasLength(1));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        provider.dispose();
+      },
+    );
+  });
 
   group('welcome step', () {
     testWidgets('shows beginner-friendly welcome options', (

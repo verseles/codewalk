@@ -10,9 +10,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/auth/oauth_service.dart';
 import '../../core/constants/api_constants.dart';
+import '../../core/errors/exceptions.dart';
 import '../../core/i18n/l10n_bridge.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
+import '../../core/network/opencode_connection_response.dart';
 import '../../core/tailscale/tailscale_http_adapter.dart';
 import '../../core/tailscale/tailscale_service.dart';
 import '../../data/datasources/app_local_datasource.dart';
@@ -166,6 +168,8 @@ class AppProvider extends ChangeNotifier {
   String? _defaultServerId;
   final Map<String, ServerHealthStatus> _serverHealthById =
       <String, ServerHealthStatus>{};
+  final Map<String, String> _serverHealthErrors = <String, String>{};
+  int _connectionCheckGeneration = 0;
   bool _healthCheckInFlight = false;
   bool _queuedHealthRefreshAll = false;
   final Set<String> _queuedHealthServerIds = <String>{};
@@ -237,6 +241,8 @@ class AppProvider extends ChangeNotifier {
   ServerHealthStatus healthFor(String serverId) {
     return _serverHealthById[serverId] ?? ServerHealthStatus.unknown;
   }
+
+  String? healthErrorFor(String serverId) => _serverHealthErrors[serverId];
 
   @visibleForTesting
   Duration get debugCurrentHealthPollingInterval =>
@@ -1355,11 +1361,14 @@ class AppProvider extends ChangeNotifier {
       }
       await checkConnection();
     }
+    final connectionError = _activeServerId == updated.id && !_isConnected
+        ? _errorMessage
+        : '';
     await refreshServerHealth(
       serverId: updated.id,
       cancelToken: healthCancelToken,
     );
-    _errorMessage = '';
+    _errorMessage = connectionError;
     notifyListeners();
     return true;
   }
@@ -1407,6 +1416,7 @@ class AppProvider extends ChangeNotifier {
 
       _serverProfiles = _serverProfiles.where((p) => p.id != id).toList();
       _serverHealthById.remove(id);
+      _serverHealthErrors.remove(id);
 
       if (_serverProfiles.isEmpty) {
         _activeServerId = null;
@@ -2160,12 +2170,17 @@ class AppProvider extends ChangeNotifier {
     var changed = false;
     for (final profile in targets) {
       final previous = _serverHealthById[profile.id];
+      final previousError = _serverHealthErrors[profile.id];
       final next = await _checkServerHealth(profile, cancelToken: cancelToken);
       _serverHealthById[profile.id] = next;
+      if (next != ServerHealthStatus.unhealthy) {
+        _serverHealthErrors.remove(profile.id);
+      }
       // Issue #180: only notify when at least one status actually changed.
       // The unconditional notify rebuilt every AppProvider listener on each
       // 10s sweep, even fully idle mid-streaming.
-      if (previous != next) {
+      if (previous != next ||
+          previousError != _serverHealthErrors[profile.id]) {
         changed = true;
       }
       if (profile.tailscaleEnabled && previous != next) {
@@ -2257,7 +2272,14 @@ class AppProvider extends ChangeNotifier {
         return ServerHealthStatus.unknown;
       }
       if (global.statusCode == 200) {
-        return ServerHealthStatus.healthy;
+        if (decodeOpenCodeHealth(global.data)) {
+          return ServerHealthStatus.healthy;
+        }
+        _recordHealthProbeFailure(
+          profile,
+          const ParseException('OpenCode reported an unhealthy server.'),
+        );
+        return ServerHealthStatus.unhealthy;
       }
       final statusCode = global.statusCode;
       firstError = statusCode == null
@@ -2276,8 +2298,15 @@ class AppProvider extends ChangeNotifier {
         return ServerHealthStatus.unknown;
       }
       _recordOAuthChallengeFromHealth(profile, e);
+      final status = e.response?.statusCode;
+      if (status != 404 && status != 405) {
+        _recordHealthProbeFailure(profile, e);
+        return ServerHealthStatus.unhealthy;
+      }
       firstError = e;
       // Fallback below.
+    } on ParseException {
+      // Older servers may not expose a JSON health endpoint. Verify /path.
     }
 
     try {
@@ -2286,6 +2315,7 @@ class AppProvider extends ChangeNotifier {
         return ServerHealthStatus.unknown;
       }
       if (fallback.statusCode == 200) {
+        decodeOpenCodePath(fallback.data);
         return ServerHealthStatus.healthy;
       }
       _logTailscaleProbeFailure(
@@ -2299,9 +2329,37 @@ class AppProvider extends ChangeNotifier {
         return ServerHealthStatus.unknown;
       }
       _recordOAuthChallengeFromHealth(profile, e);
+      _recordHealthProbeFailure(profile, e);
       _logTailscaleProbeFailure(profile, e.type, e);
       return ServerHealthStatus.unhealthy;
+    } on ParseException catch (e) {
+      _recordHealthProbeFailure(profile, e);
+      return ServerHealthStatus.unhealthy;
     }
+  }
+
+  void _recordHealthProbeFailure(ServerProfile profile, Object error) {
+    final String detail;
+    if (error is ParseException) {
+      detail = error.message;
+    } else if (error is DioException) {
+      final status = error.response?.statusCode;
+      detail = status == null
+          ? '${error.type.name} from ${error.requestOptions.path}'
+          : 'HTTP $status from ${error.requestOptions.path}';
+    } else {
+      detail =
+          L10nBridge.current?.onboardingCouldNotVerify ??
+          'Could not verify the server connection.';
+    }
+    if (_serverHealthErrors[profile.id] == detail) return;
+    _serverHealthErrors[profile.id] = detail;
+    _recordSetupDebugEvent(
+      source: 'Server connection',
+      message: detail,
+      severity: SetupDebugSeverity.error,
+      notify: false,
+    );
   }
 
   /// Records why a Tailscale-profile probe failed. Tailscale transport only
@@ -2381,6 +2439,8 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> checkConnection({String? directory}) async {
     await initialize();
+    final generation = ++_connectionCheckGeneration;
+    final serverId = activeServerId;
     if (activeServer == null) {
       _isConnected = false;
       _errorMessage = '';
@@ -2388,9 +2448,14 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     final result = await _checkConnection(directory: directory);
+    if (generation != _connectionCheckGeneration || serverId != activeServerId) {
+      return;
+    }
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        _errorMessage = failure.code == null
+            ? failure.message
+            : '${failure.message} (HTTP ${failure.code})';
         _isConnected = false;
       },
       (connected) {
@@ -2456,6 +2521,7 @@ class AppProvider extends ChangeNotifier {
 
   /// Full in-memory reset after clearAll (used by the app reset feature).
   void resetToDefaults() {
+    _connectionCheckGeneration++;
     _status = AppStatus.initial;
     _appInfo = null;
     _errorMessage = '';
@@ -2466,6 +2532,7 @@ class AppProvider extends ChangeNotifier {
     _activeServerId = null;
     _defaultServerId = null;
     _serverHealthById.clear();
+    _serverHealthErrors.clear();
     _healthTimer?.cancel();
     notifyListeners();
   }
