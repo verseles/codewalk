@@ -205,6 +205,79 @@ void main() {
   }
 
   group('issue 226 connection response failures', () {
+    testWidgets('inactive edit waits for its fresh queued health probe', (
+      tester,
+    ) async {
+      await _setLargeSurface(tester);
+      final healthGate = Completer<ServerHealthStatus>();
+      var pauseActiveProbe = false;
+      final repository = FakeAppRepository();
+      final provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: localDataSource,
+        dioClient: DioClient(),
+        serverHealthProbe: (profile) {
+          if (pauseActiveProbe && profile.url.contains('active.example')) {
+            return healthGate.future;
+          }
+          return Future.value(
+            profile.url.contains('edited.example')
+                ? ServerHealthStatus.unhealthy
+                : ServerHealthStatus.healthy,
+          );
+        },
+        enableHealthPolling: false,
+      );
+      await provider.initialize();
+      await provider.addServerProfile(
+        url: 'http://active.example:4096',
+        setAsActive: true,
+      );
+      final activeId = provider.activeServerId!;
+      await provider.addServerProfile(url: 'http://secondary.example:4096');
+      final secondary = provider.serverProfiles.last;
+      expect(provider.healthFor(secondary.id), ServerHealthStatus.healthy);
+      pauseActiveProbe = true;
+      final sweep = provider.refreshServerHealth(serverId: activeId);
+      await tester.pumpWidget(
+        buildWizard(
+          providerOverride: provider,
+          initialServerProfile: secondary,
+        ),
+      );
+      await tester.pumpAndSettle();
+      try {
+        await tester.enterText(
+          find.byKey(const ValueKey('server_url_field')),
+          'http://edited.example:4096',
+        );
+        final testButton = find.byKey(const ValueKey('server_test_button'));
+        await tester.ensureVisible(testButton);
+        await tester.tap(testButton);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(find.byKey(const ValueKey('step_ready_success')), findsNothing);
+        expect(
+          find.byKey(const ValueKey('server_test_cancel_button')),
+          findsOneWidget,
+        );
+        healthGate.complete(ServerHealthStatus.healthy);
+        await tester.pumpAndSettle();
+        await sweep;
+        expect(find.byKey(const ValueKey('step_ready_failed')), findsOneWidget);
+        expect(provider.healthFor(secondary.id), ServerHealthStatus.unhealthy);
+        expect(tester.takeException(), isNull);
+      } finally {
+        if (!healthGate.isCompleted) {
+          healthGate.complete(ServerHealthStatus.healthy);
+        }
+        await tester.pumpAndSettle();
+        await sweep;
+        await tester.pumpWidget(const SizedBox.shrink());
+        provider.dispose();
+      }
+    });
     testWidgets(
       'inactive profile health ignores another server connection failure',
       (tester) async {

@@ -171,6 +171,7 @@ class AppProvider extends ChangeNotifier {
   final Map<String, String> _serverHealthErrors = <String, String>{};
   int _connectionCheckGeneration = 0;
   bool _healthCheckInFlight = false;
+  Completer<void>? _healthRefreshCompletion;
   bool _queuedHealthRefreshAll = false;
   final Set<String> _queuedHealthServerIds = <String>{};
   StreamSubscription<TailscaleState>? _tailscaleStateSubscription;
@@ -1249,6 +1250,7 @@ class AppProvider extends ChangeNotifier {
       createdAt: now,
       updatedAt: now,
     );
+    final connectionGeneration = _connectionCheckGeneration;
     _serverProfiles = <ServerProfile>[..._serverProfiles, profile];
     _defaultServerId ??= profile.id;
     if (_activeServerId == null || setAsActive) {
@@ -1265,8 +1267,11 @@ class AppProvider extends ChangeNotifier {
     await refreshServerHealth(
       serverId: profile.id,
       cancelToken: healthCancelToken,
+      waitForCompletion: true,
     );
-    if (healthCancelToken?.isCancelled != true) {
+    if (healthCancelToken?.isCancelled != true &&
+        _activeServerId == profile.id &&
+        connectionGeneration == _connectionCheckGeneration) {
       _errorMessage = '';
     }
     notifyListeners();
@@ -1366,6 +1371,7 @@ class AppProvider extends ChangeNotifier {
     await refreshServerHealth(
       serverId: updated.id,
       cancelToken: healthCancelToken,
+      waitForCompletion: true,
     );
     notifyListeners();
     return true;
@@ -2069,17 +2075,30 @@ class AppProvider extends ChangeNotifier {
   Future<void> refreshServerHealth({
     String? serverId,
     CancelToken? cancelToken,
+    bool waitForCompletion = false,
   }) async {
     await initialize();
     if (cancelToken?.isCancelled == true) return;
     final normalizedServerId = serverId?.trim();
 
     if (_healthCheckInFlight) {
+      if (waitForCompletion) {
+        await _healthRefreshCompletion!.future;
+        return refreshServerHealth(
+          serverId: normalizedServerId,
+          cancelToken: cancelToken,
+          waitForCompletion: true,
+        );
+      }
       _queueHealthRefresh(serverId: normalizedServerId);
       return;
     }
 
     _healthCheckInFlight = true;
+    final completion = Completer<void>();
+    _healthRefreshCompletion = completion;
+    // The owning call rethrows errors; this mirror is only for queued waiters.
+    completion.future.ignore();
     var runAll = normalizedServerId == null || normalizedServerId.isEmpty;
     var runServerIds = <String>{};
     if (!runAll) {
@@ -2117,10 +2136,15 @@ class AppProvider extends ChangeNotifier {
 
         break;
       }
+    } catch (error, stackTrace) {
+      completion.completeError(error, stackTrace);
+      rethrow;
     } finally {
       _healthCheckInFlight = false;
+      _healthRefreshCompletion = null;
       _queuedHealthRefreshAll = false;
       _queuedHealthServerIds.clear();
+      if (!completion.isCompleted) completion.complete();
     }
   }
 

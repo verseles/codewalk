@@ -344,4 +344,138 @@ void main() {
     );
     expect(provider.serverProfiles, hasLength(1));
   });
+
+  test(
+    'adding an inactive profile preserves the active HTTP failure',
+    () async {
+      final activeId = await addProfile();
+      repository.checkConnectionResult = const Left(
+        NetworkFailure('active', 401),
+      );
+      await provider.checkConnection();
+      await provider.addServerProfile(url: 'http://localhost:${server.port}');
+      expect(provider.activeServerId, activeId);
+      expect(provider.errorMessage, contains('HTTP 401'));
+      expect(
+        provider.healthFor(provider.serverProfiles.last.id),
+        ServerHealthStatus.healthy,
+      );
+    },
+  );
+
+  test(
+    'uncancelled delayed add preserves a newer connection failure',
+    () async {
+      final health = Completer<ServerHealthStatus>();
+      provider.dispose();
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: InMemoryAppLocalDataSource(),
+        dioClient: DioClient(),
+        serverHealthProbe: (_) => health.future,
+        enableHealthPolling: false,
+      );
+      await provider.initialize();
+      final adding = provider.addServerProfile(
+        url: 'http://127.0.0.1:${server.port}',
+        setAsActive: true,
+      );
+      await Future<void>.delayed(Duration.zero);
+      repository.checkConnectionResult = const Left(
+        NetworkFailure('current', 401),
+      );
+      await provider.checkConnection();
+      health.complete(ServerHealthStatus.healthy);
+      await adding;
+      expect(provider.errorMessage, contains('HTTP 401'));
+    },
+  );
+
+  test('cancelled queued edit retains its completed health result', () async {
+    final health = Completer<ServerHealthStatus>();
+    String? delayedId;
+    var editedProbeCalls = 0;
+    provider.dispose();
+    provider = AppProvider(
+      getAppInfo: GetAppInfo(repository),
+      checkConnection: CheckConnection(repository),
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      serverHealthProbe: (profile) {
+        if (profile.id == delayedId) return health.future;
+        if (profile.url.contains('edited.example')) editedProbeCalls++;
+        return Future.value(ServerHealthStatus.healthy);
+      },
+      enableHealthPolling: false,
+    );
+    await provider.initialize();
+    delayedId = await addProfile();
+    await provider.addServerProfile(url: 'http://secondary.example:4096');
+    final secondary = provider.serverProfiles.last;
+    final sweep = provider.refreshServerHealth(serverId: delayedId);
+    await Future<void>.delayed(Duration.zero);
+    final token = CancelToken();
+    final editing = provider.updateServerProfile(
+      id: secondary.id,
+      url: 'http://edited.example:4096',
+      basicAuthEnabled: false,
+      basicAuthUsername: '',
+      basicAuthPassword: '',
+      oauthEnabled: false,
+      tailscaleEnabled: false,
+      aiGeneratedTitlesEnabled: true,
+      healthCancelToken: token,
+    );
+    await Future<void>.delayed(Duration.zero);
+    token.cancel();
+    health.complete(ServerHealthStatus.healthy);
+    await sweep;
+    await editing;
+    expect(editedProbeCalls, 0);
+    expect(provider.healthFor(secondary.id), ServerHealthStatus.healthy);
+  });
+
+  test(
+    'queued interactive refresh receives an unexpected probe failure',
+    () async {
+      final health = Completer<ServerHealthStatus>();
+      String? delayedId;
+      provider.dispose();
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: InMemoryAppLocalDataSource(),
+        dioClient: DioClient(),
+        serverHealthProbe: (profile) => profile.id == delayedId
+            ? health.future
+            : Future.value(ServerHealthStatus.healthy),
+        enableHealthPolling: false,
+      );
+      await provider.initialize();
+      delayedId = await addProfile();
+      await provider.addServerProfile(url: 'http://secondary.example:4096');
+      final secondary = provider.serverProfiles.last;
+      final sweep = provider.refreshServerHealth(serverId: delayedId);
+      await Future<void>.delayed(Duration.zero);
+      final editing = provider.updateServerProfile(
+        id: secondary.id,
+        url: 'http://edited.example:4096',
+        basicAuthEnabled: false,
+        basicAuthUsername: '',
+        basicAuthPassword: '',
+        oauthEnabled: false,
+        tailscaleEnabled: false,
+        aiGeneratedTitlesEnabled: true,
+      );
+      await Future<void>.delayed(Duration.zero);
+      final expectations = <Future<void>>[
+        expectLater(sweep, throwsA(isA<StateError>())),
+        expectLater(editing, throwsA(isA<StateError>())),
+      ];
+      health.completeError(StateError('Unexpected health failure'));
+      await Future.wait(expectations);
+      expect(provider.serverProfiles, hasLength(2));
+    },
+  );
 }
