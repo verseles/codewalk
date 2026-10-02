@@ -2594,7 +2594,9 @@ class AppProvider extends ChangeNotifier {
     _healthTimer?.cancel();
     _currentHealthPollingInterval = _effectiveHealthPollingInterval;
     _healthTimer = Timer.periodic(_currentHealthPollingInterval, (_) {
-      if (_cellularDataSaverService.shouldSuppressBackgroundWork) {
+      // Slow sweeps must finish so interactive tests can run their fresh pass.
+      if (_healthCheckInFlight ||
+          _cellularDataSaverService.shouldSuppressBackgroundWork) {
         return;
       }
       if (_cellularDataSaverService.shouldThrottleAutomaticForegroundSync) {

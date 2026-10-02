@@ -205,6 +205,73 @@ void main() {
   }
 
   group('issue 226 connection response failures', () {
+    testWidgets('slow automatic sweeps do not starve interactive saves', (
+      tester,
+    ) async {
+      final repository = FakeAppRepository();
+      var slowProbes = false;
+      final pollingProvider = AppProvider(
+        getAppInfo: GetAppInfo(repository),
+        checkConnection: CheckConnection(repository),
+        localDataSource: InMemoryAppLocalDataSource(),
+        dioClient: DioClient(),
+        localServerRuntime: FakeLocalOpencodeServerRuntime(),
+        enableHealthPolling: true,
+        serverHealthProbe: (profile) async {
+          if (profile.url.contains('edited.example')) {
+            return ServerHealthStatus.unhealthy;
+          }
+          if (slowProbes) {
+            await Future<void>.delayed(const Duration(seconds: 3));
+          }
+          return ServerHealthStatus.healthy;
+        },
+      );
+      await pollingProvider.initialize();
+      for (var i = 0; i < 4; i++) {
+        await pollingProvider.addServerProfile(
+          url: 'http://server$i.example:4096',
+        );
+      }
+      slowProbes = true;
+      final sweep = pollingProvider.refreshServerHealth();
+      await tester.pump();
+      final secondary = pollingProvider.serverProfiles.last;
+      var editCompleted = false;
+      final editing = pollingProvider
+          .updateServerProfile(
+            id: secondary.id,
+            url: 'http://edited.example:4096',
+            basicAuthEnabled: false,
+            basicAuthUsername: '',
+            basicAuthPassword: '',
+            oauthEnabled: false,
+            tailscaleEnabled: false,
+            aiGeneratedTitlesEnabled: true,
+          )
+          .then((result) {
+            editCompleted = true;
+            return result;
+          });
+      await tester.pump();
+      try {
+        for (var i = 0; i < 5; i++) {
+          await tester.pump(const Duration(seconds: 3));
+        }
+        expect(editCompleted, isTrue);
+        expect(
+          pollingProvider.healthFor(secondary.id),
+          ServerHealthStatus.unhealthy,
+        );
+      } finally {
+        slowProbes = false;
+        await tester.pump(const Duration(seconds: 15));
+        await sweep;
+        await editing;
+        pollingProvider.dispose();
+      }
+    });
+
     testWidgets('inactive edit waits for its fresh queued health probe', (
       tester,
     ) async {
