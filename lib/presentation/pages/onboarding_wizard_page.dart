@@ -661,7 +661,9 @@ class _OnboardingWizardPageState extends State<OnboardingWizardPage> {
         }
 
         final health = appProvider.healthFor(trackedServerId);
-        final connectionError = appProvider.errorMessage.trim();
+        final connectionError = trackedServerId == appProvider.activeServerId
+            ? appProvider.errorMessage.trim()
+            : '';
         final verified =
             health == ServerHealthStatus.healthy && connectionError.isEmpty;
         final detail = connectionError.isNotEmpty

@@ -1266,7 +1266,9 @@ class AppProvider extends ChangeNotifier {
       serverId: profile.id,
       cancelToken: healthCancelToken,
     );
-    _errorMessage = '';
+    if (healthCancelToken?.isCancelled != true) {
+      _errorMessage = '';
+    }
     notifyListeners();
     return true;
   }
@@ -1361,14 +1363,10 @@ class AppProvider extends ChangeNotifier {
       }
       await checkConnection();
     }
-    final connectionError = _activeServerId == updated.id && !_isConnected
-        ? _errorMessage
-        : '';
     await refreshServerHealth(
       serverId: updated.id,
       cancelToken: healthCancelToken,
     );
-    _errorMessage = connectionError;
     notifyListeners();
     return true;
   }
@@ -2073,6 +2071,7 @@ class AppProvider extends ChangeNotifier {
     CancelToken? cancelToken,
   }) async {
     await initialize();
+    if (cancelToken?.isCancelled == true) return;
     final normalizedServerId = serverId?.trim();
 
     if (_healthCheckInFlight) {
@@ -2172,6 +2171,8 @@ class AppProvider extends ChangeNotifier {
       final previous = _serverHealthById[profile.id];
       final previousError = _serverHealthErrors[profile.id];
       final next = await _checkServerHealth(profile, cancelToken: cancelToken);
+      // Cancelled passes must not replace a newer status or diagnostic.
+      if (cancelToken?.isCancelled == true) continue;
       _serverHealthById[profile.id] = next;
       if (next != ServerHealthStatus.unhealthy) {
         _serverHealthErrors.remove(profile.id);
@@ -2267,7 +2268,11 @@ class AppProvider extends ChangeNotifier {
 
     DioException? firstError;
     try {
-      final global = await dio.get('/global/health', cancelToken: cancelToken);
+      final global = await dio.get(
+        '/global/health',
+        cancelToken: cancelToken,
+        options: Options(responseType: ResponseType.plain),
+      );
       if (cancelToken?.isCancelled == true) {
         return ServerHealthStatus.unknown;
       }
@@ -2310,7 +2315,11 @@ class AppProvider extends ChangeNotifier {
     }
 
     try {
-      final fallback = await dio.get('/path', cancelToken: cancelToken);
+      final fallback = await dio.get(
+        '/path',
+        cancelToken: cancelToken,
+        options: Options(responseType: ResponseType.plain),
+      );
       if (cancelToken?.isCancelled == true) {
         return ServerHealthStatus.unknown;
       }

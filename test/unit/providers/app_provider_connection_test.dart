@@ -8,6 +8,7 @@ import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/presentation/providers/app_provider.dart';
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fakes.dart';
@@ -32,6 +33,7 @@ void main() {
   late int globalStatus;
   late bool globalHtml;
   late bool pathHtml;
+  String? globalRaw;
   final requests = <String>[];
   final authorization = <String?>[];
 
@@ -46,6 +48,7 @@ void main() {
     globalStatus = 200;
     globalHtml = false;
     pathHtml = false;
+    globalRaw = null;
     requests.clear();
     authorization.clear();
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
@@ -61,7 +64,8 @@ void main() {
       request.response.write(
         html
             ? '<html>login</html>'
-            : jsonEncode(isGlobal ? globalBody : pathBody),
+            : (isGlobal ? globalRaw : null) ??
+                  jsonEncode(isGlobal ? globalBody : pathBody),
       );
       await request.response.close();
     });
@@ -206,4 +210,138 @@ void main() {
       expect(provider.errorMessage, isEmpty);
     },
   );
+
+  test('malformed JSON health falls back to a verified path', () async {
+    globalRaw = '{invalid-json';
+    final id = await addProfile();
+    expect(provider.healthFor(id), ServerHealthStatus.healthy);
+    expect(requests, <String>['/global/health', '/path']);
+  });
+
+  test('malformed JSON 401 health retains HTTP diagnostic', () async {
+    globalRaw = '{private-response';
+    globalStatus = 401;
+    final id = await addProfile();
+    expect(provider.healthFor(id), ServerHealthStatus.unhealthy);
+    expect(provider.healthErrorFor(id), contains('HTTP 401'));
+    expect(provider.healthErrorFor(id), isNot(contains('private-response')));
+    expect(requests, <String>['/global/health']);
+  });
+
+  test('delayed update cannot restore an error after a newer check', () async {
+    final health = Completer<ServerHealthStatus>();
+    var delayHealth = false;
+    provider.dispose();
+    provider = AppProvider(
+      getAppInfo: GetAppInfo(repository),
+      checkConnection: CheckConnection(repository),
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      serverHealthProbe: (_) => delayHealth
+          ? health.future
+          : Future.value(ServerHealthStatus.healthy),
+      enableHealthPolling: false,
+    );
+    await provider.initialize();
+    final id = await addProfile();
+    delayHealth = true;
+    repository.checkConnectionResult = const Left(NetworkFailure('old', 403));
+    final updating = provider.updateServerProfile(
+      id: id,
+      url: provider.activeServer!.url,
+      basicAuthEnabled: false,
+      basicAuthUsername: '',
+      basicAuthPassword: '',
+      oauthEnabled: false,
+      tailscaleEnabled: false,
+      aiGeneratedTitlesEnabled: true,
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(provider.errorMessage, contains('HTTP 403'));
+    repository.checkConnectionResult = const Right(true);
+    await provider.checkConnection();
+    health.complete(ServerHealthStatus.healthy);
+    await updating;
+    expect(provider.isConnected, isTrue);
+    expect(provider.errorMessage, isEmpty);
+  });
+
+  test(
+    'cancelled update preserves newer unhealthy status and diagnostic',
+    () async {
+      final queued = _QueuedConnectionRepository();
+      provider.dispose();
+      provider = AppProvider(
+        getAppInfo: GetAppInfo(queued),
+        checkConnection: CheckConnection(queued),
+        localDataSource: InMemoryAppLocalDataSource(),
+        dioClient: DioClient(),
+        enableHealthPolling: false,
+      );
+      await provider.initialize();
+      final id = await addProfile();
+      final token = CancelToken();
+      final oldUpdate = provider.updateServerProfile(
+        id: id,
+        url: provider.activeServer!.url,
+        basicAuthEnabled: false,
+        basicAuthUsername: '',
+        basicAuthPassword: '',
+        oauthEnabled: false,
+        tailscaleEnabled: false,
+        aiGeneratedTitlesEnabled: true,
+        healthCancelToken: token,
+      );
+      await Future<void>.delayed(Duration.zero);
+      token.cancel();
+      globalHtml = true;
+      pathHtml = true;
+      await provider.refreshServerHealth(serverId: id);
+      final currentHealthError = provider.healthErrorFor(id);
+      expect(currentHealthError, isNotNull);
+      final newerCheck = provider.checkConnection();
+      await Future<void>.delayed(Duration.zero);
+      queued.calls[1].complete(const Left(NetworkFailure('current', 401)));
+      await newerCheck;
+      queued.calls[0].complete(const Left(NetworkFailure('obsolete', 403)));
+      await oldUpdate;
+      expect(provider.healthFor(id), ServerHealthStatus.unhealthy);
+      expect(provider.healthErrorFor(id), currentHealthError);
+      expect(provider.errorMessage, contains('HTTP 401'));
+    },
+  );
+
+  test('cancelled add cannot clear a newer connection failure', () async {
+    final health = Completer<ServerHealthStatus>();
+    provider.dispose();
+    provider = AppProvider(
+      getAppInfo: GetAppInfo(repository),
+      checkConnection: CheckConnection(repository),
+      localDataSource: InMemoryAppLocalDataSource(),
+      dioClient: DioClient(),
+      serverHealthProbe: (_) => health.future,
+      enableHealthPolling: false,
+    );
+    await provider.initialize();
+    final token = CancelToken();
+    final adding = provider.addServerProfile(
+      url: 'http://127.0.0.1:${server.port}',
+      setAsActive: true,
+      healthCancelToken: token,
+    );
+    await Future<void>.delayed(Duration.zero);
+    token.cancel();
+    repository.checkConnectionResult = const Left(
+      NetworkFailure('current', 401),
+    );
+    await provider.checkConnection();
+    health.complete(ServerHealthStatus.healthy);
+    await adding;
+    expect(provider.errorMessage, contains('HTTP 401'));
+    expect(
+      provider.healthFor(provider.activeServerId!),
+      ServerHealthStatus.unknown,
+    );
+    expect(provider.serverProfiles, hasLength(1));
+  });
 }

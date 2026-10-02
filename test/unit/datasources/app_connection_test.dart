@@ -253,6 +253,48 @@ void main() {
     }, (_) => fail('expected failure'));
   });
 
+  test('malformed application/json path uses validated legacy data', () async {
+    final adapter = respondWith(
+      (options) => options.path == '/path'
+          ? ResponseBody.fromString(
+              '{invalid-json',
+              200,
+              headers: <String, List<String>>{
+                Headers.contentTypeHeader: <String>['application/json'],
+              },
+            )
+          : _json(_legacy),
+    );
+    expect((await remote.getAppInfo()).hostname, 'server');
+    expect(adapter.requests.map((request) => request.path), <String>[
+      '/path',
+      '/app',
+    ]);
+  });
+
+  for (final status in <int>[401, 403, 500]) {
+    test(
+      'malformed JSON HTTP $status preserves status without fallback',
+      () async {
+        final adapter = respondWith(
+          (_) => ResponseBody.fromString(
+            '{private-response',
+            status,
+            headers: <String, List<String>>{
+              Headers.contentTypeHeader: <String>['application/json'],
+            },
+          ),
+        );
+        final result = await repository.checkConnection();
+        result.fold((failure) {
+          expect(failure.code, status);
+          expect(failure.message, isNot(contains('private-response')));
+        }, (_) => fail('expected failure'));
+        expect(adapter.requests, hasLength(1));
+      },
+    );
+  }
+
   test('health validation accepts official data and respects unhealthy', () {
     expect(
       decodeOpenCodeHealth(<String, dynamic>{

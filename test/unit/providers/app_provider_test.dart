@@ -587,7 +587,7 @@ void main() {
     });
 
     test(
-      'refreshServerHealth with pre-cancelled token leaves health unknown (issue #177)',
+      'pre-cancelled health refresh preserves the last status and diagnostic',
       () async {
         await provider.initialize();
         final created = await provider.addServerProfile(
@@ -597,6 +597,9 @@ void main() {
         final target = provider.serverProfiles
             .where((item) => item.url == 'http://127.0.0.1:5099')
             .first;
+        final previousHealth = provider.healthFor(target.id);
+        final previousError = provider.healthErrorFor(target.id);
+        expect(previousHealth, isNot(ServerHealthStatus.unknown));
 
         final token = CancelToken()..cancel('test cancel');
         await provider.refreshServerHealth(
@@ -604,7 +607,8 @@ void main() {
           cancelToken: token,
         );
 
-        expect(provider.healthFor(target.id), ServerHealthStatus.unknown);
+        expect(provider.healthFor(target.id), previousHealth);
+        expect(provider.healthErrorFor(target.id), previousError);
       },
     );
 

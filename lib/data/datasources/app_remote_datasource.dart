@@ -182,7 +182,11 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
 
     // Current API uses GET /path. Keep /app as fallback for older servers.
     try {
-      final response = await dio.get('/path', queryParameters: queryParams);
+      final response = await dio.get(
+        '/path',
+        queryParameters: queryParams,
+        options: Options(responseType: ResponseType.plain),
+      );
       return _appInfoFromPath(decodeOpenCodePath(response.data));
     } on DioException catch (error) {
       final status = error.response?.statusCode;
@@ -192,7 +196,11 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
       // Keep the existing fallback, but require a valid legacy response.
     }
 
-    final legacy = await dio.get('/app', queryParameters: queryParams);
+    final legacy = await dio.get(
+      '/app',
+      queryParameters: queryParams,
+      options: Options(responseType: ResponseType.plain),
+    );
     final data = decodeOpenCodeObject(legacy.data, '/app');
     try {
       return AppInfoModel.fromJson(data);

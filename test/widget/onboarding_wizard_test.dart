@@ -6,6 +6,7 @@ import 'package:codewalk/core/network/dio_client.dart';
 import 'package:codewalk/core/tailscale/tailscale_service.dart';
 import 'package:codewalk/data/datasources/app_remote_datasource.dart';
 import 'package:codewalk/data/repositories/app_repository_impl.dart';
+import 'package:codewalk/domain/entities/server_profile.dart';
 import 'package:codewalk/domain/usecases/check_connection.dart';
 import 'package:codewalk/domain/usecases/get_app_info.dart';
 import 'package:codewalk/l10n/generated/app_localizations.dart';
@@ -157,6 +158,7 @@ void main() {
     AppProvider? providerOverride,
     SetupWizardInitialFlow initialFlow = SetupWizardInitialFlow.choose,
     bool showSkipAction = true,
+    ServerProfile? initialServerProfile,
   }) {
     return MultiProvider(
       providers: [
@@ -179,6 +181,7 @@ void main() {
           onComplete: onComplete,
           initialFlow: initialFlow,
           showSkipAction: showSkipAction,
+          initialServerProfile: initialServerProfile,
         ),
       ),
     );
@@ -202,6 +205,54 @@ void main() {
   }
 
   group('issue 226 connection response failures', () {
+    testWidgets(
+      'inactive profile health ignores another server connection failure',
+      (tester) async {
+        await _setLargeSurface(tester);
+        final repository = FakeAppRepository();
+        final provider = AppProvider(
+          getAppInfo: GetAppInfo(repository),
+          checkConnection: CheckConnection(repository),
+          localDataSource: localDataSource,
+          dioClient: DioClient(),
+          serverHealthProbe: (_) async => ServerHealthStatus.healthy,
+          enableHealthPolling: false,
+        );
+        await provider.initialize();
+        await provider.addServerProfile(
+          url: 'http://active.example:4096',
+          setAsActive: true,
+        );
+        final activeId = provider.activeServerId;
+        await provider.addServerProfile(url: 'http://inactive.example:4096');
+        final inactiveProfile = provider.serverProfiles.last;
+        repository.checkConnectionResult = const Left(
+          NetworkFailure('Active server failure', 401),
+        );
+        await provider.checkConnection();
+        await tester.pumpWidget(
+          buildWizard(
+            providerOverride: provider,
+            initialServerProfile: inactiveProfile,
+          ),
+        );
+        await tester.pumpAndSettle();
+        final testButton = find.byKey(const ValueKey('server_test_button'));
+        await tester.ensureVisible(testButton);
+        await tester.tap(testButton);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('step_ready_success')),
+          findsOneWidget,
+        );
+        expect(provider.activeServerId, activeId);
+        expect(provider.errorMessage, contains('HTTP 401'));
+        expect(provider.serverProfiles, hasLength(2));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        provider.dispose();
+      },
+    );
     testWidgets(
       'tracked profile with HTML API response finishes and can recover',
       (tester) async {
