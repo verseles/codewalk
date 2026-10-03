@@ -1,5 +1,9 @@
 # CodeWalk v2 — User Decisions and Independent Critique Brief
 
+> **Historical decision round.** The answers and scheduling instructions below are preserved as recorded on 2026-10-02, before independent planning and the final discussion. Current approved decisions are in [`../v2-plan.md` §2](../v2-plan.md#2-decision-record-d01d16), with later refinements in §17. This record neither reopens resolved choices nor authorizes implementation, commit or publication.
+>
+> **Subsequent outcomes:** D01 selected the hybrid OpenCode-direct/CodeWalk-Host architecture; D02 selected the v2.0–v2.3 train with G1–G5 also required for public beta. D03's legacy branch has been created and is reconciled by ancestry, not recreated from this snapshot. D04 retains the same app ID with the final-v1 update choice, installer handoff and separate accepted-MVP freeze/GA checkpoints. D05 retains Allow all ON, implemented through automatic **once** replies; native Unrestricted is a separate explicit mode. D07/D15 are resolved in the plan. Read those current sections before selecting work.
+
 Decision round completed on **2026-10-02**. This document records the user's answers before independent planning. It describes the requested future product, not implemented behavior.
 
 ## Objective and delivery

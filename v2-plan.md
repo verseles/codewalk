@@ -1,9 +1,9 @@
 # CodeWalk v2 — Implementation Plan
 
-> **Status:** Option A confirmed. Local legacy branch `v1` created/selected at `d1ed5ee9`, before the transition minor; `main` retains the current v1 code as a temporary v2 reference/reuse baseline. Branch publication and deployment split remain separate work (§9.5, 2026-10-02).
-> **Baseline:** repository revision `14fbf519`, CodeWalk `1.265.0+1790827338` (last v1 release `v1.265.0`).
+> **Status:** Option A confirmed; the one-unit execution contract is in §§11.5 and 20. On 2026-10-03, `main` was at `8280ea80`, retaining the legacy reference tree; local `v1` was at `cb582cf9`, descending from its creation point `d1ed5ee9`. Reconcile live refs, Issues and publication evidence before acting; these snapshots are not checkout instructions or completion claims.
+> **Inventory baseline:** repository revision `14fbf519`, CodeWalk `1.265.0+1790827338`. Legacy maintenance has since advanced; do not infer the current release or branch state from this inventory baseline.
 > **Evidence snapshot:** 2026-10-02; Codex server/transport facts rechecked on 2026-10-03 against CLI/source 0.160.0 (§3.3). Upstream projects change weekly; every pinned fact below must be re-checked by the spike that owns it before code depends on it.
-> **Inputs:** the research pack in `plan/` (dossiers `00`–`31` plus raw evidence folders), the decision register `plan/02-decisions.md`, sixteen independent planner reports in `plan/helper-plans/`, and the orchestrator's local verification of every claim on which the reports disagreed.
+> **Inputs:** the research pack in `plan/` (dossiers `00`–`31` plus raw evidence folders), the historical decision round `plan/02-decisions.md`, sixteen original planner reports in `plan/helper-plans/`, and a subsequent twelve-helper readiness assessment reconciled against local evidence. Current decisions are in §2, not in the historical answers or helper proposals.
 > **Language:** English (decision D12). The product discussion happened in Portuguese; decisions are recorded here in English with their intent.
 
 ---
@@ -38,6 +38,10 @@
 
 **Purpose.** This is the single source of intent for CodeWalk v2. Implementation details will change as spikes and real code produce evidence. To make that safe, every important rule states **why** it exists. When a detail must change, keep the intent, change the detail, and record the change (§17).
 
+**Authority and live state.** Applicable project rules govern execution; §2 and §17 govern current product intent. Pinned official contracts and the owning spike govern upstream facts. `plan/02-decisions.md`, original helper reports and older summaries are historical inputs, not newer decisions. GitHub Issues are the canonical task tracker. This document defines scope, dependencies and acceptance; its checklist does not replace live Issue state. The orchestrator's Task Memory is its recovery mechanism, not another backlog.
+
+**Execution boundary.** Select one dependency-ready, bounded Issue or child Issue under §11.5. Planning estimates are not execution units. A plan item that mentions a commit, push, installer, release or deploy does not itself authorize that action; follow the authorization already granted for the active task and applicable project rules. Technical choices that preserve decisions and invariants belong to the orchestrator; consequential changes follow §17.
+
 **Normative words.**
 
 - **MUST** — an invariant. Changing it requires updating this plan and, where an ADR exists, the ADR flow.
@@ -51,7 +55,7 @@
 - **[I]** inference from verified facts.
 - **[U]** unverified; the named spike owns the verification and the fallback.
 
-**Identifiers.** Decisions `D01`–`D16`; release gates `G1`–`G5`; spikes `SP-01`…; work items `V1-xx`, `V2-xxx`, `V21-xxx`, `V22-xxx`, `V23-xxx`, `BL-xx` (backlog). Section 12 is written so each work item can become one GitHub issue.
+**Identifiers.** Decisions `D01`–`D16`; release gates `G1`–`G5`; spikes `SP-01`…; work items `V1-xx`, `V2-xxx`, `V21-xxx`, `V22-xxx`, `V23-xxx`, `BL-xx` (backlog). Child IDs append a stable letter, such as `V2-005A`. Section 12 maps these IDs to GitHub Issues; retain parent IDs when splitting work.
 
 **Reading order for a new contributor.** §1 → §2 → §4 → §6.2 (patterns) → the work item you are taking in §12 → the sections it references.
 
@@ -156,7 +160,7 @@ Each decision lists what was decided, why, what was rejected, and when to revisi
 
 **Why.** v1's `ChatProvider` (~22.8k lines in ~30 `part` files) and `ChatPage` (~27.5k lines in ~30 files) embed OpenCode v1 wire types and recovery heuristics; 26 presentation files call Dio directly; presentation is ~83% of ~158k lines [V `plan/00`]. Incremental migration would drag 25 v1-only workarounds into a protocol that no longer needs them.
 
-**Refinements (option A confirmed).** Create the legacy `v1` branch now from the current v1 baseline (`d1ed5ee9`, CodeWalk 1.265.0 plus planning); implement the transition minor and later maintenance patches on that branch. Do not wait for v1.266.0 to create it or recreate the branch from that future tag. Keep the current v1 source/tests/tooling in `main` as a temporary reference for selective porting, not as a commitment to incremental migration or dual-runtime support. Separate production Web from `main` before publishing the v2 rewrite (§9.5); `web-pages.yml` currently deploys on every push to `main` [V].
+**Refinements (option A confirmed).** The legacy `v1` branch was created from `d1ed5ee9` (CodeWalk 1.265.0 plus planning); implement the transition minor and later maintenance patches on that line. Verify ancestry rather than requiring its live tip to equal the creation point. Do not recreate or rewind an advanced branch, including from the future transition tag. Keep the v1 source/tests/tooling in `main` as a temporary reference for selective porting, not as a commitment to incremental migration or dual-runtime support. Separate production Web from `main` before publishing the v2 rewrite (§9.5); the assessed `web-pages.yml` deploys on every push to `main` [V].
 
 ### D04 — Same app ID; last v1 minor asks the user
 
@@ -290,12 +294,12 @@ Sixteen helpers produced independent plans (full texts in `plan/helper-plans/`).
 | 6 | Execution state: `session.execution.{started,succeeded,failed,interrupted}`, `session.retry.scheduled`; `GET /api/session/active` lists executions owned by **this** process. `session.status` and `session.idle` are declared but have no publisher. | Never depend on `session.status`. `interrupted{reason: shutdown}` is not "idle": the managed service may resume it. | [V `plan/12` §5; `plan/11`] |
 | 7 | `POST /api/session/{id}/prompt {id?, text, files, agents, skills, metadata, delivery: steer\|queue, resume}` returns the durable inbox item. The `id` (`msg_…`) is the idempotency key: re-posting the same id returns the existing admission; a conflicting payload returns 409. | Client-minted ids replace v1's content matching; retries with the same id are safe. A secondary source (Paseo) advises against client ids → SP-01 confirms. | [V `session.ts:392–410`; `plan/11` §A7] [U SP-01] |
 | 8 | Model and agent are **session** selections (`POST …/model`, `POST …/agent`); the variant lives on the model reference. | Apply selection before sending; show changes as timeline rows. | [V `plan/11`] |
-| 9 | Permissions: rules `{action, resource, effect}`; agent rules then session rules; last match wins; built-in defaults `*:*:allow`, `external_directory:*:ask`, `read:*.env:ask`. Replies `once \| always \| reject` (+ optional message). `always` persists project-wide approvals. `reject` without a message ends the step and rejects the session's other pending requests. Child sessions ask with their own session id. | D05 mechanism; "Reject with note" as the default reject; surface child requests in the parent. | [V `plan/12` §7] |
+| 9 | Permissions: rules `{action, resource, effect}`; agent rules then session rules; last match wins; built-in defaults `*:*:allow`, `external_directory:*:ask`, `read:*.env:ask`. Replies `once \| always \| reject` (+ optional message). `always` persists project-wide approvals. `reject` rejects the other pending requests of the same session **with or without a note**; a note lets the model continue, while no note ends the step. Child sessions ask with their own session id. | D05 mechanism; explain rejection's batch scope and surface child requests in the parent. | [V `plan/12` §7; `core/permission.ts:276–295`] |
 | 10 | Questions are **forms** (`form.created/replied/cancelled`), typed fields, conditional visibility; dismissing without a message ends the step. | Generic form renderer; questions never auto-answered. | [V `plan/12` §8; `form.ts`] |
 | 11 | Subagents: `subagent` tool, `background: true`, child sessions with `parentID`, synthetic parent message `{source: "subagent", childID, …}` that can wake the parent; `POST …/background` moves **all** blocking work of a session to the background; open bug #48826 reports nested background work complete too early. | Background Work tray; child state from the child's own events; never infer completion from the parent. | [V `plan/12` §11; `plan/10` §e] |
 | 12 | Revert: `revert/stage` (409 while running; may apply file changes immediately when files are included), `DELETE …/revert` clears (redo), `revert/commit` (or automatic on the next prompt); needs git snapshots. | Preview before staging; label actions by effect. | [V `session.ts:531–564`; `plan/11`] |
 | 13 | `PATCH /api/session/{id}` accepts only `title`, `metadata`, `permissions`. | No native archive; CodeWalk archive is a local "hide". | [V `session.ts:358–374`] |
-| 14 | Files: list, find (name fuzzy), read. `POST /api/experimental/fs/write` writes a raw body to an absolute path or a path relative to the location — **"not confined to the location"**, experimental. No content or symbol search. | Editor saves only behind an experimental flag with client-side path containment; rename/delete/new file wait for the host (v2.2). | [V `fs.ts:75–89`] |
+| 14 | Files: list, find (name fuzzy), read. `POST /api/experimental/fs/write` writes a raw body to an absolute path or a path relative to the location — **"not confined to the location"**, experimental. Entry listings expose path/type, not symlink targets. No content or symbol search. | Lexical validation alone cannot prove physical containment. Saves require the flag **and** a containment mechanism verified by SP-01; otherwise write is unavailable. Rename/delete/new file wait for the host (v2.2). | [V `fs.ts:75–89`, `schema/filesystem.ts:18–20`] |
 | 15 | Attachments: images PNG/JPEG/GIF/WebP (≤ 20 MiB); **PDF, AVIF, BMP, audio, video are not included in the model request**. | PDF attach disabled for OpenCode with an explanation ("export a page as an image"). | [V `docs-attachments.md:69–72`] |
 | 16 | No todo tool or endpoint in v2; titles are native (`session.renamed`); no share; config writes only via `PATCH /api/experimental/config` for `shell`. | Drop todo panel, title generator, share, OpenCode defaults editor for OpenCode. | [V `plan/12`, `plan/11` §3] |
 | 17 | No remaining-quota API; tokens and cost per step/session; model `limit.context`; typed provider errors (`provider.rate-limit`, `provider.quota` with body, `provider.auth`). | Usage vs quota separation (§5.9). | [V `plan/11` §D, `plan/12` §10] |
@@ -410,7 +414,7 @@ These MUST hold in every release. Each line says why.
 
 - **Global default:** "Allow all" ON (D05). New installs default ON. Migration preserves a v1 user's explicit OFF choice.
 - **Per session:** a mode chip shows the **effective** mode; tapping shows the modes this harness supports (§2 D05 table) with one-line explanations. If the desired mode is unavailable (for example, Pi has no approvals), the chip says why ("Pi does not ask for approval").
-- **Approval card** (Ask mode, or requests that are never automatic): action, resources, owning (child) session, diff preview when supplied, and only the choices the harness offers. OpenCode labels: **Allow once** · **Always for this project** (only when the request carries save patterns; shows them) · **Reject with note** (default reject; the model continues) · **Reject and stop** (ends the step; also rejects the session's other pending requests).
+- **Approval card** (Ask mode, or requests that are never automatic): action, resources, owning (child) session, diff preview when supplied, and only the choices the harness offers. OpenCode labels: **Allow once** · **Always for this project** (only when the request carries save patterns; shows them) · **Reject with note** (default reject; the model continues) · **Reject and stop** (ends the step). Both reject choices also reject the other pending requests of that same session; explain that batch scope and reconcile every resolved card, including child-origin cards.
 - **Child requests** surface in the parent session with an origin badge, as the official web app does.
 - **Multi-client:** first reply wins; a late reply that gets "not found / already resolved" dismisses the card silently ("answered elsewhere").
 - **Unrestricted:** confirmation dialog explaining it overrides agent restrictions and is inherited by children; OFF removes only the rule CodeWalk added and warns if someone else changed the rules meanwhile (no compare-and-set exists [V]).
@@ -467,7 +471,7 @@ Chips show the harness's own catalog and labels ("variant", "effort", "thinking"
 
 ### 5.12 Files, terminal, undo
 
-- **Files:** tree, quick open, viewer with highlighting, diff viewer (OpenCode `GET /api/session/{id}/diff?from&to` replaces v1's 25-call scan). Save is available on OpenCode only behind **Settings → Experimental → File writes** (default off), with client-side containment to the session directory, because the endpoint is unconfined. New/rename/delete files arrive with host workspace services (v2.2) or a future official endpoint.
+- **Files:** tree, quick open, viewer with highlighting, diff viewer (OpenCode `GET /api/session/{id}/diff?from&to` replaces v1's 25-call scan). OpenCode Save requires **Settings → Experimental → File writes** (default off) and a verified mechanism that keeps the resolved target inside the session directory, including symlinks/junctions and concurrent path changes. Rejecting `..` or an absolute path is only lexical protection; the phone cannot resolve remote symlinks. SP-01 owns proof of containment. If the official surface cannot establish it, keep `files.write` unavailable with an explanation even when the setting is ON; do not emulate it through hidden shell sessions. New/rename/delete files arrive with host workspace services (v2.2) or a future official endpoint.
 - **Terminal:** OpenCode PTY via one-time ticket; reconnect resumes by cursor; leaving the terminal page asks before closing a connection-scoped terminal.
 - **Undo, labeled by effect (never one generic "Undo"):**
   - OpenCode: **Revert to here** (preview first; conversation + files when requested) → banner **Restore** (clears the staged revert = redo) / **Apply** (commit; also automatic on the next prompt); disabled while running.
@@ -493,7 +497,7 @@ Drafts and input history, canned answers, tabs and MRU switcher, pins and recent
 - PDFs cannot be attached to OpenCode sessions (OpenCode does not send them to models).
 - No share links; no OpenCode defaults editor; no todo panel for OpenCode; titles come from the server.
 - Provider quota bars for OpenCode are gone until the host connectors (v2.1); limit errors still show reset times.
-- File editor saves are experimental and off by default; new/rename/delete files wait for v2.2.
+- File editor saves are experimental, off by default, and unavailable unless remote containment is verified; new/rename/delete files wait for v2.2.
 - "Archive" becomes a local hide.
 - Android overlay and Android Auto replies return in v2.1 on the new attention pipeline.
 - Symbol search in `@` mentions is removed.
@@ -581,6 +585,8 @@ tool/ci/                         # architecture/import rules, OpenAPI usage chec
 ```
 
 **Rules (CI-enforced, gate G4):** `codewalk_core` imports nothing platform- or protocol-specific; `package:dio` only in `codewalk_net`/`harness_*`; `features/` never imports `harness_*`; no `part of` files; no Dart file above 1,500 lines (exceptions need a recorded reason); no harness-name comparisons in `features/`; no `get_it` lookups inside widgets.
+
+**Transitional enforcement scope.** `V2-020` establishes an explicit path manifest for the new `packages/codewalk_*`, `packages/harness_*`, `lib/app/`, `lib/features/`, `lib/platform/`, `lib/shared/` and temporary v2 entry point. G4 applies there from their first commit. Retained v1 reference paths are excluded temporarily, but new v2 code MUST NOT import them, directly or transitively; port a reusable leaf into a governed path with its tests instead. List generated and vendored files separately, with narrow reasons for any size-rule exclusion; never exclude authored v2 code wholesale. Remove the legacy exclusions at `V2-084`. CI must also discover tests in each new package and build the v2 entry point; passing the current root-only `make check` is not evidence that those packages or the v2 bootstrap were tested.
 
 **State management:** keep `provider` with small `ChangeNotifier` controllers (one per open session, plus index, attention, usage, settings). Add `go_router` for routes and deep links (`codewalk://pair?…`, `codewalk://s/<host>/<session>`). Remove `dartz` (use a sealed `Result`). *Why:* minimal churn, explicit ownership, and v1 had no named routes or deep links.
 
@@ -680,7 +686,7 @@ abstract interface class HarnessAdapter {
   Future<CapabilitySet> capabilities({SessionRef? session});
   Future<Page<SessionSummary>> listSessions(SessionQuery query);
   Future<SessionHandle> open(SessionRef ref, OpenIntent intent);   // viewHistory | attachLive | continueInactive
-  Future<SessionHandle> create(CreateSession request);              // idempotent on request.commandId
+  Future<SessionHandle> create(CreateSession request);              // commandId correlates; retry safety is operation-specific
   CatalogFacet get catalog;                          // models, agents, efforts, commands, skills
   WorkspaceFacet? get workspace;                     // files, search, terminal (null when absent)
 }
@@ -699,6 +705,8 @@ abstract interface class SessionHandle {
 ```
 
 An unavailable operation returns a typed `CapabilityUnavailable` **before** any mutation is sent; hiding the button is not the only enforcement.
+
+**Retry contract by operation.** Record whether create, prompt, interrupt, interaction response, selection and workspace mutations have a verified same-command replay guarantee for the connected version. A command id alone does not confer idempotency. OpenCode's create input accepts a native session id, but the preserved protocol declaration does not establish replay/conflict semantics [V `protocol-groups/session.ts:220–235`]; SP-01 must test them separately from prompt admission. Preserve the original payload and correlation before a mutation. On uncertain delivery, replay only when that operation's guarantee has been demonstrated; otherwise reconcile from authoritative state and retain `uncertain` until resolved or the user deliberately resends. No automatic retry may create a second session or turn merely because prompt retries were safe.
 
 ### 6.7 Capability model
 
@@ -732,7 +740,7 @@ EventEnvelope {
 
 - Sequence numbers travel as strings in JSON (64-bit precision on Dart Web and JavaScript).
 - Upstream cursors stay opaque. OpenCode durable sequences are per aggregate and may skip internal records; a gap is not proof of a lost public event [V].
-- On any gap the consumer emits `ResyncRequired` and repairs from an authoritative snapshot; it never invents missing history.
+- On a gap in the **CodeWalk stream sequence**, or a discontinuity actually defined as loss by the native protocol, the consumer emits `ResyncRequired` and repairs from an authoritative snapshot. Do not treat allowed skips in an upstream per-aggregate sequence as missing public events; it never invents missing history.
 - Multi-client: CodeWalk serializes its own mutations per session but never claims to lock other clients (TUI, IDE). Conflicts surface as "changed elsewhere" and trigger a refresh.
 
 ### 6.9 State machines
@@ -769,7 +777,7 @@ A parent can be idle while children run. A disconnect changes connection confide
 
 - Mint a `msg_…` id in the official format (time-ordered; use a server-clock offset learned from event timestamps, because revert compares ids) and persist it with the draft before the request.
 - `POST /api/session/{id}/prompt {id, text, files, agents, skills, delivery, resume}`; the response's inbox item is the admission.
-- Timeout or disconnect after sending → retry with the same id and identical payload (bounded: 3 attempts with backoff); 409 means a conflicting payload → show the error, keep the draft.
+- Timeout or disconnect after sending → retry with the same id and identical payload only after SP-01 verifies prompt replay for the connected version (bounded: 3 attempts with backoff); 409 means a conflicting payload → show the error, keep the draft. Otherwise use the uncertainty path below; create and other mutations follow their own guarantees (§6.6).
 - If SP-01 shows client ids misbehave: omit `id`, correlate via `metadata.cw.commandId`, and resolve uncertainty by reading inbox and newest messages before allowing a manual resend.
 - Default delivery is **steer**; queued items are listed from the inbox and can be cancelled (`DELETE`) or switched (`PATCH`).
 
@@ -783,7 +791,7 @@ A parent can be idle while children run. A disconnect changes connection confide
 
 **Revert, fork, diff.** `revert/stage` after a preview (staging may apply files immediately), `DELETE …/revert` = restore, `revert/commit` = apply; 409 while running → "another client is running this session". Fork with `before` message. Diff with `GET /api/session/{id}/diff?from&to`.
 
-**Files, terminal, shell.** List/find/read; experimental write behind the setting with containment checks; PTY via ticket; `!` shell mode via `POST /api/session/{id}/shell`.
+**Files, terminal, shell.** List/find/read; experimental write only when both the setting and SP-01's containment requirement pass (§5.12); PTY via ticket; `!` shell mode via `POST /api/session/{id}/shell`.
 
 **Never used.** `session.status`/`session.idle` (no publisher); `GET /api/credential` (returns secrets); v1 routes; share; todo; config writes beyond `shell`.
 
@@ -826,11 +834,13 @@ SQLite (built-in `node:sqlite` if the pinned Node supports it reliably, otherwis
 
 #### 6.11.5 Lifecycle and packaging
 
-Single-instance lock; user-level service registration (`systemd --user`, launchd agent, Windows scheduled task/service); lazy spawn of harness processes; idle eviction only when the adapter can resume without losing running work; graceful stop sends interrupts first; orphan cleanup on start; resource caps. Bundled pinned Node runtime on desktop; npm package for headless servers. A packaging spike must prove Linux x64/ARM64, macOS (signed/notarized), and Windows x64/ARM64 before the host protocol is frozen.
+Single-instance lock; user-level service registration (`systemd --user`, launchd agent, Windows scheduled task/service); lazy spawn of harness processes; idle eviction only when the adapter can resume without losing running work; graceful stop sends interrupts first; orphan cleanup on start; resource caps. Bundled pinned Node runtime on desktop; npm package for headless servers. G5 establishes the app-facing schema in v2.0; SP-09 proves Linux x64/ARM64, macOS (signed/notarized), and Windows x64/ARM64 packaging, or the recorded npm-only fallback, before freezing the CHP **server implementation/distribution** in v2.1. Packaging does not become an implicit v2.0 prerequisite. If it exposes an app-facing contract defect, follow the schema's versioning rules and §17 rather than silently changing the published contract.
 
 #### 6.11.6 Approvals with a host present
 
-When a host's OpenCode observer is active for an endpoint, the endpoint's capability `approval.hostResponder = active` tells every client to stop auto-replying for that endpoint; the host becomes the only automatic responder. Without a host, each client auto-replies; the first reply wins and late replies are treated as "already resolved".
+For an explicitly linked direct OpenCode profile and CodeWalk Host observer, `approval.hostResponder` is a **CodeWalk-owned** coordination signal delivered through the authenticated CHP connection, not an invented field in OpenCode `/api/info`. `V21-004`/`V21-007` must define the endpoint/observer identity, effective per-session mode and policy revision, activity renewal, expiry and restart epoch. Only a verified alias (§6.4) and a current activity signal suppress that CodeWalk client's automatic replies; URL similarity or an old cached flag does not.
+
+The host is the sole automatic responder while its verified authority is current. Mode changes are submitted to that authority and acknowledged before the UI claims the new effective mode; an unavailable host leaves the requested change pending. When authority expires or the observer stops, clients resume the no-host behavior using the last acknowledged effective mode, reconciling pending requests first. A returning host renews authority before taking over. Native clients remain independent: first reply wins and late responses are dismissed as "already resolved". Prove phone + desktop + host behavior for Ask/Allow all, lost CHP connectivity, observer failure, restart, stale signals and native-client replies; do not promise globally atomic handover without upstream support.
 
 ### 6.12 Direct adapter rule (D01 clause)
 
@@ -851,6 +861,8 @@ Otherwise the harness goes through the host. The host MAY still connect to such 
 **Native listener option, still behind the host.** SP-02 also verifies a dedicated authenticated `codex app-server --listen ws://…` with the TUI explicitly using `codex --remote` (§3.3). If that option is supported later, the host connects to the selected app-server and negotiates its version; the app still speaks CHP. Keep daemon-attached and dedicated-listener sessions/ownership distinct, and never imply that the latter controls an already-running default daemon. Do not run the same live thread concurrently through independent app-server processes without verified ownership behavior [U SP-02].
 
 **Claude Code (v2.2).** One long-lived `query()` in streaming-input mode per open session, inside the host, driving the user's installed, unmodified `claude` binary (`pathToClaudeCodeExecutable`; do not bundle the proprietary SDK/CLI until licensing is cleared, `V22-004`). Always pass `permissionMode` explicitly, `includePartialMessages: true`, `enableFileCheckpointing: true`, `perTaskStopAffordance: true` (only with a stop control in the UI), `forwardSubagentText: true`, and the user's environment. `canUseTool` and elicitation become interaction requests; AskUserQuestion and plan approval are never automatic; "Allow all" allows without `updatedPermissions` (no persistent rules); Unrestricted = `bypassPermissions` only if permitted (refused as root). External sessions: `listSessions` (+`getSessionMessages`) and resume when the transcript is idle; otherwise read-only/fork; never override `CLAUDE_CODE_ENTRYPOINT` to appear in the terminal picker. Interrupt race (#98713): if a stop is ignored, re-send it after the next `system/init` and show "stop requested". Usage: `total_cost_usd` is cumulative (never sum it); quota from `rate_limit_event`; experimental usage pull only behind the connector framework. Authentication only through Anthropic's official host flow or a user API key; CodeWalk never offers a Claude login or touches tokens; naming must not imply an official Anthropic product.
+
+**Claude project activation.** The research snapshot records that SDK/headless execution skips the workspace trust dialog and can load project hooks/MCP [V `plan/21` §9; revalidate in SP-03]. Reading saved history does not authorize starting that runtime. Before the first activation of a new canonical project on that harness instance, obtain and persist the user's project-trust choice, explaining that project code/configuration can run. Keep trust separate from tool permission modes, including Allow all. If the required trust cannot be established, offer history reading without runtime activation; test this boundary with a disposable project's hooks/MCP before `V22-002`.
 
 **Pi (v2.2).** One `pi --mode rpc` process per active session; strict LF-only JSONL framing (Unicode line separators inside strings are content); read stdout continuously (backpressure stalls Pi). Settled = `agent_settled`, not `agent_end`. Session listing via the SDK `SessionManager` in the host. No permission system: the mode chip reads "Pi does not ask for approval"; "Ask" is unavailable unless a future CodeWalk Pi extension provides gating. Steer / follow-up queues, `clear_queue`, abort; thinking levels `off…max`; `/skill:name`. Pass project trust explicitly at start.
 
@@ -884,7 +896,7 @@ Everything else is event-driven. v1's send-completion watcher, 2 s status pollin
 - Resident timeline ≤ 500 items per session (pages of 50; LRU of open sessions); large tool output paged and decoded off the UI isolate above 256 KB.
 - One OpenCode event stream per endpoint; zero network activity when backgrounded with nothing tracked.
 - Android monitor battery and data cost measured over an 8-hour run before it is recommended in UI copy.
-- Bandwidth gate (G-BW): if SP-01 shows the unfiltered global stream is too expensive on cellular with several concurrent sessions, prioritize the host's OpenCode pass-through with server-side coalescing in v2.1.
+- Bandwidth checkpoint (G-BW, not a release gate): if SP-01 shows the unfiltered global stream is too expensive on cellular with several concurrent sessions, prioritize the host's OpenCode pass-through with server-side coalescing in v2.1. Record the measured device/network, session mix and decision threshold rather than presenting an unmeasured budget as passed.
 
 ### 6.16 Security and privacy rules
 
@@ -997,6 +1009,22 @@ Pins: OpenCode 2.0.21/2.0.22; Codex CLI 0.159.3, daemon 0.160.0; Claude SDK 0.3.
 
 Bounded caches, generation guards, notification batching, and reconnect backoff remain: they solve general client problems, not v1 gaps.
 
+### 8.3 Test lifecycle: incremental triage and final retirement audit
+
+Each port, replacement or removal includes triage of the **affected** tests, fixtures, fakes and helpers. Record the disposition in the owning Issue, not a separate progress file; this is not a repository-wide cleanup prerequisite for every unit.
+
+| Disposition | Evidence and action |
+|---|---|
+| **Keep** | The protected behavior/contract remains valid. Keep the regression and ensure the appropriate active suite discovers it. |
+| **Adapt / port** | The invariant remains useful but its protocol, ownership, imports or harness changes. Link the old test/case to its v2 replacement and prove the retained behavior on the new package/entry point. |
+| **Remove** | The assertion protects only retired v1 behavior or duplicates accepted replacement coverage. Record the obsolete behavior or replacement, check remaining consumers, and retire it with the validated code replacement or final cutover. A failing test alone is not obsolescence evidence. |
+
+For each affected family, name its path/cases, disposition, reason, replacement or intentionally removed behavior, and validation result. Remove orphan fixtures/helpers/imports only after their last required consumer is migrated. Preserve reusable scroll/rendering/data-preservation regressions; legitimate v1-to-v2 import fixtures may remain with explicit provenance and purpose. Required live contract recordings are not discarded merely because a newer version exists.
+
+`V2-020C` makes the retained legacy-reference and active-v2 test targets explicit during coexistence. `V2-044C`, `V2-056B` and `V2-071A` own their incremental test ports/retirements; the same rule applies to other affected implementation units. If a legacy test/helper still serves retained reference code, record its remaining consumer and retirement owner in `V2-084` rather than deleting it early. Preserve the maintenance suite on `v1`; main-side retirement is not authorization to remove legacy coverage there.
+
+`V2-084` audits all remaining main-side test families before GA: every retained test has an implemented-v2 or explicit migration purpose; all obsolete v1-only cases, orphan support files and transitional legacy test targets are retired. Its acceptance records the final test-discovery map, replacement/retirement evidence and passing aggregate package/app/Web checks. Do not make checks green through blanket skips, tags, import exclusions or coverage-budget reductions that hide still-required regressions.
+
 ---
 
 ## 9. Transition: legacy, versions, data, branches
@@ -1005,7 +1033,7 @@ Bounded caches, generation guards, notification batching, and reconnect backoff 
 
 ```mermaid
 flowchart TD
-  C["V1-03 create legacy branch v1 now from d1ed5ee9"] --> A["V1-01 update gate + exact-version handoff on v1"]
+  C["V1-03 reconcile legacy branch created from d1ed5ee9"] --> A["V1-01 update gate + exact-version handoff on v1"]
   A --> I["V1-05 both installers + acceptance tests"]
   I --> B["V1-02 release v1.266.0 (last v1 minor)"]
   B --> D["V1-04 production Web deploys from v1"]
@@ -1017,7 +1045,7 @@ flowchart TD
   M --> G["v2.0.0 GA after remaining gates: stable/latest and Web move to v2; legacy stays available"]
 ```
 
-The branch cut happens now; the transition minor is developed/released on `v1`. Keep the unchanged v1 baseline in `main` until the production/preview split permits publishing the v2 rewrite.
+The branch cut is historical preparation; reconcile its evidence before selecting the next item. The transition minor is developed/released on `v1`. Keep the unchanged v1 baseline in `main` until the production/preview split permits publishing the v2 rewrite.
 
 ### 9.2 Last v1 minor and its update gate (D04)
 
@@ -1058,9 +1086,9 @@ This applies to `install.sh` and `install.ps1`, which install **CodeWalk**. It i
 
 ### 9.5 Branches and Web deployment
 
-- `v1` is the legacy maintenance branch, created now from `d1ed5ee9` (the current v1.265.0 code plus the committed plan). The transition minor v1.266.0 and subsequent patches are developed/released there; normal maintenance freezes at the accepted v2 MVP (§9.6). The branch and its published artifacts remain available.
+- `v1` is the legacy maintenance branch, created from `d1ed5ee9` (v1.265.0 code plus the committed plan). Its tip may advance with authorized maintenance. The transition minor v1.266.0 and subsequent patches are developed/released there; normal maintenance freezes at the accepted v2 MVP (§9.6). The branch and its published artifacts remain available.
 - `main` is the v2 development line, but initially keeps the complete current v1 source, assets, tests, and build/release tooling alongside the plan. This preserves reusable UI/services and regression evidence, and avoids breaking the existing CI/Web setup before its replacement is ready. Do not turn `main` into a plan-only tree. Establish the v2 skeleton (`V2-020`), port selected pieces with tests (§8), and remove superseded code through validated implementation stages/final cutover (`V2-084`).
-- Default v2 work stays on `main`; legacy fixes and the transition minor belong on `v1`. The product owner's requested active checkout is `v1` for the current preparation task. Branch role, not the presence of the v2 plan or temporarily shared source, determines which version is being changed.
+- Default v2 work stays on `main`; legacy fixes and the transition minor belong on `v1`. The request to select `v1` applied to the 2026-10-02 preparation, not to every later task. Confirm the active task and checkout before editing. Branch role, not the presence of the v2 plan or temporarily shared source, determines which version is being changed.
 - `web-pages.yml`: production deploy from `v1` until v2.0.0; `main` deploys to a preview alias. At GA: production from `main`, legacy Web kept at a stable alias (for example the `v1` Pages branch alias) [I: Cloudflare Pages branch aliases; verify].
 - A temporary `lib/main_v2.dart` entry point MAY exist during development; at cutover (`V2-084`) the old v1 code is deleted from `main` and `main.dart` boots v2. Production never contains a v1/v2 runtime switch.
 
@@ -1083,13 +1111,13 @@ ADR work follows the project's ADR flow (`adrkeeper`); CODEBASE updates follow t
 
 | Document | Action | When |
 |---|---|---|
-| ADR-058 "CodeWalk v2 architecture" | New: hybrid topology (D01 + clauses), ports and adapters, canonical model, capability model, contract-first per harness; supersedes ADR-023's v1-specific invariants while keeping its principle | M0 (`V2-002`) |
+| ADR-058 "CodeWalk v2 architecture" | New: hybrid topology (D01 + clauses), ports and adapters, canonical model, capability model, contract-first per harness; scope the replacement of ADR-023's v1-specific invariants to v2, retaining its principle and the legacy reference contract | M0 (`V2-002`), before v2 code |
 | ADR-059 "Permission modes in v2" | New: D05 semantics; supersedes EXC-001 (v1 `always` + remember); documents the exception "auto-approve ON by default" (official default is off, mechanism matches the official auto-accept) | M0 (`V2-003`) |
 | ADR-060 "v1 → v2 transition" | New: D04 update gate and installer contract, versioning, data namespace, confirmed branch topology, Web split, patches until accepted MVP and freeze separate from GA | M0 (`V2-004`); update at `V2-086` |
 | ADR-061 "CodeWalk Host and CHP" | New: host responsibilities, security, CHP v1, approval responder, attention inbox | v2.1 (`V21-012`) |
 | Existing ADRs | Review each against v2 and mark superseded/revised with a pointer: candidates ADR-002 (scoping key), ADR-003 (dual SSE), ADR-009 (hidden-session titles), ADR-016 (caches, keep), ADR-019 (config deferral), ADR-029 (quota shell probe), ADR-031 (v1 revert), ADR-033 (proxy auth: must compose with mandatory upstream Basic auth), ADR-041 (delta reconciliation), ADR-043 (shell-gated file writes), ADR-049 (attention overlay), ADR-055 (Android Auto). Verify each ADR's actual scope during the review [H list]. | M0 + as features land |
 | `CONTRACT_MATRIX.md` | Rewrite per harness and operation (used × tested × stability), generated from `used-operations` lists | v2.0 |
-| `ai-docs/opencode_*.md` | Replace with pinned v2 anchors (copied from `plan/opencode-v2-docs/`); v1 anchors stay on the `v1` branch | v2.0 |
+| `ai-docs/opencode_*.md` | Add pinned, explicitly versioned `opencode_v2_server.md`, `opencode_v2_web.md`, `opencode_v2_models.md` anchors and provenance using the research sources. Route ADR/project references by implementation line; label retained v1 anchors as legacy references during coexistence. v1-only optimistic-ID and `prompt_async` rules never govern v2. Refresh the v2 anchors at release; remove superseded main-side v1 references at cutover, preserving them on `v1` | `V2-002`, revalidated by the relevant SP-01 child before consumers; release audit `V2-083` |
 | `BEHAVIOR.md` | Reset for v2 and grow stage by stage | v2.0 onward |
 | `CODEBASE.md`, `README.md` | Regenerate when the structure exists; README explains client vs host vs harness setup and platform limits. Before the transition minor, document tested CodeWalk installer commands, stable/v1/beta selection and migration; update for GA and host setup as those ship | `V1-05`, v2.0, v2.1 |
 | `CHANGELOG.md` | Keep machine-readable headings; v2.0.0 starts with an announcement line about the OpenCode 2 requirement | Releases |
@@ -1117,11 +1145,11 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 | Gate | What must be true | Why it prevents rework | Work item |
 |---|---|---|---|
-| **G1** Real recordings | Recorded Codex and Claude sessions (text, tools, approvals, questions, background work, usage, errors) are stored as fixtures | The model is judged against reality, not against OpenCode alone | `V2-006`, `V2-007` |
-| **G2** Two-adapter fit | Hand-authored canonical expectations for those recordings validate against the canonical/CHP schema **without schema changes**; any change happens before v2.0 freezes; the review is recorded | Proves Codex and Claude can be plugged in later by writing adapters only | `V2-026` |
+| **G1** Real recordings | Recorded Codex and Claude sessions cover text, tools, approvals, questions, background work, usage and errors through the scenario matrix in §13.1; provenance and connected versions are recorded | The model is judged against reality, not against OpenCode alone; schema-derived examples cannot satisfy this gate | `V2-006`, `V2-007` |
+| **G2** Two-adapter fit | Each recording maps to canonical expectations with frame-to-event traceability and reducer assertions for ownership, interactions, lifecycle and usage. Expectations validate against the canonical payload definitions; corresponding CHP frames validate against G5. Resolve missing concepts before the release revision freezes | Tests semantic fit, not just JSON shape; later adapters must reproduce these expectations without changing that release's model/schema | `V2-026` |
 | **G3** Fake harness | A scripted fake adapter with a different capability set (no undo, no terminal, no queue, history-only external sessions, no forms) drives the same screens in widget tests | Proves the UI really follows capabilities | `V2-024` |
-| **G4** Architecture rules in CI | Import boundaries, no harness-name branching in features, no `part of`, file-size limit | Stops coupling from creeping back during the rewrite | `V2-021` |
-| **G5** Host protocol ready | CHP v1 JSON Schema + example frames exist and are validated by Dart tests | The v2.1 host adapter is built against a contract that already exists | `V2-025` |
+| **G4** Architecture rules in CI | Import boundaries, no harness-name branching in features, no `part of`, file-size limit on the explicitly governed new surface (§6.3); v2 cannot import retained legacy code | Stops coupling from creeping back without deleting the reference baseline prematurely | `V2-021` |
+| **G5** Host protocol ready | CHP v1 JSON Schema, named canonical payload definitions and example frames exist and are validated by Dart tests; G2 and G5 refer to the same final schema revision | The v2.1 host adapter has an app-facing contract; server packaging remains a v2.1 gate, not an implicit v2.0 prerequisite | `V2-025` |
 
 **Bandwidth checkpoint (G-BW, not a gate):** if `V2-005` measures that the unfiltered global event stream is too costly on cellular with several concurrent sessions, the OpenCode pass-through with coalescing moves to the top of v2.1.
 
@@ -1129,9 +1157,9 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 | Spike | Question | Fallback if the answer is bad | Work item |
 |---|---|---|---|
-| SP-01 | OpenCode v2 live contract (pairing, stream, permissions, forms, children, revert, prompt ids, active list, durable log, fs write, PDF, bandwidth, service credentials, CORS) | Downgrade the affected capability; use stable snapshots; never invent endpoints | `V2-005` |
+| SP-01 | OpenCode v2 live contract (pairing, stream, permissions, forms, children, revert, prompt and create retry guarantees, active list, durable log, physical fs-write containment, PDF, bandwidth, service credentials, CORS) | Downgrade the affected capability; use stable snapshots; uncertain non-idempotent mutations are reconciled rather than replayed; unavailable containment keeps write disabled | `V2-005` |
 | SP-02 | Codex shared-daemon attach, TUI threads, approval replay, version skew; dedicated authenticated listener + explicit TUI `--remote`, auth/Origin and reconnect checks | Codex stays out until required live-attach acceptance passes; never present a dedicated listener as an attachment to the default daemon | `V2-006` |
-| SP-03 | Claude SDK (stream capture, callbacks, external history, interrupt race, licensing question) | History-only external sessions; API-key mode; load the SDK from the user's install | `V2-007` |
+| SP-03 | Claude SDK (stream capture, callbacks, external history, project trust before runtime activation, interrupt race, licensing question) | History-only external sessions; no runtime activation without project trust; API-key mode; load the SDK from the user's install | `V2-007` |
 | SP-04 | Web transport (fetch streaming with auth, CORS, mixed content, PTY ticket) | Web limited to HTTPS endpoints; terminal hidden on Web | `V2-008` |
 | SP-05 | iOS bring-up (project, plugins, build, ATS/local network, Keychain) | iOS ships as a build-only target until prerequisites exist | `V2-009` |
 | SP-06 | macOS managed install vs sandbox and distribution | Connect-only macOS build; managed setup via the separate host (v2.1) | `V2-010` |
@@ -1144,25 +1172,55 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 ### 11.4 Definition of done (every work item)
 
 - Behavior matches this plan or the plan is updated first (§17).
-- Focused tests and `flutter analyze` on touched paths pass; `make check` at milestone gates (not after every micro-fix).
+- Relevant focused checks pass: Flutter analyze/tests for Dart/app code, host checks for host code, document/reference validation for static docs. Run `make check` at project validation gates, including stable code before its first commit; do not rerun automatically after reviewer micro-fixes unless they invalidate that check.
+- Ports, replacements and removals include the affected test-family dispositions from §8.3, accepted replacement evidence and any justified retirement still owned by `V2-084`.
 - Invariants in §4 hold; no new capability is claimed without a fixture.
 - Docs touched by the change are updated (`BEHAVIOR.md` only for implemented behavior).
-- The reviewer loop runs after each coherent stage, before the stage is considered done.
+- The reviewer loop runs after each coherent code stage, before the stage is considered done; static docs-only work follows the project's exemption unless review was explicitly requested.
+- Evidence names the commit/worktree state, tested package/entry point, fixture version/topology and required platforms. All applicable child outputs and parent criteria are accounted for; a prerequisite merely recorded as missing is not a passing check.
+
+### 11.5 One-unit execution contract
+
+**Unit and readiness.** The orchestrator executes one open, bounded Issue at a time, within the authorized milestone/task. A parent with children is an acceptance aggregate, not a multi-week execution unit. Choose a child whose listed dependencies have accepted evidence, whose resources are available and whose required human decision is settled. Prefer the smallest unit that unblocks the critical path; numeric ID or textual order is not scheduling authority. An `[U]` fact permits starting its owning investigation, not implementing its consumers as if the fact were verified.
+
+Before starting, ensure the Issue contains:
+
+| Field | Required content |
+|---|---|
+| Identity and intent | Stable plan/child ID, milestone, one observable output, relevant decisions/invariants |
+| Inputs and scope | Accepted dependency artifacts, branch/implementation line, touched paths/interfaces, explicit exclusions |
+| Resources and evidence | Required host/account/runner/device, connected version and topology, official anchors/fixtures, freshness check |
+| Limits and validation | Time/cost budget for this unit, exact focused commands and working directories, required manual/platform checks, acceptance criteria |
+| Recovery and authority | Stop conditions, permitted fallback, next resume action, user decisions/publication authorization still needed |
+
+**Cycle.**
+
+1. **Preflight:** reconcile the Issue and live branch/commit, existing changes and Git operations; confirm dependency outputs, resources and command scope. Never rewind a branch or overwrite another task's work to match a dated snapshot. If the unit is too broad for its budget or needs unlisted infrastructure, split it or repair its dependencies before editing.
+2. **Execute:** produce only that output, following the inspected contract. Keep unrelated discoveries as follow-ups in Issues. Use the applicable research, URL, test, ADR/CODEBASE, reviewer and publication workflows; do not introduce another progress-file system.
+3. **Stop or accept:** validate the unit and review a coherent code stage. On missing resources, failed assumptions, essential-check failure, conflict with existing work or a required product/MUST decision, preserve evidence and stop that path. Replan before repeating a failed core approach; after three failed fixes, request a decision rather than looping. A time/cost limit stops the unit unless an already-authorized budget permits extension.
+4. **Record and resume:** record artifacts, commands/results, revision, fixture provenance, review outcome, limitations and the next bounded action in the Issue and existing recovery mechanism. On resume, reconcile these with live files; do not repeat an installation, release or uncertain mutation merely because its previous result is unclear.
+5. **Finish:** accept only the evidence-backed output. A parent closes only when every child and parent criterion is accepted. Stop after this unit unless the user's active instruction authorizes selecting the next one. Issue closure and release/fix closure follow the project's tracker policy.
+
+**Result states:** `accepted` (all applicable criteria passed), `delivered-awaiting-acceptance` (output ready, human/device/CI confirmation outstanding), `blocked` (named missing dependency/resource/decision), or `inconclusive` (experiment did not establish the fact). An approved capability downgrade/fallback is documented explicitly; it does not fabricate a passing test or waive a release gate. Use these distinctions in the Issue body, not a second tracker.
+
+**Human control.** Ask only for a changed D-decision/MUST or ADR exception, consequential scope/platform/distribution tradeoff, risk/cost outside the agreed limits, trust/installation consent, required announcement/publication authorization, or MVP acceptance. Resolve reversible technical details inside the established contracts autonomously. Installation consent and project trust are product interactions; the orchestrator's publication authority is a separate execution boundary. An unavailable optional resource blocks its dependent unit, not independent documentary foundations.
 
 ---
 
 ## 12. Work breakdown: GitHub milestones and issues
 
-**How to use this section.** Create one GitHub milestone per heading below and one issue per item. Copy the item's text into the issue body. IDs are stable references for discussions and commits.
+**How to use this section.** Reconcile existing GitHub milestones/Issues by stable ID before creating any; do not duplicate already delivered preparation. Create missing milestone/Issue entries through the project issue workflow and copy their scope/acceptance. Store live status and evidence there. The overview below is a scope index, not a claim that all its unchecked preparation is still undone.
 
 **Sizes (rough planning only):** **S** ≤ 2 days · **M** 3–5 days · **L** 1–2 weeks · **XL** > 2 weeks (split before starting).
+
+**Decomposition and dependency semantics.** Split any item with multiple independent outputs or a scope exceeding one unit's declared budget, regardless of its size label. Required child tables below establish the initial boundaries; split later items just in time under the same rule. A child's **Depends on** cell is its complete start-dependency list; resources are recorded separately in its preflight. A parent's **Depends on** list states dependencies for parent acceptance and includes every mandatory child. Consumers may depend on a completed child producer without waiting for unrelated siblings. Keep additional live/platform/human acceptance criteria explicit in **Done when**, never hidden in a vague dependency. Add stable child suffixes and preserve all parent criteria when splitting; validate the resulting graph for missing IDs and cycles.
 
 **Suggested labels:** `v2`, `milestone:v1.266|v2.0|v2.1|v2.2|v2.3`, `type:spike|feature|chore|docs|test`, `area:core|opencode|host|ui|platform|android|ios|web|desktop|release`, `gate` (for G1–G5).
 
 ### 12.0 Checklist overview
 
 **Milestone v1.266 — Last planned v1 minor (transition)**
-- [ ] V1-03 Create the legacy `v1` branch now and set maintenance rules
+- [ ] V1-03 Reconcile the legacy `v1` branch and maintenance rules
 - [ ] V1-01 Update gate for major versions in the v1 updater
 - [ ] V1-05 Update both CodeWalk desktop installers and their acceptance tests
 - [ ] V1-02 Release v1.266.0 with the CodeWalk 2 announcement
@@ -1172,7 +1230,7 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 - Foundations: [ ] V2-001 · [ ] V2-002 · [ ] V2-003 · [ ] V2-004
 - Spikes: [ ] V2-005 (SP-01) · [ ] V2-006 (SP-02, G1) · [ ] V2-007 (SP-03, G1) · [ ] V2-008 (SP-04) · [ ] V2-009 (SP-05) · [ ] V2-010 (SP-06) · [ ] V2-011 (SP-07) · [ ] V2-012 (SP-08)
 - Core: [ ] V2-020 · [ ] V2-021 (G4) · [ ] V2-022 · [ ] V2-023 · [ ] V2-024 (G3) · [ ] V2-025 (G5) · [ ] V2-026 (G2) · [ ] V2-027 · [ ] V2-028
-- OpenCode adapter: [ ] V2-040 · [ ] V2-041 · [ ] V2-042 · [ ] V2-043 · [ ] V2-044 · [ ] V2-045 · [ ] V2-046 · [ ] V2-047 · [ ] V2-048 · [ ] V2-049 · [ ] V2-050 · [ ] V2-051 · [ ] V2-052 · [ ] V2-053 · [ ] V2-054 · [ ] V2-055 · [ ] V2-056
+- OpenCode adapter: [ ] V2-040 · [ ] V2-041 · [ ] V2-042 · [ ] V2-043 · [ ] V2-044 · [ ] V2-045 · [ ] V2-046 · [ ] V2-047 · [ ] V2-048 · [ ] V2-049 · [ ] V2-050 · [ ] V2-051 · [ ] V2-052 · [ ] V2-053 · [ ] V2-054 · [ ] V2-055 · [ ] V2-056 · [ ] V2-060 (internal vertical slice)
 - App, platforms, release: [ ] V2-070 · [ ] V2-071 · [ ] V2-072 · [ ] V2-073 · [ ] V2-074 · [ ] V2-075 · [ ] V2-076 · [ ] V2-077 · [ ] V2-078 · [ ] V2-079 · [ ] V2-080 · [ ] V2-081 · [ ] V2-082 · [ ] V2-083 · [ ] V2-084 · [ ] V2-085 · [ ] V2-086
 
 **Milestone v2.1 — CodeWalk Host + Codex**
@@ -1207,7 +1265,7 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V1-05 — Update both CodeWalk desktop installers and acceptance tests
 - **Type / size / labels:** feature + test · M · `milestone:v1.266` `area:desktop` `area:release` `type:test`
-- **Depends on:** V1-01
+- **Depends on:** V1-05A, V1-05B, V1-05C
 - **Why:** A warning in the app does not protect desktop users if the installer resolves a different latest release or drops the user's legacy/beta choice. Both scripts currently use `/releases/latest`; this must be fixed before shipping the transition minor.
 - **Scope:**
   - Implement §9.2.1 in `install.sh` and `install.ps1`: stable/v1/beta selection, explicit target tag, installed-major detection, saved choice, paginated semantic resolution, deliberate cross-major consent, and non-interactive behavior. Keep the interface aligned across scripts and usable through the current installation entry points.
@@ -1220,19 +1278,25 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
   - [ ] Windows applies exactly the staged version and retains the choice when the remote script/release list changes; incompatible staging fails without silently downloading another target.
   - [ ] Shell syntax and focused Flutter installer tests pass; Windows and macOS acceptance pass on their runners; tested README commands match the contract; `make check` passes at the transition-minor release gate.
 
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V1-05A | V1-01 | Shared selection/consent/exact-tag handoff contract in both scripts and app invocations; offline pagination, semver, major/channel, unknown-install and failure-preservation fixtures pass on Linux; record the Windows executor inputs for B. |
+| V1-05B | V1-05A | Windows staging/restart/apply preserves that contract and applies the approved payload under changed remote metadata/script; native isolated acceptance covers recovery and incompatible staging. |
+| V1-05C | V1-05A, V1-05B | macOS shared selection acceptance, verified install.cat/direct entry points, tested README commands and final parent coverage audit; native runner evidence and the transition-minor check are linked. |
+
 #### V1-02 — Release v1.266.0 with the CodeWalk 2 announcement
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:release`
 - **Depends on:** V1-01, V1-05
 - **Why:** The gate only protects users who receive it before v2 exists.
-- **Scope:** `ANNOUNCE="…" make release V=minor`; announcement text (English, ≤ 300 characters) approved by the product owner, for example: "CodeWalk 2 is coming: it requires OpenCode 2 servers. When it arrives, this version will ask before updating."
-- **Done when:** [ ] release published, CI green, What's-new shows the announcement; [ ] product owner approved the text.
+- **Scope:** verify published/tracked legacy ref and passing checks, then use `ANNOUNCE="…" make release V=minor` only under the active release authorization. Announcement text (English, ≤ 300 characters) is separately approved by the product owner, for example: "CodeWalk 2 is coming: it requires OpenCode 2 servers. When it arrives, this version will ask before updating."
+- **Done when:** [ ] intended legacy commit/tag released, CI green, What's-new shows the announcement; [ ] release authorization and approved text recorded. Later post-GA metadata/build-code policy is validated in V2-077, not a circular prerequisite for creating the legacy branch.
 
-#### V1-03 — Create the legacy `v1` branch now and set maintenance rules
+#### V1-03 — Reconcile the legacy `v1` branch and maintenance rules
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:release`
 - **Depends on:** —
 - **Why:** Preserve a releasable v1 for users who stay (D03, D04).
-- **Scope:** create the local `v1` branch now from `d1ed5ee9` and select it as requested; document branch roles in `AGENTS.md`. Keep the current source/tests/tooling in `main` as the temporary v2 reference baseline. Implement V1-01/V1-05 and publish V1-02 later on `v1`; do not move/recreate its starting point at the future transition tag. Record bounded maintenance until the accepted MVP and subsequent freeze. Branch publication/tracking and CI proof require a separately authorized push; local branch creation alone does not imply a published legacy branch.
-- **Done when:** [ ] option A and branch roles recorded; [ ] local `v1` exists at the intended baseline and checkout preserves local work; [ ] `main` retains the original code/tree; [ ] before the first authorized legacy release, tracking/publication and passing CI are verified, with the post-GA latest/build-code policy from §9.3 tested in V2-077.
+- **Scope:** reconcile the local `v1` ref's ancestry from `d1ed5ee9` and branch roles in `AGENTS.md`. Creation/selection occurred on 2026-10-02; do not recreate or rewind an advanced ref or treat that old checkout request as a new instruction. Keep the reference source/tests/tooling in `main`. Record bounded maintenance and MVP freeze. If a ref is genuinely absent, resolve the task's branch authorization before creation; branch publication/tracking and CI proof remain prerequisites of the separately authorized release V1-02.
+- **Done when:** [ ] option A and branch roles recorded; [ ] local `v1` ancestry and live ref evidence reconciled without changing existing work; [ ] `main` retains the reference tree; [ ] publication/tracking/CI state is recorded as verified or pending, without claiming local creation proves publication.
 
 #### V1-04 — Split Web deployment
 - **Type / size / labels:** chore · S · `milestone:v1.266` `area:web` `area:release`
@@ -1243,19 +1307,19 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 ### 12.2 Milestone v2.0 — Foundations
 
-#### V2-001 — Commit the plan and decide where the research pack lives
+#### V2-001 — Reconcile the versioned plan and research location
 - **Type / size / labels:** docs · S · `milestone:v2.0` `type:docs`
 - **Depends on:** —
 - **Why:** The plan and its evidence must be versioned so intent survives implementation changes.
-- **Scope:** commit `v2-plan.md`; decide whether `plan/` (dossiers, raw evidence, helper plans) is committed (for example as `docs/v2/research/`) or archived elsewhere; add a README pointer.
-- **Done when:** [ ] plan committed; [ ] research location decided and linked.
+- **Scope:** verify the existing plan commit and tracked `plan/` research/README pointer; reconcile the corresponding Issue. Both are already evidenced in the 2026-10-03 local snapshot. Do not repeat the commit or ask a resolved location question merely because the scope index is unchecked. Any later relocation is a distinct explicit decision; commit new changes only when authorized.
+- **Done when:** [ ] plan commit and research location/pointer verified; [ ] Issue evidence reconciled, or a concrete missing artifact identified before implementation proceeds.
 
 #### V2-002 — ADR-058: CodeWalk v2 architecture
 - **Type / size / labels:** docs · M · `milestone:v2.0` `type:docs`
 - **Depends on:** V2-001
 - **Why:** ADR-023 requires recorded contracts; v2 changes topology and the contract model.
-- **Scope:** D01 with clauses, ports and adapters, canonical model, capability model, contract-first per harness, direct-adapter rule (§6.12); mark superseded v1 invariants (§10 list, after verifying each ADR's scope).
-- **Done when:** [ ] ADR merged through the ADR flow; [ ] superseded ADRs carry pointers.
+- **Scope:** D01 with clauses, ports/adapters, model/capabilities, contract-first per harness and direct-adapter rule; version the v1/v2 obligation boundaries and G4's transitional scope. Add the pinned v2 official anchors and route ADR/project references under §10 before v2 consumers; retained legacy contracts remain explicitly labelled. Review each candidate ADR's actual scope before superseding it.
+- **Done when:** [ ] ADR merged through the ADR flow; [ ] superseded scopes carry pointers; [ ] official v2 anchor paths/provenance and scoped legacy rules are unambiguous before v2 code.
 
 #### V2-003 — ADR-059: permission modes in v2
 - **Type / size / labels:** docs · S · `milestone:v2.0` `type:docs`
@@ -1272,48 +1336,64 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V2-005 — SP-01: OpenCode v2 live contract capture
 - **Type / size / labels:** spike · L · `milestone:v2.0` `area:opencode` `type:spike`
-- **Depends on:** a disposable host running OpenCode 2.0.2x
+- **Depends on:** V2-005A, V2-005B, V2-005C, V2-005D, V2-005E
+- **Resources:** disposable OpenCode host, user-authorized credentials/operations and the platform/network needed by the selected child; never production data.
 - **Why:** Several design decisions rest on facts that must be observed live (§3.1 items marked [U]).
-- **Scope:** record and answer: pairing redemption and token self-renewal; `/api/info` shape; a full turn with text/reasoning/tools; permission `once`/`always`/`reject` with and without a note; form reply and dismissal; foreground, background, and nested-background subagents (#48826), `POST …/background`; interrupt; retry and quota error bodies; revert stage/clear/commit including file effects; prompt `id` idempotency and 409; inbox steer/queue/cancel; `/api/session/active` with the TUI running; TUI session visibility; experimental durable log; fs write confinement; PDF behavior; bytes per minute with three concurrent sessions (G-BW); reading the service credential through official commands; CORS configuration.
+- **Scope:** record and answer pairing/renewal, info and full text/reasoning/tool turns; prompt **and create** replay/conflict/timeout behavior; inbox/history/reconnect; permissions (including same-session batch rejection with/without note), forms, children, interrupt, retry/quota and revert; active/TUI visibility; durable log; fs-write physical containment (real symlink/junction and concurrent path replacement, not names alone); PDF; cellular bandwidth with three concurrent sessions; official service-credential retrieval and CORS. Each child updates only the facts/compatibility entries it verified; absent containment keeps write unavailable.
 - **Done when:** [ ] fixtures in `test/contract/fixtures/opencode/<version>/` with a README; [ ] a note answers every question with evidence; [ ] contradictions with §3.1 are reported and the plan updated (§17); [ ] the compatibility table is seeded.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-005A | V2-002 | Info/auth/pairing, token renewal and a full text/reasoning/tool turn with TUI visibility; sanitized observed fixtures and initial compatibility/anchor check. |
+| V2-005B | V2-005A | Prompt and create replay/conflict/timeout matrix, steer/queue/cancel, active state, inbox/history promotion and reconnect/restart captures; classify retry safety per operation. |
+| V2-005C | V2-005A | Permission once/always/reject, parallel same-session rejection with/without note, independent-session control and forms reply/dismissal; observed interaction fixtures. |
+| V2-005D | V2-005B, V2-005C | Foreground/background/nested children, interrupt/retry/quota and revert stage/clear/commit with actual file effects; outcome/ownership fixtures. |
+| V2-005E | V2-005B | Durable-log cursors, real filesystem escapes/TOCTOU, attachments/PDF, bandwidth with three concurrent sessions, service credentials and CORS; per-capability proof or explicit unavailable fallback, with measurements/provenance. |
 
 #### V2-006 — SP-02: Codex recordings (gate G1)
 - **Type / size / labels:** spike · M · `milestone:v2.0` `gate` `type:spike`
-- **Depends on:** a machine with Codex CLI and daemon
+- **Depends on:** V2-001
+- **Resources:** disposable project and machine with Codex CLI/daemon and user-established authentication; split capture/topology experiments under §11.5 before starting.
 - **Why:** G1/G2 need real Codex data; v2.1 needs the attach method decided.
-- **Scope:** start/attach the shared daemon (socket vs `app-server proxy`); `thread/list` including TUI threads (`sourceKinds`); resume a running TUI thread and observe approval replay; answer an approval from a second client and observe `serverRequest/resolved`; steer, interrupt, child threads, plan updates, token usage, rate limits; record daemon vs CLI version. Separately test an authenticated dedicated WebSocket listener with the TUI explicitly pointing to it through `codex --remote`: a second protocol client joins the same thread, answers an approval, disconnects/rejoins mid-turn, and observes the authoritative state. Record token/JWT auth, non-loopback auth enforcement, `Origin` rejection, connected-server version, and ownership/isolation from the default daemon. This evaluates host upstream transport options, not a direct app adapter. No production code.
-- **Done when:** [ ] fixtures in `test/contract/fixtures/codex/<server-version>/`, labeled by daemon vs dedicated-listener topology; [ ] note with the host attach recommendation for Linux/macOS/Windows and verified auth/browser/reconnect limits; [ ] dedicated-listener results distinguish supported live sharing from unverified behavior and never claim attachment to existing default-daemon sessions.
+- **Scope:** start/attach the shared daemon (socket vs `app-server proxy`); `thread/list` including TUI threads (`sourceKinds`); resume a running TUI thread and observe approval replay; answer an approval from a second client and observe `serverRequest/resolved`; capture negotiated questions/user input, steer, interrupt, child/background work, plan updates, usage/rate limits and errors/retries; record daemon vs CLI version. Separately test an authenticated dedicated WebSocket listener with the TUI explicitly pointing to it through `codex --remote`: a second protocol client joins the same thread, answers an approval, disconnects/rejoins mid-turn, and observes the authoritative state. Record token/JWT auth, non-loopback auth enforcement, `Origin` rejection, connected-server version, and ownership/isolation from the default daemon. This evaluates host upstream transport options, not a direct app adapter. No production code.
+- **Done when:** [ ] observed fixtures and the complete G1 scenario matrix in `test/contract/fixtures/codex/<server-version>/`, labeled by daemon vs dedicated-listener topology; [ ] note with the host attach recommendation for Linux/macOS/Windows and verified auth/browser/reconnect limits; [ ] dedicated-listener results distinguish supported live sharing from unverified behavior and never claim attachment to existing default-daemon sessions. Uncaptured required scenarios remain pending/inconclusive, not synthetic G1 passes.
 
 #### V2-007 — SP-03: Claude Code recordings (gate G1)
 - **Type / size / labels:** spike · M · `milestone:v2.0` `gate` `type:spike`
-- **Depends on:** a machine with Claude Code logged in by the user (or an API key)
+- **Depends on:** V2-001
+- **Resources:** disposable project and machine with Claude Code logged in by the user (or user-established API-key mode); split captures under §11.5 and establish project trust before runtime activation.
 - **Why:** G1/G2 need real Claude data; v2.2 needs ownership and licensing facts early.
-- **Scope:** capture a streaming-input `query()` session: partial messages, tools, `canUseTool`, AskUserQuestion, background tasks and stop, `rate_limit_event`, interrupt race; `listSessions` including TUI-created sessions; resume while the TUI holds the session; `rewindFiles`; record the SDK license terms relevant to redistribution inside an AGPL/commercial app (input to `V22-004`). The host never reads credential files.
-- **Done when:** [ ] fixtures in `test/contract/fixtures/claude/<sdk-version>/`; [ ] note with ownership rules and the licensing question stated precisely.
+- **Scope:** capture a streaming-input `query()` session: partial messages, tools, `canUseTool`, AskUserQuestion, background tasks/stop, usage/errors and interrupt race; history/ownership/resume/rewind; verify SDK/headless project hooks/MCP behavior and the history-only versus trusted-runtime activation boundary (§6.13). Record SDK terms relevant to redistribution as input to V22-004. The host never reads credential files.
+- **Done when:** [ ] observed fixtures and complete G1 scenario matrix in `test/contract/fixtures/claude/<sdk-version>/`; [ ] ownership/trust rules and licensing question recorded. Missing required captures remain pending/inconclusive; a schema-derived transcript does not pass G1.
 
 #### V2-008 — SP-04: Web transport
 - **Type / size / labels:** spike · S · `milestone:v2.0` `area:web` `type:spike`
+- **Depends on:** V2-005A
 - **Scope:** Flutter Web `fetch` streaming SSE with an `Authorization` header in Chrome and Safari; `opencode service set cors <origin>`; mixed-content matrix (HTTPS page → HTTP LAN host); PTY ticket WebSocket.
 - **Done when:** [ ] note with the supported Web configurations and onboarding copy; [ ] terminal-on-Web decision.
 
 #### V2-009 — SP-05: iOS bring-up
 - **Type / size / labels:** spike · M · `milestone:v2.0` `area:ios` `type:spike`
-- **Depends on:** macOS CI runner; Apple Developer account for device/TestFlight (§15)
+- **Depends on:** V2-001
+- **Resources:** macOS runner for compilation; Apple account/signing/device for their separate device/distribution checks (§15.4).
 - **Scope:** `flutter create --platforms=ios`; plugin audit (desktop-only plugins excluded); `flutter build ios --no-codesign`; ATS and Local Network permission against a plain-HTTP Tailscale/LAN host; Keychain; background/resume behavior.
 - **Done when:** [ ] iOS compiles in CI; [ ] list of excluded plugins/features; [ ] distribution path decided (TestFlight or build-only).
 
 #### V2-010 — SP-06: macOS managed install and distribution
 - **Type / size / labels:** spike · S · `milestone:v2.0` `area:desktop` `type:spike`
+- **Depends on:** V2-001
 - **Scope:** sandboxed vs non-sandboxed notarized build; can the app download, verify, and run `opencode service`?
 - **Done when:** [ ] decision: non-sandboxed notarized build with managed install, or connect-only macOS app plus a separately installed host.
 
 #### V2-011 — SP-07: Android background monitor
 - **Type / size / labels:** spike · S · `milestone:v2.0` `area:android` `type:spike`
+- **Depends on:** V2-005B
 - **Scope:** foreground-service type and Android 15+ `dataSync` time limit handling; holding one SSE stream; battery and data per hour; behavior over embedded Tailscale.
 - **Done when:** [ ] service type chosen; [ ] timeout handling designed; [ ] measured budget recorded.
 
 #### V2-012 — SP-08: managed OpenCode service lifecycle per OS
 - **Type / size / labels:** spike · M · `milestone:v2.0` `area:desktop` `type:spike`
+- **Depends on:** V2-005A, V2-010
 - **Scope:** download from update metadata + SHA-256 + size; official layout; `opencode service start/status`; registration file and credential retrieval; adopt an existing v2 service; behavior with an existing v1 install (stop and ask); Linux x64/ARM64 locally, macOS and Windows (x64/ARM64) on CI runners.
 - **Done when:** [ ] per-OS procedure and failure modes documented; [ ] fallback per OS decided.
 
@@ -1321,199 +1401,262 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V2-020 — New workspace skeleton
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:core`
-- **Depends on:** V2-002
+- **Depends on:** V2-020A, V2-020B, V2-020C
 - **Why:** Establish the layering of §6.3 before any feature code.
 - **Scope:** pub workspace with `codewalk_core`, `codewalk_net`, `harness_opencode` (empty exports), `harness_host` placeholder; app bootstrap with composition root (`get_it` only there), `provider` controllers, `go_router` with deep links; theme, l10n bridge, and rendering carried over; temporary `lib/main_v2.dart`; CI runs analyze and tests for every package; new code does not use `dartz`.
-- **Done when:** [ ] `make check` green; [ ] all six targets compile (iOS via macOS CI or recorded prerequisite).
+- **Done when:** [ ] checks discover every package and explicitly exercise the v2 entry point; [ ] the six-platform evidence matrix records actual compiler results and outstanding prerequisites separately; [ ] missing platform evidence remains pending under §15.4, not an asserted successful build. This foundation output does not pass the later publication gate V2-078.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-020A | V2-002, V2-003, V2-004 | Package graph, empty exports, minimal v2 bootstrap and transitional enforcement manifest with §6.3 guards invoked by CI; package/entry-point smoke checks prove the graph without importing legacy code. First-commit guards are part of this output, not deferred to feature work. |
+| V2-020B | V2-020A, V2-021 | Composition root/controllers/router with deep-link placeholders, theme/l10n and minimal rendering bridge; mobile/desktop bootstrap smoke tests pass. Full rendering/settings parity remains V2-071. |
+| V2-020C | V2-020B, V2-009 | Aggregate package checks and explicit v2 CI/build targets; record compile results/prerequisites per platform and prove new-package test discovery. Identify retained legacy-reference versus active-v2 test targets and staged retirement ownership under §8.3; neither suite substitutes for the other. An unavailable signing/device resource is not a compile or distribution pass. |
 
 #### V2-021 — Gate G4: architecture rules in CI
 - **Type / size / labels:** test · S · `milestone:v2.0` `gate` `area:core`
-- **Depends on:** V2-020
-- **Scope:** `tool/ci/import_rules.dart` (or equivalent) enforcing §6.3 rules; planted-violation test proves the check fails.
-- **Done when:** [ ] CI fails on each planted violation and passes on main.
+- **Depends on:** V2-020A
+- **Scope:** harden and test the V2-020A guards in `tool/ci/import_rules.dart` (or equivalent) against all §6.3 rules and the transitional manifest; planted-violation tests prove each check fails before feature consumers start.
+- **Done when:** [ ] CI fails on each planted violation in governed paths, including direct/transitive imports of retained legacy code; [ ] the narrow generated/vendor exclusions and retained-baseline scope are tested; [ ] main passes without weakening authored-v2 rules.
 
 #### V2-022 — Domain model in `codewalk_core`
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:core`
-- **Depends on:** V2-020
+- **Depends on:** V2-022A, V2-022B, V2-022C
 - **Scope:** identity (§6.4), timeline items, session events, interactions, forms, work items, plans, usage, errors, capabilities (§6.5–6.7), ports (§6.6). Pure Dart, no I/O.
 - **Done when:** [ ] unit tests for value semantics and decoding of unknown values; [ ] reviewed against G1 fixtures before G2.
 
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-022A | V2-020A, V2-021 | Identity and ownership value types; pure-Dart value/collision tests, independently compilable without ports referencing future model definitions. |
+| V2-022B | V2-022A | Canonical items/events, capabilities, interactions/forms/work/usage/error definitions and their ports; unknown-value/lifecycle tests and per-operation uncertain/retry/unavailable contract, with no wire/platform imports. |
+| V2-022C | V2-022B, V2-006, V2-007 | Review the model against the observed G1 scenario matrix; document missing concepts and resolve them before G2, retaining fixture traceability. |
+
 #### V2-023 — Reducer and session store
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:core`
-- **Depends on:** V2-022
+- **Depends on:** V2-022B, V2-005A
 - **Scope:** `reduce(state, event) → (state, effects)` with the invariants of §6.5; session store per open session; LRU of open sessions; resident cap.
 - **Done when:** [ ] property test: any prefix of a fixture + reconnect + hydration equals the full replay; [ ] duplicate, reordered, late-delta, and unknown-event cases pass.
 
 #### V2-024 — Gate G3: fake harness adapter
 - **Type / size / labels:** test · M · `milestone:v2.0` `gate` `area:core` `area:ui`
-- **Depends on:** V2-022, V2-023
+- **Depends on:** V2-024A, V2-024B
 - **Scope:** scripted adapter with a capability set unlike OpenCode (no undo, no terminal, no queue, no forms, history-only external sessions, quota windows present); scenario scripts for streaming, approvals, errors, disconnects.
 - **Done when:** [ ] the same chat, session, and composer screens pass widget tests with both the fake and OpenCode fixtures; [ ] no screen code changes were needed for the fake.
 
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-024A | V2-022B, V2-023 | Scripted domain adapter and non-OpenCode capability scenarios; port/reducer tests pass without requiring screens that do not yet exist. |
+| V2-024B | V2-024A, V2-060A | Run those scenarios through the actual shared session/chat/composer screens; widget tests prove hidden/unavailable controls and no harness-name branches. G3 passes only here, not when A alone is delivered. |
+
 #### V2-025 — Gate G5: CHP v1 schema and examples
 - **Type / size / labels:** feature · M · `milestone:v2.0` `gate` `area:core`
-- **Depends on:** V2-022
-- **Scope:** `contracts/codewalk-host-v1/` JSON Schema for frames, commands, receipts, snapshots, capabilities; example frames; Dart validation tests; versioning rules (§6.11.2).
-- **Done when:** [ ] schema and examples merged; [ ] Dart tests validate every example.
+- **Depends on:** V2-022B
+- **Scope:** `contracts/codewalk-host-v1/` JSON Schema with named canonical payload definitions plus CHP envelopes, commands, receipts, snapshots and capabilities. Reuse definitions rather than treating transport and domain as interchangeable; record which definition validates each expectation. Add examples, Dart validation and versioning rules.
+- **Done when:** [ ] schema/examples merged and every example validated; [ ] the app-facing revision and canonical definition references are explicit; [ ] release evidence matches G2's final revision. Model/schema fixes invalidate earlier G2/G5 results and require revalidation, not a dependency cycle or premature Host implementation.
 
 #### V2-026 — Gate G2: two-adapter fit
 - **Type / size / labels:** test · M · `milestone:v2.0` `gate` `area:core`
-- **Depends on:** V2-006, V2-007, V2-022, V2-025
+- **Depends on:** V2-006, V2-007, V2-022, V2-023, V2-025
 - **Why:** The core protection against an OpenCode-shaped model.
-- **Scope:** for each recorded Codex and Claude session, write the expected canonical event stream (JSON) and validate it against the schema; list every concept that did not fit and fix the model; record the review.
-- **Done when:** [ ] all expectations validate without schema changes after the fixes; [ ] review notes stored with the fixtures; [ ] these expectations become the acceptance tests of `V21-005` and `V22-002`.
+- **Scope:** map each recorded Codex/Claude scenario's frame ranges to expected canonical events, named payload definitions and reducer states. Assert ownership/approval scope, questions/background completion, unknowns and cumulative/partial usage semantics; list every loss or missing concept and fix the model before freezing the revision. Validate payloads and example CHP envelopes separately; a schema-valid hand-authored stream alone does not prove semantic fit. Full production adapters remain later work.
+- **Done when:** [ ] frame-to-event mappings, schema validations and reducer assertions cover the G1 matrix; [ ] missing concepts resolved and review notes stored; [ ] the final G2/G5 revision is the same; [ ] these expectations become acceptance tests of V21-005 and V22-002 without later schema changes being silently accepted.
 
 #### V2-027 — Local storage v2
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:core`
-- **Depends on:** V2-020
+- **Depends on:** V2-020A, V2-021, V2-004
 - **Scope:** `cw2.*` namespace, schema version, payload store with ADR-016 limits, secure storage per endpoint, migration hooks (used by `V2-076`).
 - **Done when:** [ ] tests for schema upgrades and corrupted payloads; [ ] v1 keys untouched.
 
 #### V2-028 — Transport package
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:core`
-- **Depends on:** V2-020, V2-008
+- **Depends on:** V2-028A, V2-028B, V2-028C
 - **Scope:** `codewalk_net`: HTTP client per endpoint (no global active-server client), SSE parser (multi-line `data:`, comments, chunk-safe UTF-8, 16 MiB cap, isolate on IO), WebSocket client, Web `fetch` streaming, auth decorators (Basic/pairing token, proxy auth hook, Tailscale), backoff with jitter, watchdog.
 - **Done when:** [ ] parser tests (split UTF-8, comments, oversize, EOF); [ ] Web and IO implementations pass the same suite.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-028A | V2-020A, V2-021, V2-005A | Per-endpoint HTTP/IO SSE framing and limits; split UTF-8, comments, multiline, oversize and EOF parser tests. |
+| V2-028B | V2-028A, V2-008 | Web fetch streaming, WS and auth decorators with origin/redirect handling; IO/Web run equivalent framing/auth cases. |
+| V2-028C | V2-028B | Reconnect watchdog/backoff, isolation/batching and bounded-buffer behavior; deterministic timing/overflow tests and package check aggregation. |
 
 ### 12.4 Milestone v2.0 — OpenCode adapter
 
 #### V2-040 — Endpoint profiles, detection, version policy, v1 explainer
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode`
-- **Depends on:** V2-028
+- **Depends on:** V2-028, V2-027, V2-005A
 - **Scope:** profiles; authenticated `/api/info`; `503 service_*` handling; v1 detection (JSON `/global/health`) → explainer with server upgrade instructions and the legacy link; `compat` table and "untested version" chip.
 - **Done when:** [ ] tests for HTML-200, v1 JSON, 401, 503 with `retry-after`, newer/older versions.
 
 #### V2-041 — Pairing and authentication
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode`
-- **Depends on:** V2-040
+- **Depends on:** V2-040, V2-027, V2-056A, V2-005A
 - **Scope:** QR scan, pasted link, `codewalk://pair` deep link; redeem with `Accept: application/json`; store token; expiry display and re-pair; password entry; renewal only if SP-01 confirms it.
 - **Done when:** [ ] pair-by-QR and by-password against the fake server and a live server; [ ] expired/revoked tokens lead to "pair again" without data loss.
 
 #### V2-042 — Event stream, hydration, reconnect
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode`
-- **Depends on:** V2-028, V2-040, V2-005
-- **Scope:** algorithm of §6.10 (buffer, hydrate, apply, optional durable log behind a flag, incomplete prefix, isolate batching, watchdog, backoff).
+- **Depends on:** V2-028, V2-040, V2-041, V2-023, V2-005B, V2-005D, V2-056A
+- **Scope:** algorithm of §6.10 (buffer, hydrate, apply, incomplete prefix, isolate batching, watchdog, backoff). Optional durable log stays unavailable until V2-005E verifies its semantics; select a bounded implementation child with that prerequisite before enabling the flag.
 - **Done when:** [ ] fixtures: drop mid-text, mid-tool, during a pending approval, during revert; overflow disconnect; server restart with `shutdown`; [ ] no duplicates and no stuck "running" after any of them.
 
 #### V2-043 — Session index and lifecycle
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-042
+- **Depends on:** V2-042, V2-027, V2-005B
 - **Scope:** cursor-paged list across projects; children under parents; create with `location.directory`; rename; delete (children cascade warning); fork; unread via `POST …/view`; local hide (archive); ownership labels; sessions created in the TUI appear live.
 - **Done when:** [ ] a session started in the TUI appears without manual refresh; [ ] widget tests for grouping and labels.
 
 #### V2-044 — Timeline projection
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-042, V2-023
+- **Depends on:** V2-044A, V2-044B, V2-044C
 - **Scope:** map flat messages and streaming events to canonical items; `ToolKind` classification; synthetic messages as notices; unknown items; port the scroll coordinator and viewport invariants with their tests.
-- **Done when:** [ ] golden fixtures produce expected timelines; [ ] a 2,000-item session scrolls within budget.
+- **Done when:** [ ] golden fixtures produce expected timelines; [ ] a 2,000-item total-history fixture scrolls within budget while at most 500 items remain resident, using pagination.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-044A | V2-042, V2-023 | Flat-history/live-event projection into canonical items; golden fixtures cover notices, unknown items and authoritative completion. |
+| V2-044B | V2-044A, V2-043, V2-020B | Shared session/timeline screen wired only to the domain/controller; basic mobile/desktop widget tests and stable composer slot for sending. |
+| V2-044C | V2-044B | Scroll/viewport invariants and bounded pagination ported with tests; 2,000 total versus 500 resident performance case. Record the affected legacy test dispositions and old-to-new regression mapping (§8.3); retire obsolete main-side cases/support only after replacement and consumer checks. |
 
 #### V2-045 — Sending and outbox
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode`
-- **Depends on:** V2-044, V2-005
+- **Depends on:** V2-044B, V2-005B, V2-027
 - **Scope:** `msg_` id minting with server-clock offset; persist before POST; states (§6.9); bounded same-id retry; 409 handling; steer/queue split control; inbox chips with cancel and switch; fallback path if SP-01 rejects client ids.
 - **Done when:** [ ] timeout-after-admission fixture yields one message; [ ] identical prompts sent twice yield two messages; [ ] queue cancel racing delivery shows the real outcome.
 
 #### V2-046 — Execution state, stop, retries
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode`
-- **Depends on:** V2-042
+- **Depends on:** V2-042, V2-005D
 - **Scope:** execution events + active list; stop the turn; retry countdown; `interrupted{shutdown}` as "resuming"; parent idle while children run.
 - **Done when:** [ ] no state derived from `session.status`; [ ] fixtures for each outcome.
 
 #### V2-047 — Permissions and modes
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-044, V2-003
+- **Depends on:** V2-047A, V2-047B
 - **Scope:** global default "Allow all" (ON); per-session mode chip (Ask / Allow all / Unrestricted) with effective-mode display; automatic `once` replies for all observed sessions; never-automatic list; approval card with OpenCode choices and labels (§5.4); child requests in the parent; first-reply-wins handling; Unrestricted add/remove of only CodeWalk's rule with conflict warning.
 - **Done when:** [ ] tests: no `always` is ever sent automatically; forms never auto-answered; two clients answering; reject with/without note; child request surfaced; Unrestricted removal preserves other rules.
 
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-047A | V2-044B, V2-003, V2-005C | Policy/reply mapping with automatic once, never-automatic requests and first-reply-wins; tests include batch rejection with/without note and an unaffected different session. |
+| V2-047B | V2-047A | Mode chip/cards, child-origin display and Unrestricted add/remove with conflict warning; effective-mode UI and multi-client widget/contract tests. |
+
 #### V2-048 — Forms
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-044
+- **Depends on:** V2-044B, V2-005C
 - **Scope:** renderer for all field types, conditional visibility, required/validation, custom answers, external links, secret input, global-owner forms, dismiss semantics; answers preserved on network failure.
 - **Done when:** [ ] fixtures for each field type; [ ] resolved-elsewhere closes the card.
 
 #### V2-049 — Subagents and the Background Work tray
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-043, V2-046
+- **Depends on:** V2-043, V2-044B, V2-046, V2-005D
 - **Scope:** discovery order (§6.10); timeline delegation cards; tray (sheet on phones, pane on wide screens); open child with parent breadcrumb and scroll restore; stop child; "move all running work to background"; synthetic completion rows; #48826 "may still be working" handling; child composer gated by capability.
 - **Done when:** [ ] fixtures for foreground, background, nested background (early completion), parent interrupted with background children running; [ ] reconnect rebuilds child links from `parentID`.
 
 #### V2-050 — Revert, fork, diff
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-044
+- **Depends on:** V2-044B, V2-005D
 - **Scope:** preview, stage, restore (clear), apply (commit), disabled while running (409 message); fork from a message; turn diff viewer via `GET …/diff?from&to`; capability hidden without git snapshots.
 - **Done when:** [ ] fixtures for stage/clear/commit and 409; [ ] labels follow §5.12.
 
 #### V2-051 — Files
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-043
-- **Scope:** tree, quick open, viewer; experimental write behind the setting with client-side containment (inside the session directory, no `..`, no absolute paths outside); clear "experimental" labeling; no rename/delete/new file.
-- **Done when:** [ ] path validation tests (traversal, absolute, symlink-looking names); [ ] write disabled by default.
+- **Depends on:** V2-051A, V2-051B
+- **Scope:** tree, quick open and viewer; conditional experimental write under §5.12, with lexical validation and separately proven remote physical containment; no rename/delete/new file.
+- **Done when:** [ ] traversal/absolute/real-symlink/junction/concurrent-path-change cases evidence the actual boundary; [ ] write is off by default and unavailable if containment is unproved; [ ] the capability reason is tested rather than presenting lexical checks as containment.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-051A | V2-043 | Read-only tree/find/viewer; normal/unknown/binary/error fixtures and UI tests. Write investigation does not block this output. |
+| V2-051B | V2-051A, V2-005E | Experimental setting/capability guard with verified containment or explicit unavailable fallback; real-path escape and unsupported-write tests, no shell emulation. |
 
 #### V2-052 — Terminal and shell mode
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode`
-- **Depends on:** V2-028, V2-008
+- **Depends on:** V2-028, V2-008, V2-041, V2-044B, V2-045
 - **Scope:** PTY via one-time ticket; reconnect by cursor; resize; extra keys; `!` shell via `POST …/shell`; Web per SP-04.
 - **Done when:** [ ] terminal works on desktop and Android; [ ] ticket expiry handled.
 
 #### V2-053 — Commands, skills, mentions, attachments
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-045
+- **Depends on:** V2-045, V2-051A
 - **Scope:** `/` palette with sources; command execution endpoint; skills attached structurally; `@` file/agent mentions with ranges via `fs.find`; image attachments with MIME/size checks; PDF disabled with explanation.
 - **Done when:** [ ] request bodies match recorded fixtures; [ ] PDF selection shows the explanation instead of sending.
 
 #### V2-054 — Model, agent, variant selection
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-044
+- **Depends on:** V2-044B, V2-045, V2-005A
 - **Scope:** catalog, favorites/recents (keep UI), session-level changes applied before send, notices for switches, external changes reflected.
 - **Done when:** [ ] race test: model change during send applies to the intended session only.
 
 #### V2-055 — Usage, context, errors
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:opencode` `area:ui`
-- **Depends on:** V2-044
+- **Depends on:** V2-044B, V2-005D
 - **Scope:** context meter from the last step and `limit.context`; tokens and cost; typed error cards with recovery actions; quota shown only from structured limit errors; "not exposed by OpenCode" copy.
 - **Done when:** [ ] cost sums every step once; [ ] unknown values never shown as zero.
 
 #### V2-056 — Fake OpenCode v2 server and contract drift checks
 - **Type / size / labels:** test · M · `milestone:v2.0` `area:opencode` `type:test`
-- **Depends on:** V2-005
-- **Scope:** `FakeOpenCodeV2Server` (replaces `test/support/mock_opencode_server.dart`) replaying fixtures with fault injection (disconnect mid-delta, overflow, 503, 401, HTML-200, malformed JSON, oversize frame, duplicates); `used-operations` list checked against the pinned OpenAPI; nightly job against the latest OpenCode release (replaces `opencode-smoke.yml`'s v1 checks).
-- **Done when:** [ ] all adapter tests run against the fake; [ ] drift job opens an issue on changes.
+- **Depends on:** V2-056A, V2-056B
+- **Scope:** `FakeOpenCodeV2Server` (replaces `test/support/mock_opencode_server.dart`) replaying fixtures with fault injection (disconnect mid-delta, overflow, 503, 401, HTML-200, malformed JSON, oversize frame, duplicates); `used-operations` list checked against the pinned OpenAPI; nightly job against the latest OpenCode release (replaces `opencode-smoke.yml`'s v1 checks). V2-056B records the §8.3 disposition of old v1 adapter/smoke tests and support; retirement follows accepted v2 coverage and the last legacy-reference consumer.
+- **Done when:** [ ] all adapter tests run against the fake; [ ] drift job opens an issue on changes; [ ] obsolete main-side adapter/smoke cases and orphan support are retired or have a named remaining consumer and V2-084 retirement owner, with replacement evidence linked.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-056A | V2-005A, V2-005B, V2-005C | Minimal fixture-backed fake for info/auth/pairing, session/history/inbox, interactions and SSE; prove deterministic replay and fault-injection controls before adapter consumers. |
+| V2-056B | V2-056A, V2-005, V2-040, V2-041, V2-042, V2-043, V2-044, V2-045, V2-046, V2-047, V2-048, V2-049, V2-050, V2-051, V2-052, V2-053, V2-054, V2-055, V2-060 | Complete fault corpus/adapter test integration and used-operations/drift checks; record old-test-to-v2-coverage mappings and retire obsolete adapter/smoke cases/support under §8.3, retaining still-required legacy-reference consumers until V2-084. No consumer depends on this all-tests aggregate to start, avoiding a fake-server acceptance cycle. |
+
+#### V2-060 — Internal vertical slice before feature expansion
+- **Type / size / labels:** test · M · `milestone:v2.0` `area:core` `area:ui` `type:test`
+- **Depends on:** V2-060A, V2-060B
+- **Why:** Prove the composition of actual ports, storage, transport, reducer and shared screens before adding the remaining polish/features. This is private development validation, not permission for a public beta or a waiver of G1–G5.
+- **Scope:** profile/pairing → existing session/history → persisted send/admission → streamed text/tool → permission reply → stop/reconnect. Compare the same screens with the scripted domain fake and fixture-backed OpenCode; repeat a minimal live flow on a disposable host.
+- **Done when:** [ ] integrated fake tests cover a lost admission response, identical prompts, inbox promotion, interrupted stream and colliding native IDs across hosts; [ ] live smoke evidence records versions/target and remaining limitations; [ ] no harness-specific screen changes.
+
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-060A | V2-020B, V2-024A, V2-027, V2-041, V2-043, V2-044B, V2-045, V2-046, V2-047, V2-056A | Integrated fake flow through real shared screens/controllers; fault/collision/widget tests pass on the supported development targets. |
+| V2-060B | V2-060A, V2-005B, V2-005C | Minimal live smoke on a disposable host and agreed reference target; record pairing/send/approval/stop/reconnect results. Missing target resources stay pending, not a release or G3 pass. |
 
 ### 12.5 Milestone v2.0 — App features, platforms, release
 
 #### V2-070 — Tabs, drafts, input history, canned answers
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:ui`
-- **Depends on:** V2-043, V2-027
+- **Depends on:** V2-043, V2-044B, V2-045, V2-027
 - **Scope:** port UI; state keyed by `SessionRef`; drafts survive process death; canned answers.
 - **Done when:** [ ] existing widget tests for kept features pass after the port.
 
 #### V2-071 — Rendering, themes, settings, shortcuts, logs, release history
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:ui`
-- **Depends on:** V2-020
+- **Depends on:** V2-071A, V2-071B, V2-071C, V2-071D
 - **Scope:** markdown/math/HTML/Mermaid/code; 37 theme presets and Material You; settings shell; keyboard shortcuts; sanitized logs; release history parser.
 - **Done when:** [ ] visual parity checklist signed off.
 
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V2-071A | V2-020B, V2-044B | Canonical-bound markdown/math/HTML/Mermaid/code rendering with ported parser/widget/golden tests; no legacy imports. Record affected test dispositions and preserve reusable parser/rendering regressions; remove duplicate or obsolete main-side cases/helpers only with replacement and consumer evidence (§8.3). |
+| V2-071B | V2-020B | Theme presets, Material You and density/contrast behavior; mobile/desktop theme golden and setting persistence tests. |
+| V2-071C | V2-020B, V2-027 | Settings shell and keyboard action routing; focused widget/shortcut tests, with feature controls delegated to their owning items. |
+| V2-071D | V2-071C | Sanitized diagnostics/release-history surfaces, existing archive parser contract and read-only settings integration; focused privacy/parser/UI tests and parent parity checklist. |
+
 #### V2-072 — Voice
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:ui` `area:platform`
-- **Depends on:** V2-020
+- **Depends on:** V2-020B, V2-009
 - **Scope:** STT/TTS services behind platform capability checks; Web uses browser speech only; iOS per SP-05.
 - **Done when:** [ ] voice works on Android and desktop; [ ] unavailable engines are hidden with a reason.
 
 #### V2-073 — Exports, image export, forwarding
 - **Type / size / labels:** feature · S · `milestone:v2.0` `area:ui`
-- **Depends on:** V2-044
+- **Depends on:** V2-044, V2-045, V2-071A
 - **Scope:** Markdown/JSON export from canonical items (full paginated history); message image export; forward = new explicit send.
 - **Done when:** [ ] export round-trip tests.
 
 #### V2-074 — Attention model and notifications
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:platform` `area:android`
-- **Depends on:** V2-046, V2-047, V2-011
+- **Depends on:** V2-046, V2-047, V2-048, V2-011
 - **Scope:** one attention model (categories, dedupe by cause, focus suppression); local notifications on all platforms while running; Android opt-in monitor holding the single stream while tracked work runs (handles the platform time limit) plus sparse catch-up; auto-approval from the monitor (D05); honest settings copy for iOS/Web; deep links into sessions.
 - **Done when:** [ ] no duplicate notifications across reconnects; [ ] monitor stops when work ends; [ ] battery budget recorded.
 
 #### V2-075 — Managed OpenCode install and update (desktop)
 - **Type / size / labels:** feature · L · `milestone:v2.0` `area:desktop`
-- **Depends on:** V2-012, V2-010
+- **Depends on:** V2-012, V2-010, V2-041, V2-027
 - **Scope:** D10 flow (adopt → install with SHA-256 → service → local pairing); v1-present confirmation with backup advice; "Use from my other devices" (hostname/CORS changes with restart warning, pairing QR); "update available" from server events with user-triggered `opencode upgrade` (never mid-turn, never beyond the tested window without a warning).
 - **Done when:** [ ] tested on Linux and on macOS/Windows runners; [ ] hash mismatch fails closed; [ ] an existing user service is never stopped.
 
@@ -1525,19 +1668,19 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V2-077 — v2 updater and prerelease tooling
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:release`
-- **Depends on:** V2-020, V1-05
+- **Depends on:** V2-020B, V1-05
 - **Scope:** semver with prerelease ordering; stable/beta channels; ignore majors ≠ 2; keep both CodeWalk installers and app-driven exact-version handoff aligned with §9.2.1. Before the first beta, make release tooling/workflows publish `v2.0.0-beta.N` with `prerelease: true`, `make_latest: false`. Add explicit promotion to exactly `2.0.0`, not a major increment from a `2.x` version; stable GA uses `prerelease: false`, `make_latest: true`. Apply the post-GA legacy policy by tag/version, and verify global Android build-code ordering. Publish only the intended release commit/tag rather than unintentionally including another line's pending tags.
 - **Done when:** [ ] tests: `2.0.0-beta.2 < 2.0.0-beta.10 < 2.0.0`; 1.x releases never offered to v2; [ ] beta is opt-in in both installers and the updater; [ ] fixtures/dry runs cover beta flags, exact GA promotion, legacy latest policy, targeted tag publication, and Android ordering across both lines.
 
 #### V2-078 — Platform build gates in CI
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:platform`
-- **Depends on:** V2-020, V2-009
+- **Depends on:** V2-020C, V2-009
 - **Scope:** Android APK on an x64 runner (not ARM64 Linux); Linux, macOS, Windows builds on their runners; `make test-web` and Web build; iOS `flutter build ios --no-codesign` on macOS. While a temporary `main_v2.dart` exists, beta build jobs must explicitly select the v2 entry point and prove that the packaged app is v2; do not publish a v1 bootstrap with a v2 tag.
-- **Done when:** [ ] all builds green on a PR; [ ] failures block release.
+- **Done when:** [ ] package checks and explicit-v2 builds are green for every required publishable target; [ ] §15.4 links per-target compile/functional/device/signing/distribution evidence and approved tier/fallback; [ ] any missing required evidence blocks that target/checkpoint, and a known failed required check is never waived as a resource prerequisite. The MVP checklist may select its agreed Android/desktop targets, while iOS build-only and other explicitly approved limitations remain labelled; GA still requires its full platform/tier matrix.
 
 #### V2-079 — Accessibility and localization pass
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:ui`
-- **Depends on:** most UI items
+- **Depends on:** V2-041, V2-043, V2-044, V2-045, V2-047, V2-048, V2-049, V2-050, V2-051, V2-052, V2-053, V2-054, V2-055, V2-070, V2-071, V2-072, V2-073, V2-074, V2-075, V2-076, V2-077, V2-081, V2-082
 - **Scope:** new keys in all 14 locales (targeted edits, generated code in sync); semantics on approval/form/tray; screen-reader announcements throttled (completion, not every delta); 200% text; RTL (ar, ur); keyboard-only desktop flow; reduced motion.
 - **Done when:** [ ] checklist complete; [ ] no missing keys in English and Portuguese, others tracked.
 
@@ -1549,28 +1692,28 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V2-081 — Reverse-proxy authentication (Cloudflare Access) — may defer
 - **Type / size / labels:** feature · M · `milestone:v2.0` `area:core`
-- **Depends on:** V2-028
+- **Depends on:** V2-028, V2-008
 - **Why:** Existing feature (ADR-033), but v1's proxy Bearer replaced Basic auth; v2 requires both layers.
 - **Scope:** compose proxy auth with OpenCode Basic auth; per-platform support (verify Web/iOS).
 - **Done when:** [ ] works on Android and desktop, or the issue moves to v2.1 with a recorded reason.
 
 #### V2-082 — Embedded Tailscale transport
 - **Type / size / labels:** feature · S · `milestone:v2.0` `area:platform`
-- **Depends on:** V2-028
+- **Depends on:** V2-028, V2-041
 - **Scope:** port the existing transport decorator for Android, Linux, macOS; hidden elsewhere with a reason.
 - **Done when:** [ ] connection over embedded Tailscale works on Android.
 
 #### V2-083 — Documentation for v2.0
 - **Type / size / labels:** docs · M · `milestone:v2.0` `type:docs`
-- **Depends on:** feature completion
-- **Scope:** `BEHAVIOR.md` reset for v2; `CONTRACT_MATRIX.md` per operation; `ai-docs/` v2 anchors; `CODEBASE.md` (codemapper flow); `README.md` (setup, pairing, platform limits, tested CodeWalk installer commands, stable/beta/v1 selection, frozen legacy access, Android same-ID/rollback limits); release notes draft from §5.15.
+- **Depends on:** V2-001–V2-012, V2-020–V2-028, V2-040–V2-056, V2-060, V2-070–V2-082; only explicit recorded deferrals remove a prerequisite.
+- **Scope:** audit implemented v2 behavior and complete its BEHAVIOR documentation; generate the per-operation CONTRACT_MATRIX; refresh the v2 anchors established in V2-002, not introduce them for the first time; CODEBASE flow; README setup/pairing/platform tiers/tested installers/channels/frozen legacy/rollback limits; release notes draft from §5.15. Route any remaining main-side legacy references explicitly until cutover.
 - **Done when:** [ ] docs reviewed against implemented behavior.
 
 #### V2-084 — Cutover
 - **Type / size / labels:** chore · M · `milestone:v2.0` `area:release`
-- **Depends on:** V2-001–V2-012, V2-020–V2-028, V2-040–V2-056, V2-070–V2-083, G1–G5; exclude only items explicitly deferred with a recorded reason. The release/checkpoint successors are not prerequisites of this cutover.
-- **Scope:** delete v1 code from `main`; `main.dart` boots v2; remove `main_v2.dart`; analyzer budget reset for the new tree (zero new warnings); final `make check` and `make test-web`; reviewer loop on the complete stage.
-- **Done when:** [ ] no v1 code or routes remain on `main`; [ ] gates and review clean.
+- **Depends on:** V1-04, V2-001–V2-012, V2-020–V2-028, V2-040–V2-056, V2-060, V2-070–V2-083, G1–G5; exclude only items explicitly deferred with a recorded reason. The release/checkpoint successors are not prerequisites of this cutover.
+- **Scope:** delete superseded v1 code from `main` after validated replacements; `main.dart` boots v2; remove `main_v2.dart`, legacy G4 exclusions and obsolete v1 contract routing. Perform the final §8.3 test retirement audit: consolidate the Issues' keep/adapt-port/remove evidence, remove obsolete v1-only cases and orphan fixtures/fakes/helpers/imports after consumer checks, and retire transitional legacy test targets. Preserve useful v2 regressions, justified migration fixtures and the maintenance suite on `v1`. Reset the analyzer budget for the new tree (zero new warnings); run final aggregate package/app checks and `make test-web`; reviewer loop on the complete stage.
+- **Done when:** [ ] no v1 code or routes remain on `main`; [ ] all remaining main-side test families have an implemented-v2 or explicit migration purpose, with dispositions/replacement evidence recorded; [ ] obsolete cases, orphan support and transitional legacy test targets are retired without hiding required regressions through skips/exclusions; [ ] final package/app/Web discovery and checks pass; [ ] gates and review clean.
 
 #### V2-085 — The 2.0.0 GA release
 - **Type / size / labels:** chore · S · `milestone:v2.0` `area:release`
@@ -1580,22 +1723,23 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V2-086 — Usable MVP beta and v1 maintenance freeze
 - **Type / size / labels:** test + chore · M · `milestone:v2.0` `area:release`
-- **Depends on:** V1-04, V1-05, V2-040, V2-041, V2-042, V2-043, V2-044, V2-045, V2-046, V2-047, V2-070, V2-071, V2-076, V2-077, V2-078, G1–G5
+- **Depends on:** V1-04, V1-05, V2-040, V2-041, V2-042, V2-043, V2-044, V2-045, V2-046, V2-047, V2-060, V2-070, V2-071, V2-076, V2-077, V2-078, G1–G5
 - **Sequencing:** this is an earlier acceptance checkpoint, despite its higher stable ID; it does not depend on GA or V2-084.
 - **Why:** The product owner wants v1 fixes available during migration and routine v1 maintenance frozen once v2 is usable, rather than maintaining v1 until the complete v2.0 GA release.
-- **Scope:** agree the MVP platform/flow checklist (§9.6); publish an installable `v2.0.0-beta.N` as opt-in with the actual v2 entry point and G1–G5 passing; verify basic OpenCode flows, migration/data preservation, channel behavior and reconnect on the agreed Android and desktop targets; collect product-owner acceptance. Record the frozen v1 tag/commit and stop routine v1 development/releases while preserving downloads and production Web. Finish remaining features/GA gates in v2 while keeping G1–G5 green.
+- **Scope:** agree the MVP platform/flow checklist and §15.4 evidence before selecting the acceptance run; name any additional feature producers it needs (for example V2-048 if question/form flows are included). Under the active beta-publication authorization, publish an installable `v2.0.0-beta.N` as opt-in with the actual v2 entry point and G1–G5 passing; verify basic OpenCode flows, migration/data preservation, channel behavior and reconnect on the agreed Android/desktop targets; collect product-owner acceptance. Record the frozen v1 tag/commit and stop routine v1 development/releases while preserving downloads and production Web. Finish remaining features/GA gates in v2 while keeping G1–G5 green. A private V2-060 smoke, unavailable runner or pending owner acceptance is not this checkpoint.
 - **Done when:** [ ] checklist agreed and evidenced; [ ] product owner accepts the usable MVP; [ ] freeze recorded with the final maintenance artifact; [ ] beta is not latest and does not replace Web production; [ ] no full-tree merges or runtime compatibility switch were introduced.
 
 ### 12.6 Milestone v2.1 — CodeWalk Host + Codex
 
 #### V21-001 — SP-09 host packaging + host skeleton
 - **Type / size / labels:** spike + feature · L · `milestone:v2.1` `area:host`
+- **Depends on:** V2-002, V2-025
 - **Scope:** TypeScript project in `host/`; pinned Node ≥ 22.19 bundled for Linux x64/ARM64, macOS (signed/notarized), Windows x64/ARM64; npm package for headless; evaluate Bun/Node single-executable; choose SQLite implementation; PTY dependency strategy; Unix-socket vs `codex app-server proxy` on Windows; idle memory and startup measured.
 - **Done when:** [ ] packaging matrix proven or fallback chosen (npm-only); [ ] decision recorded before the CHP server is frozen.
 
 #### V21-002 — CHP server, pairing, devices, tickets, origin policy
 - **Type / size / labels:** feature · L · `milestone:v2.1` `area:host`
-- **Depends on:** V21-001, V2-025
+- **Depends on:** V21-001, V21-003, V2-025
 - **Scope:** §6.11.2–6.11.3: `info`, pair/claim, device registry (hashed tokens, revocation), WebSocket tickets, Origin and `Host` checks, loopback default, events/commands/snapshots, receipts, replay ring and `resync`.
 - **Done when:** [ ] host tests validate frames against the shared schema; [ ] security tests (unauthenticated WS rejected, wrong origin rejected, ticket single-use).
 
@@ -1607,54 +1751,60 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V21-004 — Approval responder and attention inbox
 - **Type / size / labels:** feature · M · `milestone:v2.1` `area:host`
-- **Depends on:** V21-002
-- **Scope:** host as sole automatic responder for D05 modes per session; `approval.hostResponder` capability so clients stop auto-replying; attention records with dedupe and presence-aware suppression.
-- **Done when:** [ ] no double replies with phone + desktop + host connected; [ ] attention survives client disconnects.
+- **Depends on:** V21-002, V21-003, V2-003
+- **Scope:** host D05 policy/attention pipeline and CodeWalk-owned authority signal under §6.11.6; policy revision/effective-mode acknowledgement, observer identity/activity/expiry/epoch, dedupe and durable attention.
+- **Done when:** [ ] policy/authority tests cover Ask/Allow all, two clients, stale flags, expired activity and restart; [ ] late native replies are handled; [ ] attention survives disconnect/restart; [ ] OpenCode coordination is completed and live-tested in V21-007, without extending the official info schema.
 
 #### V21-005 — Codex adapter
 - **Type / size / labels:** feature · L · `milestone:v2.1` `area:host`
-- **Depends on:** V21-002, V2-006, V2-026
+- **Depends on:** V21-005A, V21-005B
 - **Scope:** §6.13 Codex notes: shared-daemon attach (preferred); consider a dedicated authenticated listener only with SP-02 evidence and explicit TUI attachment/ownership semantics, still through the host. Connected-server version negotiation, threads/turns/items mapping, approvals (no persistent variants for "Allow all"), Unrestricted with separate sandbox control, steer/interrupt, child threads, plan, usage and rate limits, skills, fuzzy search, fs, connection-scoped terminals kept by the host.
 - **Done when:** [ ] the G2 canonical expectations for Codex pass as adapter tests; [ ] live acceptance: a TUI thread opens live in CodeWalk and an approval answered on the phone dismisses in the TUI.
 
+| Child | Depends on | Bounded output and acceptance |
+|---|---|---|
+| V21-005A | V21-002, V2-006, V2-026 | Native host adapter/ports and version/topology handling; recorded G2 expectations pass, with policy/workspace features split further under §11.5 as needed. |
+| V21-005B | V21-005A, V21-004, V21-006 | Live TUI/CodeWalk ownership and approval/reconnect acceptance through the actual app Host adapter; record connected version and target. B is not a prerequisite of building that app adapter. |
+
 #### V21-006 — Dart host adapter and host onboarding
 - **Type / size / labels:** feature · L · `milestone:v2.1` `area:core` `area:ui`
-- **Depends on:** V21-002, V2-025
+- **Depends on:** V21-002, V21-005A, V2-025
 - **Scope:** `harness_host` package implementing the ports over CHP; "Add a CodeWalk Host" (QR/link pairing); host card with harnesses, versions, auth state; unified session list across direct OpenCode and host sessions; ownership labels.
 - **Done when:** [ ] the same screens show Codex sessions with Codex capabilities and no UI code branching on harness.
 
 #### V21-007 — OpenCode observer and optional pass-through
 - **Type / size / labels:** feature · M · `milestone:v2.1` `area:host`
-- **Depends on:** V21-004
+- **Depends on:** V21-004, V21-006
 - **Scope:** watch-only subscription to OpenCode for attention and 24/7 "Allow all"; optional same-origin pass-through for Web clients (official payloads untouched); explicit aliasing between a direct profile and the host view of the same service.
-- **Done when:** [ ] approvals answered while all phones are asleep; [ ] no duplicate replies.
+- **Done when:** [ ] approvals answered while phones sleep; [ ] verified aliasing and activity/expiry/mode acknowledgement drive direct-client handover; [ ] phone + desktop + observer tests cover CHP loss, observer crash, restart, stale authority and native first replies; [ ] CodeWalk does not claim an upstream lock on native clients.
 
 #### V21-008 — Push sinks
 - **Type / size / labels:** feature · M · `milestone:v2.1` `area:host` `area:platform`
-- **Depends on:** V21-004
+- **Depends on:** V21-004, V21-006
 - **Scope:** ntfy, UnifiedPush, generic webhook, Web Push (VAPID, service worker in the Web app); content-free payloads by default; deep links.
 - **Done when:** [ ] end-to-end delivery on Android (ntfy/UnifiedPush) and an installed Web app; [ ] iOS limitations documented.
 
 #### V21-009 — Desktop host and harness install manager
 - **Type / size / labels:** feature · M · `milestone:v2.1` `area:desktop` `area:host`
-- **Depends on:** V21-001
+- **Depends on:** V21-001, V21-002, V21-006
 - **Scope:** consent-based installation of the host and supported harnesses from an allowlisted recipe set; show source and version; detect user-owned installs; updates via official channels on request, never mid-turn; host as a user service.
 - **Done when:** [ ] install/uninstall never touches user-owned installs; [ ] tested on three desktop OSes.
 
 #### V21-010 — Android overlay and Android Auto on the attention pipeline
 - **Type / size / labels:** feature · M · `milestone:v2.1` `area:android`
-- **Depends on:** V2-074, V21-004
+- **Depends on:** V2-074, V21-004, V21-006
 - **Scope:** rebuild `SessionOverlayService` and Android Auto replies as consumers of the attention model; replies go through the outbox with idempotency.
 - **Done when:** [ ] no independent polling or auto-approval in these surfaces.
 
 #### V21-011 — Experimental vendor usage connectors
 - **Type / size / labels:** feature · M · `milestone:v2.1` `area:host`
-- **Depends on:** V21-002
+- **Depends on:** V21-002, V21-003
 - **Scope:** connector framework (declared endpoint status, auth source, parser version, TTL, backoff, policy review date, kill switch); opt-in per provider; host-only; no Claude OAuth; no credential refresh or write-back; start with zero enabled private-endpoint connectors and add each one through review.
 - **Done when:** [ ] framework merged with at least one reviewed connector or an explicit "none qualified" decision.
 
 #### V21-012 — ADR-061, docs, release 2.1
 - **Type / size / labels:** docs + chore · S · `milestone:v2.1`
+- **Depends on:** V2-085, V21-001, V21-002, V21-003, V21-004, V21-005, V21-006, V21-007, V21-008, V21-009, V21-010, V21-011
 - **Scope:** ADR-061 (host and CHP); README host setup; BEHAVIOR updates; release with announcement.
 - **Done when:** [ ] released; docs match behavior.
 
@@ -1662,50 +1812,57 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 #### V22-001 — Host workspace services
 - **Type / size / labels:** feature · L · `milestone:v2.2` `area:host`
+- **Depends on:** V21-002, V21-003, V2-025
 - **Scope:** files list/search/read/write (root allowlist, symlink checks, expected-hash conflicts, atomic replace), git status/diff, uploads, PTY with snapshot-plus-cursor attach.
 - **Done when:** [ ] traversal, symlink, stale-hash, binary, and oversize tests pass.
 
 #### V22-002 — Claude Code adapter
 - **Type / size / labels:** feature · L · `milestone:v2.2` `area:host`
-- **Depends on:** V22-001, V22-004, V2-007, V2-026
-- **Scope:** §6.13 Claude notes; policy disclosure screen; API-key mode; external history rules (idle resume, otherwise read/fork).
-- **Done when:** [ ] G2 expectations for Claude pass; [ ] a test double proves the host never opens credential files; [ ] interrupt race handled.
+- **Depends on:** V22-001, V22-004, V21-004, V21-006, V2-007, V2-026
+- **Scope:** §6.13 Claude notes; policy disclosure/API-key mode; history/ownership rules and explicit project trust before runtime activation.
+- **Done when:** [ ] G2 expectations pass; [ ] a test double proves the host never opens credential files; [ ] history browsing starts no runtime; [ ] disposable hooks/MCP tests prove untrusted projects do not activate; [ ] interrupt race handled.
 
 #### V22-003 — Pi adapter
 - **Type / size / labels:** feature · M · `milestone:v2.2` `area:host`
-- **Depends on:** V22-001
+- **Depends on:** V22-001, V21-004, V21-006
 - **Scope:** §6.13 Pi notes; "Pi does not ask for approval" disclosure; SDK session listing.
 - **Done when:** [ ] LF framing and `agent_settled` tests pass; [ ] no fake approval toggle.
 
 #### V22-004 — Claude licensing and policy gate
 - **Type / size / labels:** chore · S · `milestone:v2.2`
+- **Depends on:** V2-007
 - **Why:** CodeWalk is dual-licensed (AGPL + commercial); the Claude SDK and CLI are proprietary; Anthropic's third-party rules change.
 - **Scope:** legal check on loading vs bundling the SDK; current policy re-read; naming rules for the UI.
 - **Done when:** [ ] written go/no-go with the chosen distribution mode.
 
 #### V22-005 — Docs and release 2.2
 - **Type / size / labels:** docs + chore · S · `milestone:v2.2`
+- **Depends on:** V21-012, V22-001, V22-002, V22-003, V22-004
 - **Done when:** [ ] released; docs match behavior.
 
 ### 12.8 Milestone v2.3 — Grok Build + Muse Code
 
 #### V23-001 — ACP client and Grok profile (includes SP-11)
 - **Type / size / labels:** feature · L · `milestone:v2.3` `area:host`
+- **Depends on:** V21-002, V21-004, V21-006, V22-001
 - **Scope:** official ACP TypeScript SDK; capability negotiation; `x.ai/*` extensions enabled only when advertised and pinned with fixtures; leader/shared-server verification; "Allow all" = `allow_once`.
 - **Done when:** [ ] unknown extensions never break ACP v1 behavior; [ ] fixtures for every enabled extension.
 
 #### V23-002 — SP-10 Muse distribution and licensing
 - **Type / size / labels:** spike · S · `milestone:v2.3` `type:spike`
+- **Depends on:** V2-001
 - **Done when:** [ ] decision: install via official channel, user-installed only, or defer.
 
 #### V23-003 — Muse adapter
 - **Type / size / labels:** feature · L · `milestone:v2.3` `area:host`
-- **Depends on:** V23-002
+- **Depends on:** V23-002, V21-002, V21-004, V21-006, V22-001
 - **Scope:** §6.13 Muse notes (fingerprint, command ids, requirement guards, leases, usage windows, frame cap).
 - **Done when:** [ ] official conformance transcripts and live captures pass.
 
 #### V23-004 — Docs and release 2.3
 - **Type / size / labels:** docs + chore · S · `milestone:v2.3`
+- **Depends on:** V22-005, V23-001, V23-002, V23-003
+- **Done when:** [ ] release authorized/published with passing target checks and approved announcement; [ ] docs match implemented capabilities and distribution decisions.
 
 ### 12.9 Backlog
 
@@ -1732,18 +1889,35 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 - `contracts/codewalk-host-v1/` — CHP schema and examples, validated by both Dart and host tests.
 - `FakeOpenCodeV2Server` — replays fixtures with fault injection.
 
+**G1 minimum observed scenario matrix (Codex and Claude separately).** Each fixture README links a capture, version/topology, frame ranges, canonical mapping and reducer assertions. One recording can cover several rows; every row requires real observed input, not an example generated from the schema.
+
+| Scenario | Required observed evidence | G2 semantic assertion |
+|---|---|---|
+| Text/reasoning stream | Partial text and authoritative completion, with reasoning when emitted | Final content replaces the incomplete prefix; late deltas do not corrupt it |
+| Tool lifecycle | Tool start/input/output/success or failure | Stable identity, structured status and preserved bounded detail |
+| Permission interaction | Native choices, response and resolution, including another client when supported | Scope/ownership retained; automatic approval cannot become persistent |
+| Question/input | Negotiated question, elicitation or input interaction, answer and resolution | Typed fields and required user input survive normalization; never automatic |
+| Child/background work | Delegation and completion/stop with parent/child ownership | Parent idle does not imply child completion; capabilities match controllability |
+| Usage | Token/cost observation and native quota/rate-limit signals when available | Preserve source, cumulative/partial flags and unknowns; never fabricate zero or double-count |
+| Error/retry/interrupt | Actual recoverable error or controlled tool failure plus retry/stop outcome | Connection uncertainty and execution outcome remain separate |
+
+Record attach/history ownership and reconnect/snapshot provenance across these scenarios. If a required scenario cannot be captured on the pinned version/topology, mark it pending/inconclusive and investigate its fallback; do not silently pass G1. Schema-derived malformed/unknown/ordering variants remain useful additional tests, labelled separately. A new upstream version/topology or model/schema revision invalidates the affected evidence and its dependent gates, not unrelated captures. G2 reviews loss and reducer behavior; G5 validates named canonical definitions and CHP envelopes at the same final revision.
+
 ### 13.2 Required cases
 
 | Area | Cases |
 |---|---|
 | Framing | UTF-8 split across chunks; SSE comments and multi-line data; JSONL with Unicode line separators inside strings; oversize and truncated frames |
-| Ordering | Delta before start; late delta after `ended`; duplicates; retry reusing an id; snapshot older than live events; inbox promotion between reads; durable sequence gaps |
-| Admission | Same prompt twice; timeout before/after admission; same-id retry; conflicting payload (409); queue cancel racing delivery; app restart with an uncertain send |
-| Permissions | Two clients answer; TUI answers first; reject with/without note; child request in parent; "Allow all" never sends `always`; forms never auto-answered; Unrestricted removal with concurrent changes |
+| Ordering | Delta before start; late delta after `ended`; duplicates; verified retry reusing an id; older snapshot/live events and inbox promotion races; CodeWalk sequence gaps vs allowed upstream per-aggregate skips |
+| Admission | Same prompt twice; timeout before/after admission; verified same-id prompt retry; create replay/conflict tested separately; non-idempotent mutations stay uncertain and reconcile; queue cancel racing delivery; restart with an uncertain send |
+| Permissions | Two clients answer; TUI answers first; reject also resolves other pending requests of the same session with/without note, preserving another session; child request in parent; Allow all never sends `always`; forms never auto-answered; Unrestricted concurrent removal |
 | Forms | Every field type; conditional fields; custom answers; secret fields; global owner; resolved elsewhere |
 | Children | Parent idle with running child; nested background early completion; synthetic continuation after parent idle; stop child vs stop parent; reconnect rebuilds links |
 | External sessions | TUI-created session before/after connect; live vs history-only labels; busy owner |
 | Multi-host | Same native id on two hosts and two harnesses: no cross-talk in caches, drafts, tabs, notifications |
+| Remote files | Real symlink/junction escapes and concurrent path replacement; lexical validation is not a containment proof; write stays unavailable without a verified boundary |
+| Host authority (v2.1) | Verified alias, current policy/activity signal, acknowledged mode change, expiry, observer crash/restart, CHP loss and native first reply; no invented OpenCode info field |
+| Claude trust (v2.2; spike in v2.0) | History-only browsing never starts the runtime; untrusted project cannot activate hooks/MCP; trust and tool modes remain separate |
 | Upgrade | v1.266 → v2 import; v1 keys intact; later legacy APK install-over keeps v1 data |
 | CodeWalk installers | Both scripts: offline pagination and semver fixtures; fresh stable install; saved v1 pin after GA; beta opt-in; exact approved tag survives a newer release appearing; cross-major consent/non-interactive refusal; unknown installed version; missing asset/API failure preserves prior bundle/data; Windows stage/apply retains target and survives a changed remote script; macOS exercises the same selection contract |
 | Release transition | Real prerelease flags, beta excluded from latest, stable v1 patches until accepted MVP, freeze without GA promotion, exact `2.0.0` promotion, legacy exceptions do not displace v2 latest, increasing Android codes across both lines and actual v2 beta entry point |
@@ -1753,10 +1927,22 @@ The v2.0 release is **blocked** until all five pass. Each gate is a work item in
 
 ### 13.3 Commands and gates
 
+**Command map readiness.** The current root `make check` checks the retained v1 app; it does not prove packages or a v2 bootstrap that do not yet exist. V2-020A/C must add the package working-directory map, test discovery and explicit-v2 CI targets. Until those outputs exist, use only the exact commands for the current selected paths; do not call a legacy root pass a v2/package pass. The following package/host commands are templates for their implemented stage, not claims that those paths/scripts exist now.
+
+**Test-target lifecycle.** During coexistence, label retained legacy-reference and active-v2 commands explicitly in the V2-020C map and record affected-family dispositions in each owning Issue (§8.3). Retire a test target only when its code/consumers are retired or its accepted replacement is covered. V2-084 removes the remaining obsolete main-side cases/support and transitional targets, then proves aggregate discovery of the retained v2/migration regressions; excluding failing required tests is not a retirement strategy.
+
 ```bash
-# focused, while iterating
-export PATH="$HOME/flutter/bin:$PATH" && dart test packages/codewalk_core
-export PATH="$HOME/flutter/bin:$PATH" && dart test packages/harness_opencode
+# Pure-Dart package checks: process working directory = the selected package
+# (for example packages/codewalk_core or packages/harness_opencode).
+source ~/paths
+export PATH="$HOME/flutter/bin:$PATH" && dart analyze
+export PATH="$HOME/flutter/bin:$PATH" && dart test
+
+# Flutter package checks: process working directory = that package.
+export PATH="$HOME/flutter/bin:$PATH" && flutter analyze
+export PATH="$HOME/flutter/bin:$PATH" && flutter test
+
+# Focused app checks: process working directory = repository root.
 export PATH="$HOME/flutter/bin:$PATH" && flutter analyze <touched paths>
 export PATH="$HOME/flutter/bin:$PATH" && flutter test test/<touched area>
 
@@ -1766,21 +1952,22 @@ export PATH="$HOME/flutter/bin:$PATH" && flutter test test/unit/scripts/linux_in
 # Run the added Windows/macOS acceptance cases on native runners;
 # record their exact commands in V1-05 when the harness is implemented.
 
-# milestone gates (not after every micro-fix)
+# Validation gates: after V2-020C these targets aggregate package/app checks.
+# Tests must import/bootstrap v2 explicitly while main.dart remains legacy.
 export PATH="$HOME/flutter/bin:$PATH" && make check
 export PATH="$HOME/flutter/bin:$PATH" && make test-web
 
-# host (v2.1+)
+# Host (v2.1+): process working directory = repository root, once scripts exist.
 npm --prefix host run typecheck
 npm --prefix host test
 npm --prefix host run test:contract
 ```
 
 - Android release APKs are built on GitHub Actions x64 runners (ARM64 Linux hosts are unreliable for APK builds). A testable APK for the product owner uses `HEY_CAPTION="<specific caption>" make android` on a supported host.
-- iOS: `flutter build ios --no-codesign` on a macOS runner; signed builds after the Apple prerequisite.
+- iOS: `export PATH="$HOME/flutter/bin:$PATH" && flutter build ios --no-codesign` on a macOS runner; signed builds after the Apple prerequisite. V2-078 defines the explicit v2 build entry point for every target, including iOS.
 - Desktop: build each OS on its own runner.
 - `make precommit` is not the normal validation command.
-- The reviewer loop runs after each coherent implementation stage and before release.
+- Run the reviewer workflow after a coherent code stage and its targeted checks. Static docs-only edits follow the project's exemption. Run `make check` at project validation gates, including stable code before its first commit; focused checks suffice for reviewer micro-fixes unless they invalidate that full check. Record exact commands, working directories, entry point and results in the Issue. Never report skipped/pending checks as passing.
 
 ---
 
@@ -1802,7 +1989,7 @@ npm --prefix host run test:contract
 | Codex protocol weekly drift; daemon/CLI skew | Broken Codex sessions | Negotiate against the daemon; regenerate fixtures per release; host updates via npm |
 | macOS sandbox blocks managed install | No managed setup on macOS | SP-06; notarized non-sandboxed build or separate host |
 | iOS distribution prerequisites missing | iOS not shippable | SP-05; build-only target until the Apple account exists |
-| Experimental OpenCode file write changes or is unconfined | Data loss outside the project | Off by default; client-side containment; host workspace service in v2.2 |
+| Experimental OpenCode file write changes or is unconfined | Data loss outside the project | Off by default and unavailable without verified remote physical containment; lexical checks are additional validation only; host workspace service in v2.2 |
 | Losing v1 polish (scroll anchoring, tabs) during the rewrite | UX regressions | Port invariants and their tests before deleting v1 code |
 | Scope creep from seven harnesses | Late releases | Release train; each harness behind its own gates |
 
@@ -1814,7 +2001,11 @@ npm --prefix host run test:contract
 
 | Assumption | Verified by | If false |
 |---|---|---|
-| Client-minted OpenCode prompt ids are idempotent | SP-01 | Omit ids; correlate via metadata; read-before-resend |
+| Client-minted OpenCode prompt ids have verified same-payload replay | V2-005B | Omit ids if required; correlate via supported metadata; remain uncertain and reconcile before a deliberate manual resend |
+| A supplied OpenCode session id makes create safely replayable | V2-005B, separately from prompt | Never automatically repeat uncertain create; reconcile the authoritative session/index outcome or request a deliberate new creation |
+| Remote OpenCode write is physically confined to the project | V2-005E | Keep write unavailable even if the experimental setting is on; retain read-only browsing |
+| A CodeWalk Host observer's approval authority is verifiable and live | V21-004, V21-007 | No suppression from an unverified/stale signal; use the last acknowledged mode and reconciled no-host behavior |
+| Claude history access can remain separate from trusted runtime activation | V2-007, V22-002 | History-only without runtime activation; no trust bypass through Allow all |
 | The TUI uses the shared OpenCode service by default | SP-01 (docs say yes) | Label TUI sessions "history only" when not shared |
 | A pairing token can mint its successor | SP-01 | Re-pair every 30 days with a 7-day warning |
 | Codex shared daemon reachable from Node on all OSes | SP-02, SP-09 | Use `codex app-server proxy`; Windows Codex waits |
@@ -1827,15 +2018,33 @@ npm --prefix host run test:contract
 ### 15.2 Open questions for the product owner (not blocking v2.0 start)
 
 1. **Apple Developer Program account:** available? It decides iOS TestFlight distribution and macOS notarization (needed for a non-sandboxed managed install).
-2. **Research pack location:** commit `plan/` (several MB, includes upstream excerpts) or keep it outside the repository? (`V2-001`)
-3. **Cloudflare Access users:** is reverse-proxy authentication used enough to keep it in v2.0 (`V2-081`), or can it move to v2.1?
-4. **Announcement texts** for v1.266.0 and v2.0.0 (required before each release).
+2. **Cloudflare Access users:** is reverse-proxy authentication used enough to keep it in v2.0 (V2-081), or can it move to v2.1?
+3. **Announcement texts** for v1.266.0 and v2.0.0 (required before each release).
+
+The research pack and README are tracked under `plan/`; V2-001 reconciles this established location rather than reopening the initial question. Any unavailable account/runner/device affects the owning unit and its consumers, not unrelated foundation work.
 
 ### 15.3 Prerequisites
 
 - A disposable machine running OpenCode 2.0.2x for SP-01 (never production data).
 - Machines with Codex and Claude Code logged in by the product owner for SP-02/SP-03 (CodeWalk never handles those logins).
 - CI runners: macOS (iOS/macOS), Windows, x64 Linux for Android APKs.
+
+### 15.4 Platform and acceptance evidence matrix
+
+This table specifies **required evidence**, not completed checks. Store each checkpoint's commit, v2 entry point, version/topology, runner/device, commands, result and links in V2-078 and the consuming Issue. Distinguish compilation, functional testing, signing and distribution; one does not establish another.
+
+| Target | Compile/package evidence | Functional/device evidence | Signing/distribution and permitted tier |
+|---|---|---|---|
+| Android | Actual-v2 APK on x64 CI; global build-code/channel checks | Agreed reference device: pairing/send/permissions/stop/reconnect/import; background budget separately V2-074/080 | Installable APK before owner acceptance; no local ARM64 APK claim |
+| Linux | Native runner app/package build, plus relevant ARM64 support checks | Desktop flow and installer/service lifecycle on declared architecture | Tested published artifact; unsupported optional host/runtime capability explicitly labelled |
+| macOS | Native macOS runner app/package build | Desktop flow, installer and managed-service procedure on declared architecture | Signing/notarization requires Apple prerequisites; approved connect-only fallback from SP-06 is explicit |
+| Windows | Native Windows runner app/package build | Desktop flow and staged installer/recovery/service acceptance | Tested artifact and declared architectures; no Linux-only shell test substituted for Windows acceptance |
+| Web | Explicit-v2 build and browser test target | Chrome/Safari auth/stream/mixed-content matrix, responsive chat and suspend/reconnect | V1-04 preview/stable separation verified before publication; no closed-tab notification claim |
+| iOS | No-codesign compile on macOS runner | Plugin exclusions, permission-denial and suspend/resume on available simulator/device; real-device gaps explicit | Signing/device/TestFlight require Apple resources; build-only tier stays build-only until those checks pass |
+
+**Statuses:** `pass` with evidence; `pending-resource` naming the missing resource and next action; `fail` naming the failing check; `inconclusive` with the unresolved observation; or `approved-tier/fallback` linking the recorded platform/capability decision. The last status is not a successful missing test. Do not quietly downgrade a MUST, decision or required check; use §17.
+
+Before V2-086, agree the exact Android/desktop MVP flow/target checklist and any separately labelled platform limitations. All G1–G5 and checks required by that checklist must pass; product-owner acceptance remains a separate recorded result. Before GA, complete the six-platform matrix at its approved tiers, required code checks, cutover and publication evidence. Missing optional signing/resources may retain an already permitted build-only tier; failed required compilation, tests or review corrections cannot be excused this way. Reuse evidence only when its code/entry point, native version, topology and platform assumptions remain valid.
 
 ---
 
@@ -1869,6 +2078,8 @@ Implementation will contradict some details. When it does:
 | 2026-10-02 | Require both CodeWalk installer updates and executable acceptance tests (V1-05); distinguish last v1 minor, temporary patches, accepted-MVP freeze (V2-086), and GA; reopen branch topology for confirmation without changing the baseline | D03/D04; §§9–13, 17, 20 | Product-owner follow-up; verified latest-only installer selection and missing app handoff; focused planner consultation (12 results, four Claude helpers unavailable after one retry each) |
 | 2026-10-02 | Confirm option A; create/select legacy `v1` now before the final minor; retain current v1 code/tests/tooling in `main` as a temporary reuse/reference baseline; move the transition-minor work to `v1` | D03; §§9, 12, 20; `AGENTS.md` | Product owner selected A and requested immediate legacy checkout; initial-main contents delegated to orchestrator. Retaining the baseline preserves reuse/test evidence and current build inputs until validated replacement |
 | 2026-10-03 | Clarify Codex's native authenticated app-server, daemon/proxy, TUI `--remote`, WebSocket limits, and distinct remote-control/exec-server roles; extend SP-02 to verify a dedicated listener with an explicitly attached TUI | D01 rationale; §§1, 3, 6.13, 11.3, 12, 19 | CLI 0.160.0 help plus official docs/pinned source confirm native server support; product owner reaffirmed the Host. Keep D01/D02 and Codex-through-Host delivery while correcting overly broad server/session-sharing claims |
+| 2026-10-03 | Add one-unit execution/preflight/budgets/recovery, stable child outputs and dependency graph, internal vertical slice, semantic gate/fixture and platform evidence matrices, transitional G4/package checks and early versioned official anchors; clarify rejection, per-operation retry, physical write containment, Host authority, Claude trust and G-BW | §§0, 2, 5–6, 9–15, 17–20; historical notices in `plan/README.md` and `plan/02-decisions.md` | Product owner authorized the documentary hardening after the twelve-helper readiness assessment and local source judgment; preserve D01/D02/D04/D05, G1–G5 for public beta and the release train |
+| 2026-10-03 | Make affected-test keep/adapt-port/remove triage incremental and the final obsolete-test/support/target audit explicit; preserve reusable regressions, migration evidence and legacy maintenance coverage | §§8.3, 11.4, 12 (V2-020C/044C/056/056B/071A/084), 13.3; corresponding GitHub Issues | Product owner approved explicit test-retirement scope after identifying that code cutover and mock replacement alone did not specify the obsolete-test audit; IDs, dependencies and release gates are unchanged |
 
 ---
 
@@ -1907,14 +2118,14 @@ Implementation will contradict some details. When it does:
 
 ## 20. Execution start
 
-1. **Now:** `V1-03` (create/select legacy `v1`, document roles, retain current code in `main`) → implement on `v1`: `V1-01` (update gate + selection contract) → `V1-05` (both installers + tests + README) → `V1-02` (last v1 minor, v1.266.0) → `V1-04` (production/preview split). Do not publish rewritten v2 code from `main` before `V1-04`; keeping its unchanged reference baseline is intentional.
-2. **In parallel, no code risk:** `V2-001`–`V2-004` (plan, ADRs) and the spikes `V2-005`–`V2-012` (start SP-01, SP-02, SP-03 first: they feed G1/G2).
-3. **First v2 code:** `V2-020` skeleton → `V2-021` (G4) → `V2-022`/`V2-023` → `V2-024` (G3) and `V2-025` (G5) → `V2-026` (G2) once SP-02/SP-03 fixtures exist.
-4. **First green test:** a reducer test replaying the SP-01 plain-turn fixture into `codewalk_core`.
-5. **During migration:** ship bounded v1 patches on the maintenance line; make `V2-077` / `V2-078` ready before the first v2 beta. At `V2-086`, accept the usable MVP and freeze routine v1 maintenance. Continue v2 feedback and remaining work; only `V2-084` → `V2-085` promotes GA, stable/latest, and Web production.
+1. **Select and preflight:** follow §11.5 within the active authorization. Reconcile live branch/commit/worktree and Issues; verify already delivered preparation V1-03/V2-001 instead of recreating it. Select one dependency-ready child with scope, resources, budget, exact checks and acceptance recorded. v2 work belongs on `main`; legacy work belongs on `v1`.
+2. **Legacy/publication path:** V1-01 → V1-05A/B/C → V1-02 on `v1`, with separately authorized release; V1-04 establishes the Web production/preview split. Do not publish rewritten v2 code from `main` before V1-04. Retaining its reference baseline is intentional. The current instruction, not this sequence, determines whether another unit or publication is authorized.
+3. **Foundations/captures:** reconcile V2-001 → V2-002/003/004; start dependency-ready SP-01 children and SP-02/SP-03 captures with disposable authorized resources. Missing resources block the affected capture/consumer, not independent documentation. V2-020A and V2-021 establish the package/architecture boundary; V2-022A/B and V2-023 permit the first reducer test replaying SP-01's plain-turn fixture.
+4. **Internal vertical slice and gates:** V2-020B, V2-027, V2-028 children, V2-024A and V2-056A produce infrastructure for profiles/pairing/stream/session/timeline/send/permissions/stop. Follow their exact §12 dependencies to V2-060A → V2-024B (G3), then V2-060B live smoke. V2-025 (G5 schema) can start from V2-022B; V2-026 (G2) waits for real Codex/Claude captures, model review and reducer/schema outputs. Freeze and validate G2/G5 at the same final revision. A fake without screens or a private smoke is not a public beta gate.
+5. **Acceptance/publication:** make V2-077/078 and the required platform checklist ready; under active beta authorization, V2-086 requires G1–G5 and recorded product-owner acceptance before freezing routine v1 maintenance. Finish remaining v2 work/feedback; only V2-084 → V2-085 promotes GA, stable/latest and production Web. Keep installation, signing, release and MVP consent boundaries explicit; record evidence/next action and stop after the selected unit unless continuation is authorized.
 
 ```bash
 source ~/paths
-git status --short && git log -1 --oneline
+rtk git status --short && rtk git log -1 --oneline
 export PATH="$HOME/flutter/bin:$PATH" && flutter --version
 ```

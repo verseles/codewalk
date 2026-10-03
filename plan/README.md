@@ -1,8 +1,12 @@
 # CodeWalk v2 — Planning Research Pack
 
-Research snapshot collected on **2026-10-02** to support planning **CodeWalk v2**: OpenCode v2 only (no v1 compatibility; v1 stays in legacy CodeWalk v1) plus a multi-harness architecture. Every dossier tags its claims as Verified (with a source) or Unverified/inferred. Planners without web access should treat this folder as their source of truth. Planners with web access may verify or extend it, but local evidence and official sources win.
+> **Historical research snapshot, not the execution contract.** The current product decisions are in [`../v2-plan.md` §2](../v2-plan.md#2-decision-record-d01d16); execution readiness and per-Issue rules are in its §§11.5, 12 and 20. Applicable project rules and verified official contracts govern implementation. This folder preserves the research and planning inputs as collected; later corrections are recorded in the plan's §17 change log.
 
-**User decisions:** Read [`02-decisions.md`](02-decisions.md) before proposing a plan. It records all 16 answers and the user's request for independent critical assessment of those choices. Selected answers are the baseline; recommended changes must be clearly identified for discussion.
+Research snapshot collected on **2026-10-02** to support planning **CodeWalk v2**: OpenCode v2 only (no v1 compatibility; v1 stays in legacy CodeWalk v1) plus a multi-harness architecture. Every dossier tags its claims as Verified (with a source) or Unverified/inferred. Use pinned excerpts as versioned evidence, not as proof of current upstream or workspace state. Recheck a fact through its owning spike before implementing its consumers; official sources take precedence over community summaries.
+
+**User decisions:** [`02-decisions.md`](02-decisions.md) preserves the original 16 answers and critique request, before the final discussion. Its open D01/D02 and initial D04/D05 wording are historical; do not use them to replace the subsequently approved decisions in `v2-plan.md` §2. Original helper proposals are advisory historical inputs too.
+
+**Known superseded summary claims below (2026-10-03).** The OpenCode bullet saying no write endpoint omits the experimental write route; that route is unconfined in the pinned source, so client lexical checks alone do not authorize write (§5.12/§6.10). Windows ARM64 binaries are listed in the later verified plan (§3.1). Codex's native authenticated app-server and dedicated-listener/TUI topology were rechecked against 0.160.0 (§3.3); the Host remains the chosen integration route. Resolve these claims in the current plan rather than copying this snapshot into implementation.
 
 ## Reading order
 
