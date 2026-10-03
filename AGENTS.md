@@ -26,11 +26,10 @@
 ## Required Context
 
 - Read `BEHAVIOR.md` before substantial planning.
-- For behavior changes, verify ADR-023 alignment first using `ADR.md` and local official OpenCode anchors:
-  `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md`.
+- For behavior changes, identify the implementation line and verify ADR-023's contract-first principle using `ADR.md`. New v2-authored behavior uses ADR-058 and the versioned official OpenCode anchors `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, and `ai-docs/opencode_v2_models.md`. v1 maintenance and retained legacy reference paths (including legacy code still on `main`) use the original anchors `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md`, plus their applicable v1-specific invariants. Legacy details such as `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE behavior do not constrain authored v2.
 - For new features or bug fixes, also inspect `https://github.com/openchamber/openchamber` as a secondary community reference. It must never override official OpenCode docs/source.
 - For OpenCode or OpenChamber source-code investigation, do not use the `researcher` subagent. Inspect GitHub URLs, raw files, commits, pull requests, and code directly with GitHub/URL tools.
-- If a behavior change cannot align with ADR-023, it is blocked unless an explicit ADR exception documents rationale, risk, rollback/feature flag, and regression tests.
+- If a behavior change cannot align with the applicable official contract under ADR-023, it is blocked unless an explicit ADR exception documents rationale, risk, rollback/feature flag, and regression tests.
 
 ## Documentation
 

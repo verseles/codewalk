@@ -1,6 +1,6 @@
 # Architecture Decision Records (Current State)
 
-This document contains only active architectural decisions that represent the current implementation.
+This document contains active architectural decisions for the current implementation and approved decisions whose implementation is pending; each ADR states its implementation status.
 
 ## Index
 
@@ -59,6 +59,7 @@ This document contains only active architectural decisions that represent the cu
 - ADR-055: Production Android Auto Notification Messaging for Sideloaded APK Distribution
 - ADR-056: Bounded Desktop Indeterminate Motion Policy
 - ADR-057: Interaction-Frame Budget for Session Switching
+- ADR-058: CodeWalk v2 Harness-Neutral Architecture
 
 ---
 
@@ -103,6 +104,8 @@ Adopt a server-profile architecture with active/default selection, health-aware 
 
 **Status**: Accepted
 
+**Implementation-line scope (2026-10-03):** The `serverId::scopeId` key and `_runProjectScopeTransition` implementation detail remain the accepted v1/retained-legacy identity and transition contract, including copies on `main`. The broader isolation and workspace intent remains valid where applicable, but these v1 details do not define authored v2 identity or context transitions; use ADR-058 for that line. The historical decision remains valid for v1.
+
 ### Context
 
 Session, selection, and file state must remain isolated per server and per workspace directory. Users also require explicit workspace/worktree operations without losing context integrity.
@@ -140,6 +143,8 @@ Standardize context identity as `serverId::scopeId` (directory-first, project fa
 ## ADR-003: Realtime-First Sync Lifecycle with Degraded Fallback and Platform-Aware Background Policy (2026-02-19)
 
 **Status**: Accepted
+
+**Implementation-line scope (2026-10-03):** This lifecycle and its implementation details remain accepted for v1 and retained legacy code, including copies on `main`. They are not a template for authored v2 stream count, send lifecycle, event model, or retry/reconciliation semantics; those follow ADR-058 and the versioned v2 contract anchors. The historical decision remains valid for v1.
 
 ### Context
 
@@ -1103,6 +1108,8 @@ Project context controls and conversations navigation were split across separate
 ## ADR-023: Official OpenCode Contract-First Compatibility Policy (2026-03-02)
 
 **Status**: Accepted
+
+**Implementation-line scope (2026-10-03):** ADR-023 remains the accepted contract-first principle for both v1 and authored v2, and continues to govern the retained legacy implementation on `main`. Its v1-specific routes and invariants—including `local_user_*`, `prompt_async`, `/provider.connected`, and legacy realtime/SSE behavior—apply only to v1/retained legacy paths; they are not v2 constraints. Authored v2 follows ADR-058 and the versioned `ai-docs/opencode_v2_*.md` anchors. EXC-001 remains historical v1 behavior; v2 permission semantics are outside this ADR and belong to the separately scoped V2-003 / ADR-059 work.
 
 ### Context
 
@@ -3775,3 +3782,57 @@ Fully compliant, not an exception. No endpoint, schema, event, or lifecycle sema
 - `lib/presentation/providers/chat_provider/chat_provider_cache_persistence_ops.dart` — `_scheduleCurrentSessionIdPersist`, ordered per-scope queue.
 - `lib/data/datasources/app_local_datasource_storage_helpers.dart` — oversized regenerable catalog drain.
 - `test/unit/providers/chat_provider_session_ops_test.dart` — switch persistence timing + latest-wins tests.
+
+## ADR-058: CodeWalk v2 Harness-Neutral Architecture (2026-10-03)
+
+**Status**: Accepted
+
+**Implementation**: Pending — the architecture is approved; the v2 skeleton and gates are not yet implemented.
+
+### Context
+
+CodeWalk v2 is a new client implementation on `main`, not a runtime mode added to the v1 client. The product decision is to ship a complete OpenCode v2 client first while ensuring the domain, UI, and contracts can support later harnesses without becoming OpenCode-shaped. At approval, `main` still contains the v1 source, tests, assets, and tooling as a temporary reference/reuse baseline; the v2 skeleton and its enforcement gates have not yet been implemented. ADR-023's contract-first principle remains in force, but its implementation-specific v1 routes and reconciliation workarounds must not leak into newly authored v2 code.
+
+### Decision
+
+1. **Implementation lines and release train.** Keep v1 as the legacy maintenance line and use `main` for the v2 rewrite. Preserve legacy material on `main` only as a temporary reference/reuse baseline and port reusable pieces selectively into governed v2 paths. Do not add a v1/v2 runtime switch. v2.0 is OpenCode v2 only; v2.1 adds CodeWalk Host and Codex; v2.2 adds Claude Code and Pi; v2.3 adds Grok Build and Muse Code. dsh remains experimental.
+
+2. **Hybrid connection topology (D01).** The v2.0 app uses a direct OpenCode v2 adapter over the official HTTP/SSE contract; OpenCode users do not need to install the Host. Other harnesses are reached through a CodeWalk Host adapter speaking the CodeWalk Host Protocol (CHP), with the Host translating each harness's native protocol into the CodeWalk contract. Codex deliberately uses the Host in v2.1 despite its native app-server. The Host may also observe/pass through OpenCode later; this preserves a path to a universal gateway without making the Host a v2.0 prerequisite.
+
+   A future direct harness adapter is allowed only when its server is official and documented; authenticated and protected by TLS or the user's tunnel; multi-client with sessions shared with the harness's own clients; stable or pinnable with reconnect that cannot silently lose state (replay or authoritative snapshots); and usable from a browser through CORS/Origin support or explicitly excluded from Web. The Host may connect to such a server as well.
+
+3. **Ports, adapters, and canonical state.** Use ports and adapters: `codewalk_core` owns pure-Dart identity, domain, canonical events, reducer, capabilities, policy, and errors; `codewalk_net` owns transports; `harness_opencode` owns OpenCode v2 wire DTOs/client/decoder/projection; and `harness_host` owns CHP DTOs/client/mapper from v2.1. Wire DTOs and native protocol vocabulary stay at adapter edges. Features/UI consume canonical types only. A deterministic reducer returns effects rather than performing I/O; unknown event/item values remain safe, typed unknowns instead of crashes or invented assistant text. Shared mobile and desktop screens are capability-driven and must not branch on harness names. Capability availability is the verified intersection of adapter/version, negotiated features, session/model state, policy, and platform; unknown means unavailable until verified.
+
+4. **Identity and operation contracts.** The canonical session identity is the composite `(HostId, HarnessInstanceId, nativeSessionId)` represented by `SessionRef`; it keys caches, drafts, tabs, and notifications. Native IDs alone and URL similarity are not identity. Define compatibility and operation behavior by connected harness/version. Preserve a command's original payload and correlation before mutation; a `CommandId` alone does not prove idempotency. Record replay guarantees per operation and version. If delivery is uncertain, replay only when that operation's same-command guarantee has been demonstrated; otherwise reconcile from authoritative state and retain an `uncertain` result until resolved or deliberately resent by the user. Never blindly resend a mutation or infer execution completion from a disconnect.
+
+5. **G1–G5 are release gates, including public MVP prereleases.** The v2.0 release and every public MVP prerelease are blocked until the gates pass; freezing v1 at MVP does not waive them:
+   - **G1 — real recordings:** recorded Codex and Claude sessions cover text, tools, approvals, questions, background work, usage, and errors with version/topology provenance; static upstream facts or synthetic schema examples are not a pass.
+   - **G2 — two-adapter fit:** both recordings map to canonical expectations with frame-to-event traceability and reducer assertions for ownership, interactions, lifecycle, and usage; expectations validate against canonical payload definitions and corresponding CHP frames validate against G5.
+   - **G3 — fake harness:** a scripted adapter with no undo, terminal, queue, forms, and history-only external sessions drives the same screens.
+   - **G4 — architecture enforcement:** CI guards enforce the §6.3 rules: `codewalk_core` imports no Flutter, `dart:io`, Dio, or harness package; Dio is confined to `codewalk_net`/`harness_*`; features do not import `harness_*`; no `part of`; no Dart file exceeds 1,500 lines without a recorded reason; feature UI does not compare harness names; and widgets do not look up `get_it`.
+   - **G5 — Host protocol schema:** CHP v1 schema, named canonical payload definitions, and example frames are defined and validated as v2.0 artifacts. G2 and G5 MUST use the same final schema revision. Freezing the Host server implementation/distribution and proving desktop packaging is a v2.1 gate, not a v2.0 prerequisite.
+
+6. **Transitional G4 and test scope.** From their first commit, G4 governs `packages/codewalk_*`, `packages/harness_*`, `lib/app/`, `lib/features/`, `lib/platform/`, `lib/shared/`, and the temporary v2 entry point (including `lib/main_v2.dart` if used). A separate transitional legacy-path manifest explicitly enumerates retained legacy paths that are temporarily excluded; these path exclusions are distinct from generated/vendor file-size exceptions. Generated/vendor exceptions to the size rule must be separately narrow and reasoned. Authored v2 is never exempt wholesale and must not import retained legacy code directly or transitively. V2-020A establishes first-commit guards and the transitional manifest; V2-021 proves the guards with planted violations; V2-020C establishes new-package test discovery and explicit v2 targets. V2-084 removes all retained-legacy path exclusions at cutover. These are planned work items, not claims that the packages, guards, targets, or tests already exist.
+
+7. **Contract reference and scope routing.** ADR-023 remains the contract-first principle. New v2 consumers use the pinned, versioned OpenCode references `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, and `ai-docs/opencode_v2_models.md`; official OpenCode docs/source are primary, while a source pin is not live acceptance evidence. OpenChamber is secondary community reference only and cannot override official evidence. SP-01 and owning work items must revalidate live/version-specific facts before behavior depends on them. v1 maintenance and retained legacy paths—including legacy code still present on `main`—continue to use ADR-023's original `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md` anchors and their applicable v1 invariants. V1-only `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE details do not constrain authored v2. EXC-001 is preserved as historical/legacy behavior; the v2 permission-mode replacement is V2-003 / ADR-059, not this decision.
+
+8. **Scoped legacy decisions.** ADR-002's `serverId::scopeId` identity/transition flow and ADR-003's v1 realtime lifecycle remain accepted for v1 and retained legacy implementation, but do not define authored v2 identity or event/retry/reconciliation behavior. Their original bodies and v1 validity are preserved. ADR-001 remains unchanged: its multi-server, isolation, and credential-storage principles are not displaced by this architecture.
+
+### Rationale
+
+- Direct OpenCode connectivity preserves the simplest v2.0 path, while a translating Host centralizes fast-changing harness protocols and shared approval/attention behavior.
+- Ports, canonical state, stable composite identity, and capability-driven UI make adding adapters an edge change instead of a screen rewrite.
+- Operation-specific replay and explicit uncertainty prevent duplicate sessions/turns when delivery or native guarantees are unclear.
+- G1–G5 validate the architecture against real multi-harness evidence before any public v2.0 prerelease, while transitional G4 lets `main` retain useful legacy evidence without allowing new code to depend on it.
+- Line-scoped references retain the official-contract principle without incorrectly binding v2 to v1-only route and reconciliation details.
+
+### Consequences
+
+- ✅ v2.0 can ship without a Host while preserving a staged multi-harness release path.
+- ✅ Domain state and shared mobile/desktop UI remain independent of harness wire formats and names.
+- ✅ Explicit gate, test-discovery, and import boundaries permit temporary coexistence without requiring premature deletion of the legacy reference tree.
+- ⚠ v2.0 progress depends on real Codex/Claude recordings and passing architecture gates even though those harnesses do not ship in v2.0.
+- ⚠ The Host app-facing schema must settle with G2/G5 in v2.0; Host server packaging and distribution remain v2.1 work.
+- ❌ Authored v2 may not import retained legacy implementation, claim unverified capabilities, or automatically replay uncertain non-idempotent mutations.
+
+Related: V2-002; `v2-plan.md` §§2, 4, 6.1–6.12, 8.3, 10, 11.2. Official v2 anchors: `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, `ai-docs/opencode_v2_models.md`.

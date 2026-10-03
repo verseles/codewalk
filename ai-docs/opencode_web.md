@@ -1,3 +1,5 @@
+> **Legacy OpenCode v1 anchor.** This reference applies to `v1` maintenance and the retained legacy implementation, including its temporary reference copy on `main`. New v2 consumers use [the versioned v2 Web anchor](opencode_v2_web.md) and ADR-058 in [ADR.md](../ADR.md). The original content below is preserved as v1 evidence.
+
 Title: Web
 
 URL Source: https://opencode.ai/docs/web/
