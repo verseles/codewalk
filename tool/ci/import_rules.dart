@@ -80,6 +80,7 @@ void main(List<String> arguments) {
         manifest,
         violations,
         importedLocators: graph.importedLocators(path),
+        importedLookupHelpers: graph.importedLookupHelpers(path),
         widgetDeclarationNames: graph.widgetDeclarationNames(path),
         importedHarnessNames: manifest.isFeature(relative)
             ? graph.importedHarnessNames(path)

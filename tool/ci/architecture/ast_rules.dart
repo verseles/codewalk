@@ -13,6 +13,7 @@ final class AstRules extends RecursiveAstVisitor<void> {
     this.manifest,
     this.violations, {
     this.importedLocators = const {},
+    this.importedLookupHelpers = const {},
     this.widgetDeclarationNames = const {},
     this.importedHarnessNames = const {},
   });
@@ -22,6 +23,8 @@ final class AstRules extends RecursiveAstVisitor<void> {
   final ArchitectureManifest manifest;
   final List<Violation> violations;
   final Set<String> importedLocators;
+  final Set<String> importedLookupHelpers;
+  final Set<String> _lookupHelpers = {};
   final Set<String> widgetDeclarationNames;
   final Set<String> importedHarnessNames;
   final List<VariableDeclaration> _variables = [];
@@ -40,6 +43,24 @@ final class AstRules extends RecursiveAstVisitor<void> {
     _parameters.addAll(
       declarations.parameters.whereType<SimpleFormalParameter>(),
     );
+    _lookupHelpers.addAll(importedLookupHelpers);
+    var changed = true;
+    while (changed) {
+      changed = false;
+      for (final declaration in [
+        ..._functions.map(
+          (item) => (item.name.lexeme, item.functionExpression as AstNode),
+        ),
+        ..._methods.map((item) => (item.name.lexeme, item.body as AstNode)),
+        ..._variables
+            .where((item) => item.initializer != null)
+            .map((item) => (item.name.lexeme, item.initializer! as AstNode)),
+      ]) {
+        if (_mentionsLookup(declaration.$2)) {
+          changed = _lookupHelpers.add(declaration.$1) || changed;
+        }
+      }
+    }
     source.unit.accept(this);
   }
 
@@ -157,7 +178,7 @@ final class AstRules extends RecursiveAstVisitor<void> {
         'Features must not test membership by harness name.',
       );
     }
-    if (_widgetDepth > 0 && _lookup(node)) {
+    if (_widgetDepth > 0 && (_lookup(node) || _helperCall(node))) {
       _fail(
         'widget-locator',
         node,
@@ -172,6 +193,58 @@ final class AstRules extends RecursiveAstVisitor<void> {
       );
     }
     super.visitMethodInvocation(node);
+  }
+
+  bool _helperCall(MethodInvocation node) {
+    if (node.target == null) return _helperValue(node.methodName, {});
+    if (node.methodName.name == 'call') return _helperValue(node.target!, {});
+    if (node.target is! SimpleIdentifier) return false;
+    final target = node.target! as SimpleIdentifier;
+    if (_binding(target) != null) return false;
+    return _lookupHelpers.contains('${target.name}.${node.methodName.name}');
+  }
+
+  bool _helperValue(AstNode node, Set<AstNode> visiting) {
+    if (!visiting.add(node)) return false;
+    if (node is SimpleIdentifier) {
+      final binding = _binding(node);
+      if (binding != null) {
+        return binding.$1 != null && _helperValue(binding.$1!, visiting);
+      }
+      return _lookupHelpers.contains(node.name);
+    }
+    if (node is PrefixedIdentifier) {
+      if (_binding(node.prefix) != null) return false;
+      return _lookupHelpers.contains(
+        '${node.prefix.name}.${node.identifier.name}',
+      );
+    }
+    if (node is ParenthesizedExpression) {
+      return _helperValue(node.expression, visiting);
+    }
+    if (node is PropertyAccess &&
+        node.propertyName.name == 'call' &&
+        node.target != null) {
+      return _helperValue(node.target!, visiting);
+    }
+    if (node is FunctionExpression || node is FunctionBody) {
+      return _mentionsLookup(node);
+    }
+    return false;
+  }
+
+  bool _mentionsLookup(AstNode node) {
+    if (node is SimpleIdentifier &&
+        (node.name == 'GetIt' || _lookupHelpers.contains(node.name))) {
+      return true;
+    }
+    if (node is PrefixedIdentifier &&
+        _lookupHelpers.contains(
+          '${node.prefix.name}.${node.identifier.name}',
+        )) {
+      return true;
+    }
+    return node.childEntities.whereType<AstNode>().any(_mentionsLookup);
   }
 
   bool _lookup(MethodInvocation node) {
@@ -385,6 +458,9 @@ final class _DeclarationCollector extends RecursiveAstVisitor<void> {
 
 final class _ReturnCollector extends RecursiveAstVisitor<void> {
   final List<Expression> expressions = [];
+
+  @override
+  void visitFunctionExpression(FunctionExpression node) {}
 
   @override
   void visitReturnStatement(ReturnStatement node) {

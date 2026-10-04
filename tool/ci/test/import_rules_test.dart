@@ -881,6 +881,219 @@ dependencies:
   }
 
   test(
+    'private locator resolving services into an ordinary dependency graph is valid',
+    () async {
+      final result = await run(
+        files: {
+          'lib/shared/dependencies.dart':
+              'class Service {} class AppDependencies { AppDependencies(this.service); final Service service; }\n',
+          'lib/app/composition_root.dart':
+              "import 'package:get_it/get_it.dart'; import '../shared/dependencies.dart'; AppDependencies createAppDependencies() { final locator = GetIt.asNewInstance(); locator.registerSingleton(Service()); final service = locator.get<Service>(); final graph = AppDependencies(service); return graph; }\n",
+          'lib/main_v2.dart':
+              "import 'app/composition_root.dart'; void main() { final dependencies = createAppDependencies(); }\n",
+        },
+      );
+      expect(result.exitCode, 0, reason: result.stderr.toString());
+    },
+  );
+
+  test(
+    'returns inside a private nested closure do not escape the outer factory',
+    () async {
+      final result = await run(
+        files: {
+          'lib/app/composition_root.dart':
+              "import 'package:get_it/get_it.dart'; class Graph {} Graph createGraph() { GetIt internal() { return GetIt.I; } final locator = internal(); return Graph(); }\n",
+          'lib/main_v2.dart':
+              "import 'app/composition_root.dart'; void main() { final graph = createGraph(); }\n",
+        },
+      );
+      expect(result.exitCode, 0, reason: result.stderr.toString());
+    },
+  );
+
+  for (final body in [
+    'final locator = GetIt.asNewInstance(); final alias = locator; return alias;',
+    'return GetIt.asNewInstance();',
+    'return () => GetIt.I;',
+    'return GetIt.I.get;',
+  ]) {
+    test(
+      'actual exported locator value still violates boundary: $body',
+      () => reject('get-it-boundary', {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; dynamic leak() { $body }\n",
+        'lib/main_v2.dart':
+            "import 'app/composition_root.dart'; void main() { final exposed = leak(); }\n",
+      }),
+    );
+  }
+
+  test(
+    'widget cannot delegate a lookup to an imported service helper',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "import 'package:get_it/get_it.dart'; class Service {} Service resolveService() => GetIt.I.get<Service>();\n",
+      'lib/app/page.dart':
+          "$widgetImports import 'composition_root.dart' as root; class Page extends StatelessWidget { Object build() => root.resolveService(); }\n",
+    }),
+  );
+
+  test(
+    'widget cannot mount a dependency graph by calling the private-locator factory',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "import 'package:get_it/get_it.dart'; class Graph {} Graph createGraph() { final locator = GetIt.asNewInstance(); return Graph(); }\n",
+      'lib/app/page.dart':
+          "$widgetImports import 'composition_root.dart'; class Page extends StatelessWidget { Object build() => createGraph(); }\n",
+    }),
+  );
+
+  test('ordinary graph factory closure is valid outside widgets', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; class Graph {} final createGraph = () { final locator = GetIt.asNewInstance(); return Graph(); };\n",
+        'lib/main_v2.dart':
+            "import 'app/composition_root.dart'; void main() { final graph = createGraph(); }\n",
+      },
+    );
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+  });
+
+  test(
+    'a returned object carrying the actual locator still leaks capability',
+    () => reject('get-it-boundary', {
+      'lib/app/composition_root.dart':
+          "import 'package:get_it/get_it.dart'; class Wrapper { Wrapper({required this.locator}); final GetIt locator; } Wrapper leak() { final locator = GetIt.asNewInstance(); return Wrapper(locator: locator); }\n",
+      'lib/main_v2.dart':
+          "import 'app/composition_root.dart'; void main() { final graph = leak(); }\n",
+    }),
+  );
+
+  for (final expression in [
+    '[GetIt.I]',
+    '{GetIt.I}',
+    "{'locator': GetIt.I}",
+    '(GetIt.I,)',
+    '(locator: GetIt.I,)',
+    '[...[GetIt.I]]',
+    '[if (flag) GetIt.I else GetIt.asNewInstance()]',
+    '[for (final locator in [GetIt.I]) locator]',
+    "{if (flag) 'locator': GetIt.I}",
+    "{...{'locator': GetIt.I}}",
+    '(GetIt.I as Object)',
+    'GetIt.I!',
+    'null ?? GetIt.I',
+    'switch (flag) { true => GetIt.I, false => null }',
+    '[GetIt.I][0]',
+    "{'locator': GetIt.I}['locator']",
+    '(GetIt.I..toString())',
+    '(() => GetIt.I)()',
+    '(saved = GetIt.I)',
+    '[?GetIt.I]',
+  ]) {
+    test(
+      'returned container or wrapper exports actual locator: $expression',
+      () => reject('get-it-boundary', {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; const flag = true; Object? saved; dynamic leak() => $expression;\n",
+        'lib/main_v2.dart':
+            "import 'app/composition_root.dart'; void main() { final exposed = leak(); }\n",
+      }),
+    );
+  }
+
+  for (final expression in [
+    '[GetIt.I.get<Service>()]',
+    "{'service': GetIt.I.get<Service>()}",
+    '(service: GetIt.I.get<Service>(),)',
+    '[...<Service>[GetIt.I.get<Service>()], if (flag) Service()]',
+    '[for (final locator in [GetIt.I]) locator.get<Service>()]',
+    '(GetIt.I.get<Service>() as Object)',
+    '[GetIt.I.get<Service>()][0]',
+    "{'service': GetIt.I.get<Service>()}['service']",
+    '(GetIt.I.get<Service>()..toString())',
+    '(() => GetIt.I.get<Service>())()',
+    '(saved = GetIt.I.get<Service>())',
+    '[?GetIt.I.get<Service>()]',
+  ]) {
+    test('ordinary resolved service values may escape: $expression', () async {
+      final result = await run(
+        files: {
+          'lib/app/composition_root.dart':
+              "import 'package:get_it/get_it.dart'; class Service {} const flag = true; Object? saved; dynamic createGraph() => $expression;\n",
+          'lib/main_v2.dart':
+              "import 'app/composition_root.dart'; void main() { final graph = createGraph(); }\n",
+        },
+      );
+      expect(result.exitCode, 0, reason: result.stderr.toString());
+    });
+  }
+
+  test(
+    'generic forwarding does not erase an actual locator argument',
+    () => reject('get-it-boundary', {
+      'lib/app/composition_root.dart':
+          "import 'package:get_it/get_it.dart'; T identity<T>(T value) => value; Object leak() => identity<Object>(GetIt.I);\n",
+      'lib/main_v2.dart':
+          "import 'app/composition_root.dart'; void main() { final exposed = leak(); }\n",
+    }),
+  );
+
+  test('generic forwarding of ordinary resolved services is valid', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; class Service {} T identity<T>(T value) => value; Service createGraph() => identity<Service>(GetIt.I.get<Service>());\n",
+        'lib/main_v2.dart':
+            "import 'app/composition_root.dart'; void main() { final graph = createGraph(); }\n",
+      },
+    );
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+  });
+
+  for (final body in [
+    'Object build() => root.resolveService.call();',
+    'Object build() { final cb = root.resolveService; return cb.call(); }',
+    'Object build() { final first = root.resolveService; final cb = first; return cb.call(); }',
+  ]) {
+    test(
+      'widget cannot invoke a lookup helper tearoff: $body',
+      () => reject('widget-locator', {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; class Service {} Service resolveService() => GetIt.I.get<Service>();\n",
+        'lib/app/page.dart':
+            "$widgetImports import 'composition_root.dart' as root; class Page extends StatelessWidget { $body }\n",
+      }),
+    );
+  }
+
+  test('ordinary factory tearoff call remains valid outside widgets', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; class Graph {} Graph createGraph() { final locator = GetIt.asNewInstance(); return Graph(); }\n",
+        'lib/main_v2.dart':
+            "import 'app/composition_root.dart' as root; void main() { final cb = root.createGraph; final graph = cb.call(); }\n",
+      },
+    );
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+  });
+
+  test('widget callback parameter may shadow a lookup helper name', () async {
+    final result = await run(
+      files: {
+        'lib/app/composition_root.dart':
+            "import 'package:get_it/get_it.dart'; class Service {} Service resolveService() => GetIt.I.get<Service>();\n",
+        'lib/app/page.dart':
+            "$widgetImports import 'composition_root.dart'; class Page extends StatelessWidget { Object build(Object Function() resolveService) => resolveService.call(); }\n",
+      },
+    );
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+  });
+
+  test(
     'ordinary composition wiring, display labels and comments are valid',
     () async {
       final result = await run(

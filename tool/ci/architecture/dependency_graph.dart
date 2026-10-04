@@ -6,6 +6,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+import 'locator_values.dart';
 import 'manifest.dart';
 import 'widget_types.dart';
 
@@ -91,7 +92,14 @@ final class DependencyGraph {
 
   Set<String> importedLocators(String path) => _importedLocators(path, {path});
 
-  Set<String> _importedLocators(String path, Set<String> visited) {
+  Set<String> importedLookupHelpers(String path) =>
+      _importedLocators(path, {path}, lookups: true);
+
+  Set<String> _importedLocators(
+    String path,
+    Set<String> visited, {
+    bool lookups = false,
+  }) {
     final names = <String>{};
     for (final directive in source(
       path,
@@ -103,7 +111,9 @@ final class DependencyGraph {
         if (uri == null) continue;
         final resolved = resolve(path, uri);
         if (resolved == null || !isLocal(resolved)) continue;
-        final exported = _locatorExports(resolved, {...visited});
+        final exported = _locatorExports(resolved, {
+          ...visited,
+        }, lookups: lookups);
         final visible = _visible(exported, directive.combinators);
         final prefix = directive.prefix?.name;
         names.addAll(
@@ -114,11 +124,15 @@ final class DependencyGraph {
     return names;
   }
 
-  Set<String> _locatorExports(String path, Set<String> visited) {
+  Set<String> _locatorExports(
+    String path,
+    Set<String> visited, {
+    bool lookups = false,
+  }) {
     if (!visited.add(path)) return {};
     final unit = source(path).unit;
     final names = <String>{};
-    final imported = _importedLocators(path, visited);
+    final imported = _importedLocators(path, visited, lookups: lookups);
     final bindings = <String, AstNode>{};
     for (final declaration in unit.declarations) {
       if (declaration is TopLevelVariableDeclaration) {
@@ -139,8 +153,11 @@ final class DependencyGraph {
     var changed = true;
     while (changed) {
       changed = false;
+      final values = LocatorValues(unit, {...names, ...imported});
       for (final binding in bindings.entries) {
-        if (_referencesLocator(binding.value, {...names, ...imported})) {
+        if (lookups
+            ? _referencesLocator(binding.value, {...names, ...imported})
+            : values.escapes(binding.value)) {
           changed = names.add(binding.key) || changed;
         }
       }
@@ -155,7 +172,7 @@ final class DependencyGraph {
         if (resolved == null || !isLocal(resolved)) continue;
         names.addAll(
           _visible(
-            _locatorExports(resolved, {...visited}),
+            _locatorExports(resolved, {...visited}, lookups: lookups),
             directive.combinators,
           ),
         );
