@@ -1,0 +1,81 @@
+{
+  "unit": "V2-005C",
+  "issue": "https://github.com/verseles/codewalk/issues/242",
+  "capturedOn": "2026-10-04",
+  "platform": "Linux x86_64",
+  "runtime": {
+    "package": "@opencode/cli@2.0.22",
+    "wrapper": "/workspace/.cloud-tools/bin/opencode2",
+    "serverURL": "http://127.0.0.1:49374",
+    "observedVersion": "2.0.22",
+    "initialPID": 117273,
+    "postRestartPID": 126717,
+    "sourcePin": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+    "officialPrimaryReferenceVersion": "2.0.21"
+  },
+  "checkout": {
+    "initialCommit": "5b782e2a0c0a595059a9c5f811b2a5e072d0cac6",
+    "laterFixtureOnlyCommitDuringCapture": "7bbfe16d4adf24841aea0c5cc98b5f3e0642ec24",
+    "branch": "main",
+    "applicationSourceModifiedByThisUnit": false
+  },
+  "workspace": {
+    "original": "/workspace/.cloud-runtime/opencode-v2/capture-c",
+    "originalProjectID": "global",
+    "corrected": "/workspace/.cloud-runtime/opencode-v2/capture-c-isolated",
+    "correctedProjectID": "fdb157e6e688e8ab6521d2643bf6d838517fb509",
+    "correctedInitialGitCommit": "fdb157e6e688e8ab6521d2643bf6d838517fb509",
+    "inputContents": {
+      "permission-a.txt": "C_PERMISSION_ALPHA\n",
+      "permission-b.txt": "C_PERMISSION_BETA\n"
+    }
+  },
+  "models": [
+    {
+      "providerID": "opencode",
+      "id": "fledge-alpha-free",
+      "variant": "low"
+    },
+    {
+      "providerID": "opencode",
+      "id": "space-bunny-free",
+      "variant": "low"
+    }
+  ],
+  "budget": {
+    "declaredActiveMinutes": 90,
+    "authoredPromptsIncludingFailedDiagnostic": 10,
+    "automaticRestartResumedExecutionsObserved": 3,
+    "totalObservedProviderExecutions": 13,
+    "observedCostUSD": 0,
+    "diagnostic": "Original ceiling: twelve actual provider executions, including automatic resumptions. Ten authored prompts plus three automatic native restart continuations produced thirteen actual executions, an unexpected overrun of one. The restart caused the additional executions without an extra authored prompt. Observed cost remained USD 0; resumed work was settled, three disposable capture sessions removed, and no further provider calls issued.",
+    "actualExecutionCeiling": 12,
+    "observedExecutionOverrun": 1,
+    "futureRemedy": [
+      "Use separate capture service runtimes",
+      "Dispose interrupted test sessions before a coordinated shared-service restart",
+      "Count automatic native resumptions against the actual execution ceiling"
+    ]
+  },
+  "evidenceKinds": {
+    "native-interactions.json": "Actual supported native API-created interactions and server events; no provider execution",
+    "provider-*.json": "Actual free-provider executions except clearly named global-project/single-read diagnostic attempts",
+    "post-restart-question-recovery.json": "Authoritative already-pending form plus subsequent newly observed stream; no prior created-event replay claim",
+    "post-capture-checks.json": "Authoritative later reads and deletion/cleanup; failed collector history does not recreate lost ephemeral events"
+  },
+  "redactions": [
+    "Credential fields replaced with [REDACTED]",
+    "Authorization headers never saved",
+    "Opaque provider state replaced with explicit marker"
+  ],
+  "validationCommand": "python3 test/contract/fixtures/opencode/2.0.22/c/validate.py",
+  "scopeLimitations": [
+    "No application behavior change",
+    "No multi-version compatibility window",
+    "No other platforms",
+    "No permanent cancellation claim across service restart",
+    "No model-generated arbitrary generic form fields",
+    "No parent SP-01 acceptance",
+    "No fabricated SSE/events"
+  ]
+}
