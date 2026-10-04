@@ -1,4 +1,7 @@
 /// Pure Dart canonical domain, identity, policy and ports.
 ///
-/// This public library intentionally has no implementation in V2-020A.
+/// Identity and ownership are independent of transports and native protocols.
 library;
+
+export 'src/identity.dart';
+export 'src/ownership.dart';
