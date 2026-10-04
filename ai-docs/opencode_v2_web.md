@@ -32,6 +32,16 @@ The docs call the Web UI password-protected. The pinned [web shell handler](../p
 
 Changing shared-service settings can stop/restart it; the official page describes applying configuration before restarting. These are operator-owned actions, not commands performed by this documentation unit. User-managed SSH/VPN/TLS connectivity remains distinct from the app's API protocol.
 
+## Observed Linux Chromium subset
+
+[E native 2.0.22 captures](../test/contract/fixtures/opencode/2.0.22/e/README.md)
+record authenticated `/api/info` and fetch-streamed global SSE from an allowed
+localhost origin in Chromium151. The foreign-origin browser reads were blocked;
+the fixture preserves actual HTTP/preflight headers separately from browser
+readability. Shared-service settings were not changed. This is a loopback Chrome
+subset, not Safari, HTTPS-to-LAN mixed-content, custom-origin configuration or
+PTY-ticket acceptance; SP-04 owns those remaining checks.
+
 ## Reference client and policy separation
 
 The [official event reducer](../plan/opencode-v2-src/client-solid-data.reference-reducer.ts) is implementation evidence for native event reconciliation, not a dependency the Flutter UI imports. The canonical reducer and capability-driven screens belong to CodeWalk; wire DTOs stay inside its adapter.

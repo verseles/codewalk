@@ -2,3 +2,4 @@
 test/contract/fixtures/**/*.sse whitespace=-blank-at-eof
 # The decoded native screen retains all recorded terminal rows, including empty ones.
 test/contract/fixtures/opencode/2.0.22/tui-screen.txt whitespace=-blank-at-eof
+test/contract/fixtures/**/*.pdf binary

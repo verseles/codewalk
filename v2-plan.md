@@ -300,7 +300,7 @@ Sixteen helpers produced independent plans (full texts in `plan/helper-plans/`).
 | 12 | Revert: `revert/stage` (409 while running; may apply file changes immediately when files are included), `DELETE …/revert` clears (redo), `revert/commit` (or automatic on the next prompt); needs git snapshots. | Preview before staging; label actions by effect. | [V `session.ts:531–564`; `plan/11`] |
 | 13 | `PATCH /api/session/{id}` accepts only `title`, `metadata`, `permissions`. | No native archive; CodeWalk archive is a local "hide". | [V `session.ts:358–374`] |
 | 14 | Files: list, find (name fuzzy), read. `POST /api/experimental/fs/write` writes a raw body to an absolute path or a path relative to the location — **"not confined to the location"**, experimental. Entry listings expose path/type, not symlink targets. No content or symbol search. | Lexical validation alone cannot prove physical containment. Saves require the flag **and** a containment mechanism verified by SP-01; otherwise write is unavailable. Rename/delete/new file wait for the host (v2.2). | [V `fs.ts:75–89`, `schema/filesystem.ts:18–20`] |
-| 15 | Attachments: images PNG/JPEG/GIF/WebP (≤ 20 MiB); **PDF, AVIF, BMP, audio, video are not included in the model request**. | PDF attach disabled for OpenCode with an explanation ("export a page as an image"). | [V `docs-attachments.md:69–72`] |
+| 15 | Native 2.0.21 and 2.0.22 source forwards image media **and `application/pdf`** to the model; unsupported other MIME kinds are omitted. E observes PNG recognition without tools and PDF admission/history MIME, but its free PDF-model request failed provider authentication, so PDF recognition remains unverified. | Preserve the approved CodeWalk PDF-disabled policy, with "convert a page to an image"; do not claim upstream cannot send PDF. Re-enabling requires a new product decision and appropriate provider evidence. | [V `session/runner/to-llm-message.ts:75–81`; [V2-005E evidence](test/contract/fixtures/opencode/2.0.22/e/README.md)] |
 | 16 | No todo tool or endpoint in v2; titles are native (`session.renamed`); no share; config writes only via `PATCH /api/experimental/config` for `shell`. | Drop todo panel, title generator, share, OpenCode defaults editor for OpenCode. | [V `plan/12`, `plan/11` §3] |
 | 17 | No remaining-quota API; tokens and cost per step/session; model `limit.context`; typed provider errors (`provider.rate-limit`, `provider.quota` with body, `provider.auth`). | Usage vs quota separation (§5.9). | [V `plan/11` §D, `plan/12` §10] |
 | 18 | `GET /api/credential` returns secret values to any authenticated client. | The app MUST never call it. | [V `plan/11` §1.7] |
@@ -349,7 +349,7 @@ These are distinct official surfaces, confirmed by the installed CLI help and th
 ### 3.4 Corrections to earlier summaries
 
 1. OpenCode **has** an experimental file-write endpoint, and it is **not** confined to the project (the research index said "no write endpoint").
-2. OpenCode **does not send PDFs** to the model (three planner reports said it depended on the model).
+2. The earlier claim that OpenCode does not send PDFs was incorrect: official 2.0.21 and 2.0.22 source forwards `application/pdf` media (identical source). Model recognition is provider-dependent and E remains inconclusive after free-provider authentication failure. CodeWalk's approved PDF-disabled policy is unchanged.
 3. Windows ARM64 OpenCode artifacts **exist** (the index said they did not); only the curl installer rejects that target.
 4. A legacy APK built after a v2 release **can** install over v2 (one report said it could not).
 5. ADR-045 already exists; new ADRs start at ADR-058 (one report proposed "ADR-045").
@@ -494,7 +494,7 @@ Drafts and input history, canned answers, tabs and MRU switcher, pins and recent
 ### 5.15 What changes for v1 users (release-note material)
 
 - Servers must run OpenCode 2; v1 servers show an explainer and the legacy link.
-- PDFs cannot be attached to OpenCode sessions (OpenCode does not send them to models).
+- CodeWalk keeps PDF selection disabled for OpenCode in the approved v2 product scope; convert a page to an image. Native PDF forwarding exists, but model recognition was not verified by E and enabling it needs a new product decision.
 - No share links; no OpenCode defaults editor; no todo panel for OpenCode; titles come from the server.
 - Provider quota bars for OpenCode are gone until the host connectors (v2.1); limit errors still show reset times.
 - File editor saves are experimental, off by default, and unavailable unless remote containment is verified; new/rename/delete files wait for v2.2.

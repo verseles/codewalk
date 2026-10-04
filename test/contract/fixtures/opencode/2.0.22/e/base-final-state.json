@@ -1,0 +1,187 @@
+{
+  "capturedAt": "2026-10-04T05:26:53.358645+00:00",
+  "calls": [
+    {
+      "name": "BaseFinalInfo",
+      "startedAt": "2026-10-04T05:26:53.348883+00:00",
+      "completedAt": "2026-10-04T05:26:53.349679+00:00",
+      "method": "GET",
+      "path": "/api/info",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 136,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "name": "BaseFinalActive",
+      "startedAt": "2026-10-04T05:26:53.349693+00:00",
+      "completedAt": "2026-10-04T05:26:53.350563+00:00",
+      "method": "GET",
+      "path": "/api/session/active",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 11,
+      "response": {
+        "data": {}
+      }
+    },
+    {
+      "name": "Finalsession",
+      "startedAt": "2026-10-04T05:26:53.350579+00:00",
+      "completedAt": "2026-10-04T05:26:53.351837+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 365,
+      "response": {
+        "data": {
+          "id": "ses_1a10560fdd10009e6bb31a7a089e",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091604959,
+            "updated": 1791091604987
+          },
+          "title": "V2-005E log renamed twice",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "Finalinbox",
+      "startedAt": "2026-10-04T05:26:53.351853+00:00",
+      "completedAt": "2026-10-04T05:26:53.353146+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e/inbox",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 11,
+      "response": {
+        "data": []
+      }
+    },
+    {
+      "name": "Finalhistory",
+      "startedAt": "2026-10-04T05:26:53.353158+00:00",
+      "completedAt": "2026-10-04T05:26:53.354687+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e/message?order=asc&limit=200",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 50,
+      "response": {
+        "data": [],
+        "cursor": {
+          "previous": null,
+          "next": null
+        }
+      }
+    }
+  ],
+  "state": {
+    "connectedInfo": {
+      "version": "2.0.22",
+      "pid": 126717,
+      "urls": [
+        "http://127.0.0.1:49374"
+      ],
+      "paths": {
+        "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+      }
+    },
+    "ownedActiveBeforeCleanup": [],
+    "ownedSessionState": {
+      "ses_1a10560fdd10009e6bb31a7a089e": {
+        "session": {
+          "data": {
+            "id": "ses_1a10560fdd10009e6bb31a7a089e",
+            "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            },
+            "time": {
+              "created": 1791091604959,
+              "updated": 1791091604987
+            },
+            "title": "V2-005E log renamed twice",
+            "location": {
+              "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+            }
+          }
+        },
+        "inbox": {
+          "data": []
+        },
+        "history": {
+          "data": [],
+          "cursor": {
+            "previous": null,
+            "next": null
+          }
+        }
+      }
+    },
+    "disposableGit": {
+      "initialCommit": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+      "status": "?? inside/\n?? link\n?? swap\n"
+    }
+  }
+}

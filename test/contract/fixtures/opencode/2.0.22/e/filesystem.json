@@ -1,0 +1,3532 @@
+{
+  "capturedAt": "2026-10-04T05:26:53.345792+00:00",
+  "projectDirectory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project",
+  "outsideOwnedDirectory": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside",
+  "writes": [
+    {
+      "name": "NormalWrite",
+      "pathInput": "inside/normal.txt",
+      "lexicalPath": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/normal.txt",
+      "realPathAfter": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/normal.txt",
+      "status": 200,
+      "actualBytes": "V2-005E NormalWrite\n",
+      "expectedBytes": "V2-005E NormalWrite\n",
+      "insideProjectAfter": true
+    },
+    {
+      "name": "TraversalWrite",
+      "pathInput": "../outside/traversal.txt",
+      "lexicalPath": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/traversal.txt",
+      "realPathAfter": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/traversal.txt",
+      "status": 200,
+      "actualBytes": "V2-005E TraversalWrite\n",
+      "expectedBytes": "V2-005E TraversalWrite\n",
+      "insideProjectAfter": false
+    },
+    {
+      "name": "AbsoluteWrite",
+      "pathInput": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/absolute.txt",
+      "lexicalPath": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/absolute.txt",
+      "realPathAfter": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/absolute.txt",
+      "status": 200,
+      "actualBytes": "V2-005E AbsoluteWrite\n",
+      "expectedBytes": "V2-005E AbsoluteWrite\n",
+      "insideProjectAfter": false
+    },
+    {
+      "name": "SymlinkWrite",
+      "pathInput": "link/symlink.txt",
+      "lexicalPath": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/link/symlink.txt",
+      "realPathAfter": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/symlink.txt",
+      "status": 200,
+      "actualBytes": "V2-005E SymlinkWrite\n",
+      "expectedBytes": "V2-005E SymlinkWrite\n",
+      "insideProjectAfter": false
+    }
+  ],
+  "calls": [
+    {
+      "name": "NormalWrite",
+      "startedAt": "2026-10-04T05:26:47.095312+00:00",
+      "completedAt": "2026-10-04T05:26:47.099760+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=inside%2Fnormal.txt",
+      "request": null,
+      "requestRawSha256": "fffb909e9910fc22e03d08bce0e20742bd560e167aea8affa32ddbc156fd18a9",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 176,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/normal.txt"
+        }
+      }
+    },
+    {
+      "name": "TraversalWrite",
+      "startedAt": "2026-10-04T05:26:47.100036+00:00",
+      "completedAt": "2026-10-04T05:26:47.102138+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=..%2Foutside%2Ftraversal.txt",
+      "request": null,
+      "requestRawSha256": "0a9c5e6086b6b18afba24af143d3eb2bf6c1ba67da67c1698a62a19631629fee",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 172,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/traversal.txt"
+        }
+      }
+    },
+    {
+      "name": "AbsoluteWrite",
+      "startedAt": "2026-10-04T05:26:47.102363+00:00",
+      "completedAt": "2026-10-04T05:26:47.103903+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Foutside%2Fabsolute.txt",
+      "request": null,
+      "requestRawSha256": "dfdecf8a4f4a69dd4cfed16fb0cc8307b975c4bcf19481ea8b67953e4f1ab7fc",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 171,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/outside/absolute.txt"
+        }
+      }
+    },
+    {
+      "name": "SymlinkWrite",
+      "startedAt": "2026-10-04T05:26:47.104067+00:00",
+      "completedAt": "2026-10-04T05:26:47.107450+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=link%2Fsymlink.txt",
+      "request": null,
+      "requestRawSha256": "792dcae7a026b5dd76af3de8820b44248feefdbd0bb6423a131484d9db8f1a45",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/link/symlink.txt"
+        }
+      }
+    },
+    {
+      "name": "ReadInternal",
+      "startedAt": "2026-10-04T05:26:47.107651+00:00",
+      "completedAt": "2026-10-04T05:26:47.109722+00:00",
+      "method": "GET",
+      "path": "/api/fs/read/inside%2Fnormal.txt?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "text/plain",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 20,
+      "response": {
+        "rawUtf8": "V2-005E NormalWrite\n",
+        "sha256": "fffb909e9910fc22e03d08bce0e20742bd560e167aea8affa32ddbc156fd18a9"
+      }
+    },
+    {
+      "name": "ReadSymlinkOutside",
+      "startedAt": "2026-10-04T05:26:47.109735+00:00",
+      "completedAt": "2026-10-04T05:26:47.111092+00:00",
+      "method": "GET",
+      "path": "/api/fs/read/link%2Fread-marker.txt?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 500,
+      "responseHeaders": {
+        "vary": "Origin"
+      },
+      "responseBytes": 0,
+      "response": null
+    },
+    {
+      "name": "ReadTraversalOutside",
+      "startedAt": "2026-10-04T05:26:47.111100+00:00",
+      "completedAt": "2026-10-04T05:26:47.112380+00:00",
+      "method": "GET",
+      "path": "/api/fs/read/..%2Foutside%2Fread-marker.txt?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 500,
+      "responseHeaders": {
+        "vary": "Origin"
+      },
+      "responseBytes": 0,
+      "response": null
+    },
+    {
+      "name": "ListProject",
+      "startedAt": "2026-10-04T05:26:47.112388+00:00",
+      "completedAt": "2026-10-04T05:26:47.114542+00:00",
+      "method": "GET",
+      "path": "/api/fs/list?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 205,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": [
+          {
+            "path": ".git/",
+            "type": "directory"
+          },
+          {
+            "path": "inside/",
+            "type": "directory"
+          },
+          {
+            "path": "baseline.txt",
+            "type": "file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ListOutsideSibling",
+      "startedAt": "2026-10-04T05:26:47.114560+00:00",
+      "completedAt": "2026-10-04T05:26:47.115740+00:00",
+      "method": "GET",
+      "path": "/api/fs/list?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=..%2Foutside",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 292,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": [
+          {
+            "path": "../outside/absolute.txt",
+            "type": "file"
+          },
+          {
+            "path": "../outside/read-marker.txt",
+            "type": "file"
+          },
+          {
+            "path": "../outside/symlink.txt",
+            "type": "file"
+          },
+          {
+            "path": "../outside/traversal.txt",
+            "type": "file"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FindNormalFile",
+      "startedAt": "2026-10-04T05:26:47.115758+00:00",
+      "completedAt": "2026-10-04T05:26:47.118111+00:00",
+      "method": "GET",
+      "path": "/api/fs/find?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&query=normal&limit=10",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 94,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": []
+      }
+    },
+    {
+      "name": "TOCTOUWrite0",
+      "startedAt": "2026-10-04T05:26:47.118918+00:00",
+      "completedAt": "2026-10-04T05:26:47.121063+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-0.txt",
+      "request": null,
+      "requestRawSha256": "c64a323e82eefe2f94824712a2e61460ed30a933bdc8f7ea0caece5de6c3cce9",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-0.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite1",
+      "startedAt": "2026-10-04T05:26:47.121466+00:00",
+      "completedAt": "2026-10-04T05:26:47.123619+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-1.txt",
+      "request": null,
+      "requestRawSha256": "d6bdd11e0ffe56177a1038ef79bd031ee659a52bbea65d798d0c29601956d853",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-1.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite2",
+      "startedAt": "2026-10-04T05:26:47.123926+00:00",
+      "completedAt": "2026-10-04T05:26:47.125299+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-2.txt",
+      "request": null,
+      "requestRawSha256": "852fb0257d62ece210c93b421c6bcf51cf97fa2fc2aa5ac623c10ee6f2ac0bdb",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-2.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite3",
+      "startedAt": "2026-10-04T05:26:47.125511+00:00",
+      "completedAt": "2026-10-04T05:26:47.127401+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-3.txt",
+      "request": null,
+      "requestRawSha256": "abcaf31ebdca301c9be2ed5a98788110ba5d43e74032a8d45f9f21998f40271b",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-3.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite4",
+      "startedAt": "2026-10-04T05:26:47.328524+00:00",
+      "completedAt": "2026-10-04T05:26:47.331940+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-4.txt",
+      "request": null,
+      "requestRawSha256": "585ef1f2d520714c0fa2e6571a9b4ee4b4321a4959fc3814e62d0168672bac53",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-4.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite5",
+      "startedAt": "2026-10-04T05:26:47.332355+00:00",
+      "completedAt": "2026-10-04T05:26:47.333783+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-5.txt",
+      "request": null,
+      "requestRawSha256": "bb00905a8d64420d90ce8144e0199c4541cc0178fd023cd11091aab8b4000d38",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-5.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite6",
+      "startedAt": "2026-10-04T05:26:47.434526+00:00",
+      "completedAt": "2026-10-04T05:26:47.437474+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-6.txt",
+      "request": null,
+      "requestRawSha256": "b7335a9aebf148a47dfaa589f9323b206e0550d6398c92f71f354b1def333ade",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-6.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite7",
+      "startedAt": "2026-10-04T05:26:47.638451+00:00",
+      "completedAt": "2026-10-04T05:26:47.640994+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-7.txt",
+      "request": null,
+      "requestRawSha256": "b246f3e6a68c7aba2a820251ee9d9da86ba41fdfb6b486f41e79aaedc7947a60",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-7.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite8",
+      "startedAt": "2026-10-04T05:26:47.641244+00:00",
+      "completedAt": "2026-10-04T05:26:47.642928+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-8.txt",
+      "request": null,
+      "requestRawSha256": "304bed51aee39edf4387b954845caf778ebbcd17d61cc82d97e5de251185eda5",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-8.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite9",
+      "startedAt": "2026-10-04T05:26:47.744061+00:00",
+      "completedAt": "2026-10-04T05:26:47.748666+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-9.txt",
+      "request": null,
+      "requestRawSha256": "8d506b48fffdce266f2c064b07c788b50a00d52e008cdfb15025dfa87acd943c",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 174,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-9.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite10",
+      "startedAt": "2026-10-04T05:26:47.949547+00:00",
+      "completedAt": "2026-10-04T05:26:47.952595+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-10.txt",
+      "request": null,
+      "requestRawSha256": "9e5112518dd26fb34eeb748b9f11ffc7d053dbb934e867c88e689a2dc366b686",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-10.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite11",
+      "startedAt": "2026-10-04T05:26:47.952842+00:00",
+      "completedAt": "2026-10-04T05:26:47.954223+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-11.txt",
+      "request": null,
+      "requestRawSha256": "aaec5ad7e9a43223ccb6db77c73c94bee42a3b809a10ede7e8296a14b19cf1f6",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-11.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite12",
+      "startedAt": "2026-10-04T05:26:47.954492+00:00",
+      "completedAt": "2026-10-04T05:26:47.956004+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-12.txt",
+      "request": null,
+      "requestRawSha256": "1c28e258cdca2a01e2a30fb5af89e263fee79ed487416b9f846d9dc7d11d0f3d",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-12.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite13",
+      "startedAt": "2026-10-04T05:26:47.956319+00:00",
+      "completedAt": "2026-10-04T05:26:47.957635+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-13.txt",
+      "request": null,
+      "requestRawSha256": "6a0e0c8a7d725b1b2dda7f80829edf012269f7697dc4bd82ad820ae2820800bd",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-13.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite14",
+      "startedAt": "2026-10-04T05:26:47.957857+00:00",
+      "completedAt": "2026-10-04T05:26:47.959018+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-14.txt",
+      "request": null,
+      "requestRawSha256": "e31158942817b59b476bef93b8c41c452de58d1bb3bdd1f6db3b457b4150e324",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-14.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite15",
+      "startedAt": "2026-10-04T05:26:47.959498+00:00",
+      "completedAt": "2026-10-04T05:26:47.960953+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-15.txt",
+      "request": null,
+      "requestRawSha256": "d5834f44fa4d971b2806dffa2716101074396206b1ba0bfb1b716a3dcb449882",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-15.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite16",
+      "startedAt": "2026-10-04T05:26:47.961197+00:00",
+      "completedAt": "2026-10-04T05:26:47.962430+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-16.txt",
+      "request": null,
+      "requestRawSha256": "cddae2886326f9f16e939386a3eefee92333dd123e0b067fa05bb63f5d448567",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-16.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite17",
+      "startedAt": "2026-10-04T05:26:47.962629+00:00",
+      "completedAt": "2026-10-04T05:26:47.963868+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-17.txt",
+      "request": null,
+      "requestRawSha256": "14534737687552743ed8587aea3074df066e89d370bf5baf563aa76a0de60e74",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-17.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite18",
+      "startedAt": "2026-10-04T05:26:47.964069+00:00",
+      "completedAt": "2026-10-04T05:26:47.965218+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-18.txt",
+      "request": null,
+      "requestRawSha256": "b7709b0b6e204da7f172e2c4b268e4c32df72a6f2e71e4ead34f2bed2b4bac9f",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-18.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite19",
+      "startedAt": "2026-10-04T05:26:47.965444+00:00",
+      "completedAt": "2026-10-04T05:26:47.966569+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-19.txt",
+      "request": null,
+      "requestRawSha256": "171a439268b17e1144e7c6b6e930b1b898cc048632affb642860db55b70c5b10",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-19.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite20",
+      "startedAt": "2026-10-04T05:26:48.167715+00:00",
+      "completedAt": "2026-10-04T05:26:48.170435+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-20.txt",
+      "request": null,
+      "requestRawSha256": "831d10aad4af649eb107c5c449efe49488af2a624ac3207dfa5702b07bc2ac4a",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-20.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite21",
+      "startedAt": "2026-10-04T05:26:48.271082+00:00",
+      "completedAt": "2026-10-04T05:26:48.276603+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-21.txt",
+      "request": null,
+      "requestRawSha256": "10738aae47f5645eeb819ddb6b902b3df7a27fa78d4f728dd9baeb2bb0f81952",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-21.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite22",
+      "startedAt": "2026-10-04T05:26:48.477519+00:00",
+      "completedAt": "2026-10-04T05:26:48.480226+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-22.txt",
+      "request": null,
+      "requestRawSha256": "c055ac515d42db02d01b11070e812d83655cdb26963a0adbed827b40fd55bb92",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-22.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite23",
+      "startedAt": "2026-10-04T05:26:48.480898+00:00",
+      "completedAt": "2026-10-04T05:26:48.482098+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-23.txt",
+      "request": null,
+      "requestRawSha256": "a032f07376fc0f4f056628ebf78a2e954f86f024555d7da5699809809f5da43f",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-23.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite24",
+      "startedAt": "2026-10-04T05:26:48.683325+00:00",
+      "completedAt": "2026-10-04T05:26:48.686882+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-24.txt",
+      "request": null,
+      "requestRawSha256": "5e2f99917e364f711b422602c03e6f2cda65cf46119c22dd4040c614f21fa5c3",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-24.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite25",
+      "startedAt": "2026-10-04T05:26:48.687331+00:00",
+      "completedAt": "2026-10-04T05:26:48.689009+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-25.txt",
+      "request": null,
+      "requestRawSha256": "dbb68f6e80aed55ef198d3c3099ffde4cbf255f8a08550583cf1d5e24357c1ac",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-25.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite26",
+      "startedAt": "2026-10-04T05:26:48.689415+00:00",
+      "completedAt": "2026-10-04T05:26:48.691177+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-26.txt",
+      "request": null,
+      "requestRawSha256": "3edd129cd8ce5dfad3778ee95e4b4903e1c50d65777da31b3226137023e72706",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-26.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite27",
+      "startedAt": "2026-10-04T05:26:48.792136+00:00",
+      "completedAt": "2026-10-04T05:26:48.794919+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-27.txt",
+      "request": null,
+      "requestRawSha256": "0b59efd4ddd8ae4089aaa367d44cd5aac501f56a39b4aec43b5a40d9caf56f7e",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-27.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite29",
+      "startedAt": "2026-10-04T05:26:49.096541+00:00",
+      "completedAt": "2026-10-04T05:26:49.099108+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-29.txt",
+      "request": null,
+      "requestRawSha256": "26afc157bee0f41d0cc936b8adbcb27450e462dc554d3e473e19ed47956a82a4",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-29.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite30",
+      "startedAt": "2026-10-04T05:26:49.099568+00:00",
+      "completedAt": "2026-10-04T05:26:49.101404+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-30.txt",
+      "request": null,
+      "requestRawSha256": "13d973da4c52e3399f2dcff7c4fbdb4611820d29783217103693829b085f8312",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-30.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite31",
+      "startedAt": "2026-10-04T05:26:49.101645+00:00",
+      "completedAt": "2026-10-04T05:26:49.103019+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-31.txt",
+      "request": null,
+      "requestRawSha256": "897599d1793180be3f462ccf9daacb1364a75c3e96d02041e6c079b644051561",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-31.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite32",
+      "startedAt": "2026-10-04T05:26:49.103223+00:00",
+      "completedAt": "2026-10-04T05:26:49.104855+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-32.txt",
+      "request": null,
+      "requestRawSha256": "7a5684c09fb956062bd23deef536c50eb51b8fea84ecf3da997c39c7155b3f90",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-32.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite33",
+      "startedAt": "2026-10-04T05:26:49.105096+00:00",
+      "completedAt": "2026-10-04T05:26:49.106410+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-33.txt",
+      "request": null,
+      "requestRawSha256": "3512f5b308390758b06aa8804b5d19b0f91ce3bacf4d5c9a70e4976843178199",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-33.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite34",
+      "startedAt": "2026-10-04T05:26:49.106606+00:00",
+      "completedAt": "2026-10-04T05:26:49.108330+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-34.txt",
+      "request": null,
+      "requestRawSha256": "503aa1f4029d5faf29047811da998ddb51ba05c33c425a582655c3cdcd44be79",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-34.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite35",
+      "startedAt": "2026-10-04T05:26:49.108596+00:00",
+      "completedAt": "2026-10-04T05:26:49.109661+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-35.txt",
+      "request": null,
+      "requestRawSha256": "d77eecae0969eb207fdd9b7f1c052ec3e18fc5d78a91a9689cf20f9b225f2e14",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-35.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite36",
+      "startedAt": "2026-10-04T05:26:49.109871+00:00",
+      "completedAt": "2026-10-04T05:26:49.111727+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-36.txt",
+      "request": null,
+      "requestRawSha256": "cc278ee95894c3ec167f22cd536fc01f05eb7ec8d3e9b7ce5de8807e85f0447e",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-36.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite37",
+      "startedAt": "2026-10-04T05:26:49.312677+00:00",
+      "completedAt": "2026-10-04T05:26:49.315328+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-37.txt",
+      "request": null,
+      "requestRawSha256": "73caa0fc87b69186df0b08b85b5cdf06b0bdc57b624397c7b37d050cd0157df7",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-37.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite38",
+      "startedAt": "2026-10-04T05:26:49.416118+00:00",
+      "completedAt": "2026-10-04T05:26:49.418858+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-38.txt",
+      "request": null,
+      "requestRawSha256": "e52afde69426e584a70f5bc8a2d8c902757a517706ddaa3fa054e0b7af9e18a0",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-38.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite39",
+      "startedAt": "2026-10-04T05:26:49.419099+00:00",
+      "completedAt": "2026-10-04T05:26:49.420886+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-39.txt",
+      "request": null,
+      "requestRawSha256": "de0015bfc54551497c38a9ed448de1b237c98acdec72939070a637f85fc12760",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-39.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite40",
+      "startedAt": "2026-10-04T05:26:49.722450+00:00",
+      "completedAt": "2026-10-04T05:26:49.725460+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-40.txt",
+      "request": null,
+      "requestRawSha256": "3198f684ef743c16dfd35baf933ab3bec452f1bb1a3cd5da9f48dd892e67a9af",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-40.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite43",
+      "startedAt": "2026-10-04T05:26:50.027586+00:00",
+      "completedAt": "2026-10-04T05:26:50.030618+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-43.txt",
+      "request": null,
+      "requestRawSha256": "b6f6d4b6c3ee7d1b3541dd11a4909fb3ea77100a48f70a05e4956126a64fc2c9",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-43.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite44",
+      "startedAt": "2026-10-04T05:26:50.131403+00:00",
+      "completedAt": "2026-10-04T05:26:50.133933+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-44.txt",
+      "request": null,
+      "requestRawSha256": "98741f565b90bb8878f07626b8ef8b45c4b647e4b4d65b06bf1d11e43190aa25",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-44.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite45",
+      "startedAt": "2026-10-04T05:26:50.234685+00:00",
+      "completedAt": "2026-10-04T05:26:50.237200+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-45.txt",
+      "request": null,
+      "requestRawSha256": "6cbbbb4aa0c33dc4bdb074b200d264798b0099ca1df49b9c36ff20df96a455a3",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-45.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite46",
+      "startedAt": "2026-10-04T05:26:50.237518+00:00",
+      "completedAt": "2026-10-04T05:26:50.238756+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-46.txt",
+      "request": null,
+      "requestRawSha256": "c49226c8df14f61c89772fec329d9fd8ffd3735e216bc28f8caf06a1a6dc5bc1",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-46.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite47",
+      "startedAt": "2026-10-04T05:26:50.238977+00:00",
+      "completedAt": "2026-10-04T05:26:50.240390+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-47.txt",
+      "request": null,
+      "requestRawSha256": "726f3623377a7828316d75bf7db750e254eb5aa3043fa590937675baeb6f3d5e",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-47.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite48",
+      "startedAt": "2026-10-04T05:26:50.240620+00:00",
+      "completedAt": "2026-10-04T05:26:50.241835+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-48.txt",
+      "request": null,
+      "requestRawSha256": "3411962551fe96a61890dbfcd5ca5b7678b032b1e52b96b327068d9c1897120b",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-48.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite49",
+      "startedAt": "2026-10-04T05:26:50.242113+00:00",
+      "completedAt": "2026-10-04T05:26:50.243200+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-49.txt",
+      "request": null,
+      "requestRawSha256": "44089927be1d31435dd04d07e05e84d0e81970680a2987dc1919e204f1a34bfa",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-49.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite50",
+      "startedAt": "2026-10-04T05:26:50.243507+00:00",
+      "completedAt": "2026-10-04T05:26:50.244770+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-50.txt",
+      "request": null,
+      "requestRawSha256": "8a5fbabb0f671b9c592aee0d99ce3ae2b84f548976fc5b2edb835a70aeb768d5",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-50.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite51",
+      "startedAt": "2026-10-04T05:26:50.245001+00:00",
+      "completedAt": "2026-10-04T05:26:50.246036+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-51.txt",
+      "request": null,
+      "requestRawSha256": "51a241b80502f449b7589a704fe5ed1fcaddfff1270d69e87f70df8bf3f4d0ff",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-51.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite52",
+      "startedAt": "2026-10-04T05:26:50.246241+00:00",
+      "completedAt": "2026-10-04T05:26:50.248585+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-52.txt",
+      "request": null,
+      "requestRawSha256": "40425a6d27d57b4cf58f61868da40acd9d1c2c46ce6e5ec52559df0fad5962a4",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-52.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite53",
+      "startedAt": "2026-10-04T05:26:50.248808+00:00",
+      "completedAt": "2026-10-04T05:26:50.249913+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-53.txt",
+      "request": null,
+      "requestRawSha256": "0c370de18f4e5469063067ba639a175497b659049d91625c9fbc6f3ec296ad31",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-53.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite54",
+      "startedAt": "2026-10-04T05:26:50.250121+00:00",
+      "completedAt": "2026-10-04T05:26:50.251225+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-54.txt",
+      "request": null,
+      "requestRawSha256": "ccf3434ee0681f236d68d5fa1a9721f5014245350ad4d1bc28bf76e3b06e0a13",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-54.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite55",
+      "startedAt": "2026-10-04T05:26:50.251490+00:00",
+      "completedAt": "2026-10-04T05:26:50.252642+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-55.txt",
+      "request": null,
+      "requestRawSha256": "aaf4429bbac10675c050e56698570ca0a2906ca029cf3e894ea03bf972709cdd",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-55.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite56",
+      "startedAt": "2026-10-04T05:26:50.252842+00:00",
+      "completedAt": "2026-10-04T05:26:50.253916+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-56.txt",
+      "request": null,
+      "requestRawSha256": "82e5dfa478c286f0ff85243ed88657f8cca0affab77bf77f522850f86a2944b6",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-56.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite57",
+      "startedAt": "2026-10-04T05:26:50.254500+00:00",
+      "completedAt": "2026-10-04T05:26:50.255379+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-57.txt",
+      "request": null,
+      "requestRawSha256": "100c9517e51fa7aa9b68d913ca5b86b4f597be08db6ebc086ac6e5c35135a965",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-57.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite58",
+      "startedAt": "2026-10-04T05:26:50.255576+00:00",
+      "completedAt": "2026-10-04T05:26:50.256679+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-58.txt",
+      "request": null,
+      "requestRawSha256": "c1838c5331b6b284b7f144bccf3e7cee709a36df627e0e961521355367ea7bdb",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-58.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite59",
+      "startedAt": "2026-10-04T05:26:50.256873+00:00",
+      "completedAt": "2026-10-04T05:26:50.258508+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-59.txt",
+      "request": null,
+      "requestRawSha256": "7056d2cd46e16ceb998525cdfde9863595538771b4fd8fd62d8021628458069c",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-59.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite60",
+      "startedAt": "2026-10-04T05:26:50.258710+00:00",
+      "completedAt": "2026-10-04T05:26:50.259787+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-60.txt",
+      "request": null,
+      "requestRawSha256": "3d55774934171361b48ee327ce827e9b5726e0840a67701a8c7fac2e11fa5efc",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-60.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite61",
+      "startedAt": "2026-10-04T05:26:50.260007+00:00",
+      "completedAt": "2026-10-04T05:26:50.261121+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-61.txt",
+      "request": null,
+      "requestRawSha256": "6fa67135ff67f553a88ca6a212f3998cf67f77cb52acd08cf79d2720b89b67b3",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-61.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite62",
+      "startedAt": "2026-10-04T05:26:50.261376+00:00",
+      "completedAt": "2026-10-04T05:26:50.262525+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-62.txt",
+      "request": null,
+      "requestRawSha256": "bbbc515d5b9c31d826e2ec28c37582c6fd80efbd6c28c136fffefa4f73acd4f3",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-62.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite63",
+      "startedAt": "2026-10-04T05:26:50.262739+00:00",
+      "completedAt": "2026-10-04T05:26:50.263853+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-63.txt",
+      "request": null,
+      "requestRawSha256": "db48fbd4bd20a85f90c79beafc09ecda1330f7711471f3fdc0cfdf23a11c294b",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-63.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite64",
+      "startedAt": "2026-10-04T05:26:50.264122+00:00",
+      "completedAt": "2026-10-04T05:26:50.265063+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-64.txt",
+      "request": null,
+      "requestRawSha256": "fd1959870ff0a3ea2c9d9b56db1dd339ed83bf4c8c11e521e7c978118f3ed2ed",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-64.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite66",
+      "startedAt": "2026-10-04T05:26:50.566686+00:00",
+      "completedAt": "2026-10-04T05:26:50.569236+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-66.txt",
+      "request": null,
+      "requestRawSha256": "d38f062a7c73ab36824f808625575cd821ae18b551859b217e729b1b3ac2ec14",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-66.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite67",
+      "startedAt": "2026-10-04T05:26:50.770085+00:00",
+      "completedAt": "2026-10-04T05:26:50.773074+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-67.txt",
+      "request": null,
+      "requestRawSha256": "5931366597da184dfbdb6e42b832b28333196a8fc9b1f3e9bc9ce907ad8a33ab",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-67.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite68",
+      "startedAt": "2026-10-04T05:26:50.773370+00:00",
+      "completedAt": "2026-10-04T05:26:50.774698+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-68.txt",
+      "request": null,
+      "requestRawSha256": "5e025212b58d448284769657655ad2e0404557366fa9c0b5fd372de06d7c1c36",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-68.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite69",
+      "startedAt": "2026-10-04T05:26:50.774899+00:00",
+      "completedAt": "2026-10-04T05:26:50.775980+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-69.txt",
+      "request": null,
+      "requestRawSha256": "ec5231bffaa66a697edd3ffababdf09d2b5e89fc2886f2bdcfc134f870c6e6c6",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-69.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite70",
+      "startedAt": "2026-10-04T05:26:50.776172+00:00",
+      "completedAt": "2026-10-04T05:26:50.777252+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-70.txt",
+      "request": null,
+      "requestRawSha256": "79952eed2db5bfdba8cfd74d7c500dc68c358489da9fa5ff2f9582f7c25a1bbf",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-70.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite71",
+      "startedAt": "2026-10-04T05:26:50.777472+00:00",
+      "completedAt": "2026-10-04T05:26:50.778499+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-71.txt",
+      "request": null,
+      "requestRawSha256": "54b41a12d67fb7a1b575a43788b63228488865c7961ef10b48e265b308f56b18",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-71.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite72",
+      "startedAt": "2026-10-04T05:26:50.879076+00:00",
+      "completedAt": "2026-10-04T05:26:50.881532+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-72.txt",
+      "request": null,
+      "requestRawSha256": "9dc969b17bd365bf3e69490ae5ee2bce4e567c0bf2058fb649fe24364c30b98f",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-72.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite73",
+      "startedAt": "2026-10-04T05:26:50.982179+00:00",
+      "completedAt": "2026-10-04T05:26:50.984257+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-73.txt",
+      "request": null,
+      "requestRawSha256": "17ac3710beef7288f71cd04a41297a85f47e32e275b0f07dbc37c86a46a31c75",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-73.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite74",
+      "startedAt": "2026-10-04T05:26:50.984619+00:00",
+      "completedAt": "2026-10-04T05:26:50.985837+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-74.txt",
+      "request": null,
+      "requestRawSha256": "91cac5fbc98ca72d660ccd49973093a89cbe3c813c511c5842a7e33b4971fdd2",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-74.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite75",
+      "startedAt": "2026-10-04T05:26:50.986042+00:00",
+      "completedAt": "2026-10-04T05:26:50.987093+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-75.txt",
+      "request": null,
+      "requestRawSha256": "f9c691ddc22529932f5c35422369dbc773eeffb59270e1afd59aafe003c23eeb",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-75.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite76",
+      "startedAt": "2026-10-04T05:26:50.987336+00:00",
+      "completedAt": "2026-10-04T05:26:50.988556+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-76.txt",
+      "request": null,
+      "requestRawSha256": "5f79dbe17532c64049d2ae78b1573c708eaf2c720870d7480fbfbf817ca41224",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-76.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite77",
+      "startedAt": "2026-10-04T05:26:50.988752+00:00",
+      "completedAt": "2026-10-04T05:26:50.989757+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-77.txt",
+      "request": null,
+      "requestRawSha256": "eee2b5e1df0c4323f2d7fc34c2af0d3e430a9849c454e860c70d010d13b3e941",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-77.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite78",
+      "startedAt": "2026-10-04T05:26:50.989981+00:00",
+      "completedAt": "2026-10-04T05:26:50.991098+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-78.txt",
+      "request": null,
+      "requestRawSha256": "6785f90a5c666297cc36f338bb40cdf13ab7c2cf7214a91abf714af77235df9c",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-78.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite79",
+      "startedAt": "2026-10-04T05:26:50.991331+00:00",
+      "completedAt": "2026-10-04T05:26:50.992152+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-79.txt",
+      "request": null,
+      "requestRawSha256": "c34dcc224026fcdc5d5698a6cc1363a88b99576177a275e6eb585fc35de25681",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-79.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite81",
+      "startedAt": "2026-10-04T05:26:51.193362+00:00",
+      "completedAt": "2026-10-04T05:26:51.196038+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-81.txt",
+      "request": null,
+      "requestRawSha256": "714e0d4f43b7f70d74439da5a03f8f1482f5b17d8ea2ee51793fa720a72943cc",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-81.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite82",
+      "startedAt": "2026-10-04T05:26:51.296919+00:00",
+      "completedAt": "2026-10-04T05:26:51.300646+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-82.txt",
+      "request": null,
+      "requestRawSha256": "efc6ab78d89fec34ec56cd905588166fef356db32d82b2c15b5a618c98dea8b6",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-82.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite83",
+      "startedAt": "2026-10-04T05:26:51.300946+00:00",
+      "completedAt": "2026-10-04T05:26:51.302881+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-83.txt",
+      "request": null,
+      "requestRawSha256": "e6693771d6e544662d13b83e882e253baa28fa79fd5d7895ff8e32a025bc5308",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-83.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite84",
+      "startedAt": "2026-10-04T05:26:51.603937+00:00",
+      "completedAt": "2026-10-04T05:26:51.606369+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-84.txt",
+      "request": null,
+      "requestRawSha256": "796ec8f5d9108819df3417ad2be1f686ab4d21bfb8a5c2cb8b1c8b5603ecae8c",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-84.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite85",
+      "startedAt": "2026-10-04T05:26:51.707036+00:00",
+      "completedAt": "2026-10-04T05:26:51.710042+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-85.txt",
+      "request": null,
+      "requestRawSha256": "cb6778e7fd64d30bd0026a13fdb75f79e1e4474f0d20ce55a4753f6be94a51ed",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-85.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite86",
+      "startedAt": "2026-10-04T05:26:52.412238+00:00",
+      "completedAt": "2026-10-04T05:26:52.415336+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-86.txt",
+      "request": null,
+      "requestRawSha256": "b377adfda770efe9c006b93bbdeceedd628af341131674a7a2d46d2671db9d76",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-86.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite87",
+      "startedAt": "2026-10-04T05:26:52.716397+00:00",
+      "completedAt": "2026-10-04T05:26:52.719847+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-87.txt",
+      "request": null,
+      "requestRawSha256": "cb33ca614dedf1c49b0b4857362d7424f94d468043f95a300ef2bf6a0713c6dc",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-87.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite88",
+      "startedAt": "2026-10-04T05:26:52.720222+00:00",
+      "completedAt": "2026-10-04T05:26:52.721996+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-88.txt",
+      "request": null,
+      "requestRawSha256": "f166b4ae7a950a834bfa682301f038e346a357bded390727563af3738c5dab1f",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-88.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite89",
+      "startedAt": "2026-10-04T05:26:53.023058+00:00",
+      "completedAt": "2026-10-04T05:26:53.025358+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-89.txt",
+      "request": null,
+      "requestRawSha256": "1057a67d697950cdb18ea2f3fc1866ffdd42a875f0a0c51cac9a94563fe08abb",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-89.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite90",
+      "startedAt": "2026-10-04T05:26:53.126115+00:00",
+      "completedAt": "2026-10-04T05:26:53.128830+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-90.txt",
+      "request": null,
+      "requestRawSha256": "d0cb602d14544ca586d64156b77a9b7b58604d0875b7ec2e3d3c7096bda14fa6",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-90.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite91",
+      "startedAt": "2026-10-04T05:26:53.229464+00:00",
+      "completedAt": "2026-10-04T05:26:53.231827+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-91.txt",
+      "request": null,
+      "requestRawSha256": "ad713144c76885766cc7b8af716601e669b9bf92dc38c6cb605b4087aec438b0",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-91.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite92",
+      "startedAt": "2026-10-04T05:26:53.332564+00:00",
+      "completedAt": "2026-10-04T05:26:53.335078+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-92.txt",
+      "request": null,
+      "requestRawSha256": "5293a80cee3d2d0899bc5dc625e1f0e45c8c79972cbed55b73b7f69b28940b9d",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-92.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite93",
+      "startedAt": "2026-10-04T05:26:53.335369+00:00",
+      "completedAt": "2026-10-04T05:26:53.336532+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-93.txt",
+      "request": null,
+      "requestRawSha256": "8c1158e39e0500328b5451d8bb5c8ee3f995c38fbbbe7fd1e999b1aca50635f9",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-93.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite94",
+      "startedAt": "2026-10-04T05:26:53.336741+00:00",
+      "completedAt": "2026-10-04T05:26:53.337863+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-94.txt",
+      "request": null,
+      "requestRawSha256": "4c820d5796473aea920104150b5ce9d9e69c7b6143da253b38241e3d9453194a",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-94.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite95",
+      "startedAt": "2026-10-04T05:26:53.338070+00:00",
+      "completedAt": "2026-10-04T05:26:53.339159+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-95.txt",
+      "request": null,
+      "requestRawSha256": "d7105b3a1a0ec7f9905c6bbd5bad312e0a989831ebbfe06c5f1f490db69dd738",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-95.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite96",
+      "startedAt": "2026-10-04T05:26:53.339392+00:00",
+      "completedAt": "2026-10-04T05:26:53.341010+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-96.txt",
+      "request": null,
+      "requestRawSha256": "8459320cbe88111be08c9e333a529c5d32481c5093269c38f5a0be9499204d3b",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-96.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite97",
+      "startedAt": "2026-10-04T05:26:53.341252+00:00",
+      "completedAt": "2026-10-04T05:26:53.342456+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-97.txt",
+      "request": null,
+      "requestRawSha256": "ffdf953161ad464fcfcec1af68abc3c5cce8ffd51722dfe0937be9c8a7e83092",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-97.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite98",
+      "startedAt": "2026-10-04T05:26:53.342669+00:00",
+      "completedAt": "2026-10-04T05:26:53.343707+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-98.txt",
+      "request": null,
+      "requestRawSha256": "0be1fb43f37e706e5b6b2adf4ab588b1485630eb1de25dac6a66f9d9b8a8b4f9",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-98.txt"
+        }
+      }
+    },
+    {
+      "name": "TOCTOUWrite99",
+      "startedAt": "2026-10-04T05:26:53.344125+00:00",
+      "completedAt": "2026-10-04T05:26:53.345418+00:00",
+      "method": "POST",
+      "path": "/api/experimental/fs/write?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-e%2Fproject&path=swap%2Frace-99.txt",
+      "request": null,
+      "requestRawSha256": "4cc2a92e51c02851eafb9ec5212281b69808e8d5571bc31cd5470df19c6a5b63",
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 175,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "path": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/swap/race-99.txt"
+        }
+      }
+    }
+  ],
+  "toctou": {
+    "writes": [
+      {
+        "iteration": 0,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-0.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_0\n",
+        "marker": "TOCTOU_0\n"
+      },
+      {
+        "iteration": 1,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-1.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_1\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_1\n"
+      },
+      {
+        "iteration": 2,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-2.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_2\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_2\n"
+      },
+      {
+        "iteration": 3,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-3.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_3\n",
+        "marker": "TOCTOU_3\n"
+      },
+      {
+        "iteration": 4,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-4.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_4\n",
+        "marker": "TOCTOU_4\n"
+      },
+      {
+        "iteration": 5,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-5.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_5\n",
+        "marker": "TOCTOU_5\n"
+      },
+      {
+        "iteration": 6,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-6.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_6\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_6\n"
+      },
+      {
+        "iteration": 7,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-7.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_7\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_7\n"
+      },
+      {
+        "iteration": 8,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-8.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_8\n",
+        "marker": "TOCTOU_8\n"
+      },
+      {
+        "iteration": 9,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-9.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_9\n",
+        "marker": "TOCTOU_9\n"
+      },
+      {
+        "iteration": 10,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-10.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_10\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_10\n"
+      },
+      {
+        "iteration": 11,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-11.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_11\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_11\n"
+      },
+      {
+        "iteration": 12,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-12.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_12\n",
+        "marker": "TOCTOU_12\n"
+      },
+      {
+        "iteration": 13,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-13.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_13\n",
+        "marker": "TOCTOU_13\n"
+      },
+      {
+        "iteration": 14,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-14.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_14\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_14\n"
+      },
+      {
+        "iteration": 15,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-15.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_15\n",
+        "marker": "TOCTOU_15\n"
+      },
+      {
+        "iteration": 16,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-16.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_16\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_16\n"
+      },
+      {
+        "iteration": 17,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-17.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_17\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_17\n"
+      },
+      {
+        "iteration": 18,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-18.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_18\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_18\n"
+      },
+      {
+        "iteration": 19,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-19.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_19\n",
+        "marker": "TOCTOU_19\n"
+      },
+      {
+        "iteration": 20,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-20.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_20\n",
+        "marker": "TOCTOU_20\n"
+      },
+      {
+        "iteration": 21,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-21.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_21\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_21\n"
+      },
+      {
+        "iteration": 22,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-22.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_22\n",
+        "marker": "TOCTOU_22\n"
+      },
+      {
+        "iteration": 23,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-23.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_23\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_23\n"
+      },
+      {
+        "iteration": 24,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-24.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_24\n",
+        "marker": "TOCTOU_24\n"
+      },
+      {
+        "iteration": 25,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-25.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_25\n",
+        "marker": "TOCTOU_25\n"
+      },
+      {
+        "iteration": 26,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-26.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_26\n",
+        "marker": "TOCTOU_26\n"
+      },
+      {
+        "iteration": 27,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-27.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_27\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_27\n"
+      },
+      {
+        "iteration": 29,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-29.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_29\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_29\n"
+      },
+      {
+        "iteration": 30,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-30.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_30\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_30\n"
+      },
+      {
+        "iteration": 31,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-31.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_31\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_31\n"
+      },
+      {
+        "iteration": 32,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-32.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_32\n",
+        "marker": "TOCTOU_32\n"
+      },
+      {
+        "iteration": 33,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-33.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_33\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_33\n"
+      },
+      {
+        "iteration": 34,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-34.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_34\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_34\n"
+      },
+      {
+        "iteration": 35,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-35.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_35\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_35\n"
+      },
+      {
+        "iteration": 36,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-36.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_36\n",
+        "marker": "TOCTOU_36\n"
+      },
+      {
+        "iteration": 37,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-37.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_37\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_37\n"
+      },
+      {
+        "iteration": 38,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-38.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_38\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_38\n"
+      },
+      {
+        "iteration": 39,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-39.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_39\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_39\n"
+      },
+      {
+        "iteration": 40,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-40.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_40\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_40\n"
+      },
+      {
+        "iteration": 43,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-43.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_43\n",
+        "marker": "TOCTOU_43\n"
+      },
+      {
+        "iteration": 44,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-44.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_44\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_44\n"
+      },
+      {
+        "iteration": 45,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-45.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_45\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_45\n"
+      },
+      {
+        "iteration": 46,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-46.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_46\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_46\n"
+      },
+      {
+        "iteration": 47,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-47.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_47\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_47\n"
+      },
+      {
+        "iteration": 48,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-48.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_48\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_48\n"
+      },
+      {
+        "iteration": 49,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-49.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_49\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_49\n"
+      },
+      {
+        "iteration": 50,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-50.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_50\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_50\n"
+      },
+      {
+        "iteration": 51,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-51.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_51\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_51\n"
+      },
+      {
+        "iteration": 52,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-52.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_52\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_52\n"
+      },
+      {
+        "iteration": 53,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-53.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_53\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_53\n"
+      },
+      {
+        "iteration": 54,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-54.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_54\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_54\n"
+      },
+      {
+        "iteration": 55,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-55.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_55\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_55\n"
+      },
+      {
+        "iteration": 56,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-56.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_56\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_56\n"
+      },
+      {
+        "iteration": 57,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-57.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_57\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_57\n"
+      },
+      {
+        "iteration": 58,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-58.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_58\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_58\n"
+      },
+      {
+        "iteration": 59,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-59.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_59\n",
+        "marker": "TOCTOU_59\n"
+      },
+      {
+        "iteration": 60,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-60.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_60\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_60\n"
+      },
+      {
+        "iteration": 61,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-61.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_61\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_61\n"
+      },
+      {
+        "iteration": 62,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-62.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_62\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_62\n"
+      },
+      {
+        "iteration": 63,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-63.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_63\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_63\n"
+      },
+      {
+        "iteration": 64,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-64.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_64\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_64\n"
+      },
+      {
+        "iteration": 66,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-66.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_66\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_66\n"
+      },
+      {
+        "iteration": 67,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-67.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_67\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_67\n"
+      },
+      {
+        "iteration": 68,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-68.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_68\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_68\n"
+      },
+      {
+        "iteration": 69,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-69.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_69\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_69\n"
+      },
+      {
+        "iteration": 70,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-70.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_70\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_70\n"
+      },
+      {
+        "iteration": 71,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-71.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_71\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_71\n"
+      },
+      {
+        "iteration": 72,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-72.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_72\n",
+        "marker": "TOCTOU_72\n"
+      },
+      {
+        "iteration": 73,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-73.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_73\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_73\n"
+      },
+      {
+        "iteration": 74,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-74.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_74\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_74\n"
+      },
+      {
+        "iteration": 75,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-75.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_75\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_75\n"
+      },
+      {
+        "iteration": 76,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-76.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_76\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_76\n"
+      },
+      {
+        "iteration": 77,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-77.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_77\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_77\n"
+      },
+      {
+        "iteration": 78,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-78.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_78\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_78\n"
+      },
+      {
+        "iteration": 79,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-79.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_79\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_79\n"
+      },
+      {
+        "iteration": 81,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-81.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_81\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_81\n"
+      },
+      {
+        "iteration": 82,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-82.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_82\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_82\n"
+      },
+      {
+        "iteration": 83,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-83.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_83\n",
+        "marker": "TOCTOU_83\n"
+      },
+      {
+        "iteration": 84,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-84.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_84\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_84\n"
+      },
+      {
+        "iteration": 85,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-85.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_85\n",
+        "marker": "TOCTOU_85\n"
+      },
+      {
+        "iteration": 86,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-86.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_86\n",
+        "marker": "TOCTOU_86\n"
+      },
+      {
+        "iteration": 87,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-87.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_87\n",
+        "marker": "TOCTOU_87\n"
+      },
+      {
+        "iteration": 88,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-88.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_88\n",
+        "marker": "TOCTOU_88\n"
+      },
+      {
+        "iteration": 89,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-89.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_89\n",
+        "marker": "TOCTOU_89\n"
+      },
+      {
+        "iteration": 90,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-90.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_90\n",
+        "marker": "TOCTOU_90\n"
+      },
+      {
+        "iteration": 91,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-91.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_91\n",
+        "marker": "TOCTOU_91\n"
+      },
+      {
+        "iteration": 92,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-92.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_92\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_92\n"
+      },
+      {
+        "iteration": 93,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-93.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_93\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_93\n"
+      },
+      {
+        "iteration": 94,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-94.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_94\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_94\n"
+      },
+      {
+        "iteration": 95,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-95.txt",
+        "status": 200,
+        "outsideExists": false,
+        "outsideBytes": null,
+        "insideExists": true,
+        "insideBytes": "TOCTOU_95\n",
+        "marker": "TOCTOU_95\n"
+      },
+      {
+        "iteration": 96,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-96.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_96\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_96\n"
+      },
+      {
+        "iteration": 97,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-97.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_97\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_97\n"
+      },
+      {
+        "iteration": 98,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-98.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_98\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_98\n"
+      },
+      {
+        "iteration": 99,
+        "resolvedBeforeWithinProject": "/workspace/.cloud-runtime/opencode-v2/capture-e/project/inside/race-99.txt",
+        "status": 200,
+        "outsideExists": true,
+        "outsideBytes": "TOCTOU_99\n",
+        "insideExists": false,
+        "insideBytes": null,
+        "marker": "TOCTOU_99\n"
+      }
+    ],
+    "atomicLinkReplacements": 9658,
+    "outsideWriteCount": 66
+  },
+  "writeCapability": "unavailable",
+  "readBoundaryScope": "observed normal/symlink/traversal cases only; no race-containment claim",
+  "windowsJunction": "pending native Windows resource"
+}

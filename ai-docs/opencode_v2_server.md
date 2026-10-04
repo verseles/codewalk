@@ -52,7 +52,7 @@ Prompt replay/conflict behavior and create replay/conflict behavior are separate
 - Cancelling pending input returns 204, and repeating cancellation is a no-op. Reposting the cancelled ID **re-enqueues** it; there is no permanent deduplication tombstone.
 - Promoted replay preserves original user history but can echo the requested delivery; replay may wake execution unless `resume:false`. Do not compare admission responses byte-for-byte or assume an echoed mode changed delivered work.
 
-Preserve the exact original payload, identity and scope. Reconcile authoritative state; automatic replay requires a verified operation/version/lifecycle-phase guarantee for an unresolved command. Cancellation requested, submitting or uncertain fences original-send replay until reconciled; known cancellation or settlement never automatically resends. Otherwise retain uncertainty rather than create another turn/session. Experimental file write remains unavailable without verified remote physical containment, including symlinks/junctions and concurrent path replacement; lexical checks alone are insufficient.
+Preserve the exact original payload, identity and scope. Reconcile authoritative state; automatic replay requires a verified operation/version/lifecycle-phase guarantee for an unresolved command. Cancellation requested, submitting or uncertain fences original-send replay until reconciled; known cancellation or settlement never automatically resends. Otherwise retain uncertainty rather than create another turn/session. Experimental file write remains unavailable without verified remote physical containment, including symlinks/junctions and concurrent path replacement; lexical checks alone are insufficient. [V2-005E Linux 2.0.22 captures](../test/contract/fixtures/opencode/2.0.22/e/README.md) observe actual traversal, absolute-path and symlink escapes plus concurrent path replacement into owned disposable outside space. That connected version's write capability is **unavailable**, even when the product experimental setting is enabled. Windows junctions and other native targets are not passed by Linux evidence.
 
 ## Event stream and lifecycle
 
@@ -62,9 +62,25 @@ Preserve the exact original payload, identity and scope. Reconcile authoritative
 - Streaming text/reasoning/tool input uses started/delta/ended events. The authoritative ended value replaces an incomplete prefix; execution uses `session.execution.*` and the active list. The declared `session.status` event is not a substitute publisher.
 - Parent idle does not prove child completion. Keep parent/child lineage and each child's execution/interaction ownership explicit.
 - [V2-005C](../test/contract/fixtures/opencode/2.0.22/c/README.md) observes native permissions/forms and restart recovery: interruption with reason `shutdown` can resume and re-ask a dismissed question after service restart. Refresh interactions during authoritative hydration; interruption is not permanent queued-work cancellation. A Git directory without an initial commit can resolve to upstream `projectID: "global"`; key projects by host plus canonical directory, and require a committed disposable project to prove saved-approval isolation.
-- The experimental durable session log does not replay ephemeral deltas. Its per-aggregate sequence may include internal-record skips; those are not automatically a lost public event. SP-01 owns replay/cursor acceptance before enabling it.
+- The experimental durable session log does not replay ephemeral deltas. Its per-aggregate sequence may include internal-record skips; those are not automatically a lost public event. SP-01 owns replay/cursor acceptance before enabling it. E observes only `log.synced` watermarks on the stock 2.0.22 CLI despite confirmed global events/renames, including follow mode. Its source defaults bus persistence to false and the CLI does not enable it; durable replay remains unavailable on that topology and authoritative hydration is required.
 
 Use the preserved [official reference reducer](../plan/opencode-v2-src/client-solid-data.reference-reducer.ts) and [event/schema dossier](../plan/12-opencode-v2-events-and-schemas.md), with native schema/handler citations. The CodeWalk domain, receipt states and CHP stream sequence remain CodeWalk contracts, not additional OpenCode wire fields.
+
+## Version-scoped attachments and service access
+
+[E fixtures](../test/contract/fixtures/opencode/2.0.22/e/README.md) use the supported
+`opencode service get password` CLI path only in memory to authenticate the local
+service; credential values are never retained. This is distinct from the forbidden
+provider-secret endpoint `/api/credential`.
+
+The official [2.0.21 attachment projection](https://github.com/anomalyco/opencode/blob/8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72/packages/core/src/session/runner/to-llm-message.ts#L75)
+and [2.0.22 projection](https://github.com/anomalyco/opencode/blob/05018b8862a8fc198ec9810aafd397c96bb7d86e/packages/core/src/session/runner/to-llm-message.ts#L75)
+forward `application/pdf` as media, with identical file digest; the older summary
+claim was a mistaken inference, not a version difference. E proves PNG recognition
+with tools disabled and native PDF admission/history MIME. The free PDF-model
+call returned provider.auth 403, so provider PDF recognition is unverified.
+CodeWalk's approved PDF-disabled product policy remains separate and unchanged;
+it must not be described as an upstream inability to forward PDF.
 
 ## Consumer readiness and companion anchors
 

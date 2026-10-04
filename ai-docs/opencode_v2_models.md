@@ -53,6 +53,22 @@ They have no-content success schemas. Model/agent selection and prompt admission
 
 `session.model.selected`, `session.agent.selected`, `model.updated`, `agent.updated` and related integration/provider events are native inputs. Their schema/event provenance is in the [event dossier](../plan/12-opencode-v2-events-and-schemas.md) and the [official reference reducer](../plan/opencode-v2-src/client-solid-data.reference-reducer.ts). Multi-host/session identity belongs to the CodeWalk domain; never key a selection solely by a coincident native ID across hosts.
 
+## Observed free models and attachment boundary
+
+[A/B/C/E native 2.0.22 fixtures](../test/contract/fixtures/opencode/2.0.22/README.md)
+record enabled zero-cost `opencode` models and successful real turns; catalog
+availability/zero price does not guarantee a provider will authorize a request.
+B records Fledge and E records Muse Spark provider.auth 403 free-tier failures;
+these do not authorize credential/header workarounds or paid fallback.
+
+[E attachment evidence](../test/contract/fixtures/opencode/2.0.22/e/README.md)
+proves a PNG attachment-only marker recognized without tools. Official 2.0.21
+and 2.0.22 projection forwards PDF media, and E verifies PDF admission/native
+history MIME; its declared PDF-capable free model failed provider authentication,
+so PDF recognition remains unverified. Model capabilities, upstream attachment
+forwarding and the approved CodeWalk PDF-disabled product policy are separate
+facts. The policy remains unchanged pending a new product decision.
+
 ## Acceptance boundary
 
 SP-01 establishes observed catalog/agent/model behavior on the connected version. `V2-054` owns race and session-targeting checks before the actual selector is accepted. Unknown/default/variant/availability cases remain typed and evidence-backed; the document does not certify plugin settlement, a model switch during send, or a fallback on an untested server.

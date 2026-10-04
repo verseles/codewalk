@@ -1,0 +1,78 @@
+{
+  "id": "space-bunny-free",
+  "modelID": "space-bunny-free",
+  "providerID": "opencode",
+  "name": "Space Bunny Free",
+  "compatibility": {
+    "reasoningField": "reasoning_content"
+  },
+  "package": "@opencode/ai/providers/openai-compatible",
+  "settings": {
+    "apiKey": "[REDACTED]",
+    "baseURL": "https://opencode.ai/zen/v1",
+    "provider": "opencode"
+  },
+  "capabilities": {
+    "tools": true,
+    "input": [
+      "text",
+      "image",
+      "video"
+    ],
+    "output": [
+      "text"
+    ]
+  },
+  "variants": [
+    {
+      "id": "low",
+      "settings": {
+        "reasoningEffort": "low"
+      }
+    },
+    {
+      "id": "medium",
+      "settings": {
+        "reasoningEffort": "medium"
+      }
+    },
+    {
+      "id": "high",
+      "settings": {
+        "reasoningEffort": "high"
+      }
+    },
+    {
+      "id": "xhigh",
+      "settings": {
+        "reasoningEffort": "xhigh"
+      }
+    },
+    {
+      "id": "max",
+      "settings": {
+        "reasoningEffort": "max"
+      }
+    }
+  ],
+  "time": {
+    "released": 1790121600000
+  },
+  "cost": [
+    {
+      "input": 0,
+      "output": 0,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    }
+  ],
+  "status": "active",
+  "enabled": true,
+  "limit": {
+    "context": 1048576,
+    "input": 524288,
+    "output": 524288
+  }
+}

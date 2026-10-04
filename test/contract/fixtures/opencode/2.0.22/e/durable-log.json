@@ -1,0 +1,317 @@
+{
+  "capturedAt": "2026-10-04T05:26:47.094473+00:00",
+  "sessionID": "ses_1a10560fdd10009e6bb31a7a089e",
+  "calls": [
+    {
+      "name": "durable-logCreate",
+      "startedAt": "2026-10-04T05:26:44.945834+00:00",
+      "completedAt": "2026-10-04T05:26:44.963427+00:00",
+      "method": "POST",
+      "path": "/api/session",
+      "request": {
+        "id": "ses_1a10560fdd10009e6bb31a7a089e",
+        "title": "V2-005E durable-log",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        }
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 359,
+      "response": {
+        "data": {
+          "id": "ses_1a10560fdd10009e6bb31a7a089e",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091604959,
+            "updated": 1791091604959
+          },
+          "title": "V2-005E durable-log",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "RenameBeforeLog",
+      "startedAt": "2026-10-04T05:26:44.965627+00:00",
+      "completedAt": "2026-10-04T05:26:44.971750+00:00",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e",
+      "request": {
+        "title": "V2-005E log renamed once"
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 204,
+      "responseHeaders": {
+        "vary": "Origin"
+      },
+      "responseBytes": 0,
+      "response": null
+    },
+    {
+      "name": "ReadRenamedSession",
+      "startedAt": "2026-10-04T05:26:44.971775+00:00",
+      "completedAt": "2026-10-04T05:26:44.973399+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 364,
+      "response": {
+        "data": {
+          "id": "ses_1a10560fdd10009e6bb31a7a089e",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091604959,
+            "updated": 1791091604967
+          },
+          "title": "V2-005E log renamed once",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    },
+    {
+      "name": "RenameWhileFollowing",
+      "startedAt": "2026-10-04T05:26:44.985786+00:00",
+      "completedAt": "2026-10-04T05:26:44.990732+00:00",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e",
+      "request": {
+        "title": "V2-005E log renamed twice"
+      },
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 204,
+      "responseHeaders": {
+        "vary": "Origin"
+      },
+      "responseBytes": 0,
+      "response": null
+    },
+    {
+      "name": "ReadTwiceRenamedSession",
+      "startedAt": "2026-10-04T05:26:47.091026+00:00",
+      "completedAt": "2026-10-04T05:26:47.094158+00:00",
+      "method": "GET",
+      "path": "/api/session/ses_1a10560fdd10009e6bb31a7a089e",
+      "request": null,
+      "requestRawSha256": null,
+      "requestOrigin": null,
+      "status": 200,
+      "responseHeaders": {
+        "content-type": "application/json",
+        "vary": "Origin, Accept-Encoding"
+      },
+      "responseBytes": 365,
+      "response": {
+        "data": {
+          "id": "ses_1a10560fdd10009e6bb31a7a089e",
+          "projectID": "0b4717479747cf6f6f990a40c52d12a71cea7af8",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791091604959,
+            "updated": 1791091604987
+          },
+          "title": "V2-005E log renamed twice",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+          }
+        }
+      }
+    }
+  ],
+  "observedWatermark": 1,
+  "globalStream": {
+    "path": "/api/event",
+    "openedAt": "2026-10-04T05:26:44.963471+00:00",
+    "closedAt": "2026-10-04T05:26:47.094479+00:00",
+    "status": 200,
+    "events": [
+      {
+        "id": "evt_10560fde40014t60Tdzh0QKWn2",
+        "type": "server.connected",
+        "data": {}
+      },
+      {
+        "id": "evt_10560fde7001Abr9rGgLDIegQO",
+        "created": 1791091604967,
+        "type": "session.renamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "title": "V2-005E log renamed once"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "seq": 1,
+          "version": 1
+        }
+      },
+      {
+        "id": "evt_10560fdfb001O2myGK15auzd8a",
+        "created": 1791091604987,
+        "type": "session.renamed",
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-e/project"
+        },
+        "data": {
+          "sessionID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "title": "V2-005E log renamed twice"
+        },
+        "durable": {
+          "aggregateID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "seq": 2,
+          "version": 1
+        }
+      }
+    ],
+    "frames": null,
+    "totalHttpBodyBytes": 1088,
+    "ownedEventFrameBytes": 786,
+    "heartbeatBytes": 13,
+    "ambientEventCount": 2,
+    "failure": null
+  },
+  "logReads": [
+    {
+      "path": "/api/experimental/session/ses_1a10560fdd10009e6bb31a7a089e/log",
+      "openedAt": "2026-10-04T05:26:44.973425+00:00",
+      "closedAt": "2026-10-04T05:26:44.976656+00:00",
+      "status": 200,
+      "events": [
+        {
+          "type": "log.synced",
+          "aggregateID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "seq": 1
+        }
+      ],
+      "frames": [
+        [
+          "data: {\"type\":\"log.synced\",\"aggregateID\":\"ses_1a10560fdd10009e6bb31a7a089e\",\"seq\":1}"
+        ]
+      ],
+      "totalHttpBodyBytes": 86,
+      "ownedEventFrameBytes": 86,
+      "heartbeatBytes": 0,
+      "ambientEventCount": 0,
+      "failure": null
+    },
+    {
+      "path": "/api/experimental/session/ses_1a10560fdd10009e6bb31a7a089e/log?after=0&follow=false",
+      "openedAt": "2026-10-04T05:26:44.976673+00:00",
+      "closedAt": "2026-10-04T05:26:44.980484+00:00",
+      "status": 200,
+      "events": [
+        {
+          "type": "log.synced",
+          "aggregateID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "seq": 1
+        }
+      ],
+      "frames": [
+        [
+          "data: {\"type\":\"log.synced\",\"aggregateID\":\"ses_1a10560fdd10009e6bb31a7a089e\",\"seq\":1}"
+        ]
+      ],
+      "totalHttpBodyBytes": 86,
+      "ownedEventFrameBytes": 86,
+      "heartbeatBytes": 0,
+      "ambientEventCount": 0,
+      "failure": null
+    },
+    {
+      "path": "/api/experimental/session/ses_1a10560fdd10009e6bb31a7a089e/log?after=1&follow=false",
+      "openedAt": "2026-10-04T05:26:44.980501+00:00",
+      "closedAt": "2026-10-04T05:26:44.982848+00:00",
+      "status": 200,
+      "events": [
+        {
+          "type": "log.synced",
+          "aggregateID": "ses_1a10560fdd10009e6bb31a7a089e",
+          "seq": 1
+        }
+      ],
+      "frames": [
+        [
+          "data: {\"type\":\"log.synced\",\"aggregateID\":\"ses_1a10560fdd10009e6bb31a7a089e\",\"seq\":1}"
+        ]
+      ],
+      "totalHttpBodyBytes": 86,
+      "ownedEventFrameBytes": 86,
+      "heartbeatBytes": 0,
+      "ambientEventCount": 0,
+      "failure": null
+    }
+  ],
+  "followStream": {
+    "path": "/api/experimental/session/ses_1a10560fdd10009e6bb31a7a089e/log?after=1&follow=true",
+    "openedAt": "2026-10-04T05:26:44.982863+00:00",
+    "closedAt": "2026-10-04T05:26:47.094504+00:00",
+    "status": 200,
+    "events": [
+      {
+        "type": "log.synced",
+        "aggregateID": "ses_1a10560fdd10009e6bb31a7a089e",
+        "seq": 1
+      }
+    ],
+    "frames": [
+      [
+        "data: {\"type\":\"log.synced\",\"aggregateID\":\"ses_1a10560fdd10009e6bb31a7a089e\",\"seq\":1}"
+      ]
+    ],
+    "totalHttpBodyBytes": 86,
+    "ownedEventFrameBytes": 86,
+    "heartbeatBytes": 0,
+    "ambientEventCount": 0,
+    "failure": null
+  },
+  "capability": "unavailable"
+}
