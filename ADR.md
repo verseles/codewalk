@@ -60,6 +60,8 @@ This document contains active architectural decisions for the current implementa
 - ADR-056: Bounded Desktop Indeterminate Motion Policy
 - ADR-057: Interaction-Frame Budget for Session Switching
 - ADR-058: CodeWalk v2 Harness-Neutral Architecture
+- ADR-059: Permission Modes in CodeWalk v2
+- ADR-060: CodeWalk v1 to v2 Transition
 
 ---
 
@@ -1109,7 +1111,7 @@ Project context controls and conversations navigation were split across separate
 
 **Status**: Accepted
 
-**Implementation-line scope (2026-10-03):** ADR-023 remains the accepted contract-first principle for both v1 and authored v2, and continues to govern the retained legacy implementation on `main`. Its v1-specific routes and invariants—including `local_user_*`, `prompt_async`, `/provider.connected`, and legacy realtime/SSE behavior—apply only to v1/retained legacy paths; they are not v2 constraints. Authored v2 follows ADR-058 and the versioned `ai-docs/opencode_v2_*.md` anchors. EXC-001 remains historical v1 behavior; v2 permission semantics are outside this ADR and belong to the separately scoped V2-003 / ADR-059 work.
+**Implementation-line scope (2026-10-04):** ADR-023 remains the accepted contract-first principle for both v1 and authored v2, and continues to govern the retained legacy implementation on `main`. Its v1-specific routes and invariants—including `local_user_*`, `prompt_async`, `/provider.connected`, and legacy realtime/SSE behavior—apply only to v1/retained legacy paths; they are not v2 constraints. Authored v2 follows ADR-058 and the versioned `ai-docs/opencode_v2_*.md` anchors. EXC-001 remains accepted historical v1 behavior and is superseded only for authored v2 by ADR-059, which records the default-on exception and the native one-time approval mechanism.
 
 ### Context
 
@@ -1219,7 +1221,7 @@ This contract is a direct application of the ADR-023 contract-first policy: the 
 
 ### Exception EXC-001: Composer Permission Auto-Approve Toggle
 
-**Status**: Approved ADR-023 exception.
+**Status**: Approved ADR-023 exception for v1 and retained legacy implementation, including legacy paths on `main`. **Superseded for authored v2 by ADR-059**; this historical body continues to describe the legacy `always` / `remember: true` implementation and does not define v2 project-wide permission semantics.
 
 **Summary**: CodeWalk exposes a fixed footer item inside the agent selector menu (opened from the agent chip), with the pending-permission badge on the agent chip that defaults to enabled, persists user opt-out, and auto-approves permission requests with `always` semantics unconditionally, sending `remember: true` to create durable session-scoped grants. Question prompts remain manual. The auto-approve behavior extends to the Android background worker continuity path, enabling pending permission resolution when the app resumes from background.
 
@@ -3814,7 +3816,7 @@ CodeWalk v2 is a new client implementation on `main`, not a runtime mode added t
 
 6. **Transitional G4 and test scope.** From their first commit, G4 governs `packages/codewalk_*`, `packages/harness_*`, `lib/app/`, `lib/features/`, `lib/platform/`, `lib/shared/`, and the temporary v2 entry point (including `lib/main_v2.dart` if used). A separate transitional legacy-path manifest explicitly enumerates retained legacy paths that are temporarily excluded; these path exclusions are distinct from generated/vendor file-size exceptions. Generated/vendor exceptions to the size rule must be separately narrow and reasoned. Authored v2 is never exempt wholesale and must not import retained legacy code directly or transitively. V2-020A establishes first-commit guards and the transitional manifest; V2-021 proves the guards with planted violations; V2-020C establishes new-package test discovery and explicit v2 targets. V2-084 removes all retained-legacy path exclusions at cutover. These are planned work items, not claims that the packages, guards, targets, or tests already exist.
 
-7. **Contract reference and scope routing.** ADR-023 remains the contract-first principle. New v2 consumers use the pinned, versioned OpenCode references `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, and `ai-docs/opencode_v2_models.md`; official OpenCode docs/source are primary, while a source pin is not live acceptance evidence. OpenChamber is secondary community reference only and cannot override official evidence. SP-01 and owning work items must revalidate live/version-specific facts before behavior depends on them. v1 maintenance and retained legacy paths—including legacy code still present on `main`—continue to use ADR-023's original `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md` anchors and their applicable v1 invariants. V1-only `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE details do not constrain authored v2. EXC-001 is preserved as historical/legacy behavior; the v2 permission-mode replacement is V2-003 / ADR-059, not this decision.
+7. **Contract reference and scope routing.** ADR-023 remains the contract-first principle. New v2 consumers use the pinned, versioned OpenCode references `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, and `ai-docs/opencode_v2_models.md`; official OpenCode docs/source are primary, while a source pin is not live acceptance evidence. OpenChamber is secondary community reference only and cannot override official evidence. SP-01 and owning work items must revalidate live/version-specific facts before behavior depends on them. v1 maintenance and retained legacy paths—including legacy code still present on `main`—continue to use ADR-023's original `ai-docs/opencode_server.md`, `ai-docs/opencode_web.md`, and `ai-docs/opencode_models.md` anchors and their applicable v1 invariants. V1-only `local_user_*`, `prompt_async`, `/provider.connected`, and dual-SSE details do not constrain authored v2. EXC-001 is preserved as historical/legacy behavior and superseded for authored v2 by ADR-059. ADR-060 owns the approved transition, installer, data and release policies; neither policy ADR claims those behaviors are already implemented.
 
 8. **Scoped legacy decisions.** ADR-002's `serverId::scopeId` identity/transition flow and ADR-003's v1 realtime lifecycle remain accepted for v1 and retained legacy implementation, but do not define authored v2 identity or event/retry/reconciliation behavior. Their original bodies and v1 validity are preserved. ADR-001 remains unchanged: its multi-server, isolation, and credential-storage principles are not displaced by this architecture.
 
@@ -3836,3 +3838,119 @@ CodeWalk v2 is a new client implementation on `main`, not a runtime mode added t
 - ❌ Authored v2 may not import retained legacy implementation, claim unverified capabilities, or automatically replay uncertain non-idempotent mutations.
 
 Related: V2-002; `v2-plan.md` §§2, 4, 6.1–6.12, 8.3, 10, 11.2. Official v2 anchors: `ai-docs/opencode_v2_server.md`, `ai-docs/opencode_v2_web.md`, `ai-docs/opencode_v2_models.md`.
+
+---
+
+## ADR-059: Permission Modes in CodeWalk v2 (2026-10-04)
+
+**Status**: Accepted product policy and ADR-023 exception for default-on automatic approval.
+
+**Implementation**: Pending — this records D05 for authored v2. It changes no retained legacy code and does not claim that permission modes, the Android monitor or Host coordination have shipped. It supersedes EXC-001 only for authored v2; legacy `always` / `remember: true` behavior remains governed by EXC-001.
+
+### Context
+
+The product owner retains **Allow all ON by default for all sessions**, including sessions started in a terminal, while allowing per-session alternatives. OpenCode v2's official clients use one-time replies for auto-accept; their default is to prompt. Its session wildcard overrides agent restrictions and is inherited by new children, while `always` saves project-wide approvals. Reusing the v1 exception would therefore change the scope and persistence of authorization. ADR-023 requires an explicit exception for the default-on choice; the reply mechanism itself follows the native contract.
+
+### Decision
+
+1. **Default, persistence and effective mode.** New v2 installs default to Allow all ON. The v1 importer preserves an explicit OFF value. The global setting supplies the default, and each session may select a supported mode. The chip shows the acknowledged **effective** mode, not merely the requested preference. D05 applies to every session CodeWalk observes, including terminal-origin sessions and children; it is not limited to the focused conversation. A disconnected client cannot claim to approve unseen requests.
+
+2. **Modes are capabilities.** Ask presents each pending permission request for manual response. Allow all automatically approves each eligible request once. Unrestricted uses the harness's native bypass only where verified and permitted, with explicit per-session confirmation explaining overridden restrictions and child inheritance. Additional native modes are shown only when supported. No-approval harnesses explain that they do not ask for approval; unavailable or unknown modes are not emulated or offered as effective.
+
+3. **One-time automatic approval.** For eligible OpenCode `permission.asked`, reply through the native permission route with `decision: "once"`, addressed to the request's owning session and ID. Never send `always`, legacy `remember: true`, a persistent policy amendment or a session wildcard automatically. Ordinary `.env` reads and access outside the project are included when the harness asks. Existing deny rules remain effective: native denial does not become an auto-approvable request. Native defaults, rule evaluation and what is disclosed remain harness responsibilities.
+
+4. **Never automatic.** Questions/forms, plan approvals, interactions requiring user input, unknown interaction kinds or choice sets, and any request projected as `autoApprovable: false` remain manual. An eligible request must have a verified one-time approval choice; never invent a choice or substitute a persistent one. `autoApprovable` is a CodeWalk canonical policy field, not an invented OpenCode wire field. Installation consent, project trust and the Unrestricted warning remain their explicit product interactions. Allow all does not answer forms, provide credentials or approve those interactions.
+
+5. **Manual choices preserve native scope.** Render the action, resources, owning session/child badge and supplied diff preview. Offer only native choices. For OpenCode: **Allow once**; **Always for this project** only when save patterns are present, showing those patterns; **Reject with note** as the default rejection, allowing the model to continue; and **Reject and stop** without a note, ending the step. Both rejections also resolve the other pending requests of the same owning session, with or without a note; explain that batch scope and reconcile every affected card. Other sessions are unaffected by that rejection. A manual `always` may persist project-wide grants and is never described using v1's session-lifetime guarantee. It may also resolve other now-allowed pending requests across the project's sessions after native re-evaluation; reconcile every native `permission.replied` event under its owning session identity.
+
+6. **Children and multiple clients.** Surface child-origin requests in the parent without changing their owning session identity. Dedupe by the canonical request/session identity, reconcile pending state and treat a late native not-found/already-resolved reply as answered elsewhere. First reply wins; CodeWalk does not lock TUI, IDE or other clients or promise exactly-once delivery for an unverified operation.
+
+7. **OpenCode Unrestricted is a separate mutation.** Append `{action: "*", resource: "*", effect: "allow"}` to the current session permissions and record precisely the insertion CodeWalk owns. Do not replace unrelated rules. Turning it OFF removes only that owned insertion, preserving other rules; if ownership is ambiguous or another client changed the rules, warn and refresh rather than overwrite them. There is no upstream compare-and-set. Explain that existing children may retain inherited permissions; changing the parent's rule is not an automatic rollback of child state or of completed actions.
+
+8. **Connected-client limit and Host authority.** In v2.0, automatic replies require a connected foreground client or the opt-in Android monitor; iOS/Web do not provide closed-app approval continuity. From v2.1, the linked Host observer is the sole CodeWalk automatic responder **only while its verified authority is current**. `approval.hostResponder` is a CodeWalk-owned signal over authenticated CHP, not an OpenCode `/api/info` extension. Define verified endpoint/observer alias, effective per-session mode, policy revision, activity renewal/expiry and restart epoch. Only that current signal suppresses client automatic replies; neither URL similarity nor a cached flag does. Submit mode changes to the authority and wait for acknowledgement before displaying them as effective. On unavailable authority the change stays pending; after authority expiry or observer stop, reconcile pending requests and resume client behavior using the last acknowledged effective mode. A returning Host renews authority before takeover. Native clients remain independent; globally atomic handover is not promised.
+
+### Rationale and risks
+
+- Default-on approval and all-observed-session coverage are explicit product decisions. They reduce approval friction but can authorize an action the user would have refused, including a request from a terminal or child session; Ask provides the immediate alternative.
+- One-time native replies preserve agent deny rules and avoid writing permanent grants. This is distinct from Unrestricted, which intentionally overrides those restrictions after confirmation.
+- Native first-reply-wins handling tolerates multiple responders but is not a distributed lock. Stale Host authority can cause missed or duplicate attempts unless expiry, reconciliation and effective-mode acknowledgement are implemented and tested.
+- Unrestricted removal races with other clients and cannot undo executed work, manual project grants or independently inherited child permissions. Accurate warnings and ownership tracking are required.
+
+### Rollback and implementation owners
+
+- **Per-session rollback:** switch to Ask; stop future automatic responses for that session and retain its pending manual cards. Disable the global setting for future defaults; the Android monitor can also be disabled. This does not revoke a grant or action already completed.
+- **Unrestricted rollback:** remove only CodeWalk's owned rule under the conflict policy above. Manual project-wide grants use native saved-permission management and are not silently removed by a mode switch.
+- **Policy/adapter owners:** `V2-047A` implements reply eligibility, one-time mapping and resolved-elsewhere/batch reconciliation; `V2-047B` owns effective-mode UI, child cards and warned Unrestricted ownership. `V2-074` owns connected Android monitoring; `V2-076` preserves imported OFF.
+- **Host owners:** `V21-004` defines the CHP authority/policy/attention contract; `V21-007` integrates and live-tests the explicitly linked OpenCode observer. Revert or disable a faulty automatic responder independently of manual approval; changing D05's product default requires a new decision, not a silent fallback.
+
+### Required regression acceptance (not yet executed by this ADR)
+
+- `V2-005C` provides observed OpenCode/version fixtures; `V2-047A/B` assert default ON, imported OFF and per-session Ask; all observed terminal/child session routing; automatic **once only**, no `always`/remember/wildcard mutation; preserved agent denies; and `.env`/external-directory requests when actually asked.
+- `V2-047A` / `V2-048` assert forms, questions, plan approvals, interaction-required, unknown and non-automatic requests stay manual; only verified offered choices are used.
+- `V2-047A/B` cover two clients/native replies, answered-elsewhere dismissal, child ownership, manual save-pattern/project scope and its native cross-session pending-request resolution, both rejection variants resolving the same-session batch and leaving another session unaffected.
+- `V2-047B` covers confirmation, effective-mode acknowledgement, Unrestricted insertion/removal preserving others' rules, ambiguous ownership/concurrent edits and child-inheritance warnings.
+- `V2-074` covers connected monitor eligibility and stop/disconnect limits. `V21-004` / `V21-007` cover phone + desktop + Host in Ask/Allow all, lost CHP connectivity, observer failure, restart epoch, stale/expired signals, return/takeover and native-client replies. Missing live/platform evidence remains pending.
+
+### Contract provenance
+
+The [v2 server anchor](ai-docs/opencode_v2_server.md), [Web anchor](ai-docs/opencode_v2_web.md) and [model/agent anchor](ai-docs/opencode_v2_models.md) route to official pinned evidence. The `anomalyco/opencode@v2.0.21` source pin is `8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72`: [permission implementation](https://github.com/anomalyco/opencode/blob/8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72/packages/core/src/permission.ts) (deny/rule evaluation, replies, save and same-session rejection), [TUI one-time auto-accept](https://github.com/anomalyco/opencode/blob/8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72/packages/tui/src/routes/session/index.tsx), and [TUI prompt default](https://github.com/anomalyco/opencode/blob/8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72/packages/tui/src/config/index.tsx). These sources were directly inspected on 2026-10-04. They establish static semantics, not live acceptance on another version. [OpenChamber](https://github.com/openchamber/openchamber) was inspected as a secondary community reference; it does not override the native contract or D05.
+
+Related: V2-003 ([#237](https://github.com/verseles/codewalk/issues/237)); ADR-023 / EXC-001; ADR-058; `v2-plan.md` D05, §§5.4, 6.5, 6.10, 6.11.6 and V2-047.
+
+---
+
+## ADR-060: CodeWalk v1 to v2 Transition (2026-10-04)
+
+**Status**: Accepted transition policy.
+
+**Implementation**: Pending — this approves the existing D03/D04 and §9 contracts; it does not assert that the update gate, installers, storage/importer, Web split, beta tooling, MVP freeze or GA release are implemented. GitHub Issues record each producer's current evidence. No app identifier, runtime compatibility switch or release channel is changed by this ADR.
+
+### Context
+
+CodeWalk 2 replaces CodeWalk 1 under the same application ID, `com.verseles.codewalk`, and requires OpenCode 2. Legacy users need an explicit migration choice and retained downloads. Repository-wide latest-release selection cannot preserve a v1 pin or an approved desktop update target. Production Web currently follows `main`, so the v2 rewrite must not be published through that production route until the verified production/preview split exists. Preserving old data supports recovery but does not by itself make Android binary downgrade possible.
+
+### Decision
+
+1. **Version lines and preparation.** `v1` receives the last planned minor `v1.266.0`, then bounded `v1.266.x` maintenance until the accepted usable v2 MVP. It was created from `d1ed5ee9`; reconcile ancestry and publication/tracking evidence without recreating or rewinding an advanced branch. `main` is the v2 development line and initially retains v1 source/assets/tests/tooling only for selective reuse and regression reference. Establish governed v2 packages, port relevant leaves with tests, and remove superseded legacy code at validated stages/final cutover. Do not empty `main`, introduce a v1/v2 runtime switch, or merge entire rewritten/legacy trees between the lines. Local per-machine worktrees are optional; their administration paths are not a portable project contract.
+
+2. **Last-v1 update gate (D04).** Ship the transition minor before the first v2 beta. When its updater discovers a higher major, explain the OpenCode 2 requirement, v1-server incompatibility and migration notes, with **Update to CodeWalk 2**, **Stay on CodeWalk 1**, and **Remind me later**. Stay persists a v1-only preference, resolves stable `v1.*` releases through paginated semantic ordering, and offers v2 again only after a deliberate Settings change. Remind later obeys its configured interval. A user who never installs the transition minor may still be offered v2 by the older updater; release notes/announcement must begin with the OpenCode 2 requirement, and v2 detects a v1 server and links the legacy build.
+
+3. **CodeWalk desktop installer contract.** `install.sh` and `install.ps1` install CodeWalk; this policy is separate from managed OpenCode installation. Both expose aligned, non-interactive-capable `stable`, `v1`, `beta` and exact-target inputs, including the documented pipe-to-shell/PowerShell entry points. Fix and test the precise interface in `V1-05`, rather than treating proposed environment names as an already supported API.
+   - New installs default stable. Existing installs preserve the permitted major and saved channel; an existing bundle with an unknown/unreadable version is not treated as fresh. Persist an explicit v1 choice through update/reinstall until deliberately changed.
+   - Stable excludes drafts/prereleases. Beta is explicit v2-prerelease opt-in. V1 traverses release pagination and chooses the highest compatible stable `v1.*` semantically, including after GA/freeze. Repository-wide `/releases/latest` or a branch name is not a major/channel selector. An explicit target tag must satisfy the approved major/channel policy.
+   - Cross-major replacement requires an explanation and explicit consent. Without it, non-interactive execution exits clearly and preserves the installation. The app hands off the **exact approved tag, channel and migration choice**; a newer release appearing later cannot change that target.
+   - Windows stages and applies exactly that payload across restart. Retain the staged target/channel/consent and use a compatible pinned/local executor or verified stable staging contract so a fetched newer installer cannot reinterpret them. Verify actual `install.cat` routing and direct-script/tag entry points.
+   - Missing compatible release/asset, malformed metadata, network failure or incompatible staging stops before replacement or restores the prior usable bundle. Never silently choose another major/channel. Preserve user data, links, desktop integration and restart behavior. README commands become supported claims only after executable acceptance on the relevant platforms.
+
+4. **v2 versioning and channel publication.** Set the v2 application to `2.0.0+<epoch build code>` when its owning implementation lands; never reset Android's build number. Before the first beta, tooling supports tags `v2.0.0-beta.N` with actual `prerelease: true`, `make_latest: false`. The v2 updater uses full semantic prerelease ordering, offers stable/beta, ignores majors other than 2 and preserves the existing What's-new parser. During migration, stable v1 patches remain eligible for latest; MVP freeze leaves the last stable v1 release in place. GA explicitly promotes **exactly `v2.0.0`** with `prerelease: false`, `make_latest: true`; do not run a major increment from a `2.x` version. Post-GA authorized legacy releases use `make_latest: false`. Determine policy from tag/version and explicit promotion, not an assumed tag-job branch. Serialize both lines' publication or verify the highest published Android build code before assigning the next one; GA must upgrade devices running any published v1 patch or beta. Publish only intended commits/tags.
+
+5. **Isolated data and importer.** Write only `cw2.*`, versioned by `cw2.schema`, with a new file-payload directory. Keep v1 keys for at least two minor releases; update the Android pre-engine preference purge list in `CodeWalkApplication.kt` in the same importer change. Import once, read-only, idempotently and restartably: appearance, locale, accessibility, shortcuts, voice settings/API keys through secure storage, notification preferences, canned answers, the v1 Allow all value preserving explicit OFF, and server profiles marked **needs OpenCode 2 check**. Rebind credentials only to the same origin; never automatically rewrite port `4096` to `49374`. Do not treat old message caches or unmappable tabs/pins as v2 truth. Put unmappable drafts in **Recovered drafts**. Settings → About → Migration shows counts/unresolved items.
+
+6. **Rollback boundaries.** The importer never deletes/mutates its v1 source, enabling a legacy client to read preserved data. Android install-over rollback also needs a compatible signature and a higher legacy build code; a frozen artifact may fail that requirement. Do not promise binary rollback from data preservation alone. OpenCode owns its server database: back it up before a managed v1→v2 server upgrade and never run both binaries against the same database concurrently. Keep CodeWalk app import and OpenCode server migration separate.
+
+7. **Production and preview Web.** Complete and verify `V1-04` before publishing rewritten v2 code from `main`: production deploys from `v1`; `main` deploys to a preview alias. Verify workflow destination **and hosting production-branch settings**, with observed preview-only behavior on a main push and production still serving v1. Branch creation alone is insufficient. A temporary `lib/main_v2.dart` is allowed; beta build jobs explicitly select and prove the v2 bootstrap. At `V2-084`, remove superseded v1 code and that temporary entry point so `main.dart` boots v2. At GA, move production to `main` and retain legacy Web at a stable alias; the alias choice requires hosting verification.
+
+8. **Accepted MVP freezes maintenance; GA promotes stable.** `V2-086` is a separate product-owner checkpoint before GA: agree the exact Android/desktop platform/flow checklist and additional needed producers, then evidence an installable opt-in beta covering connection/pairing, sessions/history, sending/streamed tools, permissions, stop/reconnect and v1 preservation/import. Public MVP beta still requires G1–G5, reviewer/platform gates, actual v2 packaging and beta-publication authority. A private smoke, missing runner or unaccepted checklist is not acceptance. On explicit owner acceptance, record the final v1 tag/commit and freeze routine v1 development/releases; retain downloads and v1 production Web until GA. Later critical legacy exceptions require a new explicit decision. Freeze waives no remaining v2 scope/gate or review and is neither GA nor an indefinite maintenance promise. Only separately authorized GA promotion switches stable/latest and production Web to v2.
+
+### Rationale and risks
+
+- One application ID retains upgrade continuity. An explicit major gate and exact installer handoff prevent accidental replacement with an incompatible server client.
+- New storage namespaces and read-only restartable import preserve legacy settings while avoiding incompatible cache/session assumptions. Credential origin binding prevents importing a secret into a different endpoint.
+- Separate production routing lets the rewrite develop without replacing the stable Web client. Selective ports retain useful regression evidence without creating permanent dual-runtime support.
+- A user who missed the transition minor remains exposed to the old updater's latest selection. Early delivery and visible OpenCode 2 requirements mitigate that limitation without pretending it is eliminated.
+- Signature/build-code constraints limit Android rollback; failed/stale installer state and cross-line release ordering require executable acceptance. Static policy and source inspection are not native-platform passes.
+
+### Implementation, regression and rollback owners
+
+| Producer | Required acceptance and recovery boundary |
+|---|---|
+| `V1-03` | Verify legacy ancestry, live ref/publication/tracking and retained main baseline; preserve existing branches/work. |
+| `V1-01`, `V1-05A/B/C` | Gate choices/persisted opt-out/reminder and exact approved handoff; offline pagination, stable/beta/major ordering, unknown installed version, consent/cancellation and failure/data preservation. Windows applies staged A after remote B/script changes; macOS runs shared contract cases. On failure retain/restore the prior bundle; native checks remain required. |
+| `V1-02`, `V1-04` | Separately authorized transition release with approved announcement/green CI; verify production/preview routing and hosting settings before main publication. Restore the verified stable routing if split validation fails; do not publish a rewrite through production. |
+| `V2-027`, `V2-076` | Namespace/schema/corruption checks; restart/idempotency/source preservation, imported OFF, origin-bound credentials, recovered drafts/report and purge-list synchronization. A real v1.266 upgrade is required, beyond disposable fixtures. Roll back importer use while retaining v1 source and report unresolved items. |
+| `V2-077`, `V2-078` | True `beta.2 < beta.10 < final` ordering; reject non-2 majors; actual beta/GA/latest flags, explicit final promotion, targeted tag publication and increasing Android codes across both lines. Package the actual v2 entry point; prove required native/Web/build/device evidence without equating compilation to distribution. |
+| `V2-084`, `V2-086`, `V2-085` | Validated legacy cutover/test retirement; agreed owner-accepted MVP and recorded v1 freeze artifact; separate remaining-gate/GA acceptance and production/stable promotion. An unaccepted MVP keeps bounded maintenance open; do not infer promotion from a freeze. |
+
+This ADR is a documentary producer for `V2-020A` and `V2-027`, not proof that their consumers or any release gate already pass. GitHub Issues remain the evergreen acceptance and resume record; update this ADR at the accepted-MVP checkpoint if a transition decision changes.
+
+Related: V2-004 ([#238](https://github.com/verseles/codewalk/issues/238)); ADR-058; ADR-059 (imported permission preference); `v2-plan.md` D03/D04, §§9, 12.1, V2-076–078 and V2-084–086; `AGENTS.md` version-line/publication rules. Applicable server/database contracts are routed through the [v2 server](ai-docs/opencode_v2_server.md), [Web](ai-docs/opencode_v2_web.md) and [model/agent](ai-docs/opencode_v2_models.md) anchors; retained v1 paths continue using their legacy anchors under ADR-023.
