@@ -1,0 +1,10 @@
+{
+  "version": "2.0.22",
+  "pid": 117273,
+  "urls": [
+    "http://127.0.0.1:49374"
+  ],
+  "paths": {
+    "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+  }
+}

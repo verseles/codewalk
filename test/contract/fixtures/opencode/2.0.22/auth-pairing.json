@@ -1,0 +1,128 @@
+{
+  "capturedAt": "2026-10-04T04:24:21.323083+00:00",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/info",
+      "authenticated": false,
+      "status": 401,
+      "response": {
+        "_tag": "UnauthorizedError",
+        "message": "Authentication required"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/pair",
+      "authenticated": true,
+      "response": {
+        "code": "[REDACTED]",
+        "expires_in": 300
+      },
+      "nativeCliExitCode": 0
+    },
+    {
+      "method": "GET",
+      "path": "/auth/connect/[REDACTED]",
+      "authenticated": false,
+      "status": 200,
+      "response": {
+        "token": "[REDACTED]"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/info",
+      "authenticated": true,
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 117273,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/auth/connect/[REDACTED]",
+      "authenticated": false,
+      "status": 401,
+      "response": {
+        "_tag": "UnauthorizedError",
+        "message": "Pairing link expired or already used"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/info",
+      "authenticated": true,
+      "status": 401,
+      "response": {
+        "_tag": "UnauthorizedError",
+        "message": "Authentication required"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/pair",
+      "authenticated": true,
+      "response": {
+        "code": "[REDACTED]",
+        "expires_in": 300
+      },
+      "nativeCliExitCode": 0
+    },
+    {
+      "method": "GET",
+      "path": "/auth/connect/[REDACTED]",
+      "authenticated": false,
+      "status": 200,
+      "response": {
+        "token": "[REDACTED]"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/info",
+      "authenticated": true,
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 117273,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/info",
+      "authenticated": true,
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 117273,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      }
+    }
+  ],
+  "rePairing": {
+    "newTokenDiffers": true,
+    "bothTokensAccepted": true,
+    "firstExpiryEpochSeconds": 1793679861,
+    "secondExpiryEpochSeconds": 1793679862,
+    "realTimeExpirationObserved": false
+  }
+}

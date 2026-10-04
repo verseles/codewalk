@@ -1,0 +1,77 @@
+{
+  "unit": "V2-005A",
+  "issue": "https://github.com/verseles/codewalk/issues/240",
+  "captureKind": "observed native service, provider output and native TUI",
+  "checkout": {
+    "branch": "main",
+    "commit": "5b782e2a0c0a595059a9c5f811b2a5e072d0cac6"
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "runtime": {
+    "npmPackage": "@opencode/cli",
+    "cliVersion": "2.0.22",
+    "platformPackage": "@opencode/cli-linux-x64@2.0.22",
+    "connectedVersion": "2.0.22",
+    "endpoint": "http://127.0.0.1:49374",
+    "mode": "native per-user managed service",
+    "wrapper": "/workspace/.cloud-tools/bin/opencode2",
+    "isolatedRoot": "/workspace/.cloud-runtime/opencode-v2",
+    "workspace": "/workspace/.cloud-runtime/opencode-v2/workspace"
+  },
+  "sessionID": "ses_efad87538ffeM1l1gJnGdlhjE0",
+  "preparedAt": "2026-10-04T04:23:59.962699+00:00",
+  "provider": {
+    "id": "opencode",
+    "displayName": "OpenCode Zen",
+    "model": {
+      "id": "fledge-alpha-free",
+      "providerID": "opencode",
+      "variant": "low"
+    },
+    "authenticatedIntegrationRequiredForObservedTurn": false,
+    "promptAttempts": 1,
+    "observedUSD": 0
+  },
+  "terminal": {
+    "program": "native OpenCode TUI",
+    "recordingTool": "util-linux script",
+    "rows": 24,
+    "columns": 80,
+    "decoder": "pyte 0.8.2",
+    "command": "opencode2 --session ses_efad87538ffeM1l1gJnGdlhjE0 .",
+    "openedBeforePrompt": true,
+    "inputSubmittedThrough": "native /api/session/<id>/prompt"
+  },
+  "redactions": [
+    "pairing codes and tokens replaced with [REDACTED]",
+    "Authorization headers never persisted",
+    "opaque provider state omitted; structural redaction marker retained",
+    "provider API-key settings replaced with [REDACTED]"
+  ],
+  "preserved": [
+    "native session/message/event IDs",
+    "native epoch timestamps",
+    "event envelope and durable metadata",
+    "literal ephemeral text/reasoning/tool-input deltas",
+    "full terminal values",
+    "source-file content",
+    "native tool output and completed projected messages"
+  ],
+  "limitations": [
+    "30-day real-time expiry not exercised",
+    "five-minute unused-code expiry not exercised",
+    "password rotation/revocation not exercised",
+    "JSON pairing only; browser cookies/CORS not exercised",
+    "one Linux x86_64 shared-service topology and one free model; no cross-version compatibility window",
+    "V2-005B/C/D/E and product adapter/device/release gates remain separate"
+  ],
+  "anchors": {
+    "primaryTag": "anomalyco/opencode@v2.0.21",
+    "primaryCommit": "8a8bd622a3d7dc29ccf30ec17f84e363ed95ed72",
+    "laterResearchCommit": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+    "scope": "Checked observed 2.0.22 info/auth/pairing/turn subset against preserved primary contracts; no claim that 2.0.21 was run."
+  }
+}

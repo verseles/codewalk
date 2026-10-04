@@ -1,0 +1,134 @@
+{
+  "data": [
+    {
+      "id": "msg_10527e359001D4wtdk92wivyM0",
+      "time": {
+        "created": 1791087862639
+      },
+      "text": "Use your read tool to read capture-marker.txt in the current workspace. Then reply with exactly the marker from that file. Do not modify files or invoke shell or network tools.",
+      "type": "user"
+    },
+    {
+      "id": "msg_10527e37b001IGLLnE8CpxHBE9",
+      "time": {
+        "created": 1791087862666,
+        "streamed": 1791087864388,
+        "completed": 1791087864398
+      },
+      "type": "assistant",
+      "agent": "build",
+      "model": {
+        "id": "fledge-alpha-free",
+        "providerID": "opencode",
+        "variant": "low"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "We need answer. Need read file capture-marker.txt in cwd. Call read.",
+          "state": {
+            "_redacted": "opaque provider state omitted"
+          },
+          "time": {
+            "created": 1791087863807,
+            "completed": 1791087864381
+          }
+        },
+        {
+          "type": "tool",
+          "id": "functions.read:0",
+          "name": "read",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "/workspace/.cloud-runtime/opencode-v2/workspace/capture-marker.txt"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Read file /workspace/.cloud-runtime/opencode-v2/workspace/capture-marker.txt, lines 1-1\n1: SP01_NATIVE_V2_FREE_MODEL_OK"
+              }
+            ],
+            "metadata": {
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1791087864376,
+            "ran": 1791087864385,
+            "completed": 1791087864394
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0,
+      "tokens": {
+        "input": 5879,
+        "output": 69,
+        "reasoning": 0,
+        "cache": {
+          "read": 0,
+          "write": 0
+        }
+      }
+    },
+    {
+      "id": "msg_10527ea5a001KATJddU1SAO13e",
+      "time": {
+        "created": 1791087864421,
+        "streamed": 1791087866140,
+        "completed": 1791087866143
+      },
+      "type": "assistant",
+      "agent": "build",
+      "model": {
+        "id": "fledge-alpha-free",
+        "providerID": "opencode",
+        "variant": "low"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "Need final exactly marker. Ensure no extra.",
+          "state": {
+            "_redacted": "opaque provider state omitted"
+          },
+          "time": {
+            "created": 1791087866086,
+            "completed": 1791087866133
+          }
+        },
+        {
+          "type": "text",
+          "text": "SP01_NATIVE_V2_FREE_MODEL_OK"
+        }
+      ],
+      "finish": "stop",
+      "rawFinish": "stop",
+      "cost": 0,
+      "tokens": {
+        "input": 237,
+        "output": 30,
+        "reasoning": 0,
+        "cache": {
+          "read": 5760,
+          "write": 0
+        }
+      }
+    },
+    {
+      "id": "msg_10527f123001Vvyi5SFyp2rYB6",
+      "time": {
+        "created": 1791087866147
+      },
+      "type": "idle",
+      "outcome": "succeeded"
+    }
+  ],
+  "cursor": {
+    "previous": "eyJpZCI6Im1zZ18xMDUyN2UzNTkwMDFENHd0ZGs5MndpdnlNMCIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoicHJldmlvdXMifQ",
+    "next": "eyJpZCI6Im1zZ18xMDUyN2YxMjMwMDFWdnlpNVNGeXAycllCNiIsIm9yZGVyIjoiYXNjIiwiZGlyZWN0aW9uIjoibmV4dCJ9"
+  }
+}

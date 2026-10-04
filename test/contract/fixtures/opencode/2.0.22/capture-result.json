@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-10-04T04:24:22.614655+00:00",
+  "finishedAt": "2026-10-04T04:27:22.632654+00:00",
+  "sessionID": "ses_efad87538ffeM1l1gJnGdlhjE0",
+  "model": {
+    "id": "fledge-alpha-free",
+    "providerID": "opencode",
+    "variant": "low"
+  },
+  "streamFailures": [],
+  "messageStatus": 200,
+  "sessionStatus": 200,
+  "eventCounts": {
+    "session.inbox.enqueued": 1,
+    "session.execution.started": 1,
+    "session.instructions.updated": 1,
+    "session.inbox.delivered": 1,
+    "session.step.started": 2,
+    "session.reasoning.started": 2,
+    "session.reasoning.delta": 3,
+    "session.tool.input.started": 1,
+    "session.reasoning.ended": 2,
+    "session.tool.input.ended": 1,
+    "session.tool.called": 1,
+    "session.step.streamed": 2,
+    "session.tool.success": 1,
+    "session.step.ended": 2,
+    "session.usage.updated": 2,
+    "session.text.started": 1,
+    "session.text.delta": 1,
+    "session.text.ended": 1,
+    "session.execution.succeeded": 1
+  },
+  "markerInAssistant": true,
+  "collectorWaitTimedOut": true,
+  "collectorNote": "Initial collector waited for session.execution.ended, which is not the native terminal event. Native session.execution.succeeded arrived in 3.5 seconds and authoritative session outcome is succeeded. The later abort probe of the already idle session did not change that outcome. Collector terminal-event selection corrected without repeating the provider prompt."
+}

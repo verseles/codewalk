@@ -1,0 +1,29 @@
+{
+  "data": {
+    "id": "ses_efad87538ffeM1l1gJnGdlhjE0",
+    "projectID": "eefe183a7841c4f80837016a82ec9f6ceef1272c",
+    "model": {
+      "id": "fledge-alpha-free",
+      "providerID": "opencode",
+      "variant": "low"
+    },
+    "cost": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reasoning": 0,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    "time": {
+      "created": 1791087839951,
+      "updated": 1791087839951
+    },
+    "title": "V2-005A observed free model capture",
+    "location": {
+      "directory": "/workspace/.cloud-runtime/opencode-v2/workspace"
+    }
+  }
+}
