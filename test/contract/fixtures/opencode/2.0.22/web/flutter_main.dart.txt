@@ -1,0 +1,383 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:js_interop';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
+
+@JS('cwTransport')
+external set bridge(JSFunction value);
+String base = '', authorization = '', directory = '', session = '';
+final status = ValueNotifier<String>(
+  'Disposable Flutter Web transport capture',
+);
+final tickets = <String, String>{};
+final sockets = <String, Terminal>{};
+Sse? stream;
+void main() {
+  bridge = ((JSString input) => dispatch(input.toDart).toJS).toJS;
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: ValueListenableBuilder(
+            valueListenable: status,
+            builder: (_, text, _) => Text(text),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<JSString> dispatch(String input) async {
+  final o = jsonDecode(input) as Map<String, dynamic>;
+  try {
+    final result = await operation(o);
+    status.value = 'Flutter Dart completed: ${o['op']}';
+    return jsonEncode(result).toJS;
+  } catch (error) {
+    // Raw browser errors can contain ticket URLs. Return only their type.
+    return jsonEncode({
+      'ok': false,
+      'errorType': error.runtimeType.toString(),
+    }).toJS;
+  }
+}
+
+Future<Map<String, dynamic>> request(
+  String path, {
+  String method = 'GET',
+  bool ticketHeader = false,
+}) async {
+  final headers = web.Headers();
+  headers.set('Authorization', authorization);
+  headers.set('Accept', 'application/json');
+  if (ticketHeader) headers.set('x-opencode-ticket', '1');
+  final controller = web.AbortController();
+  final timer = Timer(const Duration(seconds: 12), () => controller.abort());
+  try {
+    final response = await web.window
+        .fetch(
+          (base + path).toJS,
+          web.RequestInit(
+            method: method,
+            headers: headers,
+            signal: controller.signal,
+            credentials: 'omit',
+          ),
+        )
+        .toDart;
+    final text = (await response.text().toDart).toDart;
+    return {
+      'ok': true,
+      'status': response.status,
+      'body': text.isEmpty ? null : jsonDecode(text),
+    };
+  } finally {
+    timer.cancel();
+  }
+}
+
+String ptyPath(String id, String suffix) =>
+    '/api/pty/$id$suffix?${Uri(queryParameters: {'location[directory]': directory}).query}';
+Future<Object> operation(Map<String, dynamic> o) async {
+  switch (o['op']) {
+    case 'configure':
+      base = o['base'];
+      authorization = o['authorization'];
+      directory = o['directory'];
+      session = o['session'];
+      return {
+        'ok': true,
+        'implementation': 'compiled Dart package:web',
+        'pageOrigin': web.window.location.origin,
+      };
+    case 'info':
+      return request('/api/info');
+    case 'snapshot':
+      return request('/api/session/$session');
+    case 'sseStart':
+      stream = Sse();
+      await stream!.start();
+      return stream!.result();
+    case 'sseWait':
+      await waitFor(
+        () => stream!.events.any(
+          (e) =>
+              e['type'] == 'session.renamed' &&
+              jsonEncode(e).contains(o['marker'] as String),
+        ),
+      );
+      return stream!.result();
+    case 'sseStop':
+      stream?.controller.abort();
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+      return stream!.result();
+    case 'ticket':
+      final r = await request(
+        ptyPath(o['pty'], '/connect-token'),
+        method: 'POST',
+        ticketHeader: o['header'] != false,
+      );
+      if (r['status'] == 200) {
+        tickets[o['handle']] = r['body']['data']['ticket'];
+        return {
+          'ok': true,
+          'status': 200,
+          'handle': o['handle'],
+          'expiresIn': r['body']['data']['expires_in'],
+        };
+      }
+      return {'ok': true, 'status': r['status']};
+    case 'wsOpen':
+      final term = Terminal();
+      sockets[o['socket']] = term;
+      final q = {
+        'location[directory]': directory,
+        'ticket': tickets[o['handle']]!,
+      };
+      if (o['cursor'] != null) q['cursor'] = o['cursor'].toString();
+      final url =
+          '${base.replaceFirst('http', 'ws')}/api/pty/${o['pty']}/connect?${Uri(queryParameters: q).query}';
+      await term.open(url);
+      return term.result();
+    case 'wsWait':
+      final term = sockets[o['socket']]!;
+      await waitFor(() => term.text.contains(o['marker'] as String));
+      return term.result();
+    case 'wsSend':
+      sockets[o['socket']]!.socket.send((o['text'] as String).toJS);
+      return {'ok': true};
+    case 'wsState':
+      return sockets[o['socket']]!.result();
+    case 'wsClose':
+      final term = sockets[o['socket']]!;
+      term.socket.close();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      return term.result();
+    case 'shutdown':
+      stream?.controller.abort();
+      for (final term in sockets.values) {
+        term.socket.close();
+      }
+      tickets.clear();
+      authorization = '';
+      return {'ok': true, 'credentialsCleared': true};
+    default:
+      throw ArgumentError('unknown operation');
+  }
+}
+
+Future<void> waitFor(bool Function() condition) async {
+  for (var i = 0; i < 240; i++) {
+    if (condition()) return;
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  }
+  throw TimeoutException('bounded observation');
+}
+
+class TextCollector implements StringSink {
+  final void Function(String) append;
+  TextCollector(this.append);
+  @override
+  void write(Object? object) => append('$object');
+  @override
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) =>
+      append(objects.join(separator));
+  @override
+  void writeln([Object? object = '']) => append('$object\n');
+  @override
+  void writeCharCode(int charCode) => append(String.fromCharCode(charCode));
+}
+
+class Sse {
+  final controller = web.AbortController();
+  final events = <Map<String, dynamic>>[], chunks = <Map<String, dynamic>>[];
+  String pending = '';
+  int discardedAmbient = 0;
+  bool actualSplitUtf8 = false, aborted = false;
+  int? httpStatus;
+  String? errorType;
+  bool controlledByteByBytePassed = false;
+  int controlledByteCount = 0;
+  Future<void> start() async {
+    final headers = web.Headers();
+    headers.set('Authorization', authorization);
+    headers.set('Accept', 'text/event-stream');
+    final response = await web.window
+        .fetch(
+          '$base/api/event'.toJS,
+          web.RequestInit(
+            headers: headers,
+            signal: controller.signal,
+            credentials: 'omit',
+          ),
+        )
+        .toDart;
+    httpStatus = response.status;
+    final reader = web.ReadableStreamDefaultReader(response.body!);
+    final decoder = utf8.decoder.startChunkedConversion(
+      StringConversionSink.fromStringSink(
+        TextCollector((text) {
+          pending += text;
+          parse();
+        }),
+      ),
+    );
+    unawaited(() async {
+      try {
+        while (true) {
+          final part = await reader.read().toDart;
+          if (part.done) break;
+          final bytes = (part.value as JSUint8Array).toDart;
+          chunks.add({
+            'bytes': bytes.length,
+            'receivedMs': DateTime.now().millisecondsSinceEpoch,
+          });
+          var need = 0;
+          for (final b in bytes) {
+            if (b >= 0xc2 && b <= 0xdf) {
+              need = 1;
+            } else if (b >= 0xe0 && b <= 0xef) {
+              need = 2;
+            } else if (b >= 0xf0 && b <= 0xf4) {
+              need = 3;
+            } else if (b >= 0x80 && b <= 0xbf && need > 0) {
+              need--;
+            } else {
+              need = 0;
+            }
+          }
+          if (need > 0) actualSplitUtf8 = true;
+          decoder.add(bytes);
+        }
+      } catch (error) {
+        errorType = error.runtimeType.toString();
+      } finally {
+        aborted = controller.signal.aborted;
+        decoder.close();
+        reader.releaseLock();
+      }
+    }());
+    await waitFor(() => events.any((e) => e['type'] == 'server.connected'));
+  }
+
+  void parse() {
+    while (pending.contains('\n\n')) {
+      final end = pending.indexOf('\n\n');
+      final frame = pending.substring(0, end);
+      pending = pending.substring(end + 2);
+      final data = frame
+          .split('\n')
+          .where((l) => l.startsWith('data:'))
+          .map((l) => l.substring(5).trimLeft())
+          .join('\n');
+      if (data.isEmpty) continue;
+      final event = jsonDecode(data) as Map<String, dynamic>;
+      if (event['type'] == 'server.connected' || data.contains(session)) {
+        events.add(event);
+        if (event['type'] == 'session.renamed') {
+          // Explicit client rechunking, not an observed network split.
+          final bytes = utf8.encode(data), buffer = StringBuffer();
+          final test = utf8.decoder.startChunkedConversion(
+            StringConversionSink.fromStringSink(buffer),
+          );
+          for (final byte in bytes) {
+            test.add([byte]);
+          }
+          test.close();
+          controlledByteByBytePassed = buffer.toString() == data;
+          controlledByteCount = bytes.length;
+        }
+      } else {
+        discardedAmbient++;
+      }
+    }
+  }
+
+  Map<String, dynamic> result() => {
+    'ok': true,
+    'httpStatus': httpStatus,
+    'events': events,
+    'chunks': chunks,
+    'discardedAmbientCount': discardedAmbient,
+    'actualReadBoundarySplitUtf8': actualSplitUtf8,
+    'controlledByteByByteDecodePassed': controlledByteByBytePassed,
+    'controlledByteCount': controlledByteCount,
+    'aborted': aborted,
+    'errorType': errorType,
+  };
+}
+
+class Terminal {
+  late web.WebSocket socket;
+  String text = '';
+  final frames = <Map<String, dynamic>>[];
+  int? cursor, metaCursor, closeCode;
+  bool opened = false, failed = false;
+  Future<void> open(String url) async {
+    socket = web.WebSocket(url);
+    socket.binaryType = 'arraybuffer';
+    socket.addEventListener(
+      'open',
+      ((web.Event _) {
+        opened = true;
+      }).toJS,
+    );
+    socket.addEventListener(
+      'error',
+      ((web.Event _) {
+        failed = true;
+      }).toJS,
+    );
+    socket.addEventListener(
+      'close',
+      ((web.Event e) {
+        closeCode = (e as web.CloseEvent).code;
+      }).toJS,
+    );
+    socket.addEventListener(
+      'message',
+      ((web.Event e) {
+        final data = (e as web.MessageEvent).data;
+        if (data.isA<JSString>()) {
+          final chunk = (data as JSString).toDart;
+          text += chunk;
+          if (cursor != null) cursor = cursor! + chunk.length;
+          frames.add({
+            'kind': 'text',
+            'text': chunk,
+            'utf16Units': chunk.length,
+          });
+        } else {
+          final bytes = Uint8List.view((data as JSArrayBuffer).toDart);
+          if (bytes.isNotEmpty && bytes.first == 0) {
+            final meta =
+                jsonDecode(utf8.decode(bytes.sublist(1)))
+                    as Map<String, dynamic>;
+            cursor = meta['cursor'];
+            metaCursor = cursor;
+            frames.add({
+              'kind': 'meta',
+              'leadingByte': bytes.first,
+              'cursor': cursor,
+            });
+          }
+        }
+      }).toJS,
+    );
+    await waitFor(() => metaCursor != null || failed || closeCode != null);
+  }
+
+  Map<String, dynamic> result() => {
+    'ok': true,
+    'opened': opened,
+    'failed': failed,
+    'closeCode': closeCode,
+    'text': text,
+    'frames': frames,
+    'metaCursor': metaCursor,
+    'trackedCursor': cursor,
+  };
+}

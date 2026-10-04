@@ -1,0 +1,31 @@
+{
+  "unit": "V2-008",
+  "issue": "https://github.com/verseles/codewalk/issues/247",
+  "preflight": "https://github.com/verseles/codewalk/issues/247#issuecomment-5977121842",
+  "nativeVersion": "2.0.22",
+  "sourcePin": "05018b8862a8fc198ec9810aafd397c96bb7d86e",
+  "taskStartedAt": "2026-10-04T05:59:48Z",
+  "providerExecutions": 0,
+  "costUsd": 0,
+  "budgetSeconds": 3600,
+  "wholeIssueAccepted": false,
+  "observedScope": "Linux Chromium loopback, compiled standalone Flutter Dart Authorization fetch/SSE and native PTY tickets",
+  "pending": [
+    "Safari real runtime",
+    "trusted HTTPS page to actual HTTP LAN host mixed-content matrix",
+    "configured-origin native service restart",
+    "terminal-on-Web product-owner decision",
+    "foreground/background browser recovery"
+  ],
+  "nativeServiceReconfiguredOrRestarted": false,
+  "sourceAndBuildArchivesContainCredentials": false,
+  "postCaptureReadOnlyEvidence": "procfs absence checked separately after native cleanup; auxiliary browser-only run loaded unchanged compiled app without credentials/native calls",
+  "buildCorrections": "JSString conversion and external AbortController tear-off corrected before successful native capture",
+  "compiledBundleRetention": "main.dart.js digest/size and served response digest retained; binary bundle remains only in disposable runtime",
+  "sseByteFragmentation": "no native ReadableStream chunk split observed; explicit controlled one-byte rechunk scenario recorded separately",
+  "rejectionStatusSource": "successful WS101 from CDP; rejected WS403 from sanitized Chromium console, not CDP handshake events",
+  "browserWebSecurityMixedContentOrTlsChecksDisabled": false,
+  "chromiumProcessSandboxDisabled": true,
+  "dartSourceArchive": "flutter_main.dart.txt",
+  "reproductionSourceCopy": "Copy flutter_main.dart.txt byte-for-byte to the standalone spike lib/main.dart before building."
+}

@@ -1,0 +1,29 @@
+{
+  "flutterVersion": "3.44.0",
+  "dartVersion": "3.12.0",
+  "packageWebVersion": "1.1.1",
+  "standaloneProjectOutsideCheckout": true,
+  "commands": [
+    {
+      "command": "flutter pub get --offline",
+      "exitCode": 0
+    },
+    {
+      "command": "flutter analyze",
+      "exitCode": 0,
+      "result": "No issues found"
+    },
+    {
+      "command": "flutter build web --release --no-web-resources-cdn",
+      "exitCode": 0,
+      "result": "Built build/web"
+    }
+  ],
+  "initialBuildFailure": "external extension type abort tear-off disallowed; changed to closure before successful build",
+  "successfulBuildWarning": "MaterialIcons/CupertinoIcons font-family warning; no icon used by capture UI",
+  "compiledMainJsSha256": "81ca074c4c2db9826c8e99a06e06d4a7cc1590c32df1fad6b773b23d978e8ff1",
+  "compiledMainJsBytes": 1736004,
+  "dartSourceSha256": "403d085df464a37f6a4dd98ae747a6636e13786b68c73928d5ff7f684742f391",
+  "noCredentialBuildInputs": true,
+  "dartSourceArchive": "flutter_main.dart.txt"
+}

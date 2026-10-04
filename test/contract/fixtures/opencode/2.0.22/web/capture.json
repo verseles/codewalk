@@ -1,0 +1,1604 @@
+{
+  "startedAt": "2026-10-04T06:10:39.738800+00:00",
+  "operations": [
+    {
+      "label": "Configure",
+      "op": "configure",
+      "result": {
+        "ok": true,
+        "implementation": "compiled Dart package:web",
+        "pageOrigin": "http://localhost:35847"
+      }
+    },
+    {
+      "label": "DartInfo",
+      "op": "info",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "version": "2.0.22",
+          "pid": 126717,
+          "urls": [
+            "http://127.0.0.1:49374"
+          ],
+          "paths": {
+            "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+          }
+        }
+      }
+    },
+    {
+      "label": "StreamInitial",
+      "op": "sseStart",
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_10589869d001xVBaI6uL0qBwT5",
+            "type": "server.connected",
+            "data": {}
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791094261421
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": false,
+        "controlledByteCount": 0,
+        "aborted": false,
+        "errorType": null
+      }
+    },
+    {
+      "label": "StreamUnicodeObserved",
+      "op": "sseWait",
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_10589869d001xVBaI6uL0qBwT5",
+            "type": "server.connected",
+            "data": {}
+          },
+          {
+            "id": "evt_1058986da001Qw9R9gKCB0C6P8",
+            "created": 1791094261466,
+            "type": "session.renamed",
+            "location": {
+              "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+            },
+            "data": {
+              "sessionID": "ses_1a1058931fa000ab9e66b292f954",
+              "title": "V2-008 Olá 🚀"
+            },
+            "durable": {
+              "aggregateID": "ses_1a1058931fa000ab9e66b292f954",
+              "seq": 1,
+              "version": 1
+            }
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791094261421
+          },
+          {
+            "bytes": 345,
+            "receivedMs": 1791094261472
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": true,
+        "controlledByteCount": 337,
+        "aborted": false,
+        "errorType": null
+      }
+    },
+    {
+      "label": "StreamAbort",
+      "op": "sseStop",
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_10589869d001xVBaI6uL0qBwT5",
+            "type": "server.connected",
+            "data": {}
+          },
+          {
+            "id": "evt_1058986da001Qw9R9gKCB0C6P8",
+            "created": 1791094261466,
+            "type": "session.renamed",
+            "location": {
+              "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+            },
+            "data": {
+              "sessionID": "ses_1a1058931fa000ab9e66b292f954",
+              "title": "V2-008 Olá 🚀"
+            },
+            "durable": {
+              "aggregateID": "ses_1a1058931fa000ab9e66b292f954",
+              "seq": 1,
+              "version": 1
+            }
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791094261421
+          },
+          {
+            "bytes": 345,
+            "receivedMs": 1791094261472
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": true,
+        "controlledByteCount": 337,
+        "aborted": true,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "StreamReconnected",
+      "op": "sseStart",
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_10589874e00146X4611TRp2nhZ",
+            "type": "server.connected",
+            "data": {}
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791094261585
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": false,
+        "controlledByteCount": 0,
+        "aborted": false,
+        "errorType": null
+      }
+    },
+    {
+      "label": "SnapshotGapRecovery",
+      "op": "snapshot",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "data": {
+            "id": "ses_1a1058931fa000ab9e66b292f954",
+            "projectID": "88a7e250a946a09f579ae3015c4c8c015b159a4f",
+            "cost": 0,
+            "tokens": {
+              "input": 0,
+              "output": 0,
+              "reasoning": 0,
+              "cache": {
+                "read": 0,
+                "write": 0
+              }
+            },
+            "time": {
+              "created": 1791094239761,
+              "updated": 1791094261573
+            },
+            "title": "V2-008 snapshot during gap 🌍",
+            "location": {
+              "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "StreamAfterReconnect",
+      "op": "sseWait",
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_10589874e00146X4611TRp2nhZ",
+            "type": "server.connected",
+            "data": {}
+          },
+          {
+            "id": "evt_105898798001bYGWwsamI81gA8",
+            "created": 1791094261656,
+            "type": "session.renamed",
+            "location": {
+              "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+            },
+            "data": {
+              "sessionID": "ses_1a1058931fa000ab9e66b292f954",
+              "title": "V2-008 live after reconnect ✅"
+            },
+            "durable": {
+              "aggregateID": "ses_1a1058931fa000ab9e66b292f954",
+              "seq": 3,
+              "version": 1
+            }
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791094261585
+          },
+          {
+            "bytes": 360,
+            "receivedMs": 1791094261672
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": true,
+        "controlledByteCount": 352,
+        "aborted": false,
+        "errorType": null
+      }
+    },
+    {
+      "label": "StreamFinalAbort",
+      "op": "sseStop",
+      "result": {
+        "ok": true,
+        "httpStatus": 200,
+        "events": [
+          {
+            "id": "evt_10589874e00146X4611TRp2nhZ",
+            "type": "server.connected",
+            "data": {}
+          },
+          {
+            "id": "evt_105898798001bYGWwsamI81gA8",
+            "created": 1791094261656,
+            "type": "session.renamed",
+            "location": {
+              "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+            },
+            "data": {
+              "sessionID": "ses_1a1058931fa000ab9e66b292f954",
+              "title": "V2-008 live after reconnect ✅"
+            },
+            "durable": {
+              "aggregateID": "ses_1a1058931fa000ab9e66b292f954",
+              "seq": 3,
+              "version": 1
+            }
+          }
+        ],
+        "chunks": [
+          {
+            "bytes": 96,
+            "receivedMs": 1791094261585
+          },
+          {
+            "bytes": 360,
+            "receivedMs": 1791094261672
+          }
+        ],
+        "discardedAmbientCount": 0,
+        "actualReadBoundarySplitUtf8": false,
+        "controlledByteByByteDecodePassed": true,
+        "controlledByteCount": 352,
+        "aborted": true,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "TicketA",
+      "op": "ticket",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "handle": "first",
+        "expiresIn": 60
+      }
+    },
+    {
+      "label": "PtyInitial",
+      "op": "wsOpen",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "CW_WEB_READY\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_READY\r\n",
+            "utf16Units": 14
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 14
+          }
+        ],
+        "metaCursor": 14,
+        "trackedCursor": 14
+      }
+    },
+    {
+      "label": "PtyReady",
+      "op": "wsWait",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "CW_WEB_READY\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_READY\r\n",
+            "utf16Units": 14
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 14
+          }
+        ],
+        "metaCursor": 14,
+        "trackedCursor": 14
+      }
+    },
+    {
+      "label": "PtyUnicodeInput",
+      "op": "wsSend",
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "label": "PtyUnicodeReply",
+      "op": "wsWait",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "CW_WEB_READY\r\nOlá 🚀\r\nCW_WEB_REPLY:Olá 🚀\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_READY\r\n",
+            "utf16Units": 14
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 14
+          },
+          {
+            "kind": "text",
+            "text": "Olá 🚀\r\nCW_WEB_REPLY:Olá 🚀\r\n",
+            "utf16Units": 29
+          }
+        ],
+        "metaCursor": 14,
+        "trackedCursor": 43
+      }
+    },
+    {
+      "label": "PtyScheduleOffline",
+      "op": "wsSend",
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "label": "PtyScheduled",
+      "op": "wsWait",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "CW_WEB_READY\r\nOlá 🚀\r\nCW_WEB_REPLY:Olá 🚀\r\nDELAY\r\nCW_WEB_SCHEDULED\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_READY\r\n",
+            "utf16Units": 14
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 14
+          },
+          {
+            "kind": "text",
+            "text": "Olá 🚀\r\nCW_WEB_REPLY:Olá 🚀\r\n",
+            "utf16Units": 29
+          },
+          {
+            "kind": "text",
+            "text": "DELAY\r\n",
+            "utf16Units": 7
+          },
+          {
+            "kind": "text",
+            "text": "CW_WEB_SCHEDULED\r\n",
+            "utf16Units": 18
+          }
+        ],
+        "metaCursor": 14,
+        "trackedCursor": 68
+      }
+    },
+    {
+      "label": "PtyDisconnect",
+      "op": "wsClose",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": 1005,
+        "text": "CW_WEB_READY\r\nOlá 🚀\r\nCW_WEB_REPLY:Olá 🚀\r\nDELAY\r\nCW_WEB_SCHEDULED\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_READY\r\n",
+            "utf16Units": 14
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 14
+          },
+          {
+            "kind": "text",
+            "text": "Olá 🚀\r\nCW_WEB_REPLY:Olá 🚀\r\n",
+            "utf16Units": 29
+          },
+          {
+            "kind": "text",
+            "text": "DELAY\r\n",
+            "utf16Units": 7
+          },
+          {
+            "kind": "text",
+            "text": "CW_WEB_SCHEDULED\r\n",
+            "utf16Units": 18
+          }
+        ],
+        "metaCursor": 14,
+        "trackedCursor": 68
+      }
+    },
+    {
+      "label": "TicketReconnect",
+      "op": "ticket",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "handle": "reconnect",
+        "expiresIn": 60
+      }
+    },
+    {
+      "label": "PtyReconnect",
+      "op": "wsOpen",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "CW_WEB_OFFLINE\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_OFFLINE\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 84
+          }
+        ],
+        "metaCursor": 84,
+        "trackedCursor": 84
+      }
+    },
+    {
+      "label": "PtyLiveAfterReplayInput",
+      "op": "wsSend",
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "label": "PtyLiveAfterReplayOutput",
+      "op": "wsWait",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": null,
+        "text": "CW_WEB_OFFLINE\r\nLIVE_AGAIN\r\nCW_WEB_REPLY:LIVE_AGAIN\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_OFFLINE\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 84
+          },
+          {
+            "kind": "text",
+            "text": "LIVE_AGAIN\r\nCW_WEB_REPLY:LIVE_AGAIN\r\n",
+            "utf16Units": 37
+          }
+        ],
+        "metaCursor": 84,
+        "trackedCursor": 121
+      }
+    },
+    {
+      "label": "TicketMissingHeader",
+      "op": "ticket",
+      "result": {
+        "ok": true,
+        "status": 403
+      }
+    },
+    {
+      "label": "ConsumedTicketRejected",
+      "op": "wsOpen",
+      "result": {
+        "ok": true,
+        "opened": false,
+        "failed": true,
+        "closeCode": 1006,
+        "text": "",
+        "frames": [],
+        "metaCursor": null,
+        "trackedCursor": null
+      }
+    },
+    {
+      "label": "TicketScopeA",
+      "op": "ticket",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "handle": "scope",
+        "expiresIn": 60
+      }
+    },
+    {
+      "label": "WrongPtyTicketRejected",
+      "op": "wsOpen",
+      "result": {
+        "ok": true,
+        "opened": false,
+        "failed": true,
+        "closeCode": 1006,
+        "text": "",
+        "frames": [],
+        "metaCursor": null,
+        "trackedCursor": null
+      }
+    },
+    {
+      "label": "TicketExpiry",
+      "op": "ticket",
+      "result": {
+        "ok": true,
+        "status": 200,
+        "handle": "expiry",
+        "expiresIn": 60
+      }
+    },
+    {
+      "label": "DeniedConfigure",
+      "op": "configure",
+      "result": {
+        "ok": true,
+        "implementation": "compiled Dart package:web",
+        "pageOrigin": "http://cw-web-denied.test:35847"
+      }
+    },
+    {
+      "label": "DeniedDartInfo",
+      "op": "info",
+      "result": {
+        "ok": false,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "DeniedDartSse",
+      "op": "sseStart",
+      "result": {
+        "ok": false,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "DeniedDartMint",
+      "op": "ticket",
+      "result": {
+        "ok": false,
+        "errorType": "JSObject"
+      }
+    },
+    {
+      "label": "DeniedShutdown",
+      "op": "shutdown",
+      "result": {
+        "ok": true,
+        "credentialsCleared": true
+      }
+    },
+    {
+      "label": "ExpiredTicketRejected",
+      "op": "wsOpen",
+      "result": {
+        "ok": true,
+        "opened": false,
+        "failed": true,
+        "closeCode": 1006,
+        "text": "",
+        "frames": [],
+        "metaCursor": null,
+        "trackedCursor": null
+      }
+    },
+    {
+      "label": "PtyFinish",
+      "op": "wsSend",
+      "result": {
+        "ok": true
+      }
+    },
+    {
+      "label": "PtyFinishedOutput",
+      "op": "wsWait",
+      "result": {
+        "ok": true,
+        "opened": true,
+        "failed": false,
+        "closeCode": 1000,
+        "text": "CW_WEB_OFFLINE\r\nLIVE_AGAIN\r\nCW_WEB_REPLY:LIVE_AGAIN\r\nFINISH\r\nCW_WEB_FINISHED\r\n",
+        "frames": [
+          {
+            "kind": "text",
+            "text": "CW_WEB_OFFLINE\r\n",
+            "utf16Units": 16
+          },
+          {
+            "kind": "meta",
+            "leadingByte": 0,
+            "cursor": 84
+          },
+          {
+            "kind": "text",
+            "text": "LIVE_AGAIN\r\nCW_WEB_REPLY:LIVE_AGAIN\r\n",
+            "utf16Units": 37
+          },
+          {
+            "kind": "text",
+            "text": "FINISH\r\nCW_WEB_FINISHED\r\n",
+            "utf16Units": 25
+          }
+        ],
+        "metaCursor": 84,
+        "trackedCursor": 146
+      }
+    },
+    {
+      "label": "BrowserShutdown",
+      "op": "shutdown",
+      "result": {
+        "ok": true,
+        "credentialsCleared": true
+      }
+    }
+  ],
+  "cdp": [
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "2E13F902BBFA80A18F0026D3354BCD59",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.11",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "GET",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "2E13F902BBFA80A18F0026D3354BCD59",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.11",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.12",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "GET",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "1293B37339ABF1E98DB0E8DCCF25E4C9",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "1293B37339ABF1E98DB0E8DCCF25E4C9",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.12",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.13",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "GET",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.13",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.14",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "GET",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "CBA3C3C27D2D2C55713AA956BC6915F0",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "CBA3C3C27D2D2C55713AA956BC6915F0",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.14",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.15",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "POST",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": true
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "907908980202DCEF5E77938610B741E9",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "907908980202DCEF5E77938610B741E9",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.15",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "wsCreated",
+      "id": "151436.16",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect",
+      "ticketQueryPresent": true,
+      "scheme": "ws"
+    },
+    {
+      "page": "allowed",
+      "kind": "wsHandshake",
+      "id": "151436.16",
+      "status": 101
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.17",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "POST",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": true
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.17",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "wsCreated",
+      "id": "151436.18",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect",
+      "ticketQueryPresent": true,
+      "scheme": "ws"
+    },
+    {
+      "page": "allowed",
+      "kind": "wsHandshake",
+      "id": "151436.18",
+      "status": 101
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.19",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "POST",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.19",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 403
+    },
+    {
+      "page": "allowed",
+      "kind": "wsCreated",
+      "id": "151436.20",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect",
+      "ticketQueryPresent": true,
+      "scheme": "ws"
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.21",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "POST",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": true
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.21",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "allowed",
+      "kind": "wsCreated",
+      "id": "151436.22",
+      "path": "/api/pty/pty_10589327a001kO8IzH4TM0rLJo/connect",
+      "ticketQueryPresent": true,
+      "scheme": "ws"
+    },
+    {
+      "page": "allowed",
+      "kind": "request",
+      "id": "151436.23",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "POST",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": true
+    },
+    {
+      "page": "allowed",
+      "kind": "response",
+      "id": "151436.23",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 200
+    },
+    {
+      "page": "denied",
+      "kind": "request",
+      "id": "151434.11",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "GET",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "denied",
+      "kind": "request",
+      "id": "CD4F37DFB21A308E4E0F630393376A57",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "denied",
+      "kind": "response",
+      "id": "CD4F37DFB21A308E4E0F630393376A57",
+      "path": "/api/info",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "denied",
+      "kind": "request",
+      "id": "151434.12",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "GET",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "denied",
+      "kind": "request",
+      "id": "A508C5FB5356B6455A01ED2228C19BA1",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "denied",
+      "kind": "response",
+      "id": "A508C5FB5356B6455A01ED2228C19BA1",
+      "path": "/api/event",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "denied",
+      "kind": "request",
+      "id": "537E05C39C296AF6A8A56D1C511B4BB5",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "OPTIONS",
+      "authorizationPresent": false,
+      "ticketHeaderPresent": false
+    },
+    {
+      "page": "denied",
+      "kind": "request",
+      "id": "151434.13",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "method": "POST",
+      "authorizationPresent": true,
+      "ticketHeaderPresent": true
+    },
+    {
+      "page": "denied",
+      "kind": "response",
+      "id": "537E05C39C296AF6A8A56D1C511B4BB5",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token",
+      "ticketQueryPresent": false,
+      "scheme": "http",
+      "status": 204
+    },
+    {
+      "page": "allowed",
+      "kind": "wsCreated",
+      "id": "151436.24",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect",
+      "ticketQueryPresent": true,
+      "scheme": "ws"
+    }
+  ],
+  "console": [
+    {
+      "page": "allowed",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "page": "allowed",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    },
+    {
+      "page": "allowed",
+      "type": "error",
+      "text": "WebSocket connection to 'ws://127.0.0.1:49374/api/pty/pty_10589325d001HNndDM3eibPgaO/connect?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject&ticket=[REDACTED]' failed: Error during WebSocket handshake: Unexpected response code: 403"
+    },
+    {
+      "page": "allowed",
+      "type": "error",
+      "text": "WebSocket connection to 'ws://127.0.0.1:49374/api/pty/pty_10589327a001kO8IzH4TM0rLJo/connect?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject&ticket=[REDACTED]' failed: Error during WebSocket handshake: Unexpected response code: 403"
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Access to fetch at 'http://127.0.0.1:49374/api/info' from origin 'http://cw-web-denied.test:35847' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Access to fetch at 'http://127.0.0.1:49374/api/event' from origin 'http://cw-web-denied.test:35847' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Access to fetch at 'http://127.0.0.1:49374/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject' from origin 'http://cw-web-denied.test:35847' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+    },
+    {
+      "page": "denied",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "page": "allowed",
+      "type": "error",
+      "text": "WebSocket connection to 'ws://127.0.0.1:49374/api/pty/pty_10589325d001HNndDM3eibPgaO/connect?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject&ticket=[REDACTED]' failed: Error during WebSocket handshake: Unexpected response code: 403"
+    }
+  ],
+  "sessionID": "ses_1a1058931fa000ab9e66b292f954",
+  "ptyIDs": [
+    "pty_10589325d001HNndDM3eibPgaO",
+    "pty_10589327a001kO8IzH4TM0rLJo"
+  ],
+  "allowedOrigin": "http://localhost:35847",
+  "deniedOrigin": "http://cw-web-denied.test:35847",
+  "browserVersion": "151.0.7922.173",
+  "actualTicketExpiryWaitSeconds": 62.11560525500681,
+  "completedAt": "2026-10-04T06:12:07.246162+00:00",
+  "failure": null,
+  "calls": [
+    {
+      "name": "InitialInfo",
+      "method": "GET",
+      "path": "/api/info",
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CreateOwnSession",
+      "method": "POST",
+      "path": "/api/session",
+      "status": 200,
+      "response": {
+        "data": {
+          "id": "ses_1a1058931fa000ab9e66b292f954",
+          "projectID": "88a7e250a946a09f579ae3015c4c8c015b159a4f",
+          "cost": 0,
+          "tokens": {
+            "input": 0,
+            "output": 0,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "time": {
+            "created": 1791094239761,
+            "updated": 1791094239761
+          },
+          "title": "V2-008 disposable stream",
+          "location": {
+            "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+          }
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CreateOwnPtyA",
+      "method": "POST",
+      "path": "/api/pty?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589325d001HNndDM3eibPgaO",
+          "title": "V2-008 A",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "running",
+          "pid": 151314
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CreateOwnPtyB",
+      "method": "POST",
+      "path": "/api/pty?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589327a001kO8IzH4TM0rLJo",
+          "title": "V2-008 B",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "running",
+          "pid": 151318
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "AllowedPreflight",
+      "method": "OPTIONS",
+      "path": "/api/info",
+      "status": 204,
+      "response": null,
+      "origin": "http://localhost:35847",
+      "headers": {
+        "access-control-allow-origin": "http://localhost:35847",
+        "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
+        "access-control-allow-headers": "authorization"
+      }
+    },
+    {
+      "name": "AllowedPreflight",
+      "method": "OPTIONS",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 204,
+      "response": null,
+      "origin": "http://localhost:35847",
+      "headers": {
+        "access-control-allow-origin": "http://localhost:35847",
+        "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
+        "access-control-allow-headers": "authorization,x-opencode-ticket"
+      }
+    },
+    {
+      "name": "DeniedPreflight",
+      "method": "OPTIONS",
+      "path": "/api/info",
+      "status": 204,
+      "response": null,
+      "origin": "http://cw-web-denied.test:35847",
+      "headers": {
+        "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
+        "access-control-allow-headers": "authorization"
+      }
+    },
+    {
+      "name": "DeniedPreflight",
+      "method": "OPTIONS",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO/connect-token?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 204,
+      "response": null,
+      "origin": "http://cw-web-denied.test:35847",
+      "headers": {
+        "access-control-allow-methods": "GET, HEAD, PUT, PATCH, POST, DELETE",
+        "access-control-allow-headers": "authorization,x-opencode-ticket"
+      }
+    },
+    {
+      "name": "UnicodeRename",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "status": 204,
+      "response": null,
+      "origin": null,
+      "headers": {}
+    },
+    {
+      "name": "RenameDuringSseGap",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "status": 204,
+      "response": null,
+      "origin": null,
+      "headers": {}
+    },
+    {
+      "name": "RenameAfterReconnect",
+      "method": "PATCH",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "status": 204,
+      "response": null,
+      "origin": null,
+      "headers": {}
+    },
+    {
+      "name": "PtyStillAliveBeforeExpiry",
+      "method": "GET",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589325d001HNndDM3eibPgaO",
+          "title": "V2-008 A",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "running",
+          "pid": 151314
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "OwnPtyExitObservation",
+      "method": "GET",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589325d001HNndDM3eibPgaO",
+          "title": "V2-008 A",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "exited",
+          "pid": 151314,
+          "exitCode": 0
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CleanupPtyBefore",
+      "method": "GET",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589325d001HNndDM3eibPgaO",
+          "title": "V2-008 A",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "exited",
+          "pid": 151314,
+          "exitCode": 0
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CleanupPtyDelete",
+      "method": "DELETE",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 204,
+      "response": null,
+      "origin": null,
+      "headers": {}
+    },
+    {
+      "name": "CleanupPtyAbsent",
+      "method": "GET",
+      "path": "/api/pty/pty_10589325d001HNndDM3eibPgaO?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 404,
+      "response": {
+        "_tag": "PtyNotFoundError",
+        "ptyID": "pty_10589325d001HNndDM3eibPgaO",
+        "message": "PTY session not found: pty_10589325d001HNndDM3eibPgaO"
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CleanupPtyBefore",
+      "method": "GET",
+      "path": "/api/pty/pty_10589327a001kO8IzH4TM0rLJo?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 200,
+      "response": {
+        "location": {
+          "directory": "/workspace/.cloud-runtime/opencode-v2/capture-web/project"
+        },
+        "data": {
+          "id": "pty_10589327a001kO8IzH4TM0rLJo",
+          "title": "V2-008 B",
+          "command": "/bin/sh",
+          "args": [
+            "-c",
+            "printf 'CW_WEB_READY\\n'; while IFS= read -r line; do case \"$line\" in DELAY) printf 'CW_WEB_SCHEDULED\\n'; sleep 2; printf 'CW_WEB_OFFLINE\\n';; FINISH) printf 'CW_WEB_FINISHED\\n'; break;; *) printf 'CW_WEB_REPLY:%s\\n' \"$line\";; esac; done",
+            "-l"
+          ],
+          "cwd": "/workspace/.cloud-runtime/opencode-v2/capture-web/project",
+          "status": "running",
+          "pid": 151318
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CleanupPtyDelete",
+      "method": "DELETE",
+      "path": "/api/pty/pty_10589327a001kO8IzH4TM0rLJo?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 204,
+      "response": null,
+      "origin": null,
+      "headers": {}
+    },
+    {
+      "name": "CleanupPtyAbsent",
+      "method": "GET",
+      "path": "/api/pty/pty_10589327a001kO8IzH4TM0rLJo?location%5Bdirectory%5D=%2Fworkspace%2F.cloud-runtime%2Fopencode-v2%2Fcapture-web%2Fproject",
+      "status": 404,
+      "response": {
+        "_tag": "PtyNotFoundError",
+        "ptyID": "pty_10589327a001kO8IzH4TM0rLJo",
+        "message": "PTY session not found: pty_10589327a001kO8IzH4TM0rLJo"
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "CleanupSessionDelete",
+      "method": "DELETE",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "status": 204,
+      "response": null,
+      "origin": null,
+      "headers": {}
+    },
+    {
+      "name": "CleanupSessionAbsent",
+      "method": "GET",
+      "path": "/api/session/ses_1a1058931fa000ab9e66b292f954",
+      "status": 404,
+      "response": {
+        "_tag": "SessionNotFoundError",
+        "sessionID": "ses_1a1058931fa000ab9e66b292f954",
+        "message": "Session not found: ses_1a1058931fa000ab9e66b292f954"
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "FinalInfo",
+      "method": "GET",
+      "path": "/api/info",
+      "status": 200,
+      "response": {
+        "version": "2.0.22",
+        "pid": 126717,
+        "urls": [
+          "http://127.0.0.1:49374"
+        ],
+        "paths": {
+          "tmp": "/workspace/.cloud-runtime/opencode-v2/tmp/opencode"
+        }
+      },
+      "origin": null,
+      "headers": {
+        "content-type": "application/json"
+      }
+    }
+  ],
+  "providerExecutions": 0,
+  "costUsd": 0
+}
