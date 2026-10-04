@@ -28,15 +28,23 @@ def source_name(value):
     root = ROOT.as_posix() + "/"
     if path.startswith(root):
         path = path[len(root):]
-    if not path.startswith("lib/"):
-        raise ValueError(f"LCOV source is outside the project lib directory: {value}")
-    return path
+    if path.startswith("lib/"):
+        return path
+    parts = PurePosixPath(path).parts
+    if len(parts) >= 4 and parts[0] == "packages" and parts[2] == "lib":
+        package = ROOT.joinpath(*parts[:2])
+        if package.resolve().is_relative_to(ROOT) and (package / "pubspec.yaml").is_file():
+            return path
+    raise ValueError(f"LCOV source is outside the project library directories: {value}")
 
 
 def excluded(source):
+    library_path = source.removeprefix("lib/")
+    if source.startswith("packages/"):
+        library_path = source.split("/", 3)[3]
     return (
-        source.startswith("lib/l10n/")
-        or (source.startswith("lib/") and source.endswith(".g.dart"))
+        library_path.startswith("l10n/")
+        or source.endswith(".g.dart")
         or source.rsplit("/", 1)[-1] == "generated_plugin_registrant.dart"
     )
 

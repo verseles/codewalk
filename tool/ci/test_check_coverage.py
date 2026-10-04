@@ -104,6 +104,43 @@ class CoverageGateTest(unittest.TestCase):
         result = self.run_gate(record("./lib//example.dart"), baseline="lib/example.dart 50\n")
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_includes_local_package_libraries_in_coverage(self):
+        source = "packages/codewalk_core/lib/src/ports.dart"
+        for name in (source, str(ROOT / source)):
+            with self.subTest(name=name):
+                data = record(hits=(0, 0)) + record(name, (1, 1))
+                result = self.run_gate(data)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("50.00% (2/4)", result.stdout)
+                self.assertEqual(self.output.read_text(), data)
+
+    def test_package_coverage_preserves_protected_root_floors(self):
+        data = record(hits=(0, 0))
+        data += record("packages/codewalk_core/lib/src/ports.dart", (1,) * 10)
+        result = self.run_gate(data, baseline="lib/example.dart 50\n")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("lib/example.dart: 0.00% is below 50%", result.stderr)
+
+    def test_filters_generated_sources_in_local_packages(self):
+        prefix = "packages/codewalk_core/lib/"
+        data = record() + record(prefix + "src/model.g.dart", (0,) * 10)
+        data += record(prefix + "l10n/app.dart", (0,) * 10)
+        result = self.run_gate(data)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.output.read_text(), record())
+
+    def test_rejects_unknown_packages_and_non_library_package_sources(self):
+        for source in (
+            "packages/unknown_coverage_fixture/lib/example.dart",
+            "packages/codewalk_core/test/example.dart",
+            "packages/codewalk_core/lib/../outside.dart",
+            "/tmp/other/packages/codewalk_core/lib/example.dart",
+        ):
+            with self.subTest(source=source):
+                result = self.run_gate(record() + record(source, (1,) * 10))
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(self.output.exists())
+
     def test_output_cannot_overwrite_raw_input(self):
         self.output = self.raw
         result = self.run_gate(record())
