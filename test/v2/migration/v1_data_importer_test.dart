@@ -11,117 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'migration_fakes.dart';
 
-final class _Fixture {
-  _Fixture({
-    Map<String, Object> preferences = const {},
-    Map<String, String> secure = const {},
-    Map<String, String> legacyPayloads = const {},
-    this.knownPayloadKeys = const {},
-  }) : preferences = FakeLegacyPreferencesReader(preferences),
-       secure = FakeLegacySecureReader(secure),
-       legacyPayloads = FakeLegacyPayloadReader(legacyPayloads);
-
-  final FakeLegacyPreferencesReader preferences;
-  final FakeLegacySecureReader secure;
-  final FakeLegacyPayloadReader legacyPayloads;
-  final Set<String> knownPayloadKeys;
-  final backend = FakeMigrationMetadataBackend();
-  final payloads = FakeMigrationPayloadStore();
-  final credentialBackend = FakeMigrationCredentialBackend();
-
-  V2MetadataStore get metadata => V2MetadataStore(backend: backend);
-
-  V1DataImporter importer({
-    bool credentialsAreDurable = true,
-    bool exclusiveBeforeConsumers = true,
-    bool includeVault = true,
-    bool includeSecureReader = true,
-    Future<void> Function(String)? afterCheckpoint,
-  }) {
-    final store = metadata;
-    return V1DataImporter(
-      source: LegacySource(
-        preferences: preferences,
-        secure: includeSecureReader ? secure : null,
-        payloads: legacyPayloads,
-        knownPayloadKeys: knownPayloadKeys,
-      ),
-      metadata: store,
-      payloads: payloads,
-      credentials: includeVault
-          ? EndpointCredentialVault(
-              backend: credentialBackend,
-              beforeMutation: store.ensureSchema,
-            )
-          : null,
-      credentialsAreDurable: credentialsAreDurable,
-      exclusiveBeforeConsumers: exclusiveBeforeConsumers,
-      afterCheckpoint: afterCheckpoint,
-    );
-  }
-
-  Map<String, dynamic> get completed {
-    final raw = backend.values[V1DataImporter.journalKey];
-    if (raw == null) return {};
-    final decoded = jsonDecode(raw as String) as Map<String, dynamic>;
-    return Map<String, dynamic>.from(decoded['completed'] as Map);
-  }
-
-  Map<String, dynamic> profile(String legacyId) =>
-      jsonDecode(backend.values[V1DataImporter.profileKey(legacyId)] as String)
-          as Map<String, dynamic>;
-
-  Map<String, dynamic> draft(String sourceKey) =>
-      jsonDecode(payloads.values[V1DataImporter.recoveredDraftKey(sourceKey)]!)
-          as Map<String, dynamic>;
-}
-
-Map<String, Object> _profile({
-  String id = 'profile-one',
-  String url = 'http://legacy.invalid:4096/project',
-  String username = 'opencode',
-  String? password,
-  bool basicAuthEnabled = true,
-  bool oauthEnabled = false,
-}) => {
-  'id': id,
-  'url': url,
-  'label': 'Original server',
-  'basicAuthEnabled': basicAuthEnabled,
-  'basicAuthUsername': username,
-  'basicAuthPassword': ?password,
-  'oauthEnabled': oauthEnabled,
-};
-
-String _secureKey(String field, [String id = 'profile-one']) =>
-    'codewalk.secure::server_profile_basic_auth_$field::'
-    '${Uri.encodeComponent(id.trim())}';
-
-void _expectPending(
-  MigrationReport report,
-  MigrationCategory category,
-  String identity,
-  MigrationPendingReason reason,
-) {
-  expect(
-    report.pending.where(
-      (item) =>
-          item.id == V1DataImporter.itemId(category, identity) &&
-          item.category == category &&
-          item.reason == reason,
-    ),
-    hasLength(1),
-  );
-}
-
-Matcher _migrationFailure(MigrationFailure failure) => throwsA(
-  isA<MigrationException>().having(
-    (exception) => exception.failure,
-    'failure',
-    failure,
-  ),
-);
-
 void main() {
   for (final failure in ['unavailable', 'oversized']) {
     test(
@@ -133,7 +22,7 @@ void main() {
               ? 'n' * V2PayloadLimits.maxPayloadChars
               : 'newer preference draft',
         });
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {sourceKey: newer},
           legacyPayloads: {sourceKey: '{"text":"older file draft"}'},
           knownPayloadKeys: {sourceKey},
@@ -146,7 +35,7 @@ void main() {
 
         final report = await fixture.importer().run();
 
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.drafts,
           sourceKey,
@@ -176,27 +65,29 @@ void main() {
   test(
     'missing secure access cannot promote an inline password into the vault',
     () async {
-      final fixture = _Fixture(
+      final fixture = MigrationFixture(
         preferences: {
           'server_profiles': jsonEncode([
-            _profile(password: 'stale-inline-secret'),
+            migrationProfile(password: 'stale-inline-secret'),
           ]),
         },
-        secure: {_secureKey('password'): 'unavailable-newer-secure-secret'},
+        secure: {
+          migrationSecureKey('password'): 'unavailable-newer-secure-secret',
+        },
       );
       final originalPreferences = fixture.preferences.snapshot;
       final originalSecure = fixture.secure.snapshot;
 
       final report = await fixture.importer(includeSecureReader: false).run();
 
-      _expectPending(
+      expectMigrationPending(
         report,
         MigrationCategory.credentials,
         'password:profile-one',
         MigrationPendingReason.sourceUnavailable,
       );
       if (kIsWeb) {
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.credentials,
           'password:profile-one',
@@ -229,13 +120,15 @@ void main() {
     'missing exclusive window fails before any source or destination access',
     () async {
       const legacyKey = 'session_composer_draft::exclusive-window';
-      final fixture = _Fixture(
+      final fixture = MigrationFixture(
         preferences: {
           'experience_settings': '{"composerAutoApprovePermissions":false}',
-          'server_profiles': jsonEncode([_profile(password: 'inline-secret')]),
+          'server_profiles': jsonEncode([
+            migrationProfile(password: 'inline-secret'),
+          ]),
           legacyKey: '{"text":"private draft"}',
         },
-        secure: {_secureKey('password'): 'secure-secret'},
+        secure: {migrationSecureKey('password'): 'secure-secret'},
         legacyPayloads: {legacyKey: '{"text":"private file draft"}'},
         knownPayloadKeys: {legacyKey},
       );
@@ -245,7 +138,7 @@ void main() {
 
       await expectLater(
         fixture.importer(exclusiveBeforeConsumers: false).run(),
-        _migrationFailure(MigrationFailure.exclusivityRequired),
+        migrationFailure(MigrationFailure.exclusivityRequired),
       );
 
       expect(fixture.preferences.reads, isEmpty);
@@ -289,7 +182,7 @@ void main() {
             'localeCode': 'pt-BR',
             'composerAutoApprovePermissions': false,
           });
-          final fixture = _Fixture(
+          final fixture = MigrationFixture(
             preferences: {
               'experience_settings': failure == 'oversized'
                   ? 'x' * (V2PayloadLimits.maxPayloadChars + 1)
@@ -307,7 +200,7 @@ void main() {
 
           final pending = await fixture.importer().run();
 
-          _expectPending(
+          expectMigrationPending(
             pending,
             MigrationCategory.settings,
             'experience_settings',
@@ -346,7 +239,7 @@ void main() {
     test(
       'a valid partial experience document does not revive older globals',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'experience_settings': '{"composerAutoApprovePermissions":false}',
             'theme_mode': 'light',
@@ -368,7 +261,7 @@ void main() {
     );
 
     test('explicit AllowAll OFF survives import and a second run', () async {
-      final fixture = _Fixture(
+      final fixture = MigrationFixture(
         preferences: {
           'experience_settings': jsonEncode({
             'composerAutoApprovePermissions': false,
@@ -422,7 +315,9 @@ void main() {
     });
 
     test('absent AllowAll stays absent without an invented default', () async {
-      final fixture = _Fixture(preferences: {'experience_settings': '{}'});
+      final fixture = MigrationFixture(
+        preferences: {'experience_settings': '{}'},
+      );
 
       final report = await fixture.importer().run();
 
@@ -443,7 +338,7 @@ void main() {
 
     for (final invalid in <Object?>['false', 0, null]) {
       test('invalid AllowAll $invalid is distinct from absence', () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'experience_settings': jsonEncode({
               'composerAutoApprovePermissions': invalid,
@@ -460,7 +355,7 @@ void main() {
           ),
           isFalse,
         );
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.settings,
           'composerAutoApprovePermissions',
@@ -474,7 +369,7 @@ void main() {
     test(
       'legacy locale and theme fallbacks are imported without defaults',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {'theme_mode': 'dark', 'locale_code': 'ar'},
         );
 
@@ -495,7 +390,7 @@ void main() {
       'https://voice.invalid/v1#private-fragment',
     ]) {
       test('voice settings do not copy URL credentials ($unsafeUrl)', () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'experience_settings': jsonEncode({
               'speechApiBaseUrl': unsafeUrl,
@@ -512,7 +407,7 @@ void main() {
             fixture.backend.values.containsKey('cw2.settings.$field'),
             isFalse,
           );
-          _expectPending(
+          expectMigrationPending(
             report,
             MigrationCategory.settings,
             field,
@@ -531,17 +426,20 @@ void main() {
       () async {
         const password = 'private-endpoint-password';
         const originalUrl = 'https://LEGACY.invalid:4096/nested/path';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(url: originalUrl, password: 'stale-inline-password'),
+              migrationProfile(
+                url: originalUrl,
+                password: 'stale-inline-password',
+              ),
             ]),
             'active_server_id': 'profile-one',
             'default_server_id': 'profile-one',
           },
           secure: {
-            _secureKey('username'): 'opencode',
-            _secureKey('password'): password,
+            migrationSecureKey('username'): 'opencode',
+            migrationSecureKey('password'): password,
           },
         );
         final originalPreferences = fixture.preferences.snapshot;
@@ -562,7 +460,7 @@ void main() {
         expect(profile.containsKey('basicAuthUsername'), isFalse);
         if (kIsWeb) {
           expect(fixture.credentialBackend.values, isEmpty);
-          _expectPending(
+          expectMigrationPending(
             report,
             MigrationCategory.credentials,
             'password:profile-one',
@@ -600,10 +498,10 @@ void main() {
       test(
         'existing destination $changedUrl blocks credential transfer',
         () async {
-          final fixture = _Fixture(
+          final fixture = MigrationFixture(
             preferences: {
               'server_profiles': jsonEncode([
-                _profile(password: 'source-secret'),
+                migrationProfile(password: 'source-secret'),
               ]),
             },
           );
@@ -621,7 +519,7 @@ void main() {
           expect(fixture.backend.values[destinationKey], existing);
           expect(fixture.credentialBackend.values, isEmpty);
           expect(fixture.credentialBackend.writes, isEmpty);
-          _expectPending(
+          expectMigrationPending(
             report,
             MigrationCategory.credentials,
             'password:profile-one',
@@ -644,10 +542,10 @@ void main() {
     test(
       'a path-only destination edit retains the same credential origin',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(password: 'same-origin-secret'),
+              migrationProfile(password: 'same-origin-secret'),
             ]),
           },
         );
@@ -683,15 +581,15 @@ void main() {
     test(
       'non-opencode, OAuth, API and voice secrets remain unresolved',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(
+              migrationProfile(
                 id: 'other-user',
                 username: 'someone',
                 password: 'other-secret',
               ),
-              _profile(
+              migrationProfile(
                 id: 'oauth',
                 oauthEnabled: true,
                 basicAuthEnabled: false,
@@ -718,7 +616,7 @@ void main() {
           'codewalk.secure::stt_api_key::openai',
           'codewalk.secure::tts_api_key::elevenlabs',
         ]) {
-          _expectPending(
+          expectMigrationPending(
             report,
             MigrationCategory.credentials,
             identity,
@@ -741,24 +639,24 @@ void main() {
     test(
       'failed secure source read never falls back to a stale inline secret',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(password: 'stale-inline-secret'),
+              migrationProfile(password: 'stale-inline-secret'),
             ]),
           },
           secure: {
-            _secureKey('username'): 'opencode',
-            _secureKey('password'): 'current-secure-secret',
+            migrationSecureKey('username'): 'opencode',
+            migrationSecureKey('password'): 'current-secure-secret',
           },
         );
-        fixture.secure.failReads.add(_secureKey('password'));
+        fixture.secure.failReads.add(migrationSecureKey('password'));
         final originalPreferences = fixture.preferences.snapshot;
         final originalSecure = fixture.secure.snapshot;
 
         final report = await fixture.importer().run();
 
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.credentials,
           'password:profile-one',
@@ -787,10 +685,10 @@ void main() {
     test(
       'Web cannot promote a memory vault to durable with a caller flag',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(password: 'browser-secret'),
+              migrationProfile(password: 'browser-secret'),
             ]),
           },
         );
@@ -799,7 +697,7 @@ void main() {
             .importer(credentialsAreDurable: true)
             .run();
 
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.credentials,
           'password:profile-one',
@@ -825,10 +723,10 @@ void main() {
     test(
       'credential checkpoint interruption propagates after durable secure write',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(password: 'durable-secret'),
+              migrationProfile(password: 'durable-secret'),
             ]),
           },
         );
@@ -866,16 +764,16 @@ void main() {
       'profile URL credentials remain only in the untouched legacy source',
       () async {
         const url = 'http://opencode:private-url-secret@legacy.invalid:4096';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
-            'server_profiles': jsonEncode([_profile(url: url)]),
+            'server_profiles': jsonEncode([migrationProfile(url: url)]),
           },
         );
         final original = fixture.preferences.snapshot;
 
         final report = await fixture.importer().run();
 
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.profiles,
           'profile-one',
@@ -901,10 +799,10 @@ void main() {
       test(
         'ephemeral or unavailable vault has no credential checkpoint ($includeVault)',
         () async {
-          final fixture = _Fixture(
+          final fixture = MigrationFixture(
             preferences: {
               'server_profiles': jsonEncode([
-                _profile(password: 'private-secret'),
+                migrationProfile(password: 'private-secret'),
               ]),
             },
           );
@@ -916,7 +814,7 @@ void main() {
               )
               .run();
 
-          _expectPending(
+          expectMigrationPending(
             report,
             MigrationCategory.credentials,
             'password:profile-one',
@@ -940,9 +838,11 @@ void main() {
     test(
       'secure destination failure is retried without a premature checkpoint',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
-            'server_profiles': jsonEncode([_profile(password: 'retry-secret')]),
+            'server_profiles': jsonEncode([
+              migrationProfile(password: 'retry-secret'),
+            ]),
           },
         );
         fixture.credentialBackend.failWrite = true;
@@ -953,7 +853,7 @@ void main() {
 
         final failed = await fixture.importer().run();
 
-        _expectPending(
+        expectMigrationPending(
           failed,
           MigrationCategory.credentials,
           'password:profile-one',
@@ -978,7 +878,7 @@ void main() {
       'metadata destination failure remains retryable and source stays intact',
       () async {
         const destination = 'cw2.settings.composerAutoApprovePermissions';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'experience_settings': '{"composerAutoApprovePermissions":false}',
           },
@@ -994,7 +894,7 @@ void main() {
 
         expect(fixture.backend.values.containsKey(destination), isFalse);
         expect(fixture.completed.containsKey(opaque), isFalse);
-        _expectPending(
+        expectMigrationPending(
           failed,
           MigrationCategory.settings,
           'composerAutoApprovePermissions',
@@ -1021,7 +921,7 @@ void main() {
         'payload ${refusal ? 'refusal' : 'failure'} is retried without completion',
         () async {
           const legacyKey = 'session_composer_draft::unmapped';
-          final fixture = _Fixture(
+          final fixture = MigrationFixture(
             preferences: {legacyKey: '{"text":"recover me","shellMode":true}'},
           );
           final original = fixture.preferences.snapshot;
@@ -1037,7 +937,7 @@ void main() {
 
           expect(fixture.payloads.values, isEmpty);
           expect(fixture.completed.containsKey(id), isFalse);
-          _expectPending(
+          expectMigrationPending(
             failed,
             MigrationCategory.drafts,
             legacyKey,
@@ -1063,7 +963,7 @@ void main() {
       'durable checkpoint interruption resumes and preserves later user edits',
       () async {
         const legacyKey = 'session_composer_draft::resume';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'experience_settings': '{"composerAutoApprovePermissions":false}',
             legacyKey: '{"text":"draft after checkpoint"}',
@@ -1121,7 +1021,7 @@ void main() {
       'destination write before a failed journal is preserved on a new importer',
       () async {
         const legacyKey = 'session_composer_draft::checkpoint-crash';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {legacyKey: '{"text":"original draft"}'},
         );
         final destination = V1DataImporter.recoveredDraftKey(legacyKey);
@@ -1129,7 +1029,7 @@ void main() {
 
         await expectLater(
           fixture.importer().run(),
-          _migrationFailure(MigrationFailure.checkpointFailed),
+          migrationFailure(MigrationFailure.checkpointFailed),
         );
 
         expect(fixture.draft(legacyKey)['text'], 'original draft');
@@ -1162,14 +1062,14 @@ void main() {
     test(
       'failed report write does not lose durable checkpoints on retry',
       () async {
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {'experience_settings': '{"useAmoledDark":true}'},
         );
         fixture.backend.failWrite = V1DataImporter.reportKey;
 
         await expectLater(
           fixture.importer().run(),
-          _migrationFailure(MigrationFailure.reportFailed),
+          migrationFailure(MigrationFailure.reportFailed),
         );
 
         expect(fixture.completed, hasLength(1));
@@ -1201,7 +1101,7 @@ void main() {
       test(
         'invalid journal is preserved and prevents destination writes ($malformedJournal)',
         () async {
-          final fixture = _Fixture(
+          final fixture = MigrationFixture(
             preferences: {'experience_settings': '{"useAmoledDark":true}'},
           );
           fixture.backend.values.addAll({
@@ -1214,7 +1114,7 @@ void main() {
 
           await expectLater(
             fixture.importer().run(),
-            _migrationFailure(MigrationFailure.invalidJournal),
+            migrationFailure(MigrationFailure.invalidJournal),
           );
 
           expect(jsonEncode(fixture.backend.values), before);
@@ -1244,7 +1144,7 @@ void main() {
             'text': {'value': '@notes.txt', 'start': 0, 'end': 10},
           },
         };
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             legacyKey: jsonEncode({
               'text': 'unfinished private command',
@@ -1278,13 +1178,13 @@ void main() {
         expect(recovered['attachments'], [
           {...attachment, 'reviewRequired': true},
         ]);
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.drafts,
           legacyKey,
           MigrationPendingReason.unmappedDraft,
         );
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.drafts,
           legacyKey,
@@ -1320,7 +1220,7 @@ void main() {
       () async {
         const legacyKey = 'session_composer_draft::file-backed';
         const orphan = '/private/cache/0123456789abcdef.json';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           legacyPayloads: {legacyKey: '{"text":"file-backed text"}'},
           knownPayloadKeys: {legacyKey},
         );
@@ -1331,7 +1231,7 @@ void main() {
 
         expect(fixture.draft(legacyKey)['text'], 'file-backed text');
         expect(fixture.legacyPayloads.lastClaimedKeys, {legacyKey});
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.orphanFiles,
           orphan,
@@ -1352,7 +1252,7 @@ void main() {
           'https://files.invalid/notes.txt?token=private-attachment-token',
           'https://files.invalid/notes.txt#private-attachment-fragment',
         ];
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             legacyKey: jsonEncode({
               'text': 'preserved draft text',
@@ -1381,7 +1281,7 @@ void main() {
           expect(attachment['referenceUnavailable'], isTrue);
           expect(attachment['reviewRequired'], isTrue);
         }
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.drafts,
           legacyKey,
@@ -1400,7 +1300,7 @@ void main() {
       () async {
         const badDraft = 'session_composer_draft::malformed';
         const oversizedDraft = 'session_composer_draft::oversized-file';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'experience_settings': 'x' * (V2PayloadLimits.maxPayloadChars + 1),
             badDraft: '{broken-json',
@@ -1416,25 +1316,25 @@ void main() {
 
         final report = await fixture.importer().run();
 
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.settings,
           'experience_settings',
           MigrationPendingReason.oversized,
         );
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.profiles,
           'server_profiles',
           MigrationPendingReason.malformed,
         );
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.drafts,
           badDraft,
           MigrationPendingReason.malformed,
         );
-        _expectPending(
+        expectMigrationPending(
           report,
           MigrationCategory.drafts,
           oversizedDraft,
@@ -1453,7 +1353,7 @@ void main() {
       'unavailable source can retry without destroying original values',
       () async {
         const legacyKey = 'session_composer_draft::temporarily-unavailable';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {legacyKey: '{"text":"retained text"}'},
         );
         fixture.preferences.failReads.add(legacyKey);
@@ -1461,7 +1361,7 @@ void main() {
 
         final unavailable = await fixture.importer().run();
 
-        _expectPending(
+        expectMigrationPending(
           unavailable,
           MigrationCategory.drafts,
           legacyKey,
@@ -1486,10 +1386,10 @@ void main() {
         const legacyKey =
             'session_composer_draft::/secret-project::private-native-session';
         const attachmentUrl = 'file:///secret-project/private-attachment.txt';
-        final fixture = _Fixture(
+        final fixture = MigrationFixture(
           preferences: {
             'server_profiles': jsonEncode([
-              _profile(url: privateUrl, password: password),
+              migrationProfile(url: privateUrl, password: password),
             ]),
             legacyKey: jsonEncode({
               'text': draftText,

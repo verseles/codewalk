@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:codewalk/platform/migration/legacy_source.dart';
+import 'package:codewalk/platform/migration/migration_report.dart';
+import 'package:codewalk/platform/migration/v1_data_importer.dart';
 import 'package:codewalk/platform/storage/endpoint_credentials.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Raw read-only sources: a byte-preserving snapshot can be compared after
 /// every failure or retry without exercising a retained v1 getter.
@@ -178,3 +181,114 @@ final class FakeMigrationCredentialBackend
     values.remove(key);
   }
 }
+
+final class MigrationFixture {
+  MigrationFixture({
+    Map<String, Object> preferences = const {},
+    Map<String, String> secure = const {},
+    Map<String, String> legacyPayloads = const {},
+    this.knownPayloadKeys = const {},
+  }) : preferences = FakeLegacyPreferencesReader(preferences),
+       secure = FakeLegacySecureReader(secure),
+       legacyPayloads = FakeLegacyPayloadReader(legacyPayloads);
+
+  final FakeLegacyPreferencesReader preferences;
+  final FakeLegacySecureReader secure;
+  final FakeLegacyPayloadReader legacyPayloads;
+  final Set<String> knownPayloadKeys;
+  final backend = FakeMigrationMetadataBackend();
+  final payloads = FakeMigrationPayloadStore();
+  final credentialBackend = FakeMigrationCredentialBackend();
+
+  V2MetadataStore get metadata => V2MetadataStore(backend: backend);
+
+  V1DataImporter importer({
+    bool credentialsAreDurable = true,
+    bool exclusiveBeforeConsumers = true,
+    bool includeVault = true,
+    bool includeSecureReader = true,
+    Future<void> Function(String)? afterCheckpoint,
+  }) {
+    final store = metadata;
+    return V1DataImporter(
+      source: LegacySource(
+        preferences: preferences,
+        secure: includeSecureReader ? secure : null,
+        payloads: legacyPayloads,
+        knownPayloadKeys: knownPayloadKeys,
+      ),
+      metadata: store,
+      payloads: payloads,
+      credentials: includeVault
+          ? EndpointCredentialVault(
+              backend: credentialBackend,
+              beforeMutation: store.ensureSchema,
+            )
+          : null,
+      credentialsAreDurable: credentialsAreDurable,
+      exclusiveBeforeConsumers: exclusiveBeforeConsumers,
+      afterCheckpoint: afterCheckpoint,
+    );
+  }
+
+  Map<String, dynamic> get completed {
+    final raw = backend.values[V1DataImporter.journalKey];
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw as String) as Map<String, dynamic>;
+    return Map<String, dynamic>.from(decoded['completed'] as Map);
+  }
+
+  Map<String, dynamic> profile(String legacyId) =>
+      jsonDecode(backend.values[V1DataImporter.profileKey(legacyId)] as String)
+          as Map<String, dynamic>;
+
+  Map<String, dynamic> draft(String sourceKey) =>
+      jsonDecode(payloads.values[V1DataImporter.recoveredDraftKey(sourceKey)]!)
+          as Map<String, dynamic>;
+}
+
+Map<String, Object> migrationProfile({
+  String id = 'profile-one',
+  String url = 'http://legacy.invalid:4096/project',
+  String username = 'opencode',
+  String? password,
+  bool basicAuthEnabled = true,
+  bool oauthEnabled = false,
+}) => {
+  'id': id,
+  'url': url,
+  'label': 'Original server',
+  'basicAuthEnabled': basicAuthEnabled,
+  'basicAuthUsername': username,
+  'basicAuthPassword': ?password,
+  'oauthEnabled': oauthEnabled,
+};
+
+String migrationSecureKey(String field, [String id = 'profile-one']) =>
+    'codewalk.secure::server_profile_basic_auth_$field::'
+    '${Uri.encodeComponent(id.trim())}';
+
+void expectMigrationPending(
+  MigrationReport report,
+  MigrationCategory category,
+  String identity,
+  MigrationPendingReason reason,
+) {
+  expect(
+    report.pending.where(
+      (item) =>
+          item.id == V1DataImporter.itemId(category, identity) &&
+          item.category == category &&
+          item.reason == reason,
+    ),
+    hasLength(1),
+  );
+}
+
+Matcher migrationFailure(MigrationFailure failure) => throwsA(
+  isA<MigrationException>().having(
+    (exception) => exception.failure,
+    'failure',
+    failure,
+  ),
+);
