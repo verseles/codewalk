@@ -1,0 +1,9 @@
+{
+  "type": "form",
+  "answers": {
+    "mode/raw": [
+      "a,b"
+    ],
+    "details": "Exact opaque selection"
+  }
+}

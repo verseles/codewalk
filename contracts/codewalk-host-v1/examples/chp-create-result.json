@@ -1,0 +1,29 @@
+{
+  "type": "createResult",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "result": {
+    "receipt": {
+      "id": "command-2",
+      "owner": {
+        "type": "session",
+        "session": {
+          "version": 1,
+          "host": "host-α",
+          "harness": "profile-1",
+          "nativeId": " opaque/%session "
+        }
+      },
+      "state": "uncertain",
+      "admissionKnown": false,
+      "reason": "responseLost",
+      "error": {
+        "kind": "network",
+        "rawType": "synthetic.connection",
+        "rawMessage": "Synthetic connection observation",
+        "retryable": true,
+        "action": "refresh"
+      }
+    }
+  }
+}

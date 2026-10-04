@@ -1,0 +1,44 @@
+{
+  "type": "command",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "command": {
+    "id": "command-create",
+    "harness": {
+      "version": 1,
+      "host": "host-α",
+      "harness": "profile-1"
+    },
+    "owner": {
+      "type": "project",
+      "project": {
+        "version": 1,
+        "host": "host-α",
+        "canonicalDirectory": "/canonical/project",
+        "upstreamProjectId": "global"
+      },
+      "harness": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1"
+      }
+    },
+    "operation": "create",
+    "connectedVersion": "synthetic-1",
+    "intent": {
+      "id": "command-create",
+      "harness": {
+        "version": 1,
+        "host": "host-α",
+        "harness": "profile-1"
+      },
+      "project": {
+        "version": 1,
+        "host": "host-α",
+        "canonicalDirectory": "/canonical/project",
+        "upstreamProjectId": "global"
+      },
+      "title": "Synthetic create"
+    }
+  }
+}

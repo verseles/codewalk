@@ -1,0 +1,12 @@
+{
+  "type": "unknown",
+  "reason": "notVerified",
+  "raw": {
+    "future": [
+      false,
+      0,
+      null,
+      "值"
+    ]
+  }
+}

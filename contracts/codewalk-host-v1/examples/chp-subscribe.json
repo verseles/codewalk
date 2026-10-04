@@ -1,0 +1,17 @@
+{
+  "type": "subscribe",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "session": {
+    "version": 1,
+    "host": "host-α",
+    "harness": "profile-1",
+    "nativeId": " opaque/%session "
+  },
+  "after": {
+    "version": 1,
+    "id": "stream-1",
+    "epoch": "epoch-1",
+    "seq": "9007199254740993"
+  }
+}

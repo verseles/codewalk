@@ -1,0 +1,5593 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:codewalk:chp:1:provisional:1",
+  "title": "CodeWalk Host Protocol v1 — provisional app-facing revision",
+  "description": "Hand-authored canonical contract projection and separate CHP envelopes. Not a G1/G2/final G5 pass, Host implementation, or mutation authorization.",
+  "$ref": "#/definitions/ChpFrame",
+  "definitions": {
+    "CanonicalValue": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CanonicalValue"
+          }
+        }
+      ]
+    },
+    "CanonicalOpaqueId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "CanonicalOpenEnum": {
+      "type": "string",
+      "minLength": 1
+    },
+    "CanonicalDecimalSequence": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "not": {
+        "pattern": "[^0-9]"
+      },
+      "description": "Exact nonnegative BigInt decimal string; no uint64 ceiling. The not clause rejects final LF/CR despite dollar-anchor conventions."
+    },
+    "CanonicalInstant": {
+      "type": "string",
+      "pattern": "^([0-9]{4}|[+-][0-9]{4,6})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]{1,6})?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$",
+      "not": {
+        "pattern": "[\\r\\n]"
+      },
+      "anyOf": [
+        {
+          "format": "date-time"
+        },
+        {
+          "pattern": "^[+-][0-9]{4,6}-"
+        }
+      ],
+      "description": "ISO time with zone, including signed expanded Dart DateTime years. Calendar semantics for expanded years remain canonical codec checks."
+    },
+    "CanonicalHarnessRef": {
+      "type": "object",
+      "required": [
+        "version",
+        "host",
+        "harness"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "host": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "harness": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionRef": {
+      "type": "object",
+      "required": [
+        "version",
+        "host",
+        "harness",
+        "nativeId"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "host": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "harness": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "nativeId": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalProjectRef": {
+      "type": "object",
+      "required": [
+        "version",
+        "host",
+        "canonicalDirectory"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "host": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "canonicalDirectory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "upstreamProjectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalForkLineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "source": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "beforeItem": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionLineage": {
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fork": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalForkLineage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalOwnershipProof": {
+      "type": "object",
+      "required": [
+        "version",
+        "source",
+        "observedAt"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observedAt": {
+          "$ref": "#/definitions/CanonicalInstant"
+        },
+        "expiresAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalKnownOwnership": {
+      "type": "object",
+      "required": [
+        "version",
+        "kind",
+        "proof"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "kind": {
+          "enum": [
+            "liveShared",
+            "hostOwned",
+            "savedHistory",
+            "runningElsewhere"
+          ]
+        },
+        "proof": {
+          "$ref": "#/definitions/CanonicalOwnershipProof"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUnknownOwnership": {
+      "type": "object",
+      "required": [
+        "version",
+        "kind",
+        "reason"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "kind": {
+          "const": "unknown"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rawKind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalOwnershipInfo": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CanonicalKnownOwnership"
+        },
+        {
+          "$ref": "#/definitions/CanonicalUnknownOwnership"
+        }
+      ]
+    },
+    "CanonicalStreamPosition": {
+      "type": "object",
+      "required": [
+        "version",
+        "id",
+        "epoch",
+        "seq"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "epoch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seq": {
+          "$ref": "#/definitions/CanonicalDecimalSequence"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionOwner": {
+      "type": "object",
+      "required": [
+        "type",
+        "session"
+      ],
+      "properties": {
+        "type": {
+          "const": "session"
+        },
+        "session": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalProjectOwner": {
+      "type": "object",
+      "required": [
+        "type",
+        "project"
+      ],
+      "properties": {
+        "type": {
+          "const": "project"
+        },
+        "project": {
+          "$ref": "#/definitions/CanonicalProjectRef"
+        },
+        "harness": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalHarnessRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalHostOwner": {
+      "type": "object",
+      "required": [
+        "type",
+        "host"
+      ],
+      "properties": {
+        "type": {
+          "const": "host"
+        },
+        "host": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "harness": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalHarnessRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalGlobalOwner": {
+      "type": "object",
+      "required": [
+        "type",
+        "harness"
+      ],
+      "properties": {
+        "type": {
+          "const": "global"
+        },
+        "harness": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUnknownOwner": {
+      "type": "object",
+      "required": [
+        "type",
+        "reason"
+      ],
+      "properties": {
+        "type": {
+          "const": "unknown"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalDomainOwner": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CanonicalSessionOwner"
+        },
+        {
+          "$ref": "#/definitions/CanonicalProjectOwner"
+        },
+        {
+          "$ref": "#/definitions/CanonicalHostOwner"
+        },
+        {
+          "$ref": "#/definitions/CanonicalGlobalOwner"
+        },
+        {
+          "$ref": "#/definitions/CanonicalUnknownOwner"
+        }
+      ]
+    },
+    "CanonicalSourceProvenance": {
+      "type": "object",
+      "required": [
+        "harness",
+        "version",
+        "nativeType",
+        "durability"
+      ],
+      "properties": {
+        "harness": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nativeType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "durability": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "nativeEventId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "aggregateId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "aggregateSeq": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalDecimalSequence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extra": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalDiagnosticRef": {
+      "type": "object",
+      "required": [
+        "id",
+        "byteLength",
+        "redacted"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "redacted": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalEventMeta": {
+      "type": "object",
+      "required": [
+        "owner",
+        "position",
+        "receivedAt",
+        "source"
+      ],
+      "properties": {
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "position": {
+          "$ref": "#/definitions/CanonicalStreamPosition"
+        },
+        "receivedAt": {
+          "$ref": "#/definitions/CanonicalInstant"
+        },
+        "source": {
+          "$ref": "#/definitions/CanonicalSourceProvenance"
+        },
+        "rawRef": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalDiagnosticRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalErrorInfo": {
+      "type": "object",
+      "required": [
+        "kind",
+        "rawType",
+        "rawMessage",
+        "retryable"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "rawType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rawMessage": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "retryAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpenEnum"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "details": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCapabilityUnavailable": {
+      "type": "object",
+      "required": [
+        "capability",
+        "reason"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalOutputRef": {
+      "type": "object",
+      "required": [
+        "id",
+        "truncated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "mimeType": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sizeBytes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalAttachmentRef": {
+      "type": "object",
+      "required": [
+        "id",
+        "mimeType",
+        "content"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mimeType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "$ref": "#/definitions/CanonicalOutputRef"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalMentionRef": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "target"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "label": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalItemMeta": {
+      "type": "object",
+      "required": [
+        "id",
+        "generation",
+        "status",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "generation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "source": {
+          "$ref": "#/definitions/CanonicalSourceProvenance"
+        },
+        "turnId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ordinal": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUserInput": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "text",
+        "delivery",
+        "attachments",
+        "mentions"
+      ],
+      "properties": {
+        "type": {
+          "const": "userInput"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "text": {
+          "type": "string"
+        },
+        "delivery": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalAttachmentRef"
+          }
+        },
+        "mentions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalMentionRef"
+          }
+        },
+        "commandId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalAssistantText": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "text",
+        "complete",
+        "prefixMissing"
+      ],
+      "properties": {
+        "type": {
+          "const": "assistantText"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "text": {
+          "type": "string"
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "prefixMissing": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalReasoning": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "text",
+        "complete",
+        "prefixMissing"
+      ],
+      "properties": {
+        "type": {
+          "const": "reasoning"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "text": {
+          "type": "string"
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "prefixMissing": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalToolCall": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "kind",
+        "rawName"
+      ],
+      "properties": {
+        "type": {
+          "const": "toolCall"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "rawName": {
+          "type": "string"
+        },
+        "input": {
+          "$ref": "#/definitions/CanonicalValue"
+        },
+        "output": {
+          "$ref": "#/definitions/CanonicalValue"
+        },
+        "outputRef": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOutputRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "child": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalShellRun": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "command"
+      ],
+      "properties": {
+        "type": {
+          "const": "shellRun"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "command": {
+          "type": "string"
+        },
+        "exitCode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOutputRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalNotice": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "kind",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "const": "notice"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "text": {
+          "type": "string"
+        },
+        "relatedSession": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTurnOutcome": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "kind"
+      ],
+      "properties": {
+        "type": {
+          "const": "turnOutcome"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUnknownItem": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "rawType",
+        "raw"
+      ],
+      "properties": {
+        "type": {
+          "const": "unknownItem"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalItemMeta"
+        },
+        "rawType": {
+          "type": "string"
+        },
+        "raw": {
+          "$ref": "#/definitions/CanonicalValue"
+        },
+        "fallbackText": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTimelineItem": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CanonicalUserInput"
+        },
+        {
+          "$ref": "#/definitions/CanonicalAssistantText"
+        },
+        {
+          "$ref": "#/definitions/CanonicalReasoning"
+        },
+        {
+          "$ref": "#/definitions/CanonicalToolCall"
+        },
+        {
+          "$ref": "#/definitions/CanonicalShellRun"
+        },
+        {
+          "$ref": "#/definitions/CanonicalNotice"
+        },
+        {
+          "$ref": "#/definitions/CanonicalTurnOutcome"
+        },
+        {
+          "$ref": "#/definitions/CanonicalUnknownItem"
+        }
+      ]
+    },
+    "CanonicalConnectionState": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalExecutionOutcome": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalExecutionState": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "retryAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lastOutcome": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalExecutionOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSubmissionState": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "delivery": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpenEnum"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalInteractionState": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalRevertState": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "boundary": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "details": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalFormOption": {
+      "type": "object",
+      "required": [
+        "value",
+        "label"
+      ],
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalEqualsCondition": {
+      "type": "object",
+      "required": [
+        "type",
+        "key",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "equals"
+        },
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalNotEqualsCondition": {
+      "type": "object",
+      "required": [
+        "type",
+        "key",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "notEquals"
+        },
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalIncludesCondition": {
+      "type": "object",
+      "required": [
+        "type",
+        "key",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "includes"
+        },
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalAllConditions": {
+      "type": "object",
+      "required": [
+        "type",
+        "conditions"
+      ],
+      "properties": {
+        "type": {
+          "const": "all"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalFormCondition"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalAnyConditions": {
+      "type": "object",
+      "required": [
+        "type",
+        "conditions"
+      ],
+      "properties": {
+        "type": {
+          "const": "any"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalFormCondition"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUnknownCondition": {
+      "type": "object",
+      "required": [
+        "type",
+        "rawType",
+        "raw"
+      ],
+      "properties": {
+        "type": {
+          "const": "unknown"
+        },
+        "rawType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalFormCondition": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CanonicalEqualsCondition"
+        },
+        {
+          "$ref": "#/definitions/CanonicalNotEqualsCondition"
+        },
+        {
+          "$ref": "#/definitions/CanonicalIncludesCondition"
+        },
+        {
+          "$ref": "#/definitions/CanonicalAllConditions"
+        },
+        {
+          "$ref": "#/definitions/CanonicalAnyConditions"
+        },
+        {
+          "$ref": "#/definitions/CanonicalUnknownCondition"
+        }
+      ]
+    },
+    "CanonicalFormField": {
+      "type": "object",
+      "required": [
+        "key",
+        "kind",
+        "required",
+        "hidden",
+        "acceptsCustom",
+        "options"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "acceptsCustom": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalFormOption"
+          }
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "condition": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalFormCondition"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "defaultAnswer": {
+          "$ref": "#/definitions/CanonicalValue"
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        },
+        "constraints": {
+          "$ref": "#/definitions/CanonicalValue"
+        },
+        "externalUrl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "externalLink"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "externalUrl"
+            ],
+            "properties": {
+              "externalUrl": {
+                "type": "string"
+              },
+              "defaultAnswer": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "number"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "integer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "boolean"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "singleSelect"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "multiSelect"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "secret"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "defaultAnswer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalFormSpec": {
+      "type": "object",
+      "required": [
+        "fields"
+      ],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalFormField"
+          }
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalFormAnswers": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/CanonicalValue"
+      }
+    },
+    "CanonicalApprovalChoice": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "allows",
+        "scope",
+        "resolutionScope",
+        "acceptsNote"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        },
+        "allows": {
+          "type": "boolean"
+        },
+        "scope": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "resolutionScope": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "acceptsNote": {
+          "type": "boolean"
+        },
+        "scopePreview": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalInteractionRequest": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "kind",
+        "title",
+        "choices",
+        "requiresInput",
+        "autoApprovable"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "title": {
+          "type": "string"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalApprovalChoice"
+          }
+        },
+        "requiresInput": {
+          "type": "boolean"
+        },
+        "autoApprovable": {
+          "type": "boolean"
+        },
+        "form": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalFormSpec"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalApprovalResponse": {
+      "type": "object",
+      "required": [
+        "type",
+        "choiceId"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval"
+        },
+        "choiceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalFormResponse": {
+      "type": "object",
+      "required": [
+        "type",
+        "answers"
+      ],
+      "properties": {
+        "type": {
+          "const": "form"
+        },
+        "answers": {
+          "$ref": "#/definitions/CanonicalFormAnswers"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalInteractionResponse": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CanonicalApprovalResponse"
+        },
+        {
+          "$ref": "#/definitions/CanonicalFormResponse"
+        }
+      ]
+    },
+    "CanonicalInteractionResolution": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInteractionResponse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolvedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalWorkItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "status",
+        "completionScope"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "status": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "completionScope": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "child": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSourceProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPlanEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPlanSnapshot": {
+      "type": "object",
+      "required": [
+        "owner",
+        "entries"
+      ],
+      "properties": {
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalPlanEntry"
+          }
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSourceProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTokenBreakdown": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "input": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoning": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cacheRead": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cacheWrite": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCost": {
+      "type": "object",
+      "required": [
+        "estimated",
+        "partial",
+        "cumulative"
+      ],
+      "properties": {
+        "estimated": {
+          "type": "boolean"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "cumulative": {
+          "type": "boolean"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalContextMeter": {
+      "type": "object",
+      "required": [
+        "measurement"
+      ],
+      "properties": {
+        "measurement": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "used": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalQuotaWindow": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "usedPercent": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resetsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUsageObservation": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "scope",
+        "source",
+        "observedAt",
+        "quotas",
+        "partial",
+        "cumulative"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "scope": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "source": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "observedAt": {
+          "$ref": "#/definitions/CanonicalInstant"
+        },
+        "quotas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalQuotaWindow"
+          }
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "cumulative": {
+          "type": "boolean"
+        },
+        "tokens": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalTokenBreakdown"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalCost"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "context": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalContextMeter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "aggregationKey": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSourceProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCapability": {
+      "type": "object",
+      "required": [
+        "support",
+        "verified",
+        "constraints"
+      ],
+      "properties": {
+        "support": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/CanonicalValue"
+          }
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "semantics": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCapabilitySet": {
+      "type": "object",
+      "required": [
+        "harness",
+        "connectedVersion",
+        "values"
+      ],
+      "properties": {
+        "harness": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        },
+        "connectedVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "values": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/CanonicalCapability"
+          }
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalDomainOwner"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalScopedCapabilityEvidence": {
+      "type": "object",
+      "required": [
+        "owner",
+        "connectedVersion"
+      ],
+      "properties": {
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "connectedVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownership": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOwnershipInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authorityProof": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOwnershipProof"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCapabilityContext": {
+      "type": "object",
+      "required": [
+        "owner",
+        "connectedVersion",
+        "evidence",
+        "now",
+        "maxProofAgeMicros",
+        "mutating"
+      ],
+      "properties": {
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "connectedVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "$ref": "#/definitions/CanonicalScopedCapabilityEvidence"
+        },
+        "now": {
+          "$ref": "#/definitions/CanonicalInstant"
+        },
+        "maxProofAgeMicros": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mutating": {
+          "type": "boolean"
+        },
+        "negotiated": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modelAllowed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policyAllowed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "platformAllowed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stateAllowed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalOriginalCommand": {
+      "type": "object",
+      "required": [
+        "id",
+        "harness",
+        "owner",
+        "operation",
+        "connectedVersion",
+        "intent"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "harness": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "operation": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "connectedVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalOperationContract": {
+      "type": "object",
+      "required": [
+        "harness",
+        "operation",
+        "connectedVersion",
+        "phase",
+        "replay"
+      ],
+      "properties": {
+        "harness": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        },
+        "operation": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "connectedVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "replay": {
+          "enum": [
+            "reconcileOnly",
+            "verifiedUnresolvedAdmission"
+          ]
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "replay": {
+                "const": "verifiedUnresolvedAdmission"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalCommandReceipt": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "state",
+        "admissionKnown"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "state": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "admissionKnown": {
+          "type": "boolean"
+        },
+        "nativeRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalErrorInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unavailable": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalCapabilityUnavailable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "details": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "accepted"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "admissionKnown": {
+                "const": true
+              },
+              "error": {
+                "type": "null"
+              },
+              "unavailable": {
+                "type": "null"
+              },
+              "reason": {
+                "type": "null"
+              },
+              "details": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "rejected",
+                  "uncertain",
+                  "unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "admissionKnown": {
+                "const": false
+              },
+              "nativeRef": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "uncertain"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unavailable": {
+                "type": "null"
+              },
+              "details": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "rejected"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "error": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/CanonicalErrorInfo"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "reason": {
+                "type": "null"
+              },
+              "unavailable": {
+                "type": "null"
+              },
+              "details": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "unavailable"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "unavailable",
+              "reason"
+            ],
+            "properties": {
+              "unavailable": {
+                "$ref": "#/definitions/CanonicalCapabilityUnavailable"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "error": {
+                "type": "null"
+              },
+              "details": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "admissionKnown": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "nativeRef": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "duplicate"
+              },
+              "admissionKnown": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "error": {
+                "type": "null"
+              },
+              "unavailable": {
+                "type": "null"
+              },
+              "reason": {
+                "type": "null"
+              },
+              "details": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "not": {
+                  "enum": [
+                    "accepted",
+                    "rejected",
+                    "duplicate",
+                    "uncertain",
+                    "unavailable"
+                  ]
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "admissionKnown": {
+                "const": false
+              },
+              "nativeRef": {
+                "type": "null"
+              },
+              "error": {
+                "type": "null"
+              },
+              "unavailable": {
+                "type": "null"
+              },
+              "reason": {
+                "const": "unknownReceipt"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalCreateResult": {
+      "type": "object",
+      "required": [
+        "receipt"
+      ],
+      "properties": {
+        "receipt": {
+          "$ref": "#/definitions/CanonicalCommandReceipt"
+        },
+        "handleRef": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "handleRef"
+            ],
+            "properties": {
+              "handleRef": {
+                "type": "object"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "receipt": {
+                "properties": {
+                  "admissionKnown": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalSelection": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "agentId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "permissionMode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSelectionChange": {
+      "type": "object",
+      "required": [
+        "selection"
+      ],
+      "properties": {
+        "selection": {
+          "$ref": "#/definitions/CanonicalSelection"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPendingInput": {
+      "type": "object",
+      "required": [
+        "id",
+        "text",
+        "delivery"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "text": {
+          "type": "string"
+        },
+        "delivery": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "commandId": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPromptDraft": {
+      "type": "object",
+      "required": [
+        "text",
+        "attachments",
+        "mentions"
+      ],
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalAttachmentRef"
+          }
+        },
+        "mentions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalMentionRef"
+          }
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSelection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCreateSession": {
+      "type": "object",
+      "required": [
+        "id",
+        "harness",
+        "project"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "harness": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        },
+        "project": {
+          "$ref": "#/definitions/CanonicalProjectRef"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSelection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionInfo": {
+      "type": "object",
+      "required": [
+        "ref",
+        "title",
+        "ownership",
+        "lineage"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "title": {
+          "type": "string"
+        },
+        "ownership": {
+          "$ref": "#/definitions/CanonicalOwnershipInfo"
+        },
+        "lineage": {
+          "$ref": "#/definitions/CanonicalSessionLineage"
+        },
+        "project": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalProjectRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionSummary": {
+      "type": "object",
+      "required": [
+        "info"
+      ],
+      "properties": {
+        "info": {
+          "$ref": "#/definitions/CanonicalSessionInfo"
+        },
+        "execution": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalExecutionState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updatedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionQuery": {
+      "type": "object",
+      "required": [
+        "limit",
+        "activeOnly"
+      ],
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "activeOnly": {
+          "type": "boolean"
+        },
+        "project": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalProjectRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSnapshotBoundary": {
+      "type": "object",
+      "required": [
+        "owner",
+        "hydrationGeneration",
+        "readStart",
+        "readStartedAt",
+        "authority"
+      ],
+      "properties": {
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "hydrationGeneration": {
+          "type": "string",
+          "minLength": 1
+        },
+        "readStart": {
+          "$ref": "#/definitions/CanonicalStreamPosition"
+        },
+        "readStartedAt": {
+          "$ref": "#/definitions/CanonicalInstant"
+        },
+        "authority": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "readCompletedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSourceProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalInfoSnapshotValue": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "value"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "value": {
+          "$ref": "#/definitions/CanonicalSessionInfo"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalExecutionSnapshotValue": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "value"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "value": {
+          "$ref": "#/definitions/CanonicalExecutionState"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTimelineSnapshotCollection": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "values",
+        "complete"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalTimelineItem"
+          }
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPendingSnapshotCollection": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "values",
+        "complete"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalPendingInput"
+          }
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalInteractionSnapshotCollection": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "values",
+        "complete"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalInteractionRequest"
+          }
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalWorkSnapshotCollection": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "values",
+        "complete"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalWorkItem"
+          }
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPlanSnapshotValue": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "value"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "value": {
+          "$ref": "#/definitions/CanonicalPlanSnapshot"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUsageSnapshotCollection": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "values",
+        "complete"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalUsageObservation"
+          }
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSelectionSnapshotValue": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "value"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "value": {
+          "$ref": "#/definitions/CanonicalSelection"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalRevertSnapshotValue": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "value"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalSnapshotBoundary"
+        },
+        "value": {
+          "$ref": "#/definitions/CanonicalRevertState"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionSnapshot": {
+      "type": "object",
+      "required": [
+        "ref",
+        "hydrationGeneration",
+        "hasMoreHistory"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "hydrationGeneration": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hasMoreHistory": {
+          "type": "boolean"
+        },
+        "nextHistoryCursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "info": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInfoSnapshotValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalExecutionSnapshotValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeline": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalTimelineSnapshotCollection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalPendingSnapshotCollection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interactions": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalInteractionSnapshotCollection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "work": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalWorkSnapshotCollection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalPlanSnapshotValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalUsageSnapshotCollection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSelectionSnapshotValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revert": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalRevertSnapshotValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionPage": {
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalSessionSummary"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "boundary": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSnapshotBoundary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalHarnessDescriptor": {
+      "type": "object",
+      "required": [
+        "ref",
+        "kind",
+        "version",
+        "stability",
+        "compatibility"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/definitions/CanonicalHarnessRef"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stability": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "compatibility": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalModelEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "providerId",
+        "label",
+        "inputModalities"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "providerId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        },
+        "inputModalities": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "contextLimit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputLimit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCatalogEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capabilities": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalCapabilitySet"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalItemUpserted": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "item"
+      ],
+      "properties": {
+        "type": {
+          "const": "itemUpserted"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "item": {
+          "$ref": "#/definitions/CanonicalTimelineItem"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalItemDelta": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "itemId",
+        "field",
+        "text",
+        "generation"
+      ],
+      "properties": {
+        "type": {
+          "const": "itemDelta"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "itemId": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "field": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "text": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalItemsRemoved": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "fromItemId"
+      ],
+      "properties": {
+        "type": {
+          "const": "itemsRemoved"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "fromItemId": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalExecutionChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "state"
+      ],
+      "properties": {
+        "type": {
+          "const": "executionChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "state": {
+          "$ref": "#/definitions/CanonicalExecutionState"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalRetryScheduled": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "attempt",
+        "at",
+        "error"
+      ],
+      "properties": {
+        "type": {
+          "const": "retryScheduled"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "at": {
+          "$ref": "#/definitions/CanonicalInstant"
+        },
+        "error": {
+          "$ref": "#/definitions/CanonicalErrorInfo"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalPendingInputChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "items"
+      ],
+      "properties": {
+        "type": {
+          "const": "pendingInputChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalPendingInput"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalInteractionOpened": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "request"
+      ],
+      "properties": {
+        "type": {
+          "const": "interactionOpened"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "request": {
+          "$ref": "#/definitions/CanonicalInteractionRequest"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalInteractionResolved": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "resolution"
+      ],
+      "properties": {
+        "type": {
+          "const": "interactionResolved"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "resolution": {
+          "$ref": "#/definitions/CanonicalInteractionResolution"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalWorkChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "items"
+      ],
+      "properties": {
+        "type": {
+          "const": "workChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalWorkItem"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalPlanChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "plan"
+      ],
+      "properties": {
+        "type": {
+          "const": "planChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "plan": {
+          "$ref": "#/definitions/CanonicalPlanSnapshot"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUsageObserved": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "observation"
+      ],
+      "properties": {
+        "type": {
+          "const": "usageObserved"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "observation": {
+          "$ref": "#/definitions/CanonicalUsageObservation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSelectionChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "selection"
+      ],
+      "properties": {
+        "type": {
+          "const": "selectionChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "selection": {
+          "$ref": "#/definitions/CanonicalSelection"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalRevertChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "state"
+      ],
+      "properties": {
+        "type": {
+          "const": "revertChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "state": {
+          "$ref": "#/definitions/CanonicalRevertState"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalSessionInfoChanged": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "info"
+      ],
+      "properties": {
+        "type": {
+          "const": "sessionInfoChanged"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "info": {
+          "$ref": "#/definitions/CanonicalSessionInfo"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "meta": {
+              "properties": {
+                "owner": {
+                  "$ref": "#/definitions/CanonicalSessionOwner"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CanonicalResyncRequired": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "reason"
+      ],
+      "properties": {
+        "type": {
+          "const": "resyncRequired"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalUnknownEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "meta",
+        "rawType",
+        "raw"
+      ],
+      "properties": {
+        "type": {
+          "const": "unknownEvent"
+        },
+        "meta": {
+          "$ref": "#/definitions/CanonicalEventMeta"
+        },
+        "rawType": {
+          "type": "string"
+        },
+        "raw": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalSessionEvent": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CanonicalItemUpserted"
+        },
+        {
+          "$ref": "#/definitions/CanonicalItemDelta"
+        },
+        {
+          "$ref": "#/definitions/CanonicalItemsRemoved"
+        },
+        {
+          "$ref": "#/definitions/CanonicalExecutionChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalRetryScheduled"
+        },
+        {
+          "$ref": "#/definitions/CanonicalPendingInputChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalInteractionOpened"
+        },
+        {
+          "$ref": "#/definitions/CanonicalInteractionResolved"
+        },
+        {
+          "$ref": "#/definitions/CanonicalWorkChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalPlanChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalUsageObserved"
+        },
+        {
+          "$ref": "#/definitions/CanonicalSelectionChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalRevertChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalSessionInfoChanged"
+        },
+        {
+          "$ref": "#/definitions/CanonicalResyncRequired"
+        },
+        {
+          "$ref": "#/definitions/CanonicalUnknownEvent"
+        }
+      ]
+    },
+    "CanonicalInterruptTarget": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/CanonicalOpenEnum"
+        },
+        "child": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "turn": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalRespondIntent": {
+      "type": "object",
+      "required": [
+        "interactionId",
+        "response"
+      ],
+      "properties": {
+        "interactionId": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "response": {
+          "$ref": "#/definitions/CanonicalInteractionResponse"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalCancelQueuedIntent": {
+      "type": "object",
+      "required": [
+        "input"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalEditQueuedIntent": {
+      "type": "object",
+      "required": [
+        "input",
+        "replacement"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "replacement": {
+          "$ref": "#/definitions/CanonicalPromptDraft"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalReorderQueuedIntent": {
+      "type": "object",
+      "required": [
+        "inputs"
+      ],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalOpaqueId"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalRevertRequest": {
+      "type": "object",
+      "required": [
+        "boundary",
+        "includeFiles"
+      ],
+      "properties": {
+        "boundary": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "includeFiles": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalForkRequest": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "before": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalOpaqueId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalChildInputIntent": {
+      "type": "object",
+      "required": [
+        "child",
+        "draft"
+      ],
+      "properties": {
+        "child": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "draft": {
+          "$ref": "#/definitions/CanonicalPromptDraft"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalEmptyIntent": {
+      "type": "object",
+      "required": [],
+      "properties": {},
+      "additionalProperties": false
+    },
+    "CanonicalFileRef": {
+      "type": "object",
+      "required": [
+        "project",
+        "path"
+      ],
+      "properties": {
+        "project": {
+          "$ref": "#/definitions/CanonicalProjectRef"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalFileWrite": {
+      "type": "object",
+      "required": [
+        "id",
+        "file",
+        "content"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "file": {
+          "$ref": "#/definitions/CanonicalFileRef"
+        },
+        "content": {
+          "$ref": "#/definitions/CanonicalOutputRef"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTerminalRequest": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "columns",
+        "rows"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "owner": {
+          "$ref": "#/definitions/CanonicalDomainOwner"
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "metadata": {
+          "$ref": "#/definitions/CanonicalValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTerminalInputIntent": {
+      "type": "object",
+      "required": [
+        "terminalId",
+        "text"
+      ],
+      "properties": {
+        "terminalId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTerminalResizeIntent": {
+      "type": "object",
+      "required": [
+        "terminalId",
+        "columns",
+        "rows"
+      ],
+      "properties": {
+        "terminalId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "CanonicalTerminalCloseIntent": {
+      "type": "object",
+      "required": [
+        "terminalId"
+      ],
+      "properties": {
+        "terminalId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpHello": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "protocol",
+        "host",
+        "harnesses"
+      ],
+      "properties": {
+        "type": {
+          "const": "hello"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "protocol": {
+          "const": "codewalk-host/1"
+        },
+        "host": {
+          "$ref": "#/definitions/CanonicalOpaqueId"
+        },
+        "harnesses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CanonicalHarnessDescriptor"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpEvent": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "event"
+      ],
+      "properties": {
+        "type": {
+          "const": "event"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "event": {
+          "$ref": "#/definitions/CanonicalSessionEvent"
+        },
+        "session": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalSessionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpSubscribe": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "session"
+      ],
+      "properties": {
+        "type": {
+          "const": "subscribe"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "session": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "after": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CanonicalStreamPosition"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpResync": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "session",
+        "reason"
+      ],
+      "properties": {
+        "type": {
+          "const": "resync"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "session": {
+          "$ref": "#/definitions/CanonicalSessionRef"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpPing": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "nonce"
+      ],
+      "properties": {
+        "type": {
+          "const": "ping"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "nonce": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpPong": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "nonce"
+      ],
+      "properties": {
+        "type": {
+          "const": "pong"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "nonce": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpReceipt": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "receipt"
+      ],
+      "properties": {
+        "type": {
+          "const": "receipt"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "receipt": {
+          "$ref": "#/definitions/CanonicalCommandReceipt"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpSnapshot": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "snapshot"
+      ],
+      "properties": {
+        "type": {
+          "const": "snapshot"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "snapshot": {
+          "$ref": "#/definitions/CanonicalSessionSnapshot"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpCapabilities": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "capabilities"
+      ],
+      "properties": {
+        "type": {
+          "const": "capabilities"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "capabilities": {
+          "$ref": "#/definitions/CanonicalCapabilitySet"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpSessionPage": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "page"
+      ],
+      "properties": {
+        "type": {
+          "const": "sessionPage"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "page": {
+          "$ref": "#/definitions/CanonicalSessionPage"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpCreateResult": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "result"
+      ],
+      "properties": {
+        "type": {
+          "const": "createResult"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "result": {
+          "$ref": "#/definitions/CanonicalCreateResult"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChpCommand": {
+      "type": "object",
+      "required": [
+        "type",
+        "schemaVersion",
+        "canonicalRevision",
+        "command"
+      ],
+      "properties": {
+        "type": {
+          "const": "command"
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "canonicalRevision": {
+          "const": "cw-canonical-1-provisional.1"
+        },
+        "command": {
+          "$ref": "#/definitions/CanonicalOriginalCommand"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "create"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalCreateSession"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "prompt"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalPromptDraft"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "interrupt"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalInterruptTarget"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "respond"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalRespondIntent"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "selection"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalSelectionChange"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "cancelQueued"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalCancelQueuedIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "editQueued"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEditQueuedIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "reorderQueued"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalReorderQueuedIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "revertStage"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalRevertRequest"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "revertClear"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "revertCommit"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "fork"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalForkRequest"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "archive"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "delete"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "resume"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "background"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalEmptyIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "childInput"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalChildInputIntent"
+                  },
+                  "owner": {
+                    "$ref": "#/definitions/CanonicalSessionOwner"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "filesWrite"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalFileWrite"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "terminalOpen"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalTerminalRequest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "terminalInput"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalTerminalInputIntent"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "terminalResize"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalTerminalResizeIntent"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "operation": {
+                    "const": "terminalClose"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "properties": {
+                  "intent": {
+                    "$ref": "#/definitions/CanonicalTerminalCloseIntent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ChpFrame": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ChpHello"
+        },
+        {
+          "$ref": "#/definitions/ChpEvent"
+        },
+        {
+          "$ref": "#/definitions/ChpSubscribe"
+        },
+        {
+          "$ref": "#/definitions/ChpResync"
+        },
+        {
+          "$ref": "#/definitions/ChpPing"
+        },
+        {
+          "$ref": "#/definitions/ChpPong"
+        },
+        {
+          "$ref": "#/definitions/ChpCommand"
+        },
+        {
+          "$ref": "#/definitions/ChpReceipt"
+        },
+        {
+          "$ref": "#/definitions/ChpSnapshot"
+        },
+        {
+          "$ref": "#/definitions/ChpCapabilities"
+        },
+        {
+          "$ref": "#/definitions/ChpSessionPage"
+        },
+        {
+          "$ref": "#/definitions/ChpCreateResult"
+        }
+      ]
+    }
+  }
+}

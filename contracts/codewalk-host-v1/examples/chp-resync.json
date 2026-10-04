@@ -1,0 +1,12 @@
+{
+  "type": "resync",
+  "schemaVersion": 1,
+  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "session": {
+    "version": 1,
+    "host": "host-α",
+    "harness": "profile-1",
+    "nativeId": " opaque/%session "
+  },
+  "reason": "ringRetentionExceeded"
+}

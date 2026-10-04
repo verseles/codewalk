@@ -1,0 +1,7 @@
+{
+  "kind": "network",
+  "rawType": "synthetic.connection",
+  "rawMessage": "Synthetic connection observation",
+  "retryable": true,
+  "action": "refresh"
+}

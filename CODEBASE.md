@@ -53,6 +53,8 @@ packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
 test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
 test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions
+contracts/codewalk-host-v1/             # Provisional canonical/CHP schema, examples, model map and revision hashes
+test/contract/chp/                     # Offline Draft 7 validation and synthetic model/edge parity checks
 tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped output check
 tool/ci/import_rules.dart               # CI entry point for governed architecture checks
 tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
@@ -93,6 +95,15 @@ and generation barriers, and handles partial promotion observations without
 inventing replay cursors. Timeline retention is bounded to at most 500 items;
 the session store requires a configured LRU bound and keys full composite refs.
 The reducer is not wired to the app graph.
+
+The separate CHP artifact defines canonical payloads and transport envelopes at
+the explicitly provisional `cw-canonical-1-provisional.1` and
+`chp-1-provisional.1` revisions. Its local Draft 7 schema, example manifest,
+definition map and hashes pin the accepted canonical model. Test-only
+projections keep wire shape outside pure core; constructor/policy semantics are
+checked separately from schema shape. Real two-adapter fit, final G2/G5 revision
+agreement, merge acceptance and Host implementation remain pending.
+
 `codewalk_net` preserves HTTP statuses and raw response
 bodies, validates endpoint paths before obtaining authentication headers,
 disables automatic redirects and supports request cancellation. Its strict
