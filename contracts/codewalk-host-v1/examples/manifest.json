@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "origin": "hand-authored",
   "examples": [
     {
@@ -8,7 +8,7 @@
       "definition": "#/definitions/CanonicalHarnessRef",
       "family": "identity",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -16,7 +16,7 @@
       "definition": "#/definitions/CanonicalSessionRef",
       "family": "identity",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -24,7 +24,7 @@
       "definition": "#/definitions/CanonicalProjectRef",
       "family": "identity",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -32,7 +32,7 @@
       "definition": "#/definitions/CanonicalStreamPosition",
       "family": "ordering",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -40,7 +40,7 @@
       "definition": "#/definitions/CanonicalDomainOwner",
       "family": "ownership",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -48,7 +48,7 @@
       "definition": "#/definitions/CanonicalDomainOwner",
       "family": "ownership",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -56,7 +56,7 @@
       "definition": "#/definitions/CanonicalDomainOwner",
       "family": "unknown",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -64,7 +64,7 @@
       "definition": "#/definitions/CanonicalOwnershipProof",
       "family": "ownership",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -72,7 +72,7 @@
       "definition": "#/definitions/CanonicalOwnershipInfo",
       "family": "ownership",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -80,7 +80,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -88,7 +88,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -96,7 +96,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -104,7 +104,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -112,7 +112,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -120,7 +120,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -128,7 +128,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "timeline",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -136,7 +136,7 @@
       "definition": "#/definitions/CanonicalTimelineItem",
       "family": "unknown",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -144,7 +144,7 @@
       "definition": "#/definitions/CanonicalInteractionRequest",
       "family": "interaction",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -152,7 +152,7 @@
       "definition": "#/definitions/CanonicalInteractionRequest",
       "family": "form",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -160,7 +160,7 @@
       "definition": "#/definitions/CanonicalInteractionRequest",
       "family": "interaction",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -168,7 +168,7 @@
       "definition": "#/definitions/CanonicalInteractionRequest",
       "family": "unknown",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -176,7 +176,7 @@
       "definition": "#/definitions/CanonicalInteractionResponse",
       "family": "form",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -184,7 +184,7 @@
       "definition": "#/definitions/CanonicalWorkItem",
       "family": "work",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -192,7 +192,7 @@
       "definition": "#/definitions/CanonicalPlanSnapshot",
       "family": "work",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -200,7 +200,7 @@
       "definition": "#/definitions/CanonicalUsageObservation",
       "family": "usage",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -208,7 +208,7 @@
       "definition": "#/definitions/CanonicalCapabilitySet",
       "family": "capability",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -216,7 +216,7 @@
       "definition": "#/definitions/CanonicalErrorInfo",
       "family": "error",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -224,7 +224,7 @@
       "definition": "#/definitions/CanonicalCommandReceipt",
       "family": "receipt",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -232,7 +232,7 @@
       "definition": "#/definitions/CanonicalCommandReceipt",
       "family": "receipt",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -240,7 +240,7 @@
       "definition": "#/definitions/CanonicalCommandReceipt",
       "family": "receipt",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -248,7 +248,7 @@
       "definition": "#/definitions/CanonicalCommandReceipt",
       "family": "unknown",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -256,7 +256,7 @@
       "definition": "#/definitions/CanonicalSessionSnapshot",
       "family": "snapshot",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -264,7 +264,7 @@
       "definition": "#/definitions/CanonicalCreateResult",
       "family": "receipt",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -272,7 +272,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -280,7 +280,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -288,7 +288,7 @@
       "definition": "#/definitions/ChpEvent",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -296,7 +296,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -304,7 +304,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -312,7 +312,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -320,7 +320,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -328,7 +328,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -336,7 +336,7 @@
       "definition": "#/definitions/ChpEvent",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -344,7 +344,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -352,7 +352,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -360,7 +360,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -368,7 +368,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -376,7 +376,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -384,7 +384,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -392,7 +392,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -400,7 +400,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -408,7 +408,7 @@
       "definition": "#/definitions/CanonicalSessionEvent",
       "family": "event",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -416,7 +416,7 @@
       "definition": "#/definitions/ChpEvent",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -424,7 +424,7 @@
       "definition": "#/definitions/ChpHello",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -432,7 +432,7 @@
       "definition": "#/definitions/ChpSubscribe",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -440,7 +440,7 @@
       "definition": "#/definitions/ChpResync",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -448,7 +448,7 @@
       "definition": "#/definitions/ChpPing",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -456,7 +456,7 @@
       "definition": "#/definitions/ChpPong",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -464,7 +464,7 @@
       "definition": "#/definitions/ChpReceipt",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -472,7 +472,7 @@
       "definition": "#/definitions/ChpSnapshot",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -480,7 +480,7 @@
       "definition": "#/definitions/ChpCapabilities",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -488,7 +488,7 @@
       "definition": "#/definitions/ChpSessionPage",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -496,7 +496,7 @@
       "definition": "#/definitions/ChpCreateResult",
       "family": "transport",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -504,7 +504,7 @@
       "definition": "#/definitions/ChpCommand",
       "family": "command",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -512,7 +512,7 @@
       "definition": "#/definitions/ChpCommand",
       "family": "command",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -520,7 +520,23 @@
       "definition": "#/definitions/ChpCommand",
       "family": "command",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-prompt-steer.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
+      "origin": "hand-authored"
+    },
+    {
+      "file": "chp-command-prompt-default.json",
+      "definition": "#/definitions/ChpCommand",
+      "family": "command",
+      "schemaVersion": 1,
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -528,7 +544,7 @@
       "definition": "#/definitions/CanonicalOriginalCommand",
       "family": "command",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     },
     {
@@ -536,7 +552,7 @@
       "definition": "#/definitions/CanonicalOperationContract",
       "family": "command",
       "schemaVersion": 1,
-      "canonicalRevision": "cw-canonical-1-provisional.1",
+      "canonicalRevision": "cw-canonical-1-provisional.2",
       "origin": "hand-authored"
     }
   ]

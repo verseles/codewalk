@@ -131,6 +131,12 @@ final class FakeMigrationPayloadStore implements PayloadStore {
   final Set<String> failedKeys = {};
 
   @override
+  Future<bool> contains(String key) async {
+    reads.add(key);
+    return values.containsKey(key);
+  }
+
+  @override
   Future<String?> read(String key) async {
     reads.add(key);
     return values[key];

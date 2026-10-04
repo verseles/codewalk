@@ -9,6 +9,9 @@ final class RacingPayloadStore implements PayloadStore {
   int removals = 0;
 
   @override
+  Future<bool> contains(String key) async => value != null;
+
+  @override
   Future<String?> read(String key) async {
     final snapshot = value;
     // Model a valid replacement committed after the read took its snapshot and

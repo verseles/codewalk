@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
-  "schemaRevision": "chp-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
+  "schemaRevision": "chp-1-provisional.2",
   "status": "provisional",
   "protocol": "codewalk-host/1",
   "dialect": "http://json-schema.org/draft-07/schema#",
@@ -30,7 +30,7 @@
   ],
   "commandIntents": {
     "create": "CanonicalCreateSession",
-    "prompt": "CanonicalPromptDraft",
+    "prompt": "CanonicalPromptIntent",
     "interrupt": "CanonicalInterruptTarget",
     "respond": "CanonicalRespondIntent",
     "selection": "CanonicalSelectionChange",
@@ -52,6 +52,6 @@
     "terminalResize": "CanonicalTerminalResizeIntent",
     "terminalClose": "CanonicalTerminalCloseIntent"
   },
-  "schemaSha256": "066b7f8ed4398c7614315c678852e8a711f107c94857c2135daed5ab0e00b822",
-  "examplesManifestSha256": "92342c1e21bb770cfa6405b8e937ec44d7f0a802fb3664ef8b9bb230b18b6e5d"
+  "schemaSha256": "7ed9c368e137bc4d9ee860e8e831394a5f9de49c41d1ad3252417cc4d9f693c1",
+  "examplesManifestSha256": "7d2ea99002cf566044de838eab1fa857a5335077a8a0e54c431e20a08c33f3dd"
 }

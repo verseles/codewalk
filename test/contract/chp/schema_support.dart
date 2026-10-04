@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:json_schema/json_schema.dart';
 
 const contractPath = 'contracts/codewalk-host-v1';
-const provisionalCanonicalRevision = 'cw-canonical-1-provisional.1';
+const provisionalCanonicalRevision = 'cw-canonical-1-provisional.2';
 const canonicalModelCommit = 'df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e';
 
 Map<String, Object?> readContractObject(String relativePath) =>

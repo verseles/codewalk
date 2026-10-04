@@ -1,7 +1,7 @@
 {
   "type": "createResult",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "result": {
     "receipt": {
       "id": "command-2",

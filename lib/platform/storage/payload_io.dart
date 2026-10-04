@@ -134,6 +134,17 @@ final class FilePayloadStore implements PayloadStore {
   int get memoryEntries => _memory.length;
 
   @override
+  Future<bool> contains(String key) {
+    requireV2Key(key);
+    return _queue.run(
+      key,
+      () async =>
+          _memory.containsKey(key) ||
+          await _backend.read(key, maxBytes: maxReadableBytes) != null,
+    );
+  }
+
+  @override
   Future<String?> read(String key) {
     requireV2Key(key);
     return _queue.run(key, () async {

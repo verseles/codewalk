@@ -15,6 +15,10 @@ enum PayloadWriteResult { written, unchanged, refusedOversized }
 
 abstract interface class PayloadStore {
   Future<String?> read(String key);
+
+  /// Non-destructive presence check. Only confirmed absence returns false;
+  /// failures propagate so an importer cannot overwrite an unreadable value.
+  Future<bool> contains(String key);
   Future<PayloadWriteResult> write(String key, String value);
   Future<void> remove(String key);
 }
@@ -41,6 +45,12 @@ final class PreferencesPayloadStore implements PayloadStore {
   PreferencesPayloadStore(this.metadata);
   final V2MetadataStore metadata;
   final KeySerialExecutor _queue = KeySerialExecutor();
+
+  @override
+  Future<bool> contains(String key) {
+    requireV2Key(key);
+    return _queue.run(key, () async => await metadata.read(key) != null);
+  }
 
   @override
   Future<String?> read(String key) {

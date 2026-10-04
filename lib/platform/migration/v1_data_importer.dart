@@ -267,7 +267,7 @@ final class _ImportRun {
     if (completed.containsKey(opaque)) return;
     String status;
     try {
-      if (await importer.payloads.read(key) != null) {
+      if (await importer.payloads.contains(key)) {
         status = 'existing';
       } else {
         final result = await importer.payloads.write(key, jsonEncode(value));
@@ -323,6 +323,23 @@ final class _ImportRun {
             MigrationCategory.settings,
             field,
             MigrationPendingReason.malformed,
+          );
+        }
+      }
+      for (final field in decoded.keys) {
+        if (decoded[field] != null &&
+            !values.containsKey(field) &&
+            !{
+              'composerAutoApprovePermissions',
+              'localeCode',
+              'themeMode',
+              'speechApiBaseUrl',
+              'readAloudBaseUrl',
+            }.contains(field)) {
+          pending(
+            MigrationCategory.settings,
+            field,
+            MigrationPendingReason.unsupportedSettings,
           );
         }
       }

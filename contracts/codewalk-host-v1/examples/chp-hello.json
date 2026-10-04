@@ -1,7 +1,7 @@
 {
   "type": "hello",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "protocol": "codewalk-host/1",
   "host": "host-α",
   "harnesses": [

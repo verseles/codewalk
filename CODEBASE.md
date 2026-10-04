@@ -35,7 +35,7 @@ lib/shared/rendering/                   # Minimal GFM bridge and URL/file callba
 lib/platform/storage/storage.dart      # Storage API barrel; not initialized by the app graph
 lib/platform/storage/metadata_store.dart # cw2.* namespace and restartable schema-upgrade hooks
 lib/platform/storage/preferences_backend.dart # Guarded SharedPreferencesAsync adapter
-lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores and memory LRU
+lib/platform/storage/payload_{store,io}.dart # Bounded preferences/file payload stores, strict non-destructive presence checks, and memory LRU
 lib/platform/storage/endpoint_credentials.dart # Origin/profile-scoped password and pairing-token vault
 lib/platform/storage/{payload,credential}_factory*.dart # Conditional IO/Web backends
 lib/platform/migration/                # Unwired read-only legacy sources, restartable v1 importer and sanitized report
@@ -46,13 +46,14 @@ packages/codewalk_core/lib/src/{timeline,events,lifecycle,session}.dart # Canoni
 packages/codewalk_core/lib/src/{interactions,forms,work,usage}.dart # Explicit owners, manual choices/forms, work/plan and nullable usage contracts
 packages/codewalk_core/lib/src/{ports,catalog,workspace}.dart # Harness/session facets and read/mutation boundaries; no implementations
 packages/codewalk_core/lib/src/reducer/ # Pure event/hydration reduction, effects and bounded full-reference session LRU
-packages/codewalk_core/test/reducer/    # Observed A prefix convergence and synthetic causality/bounds checks
+packages/codewalk_core/test/reducer/    # Observed A prefix convergence, synthetic causality/bounds checks, and controlled review-race interleavings
 packages/codewalk_net/lib/codewalk_net.dart # Portable HTTP contracts, SSE decoder and HTTP/SSE bridge
 packages/codewalk_net/lib/codewalk_net_io.dart # Separate endpoint-scoped Dart IO transport entry point
 packages/{harness_opencode,harness_host}/lib/ # Empty public adapter boundaries
 packages/*/{pubspec.yaml,analysis_options.yaml,test/} # Workspace configuration and package tests
 test/v2/bootstrap_*_test.dart           # Graph lifetime, navigation and compact/wide bootstrap tests
-test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions
+test/v2/{shared,storage,migration}/     # Scoped rendering, layout, l10n, theme, storage and importer regressions, including VM payload-preservation composition coverage
+test/contract/chp/prompt_delivery_test.dart # Prompt intent delivery-shape and optional-default contract regressions
 contracts/codewalk-host-v1/             # Provisional canonical/CHP schema, examples, model map and revision hashes
 test/contract/chp/                     # Offline Draft 7 validation and synthetic model/edge parity checks
 tool/l10n/generate_v2_localizations.py   # Isolated official Flutter generation and scoped output check
@@ -86,23 +87,35 @@ interactions, work and revert. Ports observe history separately from explicit
 resume commands. Mutation guards require installation/version/scope agreement,
 fresh ownership evidence and affirmative restrictions before invoking a boundary.
 Replay requires operation-specific evidence, unresolved admission, reconciliation,
-the original scope and encoded payload, and no cancellation fence. Snapshots
-retain a read-start barrier and hydration generation for each independent read;
-these boundaries do not establish native authority. The separate pure reducer
-returns immutable session state and effects for the caller to execute. It merges
-events with authoritative full-text hydration, preserves independent read-start
-and generation barriers, and handles partial promotion observations without
-inventing replay cursors. Timeline retention is bounded to at most 500 items;
-the session store requires a configured LRU bound and keys full composite refs.
-The reducer is not wired to the app graph.
+the original scope and encoded payload, and no cancellation fence. Each
+`SnapshotBoundary` carries its collection's client read-start position, start
+time for same-position read ordering, and hydration generation; these boundaries
+do not establish native authority. The pure reducer returns immutable session
+state and caller-executed effects. Observed removal events retain their timeline
+clock even when local membership is ambiguous, fencing older reads; delayed
+removals do not erase a newer suffix. Partial history anchors retained rows on shared item IDs, while
+live items are ordered only when their stream positions are comparable and
+reordering notifies consumers. Immutable per-collection hydration-pending state
+keeps rejected collection snapshots (including work) and stream-boundary gaps
+hydrating across unrelated reads until an accepted authoritative read barrier
+clears that collection.
+Timeline retention is bounded to at most 500 items; the session store requires a
+configured LRU bound and keys full composite refs. The reducer is not wired to
+the app graph. `review_races_test.dart` adds 11 controlled synthetic
+interleavings; these are not native acceptance evidence.
 
 The separate CHP artifact defines canonical payloads and transport envelopes at
-the explicitly provisional `cw-canonical-1-provisional.1` and
-`chp-1-provisional.1` revisions. Its local Draft 7 schema, example manifest,
-definition map and hashes pin the accepted canonical model. Test-only
+the explicitly provisional `cw-canonical-1-provisional.2` and
+`chp-1-provisional.2` revisions, pinned to the unchanged canonical model commit
+`df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e`. `CanonicalPromptIntent` retains the
+original draft and optional open delivery; hand-authored examples cover omitted
+default, `queue` and `steer`, while focused tests guard the shape. The local
+Draft 7 schema, example manifest, definition map and `SHA256SUMS` integrity test
+cover the complete 74-file artifact inventory. Test-only
 projections keep wire shape outside pure core; constructor/policy semantics are
-checked separately from schema shape. Real two-adapter fit, final G2/G5 revision
-agreement, merge acceptance and Host implementation remain pending.
+checked separately from schema shape. The contract remains provisional: real
+G2/G5 evidence, merge acceptance, a production serializer and Host implementation
+remain pending.
 
 `codewalk_net` preserves HTTP statuses and raw response
 bodies, validates endpoint paths before obtaining authentication headers,
@@ -114,18 +127,24 @@ isolates, batching and connection watchdogs are not implemented here.
 Storage provides namespaced metadata, guarded schema migrations, bounded
 payloads and endpoint credentials independently of the app graph. IO payloads
 use the `cw2_payloads` directory and flushed temporary-file replacement; Web
-payloads use preferences. Native credentials use secure storage, while Web
-credentials remain instance-local memory. The separate importer reads legacy
-preferences, explicitly scoped secure keys and known SHA1 payload-file keys,
-writes only v2 destinations and checkpoints confirmed writes. Source absence is
-distinct from failure, corruption or refused size; those failures cannot select
-an older fallback and make it final. It preserves explicit AllowAll OFF and
-existing destinations during sequential resume, and records unmapped drafts for
-later review. The library requires an explicit exclusive-startup precondition;
-it supplies no lease or protection against concurrent writers. It is not wired
-to bootstrap. Actual Android legacy-backend configuration, pre-engine source
-preservation, report/recovered-draft UI, credential boundaries and a real
-installed v1.266 upgrade remain separate acceptance work.
+payloads use preferences. Both stores expose a strict, non-destructive presence
+check: lookup failures propagate rather than looking absent, so the importer
+cannot overwrite or checkpoint an unreadable existing payload. Native
+credentials use secure storage, while Web credentials remain instance-local
+memory. The separate importer reads legacy preferences, explicitly scoped
+secure keys and known SHA1 payload-file keys; it writes only v2 destinations and
+checkpoints confirmed writes. Source absence is distinct from failure,
+corruption or refused size; those failures cannot select
+an older fallback and make it final. It preserves explicit
+`composerAutoApprovePermissions: false` (AllowAll OFF) and existing destinations
+during sequential resume. Unsupported top-level settings are reported as
+unresolved opaque identities, and unmapped drafts are recorded for later review.
+`payload_preservation_test.dart` checks VM composition behavior, including
+failed destination lookups. The library requires an explicit exclusive-startup
+precondition; it supplies no lease or protection against concurrent writers. It
+is not wired to bootstrap. Actual Android legacy-backend configuration,
+pre-engine source preservation, report/recovered-draft UI, credential boundaries
+and a real installed v1.266 upgrade remain separate acceptance work.
 
 `.github/workflows/ci.yml` enforces the architecture guard in `quality` and adds
 `v2_foundations` for discovered package analysis/tests, planted guards, scoped

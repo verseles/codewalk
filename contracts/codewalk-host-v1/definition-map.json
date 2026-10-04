@@ -1,5 +1,5 @@
 {
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "canonicalModelCommit": "df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e",
   "definitions": {
     "CanonicalValue": {
@@ -577,6 +577,11 @@
         "PendingInput"
       ],
       "projection": "Existing domain type projected at the contract edge"
+    },
+    "CanonicalPromptIntent": {
+      "category": "canonical",
+      "modelTypes": ["PromptDraft", "SessionHandle", "Delivery"],
+      "projection": "Edge composition of SessionHandle.send draft and its optional delivery argument; not a new core model"
     },
     "CanonicalPromptDraft": {
       "category": "canonical",

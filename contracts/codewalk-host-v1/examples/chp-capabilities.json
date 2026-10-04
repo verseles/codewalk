@@ -1,7 +1,7 @@
 {
   "type": "capabilities",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "capabilities": {
     "harness": {
       "version": 1,

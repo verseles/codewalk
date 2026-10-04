@@ -1,7 +1,7 @@
 {
   "type": "event",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "event": {
     "type": "itemDelta",
     "meta": {

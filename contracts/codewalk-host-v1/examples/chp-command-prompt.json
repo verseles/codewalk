@@ -1,7 +1,7 @@
 {
   "type": "command",
   "schemaVersion": 1,
-  "canonicalRevision": "cw-canonical-1-provisional.1",
+  "canonicalRevision": "cw-canonical-1-provisional.2",
   "command": {
     "id": "command-prompt",
     "harness": {
@@ -21,9 +21,12 @@
     "operation": "prompt",
     "connectedVersion": "synthetic-1",
     "intent": {
-      "text": "Synthetic prompt",
-      "attachments": [],
-      "mentions": []
+      "draft": {
+        "text": "Synthetic prompt",
+        "attachments": [],
+        "mentions": []
+      },
+      "delivery": "queue"
     }
   }
 }

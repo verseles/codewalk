@@ -86,6 +86,9 @@ final class SessionState {
       _usagePositions = immutableMap(draft.usagePositions),
       _admissions = Set<ItemId>.unmodifiable(draft.admissions),
       _retiredGenerations = immutableList(draft.retiredGenerations),
+      _hydrationPending = Set<SessionCollection>.unmodifiable(
+        draft.hydrationPending,
+      ),
       _seen = immutableList(draft.seen);
 
   final SessionRef ref;
@@ -114,13 +117,14 @@ final class SessionState {
   final Map<ItemId, StreamPosition> _itemPositions;
   final Map<ItemId, StreamPosition> _itemOrder;
   final Map<SessionCollection, StreamPosition> _fields;
-  final Map<SessionCollection, StreamPosition> _snapshotStarts;
+  final Map<SessionCollection, SnapshotBoundary> _snapshotStarts;
   final Map<SessionCollection, StreamPosition> _readBarriers;
   final Map<String, StreamPosition> _interactionPositions;
   final Map<String, StreamPosition> _interactionRemovals;
   final Map<String, StreamPosition> _usagePositions;
   final Set<ItemId> _admissions;
   final List<(ItemId, String)> _retiredGenerations;
+  final Set<SessionCollection> _hydrationPending;
   final List<String> _seen;
 
   /// Bounded bookkeeping counts for diagnostics and deterministic limit tests.
@@ -387,10 +391,14 @@ Reduction hydrate(SessionState state, SessionSnapshot snapshot) {
       draft.acceptSnapshot(SessionCollection.work, work.boundary)) {
     if (work.values.any((item) => !draft.relatedWork(item))) {
       draft.refetch(SessionCollection.work, 'workScopeMismatch');
+      draft.acceptedSnapshots--;
     } else if (draft.canReplace(work.boundary, work.complete)) {
       draft.recordReadBarrier(SessionCollection.work, work.boundary);
       draft.work = draft.bound(work.values, SessionCollection.work);
       draft.changed = true;
+    } else {
+      draft.acceptedSnapshots--;
+      draft.refetch(SessionCollection.work, 'workSnapshotIncomplete');
     }
   }
   final plan = snapshot.plan;
@@ -421,6 +429,7 @@ Reduction hydrate(SessionState state, SessionSnapshot snapshot) {
     draft.changed = true;
   }
   if (draft.acceptedSnapshots > 0 &&
+      draft.hydrationPending.isEmpty &&
       !draft.effects.any(
         (effect) =>
             effect is Rehydrate ||
@@ -471,6 +480,7 @@ final class _Draft {
       usagePositions = Map.of(state._usagePositions),
       admissions = Set.of(state._admissions),
       retiredGenerations = List.of(state._retiredGenerations),
+      hydrationPending = Set.of(state._hydrationPending),
       seen = List.of(state._seen);
 
   final SessionRef ref;
@@ -496,7 +506,7 @@ final class _Draft {
   Map<ItemId, StreamPosition> itemPositions = {};
   Map<ItemId, StreamPosition> itemOrder = {};
   Map<SessionCollection, StreamPosition> fields = {};
-  Map<SessionCollection, StreamPosition> snapshotStarts = {};
+  Map<SessionCollection, SnapshotBoundary> snapshotStarts = {};
   Map<SessionCollection, StreamPosition> readBarriers = {};
   Map<String, StreamPosition> interactionPositions = {};
   Map<String, StreamPosition> interactionRemovals = {};
@@ -508,6 +518,7 @@ final class _Draft {
   bool changed = false;
   bool timelineTruncated = false;
   int acceptedSnapshots = 0;
+  Set<SessionCollection> hydrationPending = {};
 
   SessionState freeze() => SessionState._(this);
   Reduction result() {
@@ -516,6 +527,20 @@ final class _Draft {
   }
 
   void refetch(SessionCollection collection, String reason) {
+    // An independently completing read cannot settle another collection's
+    // rejected snapshot. Resident limits/admission overlays are not rejection.
+    if ({
+      'snapshotAuthorityUnknown',
+      'workScopeMismatch',
+      'workSnapshotIncomplete',
+      'itemSourceMismatch',
+      'historyReadBeforeRemoval',
+      'interactionScopeMismatch',
+      'usageScopeMismatch',
+      'planScopeMismatch',
+    }.contains(reason)) {
+      hydrationPending.add(collection);
+    }
     if (!effects.whereType<Refetch>().any(
       (effect) => effect.collection == collection && effect.reason == reason,
     )) {
@@ -539,6 +564,7 @@ final class _Draft {
     if (boundary.authority.known == SnapshotAuthority.authoritative &&
         !_newer(readBarriers[field], boundary.readStart)) {
       readBarriers[field] = boundary.readStart;
+      hydrationPending.remove(field);
     }
   }
 
@@ -551,6 +577,7 @@ final class _Draft {
         boundary.owner is! SessionOwner ||
         (boundary.owner as SessionOwner).session != ref ||
         !_sameStream(lastPosition, boundary.readStart)) {
+      hydrationPending.add(field);
       effects.add(Rehydrate(ref, 'snapshotBoundaryMismatch'));
       return false;
     }
@@ -559,12 +586,16 @@ final class _Draft {
       refetch(field, 'snapshotAuthorityUnknown');
       return false;
     }
-    if (_newer(snapshotStarts[field], boundary.readStart) ||
+    final previous = snapshotStarts[field];
+    if (_newer(previous?.readStart, boundary.readStart) ||
+        (_sameStream(previous?.readStart, boundary.readStart) &&
+            previous!.readStart.seq == boundary.readStart.seq &&
+            previous.readStartedAt.isAfter(boundary.readStartedAt)) ||
         _newer(readBarriers[field], boundary.readStart)) {
       return false;
     }
-    snapshotStarts[field] = boundary.readStart;
     if (!overlay && _newer(fields[field], boundary.readStart)) return false;
+    snapshotStarts[field] = boundary;
     acceptedSnapshots++;
     return true;
   }
@@ -605,6 +636,10 @@ final class _Draft {
       return;
     }
     final at = timeline.indexWhere((current) => current.id == item.id);
+    if (at < 0 && _atLeast(fields[SessionCollection.timeline], position)) {
+      refetch(SessionCollection.timeline, 'itemBeforeRemoval');
+      return;
+    }
     if (at >= 0) {
       final old = timeline[at];
       final oldPosition = itemPositions[item.id];
@@ -613,7 +648,7 @@ final class _Draft {
         if (_sameStream(itemOrder[item.id], position) &&
             position.seq < itemOrder[item.id]!.seq) {
           itemOrder[item.id] = position;
-          orderLive();
+          if (orderLive()) changed = true;
         }
         return;
       }
@@ -646,16 +681,30 @@ final class _Draft {
     changed = true;
   }
 
-  void orderLive() {
+  bool orderLive() {
     // Positions order newly observed items only when both are comparable.
     // Authoritative history publication supplies its own explicit order.
-    if (timeline.every(
-      (item) => _sameStream(itemOrder[item.id], lastPosition),
-    )) {
-      timeline.sort(
-        (a, b) => itemOrder[a.id]!.seq.compareTo(itemOrder[b.id]!.seq),
-      );
-    }
+    final start =
+        timeline.lastIndexWhere(
+          (item) => !_sameStream(itemOrder[item.id], lastPosition),
+        ) +
+        1;
+    final suffix = timeline.sublist(start);
+    final previousOrder = {
+      for (var i = 0; i < suffix.length; i++) suffix[i].id: i,
+    };
+    suffix.sort((a, b) {
+      final comparison = itemOrder[a.id]!.seq.compareTo(itemOrder[b.id]!.seq);
+      return comparison != 0
+          ? comparison
+          : previousOrder[a.id]!.compareTo(previousOrder[b.id]!);
+    });
+    final reordered = [
+      for (var i = 0; i < suffix.length; i++)
+        suffix[i].id != timeline[start + i].id,
+    ].any((value) => value);
+    timeline.setRange(start, timeline.length, suffix);
+    return reordered;
   }
 
   void limitTimeline() {
@@ -739,10 +788,18 @@ final class _Draft {
   }
 
   void removeFrom(ItemId id, StreamPosition position) {
+    // This clocks the native removal observation, even when local membership
+    // is ambiguous. A failed projection must still fence pre-removal reads.
     if (!acceptField(SessionCollection.timeline, position)) return;
     final at = timeline.indexWhere((item) => item.id == id);
     if (at < 0) {
       refetch(SessionCollection.timeline, 'removalBoundaryMissing');
+      return;
+    }
+    if (timeline
+        .skip(at)
+        .any((item) => _newer(itemPositions[item.id], position))) {
+      refetch(SessionCollection.timeline, 'removalBeforeItem');
       return;
     }
     timeline.removeRange(at, timeline.length);
@@ -805,7 +862,8 @@ final class _Draft {
         admissions.remove(incoming.id);
       }
     }
-    for (final current in timeline) {
+    for (var index = 0; index < timeline.length; index++) {
+      final current = timeline[index];
       if (!fetched.contains(current.id) &&
           (!canReplace(collection.boundary, collection.complete) ||
               admissions.contains(current.id) ||
@@ -813,7 +871,22 @@ final class _Draft {
                 itemPositions[current.id],
                 collection.boundary.readStart,
               ))) {
-        merged.add(current);
+        // A partial tail page must not move retained older rows behind it.
+        // Use its next shared stable ID as an anchor; disjoint older pages keep
+        // their existing prepend behavior without comparing opaque IDs.
+        final nextAnchor = timeline
+            .skip(index + 1)
+            .where((item) => fetched.contains(item.id))
+            .firstOrNull;
+        final anchor = nextAnchor == null
+            ? -1
+            : merged.indexWhere((item) => item.id == nextAnchor.id);
+        if (!canReplace(collection.boundary, collection.complete) &&
+            anchor >= 0) {
+          merged.insert(anchor, current);
+        } else {
+          merged.add(current);
+        }
         if (admissions.contains(current.id)) {
           refetch(SessionCollection.timeline, 'admissionMissingFromHistory');
         }

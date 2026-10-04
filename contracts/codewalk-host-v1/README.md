@@ -8,8 +8,9 @@ connection.
 
 `revision.json` pins canonical model commit
 `df3ed903c6c6ed6700ebb1b2fcbb2329db6c2e5e` and the provisional app-facing revision
-`cw-canonical-1-provisional.1`. **Final G5 remains pending:** real Codex/Claude
-recordings, their G2 mappings and reducer assertions must validate against the
+`cw-canonical-1-provisional.2` (`chp-1-provisional.2` schema revision).
+**Final G5 remains pending:** real Codex/Claude recordings, their G2 mappings
+and reducer assertions must validate against the
 same final revision, and the artifacts must meet the merge criterion. Synthetic
 examples and review-branch publication do not establish those gates.
 
@@ -49,6 +50,10 @@ are `hello`, `event`, `subscribe`, `resync`, `ping`, `pong`, `command`, `receipt
 reference a complete canonical event; an optional routing `session` must agree
 with its actual owner. Command envelopes carry the canonical original intent;
 known operations constrain their intent to the corresponding typed port input.
+Prompt commands use `CanonicalPromptIntent`: the original `draft` plus an
+optional open `delivery` value matching `SessionHandle.send`. Omission retains
+the adapter default; queue, steer and unknown values remain distinct. Revision
+.2 does not silently accept the older flattened prompt shape.
 Unknown operations can be retained as observations and must be denied before
 mutation. JSON validity never grants execution authority.
 
@@ -137,3 +142,6 @@ Tests run on the VM, load only local artifacts, validate every manifest example,
 reject meaningful malformed variants and compare projections with actual
 canonical codecs/constructors. No native/provider model is called. Root gates
 also cover this dev dependency and the retained legacy regression suite.
+
+`SHA256SUMS` covers the complete local artifact bundle, including this README;
+the integrity regression checks both the digests and the full inventory.

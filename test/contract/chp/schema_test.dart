@@ -48,6 +48,38 @@ void main() {
       );
     });
 
+    test('checksum inventory covers the complete current artifact bundle', () {
+      final root = Directory(contractPath);
+      final covered = <String>{};
+      for (final line in File('$contractPath/SHA256SUMS').readAsLinesSync()) {
+        final match = RegExp(
+          r'^([a-f0-9]{64})  ([a-zA-Z0-9/_.-]+)$',
+        ).firstMatch(line);
+        expect(match, isNotNull);
+        final relative = match!.group(2)!;
+        expect(relative.split('/'), isNot(contains('..')));
+        expect(covered.add(relative), isTrue);
+        expect(
+          sha256
+              .convert(File('$contractPath/$relative').readAsBytesSync())
+              .toString(),
+          match.group(1),
+          reason: relative,
+        );
+      }
+      final actual = root
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map(
+            (file) => file.path
+                .substring(root.path.length + 1)
+                .replaceAll(Platform.pathSeparator, '/'),
+          )
+          .where((path) => path != 'SHA256SUMS')
+          .toSet();
+      expect(covered, actual);
+    });
+
     test('all references are internal and resolve without a provider', () {
       final root = loadRootSchema();
       expect(root[r'$schema'], 'http://json-schema.org/draft-07/schema#');
