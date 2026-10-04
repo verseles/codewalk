@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 import 'manifest.dart';
+import 'widget_types.dart';
 
 final class DartSource {
   DartSource(this.path, this.contents) {
@@ -71,6 +72,14 @@ final class DependencyGraph {
   final Map<String, WorkspacePackage> workspace = {};
   final Map<String, String> packageLibraries = {};
   final Map<String, DartSource> _sources = {};
+  late final WidgetTypes _widgetTypes = WidgetTypes(
+    unit: (path) => source(path).unit,
+    resolve: resolve,
+    framework: resolve(
+      p.join(root, 'lib/main_v2.dart'),
+      'package:flutter/src/widgets/framework.dart',
+    ),
+  );
 
   String relative(String path) => portable(p.relative(path, from: root));
   bool isLocal(String path) => p.isWithin(root, path);
@@ -184,58 +193,8 @@ final class DependencyGraph {
     return visible;
   }
 
-  Set<String> importedWidgetTypes(String path) {
-    final classes = <String, String>{};
-    final visited = <String>{};
-    final queue = <String>[path];
-    while (queue.isNotEmpty) {
-      final current = queue.removeLast();
-      if (!visited.add(current)) continue;
-      final unit = source(current).unit;
-      for (final declaration
-          in unit.declarations.whereType<ClassDeclaration>()) {
-        final base = declaration.extendsClause?.superclass.name.lexeme;
-        if (base != null) classes[declaration.namePart.typeName.lexeme] = base;
-      }
-      for (final alias in unit.declarations.whereType<GenericTypeAlias>()) {
-        final type = alias.type;
-        if (type is NamedType) classes[alias.name.lexeme] = type.name.lexeme;
-      }
-      for (final alias in unit.declarations.whereType<ClassTypeAlias>()) {
-        classes[alias.name.lexeme] = alias.superclass.name.lexeme;
-      }
-      for (final directive in unit.directives.whereType<NamespaceDirective>()) {
-        for (final uri in [
-          directive.uri.stringValue,
-          ...directive.configurations.map((item) => item.uri.stringValue),
-        ]) {
-          if (uri == null) continue;
-          final resolved = resolve(current, uri);
-          if (resolved != null && isLocal(resolved)) queue.add(resolved);
-        }
-      }
-    }
-    final widgets = <String>{
-      'Widget',
-      'StatelessWidget',
-      'StatefulWidget',
-      'State',
-      'HookWidget',
-      'ConsumerWidget',
-      'ConsumerStatefulWidget',
-      'ConsumerState',
-    };
-    var changed = true;
-    while (changed) {
-      changed = false;
-      for (final entry in classes.entries) {
-        if (widgets.contains(entry.value)) {
-          changed = widgets.add(entry.key) || changed;
-        }
-      }
-    }
-    return widgets;
-  }
+  Set<String> widgetDeclarationNames(String path) =>
+      _widgetTypes.declarations(path);
 
   Set<String> importedHarnessNames(String path) =>
       _importedHarnessNames(path, {path});

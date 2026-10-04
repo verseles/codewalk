@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
+const widgetImports =
+    "import 'package:flutter/widgets.dart';\nimport 'package:flutter/widgets.dart' as fw;\n";
+
 void main() {
   late Directory compiled;
   late String executable;
@@ -92,7 +95,16 @@ environment:
         });
         write('$path/lib/$name.dart', 'library;\n');
       }
-      write('.dart_tool/stubs/flutter/lib/widgets.dart', 'library;\n');
+      write(
+        '.dart_tool/stubs/flutter/lib/widgets.dart',
+        "export 'src/widgets/framework.dart';\n",
+      );
+      write('.dart_tool/stubs/flutter/lib/src/widgets/framework.dart', '''
+abstract class Widget {}
+abstract class StatelessWidget extends Widget {}
+abstract class StatefulWidget extends Widget {}
+abstract class State<T> {}
+''');
       write(
         '.dart_tool/package_config.json',
         jsonEncode({'configVersion': 2, 'packages': external}),
@@ -407,7 +419,7 @@ dependencies:
       'widgets reject locator factories: $declaration',
       () => reject('widget-locator', {
         'lib/app/composition_root.dart':
-            "import 'package:get_it/get_it.dart'; $declaration class Page extends StatelessWidget { Object build() => locator().get<Object>(); }\n",
+            "$widgetImports import 'package:get_it/get_it.dart'; $declaration class Page extends StatelessWidget { Object build() => locator().get<Object>(); }\n",
       }),
     );
   }
@@ -416,7 +428,7 @@ dependencies:
     'widgets reject service locator lookup tearoffs',
     () => reject('widget-locator', {
       'lib/app/composition_root.dart':
-          "import 'package:get_it/get_it.dart'; final lookup = GetIt.I.get; class Page extends StatelessWidget { Object build() => lookup<Object>(); }\n",
+          "$widgetImports import 'package:get_it/get_it.dart'; final lookup = GetIt.I.get; class Page extends StatelessWidget { Object build() => lookup<Object>(); }\n",
     }),
   );
 
@@ -431,7 +443,7 @@ dependencies:
       'widgets reject locator lookups: $source',
       () => reject('widget-locator', {
         'lib/app/composition_root.dart':
-            "import 'package:get_it/get_it.dart';\n$source\n",
+            "$widgetImports import 'package:get_it/get_it.dart'; import 'package:get_it/get_it.dart' as gi;\n$source\n",
       }),
     );
   }
@@ -461,7 +473,7 @@ dependencies:
             "import 'package:get_it/get_it.dart'; final locator = GetIt.instance;\n",
         'lib/app/facade.dart': "export 'composition_root.dart' show locator;\n",
         'lib/app/page.dart':
-            "import 'facade.dart'${invocation.startsWith('root.') ? ' as root' : ''}; class Page extends StatelessWidget { Object build() => $invocation; }\n",
+            "$widgetImports import 'facade.dart'${invocation.startsWith('root.') ? ' as root' : ''}; class Page extends StatelessWidget { Object build() => $invocation; }\n",
       }),
     );
   }
@@ -472,7 +484,7 @@ dependencies:
         'lib/features/chat/scopes.dart':
             "void unrelated() { const kind = 'opencode'; } bool valid(String kind) => kind == 'generic';\n",
         'lib/app/composition_root.dart':
-            "import 'package:get_it/get_it.dart'; final locator = GetIt.I; class Page extends StatelessWidget { Object build(Object Function() locator) => locator(); }\n",
+            "$widgetImports import 'package:get_it/get_it.dart'; final locator = GetIt.I; class Page extends StatelessWidget { Object build(Object Function() locator) => locator(); }\n",
       },
     );
     expect(result.exitCode, 0, reason: result.stderr.toString());
@@ -486,7 +498,7 @@ dependencies:
       'lib/app/facade.dart':
           "import 'composition_root.dart' as root; final exposed = root.locator;\n",
       'lib/app/page.dart':
-          "import 'facade.dart' show exposed; class Page extends StatelessWidget { Object build() => exposed<Object>(); }\n",
+          "$widgetImports import 'facade.dart' show exposed; class Page extends StatelessWidget { Object build() => exposed<Object>(); }\n",
     }),
   );
 
@@ -503,7 +515,8 @@ dependencies:
   test(
     'imported custom widget base does not hide a lookup',
     () => reject('widget-locator', {
-      'lib/shared/base.dart': 'class CustomBase extends StatelessWidget {}\n',
+      'lib/shared/base.dart':
+          '${widgetImports}class CustomBase extends StatelessWidget {}\n',
       'lib/app/composition_root.dart':
           "import '../shared/base.dart'; import 'package:get_it/get_it.dart'; class Page extends CustomBase { Object build() => GetIt.I<Object>(); }\n",
     }),
@@ -596,8 +609,274 @@ dependencies:
       'widget type aliases cannot hide service lookups: $alias',
       () => reject('widget-locator', {
         'lib/app/composition_root.dart':
-            "import 'package:get_it/get_it.dart'; $alias class Page extends WidgetBase { Object build() => GetIt.I<Object>(); }\n",
+            "$widgetImports import 'package:get_it/get_it.dart'; $alias class Page extends WidgetBase { Object build() => GetIt.I<Object>(); }\n",
       }),
+    );
+  }
+
+  test('prefixed widget and ordinary types retain distinct identities', () async {
+    const imports =
+        "import '../shared/widget_base.dart' as ui; import '../shared/plain_base.dart' as model; import 'package:get_it/get_it.dart';\n";
+    final files = {
+      'lib/shared/widget_base.dart':
+          '${widgetImports}class Base extends StatelessWidget {}\n',
+      'lib/shared/plain_base.dart': 'class Base {}\n',
+      'lib/app/composition_root.dart':
+          '${imports}class Service extends model.Base { Object read() => GetIt.I<Object>(); }\n',
+    };
+    final positive = await run(files: files);
+    expect(positive.exitCode, 0, reason: positive.stderr.toString());
+    files['lib/app/composition_root.dart'] =
+        '${imports}class Page extends ui.Base { Object build() => GetIt.I<Object>(); }\n';
+    await reject('widget-locator', files);
+  });
+
+  test(
+    'an imported widget basename does not override a local ordinary class',
+    () async {
+      final files = {
+        'lib/shared/widget_base.dart':
+            '${widgetImports}class Base extends StatelessWidget {}\n',
+        'lib/app/composition_root.dart':
+            "import '../shared/widget_base.dart' as ui; import 'package:get_it/get_it.dart'; class Base {} class Service extends Base { Object read() => GetIt.I<Object>(); }\n",
+      };
+      final result = await run(files: files);
+      expect(result.exitCode, 0, reason: result.stderr.toString());
+    },
+  );
+
+  test(
+    'local framework-name shadow and prefixed Flutter reference differ',
+    () async {
+      final files = {
+        'lib/app/composition_root.dart':
+            "$widgetImports import 'package:get_it/get_it.dart'; class StatelessWidget {} class Service extends StatelessWidget { Object read() => GetIt.I<Object>(); }\n",
+      };
+      final positive = await run(files: files);
+      expect(positive.exitCode, 0, reason: positive.stderr.toString());
+      files['lib/app/composition_root.dart'] =
+          "$widgetImports import 'package:get_it/get_it.dart'; class StatelessWidget {} class Page extends fw.StatelessWidget { Object build() => GetIt.I<Object>(); }\n";
+      await reject('widget-locator', files);
+    },
+  );
+
+  for (final directive in [
+    "import '../shared/widget_base.dart' hide Base;",
+    "import '../shared/widget_base.dart' show Other;",
+    "import '../shared/widget_facade.dart';",
+  ]) {
+    test(
+      'show/hide keeps ordinary same-name imports ordinary: $directive',
+      () async {
+        final result = await run(
+          files: {
+            'lib/shared/widget_base.dart':
+                '${widgetImports}class Base extends StatelessWidget {} class Other {}\n',
+            'lib/shared/widget_facade.dart':
+                "export 'widget_base.dart' hide Base;\n",
+            'lib/shared/plain_base.dart': 'class Base {}\n',
+            'lib/app/composition_root.dart':
+                "$directive import '../shared/plain_base.dart' show Base; import 'package:get_it/get_it.dart'; class Service extends Base { Object read() => GetIt.I<Object>(); }\n",
+          },
+        );
+        expect(result.exitCode, 0, reason: result.stderr.toString());
+      },
+    );
+  }
+
+  test(
+    'visible widget export still blocks lookup through a prefix',
+    () => reject('widget-locator', {
+      'lib/shared/widget_base.dart':
+          '${widgetImports}class Base extends StatelessWidget {}\n',
+      'lib/shared/widget_facade.dart': "export 'widget_base.dart' show Base;\n",
+      'lib/app/composition_root.dart':
+          "import '../shared/widget_facade.dart' as ui show Base; import 'package:get_it/get_it.dart'; class Page extends ui.Base { Object build() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test('ordinary imports do not leak into a consumer public namespace', () async {
+    final result = await run(
+      files: {
+        'lib/shared/widget_base.dart':
+            '${widgetImports}class Base extends StatelessWidget {}\n',
+        'lib/shared/not_a_facade.dart':
+            "import 'widget_base.dart'; class Helper {}\n",
+        'lib/shared/plain_base.dart': 'class Base {}\n',
+        'lib/app/composition_root.dart':
+            "import '../shared/not_a_facade.dart'; import '../shared/plain_base.dart'; import 'package:get_it/get_it.dart'; class Service extends Base { Object read() => GetIt.I<Object>(); }\n",
+      },
+    );
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+  });
+
+  test(
+    'exported prefixed typedef resolves in its declaring library',
+    () => reject('widget-locator', {
+      'lib/shared/widget_base.dart':
+          '${widgetImports}class Base extends StatelessWidget {}\n',
+      'lib/shared/widget_alias.dart':
+          "import 'widget_base.dart' as ui; typedef Alias = ui.Base;\n",
+      'lib/shared/widget_facade.dart':
+          "export 'widget_alias.dart' show Alias;\n",
+      'lib/app/composition_root.dart':
+          "import '../shared/widget_facade.dart' as view; import 'package:get_it/get_it.dart'; class Page extends view.Alias { Object build() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test(
+    'conditional widget ancestry covers every export alternative',
+    () => reject('widget-locator', {
+      'lib/shared/widget_base.dart':
+          '${widgetImports}class Base extends StatelessWidget {}\n',
+      'lib/shared/plain_base.dart': 'class Base {}\n',
+      'lib/shared/widget_facade.dart':
+          "export 'plain_base.dart' if (dart.library.io) 'widget_base.dart' show Base;\n",
+      'lib/app/composition_root.dart':
+          "import '../shared/widget_facade.dart'; import 'package:get_it/get_it.dart'; class Page extends Base { Object build() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  void vendorException(Map<String, dynamic> value) {
+    (value['vendored'] as List).add({
+      'path': 'packages/harness_host/lib/vendor/native_schema.dart',
+      'reason':
+          'Pinned upstream generated wire schema, kept inside governed adapter.',
+    });
+    (value['sizeExceptions'] as List).add({
+      'path': 'packages/harness_host/lib/vendor/native_schema.dart',
+      'category': 'vendor',
+      'reason': 'Pinned upstream schema exceeds the authored-file size budget.',
+    });
+  }
+
+  test('exact vendor size exception permits only the recorded file', () async {
+    final files = {
+      'packages/harness_host/lib/vendor/native_schema.dart':
+          '${List.filled(1501, '// pinned vendor line').join('\n')}\n',
+    };
+    final positive = await run(files: files, changeManifest: vendorException);
+    expect(positive.exitCode, 0, reason: positive.stderr.toString());
+    files['packages/harness_host/lib/vendor/authored_adapter.dart'] =
+        '${List.filled(1501, '// authored line').join('\n')}\n';
+    final negative = await run(files: files, changeManifest: vendorException);
+    expect(negative.exitCode, 1);
+    expect(negative.stderr.toString(), contains('[file-size]'));
+    expect(negative.stderr.toString(), contains('authored_adapter.dart'));
+  });
+
+  test('vendor size exception keeps other architecture guards active', () async {
+    final result = await run(
+      files: {
+        'packages/harness_host/lib/vendor/native_schema.dart':
+            "part of 'owner.dart';\n${List.filled(1501, '// pinned vendor line').join('\n')}\n",
+      },
+      changeManifest: vendorException,
+    );
+    expect(result.exitCode, 1);
+    expect(result.stderr.toString(), contains('[part-of]'));
+    expect(result.stderr.toString(), isNot(contains('[file-size]')));
+  });
+
+  test(
+    'retained oversized Dio and part-of baseline stays isolated from v2',
+    () async {
+      final files = {
+        'lib/presentation/v1_owner.dart':
+            "import 'package:dio/dio.dart'; part 'v1_fragment.dart';\n${List.filled(1501, '// retained v1 line').join('\n')}\n",
+        'lib/presentation/v1_fragment.dart':
+            "part of 'v1_owner.dart'; class Retained {}\n",
+      };
+      final positive = await run(files: files);
+      expect(positive.exitCode, 0, reason: positive.stderr.toString());
+      files['lib/shared/facade.dart'] =
+          "export '../presentation/v1_owner.dart';\n";
+      files['lib/app/new_consumer.dart'] = "import '../shared/facade.dart';\n";
+      final negative = await run(files: files);
+      expect(negative.exitCode, 1);
+      expect(negative.stderr.toString(), contains('[legacy-import]'));
+      expect(negative.stderr.toString(), contains('lib/app/new_consumer.dart'));
+    },
+  );
+
+  test(
+    'valid Flutter interface implementation cannot bypass widget lookup rule',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "$widgetImports import 'package:get_it/get_it.dart'; class Page implements fw.StatelessWidget { @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation); Object read() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test(
+    'widget interface alias retains its defining namespace',
+    () => reject('widget-locator', {
+      'lib/shared/widget_contract.dart':
+          "import 'package:flutter/widgets.dart' as fw; typedef Contract = fw.StatelessWidget;\n",
+      'lib/app/composition_root.dart':
+          "import '../shared/widget_contract.dart' as ui; import 'package:get_it/get_it.dart'; class Page implements ui.Contract { @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation); Object read() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test('ordinary prefixed same-name interface remains ordinary', () async {
+    final result = await run(
+      files: {
+        'lib/shared/plain_contract.dart': 'abstract class StatelessWidget {}\n',
+        'lib/app/composition_root.dart':
+            "$widgetImports import '../shared/plain_contract.dart' as model; import 'package:get_it/get_it.dart'; class Service implements model.StatelessWidget { Object read() => GetIt.I<Object>(); }\n",
+      },
+    );
+    expect(result.exitCode, 0, reason: result.stderr.toString());
+  });
+
+  test(
+    'widget-constrained mixin body cannot look up services',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "$widgetImports import 'package:get_it/get_it.dart'; mixin WidgetAccess on fw.StatelessWidget { Object read() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test(
+    'mixin implementing widget interface cannot look up services',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "$widgetImports import 'package:get_it/get_it.dart'; mixin WidgetAccess implements fw.StatelessWidget { Object read() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test(
+    'class mixin application carries widget interface identity',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "$widgetImports import 'package:get_it/get_it.dart'; mixin Contract implements fw.StatelessWidget {} class Page with Contract { @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation); Object read() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  test(
+    'class alias preserves mixin widget ancestry',
+    () => reject('widget-locator', {
+      'lib/app/composition_root.dart':
+          "$widgetImports import 'package:get_it/get_it.dart'; mixin Contract implements fw.StatelessWidget {} abstract class MixedBase = Object with Contract; class Page extends MixedBase { @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation); Object read() => GetIt.I<Object>(); }\n",
+    }),
+  );
+
+  for (final declaration in [
+    'class Service implements Comparable<fw.Widget> { @override dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation); Object read() => GetIt.I<Object>(); }',
+    'class Plain {} mixin Ordinary on Plain { Object read() => GetIt.I<Object>(); }',
+    'mixin Ordinary on List<fw.Widget> { Object read() => GetIt.I<Object>(); }',
+    'mixin Ordinary<T extends fw.Widget> on Object { Object read() => GetIt.I<Object>(); }',
+  ]) {
+    test(
+      'ordinary outer ancestry ignores widget type arguments and bounds: $declaration',
+      () async {
+        final result = await run(
+          files: {
+            'lib/app/composition_root.dart':
+                "$widgetImports import 'package:get_it/get_it.dart'; $declaration\n",
+          },
+        );
+        expect(result.exitCode, 0, reason: result.stderr.toString());
+      },
     );
   }
 

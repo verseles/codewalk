@@ -80,7 +80,7 @@ void main(List<String> arguments) {
         manifest,
         violations,
         importedLocators: graph.importedLocators(path),
-        importedWidgetTypes: graph.importedWidgetTypes(path),
+        widgetDeclarationNames: graph.widgetDeclarationNames(path),
         importedHarnessNames: manifest.isFeature(relative)
             ? graph.importedHarnessNames(path)
             : const {},

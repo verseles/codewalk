@@ -30,6 +30,7 @@ packages/{codewalk_core,codewalk_net,harness_opencode,harness_host}/
 test/v2/bootstrap_smoke_test.dart       # Actual v2 entry point at compact/wide viewport sizes
 tool/ci/import_rules.dart               # CI entry point for governed architecture checks
 tool/ci/architecture/                   # Manifest validation, dependency closure and AST rules
+tool/ci/architecture/widget_types.dart  # Widget ancestry by declaration identity and import/export visibility
 tool/ci/v2_architecture_manifest.json   # New surface, retained reference and narrow vendor/generated scopes
 tool/ci/test/import_rules_test.dart     # Real CLI planted-violation regression cases
 tool/ci/check_v2_foundations.py         # Dynamic workspace discovery, package checks and explicit v2 targets

@@ -13,7 +13,7 @@ final class AstRules extends RecursiveAstVisitor<void> {
     this.manifest,
     this.violations, {
     this.importedLocators = const {},
-    this.importedWidgetTypes = const {},
+    this.widgetDeclarationNames = const {},
     this.importedHarnessNames = const {},
   });
 
@@ -22,27 +22,16 @@ final class AstRules extends RecursiveAstVisitor<void> {
   final ArchitectureManifest manifest;
   final List<Violation> violations;
   final Set<String> importedLocators;
-  final Set<String> importedWidgetTypes;
+  final Set<String> widgetDeclarationNames;
   final Set<String> importedHarnessNames;
   final List<VariableDeclaration> _variables = [];
   final List<FunctionDeclaration> _functions = [];
   final List<MethodDeclaration> _methods = [];
   final List<SimpleFormalParameter> _parameters = [];
-  final Set<String> _widgetTypes = {
-    'Widget',
-    'StatelessWidget',
-    'StatefulWidget',
-    'State',
-    'HookWidget',
-    'ConsumerWidget',
-    'ConsumerStatefulWidget',
-    'ConsumerState',
-  };
   final Set<int> _reported = {};
   int _widgetDepth = 0;
 
   void check() {
-    _widgetTypes.addAll(importedWidgetTypes);
     final declarations = _DeclarationCollector();
     source.unit.accept(declarations);
     _variables.addAll(declarations.variables);
@@ -51,17 +40,6 @@ final class AstRules extends RecursiveAstVisitor<void> {
     _parameters.addAll(
       declarations.parameters.whereType<SimpleFormalParameter>(),
     );
-    var changed = true;
-    while (changed) {
-      changed = false;
-      for (final declaration in declarations.classes) {
-        final base = declaration.extendsClause?.superclass.name.lexeme;
-        if (base != null && _widgetTypes.contains(base)) {
-          changed =
-              _widgetTypes.add(declaration.namePart.typeName.lexeme) || changed;
-        }
-      }
-    }
     source.unit.accept(this);
   }
 
@@ -87,9 +65,19 @@ final class AstRules extends RecursiveAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    final widget = _widgetTypes.contains(node.namePart.typeName.lexeme);
+    final widget = widgetDeclarationNames.contains(
+      node.namePart.typeName.lexeme,
+    );
     if (widget) _widgetDepth++;
     super.visitClassDeclaration(node);
+    if (widget) _widgetDepth--;
+  }
+
+  @override
+  void visitMixinDeclaration(MixinDeclaration node) {
+    final widget = widgetDeclarationNames.contains(node.name.lexeme);
+    if (widget) _widgetDepth++;
+    super.visitMixinDeclaration(node);
     if (widget) _widgetDepth--;
   }
 
